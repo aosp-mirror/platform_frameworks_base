@@ -21,8 +21,10 @@ import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.TotalCaptureResult;
@@ -47,7 +49,7 @@ import java.util.TreeSet;
 /**
  * HAL2.1+ implementation of CameraDevice. Use CameraManager#open to instantiate
  */
-public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
+public class CameraDeviceImpl extends CameraDevice {
 
     private final String TAG;
     private final boolean DEBUG;
@@ -62,7 +64,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     private final CameraDeviceCallbacks mCallbacks = new CameraDeviceCallbacks();
 
     private final StateListener mDeviceListener;
-    private volatile StateListener mSessionStateListener;
+    private volatile StateListenerKK mSessionStateListener;
     private final Handler mDeviceHandler;
 
     private volatile boolean mClosing = false;
@@ -103,7 +105,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     private final Runnable mCallOnOpened = new Runnable() {
         @Override
         public void run() {
-            StateListener sessionListener = null;
+            StateListenerKK sessionListener = null;
             synchronized(mInterfaceLock) {
                 if (mRemoteDevice == null) return; // Camera already closed
 
@@ -119,7 +121,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     private final Runnable mCallOnUnconfigured = new Runnable() {
         @Override
         public void run() {
-            StateListener sessionListener = null;
+            StateListenerKK sessionListener = null;
             synchronized(mInterfaceLock) {
                 if (mRemoteDevice == null) return; // Camera already closed
 
@@ -128,14 +130,13 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
             if (sessionListener != null) {
                 sessionListener.onUnconfigured(CameraDeviceImpl.this);
             }
-            mDeviceListener.onUnconfigured(CameraDeviceImpl.this);
         }
     };
 
     private final Runnable mCallOnActive = new Runnable() {
         @Override
         public void run() {
-            StateListener sessionListener = null;
+            StateListenerKK sessionListener = null;
             synchronized(mInterfaceLock) {
                 if (mRemoteDevice == null) return; // Camera already closed
 
@@ -144,14 +145,13 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
             if (sessionListener != null) {
                 sessionListener.onActive(CameraDeviceImpl.this);
             }
-            mDeviceListener.onActive(CameraDeviceImpl.this);
         }
     };
 
     private final Runnable mCallOnBusy = new Runnable() {
         @Override
         public void run() {
-            StateListener sessionListener = null;
+            StateListenerKK sessionListener = null;
             synchronized(mInterfaceLock) {
                 if (mRemoteDevice == null) return; // Camera already closed
 
@@ -160,7 +160,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
             if (sessionListener != null) {
                 sessionListener.onBusy(CameraDeviceImpl.this);
             }
-            mDeviceListener.onBusy(CameraDeviceImpl.this);
         }
     };
 
@@ -172,7 +171,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
             if (mClosedOnce) {
                 throw new AssertionError("Don't post #onClosed more than once");
             }
-            StateListener sessionListener = null;
+            StateListenerKK sessionListener = null;
             synchronized(mInterfaceLock) {
                 sessionListener = mSessionStateListener;
             }
@@ -187,7 +186,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
     private final Runnable mCallOnIdle = new Runnable() {
         @Override
         public void run() {
-            StateListener sessionListener = null;
+            StateListenerKK sessionListener = null;
             synchronized(mInterfaceLock) {
                 if (mRemoteDevice == null) return; // Camera already closed
 
@@ -196,14 +195,13 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
             if (sessionListener != null) {
                 sessionListener.onIdle(CameraDeviceImpl.this);
             }
-            mDeviceListener.onIdle(CameraDeviceImpl.this);
         }
     };
 
     private final Runnable mCallOnDisconnected = new Runnable() {
         @Override
         public void run() {
-            StateListener sessionListener = null;
+            StateListenerKK sessionListener = null;
             synchronized(mInterfaceLock) {
                 if (mRemoteDevice == null) return; // Camera already closed
 
@@ -313,7 +311,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         return mCameraId;
     }
 
-    @Override
     public void configureOutputs(List<Surface> outputs) throws CameraAccessException {
         // Treat a null input the same an empty list
         if (outputs == null) {
@@ -390,7 +387,11 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
 
             checkIfCameraClosedOrInError();
 
-            // TODO: we must be in UNCONFIGURED mode to begin with, or using another session
+            // Notify current session that it's going away, before starting camera operations
+            // After this call completes, the session is not allowed to call into CameraDeviceImpl
+            if (mCurrentSession != null) {
+                mCurrentSession.replaceSessionClose();
+            }
 
             // TODO: dont block for this
             boolean configureSuccess = true;
@@ -410,10 +411,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                     new CameraCaptureSessionImpl(outputs, listener, handler, this, mDeviceHandler,
                             configureSuccess);
 
-            if (mCurrentSession != null) {
-                mCurrentSession.replaceSessionClose(newSession);
-            }
-
             // TODO: wait until current session closes, then create the new session
             mCurrentSession = newSession;
 
@@ -422,6 +419,15 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
             }
 
             mSessionStateListener = mCurrentSession.getDeviceStateListener();
+        }
+    }
+
+    /**
+     * For use by backwards-compatibility code only.
+     */
+    public void setSessionListener(StateListenerKK sessionListener) {
+        synchronized(mInterfaceLock) {
+            mSessionStateListener = sessionListener;
         }
     }
 
@@ -449,7 +455,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         }
     }
 
-    @Override
     public int capture(CaptureRequest request, CaptureListener listener, Handler handler)
             throws CameraAccessException {
         if (DEBUG) {
@@ -460,7 +465,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         return submitCaptureRequest(requestList, listener, handler, /*streaming*/false);
     }
 
-    @Override
     public int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException {
         if (requests == null || requests.isEmpty()) {
@@ -543,9 +547,7 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
 
         // Need a valid handler, or current thread needs to have a looper, if
         // listener is valid
-        if (listener != null) {
-            handler = checkHandler(handler);
-        }
+        handler = checkHandler(handler, listener);
 
         // Make sure that there all requests have at least 1 surface; all surfaces are non-null
         for (CaptureRequest request : requestList) {
@@ -613,7 +615,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         }
     }
 
-    @Override
     public int setRepeatingRequest(CaptureRequest request, CaptureListener listener,
             Handler handler) throws CameraAccessException {
         List<CaptureRequest> requestList = new ArrayList<CaptureRequest>();
@@ -621,7 +622,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         return submitCaptureRequest(requestList, listener, handler, /*streaming*/true);
     }
 
-    @Override
     public int setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException {
         if (requests == null || requests.isEmpty()) {
@@ -630,7 +630,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         return submitCaptureRequest(requests, listener, handler, /*streaming*/true);
     }
 
-    @Override
     public void stopRepeating() throws CameraAccessException {
 
         synchronized(mInterfaceLock) {
@@ -681,7 +680,6 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         }
     }
 
-    @Override
     public void flush() throws CameraAccessException {
         synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
@@ -736,6 +734,133 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
         }
         finally {
             super.finalize();
+        }
+    }
+
+    /**
+     * <p>A listener for tracking the progress of a {@link CaptureRequest}
+     * submitted to the camera device.</p>
+     *
+     */
+    public static abstract class CaptureListener {
+
+        /**
+         * This constant is used to indicate that no images were captured for
+         * the request.
+         *
+         * @hide
+         */
+        public static final int NO_FRAMES_CAPTURED = -1;
+
+        /**
+         * This method is called when the camera device has started capturing
+         * the output image for the request, at the beginning of image exposure.
+         *
+         * @see android.media.MediaActionSound
+         */
+        public void onCaptureStarted(CameraDevice camera,
+                CaptureRequest request, long timestamp) {
+            // default empty implementation
+        }
+
+        /**
+         * This method is called when some results from an image capture are
+         * available.
+         *
+         * @hide
+         */
+        public void onCapturePartial(CameraDevice camera,
+                CaptureRequest request, CaptureResult result) {
+            // default empty implementation
+        }
+
+        /**
+         * This method is called when an image capture makes partial forward progress; some
+         * (but not all) results from an image capture are available.
+         *
+         */
+        public void onCaptureProgressed(CameraDevice camera,
+                CaptureRequest request, CaptureResult partialResult) {
+            // default empty implementation
+        }
+
+        /**
+         * This method is called when an image capture has fully completed and all the
+         * result metadata is available.
+         */
+        public void onCaptureCompleted(CameraDevice camera,
+                CaptureRequest request, TotalCaptureResult result) {
+            // default empty implementation
+        }
+
+        /**
+         * This method is called instead of {@link #onCaptureCompleted} when the
+         * camera device failed to produce a {@link CaptureResult} for the
+         * request.
+         */
+        public void onCaptureFailed(CameraDevice camera,
+                CaptureRequest request, CaptureFailure failure) {
+            // default empty implementation
+        }
+
+        /**
+         * This method is called independently of the others in CaptureListener,
+         * when a capture sequence finishes and all {@link CaptureResult}
+         * or {@link CaptureFailure} for it have been returned via this listener.
+         */
+        public void onCaptureSequenceCompleted(CameraDevice camera,
+                int sequenceId, long frameNumber) {
+            // default empty implementation
+        }
+
+        /**
+         * This method is called independently of the others in CaptureListener,
+         * when a capture sequence aborts before any {@link CaptureResult}
+         * or {@link CaptureFailure} for it have been returned via this listener.
+         */
+        public void onCaptureSequenceAborted(CameraDevice camera,
+                int sequenceId) {
+            // default empty implementation
+        }
+    }
+
+    /**
+     * A listener for notifications about the state of a camera device, adding in the callbacks that
+     * were part of the earlier KK API design, but now only used internally.
+     */
+    public static abstract class StateListenerKK extends StateListener {
+        /**
+         * The method called when a camera device has no outputs configured.
+         *
+         */
+        public void onUnconfigured(CameraDevice camera) {
+            // Default empty implementation
+        }
+
+        /**
+         * The method called when a camera device begins processing
+         * {@link CaptureRequest capture requests}.
+         *
+         */
+        public void onActive(CameraDevice camera) {
+            // Default empty implementation
+        }
+
+        /**
+         * The method called when a camera device is busy.
+         *
+         */
+        public void onBusy(CameraDevice camera) {
+            // Default empty implementation
+        }
+
+        /**
+         * The method called when a camera device has finished processing all
+         * submitted capture requests and has reached an idle state.
+         *
+         */
+        public void onIdle(CameraDevice camera) {
+            // Default empty implementation
         }
     }
 
@@ -1151,6 +1276,18 @@ public class CameraDeviceImpl extends android.hardware.camera2.CameraDevice {
                     "No handler given, and current thread has no looper!");
             }
             handler = new Handler(looper);
+        }
+        return handler;
+    }
+
+    /**
+     * Default handler management, conditional on there being a listener.
+     *
+     * <p>If the listener isn't null, check the handler, otherwise pass it through.</p>
+     */
+    static <T> Handler checkHandler(Handler handler, T listener) {
+        if (listener != null) {
+            return checkHandler(handler);
         }
         return handler;
     }

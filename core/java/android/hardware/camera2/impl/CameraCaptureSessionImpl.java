@@ -103,7 +103,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
          * Use the same handler as the device's StateListener for all the internal coming events
          *
          * This ensures total ordering between CameraDevice.StateListener and
-         * CameraDevice.CaptureListener events.
+         * CameraDeviceImpl.CaptureListener events.
          */
         mSequenceDrainer = new TaskDrainer<>(mDeviceHandler, new SequenceDrainListener(),
                 /*name*/"seq");
@@ -141,7 +141,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         checkNotClosed();
         checkLegalToCapture();
 
-        handler = checkHandler(handler);
+        handler = checkHandler(handler, listener);
 
         if (VERBOSE) {
             Log.v(TAG, "capture - request " + request + ", listener " + listener + " handler" +
@@ -164,7 +164,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         checkNotClosed();
         checkLegalToCapture();
 
-        handler = checkHandler(handler);
+        handler = checkHandler(handler, listener);
 
         if (VERBOSE) {
             CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
@@ -186,7 +186,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         checkNotClosed();
         checkLegalToCapture();
 
-        handler = checkHandler(handler);
+        handler = checkHandler(handler, listener);
 
         if (VERBOSE) {
             Log.v(TAG, "setRepeatingRequest - request " + request + ", listener " + listener +
@@ -209,7 +209,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         checkNotClosed();
         checkLegalToCapture();
 
-        handler = checkHandler(handler);
+        handler = checkHandler(handler, listener);
 
         if (VERBOSE) {
             CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
@@ -261,9 +261,12 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
      * <p>The semantics are identical to {@link #close}, except that unconfiguring will be skipped.
      * <p>
      *
+     * <p>After this call completes, the session will not call any further methods on the camera
+     * device.</p>
+     *
      * @see CameraCaptureSession#close
      */
-    synchronized void replaceSessionClose(CameraCaptureSession other) {
+    synchronized void replaceSessionClose() {
         /*
          * In order for creating new sessions to be fast, the new session should be created
          * before the old session is closed.
@@ -278,13 +281,17 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
         if (VERBOSE) Log.v(TAG, "replaceSessionClose");
 
-        // #close was already called explicitly, keep going the slow route
-        if (mClosed) {
-            if (VERBOSE) Log.v(TAG, "replaceSessionClose - close was already called");
-            return;
-        }
-
+        // Set up fast shutdown. Possible alternative paths:
+        // - This session is active, so close() below starts the shutdown drain
+        // - This session is mid-shutdown drain, and hasn't yet reached the idle drain listener.
+        // - This session is already closed and has executed the idle drain listener, and
+        //   configureOutputs(null) has already been called.
+        //
+        // Do not call configureOutputs(null) going forward, since it would race with the
+        // configuration for the new session. If it was already called, then we don't care, since it
+        // won't get called again.
         mSkipUnconfigure = true;
+
         close();
     }
 
@@ -347,7 +354,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
     /**
      * Forward callbacks from
-     * CameraDevice.CaptureListener to the CameraCaptureSession.CaptureListener.
+     * CameraDeviceImpl.CaptureListener to the CameraCaptureSession.CaptureListener.
      *
      * <p>In particular, all calls are automatically split to go both to our own
      * internal listener, and to the user-specified listener (by transparently posting
@@ -356,9 +363,9 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
      * <p>When a capture sequence finishes, update the pending checked sequences set.</p>
      */
     @SuppressWarnings("deprecation")
-    private CameraDevice.CaptureListener createCaptureListenerProxy(
+    private CameraDeviceImpl.CaptureListener createCaptureListenerProxy(
             Handler handler, CaptureListener listener) {
-        CameraDevice.CaptureListener localListener = new CameraDevice.CaptureListener() {
+        CameraDeviceImpl.CaptureListener localListener = new CameraDeviceImpl.CaptureListener() {
             @Override
             public void onCaptureSequenceCompleted(CameraDevice camera,
                     int sequenceId, long frameNumber) {
@@ -379,27 +386,30 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
          * - then forward the call to a handler
          * - then finally invoke the destination method on the session listener object
          */
-        Dispatchable<CaptureListener> userListenerSink;
-        if (listener == null) { // OK: API allows the user to not specify a listener
-            userListenerSink = new NullDispatcher<>();
-        } else {
-            userListenerSink = new InvokeDispatcher<>(listener);
+        if (listener == null) {
+            // OK: API allows the user to not specify a listener, and the handler may
+            // also be null in that case. Collapse whole dispatch chain to only call the local
+            // listener
+            return localListener;
         }
 
-        InvokeDispatcher<CameraDevice.CaptureListener> localSink =
+        InvokeDispatcher<CameraDeviceImpl.CaptureListener> localSink =
                 new InvokeDispatcher<>(localListener);
+
+        InvokeDispatcher<CaptureListener> userListenerSink =
+                new InvokeDispatcher<>(listener);
         HandlerDispatcher<CaptureListener> handlerPassthrough =
                 new HandlerDispatcher<>(userListenerSink, handler);
-        DuckTypingDispatcher<CameraDevice.CaptureListener, CaptureListener> duckToSession
+        DuckTypingDispatcher<CameraDeviceImpl.CaptureListener, CaptureListener> duckToSession
                 = new DuckTypingDispatcher<>(handlerPassthrough, CaptureListener.class);
-        ArgumentReplacingDispatcher<CameraDevice.CaptureListener, CameraCaptureSessionImpl>
-            replaceDeviceWithSession = new ArgumentReplacingDispatcher<>(duckToSession,
-                    /*argumentIndex*/0, this);
+        ArgumentReplacingDispatcher<CameraDeviceImpl.CaptureListener, CameraCaptureSessionImpl>
+                replaceDeviceWithSession = new ArgumentReplacingDispatcher<>(duckToSession,
+                        /*argumentIndex*/0, this);
 
-        BroadcastDispatcher<CameraDevice.CaptureListener> broadcaster =
-                new BroadcastDispatcher<CameraDevice.CaptureListener>(
-                        replaceDeviceWithSession,
-                        localSink);
+        BroadcastDispatcher<CameraDeviceImpl.CaptureListener> broadcaster =
+                new BroadcastDispatcher<CameraDeviceImpl.CaptureListener>(
+                    replaceDeviceWithSession,
+                    localSink);
 
         return new ListenerProxies.DeviceCaptureListenerProxy(broadcaster);
     }
@@ -415,10 +425,10 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
      * </ul>
      * </p>
      * */
-    CameraDevice.StateListener getDeviceStateListener() {
+    CameraDeviceImpl.StateListenerKK getDeviceStateListener() {
         final CameraCaptureSession session = this;
 
-        return new CameraDevice.StateListener() {
+        return new CameraDeviceImpl.StateListenerKK() {
             private boolean mBusy = false;
             private boolean mActive = false;
 
@@ -596,6 +606,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                  *
                  * This operation is idempotent; a session will not be closed twice.
                  */
+                if (VERBOSE) Log.v(TAG, "Session drain complete, skip unconfigure: " +
+                        mSkipUnconfigure);
 
                 // Fast path: A new capture session has replaced this one; don't unconfigure.
                 if (mSkipUnconfigure) {
