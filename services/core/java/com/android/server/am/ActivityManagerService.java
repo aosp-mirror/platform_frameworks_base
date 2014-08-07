@@ -10585,14 +10585,16 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void startAppProblemLocked(ProcessRecord app) {
-        if (app.userId == mCurrentUserId) {
-            app.errorReportReceiver = ApplicationErrorReport.getErrorReportReceiver(
-                    mContext, app.info.packageName, app.info.flags);
-        } else {
-            // If this app is not running under the current user, then we
-            // can't give it a report button because that would require
-            // launching the report UI under a different user.
-            app.errorReportReceiver = null;
+        // If this app is not running under the current user, then we
+        // can't give it a report button because that would require
+        // launching the report UI under a different user.
+        app.errorReportReceiver = null;
+
+        for (int userId : mCurrentProfileIds) {
+            if (app.userId == userId) {
+                app.errorReportReceiver = ApplicationErrorReport.getErrorReportReceiver(
+                        mContext, app.info.packageName, app.info.flags);
+            }
         }
         skipCurrentReceiverLocked(app);
     }
