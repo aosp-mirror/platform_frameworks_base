@@ -244,8 +244,7 @@ public class AnimatorInflater {
     }
 
     /**
-     * @param anim Null if this is a ValueAnimator, otherwise this is an
-     *            ObjectAnimator
+     * @param anim The animator, must not be null
      * @param arrayAnimator Incoming typed array for Animator's attributes.
      * @param arrayObjectAnimator Incoming typed array for Object Animator's
      *            attributes.
@@ -258,10 +257,6 @@ public class AnimatorInflater {
 
         int valueType = arrayAnimator.getInt(R.styleable.Animator_valueType,
                 VALUE_TYPE_FLOAT);
-
-        if (anim == null) {
-            anim = new ValueAnimator();
-        }
 
         TypeEvaluator evaluator = null;
 
@@ -592,6 +587,11 @@ public class AnimatorInflater {
                 arrayObjectAnimator = res.obtainAttributes(attrs, R.styleable.PropertyAnimator);
             }
         }
+
+        if (anim == null) {
+            anim = new ValueAnimator();
+        }
+
         parseAnimatorFromTypeArray(anim, arrayAnimator, arrayObjectAnimator);
 
         final int resID =
@@ -601,7 +601,9 @@ public class AnimatorInflater {
         }
 
         arrayAnimator.recycle();
-        arrayObjectAnimator.recycle();
+        if (arrayObjectAnimator != null) {
+            arrayObjectAnimator.recycle();
+        }
 
         return anim;
     }
