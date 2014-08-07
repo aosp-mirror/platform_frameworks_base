@@ -30,8 +30,8 @@ import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_DIGI
 import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_EXTERNAL;
 
 import android.content.Intent;
-import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiRecordSources;
 import android.hardware.hdmi.HdmiTimerRecordSources;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -1274,14 +1274,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void setAutoDeviceOff(boolean enabled) {
         assertRunOnServiceThread();
         mAutoDeviceOff = enabled;
-        mService.writeBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, enabled);
     }
 
     @ServiceThreadOnly
     void setAutoWakeup(boolean enabled) {
         assertRunOnServiceThread();
         mAutoWakeup = enabled;
-        mService.writeBooleanSetting(Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED, enabled);
     }
 
     @ServiceThreadOnly
