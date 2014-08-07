@@ -590,7 +590,6 @@ package android {
     field public static final int fillBefore = 16843196; // 0x10101bc
     field public static final int fillColor = 16843807; // 0x101041f
     field public static final int fillEnabled = 16843343; // 0x101024f
-    field public static final int fillOpacity = 16843806; // 0x101041e
     field public static final int fillViewport = 16843130; // 0x101017a
     field public static final int filter = 16843035; // 0x101011b
     field public static final int filterTouchesWhenObscured = 16843460; // 0x10102c4
@@ -1190,7 +1189,6 @@ package android {
     field public static final int strokeLineCap = 16843815; // 0x1010427
     field public static final int strokeLineJoin = 16843816; // 0x1010428
     field public static final int strokeMiterLimit = 16843817; // 0x1010429
-    field public static final int strokeOpacity = 16843810; // 0x1010422
     field public static final int strokeWidth = 16843811; // 0x1010423
     field public static final int submitBackground = 16843914; // 0x101048a
     field public static final int subtitle = 16843473; // 0x10102d1

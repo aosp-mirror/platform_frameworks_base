@@ -104,6 +104,8 @@ import java.util.Stack;
  * <dt><code>android:translateY</code></dt>
  * <dd>The amount of translation on the Y coordinate.
  * This is defined in the viewport space.</dd>
+ * <dt><code>android:alpha</code></dt>
+ * <dd>The amount of transparency.</dd>
  * </dl></dd>
  * </dl>
  *
@@ -117,15 +119,11 @@ import java.util.Stack;
  * <dd>Defines path string. This is using exactly same format as "d" attribute
  * in the SVG's path data. This is defined in the viewport space.</dd>
  * <dt><code>android:fillColor</code></dt>
- * <dd>Defines the color to fill the path (none if not present).</dd>
+ * <dd>Defines the color to fill the path (black if not present).</dd>
  * <dt><code>android:strokeColor</code></dt>
  * <dd>Defines the color to draw the path outline (none if not present).</dd>
  * <dt><code>android:strokeWidth</code></dt>
  * <dd>The width a path stroke.</dd>
- * <dt><code>android:strokeOpacity</code></dt>
- * <dd>The opacity of a path stroke.</dd>
- * <dt><code>android:fillOpacity</code></dt>
- * <dd>The opacity to fill the path with.</dd>
  * <dt><code>android:trimPathStart</code></dt>
  * <dd>The fraction of the path to trim from the start, in the range from 0 to 1.</dd>
  * <dt><code>android:trimPathEnd</code></dt>
@@ -1241,10 +1239,8 @@ public class VectorDrawable extends Drawable {
 
         int mStrokeColor = 0;
         float mStrokeWidth = 0;
-        float mStrokeOpacity = Float.NaN;
         int mFillColor = Color.BLACK;
         int mFillRule;
-        float mFillOpacity = Float.NaN;
         float mTrimPathStart = 0;
         float mTrimPathEnd = 1;
         float mTrimPathOffset = 0;
@@ -1263,10 +1259,8 @@ public class VectorDrawable extends Drawable {
 
             mStrokeColor = copy.mStrokeColor;
             mStrokeWidth = copy.mStrokeWidth;
-            mStrokeOpacity = copy.mStrokeOpacity;
             mFillColor = copy.mFillColor;
             mFillRule = copy.mFillRule;
-            mFillOpacity = copy.mFillOpacity;
             mTrimPathStart = copy.mTrimPathStart;
             mTrimPathEnd = copy.mTrimPathEnd;
             mTrimPathOffset = copy.mTrimPathOffset;
@@ -1327,8 +1321,6 @@ public class VectorDrawable extends Drawable {
 
             mFillColor = a.getColor(R.styleable.VectorDrawablePath_fillColor,
                     mFillColor);
-            mFillOpacity = a.getFloat(R.styleable.VectorDrawablePath_fillOpacity,
-                    mFillOpacity);
             mStrokeLineCap = getStrokeLineCap(a.getInt(
                     R.styleable.VectorDrawablePath_strokeLineCap, -1), mStrokeLineCap);
             mStrokeLineJoin = getStrokeLineJoin(a.getInt(
@@ -1337,8 +1329,6 @@ public class VectorDrawable extends Drawable {
                     R.styleable.VectorDrawablePath_strokeMiterLimit, mStrokeMiterlimit);
             mStrokeColor = a.getColor(R.styleable.VectorDrawablePath_strokeColor,
                     mStrokeColor);
-            mStrokeOpacity = a.getFloat(R.styleable.VectorDrawablePath_strokeOpacity,
-                    mStrokeOpacity);
             mStrokeWidth = a.getFloat(R.styleable.VectorDrawablePath_strokeWidth,
                     mStrokeWidth);
             mTrimPathEnd = a.getFloat(R.styleable.VectorDrawablePath_trimPathEnd,
@@ -1347,8 +1337,6 @@ public class VectorDrawable extends Drawable {
                     R.styleable.VectorDrawablePath_trimPathOffset, mTrimPathOffset);
             mTrimPathStart = a.getFloat(
                     R.styleable.VectorDrawablePath_trimPathStart, mTrimPathStart);
-
-            updateColorAlphas();
         }
 
         @Override
@@ -1361,16 +1349,6 @@ public class VectorDrawable extends Drawable {
                     R.styleable.VectorDrawablePath);
             updateStateFromTypedArray(a);
             a.recycle();
-        }
-
-        private void updateColorAlphas() {
-            if (!Float.isNaN(mFillOpacity)) {
-                mFillColor = applyAlpha(mFillColor, mFillOpacity);
-            }
-
-            if (!Float.isNaN(mStrokeOpacity)) {
-                mStrokeColor = applyAlpha(mStrokeColor, mStrokeOpacity);
-            }
         }
 
         /* Setters and Getters, used by animator from AnimatedVectorDrawable. */
@@ -1395,16 +1373,6 @@ public class VectorDrawable extends Drawable {
         }
 
         @SuppressWarnings("unused")
-        float getStrokeOpacity() {
-            return mStrokeOpacity;
-        }
-
-        @SuppressWarnings("unused")
-        void setStrokeOpacity(float strokeOpacity) {
-            mStrokeOpacity = strokeOpacity;
-        }
-
-        @SuppressWarnings("unused")
         int getFill() {
             return mFillColor;
         }
@@ -1412,16 +1380,6 @@ public class VectorDrawable extends Drawable {
         @SuppressWarnings("unused")
         void setFill(int fillColor) {
             mFillColor = fillColor;
-        }
-
-        @SuppressWarnings("unused")
-        float getFillOpacity() {
-            return mFillOpacity;
-        }
-
-        @SuppressWarnings("unused")
-        void setFillOpacity(float fillOpacity) {
-            mFillOpacity = fillOpacity;
         }
 
         @SuppressWarnings("unused")
