@@ -180,21 +180,27 @@ public class AlwaysOnHotwordDetector {
     private int mAvailability = STATE_NOT_READY;
 
     /**
-     * Details of the audio that triggered the keyphrase.
+     * Additional payload for {@link Callback#onDetected}.
      */
-    public static class TriggerAudio {
+    public static class EventPayload {
         /**
-         * Format of {@code data}.
+         * Indicates if {@code data} is the audio that triggered the keyphrase.
          */
-        @NonNull
+        public final boolean isTriggerAudio;
+        /**
+         * Format of {@code data}. May be null if {@code isTriggerAudio} is false.
+         */
+        @Nullable
         public final AudioFormat audioFormat;
         /**
-         * Raw audio data that triggered they keyphrase.
+         * Raw data associated with the event.
+         * This is the audio that triggered the keyphrase if {@code isTriggerAudio} is true.
          */
-        @NonNull
+        @Nullable
         public final byte[] data;
 
-        private TriggerAudio(AudioFormat _audioFormat, byte[] _data) {
+        private EventPayload(boolean _isTriggerAudio, AudioFormat _audioFormat, byte[] _data) {
+            isTriggerAudio = _isTriggerAudio;
             audioFormat = _audioFormat;
             data = _data;
         }
@@ -224,10 +230,11 @@ public class AlwaysOnHotwordDetector {
          * Clients should start a recognition again once they are done handling this
          * detection.
          *
-         * @param triggerAudio Optional trigger audio data, if it was requested during
+         * @param eventPayload Payload data for the detection event.
+         *        This may contain the trigger audio, if requested when calling
          *        {@link AlwaysOnHotwordDetector#startRecognition(int)}.
          */
-        void onDetected(@Nullable TriggerAudio triggerAudio);
+        void onDetected(@NonNull EventPayload eventPayload);
         /**
          * Called when the detection fails due to an error.
          */
@@ -487,22 +494,13 @@ public class AlwaysOnHotwordDetector {
         @Override
         public void onDetected(KeyphraseRecognitionEvent event) {
             if (DBG) {
-                Slog.d(TAG, "OnDetected(" + event + ")");
+                Slog.d(TAG, "onDetected(" + event + ")");
             } else {
                 Slog.i(TAG, "onDetected");
             }
-            Message message = Message.obtain(mHandler, MSG_HOTWORD_DETECTED);
-            // FIXME: Check whether the event contains trigger data or not.
-            // FIXME: Read the audio format from the event.
-            if (event.data != null) {
-                AudioFormat audioFormat = new AudioFormat.Builder()
-                        .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
-                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                        .setSampleRate(16000)
-                        .build();
-                message.obj = new TriggerAudio(audioFormat, event.data);
-            }
-            message.sendToTarget();
+            Message.obtain(mHandler, MSG_HOTWORD_DETECTED,
+                    new EventPayload(event.triggerInData, event.captureFormat, event.data))
+                    .sendToTarget();
         }
 
         @Override
@@ -527,7 +525,7 @@ public class AlwaysOnHotwordDetector {
                     mExternalCallback.onAvailabilityChanged(msg.arg1);
                     break;
                 case MSG_HOTWORD_DETECTED:
-                    mExternalCallback.onDetected((TriggerAudio) msg.obj);
+                    mExternalCallback.onDetected((EventPayload) msg.obj);
                     break;
                 case MSG_DETECTION_ERROR:
                     mExternalCallback.onError();
