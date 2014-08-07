@@ -948,6 +948,20 @@ public final class TvInputManager {
     }
 
     /**
+     * Returns true if there is only a single TV input session.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isSingleSessionActive() {
+        try {
+            return mService.isSingleSessionActive(mUserId);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * The Session provides the per-session functionality of TV inputs.
      * @hide
      */
