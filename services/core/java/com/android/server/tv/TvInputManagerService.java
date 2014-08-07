@@ -35,7 +35,6 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiDeviceInfo;
@@ -283,7 +282,6 @@ public final class TvInputManagerService extends SystemService {
         userState.inputMap.clear();
         userState.inputMap = inputMap;
 
-        Resources r = Resources.getSystem();
         userState.ratingSystemXmlUriSet.clear();
         userState.ratingSystemXmlUriSet.add(TvContentRating.SYSTEM_CONTENT_RATING_SYSTEM_XML);
         for (TvInputState state : userState.inputMap.values()) {
@@ -1262,6 +1260,7 @@ public final class TvInputManagerService extends SystemService {
                         args.arg1 = sessionState.mLogUri;
                         args.arg2 = ContentUris.parseId(channelUri);
                         args.arg3 = currentTime;
+                        args.arg4 = sessionState;
                         mLogHandler.obtainMessage(LogHandler.MSG_OPEN_ENTRY, args).sendToTarget();
                     } catch (RemoteException e) {
                         Slog.e(TAG, "error in tune", e);
@@ -2076,7 +2075,8 @@ public final class TvInputManagerService extends SystemService {
                     Uri uri = (Uri) args.arg1;
                     long channelId = (long) args.arg2;
                     long time = (long) args.arg3;
-                    onOpenEntry(uri, channelId, time);
+                    SessionState sessionState = (SessionState) args.arg4;
+                    onOpenEntry(uri, channelId, time, sessionState);
                     args.recycle();
                     return;
                 }
@@ -2085,7 +2085,8 @@ public final class TvInputManagerService extends SystemService {
                     Uri uri = (Uri) args.arg1;
                     long channelId = (long) args.arg2;
                     long time = (long) args.arg3;
-                    onUpdateEntry(uri, channelId, time);
+                    SessionState sessionState = (SessionState) args.arg4;
+                    onUpdateEntry(uri, channelId, time, sessionState);
                     args.recycle();
                     return;
                 }
@@ -2104,7 +2105,17 @@ public final class TvInputManagerService extends SystemService {
             }
         }
 
-        private void onOpenEntry(Uri uri, long channelId, long watchStarttime) {
+        private void onOpenEntry(Uri logUri, long channelId, long watchStarttime,
+                SessionState sessionState) {
+            if (!isChannelSearchable(channelId)) {
+                // Do not log anything about non-searchable channels.
+                synchronized (mLock) {
+                    sessionState.mLogUri = null;
+                }
+                mContentResolver.delete(logUri, null, null);
+                return;
+            }
+
             String[] projection = {
                     TvContract.Programs.COLUMN_TITLE,
                     TvContract.Programs.COLUMN_START_TIME_UTC_MILLIS,
@@ -2132,11 +2143,11 @@ public final class TvInputManagerService extends SystemService {
                     long endTime = cursor.getLong(2);
                     values.put(TvContract.WatchedPrograms.COLUMN_END_TIME_UTC_MILLIS, endTime);
                     values.put(TvContract.WatchedPrograms.COLUMN_DESCRIPTION, cursor.getString(3));
-                    mContentResolver.update(uri, values, null, null);
+                    mContentResolver.update(logUri, values, null, null);
 
                     // Schedule an update when the current program ends.
                     SomeArgs args = SomeArgs.obtain();
-                    args.arg1 = uri;
+                    args.arg1 = logUri;
                     args.arg2 = channelId;
                     args.arg3 = endTime;
                     Message msg = obtainMessage(LogHandler.MSG_UPDATE_ENTRY, args);
@@ -2149,7 +2160,7 @@ public final class TvInputManagerService extends SystemService {
             }
         }
 
-        private void onUpdateEntry(Uri uri, long channelId, long time) {
+        private void onUpdateEntry(Uri uri, long channelId, long time, SessionState sessionState) {
             String[] projection = {
                     TvContract.WatchedPrograms.COLUMN_WATCH_START_TIME_UTC_MILLIS,
                     TvContract.WatchedPrograms.COLUMN_WATCH_END_TIME_UTC_MILLIS,
@@ -2193,13 +2204,33 @@ public final class TvInputManagerService extends SystemService {
                 }
             }
             // Re-open the current log entry with the next program information.
-            onOpenEntry(uri, channelId, time);
+            onOpenEntry(uri, channelId, time, sessionState);
         }
 
         private void onCloseEntry(Uri uri, long watchEndTime) {
             ContentValues values = new ContentValues();
             values.put(TvContract.WatchedPrograms.COLUMN_WATCH_END_TIME_UTC_MILLIS, watchEndTime);
             mContentResolver.update(uri, values, null, null);
+        }
+
+        private boolean isChannelSearchable(long channelId) {
+            String[] projection = { TvContract.Channels.COLUMN_SEARCHABLE };
+            String selection = TvContract.Channels._ID + "=?";
+            String[] selectionArgs = { String.valueOf(channelId) };
+            Cursor cursor = null;
+            try {
+                cursor = mContentResolver.query(TvContract.Channels.CONTENT_URI, projection,
+                        selection, selectionArgs, null);
+                if (cursor != null && cursor.moveToNext()) {
+                    return cursor.getLong(0) == 1 ? true : false;
+                }
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+            // Unless explicitly specified non-searchable, by default the channel is searchable.
+            return true;
         }
     }
 
