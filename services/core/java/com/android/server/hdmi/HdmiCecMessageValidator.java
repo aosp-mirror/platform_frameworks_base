@@ -250,6 +250,9 @@ public final class HdmiCecMessageValidator {
             return true;
         }
         int path = HdmiUtils.twoBytesToInt(params, offset);
+        if (path != Constants.INVALID_PHYSICAL_ADDRESS && path == mService.getPhysicalAddress()) {
+            return true;
+        }
         int portId = mService.pathToPortId(path);
         if (portId == Constants.INVALID_PORT_ID) {
             return false;
@@ -259,10 +262,10 @@ public final class HdmiCecMessageValidator {
 
     /**
      * Check if the given type is valid. A valid type is one of the actual logical device types
-     * defined in the standard ({@link HdmiCecDeviceInfo#DEVICE_TV},
-     * {@link HdmiCecDeviceInfo#DEVICE_PLAYBACK}, {@link HdmiCecDeviceInfo#DEVICE_TUNER},
-     * {@link HdmiCecDeviceInfo#DEVICE_RECORDER}, and
-     * {@link HdmiCecDeviceInfo#DEVICE_AUDIO_SYSTEM}).
+     * defined in the standard ({@link HdmiDeviceInfo#DEVICE_TV},
+     * {@link HdmiDeviceInfo#DEVICE_PLAYBACK}, {@link HdmiDeviceInfo#DEVICE_TUNER},
+     * {@link HdmiDeviceInfo#DEVICE_RECORDER}, and
+     * {@link HdmiDeviceInfo#DEVICE_AUDIO_SYSTEM}).
      *
      * @param type device type
      * @return true if the given type is valid
