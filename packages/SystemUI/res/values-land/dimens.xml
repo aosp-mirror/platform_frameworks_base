@@ -41,6 +41,7 @@
     <!-- The side padding for the task stack as a percentage of the width. -->
     <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.2229</item>
 
-    <!-- Width of the zen mode interstitial dialog. -->
-    <dimen name="zen_mode_dialog_width">384dp</dimen>
+    <!-- Standard notification width + gravity -->
+    <dimen name="notification_panel_width">@dimen/standard_notification_panel_width</dimen>
+    <integer name="notification_panel_layout_gravity">@integer/standard_notification_panel_layout_gravity</integer>
 </resources>

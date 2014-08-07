@@ -243,19 +243,23 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         boolean changed = expanded != mExpanded;
         mExpanded = expanded;
         if (changed) {
-            updateHeights();
-            updateVisibilities();
-            updateSystemIconsLayoutParams();
-            updateClickTargets();
-            updateMultiUserSwitch();
-            if (mQSPanel != null) {
-                mQSPanel.setExpanded(expanded);
-            }
-            updateClockScale();
-            updateAvatarScale();
-            updateClockLp();
-            requestCaptureValues();
+            updateEverything();
         }
+    }
+
+    public void updateEverything() {
+        updateHeights();
+        updateVisibilities();
+        updateSystemIconsLayoutParams();
+        updateClickTargets();
+        updateMultiUserSwitch();
+        if (mQSPanel != null) {
+            mQSPanel.setExpanded(mExpanded);
+        }
+        updateClockScale();
+        updateAvatarScale();
+        updateClockLp();
+        requestCaptureValues();
     }
 
     private void updateHeights() {
