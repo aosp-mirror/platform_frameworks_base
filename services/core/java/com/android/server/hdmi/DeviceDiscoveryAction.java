@@ -39,7 +39,7 @@ import java.util.List;
  *   <li>Gather "Vendor id" of all acknowledge devices
  * </ol>
  */
-final class DeviceDiscoveryAction extends FeatureAction {
+final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
     private static final String TAG = "DeviceDiscoveryAction";
 
     // State in which the action is waiting for device polling.

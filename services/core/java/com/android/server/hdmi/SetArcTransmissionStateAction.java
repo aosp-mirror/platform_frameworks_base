@@ -24,7 +24,7 @@ import android.util.Slog;
  * Once TV gets &lt;Initiate ARC&gt;, TV sends &lt;Report ARC Initiated&gt; to AV Receiver.
  * If it fails or it gets &lt;Terminate ARC&gt;, TV just disables ARC.
  */
-final class SetArcTransmissionStateAction extends FeatureAction {
+final class SetArcTransmissionStateAction extends HdmiCecFeatureAction {
     private static final String TAG = "SetArcTransmissionStateAction";
 
     // State in which the action sent <Rerpot Arc Initiated> and

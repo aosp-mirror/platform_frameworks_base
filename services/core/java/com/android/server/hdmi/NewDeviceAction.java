@@ -33,7 +33,7 @@ import java.io.UnsupportedEncodingException;
  *
  * <p>Package-private, accessed by {@link HdmiControlService} only.
  */
-final class NewDeviceAction extends FeatureAction {
+final class NewDeviceAction extends HdmiCecFeatureAction {
 
     private static final String TAG = "NewDeviceAction";
 

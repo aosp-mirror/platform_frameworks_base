@@ -31,7 +31,7 @@ import java.util.Arrays;
 /**
  * Feature action that performs timer recording.
  */
-public class TimerRecordingAction extends FeatureAction {
+public class TimerRecordingAction extends HdmiCecFeatureAction {
     private static final String TAG = "TimerRecordingAction";
 
     // Timer out for waiting <Timer Status> 120s.
