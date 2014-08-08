@@ -534,6 +534,7 @@ public:
     inline void endMark() {}
     inline int level() { return mLevel; }
     inline int replayFlags() { return mDeferStruct.mReplayFlags; }
+    inline SkPath* allocPathForFrame() { return mDeferStruct.allocPathForFrame(); }
 
 private:
     DeferStateStruct& mDeferStruct;
@@ -564,6 +565,7 @@ public:
     }
     inline int level() { return mLevel; }
     inline int replayFlags() { return mReplayStruct.mReplayFlags; }
+    inline SkPath* allocPathForFrame() { return mReplayStruct.allocPathForFrame(); }
 
 private:
     ReplayStateStruct& mReplayStruct;
@@ -612,14 +614,24 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
     mat4 shadowMatrixZ(transformFromParent);
     applyViewPropertyTransforms(shadowMatrixZ, true);
 
-    const SkPath* outlinePath = properties().getOutline().getPath();
+    const SkPath* casterOutlinePath = properties().getOutline().getPath();
     const SkPath* revealClipPath = properties().getRevealClip().getPath();
     if (revealClipPath && revealClipPath->isEmpty()) return;
 
     float casterAlpha = properties().getAlpha() * properties().getOutline().getAlpha();
+
+    const SkPath* outlinePath = casterOutlinePath;
+    if (revealClipPath) {
+        // if we can't simply use the caster's path directly, create a temporary one
+        SkPath* frameAllocatedPath = handler.allocPathForFrame();
+
+        // intersect the outline with the convex reveal clip
+        Op(*casterOutlinePath, *revealClipPath, kIntersect_PathOp, frameAllocatedPath);
+        outlinePath = frameAllocatedPath;
+    }
+
     DisplayListOp* shadowOp  = new (handler.allocator()) DrawShadowOp(
-            shadowMatrixXY, shadowMatrixZ, casterAlpha,
-            outlinePath, revealClipPath);
+            shadowMatrixXY, shadowMatrixZ, casterAlpha, outlinePath);
     handler(shadowOp, PROPERTY_SAVECOUNT, properties().getClipToBounds());
 }
 
