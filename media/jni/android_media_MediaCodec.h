@@ -135,6 +135,8 @@ private:
 
     sp<AMessage> mCallbackNotification;
 
+    status_t mInitStatus;
+
     status_t createByteBufferFromABuffer(
             JNIEnv *env, bool readOnly, bool clearBuffer, const sp<ABuffer> &buffer,
             jobject *buf) const;
