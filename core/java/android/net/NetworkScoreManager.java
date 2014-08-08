@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.Manifest;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -25,6 +26,7 @@ import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 
 /**
  * Class that manages communication between network subsystems and a network scorer.
@@ -238,7 +240,9 @@ public class NetworkScoreManager {
         intent.setPackage(activeScorer);
         intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         intent.putExtra(EXTRA_NETWORKS_TO_SCORE, networks);
-        mContext.sendBroadcast(intent);
+        // A scorer should never become active if its package doesn't hold SCORE_NETWORKS, but
+        // ensure the package still holds it to be extra safe.
+        mContext.sendBroadcastAsUser(intent, UserHandle.OWNER, Manifest.permission.SCORE_NETWORKS);
         return true;
     }
 
