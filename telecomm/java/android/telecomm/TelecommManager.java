@@ -101,6 +101,17 @@ public class TelecommManager {
             "android.intent.extra.INCOMING_CALL_EXTRAS";
 
     /**
+     * Optional extra for {@link android.content.Intent#ACTION_CALL} and
+     * {@link android.content.Intent#ACTION_DIAL} {@code Intent} containing a {@link Bundle}
+     * which contains metadata about the call. This {@link Bundle} will be saved into
+     * {@code Call.Details}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_OUTGOING_CALL_EXTRAS =
+            "android.intent.extra.OUTGOING_CALL_EXTRAS";
+
+    /**
      * Optional extra for {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED}
      * containing the disconnect code.
      */
