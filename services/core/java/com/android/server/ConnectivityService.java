@@ -251,10 +251,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private int mNetworkPreference;
     private int mActiveDefaultNetwork = -1;
     // 0 is full bad, 100 is full good
-    private int mDefaultInetCondition = 0;
     private int mDefaultInetConditionPublished = 0;
-    private boolean mInetConditionChangeInFlight = false;
-    private int mDefaultConnectionSequence = 0;
 
     private Object mDnsLock = new Object();
     private int mNumDnsEntries;
@@ -272,19 +269,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * used internally to change our mobile data enabled flag
      */
     private static final int EVENT_CHANGE_MOBILE_DATA_ENABLED = 2;
-
-    /**
-     * used internally to synchronize inet condition reports
-     * arg1 = networkType
-     * arg2 = condition (0 bad, 100 good)
-     */
-    private static final int EVENT_INET_CONDITION_CHANGE = 4;
-
-    /**
-     * used internally to mark the end of inet condition hold periods
-     * arg1 = networkType
-     */
-    private static final int EVENT_INET_CONDITION_HOLD_END = 5;
 
     /**
      * used internally to clear a wakelock when transitioning
@@ -488,10 +472,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         "legacy list for type " + type + "already initialized");
             }
             mTypeLists[type] = new ArrayList<NetworkAgentInfo>();
-        }
-
-        private boolean isDefaultNetwork(NetworkAgentInfo nai) {
-            return mNetworkForRequestId.get(mDefaultRequest.requestId) == nai;
         }
 
         public boolean isTypeSupported(int type) {
@@ -2052,6 +2032,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 nai.networkInfo.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED,
                         null, null);
             }
+            if (isDefaultNetwork(nai)) {
+                mDefaultInetConditionPublished = 0;
+            }
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_LOST);
             nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_DISCONNECTED);
             mNetworkAgentInfos.remove(msg.replyTo);
@@ -2220,18 +2203,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         log("NetTransition Wakelock (" + (causedBy == null ? "unknown" : causedBy) +
                                 " cleared because we found a replacement network");
                     }
-                    break;
-                }
-                case EVENT_INET_CONDITION_CHANGE: {
-                    int netType = msg.arg1;
-                    int condition = msg.arg2;
-                    handleInetConditionChange(netType, condition);
-                    break;
-                }
-                case EVENT_INET_CONDITION_HOLD_END: {
-                    int netType = msg.arg1;
-                    int sequence = msg.arg2;
-                    handleInetConditionHoldEnd(netType, sequence);
                     break;
                 }
                 case EVENT_APPLY_GLOBAL_HTTP_PROXY: {
@@ -2428,97 +2399,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     // 100 percent is full good, 0 is full bad.
     public void reportInetCondition(int networkType, int percentage) {
-        if (VDBG) log("reportNetworkCondition(" + networkType + ", " + percentage + ")");
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.STATUS_BAR,
-                "ConnectivityService");
-
-        if (DBG) {
-            int pid = getCallingPid();
-            int uid = getCallingUid();
-            String s = pid + "(" + uid + ") reports inet is " +
-                (percentage > 50 ? "connected" : "disconnected") + " (" + percentage + ") on " +
-                "network Type " + networkType + " at " + GregorianCalendar.getInstance().getTime();
-            mInetLog.add(s);
-            while(mInetLog.size() > INET_CONDITION_LOG_MAX_SIZE) {
-                mInetLog.remove(0);
-            }
-        }
-        mHandler.sendMessage(mHandler.obtainMessage(
-            EVENT_INET_CONDITION_CHANGE, networkType, percentage));
+        if (percentage > 50) return;  // don't handle good network reports
+        NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
+        if (nai != null) reportBadNetwork(nai.network);
     }
 
     public void reportBadNetwork(Network network) {
         //TODO
-    }
-
-    private void handleInetConditionChange(int netType, int condition) {
-        if (mActiveDefaultNetwork == -1) {
-            if (DBG) log("handleInetConditionChange: no active default network - ignore");
-            return;
-        }
-        if (mActiveDefaultNetwork != netType) {
-            if (DBG) log("handleInetConditionChange: net=" + netType +
-                            " != default=" + mActiveDefaultNetwork + " - ignore");
-            return;
-        }
-        if (VDBG) {
-            log("handleInetConditionChange: net=" +
-                    netType + ", condition=" + condition +
-                    ",mActiveDefaultNetwork=" + mActiveDefaultNetwork);
-        }
-        mDefaultInetCondition = condition;
-        int delay;
-        if (mInetConditionChangeInFlight == false) {
-            if (VDBG) log("handleInetConditionChange: starting a change hold");
-            // setup a new hold to debounce this
-            if (mDefaultInetCondition > 50) {
-                delay = Settings.Global.getInt(mContext.getContentResolver(),
-                        Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY, 500);
-            } else {
-                delay = Settings.Global.getInt(mContext.getContentResolver(),
-                        Settings.Global.INET_CONDITION_DEBOUNCE_DOWN_DELAY, 3000);
-            }
-            mInetConditionChangeInFlight = true;
-            mHandler.sendMessageDelayed(mHandler.obtainMessage(EVENT_INET_CONDITION_HOLD_END,
-                    mActiveDefaultNetwork, mDefaultConnectionSequence), delay);
-        } else {
-            // we've set the new condition, when this hold ends that will get picked up
-            if (VDBG) log("handleInetConditionChange: currently in hold - not setting new end evt");
-        }
-    }
-
-    private void handleInetConditionHoldEnd(int netType, int sequence) {
-        if (DBG) {
-            log("handleInetConditionHoldEnd: net=" + netType +
-                    ", condition=" + mDefaultInetCondition +
-                    ", published condition=" + mDefaultInetConditionPublished);
-        }
-        mInetConditionChangeInFlight = false;
-
-        if (mActiveDefaultNetwork == -1) {
-            if (DBG) log("handleInetConditionHoldEnd: no active default network - ignoring");
-            return;
-        }
-        if (mDefaultConnectionSequence != sequence) {
-            if (DBG) log("handleInetConditionHoldEnd: event hold for obsolete network - ignoring");
-            return;
-        }
-        // TODO: Figure out why this optimization sometimes causes a
-        //       change in mDefaultInetCondition to be missed and the
-        //       UI to not be updated.
-        //if (mDefaultInetConditionPublished == mDefaultInetCondition) {
-        //    if (DBG) log("no change in condition - aborting");
-        //    return;
-        //}
-        NetworkInfo networkInfo = getNetworkInfoForType(mActiveDefaultNetwork);
-        if (networkInfo.isConnected() == false) {
-            if (DBG) log("handleInetConditionHoldEnd: default network not connected - ignoring");
-            return;
-        }
-        mDefaultInetConditionPublished = mDefaultInetCondition;
-        sendInetConditionBroadcast(networkInfo);
-        return;
     }
 
     public ProxyInfo getProxy() {
@@ -4206,6 +4093,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private final NetworkRequest mDefaultRequest;
 
+    private boolean isDefaultNetwork(NetworkAgentInfo nai) {
+        return mNetworkForRequestId.get(mDefaultRequest.requestId) == nai;
+    }
+
     public void registerNetworkAgent(Messenger messenger, NetworkInfo networkInfo,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
             int currentScore, NetworkMisc networkMisc) {
@@ -4532,6 +4423,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             mLegacyTypeTracker.remove(currentNetwork.networkInfo.getType(),
                                                       currentNetwork);
                         }
+                        mDefaultInetConditionPublished = 100;
                         mLegacyTypeTracker.add(newNetwork.networkInfo.getType(), newNetwork);
                     }
                 }
@@ -4581,8 +4473,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 // to connected after our normal pause unless somebody reports us as
                 // really disconnected
                 mDefaultInetConditionPublished = 0;
-                mDefaultConnectionSequence++;
-                mInetConditionChangeInFlight = false;
                 // TODO - read the tcp buffer size config string from somewhere
                 // updateNetworkSettings();
             }
