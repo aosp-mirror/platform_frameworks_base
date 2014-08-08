@@ -21,6 +21,8 @@
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/MediaCodecList.h>
+#include <media/IMediaCodecList.h>
+#include <media/MediaCodecInfo.h>
 
 #include "android_runtime/AndroidRuntime.h"
 #include "jni.h"
@@ -29,20 +31,41 @@
 
 using namespace android;
 
+static sp<IMediaCodecList> getCodecList(JNIEnv *env) {
+    sp<IMediaCodecList> mcl = MediaCodecList::getInstance();
+    if (mcl == NULL) {
+        // This should never happen unless something is really wrong
+        jniThrowException(
+                    env, "java/lang/RuntimeException", "cannot get MediaCodecList");
+    }
+    return mcl;
+}
+
 static jint android_media_MediaCodecList_getCodecCount(
         JNIEnv *env, jobject thiz) {
-    return MediaCodecList::getInstance()->countCodecs();
+    sp<IMediaCodecList> mcl = getCodecList(env);
+    if (mcl == NULL) {
+        // Runtime exception already pending.
+        return 0;
+    }
+    return mcl->countCodecs();
 }
 
 static jstring android_media_MediaCodecList_getCodecName(
         JNIEnv *env, jobject thiz, jint index) {
-    const char *name = MediaCodecList::getInstance()->getCodecName(index);
+    sp<IMediaCodecList> mcl = getCodecList(env);
+    if (mcl == NULL) {
+        // Runtime exception already pending.
+        return NULL;
+    }
 
-    if (name == NULL) {
+    const sp<MediaCodecInfo> &info = mcl->getCodecInfo(index);
+    if (info == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return NULL;
     }
 
+    const char *name = info->getCodecName();
     return env->NewStringUTF(name);
 }
 
@@ -54,32 +77,55 @@ static jint android_media_MediaCodecList_findCodecByName(
     }
 
     const char *nameStr = env->GetStringUTFChars(name, NULL);
-
     if (nameStr == NULL) {
         // Out of memory exception already pending.
         return -ENOENT;
     }
 
-    jint ret = MediaCodecList::getInstance()->findCodecByName(nameStr);
+    sp<IMediaCodecList> mcl = getCodecList(env);
+    if (mcl == NULL) {
+        // Runtime exception already pending.
+        return -ENOENT;
+    }
+
+    jint ret = mcl->findCodecByName(nameStr);
     env->ReleaseStringUTFChars(name, nameStr);
     return ret;
 }
 
 static jboolean android_media_MediaCodecList_isEncoder(
         JNIEnv *env, jobject thiz, jint index) {
-    return MediaCodecList::getInstance()->isEncoder(index);
+    sp<IMediaCodecList> mcl = getCodecList(env);
+    if (mcl == NULL) {
+        // Runtime exception already pending.
+        return false;
+    }
+
+    const sp<MediaCodecInfo> &info = mcl->getCodecInfo(index);
+    if (info == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return false;
+    }
+
+    return info->isEncoder();
 }
 
 static jarray android_media_MediaCodecList_getSupportedTypes(
         JNIEnv *env, jobject thiz, jint index) {
-    Vector<AString> types;
-    status_t err =
-        MediaCodecList::getInstance()->getSupportedTypes(index, &types);
+    sp<IMediaCodecList> mcl = getCodecList(env);
+    if (mcl == NULL) {
+        // Runtime exception already pending.
+        return NULL;
+    }
 
-    if (err != OK) {
+    const sp<MediaCodecInfo> &info = mcl->getCodecInfo(index);
+    if (info == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return NULL;
     }
+
+    Vector<AString> types;
+    info->getSupportedMimes(&types);
 
     jclass clazz = env->FindClass("java/lang/String");
     CHECK(clazz != NULL);
@@ -103,6 +149,18 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
         return NULL;
     }
 
+    sp<IMediaCodecList> mcl = getCodecList(env);
+    if (mcl == NULL) {
+        // Runtime exception already pending.
+        return NULL;
+    }
+
+    const sp<MediaCodecInfo> &info = mcl->getCodecInfo(index);
+    if (info == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return NULL;
+    }
+
     const char *typeStr = env->GetStringUTFChars(type, NULL);
 
     if (typeStr == NULL) {
@@ -110,30 +168,27 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
         return NULL;
     }
 
-    Vector<MediaCodecList::ProfileLevel> profileLevels;
+    Vector<MediaCodecInfo::ProfileLevel> profileLevels;
     Vector<uint32_t> colorFormats;
-    uint32_t flags;
-    sp<AMessage> capabilities;
 
     sp<AMessage> defaultFormat = new AMessage();
     defaultFormat->setString("mime", typeStr);
 
     // TODO query default-format also from codec/codec list
-
-    status_t err =
-        MediaCodecList::getInstance()->getCodecCapabilities(
-                index, typeStr, &profileLevels, &colorFormats, &flags,
-                &capabilities);
-
-    bool isEncoder = MediaCodecList::getInstance()->isEncoder(index);
-
-    env->ReleaseStringUTFChars(type, typeStr);
-    typeStr = NULL;
-
-    if (err != OK) {
+    const sp<MediaCodecInfo::Capabilities> &capabilities =
+        info->getCapabilitiesFor(typeStr);
+    if (capabilities == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return NULL;
     }
+    env->ReleaseStringUTFChars(type, typeStr);
+    typeStr = NULL;
+
+    capabilities->getSupportedColorFormats(&colorFormats);
+    capabilities->getSupportedProfileLevels(&profileLevels);
+    uint32_t flags = capabilities->getFlags();
+    sp<AMessage> details = capabilities->getDetails();
+    bool isEncoder = info->isEncoder();
 
     jobject defaultFormatObj = NULL;
     if (ConvertMessageToMap(env, defaultFormat, &defaultFormatObj)) {
@@ -141,7 +196,7 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
     }
 
     jobject infoObj = NULL;
-    if (ConvertMessageToMap(env, capabilities, &infoObj)) {
+    if (ConvertMessageToMap(env, details, &infoObj)) {
         env->DeleteLocalRef(defaultFormatObj);
         return NULL;
     }
@@ -164,7 +219,7 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
         env->GetFieldID(profileLevelClazz, "level", "I");
 
     for (size_t i = 0; i < profileLevels.size(); ++i) {
-        const MediaCodecList::ProfileLevel &src = profileLevels.itemAt(i);
+        const MediaCodecInfo::ProfileLevel &src = profileLevels.itemAt(i);
 
         jobject profileLevelObj = env->AllocObject(profileLevelClazz);
 
@@ -191,26 +246,6 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
     jobject caps = env->NewObject(capsClazz, capsConstructID,
             profileLevelArray, colorFormatsArray, isEncoder, flags,
             defaultFormatObj, infoObj);
-
-#if 0
-    jfieldID profileLevelsField = env->GetFieldID(
-            capsClazz,
-            "profileLevels",
-            "[Landroid/media/MediaCodecInfo$CodecProfileLevel;");
-
-    env->SetObjectField(caps, profileLevelsField, profileLevelArray);
-
-    jfieldID flagsField =
-        env->GetFieldID(capsClazz, "mFlagsVerified", "I");
-
-    env->SetIntField(caps, flagsField, flags);
-
-    jfieldID colorFormatsField = env->GetFieldID(
-            capsClazz, "colorFormats", "[I");
-
-    env->SetObjectField(caps, colorFormatsField, colorFormatsArray);
-
-#endif
 
     env->DeleteLocalRef(profileLevelArray);
     profileLevelArray = NULL;
