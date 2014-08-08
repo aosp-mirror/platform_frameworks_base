@@ -29,6 +29,9 @@ import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.MediaMetadataEditor;
 import android.media.MediaMetadataRetriever;
+import android.media.Rating;
+import android.media.RemoteControlClient;
+import android.media.RemoteControlClient.MetadataEditor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -229,8 +232,7 @@ public class MediaSessionLegacyHelper {
         }
     }
 
-    public void addRccListener(PendingIntent pi,
-            MediaSession.TransportControlsCallback listener) {
+    public void addRccListener(PendingIntent pi, MediaSession.Callback listener) {
         if (pi == null) {
             Log.w(TAG, "Pending intent was null, can't add rcc listener.");
             return;
@@ -247,10 +249,7 @@ public class MediaSessionLegacyHelper {
                 // This is already the registered listener, ignore
                 return;
             }
-            // Otherwise it changed so we need to switch to the new one
-            holder.mSession.removeTransportControlsCallback(holder.mRccListener);
         }
-        holder.mSession.addTransportControlsCallback(listener, mHandler);
         holder.mRccListener = listener;
         holder.mFlags |= MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS;
         holder.mSession.setFlags(holder.mFlags);
@@ -266,7 +265,6 @@ public class MediaSessionLegacyHelper {
         }
         SessionHolder holder = getHolder(pi, false);
         if (holder != null && holder.mRccListener != null) {
-            holder.mSession.removeTransportControlsCallback(holder.mRccListener);
             holder.mRccListener = null;
             holder.mFlags &= ~MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS;
             holder.mSession.setFlags(holder.mFlags);
@@ -288,8 +286,7 @@ public class MediaSessionLegacyHelper {
             return;
         }
         if (holder.mMediaButtonListener != null) {
-            // Already have this listener registered, but update it anyway as
-            // the extras may have changed.
+            // Already have this listener registered
             if (DEBUG) {
                 Log.d(TAG, "addMediaButtonListener already added " + pi);
             }
@@ -300,11 +297,8 @@ public class MediaSessionLegacyHelper {
         // set this flag
         holder.mFlags |= MediaSession.FLAG_HANDLES_MEDIA_BUTTONS;
         holder.mSession.setFlags(holder.mFlags);
-        holder.mSession.addTransportControlsCallback(holder.mMediaButtonListener, mHandler);
-
-        holder.mMediaButtonReceiver = new MediaButtonReceiver(pi, context);
-        holder.mSession.addCallback(holder.mMediaButtonReceiver, mHandler);
         holder.mSession.setMediaButtonReceiver(pi);
+        holder.update();
         if (DEBUG) {
             Log.d(TAG, "addMediaButtonListener added " + pi);
         }
@@ -316,13 +310,10 @@ public class MediaSessionLegacyHelper {
         }
         SessionHolder holder = getHolder(pi, false);
         if (holder != null && holder.mMediaButtonListener != null) {
-            holder.mSession.removeTransportControlsCallback(holder.mMediaButtonListener);
             holder.mFlags &= ~MediaSession.FLAG_HANDLES_MEDIA_BUTTONS;
             holder.mSession.setFlags(holder.mFlags);
             holder.mMediaButtonListener = null;
 
-            holder.mSession.removeCallback(holder.mMediaButtonReceiver);
-            holder.mMediaButtonReceiver = null;
             holder.update();
             if (DEBUG) {
                 Log.d(TAG, "removeMediaButtonListener removed " + pi);
@@ -387,28 +378,19 @@ public class MediaSessionLegacyHelper {
         }
     }
 
-    private static final class MediaButtonReceiver extends MediaSession.Callback {
-        private final PendingIntent mPendingIntent;
-        private final Context mContext;
-
-        public MediaButtonReceiver(PendingIntent pi, Context context) {
-            mPendingIntent = pi;
-            mContext = context;
-        }
-
-        @Override
-        public void onMediaButtonEvent(Intent mediaButtonIntent) {
-            MediaSessionLegacyHelper.sendKeyEvent(mPendingIntent, mContext, mediaButtonIntent);
-        }
-    }
-
-    private static final class MediaButtonListener extends MediaSession.TransportControlsCallback {
+    private static final class MediaButtonListener extends MediaSession.Callback {
         private final PendingIntent mPendingIntent;
         private final Context mContext;
 
         public MediaButtonListener(PendingIntent pi, Context context) {
             mPendingIntent = pi;
             mContext = context;
+        }
+
+        @Override
+        public boolean onMediaButtonEvent(Intent mediaButtonIntent) {
+            MediaSessionLegacyHelper.sendKeyEvent(mPendingIntent, mContext, mediaButtonIntent);
+            return true;
         }
 
         @Override
@@ -468,9 +450,10 @@ public class MediaSessionLegacyHelper {
         public final MediaSession mSession;
         public final PendingIntent mPi;
         public MediaButtonListener mMediaButtonListener;
-        public MediaButtonReceiver mMediaButtonReceiver;
-        public MediaSession.TransportControlsCallback mRccListener;
+        public MediaSession.Callback mRccListener;
         public int mFlags;
+
+        public SessionCallback mCb;
 
         public SessionHolder(MediaSession session, PendingIntent pi) {
             mSession = session;
@@ -479,8 +462,87 @@ public class MediaSessionLegacyHelper {
 
         public void update() {
             if (mMediaButtonListener == null && mRccListener == null) {
+                mSession.setCallback(null);
                 mSession.release();
+                mCb = null;
                 mSessions.remove(mPi);
+            } else if (mCb == null) {
+                mCb = new SessionCallback();
+                mSession.setCallback(mCb);
+            }
+        }
+
+        private class SessionCallback extends MediaSession.Callback {
+
+            @Override
+            public boolean onMediaButtonEvent(Intent mediaButtonIntent) {
+                if (mMediaButtonListener != null) {
+                    mMediaButtonListener.onMediaButtonEvent(mediaButtonIntent);
+                }
+                return true;
+            }
+
+            @Override
+            public void onPlay() {
+                if (mMediaButtonListener != null) {
+                    mMediaButtonListener.onPlay();
+                }
+            }
+
+            @Override
+            public void onPause() {
+                if (mMediaButtonListener != null) {
+                    mMediaButtonListener.onPause();
+                }
+            }
+
+            @Override
+            public void onSkipToNext() {
+                if (mMediaButtonListener != null) {
+                    mMediaButtonListener.onSkipToNext();
+                }
+            }
+
+            @Override
+            public void onSkipToPrevious() {
+                if (mMediaButtonListener != null) {
+                    mMediaButtonListener.onSkipToPrevious();
+                }
+            }
+
+            @Override
+            public void onFastForward() {
+                if (mMediaButtonListener != null) {
+                    mMediaButtonListener.onFastForward();
+                }
+            }
+
+            @Override
+            public void onRewind() {
+                if (mMediaButtonListener != null) {
+                    mMediaButtonListener.onRewind();
+                }
+            }
+
+            @Override
+            public void onStop() {
+                if (mMediaButtonListener != null) {
+                    mMediaButtonListener.onStop();
+                }
+            }
+
+            @Override
+            public void onSeekTo(long pos) {
+                if (mRccListener != null) {
+                    mRccListener.onSeekTo(pos);
+                }
+            }
+
+            @Override
+            public void onSetRating(Rating rating) {
+                if (mRccListener != null) {
+                    mRccListener.onSetRating(rating);
+                }
             }
         }
     }
