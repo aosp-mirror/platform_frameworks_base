@@ -351,6 +351,10 @@ public class DirectoryFragment extends Fragment {
         updateDisplayState();
     }
 
+    public void onDisplayStateChanged() {
+        updateDisplayState();
+    }
+
     public void onUserSortOrderChanged() {
         // Sort order change always triggers reload; we'll trigger state change
         // on the flip side.

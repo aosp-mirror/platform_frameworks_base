@@ -42,12 +42,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".SettingsActivity"
-            android:label="@string/menu_settings"
-            android:theme="@android:style/Theme.DeviceDefault.Light.DialogWhenLarge"
-            android:exported="false" />
-
         <provider
             android:name=".RecentsProvider"
             android:authorities="com.android.documentsui.recents"

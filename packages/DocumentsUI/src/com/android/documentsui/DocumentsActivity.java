@@ -254,7 +254,13 @@ public class DocumentsActivity extends Activity {
         mState.localOnly = intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false);
         mState.forceAdvanced = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
         mState.showAdvanced = mState.forceAdvanced
-                | SettingsActivity.getDisplayAdvancedDevices(this);
+                | LocalPreferences.getDisplayAdvancedDevices(this);
+
+        if (mState.action == ACTION_MANAGE) {
+            mState.showSize = true;
+        } else {
+            mState.showSize = LocalPreferences.getDisplayFileSize(this);
+        }
     }
 
     private class RestoreRootTask extends AsyncTask<Void, Void, RootInfo> {
@@ -349,18 +355,6 @@ public class DocumentsActivity extends Activity {
             }
 
             onCurrentDirectoryChanged(ANIM_NONE);
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if (mState.action == ACTION_MANAGE) {
-            mState.showSize = true;
-        } else {
-            mState.showSize = SettingsActivity.getDisplayFileSize(this);
-            invalidateOptionsMenu();
         }
     }
 
@@ -463,10 +457,17 @@ public class DocumentsActivity extends Activity {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.activity, menu);
 
-        // Actions are always visible when showing as dialog
+        // Most actions are visible when showing as dialog
         if (mShowAsDialog) {
             for (int i = 0; i < menu.size(); i++) {
-                menu.getItem(i).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                final MenuItem item = menu.getItem(i);
+                switch (item.getItemId()) {
+                    case R.id.menu_advanced:
+                    case R.id.menu_file_size:
+                        break;
+                    default:
+                        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                }
             }
         }
 
@@ -543,7 +544,8 @@ public class DocumentsActivity extends Activity {
         final MenuItem sortSize = menu.findItem(R.id.menu_sort_size);
         final MenuItem grid = menu.findItem(R.id.menu_grid);
         final MenuItem list = menu.findItem(R.id.menu_list);
-        final MenuItem settings = menu.findItem(R.id.menu_settings);
+        final MenuItem advanced = menu.findItem(R.id.menu_advanced);
+        final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
 
         sort.setVisible(cwd != null);
         grid.setVisible(mState.derivedMode != MODE_GRID);
@@ -594,7 +596,13 @@ public class DocumentsActivity extends Activity {
         // TODO: close any search in-progress when hiding
         search.setVisible(searchVisible);
 
-        settings.setVisible(mState.action != ACTION_MANAGE);
+        advanced.setTitle(LocalPreferences.getDisplayAdvancedDevices(this)
+                ? R.string.menu_advanced_hide : R.string.menu_advanced_show);
+        fileSize.setTitle(LocalPreferences.getDisplayFileSize(this)
+                ? R.string.menu_file_size_hide : R.string.menu_file_size_show);
+
+        advanced.setVisible(mState.action != ACTION_MANAGE);
+        fileSize.setVisible(mState.action != ACTION_MANAGE);
 
         return true;
     }
@@ -629,12 +637,29 @@ public class DocumentsActivity extends Activity {
         } else if (id == R.id.menu_list) {
             setUserMode(State.MODE_LIST);
             return true;
-        } else if (id == R.id.menu_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
+        } else if (id == R.id.menu_advanced) {
+            setDisplayAdvancedDevices(!LocalPreferences.getDisplayAdvancedDevices(this));
+            return true;
+        } else if (id == R.id.menu_file_size) {
+            setDisplayFileSize(!LocalPreferences.getDisplayFileSize(this));
             return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void setDisplayAdvancedDevices(boolean display) {
+        LocalPreferences.setDisplayAdvancedDevices(this, display);
+        mState.showAdvanced = mState.forceAdvanced | display;
+        RootsFragment.get(getFragmentManager()).onDisplayStateChanged();
+        invalidateOptionsMenu();
+    }
+
+    private void setDisplayFileSize(boolean display) {
+        LocalPreferences.setDisplayFileSize(this, display);
+        mState.showSize = display;
+        DirectoryFragment.get(getFragmentManager()).onDisplayStateChanged();
+        invalidateOptionsMenu();
     }
 
     /**
