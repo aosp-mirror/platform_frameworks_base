@@ -17354,11 +17354,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 if ((userInfo.flags&UserInfo.FLAG_INITIALIZED) == 0) {
                     if (userId != UserHandle.USER_OWNER) {
-                        // Send PRE_BOOT_COMPLETED broadcasts for this new user
-                        final ArrayList<ComponentName> doneReceivers
-                                = new ArrayList<ComponentName>();
-                        deliverPreBootCompleted(null, doneReceivers, userId);
-
                         Intent intent = new Intent(Intent.ACTION_USER_INITIALIZE);
                         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                         broadcastIntentLocked(null, null, intent, null,
