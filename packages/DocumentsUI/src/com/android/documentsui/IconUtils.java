@@ -22,6 +22,7 @@ import android.content.pm.ProviderInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.provider.DocumentsContract.Document;
+import android.util.TypedValue;
 
 import com.google.android.collect.Maps;
 
@@ -45,7 +46,7 @@ public class IconUtils {
         add("application/vnd.android.package-archive", icon);
 
         // Audio
-        icon = R.drawable.ic_doc_audio_dark;
+        icon = R.drawable.ic_doc_audio;
         add("application/ogg", icon);
         add("application/x-flac", icon);
 
@@ -132,7 +133,7 @@ public class IconUtils {
         add("application/x-font-ttf", icon);
 
         // Image
-        icon = R.drawable.ic_doc_image_dark;
+        icon = R.drawable.ic_doc_image;
         add("application/vnd.oasis.opendocument.graphics", icon);
         add("application/vnd.oasis.opendocument.graphics-template", icon);
         add("application/vnd.oasis.opendocument.image", icon);
@@ -186,7 +187,7 @@ public class IconUtils {
         add("application/x-kword", icon);
 
         // Video
-        icon = R.drawable.ic_doc_video_dark;
+        icon = R.drawable.ic_doc_video;
         add("application/x-quicktimeplayer", icon);
         add("application/x-shockwave-flash", icon);
     }
@@ -220,7 +221,7 @@ public class IconUtils {
             if (mode == DocumentsActivity.State.MODE_GRID) {
                 return res.getDrawable(R.drawable.ic_grid_folder);
             } else {
-                return res.getDrawable(R.drawable.ic_root_folder_dark);
+                return res.getDrawable(R.drawable.ic_doc_folder);
             }
         }
 
@@ -231,8 +232,7 @@ public class IconUtils {
         final Resources res = context.getResources();
 
         if (Document.MIME_TYPE_DIR.equals(mimeType)) {
-            // TODO: return a mipmap, since this is used for grid
-            return res.getDrawable(R.drawable.ic_root_folder_dark);
+            return res.getDrawable(R.drawable.ic_doc_folder);
         }
 
         // Look for exact match first
@@ -249,15 +249,27 @@ public class IconUtils {
         // Otherwise look for partial match
         final String typeOnly = mimeType.split("/")[0];
         if ("audio".equals(typeOnly)) {
-            return res.getDrawable(R.drawable.ic_doc_audio_dark);
+            return res.getDrawable(R.drawable.ic_doc_audio);
         } else if ("image".equals(typeOnly)) {
-            return res.getDrawable(R.drawable.ic_doc_image_dark);
+            return res.getDrawable(R.drawable.ic_doc_image);
         } else if ("text".equals(typeOnly)) {
             return res.getDrawable(R.drawable.ic_doc_text);
         } else if ("video".equals(typeOnly)) {
-            return res.getDrawable(R.drawable.ic_doc_video_dark);
+            return res.getDrawable(R.drawable.ic_doc_video);
         } else {
             return res.getDrawable(R.drawable.ic_doc_generic);
         }
+    }
+
+    public static Drawable applyTint(Context context, int drawableId, int tintAttrId) {
+        final Resources res = context.getResources();
+
+        final TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(tintAttrId, outValue, true);
+
+        final Drawable icon = res.getDrawable(drawableId);
+        icon.mutate();
+        icon.setTintList(res.getColorStateList(outValue.resourceId));
+        return icon;
     }
 }
