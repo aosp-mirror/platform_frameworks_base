@@ -103,7 +103,7 @@ public final class MediaProjectionManagerService extends SystemService
             try {
                 hasPermission |= checkPermission(packageName,
                         android.Manifest.permission.CAPTURE_VIDEO_OUTPUT)
-                        || mAppOps.checkOpNoThrow(
+                        || mAppOps.noteOpNoThrow(
                                 AppOpsManager.OP_PROJECT_MEDIA, uid, packageName)
                         == AppOpsManager.MODE_ALLOWED;
             } finally {
@@ -196,18 +196,27 @@ public final class MediaProjectionManagerService extends SystemService
         }
 
         @Override // Binder call
-        public int getVirtualDisplayFlags() {
-            switch (mType) {
-                case MediaProjectionManager.TYPE_SCREEN_CAPTURE:
-                    return DisplayManager.VIRTUAL_DISPLAY_FLAG_SCREEN_SHARE;
-                case MediaProjectionManager.TYPE_MIRRORING:
-                    return DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
-                            DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
-                case MediaProjectionManager.TYPE_PRESENTATION:
-                    return DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION |
-                            DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
+        public int applyVirtualDisplayFlags(int flags) {
+            if (mType == MediaProjectionManager.TYPE_SCREEN_CAPTURE) {
+                flags &= ~DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
+                flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR
+                        | DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
+                return flags;
+            } else if (mType == MediaProjectionManager.TYPE_MIRRORING) {
+                flags &= ~(DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR);
+                flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY |
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
+                return flags;
+            } else if (mType == MediaProjectionManager.TYPE_PRESENTATION) {
+                flags &= ~DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
+                flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC |
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION |
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
+                return flags;
+            } else  {
+                throw new RuntimeException("Unknown MediaProjection type");
             }
-            throw new RuntimeException("Unknown MediaProjection type");
         }
 
         @Override // Binder call
