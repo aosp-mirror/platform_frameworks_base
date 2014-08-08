@@ -31,8 +31,7 @@
             android:src="@drawable/btn_switch_to_on_mtrl_00001"
             android:gravity="center"
             android:tintMode="multiply"
-            android:tint="?attr/colorButtonNormal"
-            android:alpha="?attr/disabledAlpha" />
+            android:tint="?attr/colorButtonNormal" />
     </item>
     <item
         android:state_checked="true"

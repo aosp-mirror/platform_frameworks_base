@@ -233,7 +233,7 @@ public class ColorStateList implements Parcelable {
             }
 
             if (alphaRes != 0) {
-                alpha = r.getFraction(alphaRes, 1, 1);
+                alpha = r.getFloat(alphaRes);
             }
 
             // Apply alpha modulation.
