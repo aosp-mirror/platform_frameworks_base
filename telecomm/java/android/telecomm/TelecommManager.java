@@ -72,10 +72,10 @@ public class TelecommManager {
      * Optional extra for {@link android.content.Intent#ACTION_CALL} containing an integer that
      * determines the desired video state for an outgoing call.
      * Valid options:
-     * {@link android.telecomm.VideoCallProfile.VideoState#AUDIO_ONLY},
-     * {@link android.telecomm.VideoCallProfile.VideoState#BIDIRECTIONAL},
-     * {@link android.telecomm.VideoCallProfile.VideoState#RX_ENABLED},
-     * {@link android.telecomm.VideoCallProfile.VideoState#TX_ENABLED}.
+     * {@link VideoProfile.VideoState#AUDIO_ONLY},
+     * {@link VideoProfile.VideoState#BIDIRECTIONAL},
+     * {@link VideoProfile.VideoState#RX_ENABLED},
+     * {@link VideoProfile.VideoState#TX_ENABLED}.
      */
     public static final String EXTRA_START_CALL_WITH_VIDEO_STATE =
             "android.intent.extra.START_CALL_WITH_VIDEO_STATE";
@@ -282,10 +282,10 @@ public class TelecommManager {
     public List<PhoneAccountHandle> getEnabledPhoneAccounts() {
         try {
             if (isServiceConnected()) {
-                return getTelecommService().getEnabledPhoneAccounts();
+                return getTelecommService().getOutgoingPhoneAccounts();
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecommService#getEnabledPhoneAccounts", e);
+            Log.e(TAG, "Error calling ITelecommService#getOutgoingPhoneAccounts", e);
         }
         return null;
     }

@@ -16,7 +16,6 @@
 
 package com.android.internal.telecomm;
 
-import android.telecomm.CallAudioState;
 import android.telecomm.PhoneAccountHandle;
 
 /**
@@ -54,8 +53,6 @@ oneway interface IInCallAdapter {
     void conference(String callId, String otherCallId);
 
     void splitFromConference(String callId);
-
-    void swapWithBackgroundCall(String callId);
 
     void turnOnProximitySensor();
 

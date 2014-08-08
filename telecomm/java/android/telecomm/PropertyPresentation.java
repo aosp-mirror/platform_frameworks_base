@@ -16,8 +16,10 @@
 
 package android.telecomm;
 
-/** Defines how numbers and names are displayed in caller id. */
-public class CallPropertyPresentation {
+/**
+ * Defines how properties such as phone numbers and names are displayed to the user.
+ */
+public class PropertyPresentation {
     /** Property is displayed normally. */
     public static final int ALLOWED = 1;
 

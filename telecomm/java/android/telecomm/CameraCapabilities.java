@@ -21,9 +21,8 @@ import android.os.Parcelable;
 
 /**
  * Represents the camera capabilities important to a Video Telephony provider.
- * TODO: Add camera capabilities as required.
  */
-public final class CallCameraCapabilities implements Parcelable {
+public final class CameraCapabilities implements Parcelable {
 
     /**
      * Whether the camera supports zoom.
@@ -53,7 +52,7 @@ public final class CallCameraCapabilities implements Parcelable {
      * @param width The width of the camera video (in pixels).
      * @param height The height of the camera video (in pixels).
      */
-    public CallCameraCapabilities(boolean zoomSupported, float maxZoom, int width, int height) {
+    public CameraCapabilities(boolean zoomSupported, float maxZoom, int width, int height) {
         mZoomSupported = zoomSupported;
         mMaxZoom = maxZoom;
         mWidth = width;
@@ -63,8 +62,8 @@ public final class CallCameraCapabilities implements Parcelable {
     /**
      * Responsible for creating CallCameraCapabilities objects from deserialized Parcels.
      **/
-    public static final Parcelable.Creator<CallCameraCapabilities> CREATOR =
-            new Parcelable.Creator<CallCameraCapabilities> () {
+    public static final Parcelable.Creator<CameraCapabilities> CREATOR =
+            new Parcelable.Creator<CameraCapabilities> () {
                 /**
                  * Creates a CallCameraCapabilities instances from a parcel.
                  *
@@ -72,18 +71,18 @@ public final class CallCameraCapabilities implements Parcelable {
                  * @return The CallCameraCapabilities.
                  */
                 @Override
-                public CallCameraCapabilities createFromParcel(Parcel source) {
+                public CameraCapabilities createFromParcel(Parcel source) {
                     boolean supportsZoom = source.readByte() != 0;
                     float maxZoom = source.readFloat();
                     int width = source.readInt();
                     int height = source.readInt();
 
-                    return new CallCameraCapabilities(supportsZoom, maxZoom, width, height);
+                    return new CameraCapabilities(supportsZoom, maxZoom, width, height);
                 }
 
                 @Override
-                public CallCameraCapabilities[] newArray(int size) {
-                    return new CallCameraCapabilities[size];
+                public CameraCapabilities[] newArray(int size) {
+                    return new CameraCapabilities[size];
                 }
             };
 

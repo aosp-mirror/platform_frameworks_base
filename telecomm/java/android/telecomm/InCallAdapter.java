@@ -28,6 +28,10 @@ import com.android.internal.telecomm.IInCallAdapter;
  * given call IDs to execute commands such as {@link #answerCall} for incoming calls or
  * {@link #disconnectCall} for active calls the user would like to end. Some commands are only
  * appropriate for calls in certain states; please consult each method for such limitations.
+ * <p>
+ * The adapter will stop functioning when there are no more calls.
+ *
+ * {@hide}
  */
 public final class InCallAdapter {
     private final IInCallAdapter mAdapter;
@@ -115,7 +119,7 @@ public final class InCallAdapter {
     }
 
     /**
-     * Sets the audio route (speaker, bluetooth, etc...). See {@link CallAudioState}.
+     * Sets the audio route (speaker, bluetooth, etc...). See {@link AudioState}.
      *
      * @param route The audio route to use.
      */
@@ -232,19 +236,6 @@ public final class InCallAdapter {
     public void splitFromConference(String callId) {
         try {
             mAdapter.splitFromConference(callId);
-        } catch (RemoteException ignored) {
-        }
-    }
-
-    /**
-     * Swap this call with a background call. This is used for calls that don't support hold,
-     * e.g. CDMA.
-     *
-     * @param callId The unique ID of the call.
-     */
-    public void swapWithBackgroundCall(String callId) {
-        try {
-            mAdapter.swapWithBackgroundCall(callId);
         } catch (RemoteException ignored) {
         }
     }

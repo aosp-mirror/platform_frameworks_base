@@ -16,4 +16,7 @@
 
 package android.telecomm;
 
+/**
+ * {@hide}
+ */
 parcelable GatewayInfo;

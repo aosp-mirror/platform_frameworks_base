@@ -20,11 +20,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.DisplayMetrics;
 
 import java.util.MissingResourceException;
 import java.util.Objects;
@@ -36,13 +34,13 @@ public final class StatusHints implements Parcelable {
 
     private final ComponentName mComponentName;
     private final CharSequence mLabel;
-    private final int mIconId;
+    private final int mIconResId;
     private final Bundle mExtras;
 
-    public StatusHints(ComponentName componentName, CharSequence label, int iconId, Bundle extras) {
+    public StatusHints(ComponentName componentName, CharSequence label, int iconResId, Bundle extras) {
         mComponentName = componentName;
         mLabel = label;
-        mIconId = iconId;
+        mIconResId = iconResId;
         mExtras = extras;
     }
 
@@ -61,17 +59,19 @@ public final class StatusHints implements Parcelable {
     }
 
     /**
-     * @return The icon resource identifier.
+     * The icon resource ID for the icon to show.
+     *
+     * @return A resource ID.
      */
-    public int getIconId() {
-        return mIconId;
+    public int getIconResId() {
+        return mIconResId;
     }
 
     /**
      * @return An icon displayed in the in-call UI.
      */
     public Drawable getIcon(Context context) {
-        return getIcon(context, mIconId);
+        return getIcon(context, mIconResId);
     }
 
     /**
@@ -90,7 +90,7 @@ public final class StatusHints implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(mComponentName, flags);
         out.writeCharSequence(mLabel);
-        out.writeInt(mIconId);
+        out.writeInt(mIconResId);
         out.writeParcelable(mExtras, 0);
     }
 
@@ -108,8 +108,8 @@ public final class StatusHints implements Parcelable {
     private StatusHints(Parcel in) {
         mComponentName = in.readParcelable(getClass().getClassLoader());
         mLabel = in.readCharSequence();
-        mIconId = in.readInt();
-        mExtras = (Bundle) in.readParcelable(getClass().getClassLoader());
+        mIconResId = in.readInt();
+        mExtras = in.readParcelable(getClass().getClassLoader());
     }
 
     private Drawable getIcon(Context context, int resId) {
@@ -135,7 +135,7 @@ public final class StatusHints implements Parcelable {
             StatusHints otherHints = (StatusHints) other;
             return Objects.equals(otherHints.getComponentName(), getComponentName()) &&
                     Objects.equals(otherHints.getLabel(), getLabel()) &&
-                    otherHints.getIconId() == getIconId() &&
+                    otherHints.getIconResId() == getIconResId() &&
                     Objects.equals(otherHints.getExtras(), getExtras());
         }
         return false;
@@ -143,7 +143,7 @@ public final class StatusHints implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(mComponentName) + Objects.hashCode(mLabel) + mIconId +
+        return Objects.hashCode(mComponentName) + Objects.hashCode(mLabel) + mIconResId +
                 Objects.hashCode(mExtras);
     }
 }

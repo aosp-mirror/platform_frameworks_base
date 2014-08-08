@@ -17,18 +17,13 @@
 package android.telecomm;
 
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.net.Uri;
-import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 
-import com.android.internal.telecomm.IConnectionService;
 import com.android.internal.telecomm.IConnectionServiceAdapter;
-import com.android.internal.telecomm.IVideoCallProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -77,28 +72,36 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     }
 
     void handleCreateConnectionSuccessful(
-            ConnectionRequest request, ParcelableConnection connection) {
+            String id,
+            ConnectionRequest request,
+            ParcelableConnection connection) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.handleCreateConnectionSuccessful(request, connection);
+                adapter.handleCreateConnectionSuccessful(id, request, connection);
             } catch (RemoteException e) {
             }
         }
     }
 
-    void handleCreateConnectionFailed(ConnectionRequest request, int errorCode, String errorMsg) {
+    void handleCreateConnectionFailed(
+            String id,
+            ConnectionRequest request,
+            int errorCode,
+            String errorMsg) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.handleCreateConnectionFailed(request, errorCode, errorMsg);
+                adapter.handleCreateConnectionFailed(id, request, errorCode, errorMsg);
             } catch (RemoteException e) {
             }
         }
     }
 
-    void handleCreateConnectionCancelled(ConnectionRequest request) {
+    void handleCreateConnectionCancelled(
+            String id,
+            ConnectionRequest request) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.handleCreateConnectionCancelled(request);
+                adapter.handleCreateConnectionCancelled(id, request);
             } catch (RemoteException e) {
             }
         }
@@ -275,15 +278,15 @@ final class ConnectionServiceAdapter implements DeathRecipient {
      * Sets the call video provider for a call.
      *
      * @param callId The unique ID of the call to set with the given call video provider.
-     * @param videoCallProvider The call video provider instance to set on the call.
+     * @param videoProvider The call video provider instance to set on the call.
      */
-    void setVideoCallProvider(
-            String callId, ConnectionService.VideoCallProvider videoCallProvider) {
+    void setVideoProvider(
+            String callId, Connection.VideoProvider videoProvider) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.setVideoCallProvider(
+                adapter.setVideoProvider(
                         callId,
-                        videoCallProvider == null ? null : videoCallProvider.getInterface());
+                        videoProvider == null ? null : videoProvider.getInterface());
             } catch (RemoteException e) {
             }
         }
@@ -334,10 +337,10 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     /**
      * Sets the video state associated with a call.
      *
-     * Valid values: {@link android.telecomm.VideoCallProfile#VIDEO_STATE_AUDIO_ONLY},
-     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_BIDIRECTIONAL},
-     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_TX_ENABLED},
-     * {@link android.telecomm.VideoCallProfile#VIDEO_STATE_RX_ENABLED}.
+     * Valid values: {@link VideoProfile.VideoState#AUDIO_ONLY},
+     * {@link VideoProfile.VideoState#BIDIRECTIONAL},
+     * {@link VideoProfile.VideoState#TX_ENABLED},
+     * {@link VideoProfile.VideoState#RX_ENABLED}.
      *
      * @param callId The unique ID of the call to set the video state for.
      * @param videoState The video state.

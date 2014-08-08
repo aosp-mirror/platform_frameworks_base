@@ -16,22 +16,24 @@
 
 package android.telecomm;
 
+import com.android.internal.telecomm.IConnectionService;
+
 import android.app.PendingIntent;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.telephony.DisconnectCause;
 
-import com.android.internal.telecomm.IConnectionService;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * RemoteConnection object used by RemoteConnectionService.
+ * A connection provided to a {@link ConnectionService} by another {@code ConnectionService}
+ * running in a different process.
+ *
+ * @see ConnectionService#createRemoteOutgoingConnection(PhoneAccountHandle, ConnectionRequest)
+ * @see ConnectionService#createRemoteIncomingConnection(PhoneAccountHandle, ConnectionRequest)
  */
 public final class RemoteConnection {
 
@@ -100,7 +102,7 @@ public final class RemoteConnection {
          * Invoked when the post-dial sequence in the outgoing {@code Connection} has reached a
          * pause character. This causes the post-dial signals to stop pending user confirmation. An
          * implementation should present this choice to the user and invoke
-         * {@link #postDialContinue(boolean)} when the user makes the choice.
+         * {@link RemoteConnection#postDialContinue(boolean)} when the user makes the choice.
          *
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param remainingPostDialSequence The post-dial characters that remain to be sent.
@@ -131,7 +133,7 @@ public final class RemoteConnection {
          *
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param handle The new handle of the {@code RemoteConnection}.
-         * @param presentation The {@link CallPropertyPresentation} which controls how the
+         * @param presentation The {@link PropertyPresentation} which controls how the
          *         handle is shown.
          */
         public void onHandleChanged(RemoteConnection connection, Uri handle, int presentation) {}
@@ -142,7 +144,7 @@ public final class RemoteConnection {
          *
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param callerDisplayName The new caller display name of the {@code RemoteConnection}.
-         * @param presentation The {@link CallPropertyPresentation} which controls how the
+         * @param presentation The {@link PropertyPresentation} which controls how the
          *         caller display name is shown.
          */
         public void onCallerDisplayNameChanged(
@@ -180,11 +182,10 @@ public final class RemoteConnection {
 
     private IConnectionService mConnectionService;
     private final String mConnectionId;
-    private final Set<Listener> mListeners = Collections.newSetFromMap(
-            new ConcurrentHashMap<Listener, Boolean>(2));
+    private final Set<Listener> mListeners = new HashSet<>();
     private final Set<RemoteConnection> mConferenceableConnections = new HashSet<>();
 
-    private int mState = Connection.State.NEW;
+    private int mState = Connection.STATE_NEW;
     private int mDisconnectCauseCode = DisconnectCause.NOT_VALID;
     private String mDisconnectCauseMessage;
     private boolean mRequestingRingback;
@@ -203,12 +204,14 @@ public final class RemoteConnection {
     /**
      * @hide
      */
-    RemoteConnection(IConnectionService connectionService, ConnectionRequest request) {
+    RemoteConnection(
+            String id,
+            IConnectionService connectionService,
+            ConnectionRequest request) {
+        mConnectionId = id;
         mConnectionService = connectionService;
-        mConnectionId = request == null ? "NULL" : request.getCallId();
-
         mConnected = true;
-        mState = Connection.State.INITIALIZING;
+        mState = Connection.STATE_INITIALIZING;
     }
 
     /**
@@ -219,10 +222,10 @@ public final class RemoteConnection {
      * @param failureCode
      * @param failureMessage
      */
-    private RemoteConnection(int failureCode, String failureMessage) {
-        this(null, null);
+    RemoteConnection(int failureCode, String failureMessage) {
+        this("NULL", null, null);
         mConnected = false;
-        mState = Connection.State.FAILED;
+        mState = Connection.STATE_FAILED;
         mFailureCode = failureCode;
         mFailureMessage = failureMessage;
     }
@@ -271,7 +274,7 @@ public final class RemoteConnection {
     }
 
     /**
-     * @return For a {@link Connection.State#DISCONNECTED} {@code RemoteConnection}, the
+     * @return For a {@link Connection#STATE_DISCONNECTED} {@code RemoteConnection}, the
      * disconnect cause expressed as a code chosen from among those declared in
      * {@link DisconnectCause}.
      */
@@ -280,7 +283,7 @@ public final class RemoteConnection {
     }
 
     /**
-     * @return For a {@link Connection.State#DISCONNECTED} {@code RemoteConnection}, an optional
+     * @return For a {@link Connection#STATE_DISCONNECTED} {@code RemoteConnection}, an optional
      * reason for disconnection expressed as a free text message.
      */
     public String getDisconnectCauseMessage() {
@@ -289,7 +292,7 @@ public final class RemoteConnection {
 
     /**
      * @return A bitmask of the capabilities of the {@code RemoteConnection}, as defined in
-     *         {@link CallCapabilities}.
+     *         {@link PhoneCapabilities}.
      */
     public int getCallCapabilities() {
         return mCallCapabilities;
@@ -303,7 +306,7 @@ public final class RemoteConnection {
     }
 
     /**
-     * @return The current {@link android.telecomm.StatusHints} of this {@code RemoteConnection},
+     * @return The current {@link StatusHints} of this {@code RemoteConnection},
      * or {@code null} if none have been set.
      */
     public StatusHints getStatusHints() {
@@ -320,7 +323,7 @@ public final class RemoteConnection {
 
     /**
      * @return The presentation requirements for the handle. See
-     * {@link android.telecomm.CallPropertyPresentation} for valid values.
+     * {@link PropertyPresentation} for valid values.
      */
     public int getHandlePresentation() {
         return mHandlePresentation;
@@ -335,7 +338,7 @@ public final class RemoteConnection {
 
     /**
      * @return The presentation requirements for the caller display name. See
-     * {@link android.telecomm.CallPropertyPresentation} for valid values.
+     * {@link PropertyPresentation} for valid values.
      */
     public int getCallerDisplayNamePresentation() {
         return mCallerDisplayNamePresentation;
@@ -343,7 +346,7 @@ public final class RemoteConnection {
 
     /**
      * @return The video state of the {@code RemoteConnection}. See
-     * {@link VideoCallProfile.VideoState}.
+     * {@link VideoProfile.VideoState}.
      */
     public int getVideoState() {
         return mVideoState;
@@ -385,7 +388,7 @@ public final class RemoteConnection {
     }
 
     /**
-     * Instructs this {@link Connection.State#RINGING} {@code RemoteConnection} to answer.
+     * Instructs this {@link Connection#STATE_RINGING} {@code RemoteConnection} to answer.
      * @param videoState The video state in which to answer the call.
      */
     public void answer(int videoState) {
@@ -398,7 +401,7 @@ public final class RemoteConnection {
     }
 
     /**
-     * Instructs this {@link Connection.State#RINGING} {@code RemoteConnection} to reject.
+     * Instructs this {@link Connection#STATE_RINGING} {@code RemoteConnection} to reject.
      */
     public void reject() {
         try {
@@ -422,7 +425,7 @@ public final class RemoteConnection {
     }
 
     /**
-     * Instructs this {@link Connection.State#HOLDING} call to release from hold.
+     * Instructs this {@link Connection#STATE_HOLDING} call to release from hold.
      */
     public void unhold() {
         try {
@@ -510,24 +513,11 @@ public final class RemoteConnection {
     }
 
     /**
-     * Instructs this {@code RemoteConnection} to swap itself with an existing background call,
-     * if one such call exists.
-     */
-    public void swapWithBackgroundCall() {
-        try {
-            if (mConnected) {
-                mConnectionService.swapWithBackgroundCall(mConnectionId);
-            }
-        } catch (RemoteException ignored) {
-        }
-    }
-
-    /**
      * Set the audio state of this {@code RemoteConnection}.
      *
      * @param state The audio state of this {@code RemoteConnection}.
      */
-    public void setAudioState(CallAudioState state) {
+    public void setAudioState(AudioState state) {
         try {
             if (mConnected) {
                 mConnectionService.onAudioStateChanged(mConnectionId, state);
@@ -552,8 +542,8 @@ public final class RemoteConnection {
      * @hide
      */
     void setDisconnected(int cause, String message) {
-        if (mState != Connection.State.DISCONNECTED) {
-            mState = Connection.State.DISCONNECTED;
+        if (mState != Connection.STATE_DISCONNECTED) {
+            mState = Connection.STATE_DISCONNECTED;
             mDisconnectCauseCode = cause;
             mDisconnectCauseMessage = message;
 
@@ -591,7 +581,7 @@ public final class RemoteConnection {
     void setDestroyed() {
         if (!mListeners.isEmpty()) {
             // Make sure that the listeners are notified that the call is destroyed first.
-            if (mState != Connection.State.DISCONNECTED) {
+            if (mState != Connection.STATE_DISCONNECTED) {
                 setDisconnected(DisconnectCause.ERROR_UNSPECIFIED, "Connection destroyed.");
             }
 
@@ -676,7 +666,7 @@ public final class RemoteConnection {
     }
 
     /**
-     * Create a RemoteConnection which is in the {@link Connection.State#FAILED} state. Attempting
+     * Create a RemoteConnection which is in the {@link Connection#STATE_FAILED} state. Attempting
      * to use it for anything will almost certainly result in bad things happening. Do not do this.
      *
      * @return a failed {@link RemoteConnection}

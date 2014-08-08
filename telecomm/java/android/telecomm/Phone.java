@@ -27,6 +27,8 @@ import java.util.Objects;
 
 /**
  * A unified virtual device providing a means of voice (and other) communication on a device.
+ *
+ * {@hide}
  */
 public final class Phone {
 
@@ -35,9 +37,9 @@ public final class Phone {
          * Called when the audio state changes.
          *
          * @param phone The {@code Phone} calling this method.
-         * @param audioState The new {@link CallAudioState}.
+         * @param audioState The new {@link AudioState}.
          */
-        public void onAudioStateChanged(Phone phone, CallAudioState audioState) { }
+        public void onAudioStateChanged(Phone phone, AudioState audioState) { }
 
         /**
          * Called to bring the in-call screen to the foreground. The in-call experience should
@@ -85,7 +87,7 @@ public final class Phone {
 
     private final InCallAdapter mInCallAdapter;
 
-    private CallAudioState mAudioState;
+    private AudioState mAudioState;
 
     private final List<Listener> mListeners = new ArrayList<>();
 
@@ -129,10 +131,10 @@ public final class Phone {
     }
 
     /** {@hide} */
-    final void internalAudioStateChanged(CallAudioState callAudioState) {
-        if (!Objects.equals(mAudioState, callAudioState)) {
-            mAudioState = callAudioState;
-            fireAudioStateChanged(callAudioState);
+    final void internalAudioStateChanged(AudioState audioState) {
+        if (!Objects.equals(mAudioState, audioState)) {
+            mAudioState = audioState;
+            fireAudioStateChanged(audioState);
         }
     }
 
@@ -229,7 +231,7 @@ public final class Phone {
      *
      * @return An object encapsulating the audio state.
      */
-    public final CallAudioState getAudioState() {
+    public final AudioState getAudioState() {
         return mAudioState;
     }
 
@@ -247,7 +249,7 @@ public final class Phone {
         }
     }
 
-    private void fireAudioStateChanged(CallAudioState audioState) {
+    private void fireAudioStateChanged(AudioState audioState) {
         Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
         for (int i = 0; i < listeners.length; i++) {
             listeners[i].onAudioStateChanged(this, audioState);
