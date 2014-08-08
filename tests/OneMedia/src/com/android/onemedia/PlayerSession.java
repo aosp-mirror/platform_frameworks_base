@@ -86,10 +86,10 @@ public class PlayerSession {
         mRouter.setRoutingCallback(new RoutingCallback(), null);
 
         mSession = new MediaSession(mContext, "OneMedia");
-        mSession.addCallback(mCallback);
-        mSession.addTransportControlsCallback(new TransportCallback());
+        mSession.setCallback(mCallback);
         mSession.setPlaybackState(mPlaybackState);
-        mSession.setFlags(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        mSession.setFlags(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS
+                | MediaSession.FLAG_HANDLES_MEDIA_BUTTONS);
         mSession.setMediaRouter(mRouter);
         mSession.setActive(true);
     }
@@ -230,26 +230,6 @@ public class PlayerSession {
 
     private class SessionCb extends MediaSession.Callback {
         @Override
-        public void onMediaButtonEvent(Intent mediaRequestIntent) {
-            if (Intent.ACTION_MEDIA_BUTTON.equals(mediaRequestIntent.getAction())) {
-                KeyEvent event = (KeyEvent) mediaRequestIntent
-                        .getParcelableExtra(Intent.EXTRA_KEY_EVENT);
-                switch (event.getKeyCode()) {
-                    case KeyEvent.KEYCODE_MEDIA_PLAY:
-                        Log.d(TAG, "play button received");
-                        mRenderer.onPlay();
-                        break;
-                    case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                        Log.d(TAG, "pause button received");
-                        mRenderer.onPause();
-                        break;
-                }
-            }
-        }
-    }
-
-    private class TransportCallback extends MediaSession.TransportControlsCallback {
-        @Override
         public void onPlay() {
             mRenderer.onPlay();
         }
@@ -315,7 +295,7 @@ public class PlayerSession {
                         updateState(PlaybackState.STATE_NONE);
                         break;
                 }
-            } 
+            }
         }
     }
 }
