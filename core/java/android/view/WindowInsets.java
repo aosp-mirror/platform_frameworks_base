@@ -266,7 +266,6 @@ public final class WindowInsets {
      * {@link View#fitSystemWindows(android.graphics.Rect)}.</p>
      *
      * @return true if the insets have been fully consumed.
-     * @hide Pending API
      */
     public boolean isConsumed() {
         return mSystemWindowInsetsConsumed && mWindowDecorInsetsConsumed && mStableInsetsConsumed;
