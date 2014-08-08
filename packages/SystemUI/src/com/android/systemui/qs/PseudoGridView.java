@@ -65,15 +65,14 @@ public class PseudoGridView extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        if (widthMode == MeasureSpec.UNSPECIFIED) {
+        if (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.UNSPECIFIED) {
             throw new UnsupportedOperationException("Needs a maximum width");
         }
         int width = MeasureSpec.getSize(widthMeasureSpec);
 
         int childWidth = (width - (mNumColumns - 1) * mHorizontalSpacing) / mNumColumns;
         int childWidthSpec = MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.EXACTLY);
-        int childHeightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        int childHeightSpec = MeasureSpec.UNSPECIFIED;
         int totalHeight = 0;
         int children = getChildCount();
         int rows = (children + mNumColumns - 1) / mNumColumns;
@@ -89,7 +88,9 @@ public class PseudoGridView extends ViewGroup {
             int maxHeightSpec = MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.EXACTLY);
             for (int i = startOfRow; i < endOfRow; i++) {
                 View child = getChildAt(i);
-                child.measure(childWidthSpec, maxHeightSpec);
+                if (child.getMeasuredHeight() != maxHeight) {
+                    child.measure(childWidthSpec, maxHeightSpec);
+                }
             }
             totalHeight += maxHeight;
             if (row > 0) {
@@ -102,11 +103,12 @@ public class PseudoGridView extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        boolean isRtl = isLayoutRtl();
         int children = getChildCount();
         int rows = (children + mNumColumns - 1) / mNumColumns;
         int y = 0;
         for (int row = 0; row < rows; row++) {
-            int x = 0;
+            int x = isRtl ? getWidth() : 0;
             int maxHeight = 0;
             int startOfRow = row * mNumColumns;
             int endOfRow = Math.min(startOfRow + mNumColumns, children);
@@ -114,9 +116,16 @@ public class PseudoGridView extends ViewGroup {
                 View child = getChildAt(i);
                 int width = child.getMeasuredWidth();
                 int height = child.getMeasuredHeight();
+                if (isRtl) {
+                    x -= width;
+                }
                 child.layout(x, y, x + width, y + height);
                 maxHeight = Math.max(maxHeight, height);
-                x += width + mHorizontalSpacing;
+                if (isRtl) {
+                    x -= mHorizontalSpacing;
+                } else {
+                    x += width + mHorizontalSpacing;
+                }
             }
             y += maxHeight;
             if (row > 0) {
