@@ -21,6 +21,7 @@ import static android.media.tv.TvInputManager.INPUT_STATE_DISCONNECTED;
 
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiHotplugEvent;
 import android.hardware.hdmi.IHdmiControlService;
@@ -862,6 +863,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         public void onHardwareDeviceRemoved(TvInputHardwareInfo info);
         public void onHdmiDeviceAdded(HdmiDeviceInfo device);
         public void onHdmiDeviceRemoved(HdmiDeviceInfo device);
+        public void onHdmiDeviceUpdated(HdmiDeviceInfo device);
     }
 
     private class ListenerHandler extends Handler {
@@ -870,6 +872,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         private static final int HARDWARE_DEVICE_REMOVED = 3;
         private static final int HDMI_DEVICE_ADDED = 4;
         private static final int HDMI_DEVICE_REMOVED = 5;
+        private static final int HDMI_DEVICE_UPDATED = 6;
 
         @Override
         public final void handleMessage(Message msg) {
@@ -899,6 +902,10 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     HdmiDeviceInfo info = (HdmiDeviceInfo) msg.obj;
                     mListener.onHdmiDeviceRemoved(info);
                     break;
+                }
+                case HDMI_DEVICE_UPDATED: {
+                    HdmiDeviceInfo info = (HdmiDeviceInfo) msg.obj;
+                    mListener.onHdmiDeviceUpdated(info);
                 }
                 default: {
                     Slog.w(TAG, "Unhandled message: " + msg);
@@ -932,25 +939,40 @@ class TvInputHardwareManager implements TvInputHal.Callback {
 
     private final class HdmiDeviceEventListener extends IHdmiDeviceEventListener.Stub {
         @Override
-        public void onStatusChanged(HdmiDeviceInfo deviceInfo, boolean activated) {
+        public void onStatusChanged(HdmiDeviceInfo deviceInfo, int status) {
             synchronized (mLock) {
-                if (activated) {
-                    if (!mHdmiDeviceList.contains(deviceInfo)) {
-                        mHdmiDeviceList.add(deviceInfo);
-                    } else {
-                        Slog.w(TAG, "The list already contains " + deviceInfo + "; ignoring.");
-                        return;
+                int messageType = 0;
+                switch (status) {
+                    case HdmiControlManager.DEVICE_EVENT_ADD_DEVICE: {
+                        if (!mHdmiDeviceList.contains(deviceInfo)) {
+                            mHdmiDeviceList.add(deviceInfo);
+                        } else {
+                            Slog.w(TAG, "The list already contains " + deviceInfo + "; ignoring.");
+                            return;
+                        }
+                        messageType = ListenerHandler.HDMI_DEVICE_ADDED;
+                        break;
                     }
-                } else {
-                    if (!mHdmiDeviceList.remove(deviceInfo)) {
-                        Slog.w(TAG, "The list doesn't contain " + deviceInfo + "; ignoring.");
-                        return;
+                    case HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE: {
+                        if (!mHdmiDeviceList.remove(deviceInfo)) {
+                            Slog.w(TAG, "The list doesn't contain " + deviceInfo + "; ignoring.");
+                            return;
+                        }
+                        messageType = ListenerHandler.HDMI_DEVICE_REMOVED;
+                        break;
+                    }
+                    case HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE: {
+                        if (!mHdmiDeviceList.remove(deviceInfo)) {
+                            Slog.w(TAG, "The list doesn't contain " + deviceInfo + "; ignoring.");
+                            return;
+                        }
+                        mHdmiDeviceList.add(deviceInfo);
+                        messageType = ListenerHandler.HDMI_DEVICE_UPDATED;
+                        break;
                     }
                 }
-                Message msg = mHandler.obtainMessage(
-                        activated ? ListenerHandler.HDMI_DEVICE_ADDED
-                        : ListenerHandler.HDMI_DEVICE_REMOVED,
-                        0, 0, deviceInfo);
+
+                Message msg = mHandler.obtainMessage(messageType, 0, 0, deviceInfo);
                 if (findHardwareInfoForHdmiPortLocked(deviceInfo.getPortId()) != null) {
                     msg.sendToTarget();
                 } else {
