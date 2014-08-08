@@ -48,7 +48,6 @@ public class RootInfo implements Durable, Parcelable {
     public String rootId;
     public int flags;
     public int icon;
-    public int lightIcon;
     public String title;
     public String summary;
     public String documentId;
@@ -59,7 +58,6 @@ public class RootInfo implements Durable, Parcelable {
     public String derivedPackageName;
     public String[] derivedMimeTypes;
     public int derivedIcon;
-    public int derivedLightIcon;
 
     public RootInfo() {
         reset();
@@ -71,7 +69,6 @@ public class RootInfo implements Durable, Parcelable {
         rootId = null;
         flags = 0;
         icon = 0;
-        lightIcon = 0;
         title = null;
         summary = null;
         documentId = null;
@@ -81,7 +78,6 @@ public class RootInfo implements Durable, Parcelable {
         derivedPackageName = null;
         derivedMimeTypes = null;
         derivedIcon = 0;
-        derivedLightIcon = 0;
     }
 
     @Override
@@ -163,20 +159,15 @@ public class RootInfo implements Durable, Parcelable {
 
         // TODO: remove these special case icons
         if (isExternalStorage()) {
-            derivedIcon = R.drawable.ic_root_sdcard_dark;
-            derivedLightIcon = R.drawable.ic_root_sdcard_light;
+            derivedIcon = R.drawable.ic_root_sdcard;
         } else if (isDownloads()) {
-            derivedIcon = R.drawable.ic_root_download_dark;
-            derivedLightIcon = R.drawable.ic_root_download_light;
+            derivedIcon = R.drawable.ic_root_download;
         } else if (isImages()) {
-            derivedIcon = R.drawable.ic_doc_image_dark;
-            derivedLightIcon = R.drawable.ic_doc_image_light;
+            derivedIcon = R.drawable.ic_doc_image;
         } else if (isVideos()) {
-            derivedIcon = R.drawable.ic_doc_video_dark;
-            derivedLightIcon = R.drawable.ic_doc_video_light;
+            derivedIcon = R.drawable.ic_doc_video;
         } else if (isAudio()) {
-            derivedIcon = R.drawable.ic_doc_audio_dark;
-            derivedLightIcon = R.drawable.ic_doc_audio_light;
+            derivedIcon = R.drawable.ic_doc_audio;
         }
     }
 
@@ -220,13 +211,21 @@ public class RootInfo implements Durable, Parcelable {
         }
     }
 
-    public Drawable loadLightIcon(Context context) {
-        if (derivedLightIcon != 0) {
-            return context.getResources().getDrawable(derivedLightIcon);
-        } else if (lightIcon != 0) {
-            return IconUtils.loadPackageIcon(context, authority, lightIcon);
+    public Drawable loadGridIcon(Context context) {
+        if (derivedIcon != 0) {
+            return IconUtils.applyTint(context, derivedIcon,
+                    android.R.attr.textColorPrimaryInverse);
         } else {
-            return loadIcon(context);
+            return IconUtils.loadPackageIcon(context, authority, icon);
+        }
+    }
+
+    public Drawable loadToolbarIcon(Context context) {
+        if (derivedIcon != 0) {
+            return IconUtils.applyTint(context, derivedIcon,
+                    android.R.attr.colorControlNormal);
+        } else {
+            return IconUtils.loadPackageIcon(context, authority, icon);
         }
     }
 
