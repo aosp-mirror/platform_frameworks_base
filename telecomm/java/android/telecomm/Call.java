@@ -70,7 +70,9 @@ public final class Call {
     public static final int STATE_PRE_DIAL_WAIT = 8;
 
     /**
-     * The state of an outgoing {@code Call}, before Telecomm broadcast intent has returned.
+     * The initial state of an outgoing {@code Call}.
+     * Common transitions are to {@link #STATE_DIALING} state for a successful call or
+     * {@link #STATE_DISCONNECTED} if it failed.
      */
     public static final int STATE_CONNECTING = 9;
 
