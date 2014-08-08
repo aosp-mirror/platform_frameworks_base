@@ -452,7 +452,7 @@ aidl_files := \
 	frameworks/base/core/java/android/os/DropBoxManager.aidl \
 	frameworks/base/core/java/android/os/ParcelFileDescriptor.aidl \
 	frameworks/base/core/java/android/os/ParcelUuid.aidl \
-        frameworks/base/core/java/android/os/PersistableBundle.aidl \
+    frameworks/base/core/java/android/os/PersistableBundle.aidl \
 	frameworks/base/core/java/android/print/PrinterInfo.aidl \
 	frameworks/base/core/java/android/print/PageRange.aidl \
 	frameworks/base/core/java/android/print/PrintAttributes.aidl \
@@ -460,6 +460,7 @@ aidl_files := \
 	frameworks/base/core/java/android/print/PrinterId.aidl \
 	frameworks/base/core/java/android/print/PrintJobId.aidl \
 	frameworks/base/core/java/android/print/PrintJobInfo.aidl \
+    frameworks/base/core/java/android/service/notification/StatusBarNotification.aidl \
 	frameworks/base/core/java/android/view/accessibility/AccessibilityEvent.aidl \
 	frameworks/base/core/java/android/view/accessibility/AccessibilityNodeInfo.aidl \
 	frameworks/base/core/java/android/view/accessibility/AccessibilityRecord.aidl \
