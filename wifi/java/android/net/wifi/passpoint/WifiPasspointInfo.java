@@ -22,7 +22,6 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
-/** @hide */
 public class WifiPasspointInfo implements Parcelable {
 
     /** TODO doc */
