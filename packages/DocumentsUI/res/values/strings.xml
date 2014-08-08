@@ -47,6 +47,20 @@
     <!-- Menu item title that selects the current directory [CHAR LIMIT=48] -->
     <string name="menu_select">Select \"<xliff:g id="directory" example="My Directory">^1</xliff:g>\"</string>
 
+    <!-- Menu item that reveals internal storage built into the device [CHAR LIMIT=24] -->
+    <string name="menu_advanced_show" product="nosdcard">Show internal storage</string>
+    <!-- Menu item that reveals SD cards built into the device [CHAR LIMIT=24] -->
+    <string name="menu_advanced_show" product="default">Show SD card</string>
+    <!-- Menu item that hides internal storage built into the device [CHAR LIMIT=24] -->
+    <string name="menu_advanced_hide" product="nosdcard">Hide internal storage</string>
+    <!-- Menu item that hides SD cards built into the device [CHAR LIMIT=24] -->
+    <string name="menu_advanced_hide" product="default">Hide SD card</string>
+
+    <!-- Menu item that reveals the sizes of displayed files [CHAR LIMIT=24] -->
+    <string name="menu_file_size_show">Show file size</string>
+    <!-- Menu item that hides the sizes of displayed files [CHAR LIMIT=24] -->
+    <string name="menu_file_size_hide">Hide file size</string>
+
     <!-- Action mode title summarizing the number of documents selected [CHAR LIMIT=32] -->
     <string name="mode_selected_count"><xliff:g id="count" example="3">%1$d</xliff:g> selected</string>
 
@@ -82,12 +96,6 @@
     <string name="root_type_device">Devices</string>
     <!-- Header title for list of additional apps that can provide documents [CHAR LIMIT=24] -->
     <string name="root_type_apps">More apps</string>
-
-    <!-- Title for setting that will show all advanced storage devices [CHAR LIMIT=32] -->
-    <string name="pref_advanced_devices">Display advanced devices</string>
-    <!-- Title for setting that will show file sizes for all documents [CHAR LIMIT=32] -->
-    <string name="pref_file_size">Display file size</string>
-    <string name="pref_device_size">Display device size</string>
 
     <!-- Text shown when a directory of documents is empty [CHAR LIMIT=24] -->
     <string name="empty">No items</string>
