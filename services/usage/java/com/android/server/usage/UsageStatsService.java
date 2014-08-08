@@ -19,8 +19,8 @@ package com.android.server.usage;
 import android.Manifest;
 import android.app.AppOpsManager;
 import android.app.usage.IUsageStatsManager;
+import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Environment;
@@ -47,6 +48,10 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * A service that collects, aggregates, and persists application usage data.
+ * This data can be queried by apps that have been granted permission by AppOps.
+ */
 public class UsageStatsService extends SystemService implements
         UserUsageStatsService.StatsUpdatedListener {
     static final String TAG = "UsageStatsService";
@@ -54,8 +59,9 @@ public class UsageStatsService extends SystemService implements
     static final boolean DEBUG = false;
     private static final long TEN_SECONDS = 10 * 1000;
     private static final long TWENTY_MINUTES = 20 * 60 * 1000;
+    private static final long TWO_MINUTES = 2 * 60 * 1000;
     private static final long FLUSH_INTERVAL = DEBUG ? TEN_SECONDS : TWENTY_MINUTES;
-    static final int USAGE_STAT_RESULT_LIMIT = 10;
+    private static final long END_TIME_DELAY = DEBUG ? 0 : TWO_MINUTES;
 
     // Handler message types.
     static final int MSG_REPORT_EVENT = 0;
@@ -181,7 +187,7 @@ public class UsageStatsService extends SystemService implements
     /**
      * Called by the Binder stub.
      */
-    void reportEvent(UsageStats.Event event, int userId) {
+    void reportEvent(UsageEvents.Event event, int userId) {
         synchronized (mLock) {
             final UserUsageStatsService service = getUserDataAndInitializeIfNeededLocked(userId);
             service.reportEvent(event);
@@ -211,27 +217,37 @@ public class UsageStatsService extends SystemService implements
     /**
      * Called by the Binder stub.
      */
-    UsageStats[] getUsageStats(int userId, int bucketType, long beginTime) {
-        if (bucketType < 0 || bucketType >= UsageStatsManager.BUCKET_COUNT) {
-            return UsageStats.EMPTY_STATS;
-        }
-
+    List<UsageStats> queryUsageStats(int userId, int bucketType, long beginTime, long endTime) {
         final long timeNow = System.currentTimeMillis();
         if (beginTime > timeNow) {
-            return UsageStats.EMPTY_STATS;
+            return null;
         }
 
         synchronized (mLock) {
             UserUsageStatsService service = getUserDataAndInitializeIfNeededLocked(userId);
-            return service.getUsageStats(bucketType, beginTime);
+            return service.queryUsageStats(bucketType, beginTime, endTime);
         }
     }
 
     /**
      * Called by the Binder stub.
      */
-    UsageStats.Event[] getEvents(int userId, long time) {
-        return UsageStats.Event.EMPTY_EVENTS;
+    UsageEvents queryEvents(int userId, long beginTime, long endTime) {
+        final long timeNow = System.currentTimeMillis();
+
+        // Adjust the endTime so that we don't query for the latest events.
+        // This is to prevent apps from making decision based on what app launched them,
+        // etc.
+        endTime = Math.min(endTime, timeNow - END_TIME_DELAY);
+
+        if (beginTime > endTime) {
+            return null;
+        }
+
+        synchronized (mLock) {
+            UserUsageStatsService service = getUserDataAndInitializeIfNeededLocked(userId);
+            return service.queryEvents(beginTime, endTime);
+        }
     }
 
     private void flushToDiskLocked() {
@@ -253,7 +269,7 @@ public class UsageStatsService extends SystemService implements
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_REPORT_EVENT:
-                    reportEvent((UsageStats.Event) msg.obj, msg.arg1);
+                    reportEvent((UsageEvents.Event) msg.obj, msg.arg1);
                     break;
 
                 case MSG_FLUSH_TO_DISK:
@@ -286,30 +302,32 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public UsageStats[] getStatsSince(int bucketType, long time, String callingPackage) {
+        public ParceledListSlice<UsageStats> queryUsageStats(int bucketType, long beginTime,
+                long endTime, String callingPackage) {
             if (!hasPermission(callingPackage)) {
-                return UsageStats.EMPTY_STATS;
+                return null;
             }
 
             final int userId = UserHandle.getCallingUserId();
             final long token = Binder.clearCallingIdentity();
             try {
-                return getUsageStats(userId, bucketType, time);
+                return new ParceledListSlice<>(UsageStatsService.this.queryUsageStats(
+                        userId, bucketType, beginTime, endTime));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override
-        public UsageStats.Event[] getEventsSince(long time, String callingPackage) {
+        public UsageEvents queryEvents(long beginTime, long endTime, String callingPackage) {
             if (!hasPermission(callingPackage)) {
-                return UsageStats.Event.EMPTY_EVENTS;
+                return null;
             }
 
             final int userId = UserHandle.getCallingUserId();
             final long token = Binder.clearCallingIdentity();
             try {
-                return getEvents(userId, time);
+                return UsageStatsService.this.queryEvents(userId, beginTime, endTime);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -326,8 +344,15 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void reportEvent(ComponentName component, int userId,
                 long timeStamp, int eventType) {
-            UsageStats.Event event = new UsageStats.Event(component.getPackageName(), timeStamp,
-                    eventType);
+            if (component == null) {
+                Slog.w(TAG, "Event reported without a component name");
+                return;
+            }
+
+            UsageEvents.Event event = new UsageEvents.Event();
+            event.mComponent = component;
+            event.mTimeStamp = timeStamp;
+            event.mEventType = eventType;
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
         }
 
