@@ -19008,7 +19008,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void findNamedViews(Map<String, View> namedElements) {
-        if (getVisibility() == VISIBLE) {
+        if (getVisibility() == VISIBLE || mGhostView != null) {
             String transitionName = getTransitionName();
             if (transitionName != null) {
                 namedElements.put(transitionName, this);

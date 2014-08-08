@@ -6123,7 +6123,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /** @hide */
     @Override
     public void findNamedViews(Map<String, View> namedElements) {
-        if (getVisibility() != VISIBLE) {
+        if (getVisibility() != VISIBLE && mGhostView == null) {
             return;
         }
         super.findNamedViews(namedElements);
