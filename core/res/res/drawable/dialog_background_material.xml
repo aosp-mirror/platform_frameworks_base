@@ -14,12 +14,10 @@
      limitations under the License.
 -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-
-    <corners
-        android:radius="2dp" />
-    <solid
-        android:color="?attr/colorBackground" />
-
-</shape>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:inset="16dp">
+    <shape android:shape="rectangle">
+        <corners android:radius="2dp" />
+        <solid android:color="?attr/colorBackground" />
+    </shape>
+</inset>

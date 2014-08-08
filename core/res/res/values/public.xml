@@ -2269,6 +2269,10 @@
   <public type="attr" name="windowReenterTransition" />
   <public type="attr" name="windowSharedElementReturnTransition" />
   <public type="attr" name="windowSharedElementReenterTransition" />
+  <public type="attr" name="contentRatingSystemXml"/>
+  <public type="attr" name="datePickerMode"/>
+  <public type="attr" name="timePickerMode"/>
+  <public type="attr" name="inset" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
@@ -2560,9 +2564,4 @@
   <public type="raw" name="loaderror" id="0x01100000"/>
   <!-- WebView error page for when domain lookup fails. @hide @SystemApi -->
   <public type="raw" name="nodomain"/>
-
-  <public type="attr" name="contentRatingSystemXml"/>
-
-  <public type="attr" name="datePickerMode"/>
-  <public type="attr" name="timePickerMode"/>
 </resources>

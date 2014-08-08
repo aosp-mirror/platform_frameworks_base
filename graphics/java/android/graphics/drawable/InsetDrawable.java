@@ -119,20 +119,40 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
         // Extract the theme attributes, if any.
         state.mThemeAttrs = a.extractThemeAttrs();
 
-        final Drawable dr = a.getDrawable(R.styleable.InsetDrawable_drawable);
-        if (dr != null) {
-            state.mDrawable = dr;
-            dr.setCallback(this);
+        final int N = a.getIndexCount();
+        for (int i = 0; i < N; i++) {
+            final int attr = a.getIndex(i);
+            switch (attr) {
+                case R.styleable.InsetDrawable_drawable:
+                    final Drawable dr = a.getDrawable(attr);
+                    if (dr != null) {
+                        state.mDrawable = dr;
+                        dr.setCallback(this);
+                    }
+                    break;
+                case R.styleable.InsetDrawable_inset:
+                    final int inset = a.getDimensionPixelOffset(attr, Integer.MIN_VALUE);
+                    if (inset != Integer.MIN_VALUE) {
+                        state.mInsetLeft = inset;
+                        state.mInsetTop = inset;
+                        state.mInsetRight = inset;
+                        state.mInsetBottom = inset;
+                    }
+                    break;
+                case R.styleable.InsetDrawable_insetLeft:
+                    state.mInsetLeft = a.getDimensionPixelOffset(attr, state.mInsetLeft);
+                    break;
+                case R.styleable.InsetDrawable_insetTop:
+                    state.mInsetTop = a.getDimensionPixelOffset(attr, state.mInsetTop);
+                    break;
+                case R.styleable.InsetDrawable_insetRight:
+                    state.mInsetRight = a.getDimensionPixelOffset(attr, state.mInsetRight);
+                    break;
+                case R.styleable.InsetDrawable_insetBottom:
+                    state.mInsetBottom = a.getDimensionPixelOffset(attr, state.mInsetBottom);
+                    break;
+            }
         }
-
-        state.mInsetLeft = a.getDimensionPixelOffset(
-                R.styleable.InsetDrawable_insetLeft, state.mInsetLeft);
-        state.mInsetTop = a.getDimensionPixelOffset(
-                R.styleable.InsetDrawable_insetTop, state.mInsetTop);
-        state.mInsetRight = a.getDimensionPixelOffset(
-                R.styleable.InsetDrawable_insetRight, state.mInsetRight);
-        state.mInsetBottom = a.getDimensionPixelOffset(
-                R.styleable.InsetDrawable_insetBottom, state.mInsetBottom);
     }
 
     @Override
