@@ -33,6 +33,7 @@ import android.util.Printer;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
+import android.view.Display;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
 
@@ -1595,6 +1596,27 @@ public abstract class BatteryStats implements Parcelable {
      * @param curTime The current elepsed realtime in microseconds.
      */
     public abstract long computeBatteryTimeRemaining(long curTime);
+
+    // The part of a step duration that is the actual time.
+    public static final long STEP_LEVEL_TIME_MASK = 0x000000ffffffffffL;
+
+    // Bits in a step duration that are the new battery level we are at.
+    public static final long STEP_LEVEL_LEVEL_MASK = 0x0000ff0000000000L;
+    public static final long STEP_LEVEL_LEVEL_SHIFT = 40;
+
+    // Bits in a step duration that are the initial mode we were in at that step.
+    public static final long STEP_LEVEL_INITIAL_MODE_MASK = 0x00ff000000000000L;
+    public static final long STEP_LEVEL_INITIAL_MODE_SHIFT = 48;
+
+    // Bits in a step duration that indicate which modes changed during that step.
+    public static final long STEP_LEVEL_MODIFIED_MODE_MASK = 0xff00000000000000L;
+    public static final long STEP_LEVEL_MODIFIED_MODE_SHIFT = 56;
+
+    // Step duration mode: the screen is on, off, dozed, etc; value is Display.STATE_* - 1.
+    public static final int STEP_LEVEL_MODE_SCREEN_STATE = 0x03;
+
+    // Step duration mode: power save is on.
+    public static final int STEP_LEVEL_MODE_POWER_SAVE = 0x04;
 
     /**
      * Return the historical number of discharge steps we currently have.
@@ -3620,14 +3642,60 @@ public abstract class BatteryStats implements Parcelable {
         if (!checkin) {
             pw.println(header);
         }
-        String[] lineArgs = new String[1];
+        String[] lineArgs = new String[4];
         for (int i=0; i<count; i++) {
+            long duration = steps[i] & STEP_LEVEL_TIME_MASK;
+            int level = (int)((steps[i] & STEP_LEVEL_LEVEL_MASK)
+                    >> STEP_LEVEL_LEVEL_SHIFT);
+            long initMode = (steps[i] & STEP_LEVEL_INITIAL_MODE_MASK)
+                    >> STEP_LEVEL_INITIAL_MODE_SHIFT;
+            long modMode = (steps[i] & STEP_LEVEL_MODIFIED_MODE_MASK)
+                    >> STEP_LEVEL_MODIFIED_MODE_SHIFT;
             if (checkin) {
-                lineArgs[0] = Long.toString(steps[i]);
+                lineArgs[0] = Long.toString(duration);
+                lineArgs[1] = Integer.toString(level);
+                if ((modMode&STEP_LEVEL_MODE_SCREEN_STATE) == 0) {
+                    switch ((int)(initMode&STEP_LEVEL_MODE_SCREEN_STATE) + 1) {
+                        case Display.STATE_OFF: lineArgs[2] = "s-"; break;
+                        case Display.STATE_ON: lineArgs[2] = "s+"; break;
+                        case Display.STATE_DOZE: lineArgs[2] = "sd"; break;
+                        case Display.STATE_DOZE_SUSPEND: lineArgs[2] = "sds"; break;
+                        default: lineArgs[1] = "?"; break;
+                    }
+                } else {
+                    lineArgs[2] = "";
+                }
+                if ((modMode&STEP_LEVEL_MODE_POWER_SAVE) == 0) {
+                    lineArgs[3] = (initMode&STEP_LEVEL_MODE_POWER_SAVE) != 0 ? "p+" : "p-";
+                } else {
+                    lineArgs[3] = "";
+                }
                 dumpLine(pw, 0 /* uid */, "i" /* category */, header, (Object[])lineArgs);
             } else {
                 pw.print("  #"); pw.print(i); pw.print(": ");
-                TimeUtils.formatDuration(steps[i], pw);
+                TimeUtils.formatDuration(duration, pw);
+                pw.print(" to "); pw.print(level);
+                boolean haveModes = false;
+                if ((modMode&STEP_LEVEL_MODE_SCREEN_STATE) == 0) {
+                    pw.print(" (");
+                    switch ((int)(initMode&STEP_LEVEL_MODE_SCREEN_STATE) + 1) {
+                        case Display.STATE_OFF: pw.print("screen-off"); break;
+                        case Display.STATE_ON: pw.print("screen-on"); break;
+                        case Display.STATE_DOZE: pw.print("screen-doze"); break;
+                        case Display.STATE_DOZE_SUSPEND: pw.print("screen-doze-suspend"); break;
+                        default: lineArgs[1] = "screen-?"; break;
+                    }
+                    haveModes = true;
+                }
+                if ((modMode&STEP_LEVEL_MODE_POWER_SAVE) == 0) {
+                    pw.print(haveModes ? ", " : " (");
+                    pw.print((initMode&STEP_LEVEL_MODE_POWER_SAVE) != 0
+                            ? "power-save-on" : "power-save-off");
+                    haveModes = true;
+                }
+                if (haveModes) {
+                    pw.print(")");
+                }
                 pw.println();
             }
         }
