@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
+import static android.content.pm.PackageManager.INSTALL_FAILED_REJECTED;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
@@ -30,6 +31,7 @@ import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.InstallSessionInfo;
 import android.content.pm.InstallSessionParams;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ApkLite;
@@ -106,9 +108,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private boolean mSealed = false;
     @GuardedBy("mLock")
-    private boolean mPermissionsConfirmed = false;
+    private boolean mPermissionsAccepted = false;
     @GuardedBy("mLock")
     private boolean mDestroyed = false;
+
+    private int mFinalStatus;
+    private String mFinalMessage;
+
+    /**
+     * Path to the resolved base APK for this session, which may point at an APK
+     * inside the session (when the session defines the base), or it may point
+     * at the existing base APK (when adding splits to an existing app).
+     * <p>
+     * This is used when confirming permissions, since we can't fully stage the
+     * session inside an ASEC before confirming with user.
+     */
+    @GuardedBy("mLock")
+    private String mResolvedBaseCodePath;
 
     @GuardedBy("mLock")
     private ArrayList<FileBridge> mBridges = new ArrayList<>();
@@ -134,12 +150,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 } catch (PackageManagerException e) {
                     Slog.e(TAG, "Install failed: " + e);
                     destroyInternal();
-                    try {
-                        mRemoteObserver.onPackageInstalled(mPackageName, e.error, e.getMessage(),
-                                null);
-                    } catch (RemoteException ignored) {
-                    }
-                    mCallback.onSessionFinished(PackageInstallerSession.this, false);
+                    dispatchSessionFinished(e.error, e.getMessage(), null);
                 }
 
                 return true;
@@ -169,9 +180,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         if (mPm.checkPermission(android.Manifest.permission.INSTALL_PACKAGES,
                 installerPackageName) == PackageManager.PERMISSION_GRANTED) {
-            mPermissionsConfirmed = true;
+            mPermissionsAccepted = true;
         } else {
-            mPermissionsConfirmed = false;
+            mPermissionsAccepted = false;
         }
 
         computeProgressLocked();
@@ -182,7 +193,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         info.sessionId = sessionId;
         info.installerPackageName = installerPackageName;
+        info.resolvedBaseCodePath = mResolvedBaseCodePath;
         info.progress = mProgress;
+        info.sealed = mSealed;
         info.open = openCount.get() > 0;
 
         info.mode = params.mode;
@@ -355,11 +368,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         Preconditions.checkNotNull(mPackageName);
         Preconditions.checkNotNull(mSignatures);
+        Preconditions.checkNotNull(mResolvedBaseCodePath);
 
-        if (!mPermissionsConfirmed) {
-            // TODO: async confirm permissions with user
-            // when they confirm, we'll kick off another install() pass
-            throw new SecurityException("Caller must hold INSTALL permission");
+        if (!mPermissionsAccepted) {
+            // User needs to accept permissions; give installer an intent they
+            // can use to involve user.
+            final Intent intent = new Intent(PackageInstaller.ACTION_CONFIRM_PERMISSIONS);
+            intent.setPackage("com.android.packageinstaller");
+            intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
+            try {
+                mRemoteObserver.onUserActionRequired(intent);
+            } catch (RemoteException ignored) {
+            }
+            return;
         }
 
         // Inherit any packages and native libraries from existing install that
@@ -386,12 +407,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             public void onPackageInstalled(String basePackageName, int returnCode, String msg,
                     Bundle extras) {
                 destroyInternal();
-                try {
-                    remoteObserver.onPackageInstalled(basePackageName, returnCode, msg, extras);
-                } catch (RemoteException ignored) {
-                }
-                final boolean success = (returnCode == PackageManager.INSTALL_SUCCEEDED);
-                mCallback.onSessionFinished(PackageInstallerSession.this, success);
+                dispatchSessionFinished(returnCode, msg, extras);
             }
         };
 
@@ -409,6 +425,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mPackageName = null;
         mVersionCode = -1;
         mSignatures = null;
+        mResolvedBaseCodePath = null;
 
         final File[] files = sessionStageDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
@@ -445,18 +462,25 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     info.signatures);
 
             // Take this opportunity to enforce uniform naming
-            final String name;
+            final String targetName;
             if (info.splitName == null) {
-                name = "base.apk";
+                targetName = "base.apk";
             } else {
-                name = "split_" + info.splitName + ".apk";
+                targetName = "split_" + info.splitName + ".apk";
             }
-            if (!FileUtils.isValidExtFilename(name)) {
+            if (!FileUtils.isValidExtFilename(targetName)) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                        "Invalid filename: " + name);
+                        "Invalid filename: " + targetName);
             }
-            if (!file.getName().equals(name)) {
-                file.renameTo(new File(file.getParentFile(), name));
+
+            final File targetFile = new File(sessionStageDir, targetName);
+            if (!file.equals(targetFile)) {
+                file.renameTo(targetFile);
+            }
+
+            // Base is coming from session
+            if (info.splitName == null) {
+                mResolvedBaseCodePath = targetFile.getAbsolutePath();
             }
         }
 
@@ -472,11 +496,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
         } else {
-            // Partial installs must be consistent with existing install.
+            // Partial installs must be consistent with existing install
             final ApplicationInfo app = mPm.getApplicationInfo(mPackageName, 0, userId);
             if (app == null) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Missing existing base package for " + mPackageName);
+            }
+
+            // Base might be inherited from existing install
+            if (mResolvedBaseCodePath == null) {
+                mResolvedBaseCodePath = app.getBaseCodePath();
             }
 
             final ApkLite info;
@@ -537,6 +566,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (LOGD) Slog.d(TAG, "Spliced " + n + " existing APKs into stage");
     }
 
+    void setPermissionsResult(boolean accepted) {
+        if (!mSealed) {
+            throw new SecurityException("Must be sealed to accept permissions");
+        }
+
+        if (accepted) {
+            // Mark and kick off another install pass
+            mPermissionsAccepted = true;
+            mHandler.obtainMessage(MSG_COMMIT).sendToTarget();
+        } else {
+            destroyInternal();
+            dispatchSessionFinished(INSTALL_FAILED_REJECTED, "User rejected permissions", null);
+        }
+    }
+
     @Override
     public void close() {
         if (openCount.decrementAndGet() == 0) {
@@ -546,11 +590,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void abandon() {
-        try {
-            destroyInternal();
-        } finally {
-            mCallback.onSessionFinished(this, false);
+        destroyInternal();
+        dispatchSessionFinished(INSTALL_FAILED_INTERNAL_ERROR, "Session was abandoned", null);
+    }
+
+    private void dispatchSessionFinished(int returnCode, String msg, Bundle extras) {
+        mFinalStatus = returnCode;
+        mFinalMessage = msg;
+
+        if (mRemoteObserver != null) {
+            try {
+                mRemoteObserver.onPackageInstalled(mPackageName, returnCode, msg, extras);
+            } catch (RemoteException ignored) {
+            }
         }
+
+        final boolean success = (returnCode == PackageManager.INSTALL_SUCCEEDED);
+        mCallback.onSessionFinished(this, success);
     }
 
     private void destroyInternal() {
@@ -578,9 +634,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.printPair("mClientProgress", mClientProgress);
         pw.printPair("mProgress", mProgress);
         pw.printPair("mSealed", mSealed);
-        pw.printPair("mPermissionsConfirmed", mPermissionsConfirmed);
+        pw.printPair("mPermissionsAccepted", mPermissionsAccepted);
         pw.printPair("mDestroyed", mDestroyed);
         pw.printPair("mBridges", mBridges.size());
+        pw.printPair("mFinalStatus", mFinalStatus);
+        pw.printPair("mFinalMessage", mFinalMessage);
         pw.println();
 
         pw.decreaseIndent();
