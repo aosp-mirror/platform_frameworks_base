@@ -2680,6 +2680,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         stack.setMediaPlayer(playing ? r : null);
+        if (!playing) {
+            // Make the activity immediately above r opaque.
+            final ActivityRecord next = stack.findNextTranslucentActivity(r);
+            if (next != null) {
+                mService.convertFromTranslucent(next.appToken);
+            }
+        }
         try {
             top.app.thread.scheduleBackgroundMediaPlayingChanged(top.appToken, playing);
         } catch (RemoteException e) {
