@@ -33,9 +33,12 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseIntArray;
 import android.util.Xml;
 
@@ -44,6 +47,9 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class is used to specify meta information of a TV input.
@@ -390,7 +396,20 @@ public final class TvInputInfo implements Parcelable {
     }
 
     /**
-     * Loads the user-displayed label for this TV input service.
+     * Checks if this TV input is marked hidden by the user in the settings.
+     *
+     * @param context Supplies a {@link Context} used to check if this TV input is hidden.
+     * @return {@code true} if the user marked this TV input hidden in settings. {@code false}
+     *         otherwise.
+     * @hide
+     */
+    @SystemApi
+    public boolean isHidden(Context context) {
+        return TvInputSettings.isHidden(context, mId, UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Loads the user-displayed label for this TV input.
      *
      * @param context Supplies a {@link Context} used to load the label.
      * @return a CharSequence containing the TV input's label. If the TV input does not have
@@ -405,7 +424,20 @@ public final class TvInputInfo implements Parcelable {
     }
 
     /**
-     * Loads the user-displayed icon for this TV input service.
+     * Loads the custom label set by user in settings.
+     *
+     * @param context Supplies a {@link Context} used to load the custom label.
+     * @return a CharSequence containing the TV input's custom label. {@code null} if there is no
+     *         custom label.
+     * @hide
+     */
+    @SystemApi
+    public CharSequence loadCustomLabel(Context context) {
+        return TvInputSettings.getCustomLabel(context, mId, UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Loads the user-displayed icon for this TV input.
      *
      * @param context Supplies a {@link Context} used to load the icon.
      * @return a Drawable containing the TV input's icon. If the TV input does not have
@@ -550,5 +582,140 @@ public final class TvInputInfo implements Parcelable {
         mLabel = in.readString();
         mIsConnectedToHdmiSwitch = in.readByte() == 1 ? true : false;
         mRatingSystemXmlUri = in.readParcelable(null);
+    }
+
+    /**
+     * Utility class for putting and getting settings for TV input.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final class TvInputSettings {
+        private static final String TV_INPUT_SEPARATOR = ":";
+        private static final String CUSTOM_NAME_SEPARATOR = ",";
+
+        private TvInputSettings() { }
+
+        private static boolean isHidden(Context context, String inputId, int userId) {
+            return getHiddenTvInputIds(context, userId).contains(inputId);
+        }
+
+        private static String getCustomLabel(Context context, String inputId, int userId) {
+            for (Pair<String, String> pair : getCustomLabelList(context, userId)) {
+                if (pair.first.equals(inputId)) {
+                    return pair.second;
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Returns a list of TV input IDs which are marked as hidden by user in the settings.
+         *
+         * @param context The application context
+         * @param userId The user ID for the stored hidden input list
+         * @hide
+         */
+        @SystemApi
+        public static List<String> getHiddenTvInputIds(Context context, int userId) {
+            String hiddenIdsString = Settings.Secure.getStringForUser(
+                    context.getContentResolver(), Settings.Secure.TV_INPUT_HIDDEN_INPUTS, userId);
+            if (TextUtils.isEmpty(hiddenIdsString)) {
+                return new ArrayList<String>();
+            }
+            String[] ids = hiddenIdsString.split(TV_INPUT_SEPARATOR);
+            return Arrays.asList(ids);
+        }
+
+        /**
+         * Returns a list of TV input ID/custom label pairs set by the user in the settings.
+         *
+         * @param context The application context
+         * @param userId The user ID for the stored hidden input list
+         * @hide
+         */
+        @SystemApi
+        public static List<Pair<String, String>> getCustomLabelList(Context context, int userId) {
+            String labelsString = Settings.Secure.getStringForUser(
+                    context.getContentResolver(), Settings.Secure.TV_INPUT_CUSTOM_LABELS, userId);
+            List<Pair<String, String>> list = new ArrayList<Pair<String, String>>();
+            if (TextUtils.isEmpty(labelsString)) {
+                return list;
+            }
+            String[] pairs = labelsString.split(TV_INPUT_SEPARATOR);
+            for (String pairString : pairs) {
+                String[] pair = pairString.split(CUSTOM_NAME_SEPARATOR);
+                list.add(new Pair<String, String>(pair[0], pair[1]));
+            }
+            return list;
+        }
+
+        /**
+         * Stores a list of TV input IDs which are marked as hidden by user. This is expected to
+         * be called from the settings app.
+         *
+         * @param context The application context
+         * @param hiddenInputIds A list including all the hidden TV input IDs
+         * @param userId The user ID for the stored hidden input list
+         * @hide
+         */
+        @SystemApi
+        public static void putHiddenTvInputList(Context context, List<String> hiddenInputIds,
+                int userId) {
+            StringBuilder builder = new StringBuilder();
+            boolean firstItem = true;
+            for (String inputId : hiddenInputIds) {
+                ensureSeparatorIsNotIncluded(inputId);
+                if (firstItem) {
+                    firstItem = false;
+                } else {
+                    builder.append(TV_INPUT_SEPARATOR);
+                }
+                builder.append(inputId);
+            }
+            Settings.Secure.putStringForUser(context.getContentResolver(),
+                    Settings.Secure.TV_INPUT_HIDDEN_INPUTS, builder.toString(), userId);
+        }
+
+        /**
+         * Stores a list of TV input ID/custom label pairs set by user. This is expected to be
+         * called from the settings app.
+         *
+         * @param context The application context.
+         * @param customLabels A list of TV input ID/custom label pairs
+         * @param userId The user ID for the stored hidden input list
+         * @hide
+         */
+        @SystemApi
+        public static void putCustomLabelList(Context context,
+                List<Pair<String, String>> customLabels, int userId) {
+            StringBuilder builder = new StringBuilder();
+            boolean firstItem = true;
+            for (Pair<String, String> pair : customLabels) {
+                ensureSeparatorIsNotIncluded(pair.first);
+                ensureSeparatorIsNotIncluded(pair.second);
+                if (firstItem) {
+                    firstItem = false;
+                } else {
+                    builder.append(TV_INPUT_SEPARATOR);
+                }
+                builder.append(pair.first);
+                builder.append(CUSTOM_NAME_SEPARATOR);
+                builder.append(pair.second);
+            }
+            Settings.Secure.putStringForUser(context.getContentResolver(),
+                    Settings.Secure.TV_INPUT_CUSTOM_LABELS, builder.toString(), userId);
+        }
+
+        private static void ensureSeparatorIsNotIncluded(String value) {
+            if (value.contains(TV_INPUT_SEPARATOR)) {
+                throw new IllegalArgumentException( value + " should not include "
+                        + TV_INPUT_SEPARATOR);
+            }
+            if (value.contains(CUSTOM_NAME_SEPARATOR)) {
+                throw new IllegalArgumentException( value + " should not include "
+                        + CUSTOM_NAME_SEPARATOR);
+            }
+        }
     }
 }
