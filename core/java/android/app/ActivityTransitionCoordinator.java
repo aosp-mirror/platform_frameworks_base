@@ -131,6 +131,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     protected static final String KEY_BITMAP = "shared_element:bitmap";
     protected static final String KEY_SCALE_TYPE = "shared_element:scaleType";
     protected static final String KEY_IMAGE_MATRIX = "shared_element:imageMatrix";
+    protected static final String KEY_ELEVATION = "shared_element:elevation";
 
     protected static final ImageView.ScaleType[] SCALE_TYPE_VALUES = ImageView.ScaleType.values();
 
@@ -396,6 +397,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
 
         float z = sharedElementBundle.getFloat(KEY_TRANSLATION_Z);
         view.setTranslationZ(z);
+        float elevation = sharedElementBundle.getFloat(KEY_ELEVATION);
+        view.setElevation(elevation);
 
         float left = sharedElementBundle.getFloat(KEY_SCREEN_LEFT);
         float top = sharedElementBundle.getFloat(KEY_SCREEN_TOP);
@@ -500,6 +503,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         state.mBottom = view.getBottom();
         state.mMeasuredWidth = view.getMeasuredWidth();
         state.mMeasuredHeight = view.getMeasuredHeight();
+        state.mTranslationZ = view.getTranslationZ();
+        state.mElevation = view.getElevation();
         if (!(view instanceof ImageView)) {
             return state;
         }
@@ -558,7 +563,9 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                   imageView.setImageMatrix(state.mMatrix);
                 }
             }
-           int widthSpec = View.MeasureSpec.makeMeasureSpec(state.mMeasuredWidth,
+            view.setElevation(state.mElevation);
+            view.setTranslationZ(state.mTranslationZ);
+            int widthSpec = View.MeasureSpec.makeMeasureSpec(state.mMeasuredWidth,
                     View.MeasureSpec.EXACTLY);
             int heightSpec = View.MeasureSpec.makeMeasureSpec(state.mMeasuredHeight,
                     View.MeasureSpec.EXACTLY);
@@ -623,6 +630,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         sharedElementBundle.putFloat(KEY_SCREEN_TOP, tempBounds.top);
         sharedElementBundle.putFloat(KEY_SCREEN_BOTTOM, tempBounds.bottom);
         sharedElementBundle.putFloat(KEY_TRANSLATION_Z, view.getTranslationZ());
+        sharedElementBundle.putFloat(KEY_ELEVATION, view.getElevation());
 
         int bitmapWidth = Math.round(tempBounds.width());
         int bitmapHeight = Math.round(tempBounds.height());
@@ -806,5 +814,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         int mMeasuredHeight;
         ImageView.ScaleType mScaleType;
         Matrix mMatrix;
+        float mTranslationZ;
+        float mElevation;
     }
 }
