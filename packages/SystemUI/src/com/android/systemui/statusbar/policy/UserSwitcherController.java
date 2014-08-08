@@ -465,12 +465,12 @@ public class UserSwitcherController {
 
         @Override
         public View createDetailView(Context context, View convertView, ViewGroup parent) {
+            UserDetailView v;
             if (!(convertView instanceof UserDetailView)) {
-                convertView = UserDetailView.inflate(context, parent, false);
-            }
-            UserDetailView v = (UserDetailView) convertView;
-            if (v.getAdapter() == null) {
+                v = UserDetailView.inflate(context, parent, false);
                 v.createAndSetAdapter(UserSwitcherController.this);
+            } else {
+                v = (UserDetailView) convertView;
             }
             return v;
         }
