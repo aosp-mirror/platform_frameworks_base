@@ -386,7 +386,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             sourceView = stackView;
             transform = stackView.getStackAlgorithm().getStackTransform(task, stackScroll, transform, null);
             offsetX = transform.rect.left;
-            offsetY = Math.min(transform.rect.top, mConfig.displayRect.height());
+            offsetY = mConfig.displayRect.height();
         } else {
             transform = stackView.getStackAlgorithm().getStackTransform(task, stackScroll, transform, null);
         }
