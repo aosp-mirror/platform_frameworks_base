@@ -4649,16 +4649,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         otherwise is returned.
      */
     public boolean performClick() {
-        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
-
-        ListenerInfo li = mListenerInfo;
+        final boolean result;
+        final ListenerInfo li = mListenerInfo;
         if (li != null && li.mOnClickListener != null) {
             playSoundEffect(SoundEffectConstants.CLICK);
             li.mOnClickListener.onClick(this);
-            return true;
+            result = true;
+        } else {
+            result = false;
         }
 
-        return false;
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+        return result;
     }
 
     /**
