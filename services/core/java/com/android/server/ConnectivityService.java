@@ -4470,11 +4470,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 1000);
                     }
                 }
-
-                // this will cause us to come up initially as unconnected and switching
-                // to connected after our normal pause unless somebody reports us as
-                // really disconnected
-                mDefaultInetConditionPublished = 0;
                 // TODO - read the tcp buffer size config string from somewhere
                 // updateNetworkSettings();
             }
