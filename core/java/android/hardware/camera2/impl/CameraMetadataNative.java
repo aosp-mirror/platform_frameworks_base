@@ -67,6 +67,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Implementation of camera metadata marshal/unmarshal across Binder to
@@ -227,6 +228,7 @@ public class CameraMetadataNative implements Parcelable {
 
     private static final String CELLID_PROCESS = "CELLID";
     private static final String GPS_PROCESS = "GPS";
+    private static final int FACE_LANDMARK_SIZE = 6;
 
     private static String translateLocationProviderToProcess(final String provider) {
         if (provider == null) {
@@ -347,7 +349,7 @@ public class CameraMetadataNative implements Parcelable {
         // Check if key has been overridden to use a wrapper class on the java side.
         GetCommand g = sGetCommandMap.get(key);
         if (g != null) {
-            return (T) g.getValue(this, key);
+            return g.getValue(this, key);
         }
         return getBase(key);
     }
@@ -587,9 +589,71 @@ public class CameraMetadataNative implements Parcelable {
         return availableFormats;
     }
 
-    private Face[] getFaces() {
-        final int FACE_LANDMARK_SIZE = 6;
+    private boolean setFaces(Face[] faces) {
+        if (faces == null) {
+            return false;
+        }
 
+        int numFaces = faces.length;
+
+        // Detect if all faces are SIMPLE or not; count # of valid faces
+        boolean fullMode = true;
+        for (Face face : faces) {
+            if (face == null) {
+                numFaces--;
+                Log.w(TAG, "setFaces - null face detected, skipping");
+                continue;
+            }
+
+            if (face.getId() == Face.ID_UNSUPPORTED) {
+                fullMode = false;
+            }
+        }
+
+        Rect[] faceRectangles = new Rect[numFaces];
+        byte[] faceScores = new byte[numFaces];
+        int[] faceIds = null;
+        int[] faceLandmarks = null;
+
+        if (fullMode) {
+            faceIds = new int[numFaces];
+            faceLandmarks = new int[numFaces * FACE_LANDMARK_SIZE];
+        }
+
+        int i = 0;
+        for (Face face : faces) {
+            if (face == null) {
+                continue;
+            }
+
+            faceRectangles[i] = face.getBounds();
+            faceScores[i] = (byte)face.getScore();
+
+            if (fullMode) {
+                faceIds[i] = face.getId();
+
+                int j = 0;
+
+                faceLandmarks[i * FACE_LANDMARK_SIZE + j++] = face.getLeftEyePosition().x;
+                faceLandmarks[i * FACE_LANDMARK_SIZE + j++] = face.getLeftEyePosition().y;
+                faceLandmarks[i * FACE_LANDMARK_SIZE + j++] = face.getRightEyePosition().x;
+                faceLandmarks[i * FACE_LANDMARK_SIZE + j++] = face.getRightEyePosition().y;
+                faceLandmarks[i * FACE_LANDMARK_SIZE + j++] = face.getMouthPosition().x;
+                faceLandmarks[i * FACE_LANDMARK_SIZE + j++] = face.getMouthPosition().y;
+            }
+
+            i++;
+        }
+
+        set(CaptureResult.STATISTICS_FACE_RECTANGLES, faceRectangles);
+        set(CaptureResult.STATISTICS_FACE_IDS, faceIds);
+        set(CaptureResult.STATISTICS_FACE_LANDMARKS, faceLandmarks);
+        set(CaptureResult.STATISTICS_FACE_SCORES, faceScores);
+
+        return true;
+    }
+
+    private Face[] getFaces() {
         Integer faceDetectMode = get(CaptureResult.STATISTICS_FACE_DETECT_MODE);
         if (faceDetectMode == null) {
             Log.w(TAG, "Face detect mode metadata is null, assuming the mode is SIMPLE");
@@ -653,9 +717,12 @@ public class CameraMetadataNative implements Parcelable {
                 if (faceScores[i] <= Face.SCORE_MAX &&
                         faceScores[i] >= Face.SCORE_MIN &&
                         faceIds[i] >= 0) {
-                    Point leftEye = new Point(faceLandmarks[i*6], faceLandmarks[i*6+1]);
-                    Point rightEye = new Point(faceLandmarks[i*6+2], faceLandmarks[i*6+3]);
-                    Point mouth = new Point(faceLandmarks[i*6+4], faceLandmarks[i*6+5]);
+                    Point leftEye = new Point(faceLandmarks[i*FACE_LANDMARK_SIZE],
+                            faceLandmarks[i*FACE_LANDMARK_SIZE+1]);
+                    Point rightEye = new Point(faceLandmarks[i*FACE_LANDMARK_SIZE+2],
+                            faceLandmarks[i*FACE_LANDMARK_SIZE+3]);
+                    Point mouth = new Point(faceLandmarks[i*FACE_LANDMARK_SIZE+4],
+                            faceLandmarks[i*FACE_LANDMARK_SIZE+5]);
                     Face face = new Face(faceRectangles[i], faceScores[i], faceIds[i],
                             leftEye, rightEye, mouth);
                     faceList.add(face);
@@ -863,6 +930,13 @@ public class CameraMetadataNative implements Parcelable {
             @Override
             public <T> void setValue(CameraMetadataNative metadata, T value) {
                 metadata.setFaceRectangles((Rect[]) value);
+            }
+        });
+        sSetCommandMap.put(CaptureResult.STATISTICS_FACES.getNativeKey(),
+                new SetCommand() {
+            @Override
+            public <T> void setValue(CameraMetadataNative metadata, T value) {
+                metadata.setFaces((Face[])value);
             }
         });
         sSetCommandMap.put(CaptureRequest.TONEMAP_CURVE.getNativeKey(), new SetCommand() {
