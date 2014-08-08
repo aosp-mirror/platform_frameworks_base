@@ -351,6 +351,7 @@ public class GridView extends AbsListView {
         final int selectedPosition = mSelectedPosition;
 
         View child = null;
+        final int nextChildDir = isLayoutRtl ? -1 : +1;
         for (int pos = startPos; pos < last; pos++) {
             // is this the selected item?
             boolean selected = pos == selectedPosition;
@@ -359,9 +360,9 @@ public class GridView extends AbsListView {
             final int where = flow ? -1 : pos - startPos;
             child = makeAndAddView(pos, y, flow, nextLeft, selected, where);
 
-            nextLeft += (isLayoutRtl ? -1 : +1) * columnWidth;
+            nextLeft += nextChildDir * columnWidth;
             if (pos < last - 1) {
-                nextLeft += horizontalSpacing;
+                nextLeft += nextChildDir * horizontalSpacing;
             }
 
             if (selected && (hasFocus || inClick)) {
