@@ -147,10 +147,6 @@ public class IconUtils {
 
         // Presentation
         icon = R.drawable.ic_doc_presentation;
-        add("application/vnd.ms-powerpoint", icon);
-        add("application/vnd.openxmlformats-officedocument.presentationml.presentation", icon);
-        add("application/vnd.openxmlformats-officedocument.presentationml.template", icon);
-        add("application/vnd.openxmlformats-officedocument.presentationml.slideshow", icon);
         add("application/vnd.stardivision.impress", icon);
         add("application/vnd.sun.xml.impress", icon);
         add("application/vnd.sun.xml.impress.template", icon);
@@ -161,9 +157,6 @@ public class IconUtils {
         icon = R.drawable.ic_doc_spreadsheet;
         add("application/vnd.oasis.opendocument.spreadsheet", icon);
         add("application/vnd.oasis.opendocument.spreadsheet-template", icon);
-        add("application/vnd.ms-excel", icon);
-        add("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", icon);
-        add("application/vnd.openxmlformats-officedocument.spreadsheetml.template", icon);
         add("application/vnd.stardivision.calc", icon);
         add("application/vnd.sun.xml.calc", icon);
         add("application/vnd.sun.xml.calc.template", icon);
@@ -175,9 +168,6 @@ public class IconUtils {
         add("application/vnd.oasis.opendocument.text-master", icon);
         add("application/vnd.oasis.opendocument.text-template", icon);
         add("application/vnd.oasis.opendocument.text-web", icon);
-        add("application/msword", icon);
-        add("application/vnd.openxmlformats-officedocument.wordprocessingml.document", icon);
-        add("application/vnd.openxmlformats-officedocument.wordprocessingml.template", icon);
         add("application/vnd.stardivision.writer", icon);
         add("application/vnd.stardivision.writer-global", icon);
         add("application/vnd.sun.xml.writer", icon);
@@ -190,6 +180,25 @@ public class IconUtils {
         icon = R.drawable.ic_doc_video;
         add("application/x-quicktimeplayer", icon);
         add("application/x-shockwave-flash", icon);
+
+        // Word
+        icon = R.drawable.ic_doc_word;
+        add("application/msword", icon);
+        add("application/vnd.openxmlformats-officedocument.wordprocessingml.document", icon);
+        add("application/vnd.openxmlformats-officedocument.wordprocessingml.template", icon);
+
+        // Excel
+        icon = R.drawable.ic_doc_excel;
+        add("application/vnd.ms-excel", icon);
+        add("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", icon);
+        add("application/vnd.openxmlformats-officedocument.spreadsheetml.template", icon);
+
+        // Powerpoint
+        icon = R.drawable.ic_doc_powerpoint;
+        add("application/vnd.ms-powerpoint", icon);
+        add("application/vnd.openxmlformats-officedocument.presentationml.presentation", icon);
+        add("application/vnd.openxmlformats-officedocument.presentationml.template", icon);
+        add("application/vnd.openxmlformats-officedocument.presentationml.slideshow", icon);
     }
 
     public static Drawable loadPackageIcon(Context context, String authority, int icon) {
