@@ -149,9 +149,16 @@ final class ConnectionServiceAdapterServant {
                     }
                     break;
                 }
-                case MSG_ADD_CONFERENCE_CALL:
-                    mDelegate.addConferenceCall((String) msg.obj);
+                case MSG_ADD_CONFERENCE_CALL: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        mDelegate.addConferenceCall(
+                                (String) args.arg1, (ParcelableConference) args.arg2);
+                    } finally {
+                        args.recycle();
+                    }
                     break;
+                }
                 case MSG_REMOVE_CALL:
                     mDelegate.removeCall((String) msg.obj);
                     break;
@@ -323,8 +330,11 @@ final class ConnectionServiceAdapterServant {
         }
 
         @Override
-        public void addConferenceCall(String callId) {
-            mHandler.obtainMessage(MSG_ADD_CONFERENCE_CALL, callId).sendToTarget();
+        public void addConferenceCall(String callId, ParcelableConference parcelableConference) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            args.arg2 = parcelableConference;
+            mHandler.obtainMessage(MSG_ADD_CONFERENCE_CALL, args).sendToTarget();
         }
 
         @Override

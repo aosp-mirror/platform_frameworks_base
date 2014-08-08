@@ -363,6 +363,7 @@ public final class Call {
     private final Phone mPhone;
     private final String mTelecommCallId;
     private final InCallAdapter mInCallAdapter;
+    private final List<String> mChildrenIds = new ArrayList<>();
     private final List<Call> mChildren = new ArrayList<>();
     private final List<Call> mUnmodifiableChildren = Collections.unmodifiableList(mChildren);
     private final List<Listener> mListeners = new CopyOnWriteArrayList<>();
@@ -370,7 +371,8 @@ public final class Call {
     private final List<Call> mUnmodifiableConferenceableCalls =
             Collections.unmodifiableList(mConferenceableCalls);
 
-    private Call mParent = null;
+    private boolean mChildrenCached;
+    private String mParentId = null;
     private int mState;
     private List<String> mCannedTextResponses = null;
     private String mRemainingPostDialSequence;
@@ -513,7 +515,10 @@ public final class Call {
      * child of any conference {@code Call}s.
      */
     public Call getParent() {
-        return mParent;
+        if (mParentId != null) {
+            return mPhone.internalGetCallByTelecommId(mParentId);
+        }
+        return null;
     }
 
     /**
@@ -523,6 +528,21 @@ public final class Call {
      * {@code List} otherwise.
      */
     public List<Call> getChildren() {
+        if (!mChildrenCached) {
+            mChildrenCached = true;
+            mChildren.clear();
+
+            for(String id : mChildrenIds) {
+                Call call = mPhone.internalGetCallByTelecommId(id);
+                if (call == null) {
+                    // At least one child was still not found, so do not save true for "cached"
+                    mChildrenCached = false;
+                } else {
+                    mChildren.add(call);
+                }
+            }
+        }
+
         return mUnmodifiableChildren;
     }
 
@@ -648,16 +668,18 @@ public final class Call {
             mState = state;
         }
 
-        if (parcelableCall.getParentCallId() != null) {
-            mParent = mPhone.internalGetCallByTelecommId(parcelableCall.getParentCallId());
+        String parentId = parcelableCall.getParentCallId();
+        boolean parentChanged = !Objects.equals(mParentId, parentId);
+        if (parentChanged) {
+            mParentId = parentId;
         }
 
-        mChildren.clear();
-        if (parcelableCall.getChildCallIds() != null) {
-            for (int i = 0; i < parcelableCall.getChildCallIds().size(); i++) {
-                mChildren.add(mPhone.internalGetCallByTelecommId(
-                        parcelableCall.getChildCallIds().get(i)));
-            }
+        List<String> childCallIds = parcelableCall.getChildCallIds();
+        boolean childrenChanged = !Objects.equals(childCallIds, mChildrenIds);
+        if (childrenChanged) {
+            mChildrenIds.clear();
+            mChildrenIds.addAll(parcelableCall.getChildCallIds());
+            mChildrenCached = false;
         }
 
         List<String> conferenceableCallIds = parcelableCall.getConferenceableCallIds();
@@ -688,6 +710,12 @@ public final class Call {
         }
         if (videoCallChanged) {
             fireVideoCallChanged(mVideoCall);
+        }
+        if (parentChanged) {
+            fireParentChanged(getParent());
+        }
+        if (childrenChanged) {
+            fireChildrenChanged(getChildren());
         }
 
         // If we have transitioned to DISCONNECTED, that means we need to notify clients and
