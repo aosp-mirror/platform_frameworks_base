@@ -107,6 +107,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     private PathPermission[] mPathPermissions;
     private boolean mExported;
     private boolean mNoPerms;
+    private boolean mSingleUser;
 
     private final ThreadLocal<String> mCallingPackage = new ThreadLocal<String>();
 
@@ -460,6 +461,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
     boolean checkUser(int pid, int uid, Context context) {
         return UserHandle.getUserId(uid) == context.getUserId()
+                || mSingleUser
                 || context.checkPermission(INTERACT_ACROSS_USERS, pid, uid)
                 == PERMISSION_GRANTED;
     }
@@ -1674,6 +1676,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 setWritePermission(info.writePermission);
                 setPathPermissions(info.pathPermissions);
                 mExported = info.exported;
+                mSingleUser = (info.flags & ProviderInfo.FLAG_SINGLE_USER) != 0;
                 setAuthorities(info.authority);
             }
             ContentProvider.this.onCreate();
