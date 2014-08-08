@@ -175,7 +175,9 @@ public final class WebViewFactory {
         String[] nativePaths = null;
         try {
             nativePaths = getWebViewNativeLibraryPaths();
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (Throwable t) {
+            // Log and discard errors at this stage as we must not crash the system server.
+            Log.e(LOGTAG, "error preparing webview native library", t);
         }
         prepareWebViewInSystemServer(nativePaths);
     }
@@ -201,35 +203,37 @@ public final class WebViewFactory {
         String[] nativeLibs = null;
         try {
             nativeLibs = WebViewFactory.getWebViewNativeLibraryPaths();
-        } catch (PackageManager.NameNotFoundException e) {
-        }
+            if (nativeLibs != null) {
+                long newVmSize = 0L;
 
-        if (nativeLibs != null) {
-            long newVmSize = 0L;
-
-            for (String path : nativeLibs) {
-                if (DEBUG) Log.d(LOGTAG, "Checking file size of " + path);
-                if (path == null) continue;
-                File f = new File(path);
-                if (f.exists()) {
-                    long length = f.length();
-                    if (length > newVmSize) {
-                        newVmSize = length;
+                for (String path : nativeLibs) {
+                    if (DEBUG) Log.d(LOGTAG, "Checking file size of " + path);
+                    if (path == null) continue;
+                    File f = new File(path);
+                    if (f.exists()) {
+                        long length = f.length();
+                        if (length > newVmSize) {
+                            newVmSize = length;
+                        }
                     }
                 }
-            }
 
-            if (DEBUG) {
-                Log.v(LOGTAG, "Based on library size, need " + newVmSize +
-                        " bytes of address space.");
+                if (DEBUG) {
+                    Log.v(LOGTAG, "Based on library size, need " + newVmSize +
+                            " bytes of address space.");
+                }
+                // The required memory can be larger than the file on disk (due to .bss), and an
+                // upgraded version of the library will likely be larger, so always attempt to
+                // reserve twice as much as we think to allow for the library to grow during this
+                // boot cycle.
+                newVmSize = Math.max(2 * newVmSize, CHROMIUM_WEBVIEW_DEFAULT_VMSIZE_BYTES);
+                Log.d(LOGTAG, "Setting new address space to " + newVmSize);
+                SystemProperties.set(CHROMIUM_WEBVIEW_VMSIZE_SIZE_PROPERTY,
+                        Long.toString(newVmSize));
             }
-            // The required memory can be larger than the file on disk (due to .bss), and an
-            // upgraded version of the library will likely be larger, so always attempt to reserve
-            // twice as much as we think to allow for the library to grow during this boot cycle.
-            newVmSize = Math.max(2 * newVmSize, CHROMIUM_WEBVIEW_DEFAULT_VMSIZE_BYTES);
-            Log.d(LOGTAG, "Setting new address space to " + newVmSize);
-            SystemProperties.set(CHROMIUM_WEBVIEW_VMSIZE_SIZE_PROPERTY,
-                    Long.toString(newVmSize));
+        } catch (Throwable t) {
+            // Log and discard errors at this stage as we must not crash the system server.
+            Log.e(LOGTAG, "error preparing webview native library", t);
         }
         prepareWebViewInSystemServer(nativeLibs);
     }
