@@ -289,4 +289,8 @@
         <item name="android:layout_height">@dimen/search_panel_scrim_height</item>
         <item name="android:layout_gravity">bottom</item>
     </style>
+
+    <style name="UserDetailView">
+        <item name="numColumns">3</item>
+    </style>
 </resources>

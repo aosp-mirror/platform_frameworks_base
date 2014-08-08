@@ -326,8 +326,11 @@ public class QSPanel extends ViewGroup {
         if (mFooter.hasFooter()) {
             h += mFooter.getView().getHeight();
         }
-        mDetail.measure(exactly(width), exactly(h));
-        setMeasuredDimension(width, h);
+        mDetail.measure(exactly(width), MeasureSpec.UNSPECIFIED);
+        if (mDetail.getMeasuredHeight() < h) {
+            mDetail.measure(exactly(width), exactly(h));
+        }
+        setMeasuredDimension(width, Math.max(h, mDetail.getMeasuredHeight()));
     }
 
     private static int exactly(int size) {
