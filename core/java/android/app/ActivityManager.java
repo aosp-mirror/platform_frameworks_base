@@ -690,8 +690,6 @@ public class ActivityManager {
         /**
          * The recent activity values for the highest activity in the stack to have set the values.
          * {@link Activity#setTaskDescription(android.app.ActivityManager.TaskDescription)}.
-         *
-         * @hide
          */
         public TaskDescription taskDescription;
 
