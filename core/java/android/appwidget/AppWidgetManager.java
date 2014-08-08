@@ -16,6 +16,7 @@
 
 package android.appwidget;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -673,24 +674,24 @@ public class AppWidgetManager {
     }
 
     /**
-     * Gets the AppWidget providers for the given user profiles. User profiles can only
+     * Gets the AppWidget providers for the given user profile. User profile can only
      * be the current user or a profile of the current user. For example, the current
      * user may have a corporate profile. In this case the parent user profile has a
      * child profile, the corporate one.
      *
-     * @param profiles The profiles for which to get providers. Passing null is equivaled
+     * @param profile The profile for which to get providers. Passing null is equivaled
      *         to passing only the current user handle.
      * @return The intalled providers.
      *
      * @see android.os.Process#myUserHandle()
      * @see android.os.UserManager#getUserProfiles()
      */
-    public List<AppWidgetProviderInfo> getInstalledProvidersForProfiles(UserHandle[] profiles) {
+    public List<AppWidgetProviderInfo> getInstalledProvidersForProfile(@Nullable UserHandle profile) {
         if (mService == null) {
             return Collections.emptyList();
         }
-        return getInstalledProvidersForProfiles(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
-                profiles);
+        return getInstalledProvidersForProfile(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
+                profile);
     }
 
     /**
@@ -700,7 +701,7 @@ public class AppWidgetManager {
         if (mService == null) {
             return Collections.emptyList();
         }
-        return getInstalledProvidersForProfiles(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
+        return getInstalledProvidersForProfile(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
                 null);
     }
 
@@ -720,18 +721,18 @@ public class AppWidgetManager {
         if (mService == null) {
             return Collections.emptyList();
         }
-        return getInstalledProvidersForProfiles(categoryFilter, null);
+        return getInstalledProvidersForProfile(categoryFilter, null);
     }
 
     /**
-     * Gets the AppWidget providers for the given user profiles. User profiles can only
+     * Gets the AppWidget providers for the given user profile. User profile can only
      * be the current user or a profile of the current user. For example, the current
      * user may have a corporate profile. In this case the parent user profile has a
      * child profile, the corporate one.
      *
      * @param categoryFilter Will only return providers which register as any of the specified
      *        specified categories. See {@link AppWidgetProviderInfo#widgetCategory}.
-     * @param profiles Child profiles of the current user which to be queried. The user
+     * @param profile A profile of the current user which to be queried. The user
      *        is itself also a profile. If null, the providers only for the current user
      *        are returned.
      * @return The intalled providers.
@@ -741,25 +742,19 @@ public class AppWidgetManager {
      *
      * @hide
      */
-    public List<AppWidgetProviderInfo> getInstalledProvidersForProfiles(int categoryFilter,
-            UserHandle[] profiles) {
+    public List<AppWidgetProviderInfo> getInstalledProvidersForProfile(int categoryFilter,
+            UserHandle profile) {
         if (mService == null) {
             return Collections.emptyList();
         }
 
-        int[] profileIds = null;
-
-        if (profiles != null) {
-            final int profileCount = profiles.length;
-            profileIds = new int[profileCount];
-            for (int i = 0; i < profileCount; i++) {
-                profileIds[i] = profiles[i].getIdentifier();
-            }
+        if (profile == null) {
+            profile = Process.myUserHandle();
         }
 
         try {
-            List<AppWidgetProviderInfo> providers = mService.getInstalledProviders(categoryFilter,
-                    profileIds);
+            List<AppWidgetProviderInfo> providers = mService.getInstalledProvidersForProfile(
+                    categoryFilter, profile.getIdentifier());
             if (providers == null) {
                 return Collections.emptyList();
             }
