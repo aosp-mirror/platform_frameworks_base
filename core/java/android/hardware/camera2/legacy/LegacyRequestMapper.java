@@ -284,7 +284,7 @@ public class LegacyRequestMapper {
                 switch (controlMode) {
                     case CONTROL_MODE_USE_SCENE_MODE: {
                         int sceneMode = ParamsUtils.getOrDefault(request, CONTROL_SCENE_MODE,
-                        /*defaultValue*/CONTROL_SCENE_MODE_DISABLED);
+                                /*defaultValue*/CONTROL_SCENE_MODE_DISABLED);
                         String legacySceneMode = LegacyMetadataMapper.
                                 convertSceneModeToLegacy(sceneMode);
                         if (legacySceneMode != null) {

@@ -725,9 +725,15 @@ public class RequestThreadManager {
 
                         CameraMetadataNative result = mMapper.cachedConvertResultMetadata(
                                 mLastRequest, timestampMutable.value);
+                        /*
+                         * Order matters: The default result mapper is state-less; the
+                         * other mappers carry state and may override keys set by the default
+                         * mapper with their own values.
+                         */
+
                         // Update AF state
                         mFocusStateMapper.mapResultTriggers(result);
-                        // Update detected faces list
+                        // Update face-related results
                         mFaceDetectMapper.mapResultFaces(result, mLastRequest);
 
                         mDeviceState.setCaptureResult(holder, result);
