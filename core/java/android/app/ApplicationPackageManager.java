@@ -28,7 +28,6 @@ import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
@@ -53,7 +52,6 @@ import android.content.res.XmlResourceParser;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -1653,39 +1651,6 @@ final class ApplicationPackageManager extends PackageManager {
         }
         return getUserManager().getBadgedDrawableForUser(dr,
                 new UserHandle(mContext.getUserId()));
-    }
-
-    private static class LegacyPackageInstallObserver extends PackageInstallObserver {
-        private final IPackageInstallObserver mLegacy;
-
-        public LegacyPackageInstallObserver(IPackageInstallObserver legacy) {
-            mLegacy = legacy;
-        }
-
-        @Override
-        public void onPackageInstalled(String basePackageName, int returnCode, String msg,
-                Bundle extras) {
-            try {
-                mLegacy.packageInstalled(basePackageName, returnCode);
-            } catch (RemoteException ignored) {
-            }
-        }
-    }
-
-    private static class LegacyPackageDeleteObserver extends PackageDeleteObserver {
-        private final IPackageDeleteObserver mLegacy;
-
-        public LegacyPackageDeleteObserver(IPackageDeleteObserver legacy) {
-            mLegacy = legacy;
-        }
-
-        @Override
-        public void onPackageDeleted(String basePackageName, int returnCode, String msg) {
-            try {
-                mLegacy.packageDeleted(basePackageName, returnCode);
-            } catch (RemoteException ignored) {
-            }
-        }
     }
 
     private final ContextImpl mContext;
