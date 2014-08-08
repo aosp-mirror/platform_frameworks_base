@@ -18,12 +18,7 @@
     <item android:state_enabled="false" android:state_checked="true">
         <nine-patch android:src="@drawable/switch_track_mtrl_alpha"
             android:tint="?attr/colorControlActivated"
-            android:alpha="0.15" />
-    </item>
-    <item android:state_enabled="false">
-        <nine-patch android:src="@drawable/switch_track_mtrl_alpha"
-            android:tint="?attr/colorButtonNormal"
-            android:alpha="0.15" />
+            android:alpha="0.2" />
     </item>
     <item android:state_checked="true">
         <nine-patch android:src="@drawable/switch_track_mtrl_alpha"

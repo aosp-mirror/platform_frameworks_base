@@ -46,7 +46,7 @@ please see themes_device_defaults.xml.
         <item name="colorForegroundInverse">@color/bright_foreground_material_light</item>
         <item name="colorBackground">@color/background_material_dark</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_dark</item>
-        <item name="disabledAlpha">0.5</item>
+        <item name="disabledAlpha">@dimen/disabled_alpha_material</item>
         <item name="backgroundDimAmount">0.6</item>
 
         <!-- Text styles -->
@@ -387,7 +387,7 @@ please see themes_device_defaults.xml.
         <item name="colorForegroundInverse">@color/bright_foreground_material_dark</item>
         <item name="colorBackground">@color/background_material_light</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_light</item>
-        <item name="disabledAlpha">0.5</item>
+        <item name="disabledAlpha">@dimen/disabled_alpha_material</item>
         <item name="backgroundDimAmount">0.6</item>
 
         <!-- Text styles -->
