@@ -2273,6 +2273,8 @@
   <public type="attr" name="datePickerMode"/>
   <public type="attr" name="timePickerMode"/>
   <public type="attr" name="inset" />
+  <public type="attr" name="letterSpacing" />
+  <public type="attr" name="fontFeatureSettings" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
@@ -2564,4 +2566,5 @@
   <public type="raw" name="loaderror" id="0x01100000"/>
   <!-- WebView error page for when domain lookup fails. @hide @SystemApi -->
   <public type="raw" name="nodomain"/>
+
 </resources>

@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.R;
+import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -222,6 +223,8 @@ import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
  * @attr ref android.R.styleable#TextView_imeActionId
  * @attr ref android.R.styleable#TextView_editorExtras
  * @attr ref android.R.styleable#TextView_elegantTextHeight
+ * @attr ref android.R.styleable#TextView_letterSpacing
+ * @attr ref android.R.styleable#TextView_fontFeatureSettings
  */
 @RemoteView
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
@@ -2702,7 +2705,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @see #setLetterSpacing(float)
      * @see Paint#setLetterSpacing
-     * @hide
      */
     public float getLetterSpacing() {
         return mTextPaint.getLetterSpacing();
@@ -2716,7 +2718,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @see Paint#getLetterSpacing
      *
      * @attr ref android.R.styleable#TextView_letterSpacing
-     * @hide
      */
     @android.view.RemotableViewMethod
     public void setLetterSpacing(float letterSpacing) {
@@ -2736,8 +2737,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @see #setFontFeatureSettings(String)
      * @see Paint#setFontFeatureSettings
-     * @hide
      */
+    @Nullable
     public String getFontFeatureSettings() {
         return mTextPaint.getFontFeatureSettings();
     }
@@ -2747,14 +2748,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * font-feature-settings attribute:
      * http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings
      *
+     * @param fontFeatureSettings font feature settings represented as CSS compatible string
      * @see #getFontFeatureSettings()
      * @see Paint#getFontFeatureSettings
      *
      * @attr ref android.R.styleable#TextView_fontFeatureSettings
-     * @hide
      */
     @android.view.RemotableViewMethod
-    public void setFontFeatureSettings(String fontFeatureSettings) {
+    public void setFontFeatureSettings(@Nullable String fontFeatureSettings) {
         if (fontFeatureSettings != mTextPaint.getFontFeatureSettings()) {
             mTextPaint.setFontFeatureSettings(fontFeatureSettings);
 
