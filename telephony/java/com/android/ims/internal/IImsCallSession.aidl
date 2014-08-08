@@ -19,6 +19,7 @@ package com.android.ims.internal;
 import com.android.ims.ImsCallProfile;
 import com.android.ims.ImsStreamMediaProfile;
 import com.android.ims.internal.IImsCallSessionListener;
+import com.android.ims.internal.IImsVideoCallProvider;
 
 /**
  * An IMS session that is associated with a SIP dialog which is established from/to
@@ -216,4 +217,11 @@ interface IImsCallSession {
      * @param ussdMessage USSD message to send
      */
     void sendUssd(String ussdMessage);
+
+    /**
+     * Returns a binder for the video call provider implementation contained within the IMS service
+     * process. This binder is used by the VideoCallProvider subclass in Telephony which
+     * intermediates between the propriety implementation and Telecomm/InCall.
+     */
+    IImsVideoCallProvider getVideoCallProvider();
 }
