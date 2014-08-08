@@ -425,7 +425,8 @@ public class DocumentsActivity extends Activity {
         final RootInfo root = getCurrentRoot();
         final boolean showRootIcon = mShowAsDialog || (mState.action == ACTION_MANAGE);
         if (showRootIcon) {
-            mToolbar.setNavigationIcon(root != null ? root.loadLightIcon(this) : null);
+            mToolbar.setNavigationIcon(
+                    root != null ? root.loadToolbarIcon(mToolbar.getContext()) : null);
             mToolbar.setNavigationOnClickListener(null);
         } else {
             mToolbar.setNavigationIcon(R.drawable.ic_hamburger);

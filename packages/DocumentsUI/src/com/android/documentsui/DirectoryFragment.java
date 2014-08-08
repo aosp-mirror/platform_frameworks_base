@@ -70,7 +70,6 @@ import android.widget.AbsListView.RecyclerListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
-import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -705,11 +704,11 @@ public class DirectoryFragment extends Fragment {
             if (extras != null) {
                 final String info = extras.getString(DocumentsContract.EXTRA_INFO);
                 if (info != null) {
-                    mFooters.add(new MessageFooter(2, R.drawable.ic_dialog_info_dark, info));
+                    mFooters.add(new MessageFooter(2, R.drawable.ic_dialog_info, info));
                 }
                 final String error = extras.getString(DocumentsContract.EXTRA_ERROR);
                 if (error != null) {
-                    mFooters.add(new MessageFooter(3, R.drawable.ic_dialog_alert_dark, error));
+                    mFooters.add(new MessageFooter(3, R.drawable.ic_dialog_alert, error));
                 }
                 if (extras.getBoolean(DocumentsContract.EXTRA_LOADING, false)) {
                     mFooters.add(new LoadingFooter());
@@ -718,7 +717,7 @@ public class DirectoryFragment extends Fragment {
 
             if (result != null && result.exception != null) {
                 mFooters.add(new MessageFooter(
-                        3, R.drawable.ic_dialog_alert_dark, getString(R.string.query_error)));
+                        3, R.drawable.ic_dialog_alert, getString(R.string.query_error)));
             }
 
             if (isEmpty()) {
@@ -854,7 +853,7 @@ public class DirectoryFragment extends Fragment {
                 // be shown, so this will never block.
                 final RootInfo root = roots.getRootBlocking(docAuthority, docRootId);
                 if (state.derivedMode == MODE_GRID) {
-                    iconDrawable = root.loadLightIcon(context);
+                    iconDrawable = root.loadGridIcon(context);
                 } else {
                     iconDrawable = root.loadIcon(context);
                 }
@@ -883,8 +882,8 @@ public class DirectoryFragment extends Fragment {
                 // hint to remind user they're a directory.
                 if (Document.MIME_TYPE_DIR.equals(docMimeType) && state.derivedMode == MODE_GRID
                         && showThumbnail) {
-                    iconDrawable = context.getResources().getDrawable(
-                            R.drawable.ic_root_folder_light);
+                    iconDrawable = IconUtils.applyTint(context, R.drawable.ic_doc_folder,
+                            android.R.attr.textColorPrimaryInverse);
                 }
 
                 if (summary != null) {
