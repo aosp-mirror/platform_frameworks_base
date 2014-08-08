@@ -1739,7 +1739,7 @@ static String16 getAttributeComment(const sp<AaptAssets>& assets,
 
 static status_t writeLayoutClasses(
     FILE* fp, const sp<AaptAssets>& assets,
-    const sp<AaptSymbols>& symbols, int indent, bool includePrivate)
+    const sp<AaptSymbols>& symbols, int indent, bool includePrivate, bool nonConstantId)
 {
     const char* indentStr = getIndentSpace(indent);
     if (!includePrivate) {
@@ -1957,8 +1957,13 @@ static status_t writeLayoutClasses(
                         getSymbolName(name8).string());
                 fprintf(fp, "%s*/\n", indentStr);
                 ann.printAnnotations(fp, indentStr);
+
+                const char * id_format = nonConstantId ?
+                        "%spublic static int %s_%s = %d;\n" :
+                        "%spublic static final int %s_%s = %d;\n";
+
                 fprintf(fp,
-                        "%spublic static final int %s_%s = %d;\n",
+                        id_format,
                         indentStr, nclassName.string(),
                         flattenSymbol(name8).string(), (int)pos);
             }
@@ -2177,7 +2182,7 @@ static status_t writeSymbolClass(
     }
 
     if (styleableSymbols != NULL) {
-        err = writeLayoutClasses(fp, assets, styleableSymbols, indent, includePrivate);
+        err = writeLayoutClasses(fp, assets, styleableSymbols, indent, includePrivate, nonConstantId);
         if (err != NO_ERROR) {
             return err;
         }
