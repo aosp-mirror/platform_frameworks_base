@@ -323,7 +323,11 @@ public class WifiInfo implements Parcelable {
     /**
      * Returns the received signal strength indicator of the current 802.11
      * network, in dBm.
-     * @return the RSSI, in the range -127 to 200
+     *
+     * <p>Use {@link android.net.wifi.WifiManager#calculateSignalLevel} to convert this number into
+     * an absolute signal level which can be displayed to a user.
+     *
+     * @return the RSSI.
      */
     public int getRssi() {
         return mRssi;
