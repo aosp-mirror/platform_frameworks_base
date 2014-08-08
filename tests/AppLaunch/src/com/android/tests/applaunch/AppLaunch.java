@@ -22,6 +22,7 @@ import android.app.ActivityManager.ProcessErrorStateInfo;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IActivityManager.WaitResult;
+import android.app.UiAutomation;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -71,6 +72,18 @@ public class AppLaunch extends InstrumentationTestCase {
     private int mLaunchIterations = 10;
     private Bundle mResult = new Bundle();
     private Set<String> mRequiredAccounts;
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_FREEZE_0);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_UNFREEZE);
+        super.tearDown();
+    }
 
     public void testMeasureStartUpTime() throws RemoteException, NameNotFoundException {
         InstrumentationTestRunner instrumentation =
