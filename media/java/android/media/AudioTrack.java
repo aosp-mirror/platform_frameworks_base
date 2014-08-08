@@ -479,7 +479,7 @@ public class AudioTrack
                                  int channelConfig, int audioFormat, int mode) {
         //--------------
         // sample rate, note these values are subject to change
-        if ( (sampleRateInHz < 4000) || (sampleRateInHz > 48000) ) {
+        if (sampleRateInHz < SAMPLE_RATE_HZ_MIN || sampleRateInHz > SAMPLE_RATE_HZ_MAX) {
             throw new IllegalArgumentException(sampleRateInHz
                     + "Hz is not a supported sample rate.");
         }
