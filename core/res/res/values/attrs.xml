@@ -4926,6 +4926,7 @@
     <declare-styleable name="InsetDrawable">
         <attr name="visible" />
         <attr name="drawable" />
+        <attr name="inset"  format="dimension"/>
         <attr name="insetLeft" format="dimension" />
         <attr name="insetRight" format="dimension" />
         <attr name="insetTop" format="dimension" />
