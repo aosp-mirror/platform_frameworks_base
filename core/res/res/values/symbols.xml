@@ -1266,6 +1266,8 @@
   <java-symbol type="xml" name="default_zen_mode_config" />
   <java-symbol type="xml" name="tv_content_rating_systems" />
 
+  <java-symbol type="raw" name="color_fade_vert" />
+  <java-symbol type="raw" name="color_fade_frag" />
   <java-symbol type="raw" name="accessibility_gestures" />
   <java-symbol type="raw" name="incognito_mode_start_page" />
   <java-symbol type="raw" name="loaderror" />

@@ -64,7 +64,7 @@ import java.io.PrintWriter;
  * blocker as long as the display is not ready.  So most of the work done here
  * does not need to worry about holding a suspend blocker unless it happens
  * independently of the display ready signal.
- *
+   *
  * For debugging, you can make the electron beam and brightness animations run
  * slower by changing the "animator duration scale" option in Development Settings.
  */
@@ -78,14 +78,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // We might want to turn this off if we cannot get a guarantee that the screen
     // actually turns on and starts showing new content after the call to set the
     // screen state returns.  Playing the animation can also be somewhat slow.
-    private static final boolean USE_ELECTRON_BEAM_ON_ANIMATION = false;
+    private static final boolean USE_COLOR_FADE_ON_ANIMATION = false;
 
 
     // The minimum reduction in brightness when dimmed.
     private static final int SCREEN_DIM_MINIMUM_REDUCTION = 10;
 
-    private static final int ELECTRON_BEAM_ON_ANIMATION_DURATION_MILLIS = 250;
-    private static final int ELECTRON_BEAM_OFF_ANIMATION_DURATION_MILLIS = 400;
+    private static final int COLOR_FADE_ON_ANIMATION_DURATION_MILLIS = 250;
+    private static final int COLOR_FADE_OFF_ANIMATION_DURATION_MILLIS = 600;
 
     private static final int MSG_UPDATE_POWER_STATE = 1;
     private static final int MSG_PROXIMITY_SENSOR_DEBOUNCED = 2;
@@ -106,6 +106,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int BRIGHTNESS_RAMP_RATE_SLOW = 40;
 
     private final Object mLock = new Object();
+
+    private final Context mContext;
 
     // Our handler.
     private final DisplayControllerHandler mHandler;
@@ -146,7 +148,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     // True if we should fade the screen while turning it off, false if we should play
     // a stylish electron beam animation instead.
-    private boolean mElectronBeamFadesConfig;
+    private boolean mColorFadeFadesConfig;
 
     // The pending power request.
     // Initially null until the first call to requestPowerState.
@@ -223,8 +225,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private AutomaticBrightnessController mAutomaticBrightnessController;
 
     // Animators.
-    private ObjectAnimator mElectronBeamOnAnimator;
-    private ObjectAnimator mElectronBeamOffAnimator;
+    private ObjectAnimator mColorFadeOnAnimator;
+    private ObjectAnimator mColorFadeOffAnimator;
     private RampAnimator<DisplayPowerState> mScreenBrightnessRampAnimator;
 
     /**
@@ -240,6 +242,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mLights = LocalServices.getService(LightsManager.class);
         mSensorManager = sensorManager;
         mBlanker = blanker;
+        mContext = context;
 
         final Resources resources = context.getResources();
 
@@ -287,7 +290,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         mScreenBrightnessRangeMinimum = screenBrightnessRangeMinimum;
 
-        mElectronBeamFadesConfig = resources.getBoolean(
+        mColorFadeFadesConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_animateScreenLights);
 
         if (!DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT) {
@@ -378,17 +381,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // In the future, we might manage multiple displays independently.
         mPowerState = new DisplayPowerState(mBlanker,
                 mLights.getLight(LightsManager.LIGHT_ID_BACKLIGHT),
-                new ElectronBeam(Display.DEFAULT_DISPLAY));
+                new ColorFade(Display.DEFAULT_DISPLAY));
 
-        mElectronBeamOnAnimator = ObjectAnimator.ofFloat(
-                mPowerState, DisplayPowerState.ELECTRON_BEAM_LEVEL, 0.0f, 1.0f);
-        mElectronBeamOnAnimator.setDuration(ELECTRON_BEAM_ON_ANIMATION_DURATION_MILLIS);
-        mElectronBeamOnAnimator.addListener(mAnimatorListener);
+        mColorFadeOnAnimator = ObjectAnimator.ofFloat(
+                mPowerState, DisplayPowerState.COLOR_FADE_LEVEL, 0.0f, 1.0f);
+        mColorFadeOnAnimator.setDuration(COLOR_FADE_ON_ANIMATION_DURATION_MILLIS);
+        mColorFadeOnAnimator.addListener(mAnimatorListener);
 
-        mElectronBeamOffAnimator = ObjectAnimator.ofFloat(
-                mPowerState, DisplayPowerState.ELECTRON_BEAM_LEVEL, 1.0f, 0.0f);
-        mElectronBeamOffAnimator.setDuration(ELECTRON_BEAM_OFF_ANIMATION_DURATION_MILLIS);
-        mElectronBeamOffAnimator.addListener(mAnimatorListener);
+        mColorFadeOffAnimator = ObjectAnimator.ofFloat(
+                mPowerState, DisplayPowerState.COLOR_FADE_LEVEL, 1.0f, 0.0f);
+        mColorFadeOffAnimator.setDuration(COLOR_FADE_OFF_ANIMATION_DURATION_MILLIS);
+        mColorFadeOffAnimator.addListener(mAnimatorListener);
 
         mScreenBrightnessRampAnimator = new RampAnimator<DisplayPowerState>(
                 mPowerState, DisplayPowerState.SCREEN_BRIGHTNESS);
@@ -600,34 +603,34 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // Wait for previous off animation to complete beforehand.
             // It is relatively short but if we cancel it and switch to the
             // on animation immediately then the results are pretty ugly.
-            if (!mElectronBeamOffAnimator.isStarted()) {
+            if (!mColorFadeOffAnimator.isStarted()) {
                 // Turn the screen on.  The contents of the screen may not yet
                 // be visible if the electron beam has not been dismissed because
                 // its last frame of animation is solid black.
                 setScreenState(Display.STATE_ON);
                 if (mPowerRequest.blockScreenOn
-                        && mPowerState.getElectronBeamLevel() == 0.0f) {
+                        && mPowerState.getColorFadeLevel() == 0.0f) {
                     blockScreenOn();
                 } else {
                     unblockScreenOn();
-                    if (USE_ELECTRON_BEAM_ON_ANIMATION && mPowerRequest.isBrightOrDim()) {
+                    if (USE_COLOR_FADE_ON_ANIMATION && mPowerRequest.isBrightOrDim()) {
                         // Perform screen on animation.
-                        if (!mElectronBeamOnAnimator.isStarted()) {
-                            if (mPowerState.getElectronBeamLevel() == 1.0f) {
-                                mPowerState.dismissElectronBeam();
-                            } else if (mPowerState.prepareElectronBeam(
-                                    mElectronBeamFadesConfig ?
-                                            ElectronBeam.MODE_FADE :
-                                                    ElectronBeam.MODE_WARM_UP)) {
-                                mElectronBeamOnAnimator.start();
+                        if (!mColorFadeOnAnimator.isStarted()) {
+                            if (mPowerState.getColorFadeLevel() == 1.0f) {
+                                mPowerState.dismissColorFade();
+                            } else if (mPowerState.prepareColorFade(mContext,
+                                    mColorFadeFadesConfig ?
+                                            ColorFade.MODE_FADE :
+                                                    ColorFade.MODE_WARM_UP)) {
+                                mColorFadeOnAnimator.start();
                             } else {
-                                mElectronBeamOnAnimator.end();
+                                mColorFadeOnAnimator.end();
                             }
                         }
                     } else {
                         // Skip screen on animation.
-                        mPowerState.setElectronBeamLevel(1.0f);
-                        mPowerState.dismissElectronBeam();
+                        mPowerState.setColorFadeLevel(1.0f);
+                        mPowerState.dismissColorFade();
                     }
                 }
             }
@@ -640,8 +643,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     || mPowerState.getScreenState() != Display.STATE_ON) {
                 // Set screen state and dismiss the black surface without fanfare.
                 setScreenState(state);
-                mPowerState.setElectronBeamLevel(1.0f);
-                mPowerState.dismissElectronBeam();
+                mPowerState.setColorFadeLevel(1.0f);
+                mPowerState.dismissColorFade();
             }
         } else if (state == Display.STATE_DOZE_SUSPEND) {
             // Want screen dozing and suspended.
@@ -652,27 +655,27 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     || mPowerState.getScreenState() == Display.STATE_DOZE_SUSPEND) {
                 // Set screen state and dismiss the black surface without fanfare.
                 setScreenState(state);
-                mPowerState.setElectronBeamLevel(1.0f);
-                mPowerState.dismissElectronBeam();
+                mPowerState.setColorFadeLevel(1.0f);
+                mPowerState.dismissColorFade();
             }
         } else {
             // Want screen off.
             // Wait for previous on animation to complete beforehand.
             unblockScreenOn();
-            if (!mElectronBeamOnAnimator.isStarted()) {
+            if (!mColorFadeOnAnimator.isStarted()) {
                 if (mPowerRequest.policy == DisplayPowerRequest.POLICY_OFF) {
                     // Perform screen off animation.
-                    if (!mElectronBeamOffAnimator.isStarted()) {
-                        if (mPowerState.getElectronBeamLevel() == 0.0f) {
+                    if (!mColorFadeOffAnimator.isStarted()) {
+                        if (mPowerState.getColorFadeLevel() == 0.0f) {
                             setScreenState(Display.STATE_OFF);
-                        } else if (mPowerState.prepareElectronBeam(
-                                mElectronBeamFadesConfig ?
-                                        ElectronBeam.MODE_FADE :
-                                                ElectronBeam.MODE_COOL_DOWN)
+                        } else if (mPowerState.prepareColorFade(mContext,
+                                mColorFadeFadesConfig ?
+                                        ColorFade.MODE_FADE :
+                                                ColorFade.MODE_COOL_DOWN)
                                 && mPowerState.getScreenState() != Display.STATE_OFF) {
-                            mElectronBeamOffAnimator.start();
+                            mColorFadeOffAnimator.start();
                         } else {
-                            mElectronBeamOffAnimator.end();
+                            mColorFadeOffAnimator.end();
                         }
                     }
                 } else {
@@ -687,8 +690,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // which will be handled asynchronously.
         if (mustNotify
                 && !mScreenOnWasBlocked
-                && !mElectronBeamOnAnimator.isStarted()
-                && !mElectronBeamOffAnimator.isStarted()
+                && !mColorFadeOnAnimator.isStarted()
+                && !mColorFadeOffAnimator.isStarted()
                 && !mScreenBrightnessRampAnimator.isAnimating()
                 && mPowerState.waitUntilClean(mCleanListener)) {
             synchronized (mLock) {
@@ -936,13 +939,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mScreenBrightnessRampAnimator.isAnimating()=" +
                 mScreenBrightnessRampAnimator.isAnimating());
 
-        if (mElectronBeamOnAnimator != null) {
-            pw.println("  mElectronBeamOnAnimator.isStarted()=" +
-                    mElectronBeamOnAnimator.isStarted());
+        if (mColorFadeOnAnimator != null) {
+            pw.println("  mColorFadeOnAnimator.isStarted()=" +
+                    mColorFadeOnAnimator.isStarted());
         }
-        if (mElectronBeamOffAnimator != null) {
-            pw.println("  mElectronBeamOffAnimator.isStarted()=" +
-                    mElectronBeamOffAnimator.isStarted());
+        if (mColorFadeOffAnimator != null) {
+            pw.println("  mColorFadeOffAnimator.isStarted()=" +
+                    mColorFadeOffAnimator.isStarted());
         }
 
         if (mPowerState != null) {

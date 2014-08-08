@@ -18,6 +18,7 @@ package com.android.server.display;
 
 import com.android.server.lights.Light;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -56,7 +57,7 @@ final class DisplayPowerState {
     private final Choreographer mChoreographer;
     private final DisplayBlanker mBlanker;
     private final Light mBacklight;
-    private final ElectronBeam mElectronBeam;
+    private final ColorFade mColorFade;
     private final PhotonicModulator mPhotonicModulator;
 
     private int mScreenState;
@@ -64,19 +65,19 @@ final class DisplayPowerState {
     private boolean mScreenReady;
     private boolean mScreenUpdatePending;
 
-    private boolean mElectronBeamPrepared;
-    private float mElectronBeamLevel;
-    private boolean mElectronBeamReady;
-    private boolean mElectronBeamDrawPending;
+    private boolean mColorFadePrepared;
+    private float mColorFadeLevel;
+    private boolean mColorFadeReady;
+    private boolean mColorFadeDrawPending;
 
     private Runnable mCleanListener;
 
-    public DisplayPowerState(DisplayBlanker blanker, Light backlight, ElectronBeam electronBeam) {
+    public DisplayPowerState(DisplayBlanker blanker, Light backlight, ColorFade electronBeam) {
         mHandler = new Handler(true /*async*/);
         mChoreographer = Choreographer.getInstance();
         mBlanker = blanker;
         mBacklight = backlight;
-        mElectronBeam = electronBeam;
+        mColorFade = electronBeam;
         mPhotonicModulator = new PhotonicModulator();
 
         // At boot time, we know that the screen is on and the electron beam
@@ -89,21 +90,21 @@ final class DisplayPowerState {
         mScreenBrightness = PowerManager.BRIGHTNESS_ON;
         scheduleScreenUpdate();
 
-        mElectronBeamPrepared = false;
-        mElectronBeamLevel = 1.0f;
-        mElectronBeamReady = true;
+        mColorFadePrepared = false;
+        mColorFadeLevel = 1.0f;
+        mColorFadeReady = true;
     }
 
-    public static final FloatProperty<DisplayPowerState> ELECTRON_BEAM_LEVEL =
+    public static final FloatProperty<DisplayPowerState> COLOR_FADE_LEVEL =
             new FloatProperty<DisplayPowerState>("electronBeamLevel") {
         @Override
         public void setValue(DisplayPowerState object, float value) {
-            object.setElectronBeamLevel(value);
+            object.setColorFadeLevel(value);
         }
 
         @Override
         public Float get(DisplayPowerState object) {
-            return object.getElectronBeamLevel();
+            return object.getColorFadeLevel();
         }
     };
 
@@ -176,26 +177,26 @@ final class DisplayPowerState {
      * @param mode The electron beam animation mode to prepare.
      * @return True if the electron beam was prepared.
      */
-    public boolean prepareElectronBeam(int mode) {
-        if (!mElectronBeam.prepare(mode)) {
-            mElectronBeamPrepared = false;
-            mElectronBeamReady = true;
+    public boolean prepareColorFade(Context context, int mode) {
+        if (!mColorFade.prepare(context, mode)) {
+            mColorFadePrepared = false;
+            mColorFadeReady = true;
             return false;
         }
 
-        mElectronBeamPrepared = true;
-        mElectronBeamReady = false;
-        scheduleElectronBeamDraw();
+        mColorFadePrepared = true;
+        mColorFadeReady = false;
+        scheduleColorFadeDraw();
         return true;
     }
 
     /**
      * Dismisses the electron beam surface.
      */
-    public void dismissElectronBeam() {
-        mElectronBeam.dismiss();
-        mElectronBeamPrepared = false;
-        mElectronBeamReady = true;
+    public void dismissColorFade() {
+        mColorFade.dismiss();
+        mColorFadePrepared = false;
+        mColorFadeReady = true;
     }
 
     /**
@@ -211,20 +212,20 @@ final class DisplayPowerState {
      *
      * @param level The level, ranges from 0.0 (full off) to 1.0 (full on).
      */
-    public void setElectronBeamLevel(float level) {
-        if (mElectronBeamLevel != level) {
+    public void setColorFadeLevel(float level) {
+        if (mColorFadeLevel != level) {
             if (DEBUG) {
-                Slog.d(TAG, "setElectronBeamLevel: level=" + level);
+                Slog.d(TAG, "setColorFadeLevel: level=" + level);
             }
 
-            mElectronBeamLevel = level;
+            mColorFadeLevel = level;
             if (mScreenState != Display.STATE_OFF) {
                 mScreenReady = false;
                 scheduleScreenUpdate(); // update backlight brightness
             }
-            if (mElectronBeamPrepared) {
-                mElectronBeamReady = false;
-                scheduleElectronBeamDraw();
+            if (mColorFadePrepared) {
+                mColorFadeReady = false;
+                scheduleColorFadeDraw();
             }
         }
     }
@@ -232,8 +233,8 @@ final class DisplayPowerState {
     /**
      * Gets the level of the electron beam steering current.
      */
-    public float getElectronBeamLevel() {
-        return mElectronBeamLevel;
+    public float getColorFadeLevel() {
+        return mColorFadeLevel;
     }
 
     /**
@@ -243,7 +244,7 @@ final class DisplayPowerState {
      * The listener always overrides any previously set listener.
      */
     public boolean waitUntilClean(Runnable listener) {
-        if (!mScreenReady || !mElectronBeamReady) {
+        if (!mScreenReady || !mColorFadeReady) {
             mCleanListener = listener;
             return false;
         } else {
@@ -259,13 +260,13 @@ final class DisplayPowerState {
         pw.println("  mScreenBrightness=" + mScreenBrightness);
         pw.println("  mScreenReady=" + mScreenReady);
         pw.println("  mScreenUpdatePending=" + mScreenUpdatePending);
-        pw.println("  mElectronBeamPrepared=" + mElectronBeamPrepared);
-        pw.println("  mElectronBeamLevel=" + mElectronBeamLevel);
-        pw.println("  mElectronBeamReady=" + mElectronBeamReady);
-        pw.println("  mElectronBeamDrawPending=" + mElectronBeamDrawPending);
+        pw.println("  mColorFadePrepared=" + mColorFadePrepared);
+        pw.println("  mColorFadeLevel=" + mColorFadeLevel);
+        pw.println("  mColorFadeReady=" + mColorFadeReady);
+        pw.println("  mColorFadeDrawPending=" + mColorFadeDrawPending);
 
         mPhotonicModulator.dump(pw);
-        mElectronBeam.dump(pw);
+        mColorFade.dump(pw);
     }
 
     private void scheduleScreenUpdate() {
@@ -280,17 +281,17 @@ final class DisplayPowerState {
         mHandler.post(mScreenUpdateRunnable);
     }
 
-    private void scheduleElectronBeamDraw() {
-        if (!mElectronBeamDrawPending) {
-            mElectronBeamDrawPending = true;
+    private void scheduleColorFadeDraw() {
+        if (!mColorFadeDrawPending) {
+            mColorFadeDrawPending = true;
             mChoreographer.postCallback(Choreographer.CALLBACK_TRAVERSAL,
-                    mElectronBeamDrawRunnable, null);
+                    mColorFadeDrawRunnable, null);
         }
     }
 
     private void invokeCleanListenerIfNeeded() {
         final Runnable listener = mCleanListener;
-        if (listener != null && mScreenReady && mElectronBeamReady) {
+        if (listener != null && mScreenReady && mColorFadeReady) {
             mCleanListener = null;
             listener.run();
         }
@@ -302,7 +303,7 @@ final class DisplayPowerState {
             mScreenUpdatePending = false;
 
             int brightness = mScreenState != Display.STATE_OFF
-                    && mElectronBeamLevel > 0f ? mScreenBrightness : 0;
+                    && mColorFadeLevel > 0f ? mScreenBrightness : 0;
             if (mPhotonicModulator.setState(mScreenState, brightness)) {
                 if (DEBUG) {
                     Slog.d(TAG, "Screen ready");
@@ -317,16 +318,16 @@ final class DisplayPowerState {
         }
     };
 
-    private final Runnable mElectronBeamDrawRunnable = new Runnable() {
+    private final Runnable mColorFadeDrawRunnable = new Runnable() {
         @Override
         public void run() {
-            mElectronBeamDrawPending = false;
+            mColorFadeDrawPending = false;
 
-            if (mElectronBeamPrepared) {
-                mElectronBeam.draw(mElectronBeamLevel);
+            if (mColorFadePrepared) {
+                mColorFade.draw(mColorFadeLevel);
             }
 
-            mElectronBeamReady = true;
+            mColorFadeReady = true;
             invokeCleanListenerIfNeeded();
         }
     };
