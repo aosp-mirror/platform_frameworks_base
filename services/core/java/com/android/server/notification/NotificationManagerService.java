@@ -16,7 +16,7 @@
 
 package com.android.server.notification;
 
-import static android.service.notification.NotificationListenerService.FLAG_DISABLE_HOST_ALERTS;
+import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -125,7 +125,7 @@ public class NotificationManagerService extends SystemService {
     static final int MESSAGE_RECONSIDER_RANKING = 4;
     static final int MESSAGE_RANKING_CONFIG_CHANGE = 5;
     static final int MESSAGE_SEND_RANKING_UPDATE = 6;
-    static final int MESSAGE_LISTENER_FLAGS_CHANGED = 7;
+    static final int MESSAGE_LISTENER_HINTS_CHANGED = 7;
 
     static final int LONG_DELAY = 3500; // 3.5 seconds
     static final int SHORT_DELAY = 2000; // 2 seconds
@@ -170,12 +170,12 @@ public class NotificationManagerService extends SystemService {
     private boolean mUseAttentionLight;
     boolean mSystemReady;
 
-    private boolean mDisableNotificationAlerts;
+    private boolean mDisableNotificationEffects;
     NotificationRecord mSoundNotification;
     NotificationRecord mVibrateNotification;
 
-    private final ArraySet<ManagedServiceInfo> mListenersDisablingAlerts = new ArraySet<>();
-    private int mListenerFlags;  // right now, all flags are global
+    private final ArraySet<ManagedServiceInfo> mListenersDisablingEffects = new ArraySet<>();
+    private int mListenerHints;  // right now, all hints are global
 
     // for enabling and disabling notification pulse behavior
     private boolean mScreenOn = true;
@@ -470,8 +470,9 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onSetDisabled(int status) {
             synchronized (mNotificationList) {
-                mDisableNotificationAlerts = (status & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
-                if (disableNotificationAlerts()) {
+                mDisableNotificationEffects =
+                        (status & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
+                if (disableNotificationEffects()) {
                     // cancel whatever's going on
                     long identity = Binder.clearCallingIdentity();
                     try {
@@ -804,6 +805,13 @@ public class NotificationManagerService extends SystemService {
             public void onConfigChanged() {
                 savePolicyFile();
             }
+
+            @Override
+            void onZenModeChanged() {
+                synchronized(mNotificationList) {
+                    updateListenerHintsLocked();
+                }
+            }
         });
         final File systemDir = new File(Environment.getDataDirectory(), "system");
         mPolicyFile = new AtomicFile(new File(systemDir, "notification_policy.xml"));
@@ -846,7 +854,7 @@ public class NotificationManagerService extends SystemService {
         // flag at least once and we'll go back to 0 after that.
         if (0 == Settings.Global.getInt(getContext().getContentResolver(),
                     Settings.Global.DEVICE_PROVISIONED, 0)) {
-            mDisableNotificationAlerts = true;
+            mDisableNotificationEffects = true;
         }
         mZenModeHelper.updateZenMode();
 
@@ -932,11 +940,12 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void updateListenerFlagsLocked() {
-        final int flags = mListenersDisablingAlerts.isEmpty() ? 0 : FLAG_DISABLE_HOST_ALERTS;
-        if (flags == mListenerFlags) return;
-        mListenerFlags = flags;
-        scheduleListenerFlagsChanged(flags);
+    private void updateListenerHintsLocked() {
+        final int hints = (mListenersDisablingEffects.isEmpty() ? 0 : HINT_HOST_DISABLE_EFFECTS) |
+                mZenModeHelper.getZenModeListenerHint();
+        if (hints == mListenerHints) return;
+        mListenerHints = hints;
+        scheduleListenerHintsChanged(hints);
     }
 
     private final IBinder mService = new INotificationManager.Stub() {
@@ -1284,23 +1293,29 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void requestFlagsFromListener(INotificationListener token, int flags) {
-            synchronized (mNotificationList) {
-                final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                final boolean disableAlerts = (flags & FLAG_DISABLE_HOST_ALERTS) != 0;
-                if (disableAlerts) {
-                    mListenersDisablingAlerts.add(info);
-                } else {
-                    mListenersDisablingAlerts.remove(info);
+        public void requestHintsFromListener(INotificationListener token, int hints) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mNotificationList) {
+                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                    final boolean disableEffects = (hints & HINT_HOST_DISABLE_EFFECTS) != 0;
+                    if (disableEffects) {
+                        mListenersDisablingEffects.add(info);
+                    } else {
+                        mListenersDisablingEffects.remove(info);
+                    }
+                    mZenModeHelper.requestFromListener(hints);
+                    updateListenerHintsLocked();
                 }
-                updateListenerFlagsLocked();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
 
         @Override
-        public int getFlagsFromListener(INotificationListener token) {
+        public int getHintsFromListener(INotificationListener token) {
             synchronized (mNotificationList) {
-                return mListenerFlags;
+                return mListenerHints;
             }
         }
 
@@ -1395,8 +1410,8 @@ public class NotificationManagerService extends SystemService {
         return keys.toArray(new String[keys.size()]);
     }
 
-    private boolean disableNotificationAlerts() {
-        return mDisableNotificationAlerts || (mListenerFlags & FLAG_DISABLE_HOST_ALERTS) != 0;
+    private boolean disableNotificationEffects() {
+        return mDisableNotificationEffects || (mListenerHints & HINT_HOST_DISABLE_EFFECTS) != 0;
     }
 
     void dumpImpl(PrintWriter pw, DumpFilter filter) {
@@ -1447,7 +1462,7 @@ public class NotificationManagerService extends SystemService {
                     pw.println("  mNotificationPulseEnabled=" + mNotificationPulseEnabled);
                     pw.println("  mSoundNotification=" + mSoundNotification);
                     pw.println("  mVibrateNotification=" + mVibrateNotification);
-                    pw.println("  mDisableNotificationAlerts=" + mDisableNotificationAlerts);
+                    pw.println("  mDisableNotificationEffects=" + mDisableNotificationEffects);
                     pw.println("  mSystemReady=" + mSystemReady);
                 }
                 pw.println("  mArchive=" + mArchive.toString());
@@ -1483,11 +1498,11 @@ public class NotificationManagerService extends SystemService {
 
                 pw.println("\n  Notification listeners:");
                 mListeners.dump(pw, filter);
-                pw.print("    mListenerFlags: "); pw.println(mListenerFlags);
-                pw.print("    mListenersDisablingAlerts: (");
-                N = mListenersDisablingAlerts.size();
+                pw.print("    mListenerHints: "); pw.println(mListenerHints);
+                pw.print("    mListenersDisablingEffects: (");
+                N = mListenersDisablingEffects.size();
                 for (int i = 0; i < N; i++) {
-                    final ManagedServiceInfo listener = mListenersDisablingAlerts.valueAt(i);
+                    final ManagedServiceInfo listener = mListenersDisablingEffects.valueAt(i);
                     if (i > 0) pw.print(',');
                     pw.print(listener.component);
                 }
@@ -1705,7 +1720,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         // If we're not supposed to beep, vibrate, etc. then don't.
-        if (!disableNotificationAlerts()
+        if (!disableNotificationEffects()
                 && (!(record.isUpdate
                     && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0 ))
                 && (record.getUserId() == UserHandle.USER_ALL ||
@@ -2021,14 +2036,14 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void scheduleListenerFlagsChanged(int state) {
-        mHandler.removeMessages(MESSAGE_LISTENER_FLAGS_CHANGED);
-        mHandler.obtainMessage(MESSAGE_LISTENER_FLAGS_CHANGED, state, 0).sendToTarget();
+    private void scheduleListenerHintsChanged(int state) {
+        mHandler.removeMessages(MESSAGE_LISTENER_HINTS_CHANGED);
+        mHandler.obtainMessage(MESSAGE_LISTENER_HINTS_CHANGED, state, 0).sendToTarget();
     }
 
-    private void handleListenerFlagsChanged(int state) {
+    private void handleListenerHintsChanged(int hints) {
         synchronized (mNotificationList) {
-            mListeners.notifyListenerFlagsChangedLocked(state);
+            mListeners.notifyListenerHintsChangedLocked(hints);
         }
     }
 
@@ -2048,8 +2063,8 @@ public class NotificationManagerService extends SystemService {
                 case MESSAGE_SEND_RANKING_UPDATE:
                     handleSendRankingUpdate();
                     break;
-                case MESSAGE_LISTENER_FLAGS_CHANGED:
-                    handleListenerFlagsChanged(msg.arg1);
+                case MESSAGE_LISTENER_HINTS_CHANGED:
+                    handleListenerHintsChanged(msg.arg1);
                     break;
             }
         }
@@ -2570,8 +2585,8 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         protected void onServiceRemovedLocked(ManagedServiceInfo removed) {
-            if (mListenersDisablingAlerts.remove(removed)) {
-                updateListenerFlagsLocked();
+            if (mListenersDisablingEffects.remove(removed)) {
+                updateListenerHintsLocked();
             }
         }
 
@@ -2655,7 +2670,7 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        public void notifyListenerFlagsChangedLocked(final int flags) {
+        public void notifyListenerHintsChangedLocked(final int hints) {
             for (final ManagedServiceInfo serviceInfo : mServices) {
                 if (!serviceInfo.isEnabledForCurrentProfiles()) {
                     continue;
@@ -2663,7 +2678,7 @@ public class NotificationManagerService extends SystemService {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        notifyListenerFlagsChanged(serviceInfo, flags);
+                        notifyListenerHintsChanged(serviceInfo, hints);
                     }
                 });
             }
@@ -2702,12 +2717,12 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        private void notifyListenerFlagsChanged(ManagedServiceInfo info, int state) {
+        private void notifyListenerHintsChanged(ManagedServiceInfo info, int hints) {
             final INotificationListener listener = (INotificationListener) info.service;
             try {
-                listener.onListenerFlagsChanged(state);
+                listener.onListenerHintsChanged(hints);
             } catch (RemoteException ex) {
-                Log.e(TAG, "unable to notify listener (listener flags): " + listener, ex);
+                Log.e(TAG, "unable to notify listener (listener hints): " + listener, ex);
             }
         }
     }
