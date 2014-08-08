@@ -711,6 +711,7 @@ package android {
     field public static final int innerRadiusRatio = 16843163; // 0x101019b
     field public static final deprecated int inputMethod = 16843112; // 0x1010168
     field public static final int inputType = 16843296; // 0x1010220
+    field public static final int inset = 16843960; // 0x10104b8
     field public static final int insetBottom = 16843194; // 0x10101ba
     field public static final int insetLeft = 16843191; // 0x10101b7
     field public static final int insetRight = 16843192; // 0x10101b8
