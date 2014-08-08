@@ -15,6 +15,15 @@
  */
 package android.app;
 
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Parcelable;
 import android.view.View;
 
 import java.util.List;
@@ -28,6 +37,7 @@ import java.util.Map;
  * Transition behavior.
  */
 public abstract class SharedElementListener {
+    private Matrix mTempMatrix;
 
     static final SharedElementListener NULL_LISTENER = new SharedElementListener() {
     };
@@ -111,4 +121,66 @@ public abstract class SharedElementListener {
      *                       will be filled into sharedElements based on the transitionNames.
      */
     public void remapSharedElements(List<String> names, Map<String, View> sharedElements) {}
+
+    /**
+     * Creates a snapshot of a shared element to be used by the remote Activity and reconstituted
+     * with {@link #createSnapshotView(android.content.Context, android.os.Parcelable)}. A
+     * null return value will mean that the remote Activity will have a null snapshot View in
+     * {@link #setSharedElementStart(java.util.List, java.util.List, java.util.List)} and
+     * {@link #setSharedElementEnd(java.util.List, java.util.List, java.util.List)}.
+     *
+     * @param sharedElement The shared element View to create a snapshot for.
+     * @param viewToGlobalMatrix A matrix containing a transform from the view to the screen
+     *                           coordinates.
+     * @param screenBounds The bounds of shared element in screen coordinate space. This is
+     *                     the bounds of the view with the viewToGlobalMatrix applied.
+     * @return A snapshot to send to the remote Activity to be reconstituted with
+     * {@link #createSnapshotView(android.content.Context, android.os.Parcelable)} and passed
+     * into {@link #setSharedElementStart(java.util.List, java.util.List, java.util.List)} and
+     * {@link #setSharedElementEnd(java.util.List, java.util.List, java.util.List)}.
+     */
+    public Parcelable captureSharedElementSnapshot(View sharedElement, Matrix viewToGlobalMatrix,
+            RectF screenBounds) {
+        int bitmapWidth = Math.round(screenBounds.width());
+        int bitmapHeight = Math.round(screenBounds.height());
+        Bitmap bitmap = null;
+        if (bitmapWidth > 0 && bitmapHeight > 0) {
+            if (mTempMatrix == null) {
+                mTempMatrix = new Matrix();
+            }
+            mTempMatrix.set(viewToGlobalMatrix);
+            mTempMatrix.postTranslate(-screenBounds.left, -screenBounds.top);
+            bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            canvas.concat(mTempMatrix);
+            sharedElement.draw(canvas);
+        }
+        return bitmap;
+    }
+
+    /**
+     * Reconstitutes a snapshot View from a Parcelable returned in
+     * {@link #captureSharedElementSnapshot(android.view.View, android.graphics.Matrix,
+     * android.graphics.RectF)} to be used in {@link #setSharedElementStart(java.util.List,
+     * java.util.List, java.util.List)} and {@link #setSharedElementEnd(java.util.List,
+     * java.util.List, java.util.List)}. The returned View will be sized and positioned after
+     * this call so that it is ready to be added to the decor View's overlay.
+     *
+     * @param context The Context used to create the snapshot View.
+     * @param snapshot The Parcelable returned by {@link #captureSharedElementSnapshot(
+     * android.view.View, android.graphics.Matrix, android.graphics.RectF)}.
+     * @return A View to be sent in {@link #setSharedElementStart(java.util.List, java.util.List,
+     * java.util.List)} and {@link #setSharedElementEnd(java.util.List, java.util.List,
+     * java.util.List)}. A null value will produce a null snapshot value for those two methods.
+     */
+    public View createSnapshotView(Context context, Parcelable snapshot) {
+        View view = null;
+        if (snapshot instanceof Bitmap) {
+            Bitmap bitmap = (Bitmap) snapshot;
+            view = new View(context);
+            Resources resources = context.getResources();
+            view.setBackground(new BitmapDrawable(resources, bitmap));
+        }
+        return view;
+    }
 }

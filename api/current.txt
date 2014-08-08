@@ -5148,6 +5148,8 @@ package android.app {
 
   public abstract class SharedElementListener {
     ctor public SharedElementListener();
+    method public android.os.Parcelable captureSharedElementSnapshot(android.view.View, android.graphics.Matrix, android.graphics.RectF);
+    method public android.view.View createSnapshotView(android.content.Context, android.os.Parcelable);
     method public void handleRejectedSharedElements(java.util.List<android.view.View>);
     method public void remapSharedElements(java.util.List<java.lang.String>, java.util.Map<java.lang.String, android.view.View>);
     method public void setSharedElementEnd(java.util.List<java.lang.String>, java.util.List<android.view.View>, java.util.List<android.view.View>);
