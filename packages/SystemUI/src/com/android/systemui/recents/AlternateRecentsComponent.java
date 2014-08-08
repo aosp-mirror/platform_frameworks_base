@@ -34,8 +34,10 @@ import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
+import com.android.systemui.recents.model.TaskGrouping;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskStackViewLayoutAlgorithm;
@@ -163,6 +165,77 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
     public void onCancelPreloadingRecents() {
         // Do nothing
+    }
+
+    void showRelativeAffiliatedTask(boolean showNextTask) {
+        TaskStack stack = RecentsTaskLoader.getShallowTaskStack(mSystemServicesProxy,
+                Integer.MAX_VALUE);
+        // Return early if there are no tasks
+        if (stack.getTaskCount() == 0) return;
+
+        ActivityManager.RunningTaskInfo runningTask = getTopMostTask();
+        // Return early if the running task is in the home stack (optimization)
+        if (mSystemServicesProxy.isInHomeStack(runningTask.id)) return;
+
+        // Find the task in the recents list
+        ArrayList<Task> tasks = stack.getTasks();
+        Task toTask = null;
+        ActivityOptions launchOpts = null;
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            Task task = tasks.get(i);
+            if (task.key.id == runningTask.id) {
+                TaskGrouping group = task.group;
+                Task.TaskKey toTaskKey;
+                if (showNextTask) {
+                    toTaskKey = group.getNextTaskInGroup(task);
+                    // XXX: We will actually set the appropriate launch animations here
+                } else {
+                    toTaskKey = group.getPrevTaskInGroup(task);
+                    // XXX: We will actually set the appropriate launch animations here
+                }
+                if (toTaskKey != null) {
+                    toTask = stack.findTaskWithId(toTaskKey.id);
+                }
+                break;
+            }
+        }
+
+        // Return early if there is no next task
+        if (toTask == null) {
+            // XXX: We will actually show a bounce animation here
+            return;
+        }
+
+        // Launch the task
+        if (toTask.isActive) {
+            // Bring an active task to the foreground
+            mSystemServicesProxy.moveTaskToFront(toTask.key.id, launchOpts);
+        } else {
+            // Launch the activity anew with the desired animation
+            boolean isDocument = Utilities.isDocument(toTask.key.baseIntent);
+            Intent intent = new Intent(toTask.key.baseIntent);
+            intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
+                    | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+            if (!isDocument) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
+            try {
+                mSystemServicesProxy.startActivityFromRecents(toTask.key.id, launchOpts);
+            } catch (ActivityNotFoundException anfe) {}
+
+            // Remove the old task from activity manager
+            RecentsTaskLoader.getInstance().getSystemServicesProxy().removeTask(toTask.key.id,
+                    isDocument);
+        }
+    }
+
+    public void onShowNextAffiliatedTask() {
+        showRelativeAffiliatedTask(true);
+    }
+
+    public void onShowPrevAffiliatedTask() {
+        showRelativeAffiliatedTask(false);
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
@@ -318,7 +391,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     /** Returns the transition rect for the given task id. */
     Rect getThumbnailTransitionRect(int runningTaskId) {
         // Get the stack of tasks that we are animating into
-        TaskStack stack = RecentsTaskLoader.getShallowTaskStack(mSystemServicesProxy);
+        TaskStack stack = RecentsTaskLoader.getShallowTaskStack(mSystemServicesProxy, -1);
         if (stack.getTaskCount() == 0) {
             return new Rect();
         }

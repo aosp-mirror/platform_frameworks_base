@@ -295,9 +295,15 @@ public class RecentsTaskLoader {
     }
 
     /** Gets the list of recent tasks, ordered from back to front. */
-    private static List<ActivityManager.RecentTaskInfo> getRecentTasks(SystemServicesProxy ssp) {
+    private static List<ActivityManager.RecentTaskInfo> getRecentTasks(SystemServicesProxy ssp,
+            int numTasks) {
+        // Set a default number of tasks to query if none is provided
+        if (numTasks < 0) {
+            RecentsConfiguration config = RecentsConfiguration.getInstance();
+            numTasks = config.maxNumTasksToLoad;
+        }
         List<ActivityManager.RecentTaskInfo> tasks =
-                ssp.getRecentTasks(50, UserHandle.CURRENT.getIdentifier());
+                ssp.getRecentTasks(numTasks, UserHandle.CURRENT.getIdentifier());
         Collections.reverse(tasks);
         return tasks;
     }
@@ -313,7 +319,7 @@ public class RecentsTaskLoader {
 
         // Get the recent tasks
         SystemServicesProxy ssp = mSystemServicesProxy;
-        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp);
+        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp, -1);
 
         // From back to front, add each task to the task stack
         int taskCount = tasks.size();
@@ -395,9 +401,9 @@ public class RecentsTaskLoader {
     }
 
     /** Creates a lightweight stack of the current recent tasks, without thumbnails and icons. */
-    public static TaskStack getShallowTaskStack(SystemServicesProxy ssp) {
+    public static TaskStack getShallowTaskStack(SystemServicesProxy ssp, int numTasks) {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
-        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp);
+        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp, numTasks);
         TaskStack stack = new TaskStack();
 
         int taskCount = tasks.size();
