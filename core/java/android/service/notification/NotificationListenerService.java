@@ -58,11 +58,26 @@ public abstract class NotificationListenerService extends Service {
     private final String TAG = NotificationListenerService.class.getSimpleName()
             + "[" + getClass().getSimpleName() + "]";
 
-    /** {@link #getCurrentListenerFlags() Listener flags} constant - default state. **/
-    public static final int FLAG_NONE = 0;
-    /** {@link #getCurrentListenerFlags() Listener flags} constant - the primary device UI
-     * should disable notification sound, vibrating and other visual or aural effects. **/
-    public static final int FLAG_DISABLE_HOST_ALERTS = 1;
+    /** {@link #getCurrentListenerHints() Listener hints} constant - default state. */
+    public static final int HINTS_NONE = 0;
+
+    /** Bitmask range for {@link #getCurrentListenerHints() Listener hints} host interruption level
+     * constants.  */
+    public static final int HOST_INTERRUPTION_LEVEL_MASK = 0x3;
+
+    /** {@link #getCurrentListenerHints() Listener hints} constant - Normal interruption level. */
+    public static final int HINT_HOST_INTERRUPTION_LEVEL_ALL = 1;
+
+    /** {@link #getCurrentListenerHints() Listener hints} constant - Priority interruption level. */
+    public static final int HINT_HOST_INTERRUPTION_LEVEL_PRIORITY = 2;
+
+    /** {@link #getCurrentListenerHints() Listener hints} constant - No interruptions level. */
+    public static final int HINT_HOST_INTERRUPTION_LEVEL_NONE = 3;
+
+    /** {@link #getCurrentListenerHints() Listener hints} constant - the primary device UI
+     * should disable notification sound, vibrating and other visual or aural effects.
+     * This does not change the interruption level, only the effects. **/
+    public static final int HINT_HOST_DISABLE_EFFECTS = 1 << 2;
 
     private INotificationListenerWrapper mWrapper = null;
     private RankingMap mRankingMap;
@@ -174,11 +189,11 @@ public abstract class NotificationListenerService extends Service {
 
     /**
      * Implement this method to be notified when the
-     * {@link #getCurrentListenerFlags() listener flags} change.
+     * {@link #getCurrentListenerHints() Listener hints} change.
      *
-     * @param flags The current {@link #getCurrentListenerFlags() listener flags}.
+     * @param hints The current {@link #getCurrentListenerHints() listener hints}.
      */
-    public void onListenerFlagsChanged(int flags) {
+    public void onListenerHintsChanged(int hints) {
         // optional
     }
 
@@ -311,40 +326,40 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /**
-     * Gets the set of flags representing current state.
+     * Gets the set of hints representing current state.
      *
      * <p>
-     * The current state may differ from the requested state if the flag represents state
+     * The current state may differ from the requested state if the hint represents state
      * shared across all listeners or a feature the notification host does not support or refuses
      * to grant.
      *
-     * @return One or more of the FLAG_ constants.
+     * @return One or more of the HINT_ constants.
      */
-    public final int getCurrentListenerFlags() {
-        if (!isBound()) return FLAG_NONE;
+    public final int getCurrentListenerHints() {
+        if (!isBound()) return HINTS_NONE;
         try {
-            return getNotificationInterface().getFlagsFromListener(mWrapper);
+            return getNotificationInterface().getHintsFromListener(mWrapper);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
-            return FLAG_NONE;
+            return HINTS_NONE;
         }
     }
 
     /**
-     * Sets the desired {@link #getCurrentListenerFlags() listener flags}.
+     * Sets the desired {@link #getCurrentListenerHints() listener hints}.
      *
      * <p>
      * This is merely a request, the host may or not choose to take action depending
      * on other listener requests or other global state.
      * <p>
-     * Listen for updates using {@link #onListenerFlagsChanged(int)}.
+     * Listen for updates using {@link #onListenerHintsChanged(int)}.
      *
-     * @param flags One or more of the FLAG_ constants.
+     * @param hints One or more of the HINT_ constants.
      */
-    public final void requestListenerFlags(int flags) {
+    public final void requestListenerHints(int hints) {
         if (!isBound()) return;
         try {
-            getNotificationInterface().requestFlagsFromListener(mWrapper, flags);
+            getNotificationInterface().requestHintsFromListener(mWrapper, hints);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
@@ -480,11 +495,11 @@ public abstract class NotificationListenerService extends Service {
             }
         }
         @Override
-        public void onListenerFlagsChanged(int flags) throws RemoteException {
+        public void onListenerHintsChanged(int hints) throws RemoteException {
             try {
-                NotificationListenerService.this.onListenerFlagsChanged(flags);
+                NotificationListenerService.this.onListenerHintsChanged(hints);
             } catch (Throwable t) {
-                Log.w(TAG, "Error running onListenerFlagsChanged", t);
+                Log.w(TAG, "Error running onListenerHintsChanged", t);
             }
         }
     }

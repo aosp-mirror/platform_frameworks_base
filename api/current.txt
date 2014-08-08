@@ -27455,19 +27455,23 @@ package android.service.notification {
     method public final void cancelNotification(java.lang.String);
     method public final void cancelNotifications(java.lang.String[]);
     method public android.service.notification.StatusBarNotification[] getActiveNotifications();
-    method public final int getCurrentListenerFlags();
+    method public final int getCurrentListenerHints();
     method public android.service.notification.NotificationListenerService.RankingMap getCurrentRanking();
     method public android.os.IBinder onBind(android.content.Intent);
     method public void onListenerConnected();
-    method public void onListenerFlagsChanged(int);
+    method public void onListenerHintsChanged(int);
     method public void onNotificationPosted(android.service.notification.StatusBarNotification);
     method public void onNotificationPosted(android.service.notification.StatusBarNotification, android.service.notification.NotificationListenerService.RankingMap);
     method public void onNotificationRankingUpdate(android.service.notification.NotificationListenerService.RankingMap);
     method public void onNotificationRemoved(android.service.notification.StatusBarNotification);
     method public void onNotificationRemoved(android.service.notification.StatusBarNotification, android.service.notification.NotificationListenerService.RankingMap);
-    method public final void requestListenerFlags(int);
-    field public static final int FLAG_DISABLE_HOST_ALERTS = 1; // 0x1
-    field public static final int FLAG_NONE = 0; // 0x0
+    method public final void requestListenerHints(int);
+    field public static final int HINTS_NONE = 0; // 0x0
+    field public static final int HINT_HOST_DISABLE_EFFECTS = 4; // 0x4
+    field public static final int HINT_HOST_INTERRUPTION_LEVEL_ALL = 1; // 0x1
+    field public static final int HINT_HOST_INTERRUPTION_LEVEL_NONE = 3; // 0x3
+    field public static final int HINT_HOST_INTERRUPTION_LEVEL_PRIORITY = 2; // 0x2
+    field public static final int HOST_INTERRUPTION_LEVEL_MASK = 3; // 0x3
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.notification.NotificationListenerService";
   }
 
