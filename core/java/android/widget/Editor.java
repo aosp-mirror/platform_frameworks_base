@@ -3080,40 +3080,47 @@ public class Editor {
                             composingTextEnd);
                     builder.setComposingText(composingTextStart, composingText);
                 }
+                // TODO: Optimize this loop by caching the result.
                 for (int offset = composingTextStart; offset < composingTextEnd; offset++) {
                     if (offset < 0) {
                         continue;
                     }
+                    final boolean isRtl = layout.isRtlCharAt(offset);
                     final int line = layout.getLineForOffset(offset);
-                    final float left = layout.getPrimaryHorizontal(offset)
+                    final int nextCharIndex = offset + 1;
+                    final float localLeadingEdgeX = layout.getPrimaryHorizontal(offset);
+                    final float localTrailingEdgeX;
+                    if (nextCharIndex != layout.getLineEnd(line)) {
+                        localTrailingEdgeX = layout.getPrimaryHorizontal(nextCharIndex);
+                    } else if (isRtl) {
+                        localTrailingEdgeX = layout.getLineLeft(line);
+                    } else {
+                        localTrailingEdgeX = layout.getLineRight(line);
+                    }
+                    final float leadingEdgeX = localLeadingEdgeX
+                            + viewportToContentHorizontalOffset;
+                    final float trailingEdgeX = localTrailingEdgeX
                             + viewportToContentHorizontalOffset;
                     final float top = layout.getLineTop(line) + viewportToContentVerticalOffset;
-                    // Here we are tentatively passing offset + 1 to calculate the other side of
-                    // the primary horizontal to preserve as many positions as possible so that
-                    // the IME can reconstruct the layout entirely. However, we should revisit this
-                    // to have a clear specification about the relationship between the index of
-                    // the character and its bounding box. See also the TODO comment below.
-                    final float right = layout.getPrimaryHorizontal(offset + 1)
-                            + viewportToContentHorizontalOffset;
                     final float bottom = layout.getLineBottom(line)
                             + viewportToContentVerticalOffset;
-                    // Take TextView's padding and scroll into account.
                     // TODO: Check right-top and left-bottom as well.
-                    final boolean leftTopVisible = isPositionVisible(left, top);
-                    final boolean rightBottomVisible = isPositionVisible(right, bottom);
+                    final boolean isLeadingEdgeTopVisible = isPositionVisible(leadingEdgeX, top);
+                    final boolean isTrailingEdgeBottomVisible =
+                            isPositionVisible(trailingEdgeX, bottom);
                     final int characterRectFlags;
-                    if (leftTopVisible && rightBottomVisible) {
+                    if (isLeadingEdgeTopVisible && isTrailingEdgeBottomVisible) {
                         characterRectFlags = CursorAnchorInfo.CHARACTER_RECT_TYPE_FULLY_VISIBLE;
-                    } else if (leftTopVisible || rightBottomVisible) {
+                    } else if (isLeadingEdgeTopVisible || isTrailingEdgeBottomVisible) {
                         characterRectFlags = CursorAnchorInfo.CHARACTER_RECT_TYPE_PARTIALLY_VISIBLE;
                     } else {
                         characterRectFlags = CursorAnchorInfo.CHARACTER_RECT_TYPE_INVISIBLE;
                     }
                     // Here offset is the index in Java chars.
                     // TODO: We must have a well-defined specification. For example, how
-                    // RTL, surrogate pairs, and composition letters are handled must be
-                    // documented.
-                    builder.addCharacterRect(offset, left, top, right, bottom, characterRectFlags);
+                    // surrogate pairs and composition letters are handled must be documented.
+                    builder.addCharacterRect(offset, leadingEdgeX, top, trailingEdgeX, bottom,
+                            characterRectFlags);
                 }
             }
 
