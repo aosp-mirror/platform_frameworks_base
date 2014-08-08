@@ -27540,6 +27540,8 @@ package android.service.voice {
     method public abstract void onAvailabilityChanged(int);
     method public abstract void onDetected(android.service.voice.AlwaysOnHotwordDetector.EventPayload);
     method public abstract void onError();
+    method public abstract void onRecognitionPaused();
+    method public abstract void onRecognitionResumed();
   }
 
   public static class AlwaysOnHotwordDetector.EventPayload {
