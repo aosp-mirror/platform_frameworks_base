@@ -29,6 +29,7 @@ import android.net.wifi.WifiManager;
 import android.os.BadParcelableException;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
+import android.os.Build;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
@@ -91,7 +92,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 112 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 113 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -233,6 +234,8 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mStartCount;
 
     long mStartClockTime;
+    String mStartPlatformVersion;
+    String mEndPlatformVersion;
 
     long mUptime;
     long mUptimeStart;
@@ -341,7 +344,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mDischargeAmountScreenOff;
     int mDischargeAmountScreenOffSinceCharge;
 
-    static final int MAX_LEVEL_STEPS = 100;
+    static final int MAX_LEVEL_STEPS = 200;
 
     int mInitStepMode = 0;
     int mCurStepMode = 0;
@@ -2840,8 +2843,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
             }
 
-            mInitStepMode = mCurStepMode;
-            mModStepMode = 0;
             if (state == Display.STATE_ON) {
                 // Screen turning on.
                 final long elapsedRealtime = SystemClock.elapsedRealtime();
@@ -3928,6 +3929,18 @@ public final class BatteryStatsImpl extends BatteryStats {
         return mStartClockTime;
     }
 
+    @Override public String getStartPlatformVersion() {
+        return mStartPlatformVersion;
+    }
+
+    @Override public String getEndPlatformVersion() {
+        return mEndPlatformVersion;
+    }
+
+    @Override public int getParcelVersion() {
+        return VERSION;
+    }
+
     @Override public boolean getIsOnBattery() {
         return mOnBattery;
     }
@@ -4592,6 +4605,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     proc.detach();
                     mProcessStats.removeAt(ip);
                 } else {
+                    proc.reset();
                     active = true;
                 }
             }
@@ -4848,7 +4862,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mProcessStats.clear();
             for (int k = 0; k < numProcs; k++) {
                 String processName = in.readString();
-                Uid.Proc proc = new Proc();
+                Uid.Proc proc = new Proc(processName);
                 proc.readFromParcelLocked(in);
                 mProcessStats.put(processName, proc);
             }
@@ -5097,6 +5111,11 @@ public final class BatteryStatsImpl extends BatteryStats {
          */
         public final class Proc extends BatteryStats.Uid.Proc implements TimeBaseObs {
             /**
+             * The name of this process.
+             */
+            final String mName;
+
+            /**
              * Remains true until removed from the stats.
              */
             boolean mActive = true;
@@ -5190,7 +5209,8 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             ArrayList<ExcessivePower> mExcessivePower;
 
-            Proc() {
+            Proc(String name) {
+                mName = name;
                 mOnBatteryTimeBase.add(this);
                 mSpeedBins = new SamplingCounter[getCpuSpeedSteps()];
             }
@@ -5203,6 +5223,24 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
 
             public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
+            }
+
+            void reset() {
+                mUserTime = mSystemTime = mForegroundTime = 0;
+                mStarts = 0;
+                mLoadedUserTime = mLoadedSystemTime = mLoadedForegroundTime = 0;
+                mLoadedStarts = 0;
+                mLastUserTime = mLastSystemTime = mLastForegroundTime = 0;
+                mLastStarts = 0;
+                mUnpluggedUserTime = mUnpluggedSystemTime = mUnpluggedForegroundTime = 0;
+                mUnpluggedStarts = 0;
+                for (int i = 0; i < mSpeedBins.length; i++) {
+                    SamplingCounter c = mSpeedBins[i];
+                    if (c != null) {
+                        c.reset(false);
+                    }
+                }
+                mExcessivePower = null;
             }
 
             void detach() {
@@ -5793,7 +5831,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         public Proc getProcessStatsLocked(String name) {
             Proc ps = mProcessStats.get(name);
             if (ps == null) {
-                ps = new Proc();
+                ps = new Proc(name);
                 mProcessStats.put(name, ps);
             }
 
@@ -6147,6 +6185,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         long uptime = SystemClock.uptimeMillis() * 1000;
         long realtime = SystemClock.elapsedRealtime() * 1000;
         initTimes(uptime, realtime);
+        mStartPlatformVersion = mEndPlatformVersion = Build.ID;
         mDischargeStartLevel = 0;
         mDischargeUnplugLevel = 0;
         mDischargePlugLevel = -1;
@@ -7398,6 +7437,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             Slog.e("BatteryStats", "Error reading battery statistics", e);
         }
 
+        mEndPlatformVersion = Build.ID;
+
         if (mHistoryBuffer.dataPosition() > 0) {
             mRecordingHistory = true;
             final long elapsedRealtime = SystemClock.elapsedRealtime();
@@ -7554,6 +7595,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mUptime = in.readLong();
         mRealtime = in.readLong();
         mStartClockTime = in.readLong();
+        mStartPlatformVersion = in.readString();
+        mEndPlatformVersion = in.readString();
         mOnBatteryTimeBase.readSummaryFromParcel(in);
         mOnBatteryScreenOffTimeBase.readSummaryFromParcel(in);
         mDischargeUnplugLevel = in.readInt();
@@ -7847,6 +7890,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeLong(computeUptime(NOW_SYS, STATS_SINCE_CHARGED));
         out.writeLong(computeRealtime(NOWREAL_SYS, STATS_SINCE_CHARGED));
         out.writeLong(mStartClockTime);
+        out.writeString(mStartPlatformVersion);
+        out.writeString(mEndPlatformVersion);
         mOnBatteryTimeBase.writeSummaryToParcel(out, NOW_SYS, NOWREAL_SYS);
         mOnBatteryScreenOffTimeBase.writeSummaryToParcel(out, NOW_SYS, NOWREAL_SYS);
         out.writeInt(mDischargeUnplugLevel);
@@ -8134,6 +8179,8 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         mStartCount = in.readInt();
         mStartClockTime = in.readLong();
+        mStartPlatformVersion = in.readString();
+        mEndPlatformVersion = in.readString();
         mUptime = in.readLong();
         mUptimeStart = in.readLong();
         mRealtime = in.readLong();
@@ -8289,6 +8336,8 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         out.writeInt(mStartCount);
         out.writeLong(mStartClockTime);
+        out.writeString(mStartPlatformVersion);
+        out.writeString(mEndPlatformVersion);
         out.writeLong(mUptime);
         out.writeLong(mUptimeStart);
         out.writeLong(mRealtime);

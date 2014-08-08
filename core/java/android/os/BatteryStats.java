@@ -159,7 +159,7 @@ public abstract class BatteryStats implements Parcelable {
     private static final long BYTES_PER_MB = 1048576; // 1024^2
     private static final long BYTES_PER_GB = 1073741824; //1024^3
     
-
+    private static final String VERSION_DATA = "vers";
     private static final String UID_DATA = "uid";
     private static final String APK_DATA = "apk";
     private static final String PROCESS_DATA = "pr";
@@ -1463,6 +1463,21 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getStartClockTime();
 
     /**
+     * Return platform version tag that we were running in when the battery stats started.
+     */
+    public abstract String getStartPlatformVersion();
+
+    /**
+     * Return platform version tag that we were running in when the battery stats ended.
+     */
+    public abstract String getEndPlatformVersion();
+
+    /**
+     * Return the internal version code of the parcelled format.
+     */
+    public abstract int getParcelVersion();
+
+    /**
      * Return whether we are currently running on battery.
      */
     public abstract boolean getIsOnBattery();
@@ -2008,7 +2023,8 @@ public abstract class BatteryStats implements Parcelable {
         } else {
             dumpLine(pw, 0 /* uid */, category, BATTERY_DISCHARGE_DATA,
                     getLowDischargeAmountSinceCharge(), getHighDischargeAmountSinceCharge(),
-                    getDischargeAmountScreenOn(), getDischargeAmountScreenOff());
+                    getDischargeAmountScreenOnSinceCharge(),
+                    getDischargeAmountScreenOffSinceCharge());
         }
         
         if (reqUid < 0) {
@@ -3876,6 +3892,9 @@ public abstract class BatteryStats implements Parcelable {
             if (didPid) {
                 pw.println();
             }
+        }
+
+        if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
             if (dumpDurationSteps(pw, "Discharge step durations:", getDischargeStepDurationsArray(),
                     getNumDischargeStepDurations(), false)) {
                 long timeRemaining = computeBatteryTimeRemaining(SystemClock.elapsedRealtime());
@@ -3896,9 +3915,6 @@ public abstract class BatteryStats implements Parcelable {
                 }
                 pw.println();
             }
-        }
-
-        if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
             pw.println("Statistics since last charge:");
             pw.println("  System starts: " + getStartCount()
                     + ", currently on battery: " + getIsOnBattery());
@@ -3915,7 +3931,10 @@ public abstract class BatteryStats implements Parcelable {
     public void dumpCheckinLocked(Context context, PrintWriter pw,
             List<ApplicationInfo> apps, int flags, long histStart) {
         prepareForDumpLocked();
-        
+
+        dumpLine(pw, 0 /* uid */, "i" /* category */, VERSION_DATA,
+                "10", getParcelVersion(), getStartPlatformVersion(), getEndPlatformVersion());
+
         long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
 
         final boolean filtering =
@@ -3976,7 +3995,7 @@ public abstract class BatteryStats implements Parcelable {
                 }
             }
         }
-        if (!filtering) {
+        if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
             dumpDurationSteps(pw, DISCHARGE_STEP_DATA, getDischargeStepDurationsArray(),
                     getNumDischargeStepDurations(), true);
             String[] lineArgs = new String[1];
@@ -3994,8 +4013,6 @@ public abstract class BatteryStats implements Parcelable {
                 dumpLine(pw, 0 /* uid */, "i" /* category */, CHARGE_TIME_REMAIN_DATA,
                         (Object[])lineArgs);
             }
-        }
-        if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
             dumpCheckinLocked(context, pw, STATS_SINCE_CHARGED, -1);
         }
         if (!filtering || (flags&DUMP_UNPLUGGED_ONLY) != 0) {
