@@ -1,6 +1,7 @@
-#ifndef __R_H
-#define __R_H
+#ifndef __BASE_R_H
+#define __BASE_R_H
 
+namespace base {
 namespace R {
 
 namespace attr {
@@ -48,6 +49,7 @@ namespace array {
     };
 }
 
-}
+} // namespace R
+} // namespace base
 
-#endif // __R_H
+#endif // __BASE_R_H

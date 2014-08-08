@@ -1,0 +1,6 @@
+#!/bin/bash
+
+aapt package -M AndroidManifest.xml -S res -F bundle.apk -f --shared-lib && \
+unzip bundle.apk resources.arsc && \
+mv resources.arsc lib.arsc && \
+xxd -i lib.arsc > lib_arsc.h
