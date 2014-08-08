@@ -813,6 +813,7 @@ public final class StreamConfigurationMap {
         switch (format) {
             case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
             case HAL_PIXEL_FORMAT_BLOB:
+            case HAL_PIXEL_FORMAT_RAW_OPAQUE:
                 return format;
             case ImageFormat.JPEG:
                 throw new IllegalArgumentException(
@@ -843,12 +844,6 @@ public final class StreamConfigurationMap {
      * @throws IllegalArgumentException if the format was not user-defined
      */
     static int checkArgumentFormat(int format) {
-        // TODO: remove this hack , CTS shouldn't have been using internal constants
-        if (format == HAL_PIXEL_FORMAT_RAW_OPAQUE) {
-            Log.w(TAG, "RAW_OPAQUE is not yet a published format; allowing it anyway");
-            return format;
-        }
-
         if (!ImageFormat.isPublicFormat(format) && !PixelFormat.isPublicFormat(format)) {
             throw new IllegalArgumentException(String.format(
                     "format 0x%x was not defined in either ImageFormat or PixelFormat", format));

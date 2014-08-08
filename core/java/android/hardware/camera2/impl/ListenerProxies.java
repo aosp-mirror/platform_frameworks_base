@@ -36,13 +36,13 @@ public class ListenerProxies {
 
     // TODO: replace with codegen
 
-    public static class DeviceStateListenerProxy extends CameraDevice.StateListener {
-        private final MethodNameInvoker<CameraDevice.StateListener> mProxy;
+    public static class DeviceStateListenerProxy extends CameraDeviceImpl.StateListenerKK {
+        private final MethodNameInvoker<CameraDeviceImpl.StateListenerKK> mProxy;
 
         public DeviceStateListenerProxy(
-                Dispatchable<CameraDevice.StateListener> dispatchTarget) {
+                Dispatchable<CameraDeviceImpl.StateListenerKK> dispatchTarget) {
             dispatchTarget = checkNotNull(dispatchTarget, "dispatchTarget must not be null");
-            mProxy = new MethodNameInvoker<>(dispatchTarget, CameraDevice.StateListener.class);
+            mProxy = new MethodNameInvoker<>(dispatchTarget, CameraDeviceImpl.StateListenerKK.class);
         }
 
         @Override
@@ -87,13 +87,13 @@ public class ListenerProxies {
     }
 
     @SuppressWarnings("deprecation")
-    public static class DeviceCaptureListenerProxy extends CameraDevice.CaptureListener {
-        private final MethodNameInvoker<CameraDevice.CaptureListener> mProxy;
+    public static class DeviceCaptureListenerProxy extends CameraDeviceImpl.CaptureListener {
+        private final MethodNameInvoker<CameraDeviceImpl.CaptureListener> mProxy;
 
         public DeviceCaptureListenerProxy(
-                Dispatchable<CameraDevice.CaptureListener> dispatchTarget) {
+                Dispatchable<CameraDeviceImpl.CaptureListener> dispatchTarget) {
             dispatchTarget = checkNotNull(dispatchTarget, "dispatchTarget must not be null");
-            mProxy = new MethodNameInvoker<>(dispatchTarget, CameraDevice.CaptureListener.class);
+            mProxy = new MethodNameInvoker<>(dispatchTarget, CameraDeviceImpl.CaptureListener.class);
         }
 
         @Override
