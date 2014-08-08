@@ -37,14 +37,17 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.InstallSessionInfo;
 import android.content.pm.InstallSessionParams;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -548,8 +551,21 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             int userId) {
         mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "uninstall");
 
-        // TODO: enforce installer of record or permission
-        mPm.deletePackage(packageName, observer, userId, flags);
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DELETE_PACKAGES)
+                == PackageManager.PERMISSION_GRANTED) {
+            // Sweet, call straight through!
+            mPm.deletePackage(packageName, observer, userId, flags);
+
+        } else {
+            // Take a short detour to confirm with user
+            final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
+            intent.setData(Uri.fromParts("package", packageName, null));
+            intent.putExtra(PackageInstaller.EXTRA_CALLBACK, observer.asBinder());
+            try {
+                observer.onUserActionRequired(intent);
+            } catch (RemoteException ignored) {
+            }
+        }
     }
 
     @Override
