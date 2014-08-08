@@ -1686,12 +1686,12 @@ public abstract class Transition implements Cloneable {
     void playTransition(ViewGroup sceneRoot) {
         ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
         int numOldAnims = runningAnimators.size();
+        WindowId windowId = sceneRoot.getWindowId();
         for (int i = numOldAnims - 1; i >= 0; i--) {
             Animator anim = runningAnimators.keyAt(i);
             if (anim != null) {
                 AnimationInfo oldInfo = runningAnimators.get(anim);
-                if (oldInfo != null && oldInfo.view != null &&
-                        oldInfo.view.getContext() == sceneRoot.getContext()) {
+                if (oldInfo != null && oldInfo.view != null && oldInfo.windowId == windowId) {
                     TransitionValues oldValues = oldInfo.values;
                     View oldView = oldInfo.view;
                     TransitionValues newValues = mEndValues.viewValues.get(oldView);
