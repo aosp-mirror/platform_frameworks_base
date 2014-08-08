@@ -35552,6 +35552,7 @@ package android.view {
     method public int getSystemWindowInsetTop();
     method public boolean hasInsets();
     method public boolean hasSystemWindowInsets();
+    method public boolean isConsumed();
     method public boolean isRound();
     method public android.view.WindowInsets replaceSystemWindowInsets(int, int, int, int);
   }
