@@ -100,7 +100,7 @@ public class WifiScanner {
      */
     public static class ChannelSpec {
         /**
-         * channel frequency in KHz; for example channel 1 is specified as 2412
+         * channel frequency in MHz; for example channel 1 is specified as 2412
          */
         public int frequency;
         /**
@@ -158,6 +158,7 @@ public class WifiScanner {
             dest.writeInt(band);
             dest.writeInt(periodInMs);
             dest.writeInt(reportEvents);
+            dest.writeInt(numBssidsPerScan);
 
             if (channels != null) {
                 dest.writeInt(channels.length);
@@ -181,6 +182,7 @@ public class WifiScanner {
                         settings.band = in.readInt();
                         settings.periodInMs = in.readInt();
                         settings.reportEvents = in.readInt();
+                        settings.numBssidsPerScan = in.readInt();
                         int num_channels = in.readInt();
                         settings.channels = new ChannelSpec[num_channels];
                         for (int i = 0; i < num_channels; i++) {
