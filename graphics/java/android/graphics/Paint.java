@@ -1267,7 +1267,6 @@ public class Paint {
      * is 0.
      *
      * @return         the paint's letter-spacing for drawing text.
-     * @hide
      */
     public float getLetterSpacing() {
         return native_getLetterSpacing(mNativePaint);
@@ -1279,7 +1278,6 @@ public class Paint {
      * expansion will be around 0.05.  Negative values tighten text.
      *
      * @param letterSpacing set the paint's letter-spacing for drawing text.
-     * @hide
      */
     public void setLetterSpacing(float letterSpacing) {
         native_setLetterSpacing(mNativePaint, letterSpacing);
@@ -1289,7 +1287,6 @@ public class Paint {
      * Get font feature settings.  Default is null.
      *
      * @return the paint's currently set font feature settings.
-     * @hide
      */
     public String getFontFeatureSettings() {
         return mFontFeatureSettings;
@@ -1302,7 +1299,6 @@ public class Paint {
      * http://dev.w3.org/csswg/css-fonts/#propdef-font-feature-settings
      *
      * @param settings the font feature settings string to use, may be null.
-     * @hide
      */
     public void setFontFeatureSettings(String settings) {
         if (settings != null && settings.equals("")) {
