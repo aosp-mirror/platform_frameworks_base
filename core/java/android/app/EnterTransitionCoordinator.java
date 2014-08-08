@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ResultReceiver;
+import android.text.TextUtils;
 import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.util.ArrayMap;
@@ -82,8 +83,22 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 });
     }
 
-    public void viewInstancesReady(ArrayList<String> accepted, ArrayList<View> localViews) {
-        triggerViewsReady(mapSharedElements(accepted, localViews));
+    public void viewInstancesReady(ArrayList<String> accepted, ArrayList<String> localNames,
+            ArrayList<View> localViews) {
+        boolean remap = false;
+        for (int i = 0; i < localViews.size(); i++) {
+            View view = localViews.get(i);
+            if (!TextUtils.equals(view.getTransitionName(), localNames.get(i))
+                    || !view.isAttachedToWindow()) {
+                remap = true;
+                break;
+            }
+        }
+        if (remap) {
+            triggerViewsReady(mapNamedElements(accepted, localNames));
+        } else {
+            triggerViewsReady(mapSharedElements(accepted, localViews));
+        }
     }
 
     public void namedViewsReady(ArrayList<String> accepted, ArrayList<String> localNames) {

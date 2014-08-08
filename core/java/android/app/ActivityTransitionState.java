@@ -193,7 +193,8 @@ class ActivityTransitionState {
     private void startEnter() {
         if (mEnterActivityOptions.isReturning()) {
             if (mExitingToView != null) {
-                mEnterTransitionCoordinator.viewInstancesReady(mExitingFrom, mExitingToView);
+                mEnterTransitionCoordinator.viewInstancesReady(mExitingFrom, mExitingTo,
+                        mExitingToView);
             } else {
                 mEnterTransitionCoordinator.namedViewsReady(mExitingFrom, mExitingTo);
             }
@@ -248,8 +249,6 @@ class ActivityTransitionState {
                     mEnterTransitionCoordinator.cancelEnter();
                     mEnterTransitionCoordinator = null;
                 }
-                ArrayMap<String, View> sharedElements = new ArrayMap<String, View>();
-                activity.getWindow().getDecorView().findNamedViews(sharedElements);
 
                 ExitTransitionCoordinator exitCoordinator =
                         new ExitTransitionCoordinator(activity, mEnteringNames, null, null, true);
