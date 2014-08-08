@@ -107,7 +107,7 @@ public class VolumePanel extends Handler {
     private static final int MSG_SLIDER_VISIBILITY_CHANGED = 10;
     private static final int MSG_DISPLAY_SAFE_VOLUME_WARNING = 11;
     private static final int MSG_LAYOUT_DIRECTION = 12;
-    private static final int MSG_ZEN_MODE_CHANGED = 13;
+    private static final int MSG_ZEN_MODE_AVAILABLE_CHANGED = 13;
     private static final int MSG_USER_ACTIVITY = 14;
 
     // Pseudo stream type for master volume
@@ -125,7 +125,7 @@ public class VolumePanel extends Handler {
     private final ZenModeController mZenController;
     private boolean mRingIsSilent;
     private boolean mVoiceCapable;
-    private boolean mZenModeCapable;
+    private boolean mZenModeAvailable;
     private boolean mZenPanelExpanded;
     private int mTimeoutDelay = TIMEOUT_DELAY;
     private float mDisabledAlpha;
@@ -405,9 +405,10 @@ public class VolumePanel extends Handler {
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mVoiceCapable = context.getResources().getBoolean(R.bool.config_voice_capable);
 
-        mZenModeCapable = !useMasterVolume && mZenController != null;
-        updateZenMode(mZenController != null ? mZenController.getZen() : Global.ZEN_MODE_OFF);
-        mZenController.addCallback(mZenCallback);
+        if (mZenController != null && !useMasterVolume) {
+            mZenModeAvailable = mZenController.isZenAvailable();
+            mZenController.addCallback(mZenCallback);
+        }
 
         final boolean masterVolumeOnly = res.getBoolean(R.bool.config_useMasterVolume);
         final boolean masterVolumeKeySounds = res.getBoolean(R.bool.config_useVolumeKeySounds);
@@ -434,7 +435,7 @@ public class VolumePanel extends Handler {
         pw.print("  mTag="); pw.println(mTag);
         pw.print("  mRingIsSilent="); pw.println(mRingIsSilent);
         pw.print("  mVoiceCapable="); pw.println(mVoiceCapable);
-        pw.print("  mZenModeCapable="); pw.println(mZenModeCapable);
+        pw.print("  mZenModeAvailable="); pw.println(mZenModeAvailable);
         pw.print("  mZenPanelExpanded="); pw.println(mZenPanelExpanded);
         pw.print("  mTimeoutDelay="); pw.println(mTimeoutDelay);
         pw.print("  mDisabledAlpha="); pw.println(mDisabledAlpha);
@@ -645,7 +646,7 @@ public class VolumePanel extends Handler {
             active.group.setVisibility(View.VISIBLE);
             updateSlider(active);
             updateTimeoutDelay();
-            setZenPanelVisible(isNotificationOrRing(mActiveStreamType));
+            updateZenPanelVisible();
         }
     }
 
@@ -776,14 +777,8 @@ public class VolumePanel extends Handler {
         }
     }
 
-    private void updateZenMode(int zen) {
-        final boolean show = mZenModeCapable && isNotificationOrRing(mActiveStreamType);
-        setZenPanelVisible(show);
-    }
-
-    public void postZenModeChanged(int zen) {
-        removeMessages(MSG_ZEN_MODE_CHANGED);
-        obtainMessage(MSG_ZEN_MODE_CHANGED, zen).sendToTarget();
+    private void updateZenPanelVisible() {
+        setZenPanelVisible(mZenModeAvailable && isNotificationOrRing(mActiveStreamType));
     }
 
     public void postVolumeChanged(int streamType, int flags) {
@@ -1307,8 +1302,9 @@ public class VolumePanel extends Handler {
                 setLayoutDirection(msg.arg1);
                 break;
 
-            case MSG_ZEN_MODE_CHANGED:
-                updateZenMode(msg.arg1);
+            case MSG_ZEN_MODE_AVAILABLE_CHANGED:
+                mZenModeAvailable = msg.arg1 != 0;
+                updateZenPanelVisible();
                 break;
 
             case MSG_USER_ACTIVITY:
@@ -1359,8 +1355,8 @@ public class VolumePanel extends Handler {
     };
 
     private final ZenModeController.Callback mZenCallback = new ZenModeController.Callback() {
-        public void onZenChanged(int zen) {
-            postZenModeChanged(zen);
+        public void onZenAvailableChanged(boolean available) {
+            obtainMessage(MSG_ZEN_MODE_AVAILABLE_CHANGED, available ? 1 : 0, 0).sendToTarget();
         }
     };
 
