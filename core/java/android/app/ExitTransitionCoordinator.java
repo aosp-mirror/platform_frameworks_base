@@ -71,8 +71,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     public ExitTransitionCoordinator(Activity activity, ArrayList<String> names,
             ArrayList<String> accepted, ArrayList<View> mapped, boolean isReturning) {
-        super(activity.getWindow(), names, getListener(activity, isReturning),
-                isReturning);
+        super(activity.getWindow(), names, getListener(activity, isReturning), isReturning);
         viewsReady(mapSharedElements(accepted, mapped));
         stripOffscreenViews();
         mIsBackgroundReady = !isReturning;
@@ -87,29 +86,41 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     protected void onReceiveResult(int resultCode, Bundle resultData) {
         switch (resultCode) {
             case MSG_SET_REMOTE_RECEIVER:
+                stopCancel();
                 mResultReceiver = resultData.getParcelable(KEY_REMOTE_RECEIVER);
                 if (mIsCanceled) {
                     mResultReceiver.send(MSG_CANCEL, null);
                     mResultReceiver = null;
                 } else {
-                    if (mHandler != null) {
-                        mHandler.removeMessages(MSG_CANCEL);
-                    }
                     notifyComplete();
                 }
                 break;
             case MSG_HIDE_SHARED_ELEMENTS:
+                stopCancel();
                 if (!mIsCanceled) {
                     hideSharedElements();
                 }
                 break;
             case MSG_START_EXIT_TRANSITION:
+                mHandler.removeMessages(MSG_CANCEL);
                 startExit();
                 break;
             case MSG_SHARED_ELEMENT_DESTINATION:
                 mExitSharedElementBundle = resultData;
                 sharedElementExitBack();
                 break;
+        }
+    }
+
+    private void stopCancel() {
+        if (mHandler != null) {
+            mHandler.removeMessages(MSG_CANCEL);
+        }
+    }
+
+    private void delayCancel() {
+        if (mHandler != null) {
+            mHandler.sendEmptyMessageDelayed(MSG_CANCEL, MAX_WAIT_MS);
         }
     }
 
@@ -120,6 +131,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         if (!mIsReturning && getDecor() != null) {
             getDecor().suppressLayout(false);
         }
+        moveSharedElementsFromOverlay();
         clearState();
     }
 
@@ -140,6 +152,15 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private void startSharedElementExit() {
         Transition transition = getSharedElementExitTransition();
+        transition.addListener(new Transition.TransitionListenerAdapter() {
+            @Override
+            public void onTransitionEnd(Transition transition) {
+                transition.removeListener(this);
+                if (mExitComplete) {
+                    delayCancel();
+                }
+            }
+        });
         final ArrayList<View> sharedElementSnapshots = createSnapshots(mExitSharedElementBundle,
                 mSharedElementNames);
         getDecor().getViewTreeObserver()
@@ -151,11 +172,16 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                         return true;
                     }
                 });
+        setGhostVisibility(View.INVISIBLE);
+        scheduleGhostVisibilityChange(View.INVISIBLE);
         TransitionManager.beginDelayedTransition(getDecor(), transition);
+        scheduleGhostVisibilityChange(View.VISIBLE);
+        setGhostVisibility(View.VISIBLE);
         getDecor().invalidate();
     }
 
     private void hideSharedElements() {
+        moveSharedElementsFromOverlay();
         if (!mIsHidden) {
             setTransitionAlpha(mSharedElements, 0);
         }
@@ -169,6 +195,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             if (getDecor() != null) {
                 getDecor().suppressLayout(true);
             }
+            moveSharedElementsToOverlay();
             startTransition(new Runnable() {
                 @Override
                 public void run() {
@@ -191,7 +218,8 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                     finish();
                 }
             };
-            mHandler.sendEmptyMessageDelayed(MSG_CANCEL, MAX_WAIT_MS);
+            delayCancel();
+            moveSharedElementsToOverlay();
             if (getDecor().getBackground() == null) {
                 ColorDrawable black = new ColorDrawable(0xFF000000);
                 black.setAlpha(0);
@@ -267,11 +295,10 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                     if (mIsHidden) {
                         setTransitionAlpha(mTransitioningViews, 1);
                     }
-                }
-
-                @Override
-                public void onTransitionCancel(Transition transition) {
-                    super.onTransitionCancel(transition);
+                    if (mSharedElementBundle != null) {
+                        delayCancel();
+                    }
+                    super.onTransitionEnd(transition);
                 }
             });
             viewsTransition.forceVisibility(View.INVISIBLE, false);
@@ -308,7 +335,11 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
         Transition transition = mergeTransitions(sharedElementTransition, viewsTransition);
         if (transition != null) {
+            setGhostVisibility(View.INVISIBLE);
+            scheduleGhostVisibilityChange(View.INVISIBLE);
             TransitionManager.beginDelayedTransition(getDecor(), transition);
+            scheduleGhostVisibilityChange(View.VISIBLE);
+            setGhostVisibility(View.VISIBLE);
             getDecor().invalidate();
         } else {
             transitionStarted();
@@ -351,6 +382,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         if (isReadyToNotify()) {
             if (!mSharedElementNotified) {
                 mSharedElementNotified = true;
+                delayCancel();
                 mResultReceiver.send(MSG_TAKE_SHARED_ELEMENTS, mSharedElementBundle);
             }
             if (!mExitNotified && mExitComplete) {
@@ -376,6 +408,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     private void finish() {
+        stopCancel();
         mActivity.mActivityTransitionState.clear();
         // Clear the state so that we can't hold any references accidentally and leak memory.
         mHandler.removeMessages(MSG_CANCEL);
@@ -390,6 +423,11 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         }
         mExitSharedElementBundle = null;
         clearState();
+    }
+
+    @Override
+    protected boolean moveSharedElementWithParent() {
+        return !mIsReturning;
     }
 
     @Override
