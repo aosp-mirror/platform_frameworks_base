@@ -247,7 +247,8 @@ public class LegacyFocusStateMapper {
                 // No action necessary. The callbacks will handle transitions.
                 break;
             default:
-                Log.w(TAG, "mapTriggers - ignoring unknown control.afTrigger = " + afTrigger);
+                Log.w(TAG, "processRequestTriggers - ignoring unknown control.afTrigger = "
+                        + afTrigger);
         }
     }
 

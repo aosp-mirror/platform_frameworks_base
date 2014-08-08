@@ -150,10 +150,8 @@ public class LegacyRequestMapper {
             if (supported) {
                 params.setPreviewFpsRange(legacyFps[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
                         legacyFps[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-                params.setRecordingHint(false);
             } else {
                 Log.w(TAG, "Unsupported FPS range set [" + legacyFps[0] + "," + legacyFps[1] + "]");
-                params.setRecordingHint(true);
             }
         }
 
@@ -246,6 +244,18 @@ public class LegacyRequestMapper {
             }
 
          // TODO: Don't add control.awbLock to availableRequestKeys if it's not supported
+        }
+
+        // control.videoStabilizationMode
+        {
+            Integer stabMode = getIfSupported(request, CONTROL_VIDEO_STABILIZATION_MODE,
+                    /*defaultValue*/CONTROL_VIDEO_STABILIZATION_MODE_OFF,
+                    params.isVideoStabilizationSupported(),
+                    /*allowedValue*/CONTROL_VIDEO_STABILIZATION_MODE_OFF);
+
+            if (stabMode != null) {
+                params.setVideoStabilization(stabMode == CONTROL_VIDEO_STABILIZATION_MODE_ON);
+            }
         }
 
         // lens.focusDistance
