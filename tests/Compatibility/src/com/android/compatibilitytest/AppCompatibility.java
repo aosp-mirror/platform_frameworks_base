@@ -97,11 +97,11 @@ public class AppCompatibility extends InstrumentationTestCase {
         String packageName = mArgs.getString(PACKAGE_TO_LAUNCH);
         if (packageName != null) {
             Log.d(TAG, "Launching app " + packageName);
-            Collection<ProcessErrorStateInfo> err = launchActivity(packageName);
+            ProcessErrorStateInfo err = launchActivity(packageName);
             // Make sure there are no errors when launching the application,
             // otherwise raise an
             // exception with the first error encountered.
-            assertNull(getFirstError(err), err);
+            assertNull(getStackTrace(err), err);
             assertTrue("App crashed after launch.", processStillUp(packageName));
         } else {
             Log.d(TAG, "Missing argument, use " + PACKAGE_TO_LAUNCH +
@@ -110,20 +110,32 @@ public class AppCompatibility extends InstrumentationTestCase {
     }
 
     /**
-     * Gets the first error in collection and return the long message for it.
+     * Gets the stack trace for the error.
      *
-     * @param in {@link Collection} of {@link ProcessErrorStateInfo} to parse.
+     * @param in {@link ProcessErrorStateInfo} to parse.
      * @return {@link String} the long message of the error.
      */
-    private String getFirstError(Collection<ProcessErrorStateInfo> in) {
+    private String getStackTrace(ProcessErrorStateInfo in) {
         if (in == null) {
             return null;
+        } else {
+            return in.stackTrace;
         }
-        ProcessErrorStateInfo err = in.iterator().next();
-        if (err != null) {
-            return err.stackTrace;
+    }
+
+    /**
+     * Returns the process name that the package is going to use.
+     *
+     * @param packageName name of the package
+     * @return process name of the package
+     */
+    private String getProcessName(String packageName) {
+        try {
+            PackageInfo pi = mPackageManager.getPackageInfo(packageName, 0);
+            return pi.applicationInfo.processName;
+        } catch (NameNotFoundException e) {
+            return packageName;
         }
-        return null;
     }
 
     /**
@@ -134,7 +146,7 @@ public class AppCompatibility extends InstrumentationTestCase {
      * @return {@link Collection} of {@link ProcessErrorStateInfo} detected
      *         during the app launch.
      */
-    private Collection<ProcessErrorStateInfo> launchActivity(String packageName) {
+    private ProcessErrorStateInfo launchActivity(String packageName) {
         Intent homeIntent = new Intent(Intent.ACTION_MAIN);
         homeIntent.addCategory(Intent.CATEGORY_HOME);
         homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -146,16 +158,7 @@ public class AppCompatibility extends InstrumentationTestCase {
             return null;
         }
 
-        // We check for any Crash or ANR dialogs that are already up, and we
-        // ignore them. This is
-        // so that we don't report crashes that were caused by prior apps (which
-        // those particular
-        // tests should have caught and reported already). Otherwise, test
-        // failures would cascade
-        // from the initial broken app to many/all of the tests following that
-        // app's launch.
-        final Collection<ProcessErrorStateInfo> preErr =
-                mActivityManager.getProcessesInErrorState();
+        String processName = getProcessName(packageName);
 
         // Launch Activity
         mContext.startActivity(intent);
@@ -179,13 +182,16 @@ public class AppCompatibility extends InstrumentationTestCase {
         // possible to occur.
         final Collection<ProcessErrorStateInfo> postErr =
                 mActivityManager.getProcessesInErrorState();
-        // Take the difference between the error processes we see now, and the
-        // ones that were
-        // present when we started
-        if (preErr != null && postErr != null) {
-            postErr.removeAll(preErr);
+
+        if (postErr == null) {
+            return null;
         }
-        return postErr;
+        for (ProcessErrorStateInfo error : postErr) {
+            if (error.processName.equals(processName)) {
+                return error;
+            }
+        }
+        return null;
     }
 
     /**
@@ -195,22 +201,16 @@ public class AppCompatibility extends InstrumentationTestCase {
      * @return True if package is running, false otherwise.
      */
     private boolean processStillUp(String packageName) {
-        try {
-            PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName, 0);
-            String processName = packageInfo.applicationInfo.processName;
-            List<RunningAppProcessInfo> runningApps = mActivityManager.getRunningAppProcesses();
-            for (RunningAppProcessInfo app : runningApps) {
-                if (app.processName.equalsIgnoreCase(processName)) {
-                    Log.d(TAG, "Found process " + app.processName);
-                    return true;
-                }
+        String processName = getProcessName(packageName);
+        List<RunningAppProcessInfo> runningApps = mActivityManager.getRunningAppProcesses();
+        for (RunningAppProcessInfo app : runningApps) {
+            if (app.processName.equalsIgnoreCase(processName)) {
+                Log.d(TAG, "Found process " + app.processName);
+                return true;
             }
-            Log.d(TAG, "Failed to find process " + processName + " with package name "
-                    + packageName);
-        } catch (NameNotFoundException e) {
-            Log.w(TAG, "Failed to find package " + packageName);
-            return false;
         }
+        Log.d(TAG, "Failed to find process " + processName + " with package name "
+                + packageName);
         return false;
     }
 }
