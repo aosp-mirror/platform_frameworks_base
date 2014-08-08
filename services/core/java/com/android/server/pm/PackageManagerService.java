@@ -4634,12 +4634,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         // 2.) we are defering a needed dexopt
         // 3.) we are skipping an unneeded dexopt
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
-        for (String path : paths) {
-            for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-                if (!forceDex && pkg.mDexOptPerformed.contains(dexCodeInstructionSet)) {
-                    continue;
-                }
+        for (String dexCodeInstructionSet : dexCodeInstructionSets) {
+            if (!forceDex && pkg.mDexOptPerformed.contains(dexCodeInstructionSet)) {
+                continue;
+            }
 
+            for (String path : paths) {
                 try {
                     // This will return DEXOPT_NEEDED if we either cannot find any odex file for this
                     // patckage or the one we find does not match the image checksum (i.e. it was
@@ -4660,10 +4660,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // just result in an error again. Also, don't bother dexopting for other
                             // paths & ISAs.
                             return DEX_OPT_FAILED;
-                        } else {
-                            performedDexOpt = true;
-                            pkg.mDexOptPerformed.add(dexCodeInstructionSet);
                         }
+
+                        performedDexOpt = true;
                     } else if (!defer && isDexOptNeeded == DexFile.PATCHOAT_NEEDED) {
                         Log.i(TAG, "Running patchoat on: " + pkg.applicationInfo.packageName);
                         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
@@ -4675,10 +4674,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // just result in an error again. Also, don't bother dexopting for other
                             // paths & ISAs.
                             return DEX_OPT_FAILED;
-                        } else {
-                            performedDexOpt = true;
-                            pkg.mDexOptPerformed.add(dexCodeInstructionSet);
                         }
+
+                        performedDexOpt = true;
                     }
 
                     // We're deciding to defer a needed dexopt. Don't bother dexopting for other
@@ -4705,6 +4703,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                     return DEX_OPT_FAILED;
                 }
             }
+
+            // At this point we haven't failed dexopt and we haven't deferred dexopt. We must
+            // either have either succeeded dexopt, or have had isDexOptNeededInternal tell us
+            // it isn't required. We therefore mark that this package doesn't need dexopt unless
+            // it's forced. performedDexOpt will tell us whether we performed dex-opt or skipped
+            // it.
+            pkg.mDexOptPerformed.add(dexCodeInstructionSet);
         }
 
         // If we've gotten here, we're sure that no error occurred and that we haven't
