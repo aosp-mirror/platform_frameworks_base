@@ -2567,4 +2567,22 @@
   <!-- WebView error page for when domain lookup fails. @hide @SystemApi -->
   <public type="raw" name="nodomain"/>
 
+  <!-- Base text appearance for SystemUI elements -->
+  <public type="style" name="TextAppearance.StatusBar.Material" />
+  <!-- Base text appearance for notifications -->
+  <public type="style" name="TextAppearance.StatusBar.Material.EventContent" />
+  <!-- Notification text appearance: title -->
+  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Title" />
+  <!-- Notification text appearance: additional line of text sandwiched
+       between the title and content -->
+  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Line2" />
+  <!-- Notification text appearance: an annotation, e.g. the
+       number of messages in your inbox -->
+  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Info" />
+  <!-- Notification text appearance: timestamp -->
+  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Time" />
+  <!-- Notification text appearance: a way to highlight a bit of text (for
+       example, to separate the sender from the subject of an email if they
+       are all on the same line) -->
+  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Emphasis" />
 </resources>
