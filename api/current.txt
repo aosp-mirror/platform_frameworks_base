@@ -28604,6 +28604,7 @@ package android.telecomm {
     method public void swapWithBackgroundCall();
     method public void unhold();
     field public static final int STATE_ACTIVE = 4; // 0x4
+    field public static final int STATE_CONNECTING = 9; // 0x9
     field public static final int STATE_DIALING = 1; // 0x1
     field public static final int STATE_DISCONNECTED = 7; // 0x7
     field public static final int STATE_HOLDING = 3; // 0x3
@@ -28696,6 +28697,7 @@ package android.telecomm {
     method public static android.telecomm.CallState valueOf(java.lang.String);
     method public static final android.telecomm.CallState[] values();
     enum_constant public static final android.telecomm.CallState ACTIVE;
+    enum_constant public static final android.telecomm.CallState CONNECTING;
     enum_constant public static final android.telecomm.CallState DIALING;
     enum_constant public static final android.telecomm.CallState DISCONNECTED;
     enum_constant public static final android.telecomm.CallState NEW;
