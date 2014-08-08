@@ -4,4 +4,13 @@
 
     <!-- kill app long press back -->
     <string name="app_killed_message">Application killed. Happy now?</string>
+
+    <!-- Title of dialog to confirm rebooting. -->
+    <string name="reboot_title">Reboot</string>
+    <!-- Reboot Confirmation Dialog.  When the user chooses to reboot the device, there will
+         be a confirmation dialog.  This is the message. -->
+    <string name="reboot_confirm" product="tablet">Your tablet will reboot.</string>
+    <string name="reboot_confirm" product="default">Your phone will reboot.</string>
+    <!-- label for item that reboots the phone in phone options dialog -->
+    <string name="global_action_reboot">Reboot</string>
 </resources>

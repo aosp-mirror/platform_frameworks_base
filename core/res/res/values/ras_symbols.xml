@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources>
-  <!-- kill app long press back -->
-  <java-symbol type="string" name="app_killed_message" />
-  <java-symbol type="integer" name="config_backKillTimeout" />
+
+    <!-- kill app long press back -->
+    <java-symbol name="app_killed_message" type="string" />
+    <java-symbol name="config_backKillTimeout" type="integer" />
+
+    <!-- Power menu reboot -->
+    <java-symbol name="reboot_confirm" type="string" />
+    <java-symbol name="reboot_title" type="string" />
+    <java-symbol name="ic_lock_power_reboot" type="drawable" />
+    <java-symbol name="global_action_reboot" type="string" />
 
 </resources>
