@@ -32,7 +32,7 @@
 
     <!-- Message shown in the middle of the screen after clicking on the recent apps button
          when there are no recent apps to show. Also used for accessibility. [CHAR LIMIT=45]-->
-    <string name="status_bar_no_recent_apps">No recent apps</string>
+    <string name="status_bar_no_recent_apps">Your recent screens appear here</string>
 
     <!-- Content description for the button to dismiss Recent Apps (only present on large
          devices) -->
@@ -581,7 +581,7 @@
     <string name="quick_settings_cellular_detail_data_warning"><xliff:g id="data_limit" example="2.0 GB">%s</xliff:g> warning</string>
 
     <!-- Recents: The empty recents string. [CHAR LIMIT=NONE] -->
-    <string name="recents_empty_message">No recent apps</string>
+    <string name="recents_empty_message">Your recent screens appear here</string>
     <!-- Recents: The info panel app info button string. [CHAR LIMIT=NONE] -->
     <string name="recents_app_info_button_label">Application Info</string>
     <!-- Recents: The lock-to-app button. [CHAR LIMIT=NONE] -->
