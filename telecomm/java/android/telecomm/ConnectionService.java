@@ -1073,7 +1073,7 @@ public abstract class ConnectionService extends Service {
             // To be implemented by subclass.
         }
 
-        /**te
+        /**
          * Provides a response to a request to change the current call session video
          * properties.
          * This is in response to a request the InCall UI has received via
@@ -1139,8 +1139,8 @@ public abstract class ConnectionService extends Service {
          * @param requestedProfile The original request which was sent to the remote device.
          * @param responseProfile The actual profile changes made by the remote device.
          */
-        public void receiveSessionModifyResponse(int status,
-                                                 VideoCallProfile requestedProfile, VideoCallProfile responseProfile) {
+        public void receiveSessionModifyResponse(
+                int status, VideoCallProfile requestedProfile, VideoCallProfile responseProfile) {
             if (mVideoCallListener != null) {
                 try {
                     mVideoCallListener.receiveSessionModifyResponse(

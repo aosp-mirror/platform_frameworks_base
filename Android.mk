@@ -368,6 +368,8 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/ims/internal/IImsStreamMediaSession.aidl \
 	telephony/java/com/android/ims/internal/IImsUt.aidl \
 	telephony/java/com/android/ims/internal/IImsUtListener.aidl \
+	telephony/java/com/android/ims/internal/IImsVideoCallCallback.aidl \
+	telephony/java/com/android/ims/internal/IImsVideoCallProvider.aidl \
 	telephony/java/com/android/ims/ImsConfigListener.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \

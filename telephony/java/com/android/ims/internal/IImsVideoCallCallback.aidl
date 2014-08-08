@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.internal.telecomm;
+package com.android.ims.internal;
 
 import android.telecomm.CallCameraCapabilities;
 import android.telecomm.VideoCallProfile;
 
 /**
- * Internal definition of a callback interface, used for an InCallUi to respond to video telephony
- * changes.
+ * Internal remote interface for IMS's video call provider.
  *
- * @see android.telecomm.InCallService.VideoCall.Listener
+ * At least initially, this aidl mirrors telecomm's {@link VideoCallCallback}. We created a
+ * separate aidl interface for invoking callbacks in Telephony from the IMS Service to without
+ * accessing internal interfaces. See {@link IImsVideoCallProvider} for additional detail.
+ *
+ * @see android.telecomm.internal.IVideoCallCallback
+ * @see android.telecomm.VideoCallImpl
  *
  * {@hide}
  */
-oneway interface IVideoCallCallback {
+oneway interface IImsVideoCallCallback {
     void receiveSessionModifyRequest(in VideoCallProfile videoCallProfile);
 
     void receiveSessionModifyResponse(int status, in VideoCallProfile requestedProfile,
