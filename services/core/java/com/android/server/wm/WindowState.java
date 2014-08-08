@@ -1142,8 +1142,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     boolean showLw(boolean doAnimation, boolean requestAnim) {
         if (isHiddenFromUserLocked()) {
-            Slog.w(TAG, "current user violation " + mService.mCurrentUserId + " trying to display "
-                    + this + ", type " + mAttrs.type + ", belonging to " + mOwnerUid);
             return false;
         }
         if (!mAppOpVisibility) {
