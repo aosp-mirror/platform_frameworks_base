@@ -5209,14 +5209,10 @@
         <attr name="name" />
         <!-- The width a path stroke -->
         <attr name="strokeWidth" format="float" />
-        <!-- The opacity of a path stroke @hide-->
-        <attr name="strokeOpacity" format="float" />
         <!-- The color to stroke the path if not defined implies no stroke-->
         <attr name="strokeColor" format="color" />
         <!-- The color to fill the path if not defined implies no fill-->
         <attr name="fillColor" format="color" />
-        <!-- The level of opacity of the filled area of the path @hide-->
-        <attr name="fillOpacity" format="float" />
         <!-- The specification of the operations that define the path  -->
         <attr name="pathData" format="string" />
         <!-- The fraction of the path to trim from the start from 0 to 1 -->
