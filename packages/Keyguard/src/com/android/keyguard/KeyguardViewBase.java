@@ -236,6 +236,12 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
         mSecurityContainer.startAppearAnimation();
     }
 
+    public void startDisappearAnimation(Runnable finishRunnable) {
+        if (!mSecurityContainer.startDisappearAnimation(finishRunnable)) {
+            finishRunnable.run();
+        }
+    }
+
     /**
      * Verify that the user can get past the keyguard securely.  This is called,
      * for example, when the phone disables the keyguard but then wants to launch

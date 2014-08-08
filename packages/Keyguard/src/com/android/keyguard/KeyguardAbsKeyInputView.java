@@ -24,10 +24,7 @@ import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 
 import com.android.internal.widget.LockPatternUtils;
 
@@ -195,6 +192,11 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     public void hideBouncer(int duration) {
         KeyguardSecurityViewHelper.
                 hideBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
+    }
+
+    @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        return false;
     }
 }
 

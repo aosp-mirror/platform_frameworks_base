@@ -16,13 +16,17 @@
   -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:background="#ff000000"
-        android:detachWallpaper="true"
-        android:shareInterpolator="false"
-        android:startOffset="100">
+        android:shareInterpolator="false" android:startOffset="100">
+    <alpha
+        android:fromAlpha="1.0" android:toAlpha="0.0"
+        android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
+        android:interpolator="@interpolator/fast_out_linear_in"
+        android:duration="150"/>
 
-    <translate android:fromYDelta="110%" android:toYDelta="0"
-            android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:interpolator="@interpolator/decelerate_quint"
-            android:duration="300" />
+    <!-- Empty animation so the animation has same duration as lock_screen_behind_enter animation
+         -->
+    <translate android:fromYDelta="0" android:toYDelta="0"
+        android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
+        android:interpolator="@interpolator/linear"
+        android:duration="300" />
 </set>

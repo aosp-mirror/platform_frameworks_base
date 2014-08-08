@@ -245,6 +245,11 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     }
 
     @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        return false;
+    }
+
+    @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
         if (mCallback != null) {
             mCallback.userActivity();
