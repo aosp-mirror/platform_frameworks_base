@@ -16,18 +16,25 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
+import com.android.keyguard.AppearAnimationUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.tiles.UserDetailItemView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.StatusBarHeaderView;
 import com.android.systemui.statusbar.phone.UserAvatarView;
 
@@ -43,33 +50,42 @@ public class KeyguardUserSwitcher {
     private final KeyguardStatusBarView mStatusBarView;
     private final Adapter mAdapter;
     private final boolean mSimpleUserSwitcher;
+    private final AppearAnimationUtils mAppearAnimationUtils;
+    private final KeyguardUserSwitcherScrim mBackground;
+    private ObjectAnimator mBgAnimator;
 
     public KeyguardUserSwitcher(Context context, ViewStub userSwitcher,
             KeyguardStatusBarView statusBarView, NotificationPanelView panelView,
             UserSwitcherController userSwitcherController) {
         if (context.getResources().getBoolean(R.bool.config_keyguardUserSwitcher) || ALWAYS_ON) {
             mUserSwitcher = (ViewGroup) userSwitcher.inflate();
-            mUserSwitcher.setBackground(new KeyguardUserSwitcherScrim(mUserSwitcher));
+            mBackground = new KeyguardUserSwitcherScrim(mUserSwitcher);
+            mUserSwitcher.setBackground(mBackground);
             mStatusBarView = statusBarView;
             mStatusBarView.setKeyguardUserSwitcher(this);
             panelView.setKeyguardUserSwitcher(this);
             mAdapter = new Adapter(context, userSwitcherController);
             mAdapter.registerDataSetObserver(mDataSetObserver);
             mSimpleUserSwitcher = userSwitcherController.isSimpleUserSwitcher();
+            mAppearAnimationUtils = new AppearAnimationUtils(context, 400, -0.5f, 0.5f,
+                    AnimationUtils.loadInterpolator(
+                            context, android.R.interpolator.fast_out_slow_in));
         } else {
             mUserSwitcher = null;
             mStatusBarView = null;
             mAdapter = null;
             mSimpleUserSwitcher = false;
+            mAppearAnimationUtils = null;
+            mBackground = null;
         }
     }
 
-    public void setKeyguard(boolean keyguard) {
+    public void setKeyguard(boolean keyguard, boolean animate) {
         if (mUserSwitcher != null) {
             if (keyguard && shouldExpandByDefault()) {
-                show();
+                show(animate);
             } else {
-                hide();
+                hide(animate);
             }
         }
     }
@@ -82,20 +98,79 @@ public class KeyguardUserSwitcher {
         return mSimpleUserSwitcher;
     }
 
-    public void show() {
-        if (mUserSwitcher != null) {
-            // TODO: animate
+    public void show(boolean animate) {
+        if (mUserSwitcher != null && mUserSwitcher.getVisibility() != View.VISIBLE) {
+            cancelAnimations();
             mUserSwitcher.setVisibility(View.VISIBLE);
-            mStatusBarView.setKeyguardUserSwitcherShowing(true);
+            mStatusBarView.setKeyguardUserSwitcherShowing(true, animate);
+            if (animate) {
+                startAppearAnimation();
+            }
         }
     }
 
-    public void hide() {
+    public void hide(boolean animate) {
         if (mUserSwitcher != null && mUserSwitcher.getVisibility() == View.VISIBLE) {
-            // TODO: animate
-            mUserSwitcher.setVisibility(View.GONE);
-            mStatusBarView.setKeyguardUserSwitcherShowing(false);
+            cancelAnimations();
+            if (animate) {
+                startDisappearAnimation();
+            } else {
+                mUserSwitcher.setVisibility(View.GONE);
+            }
+            mStatusBarView.setKeyguardUserSwitcherShowing(false, animate);
         }
+    }
+
+    private void cancelAnimations() {
+        int count = mUserSwitcher.getChildCount();
+        for (int i = 0; i < count; i++) {
+            mUserSwitcher.getChildAt(i).animate().cancel();
+        }
+        if (mBgAnimator != null) {
+            mBgAnimator.cancel();
+        }
+        mUserSwitcher.animate().cancel();
+    }
+
+    private void startAppearAnimation() {
+        int count = mUserSwitcher.getChildCount();
+        View[] objects = new View[count];
+        for (int i = 0; i < count; i++) {
+            objects[i] = mUserSwitcher.getChildAt(i);
+        }
+        mUserSwitcher.setClipChildren(false);
+        mUserSwitcher.setClipToPadding(false);
+        mAppearAnimationUtils.startAppearAnimation(objects, new Runnable() {
+            @Override
+            public void run() {
+                mUserSwitcher.setClipChildren(true);
+                mUserSwitcher.setClipToPadding(true);
+            }
+        });
+        mBgAnimator = ObjectAnimator.ofInt(mBackground, "alpha", 0, 255);
+        mBgAnimator.setDuration(400);
+        mBgAnimator.setInterpolator(PhoneStatusBar.ALPHA_IN);
+        mBgAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mBgAnimator = null;
+            }
+        });
+        mBgAnimator.start();
+    }
+
+    private void startDisappearAnimation() {
+        mUserSwitcher.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mUserSwitcher.setVisibility(View.GONE);
+                        mUserSwitcher.setAlpha(1f);
+                    }
+                });
     }
 
     private void refresh() {

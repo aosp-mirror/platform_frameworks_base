@@ -16,10 +16,14 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.LayoutTransition;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -48,6 +52,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
 
     private int mSystemIconsSwitcherHiddenExpandedMargin;
+    private Interpolator mFastOutSlowInInterpolator;
 
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -61,6 +66,8 @@ public class KeyguardStatusBarView extends RelativeLayout
         mMultiUserAvatar = (ImageView) findViewById(R.id.multi_user_avatar);
         mBatteryLevel = (TextView) findViewById(R.id.battery_level);
         loadDimens();
+        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
+                android.R.interpolator.fast_out_slow_in);
         updateUserSwitcher();
     }
 
@@ -70,7 +77,14 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     private void updateVisibilities() {
-        mMultiUserSwitch.setVisibility(!mKeyguardUserSwitcherShowing ? VISIBLE : GONE);
+        if (mMultiUserSwitch.getParent() != this && !mKeyguardUserSwitcherShowing) {
+            if (mMultiUserSwitch.getParent() != null) {
+                getOverlay().remove(mMultiUserSwitch);
+            }
+            addView(mMultiUserSwitch, 0);
+        } else if (mMultiUserSwitch.getParent() == this && mKeyguardUserSwitcherShowing) {
+            removeView(mMultiUserSwitch);
+        }
         mBatteryLevel.setVisibility(mBatteryCharging ? View.VISIBLE : View.GONE);
     }
 
@@ -137,10 +151,69 @@ public class KeyguardStatusBarView extends RelativeLayout
         updateUserSwitcher();
     }
 
-    public void setKeyguardUserSwitcherShowing(boolean showing) {
+    public void setKeyguardUserSwitcherShowing(boolean showing, boolean animate) {
         mKeyguardUserSwitcherShowing = showing;
+        if (animate) {
+            animateNextLayoutChange();
+        }
         updateVisibilities();
         updateSystemIconsLayoutParams();
+    }
+
+    private void animateNextLayoutChange() {
+        final int systemIconsCurrentX = mSystemIconsSuperContainer.getLeft();
+        final boolean userSwitcherVisible = mMultiUserSwitch.getParent() == this;
+        getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                getViewTreeObserver().removeOnPreDrawListener(this);
+                boolean userSwitcherHiding = userSwitcherVisible
+                        && mMultiUserSwitch.getParent() != KeyguardStatusBarView.this;
+                mSystemIconsSuperContainer.setX(systemIconsCurrentX);
+                mSystemIconsSuperContainer.animate()
+                        .translationX(0)
+                        .setDuration(400)
+                        .setStartDelay(userSwitcherHiding ? 300 : 0)
+                        .setInterpolator(mFastOutSlowInInterpolator)
+                        .start();
+                if (userSwitcherHiding) {
+                    getOverlay().add(mMultiUserSwitch);
+                    mMultiUserSwitch.animate()
+                            .alpha(0f)
+                            .setDuration(300)
+                            .setStartDelay(0)
+                            .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                            .withEndAction(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mMultiUserSwitch.setAlpha(1f);
+                                    getOverlay().remove(mMultiUserSwitch);
+                                }
+                            })
+                            .start();
+
+                } else {
+                    mMultiUserSwitch.setAlpha(0f);
+                    mMultiUserSwitch.animate()
+                            .alpha(1f)
+                            .setDuration(300)
+                            .setStartDelay(200)
+                            .setInterpolator(PhoneStatusBar.ALPHA_IN);
+                }
+                return true;
+            }
+        });
+
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        if (visibility != View.VISIBLE) {
+            mSystemIconsSuperContainer.animate().cancel();
+            mMultiUserSwitch.animate().cancel();
+            mMultiUserSwitch.setAlpha(1f);
+        }
     }
 
     @Override

@@ -116,4 +116,9 @@ public class UserDetailItemView extends LinearLayout {
         boolean activated = ArrayUtils.contains(getDrawableState(), android.R.attr.state_activated);
         mName.setTypeface(activated ? mActivatedTypeface : mRegularTypeface);
     }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
 }
