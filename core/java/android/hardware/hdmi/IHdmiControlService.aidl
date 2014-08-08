@@ -52,9 +52,7 @@ interface IHdmiControlService {
     void setSystemAudioMode(boolean enabled, IHdmiControlCallback callback);
     void addSystemAudioModeChangeListener(IHdmiSystemAudioModeChangeListener listener);
     void removeSystemAudioModeChangeListener(IHdmiSystemAudioModeChangeListener listener);
-    void setControlEnabled(boolean enabled);
     void setArcMode(boolean enabled);
-    void setOption(int option, int value);
     void setProhibitMode(boolean enabled);
     void setSystemAudioVolume(int oldIndex, int newIndex, int maxIndex);
     void setSystemAudioMute(boolean mute);

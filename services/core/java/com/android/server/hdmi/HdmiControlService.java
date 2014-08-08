@@ -16,17 +16,27 @@
 
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.Constants.DISABLED;
+import static com.android.server.hdmi.Constants.ENABLED;
+import static com.android.server.hdmi.Constants.OPTION_CEC_AUTO_DEVICE_OFF;
+import static com.android.server.hdmi.Constants.OPTION_CEC_AUTO_WAKEUP;
+import static com.android.server.hdmi.Constants.OPTION_CEC_ENABLE;
+import static com.android.server.hdmi.Constants.OPTION_CEC_SERVICE_CONTROL;
+import static com.android.server.hdmi.Constants.OPTION_MHL_ENABLE;
+import static com.android.server.hdmi.Constants.OPTION_MHL_INPUT_SWITCHING;
+import static com.android.server.hdmi.Constants.OPTION_MHL_POWER_CHARGE;
+
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiHotplugEvent;
 import android.hardware.hdmi.HdmiPortInfo;
-import android.hardware.hdmi.HdmiTvClient;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
@@ -36,6 +46,7 @@ import android.hardware.hdmi.IHdmiRecordListener;
 import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
 import android.hardware.hdmi.IHdmiVendorCommandListener;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -44,6 +55,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -196,6 +208,8 @@ public final class HdmiControlService extends SystemService {
     // Handler used to run a task in service thread.
     private final Handler mHandler = new Handler();
 
+    private final SettingsObserver mSettingsObserver;
+
     @Nullable
     private HdmiCecController mCecController;
 
@@ -229,6 +243,7 @@ public final class HdmiControlService extends SystemService {
         super(context);
         mLocalDevices = HdmiUtils.asImmutableList(getContext().getResources().getIntArray(
                 com.android.internal.R.array.config_hdmiCecLogicalDeviceType));
+        mSettingsObserver = new SettingsObserver(mHandler);
     }
 
     @Override
@@ -241,8 +256,7 @@ public final class HdmiControlService extends SystemService {
         mCecController = HdmiCecController.create(this);
         if (mCecController != null) {
             // TODO: Remove this as soon as OEM's HAL implementation is corrected.
-            mCecController.setOption(HdmiTvClient.OPTION_CEC_ENABLE,
-                    HdmiTvClient.ENABLED);
+            mCecController.setOption(OPTION_CEC_ENABLE, ENABLED);
 
             // TODO: load value for mHdmiControlEnabled from preference.
             if (mHdmiControlEnabled) {
@@ -279,24 +293,78 @@ public final class HdmiControlService extends SystemService {
         mWakeUpMessageReceived = false;
 
         if (isTvDevice()) {
-            mCecController.setOption(HdmiTvClient.OPTION_CEC_AUTO_WAKEUP,
-                    tv().getAutoWakeup() ? HdmiTvClient.ENABLED : HdmiTvClient.DISABLED);
+            mCecController.setOption(OPTION_CEC_AUTO_WAKEUP, toInt(tv().getAutoWakeup()));
+            registerContentObserver();
         }
+    }
+
+
+    private void registerContentObserver() {
+        ContentResolver resolver = getContext().getContentResolver();
+        String[] settings = new String[] {
+                Global.HDMI_CONTROL_ENABLED,
+                Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
+                Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
+                Global.MHL_INPUT_SWITCHING_ENABLED,
+                Global.MHL_POWER_CHARGE_ENABLED
+        };
+        for (String s: settings) {
+            resolver.registerContentObserver(Global.getUriFor(s), false, mSettingsObserver,
+                    UserHandle.USER_ALL);
+        }
+    }
+
+    private class SettingsObserver extends ContentObserver {
+        public SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            String option = uri.getLastPathSegment();
+            boolean enabled = readBooleanSetting(option, true);
+            switch (option) {
+                case Global.HDMI_CONTROL_ENABLED:
+                    setControlEnabled(enabled);
+                    break;
+                case Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED:
+                    tv().setAutoWakeup(enabled);
+                    setOption(OPTION_CEC_AUTO_WAKEUP, toInt(enabled));
+                    break;
+                case Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED:
+                    tv().setAutoDeviceOff(enabled);
+                    // No need to propagate to HAL.
+                    break;
+                case Global.MHL_INPUT_SWITCHING_ENABLED:
+                    setOption(OPTION_MHL_INPUT_SWITCHING, toInt(enabled));
+                    break;
+                case Global.MHL_POWER_CHARGE_ENABLED:
+                    setOption(OPTION_MHL_POWER_CHARGE, toInt(enabled));
+                    break;
+            }
+        }
+    }
+
+    private static int toInt(boolean enabled) {
+        return enabled ? ENABLED : DISABLED;
     }
 
     boolean readBooleanSetting(String key, boolean defVal) {
         ContentResolver cr = getContext().getContentResolver();
-        return Global.getInt(cr, key, defVal ? Constants.TRUE : Constants.FALSE) == Constants.TRUE;
+        return Global.getInt(cr, key, toInt(defVal)) == ENABLED;
     }
 
     void writeBooleanSetting(String key, boolean value) {
         ContentResolver cr = getContext().getContentResolver();
-        Global.putInt(cr, key, value ? Constants.TRUE : Constants.FALSE);
+        Global.putInt(cr, key, toInt(value));
+    }
+
+    private void unregisterSettingsObserver() {
+        getContext().getContentResolver().unregisterContentObserver(mSettingsObserver);
     }
 
     private void initializeCec(int initiatedBy) {
-        mCecController.setOption(HdmiTvClient.OPTION_CEC_SERVICE_CONTROL,
-                HdmiTvClient.ENABLED);
+        mCecController.setOption(OPTION_CEC_SERVICE_CONTROL, ENABLED);
         initializeLocalDevices(mLocalDevices, initiatedBy);
     }
 
@@ -965,18 +1033,6 @@ public final class HdmiControlService extends SystemService {
         }
 
         @Override
-        public void setControlEnabled(final boolean enabled) {
-            enforceAccessPermission();
-            runOnServiceThread(new Runnable() {
-                @Override
-                public void run() {
-                    handleHdmiControlStatusChanged(enabled);
-
-                }
-            });
-        }
-
-        @Override
         public void setSystemAudioVolume(final int oldIndex, final int newIndex,
                 final int maxIndex) {
             enforceAccessPermission();
@@ -1022,30 +1078,6 @@ public final class HdmiControlService extends SystemService {
                     }
                 }
             });
-        }
-
-        @Override
-        public void setOption(final int key, final int value) {
-            enforceAccessPermission();
-            if (!isTvDevice()) {
-                return;
-            }
-            switch (key) {
-                case HdmiTvClient.OPTION_CEC_AUTO_WAKEUP:
-                    tv().setAutoWakeup(value == HdmiTvClient.ENABLED);
-                    mCecController.setOption(key, value);
-                    break;
-                case HdmiTvClient.OPTION_CEC_AUTO_DEVICE_OFF:
-                    // No need to pass this option to HAL.
-                    tv().setAutoDeviceOff(value == HdmiTvClient.ENABLED);
-                    break;
-                case HdmiTvClient.OPTION_MHL_INPUT_SWITCHING:  // Fall through
-                case HdmiTvClient.OPTION_MHL_POWER_CHARGE:
-                    if (mMhlController != null) {
-                        mMhlController.setOption(key, value);
-                    }
-                    break;
-            }
         }
 
         @Override
@@ -1502,6 +1534,9 @@ public final class HdmiControlService extends SystemService {
         for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
             device.disableDevice(mStandbyMessageReceived, callback);
         }
+        if (isTvDevice()) {
+            unregisterSettingsObserver();
+        }
     }
 
     @ServiceThreadOnly
@@ -1527,7 +1562,7 @@ public final class HdmiControlService extends SystemService {
             device.onStandby(mStandbyMessageReceived);
         }
         mStandbyMessageReceived = false;
-        mCecController.setOption(HdmiTvClient.OPTION_CEC_SERVICE_CONTROL, HdmiTvClient.DISABLED);
+        mCecController.setOption(OPTION_CEC_SERVICE_CONTROL, DISABLED);
     }
 
     private void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType) {
@@ -1572,13 +1607,19 @@ public final class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    private void handleHdmiControlStatusChanged(boolean enabled) {
+    void setOption(int key, int value) {
+        assertRunOnServiceThread();
+        mCecController.setOption(key, value);
+    }
+
+    @ServiceThreadOnly
+    void setControlEnabled(boolean enabled) {
         assertRunOnServiceThread();
 
-        int value = enabled ? HdmiTvClient.ENABLED : HdmiTvClient.DISABLED;
-        mCecController.setOption(HdmiTvClient.OPTION_CEC_ENABLE, value);
+        int value = toInt(enabled);
+        mCecController.setOption(OPTION_CEC_ENABLE, value);
         if (mMhlController != null) {
-            mMhlController.setOption(HdmiTvClient.OPTION_MHL_ENABLE, value);
+            mMhlController.setOption(OPTION_MHL_ENABLE, value);
         }
 
         synchronized (mLock) {
