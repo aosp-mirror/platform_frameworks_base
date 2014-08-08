@@ -317,7 +317,10 @@ public final class HdmiControlService extends SystemService {
                     if (logicalAddress == Constants.ADDR_UNREGISTERED) {
                         Slog.e(TAG, "Failed to allocate address:[device_type:" + deviceType + "]");
                     } else {
-                        HdmiDeviceInfo deviceInfo = createDeviceInfo(logicalAddress, deviceType);
+                        // Set POWER_STATUS_ON to all local devices because they share lifetime
+                        // with system.
+                        HdmiDeviceInfo deviceInfo = createDeviceInfo(logicalAddress, deviceType,
+                                HdmiControlManager.POWER_STATUS_ON);
                         localDevice.setDeviceInfo(deviceInfo);
                         mCecController.addLocalDevice(deviceType, localDevice);
                         mCecController.addLogicalAddress(logicalAddress);
@@ -653,7 +656,7 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    private HdmiDeviceInfo createDeviceInfo(int logicalAddress, int deviceType) {
+    private HdmiDeviceInfo createDeviceInfo(int logicalAddress, int deviceType, int powerStatus) {
         // TODO: find better name instead of model name.
         String displayName = Build.MODEL;
         return new HdmiDeviceInfo(logicalAddress,
