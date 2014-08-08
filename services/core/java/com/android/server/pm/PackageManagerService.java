@@ -85,7 +85,6 @@ import org.xmlpull.v1.XmlSerializer;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
-import android.app.PackageDeleteObserver;
 import android.app.admin.IDevicePolicyManager;
 import android.app.backup.IBackupManager;
 import android.content.BroadcastReceiver;
@@ -115,6 +114,7 @@ import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageParser.ActivityIntentInfo;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
@@ -13449,22 +13449,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return ksms.packageIsSignedByExactlyLPr(packageName, (KeySetHandle) ks);
             }
             return false;
-        }
-    }
-
-    private static class LegacyPackageDeleteObserver extends PackageDeleteObserver {
-        private final IPackageDeleteObserver mLegacy;
-
-        public LegacyPackageDeleteObserver(IPackageDeleteObserver legacy) {
-            mLegacy = legacy;
-        }
-
-        @Override
-        public void onPackageDeleted(String basePackageName, int returnCode, String msg) {
-            try {
-                mLegacy.packageDeleted(basePackageName, returnCode);
-            } catch (RemoteException ignored) {
-            }
         }
     }
 }
