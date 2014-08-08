@@ -1505,20 +1505,18 @@ private:
 class DrawShadowOp : public DrawOp {
 public:
     DrawShadowOp(const mat4& transformXY, const mat4& transformZ,
-            float casterAlpha, const SkPath* casterOutline, const SkPath* revealClip)
-            : DrawOp(NULL), mTransformXY(transformXY), mTransformZ(transformZ),
-            mCasterAlpha(casterAlpha) {
-        mOutline = *casterOutline;
-        if (revealClip) {
-            // intersect the outline with the convex reveal clip
-            Op(mOutline, *revealClip, kIntersect_PathOp, &mOutline);
-        }
+            float casterAlpha, const SkPath* casterOutline)
+        : DrawOp(NULL)
+        , mTransformXY(transformXY)
+        , mTransformZ(transformZ)
+        , mCasterAlpha(casterAlpha)
+        , mCasterOutline(casterOutline) {
     }
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) {
         renderer.getCaches().tessellationCache.precacheShadows(&state.mMatrix,
-                renderer.getLocalClipBounds(), isCasterOpaque(), &mOutline,
+                renderer.getLocalClipBounds(), isCasterOpaque(), mCasterOutline,
                 &mTransformXY, &mTransformZ, renderer.getLightCenter(), renderer.getLightRadius());
     }
 
@@ -1527,7 +1525,7 @@ public:
         Matrix4 drawTransform;
         renderer.getMatrix(&drawTransform);
         renderer.getCaches().tessellationCache.getShadowBuffers(&drawTransform,
-                renderer.getLocalClipBounds(), isCasterOpaque(), &mOutline,
+                renderer.getLocalClipBounds(), isCasterOpaque(), mCasterOutline,
                 &mTransformXY, &mTransformZ, renderer.getLightCenter(), renderer.getLightRadius(),
                 buffers);
 
@@ -1546,7 +1544,7 @@ private:
     const mat4 mTransformXY;
     const mat4 mTransformZ;
     const float mCasterAlpha;
-    SkPath mOutline;
+    const SkPath* mCasterOutline;
 };
 
 class DrawLayerOp : public DrawOp {

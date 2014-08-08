@@ -69,7 +69,9 @@ class DrawRenderNodeOp;
 class PlaybackStateStruct {
 protected:
     PlaybackStateStruct(OpenGLRenderer& renderer, int replayFlags, LinearAllocator* allocator)
-            : mRenderer(renderer), mReplayFlags(replayFlags), mAllocator(allocator){}
+            : mRenderer(renderer)
+            , mReplayFlags(replayFlags)
+            , mAllocator(allocator) {}
 
 public:
     OpenGLRenderer& mRenderer;
@@ -78,6 +80,15 @@ public:
     // Allocator with the lifetime of a single frame.
     // replay uses an Allocator owned by the struct, while defer shares the DeferredDisplayList's Allocator
     LinearAllocator * const mAllocator;
+
+    SkPath* allocPathForFrame() {
+        mTempPaths.push_back();
+        return &mTempPaths.back();
+    }
+
+private:
+    // Paths kept alive for the duration of the frame
+    std::vector<SkPath> mTempPaths;
 };
 
 class DeferStateStruct : public PlaybackStateStruct {
