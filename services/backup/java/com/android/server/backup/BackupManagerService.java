@@ -3745,28 +3745,25 @@ public class BackupManagerService extends IBackupManager.Stub {
                             }
                         } while (nRead > 0 && result == BackupTransport.TRANSPORT_OK);
 
-                        int finishResult;
-
+                        // If we've lost our running criteria, tell the transport to cancel
+                        // and roll back this (partial) backup payload; otherwise tell it
+                        // that we've reached the clean finish state.
                         if (!mKeepRunning.get()) {
                             result = BackupTransport.TRANSPORT_ERROR;
-                            // TODO: tell the transport to abort the backup
-                            Slog.w(TAG, "TODO: tell transport to halt & roll back");
+                            transport.cancelFullBackup();
+                        } else {
+                            // If we were otherwise in a good state, now interpret the final
+                            // result based on what finishBackup() returns.  If we're in a
+                            // failure case already, preserve that result and ignore whatever
+                            // finishBackup() reports.
+                            final int finishResult = transport.finishBackup();
+                            if (result == BackupTransport.TRANSPORT_OK) {
+                                result = finishResult;
+                            }
                         }
-
-                        // In all cases we need to give the transport its finish callback
-                        finishResult = transport.finishBackup();
 
                         if (MORE_DEBUG) {
-                            Slog.i(TAG, "Done trying to send backup data: result="
-                                    + result + " finishResult=" + finishResult);
-                        }
-
-                        // If we were otherwise in a good state, now interpret the final
-                        // result based on what finishBackup() returned.  If we're in a
-                        // failure case already, preserve that result and ignore whatever
-                        // finishBackup() reported.
-                        if (result == BackupTransport.TRANSPORT_OK) {
-                            result = finishResult;
+                            Slog.i(TAG, "Done trying to send backup data: result=" + result);
                         }
 
                         if (result != BackupTransport.TRANSPORT_OK) {
