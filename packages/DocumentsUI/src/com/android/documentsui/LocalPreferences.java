@@ -16,15 +16,10 @@
 
 package com.android.documentsui;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Context;
-import android.os.Bundle;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.view.MenuItem;
 
-public class SettingsActivity extends Activity {
+public class LocalPreferences {
     private static final String KEY_ADVANCED_DEVICES = "advancedDevices";
     private static final String KEY_FILE_SIZE = "fileSize";
 
@@ -38,34 +33,13 @@ public class SettingsActivity extends Activity {
                 .getBoolean(KEY_FILE_SIZE, false);
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        getFragmentManager()
-                .beginTransaction().replace(android.R.id.content, new SettingsFragment()).commit();
-
-        final ActionBar bar = getActionBar();
-        if (bar != null) {
-            bar.setDisplayShowHomeEnabled(false);
-            bar.setDisplayHomeAsUpEnabled(true);
-        }
+    public static void setDisplayAdvancedDevices(Context context, boolean display) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putBoolean(KEY_ADVANCED_DEVICES, display).apply();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    public static class SettingsFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.preferences);
-        }
+    public static void setDisplayFileSize(Context context, boolean display) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putBoolean(KEY_FILE_SIZE, display).apply();
     }
 }
