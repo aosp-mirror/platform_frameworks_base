@@ -6901,6 +6901,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return true if the view is currently pressed, false otherwise
      */
+    @ViewDebug.ExportedProperty
     public boolean isPressed() {
         return (mPrivateFlags & PFLAG_PRESSED) == PFLAG_PRESSED;
     }

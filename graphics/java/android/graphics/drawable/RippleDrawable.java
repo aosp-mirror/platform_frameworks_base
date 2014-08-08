@@ -225,8 +225,7 @@ public class RippleDrawable extends LayerDrawable {
             if (stateSet[i] == R.attr.state_enabled) {
                 enabled = true;
             }
-            if (stateSet[i] == R.attr.state_focused
-                    || stateSet[i] == R.attr.state_selected) {
+            if (stateSet[i] == R.attr.state_focused) {
                 focused = true;
             }
             if (stateSet[i] == R.attr.state_pressed) {
