@@ -28,8 +28,6 @@ import com.android.internal.telecomm.IInCallAdapter;
  * given call IDs to execute commands such as {@link #answerCall} for incoming calls or
  * {@link #disconnectCall} for active calls the user would like to end. Some commands are only
  * appropriate for calls in certain states; please consult each method for such limitations.
- * TODO(santoscordon): Needs more/better comments once the API is finalized.
- * TODO(santoscordon): Specify the adapter will stop functioning when there are no more calls.
  */
 public final class InCallAdapter {
     private final IInCallAdapter mAdapter;
@@ -56,8 +54,6 @@ public final class InCallAdapter {
 
     /**
      * Instructs Telecomm to reject the specified call.
-     * TODO(santoscordon): Add reject-with-text-message parameter when that feature
-     * is ported over.
      *
      * @param callId The identifier of the call to reject.
      * @param rejectWithMessage Whether to reject with a text message.

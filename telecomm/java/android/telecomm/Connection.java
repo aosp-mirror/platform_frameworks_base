@@ -273,7 +273,7 @@ public abstract class Connection {
     }
 
     /**
-     * TODO(santoscordon): Needs documentation.
+     * TODO: Needs documentation.
      */
     public final void setParentConnection(Connection parentConnection) {
         Log.d(this, "parenting %s to %s", this, parentConnection);
@@ -458,7 +458,7 @@ public abstract class Connection {
     }
 
     /**
-     * TODO(santoscordon): Needs documentation.
+     * TODO: Needs documentation.
      */
     public final void setPostDialWait(String remaining) {
         for (Listener l : mListeners) {
@@ -654,7 +654,7 @@ public abstract class Connection {
     public void onSwapWithBackgroundCall() {}
 
     /**
-     * TODO(santoscordon): Needs documentation.
+     * TODO: Needs documentation.
      */
     public void onChildrenChanged(List<Connection> children) {}
 
