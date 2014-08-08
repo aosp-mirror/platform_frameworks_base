@@ -8971,8 +8971,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     /**
-     * Allows app to retrieve the MIME type of a URI without having permission
-     * to access its content provider.
+     * Allows apps to retrieve the MIME type of a URI.
+     * If an app is in the same user as the ContentProvider, or if it is allowed to interact across
+     * users, then it does not need permission to access the ContentProvider.
+     * Either, it needs cross-user uri grants.
      *
      * CTS tests for this functionality can be run with "runtest cts-appsecurity".
      *
@@ -8981,12 +8983,22 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     public String getProviderMimeType(Uri uri, int userId) {
         enforceNotIsolatedCaller("getProviderMimeType");
-        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, false, ALLOW_NON_FULL_IN_PROFILE, "getProviderMimeType", null);
         final String name = uri.getAuthority();
-        final long ident = Binder.clearCallingIdentity();
+        int callingUid = Binder.getCallingUid();
+        int callingPid = Binder.getCallingPid();
+        long ident = 0;
+        boolean clearedIdentity = false;
+        userId = unsafeConvertIncomingUser(userId);
+        if (UserHandle.getUserId(callingUid) != userId) {
+            if (checkComponentPermission(INTERACT_ACROSS_USERS, callingPid,
+                    callingUid, -1, true) == PackageManager.PERMISSION_GRANTED
+                    || checkComponentPermission(INTERACT_ACROSS_USERS_FULL, callingPid,
+                    callingUid, -1, true) == PackageManager.PERMISSION_GRANTED) {
+                clearedIdentity = true;
+                ident = Binder.clearCallingIdentity();
+            }
+        }
         ContentProviderHolder holder = null;
-
         try {
             holder = getContentProviderExternalUnchecked(name, null, userId);
             if (holder != null) {
@@ -8996,10 +9008,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             Log.w(TAG, "Content provider dead retrieving " + uri, e);
             return null;
         } finally {
-            if (holder != null) {
-                removeContentProviderExternalUnchecked(name, null, userId);
+            // We need to clear the identity to call removeContentProviderExternalUnchecked
+            if (!clearedIdentity) {
+                ident = Binder.clearCallingIdentity();
             }
-            Binder.restoreCallingIdentity(ident);
+            try {
+                if (holder != null) {
+                    removeContentProviderExternalUnchecked(name, null, userId);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
         return null;
