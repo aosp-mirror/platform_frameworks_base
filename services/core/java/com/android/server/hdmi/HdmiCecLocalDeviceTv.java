@@ -617,6 +617,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         }
 
                         addAndStartAction(new HotplugDetectionAction(HdmiCecLocalDeviceTv.this));
+                        addAndStartAction(new PowerStatusMonitorAction(HdmiCecLocalDeviceTv.this));
 
                         // If there is AVR, initiate System Audio Auto initiation action,
                         // which turns on and off system audio according to last system
@@ -1300,6 +1301,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         //     LocalDeviceTv.onAddressAllocated() -> launchDeviceDiscovery().
         removeAction(DeviceDiscoveryAction.class);
         removeAction(HotplugDetectionAction.class);
+        removeAction(PowerStatusMonitorAction.class);
         // Remove recording actions.
         removeAction(OneTouchRecordAction.class);
         removeAction(TimerRecordingAction.class);
@@ -1520,5 +1522,23 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 }
             }
         });
+    }
+
+    void updateDevicePowerStatus(int logicalAddress, int newPowerStatus) {
+        HdmiDeviceInfo info = getDeviceInfo(logicalAddress);
+        if (info == null) {
+            Slog.w(TAG, "Can not update power status of non-existing device:" + logicalAddress);
+            return;
+        }
+
+        if (info.getDevicePowerStatus() == newPowerStatus) {
+            return;
+        }
+
+        HdmiDeviceInfo newInfo = HdmiUtils.cloneHdmiDeviceInfo(info, newPowerStatus);
+        // addDeviceInfo replaces old device info with new one if exists.
+        addDeviceInfo(newInfo);
+
+        // TODO: notify this update to others.
     }
 }
