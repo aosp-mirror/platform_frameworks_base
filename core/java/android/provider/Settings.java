@@ -4739,6 +4739,23 @@ public final class Settings {
                 "lock_screen_show_notifications";
 
         /**
+         * List of TV inputs that are currently hidden. This is a string
+         * containing the IDs of all hidden TV inputs. Each ID is separated by ':'.
+         *
+         * @hide
+         */
+        public static final String TV_INPUT_HIDDEN_INPUTS = "tv_input_hidden_inputs";
+
+        /**
+         * List of custom TV input labels. This is a string containing <TV input id, custom name>
+         * pairs. Each pair is separated by ':' and TV input id and custom name are separated by
+         * ','.
+         *
+         * @hide
+         */
+        public static final String TV_INPUT_CUSTOM_LABELS = "tv_input_custom_labels";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
