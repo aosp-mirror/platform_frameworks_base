@@ -32,8 +32,9 @@ public enum CallState {
     NEW,
 
     /**
-     * Indicates an outgoing call has been initiated and is waiting for the broadcast intent to
-     * return and provide call details before proceeding.
+     * The initial state of an outgoing {@code Call}.
+     * Common transitions are to {@link #DIALING} state for a successful call or
+     * {@link #DISCONNECTED} if it failed.
      */
     CONNECTING,
 
