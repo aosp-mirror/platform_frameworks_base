@@ -2107,9 +2107,9 @@
     <string name="permdesc_cache_filesystem">Allows the app to read and write the cache filesystem.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_use_sip">make/receive Internet calls</string>
+    <string name="permlab_use_sip">make/receive SIP calls</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_use_sip">Allows the app to use the SIP service to make/receive Internet calls.</string>
+    <string name="permdesc_use_sip">Allows the app to make and receive SIP calls.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bind_call_service">interact with in-call screen</string>
