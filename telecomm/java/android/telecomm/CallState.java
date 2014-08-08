@@ -32,6 +32,12 @@ public enum CallState {
     NEW,
 
     /**
+     * Indicates an outgoing call has been initiated and is waiting for the broadcast intent to
+     * return and provide call details before proceeding.
+     */
+    CONNECTING,
+
+    /**
      * Indicates that the call is about to go into the outgoing and dialing state but is waiting for
      * user input before it proceeds. For example, where no default {@link PhoneAccount} is set,
      * this is the state where the InCallUI is waiting for the user to select a

@@ -69,6 +69,11 @@ public final class Call {
      */
     public static final int STATE_PRE_DIAL_WAIT = 8;
 
+    /**
+     * The state of an outgoing {@code Call}, before Telecomm broadcast intent has returned.
+     */
+    public static final int STATE_CONNECTING = 9;
+
     public static class Details {
         private final Uri mHandle;
         private final int mHandlePresentation;
@@ -771,6 +776,8 @@ public final class Call {
         switch (parcelableCallState) {
             case NEW:
                 return STATE_NEW;
+            case CONNECTING:
+                return STATE_CONNECTING;
             case PRE_DIAL_WAIT:
                 return STATE_PRE_DIAL_WAIT;
             case DIALING:
