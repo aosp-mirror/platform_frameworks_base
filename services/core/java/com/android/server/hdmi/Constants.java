@@ -214,5 +214,35 @@ final class Constants {
     static final int RECORDING_TYPE_EXTERNAL_PHYSICAL_ADDRESS = 3;
     static final int RECORDING_TYPE_OWN_SOURCE = 4;
 
+    // Definitions used for setOption(). These should be in sync with the definition
+    // in hardware/libhardware/include/hardware/{hdmi_cec.h,mhl.h}.
+
+    // TV gets turned on by incoming <Text/Image View On>. enabled by default.
+    // If set to disabled, TV won't turn on automatically.
+    static final int OPTION_CEC_AUTO_WAKEUP = 1;
+
+    // If set to disabled, all CEC commands are discarded.
+    static final int OPTION_CEC_ENABLE = 2;
+
+    // If set to disabled, system service yields control of CEC to sub-microcontroller.
+    // If enabled, it take the control back.
+    static final int OPTION_CEC_SERVICE_CONTROL = 3;
+
+    // Put other devices to standby when TV goes to standby. enabled by default.
+    // If set to disabled, TV doesn't send <Standby> to other devices.
+    static final int OPTION_CEC_AUTO_DEVICE_OFF = 4;
+
+    // If set to disabled, TV does not switch ports when mobile device is connected.
+    static final int OPTION_MHL_INPUT_SWITCHING = 101;
+
+    // If set to enabled, TV disables power charging for mobile device.
+    static final int OPTION_MHL_POWER_CHARGE = 102;
+
+    // If set to disabled, all MHL commands are discarded.
+    static final int OPTION_MHL_ENABLE = 103;
+
+    static final int DISABLED = 0;
+    static final int ENABLED = 1;
+
     private Constants() { /* cannot be instantiated */ }
 }
