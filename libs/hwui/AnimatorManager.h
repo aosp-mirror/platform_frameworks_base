@@ -40,7 +40,8 @@ public:
     void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
 
     void pushStaging(TreeInfo& info);
-    void animate(TreeInfo& info);
+    // Returns the combined dirty mask of all animators run
+    uint32_t animate(TreeInfo& info);
 
 private:
     RenderNode& mParent;

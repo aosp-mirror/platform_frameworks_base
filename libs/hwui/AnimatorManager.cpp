@@ -66,22 +66,26 @@ void AnimatorManager::pushStaging(TreeInfo& info) {
 class AnimateFunctor {
 public:
     AnimateFunctor(RenderNode& target, TreeInfo& info)
-            : mTarget(target), mInfo(info) {}
+            : dirtyMask(0), mTarget(target), mInfo(info) {}
 
     bool operator() (BaseRenderNodeAnimator* animator) {
+        dirtyMask |= animator->dirtyMask();
         bool remove = animator->animate(mInfo);
         if (remove) {
             animator->decStrong(0);
         }
         return remove;
     }
+
+    uint32_t dirtyMask;
+
 private:
     RenderNode& mTarget;
     TreeInfo& mInfo;
 };
 
-void AnimatorManager::animate(TreeInfo& info) {
-    if (!mAnimators.size()) return;
+uint32_t AnimatorManager::animate(TreeInfo& info) {
+    if (!mAnimators.size()) return 0;
 
     // TODO: Can we target this better? For now treat it like any other staging
     // property push and just damage self before and after animators are run
@@ -97,6 +101,8 @@ void AnimatorManager::animate(TreeInfo& info) {
     mParent.mProperties.updateMatrix();
     info.damageAccumulator->pushTransform(&mParent);
     mParent.damageSelf(info);
+
+    return functor.dirtyMask;
 }
 
 } /* namespace uirenderer */

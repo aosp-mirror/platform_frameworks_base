@@ -100,6 +100,9 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		LOCAL_CFLAGS += -fno-omit-frame-pointer -marm -mapcs
 	endif
 
+	# Defaults for ATRACE_TAG and LOG_TAG for libhwui
+	LOCAL_CFLAGS += -DATRACE_TAG=ATRACE_TAG_VIEW -DLOG_TAG=\"OpenGLRenderer\"
+
 	include $(BUILD_SHARED_LIBRARY)
 
 	include $(call all-makefiles-under,$(LOCAL_PATH))

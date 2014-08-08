@@ -90,6 +90,7 @@ public:
         Y               = 1 << 11,
         Z               = 1 << 12,
         ALPHA           = 1 << 13,
+        DISPLAY_LIST    = 1 << 14,
     };
 
     ANDROID_API RenderNode();
@@ -244,7 +245,7 @@ private:
     void pushStagingDisplayListChanges(TreeInfo& info);
     void prepareSubTree(TreeInfo& info, DisplayListData* subtree);
     void applyLayerPropertiesToLayer(TreeInfo& info);
-    void prepareLayer(TreeInfo& info);
+    void prepareLayer(TreeInfo& info, uint32_t dirtyMask);
     void pushLayerUpdate(TreeInfo& info);
     void deleteDisplayListData();
     void damageSelf(TreeInfo& info);
