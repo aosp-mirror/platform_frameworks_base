@@ -124,8 +124,7 @@ public class BluetoothGattCallbackWrapper extends IBluetoothGattCallback.Stub {
     }
 
     @Override
-    public void onFoundOrLost(boolean onFound, String address, int rssi, byte[] advData)
-            throws RemoteException {
+    public void onFoundOrLost(boolean onFound, ScanResult scanResult) throws RemoteException {
     }
 
 }
