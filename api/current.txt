@@ -16747,18 +16747,14 @@ package android.media.session {
 
   public final class MediaSession {
     ctor public MediaSession(android.content.Context, java.lang.String);
-    method public void addCallback(android.media.session.MediaSession.Callback);
-    method public void addCallback(android.media.session.MediaSession.Callback, android.os.Handler);
-    method public void addTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback);
-    method public void addTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback, android.os.Handler);
     method public android.media.session.MediaController getController();
     method public android.media.session.MediaSession.Token getSessionToken();
     method public boolean isActive();
     method public void release();
-    method public void removeCallback(android.media.session.MediaSession.Callback);
-    method public void removeTransportControlsCallback(android.media.session.MediaSession.TransportControlsCallback);
     method public void sendSessionEvent(java.lang.String, android.os.Bundle);
     method public void setActive(boolean);
+    method public void setCallback(android.media.session.MediaSession.Callback);
+    method public void setCallback(android.media.session.MediaSession.Callback, android.os.Handler);
     method public void setExtras(android.os.Bundle);
     method public void setFlags(int);
     method public void setLaunchActivity(android.app.PendingIntent);
@@ -16779,7 +16775,20 @@ package android.media.session {
   public static abstract class MediaSession.Callback {
     ctor public MediaSession.Callback();
     method public void onCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
-    method public void onMediaButtonEvent(android.content.Intent);
+    method public void onCustomAction(java.lang.String, android.os.Bundle);
+    method public void onFastForward();
+    method public boolean onMediaButtonEvent(android.content.Intent);
+    method public void onPause();
+    method public void onPlay();
+    method public void onPlayFromSearch(java.lang.String, android.os.Bundle);
+    method public void onPlayUri(android.net.Uri, android.os.Bundle);
+    method public void onRewind();
+    method public void onSeekTo(long);
+    method public void onSetRating(android.media.Rating);
+    method public void onSkipToNext();
+    method public void onSkipToPrevious();
+    method public void onSkipToTrack(long);
+    method public void onStop();
   }
 
   public static final class MediaSession.Token implements android.os.Parcelable {
@@ -16803,23 +16812,6 @@ package android.media.session {
     ctor public MediaSession.Track.Builder(android.media.MediaMetadata, long, android.net.Uri);
     method public android.media.session.MediaSession.Track build();
     method public android.media.session.MediaSession.Track.Builder setExtras(android.os.Bundle);
-  }
-
-  public static abstract class MediaSession.TransportControlsCallback {
-    ctor public MediaSession.TransportControlsCallback();
-    method public void onCustomAction(java.lang.String, android.os.Bundle);
-    method public void onFastForward();
-    method public void onPause();
-    method public void onPlay();
-    method public void onPlayFromSearch(java.lang.String, android.os.Bundle);
-    method public void onPlayUri(android.net.Uri, android.os.Bundle);
-    method public void onRewind();
-    method public void onSeekTo(long);
-    method public void onSetRating(android.media.Rating);
-    method public void onSkipToNext();
-    method public void onSkipToPrevious();
-    method public void onSkipToTrack(long);
-    method public void onStop();
   }
 
   public final class MediaSessionManager {
