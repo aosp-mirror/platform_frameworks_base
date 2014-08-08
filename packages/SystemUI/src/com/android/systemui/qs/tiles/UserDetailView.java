@@ -17,45 +17,24 @@
 package com.android.systemui.qs.tiles;
 
 import com.android.systemui.R;
+import com.android.systemui.qs.PseudoGridView;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.GridView;
 
 /**
  * Quick settings detail view for user switching.
  */
-public class UserDetailView extends GridView {
+public class UserDetailView extends PseudoGridView {
 
-    public UserDetailView(Context context) {
-        this(context, null);
-    }
+    private Adapter mAdapter;
 
     public UserDetailView(Context context, AttributeSet attrs) {
-        this(context, attrs, android.R.attr.gridViewStyle);
-    }
-
-    public UserDetailView(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
-    }
-
-    public UserDetailView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-
-        setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                UserSwitcherController.UserRecord tag =
-                        (UserSwitcherController.UserRecord) view.getTag();
-                ((Adapter)getAdapter()).switchTo(tag);
-            }
-        });
+        super(context, attrs);
     }
 
     public static UserDetailView inflate(Context context, ViewGroup parent, boolean attach) {
@@ -64,10 +43,12 @@ public class UserDetailView extends GridView {
     }
 
     public void createAndSetAdapter(UserSwitcherController controller) {
-        setAdapter(new Adapter(mContext, controller));
+        mAdapter = new Adapter(mContext, controller);
+        ViewGroupAdapterBridge.link(this, mAdapter);
     }
 
-    public static class Adapter extends UserSwitcherController.BaseUserAdapter {
+    public static class Adapter extends UserSwitcherController.BaseUserAdapter
+            implements OnClickListener {
 
         private Context mContext;
 
@@ -81,6 +62,9 @@ public class UserDetailView extends GridView {
             UserSwitcherController.UserRecord item = getItem(position);
             UserDetailItemView v = UserDetailItemView.convertOrInflate(
                     mContext, convertView, parent);
+            if (v != convertView) {
+                v.setOnClickListener(this);
+            }
             String name = getName(mContext, item);
             if (item.picture == null) {
                 v.bind(name, getDrawable(mContext, item));
@@ -90,6 +74,13 @@ public class UserDetailView extends GridView {
             v.setActivated(item.isCurrent);
             v.setTag(item);
             return v;
+        }
+
+        @Override
+        public void onClick(View view) {
+            UserSwitcherController.UserRecord tag =
+                    (UserSwitcherController.UserRecord) view.getTag();
+            switchTo(tag);
         }
     }
 }
