@@ -37,7 +37,7 @@ import android.app.IActivityContainer;
 import android.app.IActivityContainerCallback;
 import android.app.IAppTask;
 import android.app.admin.DevicePolicyManager;
-import android.app.usage.UsageStats;
+import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.graphics.Rect;
@@ -3160,7 +3160,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (mUsageStatsService != null) {
                 mUsageStatsService.reportEvent(component.realActivity, component.userId,
                         System.currentTimeMillis(),
-                        UsageStats.Event.MOVE_TO_FOREGROUND);
+                        UsageEvents.Event.MOVE_TO_FOREGROUND);
             }
             synchronized (stats) {
                 stats.noteActivityResumedLocked(component.app.uid);
@@ -3169,7 +3169,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (mUsageStatsService != null) {
                 mUsageStatsService.reportEvent(component.realActivity, component.userId,
                         System.currentTimeMillis(),
-                        UsageStats.Event.MOVE_TO_BACKGROUND);
+                        UsageEvents.Event.MOVE_TO_BACKGROUND);
             }
             synchronized (stats) {
                 stats.noteActivityPausedLocked(component.app.uid);

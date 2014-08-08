@@ -39,16 +39,16 @@ public class TimeSparseArray<E> extends LongSparseArray<E> {
      * @param time The timestamp for which to search the array.
      * @return The index of the matched element, or -1 if no such match exists.
      */
-    public int closestIndexAfter(long time) {
+    public int closestIndexOnOrAfter(long time) {
         // This is essentially a binary search, except that if no match is found
         // the closest index is returned.
         final int size = size();
         int lo = 0;
-        int hi = size;
+        int hi = size - 1;
         int mid = -1;
         long key = -1;
         while (lo <= hi) {
-            mid = (lo + hi) >>> 1;
+            mid = lo + ((hi - lo) / 2);
             key = keyAt(mid);
 
             if (time > key) {
@@ -67,5 +67,25 @@ public class TimeSparseArray<E> extends LongSparseArray<E> {
         } else {
             return -1;
         }
+    }
+
+    /**
+     * Finds the index of the first element whose timestamp is less than or equal to
+     * the given time.
+     *
+     * @param time The timestamp for which to search the array.
+     * @return The index of the matched element, or -1 if no such match exists.
+     */
+    public int closestIndexOnOrBefore(long time) {
+        final int index = closestIndexOnOrAfter(time);
+        if (index < 0) {
+            // Everything is larger, so we use the last element, or -1 if the list is empty.
+            return size() - 1;
+        }
+
+        if (keyAt(index) == time) {
+            return index;
+        }
+        return index - 1;
     }
 }

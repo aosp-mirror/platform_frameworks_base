@@ -16,5 +16,4 @@
 
 package android.app.usage;
 
-parcelable UsageStats;
-parcelable UsageStats.Event;
+parcelable UsageEvents;

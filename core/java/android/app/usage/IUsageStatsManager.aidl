@@ -16,8 +16,8 @@
 
 package android.app.usage;
 
-import android.app.usage.UsageStats;
-import android.content.ComponentName;
+import android.app.usage.UsageEvents;
+import android.content.pm.ParceledListSlice;
 
 /**
  * System private API for talking with the UsageStatsManagerService.
@@ -25,6 +25,7 @@ import android.content.ComponentName;
  * {@hide}
  */
 interface IUsageStatsManager {
-    UsageStats[] getStatsSince(int bucketType, long time, String callingPackage);
-    UsageStats.Event[] getEventsSince(long time, String callingPackage);
+    ParceledListSlice queryUsageStats(int bucketType, long beginTime, long endTime,
+            String callingPackage);
+    UsageEvents queryEvents(long beginTime, long endTime, String callingPackage);
 }
