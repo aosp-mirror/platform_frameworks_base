@@ -20,6 +20,7 @@ import android.app.ActivityManager.ProcessErrorStateInfo;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
+import android.app.UiAutomation;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -66,6 +67,18 @@ public class MemoryUsageTest extends InstrumentationTestCase {
     private Map<String, String> mNameToResultKey;
     private Set<String> mPersistentProcesses;
     private IActivityManager mAm;
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_FREEZE_0);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_UNFREEZE);
+        super.tearDown();
+    }
 
     public void testMemory() {
         MemoryUsageInstrumentation instrumentation =
