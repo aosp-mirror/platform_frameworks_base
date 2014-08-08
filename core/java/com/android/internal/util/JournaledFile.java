@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * @Deprecated Use {@link com.android.internal.os.AtomicFile} instead.  It would
+ * @deprecated Use {@link com.android.internal.os.AtomicFile} instead.  It would
  * be nice to update all existing uses of this to switch to AtomicFile, but since
  * their on-file semantics are slightly different that would run the risk of losing
  * data if at the point of the platform upgrade to the new code it would need to
