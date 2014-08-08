@@ -16,11 +16,11 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.PackageManager.INSTALL_FAILED_ABORTED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
-import static android.content.pm.PackageManager.INSTALL_FAILED_REJECTED;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
@@ -577,7 +577,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mHandler.obtainMessage(MSG_COMMIT).sendToTarget();
         } else {
             destroyInternal();
-            dispatchSessionFinished(INSTALL_FAILED_REJECTED, "User rejected permissions", null);
+            dispatchSessionFinished(INSTALL_FAILED_ABORTED, "User rejected permissions", null);
         }
     }
 
@@ -591,7 +591,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Override
     public void abandon() {
         destroyInternal();
-        dispatchSessionFinished(INSTALL_FAILED_INTERNAL_ERROR, "Session was abandoned", null);
+        dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
     }
 
     private void dispatchSessionFinished(int returnCode, String msg, Bundle extras) {

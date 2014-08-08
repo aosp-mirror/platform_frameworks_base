@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageInstaller.CommitCallback;
+import android.content.pm.PackageInstaller.UninstallCallback;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -771,7 +772,7 @@ public abstract class PackageManager {
     public static final int NO_NATIVE_LIBRARIES = -114;
 
     /** {@hide} */
-    public static final int INSTALL_FAILED_REJECTED = -115;
+    public static final int INSTALL_FAILED_ABORTED = -115;
 
     /**
      * Flag parameter for {@link #deletePackage} to indicate that you don't want to delete the
@@ -845,7 +846,10 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public static final int DELETE_FAILED_OWNER_BLOCKED= -4;
+    public static final int DELETE_FAILED_OWNER_BLOCKED = -4;
+
+    /** {@hide} */
+    public static final int DELETE_FAILED_ABORTED = -5;
 
     /**
      * Return code that is passed to the {@link IPackageMoveObserver} by
@@ -3833,7 +3837,7 @@ public abstract class PackageManager {
             case INSTALL_FAILED_USER_RESTRICTED: return "INSTALL_FAILED_USER_RESTRICTED";
             case INSTALL_FAILED_DUPLICATE_PERMISSION: return "INSTALL_FAILED_DUPLICATE_PERMISSION";
             case INSTALL_FAILED_NO_MATCHING_ABIS: return "INSTALL_FAILED_NO_MATCHING_ABIS";
-            case INSTALL_FAILED_REJECTED: return "INSTALL_FAILED_REJECTED";
+            case INSTALL_FAILED_ABORTED: return "INSTALL_FAILED_ABORTED";
             default: return Integer.toString(status);
         }
     }
@@ -3861,8 +3865,8 @@ public abstract class PackageManager {
             case INSTALL_FAILED_CONTAINER_ERROR: return CommitCallback.FAILURE_STORAGE;
             case INSTALL_FAILED_INVALID_INSTALL_LOCATION: return CommitCallback.FAILURE_STORAGE;
             case INSTALL_FAILED_MEDIA_UNAVAILABLE: return CommitCallback.FAILURE_STORAGE;
-            case INSTALL_FAILED_VERIFICATION_TIMEOUT: return CommitCallback.FAILURE_REJECTED;
-            case INSTALL_FAILED_VERIFICATION_FAILURE: return CommitCallback.FAILURE_REJECTED;
+            case INSTALL_FAILED_VERIFICATION_TIMEOUT: return CommitCallback.FAILURE_ABORTED;
+            case INSTALL_FAILED_VERIFICATION_FAILURE: return CommitCallback.FAILURE_ABORTED;
             case INSTALL_FAILED_PACKAGE_CHANGED: return CommitCallback.FAILURE_INVALID;
             case INSTALL_FAILED_UID_CHANGED: return CommitCallback.FAILURE_INVALID;
             case INSTALL_FAILED_VERSION_DOWNGRADE: return CommitCallback.FAILURE_INVALID;
@@ -3880,7 +3884,7 @@ public abstract class PackageManager {
             case INSTALL_FAILED_USER_RESTRICTED: return CommitCallback.FAILURE_INCOMPATIBLE;
             case INSTALL_FAILED_DUPLICATE_PERMISSION: return CommitCallback.FAILURE_CONFLICT;
             case INSTALL_FAILED_NO_MATCHING_ABIS: return CommitCallback.FAILURE_INCOMPATIBLE;
-            case INSTALL_FAILED_REJECTED: return CommitCallback.FAILURE_REJECTED;
+            case INSTALL_FAILED_ABORTED: return CommitCallback.FAILURE_ABORTED;
             default: return CommitCallback.FAILURE_UNKNOWN;
         }
     }
@@ -3893,7 +3897,20 @@ public abstract class PackageManager {
             case DELETE_FAILED_DEVICE_POLICY_MANAGER: return "DELETE_FAILED_DEVICE_POLICY_MANAGER";
             case DELETE_FAILED_USER_RESTRICTED: return "DELETE_FAILED_USER_RESTRICTED";
             case DELETE_FAILED_OWNER_BLOCKED: return "DELETE_FAILED_OWNER_BLOCKED";
+            case DELETE_FAILED_ABORTED: return "DELETE_FAILED_ABORTED";
             default: return Integer.toString(status);
+        }
+    }
+
+    /** {@hide} */
+    public static int deleteStatusToFailureReason(int status) {
+        switch (status) {
+            case DELETE_FAILED_INTERNAL_ERROR: return UninstallCallback.FAILURE_UNKNOWN;
+            case DELETE_FAILED_DEVICE_POLICY_MANAGER: return UninstallCallback.FAILURE_BLOCKED;
+            case DELETE_FAILED_USER_RESTRICTED: return UninstallCallback.FAILURE_BLOCKED;
+            case DELETE_FAILED_OWNER_BLOCKED: return UninstallCallback.FAILURE_BLOCKED;
+            case DELETE_FAILED_ABORTED: return UninstallCallback.FAILURE_ABORTED;
+            default: return UninstallCallback.FAILURE_UNKNOWN;
         }
     }
 }

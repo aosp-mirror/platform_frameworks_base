@@ -92,6 +92,9 @@ public class PackageInstaller {
      */
     public static final String EXTRA_SESSION_ID = "android.content.pm.extra.SESSION_ID";
 
+    /** {@hide} */
+    public static final String EXTRA_CALLBACK = "android.content.pm.extra.CALLBACK";
+
     private final PackageManager mPm;
     private final IPackageInstaller mInstaller;
     private final int mUserId;
@@ -554,6 +557,26 @@ public class PackageInstaller {
      */
     public static abstract class UninstallCallback {
         /**
+         * Generic unknown failure. The system will always try to provide a more
+         * specific failure reason, but in some rare cases this may be
+         * delivered.
+         */
+        public static final int FAILURE_UNKNOWN = 0;
+
+        /**
+         * This uninstall was blocked. The package may be required for core
+         * system operation, or the user may be restricted. Attempting to
+         * uninstall again will have the same result.
+         */
+        public static final int FAILURE_BLOCKED = 1;
+
+        /**
+         * This uninstall was actively aborted. For example, the user declined
+         * to uninstall. You may try to uninstall again.
+         */
+        public static final int FAILURE_ABORTED = 2;
+
+        /**
          * User action is required to proceed. You can start the given intent
          * activity to involve the user and continue.
          * <p>
@@ -564,7 +587,7 @@ public class PackageInstaller {
         public abstract void onUserActionRequired(Intent intent);
 
         public abstract void onSuccess();
-        public abstract void onFailure(String msg);
+        public abstract void onFailure(int failureReason, String msg, Bundle extras);
     }
 
     /** {@hide} */
@@ -585,8 +608,9 @@ public class PackageInstaller {
             if (returnCode == PackageManager.DELETE_SUCCEEDED) {
                 target.onSuccess();
             } else {
+                final int failureReason = PackageManager.deleteStatusToFailureReason(returnCode);
                 msg = PackageManager.deleteStatusToString(returnCode) + ": " + msg;
-                target.onFailure(msg);
+                target.onFailure(failureReason, msg, null);
             }
         }
     }
@@ -639,13 +663,13 @@ public class PackageInstaller {
         public static final int FAILURE_INCOMPATIBLE = 4;
 
         /**
-         * This install session failed because it was rejected. For example, the
-         * user declined requested permissions, or a package verifier rejected
-         * the session.
+         * This install session failed because it was actively aborted. For
+         * example, the user declined requested permissions, or a verifier
+         * rejected the session.
          *
          * @see PackageManager#VERIFICATION_REJECT
          */
-        public static final int FAILURE_REJECTED = 5;
+        public static final int FAILURE_ABORTED = 5;
 
         public static final String EXTRA_PACKAGE_NAME = "android.content.pm.extra.PACKAGE_NAME";
 
