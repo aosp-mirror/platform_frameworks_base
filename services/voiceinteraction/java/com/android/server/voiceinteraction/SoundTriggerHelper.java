@@ -159,7 +159,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 try {
                     mActiveListener.onError(STATUS_ERROR);
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "RemoteException in onDetectionStopped");
+                    Slog.w(TAG, "RemoteException in onDetectionStopped", e);
                 }
                 mActiveListener = null;
             }
