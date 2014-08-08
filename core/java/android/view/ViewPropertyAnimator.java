@@ -253,9 +253,6 @@ public class ViewPropertyAnimator {
     ViewPropertyAnimator(View view) {
         mView = view;
         view.ensureTransformationInfo();
-        if (view.getContext().getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.L) {
-            mRTBackend = new ViewPropertyAnimatorRT(view);
-        }
     }
 
     /**
