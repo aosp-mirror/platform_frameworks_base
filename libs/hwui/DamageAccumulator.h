@@ -35,7 +35,6 @@ class IDamageAccumulator {
 public:
     virtual void pushTransform(const RenderNode* transform) = 0;
     virtual void pushTransform(const Matrix4* transform) = 0;
-    virtual void pushNullTransform() = 0;
     virtual void popTransform() = 0;
     virtual void dirty(float left, float top, float right, float bottom) = 0;
     virtual void peekAtDirty(SkRect* dest) = 0;
@@ -54,9 +53,6 @@ public:
     // will be affected by the transform when popTransform() is called.
     virtual void pushTransform(const RenderNode* transform);
     virtual void pushTransform(const Matrix4* transform);
-    // This is used in combination with peekAtDirty to inspect the damage
-    // area of a subtree
-    virtual void pushNullTransform();
 
     // Pops a transform node from the stack, propagating the dirty rect
     // up to the parent node. Returns the IDamageTransform that was just applied
@@ -83,7 +79,6 @@ class NullDamageAccumulator : public IDamageAccumulator {
 public:
     virtual void pushTransform(const RenderNode* transform) { }
     virtual void pushTransform(const Matrix4* transform) { }
-    virtual void pushNullTransform() { }
     virtual void popTransform() { }
     virtual void dirty(float left, float top, float right, float bottom) { }
     virtual void peekAtDirty(SkRect* dest) { dest->setEmpty(); }

@@ -249,6 +249,10 @@ void CanvasPropertyPrimitiveAnimator::setValue(RenderNode* target, float value) 
     mProperty->value = value;
 }
 
+uint32_t CanvasPropertyPrimitiveAnimator::dirtyMask() {
+    return RenderNode::DISPLAY_LIST;
+}
+
 /************************************************************
  *  CanvasPropertySkPaintAnimator
  ************************************************************/
@@ -288,6 +292,10 @@ void CanvasPropertyPaintAnimator::setValue(RenderNode* target, float value) {
     LOG_ALWAYS_FATAL("Unknown field %d", (int) mField);
 }
 
+uint32_t CanvasPropertyPaintAnimator::dirtyMask() {
+    return RenderNode::DISPLAY_LIST;
+}
+
 RevealAnimator::RevealAnimator(int centerX, int centerY,
         float startValue, float finalValue)
         : BaseRenderNodeAnimator(finalValue)
@@ -303,6 +311,10 @@ float RevealAnimator::getValue(RenderNode* target) const {
 void RevealAnimator::setValue(RenderNode* target, float value) {
     target->animatorProperties().mutableRevealClip().set(true,
             mCenterX, mCenterY, value);
+}
+
+uint32_t RevealAnimator::dirtyMask() {
+    return RenderNode::GENERIC;
 }
 
 } /* namespace uirenderer */

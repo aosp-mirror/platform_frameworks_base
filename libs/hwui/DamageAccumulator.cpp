@@ -83,11 +83,6 @@ void DamageAccumulator::pushTransform(const Matrix4* transform) {
     mHead->matrix4 = transform;
 }
 
-void DamageAccumulator::pushNullTransform() {
-    pushCommon();
-    mHead->type = TransformNone;
-}
-
 void DamageAccumulator::popTransform() {
     LOG_ALWAYS_FATAL_IF(mHead->prev == mHead, "Cannot pop the root frame!");
     DirtyStack* dirtyFrame = mHead;

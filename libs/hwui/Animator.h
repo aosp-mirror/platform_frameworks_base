@@ -62,7 +62,7 @@ public:
     bool isFinished() { return mPlayState == FINISHED; }
     float finalValue() { return mFinalValue; }
 
-    ANDROID_API virtual uint32_t dirtyMask() { return 0; }
+    ANDROID_API virtual uint32_t dirtyMask() = 0;
 
 protected:
     BaseRenderNodeAnimator(float finalValue);
@@ -145,6 +145,9 @@ class CanvasPropertyPrimitiveAnimator : public BaseRenderNodeAnimator {
 public:
     ANDROID_API CanvasPropertyPrimitiveAnimator(CanvasPropertyPrimitive* property,
             float finalValue);
+
+    ANDROID_API virtual uint32_t dirtyMask();
+
 protected:
     virtual float getValue(RenderNode* target) const;
     virtual void setValue(RenderNode* target, float value);
@@ -161,6 +164,9 @@ public:
 
     ANDROID_API CanvasPropertyPaintAnimator(CanvasPropertyPaint* property,
             PaintField field, float finalValue);
+
+    ANDROID_API virtual uint32_t dirtyMask();
+
 protected:
     virtual float getValue(RenderNode* target) const;
     virtual void setValue(RenderNode* target, float value);
@@ -173,13 +179,15 @@ class RevealAnimator : public BaseRenderNodeAnimator {
 public:
     ANDROID_API RevealAnimator(int centerX, int centerY,
             float startValue, float finalValue);
+
+    ANDROID_API virtual uint32_t dirtyMask();
+
 protected:
     virtual float getValue(RenderNode* target) const;
     virtual void setValue(RenderNode* target, float value);
 
 private:
     int mCenterX, mCenterY;
-    bool mInverseClip;
 };
 
 } /* namespace uirenderer */
