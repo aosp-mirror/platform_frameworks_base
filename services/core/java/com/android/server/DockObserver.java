@@ -201,9 +201,6 @@ final class DockObserver extends SystemService {
             // There are many components in the system watching for this so as to
             // adjust audio routing, screen orientation, etc.
             getContext().sendStickyBroadcastAsUser(intent, UserHandle.ALL);
-
-            // Release the wake lock that was acquired when the message was posted.
-            mWakeLock.release();
         }
     }
 
@@ -213,6 +210,7 @@ final class DockObserver extends SystemService {
             switch (msg.what) {
                 case MSG_DOCK_STATE_CHANGED:
                     handleDockStateChange();
+                    mWakeLock.release();
                     break;
             }
         }
