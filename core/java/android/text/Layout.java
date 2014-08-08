@@ -273,16 +273,22 @@ public abstract class Layout {
                 // Draw all leading margin spans.  Adjust left or right according
                 // to the paragraph direction of the line.
                 final int length = spans.length;
+                boolean useFirstLineMargin = isFirstParaLine;
+                for (int n = 0; n < length; n++) {
+                    if (spans[n] instanceof LeadingMarginSpan2) {
+                        int count = ((LeadingMarginSpan2) spans[n]).getLeadingMarginLineCount();
+                        int startLine = getLineForOffset(sp.getSpanStart(spans[n]));
+                        // if there is more than one LeadingMarginSpan2, use
+                        // the count that is greatest
+                        if (i < startLine + count) {
+                            useFirstLineMargin = true;
+                            break;
+                        }
+                    }
+                }
                 for (int n = 0; n < length; n++) {
                     if (spans[n] instanceof LeadingMarginSpan) {
                         LeadingMarginSpan margin = (LeadingMarginSpan) spans[n];
-                        boolean useFirstLineMargin = isFirstParaLine;
-                        if (margin instanceof LeadingMarginSpan2) {
-                            int count = ((LeadingMarginSpan2) margin).getLeadingMarginLineCount();
-                            int startLine = getLineForOffset(sp.getSpanStart(margin));
-                            useFirstLineMargin = i < startLine + count;
-                        }
-
                         if (dir == DIR_RIGHT_TO_LEFT) {
                             margin.drawLeadingMargin(canvas, paint, right, dir, ltop,
                                                      lbaseline, lbottom, buf,
@@ -1535,15 +1541,18 @@ public abstract class Layout {
         boolean isFirstParaLine = lineStart == 0 ||
             spanned.charAt(lineStart - 1) == '\n';
 
+        boolean useFirstLineMargin = isFirstParaLine;
+        for (int i = 0; i < spans.length; i++) {
+            if (spans[i] instanceof LeadingMarginSpan2) {
+                int spStart = spanned.getSpanStart(spans[i]);
+                int spanLine = getLineForOffset(spStart);
+                int count = ((LeadingMarginSpan2) spans[i]).getLeadingMarginLineCount();
+                // if there is more than one LeadingMarginSpan2, use the count that is greatest
+                useFirstLineMargin |= line < spanLine + count;
+            }
+        }
         for (int i = 0; i < spans.length; i++) {
             LeadingMarginSpan span = spans[i];
-            boolean useFirstLineMargin = isFirstParaLine;
-            if (span instanceof LeadingMarginSpan2) {
-                int spStart = spanned.getSpanStart(span);
-                int spanLine = getLineForOffset(spStart);
-                int count = ((LeadingMarginSpan2)span).getLeadingMarginLineCount();
-                useFirstLineMargin = line < spanLine + count;
-            }
             margin += span.getLeadingMargin(useFirstLineMargin);
         }
 
