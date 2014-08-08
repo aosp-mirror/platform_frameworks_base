@@ -768,13 +768,13 @@
     <string name="disconnect_vpn">Disconnect VPN</string>
 
     <!-- Monitoring dialog device owner body text [CHAR LIMIT=300] -->
-    <string name="monitoring_description_device_owned">This device is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\n\nYour administrator can monitor your network activity, including emails, apps and secure websites.\n\nFor more information, contact your administrator.</string>
+    <string name="monitoring_description_device_owned">This device is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\n\nYour administrator can monitor your device and network activity, including emails, apps and secure websites.\n\nFor more information, contact your administrator.</string>
 
     <!-- Monitoring dialog non-legacy VPN text [CHAR LIMIT=300] -->
-    <string name="monitoring_description_vpn">You gave \"<xliff:g id="application">%1$s</xliff:g>\" permission to set up a VPN connection.\n\nThis app can monitor your network activity, including emails, apps and secure websites.</string>
+    <string name="monitoring_description_vpn">You gave \"<xliff:g id="application">%1$s</xliff:g>\" permission to set up a VPN connection.\n\nThis app can monitor your device and network activity, including emails, apps and secure websites.</string>
 
     <!-- Monitoring dialog legacy VPN text [CHAR LIMIT=300] -->
-    <string name="monitoring_description_legacy_vpn">You\'re connected to a VPN (\"<xliff:g id="application">%1$s</xliff:g>\").\n\nYour VPN service provider can monitor your network activity including emails, apps, and secure websites.</string>
+    <string name="monitoring_description_legacy_vpn">You\'re connected to a VPN (\"<xliff:g id="application">%1$s</xliff:g>\").\n\nYour VPN service provider can monitor your device and network activity including emails, apps, and secure websites.</string>
 
     <!-- Monitoring dialog non-legacy VPN with device owner text [CHAR LIMIT=300] -->
     <string name="monitoring_description_vpn_device_owned">This device is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\n\nYour administrator is capable of monitoring your network activity including emails, apps, and secure websites. For more information, contact your administrator.\n\nAlso, you gave \"<xliff:g id="application">%2$s</xliff:g>\" permission to set up a VPN connection. This app can monitor network activity too.</string>
