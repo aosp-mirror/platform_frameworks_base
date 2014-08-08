@@ -2057,6 +2057,13 @@ package android {
     field public static final int TextAppearance_StatusBar_EventContent = 16973927; // 0x1030067
     field public static final int TextAppearance_StatusBar_EventContent_Title = 16973928; // 0x1030068
     field public static final int TextAppearance_StatusBar_Icon = 16973926; // 0x1030066
+    field public static final int TextAppearance_StatusBar_Material = 16974559; // 0x10302df
+    field public static final int TextAppearance_StatusBar_Material_EventContent = 16974560; // 0x10302e0
+    field public static final int TextAppearance_StatusBar_Material_EventContent_Emphasis = 16974565; // 0x10302e5
+    field public static final int TextAppearance_StatusBar_Material_EventContent_Info = 16974563; // 0x10302e3
+    field public static final int TextAppearance_StatusBar_Material_EventContent_Line2 = 16974562; // 0x10302e2
+    field public static final int TextAppearance_StatusBar_Material_EventContent_Time = 16974564; // 0x10302e4
+    field public static final int TextAppearance_StatusBar_Material_EventContent_Title = 16974561; // 0x10302e1
     field public static final int TextAppearance_StatusBar_Title = 16973925; // 0x1030065
     field public static final int TextAppearance_SuggestionHighlight = 16974104; // 0x1030118
     field public static final int TextAppearance_Theme = 16973888; // 0x1030040
