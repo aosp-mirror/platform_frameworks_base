@@ -329,7 +329,7 @@ public abstract class ContentResolver {
 
         try {
             String type = ActivityManagerNative.getDefault().getProviderMimeType(
-                    url, UserHandle.myUserId());
+                    ContentProvider.getUriWithoutUserId(url), resolveUserId(url));
             return type;
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
