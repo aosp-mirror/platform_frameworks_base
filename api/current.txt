@@ -5752,7 +5752,7 @@ package android.appwidget {
     method protected android.appwidget.AppWidgetHostView onCreateView(android.content.Context, int, android.appwidget.AppWidgetProviderInfo);
     method protected void onProviderChanged(int, android.appwidget.AppWidgetProviderInfo);
     method protected void onProvidersChanged();
-    method public final void startAppWidgetConfigureActivityForResult(android.app.Activity, android.content.Intent, int);
+    method public final void startAppWidgetConfigureActivityForResult(android.app.Activity, int, int, int, android.os.Bundle);
     method public void startListening();
     method public void stopListening();
   }
@@ -5780,7 +5780,7 @@ package android.appwidget {
     method public android.appwidget.AppWidgetProviderInfo getAppWidgetInfo(int);
     method public android.os.Bundle getAppWidgetOptions(int);
     method public java.util.List<android.appwidget.AppWidgetProviderInfo> getInstalledProviders();
-    method public java.util.List<android.appwidget.AppWidgetProviderInfo> getInstalledProvidersForProfiles(android.os.UserHandle[]);
+    method public java.util.List<android.appwidget.AppWidgetProviderInfo> getInstalledProvidersForProfile(android.os.UserHandle);
     method public static android.appwidget.AppWidgetManager getInstance(android.content.Context);
     method public void notifyAppWidgetViewDataChanged(int[], int);
     method public void notifyAppWidgetViewDataChanged(int, int);
