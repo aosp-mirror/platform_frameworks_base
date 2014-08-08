@@ -8679,10 +8679,10 @@ package android.content.pm {
     method public abstract void onSuccess();
     method public abstract void onUserActionRequired(android.content.Intent);
     field public static final java.lang.String EXTRA_PACKAGE_NAME = "android.content.pm.extra.PACKAGE_NAME";
+    field public static final int FAILURE_ABORTED = 5; // 0x5
     field public static final int FAILURE_CONFLICT = 2; // 0x2
     field public static final int FAILURE_INCOMPATIBLE = 4; // 0x4
     field public static final int FAILURE_INVALID = 1; // 0x1
-    field public static final int FAILURE_REJECTED = 5; // 0x5
     field public static final int FAILURE_STORAGE = 3; // 0x3
     field public static final int FAILURE_UNKNOWN = 0; // 0x0
   }
@@ -8709,9 +8709,12 @@ package android.content.pm {
 
   public static abstract class PackageInstaller.UninstallCallback {
     ctor public PackageInstaller.UninstallCallback();
-    method public abstract void onFailure(java.lang.String);
+    method public abstract void onFailure(int, java.lang.String, android.os.Bundle);
     method public abstract void onSuccess();
     method public abstract void onUserActionRequired(android.content.Intent);
+    field public static final int FAILURE_ABORTED = 2; // 0x2
+    field public static final int FAILURE_BLOCKED = 1; // 0x1
+    field public static final int FAILURE_UNKNOWN = 0; // 0x0
   }
 
   public class PackageItemInfo {
