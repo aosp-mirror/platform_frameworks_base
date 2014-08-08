@@ -770,6 +770,9 @@ public abstract class PackageManager {
      */
     public static final int NO_NATIVE_LIBRARIES = -114;
 
+    /** {@hide} */
+    public static final int INSTALL_FAILED_REJECTED = -115;
+
     /**
      * Flag parameter for {@link #deletePackage} to indicate that you don't want to delete the
      * package's data directory.
@@ -3830,6 +3833,7 @@ public abstract class PackageManager {
             case INSTALL_FAILED_USER_RESTRICTED: return "INSTALL_FAILED_USER_RESTRICTED";
             case INSTALL_FAILED_DUPLICATE_PERMISSION: return "INSTALL_FAILED_DUPLICATE_PERMISSION";
             case INSTALL_FAILED_NO_MATCHING_ABIS: return "INSTALL_FAILED_NO_MATCHING_ABIS";
+            case INSTALL_FAILED_REJECTED: return "INSTALL_FAILED_REJECTED";
             default: return Integer.toString(status);
         }
     }
@@ -3857,8 +3861,8 @@ public abstract class PackageManager {
             case INSTALL_FAILED_CONTAINER_ERROR: return CommitCallback.FAILURE_STORAGE;
             case INSTALL_FAILED_INVALID_INSTALL_LOCATION: return CommitCallback.FAILURE_STORAGE;
             case INSTALL_FAILED_MEDIA_UNAVAILABLE: return CommitCallback.FAILURE_STORAGE;
-            case INSTALL_FAILED_VERIFICATION_TIMEOUT: return CommitCallback.FAILURE_UNKNOWN;
-            case INSTALL_FAILED_VERIFICATION_FAILURE: return CommitCallback.FAILURE_UNKNOWN;
+            case INSTALL_FAILED_VERIFICATION_TIMEOUT: return CommitCallback.FAILURE_REJECTED;
+            case INSTALL_FAILED_VERIFICATION_FAILURE: return CommitCallback.FAILURE_REJECTED;
             case INSTALL_FAILED_PACKAGE_CHANGED: return CommitCallback.FAILURE_INVALID;
             case INSTALL_FAILED_UID_CHANGED: return CommitCallback.FAILURE_INVALID;
             case INSTALL_FAILED_VERSION_DOWNGRADE: return CommitCallback.FAILURE_INVALID;
@@ -3876,6 +3880,7 @@ public abstract class PackageManager {
             case INSTALL_FAILED_USER_RESTRICTED: return CommitCallback.FAILURE_INCOMPATIBLE;
             case INSTALL_FAILED_DUPLICATE_PERMISSION: return CommitCallback.FAILURE_CONFLICT;
             case INSTALL_FAILED_NO_MATCHING_ABIS: return CommitCallback.FAILURE_INCOMPATIBLE;
+            case INSTALL_FAILED_REJECTED: return CommitCallback.FAILURE_REJECTED;
             default: return CommitCallback.FAILURE_UNKNOWN;
         }
     }
