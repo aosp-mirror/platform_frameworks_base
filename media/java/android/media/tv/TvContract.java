@@ -53,13 +53,25 @@ public final class TvContract {
 
     private static final String PATH_CHANNEL = "channel";
     private static final String PATH_PROGRAM = "program";
-    private static final String PATH_INPUT = "input";
     private static final String PATH_PASSTHROUGH = "passthrough";
+
+    /**
+     * An optional query, update or delete URI parameter that allows the caller to specify TV input
+     * ID to filter channels.
+     * @hide
+     */
+    public static final String PARAM_INPUT = "input";
+
+    /**
+     * An optional query, update or delete URI parameter that allows the caller to specify channel
+     * ID to filter programs.
+     * @hide
+     */
+    public static final String PARAM_CHANNEL = "channel";
 
     /**
      * An optional query, update or delete URI parameter that allows the caller to specify start
      * time (in milliseconds since the epoch) to filter programs.
-     *
      * @hide
      */
     public static final String PARAM_START_TIME = "start_time";
@@ -67,7 +79,6 @@ public final class TvContract {
     /**
      * An optional query, update or delete URI parameter that allows the caller to specify end time
      * (in milliseconds since the epoch) to filter programs.
-     *
      * @hide
      */
     public static final String PARAM_END_TIME = "end_time";
@@ -76,7 +87,6 @@ public final class TvContract {
      * A query, update or delete URI parameter that allows the caller to operate on all or
      * browsable-only channels. If set to "true", the rows that contain non-browsable channels are
      * not affected.
-     *
      * @hide
      */
     public static final String PARAM_BROWSABLE_ONLY = "browsable_only";
@@ -84,7 +94,6 @@ public final class TvContract {
     /**
      * A optional query, update or delete URI parameter that allows the caller to specify canonical
      * genre to filter programs.
-     *
      * @hide
      */
     public static final String PARAM_CANONICAL_GENRE = "canonical_genre";
@@ -116,17 +125,7 @@ public final class TvContract {
      */
     public static final Uri buildChannelUriForPassthroughTvInput(String inputId) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY)
-                .appendPath(PATH_INPUT).appendPath(inputId).appendPath(PATH_CHANNEL)
-                .appendPath(PATH_PASSTHROUGH).build();
-    }
-
-    /**
-     * Returns true, if {@code channelUri} is a channel URI for a passthrough TV input.
-     * @hide
-     */
-    @SystemApi
-    public static final boolean isChannelUriForPassthroughTvInput(Uri channelUri) {
-        return channelUri.toString().endsWith(PATH_PASSTHROUGH);
+                .appendPath(PATH_PASSTHROUGH).appendPath(inputId).build();
     }
 
     /**
@@ -144,7 +143,7 @@ public final class TvContract {
      * @param channelUri The URI of the channel whose logo is pointed to.
      */
     public static final Uri buildChannelLogoUri(Uri channelUri) {
-        if (!PATH_CHANNEL.equals(channelUri.getPathSegments().get(0))) {
+        if (!isChannelUriForTunerTvInput(channelUri)) {
             throw new IllegalArgumentException("Not a channel: " + channelUri);
         }
         return Uri.withAppendedPath(channelUri, Channels.Logo.CONTENT_DIRECTORY);
@@ -169,8 +168,8 @@ public final class TvContract {
      * @hide
      */
     public static final Uri buildChannelsUriForInput(String inputId, boolean browsableOnly) {
-        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY)
-                .appendPath(PATH_INPUT).appendPath(inputId).appendPath(PATH_CHANNEL)
+        return Channels.CONTENT_URI.buildUpon()
+                .appendQueryParameter(PARAM_INPUT, inputId)
                 .appendQueryParameter(PARAM_BROWSABLE_ONLY, String.valueOf(browsableOnly)).build();
     }
 
@@ -194,8 +193,7 @@ public final class TvContract {
 
         Uri uri;
         if (inputId == null) {
-            uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY)
-                    .appendPath(PATH_CHANNEL).build();
+            uri = Channels.CONTENT_URI;
         } else {
             uri = buildChannelsUriForInput(inputId, browsableOnly);
         }
@@ -217,9 +215,8 @@ public final class TvContract {
      * @param channelId The ID of the channel to return programs for.
      */
     public static final Uri buildProgramsUriForChannel(long channelId) {
-        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY)
-                .appendPath(PATH_CHANNEL).appendPath(String.valueOf(channelId))
-                .appendPath(PATH_PROGRAM).build();
+        return Programs.CONTENT_URI.buildUpon()
+                .appendQueryParameter(PARAM_CHANNEL, String.valueOf(channelId)).build();
     }
 
     /**
@@ -228,7 +225,7 @@ public final class TvContract {
      * @param channelUri The URI of the channel to return programs for.
      */
     public static final Uri buildProgramsUriForChannel(Uri channelUri) {
-        if (!PATH_CHANNEL.equals(channelUri.getPathSegments().get(0))) {
+        if (!isChannelUriForTunerTvInput(channelUri)) {
             throw new IllegalArgumentException("Not a channel: " + channelUri);
         }
         return buildProgramsUriForChannel(ContentUris.parseId(channelUri));
@@ -263,7 +260,7 @@ public final class TvContract {
      */
     public static final Uri buildProgramsUriForChannel(Uri channelUri, long startTime,
             long endTime) {
-        if (!PATH_CHANNEL.equals(channelUri.getPathSegments().get(0))) {
+        if (!isChannelUriForTunerTvInput(channelUri)) {
             throw new IllegalArgumentException("Not a channel: " + channelUri);
         }
         return buildProgramsUriForChannel(ContentUris.parseId(channelUri), startTime, endTime);
@@ -279,41 +276,47 @@ public final class TvContract {
         return ContentUris.withAppendedId(WatchedPrograms.CONTENT_URI, watchedProgramId);
     }
 
-    /**
-     * Extracts the {@link Channels#COLUMN_INPUT_ID} from a given URI.
-     *
-     * @param channelsUri A URI constructed by {@link #buildChannelsUriForInput(String)},
-     *            {@link #buildChannelsUriForInput(String, boolean)}, or
-     *            {@link #buildChannelsUriForCanonicalGenre(String, String, boolean)}.
-     * @hide
-     */
-    public static final String getInputId(Uri channelsUri) {
-        final List<String> paths = channelsUri.getPathSegments();
-        if (paths.size() < 3) {
-            throw new IllegalArgumentException("Not channels: " + channelsUri);
-        }
-        if (!PATH_INPUT.equals(paths.get(0)) || !PATH_CHANNEL.equals(paths.get(2))) {
-            throw new IllegalArgumentException("Not channels: " + channelsUri);
-        }
-        return paths.get(1);
+    private static final boolean isTvUri(Uri uri) {
+        return uri != null && ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())
+                && AUTHORITY.equals(uri.getAuthority());
+    }
+
+    private static final boolean isTwoSegmentUriStartingWith(Uri uri, String pathSegment) {
+        List<String> pathSegments = uri.getPathSegments();
+        return pathSegments.size() == 2 && pathSegment.equals(pathSegments.get(0));
     }
 
     /**
-     * Extracts the {@link Channels#_ID} from a given URI.
-     *
-     * @param programsUri A URI constructed by {@link #buildProgramsUriForChannel(Uri)} or
-     *            {@link #buildProgramsUriForChannel(Uri, long, long)}.
+     * Returns true, if {@code uri} is a channel URI.
      * @hide
      */
-    public static final String getChannelId(Uri programsUri) {
-        final List<String> paths = programsUri.getPathSegments();
-        if (paths.size() < 3) {
-            throw new IllegalArgumentException("Not programs: " + programsUri);
-        }
-        if (!PATH_CHANNEL.equals(paths.get(0)) || !PATH_PROGRAM.equals(paths.get(2))) {
-            throw new IllegalArgumentException("Not programs: " + programsUri);
-        }
-        return paths.get(1);
+    public static final boolean isChannelUri(Uri uri) {
+        return isChannelUriForTunerTvInput(uri) || isChannelUriForPassthroughTvInput(uri);
+    }
+
+    /**
+     * Returns true, if {@code uri} is a channel URI for a tuner TV input.
+     * @hide
+     */
+    public static final boolean isChannelUriForTunerTvInput(Uri uri) {
+        return isTvUri(uri) && isTwoSegmentUriStartingWith(uri, PATH_CHANNEL);
+    }
+
+    /**
+     * Returns true, if {@code uri} is a channel URI for a passthrough TV input.
+     * @hide
+     */
+    @SystemApi
+    public static final boolean isChannelUriForPassthroughTvInput(Uri uri) {
+        return isTvUri(uri) && isTwoSegmentUriStartingWith(uri, PATH_PASSTHROUGH);
+    }
+
+    /**
+     * Returns true, if {@code uri} is a program URI.
+     * @hide
+     */
+    public static final boolean isProgramUri(Uri uri) {
+        return isTvUri(uri) && isTwoSegmentUriStartingWith(uri, PATH_PROGRAM);
     }
 
 
@@ -1104,7 +1107,6 @@ public final class TvContract {
     /**
      * Column definitions for the TV programs that the user watched. Applications do not have access
      * to this table.
-     *
      * @hide
      */
     public static final class WatchedPrograms implements BaseTvColumns {
