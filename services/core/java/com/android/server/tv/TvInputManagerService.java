@@ -1933,13 +1933,13 @@ public final class TvInputManagerService extends SystemService {
                         }
                     }
 
-                    List<HdmiDeviceInfo> cecDeviceInfoList =
-                            mTvInputHardwareManager.getHdmiCecInputDeviceList();
-                    for (HdmiDeviceInfo cecDeviceInfo : cecDeviceInfoList) {
+                    List<HdmiDeviceInfo> deviceInfoList =
+                            mTvInputHardwareManager.getHdmiDeviceList();
+                    for (HdmiDeviceInfo deviceInfo : deviceInfoList) {
                         try {
-                            serviceState.mService.notifyHdmiCecDeviceAdded(cecDeviceInfo);
+                            serviceState.mService.notifyHdmiDeviceAdded(deviceInfo);
                         } catch (RemoteException e) {
-                            Slog.e(TAG, "error in notifyHdmiCecDeviceAdded", e);
+                            Slog.e(TAG, "error in notifyHdmiDeviceAdded", e);
                         }
                     }
                 }
@@ -2025,11 +2025,11 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void addHdmiCecTvInput(int logicalAddress, TvInputInfo inputInfo) {
+        public void addHdmiTvInput(int logicalAddress, TvInputInfo inputInfo) {
             ensureHardwarePermission();
             ensureValidInput(inputInfo);
             synchronized (mLock) {
-                mTvInputHardwareManager.addHdmiCecTvInput(logicalAddress, inputInfo);
+                mTvInputHardwareManager.addHdmiTvInput(logicalAddress, inputInfo);
                 addTvInputLocked(inputInfo);
             }
         }
@@ -2275,32 +2275,32 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void onHdmiCecDeviceAdded(HdmiDeviceInfo cecDeviceInfo) {
+        public void onHdmiDeviceAdded(HdmiDeviceInfo deviceInfo) {
             synchronized (mLock) {
                 UserState userState = getUserStateLocked(mCurrentUserId);
                 // Broadcast the event to all hardware inputs.
                 for (ServiceState serviceState : userState.serviceStateMap.values()) {
                     if (!serviceState.mIsHardware || serviceState.mService == null) continue;
                     try {
-                        serviceState.mService.notifyHdmiCecDeviceAdded(cecDeviceInfo);
+                        serviceState.mService.notifyHdmiDeviceAdded(deviceInfo);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in notifyHdmiCecDeviceAdded", e);
+                        Slog.e(TAG, "error in notifyHdmiDeviceAdded", e);
                     }
                 }
             }
         }
 
         @Override
-        public void onHdmiCecDeviceRemoved(HdmiDeviceInfo cecDeviceInfo) {
+        public void onHdmiDeviceRemoved(HdmiDeviceInfo deviceInfo) {
             synchronized (mLock) {
                 UserState userState = getUserStateLocked(mCurrentUserId);
                 // Broadcast the event to all hardware inputs.
                 for (ServiceState serviceState : userState.serviceStateMap.values()) {
                     if (!serviceState.mIsHardware || serviceState.mService == null) continue;
                     try {
-                        serviceState.mService.notifyHdmiCecDeviceRemoved(cecDeviceInfo);
+                        serviceState.mService.notifyHdmiDeviceRemoved(deviceInfo);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in notifyHdmiCecDeviceRemoved", e);
+                        Slog.e(TAG, "error in notifyHdmiDeviceRemoved", e);
                     }
                 }
             }

@@ -103,10 +103,10 @@ public final class TvInputInfo implements Parcelable {
 
     private static final String XML_START_TAG_NAME = "tv-input";
     private static final String DELIMITER_INFO_IN_ID = "/";
-    private static final String PREFIX_CEC_DEVICE = "CEC";
+    private static final String PREFIX_HDMI_DEVICE = "HDMI";
     private static final String PREFIX_HARDWARE_DEVICE = "HW";
-    private static final int LENGTH_CEC_PHYSICAL_ADDRESS = 4;
-    private static final int LENGTH_CEC_LOGICAL_ADDRESS = 2;
+    private static final int LENGTH_HDMI_PHYSICAL_ADDRESS = 4;
+    private static final int LENGTH_HDMI_LOGICAL_ADDRESS = 2;
 
     private final ResolveInfo mService;
     private final String mId;
@@ -155,7 +155,7 @@ public final class TvInputInfo implements Parcelable {
      * instantiating it from the given Context, ResolveInfo, and HdmiDeviceInfo.
      *
      * @param service The ResolveInfo returned from the package manager about this TV input service.
-     * @param cecInfo The HdmiDeviceInfo for a HDMI CEC logical device.
+     * @param deviceInfo The HdmiDeviceInfo for a HDMI CEC logical device.
      * @param parentId The ID of this TV input's parent input. {@code null} if none exists.
      * @param iconUri The {@link android.net.Uri} to load the icon image.
      *        {@see android.content.ContentResolver#openInputStream}. If it is null, the application
@@ -166,12 +166,12 @@ public final class TvInputInfo implements Parcelable {
      */
     @SystemApi
     public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
-            HdmiDeviceInfo cecInfo, String parentId, String label, Uri iconUri)
+            HdmiDeviceInfo deviceInfo, String parentId, String label, Uri iconUri)
                     throws XmlPullParserException, IOException {
-        boolean isConnectedToHdmiSwitch = (cecInfo.getPhysicalAddress() & 0x0FFF) != 0;
-        return createTvInputInfo(context, service, generateInputIdForHdmiCec(
+        boolean isConnectedToHdmiSwitch = (deviceInfo.getPhysicalAddress() & 0x0FFF) != 0;
+        return createTvInputInfo(context, service, generateInputIdForHdmiDevice(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                cecInfo), parentId, TYPE_HDMI, label, iconUri, isConnectedToHdmiSwitch);
+                deviceInfo), parentId, TYPE_HDMI, label, iconUri, isConnectedToHdmiSwitch);
     }
 
     /**
@@ -497,16 +497,16 @@ public final class TvInputInfo implements Parcelable {
      * Used to generate an input id from a ComponentName and HdmiDeviceInfo.
      *
      * @param name the component name for generating an input id.
-     * @param cecInfo HdmiDeviceInfo describing this TV input.
-     * @return the generated input id for the given {@code name} and {@code cecInfo}.
+     * @param deviceInfo HdmiDeviceInfo describing this TV input.
+     * @return the generated input id for the given {@code name} and {@code deviceInfo}.
      */
-    private static final String generateInputIdForHdmiCec(
-            ComponentName name, HdmiDeviceInfo cecInfo) {
-        // Example of the format : "/CEC%04X%02X"
-        String format = String.format("%s%s%%0%sX%%0%sX", DELIMITER_INFO_IN_ID, PREFIX_CEC_DEVICE,
-                LENGTH_CEC_PHYSICAL_ADDRESS, LENGTH_CEC_LOGICAL_ADDRESS);
+    private static final String generateInputIdForHdmiDevice(
+            ComponentName name, HdmiDeviceInfo deviceInfo) {
+        // Example of the format : "/HDMI%04X%02X"
+        String format = String.format("%s%s%%0%sX%%0%sX", DELIMITER_INFO_IN_ID, PREFIX_HDMI_DEVICE,
+                LENGTH_HDMI_PHYSICAL_ADDRESS, LENGTH_HDMI_LOGICAL_ADDRESS);
         return name.flattenToShortString() + String.format(format,
-                cecInfo.getPhysicalAddress(), cecInfo.getLogicalAddress());
+                deviceInfo.getPhysicalAddress(), deviceInfo.getLogicalAddress());
     }
 
     /**
