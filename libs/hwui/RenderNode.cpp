@@ -136,13 +136,18 @@ void RenderNode::damageSelf(TreeInfo& info) {
     }
 }
 
-void RenderNode::prepareLayer(TreeInfo& info) {
+void RenderNode::prepareLayer(TreeInfo& info, uint32_t dirtyMask) {
     LayerType layerType = properties().layerProperties().type();
     if (CC_UNLIKELY(layerType == kLayerTypeRenderLayer)) {
-        // We push a null transform here as we don't care what the existing dirty
-        // area is, only what our display list dirty is as well as our children's
-        // dirty area
-        info.damageAccumulator->pushNullTransform();
+        // Damage applied so far needs to affect our parent, but does not require
+        // the layer to be updated. So we pop/push here to clear out the current
+        // damage and get a clean state for display list or children updates to
+        // affect, which will require the layer to be updated
+        info.damageAccumulator->popTransform();
+        info.damageAccumulator->pushTransform(this);
+        if (dirtyMask & DISPLAY_LIST) {
+            damageSelf(info);
+        }
     }
 }
 
@@ -151,9 +156,6 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     // If we are not a layer OR we cannot be rendered (eg, view was detached)
     // we need to destroy any Layers we may have had previously
     if (CC_LIKELY(layerType != kLayerTypeRenderLayer) || CC_UNLIKELY(!isRenderable())) {
-        if (layerType == kLayerTypeRenderLayer) {
-            info.damageAccumulator->popTransform();
-        }
         if (CC_UNLIKELY(mLayer)) {
             LayerRenderer::destroyLayer(mLayer);
             mLayer = NULL;
@@ -175,7 +177,6 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
 
     SkRect dirty;
     info.damageAccumulator->peekAtDirty(&dirty);
-    info.damageAccumulator->popTransform();
 
     if (!mLayer) {
         if (info.errorHandler) {
@@ -204,8 +205,8 @@ void RenderNode::prepareTreeImpl(TreeInfo& info) {
     if (info.mode == TreeInfo::MODE_FULL) {
         pushStagingPropertiesChanges(info);
     }
-    mAnimatorManager.animate(info);
-    prepareLayer(info);
+    uint32_t animatorDirtyMask = mAnimatorManager.animate(info);
+    prepareLayer(info, animatorDirtyMask);
     if (info.mode == TreeInfo::MODE_FULL) {
         pushStagingDisplayListChanges(info);
     }

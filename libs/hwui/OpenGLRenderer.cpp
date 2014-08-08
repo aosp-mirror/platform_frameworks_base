@@ -598,6 +598,7 @@ void OpenGLRenderer::clearLayerUpdates() {
 }
 
 void OpenGLRenderer::flushLayerUpdates() {
+    ATRACE_CALL();
     syncState();
     updateLayers();
     flushLayers();
