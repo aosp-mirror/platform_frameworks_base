@@ -20,15 +20,18 @@ import android.app.AlarmClockInfo;
 import android.app.AlarmManager;
 import android.app.INotificationManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
+import android.provider.Settings.Secure;
 import android.service.notification.Condition;
 import android.service.notification.IConditionListener;
 import android.service.notification.ZenModeConfig;
@@ -52,6 +55,7 @@ public class ZenModeControllerImpl implements ZenModeController {
     private final INotificationManager mNoMan;
     private final LinkedHashMap<Uri, Condition> mConditions = new LinkedHashMap<Uri, Condition>();
     private final AlarmManager mAlarmManager;
+    private final SetupObserver mSetupObserver;
 
     private int mUserId;
     private boolean mRequesting;
@@ -76,6 +80,8 @@ public class ZenModeControllerImpl implements ZenModeController {
         mNoMan = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        mSetupObserver = new SetupObserver(handler);
+        mSetupObserver.register();
     }
 
     @Override
@@ -96,6 +102,11 @@ public class ZenModeControllerImpl implements ZenModeController {
     @Override
     public void setZen(int zen) {
         mModeSetting.setValue(zen);
+    }
+
+    @Override
+    public boolean isZenAvailable() {
+        return mSetupObserver.isDeviceProvisioned() && mSetupObserver.isUserSetup();
     }
 
     @Override
@@ -148,6 +159,7 @@ public class ZenModeControllerImpl implements ZenModeController {
         mContext.registerReceiverAsUser(mReceiver, new UserHandle(mUserId),
                 new IntentFilter(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED), null, null);
         mRegistered = true;
+        mSetupObserver.register();
     }
 
     private void fireNextAlarmChanged() {
@@ -159,6 +171,12 @@ public class ZenModeControllerImpl implements ZenModeController {
     private void fireZenChanged(int zen) {
         for (Callback cb : mCallbacks) {
             cb.onZenChanged(zen);
+        }
+    }
+
+    private void fireZenAvailableChanged(boolean available) {
+        for (Callback cb : mCallbacks) {
+            cb.onZenAvailableChanged(available);
         }
     }
 
@@ -204,4 +222,42 @@ public class ZenModeControllerImpl implements ZenModeController {
             }
         }
     };
+
+    private final class SetupObserver extends ContentObserver {
+        private final ContentResolver mResolver;
+
+        private boolean mRegistered;
+
+        public SetupObserver(Handler handler) {
+            super(handler);
+            mResolver = mContext.getContentResolver();
+        }
+
+        public boolean isUserSetup() {
+            return Secure.getIntForUser(mResolver, Secure.USER_SETUP_COMPLETE, 0, mUserId) != 0;
+        }
+
+        public boolean isDeviceProvisioned() {
+            return Global.getInt(mResolver, Global.DEVICE_PROVISIONED, 0) != 0;
+        }
+
+        public void register() {
+            if (mRegistered) {
+                mResolver.unregisterContentObserver(this);
+            }
+            mResolver.registerContentObserver(
+                    Global.getUriFor(Global.DEVICE_PROVISIONED), false, this);
+            mResolver.registerContentObserver(
+                    Secure.getUriFor(Secure.USER_SETUP_COMPLETE), false, this, mUserId);
+            fireZenAvailableChanged(isZenAvailable());
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (Global.getUriFor(Global.DEVICE_PROVISIONED).equals(uri)
+                    || Secure.getUriFor(Secure.USER_SETUP_COMPLETE).equals(uri)) {
+                fireZenAvailableChanged(isZenAvailable());
+            }
+        }
+    }
 }
