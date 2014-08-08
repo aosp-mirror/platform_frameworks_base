@@ -5695,46 +5695,47 @@ package android.app.job {
 
 package android.app.usage {
 
-  public final class PackageUsageStats implements android.os.Parcelable {
+  public final class UsageEvents implements android.os.Parcelable {
     method public int describeContents();
-    method public long getLastTimeUsed();
-    method public java.lang.String getPackageName();
-    method public long getTotalTimeSpent();
+    method public boolean getNextEvent(android.app.usage.UsageEvents.Event);
+    method public boolean hasNextEvent();
+    method public void resetToStart();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public static final class UsageEvents.Event {
+    ctor public UsageEvents.Event();
+    method public android.content.ComponentName getComponent();
+    method public int getEventType();
+    method public long getTimeStamp();
+    field public static final int MOVE_TO_BACKGROUND = 2; // 0x2
+    field public static final int MOVE_TO_FOREGROUND = 1; // 0x1
+    field public static final int NONE = 0; // 0x0
   }
 
   public final class UsageStats implements android.os.Parcelable {
     ctor public UsageStats(android.app.usage.UsageStats);
+    method public void add(android.app.usage.UsageStats);
     method public int describeContents();
     method public long getFirstTimeStamp();
     method public long getLastTimeStamp();
-    method public android.app.usage.PackageUsageStats getPackage(int);
-    method public android.app.usage.PackageUsageStats getPackage(java.lang.String);
-    method public int getPackageCount();
+    method public long getLastTimeUsed();
+    method public java.lang.String getPackageName();
+    method public long getTotalTimeInForeground();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public static class UsageStats.Event implements android.os.Parcelable {
-    ctor public UsageStats.Event();
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int MOVE_TO_BACKGROUND = 2; // 0x2
-    field public static final int MOVE_TO_FOREGROUND = 1; // 0x1
-    field public static final int NONE = 0; // 0x0
-    field public int eventType;
-    field public java.lang.String packageName;
-    field public long timeStamp;
   }
 
   public final class UsageStatsManager {
-    method public android.app.usage.UsageStats[] getDailyStatsSince(long);
-    method public android.app.usage.UsageStats[] getMonthlyStatsSince(long);
-    method public android.app.usage.UsageStats getRecentStatsSince(long);
-    method public android.app.usage.UsageStats[] getWeeklyStatsSince(long);
-    method public android.app.usage.UsageStats[] getYearlyStatsSince(long);
+    method public android.util.ArrayMap<java.lang.String, android.app.usage.UsageStats> queryAndAggregateUsageStats(long, long);
+    method public android.app.usage.UsageEvents queryEvents(long, long);
+    method public java.util.List<android.app.usage.UsageStats> queryUsageStats(int, long, long);
+    field public static final int INTERVAL_BEST = 4; // 0x4
+    field public static final int INTERVAL_DAILY = 0; // 0x0
+    field public static final int INTERVAL_MONTHLY = 2; // 0x2
+    field public static final int INTERVAL_WEEKLY = 1; // 0x1
+    field public static final int INTERVAL_YEARLY = 3; // 0x3
   }
 
 }

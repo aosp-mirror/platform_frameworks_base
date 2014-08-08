@@ -32,7 +32,7 @@ public abstract class UsageStatsManagerInternal {
      * @param userId The user id to which the component belongs to.
      * @param timeStamp The time at which this event ocurred.
      * @param eventType The event that occured. Valid values can be found at
-     * {@link android.app.usage.UsageStats.Event}
+     * {@link UsageEvents}
      */
     public abstract void reportEvent(ComponentName component, int userId,
             long timeStamp, int eventType);

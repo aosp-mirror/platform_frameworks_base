@@ -18,76 +18,17 @@ package android.app.usage;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.ArrayMap;
 
+/**
+ * Contains usage statistics for an app package for a specific
+ * time range.
+ */
 public final class UsageStats implements Parcelable {
-    public static class Event implements Parcelable {
-        /**
-         * {@hide}
-         */
-        public static final Event[] EMPTY_EVENTS = new Event[0];
-
-        public static final int NONE = 0;
-        public static final int MOVE_TO_FOREGROUND = 1;
-        public static final int MOVE_TO_BACKGROUND = 2;
-
-        /**
-         * {@hide}
-         */
-        public static final int END_OF_DAY = 3;
-
-        /**
-         * {@hide}
-         */
-        public static final int CONTINUE_PREVIOUS_DAY = 4;
-
-        public Event() {}
-
-        /**
-         * {@hide}
-         */
-        public Event(String packageName, long timeStamp, int eventType) {
-            this.packageName = packageName;
-            this.timeStamp = timeStamp;
-            this.eventType = eventType;
-        }
-
-        public String packageName;
-        public long timeStamp;
-        public int eventType;
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeLong(timeStamp);
-            dest.writeInt(eventType);
-            dest.writeString(packageName);
-        }
-
-        public static final Creator<Event> CREATOR = new Creator<Event>() {
-            @Override
-            public Event createFromParcel(Parcel source) {
-                final long time = source.readLong();
-                final int type = source.readInt();
-                final String name = source.readString();
-                return new Event(name, time, type);
-            }
-
-            @Override
-            public Event[] newArray(int size) {
-                return new Event[size];
-            }
-        };
-    }
 
     /**
      * {@hide}
      */
-    public static final UsageStats[] EMPTY_STATS = new UsageStats[0];
+    public String mPackageName;
 
     /**
      * {@hide}
@@ -102,25 +43,22 @@ public final class UsageStats implements Parcelable {
     /**
      * {@hide}
      */
-    public long mLastTimeSaved;
-
-    private ArrayMap<String, PackageUsageStats> mPackageStats = new ArrayMap<>();
-
-    /**
-     * Can be null
-     * {@hide}
-     */
-    public TimeSparseArray<Event> mEvents;
+    public long mLastTimeUsed;
 
     /**
      * {@hide}
      */
-    public static UsageStats create(long beginTimeStamp, long endTimeStamp) {
-        UsageStats stats = new UsageStats();
-        stats.mBeginTimeStamp = beginTimeStamp;
-        stats.mEndTimeStamp = endTimeStamp;
-        return stats;
-    }
+    public long mTotalTimeInForeground;
+
+    /**
+     * {@hide}
+     */
+    public int mLaunchCount;
+
+    /**
+     * {@hide}
+     */
+    public int mLastEvent;
 
     /**
      * {@hide}
@@ -129,57 +67,68 @@ public final class UsageStats implements Parcelable {
     }
 
     public UsageStats(UsageStats stats) {
+        mPackageName = stats.mPackageName;
         mBeginTimeStamp = stats.mBeginTimeStamp;
         mEndTimeStamp = stats.mEndTimeStamp;
-        mLastTimeSaved = stats.mLastTimeSaved;
-
-        final int pkgCount = stats.mPackageStats.size();
-        mPackageStats.ensureCapacity(pkgCount);
-        for (int i = 0; i < pkgCount; i++) {
-            PackageUsageStats pkgStats = stats.mPackageStats.valueAt(i);
-            mPackageStats.append(stats.mPackageStats.keyAt(i), new PackageUsageStats(pkgStats));
-        }
-
-        final int eventCount = stats.mEvents == null ? 0 : stats.mEvents.size();
-        if (eventCount > 0) {
-            mEvents = new TimeSparseArray<>();
-            for (int i = 0; i < eventCount; i++) {
-                mEvents.append(stats.mEvents.keyAt(i), stats.mEvents.valueAt(i));
-            }
-        }
+        mLastTimeUsed = stats.mLastTimeUsed;
+        mTotalTimeInForeground = stats.mTotalTimeInForeground;
+        mLaunchCount = stats.mLaunchCount;
+        mLastEvent = stats.mLastEvent;
     }
 
+    public String getPackageName() {
+        return mPackageName;
+    }
+
+    /**
+     * Get the beginning of the time range this {@link android.app.usage.UsageStats} represents.
+     */
     public long getFirstTimeStamp() {
         return mBeginTimeStamp;
     }
 
+    /**
+     * Get the end of the time range this {@link android.app.usage.UsageStats} represents.
+     */
     public long getLastTimeStamp() {
         return mEndTimeStamp;
     }
 
-    public int getPackageCount() {
-        return mPackageStats.size();
-    }
-
-    public PackageUsageStats getPackage(int index) {
-        return mPackageStats.valueAt(index);
-    }
-
-    public PackageUsageStats getPackage(String packageName) {
-        return mPackageStats.get(packageName);
+    /**
+     * Get the last time this package was used.
+     */
+    public long getLastTimeUsed() {
+        return mLastTimeUsed;
     }
 
     /**
-     * {@hide}
+     * Get the total time this package spent in the foreground.
      */
-    public PackageUsageStats getOrCreatePackageUsageStats(String packageName) {
-        PackageUsageStats pkgStats = mPackageStats.get(packageName);
-        if (pkgStats == null) {
-            pkgStats = new PackageUsageStats();
-            pkgStats.mPackageName = packageName;
-            mPackageStats.put(packageName, pkgStats);
+    public long getTotalTimeInForeground() {
+        return mTotalTimeInForeground;
+    }
+
+    /**
+     * Add the statistics from the right {@link UsageStats} to the left. The package name for
+     * both {@link UsageStats} objects must be the same.
+     * @param right The {@link UsageStats} object to merge into this one.
+     * @throws java.lang.IllegalArgumentException if the package names of the two
+     *         {@link UsageStats} objects are different.
+     */
+    public void add(UsageStats right) {
+        if (!mPackageName.equals(right.mPackageName)) {
+            throw new IllegalArgumentException("Can't merge UsageStats for package '" +
+                    mPackageName + "' with UsageStats for package '" + right.mPackageName + "'.");
         }
-        return pkgStats;
+
+        if (right.mEndTimeStamp > mEndTimeStamp) {
+            mLastEvent = right.mLastEvent;
+            mEndTimeStamp = right.mEndTimeStamp;
+            mLastTimeUsed = right.mLastTimeUsed;
+        }
+        mBeginTimeStamp = Math.min(mBeginTimeStamp, right.mBeginTimeStamp);
+        mTotalTimeInForeground += right.mTotalTimeInForeground;
+        mLaunchCount += right.mLaunchCount;
     }
 
     @Override
@@ -189,47 +138,26 @@ public final class UsageStats implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mPackageName);
         dest.writeLong(mBeginTimeStamp);
         dest.writeLong(mEndTimeStamp);
-        dest.writeLong(mLastTimeSaved);
-
-        int size = mPackageStats.size();
-        dest.writeInt(size);
-        for (int i = 0; i < size; i++) {
-            mPackageStats.valueAt(i).writeToParcel(dest, flags);
-        }
-
-        size = mEvents == null ? 0 : mEvents.size();
-        dest.writeInt(size);
-        for (int i = 0; i < size; i++) {
-            mEvents.valueAt(i).writeToParcel(dest, flags);
-        }
+        dest.writeLong(mLastTimeUsed);
+        dest.writeLong(mTotalTimeInForeground);
+        dest.writeInt(mLaunchCount);
+        dest.writeInt(mLastEvent);
     }
 
     public static final Creator<UsageStats> CREATOR = new Creator<UsageStats>() {
         @Override
         public UsageStats createFromParcel(Parcel in) {
             UsageStats stats = new UsageStats();
+            stats.mPackageName = in.readString();
             stats.mBeginTimeStamp = in.readLong();
             stats.mEndTimeStamp = in.readLong();
-            stats.mLastTimeSaved = in.readLong();
-
-            int size = in.readInt();
-            stats.mPackageStats.ensureCapacity(size);
-            for (int i = 0; i < size; i++) {
-                final PackageUsageStats pkgStats = PackageUsageStats.CREATOR.createFromParcel(in);
-                stats.mPackageStats.put(pkgStats.mPackageName, pkgStats);
-            }
-
-            size = in.readInt();
-            if (size > 0) {
-                stats.mEvents = new TimeSparseArray<>(size);
-                for (int i = 0; i < size; i++) {
-                    final Event event = Event.CREATOR.createFromParcel(in);
-                    stats.mEvents.put(event.timeStamp, event);
-                }
-            }
-
+            stats.mLastTimeUsed = in.readLong();
+            stats.mTotalTimeInForeground = in.readLong();
+            stats.mLaunchCount = in.readInt();
+            stats.mLastEvent = in.readInt();
             return stats;
         }
 
