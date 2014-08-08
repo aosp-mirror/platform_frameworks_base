@@ -74,7 +74,6 @@ public abstract class Connection {
         public void onRequestingRingback(Connection c, boolean ringback) {}
         public void onDestroyed(Connection c) {}
         public void onCallCapabilitiesChanged(Connection c, int callCapabilities) {}
-        public void onParentConnectionChanged(Connection c, Connection parent) {}
         public void onVideoProviderChanged(
                 Connection c, VideoProvider videoProvider) {}
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
@@ -82,6 +81,7 @@ public abstract class Connection {
         public void onStartActivityFromInCall(Connection c, PendingIntent intent) {}
         public void onConferenceableConnectionsChanged(
                 Connection c, List<Connection> conferenceableConnections) {}
+        public void onConferenceChanged(Connection c, Conference conference) {}
     }
 
     public static abstract class VideoProvider {
@@ -455,9 +455,6 @@ public abstract class Connection {
      */
     private final Set<Listener> mListeners = Collections.newSetFromMap(
             new ConcurrentHashMap<Listener, Boolean>(8, 0.9f, 1));
-    private final List<Connection> mChildConnections = new ArrayList<>();
-    private final List<Connection> mUnmodifiableChildConnections =
-            Collections.unmodifiableList(mChildConnections);
     private final List<Connection> mConferenceableConnections = new ArrayList<>();
     private final List<Connection> mUnmodifiableConferenceableConnections =
             Collections.unmodifiableList(mConferenceableConnections);
@@ -470,7 +467,6 @@ public abstract class Connection {
     private int mCallerDisplayNamePresentation;
     private boolean mRequestingRingback = false;
     private int mCallCapabilities;
-    private Connection mParentConnection;
     private VideoProvider mVideoProvider;
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
@@ -478,6 +474,8 @@ public abstract class Connection {
     private int mFailureCode;
     private String mFailureMessage;
     private boolean mIsCanceled;
+    private Conference mConference;
+    private ConnectionService mConnectionService;
 
     /**
      * Create a new Connection.
@@ -543,18 +541,19 @@ public abstract class Connection {
     }
 
     /**
+     * @return The conference that this connection is a part of.  Null if it is not part of any
+     *         conference.
+     */
+    public final Conference getConference() {
+        return mConference;
+    }
+
+    /**
      * Returns whether this connection is requesting that the system play a ringback tone
      * on its behalf.
      */
     public final boolean isRequestingRingback() {
         return mRequestingRingback;
-    }
-
-    /**
-     * Returns whether this connection is a conference connection (has child connections).
-     */
-    public final boolean isConferenceConnection() {
-        return !mChildConnections.isEmpty();
     }
 
     /**
@@ -653,34 +652,6 @@ public abstract class Connection {
                 Log.wtf(Connection.class, "Unknown state %d", state);
                 return "UNKNOWN";
         }
-    }
-
-    /**
-     * TODO: Needs documentation.
-     */
-    public final void setParentConnection(Connection parentConnection) {
-        Log.d(this, "parenting %s to %s", this, parentConnection);
-        if (mParentConnection != parentConnection) {
-            if (mParentConnection != null) {
-                mParentConnection.removeChild(this);
-            }
-            mParentConnection = parentConnection;
-            if (mParentConnection != null) {
-                mParentConnection.addChild(this);
-                // do something if the child connections goes down to ZERO.
-            }
-            for (Listener l : mListeners) {
-                l.onParentConnectionChanged(this, mParentConnection);
-            }
-        }
-    }
-
-    public final Connection getParentConnection() {
-        return mParentConnection;
-    }
-
-    public final List<Connection> getChildConnections() {
-        return mUnmodifiableChildConnections;
     }
 
     /**
@@ -936,6 +907,60 @@ public abstract class Connection {
         return mUnmodifiableConferenceableConnections;
     }
 
+    /*
+     * @hide
+     */
+    public final void setConnectionService(ConnectionService connectionService) {
+        if (mConnectionService != null) {
+            Log.e(this, new Exception(), "Trying to set ConnectionService on a connection " +
+                    "which is already associated with another ConnectionService.");
+        } else {
+            mConnectionService = connectionService;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public final void unsetConnectionService(ConnectionService connectionService) {
+        if (mConnectionService != connectionService) {
+            Log.e(this, new Exception(), "Trying to remove ConnectionService from a Connection " +
+                    "that does not belong to the ConnectionService.");
+        } else {
+            mConnectionService = null;
+        }
+    }
+
+    /**
+     * Sets the conference that this connection is a part of. This will fail if the connection is
+     * already part of a conference call. {@link #resetConference} to un-set the conference first.
+     *
+     * @param conference The conference.
+     * @return {@code true} if the conference was successfully set.
+     * @hide
+     */
+    public final boolean setConference(Conference conference) {
+        // We check to see if it is already part of another conference.
+        if (mConference == null && mConnectionService != null &&
+                mConnectionService.containsConference(conference)) {
+            mConference = conference;
+            fireConferenceChanged();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Resets the conference that this connection is a part of.
+     * @hide
+     */
+    public final void resetConference() {
+        if (mConference != null) {
+            mConference = null;
+            fireConferenceChanged();
+        }
+    }
+
     /**
      * Launches an activity for this connection on top of the in-call UI.
      *
@@ -1022,11 +1047,6 @@ public abstract class Connection {
     public void onPostDialContinue(boolean proceed) {}
 
     /**
-     * TODO: Needs documentation.
-     */
-    public void onChildrenChanged(List<Connection> children) {}
-
-    /**
      * Called when the phone account UI was clicked.
      */
     public void onPhoneAccountClicked() {}
@@ -1071,18 +1091,6 @@ public abstract class Connection {
             sNullConnection = new Connection() {};
         }
         return sNullConnection;
-    }
-
-    private void addChild(Connection connection) {
-        Log.d(this, "adding child %s", connection);
-        mChildConnections.add(connection);
-        onChildrenChanged(mChildConnections);
-    }
-
-    private void removeChild(Connection connection) {
-        Log.d(this, "removing child %s", connection);
-        mChildConnections.remove(connection);
-        onChildrenChanged(mChildConnections);
     }
 
     private void setState(int state) {
@@ -1136,6 +1144,12 @@ public abstract class Connection {
     private final void  fireOnConferenceableConnectionsChanged() {
         for (Listener l : mListeners) {
             l.onConferenceableConnectionsChanged(this, mConferenceableConnections);
+        }
+    }
+
+    private final void fireConferenceChanged() {
+        for (Listener l : mListeners) {
+            l.onConferenceChanged(this, mConference);
         }
     }
 

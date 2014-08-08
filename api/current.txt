@@ -28838,6 +28838,25 @@ package android.telecomm {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
+  public abstract class Conference {
+    ctor public Conference(android.telecomm.PhoneAccountHandle);
+    method public boolean addConnection(android.telecomm.Connection);
+    method public void destroy();
+    method public final int getCapabilities();
+    method public final java.util.List<android.telecomm.Connection> getConnections();
+    method public final android.telecomm.PhoneAccountHandle getPhoneAccount();
+    method public final int getState();
+    method public void onDisconnect();
+    method public void onHold();
+    method public void onSeparate(android.telecomm.Connection);
+    method public void onUnhold();
+    method public void removeConnection(android.telecomm.Connection);
+    method public final void setActive();
+    method public final void setCapabilities(int);
+    method public final void setDisconnected(int, java.lang.String);
+    method public final void setOnHold();
+  }
+
   public abstract class Connection {
     ctor public Connection();
     method public static android.telecomm.Connection createCanceledConnection();
@@ -28848,22 +28867,19 @@ package android.telecomm {
     method public final int getCallCapabilities();
     method public final java.lang.String getCallerDisplayName();
     method public final int getCallerDisplayNamePresentation();
-    method public final java.util.List<android.telecomm.Connection> getChildConnections();
+    method public final android.telecomm.Conference getConference();
     method public final java.util.List<android.telecomm.Connection> getConferenceableConnections();
     method public final int getFailureCode();
     method public final java.lang.String getFailureMessage();
     method public final android.net.Uri getHandle();
     method public final int getHandlePresentation();
-    method public final android.telecomm.Connection getParentConnection();
     method public final int getState();
     method public final android.telecomm.StatusHints getStatusHints();
     method public final android.telecomm.Connection.VideoProvider getVideoProvider();
     method public final int getVideoState();
-    method public final boolean isConferenceConnection();
     method public final boolean isRequestingRingback();
     method public void onAbort();
     method public void onAnswer(int);
-    method public void onChildrenChanged(java.util.List<android.telecomm.Connection>);
     method public void onConferenceWith(android.telecomm.Connection);
     method public void onDisconnect();
     method public void onHold();
@@ -28882,6 +28898,7 @@ package android.telecomm {
     method public final void setCallerDisplayName(java.lang.String, int);
     method public final void setCanceled();
     method public final void setConferenceableConnections(java.util.List<android.telecomm.Connection>);
+    method public final void setConnectionService(android.telecomm.ConnectionService);
     method public final void setDialing();
     method public final void setDisconnected(int, java.lang.String);
     method public final void setFailed(int, java.lang.String);
@@ -28889,7 +28906,6 @@ package android.telecomm {
     method public final void setInitialized();
     method public final void setInitializing();
     method public final void setOnHold();
-    method public final void setParentConnection(android.telecomm.Connection);
     method public final void setPostDialWait(java.lang.String);
     method public final void setRequestingRingback(boolean);
     method public final void setRinging();
@@ -28952,13 +28968,14 @@ package android.telecomm {
 
   public abstract class ConnectionService extends android.app.Service {
     ctor public ConnectionService();
+    method public final void addConference(android.telecomm.Conference);
     method public final android.telecomm.RemoteConnection createRemoteIncomingConnection(android.telecomm.PhoneAccountHandle, android.telecomm.ConnectionRequest);
     method public final android.telecomm.RemoteConnection createRemoteOutgoingConnection(android.telecomm.PhoneAccountHandle, android.telecomm.ConnectionRequest);
     method public final java.util.Collection<android.telecomm.Connection> getAllConnections();
     method public final android.os.IBinder onBind(android.content.Intent);
+    method public void onConference(android.telecomm.Connection, android.telecomm.Connection);
     method public void onConnectionAdded(android.telecomm.Connection);
     method public void onConnectionRemoved(android.telecomm.Connection);
-    method public void onCreateConferenceConnection(java.lang.String, android.telecomm.Connection, android.telecomm.Response<java.lang.String, android.telecomm.Connection>);
     method public android.telecomm.Connection onCreateIncomingConnection(android.telecomm.PhoneAccountHandle, android.telecomm.ConnectionRequest);
     method public android.telecomm.Connection onCreateOutgoingConnection(android.telecomm.PhoneAccountHandle, android.telecomm.ConnectionRequest);
     field public static final java.lang.String SERVICE_INTERFACE = "android.telecomm.ConnectionService";
