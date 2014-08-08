@@ -41,7 +41,8 @@ interface IAppWidgetService {
     void deleteAllHosts();
     RemoteViews getAppWidgetViews(String callingPackage, int appWidgetId);
     int[] getAppWidgetIdsForHost(String callingPackage, int hostId);
-    IntentSender createAppWidgetConfigIntentSender(String callingPackage, in Intent intent);
+    IntentSender createAppWidgetConfigIntentSender(String callingPackage, int appWidgetId,
+            int intentFlags);
 
     //
     // for AppWidgetManager
@@ -53,8 +54,8 @@ interface IAppWidgetService {
             in RemoteViews views);
     void updateAppWidgetProvider(in ComponentName provider, in RemoteViews views);
     void notifyAppWidgetViewDataChanged(String packageName, in int[] appWidgetIds, int viewId);
-    List<AppWidgetProviderInfo> getInstalledProviders(int categoryFilter,
-            in int[] profileIds);
+    List<AppWidgetProviderInfo> getInstalledProvidersForProfile(int categoryFilter,
+            int profileId);
     AppWidgetProviderInfo getAppWidgetInfo(String callingPackage, int appWidgetId);
     boolean hasBindAppWidgetPermission(in String packageName, int userId);
     void setBindAppWidgetPermission(in String packageName, int userId, in boolean permission);

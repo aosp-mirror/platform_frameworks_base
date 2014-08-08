@@ -16,6 +16,7 @@
 
 package android.appwidget;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -269,7 +270,7 @@ public class AppWidgetProviderInfo implements Parcelable {
      *         {@link android.util.DisplayMetrics#densityDpi}.
      * @return The provider icon.
      */
-    public final Drawable loadIcon(Context context, int density) {
+    public final Drawable loadIcon(@NonNull Context context, int density) {
         return loadDrawable(context, density, providerInfo.getIconResource());
     }
 
@@ -289,7 +290,7 @@ public class AppWidgetProviderInfo implements Parcelable {
      *         {@link android.util.DisplayMetrics#densityDpi}.
      * @return The widget preview image.
      */
-    public final Drawable loadPreviewImage(Context context, int density) {
+    public final Drawable loadPreviewImage(@NonNull Context context, int density) {
         return loadDrawable(context, density, previewImage);
     }
 

@@ -121,8 +121,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     private static final int LOADED_PROFILE_ID = -1;
 
-    private static final int DISABLED_PROFILE = -1;
-
     private static final int UNKNOWN_USER_ID = -10;
 
     // Bump if the stored widgets need to be upgraded.
@@ -660,7 +658,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @Override
-    public IntentSender createAppWidgetConfigIntentSender(String callingPackage, Intent intent) {
+    public IntentSender createAppWidgetConfigIntentSender(String callingPackage, int appWidgetId,
+            int intentFlags) {
         final int userId = UserHandle.getCallingUserId();
 
         if (DEBUG) {
@@ -669,57 +668,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         // Make sure the package runs under the caller uid.
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
-
-        // The only allowed action is the one to start the configure activity.
-        if (!AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(intent.getAction())) {
-            throw new IllegalArgumentException("Only allowed action is "
-                    + AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
-        }
-
-        // Verify that widget id is provided.
-        final int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
-                AppWidgetManager.INVALID_APPWIDGET_ID);
-        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
-            throw new IllegalArgumentException("Widget id required");
-        }
-
-        // Make sure a component name is provided.
-        ComponentName component = intent.getComponent();
-        if (component == null) {
-            throw new IllegalArgumentException("Component name required");
-        }
-
-        // Verify the user handle.
-        UserHandle userHandle = intent.getParcelableExtra(
-                AppWidgetManager.EXTRA_APPWIDGET_PROVIDER_PROFILE);
-        if (userHandle != null) {
-            // Remove the profile extra as the receiver already runs under this
-            // user and this information is of no use to this receiver.
-            intent.removeExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER_PROFILE);
-
-            // If the user handle is not the caller, check if it is an enabled
-            // profile for which the package is white-listed.
-            final int profileId = userHandle.getIdentifier();
-            if (profileId != userId) {
-                // Make sure the passed user handle is a profile in the group.
-                final int[] profileIds = mSecurityPolicy.resolveCallerEnabledGroupProfiles(
-                        new int[]{profileId});
-                if (profileIds.length <= 0) {
-                    // The profile is not in the group or not enabled, done.
-                    return null;
-                }
-
-                // Make sure the provider is white-listed.
-                if (!mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
-                        component.getPackageName(), profileId)) {
-                    throw new IllegalArgumentException("Cannot access provider "
-                            + component + " in user " + profileIds);
-                }
-            }
-        } else {
-            // If a profile is not specified use the caller user id.
-            userHandle = new UserHandle(userId);
-        }
 
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(userId);
@@ -738,19 +686,18 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 throw new IllegalArgumentException("Widget not bound " + appWidgetId);
             }
 
-            // Make sure the component refers to the provider config activity.
-            if (!component.equals(provider.info.configure)
-                    || !provider.info.getProfile().equals(userHandle)) {
-                throw new IllegalArgumentException("No component" + component
-                        + " for user " + userHandle.getIdentifier());
-            }
+            Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+            intent.setComponent(provider.info.configure);
+            intent.setFlags(intentFlags);
 
             // All right, create the sender.
             final long identity = Binder.clearCallingIdentity();
             try {
                 return PendingIntent.getActivityAsUser(
                         mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT
-                                | PendingIntent.FLAG_CANCEL_CURRENT, null, userHandle)
+                                | PendingIntent.FLAG_CANCEL_CURRENT, null,
+                                new UserHandle(provider.getUserId()))
                         .getIntentSender();
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -771,9 +718,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
 
         // Check that if a cross-profile binding is attempted, it is allowed.
-        final int[] profileIds = mSecurityPolicy.resolveCallerEnabledGroupProfiles(
-                new int[] {providerProfileId});
-        if (profileIds.length <= 0) {
+        if (!mSecurityPolicy.isEnabledGroupProfile(providerProfileId)) {
             return false;
         }
 
@@ -1309,28 +1254,23 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @Override
-    public List<AppWidgetProviderInfo> getInstalledProviders(int categoryFilter, int[] profileIds) {
+    public List<AppWidgetProviderInfo> getInstalledProvidersForProfile(int categoryFilter,
+            int profileId) {
         final int userId = UserHandle.getCallingUserId();
 
         if (DEBUG) {
             Slog.i(TAG, "getInstalledProvidersForProfiles() " + userId);
         }
 
-        if (profileIds != null && profileIds.length > 0) {
-            // Make sure the profile ids are children of the calling user.
-            profileIds = mSecurityPolicy.resolveCallerEnabledGroupProfiles(profileIds);
-        } else {
-            profileIds = new int[] {userId};
-        }
-
-        if (profileIds.length == 0) {
+        // Ensure the profile is in the group and enabled.
+        if (!mSecurityPolicy.isEnabledGroupProfile(profileId)) {
             return null;
         }
 
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(userId);
 
-            ArrayList<AppWidgetProviderInfo> result = new ArrayList<>();
+            ArrayList<AppWidgetProviderInfo> result = null;
 
             final int providerCount = mProviders.size();
             for (int i = 0; i < providerCount; i++) {
@@ -1342,19 +1282,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     continue;
                 }
 
-                // Add providers only for the requested profiles ...
+                // Add providers only for the requested profile that are white-listed.
                 final int providerProfileId = info.getProfile().getIdentifier();
-                final int profileCount = profileIds.length;
-                for (int j = 0; j < profileCount; j++) {
-                    final int profileId = profileIds[j];
-                    if (providerProfileId == profileId) {
-                        // ... that are white-listed by the profile manager.
-                        if (mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
-                                provider.id.componentName.getPackageName(), providerProfileId)) {
-                            result.add(cloneIfLocalBinder(info));
-                        }
-                        break;
+                if (providerProfileId == profileId
+                        && mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
+                            provider.id.componentName.getPackageName(), providerProfileId)) {
+                    if (result == null) {
+                        result = new ArrayList<>();
                     }
+                    result.add(cloneIfLocalBinder(info));
                 }
             }
 
@@ -2967,35 +2903,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     private final class SecurityPolicy {
 
-        public int[] resolveCallerEnabledGroupProfiles(int[] profileIds) {
+        public boolean isEnabledGroupProfile(int profileId) {
             final int parentId = UserHandle.getCallingUserId();
-
-            int enabledProfileCount = 0;
-            final int profileCount = profileIds.length;
-            for (int i = 0; i < profileCount; i++) {
-                final int profileId = profileIds[i];
-                if (!isParentOrProfile(parentId, profileId)) {
-                    throw new SecurityException("Not the current user or"
-                            + " a child profile: " + profileId);
-                }
-                if (!isProfileEnabled(profileId)) {
-                    profileIds[i] = DISABLED_PROFILE;
-                } else {
-                    enabledProfileCount++;
-                }
-            }
-
-            int resolvedProfileIndex = 0;
-            final int[] resolvedProfiles = new int[enabledProfileCount];
-            for (int i = 0; i < profileCount; i++) {
-                final int profileId = profileIds[i];
-                if (profileId != DISABLED_PROFILE) {
-                    resolvedProfiles[resolvedProfileIndex] = profileId;
-                    resolvedProfileIndex++;
-                }
-            }
-
-            return resolvedProfiles;
+            return isParentOrProfile(parentId, profileId) && isProfileEnabled(profileId);
         }
 
         public int[] getEnabledGroupProfileIds(int userId) {

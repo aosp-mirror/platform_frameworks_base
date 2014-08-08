@@ -19,12 +19,15 @@ package android.appwidget;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -199,32 +202,30 @@ public class AppWidgetHost {
     /**
      * Starts an app widget provider configure activity for result on behalf of the caller.
      * Use this method if the provider is in another profile as you are not allowed to start
-     * an activity in another profile. The provided intent must have action {@link
-     * AppWidgetManager#ACTION_APPWIDGET_CONFIGURE}. The widget id must be specified by
-     * the {@link AppWidgetManager#EXTRA_APPWIDGET_ID} extra. The provider configure
-     * activity must be specified as the component name of the intent via {@link
-     * Intent#setComponent(android.content.ComponentName)}. The user profile under which
-     * the provider operates is specified via the {@link
-     * AppWidgetManager#EXTRA_APPWIDGET_PROVIDER_PROFILE} extra. If a user profile is
-     * not provided, the current user is used. Finally, you can optionally provide a
-     * request code that is returned in {@link Activity#onActivityResult(int, int,
-     * android.content.Intent)}.
+     * an activity in another profile. You can optionally provide a request code that is
+     * returned in {@link Activity#onActivityResult(int, int, android.content.Intent)} and
+     * an options bundle to be passed to the started activity.
+     * <p>
+     * Note that the provided app widget has to be bound for this method to work.
+     * </p>
      *
      * @param activity The activity from which to start the configure one.
-     * @param intent Properly populated intent for launching the configuration activity.
+     * @param appWidgetId The bound app widget whose provider's config activity to start.
      * @param requestCode Optional request code retuned with the result.
+     * @param intentFlags Optional intent flags.
      *
      * @throws android.content.ActivityNotFoundException If the activity is not found.
      *
      * @see AppWidgetProviderInfo#getProfile()
      */
-    public final void startAppWidgetConfigureActivityForResult(Activity activity, Intent intent,
-            int requestCode) {
+    public final void startAppWidgetConfigureActivityForResult(@NonNull Activity activity,
+            int appWidgetId, int intentFlags, int requestCode, @Nullable Bundle options) {
         try {
             IntentSender intentSender = sService.createAppWidgetConfigIntentSender(
-                    mContext.getPackageName(), intent);
+                    mContext.getPackageName(), appWidgetId, intentFlags);
             if (intentSender != null) {
-                activity.startIntentSenderForResult(intentSender, requestCode, null, 0, 0, 0);
+                activity.startIntentSenderForResult(intentSender, requestCode, null, 0, 0, 0,
+                        options);
             } else {
                 throw new ActivityNotFoundException();
             }
