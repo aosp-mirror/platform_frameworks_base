@@ -3673,6 +3673,7 @@ package android.app {
     field public int id;
     field public android.content.ComponentName origActivity;
     field public int persistentId;
+    field public android.app.ActivityManager.TaskDescription taskDescription;
   }
 
   public static class ActivityManager.RunningAppProcessInfo implements android.os.Parcelable {
