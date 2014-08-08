@@ -73,9 +73,12 @@ public abstract class SystemService {
     public static final int PHASE_THIRD_PARTY_APPS_CAN_START = 600;
 
     /**
-     * After receiving this boot phase, services must have finished all boot-related work.
+     * After receiving this boot phase, services can allow user interaction with the device.
+     * This phase occurs when boot has completed and the home application has started.
+     * System services may prefer to listen to this phase rather than registering a
+     * broadcast receiver for ACTION_BOOT_COMPLETED to reduce overall latency.
      */
-    public static final int PHASE_BOOT_COMPLETE = 1000;
+    public static final int PHASE_BOOT_COMPLETED = 1000;
 
     private final Context mContext;
 

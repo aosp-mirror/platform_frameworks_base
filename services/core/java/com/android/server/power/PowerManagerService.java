@@ -474,6 +474,19 @@ public final class PowerManagerService extends com.android.server.SystemService
         Watchdog.getInstance().addThread(mHandler);
     }
 
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == PHASE_BOOT_COMPLETED) {
+            // This is our early signal that the system thinks it has finished booting.
+            // However, the boot animation may still be running for a few more seconds
+            // since it is ultimately in charge of when it terminates.
+            // Defer transitioning into the boot completed state until the animation exits.
+            // We do this so that the screen does not start to dim prematurely before
+            // the user has actually had a chance to interact with the device.
+            startWatchingForBootAnimationFinished();
+        }
+    }
+
     public void systemReady(IAppOpsService appOps) {
         synchronized (mLock) {
             mSystemReady = true;
@@ -514,11 +527,6 @@ public final class PowerManagerService extends com.android.server.SystemService
             filter.addAction(Intent.ACTION_BATTERY_CHANGED);
             filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
             mContext.registerReceiver(new BatteryReceiver(), filter, null, mHandler);
-
-            filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_BOOT_COMPLETED);
-            filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-            mContext.registerReceiver(new BootCompletedReceiver(), filter, null, mHandler);
 
             filter = new IntentFilter();
             filter.addAction(Intent.ACTION_DREAMING_STARTED);
@@ -2401,19 +2409,6 @@ public final class PowerManagerService extends com.android.server.SystemService
             synchronized (mLock) {
                 handleBatteryStateChangedLocked();
             }
-        }
-    }
-
-    private final class BootCompletedReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // This is our early signal that the system thinks it has finished booting.
-            // However, the boot animation may still be running for a few more seconds
-            // since it is ultimately in charge of when it terminates.
-            // Defer transitioning into the boot completed state until the animation exits.
-            // We do this so that the screen does not start to dim prematurely before
-            // the user has actually had a chance to interact with the device.
-            startWatchingForBootAnimationFinished();
         }
     }
 
