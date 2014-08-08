@@ -162,6 +162,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         JobStatus jobStatus = new JobStatus(job, uId);
         cancelJob(uId, job.getId());
         startTrackingJob(jobStatus);
+        mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
         return JobScheduler.RESULT_SUCCESS;
     }
 
@@ -507,7 +508,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                 case MSG_JOB_EXPIRED:
                     synchronized (mJobs) {
                         JobStatus runNow = (JobStatus) message.obj;
-                        if (!mPendingJobs.contains(runNow)) {
+                        // runNow can be null, which is a controller's way of indicating that its
+                        // state is such that all ready jobs should be run immediately.
+                        if (runNow != null && !mPendingJobs.contains(runNow)) {
                             mPendingJobs.add(runNow);
                         }
                     }

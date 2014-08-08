@@ -434,6 +434,12 @@ public class JobInfo implements Parcelable {
          * @return The job object to hand to the JobScheduler. This object is immutable.
          */
         public JobInfo build() {
+            // Allow tasks with no constraints. What am I, a database?
+            if (!mHasEarlyConstraint && !mHasLateConstraint && !mRequiresCharging &&
+                    !mRequiresDeviceIdle && mNetworkCapabilities == NetworkType.NONE) {
+                throw new IllegalArgumentException("You're trying to build a job with no " +
+                        "constraints, this is not allowed.");
+            }
             mExtras = new PersistableBundle(mExtras);  // Make our own copy.
             // Check that a deadline was not set on a periodic job.
             if (mIsPeriodic && (mMaxExecutionDelayMillis != 0L)) {
