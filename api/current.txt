@@ -15150,6 +15150,7 @@ package android.media {
     method public boolean containsKey(java.lang.String);
     method public int describeContents();
     method public android.graphics.Bitmap getBitmap(java.lang.String);
+    method public android.media.MediaMetadata.Description getDescription();
     method public long getLong(java.lang.String);
     method public android.media.Rating getRating(java.lang.String);
     method public java.lang.String getString(java.lang.String);
@@ -15195,6 +15196,14 @@ package android.media {
     method public android.media.MediaMetadata.Builder putRating(java.lang.String, android.media.Rating);
     method public android.media.MediaMetadata.Builder putString(java.lang.String, java.lang.String);
     method public android.media.MediaMetadata.Builder putText(java.lang.String, java.lang.CharSequence);
+  }
+
+  public final class MediaMetadata.Description {
+    method public java.lang.CharSequence getDescription();
+    method public android.graphics.Bitmap getIcon();
+    method public android.net.Uri getIconUri();
+    method public java.lang.CharSequence getSubtitle();
+    method public java.lang.CharSequence getTitle();
   }
 
   public abstract deprecated class MediaMetadataEditor {

@@ -190,8 +190,8 @@ public final class MediaMetadata implements Parcelable {
 
     private static final String[] PREFERRED_DESCRIPTION_ORDER = {
             METADATA_KEY_TITLE,
-            METADATA_KEY_ALBUM,
             METADATA_KEY_ARTIST,
+            METADATA_KEY_ALBUM,
             METADATA_KEY_ALBUM_ARTIST,
             METADATA_KEY_WRITER,
             METADATA_KEY_AUTHOR,
@@ -406,7 +406,6 @@ public final class MediaMetadata implements Parcelable {
      * Returns a simple description of this metadata for display purposes.
      *
      * @return A simple description of this metadata.
-     * @hide
      */
     public @NonNull Description getDescription() {
         if (mDescription != null) {
@@ -673,43 +672,86 @@ public final class MediaMetadata implements Parcelable {
 
     /**
      * A simple form of the metadata that can be used for display.
-     *
-     * @hide
      */
     public final class Description {
         /**
          * A primary title suitable for display or null.
          */
-        public final CharSequence title;
+        private final CharSequence mTitle;
         /**
          * A subtitle suitable for display or null.
          */
-        public final CharSequence subtitle;
+        private final CharSequence mSubtitle;
         /**
          * A description suitable for display or null.
          */
-        public final CharSequence description;
+        private final CharSequence mDescription;
         /**
          * A bitmap icon suitable for display or null.
          */
-        public final Bitmap icon;
+        private final Bitmap mIcon;
         /**
          * A Uri for an icon suitable for display or null.
          */
-        public final Uri iconUri;
+        private final Uri mIconUri;
+
+        /**
+         * Returns the best available title or null.
+         *
+         * @return A title or null.
+         */
+        public @Nullable CharSequence getTitle() {
+            return mTitle;
+        }
+
+        /**
+         * Returns the best available subtitle or null.
+         *
+         * @return A subtitle or null.
+         */
+        public @Nullable CharSequence getSubtitle() {
+            return mSubtitle;
+        }
+
+        /**
+         * Returns the best available description or null.
+         *
+         * @return A description or null.
+         */
+        public @Nullable CharSequence getDescription() {
+            return mDescription;
+        }
+
+        /**
+         * Returns the best available icon or null.
+         *
+         * @return An icon or null.
+         */
+        public @Nullable Bitmap getIcon() {
+            return mIcon;
+        }
+
+        /**
+         * Returns the best available icon Uri or null.
+         *
+         * @return An icon uri or null.
+         */
+        public @Nullable Uri getIconUri() {
+            return mIconUri;
+        }
 
         private Description(CharSequence title, CharSequence subtitle, CharSequence description,
                 Bitmap icon, Uri iconUri) {
-            this.title = title;
-            this.subtitle = subtitle;
-            this.description = description;
-            this.icon = icon;
-            this.iconUri = iconUri;
+            mTitle = title;
+            mSubtitle = subtitle;
+            mDescription = description;
+            mIcon = icon;
+            mIconUri = iconUri;
         }
 
         @Override
         public String toString() {
-            return title + ", " + subtitle + ", " + description;
+            return mTitle + ", " + mSubtitle + ", " + mDescription;
         }
     }
 
