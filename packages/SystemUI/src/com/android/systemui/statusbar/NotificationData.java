@@ -155,8 +155,11 @@ public class NotificationData {
     }
 
     public boolean isAmbient(String key) {
-        mRankingMap.getRanking(key, mTmpRanking);
-        return mTmpRanking.isAmbient();
+        if (mRankingMap != null) {
+            mRankingMap.getRanking(key, mTmpRanking);
+            return mTmpRanking.isAmbient();
+        }
+        return false;
     }
 
     private void updateRankingAndSort(RankingMap ranking) {
