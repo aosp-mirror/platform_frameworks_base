@@ -165,6 +165,9 @@
     <!-- Doze: should the significant motion sensor be used as a pulse signal? -->
     <bool name="doze_pulse_on_significant_motion">false</bool>
 
+    <!-- Doze: should the pickup sensor be used as a pulse signal? -->
+    <bool name="doze_pulse_on_pick_up">false</bool>
+
     <!-- Doze: maximum brightness to use when pulsing -->
     <integer name="doze_pulse_brightness">40</integer>
 
