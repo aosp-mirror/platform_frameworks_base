@@ -502,8 +502,17 @@ final public class MediaCodec {
 
             int i = 0;
             for (Map.Entry<String, Object> entry: formatMap.entrySet()) {
-                keys[i] = entry.getKey();
-                values[i] = entry.getValue();
+                if (entry.getKey().equals(MediaFormat.KEY_AUDIO_SESSION_ID)) {
+                    // TODO: Wire up as soon as AudioService is ready. Check entry.getValue() for
+                    // non-integral type.
+                    // long audioHwSync = audioService.getAudioHwSyncForSession(entry.getValue());
+                    long audioHwSync = 0;
+                    keys[i] = "audio-hw-sync";
+                    values[i] = audioHwSync;
+                } else {
+                    keys[i] = entry.getKey();
+                    values[i] = entry.getValue();
+                }
                 ++i;
             }
         }
