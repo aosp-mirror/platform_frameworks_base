@@ -15097,6 +15097,7 @@ package android.media {
     field public static final java.lang.String KEY_AAC_MAX_OUTPUT_CHANNEL_COUNT = "aac-max-output-channel_count";
     field public static final java.lang.String KEY_AAC_PROFILE = "aac-profile";
     field public static final java.lang.String KEY_AAC_SBR_MODE = "aac-sbr-mode";
+    field public static final java.lang.String KEY_AUDIO_SESSION_ID = "audio-session-id";
     field public static final java.lang.String KEY_BITRATE_MODE = "bitrate-mode";
     field public static final java.lang.String KEY_BIT_RATE = "bitrate";
     field public static final java.lang.String KEY_CAPTURE_RATE = "capture-rate";
@@ -15122,7 +15123,6 @@ package android.media {
     field public static final java.lang.String KEY_PROFILE = "profile";
     field public static final java.lang.String KEY_PUSH_BLANK_BUFFERS_ON_STOP = "push-blank-buffers-on-shutdown";
     field public static final java.lang.String KEY_QUALITY = "quality";
-    field public static final java.lang.String KEY_REFERENCE_CLOCK_ID = "reference-clock-id";
     field public static final java.lang.String KEY_REPEAT_PREVIOUS_FRAME_AFTER = "repeat-previous-frame-after";
     field public static final java.lang.String KEY_SAMPLE_RATE = "sample-rate";
     field public static final java.lang.String KEY_TEMPORAL_LAYERING = "ts-schema";
