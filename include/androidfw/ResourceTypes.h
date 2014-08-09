@@ -1684,6 +1684,8 @@ public:
     public:
         inline virtual ~Accessor() { }
 
+        virtual const String16& getAssetsPackage() const = 0;
+
         virtual uint32_t getCustomResource(const String16& package,
                                            const String16& type,
                                            const String16& name) const = 0;

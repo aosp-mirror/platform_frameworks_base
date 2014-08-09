@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="test3">test3</string>
+    <string name="test4">test4</string>
+
+    <integer name="number3">200</integer>
+</resources>
