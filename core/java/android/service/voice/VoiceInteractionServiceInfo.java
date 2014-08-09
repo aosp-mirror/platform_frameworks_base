@@ -17,13 +17,14 @@
 package android.service.voice;
 
 import android.Manifest;
+import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.speech.RecognitionService;
+import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
@@ -46,6 +47,12 @@ public class VoiceInteractionServiceInfo {
     public VoiceInteractionServiceInfo(PackageManager pm, ComponentName comp)
             throws PackageManager.NameNotFoundException {
         this(pm, pm.getServiceInfo(comp, PackageManager.GET_META_DATA));
+    }
+
+    public VoiceInteractionServiceInfo(PackageManager pm, ComponentName comp, int userHandle)
+            throws PackageManager.NameNotFoundException, RemoteException {
+        this(pm, AppGlobals.getPackageManager().getServiceInfo(comp,
+                PackageManager.GET_META_DATA, userHandle));
     }
 
     public VoiceInteractionServiceInfo(PackageManager pm, ServiceInfo si) {
