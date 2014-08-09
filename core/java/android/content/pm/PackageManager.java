@@ -179,9 +179,9 @@ public abstract class PackageManager {
     /**
      * {@link PackageInfo} flag: return information about
      * hardware preferences in
-     * {@link PackageInfo#configPreferences PackageInfo.configPreferences} and
-     * requested features in {@link PackageInfo#reqFeatures
-     * PackageInfo.reqFeatures}.
+     * {@link PackageInfo#configPreferences PackageInfo.configPreferences},
+     * and requested features in {@link PackageInfo#reqFeatures} and
+     * {@link PackageInfo#featureGroups}.
      */
     public static final int GET_CONFIGURATIONS = 0x00004000;
 

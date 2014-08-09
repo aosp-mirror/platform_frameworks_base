@@ -1676,12 +1676,8 @@ int doDump(Bundle* bundle)
 
                         String8 name = getResolvedAttribute(&res, tree, NAME_ATTR, &error);
                         if (name != "" && error == "") {
-                            int required = getIntegerAttribute(tree, REQUIRED_ATTR, NULL, 1);
-                            top.features.add(name, required);
-                            if (required) {
-                                addParentFeatures(&top, name);
-                            }
-
+                            top.features.add(name, true);
+                            addParentFeatures(&top, name);
                         } else {
                             int vers = getIntegerAttribute(tree, GL_ES_VERSION_ATTR, &error);
                             if (error == "") {
