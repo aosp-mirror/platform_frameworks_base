@@ -804,33 +804,6 @@ public final class Settings {
     public static final String ACTION_ZEN_MODE_SETTINGS = "android.settings.ZEN_MODE_SETTINGS";
 
     /**
-     * Activity Action: Modify zen mode settings.
-     * <p>
-     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
-     * <p>
-     * This intent MUST be started using
-     * {@link android.service.voice.VoiceInteractionSession#startVoiceActivity
-     * startVoiceActivity}.
-     * <p>
-     * To tell which state zen mode should be set to, add the
-     * {@link #EXTRA_ZEN_MODE_INTERRUPTION_STATE} extra to this Intent with the state specified.
-     * If there is no extra in this Intent, no changes will be made.
-     * <p>
-     * The Activity should verify that
-     * {@link android.app.Activity#isVoiceInteraction isVoiceInteraction}.
-     * returns true before modifying the setting.
-     * <p>
-     * Input: Nothing.
-     * <p>
-     * Output: Nothing.
-     *
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_VOICE_CONTROL_ZEN_MODE =
-            "android.settings.VOICE_CONTROL_ZEN_MODE";
-
-    /**
      * Activity Action: Show the regulatory information screen for the device.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard
@@ -970,19 +943,6 @@ public final class Settings {
      * intent as a boolean.
      */
     public static final String EXTRA_AIRPLANE_MODE_ENABLED = "airplane_mode_enabled";
-
-    /**
-     * Activity Extra: Modify the zen mode interruption state.
-     * <p>
-     * This can be passed as an extra field to the {@link #ACTION_VOICE_CONTROL_ZEN_MODE}
-     * intent as an integer. The value should be one of
-     * {@link android.provider.Settings.Global#ZEN_MODE_OFF},
-     * {@link android.provider.Settings.Global#ZEN_MODE_IMPORTANT_INTERRUPTIONS},
-     * {@link android.provider.Settings.Global#ZEN_MODE_NO_INTERRUPTIONS}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_ZEN_MODE_INTERRUPTION_STATE = "zen_mode_interruption_state";
 
     private static final String JID_RESOURCE_PREFIX = "android";
 
