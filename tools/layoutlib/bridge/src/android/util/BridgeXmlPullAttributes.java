@@ -22,6 +22,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.android.BridgeContext;
+import com.android.layoutlib.bridge.impl.ResourceHelper;
 import com.android.resources.ResourceType;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -210,6 +211,9 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
                 value = r.getValue();
             }
 
+            if (value.charAt(0) == '#') {
+                return ResourceHelper.getColor(value);
+            }
             return XmlUtils.convertValueToInt(value, defaultValue);
         }
 
