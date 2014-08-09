@@ -444,12 +444,13 @@ public final class MediaFormat {
     public static final String KEY_BITRATE_MODE = "bitrate-mode";
 
     /**
-     * A key describing the reference clock ID for a tunneled codec.
+     * A key describing the audio session ID of the AudioTrack associated
+     * to a tunneled video codec.
      * The associated value is an integer.
      *
      * @see MediaCodecInfo.CodecCapabilities#FEATURE_TunneledPlayback
      */
-    public static final String KEY_REFERENCE_CLOCK_ID = "reference-clock-id";
+    public static final String KEY_AUDIO_SESSION_ID = "audio-session-id";
 
     /**
      * A key for boolean AUTOSELECT behavior for the track. Tracks with AUTOSELECT=true
