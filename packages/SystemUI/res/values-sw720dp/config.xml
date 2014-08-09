@@ -39,5 +39,8 @@
     <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
          card. -->
     <integer name="keyguard_max_notification_count">5</integer>
+
+    <!-- Transposes the recents layout in landscape. -->
+    <bool name="recents_transpose_layout_with_orientation">false</bool>
 </resources>
 
