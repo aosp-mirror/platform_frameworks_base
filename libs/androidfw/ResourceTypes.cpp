@@ -4630,11 +4630,13 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
                     type.size(), package.string(), package.size(), &specFlags);
             if (rid != 0) {
                 if (enforcePrivate) {
-                    if ((specFlags&ResTable_typeSpec::SPEC_PUBLIC) == 0) {
-                        if (accessor != NULL) {
-                            accessor->reportError(accessorCookie, "Resource is not public.");
+                    if (accessor == NULL || accessor->getAssetsPackage() != package) {
+                        if ((specFlags&ResTable_typeSpec::SPEC_PUBLIC) == 0) {
+                            if (accessor != NULL) {
+                                accessor->reportError(accessorCookie, "Resource is not public.");
+                            }
+                            return false;
                         }
-                        return false;
                     }
                 }
 

@@ -19,6 +19,7 @@
 #include <utils/String8.h>
 #include <utils/String16.h>
 #include "TestHelpers.h"
+#include "data/R.h"
 
 #include <gtest/gtest.h>
 
@@ -42,16 +43,6 @@ namespace {
 #include "data/overlay/overlay_arsc.h"
 
 enum { MAY_NOT_BE_BAG = false };
-
-static const uint32_t attr_attr1            = 0x7f010000;
-static const uint32_t attr_attr2            = 0x7f010001;
-static const uint32_t string_test1          = 0x7f020000;
-static const uint32_t string_test2          = 0x7f020001;
-static const uint32_t integer_number1       = 0x7f030000;
-static const uint32_t integer_number2       = 0x7f030001;
-static const uint32_t style_Theme1          = 0x7f040000;
-static const uint32_t style_Theme2          = 0x7f040001;
-static const uint32_t array_integerArray1   = 0x7f050000;
 
 class IdmapTest : public ::testing::Test {
 protected:
@@ -79,7 +70,7 @@ TEST_F(IdmapTest, canLoadIdmap) {
 
 TEST_F(IdmapTest, overlayOverridesResourceValue) {
     Res_value val;
-    ssize_t block = mTargetTable.getResource(string_test2, &val, false);
+    ssize_t block = mTargetTable.getResource(R::string::test2, &val, false);
     ASSERT_GE(block, 0);
     ASSERT_EQ(Res_value::TYPE_STRING, val.dataType);
     const ResStringPool* pool = mTargetTable.getTableStringBlock(block);
@@ -93,7 +84,7 @@ TEST_F(IdmapTest, overlayOverridesResourceValue) {
 
     ASSERT_EQ(NO_ERROR, mTargetTable.add(overlay_arsc, overlay_arsc_len, mData, mDataSize));
 
-    ssize_t newBlock = mTargetTable.getResource(string_test2, &val, false);
+    ssize_t newBlock = mTargetTable.getResource(R::string::test2, &val, false);
     ASSERT_GE(newBlock, 0);
     ASSERT_NE(block, newBlock);
     ASSERT_EQ(Res_value::TYPE_STRING, val.dataType);
@@ -110,7 +101,7 @@ TEST_F(IdmapTest, overlaidResourceHasSameName) {
     ASSERT_EQ(NO_ERROR, mTargetTable.add(overlay_arsc, overlay_arsc_len, mData, mDataSize));
 
     ResTable::resource_name resName;
-    ASSERT_TRUE(mTargetTable.getResourceName(array_integerArray1, false, &resName));
+    ASSERT_TRUE(mTargetTable.getResourceName(R::array::integerArray1, false, &resName));
 
     ASSERT_TRUE(resName.package != NULL);
     ASSERT_TRUE(resName.type != NULL);

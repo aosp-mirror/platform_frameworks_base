@@ -19,6 +19,7 @@
 #include <utils/String8.h>
 #include <utils/String16.h>
 #include "TestHelpers.h"
+#include "data/R.h"
 
 #include <gtest/gtest.h>
 
@@ -35,16 +36,6 @@ namespace {
 
 enum { MAY_NOT_BE_BAG = false };
 
-static const uint32_t attr_attr1            = 0x7f010000;
-static const uint32_t attr_attr2            = 0x7f010001;
-static const uint32_t string_test1          = 0x7f020000;
-static const uint32_t string_test2          = 0x7f020001;
-static const uint32_t integer_number1       = 0x7f030000;
-static const uint32_t integer_number2       = 0x7f030001;
-static const uint32_t style_Theme1          = 0x7f040000;
-static const uint32_t style_Theme2          = 0x7f040001;
-static const uint32_t array_integerArray1   = 0x7f050000;
-
 TEST(ResTableTest, shouldLoadSuccessfully) {
     ResTable table;
     ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
@@ -55,7 +46,7 @@ TEST(ResTableTest, simpleTypeIsRetrievedCorrectly) {
     ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
 
     Res_value val;
-    ssize_t block = table.getResource(string_test1, &val, MAY_NOT_BE_BAG);
+    ssize_t block = table.getResource(R::string::test1, &val, MAY_NOT_BE_BAG);
 
     ASSERT_GE(block, 0);
     ASSERT_EQ(Res_value::TYPE_STRING, val.dataType);
@@ -75,7 +66,7 @@ TEST(ResTableTest, resourceNameIsResolved) {
                                              0, 0,
                                              defPackage.string(), defPackage.size());
     ASSERT_NE(uint32_t(0x00000000), resID);
-    ASSERT_EQ(string_test1, resID);
+    ASSERT_EQ(R::string::test1, resID);
 }
 
 TEST(ResTableTest, noParentThemeIsAppliedCorrectly) {
@@ -83,19 +74,19 @@ TEST(ResTableTest, noParentThemeIsAppliedCorrectly) {
     ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
 
     ResTable::Theme theme(table);
-    ASSERT_EQ(NO_ERROR, theme.applyStyle(style_Theme1));
+    ASSERT_EQ(NO_ERROR, theme.applyStyle(R::style::Theme1));
 
     Res_value val;
     uint32_t specFlags = 0;
-    ssize_t index = theme.getAttribute(attr_attr1, &val, &specFlags);
+    ssize_t index = theme.getAttribute(R::attr::attr1, &val, &specFlags);
     ASSERT_GE(index, 0);
     ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
     ASSERT_EQ(uint32_t(100), val.data);
 
-    index = theme.getAttribute(attr_attr2, &val, &specFlags);
+    index = theme.getAttribute(R::attr::attr2, &val, &specFlags);
     ASSERT_GE(index, 0);
     ASSERT_EQ(Res_value::TYPE_REFERENCE, val.dataType);
-    ASSERT_EQ(integer_number1, val.data);
+    ASSERT_EQ(R::integer::number1, val.data);
 }
 
 TEST(ResTableTest, parentThemeIsAppliedCorrectly) {
@@ -103,19 +94,19 @@ TEST(ResTableTest, parentThemeIsAppliedCorrectly) {
     ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
 
     ResTable::Theme theme(table);
-    ASSERT_EQ(NO_ERROR, theme.applyStyle(style_Theme2));
+    ASSERT_EQ(NO_ERROR, theme.applyStyle(R::style::Theme2));
 
     Res_value val;
     uint32_t specFlags = 0;
-    ssize_t index = theme.getAttribute(attr_attr1, &val, &specFlags);
+    ssize_t index = theme.getAttribute(R::attr::attr1, &val, &specFlags);
     ASSERT_GE(index, 0);
     ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
     ASSERT_EQ(uint32_t(300), val.data);
 
-    index = theme.getAttribute(attr_attr2, &val, &specFlags);
+    index = theme.getAttribute(R::attr::attr2, &val, &specFlags);
     ASSERT_GE(index, 0);
     ASSERT_EQ(Res_value::TYPE_REFERENCE, val.dataType);
-    ASSERT_EQ(integer_number1, val.data);
+    ASSERT_EQ(R::integer::number1, val.data);
 }
 
 TEST(ResTableTest, referenceToBagIsNotResolved) {
@@ -123,15 +114,15 @@ TEST(ResTableTest, referenceToBagIsNotResolved) {
     ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
 
     Res_value val;
-    ssize_t block = table.getResource(integer_number2, &val, MAY_NOT_BE_BAG);
+    ssize_t block = table.getResource(R::integer::number2, &val, MAY_NOT_BE_BAG);
     ASSERT_GE(block, 0);
     ASSERT_EQ(Res_value::TYPE_REFERENCE, val.dataType);
-    ASSERT_EQ(array_integerArray1, val.data);
+    ASSERT_EQ(R::array::integerArray1, val.data);
 
     ssize_t newBlock = table.resolveReference(&val, block);
     EXPECT_EQ(block, newBlock);
     EXPECT_EQ(Res_value::TYPE_REFERENCE, val.dataType);
-    EXPECT_EQ(array_integerArray1, val.data);
+    EXPECT_EQ(R::array::integerArray1, val.data);
 }
 
 TEST(ResTableTest, resourcesStillAccessibleAfterParameterChange) {
@@ -139,12 +130,12 @@ TEST(ResTableTest, resourcesStillAccessibleAfterParameterChange) {
     ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
 
     Res_value val;
-    ssize_t block = table.getResource(integer_number1, &val, MAY_NOT_BE_BAG);
+    ssize_t block = table.getResource(R::integer::number1, &val, MAY_NOT_BE_BAG);
     ASSERT_GE(block, 0);
     ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
 
     const ResTable::bag_entry* entry;
-    ssize_t count = table.lockBag(array_integerArray1, &entry);
+    ssize_t count = table.lockBag(R::array::integerArray1, &entry);
     ASSERT_GE(count, 0);
     table.unlockBag(entry);
 
@@ -153,11 +144,11 @@ TEST(ResTableTest, resourcesStillAccessibleAfterParameterChange) {
     param.density = 320;
     table.setParameters(&param);
 
-    block = table.getResource(integer_number1, &val, MAY_NOT_BE_BAG);
+    block = table.getResource(R::integer::number1, &val, MAY_NOT_BE_BAG);
     ASSERT_GE(block, 0);
     ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
 
-    count = table.lockBag(array_integerArray1, &entry);
+    count = table.lockBag(R::array::integerArray1, &entry);
     ASSERT_GE(count, 0);
     table.unlockBag(entry);
 }
@@ -167,7 +158,7 @@ TEST(ResTableTest, resourceIsOverridenWithBetterConfig) {
     ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
 
     Res_value val;
-    ssize_t block = table.getResource(integer_number1, &val, MAY_NOT_BE_BAG);
+    ssize_t block = table.getResource(R::integer::number1, &val, MAY_NOT_BE_BAG);
     ASSERT_GE(block, 0);
     ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
     ASSERT_EQ(uint32_t(200), val.data);
@@ -180,7 +171,7 @@ TEST(ResTableTest, resourceIsOverridenWithBetterConfig) {
     param.country[1] = 'E';
     table.setParameters(&param);
 
-    block = table.getResource(integer_number1, &val, MAY_NOT_BE_BAG);
+    block = table.getResource(R::integer::number1, &val, MAY_NOT_BE_BAG);
     ASSERT_GE(block, 0);
     ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
     ASSERT_EQ(uint32_t(400), val.data);
