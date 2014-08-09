@@ -29,10 +29,11 @@ import com.android.internal.telecomm.IVideoCallProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Provides methods for IConnectionService implementations to interact with the system phone app.
@@ -40,7 +41,8 @@ import java.util.Set;
  * @hide
  */
 final class ConnectionServiceAdapter implements DeathRecipient {
-    private final Set<IConnectionServiceAdapter> mAdapters = new HashSet<>();
+    private final Set<IConnectionServiceAdapter> mAdapters = Collections.newSetFromMap(
+            new ConcurrentHashMap<IConnectionServiceAdapter, Boolean>(2));
 
     ConnectionServiceAdapter() {
     }
