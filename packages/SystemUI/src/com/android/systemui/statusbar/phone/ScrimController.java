@@ -44,7 +44,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private static final int TAG_KEY_ANIM = R.id.scrim;
 
     private static final long PULSE_IN_ANIMATION_DURATION = 1000;
-    private static final long PULSE_VISIBLE_DURATION = 2000;
+    private static final long PULSE_VISIBLE_DURATION = 3000;
     private static final long PULSE_OUT_ANIMATION_DURATION = 1000;
     private static final long PULSE_INVISIBLE_DURATION = 1000;
     private static final long PULSE_DURATION = PULSE_IN_ANIMATION_DURATION
@@ -131,11 +131,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     }
 
     /** When dozing, fade screen contents in and out a few times using the front scrim. */
-    public long pulse(int pulses) {
+    public long pulse(int pulses, boolean delayed) {
         if (!mDozing) return 0;
         mPulsesRemaining = Math.max(pulses, mPulsesRemaining);
-        mScrimInFront.postDelayed(mPulseIn, PRE_PULSE_DELAY);
-        return PRE_PULSE_DELAY + mPulsesRemaining * PULSE_DURATION;
+        final long delay = delayed ? PRE_PULSE_DELAY : 0;
+        mScrimInFront.postDelayed(mPulseIn, delay);
+        return delay + mPulsesRemaining * PULSE_DURATION;
     }
 
     private void cancelPulsing() {
