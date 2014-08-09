@@ -402,7 +402,6 @@ public final class SystemServer {
         BluetoothManagerService bluetooth = null;
         UsbService usb = null;
         SerialService serial = null;
-        RecognitionManagerService recognition = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
         CommonTimeManagementService commonTimeMgmtService = null;
         InputManagerService inputManager = null;
@@ -843,13 +842,6 @@ public final class SystemServer {
                     mSystemServiceManager.startService(APPWIDGET_SERVICE_CLASS);
                 }
 
-                try {
-                    Slog.i(TAG, "Recognition Service");
-                    recognition = new RecognitionManagerService(context);
-                } catch (Throwable e) {
-                    reportWtf("starting Recognition Service", e);
-                }
-
                 if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_VOICE_RECOGNIZERS)) {
                     mSystemServiceManager.startService(VOICE_RECOGNITION_MANAGER_SERVICE_CLASS);
                 }
@@ -1046,7 +1038,6 @@ public final class SystemServer {
         final NetworkScoreService networkScoreF = networkScore;
         final WallpaperManagerService wallpaperF = wallpaper;
         final InputMethodManagerService immF = imm;
-        final RecognitionManagerService recognitionF = recognition;
         final LocationManagerService locationF = location;
         final CountryDetectorService countryDetectorF = countryDetector;
         final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
@@ -1115,11 +1106,6 @@ public final class SystemServer {
                     if (connectivityF != null) connectivityF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making Connectivity Service ready", e);
-                }
-                try {
-                    if (recognitionF != null) recognitionF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Recognition Service ready", e);
                 }
                 try {
                     if (audioServiceF != null) audioServiceF.systemReady();
