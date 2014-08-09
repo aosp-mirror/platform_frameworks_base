@@ -18,11 +18,16 @@ package com.android.server.voiceinteraction;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
@@ -38,7 +43,11 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
+import android.service.voice.VoiceInteractionService;
+import android.service.voice.VoiceInteractionServiceInfo;
+import android.speech.RecognitionService;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.app.IVoiceInteractionManagerService;
@@ -50,13 +59,14 @@ import com.android.server.UiThread;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * SystemService that publishes an IVoiceInteractionManagerService.
  */
 public class VoiceInteractionManagerService extends SystemService {
-
     static final String TAG = "VoiceInteractionManagerService";
+    static final boolean DEBUG = false;
 
     final Context mContext;
     final ContentResolver mResolver;
@@ -82,6 +92,11 @@ public class VoiceInteractionManagerService extends SystemService {
         if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             mServiceStub.systemRunning(isSafeMode());
         }
+    }
+
+    @Override
+    public void onStartUser(int userHandle) {
+        mServiceStub.initForUser(userHandle);
     }
 
     @Override
@@ -112,6 +127,60 @@ public class VoiceInteractionManagerService extends SystemService {
                     Slog.wtf(TAG, "VoiceInteractionManagerService Crash", e);
                 }
                 throw e;
+            }
+        }
+
+        public void initForUser(int userHandle) {
+            if (DEBUG) Slog.i(TAG, "initForUser user=" + userHandle);
+            ComponentName curInteractor = getCurInteractor(userHandle);
+            ComponentName curRecognizer = getCurRecognizer(userHandle);
+            if (curRecognizer != null) {
+                // If we already have at least a recognizer, then we probably want to
+                // leave things as they are...  unless something has disappeared.
+                IPackageManager pm = AppGlobals.getPackageManager();
+                ServiceInfo interactorInfo = null;
+                ServiceInfo recognizerInfo = null;
+                try {
+                    recognizerInfo = pm.getServiceInfo(curRecognizer, 0, userHandle);
+                    if (curInteractor != null) {
+                        interactorInfo = pm.getServiceInfo(curInteractor, 0, userHandle);
+                    }
+                } catch (RemoteException e) {
+                }
+                // If the apps for the currently set components still exist, then all is okay.
+                if (recognizerInfo != null && (curInteractor == null || interactorInfo != null)) {
+                    return;
+                }
+            }
+
+            // Initializing settings, look for an interactor first.
+            curInteractor = findAvailInteractor(userHandle);
+            if (curInteractor != null) {
+                try {
+                    VoiceInteractionServiceInfo info = new VoiceInteractionServiceInfo(
+                            mContext.getPackageManager(), curInteractor, userHandle);
+                    if (info.getParseError() == null) {
+                        setCurInteractor(curInteractor, userHandle);
+                        if (info.getRecognitionService() != null) {
+                            // Eventually it will be an error to not specify this.
+                            curRecognizer = new ComponentName(info.getServiceInfo().packageName,
+                                    info.getRecognitionService());
+                            setCurRecognizer(curRecognizer, userHandle);
+                            return;
+                        }
+                    } else {
+                        Slog.w(TAG, "Bad interaction service " + curInteractor + ": "
+                                + info.getParseError());
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                } catch (RemoteException e) {
+                }
+            }
+
+            // No voice interactor, we'll just set up a simple recognizer.
+            curRecognizer = findAvailRecognizer(null, userHandle);
+            if (curRecognizer != null) {
+                setCurRecognizer(curRecognizer, userHandle);
             }
         }
 
@@ -163,6 +232,105 @@ public class VoiceInteractionManagerService extends SystemService {
                     }
                 }
             }
+        }
+
+        ComponentName findAvailInteractor(int userHandle) {
+            List<ResolveInfo> available =
+                    mContext.getPackageManager().queryIntentServicesAsUser(
+                            new Intent(VoiceInteractionService.SERVICE_INTERFACE), 0, userHandle);
+            int numAvailable = available.size();
+
+            if (numAvailable == 0) {
+                Slog.w(TAG, "no available voice interaction services found for user " + userHandle);
+                return null;
+            } else {
+                // Find first system package.  We never want to allow third party services to
+                // be automatically selected, because those require approval of the user.
+                ServiceInfo serviceInfo = null;
+                for (int i=0; i<numAvailable; i++) {
+                    ServiceInfo cur = available.get(i).serviceInfo;
+                    if ((cur.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
+                        if (serviceInfo == null) {
+                            serviceInfo = cur;
+                        } else {
+                            Slog.w(TAG, "more than one voice interaction service, picking first "
+                                    + new ComponentName(serviceInfo.packageName, serviceInfo.name)
+                                    + " over "
+                                    + new ComponentName(cur.packageName, cur.name));
+                        }
+                    }
+                }
+
+                return serviceInfo != null ?
+                        new ComponentName(serviceInfo.packageName, serviceInfo.name) : null;
+            }
+        }
+
+        ComponentName getCurInteractor(int userHandle) {
+            String curInteractor = Settings.Secure.getStringForUser(
+                    mContext.getContentResolver(),
+                    Settings.Secure.VOICE_INTERACTION_SERVICE, userHandle);
+            if (TextUtils.isEmpty(curInteractor)) {
+                return null;
+            }
+            if (DEBUG) Slog.i(TAG, "getCurInteractor curInteractor=" + curInteractor
+                    + " user=" + userHandle);
+            return ComponentName.unflattenFromString(curInteractor);
+        }
+
+        void setCurInteractor(ComponentName comp, int userHandle) {
+            Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                    Settings.Secure.VOICE_INTERACTION_SERVICE,
+                    comp != null ? comp.flattenToShortString() : "", userHandle);
+            if (DEBUG) Slog.i(TAG, "setCurInteractor comp=" + comp
+                    + " user=" + userHandle);
+        }
+
+        ComponentName findAvailRecognizer(String prefPackage, int userHandle) {
+            List<ResolveInfo> available =
+                    mContext.getPackageManager().queryIntentServicesAsUser(
+                            new Intent(RecognitionService.SERVICE_INTERFACE), 0, userHandle);
+            int numAvailable = available.size();
+
+            if (numAvailable == 0) {
+                Slog.w(TAG, "no available voice recognition services found for user " + userHandle);
+                return null;
+            } else {
+                if (prefPackage != null) {
+                    for (int i=0; i<numAvailable; i++) {
+                        ServiceInfo serviceInfo = available.get(i).serviceInfo;
+                        if (prefPackage.equals(serviceInfo.packageName)) {
+                            return new ComponentName(serviceInfo.packageName, serviceInfo.name);
+                        }
+                    }
+                }
+                if (numAvailable > 1) {
+                    Slog.w(TAG, "more than one voice recognition service found, picking first");
+                }
+
+                ServiceInfo serviceInfo = available.get(0).serviceInfo;
+                return new ComponentName(serviceInfo.packageName, serviceInfo.name);
+            }
+        }
+
+        ComponentName getCurRecognizer(int userHandle) {
+            String curRecognizer = Settings.Secure.getStringForUser(
+                    mContext.getContentResolver(),
+                    Settings.Secure.VOICE_RECOGNITION_SERVICE, userHandle);
+            if (TextUtils.isEmpty(curRecognizer)) {
+                return null;
+            }
+            if (DEBUG) Slog.i(TAG, "getCurRecognizer curRecognizer=" + curRecognizer
+                    + " user=" + userHandle);
+            return ComponentName.unflattenFromString(curRecognizer);
+        }
+
+        void setCurRecognizer(ComponentName comp, int userHandle) {
+            Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                    Settings.Secure.VOICE_RECOGNITION_SERVICE,
+                    comp != null ? comp.flattenToShortString() : "", userHandle);
+            if (DEBUG) Slog.i(TAG, "setCurRecognizer comp=" + comp
+                    + " user=" + userHandle);
         }
 
         @Override
@@ -461,22 +629,56 @@ public class VoiceInteractionManagerService extends SystemService {
             }
 
             @Override
-            public void onPackageDisappeared(String packageName, int reason) {
-            }
-
-            @Override
-            public void onPackageAppeared(String packageName, int reason) {
-                if (mImpl != null && packageName.equals(mImpl.mComponent.getPackageName())) {
-                    switchImplementationIfNeededLocked(true);
-                }
-            }
-
-            @Override
-            public void onPackageModified(String packageName) {
-            }
-
-            @Override
             public void onSomePackagesChanged() {
+                int userHandle = getChangingUserId();
+                if (DEBUG) Slog.i(TAG, "onSomePackagesChanged user=" + userHandle);
+
+                ComponentName curInteractor = getCurInteractor(userHandle);
+                ComponentName curRecognizer = getCurRecognizer(userHandle);
+                if (curRecognizer == null) {
+                    // Could a new recognizer appear when we don't have one pre-installed?
+                    if (anyPackagesAppearing()) {
+                        curRecognizer = findAvailRecognizer(null, userHandle);
+                        if (curRecognizer != null) {
+                            setCurRecognizer(curRecognizer, userHandle);
+                        }
+                    }
+                    return;
+                }
+
+                if (curInteractor != null) {
+                    int change = isPackageDisappearing(curInteractor.getPackageName());
+                    if (change == PACKAGE_PERMANENT_CHANGE) {
+                        // The currently set interactor is permanently gone; fall back to
+                        // the default config.
+                        setCurInteractor(null, userHandle);
+                        setCurRecognizer(null, userHandle);
+                        initForUser(userHandle);
+                        return;
+                    }
+
+                    change = isPackageAppearing(curInteractor.getPackageName());
+                    if (change != PACKAGE_UNCHANGED) {
+                        // If current interactor is now appearing, for any reason, then
+                        // restart our connection with it.
+                        if (mImpl != null && curInteractor.getPackageName().equals(
+                                mImpl.mComponent.getPackageName())) {
+                            switchImplementationIfNeededLocked(true);
+                        }
+                    }
+                    return;
+                }
+
+                // There is no interactor, so just deal with a simple recognizer.
+                int change = isPackageDisappearing(curRecognizer.getPackageName());
+                if (change == PACKAGE_PERMANENT_CHANGE
+                        || change == PACKAGE_TEMPORARY_CHANGE) {
+                    setCurRecognizer(findAvailRecognizer(null, userHandle), userHandle);
+
+                } else if (isPackageModified(curRecognizer.getPackageName())) {
+                    setCurRecognizer(findAvailRecognizer(curRecognizer.getPackageName(),
+                            userHandle), userHandle);
+                }
             }
         };
     }
