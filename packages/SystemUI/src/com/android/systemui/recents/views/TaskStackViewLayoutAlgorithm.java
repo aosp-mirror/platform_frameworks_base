@@ -60,8 +60,6 @@ public class TaskStackViewLayoutAlgorithm {
 
     public TaskStackViewLayoutAlgorithm(RecentsConfiguration config) {
         mConfig = config;
-        mWithinAffiliationOffset = mConfig.taskBarHeight;
-        mBetweenAffiliationOffset = 4 * mConfig.taskBarHeight;
 
         // Precompute the path
         initializeCurve();
@@ -84,6 +82,11 @@ public class TaskStackViewLayoutAlgorithm {
         int left = mStackRect.left + (mStackRect.width() - size) / 2;
         mTaskRect.set(left, mStackRect.top,
                 left + size, mStackRect.top + size);
+
+        // Update the affiliation offsets
+        float visibleTaskPct = 0.55f;
+        mWithinAffiliationOffset = mConfig.taskBarHeight;
+        mBetweenAffiliationOffset = (int) (visibleTaskPct * mTaskRect.height());
     }
 
     /** Computes the minimum and maximum scroll progress values.  This method may be called before
@@ -110,8 +113,7 @@ public class TaskStackViewLayoutAlgorithm {
                 screenYToCurveProgress(mStackVisibleRect.bottom - (mStackVisibleRect.bottom - mStackRect.bottom));
 
         // Update the task offsets
-        float pAtBackMostCardTop = screenYToCurveProgress(mStackVisibleRect.top +
-                (mStackVisibleRect.height() - taskHeight) / 2);
+        float pAtBackMostCardTop = 0.5f;
         float pAtFrontMostCardTop = pAtBackMostCardTop;
         float pAtSecondFrontMostCardTop = pAtBackMostCardTop;
         int taskCount = tasks.size();
@@ -128,14 +130,15 @@ public class TaskStackViewLayoutAlgorithm {
             }
         }
 
-        mMinScrollP = 0f;
         mMaxScrollP = pAtFrontMostCardTop - ((1f - pTaskHeightOffset - pNavBarOffset));
+        mMinScrollP = tasks.size() == 1 ? Math.max(mMaxScrollP, 0f) : 0f;
         if (launchedWithAltTab) {
             // Center the second most task, since that will be focused first
             mInitialScrollP = pAtSecondFrontMostCardTop - 0.5f;
         } else {
-            mInitialScrollP = pAtSecondFrontMostCardTop - ((1f - pTaskHeightOffset - pNavBarOffset));
+            mInitialScrollP = pAtFrontMostCardTop - 0.825f;
         }
+        mInitialScrollP = Math.max(0, mInitialScrollP);
     }
 
     /** Update/get the transform */

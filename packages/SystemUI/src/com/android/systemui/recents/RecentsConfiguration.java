@@ -37,8 +37,6 @@ public class RecentsConfiguration {
     static RecentsConfiguration sInstance;
     static int sPrevConfigurationHashCode;
 
-    DisplayMetrics mDisplayMetrics;
-
     /** Animations */
     public float animationPxMovementPerSecond;
 
@@ -156,13 +154,21 @@ public class RecentsConfiguration {
         SharedPreferences settings = context.getSharedPreferences(context.getPackageName(), 0);
         Resources res = context.getResources();
         DisplayMetrics dm = res.getDisplayMetrics();
-        mDisplayMetrics = dm;
 
         // Debug mode
         debugModeEnabled = settings.getBoolean(Constants.Values.App.Key_DebugModeEnabled, false);
         if (debugModeEnabled) {
             Console.Enabled = true;
         }
+
+        // Layout
+        isLandscape = res.getConfiguration().orientation ==
+                Configuration.ORIENTATION_LANDSCAPE;
+        transposeRecentsLayoutWithOrientation =
+                res.getBoolean(R.bool.recents_transpose_layout_with_orientation);
+
+        // Insets
+        displayRect.set(0, 0, dm.widthPixels, dm.heightPixels);
 
         // Animations
         animationPxMovementPerSecond =
@@ -173,15 +179,6 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_filter_animate_current_views_duration);
         filteringNewViewsAnimDuration =
                 res.getInteger(R.integer.recents_filter_animate_new_views_duration);
-
-        // Insets
-        displayRect.set(0, 0, dm.widthPixels, dm.heightPixels);
-
-        // Layout
-        isLandscape = res.getConfiguration().orientation ==
-                Configuration.ORIENTATION_LANDSCAPE;
-        transposeRecentsLayoutWithOrientation =
-                res.getBoolean(R.bool.recents_transpose_layout_with_orientation);
 
         // Search Bar
         searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
