@@ -71,6 +71,7 @@ void usage(void)
         "        [--product product1,product2,...] \\\n"
         "        [-c CONFIGS] [--preferred-configurations CONFIGS] \\\n"
         "        [--split CONFIGS [--split CONFIGS]] \\\n"
+        "        [--feature-of package [--feature-after package]] \\\n"
         "        [raw-files-dir [raw-files-dir] ...] \\\n"
         "        [--output-text-symbols DIR]\n"
         "\n"
@@ -167,6 +168,14 @@ void usage(void)
         "   --split\n"
         "       Builds a separate split APK for the configurations listed. This can\n"
         "       be loaded alongside the base APK at runtime.\n"
+        "   --feature-of\n"
+        "       Builds a split APK that is a feature of the apk specified here. Resources\n"
+        "       in the base APK can be referenced from the the feature APK.\n"
+        "   --feature-after\n"
+        "       An app can have multiple Feature Split APKs which must be totally ordered.\n"
+        "       If --feature-of is specified, this flag specifies which Feature Split APK\n"
+        "       comes before this one. The first Feature Split APK should not define\n"
+        "       anything here.\n"
         "   --rename-manifest-package\n"
         "       Rewrite the manifest so that its package name is the package name\n"
         "       given here.  Relative class names (for example .Foo) will be\n"
@@ -583,6 +592,24 @@ int main(int argc, char* const argv[])
                         goto bail;
                     }
                     bundle.addSplitConfigurations(argv[0]);
+                } else if (strcmp(cp, "-feature-of") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '--feature-of' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    bundle.setFeatureOfPackage(argv[0]);
+                } else if (strcmp(cp, "-feature-after") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '--feature-after' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    bundle.setFeatureAfterPackage(argv[0]);
                 } else if (strcmp(cp, "-rename-manifest-package") == 0) {
                     argc--;
                     argv++;
