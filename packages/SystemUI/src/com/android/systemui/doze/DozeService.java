@@ -30,6 +30,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
+import android.media.AudioAttributes;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemProperties;
@@ -61,15 +62,14 @@ public class DozeService extends DreamService {
 
     private Host mHost;
     private SensorManager mSensors;
-    private Sensor mSigMotionSensor;
+    private TriggerSensor mSigMotionSensor;
+    private TriggerSensor mPickupSensor;
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;
     private AlarmManager mAlarmManager;
     private int mMaxBrightness;
     private boolean mDreaming;
     private boolean mBroadcastReceiverRegistered;
-    private boolean mSigMotionConfigured;
-    private boolean mSigMotionEnabled;
     private boolean mDisplayStateSupported;
     private int mDisplayStateWhenOn;
     private boolean mNotificationLightOn;
@@ -88,8 +88,7 @@ public class DozeService extends DreamService {
         pw.print("  mDreaming: "); pw.println(mDreaming);
         pw.print("  mBroadcastReceiverRegistered: "); pw.println(mBroadcastReceiverRegistered);
         pw.print("  mSigMotionSensor: "); pw.println(mSigMotionSensor);
-        pw.print("  mSigMotionConfigured: "); pw.println(mSigMotionConfigured);
-        pw.print("  mSigMotionEnabled: "); pw.println(mSigMotionEnabled);
+        pw.print("  mPickupSensor:"); pw.println(mPickupSensor);
         pw.print("  mMaxBrightness: "); pw.println(mMaxBrightness);
         pw.print("  mDisplayStateSupported: "); pw.println(mDisplayStateSupported);
         pw.print("  mNotificationLightOn: "); pw.println(mNotificationLightOn);
@@ -110,13 +109,14 @@ public class DozeService extends DreamService {
         setWindowless(true);
 
         mSensors = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
-        mSigMotionSensor = mSensors.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
+        mSigMotionSensor = new TriggerSensor(Sensor.TYPE_SIGNIFICANT_MOTION, "doze.pulse.sigmotion",
+                R.bool.doze_pulse_on_significant_motion);
+        mPickupSensor = new TriggerSensor(Sensor.TYPE_PICK_UP_GESTURE, "doze.pulse.pickup",
+                R.bool.doze_pulse_on_pick_up);
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mTag);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         final Resources res = mContext.getResources();
-        mSigMotionConfigured = SystemProperties.getBoolean("doze.pulse.sigmotion",
-                res.getBoolean(R.bool.doze_pulse_on_significant_motion));
         mDisplayStateSupported = SystemProperties.getBoolean("doze.display.supported",
                 res.getBoolean(R.bool.doze_display_state_supported));
         mMaxBrightness = MathUtils.constrain(res.getInteger(R.integer.doze_pulse_brightness),
@@ -217,8 +217,12 @@ public class DozeService extends DreamService {
     }
 
     private void requestPulse(int pulses) {
+        requestPulse(pulses, true /*delayed*/);
+    }
+
+    private void requestPulse(int pulses, boolean delayed) {
         if (mHost != null) {
-            mHost.requestPulse(pulses, this);
+            mHost.requestPulse(pulses, delayed, this);
         }
     }
 
@@ -230,19 +234,10 @@ public class DozeService extends DreamService {
 
     private void listenForPulseSignals(boolean listen) {
         if (DEBUG) Log.d(mTag, "listenForPulseSignals: " + listen);
-        listenForSignificantMotion(listen);
+        mSigMotionSensor.setListening(listen);
+        mPickupSensor.setListening(listen);
         listenForBroadcasts(listen);
         listenForNotifications(listen);
-    }
-
-    private void listenForSignificantMotion(boolean listen) {
-        if (!mSigMotionConfigured || mSigMotionSensor == null) return;
-        if (listen) {
-            mSigMotionEnabled =
-                    mSensors.requestTriggerSensor(mSigMotionListener, mSigMotionSensor);
-        } else if (mSigMotionEnabled) {
-            mSensors.cancelTriggerSensor(mSigMotionListener, mSigMotionSensor);
-        }
     }
 
     private void listenForBroadcasts(boolean listen) {
@@ -299,21 +294,6 @@ public class DozeService extends DreamService {
         }
     };
 
-    private final TriggerEventListener mSigMotionListener = new TriggerEventListener() {
-        @Override
-        public void onTrigger(TriggerEvent event) {
-            if (DEBUG) Log.d(mTag, "sigMotion.onTrigger: " + triggerEventToString(event));
-            if (DEBUG) {
-                final Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
-                if (v != null) {
-                    v.vibrate(1000);
-                }
-            }
-            requestPulse();
-            listenForSignificantMotion(true);  // reregister, this sensor only fires once
-        }
-    };
-
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -355,13 +335,57 @@ public class DozeService extends DreamService {
         void addCallback(Callback callback);
         void removeCallback(Callback callback);
         void requestDoze(DozeService dozeService);
-        void requestPulse(int pulses, DozeService dozeService);
+        void requestPulse(int pulses, boolean delayed, DozeService dozeService);
         void dozingStopped(DozeService dozeService);
 
         public interface Callback {
             void onNewNotifications();
             void onBuzzBeepBlinked();
             void onNotificationLight(boolean on);
+        }
+    }
+
+    private class TriggerSensor extends TriggerEventListener {
+        private final Sensor mSensor;
+        private final boolean mConfigured;
+
+        private boolean mEnabled;
+
+        public TriggerSensor(int type, String sysPropConfig, int resConfig) {
+            mSensor = mSensors.getDefaultSensor(type);
+            mConfigured = SystemProperties.getBoolean(sysPropConfig,
+                    mContext.getResources().getBoolean(resConfig));
+        }
+
+        public void setListening(boolean listen) {
+            if (!mConfigured || mSensor == null) return;
+            if (listen) {
+                mEnabled = mSensors.requestTriggerSensor(this, mSensor);
+            } else if (mEnabled) {
+                mSensors.cancelTriggerSensor(this, mSensor);
+                mEnabled = false;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("{mEnabled=").append(mEnabled).append(", mConfigured=")
+                    .append(mConfigured).append(", mSensor=").append(mSensor).append("}").toString();
+        }
+
+        @Override
+        public void onTrigger(TriggerEvent event) {
+            if (DEBUG) Log.d(mTag, "onTrigger: " + triggerEventToString(event));
+            if (DEBUG) {
+                final Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+                if (v != null) {
+                    v.vibrate(1000, new AudioAttributes.Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION).build());
+                }
+            }
+            requestPulse(1, false /*delayed*/);
+            setListening(true);  // reregister, this sensor only fires once
         }
     }
 }
