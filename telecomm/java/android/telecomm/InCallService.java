@@ -207,10 +207,23 @@ public abstract class InCallService extends Service {
         public static final int SESSION_EVENT_TX_START = 3;
 
         /**
-         * Video transmission has stopped. This occur after a negotiated stop of video transmission when
-         * the underlying protocol has actually stopped transmitting video to the remote party.
+         * Video transmission has stopped. This occurs after a negotiated stop of video transmission
+         * when the underlying protocol has actually stopped transmitting video to the remote party.
          */
         public static final int SESSION_EVENT_TX_STOP = 4;
+
+        /**
+         * A camera failure has occurred for the selected camera.  The In-Call UI can use this as a
+         * cue to inform the user the camera is not available.
+         */
+        public static final int SESSION_EVENT_CAMERA_FAILURE = 5;
+
+        /**
+         * Issued after {@code SESSION_EVENT_CAMERA_FAILURE} when the camera is once again ready for
+         * operation.  The In-Call UI can use this as a cue to inform the user that the camera has
+         * become available again.
+         */
+        public static final int SESSION_EVENT_CAMERA_READY = 6;
 
         /**
          * Session modify request was successful.
@@ -359,7 +372,9 @@ public abstract class InCallService extends Service {
              * Valid values are: {@link VideoCall#SESSION_EVENT_RX_PAUSE},
              * {@link VideoCall#SESSION_EVENT_RX_RESUME},
              * {@link VideoCall#SESSION_EVENT_TX_START},
-             * {@link VideoCall#SESSION_EVENT_TX_STOP}
+             * {@link VideoCall#SESSION_EVENT_TX_STOP},
+             * {@link VideoCall#SESSION_EVENT_CAMERA_FAILURE},
+             * {@link VideoCall#SESSION_EVENT_CAMERA_READY}
              *
              * @param event The event.
              */
