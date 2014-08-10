@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.net.Uri;
+import android.os.IBinder;
 import android.provider.BaseColumns;
 import android.util.ArraySet;
 
@@ -795,7 +796,7 @@ public final class TvContract {
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/program";
 
         /**
-         * The ID of the TV channel that contains this TV program.
+         * The ID of the TV channel that provides this TV program.
          * <p>
          * This is a part of the channel URI and matches to {@link BaseColumns#_ID}.
          * </p><p>
@@ -1109,6 +1110,7 @@ public final class TvContract {
      * to this table.
      * @hide
      */
+    @SystemApi
     public static final class WatchedPrograms implements BaseTvColumns {
 
         /** The content:// style URI for this table. */
@@ -1141,7 +1143,7 @@ public final class TvContract {
         public static final String COLUMN_WATCH_END_TIME_UTC_MILLIS = "watch_end_time_utc_millis";
 
         /**
-         * The channel ID that contains this TV program.
+         * The ID of the TV channel that provides this TV program.
          * <p>
          * Type: INTEGER (long)
          * </p>
@@ -1181,17 +1183,30 @@ public final class TvContract {
         public static final String COLUMN_DESCRIPTION = "description";
 
         /**
-         * Extra parameters of the tune operation.
+         * Extra parameters given to {@link TvInputService.Session#tune(Uri, android.os.Bundle)
+         * TvInputService.Session.tune(Uri, android.os.Bundle)} when tuning to the channel that
+         * provides this TV program. (Used internally.)
          * <p>
-         * This column contains an encoded string which is comma-separated key-value pairs.
-         * (Ex. "[key1]=[value1], [key2]=[value2]"). COLUMN_TUNE_PARAMS will use '%' as an escape
-         * character for the characters of '%', '=', and ','.
+         * This column contains an encoded string that represents comma-separated key-value pairs of
+         * the tune parameters. (Ex. "[key1]=[value1], [key2]=[value2]"). '%' is used as an escape
+         * character for '%', '=', and ','.
          * </p><p>
          * Type: TEXT
          * </p>
-         * @see TvInputManager.Session.tune(Uri, Bundle)
          */
-        public static final String COLUMN_TUNE_PARAMS = "tune_params";
+        public static final String COLUMN_INTERNAL_TUNE_PARAMS = "tune_params";
+
+        /**
+         * The session token of this TV program. (Used internally.)
+         * <p>
+         * This contains a String representation of {@link IBinder} for
+         * {@link TvInputService.Session} that provides the current TV program. It is used
+         * internally to distinguish watched programs entries from different TV input sessions.
+         * </p><p>
+         * Type: TEXT
+         * </p>
+         */
+        public static final String COLUMN_INTERNAL_SESSION_TOKEN = "session_token";
 
         private WatchedPrograms() {}
     }
