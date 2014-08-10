@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -143,7 +144,7 @@ public final class AudioAttributes implements Parcelable {
      * degradation only when going to a secure sink.
      */
     // FIXME not guaranteed yet
-    // TODO  add OR to getFlags() when supported and in public API
+    // TODO  add in FLAG_ALL_PUBLIC when supported and in public API
     public final static int FLAG_SECURE = 0x1 << 1;
     /**
      * @hide
@@ -151,13 +152,26 @@ public final class AudioAttributes implements Parcelable {
      * Internal use only for dealing with legacy STREAM_BLUETOOTH_SCO
      */
     public final static int FLAG_SCO = 0x1 << 2;
+    /**
+     * @hide
+     * Flag defining a behavior where the system ensures that the playback of the sound will
+     * be compatible with its use as a broadcast for surrounding people and/or devices.
+     * Ensures audibility with no or minimal post-processing applied.
+     */
+    @SystemApi
+    public final static int FLAG_BEACON = 0x1 << 3;
 
     /**
      * @hide
      * CANDIDATE FOR PUBLIC API
      * Flag requesting the use of an output stream supporting hardware A/V synchronization.
      */
+    // TODO  add in FLAG_ALL_PUBLIC when in public API
     public final static int FLAG_HW_AV_SYNC = 0x1 << 4;
+
+    private final static int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO |
+            FLAG_BEACON | FLAG_HW_AV_SYNC;
+    private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED;
 
     private int mUsage = USAGE_UNKNOWN;
     private int mContentType = CONTENT_TYPE_UNKNOWN;
@@ -202,7 +216,7 @@ public final class AudioAttributes implements Parcelable {
      */
     public int getFlags() {
         // only return the flags that are public
-        return (mFlags & (FLAG_AUDIBILITY_ENFORCED | FLAG_HW_AV_SYNC));
+        return (mFlags & (FLAG_ALL_PUBLIC));
     }
 
     /**
@@ -212,7 +226,7 @@ public final class AudioAttributes implements Parcelable {
      * @return a combined mask of all flags
      */
     public int getAllFlags() {
-        return mFlags;
+        return (mFlags & FLAG_ALL);
     }
 
     /**
@@ -345,8 +359,7 @@ public final class AudioAttributes implements Parcelable {
          * @return the same Builder instance.
          */
         public Builder setFlags(int flags) {
-            flags &= (AudioAttributes.FLAG_AUDIBILITY_ENFORCED | AudioAttributes.FLAG_SCO
-                    | AudioAttributes.FLAG_SECURE | AudioAttributes.FLAG_HW_AV_SYNC);
+            flags &= AudioAttributes.FLAG_ALL;
             mFlags |= flags;
             return this;
         }
