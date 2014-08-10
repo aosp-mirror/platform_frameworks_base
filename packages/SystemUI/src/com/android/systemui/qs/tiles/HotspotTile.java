@@ -35,7 +35,13 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
         super(host);
         mController = host.getHotspotController();
         mUsageTracker = new UsageTracker(host.getContext(), HotspotTile.class);
-        mUsageTracker.listenForReset();
+        mUsageTracker.setListening(true);
+    }
+
+    @Override
+    protected void handleDestroy() {
+        super.handleDestroy();
+        mUsageTracker.setListening(false);
     }
 
     @Override

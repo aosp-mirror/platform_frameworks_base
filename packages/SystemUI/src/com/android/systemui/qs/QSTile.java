@@ -37,9 +37,8 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.volume.VolumeComponent;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -134,6 +133,14 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mHandler.obtainMessage(H.SCAN_STATE_CHANGED, state ? 1 : 0, 0).sendToTarget();
     }
 
+    public void destroy() {
+        mHandler.sendEmptyMessage(H.DESTROY);
+    }
+
+    public TState getState() {
+        return mState;
+    }
+
     // call only on tile worker looper
 
     private void handleSetCallback(Callback callback) {
@@ -181,6 +188,11 @@ public abstract class QSTile<TState extends State> implements Listenable {
         handleRefreshState(null);
     }
 
+    protected void handleDestroy() {
+        setListening(false);
+        mCallback = null;
+    }
+
     protected final class H extends Handler {
         private static final int SET_CALLBACK = 1;
         private static final int CLICK = 2;
@@ -190,6 +202,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         private static final int USER_SWITCH = 6;
         private static final int TOGGLE_STATE_CHANGED = 7;
         private static final int SCAN_STATE_CHANGED = 8;
+        private static final int DESTROY = 9;
 
         private H(Looper looper) {
             super(looper);
@@ -223,6 +236,11 @@ public abstract class QSTile<TState extends State> implements Listenable {
                 } else if (msg.what == SCAN_STATE_CHANGED) {
                     name = "handleScanStateChanged";
                     handleScanStateChanged(msg.arg1 != 0);
+                } else if (msg.what == DESTROY) {
+                    name = "handleDestroy";
+                    handleDestroy();
+                } else {
+                    throw new IllegalArgumentException("Unknown msg: " + msg.what);
                 }
             } catch (Throwable t) {
                 final String error = "Error in " + name;
@@ -245,7 +263,8 @@ public abstract class QSTile<TState extends State> implements Listenable {
         void collapsePanels();
         Looper getLooper();
         Context getContext();
-        List<QSTile<?>> getTiles();
+        Collection<QSTile<?>> getTiles();
+        void setCallback(Callback callback);
         BluetoothController getBluetoothController();
         LocationController getLocationController();
         RotationLockController getRotationLockController();
@@ -255,6 +274,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
         CastController getCastController();
         FlashlightController getFlashlightController();
         KeyguardMonitor getKeyguardMonitor();
+
+        public interface Callback {
+            void onTilesChanged();
+        }
     }
 
     public static class State {
