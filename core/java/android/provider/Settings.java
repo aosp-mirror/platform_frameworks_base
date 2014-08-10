@@ -3546,6 +3546,13 @@ public final class Settings {
         public static final String DISABLED_SYSTEM_INPUT_METHODS = "disabled_system_input_methods";
 
         /**
+         * Whether to show the IME when a hard keyboard is connected. This is a boolean that
+         * determines if the IME should be shown when a hard keyboard is attached.
+         * @hide
+         */
+        public static final String SHOW_IME_WITH_HARD_KEYBOARD = "show_ime_with_hard_keyboard";
+
+        /**
          * Host name and port for global http proxy. Uses ':' seperator for
          * between host and port.
          *
