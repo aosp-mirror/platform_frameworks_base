@@ -590,6 +590,11 @@ public class BackupTransport {
         }
 
         @Override
+        public void cancelFullBackup() throws RemoteException {
+            BackupTransport.this.cancelFullBackup();
+        }
+
+        @Override
         public int getNextFullRestoreDataChunk(ParcelFileDescriptor socket) {
             return BackupTransport.this.getNextFullRestoreDataChunk(socket);
         }
