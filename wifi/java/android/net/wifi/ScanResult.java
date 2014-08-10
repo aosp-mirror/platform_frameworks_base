@@ -141,7 +141,6 @@ public class ScanResult implements Parcelable {
     /**
      * Passpoint ANQP information. This is not fetched automatically.
      * Use {@link WifiPasspointManager#requestAnqpInfo} to request ANQP info.
-     * {@hide}
      */
     public WifiPasspointInfo passpoint;
 
