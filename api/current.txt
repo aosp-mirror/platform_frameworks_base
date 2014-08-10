@@ -18340,6 +18340,7 @@ package android.net.wifi {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public java.lang.String BSSID;
+    field public java.lang.String FQDN;
     field public java.lang.String SSID;
     field public java.util.BitSet allowedAuthAlgorithms;
     field public java.util.BitSet allowedGroupCiphers;
@@ -18429,9 +18430,11 @@ package android.net.wifi {
   }
 
   public static final class WifiEnterpriseConfig.Eap {
+    field public static final int AKA = 5; // 0x5
     field public static final int NONE = -1; // 0xffffffff
     field public static final int PEAP = 0; // 0x0
     field public static final int PWD = 3; // 0x3
+    field public static final int SIM = 4; // 0x4
     field public static final int TLS = 1; // 0x1
     field public static final int TTLS = 2; // 0x2
   }

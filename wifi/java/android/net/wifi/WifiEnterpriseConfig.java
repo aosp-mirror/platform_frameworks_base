@@ -224,9 +224,9 @@ public class WifiEnterpriseConfig implements Parcelable {
         public static final int TTLS    = 2;
         /** EAP-Password */
         public static final int PWD     = 3;
-        /** EAP-Subscriber Identity Module {@hide} */
+        /** EAP-Subscriber Identity Module */
         public static final int SIM     = 4;
-        /** EAP-Authentication and Key Agreement {@hide} */
+        /** EAP-Authentication and Key Agreement */
         public static final int AKA     = 5;
         /** @hide */
         public static final String[] strings = { "PEAP", "TLS", "TTLS", "PWD", "SIM", "AKA" };
