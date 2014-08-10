@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * RemoteConnection object used by RemoteConnectionService.
@@ -179,7 +180,8 @@ public final class RemoteConnection {
 
     private IConnectionService mConnectionService;
     private final String mConnectionId;
-    private final Set<Listener> mListeners = new HashSet<>();
+    private final Set<Listener> mListeners = Collections.newSetFromMap(
+            new ConcurrentHashMap<Listener, Boolean>(2));
     private final Set<RemoteConnection> mConferenceableConnections = new HashSet<>();
 
     private int mState = Connection.State.NEW;
