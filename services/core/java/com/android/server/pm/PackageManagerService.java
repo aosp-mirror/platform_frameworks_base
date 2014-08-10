@@ -1346,7 +1346,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 SystemConfig.PermissionEntry perm = permConfig.valueAt(i);
                 BasePermission bp = mSettings.mPermissions.get(perm.name);
                 if (bp == null) {
-                    bp = new BasePermission(perm.name, null, BasePermission.TYPE_BUILTIN);
+                    bp = new BasePermission(perm.name, "android", BasePermission.TYPE_BUILTIN);
                     mSettings.mPermissions.put(perm.name, bp);
                 }
                 if (perm.gids != null) {
