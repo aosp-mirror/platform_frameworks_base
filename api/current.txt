@@ -28902,6 +28902,8 @@ package android.telecomm {
     method public abstract void setPreviewSurface(android.view.Surface);
     method public abstract void setVideoCallListener(android.telecomm.InCallService.VideoCall.Listener);
     method public abstract void setZoom(float);
+    field public static final int SESSION_EVENT_CAMERA_FAILURE = 5; // 0x5
+    field public static final int SESSION_EVENT_CAMERA_READY = 6; // 0x6
     field public static final int SESSION_EVENT_RX_PAUSE = 1; // 0x1
     field public static final int SESSION_EVENT_RX_RESUME = 2; // 0x2
     field public static final int SESSION_EVENT_TX_START = 3; // 0x3
