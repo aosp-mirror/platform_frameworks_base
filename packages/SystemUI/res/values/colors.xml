@@ -49,7 +49,7 @@
     <color name="data_usage_graph_track">#33FFFFFF</color><!-- 20% white -->
     <color name="data_usage_graph_warning">#FFFFFFFF</color>
     <color name="status_bar_clock_color">#FFFFFFFF</color>
-    <color name="qs_user_detail_icon_muted">#4DB0BEC5</color> <!-- 30% blue grey 200-->
+    <color name="qs_user_detail_icon_muted">#FFFFFFFF</color> <!-- not so muted after all -->
 
     <!-- Tint color for the content on the notification overflow card. -->
     <color name="keyguard_overflow_content_color">#ff686868</color>

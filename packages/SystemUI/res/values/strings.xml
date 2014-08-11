@@ -683,7 +683,7 @@
     <string name="guest_nickname">Guest</string>
 
     <!-- Label for adding a new guest in the user switcher [CHAR LIMIT=35] -->
-    <string name="guest_new_guest">+ Guest</string>
+    <string name="guest_new_guest">Add guest</string>
 
     <!-- Label for exiting guest session in the user switcher [CHAR LIMIT=35] -->
     <string name="guest_exit_guest">Exit guest</string>
