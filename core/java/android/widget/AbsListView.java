@@ -2379,7 +2379,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             lp.itemId = mAdapter.getItemId(position);
         }
         lp.viewType = mAdapter.getItemViewType(position);
-        child.setLayoutParams(lp);
+        if (lp != vlp) {
+          child.setLayoutParams(lp);
+        }
     }
 
     class ListItemAccessibilityDelegate extends AccessibilityDelegate {
