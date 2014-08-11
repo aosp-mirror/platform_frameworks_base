@@ -19,7 +19,7 @@
 #include <utils/String8.h>
 #include <utils/String16.h>
 #include "TestHelpers.h"
-#include "data/R.h"
+#include "data/basic/R.h"
 
 #include <gtest/gtest.h>
 
@@ -78,7 +78,7 @@ TEST(SplitTest, TestGetResourceFromBase) {
 
     Res_value val;
     ResTable_config config;
-    ssize_t block = table.getResource(R::string::test1, &val, MAY_NOT_BE_BAG, 0, NULL, &config);
+    ssize_t block = table.getResource(base::R::string::test1, &val, MAY_NOT_BE_BAG, 0, NULL, &config);
 
     // The returned block should tell us which string pool to get the value, if it is a string.
     EXPECT_GE(block, 0);
@@ -101,7 +101,7 @@ TEST(SplitTest, TestGetResourceFromSplit) {
 
     Res_value val;
     ResTable_config config;
-    ssize_t block = table.getResource(R::string::test1, &val, MAY_NOT_BE_BAG, 0, NULL, &config);
+    ssize_t block = table.getResource(base::R::string::test1, &val, MAY_NOT_BE_BAG, 0, NULL, &config);
 
     EXPECT_GE(block, 0);
 
@@ -120,12 +120,12 @@ TEST(SplitTest, ResourcesFromBaseAndSplitHaveSameNames) {
     ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
 
     ResTable::resource_name baseName;
-    EXPECT_TRUE(table.getResourceName(R::string::test1, false, &baseName));
+    EXPECT_TRUE(table.getResourceName(base::R::string::test1, false, &baseName));
 
     ASSERT_EQ(NO_ERROR, table.add(split_de_fr_arsc, split_de_fr_arsc_len));
 
     ResTable::resource_name frName;
-    EXPECT_TRUE(table.getResourceName(R::string::test1, false, &frName));
+    EXPECT_TRUE(table.getResourceName(base::R::string::test1, false, &frName));
 
     EXPECT_EQ(
             String16(baseName.package, baseName.packageLen),
@@ -149,7 +149,7 @@ TEST(SplitTest, TypeEntrySpecFlagsAreUpdated) {
 
     Res_value val;
     uint32_t specFlags = 0;
-    ssize_t block = table.getResource(R::string::test1, &val, MAY_NOT_BE_BAG, 0, &specFlags, NULL);
+    ssize_t block = table.getResource(base::R::string::test1, &val, MAY_NOT_BE_BAG, 0, &specFlags, NULL);
     EXPECT_GE(block, 0);
 
     EXPECT_EQ(static_cast<uint32_t>(0), specFlags);
@@ -157,7 +157,7 @@ TEST(SplitTest, TypeEntrySpecFlagsAreUpdated) {
     ASSERT_EQ(NO_ERROR, table.add(split_de_fr_arsc, split_de_fr_arsc_len));
 
     uint32_t frSpecFlags = 0;
-    block = table.getResource(R::string::test1, &val, MAY_NOT_BE_BAG, 0, &frSpecFlags, NULL);
+    block = table.getResource(base::R::string::test1, &val, MAY_NOT_BE_BAG, 0, &frSpecFlags, NULL);
     EXPECT_GE(block, 0);
 
     EXPECT_EQ(ResTable_config::CONFIG_LOCALE, frSpecFlags);
@@ -168,12 +168,12 @@ TEST(SplitFeatureTest, TestNewResourceIsAccessible) {
     ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
 
     Res_value val;
-    ssize_t block = table.getResource(R::string::test3, &val, MAY_NOT_BE_BAG);
+    ssize_t block = table.getResource(base::R::string::test3, &val, MAY_NOT_BE_BAG);
     EXPECT_LT(block, 0);
 
     ASSERT_EQ(NO_ERROR, table.add(feature_arsc, feature_arsc_len));
 
-    block = table.getResource(R::string::test3, &val, MAY_NOT_BE_BAG);
+    block = table.getResource(base::R::string::test3, &val, MAY_NOT_BE_BAG);
     EXPECT_GE(block, 0);
 
     EXPECT_EQ(Res_value::TYPE_STRING, val.dataType);
@@ -184,11 +184,11 @@ TEST(SplitFeatureTest, TestNewResourceIsAccessibleByName) {
     ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
 
     ResTable::resource_name name;
-    EXPECT_FALSE(table.getResourceName(R::string::test3, false, &name));
+    EXPECT_FALSE(table.getResourceName(base::R::string::test3, false, &name));
 
     ASSERT_EQ(NO_ERROR, table.add(feature_arsc, feature_arsc_len));
 
-    EXPECT_TRUE(table.getResourceName(R::string::test3, false, &name));
+    EXPECT_TRUE(table.getResourceName(base::R::string::test3, false, &name));
 
     EXPECT_EQ(String16("com.android.test.basic"),
             String16(name.package, name.packageLen));
