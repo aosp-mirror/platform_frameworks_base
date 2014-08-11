@@ -604,6 +604,18 @@ public final class HdmiControlService extends SystemService {
         sendCecCommand(command, null);
     }
 
+    @ServiceThreadOnly
+    void sendMhlSubcommand(int portId, HdmiMhlSubcommand command) {
+        assertRunOnServiceThread();
+        sendMhlSubcommand(portId, command, null);
+    }
+
+    @ServiceThreadOnly
+    void sendMhlSubcommand(int portId, HdmiMhlSubcommand command, SendMessageCallback callback) {
+        assertRunOnServiceThread();
+        mMhlController.sendSubcommand(portId, command, callback);
+    }
+
     /**
      * Send <Feature Abort> command on the given CEC message if possible.
      * If the aborted message is invalid, then it wont send the message.
@@ -730,6 +742,74 @@ public final class HdmiControlService extends SystemService {
         return new HdmiDeviceInfo(logicalAddress,
                 getPhysicalAddress(), pathToPortId(getPhysicalAddress()), deviceType,
                 getVendorId(), displayName);
+    }
+
+    @ServiceThreadOnly
+    boolean handleMhlSubcommand(int portId, HdmiMhlSubcommand message) {
+        assertRunOnServiceThread();
+
+        HdmiMhlLocalDevice device = mMhlController.getLocalDevice(portId);
+        if (device != null) {
+            return device.handleSubcommand(message);
+        }
+        Slog.w(TAG, "No mhl device exists[portId:" + portId + ", message:" + message);
+        return false;
+    }
+
+    @ServiceThreadOnly
+    void handleMhlHotplugEvent(int portId, boolean connected) {
+        assertRunOnServiceThread();
+        if (connected) {
+            HdmiMhlLocalDevice newDevice = new HdmiMhlLocalDevice(this, portId);
+            HdmiMhlLocalDevice oldDevice = mMhlController.addLocalDevice(newDevice);
+            if (oldDevice != null) {
+                oldDevice.onDeviceRemoved();
+                Slog.i(TAG, "Old device of port " + portId + " is removed");
+            }
+        } else {
+            HdmiMhlLocalDevice device = mMhlController.removeLocalDevice(portId);
+            if (device != null) {
+                device.onDeviceRemoved();
+            } else {
+                Slog.w(TAG, "No device to remove:[portId=" + portId);
+            }
+        }
+    }
+
+    @ServiceThreadOnly
+    void handleMhlCbusModeChanged(int portId, int cbusmode) {
+        assertRunOnServiceThread();
+        HdmiMhlLocalDevice device = mMhlController.getLocalDevice(portId);
+        if (device != null) {
+            device.setCbusMode(cbusmode);
+        } else {
+            Slog.w(TAG, "No mhl device exists for cbus mode change[portId:" + portId +
+                    ", cbusmode:" + cbusmode + "]");
+        }
+    }
+
+    @ServiceThreadOnly
+    void handleMhlVbusOvercurrent(int portId, boolean on) {
+        assertRunOnServiceThread();
+        HdmiMhlLocalDevice device = mMhlController.getLocalDevice(portId);
+        if (device != null) {
+            device.onVbusOvercurrentDetected(on);
+        } else {
+            Slog.w(TAG, "No mhl device exists for vbus overcurrent event[portId:" + portId + "]");
+        }
+    }
+
+    @ServiceThreadOnly
+    void handleCapabilityRegisterChanged(int portId, int adopterId, int deviceId) {
+        assertRunOnServiceThread();
+        HdmiMhlLocalDevice device = mMhlController.getLocalDevice(portId);
+        // Hot plug event should be called before capability register change event.
+        if (device != null) {
+            device.setCapabilityRegister(adopterId, deviceId);
+        } else {
+            Slog.w(TAG, "No mhl device exists for capability register change event[portId:"
+                    + portId + ", adopterId:" + adopterId + ", deviceId:" + deviceId + "]");
+        }
     }
 
     // Record class that monitors the event of the caller of being killed. Used to clean up
