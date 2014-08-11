@@ -37,12 +37,9 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.DelegateViewHelper;
@@ -77,6 +74,7 @@ public class NavigationBarView extends LinearLayout {
     private Drawable mRecentIcon;
     private Drawable mRecentLandIcon;
 
+    private NavigationBarViewTaskSwitchHelper mTaskSwitchHelper;
     private DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
     private final NavigationBarTransitions mBarTransitions;
@@ -177,6 +175,7 @@ public class NavigationBarView extends LinearLayout {
         mVertical = false;
         mShowMenu = false;
         mDelegateHelper = new DelegateViewHelper(this);
+        mTaskSwitchHelper = new NavigationBarViewTaskSwitchHelper(context);
 
         getIcons(res);
 
@@ -192,6 +191,7 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setBar(BaseStatusBar phoneStatusBar) {
+        mTaskSwitchHelper.setBar(phoneStatusBar);
         mDelegateHelper.setBar(phoneStatusBar);
     }
 
@@ -201,6 +201,9 @@ public class NavigationBarView extends LinearLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (mTaskSwitchHelper.onTouchEvent(event)) {
+            return true;
+        }
         if (mDeadZone != null && event.getAction() == MotionEvent.ACTION_OUTSIDE) {
             mDeadZone.poke(event);
         }
@@ -213,7 +216,8 @@ public class NavigationBarView extends LinearLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        return mDelegateHelper.onInterceptTouchEvent(event);
+        return mTaskSwitchHelper.onInterceptTouchEvent(event) ||
+                mDelegateHelper.onInterceptTouchEvent(event);
     }
 
     private H mHandler = new H();
@@ -421,6 +425,8 @@ public class NavigationBarView extends LinearLayout {
         if (mDelegateHelper != null) {
             mDelegateHelper.setSwapXY(mVertical);
         }
+        boolean isRTL = (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL);
+        mTaskSwitchHelper.setBarState(mVertical, isRTL);
 
         setNavigationIconHints(mNavigationIconHints, true);
     }

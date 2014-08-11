@@ -29,5 +29,7 @@ public interface RecentsComponent {
     void toggleRecents(Display display, int layoutDirection, View statusBarView);
     void preloadRecents();
     void cancelPreloadingRecents();
+    void showNextAffiliatedTask();
+    void showPrevAffiliatedTask();
     void setCallback(Callbacks cb);
 }
