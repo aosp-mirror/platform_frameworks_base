@@ -2460,12 +2460,29 @@ public final class ViewRootImpl implements ViewParent,
             if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
                 // Draw with hardware renderer.
                 mIsAnimating = false;
+                boolean invalidateRoot = false;
                 if (mHardwareYOffset != yOffset || mHardwareXOffset != xOffset) {
                     mHardwareYOffset = yOffset;
                     mHardwareXOffset = xOffset;
-                    mAttachInfo.mHardwareRenderer.invalidateRoot();
+                    invalidateRoot = true;
                 }
                 mResizeAlpha = resizeAlpha;
+
+                if (!invalidateRoot) {
+                    // If accessibility focus moved, invalidate the root.
+                    final Drawable drawable = mAttachInfo.mAccessibilityFocusDrawable;
+                    if (drawable != null) {
+                        final Rect bounds = mAttachInfo.mTmpInvalRect;
+                        if (getAccessibilityFocusedRect(bounds)
+                                && !bounds.equals(drawable.getBounds())) {
+                            invalidateRoot = true;
+                        }
+                    }
+                }
+
+                if (invalidateRoot) {
+                    mAttachInfo.mHardwareRenderer.invalidateRoot();
+                }
 
                 dirty.setEmpty();
 
@@ -2621,41 +2638,46 @@ public final class ViewRootImpl implements ViewParent,
      * @param canvas The canvas on which to draw.
      */
     private void drawAccessibilityFocusedDrawableIfNeeded(Canvas canvas) {
+        final Rect bounds = mAttachInfo.mTmpInvalRect;
+        if (getAccessibilityFocusedRect(bounds)) {
+            final Drawable drawable = getAccessibilityFocusedDrawable();
+            if (drawable != null) {
+                drawable.setBounds(bounds);
+                drawable.draw(canvas);
+            }
+        }
+    }
+
+    private boolean getAccessibilityFocusedRect(Rect bounds) {
         final AccessibilityManager manager = AccessibilityManager.getInstance(mView.mContext);
         if (!manager.isEnabled() || !manager.isTouchExplorationEnabled()) {
-            return;
+            return false;
         }
 
         final View host = mAccessibilityFocusedHost;
         if (host == null || host.mAttachInfo == null) {
-            return;
-        }
-
-        final Drawable drawable = getAccessibilityFocusedDrawable();
-        if (drawable == null) {
-            return;
+            return false;
         }
 
         final AccessibilityNodeProvider provider = host.getAccessibilityNodeProvider();
-        final Rect bounds = mAttachInfo.mTmpInvalRect;
         if (provider == null) {
             host.getBoundsOnScreen(bounds);
         } else if (mAccessibilityFocusedVirtualView != null) {
             mAccessibilityFocusedVirtualView.getBoundsInScreen(bounds);
         } else {
-            return;
+            return false;
         }
 
-        bounds.offset(-mAttachInfo.mWindowLeft, -mAttachInfo.mWindowTop);
-        bounds.intersect(0, 0, mAttachInfo.mViewRootImpl.mWidth, mAttachInfo.mViewRootImpl.mHeight);
-        drawable.setBounds(bounds);
-        drawable.draw(canvas);
+        final AttachInfo attachInfo = mAttachInfo;
+        bounds.offset(-attachInfo.mWindowLeft, -attachInfo.mWindowTop);
+        bounds.intersect(0, 0, attachInfo.mViewRootImpl.mWidth, attachInfo.mViewRootImpl.mHeight);
+        return true;
     }
 
     private Drawable getAccessibilityFocusedDrawable() {
         // Lazily load the accessibility focus drawable.
         if (mAttachInfo.mAccessibilityFocusDrawable == null) {
-            TypedValue value = new TypedValue();
+            final TypedValue value = new TypedValue();
             final boolean resolved = mView.mContext.getTheme().resolveAttribute(
                     R.attr.accessibilityFocusedDrawable, value, true);
             if (resolved) {
