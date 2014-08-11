@@ -32,7 +32,7 @@
     <string name="keyguard_label_text" msgid="861796461028298424">"Tryck på Menu och sedan på 0 om du vill låsa upp."</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Du har försökt låsa upp med Ansiktslås för många gånger"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Batteriet har laddats"</string>
-    <string name="keyguard_plugged_in" msgid="9087497435553252863">"Debitering"</string>
+    <string name="keyguard_plugged_in" msgid="9087497435553252863">"Laddar"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Anslut din laddare."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"Tryck på Meny om du vill låsa upp."</string>
     <string name="keyguard_network_locked_message" msgid="9169717779058037168">"Nätverk låst"</string>
