@@ -510,9 +510,10 @@ public class CallLog {
                 for (int i = 0; i < count; i++) {
                     final UserInfo user = users.get(i);
                     final UserHandle userHandle = user.getUserHandle();
-                    if (userManager.isUserRunning(userHandle) &&
-                            !userManager.hasUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS,
-                                    userHandle)) {
+                    if (userManager.isUserRunning(userHandle)
+                            && !userManager.hasUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS,
+                                    userHandle)
+                            && !user.isManagedProfile()) {
                         Uri uri = addEntryAndRemoveExpiredEntries(context,
                                 ContentProvider.maybeAddUserId(CONTENT_URI, user.id), values);
                         if (user.id == currentUserId) {
