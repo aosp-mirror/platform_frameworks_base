@@ -23029,9 +23029,9 @@ package android.os {
     method public boolean isUserRunning(android.os.UserHandle);
     method public boolean isUserRunningOrStopping(android.os.UserHandle);
     method public boolean setRestrictionsChallenge(java.lang.String);
-    method public void setUserRestriction(java.lang.String, boolean);
-    method public void setUserRestrictions(android.os.Bundle);
-    method public void setUserRestrictions(android.os.Bundle, android.os.UserHandle);
+    method public deprecated void setUserRestriction(java.lang.String, boolean);
+    method public deprecated void setUserRestrictions(android.os.Bundle);
+    method public deprecated void setUserRestrictions(android.os.Bundle, android.os.UserHandle);
     field public static final java.lang.String DISALLOW_ADD_USER = "no_add_user";
     field public static final java.lang.String DISALLOW_ADJUST_VOLUME = "no_adjust_volume";
     field public static final java.lang.String DISALLOW_APPS_CONTROL = "no_control_apps";
