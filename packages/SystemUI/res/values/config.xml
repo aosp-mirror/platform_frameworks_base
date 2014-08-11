@@ -90,6 +90,14 @@
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">1</integer>
 
+    <!-- The default tiles to display in QuickSettings -->
+    <string name="quick_settings_tiles_default" translatable="false">
+        wifi,bt,inversion,cell,airplane,rotation,flashlight,location,cast
+    </string>
+
+    <!-- The tiles to display in QuickSettings -->
+    <string name="quick_settings_tiles" translatable="false">default</string>
+
     <!-- Whether or not the RSSI tile is capitalized or not. -->
     <bool name="quick_settings_rssi_tile_capitalization">true</bool>
 

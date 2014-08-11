@@ -37,6 +37,7 @@ import com.android.systemui.settings.ToggleSlider;
 import com.android.systemui.statusbar.phone.QSTileHost;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /** View that represents the quick settings tile panel. **/
 public class QSPanel extends ViewGroup {
@@ -186,12 +187,25 @@ public class QSPanel extends ViewGroup {
         v.setVisibility(visible ? VISIBLE : GONE);
     }
 
-    public void addTile(final QSTile<?> tile) {
+    public void setTiles(Collection<QSTile<?>> tiles) {
+        for (TileRecord record : mRecords) {
+            removeView(record.tileView);
+        }
+        mRecords.clear();
+        for (QSTile<?> tile : tiles) {
+            addTile(tile);
+        }
+        if (isShowingDetail()) {
+            mDetail.bringToFront();
+        }
+    }
+
+    private void addTile(final QSTile<?> tile) {
         final TileRecord r = new TileRecord();
         r.tile = tile;
         r.tileView = tile.createTileView(mContext);
         r.tileView.setVisibility(View.GONE);
-        r.tile.setCallback(new QSTile.Callback() {
+        final QSTile.Callback callback = new QSTile.Callback() {
             @Override
             public void onStateChanged(QSTile.State state) {
                 setTileVisibility(r.tileView, state.visible);
@@ -213,7 +227,8 @@ public class QSPanel extends ViewGroup {
                     fireScanStateChanged(state);
                 }
             }
-        });
+        };
+        r.tile.setCallback(callback);
         final View.OnClickListener click = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -227,6 +242,8 @@ public class QSPanel extends ViewGroup {
             }
         };
         r.tileView.init(click, clickSecondary);
+        r.tile.setListening(mListening);
+        callback.onStateChanged(r.tile.getState());
         r.tile.refreshState();
         mRecords.add(r);
 
