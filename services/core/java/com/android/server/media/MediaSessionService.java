@@ -87,7 +87,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     private IAudioService mAudioService;
     private ContentResolver mContentResolver;
 
-    private MediaSessionRecord mPrioritySession;
     private int mCurrentUserId = -1;
 
     // Used to notify system UI when remote volume was changed. TODO find a
@@ -125,18 +124,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                 return;
             }
             mPriorityStack.onSessionStateChange(record);
-            if (record.isSystemPriority()) {
-                if (record.isActive()) {
-                    if (mPrioritySession != null) {
-                        Log.w(TAG, "Replacing existing priority session with a new session");
-                    }
-                    mPrioritySession = record;
-                } else {
-                    if (mPrioritySession == record) {
-                        mPrioritySession = null;
-                    }
-                }
-            }
         }
         mHandler.post(MessageHandler.MSG_SESSIONS_CHANGED, record.getUserId(), 0);
     }
@@ -258,9 +245,6 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         mPriorityStack.removeSession(session);
         mAllSessions.remove(session);
-        if (session == mPrioritySession) {
-            mPrioritySession = null;
-        }
 
         try {
             session.getCallback().asBinder().unlinkToDeath(session, 0);
@@ -716,10 +700,6 @@ public class MediaSessionService extends SystemService implements Monitor {
             pw.println();
 
             synchronized (mLock) {
-                pw.println("Session for calls:" + mPrioritySession);
-                if (mPrioritySession != null) {
-                    mPrioritySession.dump(pw, "");
-                }
                 int count = mAllSessions.size();
                 pw.println(count + " Sessions:");
                 for (int i = 0; i < count; i++) {
