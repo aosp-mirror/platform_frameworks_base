@@ -36,6 +36,7 @@ import android.hardware.camera2.utils.ParamsUtils;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
+import android.util.SizeF;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -187,10 +188,6 @@ public class LegacyMetadataMapper {
          */
         mapFlash(m, p);
 
-        /*
-         * request.*
-         */
-        mapRequest(m, p);
         // TODO: map other fields
 
         /*
@@ -222,6 +219,13 @@ public class LegacyMetadataMapper {
          * scaler.availableStream*, scaler.available*Durations, sensor.info.maxFrameDuration
          */
         mapScalerStreamConfigs(m, p);
+
+        // Order matters below: Put this last so that we can read the metadata set previously
+
+        /*
+         * request.*
+         */
+        mapRequest(m, p);
 
     }
 
@@ -535,9 +539,16 @@ public class LegacyMetadataMapper {
          * android.control.availableSceneModes
          */
         List<String> sceneModes = p.getSupportedSceneModes();
-        int[] supportedSceneModes = (sceneModes == null) ? new int[0] :
-                ArrayUtils.convertStringListToIntArray(sceneModes, sLegacySceneModes, sSceneModes);
-        m.set(CONTROL_AVAILABLE_SCENE_MODES, supportedSceneModes);
+        List<Integer> supportedSceneModes =
+                ArrayUtils.convertStringListToIntList(sceneModes, sLegacySceneModes, sSceneModes);
+        if (supportedSceneModes == null) { // camera1 doesn't support scene mode settings
+            supportedSceneModes = new ArrayList<Integer>();
+            supportedSceneModes.add(CONTROL_SCENE_MODE_DISABLED); // disabled is always available
+        }
+        if (p.getMaxNumDetectedFaces() > 0) { // always supports FACE_PRIORITY when face detecting
+            supportedSceneModes.add(CONTROL_SCENE_MODE_FACE_PRIORITY);
+        }
+        m.set(CONTROL_AVAILABLE_SCENE_MODES, ArrayUtils.toIntArray(supportedSceneModes));
     }
 
     private static void mapLens(CameraMetadataNative m, Camera.Parameters p) {
@@ -545,11 +556,23 @@ public class LegacyMetadataMapper {
          *  We can tell if the lens is fixed focus;
          *  but if it's not, we can't tell the minimum focus distance, so leave it null then.
          */
-        if (p.getFocusMode() == Camera.Parameters.FOCUS_MODE_FIXED) {
+        if (VERBOSE) {
+            Log.v(TAG, "mapLens - focus-mode='" + p.getFocusMode() + "'");
+        }
+
+        if (Camera.Parameters.FOCUS_MODE_FIXED.equals(p.getFocusMode())) {
             /*
              * lens.info.minimumFocusDistance
              */
             m.set(LENS_INFO_MINIMUM_FOCUS_DISTANCE, LENS_INFO_MINIMUM_FOCUS_DISTANCE_FIXED_FOCUS);
+
+            if (VERBOSE) {
+                Log.v(TAG, "mapLens - lens.info.minimumFocusDistance = 0");
+            }
+        } else {
+            if (VERBOSE) {
+                Log.v(TAG, "mapLens - lens.info.minimumFocusDistance is unknown");
+            }
         }
 
         float[] focalLengths = new float[] { p.getFocalLength() };
@@ -620,7 +643,17 @@ public class LegacyMetadataMapper {
                     CameraCharacteristics.STATISTICS_INFO_MAX_FACE_COUNT                  ,
                     CameraCharacteristics.SYNC_MAX_LATENCY                                ,
             };
-            m.set(REQUEST_AVAILABLE_CHARACTERISTICS_KEYS, getTagsForKeys(availableKeys));
+            List<Key<?>> characteristicsKeys = new ArrayList<>(Arrays.asList(availableKeys));
+
+            /*
+             * Add the conditional keys
+             */
+            if (m.get(LENS_INFO_MINIMUM_FOCUS_DISTANCE) != null) {
+                characteristicsKeys.add(LENS_INFO_MINIMUM_FOCUS_DISTANCE);
+            }
+
+            m.set(REQUEST_AVAILABLE_CHARACTERISTICS_KEYS,
+                    getTagsForKeys(characteristicsKeys.toArray(new Key<?>[0])));
         }
 
         /*
@@ -757,6 +790,23 @@ public class LegacyMetadataMapper {
          * sensor.info.pixelArraySize
          */
         m.set(SENSOR_INFO_PIXEL_ARRAY_SIZE, largestJpegSize);
+
+        /*
+         * sensor.info.physicalSize
+         */
+        {
+            /*
+             * Assume focal length is at infinity focus and that the lens is rectilinear.
+             */
+            float focalLength = p.getFocalLength(); // in mm
+            double angleHor = p.getHorizontalViewAngle() * Math.PI / 180; // to radians
+            double angleVer = p.getVerticalViewAngle() * Math.PI / 180; // to radians
+
+            float height = (float)Math.abs(2 * focalLength * Math.tan(angleVer / 2));
+            float width = (float)Math.abs(2 * focalLength * Math.tan(angleHor / 2));
+
+            m.set(SENSOR_INFO_PHYSICAL_SIZE, new SizeF(width, height)); // in mm
+        }
     }
 
     private static void mapStatistics(CameraMetadataNative m, Parameters p) {
@@ -850,6 +900,11 @@ public class LegacyMetadataMapper {
     }
 
     static String convertSceneModeToLegacy(int mode) {
+        if (mode == CONTROL_SCENE_MODE_FACE_PRIORITY) {
+            // OK: Let LegacyFaceDetectMapper handle turning face detection on/off
+            return Parameters.SCENE_MODE_AUTO;
+        }
+
         int index = ArrayUtils.getArrayIndex(sSceneModes, mode);
         if (index < 0) {
             return null;
@@ -1057,7 +1112,24 @@ public class LegacyMetadataMapper {
         }
 
         // control.captureIntent
-        m.set(CaptureRequest.CONTROL_CAPTURE_INTENT, templateId);
+        {
+            int captureIntent;
+            switch (templateId) {
+                case CameraDevice.TEMPLATE_PREVIEW:
+                    captureIntent = CONTROL_CAPTURE_INTENT_PREVIEW;
+                    break;
+                case CameraDevice.TEMPLATE_STILL_CAPTURE:
+                    captureIntent = CONTROL_CAPTURE_INTENT_STILL_CAPTURE;
+                    break;
+                case CameraDevice.TEMPLATE_RECORD:
+                    captureIntent = CONTROL_CAPTURE_INTENT_VIDEO_RECORD;
+                    break;
+                default:
+                    // Can't get anything else since it's guarded by the IAE check
+                    throw new AssertionError("Impossible; keep in sync with sAllowedTemplates");
+            }
+            m.set(CaptureRequest.CONTROL_CAPTURE_INTENT, captureIntent);
+        }
 
         // control.aeMode
         m.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
@@ -1092,6 +1164,11 @@ public class LegacyMetadataMapper {
                         afMode = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE;
                     }
                 }
+            }
+
+            if (VERBOSE) {
+                Log.v(TAG, "createRequestTemplate (templateId=" + templateId + ")," +
+                        " afMode=" + afMode + ", minimumFocusDistance=" + minimumFocusDistance);
             }
 
             m.set(CaptureRequest.CONTROL_AF_MODE, afMode);
