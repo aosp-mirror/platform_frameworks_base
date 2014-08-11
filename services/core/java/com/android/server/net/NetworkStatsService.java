@@ -62,8 +62,6 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
-import static com.android.internal.util.ArrayUtils.appendElement;
-import static com.android.internal.util.ArrayUtils.contains;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 import static com.android.server.NetworkManagementSocketTagger.resetKernelUidStats;
@@ -107,6 +105,8 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.MathUtils;
@@ -121,14 +121,12 @@ import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.EventLogTags;
 import com.android.server.connectivity.Tethering;
-import com.google.android.collect.Maps;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -215,7 +213,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final Object mStatsLock = new Object();
 
     /** Set of currently active ifaces. */
-    private HashMap<String, NetworkIdentitySet> mActiveIfaces = Maps.newHashMap();
+    private final ArrayMap<String, NetworkIdentitySet> mActiveIfaces = new ArrayMap<>();
+    /** Set of currently active ifaces for UID stats. */
+    private final ArrayMap<String, NetworkIdentitySet> mActiveUidIfaces = new ArrayMap<>();
     /** Current default active iface. */
     private String mActiveIface;
     /** Set of any ifaces associated with mobile networks since boot. */
@@ -883,30 +883,52 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         mActiveIface = activeLink != null ? activeLink.getInterfaceName() : null;
 
-        // rebuild active interfaces based on connected networks
+        // Rebuild active interfaces based on connected networks
         mActiveIfaces.clear();
+        mActiveUidIfaces.clear();
 
+        final ArraySet<String> mobileIfaces = new ArraySet<>();
         for (NetworkState state : states) {
             if (state.networkInfo.isConnected()) {
-                // collect networks under their parent interfaces
-                final String iface = state.linkProperties.getInterfaceName();
+                final boolean isMobile = isNetworkTypeMobile(state.networkInfo.getType());
+                final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state);
 
-                NetworkIdentitySet ident = mActiveIfaces.get(iface);
-                if (ident == null) {
-                    ident = new NetworkIdentitySet();
-                    mActiveIfaces.put(iface, ident);
+                // Traffic occurring on the base interface is always counted for
+                // both total usage and UID details.
+                final String baseIface = state.linkProperties.getInterfaceName();
+                findOrCreateNetworkIdentitySet(mActiveIfaces, baseIface).add(ident);
+                findOrCreateNetworkIdentitySet(mActiveUidIfaces, baseIface).add(ident);
+                if (isMobile) {
+                    mobileIfaces.add(baseIface);
                 }
 
-                ident.add(NetworkIdentity.buildNetworkIdentity(mContext, state));
-
-                // remember any ifaces associated with mobile networks
-                if (isNetworkTypeMobile(state.networkInfo.getType()) && iface != null) {
-                    if (!contains(mMobileIfaces, iface)) {
-                        mMobileIfaces = appendElement(String.class, mMobileIfaces, iface);
+                // Traffic occurring on stacked interfaces is usually clatd,
+                // which is already accounted against its final egress interface
+                // by the kernel. Thus, we only need to collect stacked
+                // interface stats at the UID level.
+                final List<LinkProperties> stackedLinks = state.linkProperties.getStackedLinks();
+                for (LinkProperties stackedLink : stackedLinks) {
+                    final String stackedIface = stackedLink.getInterfaceName();
+                    findOrCreateNetworkIdentitySet(mActiveUidIfaces, stackedIface).add(ident);
+                    if (isMobile) {
+                        mobileIfaces.add(stackedIface);
                     }
                 }
             }
         }
+
+        mobileIfaces.remove(null);
+        mMobileIfaces = mobileIfaces.toArray(new String[mobileIfaces.size()]);
+    }
+
+    private static <K> NetworkIdentitySet findOrCreateNetworkIdentitySet(
+            ArrayMap<K, NetworkIdentitySet> map, K key) {
+        NetworkIdentitySet ident = map.get(key);
+        if (ident == null) {
+            ident = new NetworkIdentitySet();
+            map.put(key, ident);
+        }
+        return ident;
     }
 
     /**
@@ -926,8 +948,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
             mDevRecorder.recordSnapshotLocked(devSnapshot, mActiveIfaces, currentTime);
             mXtRecorder.recordSnapshotLocked(xtSnapshot, mActiveIfaces, currentTime);
-            mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveIfaces, currentTime);
-            mUidTagRecorder.recordSnapshotLocked(uidSnapshot, mActiveIfaces, currentTime);
+            mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, currentTime);
+            mUidTagRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, currentTime);
 
         } catch (IllegalStateException e) {
             Slog.w(TAG, "problem reading network stats: " + e);
@@ -980,8 +1002,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
             mDevRecorder.recordSnapshotLocked(devSnapshot, mActiveIfaces, currentTime);
             mXtRecorder.recordSnapshotLocked(xtSnapshot, mActiveIfaces, currentTime);
-            mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveIfaces, currentTime);
-            mUidTagRecorder.recordSnapshotLocked(uidSnapshot, mActiveIfaces, currentTime);
+            mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, currentTime);
+            mUidTagRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, currentTime);
 
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem reading network stats", e);
@@ -1136,10 +1158,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
             pw.println("Active interfaces:");
             pw.increaseIndent();
-            for (String iface : mActiveIfaces.keySet()) {
-                final NetworkIdentitySet ident = mActiveIfaces.get(iface);
-                pw.print("iface="); pw.print(iface);
-                pw.print(" ident="); pw.println(ident.toString());
+            for (int i = 0; i < mActiveIfaces.size(); i++) {
+                pw.printPair("iface", mActiveIfaces.keyAt(i));
+                pw.printPair("ident", mActiveIfaces.valueAt(i));
+                pw.println();
+            }
+            pw.decreaseIndent();
+
+            pw.println("Active UID interfaces:");
+            pw.increaseIndent();
+            for (int i = 0; i < mActiveUidIfaces.size(); i++) {
+                pw.printPair("iface", mActiveUidIfaces.keyAt(i));
+                pw.printPair("ident", mActiveUidIfaces.valueAt(i));
+                pw.println();
             }
             pw.decreaseIndent();
 

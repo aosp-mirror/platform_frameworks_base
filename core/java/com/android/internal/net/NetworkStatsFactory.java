@@ -25,17 +25,20 @@ import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 import android.net.NetworkStats;
 import android.os.StrictMode;
 import android.os.SystemClock;
+import android.util.ArrayMap;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ProcFileReader;
+
+import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ProtocolException;
-
-import libcore.io.IoUtils;
+import java.util.Objects;
 
 /**
  * Creates {@link NetworkStats} instances by parsing various {@code /proc/}
@@ -53,6 +56,19 @@ public class NetworkStatsFactory {
     private final File mStatsXtIfaceFmt;
     /** Path to {@code /proc/net/xt_qtaguid/stats}. */
     private final File mStatsXtUid;
+
+    @GuardedBy("sStackedIfaces")
+    private static final ArrayMap<String, String> sStackedIfaces = new ArrayMap<>();
+
+    public static void noteStackedIface(String stackedIface, String baseIface) {
+        synchronized (sStackedIfaces) {
+            if (baseIface != null) {
+                sStackedIfaces.put(stackedIface, baseIface);
+            } else {
+                sStackedIfaces.remove(stackedIface);
+            }
+        }
+    }
 
     public NetworkStatsFactory() {
         this(new File("/proc/"));
@@ -171,8 +187,54 @@ public class NetworkStatsFactory {
     }
 
     public NetworkStats readNetworkStatsDetail(int limitUid, String[] limitIfaces, int limitTag,
-            NetworkStats lastStats)
-            throws IOException {
+            NetworkStats lastStats) throws IOException {
+        final NetworkStats stats = readNetworkStatsDetailInternal(limitUid, limitIfaces, limitTag,
+                lastStats);
+
+        synchronized (sStackedIfaces) {
+            // Sigh, xt_qtaguid ends up double-counting tx traffic going through
+            // clatd interfaces, so we need to subtract it here.
+            final int size = sStackedIfaces.size();
+            for (int i = 0; i < size; i++) {
+                final String stackedIface = sStackedIfaces.keyAt(i);
+                final String baseIface = sStackedIfaces.valueAt(i);
+
+                // Count up the tx traffic and subtract from root UID on the
+                // base interface.
+                NetworkStats.Entry adjust = new NetworkStats.Entry(baseIface, 0, 0, 0, 0L, 0L, 0L,
+                        0L, 0L);
+                NetworkStats.Entry entry = null;
+                for (int j = 0; j < stats.size(); j++) {
+                    entry = stats.getValues(j, entry);
+                    if (Objects.equals(entry.iface, stackedIface)) {
+                        adjust.txBytes -= entry.txBytes;
+                        adjust.txPackets -= entry.txPackets;
+                    }
+                }
+                stats.combineValues(adjust);
+            }
+        }
+
+        // Double sigh, all rx traffic on clat needs to be tweaked to
+        // account for the dropped IPv6 header size post-unwrap.
+        NetworkStats.Entry entry = null;
+        for (int i = 0; i < stats.size(); i++) {
+            entry = stats.getValues(i, entry);
+            if (entry.iface != null && entry.iface.startsWith("clat")) {
+                // Delta between IPv4 header (20b) and IPv6 header (40b)
+                entry.rxBytes = entry.rxPackets * 20;
+                entry.rxPackets = 0;
+                entry.txBytes = 0;
+                entry.txPackets = 0;
+                stats.combineValues(entry);
+            }
+        }
+
+        return stats;
+    }
+
+    private NetworkStats readNetworkStatsDetailInternal(int limitUid, String[] limitIfaces,
+            int limitTag, NetworkStats lastStats) throws IOException {
         if (USE_NATIVE_PARSING) {
             final NetworkStats stats;
             if (lastStats != null) {

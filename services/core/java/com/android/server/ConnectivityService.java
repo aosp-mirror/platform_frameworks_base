@@ -119,7 +119,9 @@ import android.util.Xml;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.app.IBatteryStats;
 import com.android.internal.net.LegacyVpnInfo;
+import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.telephony.DctConstants;
@@ -4476,12 +4478,23 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 // TODO - read the tcp buffer size config string from somewhere
                 // updateNetworkSettings();
             }
-            // notify battery stats service about this network
+
+            // Notify battery stats service about this network, both the normal
+            // interface and any stacked links.
             try {
-                BatteryStatsService.getService().noteNetworkInterfaceType(
-                        newNetwork.linkProperties.getInterfaceName(),
-                        newNetwork.networkInfo.getType());
-            } catch (RemoteException e) { }
+                final IBatteryStats bs = BatteryStatsService.getService();
+                final int type = newNetwork.networkInfo.getType();
+
+                final String baseIface = newNetwork.linkProperties.getInterfaceName();
+                bs.noteNetworkInterfaceType(baseIface, type);
+                for (LinkProperties stacked : newNetwork.linkProperties.getStackedLinks()) {
+                    final String stackedIface = stacked.getInterfaceName();
+                    bs.noteNetworkInterfaceType(stackedIface, type);
+                    NetworkStatsFactory.noteStackedIface(stackedIface, baseIface);
+                }
+            } catch (RemoteException ignored) {
+            }
+
             notifyNetworkCallbacks(newNetwork, ConnectivityManager.CALLBACK_AVAILABLE);
         } else {
             if (DBG && newNetwork.networkRequests.size() != 0) {
