@@ -93,9 +93,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final IHdmiHotplugEventListener mHdmiHotplugEventListener =
             new HdmiHotplugEventListener();
     private final IHdmiDeviceEventListener mHdmiDeviceEventListener = new HdmiDeviceEventListener();
-    private final IHdmiInputChangeListener mHdmiInputChangeListener = new HdmiInputChangeListener();
     private final IHdmiSystemAudioModeChangeListener mHdmiSystemAudioModeChangeListener =
             new HdmiSystemAudioModeChangeListener();
+
     // TODO: Should handle STANDBY case.
     private final SparseBooleanArray mHdmiStateMap = new SparseBooleanArray();
     private final List<Message> mPendingHdmiDeviceEvents = new LinkedList<>();
@@ -123,7 +123,6 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     mHdmiControlService.addSystemAudioModeChangeListener(
                             mHdmiSystemAudioModeChangeListener);
                     mHdmiDeviceList.addAll(mHdmiControlService.getInputDevices());
-                    mHdmiControlService.setInputChangeListener(mHdmiInputChangeListener);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Error registering listeners to HdmiControlService:", e);
                 }
@@ -990,31 +989,6 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 } else {
                     mPendingHdmiDeviceEvents.add(msg);
                 }
-            }
-        }
-    }
-
-    private final class HdmiInputChangeListener extends IHdmiInputChangeListener.Stub {
-        @Override
-        public void onChanged(HdmiDeviceInfo device) throws RemoteException {
-            String inputId;
-            synchronized (mLock) {
-                if (device.isCecDevice()) {
-                    inputId = mHdmiInputIdMap.get(device.getLogicalAddress());
-                } else {
-                    TvInputHardwareInfo hardwareInfo =
-                            findHardwareInfoForHdmiPortLocked(device.getPortId());
-                    inputId = (hardwareInfo == null) ? null
-                            : mHardwareInputIdMap.get(hardwareInfo.getDeviceId());
-                }
-            }
-            if (inputId != null) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(TvContract.buildChannelUriForPassthroughTvInput(inputId));
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivity(intent);
-            } else {
-                Slog.w(TAG, "onChanged: InputId cannot be found for :" + device);
             }
         }
     }
