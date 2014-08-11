@@ -23,8 +23,9 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.Listenable;
 
-public class UsageTracker {
+public class UsageTracker implements Listenable {
     private static final long MILLIS_PER_DAY = 1000 * 60 * 60 * 24;
 
     private final Context mContext;
@@ -32,7 +33,7 @@ public class UsageTracker {
     private final String mPrefKey;
     private final String mResetAction;
 
-    private BroadcastReceiver mReceiver;
+    private boolean mRegistered;
 
     public UsageTracker(Context context, Class<?> tile) {
         mContext = context;
@@ -42,17 +43,14 @@ public class UsageTracker {
         mResetAction = "com.android.systemui.qs." + tile.getSimpleName() + ".usage_reset";
     }
 
-    public void listenForReset() {
-        if (mReceiver != null) {
-            mReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (mResetAction.equals(intent.getAction())) {
-                        reset();
-                    }
-                }
-            };
-            mContext.registerReceiver(mReceiver, new IntentFilter(mResetAction));
+    @Override
+    public void setListening(boolean listen) {
+        if (listen && !mRegistered) {
+             mContext.registerReceiver(mReceiver, new IntentFilter(mResetAction));
+             mRegistered = true;
+        } else if (!listen && mRegistered) {
+            mContext.unregisterReceiver(mReceiver);
+            mRegistered = false;
         }
     }
 
@@ -72,4 +70,13 @@ public class UsageTracker {
     private SharedPreferences getSharedPrefs() {
         return mContext.getSharedPreferences(mContext.getPackageName(), 0);
     }
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mResetAction.equals(intent.getAction())) {
+                reset();
+            }
+        }
+    };
 }
