@@ -2174,5 +2174,10 @@ public final class TvInputManagerService extends SystemService {
                 }
             }
         }
+
+        @Override
+        public void onHdmiDeviceUpdated(HdmiDeviceInfo deviceInfo) {
+            // TODO: implement here.
+        }
     }
 }
