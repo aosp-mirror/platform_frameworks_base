@@ -188,10 +188,6 @@ public class LegacyMetadataMapper {
          */
         mapFlash(m, p);
 
-        /*
-         * request.*
-         */
-        mapRequest(m, p);
         // TODO: map other fields
 
         /*
@@ -223,6 +219,13 @@ public class LegacyMetadataMapper {
          * scaler.availableStream*, scaler.available*Durations, sensor.info.maxFrameDuration
          */
         mapScalerStreamConfigs(m, p);
+
+        // Order matters below: Put this last so that we can read the metadata set previously
+
+        /*
+         * request.*
+         */
+        mapRequest(m, p);
 
     }
 
@@ -553,11 +556,23 @@ public class LegacyMetadataMapper {
          *  We can tell if the lens is fixed focus;
          *  but if it's not, we can't tell the minimum focus distance, so leave it null then.
          */
-        if (p.getFocusMode() == Camera.Parameters.FOCUS_MODE_FIXED) {
+        if (VERBOSE) {
+            Log.v(TAG, "mapLens - focus-mode='" + p.getFocusMode() + "'");
+        }
+
+        if (Camera.Parameters.FOCUS_MODE_FIXED.equals(p.getFocusMode())) {
             /*
              * lens.info.minimumFocusDistance
              */
             m.set(LENS_INFO_MINIMUM_FOCUS_DISTANCE, LENS_INFO_MINIMUM_FOCUS_DISTANCE_FIXED_FOCUS);
+
+            if (VERBOSE) {
+                Log.v(TAG, "mapLens - lens.info.minimumFocusDistance = 0");
+            }
+        } else {
+            if (VERBOSE) {
+                Log.v(TAG, "mapLens - lens.info.minimumFocusDistance is unknown");
+            }
         }
 
         float[] focalLengths = new float[] { p.getFocalLength() };
@@ -628,7 +643,17 @@ public class LegacyMetadataMapper {
                     CameraCharacteristics.STATISTICS_INFO_MAX_FACE_COUNT                  ,
                     CameraCharacteristics.SYNC_MAX_LATENCY                                ,
             };
-            m.set(REQUEST_AVAILABLE_CHARACTERISTICS_KEYS, getTagsForKeys(availableKeys));
+            List<Key<?>> characteristicsKeys = new ArrayList<>(Arrays.asList(availableKeys));
+
+            /*
+             * Add the conditional keys
+             */
+            if (m.get(LENS_INFO_MINIMUM_FOCUS_DISTANCE) != null) {
+                characteristicsKeys.add(LENS_INFO_MINIMUM_FOCUS_DISTANCE);
+            }
+
+            m.set(REQUEST_AVAILABLE_CHARACTERISTICS_KEYS,
+                    getTagsForKeys(characteristicsKeys.toArray(new Key<?>[0])));
         }
 
         /*
@@ -1139,6 +1164,11 @@ public class LegacyMetadataMapper {
                         afMode = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE;
                     }
                 }
+            }
+
+            if (VERBOSE) {
+                Log.v(TAG, "createRequestTemplate (templateId=" + templateId + ")," +
+                        " afMode=" + afMode + ", minimumFocusDistance=" + minimumFocusDistance);
             }
 
             m.set(CaptureRequest.CONTROL_AF_MODE, afMode);
