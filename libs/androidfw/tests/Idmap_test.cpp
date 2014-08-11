@@ -19,7 +19,7 @@
 #include <utils/String8.h>
 #include <utils/String16.h>
 #include "TestHelpers.h"
-#include "data/R.h"
+#include "data/basic/R.h"
 
 #include <gtest/gtest.h>
 
@@ -70,7 +70,7 @@ TEST_F(IdmapTest, canLoadIdmap) {
 
 TEST_F(IdmapTest, overlayOverridesResourceValue) {
     Res_value val;
-    ssize_t block = mTargetTable.getResource(R::string::test2, &val, false);
+    ssize_t block = mTargetTable.getResource(base::R::string::test2, &val, false);
     ASSERT_GE(block, 0);
     ASSERT_EQ(Res_value::TYPE_STRING, val.dataType);
     const ResStringPool* pool = mTargetTable.getTableStringBlock(block);
@@ -84,7 +84,7 @@ TEST_F(IdmapTest, overlayOverridesResourceValue) {
 
     ASSERT_EQ(NO_ERROR, mTargetTable.add(overlay_arsc, overlay_arsc_len, mData, mDataSize));
 
-    ssize_t newBlock = mTargetTable.getResource(R::string::test2, &val, false);
+    ssize_t newBlock = mTargetTable.getResource(base::R::string::test2, &val, false);
     ASSERT_GE(newBlock, 0);
     ASSERT_NE(block, newBlock);
     ASSERT_EQ(Res_value::TYPE_STRING, val.dataType);
@@ -101,7 +101,7 @@ TEST_F(IdmapTest, overlaidResourceHasSameName) {
     ASSERT_EQ(NO_ERROR, mTargetTable.add(overlay_arsc, overlay_arsc_len, mData, mDataSize));
 
     ResTable::resource_name resName;
-    ASSERT_TRUE(mTargetTable.getResourceName(R::array::integerArray1, false, &resName));
+    ASSERT_TRUE(mTargetTable.getResourceName(base::R::array::integerArray1, false, &resName));
 
     ASSERT_TRUE(resName.package != NULL);
     ASSERT_TRUE(resName.type != NULL);
