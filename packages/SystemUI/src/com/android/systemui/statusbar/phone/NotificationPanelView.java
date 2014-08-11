@@ -279,6 +279,8 @@ public class NotificationPanelView extends PanelView implements
             positionClockAndNotifications();
             mNotificationStackScroller.setStackHeight(getExpandedHeight());
         }
+        mNotificationStackScroller.updateIsSmallScreen(
+                mHeader.getCollapsedHeight() + mQsPeekHeight);
     }
 
     @Override
