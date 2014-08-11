@@ -412,16 +412,22 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         pw.println(prefix + mTag + " " + this);
 
         final String indent = prefix + "  ";
-        // We print the hashcode for matching with the list in user records
         pw.println(indent + "ownerPid=" + mOwnerPid + ", ownerUid=" + mOwnerUid
                 + ", userId=" + mUserId);
         pw.println(indent + "package=" + mPackageName);
+        pw.println(indent + "launchIntent=" + mLaunchIntent);
+        pw.println(indent + "mediaButtonReceiver=" + mMediaButtonReceiver);
         pw.println(indent + "active=" + mIsActive);
         pw.println(indent + "flags=" + mFlags);
         pw.println(indent + "rating type=" + mRatingType);
         pw.println(indent + "controllers: " + mControllerCallbacks.size());
         pw.println(indent + "state=" + (mPlaybackState == null ? null : mPlaybackState.toString()));
+        pw.println(indent + "audioAttrs=" + mAudioAttrs);
+        pw.println(indent + "volumeType=" + mVolumeType + ", controlType=" + mVolumeControlType
+                + ", max=" + mMaxVolume + ", current=" + mCurrentVolume);
         pw.println(indent + "metadata:" + getShortMetadataString());
+        pw.println(indent + "queueTitle=" + mQueueTitle + ", size="
+                + (mQueue == null ? 0 : mQueue.getList().size()));
     }
 
     @Override
