@@ -16,8 +16,8 @@
 
 package com.android.server.hdmi;
 
-import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -137,14 +137,14 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     protected boolean handleActiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        mayResetActiveSource(physicalAddress);
+        return true;  // Broadcast message.
+    }
+
+    private void mayResetActiveSource(int physicalAddress) {
         if (physicalAddress != mService.getPhysicalAddress()) {
             mIsActiveSource = false;
-            if (mService.isPowerOnOrTransient()) {
-                mService.nap();
-            }
-            return true;
         }
-        return false;
     }
 
     @Override
@@ -152,13 +152,58 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     protected boolean handleSetStreamPath(HdmiCecMessage message) {
         assertRunOnServiceThread();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        maySetActiveSource(physicalAddress);
+        maySendActiveSource();
+        wakeUpIfActiveSource();
+        return true;  // Broadcast message.
+    }
+
+    // Samsung model, we tested, sends <RoutingChange> and <RequestActiveSource> consecutively,
+    // Then if there is no <ActiveSource> response, it will change the input to
+    // the internal source.  To handle this, we'll set ActiveSource aggressively.
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRoutingChange(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int newPath = HdmiUtils.twoBytesToInt(message.getParams(), 2);
+        maySetActiveSource(newPath);
+        return true;  // Broadcast message.
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRoutingInformation(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        maySetActiveSource(physicalAddress);
+        return true;  // Broadcast message.
+    }
+
+    private void maySetActiveSource(int physicalAddress) {
         if (physicalAddress == mService.getPhysicalAddress()) {
-            if (mService.isPowerStandbyOrTransient()) {
-                mService.wakeUp();
-            }
-            return true;
+            mIsActiveSource = true;
         }
-        return false;
+    }
+
+    private void wakeUpIfActiveSource() {
+        if (mIsActiveSource && mService.isPowerStandbyOrTransient()) {
+            mService.wakeUp();
+        }
+    }
+
+    private void maySendActiveSource() {
+        if (mIsActiveSource) {
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(
+                    mAddress, mService.getPhysicalAddress()));
+        }
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRequestActiveSource(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        maySendActiveSource();
+        return true;  // Broadcast message.
     }
 
     @Override
