@@ -535,9 +535,16 @@ public class LegacyMetadataMapper {
          * android.control.availableSceneModes
          */
         List<String> sceneModes = p.getSupportedSceneModes();
-        int[] supportedSceneModes = (sceneModes == null) ? new int[0] :
-                ArrayUtils.convertStringListToIntArray(sceneModes, sLegacySceneModes, sSceneModes);
-        m.set(CONTROL_AVAILABLE_SCENE_MODES, supportedSceneModes);
+        List<Integer> supportedSceneModes =
+                ArrayUtils.convertStringListToIntList(sceneModes, sLegacySceneModes, sSceneModes);
+        if (supportedSceneModes == null) { // camera1 doesn't support scene mode settings
+            supportedSceneModes = new ArrayList<Integer>();
+            supportedSceneModes.add(CONTROL_SCENE_MODE_DISABLED); // disabled is always available
+        }
+        if (p.getMaxNumDetectedFaces() > 0) { // always supports FACE_PRIORITY when face detecting
+            supportedSceneModes.add(CONTROL_SCENE_MODE_FACE_PRIORITY);
+        }
+        m.set(CONTROL_AVAILABLE_SCENE_MODES, ArrayUtils.toIntArray(supportedSceneModes));
     }
 
     private static void mapLens(CameraMetadataNative m, Camera.Parameters p) {
@@ -850,6 +857,11 @@ public class LegacyMetadataMapper {
     }
 
     static String convertSceneModeToLegacy(int mode) {
+        if (mode == CONTROL_SCENE_MODE_FACE_PRIORITY) {
+            // OK: Let LegacyFaceDetectMapper handle turning face detection on/off
+            return Parameters.SCENE_MODE_AUTO;
+        }
+
         int index = ArrayUtils.getArrayIndex(sSceneModes, mode);
         if (index < 0) {
             return null;

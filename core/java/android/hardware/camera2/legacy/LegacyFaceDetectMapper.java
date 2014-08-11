@@ -48,9 +48,16 @@ public class LegacyFaceDetectMapper {
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
 
     private final Camera mCamera;
+    /** Is the camera capable of face detection? */
     private final boolean mFaceDetectSupported;
+    /** Is the camera is running face detection? */
     private boolean mFaceDetectEnabled = false;
+    /** Did the last request say to use SCENE_MODE = FACE_PRIORITY? */
+    private boolean mFaceDetectScenePriority = false;
+    /** Did the last request enable the face detect mode to ON? */
+    private boolean mFaceDetectReporting = false;
 
+    /** Synchronize access to all fields */
     private final Object mLock = new Object();
     private Camera.Face[] mFaces;
     private Camera.Face[] mFacesPrev;
@@ -129,6 +136,17 @@ public class LegacyFaceDetectMapper {
             return;
         }
 
+        /*
+         * control.sceneMode
+         */
+        int sceneMode = ParamsUtils.getOrDefault(captureRequest, CONTROL_SCENE_MODE,
+                CONTROL_SCENE_MODE_DISABLED);
+        if (sceneMode == CONTROL_SCENE_MODE_FACE_PRIORITY && !mFaceDetectSupported) {
+            Log.w(TAG, "processFaceDetectMode - ignoring control.sceneMode == FACE_PRIORITY; " +
+                    "face detection is not available");
+            return;
+        }
+
         // Print some warnings out in case the values were wrong
         switch (fdMode) {
             case STATISTICS_FACE_DETECT_MODE_OFF:
@@ -145,7 +163,8 @@ public class LegacyFaceDetectMapper {
                 return;
         }
 
-        boolean enableFaceDetect = fdMode != STATISTICS_FACE_DETECT_MODE_OFF;
+        boolean enableFaceDetect = (fdMode != STATISTICS_FACE_DETECT_MODE_OFF)
+                || (sceneMode == CONTROL_SCENE_MODE_FACE_PRIORITY);
         synchronized (mLock) {
             // Enable/disable face detection if it's changed since last time
             if (enableFaceDetect != mFaceDetectEnabled) {
@@ -166,6 +185,8 @@ public class LegacyFaceDetectMapper {
                 }
 
                 mFaceDetectEnabled = enableFaceDetect;
+                mFaceDetectScenePriority = sceneMode == CONTROL_SCENE_MODE_FACE_PRIORITY;
+                mFaceDetectReporting = fdMode != STATISTICS_FACE_DETECT_MODE_OFF;
             }
         }
     }
@@ -177,6 +198,10 @@ public class LegacyFaceDetectMapper {
      * <p>Face detect callbacks are processed in the background, and each call to
      * {@link #mapResultFaces} will have the latest faces as reflected by the camera1 callbacks.</p>
      *
+     * <p>If the scene mode was set to {@code FACE_PRIORITY} but face detection is disabled,
+     * the camera will still run face detection in the background, but no faces will be reported
+     * in the capture result.</p>
+     *
      * @param result a non-{@code null} result
      * @param legacyRequest a non-{@code null} request (read-only)
      */
@@ -186,15 +211,18 @@ public class LegacyFaceDetectMapper {
 
         Camera.Face[] faces, previousFaces;
         int fdMode;
+        boolean fdScenePriority;
         synchronized (mLock) {
-            fdMode = mFaceDetectEnabled ?
+            fdMode = mFaceDetectReporting ?
                             STATISTICS_FACE_DETECT_MODE_SIMPLE : STATISTICS_FACE_DETECT_MODE_OFF;
 
-            if (mFaceDetectEnabled) {
+            if (mFaceDetectReporting) {
                 faces = mFaces;
             } else {
                 faces = null;
             }
+
+            fdScenePriority = mFaceDetectScenePriority;
 
             previousFaces = mFacesPrev;
             mFacesPrev = faces;
@@ -227,5 +255,10 @@ public class LegacyFaceDetectMapper {
 
         result.set(CaptureResult.STATISTICS_FACES, convertedFaces.toArray(new Face[0]));
         result.set(CaptureResult.STATISTICS_FACE_DETECT_MODE, fdMode);
+
+        // Override scene mode with FACE_PRIORITY if the request was using FACE_PRIORITY
+        if (fdScenePriority) {
+            result.set(CaptureResult.CONTROL_SCENE_MODE, CONTROL_SCENE_MODE_FACE_PRIORITY);
+        }
     }
 }
