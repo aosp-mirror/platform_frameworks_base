@@ -33,6 +33,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -262,5 +263,12 @@ public class KeyphraseEnrollmentInfo {
         }
         Slog.w(TAG, "Enrollment application doesn't support the given keyphrase/locale");
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "KeyphraseEnrollmentInfo [Keyphrases=" + Arrays.toString(mKeyphrases)
+                + ", EnrollmentPackage=" + mEnrollmentPackage + ", ParseError=" + mParseError
+                + "]";
     }
 }

@@ -33,6 +33,9 @@ import android.provider.Settings;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractionManagerService;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 
 /**
  * Top-level service of the current global voice interactor, which is providing
@@ -242,6 +245,19 @@ public class VoiceInteractionService extends Service {
             }
         } catch (Exception ex) {
             // Ignore.
+        }
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("VOICE INTERACTION");
+        synchronized (mLock) {
+            pw.println("  AlwaysOnHotwordDetector");
+            if (mHotwordDetector == null) {
+                pw.println("    NULL");
+            } else {
+                mHotwordDetector.dump("    ", pw);
+            }
         }
     }
 }
