@@ -41,7 +41,13 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
             }
         };
         mUsageTracker = new UsageTracker(host.getContext(), ColorInversionTile.class);
-        mUsageTracker.listenForReset();
+        mUsageTracker.setListening(true);
+    }
+
+    @Override
+    protected void handleDestroy() {
+        super.handleDestroy();
+        mUsageTracker.setListening(false);
     }
 
     @Override

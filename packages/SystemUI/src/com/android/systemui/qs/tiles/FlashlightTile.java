@@ -16,17 +16,12 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.app.ActivityManager;
+import android.os.SystemClock;
+
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.SecureSetting;
 import com.android.systemui.statusbar.policy.FlashlightController;
-
-import android.app.ActivityManager;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.SystemClock;
-import android.provider.Settings.Secure;
-import android.util.Log;
 
 /** Quick settings tile: Control flashlight **/
 public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
@@ -43,6 +38,12 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         super(host);
         mFlashlightController = host.getFlashlightController();
         mFlashlightController.addListener(this);
+    }
+
+    @Override
+    protected void handleDestroy() {
+        super.handleDestroy();
+        mFlashlightController.removeListener(this);
     }
 
     @Override

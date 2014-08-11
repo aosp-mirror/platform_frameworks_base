@@ -818,10 +818,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mUserSwitcherController, mKeyguardMonitor,
                     mSecurityController);
             mQSPanel.setHost(qsh);
-            for (QSTile<?> tile : qsh.getTiles()) {
-                mQSPanel.addTile(tile);
-            }
+            mQSPanel.setTiles(qsh.getTiles());
             mHeader.setQSPanel(mQSPanel);
+            qsh.setCallback(new QSTileHost.Callback() {
+                @Override
+                public void onTilesChanged() {
+                    mQSPanel.setTiles(qsh.getTiles());
+                }
+            });
         }
 
         mBackdrop = (FrameLayout) mStatusBarWindow.findViewById(R.id.backdrop);
