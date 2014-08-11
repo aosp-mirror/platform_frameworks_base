@@ -624,7 +624,7 @@ public final class TvInputInfo implements Parcelable {
                 return new ArrayList<String>();
             }
             String[] ids = hiddenIdsString.split(TV_INPUT_SEPARATOR);
-            return Arrays.asList(ids);
+            return new ArrayList(Arrays.asList(ids));
         }
 
         /**
@@ -665,7 +665,7 @@ public final class TvInputInfo implements Parcelable {
             StringBuilder builder = new StringBuilder();
             boolean firstItem = true;
             for (String inputId : hiddenInputIds) {
-                ensureSeparatorIsNotIncluded(inputId);
+                ensureValidField(inputId);
                 if (firstItem) {
                     firstItem = false;
                 } else {
@@ -692,8 +692,8 @@ public final class TvInputInfo implements Parcelable {
             StringBuilder builder = new StringBuilder();
             boolean firstItem = true;
             for (Pair<String, String> pair : customLabels) {
-                ensureSeparatorIsNotIncluded(pair.first);
-                ensureSeparatorIsNotIncluded(pair.second);
+                ensureValidField(pair.first);
+                ensureValidField(pair.second);
                 if (firstItem) {
                     firstItem = false;
                 } else {
@@ -707,13 +707,16 @@ public final class TvInputInfo implements Parcelable {
                     Settings.Secure.TV_INPUT_CUSTOM_LABELS, builder.toString(), userId);
         }
 
-        private static void ensureSeparatorIsNotIncluded(String value) {
+        private static void ensureValidField(String value) {
+            if (TextUtils.isEmpty(value)) {
+                throw new IllegalArgumentException(value + " should not empty ");
+            }
             if (value.contains(TV_INPUT_SEPARATOR)) {
-                throw new IllegalArgumentException( value + " should not include "
+                throw new IllegalArgumentException(value + " should not include "
                         + TV_INPUT_SEPARATOR);
             }
             if (value.contains(CUSTOM_NAME_SEPARATOR)) {
-                throw new IllegalArgumentException( value + " should not include "
+                throw new IllegalArgumentException(value + " should not include "
                         + CUSTOM_NAME_SEPARATOR);
             }
         }
