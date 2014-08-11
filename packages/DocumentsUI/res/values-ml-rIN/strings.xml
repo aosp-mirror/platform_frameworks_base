@@ -30,6 +30,18 @@
     <string name="menu_share" msgid="3075149983979628146">"പങ്കിടുക"</string>
     <string name="menu_delete" msgid="8138799623850614177">"ഇല്ലാതാക്കുക"</string>
     <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" തിരഞ്ഞെടുക്കുക"</string>
+    <!-- no translation found for menu_advanced_show (4693652895715631401) -->
+    <skip />
+    <!-- no translation found for menu_advanced_show (5792182900084144261) -->
+    <skip />
+    <!-- no translation found for menu_advanced_hide (4218809952721972589) -->
+    <skip />
+    <!-- no translation found for menu_advanced_hide (4845869969015718848) -->
+    <skip />
+    <!-- no translation found for menu_file_size_show (3240323619260823076) -->
+    <skip />
+    <!-- no translation found for menu_file_size_hide (8881975928502581042) -->
+    <skip />
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> തിരഞ്ഞെടുത്തു"</string>
     <string name="sort_name" msgid="9183560467917256779">"പേര് പ്രകാരം"</string>
     <string name="sort_date" msgid="586080032956151448">"പരിഷ്‌ക്കരിച്ച തീയതി പ്രകാരം"</string>
@@ -45,9 +57,6 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"കുറുക്കുവഴികൾ"</string>
     <string name="root_type_device" msgid="7121342474653483538">"ഉപകരണങ്ങൾ"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"കൂടുതൽ അപ്ലിക്കേഷനുകൾ"</string>
-    <string name="pref_advanced_devices" msgid="903257239609301276">"വിപുലമായ ഉപകരണങ്ങൾ ദൃശ്യമാക്കുക"</string>
-    <string name="pref_file_size" msgid="2826879315743961459">"ഫയൽ വലുപ്പം ദൃശ്യമാക്കുക"</string>
-    <string name="pref_device_size" msgid="3542106883278997222">"ഉപകരണ വലുപ്പം ദൃശ്യമാക്കുക"</string>
     <string name="empty" msgid="7858882803708117596">"ഇനങ്ങളൊന്നുമില്ല"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"ഫയൽ തുറക്കാനായില്ല"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"ചില പ്രമാണങ്ങൾ ഇല്ലാതാക്കാനായില്ല"</string>
