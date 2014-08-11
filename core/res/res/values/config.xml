@@ -1650,6 +1650,11 @@
     the IMS connection -->
     <bool name="useImsAlwaysForEmergencyCall">true</bool>
 
+    <!-- Flag indicating whether the IMS service can be turned off. If false then
+        the service will not be turned-off completely (the ImsManager.turnOffIms() will
+        be disabled) but individual Features can be disabled using ImsConfig.setFeatureValue() -->
+    <bool name="imsServiceAllowTurnOff">true</bool>
+
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
     <string-array translatable="false" name="config_cdma_home_system" />

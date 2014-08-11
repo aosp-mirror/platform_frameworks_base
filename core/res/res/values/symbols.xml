@@ -1956,6 +1956,7 @@
   <java-symbol type="style" name="Theme.DeviceDefault.Resolver" />
   <java-symbol type="attr" name="preferenceFragmentStyle" />
   <java-symbol type="bool" name="skipHoldBeforeMerge" />
+  <java-symbol type="bool" name="imsServiceAllowTurnOff" />
   <java-symbol type="bool" name="useImsAlwaysForEmergencyCall" />
   <java-symbol type="attr" name="touchscreenBlocksFocus" />
   <java-symbol type="layout" name="resolver_list_with_default" />
