@@ -1469,6 +1469,10 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
+    public void onReset(ExpandableView view) {
+    }
+
+    @Override
     public void onScrollChanged() {
         if (mQsExpanded) {
             requestScrollerTopPaddingUpdate(false /* animate */);
