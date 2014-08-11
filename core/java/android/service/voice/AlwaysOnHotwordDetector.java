@@ -39,6 +39,8 @@ import android.util.Slog;
 
 import com.android.internal.app.IVoiceInteractionManagerService;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -490,7 +492,7 @@ public class AlwaysOnHotwordDetector {
                     new RecognitionConfig(captureTriggerAudio, allowMultipleTriggers,
                             recognitionExtra, null /* additional data */));
         } catch (RemoteException e) {
-            Slog.w(TAG, "RemoteException in startRecognition!");
+            Slog.w(TAG, "RemoteException in startRecognition!", e);
         }
         if (code != STATUS_OK) {
             Slog.w(TAG, "startRecognition() failed with error code " + code);
@@ -504,7 +506,7 @@ public class AlwaysOnHotwordDetector {
             code = mModelManagementService.stopRecognition(
                     mVoiceInteractionService, mKeyphraseMetadata.id, mInternalCallback);
         } catch (RemoteException e) {
-            Slog.w(TAG, "RemoteException in stopRecognition!");
+            Slog.w(TAG, "RemoteException in stopRecognition!", e);
         }
 
         if (code != STATUS_OK) {
@@ -636,7 +638,7 @@ public class AlwaysOnHotwordDetector {
                 dspModuleProperties =
                         mModelManagementService.getDspModuleProperties(mVoiceInteractionService);
             } catch (RemoteException e) {
-                Slog.w(TAG, "RemoteException in getDspProperties!");
+                Slog.w(TAG, "RemoteException in getDspProperties!", e);
             }
             // No DSP available
             if (dspModuleProperties == null) {
@@ -657,9 +659,20 @@ public class AlwaysOnHotwordDetector {
                 return mModelManagementService.isEnrolledForKeyphrase(
                         mVoiceInteractionService, keyphraseId);
             } catch (RemoteException e) {
-                Slog.w(TAG, "RemoteException in listRegisteredKeyphraseSoundModels!");
+                Slog.w(TAG, "RemoteException in listRegisteredKeyphraseSoundModels!", e);
             }
             return false;
+        }
+    }
+
+    /** @hide */
+    public void dump(String prefix, PrintWriter pw) {
+        synchronized (mLock) {
+            pw.print(prefix); pw.print("Text="); pw.println(mText);
+            pw.print(prefix); pw.print("Locale="); pw.println(mLocale);
+            pw.print(prefix); pw.print("Availability="); pw.println(mAvailability);
+            pw.print(prefix); pw.print("KeyphraseMetadata="); pw.println(mKeyphraseMetadata);
+            pw.print(prefix); pw.print("EnrollmentInfo="); pw.println(mKeyphraseEnrollmentInfo);
         }
     }
 }
