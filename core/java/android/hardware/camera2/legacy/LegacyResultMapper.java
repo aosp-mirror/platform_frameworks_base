@@ -143,6 +143,19 @@ public class LegacyResultMapper {
         mapAwb(result, /*out*/params);
 
         /*
+         * control.captureIntent
+         */
+        {
+            int captureIntent = ParamsUtils.getOrDefault(request,
+                    CaptureRequest.CONTROL_CAPTURE_INTENT,
+                    /*defaultValue*/CaptureRequest.CONTROL_CAPTURE_INTENT_PREVIEW);
+
+            captureIntent = LegacyRequestMapper.filterSupportedCaptureIntent(captureIntent);
+
+            result.set(CONTROL_CAPTURE_INTENT, captureIntent);
+        }
+
+        /*
          * control.mode
          */
         {
