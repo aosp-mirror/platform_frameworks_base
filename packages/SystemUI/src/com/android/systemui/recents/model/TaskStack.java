@@ -266,6 +266,19 @@ public class TaskStack {
         return mTaskList.indexOf(t);
     }
 
+    /** Finds the task with the specified task id. */
+    public Task findTaskWithId(int taskId) {
+        ArrayList<Task> tasks = mTaskList.getTasks();
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            Task task = tasks.get(i);
+            if (task.key.id == taskId) {
+                return task;
+            }
+        }
+        return null;
+    }
+
     /******** Filtering ********/
 
     /** Filters the stack into tasks similar to the one specified */

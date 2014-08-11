@@ -109,12 +109,14 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_TOGGLE_RECENTS_APPS = 1021;
     protected static final int MSG_PRELOAD_RECENT_APPS = 1022;
     protected static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
-    protected static final int MSG_OPEN_SEARCH_PANEL = 1024;
-    protected static final int MSG_CLOSE_SEARCH_PANEL = 1025;
-    protected static final int MSG_SHOW_HEADS_UP = 1026;
-    protected static final int MSG_HIDE_HEADS_UP = 1027;
-    protected static final int MSG_ESCALATE_HEADS_UP = 1028;
-    protected static final int MSG_DECAY_HEADS_UP = 1029;
+    protected static final int MSG_SHOW_NEXT_AFFILIATED_TASK = 1024;
+    protected static final int MSG_SHOW_PREV_AFFILIATED_TASK = 1025;
+    protected static final int MSG_OPEN_SEARCH_PANEL = 1026;
+    protected static final int MSG_CLOSE_SEARCH_PANEL = 1027;
+    protected static final int MSG_SHOW_HEADS_UP = 1028;
+    protected static final int MSG_HIDE_HEADS_UP = 1029;
+    protected static final int MSG_ESCALATE_HEADS_UP = 1030;
+    protected static final int MSG_DECAY_HEADS_UP = 1031;
 
     protected static final boolean ENABLE_HEADS_UP = true;
     // scores above this threshold should be displayed in heads up mode.
@@ -689,6 +691,20 @@ public abstract class BaseStatusBar extends SystemUI implements
         mHandler.sendEmptyMessage(msg);
     }
 
+    /** Jumps to the next affiliated task in the group. */
+    public void showNextAffiliatedTask() {
+        int msg = MSG_SHOW_NEXT_AFFILIATED_TASK;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
+    /** Jumps to the previous affiliated task in the group. */
+    public void showPreviousAffiliatedTask() {
+        int msg = MSG_SHOW_PREV_AFFILIATED_TASK;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
     @Override
     public void showSearchPanel() {
         int msg = MSG_OPEN_SEARCH_PANEL;
@@ -800,6 +816,18 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    protected void showRecentsNextAffiliatedTask() {
+        if (mRecents != null) {
+            mRecents.showNextAffiliatedTask();
+        }
+    }
+
+    protected void showRecentsPreviousAffiliatedTask() {
+        if (mRecents != null) {
+            mRecents.showPrevAffiliatedTask();
+        }
+    }
+
     @Override
     public void onVisibilityChanged(boolean visible) {
         // Do nothing
@@ -883,6 +911,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                   break;
              case MSG_CANCEL_PRELOAD_RECENT_APPS:
                   cancelPreloadingRecents();
+                  break;
+             case MSG_SHOW_NEXT_AFFILIATED_TASK:
+                  showRecentsNextAffiliatedTask();
+                  break;
+             case MSG_SHOW_PREV_AFFILIATED_TASK:
+                  showRecentsPreviousAffiliatedTask();
                   break;
              case MSG_OPEN_SEARCH_PANEL:
                  if (DEBUG) Log.d(TAG, "opening search panel");

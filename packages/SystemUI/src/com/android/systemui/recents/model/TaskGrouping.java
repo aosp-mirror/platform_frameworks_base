@@ -43,6 +43,24 @@ public class TaskGrouping {
         updateTaskIndices();
     }
 
+    /** Returns the key of the next task in the group. */
+    public Task.TaskKey getNextTaskInGroup(Task t) {
+        int i = indexOf(t);
+        if ((i + 1) < getTaskCount()) {
+            return mTaskKeys.get(i + 1);
+        }
+        return null;
+    }
+
+    /** Returns the key of the previous task in the group. */
+    public Task.TaskKey getPrevTaskInGroup(Task t) {
+        int i = indexOf(t);
+        if ((i - 1) >= 0) {
+            return mTaskKeys.get(i - 1);
+        }
+        return null;
+    }
+
     /** Gets the front task */
     public boolean isFrontMostTask(Task t) {
         return (t.key == mFrontMostTaskKey);
