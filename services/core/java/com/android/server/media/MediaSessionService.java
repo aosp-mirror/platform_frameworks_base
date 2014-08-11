@@ -29,6 +29,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.IRemoteVolumeController;
@@ -37,6 +38,7 @@ import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.media.session.ISessionManager;
 import android.media.session.MediaSession;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -86,6 +88,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     private KeyguardManager mKeyguardManager;
     private IAudioService mAudioService;
     private ContentResolver mContentResolver;
+    private SettingsObserver mSettingsObserver;
 
     private MediaSessionRecord mPrioritySession;
     private int mCurrentUserId = -1;
@@ -111,6 +114,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
         mAudioService = getAudioService();
         mContentResolver = getContext().getContentResolver();
+        mSettingsObserver = new SettingsObserver();
+        mSettingsObserver.observe();
     }
 
     private IAudioService getAudioService() {
@@ -225,6 +230,28 @@ public class MediaSessionService extends SystemService implements Monitor {
 
                 UserRecord newUser = getOrCreateUser(userId);
                 newUser.startLocked();
+            }
+        }
+    }
+
+    private void updateActiveSessionListeners() {
+        synchronized (mLock) {
+            for (int i = mSessionsListeners.size() - 1; i >= 0; i--) {
+                SessionsListenerRecord listener = mSessionsListeners.get(i);
+                try {
+                    enforceMediaPermissions(listener.mComponentName, listener.mPid, listener.mUid,
+                            listener.mUserId);
+                } catch (SecurityException e) {
+                    Log.i(TAG, "ActiveSessionsListener " + listener.mComponentName
+                            + " is no longer authorized. Disconnecting.");
+                    mSessionsListeners.remove(i);
+                    try {
+                        listener.mListener
+                                .onActiveSessionsChanged(new ArrayList<MediaSession.Token>());
+                    } catch (Exception e1) {
+                        // ignore
+                    }
+                }
             }
         }
     }
@@ -525,11 +552,19 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     final class SessionsListenerRecord implements IBinder.DeathRecipient {
         private final IActiveSessionsListener mListener;
+        private final ComponentName mComponentName;
         private final int mUserId;
+        private final int mPid;
+        private final int mUid;
 
-        public SessionsListenerRecord(IActiveSessionsListener listener, int userId) {
+        public SessionsListenerRecord(IActiveSessionsListener listener,
+                ComponentName componentName,
+                int userId, int pid, int uid) {
             mListener = listener;
+            mComponentName = componentName;
             mUserId = userId;
+            mPid = pid;
+            mUid = uid;
         }
 
         @Override
@@ -537,6 +572,25 @@ public class MediaSessionService extends SystemService implements Monitor {
             synchronized (mLock) {
                 mSessionsListeners.remove(this);
             }
+        }
+    }
+
+    final class SettingsObserver extends ContentObserver {
+        private final Uri mSecureSettingsUri = Settings.Secure.getUriFor(
+                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
+
+        private SettingsObserver() {
+            super(null);
+        }
+
+        private void observe() {
+            mContentResolver.registerContentObserver(mSecureSettingsUri,
+                    false, this, UserHandle.USER_ALL);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            updateActiveSessionListeners();
         }
     }
 
@@ -607,7 +661,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                         return;
                     }
                     SessionsListenerRecord record = new SessionsListenerRecord(listener,
-                            resolvedUserId);
+                            componentName, resolvedUserId, pid, uid);
                     try {
                         listener.asBinder().linkToDeath(record, 0);
                     } catch (RemoteException e) {
