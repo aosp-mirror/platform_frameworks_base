@@ -187,48 +187,77 @@ public class AlwaysOnHotwordDetector {
      * Additional payload for {@link Callback#onDetected}.
      */
     public static class EventPayload {
-        /**
-         * Indicates if {@code data} is the audio that triggered the keyphrase.
-         */
-        public final boolean triggerAvailable;
-        /**
-         * Indicates if {@code captureSession} can be used to continue capturing more audio from
-         * the DSP hardware.
-         *
-         * Candidate for public API
-         * @hide
-         */
-        public final boolean captureAvailable;
-        /**
-         * The session to use when attempting to capture more audio from the DSP hardware.
-         *
-         * Candidate for public API
-         * TODO: When unhiding, change javadoc of audioFormat to -
-         * "Format of {@code data} or the audio that may be captured using {@code captureSession}.
-         * May be null if {@code triggerAvailable} and {@code captureAvailable} are false."
-         * @hide
-         */
-        public final int captureSession;
-        /**
-         * Format of {@code data}.
-         * May be null if {@code triggerAvailable} is false.
-         */
-        @Nullable
-        public final AudioFormat audioFormat;
-        /**
-         * Raw data associated with the event.
-         * This is the audio that triggered the keyphrase if {@code isTriggerAudio} is true.
-         */
-        @Nullable
-        public final byte[] data;
+        private final boolean mTriggerAvailable;
+        // Indicates if {@code captureSession} can be used to continue capturing more audio
+        // from the DSP hardware.
+        private final boolean mCaptureAvailable;
+        // The session to use when attempting to capture more audio from the DSP hardware.
+        private final int mCaptureSession;
+        private final AudioFormat mAudioFormat;
+        // Raw data associated with the event.
+        // This is the audio that triggered the keyphrase if {@code isTriggerAudio} is true.
+        private final byte[] mData;
 
-        private EventPayload(boolean _triggerAvailable, boolean _captureAvailable,
-                AudioFormat _audioFormat, int _captureSession, byte[] _data) {
-            triggerAvailable = _triggerAvailable;
-            captureAvailable = _captureAvailable;
-            captureSession = _captureSession;
-            audioFormat = _audioFormat;
-            data = _data;
+        private EventPayload(boolean triggerAvailable, boolean captureAvailable,
+                AudioFormat audioFormat, int captureSession, byte[] data) {
+            mTriggerAvailable = triggerAvailable;
+            mCaptureAvailable = captureAvailable;
+            mCaptureSession = captureSession;
+            mAudioFormat = audioFormat;
+            mData = data;
+        }
+
+        /**
+         * Gets the format of the audio obtained using {@link #getTriggerAudio()}.
+         * May be null if there's no audio present.
+         */
+        @Nullable
+        public AudioFormat getCaptureAudioFormat() {
+            return mAudioFormat;
+        }
+
+        /**
+         * Gets the raw audio that triggered the keyphrase.
+         * This may be null if the trigger audio isn't available.
+         * If non-null, the format of the audio can be obtained by calling
+         * {@link #getCaptureAudioFormat()}.
+         *
+         * @see AlwaysOnHotwordDetector#RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+         */
+        @Nullable
+        public byte[] getTriggerAudio() {
+            if (mTriggerAvailable) {
+                return mData;
+            } else {
+                return null;
+            }
+        }
+
+        /**
+         * Gets the session ID to start a capture from the DSP.
+         * This may be null if streaming capture isn't possible.
+         * If non-null, the format of the audio that can be captured can be
+         * obtained using {@link #getCaptureAudioFormat()}.
+         *
+         * TODO: Candidate for Public API when the API to start capture with a session ID
+         * is made public.
+         *
+         * TODO: Add this to {@link #getCaptureAudioFormat()}:
+         * "Gets the format of the audio obtained using {@link #getTriggerAudio()}
+         * or {@link #getCaptureSession()}. May be null if no audio can be obtained
+         * for either the trigger or a streaming session."
+         *
+         * TODO: Should this return a known invalid value instead?
+         *
+         * @hide
+         */
+        @Nullable
+        public Integer getCaptureSession() {
+            if (mCaptureAvailable) {
+                return mCaptureSession;
+            } else {
+                return null;
+            }
         }
     }
 
