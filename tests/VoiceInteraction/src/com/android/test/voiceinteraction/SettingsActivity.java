@@ -1,13 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-/**
- * Copyright (c) 2014, The Android Open Source Project
+/*
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,9 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
--->
 
-<voice-interaction-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:sessionService="com.android.test.voiceinteraction.MainInteractionSessionService"
-    android:recognitionService="com.android.test.voiceinteraction.MainRecognitionService"
-    android:settingsActivity="com.android.test.voiceinteraction.SettingsActivity" />
+package com.android.test.voiceinteraction;
+
+import android.app.Activity;
+import android.os.Bundle;
+
+/**
+ * Stub activity to test out settings selection for voice interactor.
+ */
+public class SettingsActivity extends Activity {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.settings);
+    }
+}
