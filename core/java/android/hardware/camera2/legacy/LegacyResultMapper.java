@@ -35,9 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.android.internal.util.Preconditions.*;
-import static android.hardware.camera2.CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_OFF;
-import static android.hardware.camera2.CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_ON;
-import static android.hardware.camera2.CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE;
 import static android.hardware.camera2.CaptureResult.*;
 
 /**
@@ -166,6 +163,8 @@ public class LegacyResultMapper {
             int mode = LegacyMetadataMapper.convertSceneModeFromLegacy(legacySceneMode);
             if (mode != LegacyMetadataMapper.UNKNOWN_MODE) {
                 result.set(CaptureResult.CONTROL_SCENE_MODE, mode);
+                // In case of SCENE_MODE == FACE_PRIORITY, LegacyFaceDetectMapper will override
+                // the result to say SCENE_MODE == FACE_PRIORITY.
             }  else {
                 Log.w(TAG, "Unknown scene mode " + legacySceneMode +
                         " returned by camera HAL, setting to disabled.");
