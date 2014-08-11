@@ -193,6 +193,7 @@
 
         <!-- Alternate Recents -->
         <activity android:name=".recents.RecentsActivity"
+                  android:label="@string/accessibility_desc_recent_apps"
                   android:launchMode="singleInstance"
                   android:excludeFromRecents="true"
                   android:theme="@style/RecentsTheme">
