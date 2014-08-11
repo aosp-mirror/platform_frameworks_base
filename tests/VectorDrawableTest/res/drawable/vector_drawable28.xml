@@ -17,7 +17,8 @@
     android:height="64dp"
     android:viewportHeight="200"
     android:viewportWidth="200"
-    android:width="64dp" >
+    android:width="64dp"
+    android:autoMirrored="true" >
 
     <group>
         <path

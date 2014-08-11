@@ -268,7 +268,8 @@ public class VectorDrawable extends Drawable {
 
                 mVectorState.updateCacheStates();
             }
-            canvas.drawBitmap(bitmap, null, bounds, null);
+            // The bitmap's size is the same as the bounds.
+            canvas.drawBitmap(bitmap, 0, 0, null);
         }
 
         canvas.restoreToCount(saveCount);
