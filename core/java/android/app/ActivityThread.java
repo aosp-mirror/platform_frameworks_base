@@ -3494,6 +3494,20 @@ public final class ActivityThread {
         synchronized (mResourcesManager) {
             mCoreSettings = coreSettings;
         }
+        onCoreSettingsChange();
+    }
+
+    private void onCoreSettingsChange() {
+        boolean debugViewAttributes =
+                mCoreSettings.getInt(Settings.Global.DEBUG_VIEW_ATTRIBUTES, 0) != 0;
+        if (debugViewAttributes != View.mDebugViewAttributes) {
+            View.mDebugViewAttributes = debugViewAttributes;
+
+            // request all activities to relaunch for the changes to take place
+            for (Map.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
+                requestRelaunchActivity(entry.getKey(), null, null, 0, false, null, false);
+            }
+        }
     }
 
     private void handleUpdatePackageCompatibilityInfo(UpdateCompatibilityData data) {
@@ -4323,6 +4337,9 @@ public final class ActivityThread {
 
         final boolean is24Hr = "24".equals(mCoreSettings.getString(Settings.System.TIME_12_24));
         DateFormat.set24HourTimePref(is24Hr);
+
+        View.mDebugViewAttributes =
+                mCoreSettings.getInt(Settings.Global.DEBUG_VIEW_ATTRIBUTES, 0) != 0;
 
         /**
          * For system applications on userdebug/eng builds, log stack
