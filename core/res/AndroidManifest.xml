@@ -2865,7 +2865,6 @@
         </activity>
         <activity-alias android:name="com.android.internal.app.ForwardIntentToUserOwner"
                 android:targetActivity="com.android.internal.app.IntentForwarderActivity"
-                android:icon="@drawable/personal_icon"
                 android:exported="true"
                 android:label="@string/user_owner_label">
         </activity-alias>
