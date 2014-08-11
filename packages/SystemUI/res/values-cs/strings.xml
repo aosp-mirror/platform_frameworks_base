@@ -39,12 +39,9 @@
     <string name="invalid_charger_title" msgid="3515740382572798460">"Nabíjení přes USB není podporováno."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Používejte pouze nabíječku, která je součástí balení."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Nastavení"</string>
-    <!-- no translation found for battery_saver_confirmation_title (5299585433050361634) -->
-    <skip />
-    <!-- no translation found for battery_saver_confirmation_ok (7507968430447930257) -->
-    <skip />
-    <!-- no translation found for battery_saver_start_action (5576697451677486320) -->
-    <skip />
+    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Zapnout úsporu baterie?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Zapnout"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"Zapnout úsporu baterie"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Nastavení"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Režim V letadle"</string>
@@ -184,7 +181,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Poloha nastavena pomocí systému GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Aktivní žádosti o polohu"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Vymazat všechna oznámení."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informace o aplikaci"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"Nastavení"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Obrazovka se automaticky otočí."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Obrazovka je uzamčena v orientaci na šířku."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Obrazovka je uzamčena v orientaci na výšku."</string>
@@ -272,6 +269,8 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"Prioritní"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Vše"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Nabíjení (plně nabito za <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"Přidat uživatele"</string>
+    <string name="user_new_user_name" msgid="426540612051178753">"Nový uživatel"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Host"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"Přidat hosta"</string>
     <string name="guest_exit_guest" msgid="1619100760451149682">"Ukončit relaci hosta"</string>
@@ -290,10 +289,8 @@
     <item quantity="other" msgid="5408537517529822157">"Na %d h"</item>
   </plurals>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Režim Úspora baterie je zapnutý."</string>
-    <!-- no translation found for battery_saver_notification_text (820318788126672692) -->
-    <skip />
-    <!-- no translation found for battery_saver_notification_action_text (109158658238110382) -->
-    <skip />
+    <string name="battery_saver_notification_text" msgid="820318788126672692">"Omezuje výkon a data na pozadí"</string>
+    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Vypnout úsporu baterie"</string>
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g> %%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Skrytý obsah"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"Aplikace <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> začne zaznamenávat vše, co je zobrazeno na obrazovce."</string>
@@ -301,26 +298,15 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Smazat vše"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Spustit"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Žádná oznámení"</string>
-    <!-- no translation found for device_owned_footer (3802752663326030053) -->
-    <skip />
-    <!-- no translation found for vpn_footer (2388611096129106812) -->
-    <skip />
-    <!-- no translation found for monitoring_title_device_owned (7121079311903859610) -->
-    <skip />
-    <!-- no translation found for monitoring_title (169206259253048106) -->
-    <skip />
-    <!-- no translation found for open_app (4011771120339160755) -->
-    <skip />
-    <!-- no translation found for disconnect_vpn (1324915059568548655) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_owned (7801926679066533391) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (93140751707065515) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn (5397847778080663075) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (696121105616356493) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_device_owned (649791650224064248) -->
-    <skip />
+    <string name="device_owned_footer" msgid="3802752663326030053">"Zařízení může být sledováno"</string>
+    <string name="vpn_footer" msgid="2388611096129106812">"Síť může být sledována"</string>
+    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Sledování zařízení"</string>
+    <string name="monitoring_title" msgid="169206259253048106">"Sledování sítě"</string>
+    <string name="open_app" msgid="4011771120339160755">"Spustit aplikaci"</string>
+    <string name="disconnect_vpn" msgid="1324915059568548655">"Odpojit VPN"</string>
+    <string name="monitoring_description_device_owned" msgid="7512371572956715493">"Toto zařízení je spravováno následující organizací:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nSprávce může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a zabezpečených webových stránek.\n\nChcete-li získat další informace, kontaktujte svého správce."</string>
+    <string name="monitoring_description_vpn" msgid="7288268682714305659">"Aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g> jste udělili oprávnění k nastavení připojení VPN.\n\nSprávce může sledovat vaši aktivitu zařízení a aktivitu v síti, včetně e-mailů, aplikací a zabezpečených webových stránek."</string>
+    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Jste připojeni k síti VPN (<xliff:g id="APPLICATION">%1$s</xliff:g>).\n\nPoskytovatel připojení VPN může sledovat vaši aktivitu zařízení a aktivitu v síti, včetně e-mailů, aplikací a zabezpečených webových stránek."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Toto zařízení je spravováno následující organizací:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nSprávce může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a zabezpečených webových stránek. Další informace získáte od svého správce.\n\nNavíc jste aplikaci <xliff:g id="APPLICATION">%2$s</xliff:g> udělili oprávnění k nastavení připojení VPN. Aktivitu v síti může sledovat také tato aplikace."</string>
+    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Toto zařízení je spravováno následující organizací:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nSprávce může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a zabezpečených webových stránek. Další informace získáte od svého správce.\n\nNavíc jste připojeni také k síti VPN (<xliff:g id="APPLICATION">%2$s</xliff:g>). Vaši aktivitu v síti může sledovat také poskytovatel připojení VPN."</string>
 </resources>

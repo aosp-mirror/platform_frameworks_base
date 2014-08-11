@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"सिस्‍टम UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"साफ़ करें"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"सूची से निकालें"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ऐप्स जानकारी"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ऐप्स की जानकारी"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"कोई हाल ही के ऐप्स  नहीं"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"हाल ही के ऐप्स  खारिज करें"</string>
   <plurals name="status_bar_accessibility_recent_apps">
@@ -39,12 +39,9 @@
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB चार्जिंग समर्थित नहीं है."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"केवल आपूर्ति किए गए चार्जर का उपयोग करें."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"सेटिंग"</string>
-    <!-- no translation found for battery_saver_confirmation_title (5299585433050361634) -->
-    <skip />
-    <!-- no translation found for battery_saver_confirmation_ok (7507968430447930257) -->
-    <skip />
-    <!-- no translation found for battery_saver_start_action (5576697451677486320) -->
-    <skip />
+    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"बैटरी बचतकर्ता चालू करें?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"चालू करें"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"बैटरी बचतकर्ता को चालू करें"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"सेटिंग"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"वाई-फ़ाई"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"हवाई जहाज मोड"</string>
@@ -182,7 +179,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS द्वारा सेट किया गया स्‍थान"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"स्थान अनुरोध सक्रिय"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सभी सूचनाएं साफ़ करें."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"ऐप्स जानकारी"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"सेटिंग"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"स्‍क्रीन स्‍वचालित रूप से घूमेगी."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"स्‍क्रीन लैंडस्केप अभिविन्यास में लॉक है."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"स्‍क्रीन पोर्ट्रेट अभिविन्‍यास में लॉक है."</string>
@@ -270,6 +267,8 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"प्राथमिकता"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"सभी"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"चार्ज हो रहा है (पूर्ण होने में <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> शेष)"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"उपयोगकर्ता जोड़ें"</string>
+    <string name="user_new_user_name" msgid="426540612051178753">"नया उपयोगकर्ता"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"अतिथि"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ अतिथि"</string>
     <string name="guest_exit_guest" msgid="1619100760451149682">"अतिथि मोड से बाहर निकलें"</string>
@@ -288,10 +287,8 @@
     <item quantity="other" msgid="5408537517529822157">"%d घंटे के लिए"</item>
   </plurals>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"बैटरी सेवर चालू है"</string>
-    <!-- no translation found for battery_saver_notification_text (820318788126672692) -->
-    <skip />
-    <!-- no translation found for battery_saver_notification_action_text (109158658238110382) -->
-    <skip />
+    <string name="battery_saver_notification_text" msgid="820318788126672692">"निष्‍पादन और पृष्ठभूमि डेटा को कम करता है"</string>
+    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"बैटरी बचतकर्ता को बंद करें"</string>
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"छिपी हुई सामग्री"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपके स्क्रीन पर प्रदर्शित प्रत्येक सामग्री को कैप्चर करना प्रारंभ कर देगी."</string>
@@ -299,26 +296,15 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सभी साफ करें"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"अब प्रारंभ करें"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"कोई सूचना नहीं"</string>
-    <!-- no translation found for device_owned_footer (3802752663326030053) -->
-    <skip />
-    <!-- no translation found for vpn_footer (2388611096129106812) -->
-    <skip />
-    <!-- no translation found for monitoring_title_device_owned (7121079311903859610) -->
-    <skip />
-    <!-- no translation found for monitoring_title (169206259253048106) -->
-    <skip />
-    <!-- no translation found for open_app (4011771120339160755) -->
-    <skip />
-    <!-- no translation found for disconnect_vpn (1324915059568548655) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_owned (7801926679066533391) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (93140751707065515) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn (5397847778080663075) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (696121105616356493) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_device_owned (649791650224064248) -->
-    <skip />
+    <string name="device_owned_footer" msgid="3802752663326030053">"उपकरण को मॉनीटर किया जा सकता है"</string>
+    <string name="vpn_footer" msgid="2388611096129106812">"नेटवर्क को मॉनीटर किया जा सकता है"</string>
+    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"उपकरण को मॉनीटर करना"</string>
+    <string name="monitoring_title" msgid="169206259253048106">"नेटवर्क को मॉनीटर करना"</string>
+    <string name="open_app" msgid="4011771120339160755">"ऐप्स खोलें"</string>
+    <string name="disconnect_vpn" msgid="1324915059568548655">"VPN डिस्‍कनेक्‍ट करें"</string>
+    <string name="monitoring_description_device_owned" msgid="7512371572956715493">"यह उपकरण इसके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है.\n\nअधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें."</string>
+    <string name="monitoring_description_vpn" msgid="7288268682714305659">"आपने \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" को VPN कनेक्‍शन सेट करने की अनुमति दी है.\n\nयह ऐप्‍स ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपके उपकरण और नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
+    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"आप VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\") से कनेक्‍ट हैं.\n\nआपका VPN सेवा प्रदाता ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपके उपकरण और नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"यह उपकरण इसके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर कर सकता है. अधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें.\n\nसाथ ही, आपने VPN कनेक्‍शन सेट करने के लिए \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" अनुमति भी दी है. यह ऐप्‍स नेटवर्क गतिविधि को भी मॉनीटर कर सकता है."</string>
+    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"यह उपकरण इसके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक, ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर कर सकता है. अधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें.\n\nसाथ ही, आप VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") से कनेक्‍ट हैं. आपका VPN सेवा प्रदाता नेटवर्क गतिविधि को भी मॉनीटर कर सकता है."</string>
 </resources>
