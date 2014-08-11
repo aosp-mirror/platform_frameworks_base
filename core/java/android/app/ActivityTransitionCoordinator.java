@@ -16,15 +16,12 @@
 package android.app;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.os.ResultReceiver;
 import android.transition.Transition;
 import android.transition.TransitionSet;
@@ -128,7 +125,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     protected static final String KEY_SCREEN_RIGHT = "shared_element:screenRight";
     protected static final String KEY_SCREEN_BOTTOM= "shared_element:screenBottom";
     protected static final String KEY_TRANSLATION_Z = "shared_element:translationZ";
-    protected static final String KEY_BITMAP = "shared_element:bitmap";
+    protected static final String KEY_SNAPSHOT = "shared_element:bitmap";
     protected static final String KEY_SCALE_TYPE = "shared_element:scaleType";
     protected static final String KEY_IMAGE_MATRIX = "shared_element:imageMatrix";
 
@@ -405,6 +402,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         if (decorLoc != null) {
             left -= decorLoc[0];
             top -= decorLoc[1];
+            right -= decorLoc[0];
+            bottom -= decorLoc[1];
         } else {
             // Find the location in the view's parent
             getSharedElementParentMatrix(view, tempMatrix);
@@ -532,14 +531,14 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         for (String name: names) {
             Bundle sharedElementBundle = state.getBundle(name);
             if (sharedElementBundle != null) {
-                Bitmap bitmap = sharedElementBundle.getParcelable(KEY_BITMAP);
-                View snapshot = new View(context);
-                Resources resources = getWindow().getContext().getResources();
-                if (bitmap != null) {
-                    snapshot.setBackground(new BitmapDrawable(resources, bitmap));
+                Parcelable parcelable = sharedElementBundle.getParcelable(KEY_SNAPSHOT);
+                View snapshot = null;
+                if (parcelable != null) {
+                    snapshot = mListener.createSnapshotView(context, parcelable);
                 }
-                snapshot.setTransitionName(name);
-                setSharedElementState(snapshot, name, state, null, null, decorLoc);
+                if (snapshot != null) {
+                    setSharedElementState(snapshot, name, state, null, null, decorLoc);
+                }
                 snapshots.add(snapshot);
             }
         }
@@ -610,7 +609,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
      * @param transitionArgs Bundle to store shared element placement information.
      * @param tempBounds     A temporary Rect for capturing the current location of views.
      */
-    protected static void captureSharedElementState(View view, String name, Bundle transitionArgs,
+    protected void captureSharedElementState(View view, String name, Bundle transitionArgs,
             Matrix tempMatrix, RectF tempBounds) {
         Bundle sharedElementBundle = new Bundle();
         tempMatrix.reset();
@@ -624,13 +623,9 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         sharedElementBundle.putFloat(KEY_SCREEN_BOTTOM, tempBounds.bottom);
         sharedElementBundle.putFloat(KEY_TRANSLATION_Z, view.getTranslationZ());
 
-        int bitmapWidth = Math.round(tempBounds.width());
-        int bitmapHeight = Math.round(tempBounds.height());
-        if (bitmapWidth > 0 && bitmapHeight > 0) {
-            Bitmap bitmap = Bitmap.createBitmap(bitmapWidth, bitmapWidth, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            view.draw(canvas);
-            sharedElementBundle.putParcelable(KEY_BITMAP, bitmap);
+        Parcelable bitmap = mListener.captureSharedElementSnapshot(view, tempMatrix, tempBounds);
+        if (bitmap != null) {
+            sharedElementBundle.putParcelable(KEY_SNAPSHOT, bitmap);
         }
 
         if (view instanceof ImageView) {
