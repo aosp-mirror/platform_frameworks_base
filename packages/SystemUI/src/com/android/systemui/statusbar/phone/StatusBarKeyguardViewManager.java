@@ -206,12 +206,13 @@ public class StatusBarKeyguardViewManager {
      * Starts the animation before we dismiss Keyguard, i.e. an disappearing animation on the
      * security view of the bouncer.
      *
-     * @param finishRunnable the runnable to be run after the animation finished
+     * @param finishRunnable the runnable to be run after the animation finished, or {@code null} if
+     *                       no action should be run
      */
     public void startPreHideAnimation(Runnable finishRunnable) {
         if (mBouncer.isShowing()) {
             mBouncer.startPreHideAnimation(finishRunnable);
-        } else {
+        } else if (finishRunnable != null) {
             finishRunnable.run();
         }
     }
@@ -361,5 +362,18 @@ public class StatusBarKeyguardViewManager {
 
     public boolean interceptMediaKey(KeyEvent event) {
         return mBouncer.interceptMediaKey(event);
+    }
+
+    public void onActivityDrawn() {
+        if (mPhoneStatusBar.isCollapsing()) {
+            mPhoneStatusBar.addPostCollapseAction(new Runnable() {
+                @Override
+                public void run() {
+                    mViewMediatorCallback.readyForKeyguardDone();
+                }
+            });
+        } else {
+            mViewMediatorCallback.readyForKeyguardDone();
+        }
     }
 }

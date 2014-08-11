@@ -221,12 +221,12 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 !mPreviewInflater.wouldLaunchResolverActivity(intent)) {
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);
         } else {
-            mActivityStarter.startActivity(intent);
+            mActivityStarter.startActivity(intent, false /* dismissShade */);
         }
     }
 
     public void launchPhone() {
-        mActivityStarter.startActivity(PHONE_INTENT);
+        mActivityStarter.startActivity(PHONE_INTENT, false /* dismissShade */);
     }
 
 

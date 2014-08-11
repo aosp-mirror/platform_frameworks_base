@@ -42,6 +42,7 @@ import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -89,6 +90,7 @@ import com.android.systemui.SwipeHelper;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
@@ -130,9 +132,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     public static final int EXPANDED_LEAVE_ALONE = -10000;
     public static final int EXPANDED_FULL_OPEN = -10001;
 
-    /** If true, delays dismissing the Keyguard until the ActivityManager calls back. */
-    protected static final boolean DELAY_DISMISS_TO_ACTIVITY_LAUNCH = false;
-
     protected CommandQueue mCommandQueue;
     protected IStatusBarService mBarService;
     protected H mHandler = createHandler();
@@ -163,6 +162,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected DevicePolicyManager mDevicePolicyManager;
     protected IDreamManager mDreamManager;
     PowerManager mPowerManager;
+    protected StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     protected int mRowMinHeight;
     protected int mRowMaxHeight;
 
@@ -252,27 +252,33 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
             final boolean isActivity = pendingIntent.isActivity();
             if (isActivity) {
+                final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
                 dismissKeyguardThenExecute(new OnDismissAction() {
                     @Override
                     public boolean onDismiss() {
-                        try {
-                            // The intent we are sending is for the application, which
-                            // won't have permission to immediately start an activity after
-                            // the user switches to home.  We know it is safe to do at this
-                            // point, so make sure new activity switches are now allowed.
-                            ActivityManagerNative.getDefault().resumeAppSwitches();
-                        } catch (RemoteException e) {
+                        if (keyguardShowing) {
+                            try {
+                                ActivityManagerNative.getDefault()
+                                        .keyguardWaitingForActivityDrawn();
+                                // The intent we are sending is for the application, which
+                                // won't have permission to immediately start an activity after
+                                // the user switches to home.  We know it is safe to do at this
+                                // point, so make sure new activity switches are now allowed.
+                                ActivityManagerNative.getDefault().resumeAppSwitches();
+                            } catch (RemoteException e) {
+                            }
                         }
 
                         boolean handled = superOnClickHandler(view, pendingIntent, fillInIntent);
+                        overrideActivityPendingAppTransition(keyguardShowing);
 
                         // close the shade if it was open
                         if (handled) {
-                            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
+                            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
                             visibilityChanged(false);
                         }
                         // Wait for activity start.
-                        return handled && DELAY_DISMISS_TO_ACTIVITY_LAUNCH;
+                        return handled;
                     }
                 });
                 return true;
@@ -1064,7 +1070,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                             startAppNotificationSettingsActivity(pkg, appUidF);
                             animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
                             visibilityChanged(false);
-                            return DELAY_DISMISS_TO_ACTIVITY_LAUNCH;
+                            return true;
                         }
                     });
                 }
@@ -1254,51 +1260,71 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         public void onClick(final View v) {
+            final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
             dismissKeyguardThenExecute(new OnDismissAction() {
                 public boolean onDismiss() {
-                    try {
-                        // The intent we are sending is for the application, which
-                        // won't have permission to immediately start an activity after
-                        // the user switches to home.  We know it is safe to do at this
-                        // point, so make sure new activity switches are now allowed.
-                        ActivityManagerNative.getDefault().resumeAppSwitches();
-                    } catch (RemoteException e) {
+                    if (mIsHeadsUp) {
+                        mHeadsUpNotificationView.clear();
                     }
+                    AsyncTask.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (keyguardShowing) {
+                                try {
+                                    ActivityManagerNative.getDefault()
+                                            .keyguardWaitingForActivityDrawn();
+                                    // The intent we are sending is for the application, which
+                                    // won't have permission to immediately start an activity after
+                                    // the user switches to home.  We know it is safe to do at this
+                                    // point, so make sure new activity switches are now allowed.
+                                    ActivityManagerNative.getDefault().resumeAppSwitches();
+                                } catch (RemoteException e) {
+                                }
+                            }
 
-                    boolean sent = false;
-                    if (mIntent != null) {
-                        int[] pos = new int[2];
-                        v.getLocationOnScreen(pos);
-                        Intent overlay = new Intent();
-                        overlay.setSourceBounds(new Rect(pos[0], pos[1],
-                                pos[0] + v.getWidth(), pos[1] + v.getHeight()));
-                        try {
-                            mIntent.send(mContext, 0, overlay);
-                            sent = true;
-                        } catch (PendingIntent.CanceledException e) {
-                            // the stack trace isn't very helpful here.
-                            // Just log the exception message.
-                            Log.w(TAG, "Sending contentIntent failed: " + e);
-                        }
-                    }
+                            if (mIntent != null) {
+                                try {
+                                    mIntent.send();
+                                } catch (PendingIntent.CanceledException e) {
+                                    // the stack trace isn't very helpful here.
+                                    // Just log the exception message.
+                                    Log.w(TAG, "Sending contentIntent failed: " + e);
 
-                    try {
-                        if (mIsHeadsUp) {
-                            mHeadsUpNotificationView.clear();
+                                    // TODO: Dismiss Keyguard.
+                                }
+                                if (mIntent.isActivity()) {
+                                    overrideActivityPendingAppTransition(keyguardShowing);
+                                }
+                            }
+
+                            try {
+                                mBarService.onNotificationClick(mNotificationKey);
+                            } catch (RemoteException ex) {
+                                // system process is dead if we're here.
+                            }
                         }
-                        mBarService.onNotificationClick(mNotificationKey);
-                    } catch (RemoteException ex) {
-                        // system process is dead if we're here.
-                    }
+                    });
 
                     // close the shade if it was open
-                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
+                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
                     visibilityChanged(false);
 
-                    boolean waitForActivityLaunch = sent && mIntent.isActivity();
-                    return waitForActivityLaunch && DELAY_DISMISS_TO_ACTIVITY_LAUNCH;
+                    return mIntent != null && mIntent.isActivity();
                 }
             });
+        }
+    }
+
+    public void animateCollapsePanels(int flags, boolean force) {
+    }
+
+    public void overrideActivityPendingAppTransition(boolean keyguardShowing) {
+        if (keyguardShowing) {
+            try {
+                mWindowManagerService.overridePendingAppTransition(null, 0, 0, null);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Error overriding app transition: " + e);
+            }
         }
     }
 

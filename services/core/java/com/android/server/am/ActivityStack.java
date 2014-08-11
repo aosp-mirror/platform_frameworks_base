@@ -46,7 +46,6 @@ import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
-import com.android.server.am.ActivityStackSupervisor.ActivityDisplay;
 import com.android.server.wm.AppTransition;
 import com.android.server.wm.TaskGroup;
 import com.android.server.wm.WindowManagerService;
@@ -1059,7 +1058,7 @@ final class ActivityStack {
 
         if (next.nowVisible) {
             // We won't get a call to reportActivityVisibleLocked() so dismiss lockscreen now.
-            mStackSupervisor.dismissKeyguard();
+            mStackSupervisor.notifyActivityDrawnForKeyguard();
         }
 
         // schedule an idle timeout in case the app doesn't do it for us.

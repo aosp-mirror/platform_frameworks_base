@@ -133,6 +133,7 @@ public class KeyguardViewMediator extends SystemUI {
     private static final int KEYGUARD_TIMEOUT = 13;
     private static final int DISMISS = 17;
     private static final int START_KEYGUARD_EXIT_ANIM = 18;
+    private static final int ON_ACTIVITY_DRAWN = 19;
 
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -256,6 +257,7 @@ public class KeyguardViewMediator extends SystemUI {
     private boolean mWaitingUntilKeyguardVisible = false;
     private LockPatternUtils mLockPatternUtils;
     private boolean mKeyguardDonePending = false;
+    private boolean mHideAnimationRun = false;
 
     private SoundPool mLockSounds;
     private int mLockSoundId;
@@ -287,6 +289,7 @@ public class KeyguardViewMediator extends SystemUI {
             // ActivityManagerService) will not reconstruct the keyguard if it is already showing.
             synchronized (KeyguardViewMediator.this) {
                 mSwitchingUser = true;
+                mKeyguardDonePending = false;
                 resetStateLocked();
                 adjustStatusBarLocked();
                 // When we switch users we want to bring the new user to the biometric unlock even
@@ -431,11 +434,22 @@ public class KeyguardViewMediator extends SystemUI {
         @Override
         public void keyguardDonePending() {
             mKeyguardDonePending = true;
+            mHideAnimationRun = true;
+            mStatusBarKeyguardViewManager.startPreHideAnimation(null /* finishRunnable */);
         }
 
         @Override
         public void keyguardGone() {
             mKeyguardDisplayManager.hide();
+        }
+
+        @Override
+        public void readyForKeyguardDone() {
+            if (mKeyguardDonePending) {
+                // Somebody has called keyguardDonePending before, which means that we are
+                // authenticated
+                KeyguardViewMediator.this.keyguardDone(true /* authenticated */, true /* wakeUp */);
+            }
         }
     };
 
@@ -545,6 +559,7 @@ public class KeyguardViewMediator extends SystemUI {
             if (DEBUG) Log.d(TAG, "onScreenTurnedOff(" + why + ")");
 
             mKeyguardDonePending = false;
+            mHideAnimationRun = false;
 
             // Lock immediately based on setting if secure (user has a pin/pattern/password).
             // This also "locks" the device when not secure to provide easy access to the
@@ -1067,6 +1082,9 @@ public class KeyguardViewMediator extends SystemUI {
                     StartKeyguardExitAnimParams params = (StartKeyguardExitAnimParams) msg.obj;
                     handleStartKeyguardExitAnimation(params.startTime, params.fadeoutDuration);
                     break;
+                case ON_ACTIVITY_DRAWN:
+                    handleOnActivityDrawn();
+                    break;
             }
         }
     };
@@ -1181,6 +1199,7 @@ public class KeyguardViewMediator extends SystemUI {
             mHiding = false;
             mShowing = true;
             mKeyguardDonePending = false;
+            mHideAnimationRun = false;
             updateActivityLockScreenState();
             adjustStatusBarLocked();
             userActivity();
@@ -1193,6 +1212,20 @@ public class KeyguardViewMediator extends SystemUI {
         mKeyguardDisplayManager.show();
     }
 
+    private final Runnable mKeyguardGoingAwayRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                // Don't actually hide the Keyguard at the moment, wait for window
+                // manager until it tells us it's safe to do so with
+                // startKeyguardExitAnimation.
+                mWM.keyguardGoingAway();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error while calling WindowManager", e);
+            }
+        }
+    };
+
     /**
      * Handle message sent by {@link #hideLocked()}
      * @see #HIDE
@@ -1203,19 +1236,11 @@ public class KeyguardViewMediator extends SystemUI {
 
             mHiding = true;
             if (mShowing && !mOccluded) {
-                mStatusBarKeyguardViewManager.startPreHideAnimation(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            // Don't actually hide the Keyguard at the moment, wait for window
-                            // manager until it tells us it's safe to do so with
-                            // startKeyguardExitAnimation.
-                            mWM.keyguardGoingAway();
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Error while calling WindowManager", e);
-                        }
-                    }
-                });
+                if (!mHideAnimationRun) {
+                    mStatusBarKeyguardViewManager.startPreHideAnimation(mKeyguardGoingAwayRunnable);
+                } else {
+                    mKeyguardGoingAwayRunnable.run();
+                }
             } else {
 
                 // Don't try to rely on WindowManager - if Keyguard wasn't showing, window
@@ -1224,6 +1249,12 @@ public class KeyguardViewMediator extends SystemUI {
                         SystemClock.uptimeMillis() + mHideAnimation.getStartOffset(),
                         mHideAnimation.getDuration());
             }
+        }
+    }
+
+    private void handleOnActivityDrawn() {
+        if (mKeyguardDonePending) {
+            mStatusBarKeyguardViewManager.onActivityDrawn();
         }
     }
 
@@ -1244,6 +1275,7 @@ public class KeyguardViewMediator extends SystemUI {
             mStatusBarKeyguardViewManager.hide(startTime, fadeoutDuration);
             mShowing = false;
             mKeyguardDonePending = false;
+            mHideAnimationRun = false;
             updateActivityLockScreenState();
             adjustStatusBarLocked();
         }
@@ -1357,6 +1389,9 @@ public class KeyguardViewMediator extends SystemUI {
         mHandler.sendMessage(msg);
     }
 
+    public void onActivityDrawn() {
+        mHandler.sendEmptyMessage(ON_ACTIVITY_DRAWN);
+    }
     public ViewMediatorCallback getViewMediatorCallback() {
         return mViewMediatorCallback;
     }

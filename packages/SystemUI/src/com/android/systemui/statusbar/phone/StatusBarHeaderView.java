@@ -483,17 +483,19 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         } else if (v == mAlarmStatus && mNextAlarm != null) {
             PendingIntent showIntent = mNextAlarm.getShowIntent();
             if (showIntent != null && showIntent.isActivity()) {
-                mActivityStarter.startActivity(showIntent.getIntent());
+                mActivityStarter.startActivity(showIntent.getIntent(), true /* dismissShade */);
             }
         }
     }
 
     private void startSettingsActivity() {
-        mActivityStarter.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+        mActivityStarter.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS),
+                true /* dismissShade */);
     }
 
     private void startBatteryActivity() {
-        mActivityStarter.startActivity(new Intent(Intent.ACTION_POWER_USAGE_SUMMARY));
+        mActivityStarter.startActivity(new Intent(Intent.ACTION_POWER_USAGE_SUMMARY),
+                true /* dismissShade */);
     }
 
     public void setQSPanel(QSPanel qsp) {
