@@ -94,6 +94,11 @@ enum ClipSideFlags {
     kClipSide_ConservativeFull = 0x1F
 };
 
+enum VertexBufferDisplayFlags {
+    kVertexBuffer_Offset = 0x1,
+    kVertexBuffer_ShadowAA = 0x2,
+};
+
 /**
  * Defines additional transformation that should be applied by the model view matrix, beyond that of
  * the currentTransform()
@@ -656,17 +661,17 @@ private:
      *
      * @param vertexBuffer The VertexBuffer to be drawn
      * @param paint The paint to render with
-     * @param useOffset Offset the vertexBuffer (used in drawing non-AA lines)
+     * @param flags flags with which to draw
      */
     status_t drawVertexBuffer(float translateX, float translateY, const VertexBuffer& vertexBuffer,
-            const SkPaint* paint, bool useOffset = false);
+            const SkPaint* paint, int flags = 0);
 
     /**
      * Convenience for translating method
      */
     status_t drawVertexBuffer(const VertexBuffer& vertexBuffer,
-            const SkPaint* paint, bool useOffset = false) {
-        return drawVertexBuffer(0.0f, 0.0f, vertexBuffer, paint, useOffset);
+            const SkPaint* paint, int flags = 0) {
+        return drawVertexBuffer(0.0f, 0.0f, vertexBuffer, paint, flags);
     }
 
     /**
@@ -842,7 +847,7 @@ private:
     void setupDrawWithTextureAndColor(bool isAlpha8 = false);
     void setupDrawWithExternalTexture();
     void setupDrawNoTexture();
-    void setupDrawAA();
+    void setupDrawAA(bool useShadowInterp);
     void setupDrawColor(int color, int alpha);
     void setupDrawColor(float r, float g, float b, float a);
     void setupDrawAlpha8Color(int color, int alpha);
