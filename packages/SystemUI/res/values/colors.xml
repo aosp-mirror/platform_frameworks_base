@@ -83,7 +83,7 @@
     <color name="notification_material_background_dimmed_color">#d4ffffff</color>
 
     <!-- The color of the material notification background when low priority -->
-    <color name="notification_material_background_low_priority_color">#ffdcdcdc</color>
+    <color name="notification_material_background_low_priority_color">#ffe0e0e0</color>
 
     <!-- The color of the ripples on the untinted notifications -->
     <color name="notification_ripple_untinted_color">#20000000</color>
