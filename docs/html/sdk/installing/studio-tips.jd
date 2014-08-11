@@ -52,6 +52,12 @@ Plugin User Guide</a>.</p>
 <p>The following topics describe how to perform
 some basic development tasks with Android Studio.</p>
 
+<p class="note"><strong>Note:</strong> This section lists Android Studio keyboard shortcuts
+for the default keymap. To change the default keymap on Windows and Linux, go to
+<strong>File</strong> &gt; <strong>Settings</strong> &gt; <strong>Keymap</strong>. To change
+the default keymap on Mac OS X, go to <strong>Android Studio</strong> &gt;
+<strong>Preferences</strong> &gt; <strong>Keymap</strong>.</p>
+
 <h3>Creating virtual devices</h3>
 
 <p>All the capabilities of the <a href="{@docRoot}tools/devices/managing-avds.html">Android
@@ -75,10 +81,11 @@ for updates.</p>
 <h3>Creating new files</h3>
 
 <p>You can quickly add new code and resource files by clicking the appropriate directory in the
-<strong>Project</strong> pane and pressing CTRL + N (CMD + N, on Mac). Based on the type of
-directory selected, Android Studio offers to create the appropriate file type.</p>
+<strong>Project</strong> pane and pressing ALT + INSERT on Windows and Linux or COMMAND + N on Mac.
+Based on the type of directory selected, Android Studio offers to create the appropriate file
+type.</p>
 
-<p>For example, if you select a layout directory, press CTRL + N, and select
+<p>For example, if you select a layout directory, press ALT + INSERT on Windows, and select
 <strong>Layout resource file</strong>, a dialog opens so you can name the file (you can exclude
 the {@code .xml} suffix) and choose a root view element. The editor then switches to the layout
 design editor so you can begin designing your layout.</p>
