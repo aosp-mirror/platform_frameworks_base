@@ -210,6 +210,8 @@ abstract class HdmiCecLocalDevice {
                 return handleReportPhysicalAddress(message);
             case Constants.MESSAGE_ROUTING_CHANGE:
                 return handleRoutingChange(message);
+            case Constants.MESSAGE_ROUTING_INFORMATION:
+                return handleRoutingInformation(message);
             case Constants.MESSAGE_INITIATE_ARC:
                 return handleInitiateArc(message);
             case Constants.MESSAGE_TERMINATE_ARC:
@@ -328,6 +330,10 @@ abstract class HdmiCecLocalDevice {
     }
 
     protected boolean handleRoutingChange(HdmiCecMessage message) {
+        return false;
+    }
+
+    protected boolean handleRoutingInformation(HdmiCecMessage message) {
         return false;
     }
 
