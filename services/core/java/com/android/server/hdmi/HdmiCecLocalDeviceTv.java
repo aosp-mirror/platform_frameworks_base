@@ -640,7 +640,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private void clearDeviceInfoList() {
         assertRunOnServiceThread();
         for (HdmiDeviceInfo info : mSafeExternalInputs) {
-            invokeDeviceEventListener(info, false);
+            invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE);
         }
         mDeviceInfos.clear();
         updateSafeDeviceInfoList();
@@ -1070,9 +1070,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return false;
     }
 
-    private void invokeDeviceEventListener(HdmiDeviceInfo info, boolean activated) {
+    private void invokeDeviceEventListener(HdmiDeviceInfo info, int status) {
         if (!hideDevicesBehindLegacySwitch(info)) {
-            mService.invokeDeviceEventListeners(info, activated);
+            mService.invokeDeviceEventListeners(info, status);
         }
     }
 
@@ -1144,7 +1144,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             // The addition of TV device itself should not be notified.
             return;
         }
-        invokeDeviceEventListener(info, true);
+        invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
     }
 
     /**
@@ -1158,7 +1158,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         HdmiDeviceInfo info = removeDeviceInfo(address);
 
         mCecMessageCache.flushMessagesFrom(address);
-        invokeDeviceEventListener(info, false);
+        invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE);
     }
 
     @ServiceThreadOnly
@@ -1537,6 +1537,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         // addDeviceInfo replaces old device info with new one if exists.
         addDeviceInfo(newInfo);
 
-        // TODO: notify this update to others.
+        invokeDeviceEventListener(newInfo, HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE);
     }
 }
