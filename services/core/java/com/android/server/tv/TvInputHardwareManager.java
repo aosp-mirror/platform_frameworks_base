@@ -28,6 +28,7 @@ import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.hardware.hdmi.IHdmiInputChangeListener;
+import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
 import android.media.AudioDevicePort;
 import android.media.AudioFormat;
 import android.media.AudioGain;
@@ -93,6 +94,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             new HdmiHotplugEventListener();
     private final IHdmiDeviceEventListener mHdmiDeviceEventListener = new HdmiDeviceEventListener();
     private final IHdmiInputChangeListener mHdmiInputChangeListener = new HdmiInputChangeListener();
+    private final IHdmiSystemAudioModeChangeListener mHdmiSystemAudioModeChangeListener =
+            new HdmiSystemAudioModeChangeListener();
     // TODO: Should handle STANDBY case.
     private final SparseBooleanArray mHdmiStateMap = new SparseBooleanArray();
     private final List<Message> mPendingHdmiDeviceEvents = new LinkedList<>();
@@ -117,6 +120,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 try {
                     mHdmiControlService.addHotplugEventListener(mHdmiHotplugEventListener);
                     mHdmiControlService.addDeviceEventListener(mHdmiDeviceEventListener);
+                    mHdmiControlService.addSystemAudioModeChangeListener(
+                            mHdmiSystemAudioModeChangeListener);
                     mHdmiDeviceList.addAll(mHdmiControlService.getInputDevices());
                     mHdmiControlService.setInputChangeListener(mHdmiInputChangeListener);
                 } catch (RemoteException e) {
@@ -615,7 +620,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 int sinkDevice = mAudioManager.getDevicesForStream(AudioManager.STREAM_MUSIC);
                 for (AudioPort port : devicePorts) {
                     AudioDevicePort devicePort = (AudioDevicePort) port;
-                    if (devicePort.type() == sinkDevice) {
+                    if ((devicePort.type() & sinkDevice) != 0) {
                         return devicePort;
                     }
                 }
@@ -838,6 +843,13 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
         }
 
+        private void handleAudioSinkUpdated() {
+            synchronized (mImplLock) {
+                updateAudioSinkLocked();
+                updateAudioPatchLocked();
+            }
+        }
+
         @Override
         public void overrideAudioSink(int audioType, String audioAddress, int samplingRate,
                 int channelMask, int format) {
@@ -1003,6 +1015,19 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 mContext.startActivity(intent);
             } else {
                 Slog.w(TAG, "onChanged: InputId cannot be found for :" + device);
+            }
+        }
+    }
+
+    private final class HdmiSystemAudioModeChangeListener extends
+        IHdmiSystemAudioModeChangeListener.Stub {
+        @Override
+        public void onStatusChanged(boolean enabled) throws RemoteException {
+            synchronized (mLock) {
+                for (int i = 0; i < mConnections.size(); ++i) {
+                    TvInputHardwareImpl impl = mConnections.valueAt(i).getHardwareImplLocked();
+                    impl.handleAudioSinkUpdated();
+                }
             }
         }
     }
