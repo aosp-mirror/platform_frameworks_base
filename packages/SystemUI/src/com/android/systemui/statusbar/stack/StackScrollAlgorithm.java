@@ -71,6 +71,8 @@ public class StackScrollAlgorithm {
     private int mBottomStackSlowDownLength;
     private int mTopStackSlowDownLength;
     private int mCollapseSecondCardPadding;
+    private boolean mIsSmallScreen;
+    private int mMaxNotificationHeight;
 
     public StackScrollAlgorithm(Context context) {
         initConstants(context);
@@ -106,6 +108,8 @@ public class StackScrollAlgorithm {
                 .getDimensionPixelSize(R.dimen.notification_padding);
         mCollapsedSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_min_height);
+        mMaxNotificationHeight = context.getResources()
+                .getDimensionPixelSize(R.dimen.notification_max_height);
         mTopStackPeekSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.top_stack_peek_amount);
         mBottomStackPeekSize = context.getResources()
@@ -377,14 +381,17 @@ public class StackScrollAlgorithm {
                 // We are in the top Stack
                 updateStateForTopStackChild(algorithmState,
                         numberOfElementsCompletelyIn, i, childHeight, childViewState, scrollOffset);
-                clampYTranslation(childViewState, childHeight);
+                clampPositionToTopStackEnd(childViewState, childHeight);
+
                 // check if we are overlapping with the bottom stack
                 if (childViewState.yTranslation + childHeight + mPaddingBetweenElements
                         >= bottomStackStart && !mIsExpansionChanging && i != 0) {
-                    // TODO: handle overlapping sizes with end stack better
-                    // we just collapse this element
-                    childViewState.height = mCollapsedSize;
+                    // we just collapse this element slightly
+                    int newSize = (int) Math.max(bottomStackStart - mPaddingBetweenElements -
+                            childViewState.yTranslation, mCollapsedSize);
+                    childViewState.height = newSize;
                 }
+                clampPositionToBottomStackStart(childViewState, childViewState.height);
             } else if (nextYPosition >= bottomStackStart) {
                 // Case 2:
                 // We are in the bottom stack.
@@ -489,11 +496,17 @@ public class StackScrollAlgorithm {
         // the offset starting at the transitionPosition of the bottom stack
         float offset = mBottomStackIndentationFunctor.getValue(algorithmState.partialInBottom);
         algorithmState.itemsInBottomStack += algorithmState.partialInBottom;
-        childViewState.yTranslation = transitioningPositionStart + offset - childHeight
+        int newHeight = childHeight;
+        if (childHeight > mCollapsedSize && mIsSmallScreen) {
+            newHeight = (int) Math.max(Math.min(transitioningPositionStart + offset -
+                    mPaddingBetweenElements - currentYPosition, childHeight), mCollapsedSize);
+            childViewState.height = newHeight;
+        }
+        childViewState.yTranslation = transitioningPositionStart + offset - newHeight
                 - mPaddingBetweenElements;
-        
+
         // We want at least to be at the end of the top stack when collapsing
-        clampPositionToTopStackEnd(childViewState, childHeight);
+        clampPositionToTopStackEnd(childViewState, newHeight);
         childViewState.location = StackScrollState.ViewState.LOCATION_MAIN_AREA;
     }
 
@@ -703,6 +716,20 @@ public class StackScrollAlgorithm {
 
     private void updateInnerHeight() {
         mInnerHeight = mLayoutHeight - mTopPadding;
+    }
+
+
+    /**
+     * Update whether the device is very small, i.e. Notifications can be in both the top and the
+     * bottom stack at the same time
+     *
+     * @param panelHeight The normal height of the panel when it's open
+     */
+    public void updateIsSmallScreen(int panelHeight) {
+        mIsSmallScreen = panelHeight <
+                mCollapsedSize  /* top stack */
+                + mBottomStackSlowDownLength + mBottomStackPeekSize /* bottom stack */
+                + mMaxNotificationHeight; /* max notification height */
     }
 
     public void onExpansionStarted(StackScrollState currentState) {
