@@ -145,6 +145,8 @@
     <integer name="recents_animate_task_view_remove_duration">250</integer>
     <!-- The minimum alpha for the dim applied to cards that go deeper into the stack. -->
     <integer name="recents_max_task_stack_view_dim">96</integer>
+    <!-- The number of tasks that RecentsTaskLoader should load. -->
+    <integer name="recents_max_num_tasks_to_load">50</integer>
     <!-- Transposes the recents layout in landscape. -->
     <bool name="recents_transpose_layout_with_orientation">true</bool>
 

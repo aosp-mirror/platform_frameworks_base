@@ -274,6 +274,20 @@ public class Recents extends SystemUI implements RecentsComponent {
     }
 
     @Override
+    public void showNextAffiliatedTask() {
+        if (mUseAlternateRecents) {
+            mAlternateRecents.onShowNextAffiliatedTask();
+        }
+    }
+
+    @Override
+    public void showPrevAffiliatedTask() {
+        if (mUseAlternateRecents) {
+            mAlternateRecents.onShowPrevAffiliatedTask();
+        }
+    }
+
+    @Override
     public void setCallback(Callbacks cb) {
         if (mUseAlternateRecents) {
             mAlternateRecents.setRecentsComponentCallback(cb);

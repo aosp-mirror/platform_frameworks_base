@@ -58,6 +58,9 @@ public class RecentsConfiguration {
     boolean isLandscape;
     boolean transposeRecentsLayoutWithOrientation;
 
+    /** Loading */
+    public int maxNumTasksToLoad;
+
     /** Search bar */
     int searchBarAppWidgetId = -1;
     public int searchBarSpaceHeightPx;
@@ -162,8 +165,7 @@ public class RecentsConfiguration {
         }
 
         // Layout
-        isLandscape = res.getConfiguration().orientation ==
-                Configuration.ORIENTATION_LANDSCAPE;
+        isLandscape = res.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
         transposeRecentsLayoutWithOrientation =
                 res.getBoolean(R.bool.recents_transpose_layout_with_orientation);
 
@@ -179,6 +181,9 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_filter_animate_current_views_duration);
         filteringNewViewsAnimDuration =
                 res.getInteger(R.integer.recents_filter_animate_new_views_duration);
+
+        // Loading
+        maxNumTasksToLoad = res.getInteger(R.integer.recents_max_num_tasks_to_load);
 
         // Search Bar
         searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
