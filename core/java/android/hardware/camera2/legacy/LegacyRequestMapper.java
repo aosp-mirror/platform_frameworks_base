@@ -246,6 +246,19 @@ public class LegacyRequestMapper {
          // TODO: Don't add control.awbLock to availableRequestKeys if it's not supported
         }
 
+        // control.captureIntent
+        {
+            int captureIntent = ParamsUtils.getOrDefault(request,
+                    CONTROL_CAPTURE_INTENT,
+                    /*defaultValue*/CONTROL_CAPTURE_INTENT_PREVIEW);
+
+            captureIntent = filterSupportedCaptureIntent(captureIntent);
+
+            params.setRecordingHint(
+                    captureIntent == CONTROL_CAPTURE_INTENT_VIDEO_RECORD ||
+                    captureIntent == CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT);
+        }
+
         // control.videoStabilizationMode
         {
             Integer stabMode = getIfSupported(request, CONTROL_VIDEO_STABILIZATION_MODE,
@@ -337,6 +350,28 @@ public class LegacyRequestMapper {
                         + testPatternMode + "; only OFF is supported");
             }
         }
+    }
+
+    static int filterSupportedCaptureIntent(int captureIntent) {
+        switch (captureIntent) {
+            case CONTROL_CAPTURE_INTENT_CUSTOM:
+            case CONTROL_CAPTURE_INTENT_PREVIEW:
+            case CONTROL_CAPTURE_INTENT_STILL_CAPTURE:
+            case CONTROL_CAPTURE_INTENT_VIDEO_RECORD:
+            case CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT:
+                break;
+            case CONTROL_CAPTURE_INTENT_ZERO_SHUTTER_LAG:
+            case CONTROL_CAPTURE_INTENT_MANUAL:
+                captureIntent = CONTROL_CAPTURE_INTENT_PREVIEW;
+                Log.w(TAG, "Unsupported control.captureIntent value " + captureIntent
+                        + "; default to PREVIEW");
+            default:
+                captureIntent = CONTROL_CAPTURE_INTENT_PREVIEW;
+                Log.w(TAG, "Unknown control.captureIntent value " + captureIntent
+                        + "; default to PREVIEW");
+        }
+
+        return captureIntent;
     }
 
     private static List<Camera.Area> convertMeteringRegionsToLegacy(
