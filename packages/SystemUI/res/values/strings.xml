@@ -206,7 +206,7 @@
     <!-- Content description of the menu button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_menu">Menu</string>
     <!-- Content description of the recents button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_recent">Recent apps</string>
+    <string name="accessibility_recent">Recent screens</string>
     <!-- Content description of the search button for accessibility. [CHAR LIMIT=NONE] -->
     <string name="accessibility_search_light">Search</string>
     <!-- Content description of the camera button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -391,7 +391,7 @@
     <!-- Content description for the quick settings panel (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_quick_settings">Quick settings.</string>
     <!-- Content description for the recent apps panel (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_desc_recent_apps">Recent apps.</string>
+    <string name="accessibility_desc_recent_apps">Recent screens.</string>
 
     <!-- Content description of the user tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_user">User <xliff:g id="user" example="John Doe">%s</xliff:g>.</string>
