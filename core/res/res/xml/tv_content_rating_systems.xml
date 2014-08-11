@@ -17,9 +17,113 @@
 */
 -->
 <rating-system-definitions>
-    <!-- TV content rating system for AM TV -->
+    <!-- Range specific TV content rating system for AM TV-->
+    <rating-system-definition id="AM_TV_RS"
+        displayName="@string/display_name_amtvrs"
+        description="@string/description_amtvrs"
+        country="AM">
+        <rating-definition id="AM_TV_RS_Y"
+            displayName="@string/display_name_amtvrs_y"
+            description="@string/description_amtvrs_y"
+            ageHint="2" />
+        <rating-definition id="AM_TV_RS_Y7"
+            displayName="@string/display_name_amtvrs_y7"
+            description="@string/description_amtvrs_y7"
+            ageHint="7" />
+        <rating-definition id="AM_TV_RS_GA"
+            displayName="@string/display_name_amtvrs_ga"
+            description="@string/description_amtvrs_ga"
+            ageHint="0" />
+        <rating-definition id="AM_TV_RS_TW"
+            displayName="@string/display_name_amtvrs_tw"
+            description="@string/description_amtvrs_tw"
+            ageHint="9" />
+        <rating-definition id="AM_TV_RS_T"
+            displayName="@string/display_name_amtvrs_t"
+            description="@string/description_amtvrs_t"
+            ageHint="12" />
+        <rating-definition id="AM_TV_RS_A"
+            displayName="@string/display_name_amtvrs_a"
+            description="@string/description_amtvrs_a"
+            ageHint="18" />
+        <order>
+             <rating id="AM_TV_RS_Y" />
+             <rating id="AM_TV_RS_Y7" />
+        </order>
+        <order>
+            <rating id="AM_TV_RS_GA" />
+            <rating id="AM_TV_RS_TW" />
+            <rating id="AM_TV_RS_T" />
+            <rating id="AM_TV_RS_A" />
+        </order>
+    </rating-system-definition>
+
+    <!-- Age specific TV content rating system for AM TV-->
+    <rating-system-definition id="AM_TV_AS"
+        displayName="@string/display_name_amtvas"
+        description="@string/description_amtvas"
+        country="AM">
+        <rating-definition id="AM_TV_AS_EC"
+            displayName="@string/display_name_amtvas_ec"
+            description="@string/description_amtvas_ec"
+            ageHint="2" />
+        <rating-definition id="AM_TV_AS_E"
+            displayName="@string/display_name_amtvas_e"
+            description="@string/description_amtvas_e"
+            ageHint="5" />
+        <rating-definition id="AM_TV_AS_E9"
+            displayName="@string/display_name_amtvas_e9"
+            description="@string/description_amtvas_e9"
+            ageHint="9" />
+        <rating-definition id="AM_TV_AS_T"
+            displayName="@string/display_name_amtvas_t"
+            description="@string/description_amtvas_t"
+            ageHint="12" />
+        <rating-definition id="AM_TV_AS_M"
+            displayName="@string/display_name_amtvas_m"
+            description="@string/description_amtvas_m"
+            ageHint="16" />
+        <rating-definition id="AM_TV_AS_AO"
+            displayName="@string/display_name_amtvas_ao"
+            description="@string/description_amtvas_ao"
+            ageHint="17" />
+        <order>
+            <rating id="AM_TV_AS_EC" />
+            <rating id="AM_TV_AS_E" />
+            <rating id="AM_TV_AS_E9" />
+            <rating id="AM_TV_AS_T" />
+            <rating id="AM_TV_AS_M" />
+            <rating id="AM_TV_AS_AO" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for AR TV -->
+    <rating-system-definition id="AR_TV"
+        displayName="@string/display_name_artv"
+        country="AR">
+        <rating-definition id="AR_TV_ALL"
+            displayName="@string/display_name_artv_all"
+            description="@string/description_artv_all"
+            ageHint="0" />
+        <rating-definition id="AR_TV_13"
+            displayName="@string/display_name_artv_13"
+            description="@string/description_artv_13"
+            ageHint="13" />
+        <rating-definition id="AR_TV_16"
+            displayName="@string/display_name_artv_16"
+            description="@string/description_artv_16"
+            ageHint="16" />
+        <rating-definition id="AR_TV_18"
+            displayName="@string/display_name_artv_18"
+            description="@string/description_artv_18"
+            ageHint="18" />
+        <order>
+            <rating id="AR_TV_ALL" />
+            <rating id="AR_TV_13" />
+            <rating id="AR_TV_16" />
+            <rating id="AR_TV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for AU TV -->
     <rating-system-definition id="AU_TV"
@@ -35,7 +139,7 @@
             ageHint="0" />
         <rating-definition id="AU_TV_PG"
             displayName="@string/display_name_autv_pg"
-            description="@string/description_autv_g"
+            description="@string/description_autv_pg"
             ageHint="15" />
         <rating-definition id="AU_TV_M"
             displayName="@string/display_name_autv_m"
@@ -64,6 +168,37 @@
     </rating-system-definition>
 
     <!-- TV content rating system for BG TV -->
+    <rating-system-definition id="BG_TV"
+        displayName="@string/display_name_bgtv"
+        country="BG">
+        <rating-definition id="BG_TV_A"
+            displayName="@string/display_name_bgtv_a"
+            description="@string/description_bgtv_a"
+            ageHint="0" />
+        <rating-definition id="BG_TV_B"
+            displayName="@string/display_name_bgtv_b"
+            description="@string/description_bgtv_b"
+            ageHint="0" />
+        <rating-definition id="BG_TV_C"
+            displayName="@string/display_name_bgtv_c"
+            description="@string/description_bgtv_c"
+            ageHint="12" />
+        <rating-definition id="BG_TV_D"
+            displayName="@string/display_name_bgtv_d"
+            description="@string/description_bgtv_d"
+            ageHint="16" />
+        <rating-definition id="BG_TV_X"
+            displayName="@string/display_name_bgtv_x"
+            description="@string/description_bgtv_x"
+            ageHint="18" />
+        <order>
+            <rating id="BG_TV_A" />
+            <rating id="BG_TV_B" />
+            <rating id="BG_TV_C" />
+            <rating id="BG_TV_D" />
+            <rating id="BG_TV_X" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for BR TV -->
     <rating-system-definition id="BR_TV"
@@ -104,12 +239,111 @@
     </rating-system-definition>
 
     <!-- TV content rating system for CA TV -->
+    <rating-system-definition id="CA_TV"
+        displayName="@string/display_name_catv"
+        country="CA">
+        <rating-definition id="CA_TV_EXEMPT"
+            displayName="@string/display_name_catv_exempt"
+            description="@string/description_catv_exempt"
+            ageHint="0" />
+        <rating-definition id="CA_TV_C"
+            displayName="@string/display_name_catv_c"
+            description="@string/description_catv_c"
+            ageHint="0" />
+        <rating-definition id="CA_TV_C8"
+            displayName="@string/display_name_catv_c8"
+            description="@string/description_catv_c8"
+            ageHint="8" />
+        <rating-definition id="CA_TV_G"
+            displayName="@string/display_name_catv_g"
+            description="@string/description_catv_g"
+            ageHint="0" />
+        <rating-definition id="CA_TV_PG"
+            displayName="@string/display_name_catv_pg"
+            description="@string/description_catv_pg"
+            ageHint="14" />
+        <rating-definition id="CA_TV_14"
+            displayName="@string/display_name_catv_14"
+            description="@string/description_catv_14"
+            ageHint="14" />
+        <rating-definition id="CA_TV_18"
+            displayName="@string/display_name_catv_18"
+            description="@string/description_catv_18"
+            ageHint="18" />
+        <order>
+            <rating id="CA_TV_C" />
+            <rating id="CA_TV_C8" />
+        </order>
+        <order>
+            <rating id="CA_TV_G" />
+            <rating id="CA_TV_PG" />
+            <rating id="CA_TV_14" />
+            <rating id="CA_TV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for CH TV -->
+    <rating-system-definition id="CH_TV"
+        displayName="@string/display_name_chtv"
+        country="CH">
+        <rating-definition id="CH_TV_ALL"
+            displayName="@string/display_name_chtv_all"
+            description="@string/description_chtv_all"
+            ageHint="0" />
+        <rating-definition id="CH_TV_RED"
+            displayName="@string/display_name_chtv_red"
+            description="@string/description_chtv_red"
+            ageHint="18" />
+        <order>
+            <rating id="CH_TV_ALL" />
+            <rating id="CH_TV_RED" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for CL TV -->
-
-    <!-- TV content rating system for CO TV -->
+    <rating-system-definition id="CL_TV"
+        displayName="@string/display_name_cltv"
+        country="CL">
+        <rating-definition id="CL_TV_I"
+            displayName="@string/display_name_cltv_i"
+            description="@string/description_cltv_i"
+            ageHint="0" />
+        <rating-definition id="CL_TV_I7"
+            displayName="@string/display_name_cltv_i7"
+            description="@string/description_cltv_i7"
+            ageHint="7" />
+        <rating-definition id="CL_TV_I10"
+            displayName="@string/display_name_cltv_i10"
+            description="@string/description_cltv_i10"
+            ageHint="10" />
+        <rating-definition id="CL_TV_I12"
+            displayName="@string/display_name_cltv_i12"
+            description="@string/description_cltv_i12"
+            ageHint="12" />
+        <rating-definition id="CL_TV_F"
+            displayName="@string/display_name_cltv_f"
+            description="@string/description_cltv_f"
+            ageHint="0" />
+        <rating-definition id="CL_TV_R"
+            displayName="@string/display_name_cltv_r"
+            description="@string/description_cltv_r"
+            ageHint="12" />
+        <rating-definition id="CL_TV_A"
+            displayName="@string/display_name_cltv_a"
+            description="@string/description_cltv_a"
+            ageHint="18" />
+        <order>
+            <rating id="CL_TV_I" />
+            <rating id="CL_TV_I7" />
+            <rating id="CL_TV_I10" />
+            <rating id="CL_TV_I12" />
+        </order>
+        <order>
+            <rating id="CL_TV_F" />
+            <rating id="CL_TV_R" />
+            <rating id="CL_TV_A" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for DE TV -->
     <rating-system-definition id="DE_TV"
@@ -140,14 +374,40 @@
     </rating-system-definition>
 
     <!-- TV content rating system for DK TV -->
+    <rating-system-definition id="DK_TV"
+        displayName="@string/display_name_dktv"
+        country="DK">
+        <rating-definition id="DK_TV_G"
+            displayName="@string/display_name_dktv_g"
+            description="@string/description_dktv_g"
+            ageHint="0" />
+        <rating-definition id="DK_TV_Y"
+            displayName="@string/display_name_dktv_y"
+            description="@string/description_dktv_y"
+            ageHint="13" />
+        <rating-definition id="DK_TV_R"
+            displayName="@string/display_name_dktv_r"
+            description="@string/description_dktv_r"
+            ageHint="18" />
+        <rating-definition id="DK_TV_B"
+            displayName="@string/display_name_dktv_b"
+            description="@string/description_dktv_b"
+            ageHint="18" />
+        <order>
+            <rating id="DK_TV_G" />
+            <rating id="DK_TV_Y" />
+            <rating id="DK_TV_R" />
+            <rating id="DK_TV_B" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for ES TV -->
     <rating-system-definition id="ES_TV"
         displayName="@string/display_name_estv"
         country="ES">
-        <rating-definition id="ES_TV_ALL"
-            displayName="@string/display_name_estv_all"
-            description="@string/description_estv_all"
+        <rating-definition id="ES_TV_TP"
+            displayName="@string/display_name_estv_tp"
+            description="@string/description_estv_tp"
             ageHint="0" />
         <rating-definition id="ES_TV_I"
             displayName="@string/display_name_estv_i"
@@ -157,23 +417,65 @@
             displayName="@string/display_name_estv_7"
             description="@string/description_estv_7"
             ageHint="7" />
-        <rating-definition id="ES_TV_13"
-            displayName="@string/display_name_estv_13"
-            description="@string/description_estv_13"
-            ageHint="13" />
+        <rating-definition id="ES_TV_7I"
+            displayName="@string/display_name_estv_7i"
+            description="@string/description_estv_7i"
+            ageHint="7" />
+        <rating-definition id="ES_TV_12"
+            displayName="@string/display_name_estv_12"
+            description="@string/description_estv_12"
+            ageHint="12" />
+        <rating-definition id="ES_TV_16"
+            displayName="@string/display_name_estv_16"
+            description="@string/description_estv_16"
+            ageHint="16" />
         <rating-definition id="ES_TV_18"
             displayName="@string/display_name_estv_18"
             description="@string/description_estv_18"
             ageHint="18" />
         <order>
-            <rating id="ES_TV_ALL" />
+            <rating id="ES_TV_TP" />
+            <rating id="ES_TV_I" />
             <rating id="ES_TV_7" />
-            <rating id="ES_TV_13" />
+            <rating id="ES_TV_7I" />
+            <rating id="ES_TV_12" />
+            <rating id="ES_TV_16" />
             <rating id="ES_TV_18" />
         </order>
     </rating-system-definition>
 
     <!-- TV content rating system for FI TV -->
+    <rating-system-definition id="FI_TV"
+        displayName="@string/display_name_fitv"
+        country="FI">
+        <rating-definition id="FI_TV_S"
+            displayName="@string/display_name_fitv_s"
+            description="@string/description_fitv_s"
+            ageHint="0" />
+        <rating-definition id="FI_TV_K7"
+            displayName="@string/display_name_fitv_k7"
+            description="@string/description_fitv_k7"
+            ageHint="7" />
+        <rating-definition id="FI_TV_K12"
+            displayName="@string/display_name_fitv_k12"
+            description="@string/description_fitv_k12"
+            ageHint="12" />
+        <rating-definition id="FI_TV_K16"
+            displayName="@string/display_name_fitv_k16"
+            description="@string/description_fitv_k16"
+            ageHint="16" />
+        <rating-definition id="FI_TV_K18"
+            displayName="@string/display_name_fitv_k18"
+            description="@string/description_fitv_k18"
+            ageHint="18" />
+        <order>
+            <rating id="FI_TV_S" />
+            <rating id="FI_TV_K7" />
+            <rating id="FI_TV_K12" />
+            <rating id="FI_TV_K16" />
+            <rating id="FI_TV_K18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for FR TV -->
     <rating-system-definition id="FR_TV"
@@ -186,23 +488,19 @@
         <rating-definition id="FR_TV_10"
             displayName="@string/display_name_frtv_10"
             description="@string/description_frtv_10"
-            ageHint="10">
-        </rating-definition>
+            ageHint="10" />
         <rating-definition id="FR_TV_12"
             displayName="@string/display_name_frtv_12"
             description="@string/description_frtv_12"
-            ageHint="12">
-        </rating-definition>
+            ageHint="12" />
         <rating-definition id="FR_TV_16"
             displayName="@string/display_name_frtv_16"
             description="@string/description_frtv_16"
-            ageHint="16">
-        </rating-definition>
+            ageHint="16" />
         <rating-definition id="FR_TV_18"
             displayName="@string/display_name_frtv_18"
             description="@string/description_frtv_18"
-            ageHint="18">
-        </rating-definition>
+            ageHint="18" />
         <order>
             <rating id="FR_TV_ALL" />
             <rating id="FR_TV_10" />
@@ -213,28 +511,291 @@
     </rating-system-definition>
 
     <!-- TV content rating system for GR TV -->
+    <rating-system-definition id="GR_TV"
+        displayName="@string/display_name_grtv"
+        country="GR">
+        <rating-definition id="GR_TV_all"
+            displayName="@string/display_name_grtv_all"
+            description="@string/description_grtv_all"
+            ageHint="0" />
+        <rating-definition id="GR_TV_10"
+            displayName="@string/display_name_grtv_10"
+            description="@string/description_grtv_10"
+            ageHint="10" />
+        <rating-definition id="GR_TV_12"
+            displayName="@string/display_name_grtv_12"
+            description="@string/description_grtv_12"
+            ageHint="12" />
+        <rating-definition id="GR_TV_15"
+            displayName="@string/display_name_grtv_15"
+            description="@string/description_grtv_15"
+            ageHint="15" />
+        <rating-definition id="GR_TV_18"
+            displayName="@string/display_name_grtv_18"
+            description="@string/description_grtv_18"
+            ageHint="18" />
+        <order>
+            <rating id="GR_TV_all" />
+            <rating id="GR_TV_10" />
+            <rating id="GR_TV_12" />
+            <rating id="GR_TV_15" />
+            <rating id="GR_TV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for HK TV -->
+    <rating-system-definition id="HK_TV"
+        displayName="@string/display_name_hktv"
+        country="HK">
+        <rating-definition id="HK_TV_G"
+            displayName="@string/display_name_hktv_g"
+            description="@string/description_hktv_g"
+            ageHint="0" />
+        <rating-definition id="HK_TV_PG"
+            displayName="@string/display_name_hktv_pg"
+            description="@string/description_hktv_pg"
+            ageHint="14" />
+        <rating-definition id="HK_TV_M"
+            displayName="@string/display_name_hktv_m"
+            description="@string/description_hktv_m"
+            ageHint="18" />
+        <order>
+            <rating id="HK_TV_G" />
+            <rating id="HK_TV_PG" />
+            <rating id="HK_TV_M" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for HU TV -->
+    <rating-system-definition id="HU_TV"
+        displayName="@string/display_name_hutv"
+        country="HU">
+        <rating-definition id="HU_TV_U"
+            displayName="@string/display_name_hutv_u"
+            description="@string/description_hutv_u"
+            ageHint="0" />
+        <rating-definition id="HU_TV_CF"
+            displayName="@string/display_name_hutv_cf"
+            description="@string/description_hutv_cf"
+            ageHint="0" />
+        <rating-definition id="HU_TV_6"
+            displayName="@string/display_name_hutv_6"
+            description="@string/description_hutv_6"
+            ageHint="6" />
+        <rating-definition id="HU_TV_12"
+            displayName="@string/display_name_hutv_12"
+            description="@string/description_hutv_12"
+            ageHint="12" />
+        <rating-definition id="HU_TV_16"
+            displayName="@string/display_name_hutv_16"
+            description="@string/description_hutv_16"
+            ageHint="16" />
+        <rating-definition id="HU_TV_18"
+            displayName="@string/display_name_hutv_18"
+            description="@string/description_hutv_18"
+            ageHint="18" />
+        <order>
+            <rating id="HU_TV_U" />
+            <rating id="HU_TV_CF" />
+            <rating id="HU_TV_6" />
+            <rating id="HU_TV_12" />
+            <rating id="HU_TV_16" />
+            <rating id="HU_TV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for ID TV -->
+    <rating-system-definition id="ID_TV"
+        displayName="@string/display_name_idtv"
+        country="ID">
+        <rating-definition id="ID_TV_P"
+            displayName="@string/display_name_idtv_p"
+            description="@string/description_idtv_p"
+            ageHint="2" />
+        <rating-definition id="ID_TV_A"
+            displayName="@string/display_name_idtv_a"
+            description="@string/description_idtv_a"
+            ageHint="7" />
+        <rating-definition id="ID_TV_A_BO"
+            displayName="@string/display_name_idtv_a_bo"
+            description="@string/description_idtv_a_bo"
+            ageHint="10" />
+        <rating-definition id="ID_TV_SU"
+            displayName="@string/display_name_idtv_su"
+            description="@string/description_idtv_su"
+            ageHint="0" />
+        <rating-definition id="ID_TV_BO"
+            displayName="@string/display_name_idtv_bo"
+            description="@string/description_idtv_bo"
+            ageHint="5" />
+        <rating-definition id="ID_TV_R"
+            displayName="@string/display_name_idtv_r"
+            description="@string/description_idtv_r"
+            ageHint="13" />
+        <rating-definition id="ID_TV_R_BO"
+            displayName="@string/display_name_idtv_r_bo"
+            description="@string/description_idtv_r_bo"
+            ageHint="18" />
+        <rating-definition id="ID_TV_D"
+            displayName="@string/display_name_idtv_d"
+            description="@string/description_idtv_d"
+            ageHint="18" />
+        <order>
+            <rating id="ID_TV_P" />
+            <rating id="ID_TV_A" />
+            <rating id="ID_TV_A_BO" />
+        </order>
+        <order>
+            <rating id="ID_TV_SU" />
+            <rating id="ID_TV_BO" />
+            <rating id="ID_TV_R" />
+            <rating id="ID_TV_R_BO" />
+            <rating id="ID_TV_D" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for IE TV -->
+    <rating-system-definition id="IE_TV"
+        displayName="@string/display_name_ietv"
+        country="IE">
+        <rating-definition id="IE_TV_GA"
+            displayName="@string/display_name_ietv_ga"
+            description="@string/description_ietv_ga"
+            ageHint="0" />
+        <rating-definition id="IE_TV_Ch"
+            displayName="@string/display_name_ietv_ch"
+            description="@string/description_ietv_ch"
+            ageHint="10" />
+        <rating-definition id="IE_TV_YA"
+            displayName="@string/display_name_ietv_ya"
+            description="@string/description_ietv_ya"
+            ageHint="13" />
+        <rating-definition id="IE_TV_PS"
+            displayName="@string/display_name_ietv_ps"
+            description="@string/description_ietv_ps"
+            ageHint="18" />
+        <rating-definition id="IE_TV_MA"
+            displayName="@string/display_name_ietv_ma"
+            description="@string/description_ietv_ma"
+            ageHint="21" />
+        <order>
+            <rating id="IE_TV_GA" />
+            <rating id="IE_TV_Ch" />
+            <rating id="IE_TV_YA" />
+            <rating id="IE_TV_PS" />
+            <rating id="IE_TV_MA" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for IL TV -->
+    <rating-system-definition id="IL_TV"
+        displayName="@string/display_name_iltv"
+        country="IL">
+        <rating-definition id="IL_TV_G"
+            displayName="@string/display_name_iltv_g"
+            description="@string/description_iltv_g"
+            ageHint="0" />
+        <rating-definition id="IL_TV_12"
+            displayName="@string/display_name_iltv_12"
+            description="@string/description_iltv_12"
+            ageHint="12" />
+        <rating-definition id="IL_TV_15"
+            displayName="@string/display_name_iltv_15"
+            description="@string/description_iltv_15"
+            ageHint="15" />
+        <rating-definition id="IL_TV_18"
+            displayName="@string/display_name_iltv_18"
+            description="@string/description_iltv_18"
+            ageHint="18" />
+        <rating-definition id="IL_TV_E"
+            displayName="@string/display_name_iltv_e"
+            description="@string/description_iltv_e"
+            ageHint="0" />
+        <order>
+            <rating id="IL_TV_G" />
+            <rating id="IL_TV_12" />
+            <rating id="IL_TV_15" />
+            <rating id="IL_TV_18" />
+            <rating id="IL_TV_E" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for IN TV -->
+    <rating-system-definition id="IN_TV"
+        displayName="@string/display_name_intv"
+        country="IN">
+        <rating-definition id="IN_TV_U"
+            displayName="@string/display_name_intv_u"
+            description="@string/description_intv_u"
+            ageHint="0" />
+        <rating-definition id="IN_TV_U/A"
+            displayName="@string/display_name_intv_u/a"
+            description="@string/description_intv_u/a"
+            ageHint="12" />
+        <rating-definition id="IN_TV_A"
+            displayName="@string/display_name_intv_a"
+            description="@string/description_intv_a"
+            ageHint="18" />
+        <rating-definition id="IN_TV_S"
+            displayName="@string/display_name_intv_s"
+            description="@string/description_intv_s"
+            ageHint="0" />
+        <order>
+            <rating id="IN_TV_U" />
+            <rating id="IN_TV_U/A" />
+            <rating id="IN_TV_A" />
+            <rating id="IN_TV_S" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for IS TV -->
-
-    <!-- TV content rating system for KH TV -->
+    <rating-system-definition id="IS_TV"
+        displayName="@string/display_name_istv"
+        country="IS">
+        <rating-definition id="IS_TV_L"
+            displayName="@string/display_name_istv_l"
+            description="@string/description_istv_l"
+            ageHint="0" />
+        <rating-definition id="IS_TV_7"
+            displayName="@string/display_name_istv_7"
+            description="@string/description_istv_7"
+            ageHint="7" />
+        <rating-definition id="IS_TV_10"
+            displayName="@string/display_name_istv_10"
+            description="@string/description_istv_10"
+            ageHint="10" />
+        <rating-definition id="IS_TV_12"
+            displayName="@string/display_name_istv_12"
+            description="@string/description_istv_12"
+            ageHint="12" />
+        <rating-definition id="IS_TV_14"
+            displayName="@string/display_name_istv_14"
+            description="@string/description_istv_14"
+            ageHint="14" />
+        <rating-definition id="IS_TV_16"
+            displayName="@string/display_name_istv_16"
+            description="@string/description_istv_16"
+            ageHint="16" />
+        <rating-definition id="IS_TV_18"
+            displayName="@string/display_name_istv_18"
+            description="@string/description_istv_18"
+            ageHint="18" />
+        <order>
+            <rating id="IS_TV_L" />
+            <rating id="IS_TV_7" />
+            <rating id="IS_TV_10" />
+            <rating id="IS_TV_12" />
+            <rating id="IS_TV_14" />
+            <rating id="IS_TV_16" />
+            <rating id="IS_TV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for KR TV -->
     <rating-system-definition id="KR_TV"
         displayName="@string/display_name_krtv"
         country="KR">
-        <rating-definition id="KR_TV_ALL"
+        <rating-definition id="KR_TV_All"
             displayName="@string/display_name_krtv_all"
             description="@string/description_krtv_all"
             ageHint="0" />
@@ -255,7 +816,7 @@
             description="@string/description_krtv_19"
             ageHint="19" />
         <order>
-            <rating id="KR_TV_ALL" />
+            <rating id="KR_TV_All" />
             <rating id="KR_TV_7" />
             <rating id="KR_TV_12" />
             <rating id="KR_TV_15" />
@@ -264,10 +825,118 @@
     </rating-system-definition>
 
     <!-- TV content rating system for MV TV -->
+    <rating-system-definition id="MV_TV"
+        displayName="@string/display_name_mvtv"
+        country="MV">
+        <rating-definition id="MV_TV_Y"
+            displayName="@string/display_name_mvtv_y"
+            description="@string/description_mvtv_y"
+            ageHint="0" />
+        <rating-definition id="MV_TV_G"
+            displayName="@string/display_name_mvtv_g"
+            description="@string/description_mvtv_g"
+            ageHint="0" />
+        <rating-definition id="MV_TV_PG"
+            displayName="@string/display_name_mvtv_pg"
+            description="@string/description_mvtv_pg"
+            ageHint="0" />
+        <rating-definition id="MV_TV_PG-12"
+            displayName="@string/display_name_mvtv_pg-12"
+            description="@string/description_mvtv_pg-12"
+            ageHint="12" />
+        <rating-definition id="MV_TV_12"
+            displayName="@string/display_name_mvtv_12"
+            description="@string/description_mvtv_12"
+            ageHint="12" />
+        <rating-definition id="MV_TV_15"
+            displayName="@string/display_name_mvtv_15"
+            description="@string/description_mvtv_15"
+            ageHint="15" />
+        <rating-definition id="MV_TV_18"
+            displayName="@string/display_name_mvtv_18"
+            description="@string/description_mvtv_18"
+            ageHint="18" />
+        <rating-definition id="MV_TV_21"
+            displayName="@string/display_name_mvtv_21"
+            description="@string/description_mvtv_21"
+            ageHint="21" />
+        <rating-definition id="MV_TV_X"
+            displayName="@string/display_name_mvtv_x"
+            description="@string/description_mvtv_x"
+            ageHint="25" />
+        <order>
+            <rating id="MV_TV_Y" />
+            <rating id="MV_TV_G" />
+            <rating id="MV_TV_PG" />
+            <rating id="MV_TV_PG-12" />
+            <rating id="MV_TV_12" />
+            <rating id="MV_TV_15" />
+            <rating id="MV_TV_18" />
+            <rating id="MV_TV_21" />
+            <rating id="MV_TV_X" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for MX TV -->
+    <rating-system-definition id="MX_TV"
+        displayName="@string/display_name_mxtv"
+        country="MX">
+        <rating-definition id="MX_TV_A"
+            displayName="@string/display_name_mxtv_a"
+            description="@string/description_mxtv_a"
+            ageHint="7" />
+        <rating-definition id="MX_TV_B"
+            displayName="@string/display_name_mxtv_b"
+            description="@string/description_mxtv_b"
+            ageHint="12" />
+        <rating-definition id="MX_TV_B-15"
+            displayName="@string/display_name_mxtv_b-15"
+            description="@string/description_mxtv_b-15"
+            ageHint="15" />
+        <rating-definition id="MX_TV_C"
+            displayName="@string/display_name_mxtv_c"
+            description="@string/description_mxtv_c"
+            ageHint="18" />
+        <rating-definition id="MX_TV_D"
+            displayName="@string/display_name_mxtv_d"
+            description="@string/description_mxtv_d"
+            ageHint="21" />
+        <rating-definition id="MX_TV_RC"
+            displayName="@string/display_name_mxtv_rc"
+            description="@string/description_mxtv_rc"
+            ageHint="0" />
+        <order>
+            <rating id="MX_TV_A" />
+            <rating id="MX_TV_B" />
+            <rating id="MX_TV_B-15" />
+            <rating id="MX_TV_C" />
+            <rating id="MX_TV_D" />
+            <rating id="MX_TV_RC" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for MY TV -->
+    <rating-system-definition id="MY_TV"
+        displayName="@string/display_name_mytv"
+        country="MY">
+        <rating-definition id="MY_TV_U"
+            displayName="@string/display_name_mytv_u"
+            description="@string/description_mytv_u"
+            ageHint="0" />
+        <rating-definition id="MY_TV_P13"
+            displayName="@string/display_name_mytv_p13"
+            description="@string/description_mytv_p13"
+            ageHint="13" />
+        <rating-definition id="MY_TV_18"
+            displayName="@string/display_name_mytv_18"
+            description="@string/description_mytv_18"
+            ageHint="18" />
+        <order>
+            <rating id="MY_TV_U" />
+            <rating id="MY_TV_P13" />
+            <rating id="MY_TV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for NL TV -->
     <rating-system-definition id="NL_TV"
@@ -347,7 +1016,6 @@
             <sub-rating id="NL_TV_DA" />
             <sub-rating id="NL_TV_L" />
         </rating-definition>
-
         <order>
             <rating id="NL_TV_AL" />
             <rating id="NL_TV_6" />
@@ -357,33 +1025,528 @@
         </order>
     </rating-system-definition>
 
-    <!-- TV content rating system for NZ TV -->
+    <!-- TV content rating system for NZ Free-to-Air TV -->
+    <rating-system-definition id="NZ_FTV"
+        displayName="@string/display_name_nzftv"
+        description="@string/description_nzftv"
+        country="NZ">
+        <rating-definition id="NZ_FTV_G"
+            displayName="@string/display_name_nzftv_g"
+            description="@string/description_nzftv_g"
+            ageHint="0" />
+        <rating-definition id="NZ_FTV_PGR"
+            displayName="@string/display_name_nzftv_pgr"
+            description="@string/description_nzftv_pgr"
+            ageHint="14" />
+        <rating-definition id="NZ_FTV_AO"
+            displayName="@string/display_name_nzftv_ao"
+            description="@string/description_nzftv_ao"
+            ageHint="18" />
+        <order>
+            <rating id="NZ_FTV_G" />
+            <rating id="NZ_FTV_PGR" />
+            <rating id="NZ_FTV_AO" />
+        </order>
+    </rating-system-definition>
+
+    <!-- TV content rating system for NZ Pay Television -->
+    <rating-system-definition id="NZ_PTV"
+        displayName="@string/display_name_nzptv"
+        description="@string/description_nzptv"
+        country="NZ">
+        <sub-rating-definition id="NZ_PTV_C"
+            displayName="@string/display_name_nzptv_c"
+            description="@string/description_nzptv_c" />
+        <sub-rating-definition id="NZ_PTV_V"
+            displayName="@string/display_name_nzptv_v"
+            description="@string/description_nzptv_v" />
+        <sub-rating-definition id="NZ_PTV_L"
+            displayName="@string/display_name_nzptv_l"
+            description="@string/description_nzptv_l" />
+        <sub-rating-definition id="NZ_PTV_S"
+            displayName="@string/display_name_nzptv_s"
+            description="@string/description_nzptv_s" />
+        <rating-definition id="NZ_PTV_G"
+            displayName="@string/display_name_nzptv_g"
+            description="@string/description_nzptv_g"
+            ageHint="0" />
+        <rating-definition id="NZ_PTV_PG"
+            displayName="@string/display_name_nzptv_pg"
+            description="@string/description_nzptv_pg"
+            ageHint="10">
+            <sub-rating id="NZ_PTV_C" />
+            <sub-rating id="NZ_PTV_V" />
+            <sub-rating id="NZ_PTV_L" />
+            <sub-rating id="NZ_PTV_S" />
+        </rating-definition>
+        <rating-definition id="NZ_PTV_M"
+            displayName="@string/display_name_nzptv_m"
+            description="@string/description_nzptv_m"
+            ageHint="13">
+            <sub-rating id="NZ_PTV_C" />
+            <sub-rating id="NZ_PTV_V" />
+            <sub-rating id="NZ_PTV_L" />
+            <sub-rating id="NZ_PTV_S" />
+        </rating-definition>
+        <rating-definition id="NZ_PTV_16"
+            displayName="@string/display_name_nzptv_16"
+            description="@string/description_nzptv_16"
+            ageHint="16">
+            <sub-rating id="NZ_PTV_C" />
+            <sub-rating id="NZ_PTV_V" />
+            <sub-rating id="NZ_PTV_L" />
+            <sub-rating id="NZ_PTV_S" />
+        </rating-definition>
+        <rating-definition id="NZ_PTV_18"
+            displayName="@string/display_name_nzptv_18"
+            description="@string/description_nzptv_18"
+            ageHint="18">
+            <sub-rating id="NZ_PTV_C" />
+            <sub-rating id="NZ_PTV_V" />
+            <sub-rating id="NZ_PTV_L" />
+            <sub-rating id="NZ_PTV_S" />
+        </rating-definition>
+        <order>
+            <rating id="NZ_PTV_G" />
+            <rating id="NZ_PTV_PG" />
+            <rating id="NZ_PTV_M" />
+            <rating id="NZ_PTV_16" />
+            <rating id="NZ_PTV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for PE TV -->
+    <rating-system-definition id="PE_TV"
+        displayName="@string/display_name_petv"
+        description="@string/description_petv"
+        country="PE">
+        <rating-definition id="PE_TV_A"
+            displayName="@string/display_name_petv_a"
+            description="@string/description_petv_a"
+            ageHint="0" />
+        <rating-definition id="PE_TV_14"
+            displayName="@string/display_name_petv_14"
+            description="@string/description_petv_14"
+            ageHint="14" />
+        <rating-definition id="PE_TV_18"
+            displayName="@string/display_name_petv_18"
+            description="@string/description_petv_18"
+            ageHint="18" />
+        <order>
+            <rating id="PE_TV_A" />
+            <rating id="PE_TV_14" />
+            <rating id="PE_TV_18" />
+        </order>
+    </rating-system-definition>
+
+    <rating-system-definition id="PE_ATV"
+        displayName="@string/display_name_peatv"
+        description="@string/description_peatv"
+        country="PE">
+        <rating-definition id="PE_ATV_GP"
+            displayName="@string/display_name_peatv_gp"
+            description="@string/description_peatv_gp"
+            ageHint="0" />
+        <rating-definition id="PE_ATV_PG"
+            displayName="@string/display_name_peatv_pg"
+            description="@string/description_peatv_pg"
+            ageHint="6" />
+        <rating-definition id="PE_ATV_14"
+            displayName="@string/display_name_peatv_14"
+            description="@string/description_peatv_14"
+            ageHint="14" />
+        <rating-definition id="PE_ATV_18"
+            displayName="@string/display_name_peatv_18"
+            description="@string/description_peatv_18"
+            ageHint="18" />
+        <order>
+            <rating id="PE_ATV_GP" />
+            <rating id="PE_ATV_PG" />
+            <rating id="PE_ATV_14" />
+            <rating id="PE_ATV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for PH TV -->
+    <rating-system-definition id="PH_TV"
+        displayName="@string/display_name_phtv"
+        country="PH">
+        <rating-definition id="PH_TV_G"
+            displayName="@string/display_name_phtv_g"
+            description="@string/description_phtv_g"
+            ageHint="0" />
+        <rating-definition id="PH_TV_PG"
+            displayName="@string/display_name_phtv_pg"
+            description="@string/description_phtv_pg"
+            ageHint="14" />
+        <rating-definition id="PH_TV_SPG"
+            displayName="@string/display_name_phtv_spg"
+            description="@string/description_phtv_spg"
+            ageHint="18" />
+        <order>
+            <rating id="PH_TV_G" />
+            <rating id="PH_TV_PG" />
+            <rating id="PH_TV_SPG" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for PL TV -->
+    <rating-system-definition id="PL_TV"
+        displayName="@string/display_name_pltv"
+        country="PL">
+        <rating-definition id="PL_TV_G"
+            displayName="@string/display_name_pltv_g"
+            description="@string/description_pltv_g"
+            ageHint="0" />
+        <rating-definition id="PL_TV_7"
+            displayName="@string/display_name_pltv_7"
+            description="@string/description_pltv_7"
+            ageHint="7" />
+        <rating-definition id="PL_TV_12"
+            displayName="@string/display_name_pltv_12"
+            description="@string/description_pltv_12"
+            ageHint="12" />
+        <rating-definition id="PL_TV_16"
+            displayName="@string/display_name_pltv_16"
+            description="@string/description_pltv_16"
+            ageHint="16" />
+        <rating-definition id="PL_TV_18"
+            displayName="@string/display_name_pltv_18"
+            description="@string/description_pltv_18"
+            ageHint="18" />
+        <order>
+            <rating id="PL_TV_G" />
+            <rating id="PL_TV_7" />
+            <rating id="PL_TV_12" />
+            <rating id="PL_TV_16" />
+            <rating id="PL_TV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for PT TV -->
+    <rating-system-definition id="PT_TV"
+        displayName="@string/display_name_pttv"
+        country="PT">
+        <rating-definition id="PT_TV_T"
+            displayName="@string/display_name_pttv_t"
+            description="@string/description_pttv_t"
+            ageHint="0" />
+        <rating-definition id="PT_TV_10"
+            displayName="@string/display_name_pttv_10"
+            description="@string/description_pttv_10"
+            ageHint="10" />
+        <rating-definition id="PT_TV_12"
+            displayName="@string/display_name_pttv_12"
+            description="@string/description_pttv_12"
+            ageHint="12" />
+        <rating-definition id="PT_TV_16"
+            displayName="@string/display_name_pttv_16"
+            description="@string/description_pttv_16"
+            ageHint="16" />
+        <order>
+            <rating id="PT_TV_T" />
+            <rating id="PT_TV_10" />
+            <rating id="PT_TV_12" />
+            <rating id="PT_TV_16" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for RO TV -->
+    <rating-system-definition id="RO_TV"
+        displayName="@string/display_name_rotv"
+        country="RO">
+        <rating-definition id="RO_TV_Y"
+            displayName="@string/display_name_rotv_y"
+            description="@string/description_rotv_y"
+            ageHint="0" />
+        <rating-definition id="RO_TV_G"
+            displayName="@string/display_name_rotv_g"
+            description="@string/description_rotv_g"
+            ageHint="0" />
+        <rating-definition id="RO_TV_AP"
+            displayName="@string/display_name_rotv_ap"
+            description="@string/description_rotv_ap"
+            ageHint="12" />
+        <rating-definition id="RO_TV_12"
+            displayName="@string/display_name_rotv_12"
+            description="@string/description_rotv_12"
+            ageHint="12" />
+        <rating-definition id="RO_TV_15"
+            displayName="@string/display_name_rotv_15"
+            description="@string/description_rotv_15"
+            ageHint="15" />
+        <rating-definition id="RO_TV_18"
+            displayName="@string/display_name_rotv_18"
+            description="@string/description_rotv_18"
+            ageHint="18" />
+        <order>
+            <rating id="RO_TV_Y" />
+            <rating id="RO_TV_G" />
+            <rating id="RO_TV_AP" />
+            <rating id="RO_TV_12" />
+            <rating id="RO_TV_15" />
+            <rating id="RO_TV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for RU TV -->
+    <rating-system-definition id="RU_TV"
+        displayName="@string/display_name_rutv"
+        country="RU">
+        <rating-definition id="RU_TV_0"
+            displayName="@string/display_name_rutv_0"
+            description="@string/description_rutv_0"
+            ageHint="0" />
+        <rating-definition id="RU_TV_6"
+            displayName="@string/display_name_rutv_6"
+            description="@string/description_rutv_6"
+            ageHint="6" />
+        <rating-definition id="RU_TV_12"
+            displayName="@string/display_name_rutv_12"
+            description="@string/description_rutv_12"
+            ageHint="12" />
+        <rating-definition id="RU_TV_16"
+            displayName="@string/display_name_rutv_16"
+            description="@string/description_rutv_16"
+            ageHint="16" />
+        <rating-definition id="RU_TV_18"
+            displayName="@string/display_name_rutv_18"
+            description="@string/description_rutv_18"
+            ageHint="18" />
+        <order>
+            <rating id="RU_TV_0" />
+            <rating id="RU_TV_6" />
+            <rating id="RU_TV_12" />
+            <rating id="RU_TV_16" />
+            <rating id="RU_TV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for RS TV -->
+    <rating-system-definition id="RS_TV"
+        displayName="@string/display_name_rstv"
+        country="RS">
+        <rating-definition id="RS_TV_G"
+            displayName="@string/display_name_rstv_g"
+            description="@string/description_rstv_g"
+            ageHint="0" />
+        <rating-definition id="RS_TV_12"
+            displayName="@string/display_name_rstv_12"
+            description="@string/description_rstv_12"
+            ageHint="12" />
+        <rating-definition id="RS_TV_14"
+            displayName="@string/display_name_rstv_14"
+            description="@string/description_rstv_14"
+            ageHint="14" />
+        <rating-definition id="RS_TV_15"
+            displayName="@string/display_name_rstv_15"
+            description="@string/description_rstv_15"
+            ageHint="15" />
+        <rating-definition id="RS_TV_16"
+            displayName="@string/display_name_rstv_16"
+            description="@string/description_rstv_16"
+            ageHint="16" />
+        <rating-definition id="RS_TV_17"
+            displayName="@string/display_name_rstv_17"
+            description="@string/description_rstv_17"
+            ageHint="17" />
+        <rating-definition id="RS_TV_18"
+            displayName="@string/display_name_rstv_18"
+            description="@string/description_rstv_18"
+            ageHint="18" />
+        <order>
+            <rating id="RS_TV_G" />
+            <rating id="RS_TV_12" />
+            <rating id="RS_TV_14" />
+            <rating id="RS_TV_15" />
+            <rating id="RS_TV_16" />
+            <rating id="RS_TV_17" />
+            <rating id="RS_TV_18" />
+        </order>
+    </rating-system-definition>
 
-    <!-- TV content rating system for SG TV -->
+    <!-- TV content rating system for SG Free-to-Air TV -->
+    <rating-system-definition id="SG_FTV"
+        displayName="@string/display_name_sgftv"
+        country="SG">
+        <rating-definition id="SG_FTV_PG"
+            displayName="@string/display_name_sgftv_pg"
+            description="@string/description_sgftv_pg"
+            ageHint="0" />
+        <rating-definition id="SG_FTV_PG13"
+            displayName="@string/display_name_sgftv_pg13"
+            description="@string/description_sgftv_pg13"
+            ageHint="13" />
+       <order>
+            <rating id="SG_FTV_PG" />
+            <rating id="SG_FTV_PG13" />
+        </order>
+    </rating-system-definition>
+
+    <!-- TV content rating system for SG Pay TV -->
+    <rating-system-definition id="SG_PTV"
+        displayName="@string/display_name_sgptv"
+        country="SG">
+        <rating-definition id="SG_PTV_NC16"
+            displayName="@string/display_name_sgptv_nc16"
+            description="@string/description_sgptv_nc16"
+            ageHint="16" />
+        <rating-definition id="SG_PTV_M18"
+            displayName="@string/display_name_sgptv_m18"
+            description="@string/description_sgptv_m18"
+            ageHint="18" />
+       <order>
+            <rating id="SG_PTV_NC16" />
+            <rating id="SG_PTV_M18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for SI TV -->
+    <rating-system-definition id="SI_TV"
+        displayName="@string/display_name_sitv"
+        country="SI">
+        <rating-definition id="SI_TV_VS"
+            displayName="@string/display_name_sitv_vs"
+            description="@string/description_sitv_vs"
+            ageHint="6" />
+        <rating-definition id="SI_TV_12"
+            displayName="@string/display_name_sitv_12"
+            description="@string/description_sitv_12"
+            ageHint="12" />
+        <rating-definition id="SI_TV_15"
+            displayName="@string/display_name_sitv_15"
+            description="@string/description_sitv_15"
+            ageHint="15" />
+        <rating-definition id="SI_TV_AD"
+            displayName="@string/display_name_sitv_ad"
+            description="@string/description_sitv_ad"
+            ageHint="0" />
+        <order>
+            <rating id="SI_TV_VS" />
+            <rating id="SI_TV_12" />
+            <rating id="SI_TV_15" />
+            <rating id="SI_TV_AD" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for TH TV -->
+    <rating-system-definition id="TH_TV"
+        displayName="@string/display_name_thtv"
+        country="TH">
+        <rating-definition id="TH_TV_P"
+            displayName="@string/display_name_thtv_primary"
+            description="@string/description_thtv_primary"
+            ageHint="0" />
+        <rating-definition id="TH_TV_C"
+            displayName="@string/display_name_thtv_children"
+            description="@string/description_thtv_children"
+            ageHint="6" />
+        <rating-definition id="TH_TV_G"
+            displayName="@string/display_name_thtv_general"
+            description="@string/description_thtv_general"
+            ageHint="0" />
+        <rating-definition id="TH_TV_PG13"
+            displayName="@string/display_name_thtv_pg13"
+            description="@string/description_thtv_pg13"
+            ageHint="13" />
+        <rating-definition id="TH_TV_PG18"
+            displayName="@string/display_name_thtv_pg18"
+            description="@string/description_thtv_pg18"
+            ageHint="18" />
+        <rating-definition id="TH_TV_A"
+            displayName="@string/display_name_thtv_adults"
+            description="@string/description_thtv_adults"
+            ageHint="18" />
+        <order>
+            <rating id="TH_TV_P" />
+            <rating id="TH_TV_C" />
+        </order>
+        <order>
+            <rating id="TH_TV_G" />
+            <rating id="TH_TV_PG13" />
+            <rating id="TH_TV_PG18" />
+            <rating id="TH_TV_A" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for TR TV -->
+    <rating-system-definition id="TR_TV"
+        displayName="@string/display_name_trtv"
+        country="TR">
+        <rating-definition id="TR_TV_G"
+            displayName="@string/display_name_trtv_g"
+            description="@string/description_trtv_g"
+            ageHint="0" />
+        <rating-definition id="TR_TV_7"
+            displayName="@string/display_name_trtv_7"
+            description="@string/description_trtv_7"
+            ageHint="7" />
+        <rating-definition id="TR_TV_13"
+            displayName="@string/display_name_trtv_13"
+            description="@string/description_trtv_13"
+            ageHint="13" />
+        <rating-definition id="TR_TV_18"
+            displayName="@string/display_name_trtv_18"
+            description="@string/description_trtv_18"
+            ageHint="18" />
+        <order>
+            <rating id="TR_TV_G" />
+            <rating id="TR_TV_7" />
+            <rating id="TR_TV_13" />
+            <rating id="TR_TV_18" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for TW TV -->
+    <rating-system-definition id="TW_TV"
+        displayName="@string/display_name_twtv"
+        country="TW">
+        <rating-definition id="TW_TV_G"
+            displayName="@string/display_name_twtv_g"
+            description="@string/description_twtv_g"
+            ageHint="0" />
+        <rating-definition id="TW_TV_P"
+            displayName="@string/display_name_twtv_p"
+            description="@string/description_twtv_p"
+            ageHint="6" />
+        <rating-definition id="TW_TV_PG"
+            displayName="@string/display_name_twtv_pg"
+            description="@string/description_twtv_pg"
+            ageHint="12" />
+        <rating-definition id="TW_TV_R"
+            displayName="@string/display_name_twtv_r"
+            description="@string/description_twtv_r"
+            ageHint="18" />
+        <order>
+            <rating id="TW_TV_G" />
+            <rating id="TW_TV_P" />
+            <rating id="TW_TV_PG" />
+            <rating id="TW_TV_R" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for UA TV -->
+    <rating-system-definition id="UA_TV"
+        displayName="@string/display_name_uatv"
+        country="UA">
+        <rating-definition id="UA_TV_G"
+            displayName="@string/display_name_uatv_green circle"
+            description="@string/description_uatv_green circle"
+            ageHint="0" />
+        <rating-definition id="UA_TV_Y"
+            displayName="@string/display_name_uatv_yellow triangle"
+            description="@string/description_uatv_yellow triangle"
+            ageHint="12" />
+        <rating-definition id="UA_TV_R"
+            displayName="@string/display_name_uatv_red square"
+            description="@string/description_uatv_red square"
+            ageHint="18" />
+        <order>
+            <rating id="UA_TV_G" />
+            <rating id="UA_TV_Y" />
+            <rating id="UA_TV_R" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for US TV -->
     <rating-system-definition id="US_TVPG"
@@ -459,6 +1622,123 @@
     </rating-system-definition>
 
     <!-- TV content rating system for VE TV -->
+    <rating-system-definition id="VE_TV"
+        displayName="@string/display_name_vetv"
+        country="VE">
+        <rating-definition id="VE_TV_TU"
+            displayName="@string/display_name_vetv_tu"
+            description="@string/description_vetv_tu"
+            ageHint="0" />
+        <rating-definition id="VE_TV_SU"
+            displayName="@string/display_name_vetv_su"
+            description="@string/description_vetv_su"
+            ageHint="15" />
+        <rating-definition id="VE_TV_A"
+            displayName="@string/display_name_vetv_a"
+            description="@string/description_vetv_a"
+            ageHint="18" />
+        <order>
+            <rating id="VE_TV_TU" />
+            <rating id="VE_TV_SU" />
+            <rating id="VE_TV_A" />
+        </order>
+    </rating-system-definition>
 
     <!-- TV content rating system for ZA TV -->
+    <rating-system-definition id="ZA_TV"
+        displayName="@string/display_name_zatv"
+        country="ZA">
+        <sub-rating-definition id="ZA_TV_D"
+            displayName="@string/display_name_zatv_d"
+            description="@string/description_zatv_d" />
+        <sub-rating-definition id="ZA_TV_V"
+            displayName="@string/display_name_zatv_v"
+            description="@string/description_zatv_v" />
+        <sub-rating-definition id="ZA_TV_N"
+            displayName="@string/display_name_zatv_n"
+            description="@string/description_zatv_n" />
+        <sub-rating-definition id="ZA_TV_P"
+            displayName="@string/display_name_zatv_p"
+            description="@string/description_zatv_p" />
+        <sub-rating-definition id="ZA_TV_S"
+            displayName="@string/display_name_zatv_s"
+            description="@string/description_zatv_s" />
+        <sub-rating-definition id="ZA_TV_L"
+            displayName="@string/display_name_zatv_l"
+            description="@string/description_zatv_l" />
+        <rating-definition id="ZA_TV_F"
+            displayName="@string/display_name_zatv_f"
+            description="@string/description_zatv_f"
+            ageHint="0">
+            <sub-rating id="ZA_TV_D" />
+            <sub-rating id="ZA_TV_V" />
+            <sub-rating id="ZA_TV_N" />
+            <sub-rating id="ZA_TV_P" />
+            <sub-rating id="ZA_TV_S" />
+            <sub-rating id="ZA_TV_L" />
+        </rating-definition>
+        <rating-definition id="ZA_TV_PG"
+            displayName="@string/display_name_zatv_pg"
+            description="@string/description_zatv_pg"
+            ageHint="0">
+            <sub-rating id="ZA_TV_D" />
+            <sub-rating id="ZA_TV_V" />
+            <sub-rating id="ZA_TV_N" />
+            <sub-rating id="ZA_TV_P" />
+            <sub-rating id="ZA_TV_S" />
+            <sub-rating id="ZA_TV_L" />
+        </rating-definition>
+        <rating-definition id="ZA_TV_13"
+            displayName="@string/display_name_zatv_13"
+            description="@string/description_zatv_13"
+            ageHint="13">
+            <sub-rating id="ZA_TV_D" />
+            <sub-rating id="ZA_TV_V" />
+            <sub-rating id="ZA_TV_N" />
+            <sub-rating id="ZA_TV_P" />
+            <sub-rating id="ZA_TV_S" />
+            <sub-rating id="ZA_TV_L" />
+        </rating-definition>
+        <rating-definition id="ZA_TV_16"
+            displayName="@string/display_name_zatv_16"
+            description="@string/description_zatv_16"
+            ageHint="16">
+            <sub-rating id="ZA_TV_D" />
+            <sub-rating id="ZA_TV_V" />
+            <sub-rating id="ZA_TV_N" />
+            <sub-rating id="ZA_TV_P" />
+            <sub-rating id="ZA_TV_S" />
+            <sub-rating id="ZA_TV_L" />
+        </rating-definition>
+        <rating-definition id="ZA_TV_18"
+            displayName="@string/display_name_zatv_18"
+            description="@string/description_zatv_18"
+            ageHint="18">
+            <sub-rating id="ZA_TV_D" />
+            <sub-rating id="ZA_TV_V" />
+            <sub-rating id="ZA_TV_N" />
+            <sub-rating id="ZA_TV_P" />
+            <sub-rating id="ZA_TV_S" />
+            <sub-rating id="ZA_TV_L" />
+        </rating-definition>
+        <rating-definition id="ZA_TV_R18"
+            displayName="@string/display_name_zatv_r18"
+            description="@string/description_zatv_r18"
+            ageHint="18">
+            <sub-rating id="ZA_TV_D" />
+            <sub-rating id="ZA_TV_V" />
+            <sub-rating id="ZA_TV_N" />
+            <sub-rating id="ZA_TV_P" />
+            <sub-rating id="ZA_TV_S" />
+            <sub-rating id="ZA_TV_L" />
+        </rating-definition>
+        <order>
+            <rating id="ZA_TV_F" />
+            <rating id="ZA_TV_PG" />
+            <rating id="ZA_TV_13" />
+            <rating id="ZA_TV_16" />
+            <rating id="ZA_TV_18" />
+            <rating id="ZA_TV_R18" />
+        </order>
+    </rating-system-definition>
 </rating-system-definitions>
