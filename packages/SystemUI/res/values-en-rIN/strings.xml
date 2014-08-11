@@ -179,7 +179,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Location set by GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Location requests active"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Clear all notifications."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"App info"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"Settings"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Screen will rotate automatically."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Screen is locked in landscape orientation."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Screen is locked in portrait orientation."</string>
@@ -267,6 +267,8 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"Priority"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"All"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Charging (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> until full)"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"Add user"</string>
+    <string name="user_new_user_name" msgid="426540612051178753">"New user"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Guest"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ Guest"</string>
     <string name="guest_exit_guest" msgid="1619100760451149682">"Exit guest"</string>
@@ -300,9 +302,9 @@
     <string name="monitoring_title" msgid="169206259253048106">"Network monitoring"</string>
     <string name="open_app" msgid="4011771120339160755">"Open app"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Disconnect VPN"</string>
-    <string name="monitoring_description_device_owned" msgid="7801926679066533391">"This device is managed by:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nYour administrator can monitor your network activity, including emails, apps and secure websites.\n\nFor more information, contact your administrator."</string>
-    <string name="monitoring_description_vpn" msgid="93140751707065515">"You gave \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" permission to set up a VPN connection.\n\nThis app can monitor your network activity, including emails, apps and secure websites."</string>
-    <string name="monitoring_description_legacy_vpn" msgid="5397847778080663075">"You\'re connected to a VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\").\n\nYour VPN service provider can monitor your network activity including emails, apps and secure websites."</string>
+    <string name="monitoring_description_device_owned" msgid="7512371572956715493">"This device is managed by:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nYour administrator can monitor your device and network activity, including emails, apps and secure websites.\n\nFor more information, contact your administrator."</string>
+    <string name="monitoring_description_vpn" msgid="7288268682714305659">"You gave \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" permission to set up a VPN connection.\n\nThis app can monitor your device and network activity, including emails, apps and secure websites."</string>
+    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"You\'re connected to a VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\").\n\nYour VPN service provider can monitor your device and network activity including emails, apps and secure websites."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"This device is managed by:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nYour administrator is capable of monitoring your network activity including emails, apps and secure websites. For more information, contact your administrator.\n\nAlso, you gave \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" permission to set up a VPN connection. This app can monitor network activity too."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"This device is managed by:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nYour administrator is capable of monitoring your network activity including emails, apps and secure websites. For more information, contact your administrator.\n\nAlso, you\'re connected to a VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). Your VPN service provider can monitor network activity too."</string>
 </resources>

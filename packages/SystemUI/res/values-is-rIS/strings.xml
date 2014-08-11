@@ -39,12 +39,9 @@
     <string name="invalid_charger_title" msgid="3515740382572798460">"Ekki er stuðningur við USB-hleðslu."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Notaðu eingöngu hleðslutækið sem fylgir með."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Stillingar"</string>
-    <!-- no translation found for battery_saver_confirmation_title (5299585433050361634) -->
-    <skip />
-    <!-- no translation found for battery_saver_confirmation_ok (7507968430447930257) -->
-    <skip />
-    <!-- no translation found for battery_saver_start_action (5576697451677486320) -->
-    <skip />
+    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Kveikja á rafhlöðusparnaði?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Kveikja"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"Kveikja á rafhlöðusparnaði"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Stillingar"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Flugstilling"</string>
@@ -182,7 +179,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Staðsetning valin með GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Staðsetningarbeiðnir virkar"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Hreinsa allar tilkynningar."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Upplýsingar um forrit"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"Stillingar"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skjárinn snýst sjálfkrafa."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Skjárinn er læstur í langsniði."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Skjárinn er læstur í skammsniði."</string>
@@ -270,6 +267,8 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"Forgangur"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Allar"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Í hleðslu (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> fram að fullri hleðslu)"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"Bæta notanda við"</string>
+    <string name="user_new_user_name" msgid="426540612051178753">"Nýr notandi"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Gestur"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ Gestur"</string>
     <string name="guest_exit_guest" msgid="1619100760451149682">"Loka gestastillingu"</string>
@@ -288,10 +287,8 @@
     <item quantity="other" msgid="5408537517529822157">"Í %d klukkustundir"</item>
   </plurals>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Kveikt er á rafhlöðusparnaði"</string>
-    <!-- no translation found for battery_saver_notification_text (820318788126672692) -->
-    <skip />
-    <!-- no translation found for battery_saver_notification_action_text (109158658238110382) -->
-    <skip />
+    <string name="battery_saver_notification_text" msgid="820318788126672692">"Dregur úr afköstum og bakgrunnsgögnum"</string>
+    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Slökkva á rafhlöðusparnaði"</string>
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Innihald falið"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> mun fanga allt sem birtist á skjánum."</string>
@@ -299,26 +296,15 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Hreinsa allt"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Byrja núna"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Engar tilkynningar"</string>
-    <!-- no translation found for device_owned_footer (3802752663326030053) -->
-    <skip />
-    <!-- no translation found for vpn_footer (2388611096129106812) -->
-    <skip />
-    <!-- no translation found for monitoring_title_device_owned (7121079311903859610) -->
-    <skip />
-    <!-- no translation found for monitoring_title (169206259253048106) -->
-    <skip />
-    <!-- no translation found for open_app (4011771120339160755) -->
-    <skip />
-    <!-- no translation found for disconnect_vpn (1324915059568548655) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_owned (7801926679066533391) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (93140751707065515) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn (5397847778080663075) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (696121105616356493) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_device_owned (649791650224064248) -->
-    <skip />
+    <string name="device_owned_footer" msgid="3802752663326030053">"Hugsanlega er fylgst með tækjum"</string>
+    <string name="vpn_footer" msgid="2388611096129106812">"Hugsanlega er fylgst með netinu"</string>
+    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Tækjaeftirlit"</string>
+    <string name="monitoring_title" msgid="169206259253048106">"Neteftirlit"</string>
+    <string name="open_app" msgid="4011771120339160755">"Opna forrit"</string>
+    <string name="disconnect_vpn" msgid="1324915059568548655">"Aftengja VPN-net"</string>
+    <string name="monitoring_description_device_owned" msgid="7512371572956715493">"Þessu tæki er stjórnað af:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nStjórnandinn getur fylgst með virkni þinni í tækinu og á netinu, þar á meðal tölvupósti, forritum og öruggum vefsvæðum.\n\nHafðu samband við stjórnandann til að fá frekari upplýsingar."</string>
+    <string name="monitoring_description_vpn" msgid="7288268682714305659">"Þú veittir „<xliff:g id="APPLICATION">%1$s</xliff:g>“ heimild til að koma á VPN-tengingu.\n\nÞetta forrit getur fylgst með virkni þinni í tækinu og á netinu, þar á meðal tölvupósti, forritum og öruggum vefsvæðum."</string>
+    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Þú ert með tengingu við VPN-net („<xliff:g id="APPLICATION">%1$s</xliff:g>“).\n\nVPN-þjónustuaðilinn þinn getur fylgst með virkni þinni í tækinu og á netinu, þar á meðal tölvupósti, forritum og öruggum vefsvæðum."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Stjórnandi þessa tækis er:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nStjórnandinn getur fylgst með netvirkni þinni, þ. á m. tölvupósti, forritum og öruggum vefsvæðum. Hafðu samband við stjórnandann til að fá frekari upplýsingar.\n\nÞú veittir „<xliff:g id="APPLICATION">%2$s</xliff:g>“ einnig  heimild til að setja upp VPN-tengingu. Þetta forrit getur líka fylgst með netvirkni þinni."</string>
+    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Stjórnandi þessa tækis er:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nStjórnandinn getur fylgst með netvirkni þinni, þ. á m. tölvupósti, forritum og öruggum vefsvæðum. Hafðu samband við stjórnandann til að fá frekari upplýsingar.\n\nÞú ert einnig tengd(ur) VPN-neti („<xliff:g id="APPLICATION">%2$s</xliff:g>“). VPN-þjónustuaðilinn þinn getur líka fylgst með netvirkni þinni."</string>
 </resources>

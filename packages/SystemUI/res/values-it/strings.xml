@@ -39,12 +39,9 @@
     <string name="invalid_charger_title" msgid="3515740382572798460">"Ricarica tramite USB non supportata."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Utilizza solo il caricabatterie fornito in dotazione."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Impostazioni"</string>
-    <!-- no translation found for battery_saver_confirmation_title (5299585433050361634) -->
-    <skip />
-    <!-- no translation found for battery_saver_confirmation_ok (7507968430447930257) -->
-    <skip />
-    <!-- no translation found for battery_saver_start_action (5576697451677486320) -->
-    <skip />
+    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Attivare il risparmio energetico?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Attiva"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"Attiva risparmio energetico"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Impostazioni"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Modalità aereo"</string>
@@ -184,7 +181,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Posizione stabilita dal GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Richieste di accesso alla posizione attive"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Cancella tutte le notifiche."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informazioni applicazione"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"Impostazioni"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Lo schermo ruoterà automaticamente."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Lo schermo è bloccato in orientamento orizzontale."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Lo schermo è bloccato in orientamento verticale."</string>
@@ -272,6 +269,8 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"Priorità"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Tutti"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"In carica (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> al termine)"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"Aggiungi utente"</string>
+    <string name="user_new_user_name" msgid="426540612051178753">"Nuovo utente"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Ospite"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ ospite"</string>
     <string name="guest_exit_guest" msgid="1619100760451149682">"Esci dalla modalità ospite"</string>
@@ -290,10 +289,8 @@
     <item quantity="other" msgid="5408537517529822157">"Per %d ore"</item>
   </plurals>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Risparmio batteria attivo"</string>
-    <!-- no translation found for battery_saver_notification_text (820318788126672692) -->
-    <skip />
-    <!-- no translation found for battery_saver_notification_action_text (109158658238110382) -->
-    <skip />
+    <string name="battery_saver_notification_text" msgid="820318788126672692">"Riduce le prestazioni e i dati in background"</string>
+    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Disattiva risparmio energetico"</string>
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Contenuti nascosti"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> inizierà ad acquisire tutto ciò che è visualizzato sul tuo schermo."</string>
@@ -301,26 +298,15 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Cancella tutto"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Avvia adesso"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Nessuna notifica"</string>
-    <!-- no translation found for device_owned_footer (3802752663326030053) -->
-    <skip />
-    <!-- no translation found for vpn_footer (2388611096129106812) -->
-    <skip />
-    <!-- no translation found for monitoring_title_device_owned (7121079311903859610) -->
-    <skip />
-    <!-- no translation found for monitoring_title (169206259253048106) -->
-    <skip />
-    <!-- no translation found for open_app (4011771120339160755) -->
-    <skip />
-    <!-- no translation found for disconnect_vpn (1324915059568548655) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_owned (7801926679066533391) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (93140751707065515) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn (5397847778080663075) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (696121105616356493) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_device_owned (649791650224064248) -->
-    <skip />
+    <string name="device_owned_footer" msgid="3802752663326030053">"Il dispositivo potrebbe essere monitorato"</string>
+    <string name="vpn_footer" msgid="2388611096129106812">"La rete potrebbe essere monitorata"</string>
+    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Monitoraggio del dispositivo"</string>
+    <string name="monitoring_title" msgid="169206259253048106">"Monitoraggio rete"</string>
+    <string name="open_app" msgid="4011771120339160755">"Apri app"</string>
+    <string name="disconnect_vpn" msgid="1324915059568548655">"Scollega VPN"</string>
+    <string name="monitoring_description_device_owned" msgid="7512371572956715493">"Questo dispositivo è gestito da:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nIl tuo amministratore può monitorare la tua attività di rete e sul dispositivo, inclusi email, app e siti web protetti.\n\nPer ulteriori informazioni, contatta l\'amministratore."</string>
+    <string name="monitoring_description_vpn" msgid="7288268682714305659">"Hai autorizzato \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" a configurare una connessione VPN.\n\nQuesta app può monitorare la tua attività di rete e sul dispositivo, inclusi email, app e siti web protetti."</string>
+    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Sei collegato a una rete VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\").\n\nIl tuo provider di servizi VPN può monitorare la tua attività di rete e sul dispositivo, inclusi email, app e siti web protetti."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Il dispositivo è gestito da:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nIl tuo amministratore può monitorare la tua attività di rete, inclusi email, app e siti web protetti. Per ulteriori informazioni, contatta l\'amministratore.\n\nInoltre, hai autorizzato \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" a configurare una connessione VPN. Questa app può monitorare anche l\'attività di rete."</string>
+    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Il dispositivo è gestito da:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nIl tuo amministratore può monitorare la tua attività di rete, inclusi email, app e siti web protetti. Per ulteriori informazioni, contatta l\'amministratore.\n\nInoltre, sei collegato a una rete VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). Il tuo provider di servizi VPN può monitorare anche l\'attività di rete."</string>
 </resources>
