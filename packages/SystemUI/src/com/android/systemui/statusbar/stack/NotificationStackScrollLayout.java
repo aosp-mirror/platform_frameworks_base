@@ -2165,6 +2165,14 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     /**
+     * @param qsMinHeight The minimum height of the quick settings including padding
+     *                    See {@link StackScrollAlgorithm#updateIsSmallScreen}.
+     */
+    public void updateIsSmallScreen(int qsMinHeight) {
+        mStackScrollAlgorithm.updateIsSmallScreen(mMaxLayoutHeight - qsMinHeight);
+    }
+
+    /**
      * A listener that is notified when some child locations might have changed.
      */
     public interface OnChildLocationsChangedListener {
