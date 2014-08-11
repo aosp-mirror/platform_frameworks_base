@@ -27571,9 +27571,8 @@ package android.service.voice {
   }
 
   public static class AlwaysOnHotwordDetector.EventPayload {
-    field public final android.media.AudioFormat audioFormat;
-    field public final byte[] data;
-    field public final boolean triggerAvailable;
+    method public android.media.AudioFormat getCaptureAudioFormat();
+    method public byte[] getTriggerAudio();
   }
 
   public class VoiceInteractionService extends android.app.Service {
