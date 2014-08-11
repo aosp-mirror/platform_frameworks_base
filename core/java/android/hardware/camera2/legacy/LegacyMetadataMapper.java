@@ -36,6 +36,7 @@ import android.hardware.camera2.utils.ParamsUtils;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
+import android.util.SizeF;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -764,6 +765,23 @@ public class LegacyMetadataMapper {
          * sensor.info.pixelArraySize
          */
         m.set(SENSOR_INFO_PIXEL_ARRAY_SIZE, largestJpegSize);
+
+        /*
+         * sensor.info.physicalSize
+         */
+        {
+            /*
+             * Assume focal length is at infinity focus and that the lens is rectilinear.
+             */
+            float focalLength = p.getFocalLength(); // in mm
+            double angleHor = p.getHorizontalViewAngle() * Math.PI / 180; // to radians
+            double angleVer = p.getVerticalViewAngle() * Math.PI / 180; // to radians
+
+            float height = (float)Math.abs(2 * focalLength * Math.tan(angleVer / 2));
+            float width = (float)Math.abs(2 * focalLength * Math.tan(angleHor / 2));
+
+            m.set(SENSOR_INFO_PHYSICAL_SIZE, new SizeF(width, height)); // in mm
+        }
     }
 
     private static void mapStatistics(CameraMetadataNative m, Parameters p) {
@@ -1069,7 +1087,24 @@ public class LegacyMetadataMapper {
         }
 
         // control.captureIntent
-        m.set(CaptureRequest.CONTROL_CAPTURE_INTENT, templateId);
+        {
+            int captureIntent;
+            switch (templateId) {
+                case CameraDevice.TEMPLATE_PREVIEW:
+                    captureIntent = CONTROL_CAPTURE_INTENT_PREVIEW;
+                    break;
+                case CameraDevice.TEMPLATE_STILL_CAPTURE:
+                    captureIntent = CONTROL_CAPTURE_INTENT_STILL_CAPTURE;
+                    break;
+                case CameraDevice.TEMPLATE_RECORD:
+                    captureIntent = CONTROL_CAPTURE_INTENT_VIDEO_RECORD;
+                    break;
+                default:
+                    // Can't get anything else since it's guarded by the IAE check
+                    throw new AssertionError("Impossible; keep in sync with sAllowedTemplates");
+            }
+            m.set(CaptureRequest.CONTROL_CAPTURE_INTENT, captureIntent);
+        }
 
         // control.aeMode
         m.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
