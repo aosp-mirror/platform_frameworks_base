@@ -49,10 +49,10 @@ public class KeyguardUserSwitcher {
     private final ViewGroup mUserSwitcher;
     private final KeyguardStatusBarView mStatusBarView;
     private final Adapter mAdapter;
-    private final boolean mSimpleUserSwitcher;
     private final AppearAnimationUtils mAppearAnimationUtils;
     private final KeyguardUserSwitcherScrim mBackground;
     private ObjectAnimator mBgAnimator;
+    private UserSwitcherController mUserSwitcherController;
 
     public KeyguardUserSwitcher(Context context, ViewStub userSwitcher,
             KeyguardStatusBarView statusBarView, NotificationPanelView panelView,
@@ -66,7 +66,7 @@ public class KeyguardUserSwitcher {
             panelView.setKeyguardUserSwitcher(this);
             mAdapter = new Adapter(context, userSwitcherController);
             mAdapter.registerDataSetObserver(mDataSetObserver);
-            mSimpleUserSwitcher = userSwitcherController.isSimpleUserSwitcher();
+            mUserSwitcherController = userSwitcherController;
             mAppearAnimationUtils = new AppearAnimationUtils(context, 400, -0.5f, 0.5f,
                     AnimationUtils.loadInterpolator(
                             context, android.R.interpolator.fast_out_slow_in));
@@ -74,7 +74,6 @@ public class KeyguardUserSwitcher {
             mUserSwitcher = null;
             mStatusBarView = null;
             mAdapter = null;
-            mSimpleUserSwitcher = false;
             mAppearAnimationUtils = null;
             mBackground = null;
         }
@@ -95,7 +94,7 @@ public class KeyguardUserSwitcher {
      * @see android.os.UserManager#isUserSwitcherEnabled()
      */
     private boolean shouldExpandByDefault() {
-        return mSimpleUserSwitcher;
+        return (mUserSwitcherController != null) && mUserSwitcherController.isSimpleUserSwitcher();
     }
 
     public void show(boolean animate) {
