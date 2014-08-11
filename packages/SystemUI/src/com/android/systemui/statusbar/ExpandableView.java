@@ -255,6 +255,10 @@ public abstract class ExpandableView extends FrameLayout {
     public void setBelowSpeedBump(boolean below) {
     }
 
+    public void reset() {
+        mOnHeightChangedListener.onReset(this);
+    }
+
     /**
      * A listener notifying when {@link #getActualHeight} changes.
      */
@@ -265,5 +269,12 @@ public abstract class ExpandableView extends FrameLayout {
          *             padding or the padding between the elements changed
          */
         void onHeightChanged(ExpandableView view);
+
+        /**
+         * Called when the view is reset and therefore the height will change abruptly
+         *
+         * @param view The view which was reset.
+         */
+        void onReset(ExpandableView view);
     }
 }

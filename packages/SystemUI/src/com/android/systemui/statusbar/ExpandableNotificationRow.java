@@ -59,6 +59,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mClearable;
     private ExpansionLogger mLogger;
     private String mLoggingKey;
+    private boolean mWasReset;
 
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
@@ -88,6 +89,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mPublicLayout.reset();
         mPrivateLayout.reset();
         mMaxExpandHeight = 0;
+        mWasReset = true;
         logExpansionEvent(false, wasExpanded);
     }
 
@@ -246,11 +248,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        boolean updateExpandHeight = mMaxExpandHeight == 0;
+        boolean updateExpandHeight = mMaxExpandHeight == 0 && !mWasReset;
         mMaxExpandHeight = mPrivateLayout.getMaxHeight();
         if (updateExpandHeight) {
             applyExpansionToLayout();
         }
+        mWasReset = false;
     }
 
     public void setSensitive(boolean sensitive) {
