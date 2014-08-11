@@ -53,6 +53,10 @@ public:
     _ZipEntryRO() : cookie(NULL) {
     }
 
+    ~_ZipEntryRO() {
+      EndIteration(cookie);
+    }
+
 private:
     _ZipEntryRO(const _ZipEntryRO& other);
     _ZipEntryRO& operator=(const _ZipEntryRO& other);
