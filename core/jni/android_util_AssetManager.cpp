@@ -1021,7 +1021,7 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
         return JNI_FALSE;
     }
 
-    DEBUG_STYLES(LOGI("APPLY STYLE: theme=0x%x defStyleAttr=0x%x defStyleRes=0x%x",
+    DEBUG_STYLES(ALOGI("APPLY STYLE: theme=0x%x defStyleAttr=0x%x defStyleRes=0x%x",
         themeToken, defStyleAttr, defStyleRes));
 
     ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeToken);
@@ -1089,7 +1089,7 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
     for (jsize ii=0; ii<NI; ii++) {
         const uint32_t curIdent = (uint32_t)src[ii];
 
-        DEBUG_STYLES(LOGI("RETRIEVING ATTR 0x%08x...", curIdent));
+        DEBUG_STYLES(ALOGI("RETRIEVING ATTR 0x%08x...", curIdent));
 
         // Try to find a value for this attribute...  we prioritize values
         // coming from, first XML attributes, then XML style, then default
@@ -1104,7 +1104,7 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
             block = -1;
             value.dataType = Res_value::TYPE_ATTRIBUTE;
             value.data = srcValues[ii];
-            DEBUG_STYLES(LOGI("-> From values: type=0x%x, data=0x%08x",
+            DEBUG_STYLES(ALOGI("-> From values: type=0x%x, data=0x%08x",
                     value.dataType, value.data));
         }
 
@@ -1118,7 +1118,7 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
                 block = defStyleEnt->stringBlock;
                 typeSetFlags = defStyleTypeSetFlags;
                 value = defStyleEnt->map.value;
-                DEBUG_STYLES(LOGI("-> From def style: type=0x%x, data=0x%08x",
+                DEBUG_STYLES(ALOGI("-> From def style: type=0x%x, data=0x%08x",
                         value.dataType, value.data));
             }
             defStyleEnt++;
@@ -1130,14 +1130,14 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
             ssize_t newBlock = theme->resolveAttributeReference(&value, block,
                     &resid, &typeSetFlags, &config);
             if (newBlock >= 0) block = newBlock;
-            DEBUG_STYLES(LOGI("-> Resolved attr: type=0x%x, data=0x%08x",
+            DEBUG_STYLES(ALOGI("-> Resolved attr: type=0x%x, data=0x%08x",
                     value.dataType, value.data));
         } else {
             // If we still don't have a value for this attribute, try to find
             // it in the theme!
             ssize_t newBlock = theme->getAttribute(curIdent, &value, &typeSetFlags);
             if (newBlock >= 0) {
-                DEBUG_STYLES(LOGI("-> From theme: type=0x%x, data=0x%08x",
+                DEBUG_STYLES(ALOGI("-> From theme: type=0x%x, data=0x%08x",
                         value.dataType, value.data));
                 newBlock = res.resolveReference(&value, block, &resid,
                         &typeSetFlags, &config);
@@ -1148,19 +1148,19 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
                 }
 #endif
                 if (newBlock >= 0) block = newBlock;
-                DEBUG_STYLES(LOGI("-> Resolved theme: type=0x%x, data=0x%08x",
+                DEBUG_STYLES(ALOGI("-> Resolved theme: type=0x%x, data=0x%08x",
                         value.dataType, value.data));
             }
         }
 
         // Deal with the special @null value -- it turns back to TYPE_NULL.
         if (value.dataType == Res_value::TYPE_REFERENCE && value.data == 0) {
-            DEBUG_STYLES(LOGI("-> Setting to @null!"));
+            DEBUG_STYLES(ALOGI("-> Setting to @null!"));
             value.dataType = Res_value::TYPE_NULL;
             block = -1;
         }
 
-        DEBUG_STYLES(LOGI("Attribute 0x%08x: type=0x%x, data=0x%08x",
+        DEBUG_STYLES(ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x",
                 curIdent, value.dataType, value.data));
 
         // Write the final value back to Java.
@@ -1215,7 +1215,7 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
         return JNI_FALSE;
     }
 
-    DEBUG_STYLES(LOGI("APPLY STYLE: theme=0x%x defStyleAttr=0x%x defStyleRes=0x%x xml=0x%x",
+    DEBUG_STYLES(ALOGI("APPLY STYLE: theme=0x%x defStyleAttr=0x%x defStyleRes=0x%x xml=0x%x",
         themeToken, defStyleAttr, defStyleRes, xmlParserToken));
 
     ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeToken);
@@ -1313,7 +1313,7 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
     for (jsize ii=0; ii<NI; ii++) {
         const uint32_t curIdent = (uint32_t)src[ii];
 
-        DEBUG_STYLES(LOGI("RETRIEVING ATTR 0x%08x...", curIdent));
+        DEBUG_STYLES(ALOGI("RETRIEVING ATTR 0x%08x...", curIdent));
 
         // Try to find a value for this attribute...  we prioritize values
         // coming from, first XML attributes, then XML style, then default
@@ -1334,7 +1334,7 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
             xmlParser->getAttributeValue(ix, &value);
             ix++;
             curXmlAttr = xmlParser->getAttributeNameResID(ix);
-            DEBUG_STYLES(LOGI("-> From XML: type=0x%x, data=0x%08x",
+            DEBUG_STYLES(ALOGI("-> From XML: type=0x%x, data=0x%08x",
                     value.dataType, value.data));
         }
 
@@ -1348,7 +1348,7 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
                 block = styleEnt->stringBlock;
                 typeSetFlags = styleTypeSetFlags;
                 value = styleEnt->map.value;
-                DEBUG_STYLES(LOGI("-> From style: type=0x%x, data=0x%08x",
+                DEBUG_STYLES(ALOGI("-> From style: type=0x%x, data=0x%08x",
                         value.dataType, value.data));
             }
             styleEnt++;
@@ -1364,7 +1364,7 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
                 block = defStyleEnt->stringBlock;
                 typeSetFlags = defStyleTypeSetFlags;
                 value = defStyleEnt->map.value;
-                DEBUG_STYLES(LOGI("-> From def style: type=0x%x, data=0x%08x",
+                DEBUG_STYLES(ALOGI("-> From def style: type=0x%x, data=0x%08x",
                         value.dataType, value.data));
             }
             defStyleEnt++;
@@ -1376,14 +1376,14 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
             ssize_t newBlock = theme->resolveAttributeReference(&value, block,
                     &resid, &typeSetFlags, &config);
             if (newBlock >= 0) block = newBlock;
-            DEBUG_STYLES(LOGI("-> Resolved attr: type=0x%x, data=0x%08x",
+            DEBUG_STYLES(ALOGI("-> Resolved attr: type=0x%x, data=0x%08x",
                     value.dataType, value.data));
         } else {
             // If we still don't have a value for this attribute, try to find
             // it in the theme!
             ssize_t newBlock = theme->getAttribute(curIdent, &value, &typeSetFlags);
             if (newBlock >= 0) {
-                DEBUG_STYLES(LOGI("-> From theme: type=0x%x, data=0x%08x",
+                DEBUG_STYLES(ALOGI("-> From theme: type=0x%x, data=0x%08x",
                         value.dataType, value.data));
                 newBlock = res.resolveReference(&value, block, &resid,
                         &typeSetFlags, &config);
@@ -1394,19 +1394,19 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
                 }
 #endif
                 if (newBlock >= 0) block = newBlock;
-                DEBUG_STYLES(LOGI("-> Resolved theme: type=0x%x, data=0x%08x",
+                DEBUG_STYLES(ALOGI("-> Resolved theme: type=0x%x, data=0x%08x",
                         value.dataType, value.data));
             }
         }
 
         // Deal with the special @null value -- it turns back to TYPE_NULL.
         if (value.dataType == Res_value::TYPE_REFERENCE && value.data == 0) {
-            DEBUG_STYLES(LOGI("-> Setting to @null!"));
+            DEBUG_STYLES(ALOGI("-> Setting to @null!"));
             value.dataType = Res_value::TYPE_NULL;
             block = kXmlBlock;
         }
 
-        DEBUG_STYLES(LOGI("Attribute 0x%08x: type=0x%x, data=0x%08x",
+        DEBUG_STYLES(ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x",
                 curIdent, value.dataType, value.data));
 
         // Write the final value back to Java.
