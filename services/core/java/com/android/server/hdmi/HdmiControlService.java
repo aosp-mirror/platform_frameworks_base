@@ -1254,11 +1254,11 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    void invokeDeviceEventListeners(HdmiDeviceInfo device, boolean activated) {
+    void invokeDeviceEventListeners(HdmiDeviceInfo device, int status) {
         synchronized (mLock) {
             for (IHdmiDeviceEventListener listener : mDeviceEventListeners) {
                 try {
-                    listener.onStatusChanged(device, activated);
+                    listener.onStatusChanged(device, status);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Failed to report device event:" + e);
                 }

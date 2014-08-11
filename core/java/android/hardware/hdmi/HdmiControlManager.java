@@ -69,6 +69,10 @@ public final class HdmiControlManager {
     public static final int RESULT_INCORRECT_MODE = 6;
     public static final int RESULT_COMMUNICATION_FAILED = 7;
 
+    public static final int DEVICE_EVENT_ADD_DEVICE = 1;
+    public static final int DEVICE_EVENT_REMOVE_DEVICE = 2;
+    public static final int DEVICE_EVENT_UPDATE_DEVICE = 3;
+
     // --- One Touch Recording success result
     /** Recording currently selected source. Indicates the status of a recording. */
     public static final int ONE_TOUCH_RECORD_RECORDING_CURRENTLY_SELECTED_SOURCE = 0x01;
