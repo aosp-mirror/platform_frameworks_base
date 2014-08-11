@@ -4256,6 +4256,16 @@ public class PackageParser {
         public ArraySet<String> mUpgradeKeySets;
         public ArrayMap<String, ArraySet<PublicKey>> mKeySetMapping;
 
+        /**
+         * The install time abi override for this package, if any.
+         *
+         * TODO: This seems like a horrible place to put the abiOverride because
+         * this isn't something the packageParser parsers. However, this fits in with
+         * the rest of the PackageManager where package scanning randomly pushes
+         * and prods fields out of {@code this.applicationInfo}.
+         */
+        public String cpuAbiOverride;
+
         public Package(String packageName) {
             this.packageName = packageName;
             applicationInfo.packageName = packageName;

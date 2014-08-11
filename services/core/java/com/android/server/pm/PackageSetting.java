@@ -31,9 +31,11 @@ final class PackageSetting extends PackageSettingBase {
 
     PackageSetting(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
-            String secondaryCpuAbiString, int pVersionCode, int pkgFlags) {
+            String secondaryCpuAbiString, String cpuAbiOverrideString,
+            int pVersionCode, int pkgFlags) {
         super(name, realName, codePath, resourcePath, legacyNativeLibraryPathString,
-                primaryCpuAbiString, secondaryCpuAbiString, pVersionCode, pkgFlags);
+                primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
+                pVersionCode, pkgFlags);
     }
 
     /**
