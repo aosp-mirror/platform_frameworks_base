@@ -99,6 +99,34 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
+     * Callback interface used to get the input change event.
+     */
+    public interface InputChangeListener {
+        /**
+         * Called when the input was changed.
+         *
+         * @param info newly selected HDMI input
+         */
+        void onChanged(HdmiDeviceInfo info);
+    }
+
+    /**
+     * Set the listener used to get informed of the input change event.
+     *
+     * @param listener listener object
+     */
+    public void setInputChangeListener(InputChangeListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null.");
+        }
+        try {
+            mService.setInputChangeListener(getListenerWrapper(listener));
+        } catch (RemoteException e) {
+            Log.e("TAG", "Failed to set InputChangeListener:", e);
+        }
+    }
+
+    /**
      * Set system audio volume
      *
      * @param oldIndex current volume index
@@ -253,6 +281,15 @@ public final class HdmiTvClient extends HdmiClient {
             @Override
             public void onComplete(int result) {
                 callback.onComplete(result);
+            }
+        };
+    }
+
+    private static IHdmiInputChangeListener getListenerWrapper(final InputChangeListener listener) {
+        return new IHdmiInputChangeListener.Stub() {
+            @Override
+            public void onChanged(HdmiDeviceInfo info) {
+                listener.onChanged(info);
             }
         };
     }
