@@ -2663,6 +2663,20 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     /**
+     * Set whether the current VPN package has the ability to launch VPNs without
+     * user intervention. This method is used by system UIs and not available
+     * in ConnectivityManager. Permissions are checked in Vpn class.
+     * @hide
+     */
+    @Override
+    public void setVpnPackageAuthorization(boolean authorized) {
+        int user = UserHandle.getUserId(Binder.getCallingUid());
+        synchronized(mVpns) {
+            mVpns.get(user).setPackageAuthorization(authorized);
+        }
+    }
+
+    /**
      * Configure a TUN interface and return its file descriptor. Parameters
      * are encoded and opaque to this class. This method is used by VpnBuilder
      * and not available in ConnectivityManager. Permissions are checked in

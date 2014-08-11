@@ -119,11 +119,7 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     @Override
     public void onClick(DialogInterface dialog, int which) {
         if (which == DialogInterface.BUTTON_NEGATIVE) {
-            if (mSecurityController.isLegacyVpn()) {
-                mSecurityController.disconnectFromLegacyVpn();
-            } else {
-                mSecurityController.openVpnApp();
-            }
+            mSecurityController.disconnectFromVpn();
         }
     }
 
@@ -142,7 +138,7 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         if (mSecurityController.isLegacyVpn()) {
             return mContext.getString(R.string.disconnect_vpn);
         } else {
-            return mContext.getString(R.string.open_app);
+            return mContext.getString(R.string.disable_vpn);
         }
     }
 

@@ -21,9 +21,7 @@ import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 
 import android.app.AppGlobals;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -35,10 +33,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
-import android.net.BaseNetworkStateTracker;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
@@ -51,7 +45,6 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMisc;
-import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.UidRange;
 import android.os.Binder;
@@ -70,14 +63,14 @@ import android.os.UserManager;
 import android.security.Credentials;
 import android.security.KeyStore;
 import android.util.Log;
-import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.R;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
 import com.android.server.net.BaseNetworkObserver;
+
+import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,8 +84,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import libcore.io.IoUtils;
 
 /**
  * @hide
@@ -114,8 +105,6 @@ public class Vpn {
     private boolean mAllowIPv6;
     private Connection mConnection;
     private LegacyVpnRunner mLegacyVpnRunner;
-    private PendingIntent mStatusIntent;
-    private volatile boolean mEnableNotif = true;
     private volatile boolean mEnableTeardown = true;
     private final IConnectivityManager mConnService;
     private final INetworkManagementService mNetd;
@@ -180,14 +169,6 @@ public class Vpn {
     }
 
     /**
-     * Set if this object is responsible for showing its own notifications. When
-     * {@code false}, notifications are handled externally by someone else.
-     */
-    public void setEnableNotifications(boolean enableNotif) {
-        mEnableNotif = enableNotif;
-    }
-
-    /**
      * Set if this object is responsible for watching for {@link NetworkInfo}
      * teardown. When {@code false}, teardown is handled externally by someone
      * else.
@@ -228,6 +209,20 @@ public class Vpn {
     public synchronized boolean prepare(String oldPackage, String newPackage) {
         // Return false if the package does not match.
         if (oldPackage != null && !oldPackage.equals(mPackage)) {
+            // The package doesn't match. If this VPN was not previously authorized, return false
+            // to force user authorization. Otherwise, revoke the VPN anyway.
+            if (!oldPackage.equals(VpnConfig.LEGACY_VPN) && isVpnUserPreConsented(oldPackage)) {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    // This looks bizarre, but it is what ConfirmDialog in VpnDialogs is doing when
+                    // the user clicks through to allow the VPN to consent. So we are emulating the
+                    // action of the dialog without actually showing it.
+                    prepare(null, oldPackage);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+                return true;
+            }
             return false;
         }
 
@@ -240,11 +235,8 @@ public class Vpn {
         // Check if the caller is authorized.
         enforceControlPermission();
 
-        // Reset the interface and hide the notification.
+        // Reset the interface.
         if (mInterface != null) {
-            for (UidRange uidRange : mVpnUsers) {
-                hideNotification(uidRange.getStartUser());
-            }
             agentDisconnect();
             jniReset(mInterface);
             mInterface = null;
@@ -287,12 +279,46 @@ public class Vpn {
             Binder.restoreCallingIdentity(token);
         }
         mConfig = null;
+
         updateState(DetailedState.IDLE, "prepare");
         return true;
     }
 
+    /**
+     * Set whether the current package has the ability to launch VPNs without user intervention.
+     */
+    public void setPackageAuthorization(boolean authorized) {
+        // Check if the caller is authorized.
+        enforceControlPermission();
+
+        if (mPackage == null || VpnConfig.LEGACY_VPN.equals(mPackage)) {
+            return;
+        }
+
+        long token = Binder.clearCallingIdentity();
+        try {
+            AppOpsManager appOps =
+                    (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+            appOps.setMode(AppOpsManager.OP_ACTIVATE_VPN, mOwnerUID, mPackage,
+                    authorized ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED);
+        } catch (Exception e) {
+            Log.wtf(TAG, "Failed to set app ops for package " + mPackage, e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private boolean isVpnUserPreConsented(String packageName) {
+        AppOpsManager appOps =
+                (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+
+        // Verify that the caller matches the given package and has permission to activate VPNs.
+        return appOps.noteOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN, Binder.getCallingUid(),
+                packageName) == AppOpsManager.MODE_ALLOWED;
+    }
+
     private int getAppUid(String app) {
-        if (app == VpnConfig.LEGACY_VPN) {
+        if (VpnConfig.LEGACY_VPN.equals(app)) {
             return Process.myUid();
         }
         PackageManager pm = mContext.getPackageManager();
@@ -355,9 +381,10 @@ public class Vpn {
         try {
             mNetworkAgent = new NetworkAgent(mLooper, mContext, NETWORKTYPE,
                     mNetworkInfo, mNetworkCapabilities, lp, 0, networkMisc) {
+                            @Override
                             public void unwanted() {
                                 // We are user controlled, not driven by NetworkRequest.
-                            };
+                            }
                         };
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -540,39 +567,6 @@ public class Vpn {
 
         // add the user
         mVpnUsers.add(UidRange.createForUser(user));
-
-        // show the notification
-        if (!mPackage.equals(VpnConfig.LEGACY_VPN)) {
-            // Load everything for the user's notification
-            PackageManager pm = mContext.getPackageManager();
-            ApplicationInfo app = null;
-            final long token = Binder.clearCallingIdentity();
-            try {
-                app = AppGlobals.getPackageManager().getApplicationInfo(mPackage, 0, mUserId);
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Invalid application");
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-            String label = app.loadLabel(pm).toString();
-            // Load the icon and convert it into a bitmap.
-            Drawable icon = app.loadIcon(pm);
-            Bitmap bitmap = null;
-            if (icon.getIntrinsicWidth() > 0 && icon.getIntrinsicHeight() > 0) {
-                int width = mContext.getResources().getDimensionPixelSize(
-                        android.R.dimen.notification_large_icon_width);
-                int height = mContext.getResources().getDimensionPixelSize(
-                        android.R.dimen.notification_large_icon_height);
-                icon.setBounds(0, 0, width, height);
-                bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                Canvas c = new Canvas(bitmap);
-                icon.draw(c);
-                c.setBitmap(null);
-            }
-            showNotification(label, bitmap, user);
-        } else {
-            showNotification(null, null, user);
-        }
     }
 
     private void removeVpnUserLocked(int user) {
@@ -584,7 +578,6 @@ public class Vpn {
                 mNetworkAgent.removeUidRanges(new UidRange[] { uidRange });
             }
             mVpnUsers.remove(uidRange);
-            hideNotification(user);
     }
 
     private void onUserAdded(int userId) {
@@ -652,9 +645,6 @@ public class Vpn {
         public void interfaceRemoved(String interfaze) {
             synchronized (Vpn.this) {
                 if (interfaze.equals(mInterface) && jniCheck(interfaze) == 0) {
-                    for (UidRange uidRange : mVpnUsers) {
-                        hideNotification(uidRange.getStartUser());
-                    }
                     mVpnUsers = null;
                     mInterface = null;
                     if (mConnection != null) {
@@ -709,56 +699,6 @@ public class Vpn {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mService = null;
-        }
-    }
-
-    private void showNotification(String label, Bitmap icon, int user) {
-        if (!mEnableNotif) return;
-        final long token = Binder.clearCallingIdentity();
-        try {
-            mStatusIntent = VpnConfig.getIntentForStatusPanel(mContext);
-
-            NotificationManager nm = (NotificationManager)
-                    mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-
-            if (nm != null) {
-                String title = (label == null) ? mContext.getString(R.string.vpn_title) :
-                        mContext.getString(R.string.vpn_title_long, label);
-                String text = (mConfig.session == null) ? mContext.getString(R.string.vpn_text) :
-                        mContext.getString(R.string.vpn_text_long, mConfig.session);
-
-                Notification notification = new Notification.Builder(mContext)
-                        .setSmallIcon(R.drawable.vpn_connected)
-                        .setLargeIcon(icon)
-                        .setContentTitle(title)
-                        .setContentText(text)
-                        .setContentIntent(mStatusIntent)
-                        .setDefaults(0)
-                        .setOngoing(true)
-                        .setColor(mContext.getResources().getColor(
-                                com.android.internal.R.color.system_notification_accent_color))
-                        .build();
-                nm.notifyAsUser(null, R.drawable.vpn_connected, notification, new UserHandle(user));
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    private void hideNotification(int user) {
-        if (!mEnableNotif) return;
-        mStatusIntent = null;
-
-        NotificationManager nm = (NotificationManager)
-                mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (nm != null) {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                nm.cancelAsUser(null, R.drawable.vpn_connected, new UserHandle(user));
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
         }
     }
 
@@ -971,9 +911,6 @@ public class Vpn {
         final LegacyVpnInfo info = new LegacyVpnInfo();
         info.key = mConfig.user;
         info.state = LegacyVpnInfo.stateFromNetworkInfo(mNetworkInfo);
-        if (mNetworkInfo.isConnected()) {
-            info.intent = mStatusIntent;
-        }
         return info;
     }
 
