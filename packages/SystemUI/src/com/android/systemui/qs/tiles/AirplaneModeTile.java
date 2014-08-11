@@ -31,6 +31,8 @@ import com.android.systemui.qs.QSTile;
 public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
     private final GlobalSetting mSetting;
 
+    private boolean mListening;
+
     public AirplaneModeTile(Host host) {
         super(host);
 
@@ -79,6 +81,8 @@ public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
     }
 
     public void setListening(boolean listening) {
+        if (mListening == listening) return;
+        mListening = listening;
         if (listening) {
             final IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);

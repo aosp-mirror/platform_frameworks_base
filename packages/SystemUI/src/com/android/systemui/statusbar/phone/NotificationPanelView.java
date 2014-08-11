@@ -197,6 +197,20 @@ public class NotificationPanelView extends PanelView implements
         mAfforanceHelper = new KeyguardAffordanceHelper(this, getContext());
         mSecureCameraLaunchManager =
                 new SecureCameraLaunchManager(getContext(), mKeyguardBottomArea);
+
+        // recompute internal state when qspanel height changes
+        mQsContainer.addOnLayoutChangeListener(new OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right,
+                    int bottom, int oldLeft, int oldTop, int oldRight,
+                    int oldBottom) {
+                final int height = bottom - top;
+                final int oldHeight = oldBottom - oldTop;
+                if (height != oldHeight) {
+                    onScrollChanged();
+                }
+            }
+        });
     }
 
     @Override
