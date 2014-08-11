@@ -94,6 +94,9 @@ public class AudioTrack
     /** Maximum value for sample rate */
     private static final int SAMPLE_RATE_HZ_MAX = 48000;
 
+    /** Maximum value for AudioTrack channel count */
+    private static final int CHANNEL_COUNT_MAX = 8;
+
     /** indicates AudioTrack state is stopped */
     public static final int PLAYSTATE_STOPPED = 1;  // matches SL_PLAYSTATE_STOPPED
     /** indicates AudioTrack state is paused */
@@ -465,7 +468,9 @@ public class AudioTrack
             AudioFormat.CHANNEL_OUT_LOW_FREQUENCY |
             AudioFormat.CHANNEL_OUT_BACK_LEFT |
             AudioFormat.CHANNEL_OUT_BACK_RIGHT |
-            AudioFormat.CHANNEL_OUT_BACK_CENTER;
+            AudioFormat.CHANNEL_OUT_BACK_CENTER |
+            AudioFormat.CHANNEL_OUT_SIDE_LEFT |
+            AudioFormat.CHANNEL_OUT_SIDE_RIGHT;
 
     // Convenience method for the constructor's parameter checks.
     // This is where constructor IllegalArgumentException-s are thrown
@@ -541,6 +546,12 @@ public class AudioTrack
             loge("Channel configuration features unsupported channels");
             return false;
         }
+        final int channelCount = Integer.bitCount(channelConfig);
+        if (channelCount > CHANNEL_COUNT_MAX) {
+            loge("Channel configuration contains too many channels " +
+                    channelCount + ">" + CHANNEL_COUNT_MAX);
+            return false;
+        }
         // check for unsupported multichannel combinations:
         // - FL/FR must be present
         // - L/R channels must be paired (e.g. no single L channel)
@@ -557,6 +568,13 @@ public class AudioTrack
                 loge("Rear channels can't be used independently");
                 return false;
             }
+        }
+        final int sidePair =
+                AudioFormat.CHANNEL_OUT_SIDE_LEFT | AudioFormat.CHANNEL_OUT_SIDE_RIGHT;
+        if ((channelConfig & sidePair) != 0
+                && (channelConfig & sidePair) != sidePair) {
+            loge("Side channels can't be used independently");
+            return false;
         }
         return true;
     }
