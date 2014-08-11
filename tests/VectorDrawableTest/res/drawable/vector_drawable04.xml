@@ -16,7 +16,8 @@
             android:width="64dp"
             android:height="64dp"
             android:viewportWidth="7.30625"
-            android:viewportHeight="12.25">
+            android:viewportHeight="12.25"
+            android:autoMirrored="true">
 
     <group>
         <clip-path
