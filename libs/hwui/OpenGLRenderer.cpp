@@ -1641,8 +1641,9 @@ void OpenGLRenderer::setupDrawNoTexture() {
     mCaches.disableTexCoordsVertexArray();
 }
 
-void OpenGLRenderer::setupDrawAA() {
+void OpenGLRenderer::setupDrawAA(bool useShadowInterp) {
     mDescription.isAA = true;
+    mDescription.isShadowAA = useShadowInterp;
 }
 
 void OpenGLRenderer::setupDrawColor(int color, int alpha) {
@@ -2365,7 +2366,7 @@ status_t OpenGLRenderer::drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* 
 }
 
 status_t OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
-        const VertexBuffer& vertexBuffer, const SkPaint* paint, bool useOffset) {
+        const VertexBuffer& vertexBuffer, const SkPaint* paint, int displayFlags) {
     // not missing call to quickReject/dirtyLayer, always done at a higher level
     if (!vertexBuffer.getVertexCount()) {
         // no vertices to draw
@@ -2381,13 +2382,14 @@ status_t OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
 
     setupDraw();
     setupDrawNoTexture();
-    if (isAA) setupDrawAA();
+    if (isAA) setupDrawAA((displayFlags & kVertexBuffer_ShadowAA));
     setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
     setupDrawColorFilter(getColorFilter(paint));
     setupDrawShader(getShader(paint));
     setupDrawBlending(paint, isAA);
     setupDrawProgram();
-    setupDrawModelView(kModelViewMode_Translate, useOffset, translateX, translateY, 0, 0);
+    setupDrawModelView(kModelViewMode_Translate, (displayFlags & kVertexBuffer_Offset),
+            translateX, translateY, 0, 0);
     setupDrawColorUniforms(getShader(paint));
     setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawShaderUniforms(getShader(paint));
@@ -2396,7 +2398,6 @@ status_t OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
     bool force = mCaches.unbindMeshBuffer();
     mCaches.bindPositionVertexPointer(true, vertices, isAA ? gAlphaVertexStride : gVertexStride);
     mCaches.resetTexCoordsVertexPointer();
-
 
     int alphaSlot = -1;
     if (isAA) {
@@ -2466,8 +2467,8 @@ status_t OpenGLRenderer::drawLines(const float* points, int count, const SkPaint
         return DrawGlInfo::kStatusDone;
     }
 
-    bool useOffset = !paint->isAntiAlias();
-    return drawVertexBuffer(buffer, paint, useOffset);
+    int displayFlags = paint->isAntiAlias() ? 0 : kVertexBuffer_Offset;
+    return drawVertexBuffer(buffer, paint, displayFlags);
 }
 
 status_t OpenGLRenderer::drawPoints(const float* points, int count, const SkPaint* paint) {
@@ -2483,8 +2484,8 @@ status_t OpenGLRenderer::drawPoints(const float* points, int count, const SkPain
         return DrawGlInfo::kStatusDone;
     }
 
-    bool useOffset = !paint->isAntiAlias();
-    return drawVertexBuffer(buffer, paint, useOffset);
+    int displayFlags = paint->isAntiAlias() ? 0 : kVertexBuffer_Offset;
+    return drawVertexBuffer(buffer, paint, displayFlags);
 }
 
 status_t OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
@@ -3167,12 +3168,12 @@ status_t OpenGLRenderer::drawShadow(float casterAlpha,
 
     if (ambientShadowVertexBuffer && mAmbientShadowAlpha > 0) {
         paint.setARGB(casterAlpha * mAmbientShadowAlpha, 0, 0, 0);
-        drawVertexBuffer(*ambientShadowVertexBuffer, &paint);
+        drawVertexBuffer(*ambientShadowVertexBuffer, &paint, kVertexBuffer_ShadowAA);
     }
 
     if (spotShadowVertexBuffer && mSpotShadowAlpha > 0) {
         paint.setARGB(casterAlpha * mSpotShadowAlpha, 0, 0, 0);
-        drawVertexBuffer(*spotShadowVertexBuffer, &paint);
+        drawVertexBuffer(*spotShadowVertexBuffer, &paint, kVertexBuffer_ShadowAA);
     }
 
     return DrawGlInfo::kStatusDrew;
