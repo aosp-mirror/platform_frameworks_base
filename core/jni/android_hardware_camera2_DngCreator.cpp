@@ -428,7 +428,7 @@ InputStripSource::~InputStripSource() {}
 
 status_t InputStripSource::writeToStream(Output& stream, uint32_t count) {
     status_t err = OK;
-    uint32_t fullSize = mRowStride * mHeight;
+    uint32_t fullSize = mWidth * mHeight * mBytesPerSample * mSamplesPerPixel;
     jlong offset = mOffset;
 
     if (fullSize != count) {
@@ -560,7 +560,7 @@ DirectStripSource::DirectStripSource(JNIEnv* env, const uint8_t* pixelBytes, uin
 DirectStripSource::~DirectStripSource() {}
 
 status_t DirectStripSource::writeToStream(Output& stream, uint32_t count) {
-    uint32_t fullSize = mRowStride * mHeight;
+    uint32_t fullSize = mWidth * mHeight * mBytesPerSample * mSamplesPerPixel;
 
     if (fullSize != count) {
         ALOGE("%s: Amount to write %u doesn't match image size %u", __FUNCTION__, count,
