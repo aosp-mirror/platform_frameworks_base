@@ -41,6 +41,8 @@ import java.util.List;
  * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
  * &lt;!DOCTYPE rating-systems [
  *     &lt;!ELEMENT rating-system-definitions (rating-system-definition+)&gt;
+ *     &lt;!ATTLIST rating-system-definitions
+ *         version     CDATA #REQUIRED&gt;
  *     &lt;!ELEMENT rating-system-definition (
  *         (sub-rating-definition*, rating-definition, sub-rating-definition*)+, order*)&gt;
  *     &lt;!ATTLIST rating-system-definition
@@ -73,7 +75,7 @@ import java.util.List;
  * <u>System defined string for {@code domain}</u>
  * <table border="0" cellspacing="0" cellpadding="0">
  *     <tr>
- *         <td>String value</td>
+ *         <td width=10%>String value</td>
  *         <td>Comments</td>
  *     </tr>
  *     <tr>
@@ -85,7 +87,7 @@ import java.util.List;
  * <u>System defined string for {@code ratingSystem}</u>
  * <table border="0" cellspacing="0" cellpadding="0">
  *     <tr>
- *         <td>String value</td>
+ *         <td width=10%>String value</td>
  *         <td>Comments</td>
  *     </tr>
  *     <tr>
@@ -282,7 +284,7 @@ import java.util.List;
  * <u>System defined string for {@code rating}</u>
  * <table border="0" cellspacing="0" cellpadding="0">
  *     <tr>
- *         <td>String value</td>
+ *         <td width=10%>String value</td>
  *         <td>Comments</td>
  *     </tr>
  *     <tr>
@@ -767,7 +769,6 @@ import java.util.List;
  *     <tr>
  *         <td>IN_TV_S</td>
  *         <td>Public exhibition restricted to members of any profession or any class of persons
- *         <td>Public exhibition restricted to members of any profession or any class of persons
  *         </td>
  *     </tr>
  *     <tr>
@@ -860,7 +861,6 @@ import java.util.List;
  *     <tr>
  *         <td>MX_TV_A</td>
  *         <td>Appropriate for all ages, parental guidance is recommended for children under 7 years
- *         <td>Appropriate for all ages, parental guidance is recommended for children under 7 years
  *         </td>
  *     </tr>
  *     <tr>
@@ -870,7 +870,6 @@ import java.util.List;
  *     </tr>
  *     <tr>
  *         <td>MX_TV_B-15</td>
- *         <td>Designed for ages 15 and up, slightly more intensive than the \'A\' and \'B\' ratings
  *         <td>Designed for ages 15 and up, slightly more intensive than the \'A\' and \'B\' ratings
  *         </td>
  *     </tr>
@@ -1237,7 +1236,6 @@ import java.util.List;
  *     <tr>
  *         <td>US_TVPG_TV_PG</td>
  *         <td>This program contains material that parents may find unsuitable for younger children
- *         <td>This program contains material that parents may find unsuitable for younger children
  *         </td>
  *     </tr>
  *     <tr>
@@ -1310,7 +1308,7 @@ import java.util.List;
  * <u>System defined string for {@code subRating}</u>
  * <table border="0" cellspacing="0" cellpadding="0">
  *     <tr>
- *         <td>String value</td>
+ *         <td width=10%>String value</td>
  *         <td>Comments</td>
  *     </tr>
  *     <tr>
