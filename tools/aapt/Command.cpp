@@ -1163,8 +1163,15 @@ int doDump(Bundle* bundle)
                         fprintf(stderr, "ERROR getting 'android:versionName' attribute: %s\n", error.string());
                         goto bail;
                     }
-                    printf("versionName='%s'\n",
+                    printf("versionName='%s'",
                             ResTable::normalizeForOutput(versionName.string()).string());
+
+                    String8 splitName = getAttribute(tree, NULL, "split", NULL);
+                    if (!splitName.isEmpty()) {
+                        printf(" split='%s'", ResTable::normalizeForOutput(
+                                    splitName.string()).string());
+                    }
+                    printf("\n");
                 } else if (depth == 2) {
                     withinApplication = false;
                     if (tag == "application") {
