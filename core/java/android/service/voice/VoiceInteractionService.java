@@ -128,7 +128,7 @@ public class VoiceInteractionService extends Service {
         if (curComp == null) {
             return false;
         }
-        return curComp.equals(cur);
+        return curComp.equals(service);
     }
 
     /**
