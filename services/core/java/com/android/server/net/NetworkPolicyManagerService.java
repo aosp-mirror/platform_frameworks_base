@@ -38,8 +38,8 @@ import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkPolicyManager.EXTRA_NETWORK_TEMPLATE;
-import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_BACKGROUND_BATTERY_SAVE;
+import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
@@ -96,6 +96,7 @@ import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
+import android.net.LinkProperties;
 import android.net.NetworkIdentity;
 import android.net.NetworkInfo;
 import android.net.NetworkPolicy;
@@ -127,6 +128,7 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.NtpTrustedTime;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -141,6 +143,8 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.google.android.collect.Lists;
+
+import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -157,8 +161,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
-import libcore.io.IoUtils;
 
 /**
  * Service that maintains low-level network policy rules, using
@@ -1049,36 +1051,44 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // use over those networks can have a cost associated with it).
         final boolean powerSave = mRestrictPower && !mRestrictBackground;
 
-        // first, derive identity for all connected networks, which can be used
-        // to match against templates.
-        final ArrayMap<NetworkIdentity, String> networks = new ArrayMap<NetworkIdentity,
-                String>(states.length);
+        // First, generate identities of all connected networks so we can
+        // quickly compare them against all defined policies below.
+        final ArrayList<Pair<String, NetworkIdentity>> connIdents = new ArrayList<>(states.length);
         final ArraySet<String> connIfaces = new ArraySet<String>(states.length);
         for (NetworkState state : states) {
-            // stash identity and iface away for later use
             if (state.networkInfo.isConnected()) {
-                final String iface = state.linkProperties.getInterfaceName();
                 final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state);
-                networks.put(ident, iface);
+
+                final String baseIface = state.linkProperties.getInterfaceName();
+                connIdents.add(Pair.create(baseIface, ident));
                 if (powerSave) {
-                    connIfaces.add(iface);
+                    connIfaces.add(baseIface);
+                }
+
+                // Stacked interfaces are considered to have same identity as
+                // their parent network.
+                final List<LinkProperties> stackedLinks = state.linkProperties.getStackedLinks();
+                for (LinkProperties stackedLink : stackedLinks) {
+                    final String stackedIface = stackedLink.getInterfaceName();
+                    connIdents.add(Pair.create(stackedIface, ident));
+                    if (powerSave) {
+                        connIfaces.add(stackedIface);
+                    }
                 }
             }
         }
 
-        // build list of rules and ifaces to enforce them against
+        // Apply policies against all connected interfaces found above
         mNetworkRules.clear();
         final ArrayList<String> ifaceList = Lists.newArrayList();
-        for (int i = mNetworkPolicy.size()-1; i >= 0; i--) {
+        for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
             final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
 
-            // collect all active ifaces that match this template
             ifaceList.clear();
-            for (int j = networks.size()-1; j >= 0; j--) {
-                final NetworkIdentity ident = networks.keyAt(j);
-                if (policy.template.matches(ident)) {
-                    final String iface = networks.valueAt(j);
-                    ifaceList.add(iface);
+            for (int j = connIdents.size() - 1; j >= 0; j--) {
+                final Pair<String, NetworkIdentity> ident = connIdents.get(j);
+                if (policy.template.matches(ident.second)) {
+                    ifaceList.add(ident.first);
                 }
             }
 
@@ -1786,6 +1796,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 fout.println(mNetworkPolicy.valueAt(i).toString());
             }
             fout.decreaseIndent();
+
+            fout.print("Metered ifaces: "); fout.println(String.valueOf(mMeteredIfaces));
 
             fout.println("Policy for UIDs:");
             fout.increaseIndent();
