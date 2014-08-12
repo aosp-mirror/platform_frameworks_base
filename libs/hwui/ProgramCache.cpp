@@ -121,8 +121,12 @@ const char* gVS_Main_OutBitmapTexCoords =
 const char* gVS_Main_Position =
         "    vec4 transformedPosition = projection * transform * position;\n"
         "    gl_Position = transformedPosition;\n";
+
+const char* gVS_Main_ShadowAAVertexShape =
+        "    alpha = pow(vtxAlpha, 0.667);\n";
 const char* gVS_Main_AAVertexShape =
         "    alpha = vtxAlpha;\n";
+
 const char* gVS_Main_HasRoundRectClip =
         "    roundRectPos = (roundRectInvTransform * transformedPosition).xy;\n";
 const char* gVS_Footer =
@@ -237,6 +241,8 @@ const char* gFS_Main_ModulateColor =
         "    fragColor *= color.a;\n";
 const char* gFS_Main_AccountForAAVertexShape =
         "    fragColor *= alpha;\n";
+const char* gFS_Main_AccountForShadowAAVertexShape =
+        "    fragColor *= pow(alpha, 1.5);\n";
 
 const char* gFS_Main_FetchTexture[2] = {
         // Don't modulate
@@ -515,7 +521,11 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
             shader.append(gVS_Main_OutTexCoords);
         }
         if (description.isAA) {
-            shader.append(gVS_Main_AAVertexShape);
+            if (description.isShadowAA) {
+                shader.append(gVS_Main_ShadowAAVertexShape);
+            } else {
+                shader.append(gVS_Main_AAVertexShape);
+            }
         }
         if (description.hasColors) {
             shader.append(gVS_Main_OutColors);
@@ -750,7 +760,11 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         shader.append(gFS_Main_ApplyColorOp[description.colorOp]);
 
         if (description.isAA) {
-            shader.append(gFS_Main_AccountForAAVertexShape);
+            if (description.isShadowAA) {
+                shader.append(gFS_Main_AccountForShadowAAVertexShape);
+            } else {
+                shader.append(gFS_Main_AccountForAAVertexShape);
+            }
         }
 
         // Output the fragment
