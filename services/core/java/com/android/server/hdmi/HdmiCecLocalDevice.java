@@ -631,6 +631,7 @@ abstract class HdmiCecLocalDevice {
         synchronized (mLock) {
             mActiveRoutingPath = path;
         }
+        mService.setActivePortId(pathToPortId(path));
     }
 
     /**
@@ -649,11 +650,9 @@ abstract class HdmiCecLocalDevice {
      * @param portId the new active port id
      */
     void setActivePortId(int portId) {
-        synchronized (mLock) {
-            // We update active routing path instead, since we get the active port id from
-            // the active routing path.
-            mActiveRoutingPath = mService.portIdToPath(portId);
-        }
+        // We update active routing path instead, since we get the active port id from
+        // the active routing path.
+        setActivePath(mService.portIdToPath(portId));
     }
 
     @ServiceThreadOnly
