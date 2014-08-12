@@ -401,7 +401,9 @@ public class KeyguardAffordanceView extends ImageView {
             Interpolator interpolator, Runnable runnable) {
         cancelAnimator(mAlphaAnimator);
         int endAlpha = (int) (alpha * 255);
+        final Drawable background = getBackground();
         if (!animate) {
+            if (background != null) background.mutate().setAlpha(endAlpha);
             setImageAlpha(endAlpha);
         } else {
             int currentAlpha = getImageAlpha();
@@ -410,7 +412,9 @@ public class KeyguardAffordanceView extends ImageView {
             animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
-                    setImageAlpha((int) animation.getAnimatedValue());
+                    int alpha = (int) animation.getAnimatedValue();
+                    if (background != null) background.mutate().setAlpha(alpha);
+                    setImageAlpha(alpha);
                 }
             });
             animator.addListener(mAlphaEndListener);
