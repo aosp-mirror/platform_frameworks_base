@@ -86,28 +86,6 @@ public class WifiManager {
     public static final String EXTRA_SCAN_AVAILABLE = "scan_enabled";
 
     /**
-     * Broadcast intent action indicating that the credential of a Wi-Fi network
-     * has been changed. One extra provides the ssid of the network. Another
-     * extra provides the event type, whether the credential is saved or forgot.
-     * @hide
-     */
-    @SystemApi
-    public static final String WIFI_CREDENTIAL_CHANGED_ACTION =
-            "android.net.wifi.WIFI_CREDENTIAL_CHANGED";
-    /** @hide */
-    @SystemApi
-    public static final String EXTRA_WIFI_CREDENTIAL_EVENT_TYPE = "et";
-    /** @hide */
-    @SystemApi
-    public static final String EXTRA_WIFI_CREDENTIAL_SSID = "ssid";
-    /** @hide */
-    @SystemApi
-    public static final int WIFI_CREDENTIAL_SAVED = 0;
-    /** @hide */
-    @SystemApi
-    public static final int WIFI_CREDENTIAL_FORGOT = 1;
-
-    /**
      * Broadcast intent action indicating that Wi-Fi has been enabled, disabled,
      * enabling, disabling, or unknown. One extra provides this state as an int.
      * Another extra provides the previous state, if available.
