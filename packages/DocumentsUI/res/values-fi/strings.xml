@@ -30,6 +30,18 @@
     <string name="menu_share" msgid="3075149983979628146">"Jaa"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Poista"</string>
     <string name="menu_select" msgid="8711270657353563424">"Valitse <xliff:g id="DIRECTORY">^1</xliff:g>"</string>
+    <!-- no translation found for menu_advanced_show (4693652895715631401) -->
+    <skip />
+    <!-- no translation found for menu_advanced_show (5792182900084144261) -->
+    <skip />
+    <!-- no translation found for menu_advanced_hide (4218809952721972589) -->
+    <skip />
+    <!-- no translation found for menu_advanced_hide (4845869969015718848) -->
+    <skip />
+    <!-- no translation found for menu_file_size_show (3240323619260823076) -->
+    <skip />
+    <!-- no translation found for menu_file_size_hide (8881975928502581042) -->
+    <skip />
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> valittua"</string>
     <string name="sort_name" msgid="9183560467917256779">"Nimen mukaan"</string>
     <string name="sort_date" msgid="586080032956151448">"Muokkauspäivän mukaan"</string>
@@ -45,9 +57,6 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"Pikakuvakkeet"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Laitteet"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Lisää sovelluksia"</string>
-    <string name="pref_advanced_devices" msgid="903257239609301276">"Näytä kehittyneet laitteet"</string>
-    <string name="pref_file_size" msgid="2826879315743961459">"Näytä tiedoston koko"</string>
-    <string name="pref_device_size" msgid="3542106883278997222">"Näytä laitteen koko"</string>
     <string name="empty" msgid="7858882803708117596">"Ei kohteita"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Tiedostoa ei voi avata"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Joitakin asiakirjoja ei voi poistaa"</string>

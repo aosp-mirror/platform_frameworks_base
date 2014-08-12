@@ -30,6 +30,18 @@
     <string name="menu_share" msgid="3075149983979628146">"Distribuiți"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Ștergeți"</string>
     <string name="menu_select" msgid="8711270657353563424">"Selectați „<xliff:g id="DIRECTORY">^1</xliff:g>”"</string>
+    <!-- no translation found for menu_advanced_show (4693652895715631401) -->
+    <skip />
+    <!-- no translation found for menu_advanced_show (5792182900084144261) -->
+    <skip />
+    <!-- no translation found for menu_advanced_hide (4218809952721972589) -->
+    <skip />
+    <!-- no translation found for menu_advanced_hide (4845869969015718848) -->
+    <skip />
+    <!-- no translation found for menu_file_size_show (3240323619260823076) -->
+    <skip />
+    <!-- no translation found for menu_file_size_hide (8881975928502581042) -->
+    <skip />
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> selectate"</string>
     <string name="sort_name" msgid="9183560467917256779">"După nume"</string>
     <string name="sort_date" msgid="586080032956151448">"După data modificării"</string>
@@ -45,9 +57,6 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"Comenzi rapide"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Dispozitive"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Alte aplicații"</string>
-    <string name="pref_advanced_devices" msgid="903257239609301276">"Afișați dispozitive avansate"</string>
-    <string name="pref_file_size" msgid="2826879315743961459">"Afișați dimensiunile fișierelor"</string>
-    <string name="pref_device_size" msgid="3542106883278997222">"Afișați capacitatea de stocare a dispozitivelor"</string>
     <string name="empty" msgid="7858882803708117596">"Nu există elemente"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Fișierul nu poate fi deschis"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Unele documente nu au putut fi șterse"</string>
