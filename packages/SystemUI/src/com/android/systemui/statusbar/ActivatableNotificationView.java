@@ -263,7 +263,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mBackgroundNormal.setVisibility(View.INVISIBLE);
+                    if (mDimmed) {
+                        mBackgroundNormal.setVisibility(View.INVISIBLE);
+                    }
                 }
             });
             animator.reverse();
