@@ -157,6 +157,12 @@ public class RippleDrawable extends LayerDrawable {
     private boolean mOverrideBounds;
 
     /**
+     * Whether hotspots are being cleared. Used to prevent re-entry by
+     * animation finish listeners.
+     */
+    private boolean mClearingHotspots;
+
+    /**
      * Constructor used for drawable inflation.
      */
     RippleDrawable() {
@@ -524,6 +530,8 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     private void clearHotspots() {
+        mClearingHotspots = true;
+
         final int count = mAnimatingRipplesCount;
         final Ripple[] ripples = mAnimatingRipples;
         for (int i = 0; i < count; i++) {
@@ -532,11 +540,6 @@ public class RippleDrawable extends LayerDrawable {
             final Ripple ripple = ripples[i];
             ripples[i] = null;
             ripple.cancel();
-
-            // The active ripple may also be animating. Don't cancel it twice.
-            if (mRipple == ripple) {
-                mRipple = null;
-            }
         }
 
         if (mRipple != null) {
@@ -549,6 +552,7 @@ public class RippleDrawable extends LayerDrawable {
             mBackground = null;
         }
 
+        mClearingHotspots = false;
         mAnimatingRipplesCount = 0;
         invalidateSelf();
     }
@@ -647,15 +651,17 @@ public class RippleDrawable extends LayerDrawable {
      * @param ripple the ripple to remove
      */
     void removeRipple(Ripple ripple) {
-        // Ripple ripple ripple ripple. Ripple ripple.
-        final Ripple[] ripples = mAnimatingRipples;
-        final int count = mAnimatingRipplesCount;
-        final int index = getRippleIndex(ripple);
-        if (index >= 0) {
-            System.arraycopy(ripples, index + 1, ripples, index + 1 - 1, count - (index + 1));
-            ripples[count - 1] = null;
-            mAnimatingRipplesCount--;
-            invalidateSelf();
+        if (!mClearingHotspots) {
+            // Ripple ripple ripple ripple. Ripple ripple.
+            final Ripple[] ripples = mAnimatingRipples;
+            final int count = mAnimatingRipplesCount;
+            final int index = getRippleIndex(ripple);
+            if (index >= 0) {
+                System.arraycopy(ripples, index + 1, ripples, index + 1 - 1, count - (index + 1));
+                ripples[count - 1] = null;
+                mAnimatingRipplesCount--;
+                invalidateSelf();
+            }
         }
     }
 
