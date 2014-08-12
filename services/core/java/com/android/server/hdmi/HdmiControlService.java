@@ -239,6 +239,9 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private boolean mWakeUpMessageReceived = false;
 
+    @ServiceThreadOnly
+    private int mActivePortId = Constants.INVALID_PORT_ID;
+
     public HdmiControlService(Context context) {
         super(context);
         mLocalDevices = HdmiUtils.asImmutableList(getContext().getResources().getIntArray(
@@ -1717,5 +1720,11 @@ public final class HdmiControlService extends SystemService {
                 }
             });
         }
+    }
+
+    @ServiceThreadOnly
+    void setActivePortId(int portId) {
+        assertRunOnServiceThread();
+        mActivePortId = portId;
     }
 }
