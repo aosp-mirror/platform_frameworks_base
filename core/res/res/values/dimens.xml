@@ -389,4 +389,8 @@
      used on circular displays. In the case where there is no "chin", this will default
      to 0 -->
      <dimen name="circular_display_mask_offset">0px</dimen>
+
+     <dimen name="lock_pattern_dot_line_width">3dp</dimen>
+     <dimen name="lock_pattern_dot_size">12dp</dimen>
+     <dimen name="lock_pattern_dot_size_activated">28dp</dimen>
 </resources>
