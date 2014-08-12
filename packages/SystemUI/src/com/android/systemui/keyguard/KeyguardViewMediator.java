@@ -1200,23 +1200,29 @@ public class KeyguardViewMediator extends SystemUI {
     private void handleHide() {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleHide");
-            try {
-                mHiding = true;
-                if (mShowing && !mOccluded) {
 
-                    // Don't actually hide the Keyguard at the moment, wait for window manager until
-                    // it tells us it's safe to do so with startKeyguardExitAnimation.
-                    mWM.keyguardGoingAway();
-                } else {
+            mHiding = true;
+            if (mShowing && !mOccluded) {
+                mStatusBarKeyguardViewManager.startPreHideAnimation(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            // Don't actually hide the Keyguard at the moment, wait for window
+                            // manager until it tells us it's safe to do so with
+                            // startKeyguardExitAnimation.
+                            mWM.keyguardGoingAway();
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Error while calling WindowManager", e);
+                        }
+                    }
+                });
+            } else {
 
-                    // Don't try to rely on WindowManager - if Keyguard wasn't showing, window
-                    // manager won't start the exit animation.
-                    handleStartKeyguardExitAnimation(
-                            SystemClock.uptimeMillis() + mHideAnimation.getStartOffset(),
-                            mHideAnimation.getDuration());
-                }
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error while calling WindowManager", e);
+                // Don't try to rely on WindowManager - if Keyguard wasn't showing, window
+                // manager won't start the exit animation.
+                handleStartKeyguardExitAnimation(
+                        SystemClock.uptimeMillis() + mHideAnimation.getStartOffset(),
+                        mHideAnimation.getDuration());
             }
         }
     }

@@ -332,5 +332,10 @@ public class KeyguardAccountView extends LinearLayout implements KeyguardSecurit
     public void startAppearAnimation() {
         // TODO.
     }
+
+    @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        return false;
+    }
 }
 

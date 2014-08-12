@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.os.RemoteException;
 import android.util.Slog;

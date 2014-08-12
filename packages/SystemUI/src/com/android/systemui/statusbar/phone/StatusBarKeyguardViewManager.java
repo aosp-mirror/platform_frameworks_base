@@ -39,6 +39,10 @@ import static com.android.keyguard.KeyguardHostView.OnDismissAction;
  * {@link com.android.keyguard.KeyguardViewBase}.
  */
 public class StatusBarKeyguardViewManager {
+
+    // When hiding the Keyguard with timing supplied from WindowManager, better be early than late.
+    private static final long HIDE_TIMING_CORRECTION_MS = -3 * 16;
+
     private static String TAG = "StatusBarKeyguardViewManager";
 
     private final Context mContext;
@@ -199,13 +203,27 @@ public class StatusBarKeyguardViewManager {
     }
 
     /**
+     * Starts the animation before we dismiss Keyguard, i.e. an disappearing animation on the
+     * security view of the bouncer.
+     *
+     * @param finishRunnable the runnable to be run after the animation finished
+     */
+    public void startPreHideAnimation(Runnable finishRunnable) {
+        if (mBouncer.isShowing()) {
+            mBouncer.startPreHideAnimation(finishRunnable);
+        } else {
+            finishRunnable.run();
+        }
+    }
+
+    /**
      * Hides the keyguard view
      */
     public void hide(long startTime, final long fadeoutDuration) {
         mShowing = false;
 
         long uptimeMillis = SystemClock.uptimeMillis();
-        long delay = Math.max(0, startTime - uptimeMillis);
+        long delay = Math.max(0, startTime + HIDE_TIMING_CORRECTION_MS - uptimeMillis);
 
         if (mPhoneStatusBar.isInLaunchTransition() ) {
             mPhoneStatusBar.fadeKeyguardAfterLaunchTransition(new Runnable() {
@@ -213,8 +231,7 @@ public class StatusBarKeyguardViewManager {
                 public void run() {
                     mStatusBarWindowManager.setKeyguardShowing(false);
                     mStatusBarWindowManager.setKeyguardFadingAway(true);
-                    mBouncer.animateHide(PhoneStatusBar.FADE_KEYGUARD_START_DELAY,
-                            PhoneStatusBar.FADE_KEYGUARD_DURATION);
+                    mBouncer.hide(true /* destroyView */);
                     updateStates();
                     mScrimController.animateKeyguardFadingOut(
                             PhoneStatusBar.FADE_KEYGUARD_START_DELAY,
@@ -245,7 +262,7 @@ public class StatusBarKeyguardViewManager {
                 mPhoneStatusBar.finishKeyguardFadingAway();
             }
             mStatusBarWindowManager.setKeyguardShowing(false);
-            mBouncer.animateHide(delay, fadeoutDuration);
+            mBouncer.hide(true /* destroyView */);
             mViewMediatorCallback.keyguardGone();
             updateStates();
         }
