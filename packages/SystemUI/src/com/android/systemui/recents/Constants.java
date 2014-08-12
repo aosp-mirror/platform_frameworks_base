@@ -39,6 +39,8 @@ public class Constants {
             public static final boolean EnableSearchLayout = true;
             // Enables the dynamic shadows behind each task
             public static final boolean EnableShadows = true;
+            // Enables the thumbnail alpha on the front-most task
+            public static final boolean EnableThumbnailAlphaOnFrontmost = false;
             // This disables the bitmap and icon caches
             public static final boolean DisableBackgroundCache = false;
             // Enables the simulated task affiliations

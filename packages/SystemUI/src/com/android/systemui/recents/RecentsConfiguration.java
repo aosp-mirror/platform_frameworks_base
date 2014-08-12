@@ -81,6 +81,7 @@ public class RecentsConfiguration {
     public int taskViewRoundedCornerRadiusPx;
     public int taskViewHighlightPx;
     public int taskViewAffiliateGroupEnterOffsetPx;
+    public float taskViewThumbnailAlpha;
 
     /** Task bar colors */
     public int taskBarViewDefaultBackgroundColor;
@@ -217,6 +218,9 @@ public class RecentsConfiguration {
         taskViewTranslationZMaxPx = res.getDimensionPixelSize(R.dimen.recents_task_view_z_max);
         taskViewAffiliateGroupEnterOffsetPx =
                 res.getDimensionPixelSize(R.dimen.recents_task_view_affiliate_group_enter_offset);
+        TypedValue thumbnailAlphaValue = new TypedValue();
+        res.getValue(R.dimen.recents_task_view_thumbnail_alpha, thumbnailAlphaValue, true);
+        taskViewThumbnailAlpha = thumbnailAlphaValue.getFloat();
 
         // Task bar colors
         taskBarViewDefaultBackgroundColor =

@@ -73,6 +73,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     boolean mStackViewsDirty = true;
     boolean mAwaitingFirstLayout = true;
     boolean mStartEnterAnimationRequestedAfterLayout;
+    boolean mStartEnterAnimationCompleted;
     ViewAnimation.TaskViewEnterContext mStartEnterAnimationContext;
     int[] mTmpVisibleRange = new int[2];
     TaskViewTransform mTmpTransform = new TaskViewTransform();
@@ -609,6 +610,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
                 @Override
                 public void run() {
+                    mStartEnterAnimationCompleted = true;
                     // Start dozing
                     mUIDozeTrigger.startDozing();
                 }
@@ -812,6 +814,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // If the doze trigger has already fired, then update the state for this task view
         if (mUIDozeTrigger.hasTriggered()) {
             tv.setNoUserInteractionState();
+        }
+
+        // If we've finished the start animation, then ensure we always enable the focus animations
+        if (mStartEnterAnimationCompleted) {
+            tv.enableFocusAnimations();
         }
 
         // Find the index where this task should be placed in the stack
