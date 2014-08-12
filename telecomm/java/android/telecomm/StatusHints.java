@@ -27,6 +27,7 @@ import android.os.Parcelable;
 import android.util.DisplayMetrics;
 
 import java.util.MissingResourceException;
+import java.util.Objects;
 
 /**
  * Contains status label and icon displayed in the in-call UI.
@@ -126,5 +127,23 @@ public final class StatusHints implements Parcelable {
                     resId, mComponentName.getPackageName());
             return null;
         }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other != null && other instanceof StatusHints) {
+            StatusHints otherHints = (StatusHints) other;
+            return Objects.equals(otherHints.getComponentName(), getComponentName()) &&
+                    Objects.equals(otherHints.getLabel(), getLabel()) &&
+                    otherHints.getIconId() == getIconId() &&
+                    Objects.equals(otherHints.getExtras(), getExtras());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(mComponentName) + Objects.hashCode(mLabel) + mIconId +
+                Objects.hashCode(mExtras);
     }
 }
