@@ -20,7 +20,7 @@ Rename the PS name of the input font.
 OpenType fonts (*.otf) are not currently supported. They are copied to the destination without renaming.
 XML files are also copied in case they are passed there by mistake.
 
-Usage: build_font.py /path/to/input_font.ttf /path/to/output_font.ttf
+Usage: build_font_single.py /path/to/input_font.ttf /path/to/output_font.ttf
 
 """
 
@@ -67,7 +67,8 @@ EXTENSIONS = ['.ttf', '.otf', '.xml']
 
 def main(argv):
   if len(argv) < 2:
-    sys.exit('Usage: build_font.py /path/to/input/font.ttf /path/to/out/font.ttf')
+    print 'Incorrect usage: ' + str(argv)
+    sys.exit('Usage: build_font_single.py /path/to/input/font.ttf /path/to/out/font.ttf')
   dest_path = argv[-1]
   input_path = argv[0]
   extension = os.path.splitext(input_path)[1].lower()
