@@ -85,6 +85,7 @@ static jint android_media_MediaCodecList_findCodecByName(
     sp<IMediaCodecList> mcl = getCodecList(env);
     if (mcl == NULL) {
         // Runtime exception already pending.
+        env->ReleaseStringUTFChars(name, nameStr);
         return -ENOENT;
     }
 
@@ -162,7 +163,6 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
     }
 
     const char *typeStr = env->GetStringUTFChars(type, NULL);
-
     if (typeStr == NULL) {
         // Out of memory exception already pending.
         return NULL;
@@ -177,12 +177,12 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
     // TODO query default-format also from codec/codec list
     const sp<MediaCodecInfo::Capabilities> &capabilities =
         info->getCapabilitiesFor(typeStr);
+    env->ReleaseStringUTFChars(type, typeStr);
+    typeStr = NULL;
     if (capabilities == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return NULL;
     }
-    env->ReleaseStringUTFChars(type, typeStr);
-    typeStr = NULL;
 
     capabilities->getSupportedColorFormats(&colorFormats);
     capabilities->getSupportedProfileLevels(&profileLevels);
