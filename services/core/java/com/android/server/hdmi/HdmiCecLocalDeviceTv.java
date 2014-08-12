@@ -309,7 +309,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         // TODO: Return immediately if the operation is triggered by <Text/Image View On>
         // and this is the first notification about the active input after power-on
         // (switch to HDMI didn't happen so far but is expected to happen soon).
-        int oldPath = mService.portIdToPath(getActivePortId());
+        int oldPath = getActivePortId() != Constants.INVALID_PORT_ID
+                ? mService.portIdToPath(getActivePortId()) : getDeviceInfo().getPhysicalAddress();
         int newPath = mService.portIdToPath(portId);
         HdmiCecMessage routingChange =
                 HdmiCecMessageBuilder.buildRoutingChange(mAddress, oldPath, newPath);
@@ -336,11 +337,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (!action.isEmpty()) {
             action.get(0).processKeyEvent(keyCode, isPressed);
         } else {
-            if (isPressed) {
+            if (isPressed && getActiveSource().isValid()) {
                 int logicalAddress = getActiveSource().logicalAddress;
                 addAndStartAction(new SendKeyAction(this, logicalAddress, keyCode));
             } else {
-                Slog.w(TAG, "Discard key release event");
+                Slog.w(TAG, "Discard key event: " + keyCode + " pressed:" + isPressed);
             }
         }
     }
