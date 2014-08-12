@@ -690,6 +690,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         SpeedBumpView speedBump = (SpeedBumpView) LayoutInflater.from(mContext).inflate(
                         R.layout.status_bar_notification_speed_bump, mStackScroller, false);
         mStackScroller.setSpeedBumpView(speedBump);
+        mEmptyShadeView = (EmptyShadeView) LayoutInflater.from(mContext).inflate(
+                R.layout.status_bar_no_notifications, mStackScroller, false);
+        mStackScroller.setEmptyShadeView(mEmptyShadeView);
         mDismissView = (DismissView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_notification_dismiss_all, mStackScroller, false);
         mDismissView.setOnButtonClickListener(new View.OnClickListener() {
@@ -699,9 +702,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         });
         mStackScroller.setDismissView(mDismissView);
-        mEmptyShadeView = (EmptyShadeView) LayoutInflater.from(mContext).inflate(
-                R.layout.status_bar_no_notifications, mStackScroller, false);
-        mStackScroller.setEmptyShadeView(mEmptyShadeView);
         mExpandedContents = mStackScroller;
 
         mScrimController = new ScrimController(mStatusBarWindow.findViewById(R.id.scrim_behind),
