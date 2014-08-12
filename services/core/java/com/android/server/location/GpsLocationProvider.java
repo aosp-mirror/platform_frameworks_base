@@ -221,6 +221,14 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int GPS_GEOFENCE_ERROR_INVALID_TRANSITION = -103;
     private static final int GPS_GEOFENCE_ERROR_GENERIC = -149;
 
+    // Value of batterySaverGpsMode such that GPS isn't affected by battery saver mode.
+    private static final int BATTERY_SAVER_MODE_NO_CHANGE = 0;
+    // Value of batterySaverGpsMode such that GPS is disabled when battery saver mode
+    // is enabled and the screen is off.
+    private static final int BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF = 1;
+    // Secure setting for GPS behavior when battery saver mode is on.
+    private static final String BATTERY_SAVER_GPS_MODE = "batterySaverGpsMode";
+
     /** simpler wrapper for ProviderRequest + Worksource */
     private static class GpsRequest {
         public ProviderRequest request;
@@ -308,6 +316,13 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     private int mPositionMode;
 
+    // Current request from underlying location clients.
+    private ProviderRequest mProviderRequest = null;
+    // Current list of underlying location clients.
+    private WorkSource mWorkSource = null;
+    // True if gps should be disabled (used to support battery saver mode in settings).
+    private boolean mDisableGps = false;
+
     // properties loaded from PROPERTIES_FILE
     private Properties mProperties;
     private String mSuplServerHost;
@@ -352,6 +367,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // Alarms
     private final static String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
     private final static String ALARM_TIMEOUT = "com.android.internal.location.ALARM_TIMEOUT";
+    private final PowerManager mPowerManager;
     private final AlarmManager mAlarmManager;
     private final PendingIntent mWakeupIntent;
     private final PendingIntent mTimeoutIntent;
@@ -441,23 +457,27 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 checkSmsSuplInit(intent);
             } else if (action.equals(Intents.WAP_PUSH_RECEIVED_ACTION)) {
                 checkWapSuplInit(intent);
-             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                 int networkState;
-                 if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false)) {
-                     networkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
-                 } else {
-                     networkState = LocationProvider.AVAILABLE;
-                 }
+            } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                int networkState;
+                if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false)) {
+                    networkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
+                } else {
+                    networkState = LocationProvider.AVAILABLE;
+                }
 
-                 // retrieve NetworkInfo result for this UID
-                 NetworkInfo info =
-                         intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
-                 ConnectivityManager connManager = (ConnectivityManager)
-                         mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-                 info = connManager.getNetworkInfo(info.getType());
+                // retrieve NetworkInfo result for this UID
+                NetworkInfo info =
+                        intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+                ConnectivityManager connManager = (ConnectivityManager)
+                        mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+                info = connManager.getNetworkInfo(info.getType());
 
-                 updateNetworkState(networkState, info);
-             }
+                updateNetworkState(networkState, info);
+            } else if (PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(action)
+                    || Intent.ACTION_SCREEN_OFF.equals(action)
+                    || Intent.ACTION_SCREEN_ON.equals(action)) {
+                updateLowPowerMode();
+            }
         }
     };
 
@@ -472,6 +492,22 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private void checkWapSuplInit(Intent intent) {
         byte[] supl_init = (byte[]) intent.getExtra("data");
         native_agps_ni_message(supl_init,supl_init.length);
+    }
+
+    private void updateLowPowerMode() {
+        final boolean disableGps;
+        switch (Settings.Secure.getInt(mContext.getContentResolver(), BATTERY_SAVER_GPS_MODE,
+                BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF)) {
+            case BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF:
+                disableGps = mPowerManager.isPowerSaveMode() && !mPowerManager.isInteractive();
+                break;
+            default:
+                disableGps = false;
+        }
+        if (disableGps != mDisableGps) {
+            mDisableGps = disableGps;
+            updateRequirements();
+        }
     }
 
     public static boolean isSupported() {
@@ -526,8 +562,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
         mLocation.setExtras(mLocationExtras);
 
         // Create a wake lock
-        PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
+        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
         mWakeLock.setReferenceCounted(true);
 
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
@@ -604,6 +640,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
         intentFilter.addAction(ALARM_WAKEUP);
         intentFilter.addAction(ALARM_TIMEOUT);
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        intentFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
+        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         mContext.registerReceiver(mBroadcastReciever, intentFilter, null, mHandler);
     }
 
@@ -888,31 +927,43 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     private void handleSetRequest(ProviderRequest request, WorkSource source) {
+        mProviderRequest = request;
+        mWorkSource = source;
+        updateRequirements();
+    }
+
+    // Called when the requirements for GPS may have changed
+    private void updateRequirements() {
+        if (mProviderRequest == null || mWorkSource == null) {
+            return;
+        }
+
         boolean singleShot = false;
 
         // see if the request is for a single update
-        if (request.locationRequests != null && request.locationRequests.size() > 0) {
+        if (mProviderRequest.locationRequests != null
+                && mProviderRequest.locationRequests.size() > 0) {
             // if any request has zero or more than one updates
             // requested, then this is not single-shot mode
             singleShot = true;
 
-            for (LocationRequest lr : request.locationRequests) {
+            for (LocationRequest lr : mProviderRequest.locationRequests) {
                 if (lr.getNumUpdates() != 1) {
                     singleShot = false;
                 }
             }
         }
 
-        if (DEBUG) Log.d(TAG, "setRequest " + request);
-        if (request.reportLocation) {
+        if (DEBUG) Log.d(TAG, "setRequest " + mProviderRequest);
+        if (mProviderRequest.reportLocation && !mDisableGps) {
             // update client uids
-            updateClientUids(source);
+            updateClientUids(mWorkSource);
 
-            mFixInterval = (int) request.interval;
+            mFixInterval = (int) mProviderRequest.interval;
 
             // check for overflow
-            if (mFixInterval != request.interval) {
-                Log.w(TAG, "interval overflow: " + request.interval);
+            if (mFixInterval != mProviderRequest.interval) {
+                Log.w(TAG, "interval overflow: " + mProviderRequest.interval);
                 mFixInterval = Integer.MAX_VALUE;
             }
 
@@ -1909,6 +1960,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         StringBuilder s = new StringBuilder();
         s.append("  mFixInterval=").append(mFixInterval).append("\n");
+        s.append("  mDisableGps (battery saver mode)=").append(mDisableGps).append("\n");
         s.append("  mEngineCapabilities=0x").append(Integer.toHexString(mEngineCapabilities)).append(" (");
         if (hasCapability(GPS_CAPABILITY_SCHEDULING)) s.append("SCHED ");
         if (hasCapability(GPS_CAPABILITY_MSB)) s.append("MSB ");
@@ -2000,3 +2052,4 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private native boolean native_start_navigation_message_collection();
     private native boolean native_stop_navigation_message_collection();
 }
+
