@@ -25,6 +25,7 @@ import android.app.ActivityThread;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -159,6 +160,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected boolean mHeadsUpTicker = false;
     protected boolean mDisableNotificationAlerts = false;
 
+    protected DevicePolicyManager mDevicePolicyManager;
     protected IDreamManager mDreamManager;
     PowerManager mPowerManager;
     protected int mRowMinHeight;
@@ -299,6 +301,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                 userSwitched(mCurrentUserId);
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
                 updateCurrentProfilesCache();
+            } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(
+                    action)) {
+                mUsersAllowingPrivateNotifications.clear();
+                updateLockscreenNotificationSetting();
+                updateNotifications();
             }
         }
     };
@@ -379,6 +386,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
         mDisplay = mWindowManager.getDefaultDisplay();
+        mDevicePolicyManager = (DevicePolicyManager)mContext.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
 
         mNotificationData = new NotificationData(this);
 
@@ -478,6 +487,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
+        filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
         updateCurrentProfilesCache();
@@ -865,7 +875,11 @@ public abstract class BaseStatusBar extends SystemUI implements
             final boolean allowed = 0 != Settings.Secure.getIntForUser(
                     mContext.getContentResolver(),
                     Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0, userHandle);
-            mUsersAllowingPrivateNotifications.append(userHandle, allowed);
+            final int dpmFlags = mDevicePolicyManager.getKeyguardDisabledFeatures(null /* admin */,
+                    userHandle);
+            final boolean allowedByDpm = (dpmFlags
+                    & DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS) == 0;
+            mUsersAllowingPrivateNotifications.append(userHandle, allowed && allowedByDpm);
             return allowed;
         }
 
@@ -1455,7 +1469,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
                 1,
                 mCurrentUserId) != 0;
-        setShowLockscreenNotifications(show);
+        final int dpmFlags = mDevicePolicyManager.getKeyguardDisabledFeatures(
+                null /* admin */, mCurrentUserId);
+        final boolean allowedByDpm = (dpmFlags
+                & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS) == 0;
+        setShowLockscreenNotifications(show && allowedByDpm);
     }
 
     protected abstract void haltTicker();
