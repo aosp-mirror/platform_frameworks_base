@@ -363,9 +363,10 @@ UI, then the string tag is the only way to identify it. If you want to get the f
 activity later, you need to use {@link android.app.FragmentManager#findFragmentByTag
 findFragmentByTag()}.</p>
 
-<p>For an example activity that uses a fragment as a background worker, without a UI, see the <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentRetainInstance.html">{@code
-FragmentRetainInstance.java}</a> sample.</p>
+<p>For an example activity that uses a fragment as a background worker, without a UI, see the {@code
+FragmentRetainInstance.java} sample, which is included in the SDK samples (available through the
+Android SDK Manager) and located on your system as 
+<code>&lt;sdk_root&gt;/APIDemos/app/src/main/java/com/example/android/apis/app/FragmentRetainInstance.java</code>.</p>
 
 
 
