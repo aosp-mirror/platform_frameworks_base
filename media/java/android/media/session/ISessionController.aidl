@@ -48,8 +48,8 @@ interface ISessionController {
     PendingIntent getLaunchPendingIntent();
     long getFlags();
     ParcelableVolumeInfo getVolumeAttributes();
-    void adjustVolume(int direction, int flags);
-    void setVolumeTo(int value, int flags);
+    void adjustVolume(int direction, int flags, String packageName);
+    void setVolumeTo(int value, int flags, String packageName);
 
     IMediaRouterDelegate createMediaRouterDelegate(IMediaRouterStateCallback callback);
 

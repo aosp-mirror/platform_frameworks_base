@@ -79,6 +79,7 @@ import android.view.WindowManager;
 
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.util.XmlUtils;
+import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -635,6 +636,7 @@ public class AudioService extends IAudioService.Stub {
         mMasterVolumeRamp = context.getResources().getIntArray(
                 com.android.internal.R.array.config_masterVolumeRamp);
 
+        LocalServices.addService(AudioManagerInternal.class, new AudioServiceInternal());
     }
 
     public void systemReady() {
@@ -956,6 +958,11 @@ public class AudioService extends IAudioService.Stub {
     /** @see AudioManager#adjustStreamVolume(int, int, int) */
     public void adjustStreamVolume(int streamType, int direction, int flags,
             String callingPackage) {
+        adjustStreamVolume(streamType, direction, flags, callingPackage, Binder.getCallingUid());
+    }
+
+    private void adjustStreamVolume(int streamType, int direction, int flags,
+            String callingPackage, int uid) {
         if (mUseFixedVolume) {
             return;
         }
@@ -984,8 +991,8 @@ public class AudioService extends IAudioService.Stub {
             return;
         }
 
-        if (mAppOps.noteOp(STEAM_VOLUME_OPS[streamTypeAlias], Binder.getCallingUid(),
-                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+        if (mAppOps.noteOp(STEAM_VOLUME_OPS[streamTypeAlias], uid, callingPackage)
+                != AppOpsManager.MODE_ALLOWED) {
             return;
         }
 
@@ -1161,6 +1168,11 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#setStreamVolume(int, int, int) */
     public void setStreamVolume(int streamType, int index, int flags, String callingPackage) {
+        setStreamVolume(streamType, index, flags, callingPackage, Binder.getCallingUid());
+    }
+
+    private void setStreamVolume(int streamType, int index, int flags, String callingPackage,
+            int uid) {
         if (mUseFixedVolume) {
             return;
         }
@@ -1179,8 +1191,8 @@ public class AudioService extends IAudioService.Stub {
             return;
         }
 
-        if (mAppOps.noteOp(STEAM_VOLUME_OPS[streamTypeAlias], Binder.getCallingUid(),
-                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+        if (mAppOps.noteOp(STEAM_VOLUME_OPS[streamTypeAlias], uid, callingPackage)
+                != AppOpsManager.MODE_ALLOWED) {
             return;
         }
 
@@ -5344,6 +5356,24 @@ public class AudioService extends IAudioService.Stub {
             } catch (RemoteException e) {
                 Log.w(TAG, "Error calling dismiss", e);
             }
+        }
+    }
+
+    /**
+     * Interface for system components to get some extra functionality through
+     * LocalServices.
+     */
+    final class AudioServiceInternal extends AudioManagerInternal {
+        @Override
+        public void adjustStreamVolumeForUid(int streamType, int direction, int flags,
+                String callingPackage, int uid) {
+            adjustStreamVolume(streamType, direction, flags, callingPackage, uid);
+        }
+
+        @Override
+        public void setStreamVolumeForUid(int streamType, int direction, int flags,
+                String callingPackage, int uid) {
+            setStreamVolume(streamType, direction, flags, callingPackage, uid);
         }
     }
 
