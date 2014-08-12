@@ -2881,14 +2881,11 @@ public class AudioService extends IAudioService.Stub {
                                         (1 << AudioSystem.STREAM_SYSTEM);
 
         switch (mPlatformType) {
-            case PLATFORM_VOICE:
-                ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
-                break;
             case PLATFORM_TELEVISION:
                 ringerModeAffectedStreams = 0;
                 break;
             default:
-                ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
+                ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
                 break;
         }
 
