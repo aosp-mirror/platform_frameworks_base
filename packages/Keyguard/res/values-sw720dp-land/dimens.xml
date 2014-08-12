@@ -26,4 +26,6 @@
 
     <!-- Horizontal padding for the widget pager -->
     <dimen name="kg_widget_pager_horizontal_padding">32dp</dimen>
+
+    <dimen name="widget_big_font_size">150dp</dimen>
 </resources>

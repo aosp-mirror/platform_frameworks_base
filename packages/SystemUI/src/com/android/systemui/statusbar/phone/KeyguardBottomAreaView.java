@@ -24,15 +24,18 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -62,7 +65,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private KeyguardAffordanceView mCameraImageView;
     private KeyguardAffordanceView mPhoneImageView;
     private KeyguardAffordanceView mLockIcon;
-    private View mIndicationText;
+    private TextView mIndicationText;
     private ViewGroup mPreviewContainer;
 
     private View mPhonePreview;
@@ -101,7 +104,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mCameraImageView = (KeyguardAffordanceView) findViewById(R.id.camera_button);
         mPhoneImageView = (KeyguardAffordanceView) findViewById(R.id.phone_button);
         mLockIcon = (KeyguardAffordanceView) findViewById(R.id.lock_icon);
-        mIndicationText = findViewById(R.id.keyguard_indication_text);
+        mIndicationText = (TextView) findViewById(R.id.keyguard_indication_text);
         watchForCameraPolicyChanges();
         watchForAccessibilityChanges();
         updateCameraVisibility();
@@ -114,6 +117,23 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mPreviewInflater = new PreviewInflater(mContext, new LockPatternUtils(mContext));
         inflatePreviews();
         mLockIcon.setOnClickListener(this);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        int indicationBottomMargin = getResources().getDimensionPixelSize(
+                R.dimen.keyguard_indication_margin_bottom);
+        MarginLayoutParams mlp = (MarginLayoutParams) mIndicationText.getLayoutParams();
+        if (mlp.bottomMargin != indicationBottomMargin) {
+            mlp.bottomMargin = indicationBottomMargin;
+            mIndicationText.setLayoutParams(mlp);
+        }
+
+        // Respect font size setting.
+        mIndicationText.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.text_size_small_material));
     }
 
     public void setActivityStarter(ActivityStarter activityStarter) {
