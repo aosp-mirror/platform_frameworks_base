@@ -385,11 +385,14 @@ public class StackScrollAlgorithm {
 
                 // check if we are overlapping with the bottom stack
                 if (childViewState.yTranslation + childHeight + mPaddingBetweenElements
-                        >= bottomStackStart && !mIsExpansionChanging && i != 0) {
+                        >= bottomStackStart && !mIsExpansionChanging && i != 0 && mIsSmallScreen) {
                     // we just collapse this element slightly
                     int newSize = (int) Math.max(bottomStackStart - mPaddingBetweenElements -
                             childViewState.yTranslation, mCollapsedSize);
                     childViewState.height = newSize;
+                    updateStateForChildTransitioningInBottom(algorithmState, bottomStackStart,
+                            bottomPeekStart, childViewState.yTranslation, childViewState,
+                            childHeight);
                 }
                 clampPositionToBottomStackStart(childViewState, childViewState.height);
             } else if (nextYPosition >= bottomStackStart) {
