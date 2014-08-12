@@ -701,8 +701,13 @@ public final class ViewRootImpl implements ViewParent,
             final boolean forceHwAccelerated = (attrs.privateFlags &
                     WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED) != 0;
 
-            if (!HardwareRenderer.sRendererDisabled || (HardwareRenderer.sSystemRendererDisabled
-                    && forceHwAccelerated)) {
+            if (fakeHwAccelerated) {
+                // This is exclusively for the preview windows the window manager
+                // shows for launching applications, so they will look more like
+                // the app being launched.
+                mAttachInfo.mHardwareAccelerationRequested = true;
+            } else if (!HardwareRenderer.sRendererDisabled
+                    || (HardwareRenderer.sSystemRendererDisabled && forceHwAccelerated)) {
                 if (mAttachInfo.mHardwareRenderer != null) {
                     mAttachInfo.mHardwareRenderer.destroy();
                 }
@@ -714,13 +719,6 @@ public final class ViewRootImpl implements ViewParent,
                     mAttachInfo.mHardwareAccelerated =
                             mAttachInfo.mHardwareAccelerationRequested = true;
                 }
-            } else if (fakeHwAccelerated) {
-                // The window had wanted to use hardware acceleration, but this
-                // is not allowed in its process.  By setting this flag, it can
-                // still render as if it was accelerated.  This is basically for
-                // the preview windows the window manager shows for launching
-                // applications, so they will look more like the app being launched.
-                mAttachInfo.mHardwareAccelerationRequested = true;
             }
         }
     }
