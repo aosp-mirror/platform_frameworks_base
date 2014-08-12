@@ -153,7 +153,8 @@ public final class TvContract {
     /**
      * Builds a URI that points to all channels from a given TV input.
      *
-     * @param inputId The ID of the TV input to build a channels URI for.
+     * @param inputId The ID of the TV input to build a channels URI for. If {@code null}, builds a
+     *            URI for all the TV inputs.
      */
     public static final Uri buildChannelsUriForInput(String inputId) {
         return buildChannelsUriForInput(inputId, false);
@@ -162,43 +163,46 @@ public final class TvContract {
     /**
      * Builds a URI that points to all or browsable-only channels from a given TV input.
      *
-     * @param inputId The ID of the TV input to build a channels URI for.
+     * @param inputId The ID of the TV input to build a channels URI for. If {@code null}, builds a
+     *            URI for all the TV inputs.
      * @param browsableOnly If set to {@code true} the URI points to only browsable channels. If set
      *            to {@code false} the URI points to all channels regardless of whether they are
      *            browsable or not.
      * @hide
      */
+    @SystemApi
     public static final Uri buildChannelsUriForInput(String inputId, boolean browsableOnly) {
-        return Channels.CONTENT_URI.buildUpon()
-                .appendQueryParameter(PARAM_INPUT, inputId)
-                .appendQueryParameter(PARAM_BROWSABLE_ONLY, String.valueOf(browsableOnly)).build();
+        Uri.Builder builder = Channels.CONTENT_URI.buildUpon();
+        if (inputId != null) {
+            builder.appendQueryParameter(PARAM_INPUT, inputId);
+        }
+        return builder.appendQueryParameter(PARAM_BROWSABLE_ONLY, String.valueOf(browsableOnly))
+                .build();
     }
 
     /**
      * Builds a URI that points to all or browsable-only channels which have programs with the given
      * genre from the given TV input.
      *
-     * @param inputId The ID of the TV input to build a channels URI for. If null, builds a URI for
-     *            all the TV inputs.
-     * @param genre {@link Programs.Genres} to search.
+     * @param inputId The ID of the TV input to build a channels URI for. If {@code null}, builds a
+     *            URI for all the TV inputs.
+     * @param genre {@link Programs.Genres} to search. If {@code null}, builds a URI for all genres.
      * @param browsableOnly If set to {@code true} the URI points to only browsable channels. If set
      *            to {@code false} the URI points to all channels regardless of whether they are
      *            browsable or not.
      * @hide
      */
-    public static final Uri buildChannelsUriForCanonicalGenre(String inputId, String genre,
+    @SystemApi
+    public static final Uri buildChannelsUriForInput(String inputId, String genre,
             boolean browsableOnly) {
+        if (genre == null) {
+            return buildChannelsUriForInput(inputId, browsableOnly);
+        }
         if (!Programs.Genres.isCanonical(genre)) {
             throw new IllegalArgumentException("Not a canonical genre: '" + genre + "'");
         }
-
-        Uri uri;
-        if (inputId == null) {
-            uri = Channels.CONTENT_URI;
-        } else {
-            uri = buildChannelsUriForInput(inputId, browsableOnly);
-        }
-        return uri.buildUpon().appendQueryParameter(PARAM_CANONICAL_GENRE, genre).build();
+        return buildChannelsUriForInput(inputId, browsableOnly).buildUpon()
+                .appendQueryParameter(PARAM_CANONICAL_GENRE, genre).build();
     }
 
     /**
