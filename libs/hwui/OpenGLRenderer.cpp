@@ -1641,9 +1641,9 @@ void OpenGLRenderer::setupDrawNoTexture() {
     mCaches.disableTexCoordsVertexArray();
 }
 
-void OpenGLRenderer::setupDrawAA(bool useShadowInterp) {
-    mDescription.isAA = true;
-    mDescription.isShadowAA = useShadowInterp;
+void OpenGLRenderer::setupDrawVertexAlpha(bool useShadowAlphaInterp) {
+    mDescription.hasVertexAlpha = true;
+    mDescription.useShadowAlphaInterp = useShadowAlphaInterp;
 }
 
 void OpenGLRenderer::setupDrawColor(int color, int alpha) {
@@ -2382,7 +2382,7 @@ status_t OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
 
     setupDraw();
     setupDrawNoTexture();
-    if (isAA) setupDrawAA((displayFlags & kVertexBuffer_ShadowAA));
+    if (isAA) setupDrawVertexAlpha((displayFlags & kVertexBuffer_ShadowInterp));
     setupDrawColor(color, ((color >> 24) & 0xFF) * mSnapshot->alpha);
     setupDrawColorFilter(getColorFilter(paint));
     setupDrawShader(getShader(paint));
@@ -3168,12 +3168,12 @@ status_t OpenGLRenderer::drawShadow(float casterAlpha,
 
     if (ambientShadowVertexBuffer && mAmbientShadowAlpha > 0) {
         paint.setARGB(casterAlpha * mAmbientShadowAlpha, 0, 0, 0);
-        drawVertexBuffer(*ambientShadowVertexBuffer, &paint, kVertexBuffer_ShadowAA);
+        drawVertexBuffer(*ambientShadowVertexBuffer, &paint, kVertexBuffer_ShadowInterp);
     }
 
     if (spotShadowVertexBuffer && mSpotShadowAlpha > 0) {
         paint.setARGB(casterAlpha * mSpotShadowAlpha, 0, 0, 0);
-        drawVertexBuffer(*spotShadowVertexBuffer, &paint, kVertexBuffer_ShadowAA);
+        drawVertexBuffer(*spotShadowVertexBuffer, &paint, kVertexBuffer_ShadowInterp);
     }
 
     return DrawGlInfo::kStatusDrew;
