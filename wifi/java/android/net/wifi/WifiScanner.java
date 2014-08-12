@@ -634,6 +634,10 @@ public class WifiScanner {
          * @param results list of scan results, one for each access point visible currently
          */
         public void onFound(ScanResult[] results);
+        /** indicates that access points were missed by on going scans
+         * @param results list of scan results, for each access point that is not visible anymore
+         */
+        public void onLost(ScanResult[] results);
     }
 
     /** @hide */
@@ -983,6 +987,10 @@ public class WifiScanner {
                     return;
                 case CMD_AP_FOUND:
                     ((BssidListener) listener).onFound(
+                            ((ParcelableScanResults) msg.obj).getResults());
+                    return;
+                case CMD_AP_LOST:
+                    ((BssidListener) listener).onLost(
                             ((ParcelableScanResults) msg.obj).getResults());
                     return;
                 case CMD_WIFI_CHANGE_DETECTED:
