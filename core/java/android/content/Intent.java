@@ -2279,15 +2279,20 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.DIGITAL_AUDIO_DOCK_PLUG";
 
     /**
-     * Broadcast Action: A HMDI cable was plugged or unplugged
+     * Broadcast Action: A sticky broadcast indicating an HMDI cable was plugged or unplugged
      *
      * <p>The intent will have the following extra values:
      * <ul>
      *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
      *   <li><em>name</em> - HDMI cable, human readable string </li>
+     *   <li><em>maxChannelCount</em> - the maximum number of output channels supported by the
+     *       connected HDMI device, only available when <i>state</i> is 1.</li>
+     *   <li><em>encodings</em> - an array of formats supported by the connected HDMI device,
+     *       only available when <i>state</i> is 1. Encoding values are defined in
+     *       {@link android.media.AudioFormat} (for instance see
+     *       {@link android.media.AudioFormat#ENCODING_PCM_16BIT}). Use
+     *       {@link #getIntArrayExtra(String)} to retrieve the encoding values.</li>
      * </ul>
-     * </ul>
-     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_HDMI_AUDIO_PLUG =

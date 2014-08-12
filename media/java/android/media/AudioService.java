@@ -4389,7 +4389,7 @@ public class AudioService extends IAudioService.Stub {
             intent.setAction(Intent.ACTION_DIGITAL_AUDIO_DOCK_PLUG);
         } else if (device == AudioSystem.DEVICE_OUT_HDMI) {
             connType = AudioRoutesInfo.MAIN_HDMI;
-            intent.setAction(Intent.ACTION_HDMI_AUDIO_PLUG);
+            configureHdmiPlugIntent(intent, state);
         }
 
         synchronized (mCurAudioRoutes) {
@@ -4467,6 +4467,49 @@ public class AudioService extends IAudioService.Stub {
             }
             if (!isUsb && (device != AudioSystem.DEVICE_IN_WIRED_HEADSET)) {
                 sendDeviceConnectionIntent(device, state, name);
+            }
+        }
+    }
+
+    private void configureHdmiPlugIntent(Intent intent, int state) {
+        intent.setAction(Intent.ACTION_HDMI_AUDIO_PLUG);
+        if (state == 1) {
+            ArrayList<AudioPort> ports = new ArrayList<AudioPort>();
+            int[] portGeneration = new int[1];
+            int status = AudioSystem.listAudioPorts(ports, portGeneration);
+            if (status == AudioManager.SUCCESS) {
+                for (AudioPort port : ports) {
+                    if (port instanceof AudioDevicePort) {
+                        final AudioDevicePort devicePort = (AudioDevicePort) port;
+                        if (devicePort.type() == AudioManager.DEVICE_OUT_HDMI) {
+                            // format the list of supported encodings
+                            int[] formats = devicePort.formats();
+                            if (formats.length > 0) {
+                                ArrayList<Integer> encodingList = new ArrayList(1);
+                                for (int format : formats) {
+                                    // a format in the list can be 0, skip it
+                                    if (format != AudioFormat.ENCODING_INVALID) {
+                                        encodingList.add(format);
+                                    }
+                                }
+                                int[] encodingArray = new int[encodingList.size()];
+                                for (int i = 0 ; i < encodingArray.length ; i++) {
+                                    encodingArray[i] = encodingList.get(i);
+                                }
+                                intent.putExtra("encodings", encodingArray);
+                            }
+                            // find the maximum supported number of channels
+                            int maxChannels = 0;
+                            for (int mask : devicePort.channelMasks()) {
+                                int channelCount = AudioFormat.channelCountFromOutChannelMask(mask);
+                                if (channelCount > maxChannels) {
+                                    maxChannels = channelCount;
+                                }
+                            }
+                            intent.putExtra("maxChannelCount", maxChannels);
+                        }
+                    }
+                }
             }
         }
     }
