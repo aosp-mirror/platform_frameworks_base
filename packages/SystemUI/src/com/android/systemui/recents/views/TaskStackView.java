@@ -349,9 +349,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /** Updates the min and max virtual scroll bounds */
-    void updateMinMaxScroll(boolean boundScrollToNewMinMax, boolean launchedWithAltTab) {
+    void updateMinMaxScroll(boolean boundScrollToNewMinMax, boolean launchedWithAltTab,
+            boolean launchedFromHome) {
         // Compute the min and max scroll values
-        mLayoutAlgorithm.computeMinMaxScroll(mStack.getTasks(), launchedWithAltTab);
+        mLayoutAlgorithm.computeMinMaxScroll(mStack.getTasks(), launchedWithAltTab, launchedFromHome);
 
         // Debug logging
         if (boundScrollToNewMinMax) {
@@ -366,6 +367,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /** Focuses the task at the specified index in the stack */
     void focusTask(int taskIndex, boolean scrollToNewPosition) {
+        // Return early if the task is already focused
+        if (taskIndex == mFocusedTaskIndex) return;
+
         if (0 <= taskIndex && taskIndex < mStack.getTaskCount()) {
             mFocusedTaskIndex = taskIndex;
 
@@ -406,14 +410,24 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     void focusNextTask(boolean forward) {
         // Find the next index to focus
         int numTasks = mStack.getTaskCount();
-        if (mFocusedTaskIndex < 0) {
-            mFocusedTaskIndex = numTasks - 1;
-        }
+        if (numTasks == 0) return;
+
+        int nextFocusIndex = numTasks - 1;
         if (0 <= mFocusedTaskIndex && mFocusedTaskIndex < numTasks) {
-            mFocusedTaskIndex = Math.max(0, Math.min(numTasks - 1,
+            nextFocusIndex = Math.max(0, Math.min(numTasks - 1,
                     mFocusedTaskIndex + (forward ? -1 : 1)));
         }
-        focusTask(mFocusedTaskIndex, true);
+        focusTask(nextFocusIndex, true);
+    }
+
+    /** Dismisses the focused task. */
+    public void dismissFocusedTask() {
+        // Return early if there is no focused task index
+        if (mFocusedTaskIndex < 0) return;
+
+        Task t = mStack.getTasks().get(mFocusedTaskIndex);
+        TaskView tv = getChildViewForTask(t);
+        tv.dismissTask();
     }
 
     @Override
@@ -436,12 +450,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /** Computes the stack and task rects */
     public void computeRects(int windowWidth, int windowHeight, Rect taskStackBounds,
-                             boolean launchedWithAltTab) {
+            boolean launchedWithAltTab, boolean launchedFromHome) {
         // Compute the rects in the stack algorithm
         mLayoutAlgorithm.computeRects(windowWidth, windowHeight, taskStackBounds);
 
         // Update the scroll bounds
-        updateMinMaxScroll(false, launchedWithAltTab);
+        updateMinMaxScroll(false, launchedWithAltTab, launchedFromHome);
     }
 
     /**
@@ -456,7 +470,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Compute our stack/task rects
         Rect taskStackBounds = new Rect(mTaskStackBounds);
         taskStackBounds.bottom -= mConfig.systemInsets.bottom;
-        computeRects(width, height, taskStackBounds, mConfig.launchedWithAltTab);
+        computeRects(width, height, taskStackBounds, mConfig.launchedWithAltTab,
+                mConfig.launchedFromHome);
 
         // If this is the first layout, then scroll to the front of the stack and synchronize the
         // stack views immediately to load all the views
@@ -546,7 +561,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // When Alt-Tabbing, we scroll to and focus the previous task
         if (mConfig.launchedWithAltTab) {
-            focusTask(Math.max(0, mStack.getTaskCount() - 2), false);
+            if (mConfig.launchedFromHome) {
+                focusTask(Math.max(0, mStack.getTaskCount() - 1), false);
+            } else {
+                focusTask(Math.max(0, mStack.getTaskCount() - 2), false);
+            }
         }
     }
 
@@ -661,7 +680,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mCb.onTaskViewDismissed(removedTask);
 
         // Update the min/max scroll and animate other task views into their new positions
-        updateMinMaxScroll(true, mConfig.launchedWithAltTab);
+        updateMinMaxScroll(true, mConfig.launchedWithAltTab, mConfig.launchedFromHome);
         requestSynchronizeStackViewsWithModel(200);
 
         // Update the new front most task
@@ -859,11 +878,23 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     public void onTaskViewDismissed(TaskView tv) {
         Task task = tv.getTask();
+        int taskIndex = mStack.indexOfTask(task);
+        boolean taskWasFocused = tv.isFocusedTask();
         // Announce for accessibility
         tv.announceForAccessibility(getContext().getString(R.string.accessibility_recents_item_dismissed,
                 tv.getTask().activityLabel));
         // Remove the task from the view
         mStack.removeTask(task);
+        // If the dismissed task was focused, then we should focus the next task in front
+        if (taskWasFocused) {
+            ArrayList<Task> tasks = mStack.getTasks();
+            int nextTaskIndex = Math.min(tasks.size() - 1, taskIndex);
+            if (nextTaskIndex >= 0) {
+                Task nextTask = tasks.get(nextTaskIndex);
+                TaskView nextTv = getChildViewForTask(nextTask);
+                nextTv.setFocusedTask();
+            }
+        }
     }
 
     @Override
@@ -874,6 +905,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     public void onTaskViewFullScreenTransitionCompleted() {
         requestSynchronizeStackViewsWithModel();
+    }
+
+    @Override
+    public void onTaskViewFocusChanged(TaskView tv, boolean focused) {
+        if (focused) {
+            mFocusedTaskIndex = mStack.indexOfTask(tv.getTask());
+        }
     }
 
     /**** TaskStackViewScroller.TaskStackViewScrollerCallbacks ****/

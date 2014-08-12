@@ -20,6 +20,7 @@ import android.graphics.Color;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.NamedCounter;
+import com.android.systemui.recents.misc.Utilities;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -433,10 +434,8 @@ public class TaskStack {
                 float alpha = 1f;
                 for (int j = 0; j < taskCount; j++) {
                     Task t = tasksMap.get(group.mTaskKeys.get(j));
-                    t.colorPrimary = Color.rgb(
-                            (int) (alpha * Color.red(affiliationColor) + (1f - alpha) * 0xFF),
-                            (int) (alpha * Color.green(affiliationColor) + (1f - alpha) * 0xFF),
-                            (int) (alpha * Color.blue(affiliationColor) + (1f - alpha) * 0xFF));
+                    t.colorPrimary = Utilities.getColorWithOverlay(affiliationColor, Color.WHITE,
+                            alpha);
                     alpha -= alphaStep;
                 }
             }
