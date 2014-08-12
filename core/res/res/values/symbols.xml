@@ -1041,14 +1041,12 @@
   <java-symbol type="drawable" name="text_edit_side_paste_window" />
   <java-symbol type="drawable" name="text_edit_paste_window" />
   <java-symbol type="drawable" name="btn_check_off" />
-  <java-symbol type="drawable" name="btn_code_lock_default_mtrl_alpha" />
-  <java-symbol type="drawable" name="btn_code_lock_touched_mtrl_alpha" />
-  <java-symbol type="drawable" name="indicator_code_lock_point_area_default_mtrl_alpha" />
-  <java-symbol type="drawable" name="indicator_code_lock_point_area_mtrl_alpha" />
-  <java-symbol type="drawable" name="indicator_code_lock_drag_direction_up_mtrl_alpha" />
   <java-symbol type="color" name="lock_pattern_view_regular_color" />
   <java-symbol type="color" name="lock_pattern_view_success_color" />
   <java-symbol type="color" name="lock_pattern_view_error_color" />
+  <java-symbol type="dimen" name="lock_pattern_dot_line_width" />
+  <java-symbol type="dimen" name="lock_pattern_dot_size" />
+  <java-symbol type="dimen" name="lock_pattern_dot_size_activated" />
   <java-symbol type="drawable" name="clock_dial" />
   <java-symbol type="drawable" name="clock_hand_hour" />
   <java-symbol type="drawable" name="clock_hand_minute" />
