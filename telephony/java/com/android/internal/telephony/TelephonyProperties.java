@@ -209,14 +209,4 @@ public interface TelephonyProperties
      * Set to the sim count.
      */
     static final String PROPERTY_SIM_COUNT = "ro.telephony.sim.count";
-
-    /**
-     * Enable VoLTE/VT over IMS: debug option
-     * If 1: use IMS if provisioned/registered etc (i.e. standard operation)
-     * If 0: use CS.
-     * If missing: use PROPERTY_DBG_IMS_VOLTE_ENABLE_DEAFULT
-     */
-    static final String PROPERTY_DBG_IMS_VOLTE_ENABLE = "persist.dbg.ims_volte_enable";
-
-    static final int PROPERTY_DBG_IMS_VOLTE_ENABLE_DEAFULT = 0;
 }
