@@ -238,14 +238,13 @@ public class VectorDrawable extends Drawable {
 
     @Override
     public void draw(Canvas canvas) {
-        final int saveCount = canvas.save();
         final Rect bounds = getBounds();
-
         if (bounds.width() == 0 || bounds.height() == 0) {
             // too small to draw
             return;
         }
 
+        final int saveCount = canvas.save();
         final boolean needMirroring = needMirroring();
 
         canvas.translate(bounds.left, bounds.top);
