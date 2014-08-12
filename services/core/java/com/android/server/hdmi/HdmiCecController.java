@@ -94,13 +94,14 @@ final class HdmiCecController {
     // interacts with HAL.
     private volatile long mNativePtr;
 
-    private HdmiControlService mService;
+    private final HdmiControlService mService;
 
     // Stores the local CEC devices in the system. Device type is used for key.
     private final SparseArray<HdmiCecLocalDevice> mLocalDevices = new SparseArray<>();
 
     // Private constructor.  Use HdmiCecController.create().
-    private HdmiCecController() {
+    private HdmiCecController(HdmiControlService service) {
+        mService = service;
     }
 
     /**
@@ -114,21 +115,20 @@ final class HdmiCecController {
      *         returns {@code null}.
      */
     static HdmiCecController create(HdmiControlService service) {
-        HdmiCecController controller = new HdmiCecController();
+        HdmiCecController controller = new HdmiCecController(service);
         long nativePtr = nativeInit(controller, service.getServiceLooper().getQueue());
         if (nativePtr == 0L) {
             controller = null;
             return null;
         }
 
-        controller.init(service, nativePtr);
+        controller.init(nativePtr);
         return controller;
     }
 
-    private void init(HdmiControlService service, long nativePtr) {
-        mService = service;
-        mIoHandler = new Handler(service.getServiceLooper());
-        mControlHandler = new Handler(service.getServiceLooper());
+    private void init(long nativePtr) {
+        mIoHandler = new Handler(mService.getServiceLooper());
+        mControlHandler = new Handler(mService.getServiceLooper());
         mNativePtr = nativePtr;
     }
 
