@@ -1217,7 +1217,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         r.task.stack.setLaunchTime(r);
 
-        if (app != null && app.thread != null && !app.killedByAm) {
+        if (app != null && app.thread != null) {
             try {
                 if ((r.info.flags&ActivityInfo.FLAG_MULTIPROCESS) == 0
                         || !"android".equals(r.info.packageName)) {
