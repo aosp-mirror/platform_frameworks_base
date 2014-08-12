@@ -80,6 +80,10 @@ public class BidiRenderer {
         mText = text;
         mFonts = new ArrayList<Font>(paint.getFonts().size());
         for (FontInfo fontInfo : paint.getFonts()) {
+            if (fontInfo == null) {
+                mFonts.add(null);
+                continue;
+            }
             mFonts.add(fontInfo.mFont);
         }
         mBounds = new RectF();
