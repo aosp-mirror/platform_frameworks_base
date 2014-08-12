@@ -26,6 +26,22 @@
     android:fitsSystemWindows="true"
     android:descendantFocusability="afterDescendants">
 
+    <FrameLayout android:id="@+id/brightness_mirror"
+            android:layout_width="@dimen/notification_panel_width"
+            android:layout_height="wrap_content"
+            android:layout_gravity="@integer/notification_panel_layout_gravity"
+            android:paddingLeft="@dimen/notification_side_padding"
+            android:paddingRight="@dimen/notification_side_padding"
+            android:visibility="gone">
+        <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:elevation="2dp"
+                android:background="@drawable/brightness_mirror_background">
+            <include layout="@layout/quick_settings_brightness_dialog" />
+        </FrameLayout>
+    </FrameLayout>
+
     <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
             android:id="@+id/backdrop"
             android:layout_width="match_parent"
