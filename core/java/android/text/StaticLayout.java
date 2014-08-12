@@ -483,7 +483,7 @@ public class StaticLayout extends Layout {
                 mLineCount < mMaximumVisibleLineCount) {
             // Log.e("text", "output last " + bufEnd);
 
-            measured.setPara(source, bufStart, bufEnd, textDir);
+            measured.setPara(source, bufEnd, bufEnd, textDir);
 
             paint.getFontMetricsInt(fm);
 
