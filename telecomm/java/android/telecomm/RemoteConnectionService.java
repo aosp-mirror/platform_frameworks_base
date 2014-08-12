@@ -232,7 +232,6 @@ final class RemoteConnectionService {
 
     RemoteConnectionService(IConnectionService connectionService) throws RemoteException {
         mConnectionService = connectionService;
-        mConnectionService.addConnectionServiceAdapter(mServant.getStub());
         mConnectionService.asBinder().linkToDeath(mDeathRecipient, 0);
     }
 
@@ -245,7 +244,7 @@ final class RemoteConnectionService {
             PhoneAccountHandle connectionManagerPhoneAccount,
             ConnectionRequest request,
             boolean isIncoming) {
-        ConnectionRequest newRequest = new ConnectionRequest(
+        final ConnectionRequest newRequest = new ConnectionRequest(
                 request.getAccountHandle(),
                 UUID.randomUUID().toString(),
                 request.getHandle(),
@@ -253,14 +252,29 @@ final class RemoteConnectionService {
                 request.getExtras(),
                 request.getVideoState());
         try {
+            if (mConnectionById.isEmpty()) {
+                mConnectionService.addConnectionServiceAdapter(mServant.getStub());
+            }
+            RemoteConnection connection =
+                    new RemoteConnection(mConnectionService, newRequest);
+            mPendingConnections.add(connection);
+            mConnectionById.put(newRequest.getCallId(), connection);
             mConnectionService.createConnection(
                     connectionManagerPhoneAccount,
                     newRequest,
                     isIncoming);
-            RemoteConnection connection =
-                    new RemoteConnection(mConnectionService, request);
-            mPendingConnections.add(connection);
-            mConnectionById.put(newRequest.getCallId(), connection);
+            connection.addListener(new RemoteConnection.Listener() {
+                @Override
+                public void onDestroyed(RemoteConnection connection) {
+                    mConnectionById.remove(newRequest.getCallId());
+                    if (mConnectionById.isEmpty()) {
+                        try {
+                            mConnectionService.removeConnectionServiceAdapter(mServant.getStub());
+                        } catch (RemoteException e) {
+                        }
+                    }
+                }
+            });
             return connection;
         } catch (RemoteException e) {
             return RemoteConnection.failure(DisconnectCause.ERROR_UNSPECIFIED, e.toString());

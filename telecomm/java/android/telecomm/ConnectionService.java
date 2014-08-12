@@ -45,7 +45,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * A {@link android.app.Service} that provides telephone connections to processes running on an
@@ -61,7 +60,7 @@ public abstract class ConnectionService extends Service {
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
 
-    private static final int MSG_ADD_CALL_SERVICE_ADAPTER = 1;
+    private static final int MSG_ADD_CONNECTION_SERVICE_ADAPTER = 1;
     private static final int MSG_CREATE_CONNECTION = 2;
     private static final int MSG_ABORT = 3;
     private static final int MSG_ANSWER = 4;
@@ -77,6 +76,7 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_SWAP_WITH_BACKGROUND_CALL = 14;
     private static final int MSG_ON_POST_DIAL_CONTINUE = 15;
     private static final int MSG_ON_PHONE_ACCOUNT_CLICKED = 16;
+    private static final int MSG_REMOVE_CONNECTION_SERVICE_ADAPTER = 17;
 
     private static Connection sNullConnection;
 
@@ -122,7 +122,11 @@ public abstract class ConnectionService extends Service {
     private final IBinder mBinder = new IConnectionService.Stub() {
         @Override
         public void addConnectionServiceAdapter(IConnectionServiceAdapter adapter) {
-            mHandler.obtainMessage(MSG_ADD_CALL_SERVICE_ADAPTER, adapter).sendToTarget();
+            mHandler.obtainMessage(MSG_ADD_CONNECTION_SERVICE_ADAPTER, adapter).sendToTarget();
+        }
+
+        public void removeConnectionServiceAdapter(IConnectionServiceAdapter adapter) {
+            mHandler.obtainMessage(MSG_REMOVE_CONNECTION_SERVICE_ADAPTER, adapter).sendToTarget();
         }
 
         @Override
@@ -224,9 +228,12 @@ public abstract class ConnectionService extends Service {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_ADD_CALL_SERVICE_ADAPTER:
+                case MSG_ADD_CONNECTION_SERVICE_ADAPTER:
                     mAdapter.addAdapter((IConnectionServiceAdapter) msg.obj);
                     onAdapterAttached();
+                    break;
+                case MSG_REMOVE_CONNECTION_SERVICE_ADAPTER:
+                    mAdapter.removeAdapter((IConnectionServiceAdapter) msg.obj);
                     break;
                 case MSG_CREATE_CONNECTION: {
                     SomeArgs args = (SomeArgs) msg.obj;
@@ -236,6 +243,7 @@ public abstract class ConnectionService extends Service {
                         final ConnectionRequest request = (ConnectionRequest) args.arg2;
                         final boolean isIncoming = args.argi1 == 1;
                         if (!mAreAccountsInitialized) {
+                            Log.d(this, "Enqueueing pre-init request %s", request.getCallId());
                             mPreInitializationConnectionRequests.add(new Runnable() {
                                 @Override
                                 public void run() {
@@ -246,6 +254,7 @@ public abstract class ConnectionService extends Service {
                                 }
                             });
                         } else {
+                            Log.d(this, "Immediately processing request %s", request.getCallId());
                             createConnection(connectionManagerPhoneAccount, request, isIncoming);
                         }
                     } finally {
@@ -490,8 +499,6 @@ public abstract class ConnectionService extends Service {
         }
 
         if (createdConnection != null) {
-            Log.d(this, "adapter handleCreateConnectionSuccessful %s",
-                    request.getCallId());
             if (createdConnection.getState() == Connection.State.INITIALIZING) {
                 // Wait for the connection to become initialized.
                 createdConnection.addConnectionListener(new Connection.Listener() {
@@ -501,11 +508,14 @@ public abstract class ConnectionService extends Service {
                             case Connection.State.FAILED:
                                 Log.d(this, "Connection (%s) failed (%d: %s)", request,
                                         c.getFailureCode(), c.getFailureMessage());
+                                Log.d(this, "adapter handleCreateConnectionFailed %s",
+                                        request.getCallId());
                                 mAdapter.handleCreateConnectionFailed(request, c.getFailureCode(),
                                         c.getFailureMessage());
                                 break;
                             case Connection.State.CANCELED:
-                                Log.d(this, "Connection (%s) canceled", request);
+                                Log.d(this, "adapter handleCreateConnectionCanceled %s",
+                                        request.getCallId());
                                 mAdapter.handleCreateConnectionCancelled(request);
                                 break;
                             case Connection.State.INITIALIZING:
@@ -531,6 +541,7 @@ public abstract class ConnectionService extends Service {
             }
         } else {
             // Tell telecomm to try a different service.
+            Log.d(this, "adapter handleCreateConnectionFailed %s", request.getCallId());
             mAdapter.handleCreateConnectionFailed(request, DisconnectCause.ERROR_UNSPECIFIED, null);
         }
     }
@@ -544,7 +555,7 @@ public abstract class ConnectionService extends Service {
                 connection.getState(),
                 CallCapabilities.toString(connection.getCallCapabilities()));
 
-
+        Log.d(this, "adapter handleCreateConnectionSuccessful %s", request.getCallId());
         mAdapter.handleCreateConnectionSuccessful(
                 request,
                 new ParcelableConnection(
@@ -859,10 +870,12 @@ public abstract class ConnectionService extends Service {
     }
 
     private void removeConnection(Connection connection) {
+        String id = mIdByConnection.get(connection);
         connection.removeConnectionListener(mConnectionListener);
         mConnectionById.remove(mIdByConnection.get(connection));
         mIdByConnection.remove(connection);
         onConnectionRemoved(connection);
+        mAdapter.removeCall(id);
     }
 
     private Connection findConnectionForAction(String callId, String action) {
