@@ -158,12 +158,14 @@ private:
     void insertTranslate();
 
     LinearAllocator& alloc() { return mDisplayListData->allocator; }
-    void addStateOp(StateOp* op);
-    void addDrawOp(DrawOp* op);
-    void addOpInternal(DisplayListOp* op) {
+
+    // Each method returns final index of op
+    int addStateOp(StateOp* op);
+    int addDrawOp(DrawOp* op);
+    int addOpInternal(DisplayListOp* op) {
         insertRestoreToCount();
         insertTranslate();
-        mDisplayListData->displayListOps.add(op);
+        return mDisplayListData->displayListOps.add(op);
     }
 
     template<class T>

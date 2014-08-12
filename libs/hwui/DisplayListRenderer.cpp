@@ -176,15 +176,15 @@ bool DisplayListRenderer::clipRegion(const SkRegion* region, SkRegion::Op op) {
 status_t DisplayListRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t flags) {
     // dirty is an out parameter and should not be recorded,
     // it matters only when replaying the display list
+    DrawRenderNodeOp* op = new (alloc()) DrawRenderNodeOp(renderNode, flags, *currentTransform());
+    int opIndex = addDrawOp(op);
+    mDisplayListData->addChild(op);
 
     if (renderNode->stagingProperties().isProjectionReceiver()) {
         // use staging property, since recording on UI thread
-        mDisplayListData->projectionReceiveIndex = mDisplayListData->displayListOps.size();
+        mDisplayListData->projectionReceiveIndex = opIndex;
     }
 
-    DrawRenderNodeOp* op = new (alloc()) DrawRenderNodeOp(renderNode, flags, *currentTransform());
-    addDrawOp(op);
-    mDisplayListData->addChild(op);
     return DrawGlInfo::kStatusDone;
 }
 
@@ -447,11 +447,11 @@ void DisplayListRenderer::insertTranslate() {
     }
 }
 
-void DisplayListRenderer::addStateOp(StateOp* op) {
-    addOpInternal(op);
+int DisplayListRenderer::addStateOp(StateOp* op) {
+    return addOpInternal(op);
 }
 
-void DisplayListRenderer::addDrawOp(DrawOp* op) {
+int DisplayListRenderer::addDrawOp(DrawOp* op) {
     Rect localBounds;
     if (op->getLocalBounds(localBounds)) {
         bool rejected = quickRejectConservative(localBounds.left, localBounds.top,
@@ -460,7 +460,7 @@ void DisplayListRenderer::addDrawOp(DrawOp* op) {
     }
 
     mDisplayListData->hasDrawOps = true;
-    addOpInternal(op);
+    return addOpInternal(op);
 }
 
 }; // namespace uirenderer
