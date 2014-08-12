@@ -1427,6 +1427,9 @@ public final class TvContentRating {
         if (TextUtils.isEmpty(domain)) {
             throw new IllegalArgumentException("domain cannot be empty");
         }
+        if (TextUtils.isEmpty(ratingSystem)) {
+            throw new IllegalArgumentException("ratingSystem cannot be empty");
+        }
         if (TextUtils.isEmpty(rating)) {
             throw new IllegalArgumentException("rating cannot be empty");
         }
@@ -1471,7 +1474,7 @@ public final class TvContentRating {
         mDomain = domain;
         mRatingSystem = ratingSystem;
         mRating = rating;
-        mSubRatings = subRatings;
+        mSubRatings = (subRatings == null || subRatings.length == 0) ? null : subRatings;
     }
 
     /**
@@ -1548,6 +1551,11 @@ public final class TvContentRating {
             throw new IllegalArgumentException("rating cannot be null");
         }
         if (!rating.getMainRating().equals(mRating)) {
+            return false;
+        }
+        if (!rating.getDomain().equals(mDomain) ||
+                !rating.getRatingSystem().equals(mRatingSystem) ||
+                !rating.getMainRating().equals(mRating)) {
             return false;
         }
         List<String> subRatings = getSubRatings();
