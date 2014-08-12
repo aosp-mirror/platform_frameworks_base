@@ -678,6 +678,12 @@
 
     <!-- Related to user switcher --><skip/>
 
+    <!-- Accessibility label for the button that opens the user switcher. -->
+    <string name="accessibility_multi_user_switch_switcher">Switch user</string>
+
+    <!-- Accessibility label for the button that opens the quick contact of the user. -->
+    <string name="accessibility_multi_user_switch_quick_contact">Show profile</string>
+
     <!-- Label for the adding a new user in the user switcher [CHAR LIMIT=35] -->
     <string name="user_add_user">Add user</string>
 
