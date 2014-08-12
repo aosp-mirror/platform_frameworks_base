@@ -436,18 +436,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         int path = HdmiUtils.twoBytesToInt(message.getParams());
         int address = message.getSource();
+        int type = message.getParams()[2];
 
-        // Build cec switch list with pure CEC switch, AVR.
-        if (address == Constants.ADDR_UNREGISTERED) {
-            int type = message.getParams()[2];
-            if (type == HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH) {
-                mCecSwitches.add(path);
-                updateSafeDeviceInfoList();
-                return true;  // Pure switch does not need further processing. Return here.
-            } else if (type == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
-                mCecSwitches.add(path);
-            }
-        }
+        if (updateCecSwitchInfo(address, type, path)) return true;
 
         // Ignore if [Device Discovery Action] is going on.
         if (hasAction(DeviceDiscoveryAction.class)) {
@@ -460,6 +451,19 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
         startNewDeviceAction(ActiveSource.of(address, path));
         return true;
+    }
+
+    boolean updateCecSwitchInfo(int address, int type, int path) {
+        if (address == Constants.ADDR_UNREGISTERED
+                && type == HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH) {
+            mCecSwitches.add(path);
+            updateSafeDeviceInfoList();
+            return true;  // Pure switch does not need further processing. Return here.
+        }
+        if (type == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
+            mCecSwitches.add(path);
+        }
+        return false;
     }
 
     void startNewDeviceAction(ActiveSource activeSource) {
@@ -1071,7 +1075,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     private void invokeDeviceEventListener(HdmiDeviceInfo info, int status) {
-        if (!hideDevicesBehindLegacySwitch(info)) {
+        if (info.isSourceType() && !hideDevicesBehindLegacySwitch(info)) {
             mService.invokeDeviceEventListeners(info, status);
         }
     }

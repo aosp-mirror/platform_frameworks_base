@@ -256,6 +256,9 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         current.mPortId = getPortId(current.mPhysicalAddress);
         current.mDeviceType = params[2] & 0xFF;
 
+        tv().updateCecSwitchInfo(current.mLogicalAddress, current.mDeviceType,
+                    current.mPhysicalAddress);
+
         increaseProcessedDeviceCount();
         checkAndProceedStage();
     }
