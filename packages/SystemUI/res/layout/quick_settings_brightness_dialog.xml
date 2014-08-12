@@ -15,8 +15,7 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
-    style="@style/BrightnessDialogContainer"
-    android:clickable="true">
+    style="@style/BrightnessDialogContainer">
 
     <ImageView
         android:id="@+id/brightness_icon"

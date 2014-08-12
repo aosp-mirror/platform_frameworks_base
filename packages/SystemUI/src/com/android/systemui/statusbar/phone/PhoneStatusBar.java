@@ -133,6 +133,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
+import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
@@ -229,6 +230,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     UserSwitcherController mUserSwitcherController;
     NextAlarmController mNextAlarmController;
     KeyguardMonitor mKeyguardMonitor;
+    BrightnessMirrorController mBrightnessMirrorController;
 
     int mNaturalBarHeight = -1;
     int mIconSize = -1;
@@ -819,6 +821,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mSecurityController);
             mQSPanel.setHost(qsh);
             mQSPanel.setTiles(qsh.getTiles());
+            mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);
+            mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
             mHeader.setQSPanel(mQSPanel);
             qsh.setCallback(new QSTileHost.Callback() {
                 @Override
@@ -3047,6 +3051,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         if (mHeadsUpNotificationView != null) {
             mHeadsUpNotificationView.updateResources();
+        }
+        if (mBrightnessMirrorController != null) {
+            mBrightnessMirrorController.updateResources();
         }
     }
 

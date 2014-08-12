@@ -188,6 +188,7 @@ public class BrightnessController implements ToggleSlider.Listener {
         mListening = false;
     }
 
+    @Override
     public void onChanged(ToggleSlider view, boolean tracking, boolean automatic, int value) {
         updateIcon(mAutomatic);
         if (!mAutomatic) {
