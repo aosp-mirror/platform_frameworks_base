@@ -65,6 +65,8 @@ public class Paint_Delegate {
             new DelegateManager<Paint_Delegate>(Paint_Delegate.class);
 
     // ---- delegate helper data ----
+
+    // This list can contain null elements.
     private List<FontInfo> mFonts;
 
     // ---- delegate data ----
@@ -1171,6 +1173,12 @@ public class Paint_Delegate {
             // and skew info.
             ArrayList<FontInfo> infoList = new ArrayList<FontInfo>(fonts.size());
             for (Font font : fonts) {
+                if (font == null) {
+                    // If the font is null, add null to infoList. When rendering the text, if this
+                    // null is reached, a warning will be logged.
+                    infoList.add(null);
+                    continue;
+                }
                 FontInfo info = new FontInfo();
                 info.mFont = font.deriveFont(mTextSize);
                 if (mTextScaleX != 1.0 || mTextSkewX != 0) {

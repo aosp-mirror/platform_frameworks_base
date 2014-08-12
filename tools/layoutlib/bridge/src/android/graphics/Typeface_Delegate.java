@@ -74,6 +74,10 @@ public final class Typeface_Delegate {
      * Return a list of fonts that match the style and variant. The list is ordered according to
      * preference of fonts.
      *
+     * The list may contain null when the font failed to load. If null is reached when trying to
+     * render with this list of fonts, then a warning should be logged letting the user know that
+     * some font failed to load.
+     *
      * @param variant The variant preferred. Can only be {@link FontVariant#COMPACT} or
      *                {@link FontVariant#ELEGANT}
      */
@@ -83,7 +87,7 @@ public final class Typeface_Delegate {
         List<Font> fonts = new ArrayList<Font>(mFontFamilies.length);
         for (int i = 0; i < mFontFamilies.length; i++) {
             FontFamily_Delegate ffd = mFontFamilies[i];
-            if (ffd != null) {
+            if (ffd != null && ffd.isValid()) {
                 Font font = ffd.getFont(mStyle);
                 if (font != null) {
                     FontVariant ffdVariant = ffd.getVariant();
@@ -107,6 +111,12 @@ public final class Typeface_Delegate {
                     } else {
                         fonts.add(font2);
                     }
+                } else {
+                    // The FontFamily is valid but doesn't contain any matching font. This means
+                    // that the font failed to load. We add null to the list of fonts. Don't throw
+                    // the warning just yet. If this is a non-english font, we don't want to warn
+                    // users who are trying to render only english text.
+                    fonts.add(null);
                 }
             }
         }
