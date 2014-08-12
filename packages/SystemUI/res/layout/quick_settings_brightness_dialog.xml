@@ -15,6 +15,8 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
     style="@style/BrightnessDialogContainer">
 
     <ImageView
@@ -24,7 +26,8 @@
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="8dp"
         android:src="@drawable/ic_qs_brightness_auto_off"
-        android:contentDescription="@null" />
+        android:contentDescription="@null"
+        android:visibility="gone" />
 
     <com.android.systemui.settings.ToggleSlider
         android:id="@+id/brightness_slider"
