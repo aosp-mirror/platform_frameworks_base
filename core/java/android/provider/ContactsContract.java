@@ -8164,8 +8164,10 @@ public final class ContactsContract {
                     && !(actualContext instanceof Activity)) {
                 actualContext = ((ContextWrapper) actualContext).getBaseContext();
             }
-            final int intentFlags = (actualContext instanceof Activity)
-                    ? 0 : Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK;
+            final int intentFlags = ((actualContext instanceof Activity)
+                    ? 0 : Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    // Workaround for b/16898764. Declaring singleTop in manifest doesn't work.
+                    | Intent.FLAG_ACTIVITY_SINGLE_TOP;
 
             // Launch pivot dialog through intent for now
             final Intent intent = new Intent(ACTION_QUICK_CONTACT).addFlags(intentFlags);
