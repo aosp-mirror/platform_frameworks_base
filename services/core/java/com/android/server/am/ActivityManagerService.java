@@ -4665,14 +4665,26 @@ public final class ActivityManagerService extends ActivityManagerNative
                             + android.Manifest.permission.CLEAR_APP_USER_DATA + " to clear data"
                                     + " of package " + packageName);
                 }
+
+                // Remove all tasks match the cleared application package and user
+                for (int i = mRecentTasks.size() - 1; i >= 0; i--) {
+                    final TaskRecord tr = mRecentTasks.get(i);
+                    final String taskPackageName =
+                            tr.getBaseIntent().getComponent().getPackageName();
+                    if (tr.userId != userId) continue;
+                    if (!taskPackageName.equals(packageName)) continue;
+                    removeTaskByIdLocked(tr.taskId, 0);
+                }
             }
 
             try {
                 // Clear application user data
                 pm.clearApplicationUserData(packageName, observer, userId);
 
-                // Remove all permissions granted from/to this package
-                removeUriPermissionsForPackageLocked(packageName, userId, true);
+                synchronized(this) {
+                    // Remove all permissions granted from/to this package
+                    removeUriPermissionsForPackageLocked(packageName, userId, true);
+                }
 
                 Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
                         Uri.fromParts("package", packageName, null));
@@ -7410,7 +7422,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final int N = mRecentTasks.size();
                 for (int i = 0; i < N; i++) {
                     TaskRecord tr = mRecentTasks.get(i);
-                    // Skip tasks that are not created by the caller
+                    // Skip tasks that do not match the package name
                     if (packages.contains(tr.getBaseIntent().getComponent().getPackageName())) {
                         ActivityManager.RecentTaskInfo taskInfo =
                                 createRecentTaskInfoFromTaskRecord(tr);
