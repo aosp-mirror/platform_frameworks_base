@@ -106,3 +106,15 @@ Android work profile Chrome app.</li>
 <li>Deleting a Android work profile may take several minutes to complete. You
 cannot create a new Android work profile until the deletion operation is over.</li>
 </ul>
+
+<h3 id="64bitsupport">64-bit support</h3>
+<ul>
+<li><p>If you are using the NDK to compile apps for 32- or 64-bit systems and
+want to use the features provided in the L Developer Preview, download the
+{@code android-ndk64-r10} package for your target platform from the
+<a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK page</a>. The
+{@code android-ndk64-r10} package contains the L Developer Preview API
+library (located under the {@code platforms/android-L/} API directory) for both
+32- and 64-bit systems. The package also includes the {@code gcc-4.9} compiler
+for both 32- and 64-bit apps.</p></li>
+</ul>
