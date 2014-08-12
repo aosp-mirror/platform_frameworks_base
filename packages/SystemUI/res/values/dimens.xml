@@ -175,6 +175,7 @@
     <dimen name="qs_panel_padding_bottom">8dp</dimen>
     <dimen name="qs_detail_item_height">48dp</dimen>
     <dimen name="qs_detail_item_height_twoline">72dp</dimen>
+    <dimen name="qs_brightness_padding_top">6dp</dimen>
 
 
     <dimen name="segmented_button_spacing">4dp</dimen>
