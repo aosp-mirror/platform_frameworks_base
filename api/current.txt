@@ -5414,6 +5414,7 @@ package android.app.admin {
     method public boolean getCrossProfileCallerIdDisabled(android.content.ComponentName);
     method public java.util.List<java.lang.String> getCrossProfileWidgetProviders(android.content.ComponentName);
     method public int getCurrentFailedPasswordAttempts();
+    method public java.util.List<byte[]> getInstalledCaCerts();
     method public int getKeyguardDisabledFeatures(android.content.ComponentName);
     method public int getMaximumFailedPasswordsForWipe(android.content.ComponentName);
     method public long getMaximumTimeToLock(android.content.ComponentName);
@@ -5433,7 +5434,6 @@ package android.app.admin {
     method public boolean getStorageEncryption(android.content.ComponentName);
     method public int getStorageEncryptionStatus();
     method public java.util.List<java.lang.String> getTrustAgentFeaturesEnabled(android.content.ComponentName, android.content.ComponentName);
-    method public boolean hasAnyCaCertsInstalled();
     method public boolean hasCaCertInstalled(byte[]);
     method public boolean hasGrantedPolicy(android.content.ComponentName, int);
     method public boolean installCaCert(android.content.ComponentName, byte[]);
@@ -5483,6 +5483,7 @@ package android.app.admin {
     method public int setStorageEncryption(android.content.ComponentName, boolean);
     method public void setTrustAgentFeaturesEnabled(android.content.ComponentName, android.content.ComponentName, java.util.List<java.lang.String>);
     method public boolean switchUser(android.content.ComponentName, android.os.UserHandle);
+    method public void uninstallAllUserCaCerts(android.content.ComponentName);
     method public void uninstallCaCert(android.content.ComponentName, byte[]);
     method public void wipeData(int);
     field public static final java.lang.String ACTION_ADD_DEVICE_ADMIN = "android.app.action.ADD_DEVICE_ADMIN";
