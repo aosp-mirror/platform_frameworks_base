@@ -996,12 +996,21 @@ public final class HdmiControlService extends SystemService {
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
-                    HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(deviceType);
-                    if (localDevice == null) {
-                        Slog.w(TAG, "Local device not available");
-                        return;
+                    if (mMhlController != null) {
+                        HdmiMhlLocalDevice device = mMhlController.getLocalDevice(mActivePortId);
+                        if (device != null) {
+                            device.sendKeyEvent(keyCode, isPressed);
+                            return;
+                        }
                     }
-                    localDevice.sendKeyEvent(keyCode, isPressed);
+                    if (mCecController != null) {
+                        HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(deviceType);
+                        if (localDevice == null) {
+                            Slog.w(TAG, "Local device not available");
+                            return;
+                        }
+                        localDevice.sendKeyEvent(keyCode, isPressed);
+                    }
                 }
             });
         }
