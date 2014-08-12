@@ -209,6 +209,15 @@ public class NotificationStackScrollLayout extends ViewGroup
     public NotificationStackScrollLayout(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
+        int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_max_height);
+        mExpandHelper = new ExpandHelper(getContext(), this,
+                minHeight, maxHeight);
+        mExpandHelper.setEventSource(this);
+        mExpandHelper.setScrollAdapter(this);
+
+        mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, getContext());
+        mSwipeHelper.setLongPressListener(mLongPressListener);
         initView(context);
         if (DEBUG) {
             setWillNotDraw(false);
@@ -246,10 +255,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mOverflingDistance = configuration.getScaledOverflingDistance();
-        float densityScale = getResources().getDisplayMetrics().density;
-        float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
-        mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, getContext());
-        mSwipeHelper.setLongPressListener(mLongPressListener);
 
         mSidePaddings = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_side_padding);
@@ -264,12 +269,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         mPaddingBetweenElementsNormal = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_padding);
         updatePadding(mAmbientState.isDimmed());
-        int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
-        int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_max_height);
-        mExpandHelper = new ExpandHelper(getContext(), this,
-                minHeight, maxHeight);
-        mExpandHelper.setEventSource(this);
-        mExpandHelper.setScrollAdapter(this);
         mMinTopOverScrollToEscape = getResources().getDimensionPixelSize(
                 R.dimen.min_top_overscroll_to_qs);
         mNotificationTopPadding = getResources().getDimensionPixelSize(
