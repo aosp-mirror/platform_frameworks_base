@@ -28,9 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Encapsulates a sequence of CEC/MHL command exchange for a certain feature.
+ * Encapsulates a sequence of CEC command exchange for a certain feature.
  * <p>
- * Many CEC/MHL features are accomplished by CEC devices on the bus exchanging more than one
+ * Many CEC features are accomplished by CEC devices on the bus exchanging more than one
  * command. {@link HdmiCecFeatureAction} represents the life cycle of the communication, manages the
  * state as the process progresses, and if necessary, returns the result to the caller which
  * initiates the action, through the callback given at the creation of the object. All the actual
@@ -42,7 +42,7 @@ import java.util.List;
  * package private, accessed by {@link HdmiControlService} only.
  */
 abstract class HdmiCecFeatureAction {
-    private static final String TAG = "FeatureAction";
+    private static final String TAG = "HdmiCecFeatureAction";
 
     // Timer handler message used for timeout event
     protected static final int MSG_TIMEOUT = 100;
