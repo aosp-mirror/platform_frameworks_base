@@ -18,7 +18,6 @@ package com.android.server.hdmi;
 
 import static com.android.server.hdmi.Constants.DISABLED;
 import static com.android.server.hdmi.Constants.ENABLED;
-import static com.android.server.hdmi.Constants.OPTION_CEC_AUTO_DEVICE_OFF;
 import static com.android.server.hdmi.Constants.OPTION_CEC_AUTO_WAKEUP;
 import static com.android.server.hdmi.Constants.OPTION_CEC_ENABLE;
 import static com.android.server.hdmi.Constants.OPTION_CEC_SERVICE_CONTROL;
@@ -33,8 +32,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
-import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiHotplugEvent;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -55,8 +54,10 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -244,9 +245,22 @@ public final class HdmiControlService extends SystemService {
 
     public HdmiControlService(Context context) {
         super(context);
-        mLocalDevices = HdmiUtils.asImmutableList(getContext().getResources().getIntArray(
-                com.android.internal.R.array.config_hdmiCecLogicalDeviceType));
+        mLocalDevices = getIntList(SystemProperties.get(Constants.PROPERTY_DEVICE_TYPE));
         mSettingsObserver = new SettingsObserver(mHandler);
+    }
+
+    private static List<Integer> getIntList(String string) {
+        ArrayList<Integer> list = new ArrayList<>();
+        TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(',');
+        splitter.setString(string);
+        for (String item : splitter) {
+            try {
+                list.add(Integer.parseInt(item));
+            } catch (NumberFormatException e) {
+                Slog.w(TAG, "Can't parseInt: " + item);
+            }
+        }
+        return Collections.unmodifiableList(list);
     }
 
     @Override

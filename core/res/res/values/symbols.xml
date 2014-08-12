@@ -1328,7 +1328,6 @@
   <java-symbol type="anim" name="voice_activity_open_exit" />
   <java-symbol type="anim" name="voice_activity_open_enter" />
 
-  <java-symbol type="array" name="config_hdmiCecLogicalDeviceType" />
   <java-symbol type="array" name="config_keyboardTapVibePattern" />
   <java-symbol type="array" name="config_longPressVibePattern" />
   <java-symbol type="array" name="config_safeModeDisabledVibePattern" />

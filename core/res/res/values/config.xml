@@ -470,19 +470,6 @@
          provide full support for multiple displays.  -->
     <integer name="config_undockedHdmiRotation">-1</integer>
 
-    <!-- HDMI-CEC logical device types allowed on the system. Logical device types
-         are defined in HDMI-CEC standard 1.4 as follows:
-           0 TV
-           1 Recording Device
-           2 Reserved
-           3 Tuner
-           4 Playback
-           5 Audio System
-           6 Pure CEC Switch
-           7 Video Processor    -->
-    <integer-array name="config_hdmiCecLogicalDeviceType">
-    </integer-array>
-
     <!-- Control the default UI mode type to use when there is no other type override
          happening.  One of the following values (See Configuration.java):
              1  UI_MODE_TYPE_NORMAL

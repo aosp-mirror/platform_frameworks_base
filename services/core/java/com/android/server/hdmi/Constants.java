@@ -265,5 +265,10 @@ final class Constants {
     static final int MHL_CBUS_MODE_ECBUS_S = 2;
     static final int MHL_CBUS_MODE_ECBUS_D = 3;
 
+    // Property name for the local device configurations.
+    // TODO(OEM): OEM should provide this property, and the value is the comma separated integer
+    //     values which denotes the device type in HDMI Spec 1.4.
+    static final String PROPERTY_DEVICE_TYPE = "ro.hdmi.device_type";
+
     private Constants() { /* cannot be instantiated */ }
 }
