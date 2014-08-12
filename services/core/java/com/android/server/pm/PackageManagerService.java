@@ -3195,7 +3195,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (fromSource != null) {
             packageNames = fromSource.get(targetUserId);
         }
-        if (packageNames.contains(intent.getPackage())) {
+        if (packageNames != null && packageNames.contains(intent.getPackage())) {
             return true;
         }
         // We need the package name, so we try to resolve with the loosest flags possible
