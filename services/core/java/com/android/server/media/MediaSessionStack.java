@@ -63,9 +63,6 @@ public class MediaSessionStack {
      */
     public void addSession(MediaSessionRecord record) {
         mSessions.add(record);
-        if ((record.getFlags() & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
-            mGlobalPrioritySession = record;
-        }
         clearCache();
     }
 
@@ -110,6 +107,9 @@ public class MediaSessionStack {
      * @param record The record that changed.
      */
     public void onSessionStateChange(MediaSessionRecord record) {
+        if ((record.getFlags() & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
+            mGlobalPrioritySession = record;
+        }
         // For now just clear the cache. Eventually we'll selectively clear
         // depending on what changed.
         clearCache();
@@ -220,6 +220,7 @@ public class MediaSessionStack {
         ArrayList<MediaSessionRecord> sortedSessions = getPriorityListLocked(false, 0,
                 UserHandle.USER_ALL);
         int count = sortedSessions.size();
+        pw.println(prefix + "Global priority session is " + mGlobalPrioritySession);
         pw.println(prefix + "Sessions Stack - have " + count + " sessions:");
         String indent = prefix + "  ";
         for (int i = 0; i < count; i++) {
