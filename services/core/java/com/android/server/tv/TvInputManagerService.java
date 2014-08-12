@@ -1809,7 +1809,7 @@ public final class TvInputManagerService extends SystemService {
                 // If there are any other sessions based on this session, they should be released.
                 UserState userState = getUserStateLocked(mUserId);
                 for (SessionState sessionState : userState.sessionStateMap.values()) {
-                    if (mSession != null && mSession == sessionState.mHardwareSessionToken) {
+                    if (mSessionToken == sessionState.mHardwareSessionToken) {
                         try {
                             sessionState.mSession.release();
                         } catch (RemoteException e) {
