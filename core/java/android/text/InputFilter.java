@@ -75,14 +75,15 @@ public interface InputFilter
      * greater than the specified length.
      */
     public static class LengthFilter implements InputFilter {
+        private final int mMax;
+
         public LengthFilter(int max) {
             mMax = max;
         }
 
-        public CharSequence filter(CharSequence source, int start, int end,
-                                   Spanned dest, int dstart, int dend) {
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest,
+                int dstart, int dend) {
             int keep = mMax - (dest.length() - (dend - dstart));
-
             if (keep <= 0) {
                 return "";
             } else if (keep >= end - start) {
@@ -99,6 +100,11 @@ public interface InputFilter
             }
         }
 
-        private int mMax;
+        /**
+         * @return the maximum length enforced by this input filter
+         */
+        public int getMax() {
+            return mMax;
+        }
     }
 }
