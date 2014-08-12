@@ -30,6 +30,12 @@
     <string name="menu_share" msgid="3075149983979628146">"Bendrinti"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Ištrinti"</string>
     <string name="menu_select" msgid="8711270657353563424">"Pasirinkti katalogą „<xliff:g id="DIRECTORY">^1</xliff:g>“"</string>
+    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Rodyti vidinę atmintį"</string>
+    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Rodyti SD kortelę"</string>
+    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Slėpti vidinę atmintį"</string>
+    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Slėpti SD kortelę"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"Rodyti failo dydį"</string>
+    <string name="menu_file_size_hide" msgid="8881975928502581042">"Slėpti failo dydį"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"Pasirinkta: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Pagal pavadinimą"</string>
     <string name="sort_date" msgid="586080032956151448">"Pagal keitimo datą"</string>
@@ -45,9 +51,6 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"Spartieji klavišai"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Įrenginiai"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Daugiau programų"</string>
-    <string name="pref_advanced_devices" msgid="903257239609301276">"Rodyti išplėstinius įrenginius"</string>
-    <string name="pref_file_size" msgid="2826879315743961459">"Rodyti failo dydį"</string>
-    <string name="pref_device_size" msgid="3542106883278997222">"Rodyti įrenginio dydį"</string>
     <string name="empty" msgid="7858882803708117596">"Nėra elementų"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Nepavyksta atidaryti failo"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Nepavyko ištrinti kai kurių dokumentų"</string>
