@@ -17,6 +17,7 @@ package android.view;
 
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.widget.FrameLayout;
 
 /**
  * This view draws another View in an Overlay without changing the parent. It will not be drawn
@@ -28,17 +29,13 @@ import android.graphics.Matrix;
  */
 public class GhostView extends View {
     private final View mView;
+    private int mReferences;
 
-    private GhostView(View view, ViewGroup host, Matrix matrix) {
+    private GhostView(View view) {
         super(view.getContext());
         mView = view;
         mView.mGhostView = this;
-        mRenderNode.setAnimationMatrix(matrix);
         final ViewGroup parent = (ViewGroup) mView.getParent();
-        setLeft(0);
-        setTop(0);
-        setRight(host.getWidth());
-        setBottom(host.getHeight());
         setGhostedVisibility(View.INVISIBLE);
         parent.mRecreateDisplayList = true;
         parent.getDisplayList();
@@ -100,10 +97,13 @@ public class GhostView extends View {
         ViewGroupOverlay overlay = viewGroup.getOverlay();
         ViewOverlay.OverlayViewGroup overlayViewGroup = overlay.mOverlayViewGroup;
         GhostView ghostView = view.mGhostView;
+        int previousRefCount = 0;
         if (ghostView != null) {
-            ViewGroup oldParent = (ViewGroup) ghostView.getParent();
-            if (oldParent != overlayViewGroup) {
-                oldParent.removeView(ghostView);
+            View oldParent = (View) ghostView.getParent();
+            ViewGroup oldGrandParent = (ViewGroup) oldParent.getParent();
+            if (oldGrandParent != overlayViewGroup) {
+                previousRefCount = ghostView.mReferences;
+                oldGrandParent.removeView(oldParent);
                 ghostView = null;
             }
         }
@@ -112,9 +112,19 @@ public class GhostView extends View {
                 matrix = new Matrix();
                 calculateMatrix(view, viewGroup, matrix);
             }
-            ghostView = new GhostView(view, (ViewGroup) overlayViewGroup.mHostView, matrix);
-            overlay.add(ghostView);
+            ghostView = new GhostView(view);
+            ghostView.setMatrix(matrix);
+            FrameLayout parent = new FrameLayout(view.getContext());
+            parent.setClipChildren(false);
+            copySize(viewGroup, parent);
+            copySize(viewGroup, ghostView);
+            parent.addView(ghostView);
+            overlay.add(parent);
+            ghostView.mReferences = previousRefCount;
+        } else if (matrix != null) {
+            ghostView.setMatrix(matrix);
         }
+        ghostView.mReferences++;
         return ghostView;
     }
 
@@ -125,12 +135,23 @@ public class GhostView extends View {
     public static void removeGhost(View view) {
         GhostView ghostView = view.mGhostView;
         if (ghostView != null) {
-            ViewGroup parent = (ViewGroup) ghostView.getParent();
-            parent.removeView(ghostView);
+            ghostView.mReferences--;
+            if (ghostView.mReferences == 0) {
+                ViewGroup parent = (ViewGroup) ghostView.getParent();
+                ViewGroup grandParent = (ViewGroup) parent.getParent();
+                grandParent.removeView(parent);
+            }
         }
     }
 
     public static GhostView getGhost(View view) {
         return view.mGhostView;
+    }
+
+    private static void copySize(View from, View to) {
+        to.setLeft(0);
+        to.setTop(0);
+        to.setRight(from.getWidth());
+        to.setBottom(from.getHeight());
     }
 }
