@@ -345,8 +345,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
      * Creates the activity options for an app->recents transition.  If this method sets the static
      * screenshot, then we will use that for the transition.
      */
-    ActivityOptions getThumbnailTransitionActivityOptions(ActivityManager.RunningTaskInfo topTask) {
-
+    ActivityOptions getThumbnailTransitionActivityOptions(ActivityManager.RunningTaskInfo topTask,
+            boolean isTopTaskHome) {
         if (Constants.DebugFlags.App.EnableScreenshotAppTransition) {
             // Recycle the last screenshot
             consumeLastScreenshot();
@@ -365,7 +365,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         Bitmap firstThumbnail = mSystemServicesProxy.getTaskThumbnail(topTask.id);
         if (firstThumbnail != null) {
             // Update the destination rect
-            Rect toTaskRect = getThumbnailTransitionRect(topTask.id);
+            Rect toTaskRect = getThumbnailTransitionRect(topTask.id, isTopTaskHome);
             if (toTaskRect.width() > 0 && toTaskRect.height() > 0) {
                 // Create the new thumbnail for the animation down
                 // XXX: We should find a way to optimize this so we don't need to create a new bitmap
@@ -389,7 +389,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     }
 
     /** Returns the transition rect for the given task id. */
-    Rect getThumbnailTransitionRect(int runningTaskId) {
+    Rect getThumbnailTransitionRect(int runningTaskId, boolean isTopTaskHome) {
         // Get the stack of tasks that we are animating into
         TaskStack stack = RecentsTaskLoader.getShallowTaskStack(mSystemServicesProxy, -1);
         if (stack.getTaskCount() == 0) {
@@ -401,7 +401,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         TaskStackViewLayoutAlgorithm algo = tsv.getStackAlgorithm();
         Rect taskStackBounds = new Rect(mTaskStackBounds);
         taskStackBounds.bottom -= mSystemInsets.bottom;
-        tsv.computeRects(mWindowRect.width(), mWindowRect.height(), taskStackBounds, mTriggeredFromAltTab);
+        tsv.computeRects(mWindowRect.width(), mWindowRect.height(), taskStackBounds,
+                mTriggeredFromAltTab, isTopTaskHome);
         tsv.getScroller().setStackScrollToInitialState();
 
         // Find the running task in the TaskStack
@@ -442,7 +443,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
         if (useThumbnailTransition) {
             // Try starting with a thumbnail transition
-            ActivityOptions opts = getThumbnailTransitionActivityOptions(topTask);
+            ActivityOptions opts = getThumbnailTransitionActivityOptions(topTask, isTopTaskHome);
             if (opts != null) {
                 if (sLastScreenshot != null) {
                     startAlternateRecentsActivity(topTask, opts, EXTRA_FROM_APP_FULL_SCREENSHOT);
