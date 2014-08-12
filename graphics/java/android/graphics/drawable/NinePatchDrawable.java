@@ -17,6 +17,7 @@
 package android.graphics.drawable;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -609,16 +610,17 @@ public class NinePatchDrawable extends Drawable {
             // Empty constructor.
         }
 
-        NinePatchState(NinePatch ninePatch, Rect padding) {
+        NinePatchState(@NonNull NinePatch ninePatch, @Nullable Rect padding) {
             this(ninePatch, padding, null, DEFAULT_DITHER, false);
         }
 
-        NinePatchState(NinePatch ninePatch, Rect padding, Rect opticalInsets) {
+        NinePatchState(@NonNull NinePatch ninePatch, @Nullable Rect padding,
+                @Nullable Rect opticalInsets) {
             this(ninePatch, padding, opticalInsets, DEFAULT_DITHER, false);
         }
 
-        NinePatchState(NinePatch ninePatch, Rect padding, Rect opticalInsets, boolean dither,
-                boolean autoMirror) {
+        NinePatchState(@NonNull NinePatch ninePatch, @Nullable Rect padding,
+                @Nullable Rect opticalInsets, boolean dither, boolean autoMirror) {
             mNinePatch = ninePatch;
             mPadding = padding;
             mOpticalInsets = Insets.of(opticalInsets);
@@ -626,7 +628,7 @@ public class NinePatchDrawable extends Drawable {
             mAutoMirrored = autoMirror;
 
             // Sanity check for valid padding when we have optical insets.
-            if (!opticalInsets.isEmpty()) {
+            if (opticalInsets != null && !opticalInsets.isEmpty()) {
                 if (mPadding == null) {
                     mPadding = new Rect();
                 }
@@ -643,7 +645,7 @@ public class NinePatchDrawable extends Drawable {
 
         // Copy constructor
 
-        NinePatchState(NinePatchState state) {
+        NinePatchState(@NonNull NinePatchState state) {
             // We don't deep-copy any fields because they are all immutable.
             mNinePatch = state.mNinePatch;
             mTint = state.mTint;
