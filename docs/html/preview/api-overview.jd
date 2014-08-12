@@ -19,6 +19,7 @@ sdk.platform.apiLevel=20
       <li><a href="#BehaviorNotifications">If your app implements notifications...</a></li>
       <li><a href="#BehaviorMediaControl">If your app uses RemoteControlClient...</a></li>
 <li><a href="#BehaviorGetRecentTasks">If your app uses ActivityManager.getRecentTasks()...</a></li>
+<li><a href="#64BitSupport">If you are using the Android Native Development Kit (NDK)...</a></li>
     </ol>
   </li>
   <li><a href="#UI">User Interface</a>
@@ -245,6 +246,29 @@ its data, including the calling application’s own tasks and possibly some othe
 non-sensitive tasks (such as Home). If your app is using this method to retrieve
 its own tasks, use {@code android.app.ActivityManager.getAppTasks()} instead to
 retrieve that information.</p>
+
+<h3 id="64BitSupport">If you are using the Android Native Development Kit (NDK)...</h3>
+
+<p>The L Developer Preview introduces support for 64-bit systems and other
+  preview NDK APIs. The 64-bit enhancement adds needed address space as Android
+  usage diversifies and increases performance while still supporting existing
+  32-bit apps fully. Use of OpenSSL for cryptography in the platform is also
+  faster. In addition, this release introduces new native audio and media NDK
+  APIs and native OpenGL ES (GLES) 3.1 support.</p>
+
+<p>To use this enhancement, download and install NDK Revision 10 from the
+<a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK page</a>. Refer to the
+Revision 10 <a href="{@docRoot}tools/sdk/ndk/index.html#Revisions">release notes</a>
+for more information about important changes and bug fixes to the NDK.</p>
+
+<p>If you are using the NDK and want to use the features provided in the L
+  Developer Preview, download the {@code android-ndk64-r10} package for your
+  target platform. Due to a
+  <a href="https://code.google.com/p/android/issues/detail?id=73705">known issue</a>,
+  you must still download the 64-bit package even if you only want to compile
+  apps for 32-bit systems. The package also includes
+  the {@code gcc-4.9} compiler for both 32- and 64-bit apps. The L Developer
+  Preview API library is located under the {@code platforms/android-L/} API directory.</p>
 
 <h2 id="UI">User Interface</h2>
 
