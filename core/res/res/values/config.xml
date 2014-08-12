@@ -1875,7 +1875,7 @@
 
     <!-- Flag indicating emergency calls will always use IMS irrespective of the state of
     the IMS connection -->
-    <bool name="useImsAlwaysForEmergencyCall">true</bool>
+    <bool name="useImsAlwaysForEmergencyCall">false</bool>
 
     <!-- Flag indicating whether the IMS service can be turned off. If false then
         the service will not be turned-off completely (the ImsManager.turnOffIms() will
