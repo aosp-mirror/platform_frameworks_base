@@ -181,7 +181,7 @@ class UserUsageStatsService {
 
         final List<UsageStats> results = mDatabase.queryUsageStats(bucketType, beginTime, endTime);
         if (DEBUG) {
-            Slog.d(TAG, mLogPrefix + "Results: " + results.size());
+            Slog.d(TAG, mLogPrefix + "Results: " + (results == null ? 0 : results.size()));
         }
         return results;
     }
