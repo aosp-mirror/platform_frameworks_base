@@ -311,11 +311,15 @@ public class UsageStatsService extends SystemService implements
             final int userId = UserHandle.getCallingUserId();
             final long token = Binder.clearCallingIdentity();
             try {
-                return new ParceledListSlice<>(UsageStatsService.this.queryUsageStats(
-                        userId, bucketType, beginTime, endTime));
+                final List<UsageStats> results = UsageStatsService.this.queryUsageStats(
+                        userId, bucketType, beginTime, endTime);
+                if (results != null) {
+                    return new ParceledListSlice<>(results);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+            return null;
         }
 
         @Override
