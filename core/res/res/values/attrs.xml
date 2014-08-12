@@ -3163,6 +3163,17 @@
                  result to valid color values. Saturate(S + D) -->
             <enum name="add" value="16" />
         </attr>
+        <!-- Gravity for aligning a CheckedTextView's checkmark to one side or the other. -->
+        <attr name="checkMarkGravity">
+            <!-- Push object to the left of its container, not changing its size. -->
+            <flag name="left" value="0x03" />
+            <!-- Push object to the right of its container, not changing its size. -->
+            <flag name="right" value="0x05" />
+            <!-- Push object to the beginning of its container, not changing its size. -->
+            <flag name="start" value="0x00800003" />
+            <!-- Push object to the end of its container, not changing its size. -->
+            <flag name="end" value="0x00800005" />
+        </attr>
     </declare-styleable>
     <declare-styleable name="EditText">
     </declare-styleable>
