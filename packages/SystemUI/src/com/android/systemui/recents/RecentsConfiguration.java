@@ -112,6 +112,9 @@ public class RecentsConfiguration {
     public boolean launchedFromHome;
     public int launchedToTaskId;
 
+    /** Misc **/
+    public int altTabKeyDelay;
+
     /** Dev options and global settings */
     public boolean lockToAppEnabled;
     public boolean developerOptionsEnabled;
@@ -250,6 +253,9 @@ public class RecentsConfiguration {
         // Nav bar scrim
         navBarScrimEnterDuration =
                 res.getInteger(R.integer.recents_nav_bar_scrim_enter_duration);
+
+        // Misc
+        altTabKeyDelay = res.getInteger(R.integer.recents_alt_tab_key_delay);
     }
 
     /** Updates the system insets */

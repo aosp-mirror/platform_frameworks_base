@@ -16,9 +16,16 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -28,12 +35,14 @@ import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 
 
@@ -46,10 +55,15 @@ class TaskViewHeader extends FrameLayout {
     ImageView mApplicationIcon;
     TextView mActivityDescription;
 
+    RippleDrawable mBackground;
+    ColorDrawable mBackgroundColor;
     Drawable mLightDismissDrawable;
     Drawable mDarkDismissDrawable;
+    ValueAnimator mBackgroundColorAnimator;
 
     boolean mIsFullscreen;
+    boolean mCurrentPrimaryColorIsDark;
+    int mCurrentPrimaryColor;
 
     static Paint sHighlightPaint;
 
@@ -69,6 +83,13 @@ class TaskViewHeader extends FrameLayout {
         super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
         setWillNotDraw(false);
+        setClipToOutline(true);
+        setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                outline.setRect(0, 0, getMeasuredWidth(), getMeasuredHeight());
+            }
+        });
 
         // Load the dismiss resources
         Resources res = context.getResources();
@@ -107,6 +128,15 @@ class TaskViewHeader extends FrameLayout {
                 mApplicationIcon.setBackground(null);
             }
         }
+
+        mBackgroundColor = new ColorDrawable(0);
+        // Copy the ripple drawable since we are going to be manipulating it
+        mBackground = (RippleDrawable)
+                getResources().getDrawable(R.drawable.recents_task_view_header_bg);
+        mBackground = (RippleDrawable) mBackground.mutate().getConstantState().newDrawable();
+        mBackground.setColor(ColorStateList.valueOf(0));
+        mBackground.setDrawableByLayerId(mBackground.getId(0), mBackgroundColor);
+        setBackground(mBackground);
     }
 
     @Override
@@ -130,6 +160,12 @@ class TaskViewHeader extends FrameLayout {
         return false;
     }
 
+    /** Returns the secondary color for a primary color. */
+    int getSecondaryColor(int primaryColor, boolean useLightOverlayColor) {
+        int overlayColor = useLightOverlayColor ? Color.WHITE : Color.BLACK;
+        return Utilities.getColorWithOverlay(primaryColor, overlayColor, 0.8f);
+    }
+
     /** Binds the bar view to the task */
     void rebindToTask(Task t) {
         // If an activity icon is defined, then we use that as the primary icon to show in the bar,
@@ -147,8 +183,10 @@ class TaskViewHeader extends FrameLayout {
         int existingBgColor = (getBackground() instanceof ColorDrawable) ?
                 ((ColorDrawable) getBackground()).getColor() : 0;
         if (existingBgColor != t.colorPrimary) {
-            setBackgroundColor(t.colorPrimary);
+            mBackgroundColor.setColor(t.colorPrimary);
         }
+        mCurrentPrimaryColor = t.colorPrimary;
+        mCurrentPrimaryColorIsDark = t.useLightOnPrimaryColor;
         mActivityDescription.setTextColor(t.useLightOnPrimaryColor ?
                 mConfig.taskBarViewLightTextColor : mConfig.taskBarViewDarkTextColor);
         mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
@@ -165,12 +203,12 @@ class TaskViewHeader extends FrameLayout {
 
     /** Prepares this task view for the enter-recents animations.  This is called earlier in the
      * first layout because the actual animation into recents may take a long time. */
-    public void prepareEnterRecentsAnimation() {
+    void prepareEnterRecentsAnimation() {
         setVisibility(View.INVISIBLE);
     }
 
     /** Animates this task bar as it enters recents */
-    public void startEnterRecentsAnimation(int delay, Runnable postAnimRunnable) {
+    void startEnterRecentsAnimation(int delay, Runnable postAnimRunnable) {
         // Animate the task bar of the first task view
         setVisibility(View.VISIBLE);
         setTranslationY(-getMeasuredHeight());
@@ -184,7 +222,7 @@ class TaskViewHeader extends FrameLayout {
     }
 
     /** Animates this task bar as it exits recents */
-    public void startLaunchTaskAnimation(Runnable preAnimRunnable, final Runnable postAnimRunnable) {
+    void startLaunchTaskAnimation(Runnable preAnimRunnable, final Runnable postAnimRunnable) {
         // Animate the task bar out of the first task view
         animate()
                 .translationY(-getMeasuredHeight())
@@ -202,7 +240,7 @@ class TaskViewHeader extends FrameLayout {
     }
 
     /** Animates this task bar dismiss button when launching a task. */
-    public void startLaunchTaskDismissAnimation() {
+    void startLaunchTaskDismissAnimation() {
         if (mDismissButton.getVisibility() == View.VISIBLE) {
             mDismissButton.animate().cancel();
             mDismissButton.animate()
@@ -216,7 +254,7 @@ class TaskViewHeader extends FrameLayout {
     }
 
     /** Animates this task bar if the user does not interact with the stack after a certain time. */
-    public void startNoUserInteractionAnimation() {
+    void startNoUserInteractionAnimation() {
         mDismissButton.setVisibility(View.VISIBLE);
         mDismissButton.setAlpha(0f);
         mDismissButton.animate()
@@ -229,11 +267,78 @@ class TaskViewHeader extends FrameLayout {
     }
 
     /** Mark this task view that the user does has not interacted with the stack after a certain time. */
-    public void setNoUserInteractionState() {
+    void setNoUserInteractionState() {
         if (mDismissButton.getVisibility() != View.VISIBLE) {
             mDismissButton.animate().cancel();
             mDismissButton.setVisibility(View.VISIBLE);
             mDismissButton.setAlpha(1f);
+        }
+    }
+
+    /** Notifies the associated TaskView has been focused. */
+    void onTaskViewFocusChanged(boolean focused) {
+        boolean isRunning = false;
+        if (mBackgroundColorAnimator != null) {
+            isRunning = mBackgroundColorAnimator.isRunning();
+            mBackgroundColorAnimator.removeAllUpdateListeners();
+            mBackgroundColorAnimator.cancel();
+        }
+        if (focused) {
+            int secondaryColor = getSecondaryColor(mCurrentPrimaryColor, mCurrentPrimaryColorIsDark);
+            int[][] states = new int[][] {
+                    new int[] { android.R.attr.state_enabled },
+                    new int[] { android.R.attr.state_pressed }
+            };
+            int[] newStates = new int[]{
+                    android.R.attr.state_enabled,
+                    android.R.attr.state_pressed
+            };
+            int[] colors = new int[] {
+                    secondaryColor,
+                    secondaryColor
+            };
+            mBackground.setColor(new ColorStateList(states, colors));
+            mBackground.setState(newStates);
+            // Pulse the background color
+            int currentColor = mBackgroundColor.getColor();
+            int lightPrimaryColor = getSecondaryColor(mCurrentPrimaryColor, mCurrentPrimaryColorIsDark);
+            mBackgroundColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), lightPrimaryColor,
+                    currentColor);
+            mBackgroundColorAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mBackground.setState(new int[] {});
+                }
+            });
+            mBackgroundColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    mBackgroundColor.setColor((Integer) animation.getAnimatedValue());
+                }
+            });
+            mBackgroundColorAnimator.setRepeatCount(ValueAnimator.INFINITE);
+            mBackgroundColorAnimator.setRepeatMode(ValueAnimator.REVERSE);
+            mBackgroundColorAnimator.setStartDelay(750);
+            mBackgroundColorAnimator.setDuration(750);
+            mBackgroundColorAnimator.start();
+        } else {
+            if (isRunning) {
+                // Restore the background color
+                int currentColor = mBackgroundColor.getColor();
+                mBackgroundColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), currentColor,
+                        mCurrentPrimaryColor);
+                mBackgroundColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        mBackgroundColor.setColor((Integer) animation.getAnimatedValue());
+                    }
+                });
+                mBackgroundColorAnimator.setRepeatCount(0);
+                mBackgroundColorAnimator.setDuration(150);
+                mBackgroundColorAnimator.start();
+            } else {
+                mBackground.setState(new int[] {});
+            }
         }
     }
 }

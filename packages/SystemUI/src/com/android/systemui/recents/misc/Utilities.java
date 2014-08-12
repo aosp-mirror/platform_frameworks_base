@@ -89,6 +89,17 @@ public class Utilities {
         return Math.abs((fgL + 0.05f) / (bgL + 0.05f));
     }
 
+    /** Returns the base color overlaid with another overlay color with a specified alpha. */
+    public static int getColorWithOverlay(int baseColor, int overlayColor, float overlayAlpha) {
+        return Color.rgb(
+            (int) (overlayAlpha * Color.red(baseColor) +
+                    (1f - overlayAlpha) * Color.red(overlayColor)),
+            (int) (overlayAlpha * Color.green(baseColor) +
+                    (1f - overlayAlpha) * Color.green(overlayColor)),
+            (int) (overlayAlpha * Color.blue(baseColor) +
+                    (1f - overlayAlpha) * Color.blue(overlayColor)));
+    }
+
     /** Sets some private shadow properties. */
     public static void setShadowProperty(String property, String value)
             throws IllegalAccessException, InvocationTargetException {
