@@ -283,7 +283,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 addUsersToMenu(mItems);
             } else if (GLOBAL_ACTION_KEY_SETTINGS.equals(actionKey)) {
                 mItems.add(getSettingsAction());
-            } else if (GLOBAL_ACTION_KEY_LOCKDOWN.equals(actionKey) && hasTrustAgents()) {
+            } else if (GLOBAL_ACTION_KEY_LOCKDOWN.equals(actionKey)) {
                 mItems.add(getLockdownAction());
             } else {
                 Log.e(TAG, "Invalid global action key " + actionKey);
@@ -321,11 +321,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         dialog.setOnDismissListener(this);
 
         return dialog;
-    }
-
-    private boolean hasTrustAgents() {
-        // TODO: Add implementation.
-        return true;
     }
 
     private final class PowerAction extends SinglePressAction implements LongPressAction {

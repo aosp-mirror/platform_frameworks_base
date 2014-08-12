@@ -38,6 +38,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.policy.PreviewInflater;
@@ -72,6 +73,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private LockPatternUtils mLockPatternUtils;
     private FlashlightController mFlashlightController;
     private PreviewInflater mPreviewInflater;
+    private KeyguardIndicationController mIndicationController;
     private boolean mFaceUnlockRunning;
 
     public KeyguardBottomAreaView(Context context) {
@@ -111,6 +113,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         setClipToPadding(false);
         mPreviewInflater = new PreviewInflater(mContext, new LockPatternUtils(mContext));
         inflatePreviews();
+        mLockIcon.setOnClickListener(this);
     }
 
     public void setActivityStarter(ActivityStarter activityStarter) {
@@ -204,6 +207,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             launchCamera();
         } else if (v == mPhoneImageView) {
             launchPhone();
+        } if (v == mLockIcon) {
+            mIndicationController.showTransientIndication(
+                    R.string.keyguard_indication_trust_disabled);
+            mLockPatternUtils.requireCredentialEntry(mLockPatternUtils.getCurrentUser());
         }
     }
 
@@ -244,6 +251,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         boolean trustManaged = mUnlockMethodCache.isTrustManaged();
         mLockIcon.setBackgroundResource(trustManaged && !mFaceUnlockRunning
                 ? R.drawable.trust_circle : 0);
+        mLockIcon.setClickable(trustManaged);
     }
 
     public KeyguardAffordanceView getPhoneView() {
@@ -318,4 +326,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             updateLockIcon();
         }
     };
+
+    public void setKeyguardIndicationController(
+            KeyguardIndicationController keyguardIndicationController) {
+        mIndicationController = keyguardIndicationController;
+    }
 }
