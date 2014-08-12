@@ -481,11 +481,6 @@ public class AudioService extends IAudioService.Stub {
     final RemoteCallbackList<IAudioRoutesObserver> mRoutesObservers
             = new RemoteCallbackList<IAudioRoutesObserver>();
 
-    /**
-     * A fake stream type to match the notion of remote media playback
-     */
-    public final static int STREAM_REMOTE_MUSIC = -200;
-
     // Devices for which the volume is fixed and VolumePanel slider should be disabled
     int mFixedVolumeDevices = AudioSystem.DEVICE_OUT_HDMI |
             AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET |
@@ -896,27 +891,6 @@ public class AudioService extends IAudioService.Stub {
     ///////////////////////////////////////////////////////////////////////////
     // IPC methods
     ///////////////////////////////////////////////////////////////////////////
-    /** @see AudioManager#isLocalOrRemoteMusicActive() */
-    public boolean isLocalOrRemoteMusicActive() {
-        if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
-            // local / wired / BT playback active
-            if (DEBUG_VOL) Log.d(TAG, "isLocalOrRemoteMusicActive(): local");
-            return true;
-        }
-        if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
-            // remote "cast-like" playback active
-            if (DEBUG_VOL) Log.d(TAG, "isLocalOrRemoteMusicActive(): has PLAYBACK_TYPE_REMOTE");
-            return true;
-        }
-        if (AudioSystem.isStreamActiveRemotely(AudioSystem.STREAM_MUSIC, 0)) {
-            // remote submix playback active
-            if (DEBUG_VOL) Log.d(TAG, "isLocalOrRemoteMusicActive(): remote submix");
-            return true;
-        }
-        if (DEBUG_VOL) Log.d(TAG, "isLocalOrRemoteMusicActive(): no");
-        return false;
-    }
-
     /** @see AudioManager#adjustVolume(int, int) */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
             String callingPackage) {
@@ -930,9 +904,8 @@ public class AudioService extends IAudioService.Stub {
         }
         final int resolvedStream = mStreamVolumeAlias[streamType];
 
-        // Play sounds on STREAM_RING and STREAM_REMOTE_MUSIC only.
-        if ((streamType != STREAM_REMOTE_MUSIC) &&
-                (flags & AudioManager.FLAG_PLAY_SOUND) != 0 &&
+        // Play sounds on STREAM_RING only.
+        if ((flags & AudioManager.FLAG_PLAY_SOUND) != 0 &&
                 resolvedStream != AudioSystem.STREAM_RING) {
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
         }
@@ -945,12 +918,7 @@ public class AudioService extends IAudioService.Stub {
             if (DEBUG_VOL) Log.d(TAG, "Volume controller suppressed adjustment");
         }
 
-        if (streamType == STREAM_REMOTE_MUSIC) {
-            // TODO bounce it to MediaSessionService to find an appropriate
-            // session
-        } else {
-            adjustStreamVolume(streamType, direction, flags, callingPackage);
-        }
+        adjustStreamVolume(streamType, direction, flags, callingPackage);
     }
 
     /** @see AudioManager#adjustStreamVolume(int, int, int) */
@@ -1885,10 +1853,6 @@ public class AudioService extends IAudioService.Stub {
                 }
             }
             int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
-            if (streamType == STREAM_REMOTE_MUSIC) {
-                // here handle remote media playback the same way as local playback
-                streamType = AudioManager.STREAM_MUSIC;
-            }
             int device = getDeviceForStream(streamType);
             int index = mStreamStates[mStreamVolumeAlias[streamType]].getIndex(device);
             setStreamVolumeInt(mStreamVolumeAlias[streamType], index, device, true);
@@ -2973,12 +2937,6 @@ public class AudioService extends IAudioService.Stub {
                     if (DEBUG_VOL)
                         Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
                     return AudioSystem.STREAM_MUSIC;
-                } else
-                    if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC))
-                    {
-                        if (DEBUG_VOL)
-                            Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
-                        return STREAM_REMOTE_MUSIC;
                     } else {
                         if (DEBUG_VOL)
                             Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING b/c default");
@@ -2992,19 +2950,8 @@ public class AudioService extends IAudioService.Stub {
             break;
         case PLATFORM_TELEVISION:
             if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-                if (isAfMusicActiveRecently(DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS)) {
-                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: forcing STREAM_MUSIC");
+                    // TV always defaults to STREAM_MUSIC
                     return AudioSystem.STREAM_MUSIC;
-                } else if (mMediaFocusControl.checkUpdateRemoteStateIfActive(
-                                                                        AudioSystem.STREAM_MUSIC)) {
-                    if (DEBUG_VOL)
-                        Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
-                    return STREAM_REMOTE_MUSIC;
-                } else {
-                    if (DEBUG_VOL) Log.v(TAG,
-                            "getActiveStreamType: using STREAM_MUSIC as default");
-                    return AudioSystem.STREAM_MUSIC;
-                }
             }
             break;
         default:
@@ -3027,12 +2974,6 @@ public class AudioService extends IAudioService.Stub {
                 if (isAfMusicActiveRecently(DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS)) {
                     if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: forcing STREAM_MUSIC");
                     return AudioSystem.STREAM_MUSIC;
-                } else
-                    if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC))
-                    {
-                        if (DEBUG_VOL)
-                            Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
-                        return STREAM_REMOTE_MUSIC;
                 } else {
                     if (DEBUG_VOL) Log.v(TAG,
                             "getActiveStreamType: using STREAM_NOTIFICATION as default");
