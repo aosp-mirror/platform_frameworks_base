@@ -92,27 +92,14 @@ public class KeyguardBouncer {
         }
     }
 
-    public void animateHide(long delay, long duration) {
-        if (isShowing()) {
-            mFadingOut = true;
-            mKeyguardView.animate()
-                    .alpha(0)
-                    .withLayer()
-
-                    // Make it disappear faster, as the focus should be on the activity behind.
-                    .setDuration(duration / 2)
-                    .setInterpolator(PhoneStatusBar.ALPHA_OUT)
-                    .setStartDelay(delay)
-                    .withEndAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            mFadingOut = false;
-                            hide(true /* destroyView */);
-                        }
-                    })
-                    .start();
+    /**
+     * See {@link StatusBarKeyguardViewManager#startPreHideAnimation}.
+     */
+    public void startPreHideAnimation(Runnable runnable) {
+        if (mKeyguardView != null) {
+            mKeyguardView.startDisappearAnimation(runnable);
         } else {
-            hide(true /* destroyView */);
+            runnable.run();
         }
     }
 

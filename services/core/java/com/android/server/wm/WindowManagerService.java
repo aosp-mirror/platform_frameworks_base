@@ -1695,7 +1695,13 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Win #" + i + " " + w + ": isOnScreen="
                     + w.isOnScreen() + " mDrawState=" + w.mWinAnimator.mDrawState);
-            if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0 && w.isOnScreen()
+
+            // If the app is executing an animation because the keyguard is going away, keep the
+            // wallpaper during the animation so it doesn't flicker out.
+            final boolean hasWallpaper = (w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0
+                    || (w.mAppToken != null
+                            && w.mWinAnimator.keyguardGoingAwayAnimation);
+            if (hasWallpaper && w.isOnScreen()
                     && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
                 if (DEBUG_WALLPAPER) Slog.v(TAG,
                         "Found wallpaper target: #" + i + "=" + w);

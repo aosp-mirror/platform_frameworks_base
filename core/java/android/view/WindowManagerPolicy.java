@@ -738,7 +738,13 @@ public interface WindowManagerPolicy {
      * Create and return an animation to re-display a force hidden window.
      */
     public Animation createForceHideEnterAnimation(boolean onWallpaper);
-    
+
+    /**
+     * Create and return an animation to let the wallpaper disappear after being shown on a force
+     * hiding window.
+     */
+    public Animation createForceHideWallpaperExitAnimation();
+
     /**
      * Called from the input reader thread before a key is enqueued.
      *

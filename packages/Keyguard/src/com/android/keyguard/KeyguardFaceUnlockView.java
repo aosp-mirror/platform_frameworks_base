@@ -17,7 +17,6 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.TelephonyManager;
@@ -352,5 +351,10 @@ public class KeyguardFaceUnlockView extends LinearLayout implements KeyguardSecu
     @Override
     public void startAppearAnimation() {
         // TODO.
+    }
+
+    @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        return false;
     }
 }
