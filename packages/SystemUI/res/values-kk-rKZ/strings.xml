@@ -39,12 +39,9 @@
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB арқылы зарядтауға қолдау көрсетілмейді."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Тек жинақтағы зарядтағышты пайдаланыңыз."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Параметрлер"</string>
-    <!-- no translation found for battery_saver_confirmation_title (5299585433050361634) -->
-    <skip />
-    <!-- no translation found for battery_saver_confirmation_ok (7507968430447930257) -->
-    <skip />
-    <!-- no translation found for battery_saver_start_action (5576697451677486320) -->
-    <skip />
+    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Батарея үнемдегішті қосу керек пе?"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Қосу"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"Батарея үнемдегішін қосу"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Параметрлер"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Ұшақ режимі"</string>
@@ -182,7 +179,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Аймақ GPS арқылы орнатылған"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Аймақ өтініштері қосылған"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Барлық хабарларды жойыңыз."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Қолданба ақпараты"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"Параметрлер"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Экран автоматты түрде бұрылады."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Экран ландшафт бағытында бекітілген."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Экран портрет бағытында бекітілген."</string>
@@ -270,6 +267,8 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"Басымдық"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Барлығы"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Зарядталуда (толғанша <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"Пайдаланушы қосу"</string>
+    <string name="user_new_user_name" msgid="426540612051178753">"Жаңа пайдаланушы"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Қонақ"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ Қонақ"</string>
     <string name="guest_exit_guest" msgid="1619100760451149682">"Қонақтан шығу"</string>
@@ -288,10 +287,8 @@
     <item quantity="other" msgid="5408537517529822157">"%d сағат бойы"</item>
   </plurals>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Батарея үнемдегіш қосулы"</string>
-    <!-- no translation found for battery_saver_notification_text (820318788126672692) -->
-    <skip />
-    <!-- no translation found for battery_saver_notification_action_text (109158658238110382) -->
-    <skip />
+    <string name="battery_saver_notification_text" msgid="820318788126672692">"Өнімділікті және фондық деректерді азайтады"</string>
+    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Батарея үнемдегішті өшіру"</string>
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Мазмұн жасырылған"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> экранда көрсетілгеннің барлығын түсіре бастайды."</string>
@@ -299,26 +296,15 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Барлығын тазалау"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Қазір бастау"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Хабарландырулар жоқ"</string>
-    <!-- no translation found for device_owned_footer (3802752663326030053) -->
-    <skip />
-    <!-- no translation found for vpn_footer (2388611096129106812) -->
-    <skip />
-    <!-- no translation found for monitoring_title_device_owned (7121079311903859610) -->
-    <skip />
-    <!-- no translation found for monitoring_title (169206259253048106) -->
-    <skip />
-    <!-- no translation found for open_app (4011771120339160755) -->
-    <skip />
-    <!-- no translation found for disconnect_vpn (1324915059568548655) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_owned (7801926679066533391) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (93140751707065515) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn (5397847778080663075) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (696121105616356493) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_device_owned (649791650224064248) -->
-    <skip />
+    <string name="device_owned_footer" msgid="3802752663326030053">"Құрылғы бақылануы мүмкін"</string>
+    <string name="vpn_footer" msgid="2388611096129106812">"Желі бақылауда болуы мүмкін"</string>
+    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Құрылғыны бақылау"</string>
+    <string name="monitoring_title" msgid="169206259253048106">"Желіні бақылау"</string>
+    <string name="open_app" msgid="4011771120339160755">"Ашық қолданба"</string>
+    <string name="disconnect_vpn" msgid="1324915059568548655">"VPN желісін ажырату"</string>
+    <string name="monitoring_description_device_owned" msgid="7512371572956715493">"Бұл құрылғыны басқаратын ұйым:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nӘкімші желілік белсенділікті, соның ішінде, электрондық хабарларды, қолданбаларды және қорғалған веб-сайттарды бақылауы мүмкін.\n\nҚосымша ақпарат алу үшін әкімшіге хабарласыңыз."</string>
+    <string name="monitoring_description_vpn" msgid="7288268682714305659">"Сіз «<xliff:g id="APPLICATION">%1$s</xliff:g>» қолданбасына VPN байланысын орнату рұқсатын бердіңіз.\n\nБұл қолданба құрылғыңызды және желілік белсенділікті, соның ішінде, электрондық хабарларды, қолданбаларды және қорғалған веб-сайттарды бақылауы мүмкін."</string>
+    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Сіз VPN («<xliff:g id="APPLICATION">%1$s</xliff:g>») желісіне қосылғансыз.\n\nVPN қызмет жеткізушісі құрылғыңызды және желілік белсенділікті, соның ішінде, электрондық хабарларды, қолданбаларды және қорғалған веб-сайттарды бақылауы мүмкін."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Бұл құр. келесі ұйым бас.:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nӘкімші желілік белсенділікті, соның ішінде, электрондық хаб-ды, қолд-ды және қорғалған веб-сайттарды бақ. мүмкін. Қосымша ақпарат алу үшін әкімшіге хабарласыңыз.\n\nСондай-ақ, сіз «<xliff:g id="APPLICATION">%2$s</xliff:g>» қолд-на VPN байланысын орнатуға рұқсат еттіңіз. Бұл қолд. да желілік белс-ті бақылауы мүмкін."</string>
+    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Бұл құрылғыны келесі ұйым басқарады:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nӘкімші желілік белсенділікті, соның ішінде, электрондық хабарларды, қолданбаларды және қорғалған веб-сайттарды бақылауы мүмкін. Қосымша ақпарат алу үшін әкімшіге хабарласыңыз.\n\nСондай-ақ, сіз VPN («<xliff:g id="APPLICATION">%2$s</xliff:g>») желісіне қосылғансыз. VPN қызмет жет-сі де жел. белс-ті бақ. мүм."</string>
 </resources>

@@ -39,12 +39,9 @@
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB充電には対応していません。"</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"専用の充電器のみを使用してください。"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"設定"</string>
-    <!-- no translation found for battery_saver_confirmation_title (5299585433050361634) -->
-    <skip />
-    <!-- no translation found for battery_saver_confirmation_ok (7507968430447930257) -->
-    <skip />
-    <!-- no translation found for battery_saver_start_action (5576697451677486320) -->
-    <skip />
+    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"バッテリーセーバーをONにしますか？"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"ONにする"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"バッテリーセーバーをONにします"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"設定"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"機内モード"</string>
@@ -184,7 +181,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPSにより現在地が設定されました"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"現在地リクエストがアクティブ"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"通知をすべて消去。"</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"アプリ情報"</string>
+    <!-- no translation found for status_bar_notification_inspect_item_title (5386295743469882227) -->
+    <skip />
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"画面は自動的に回転します。"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"画面は横向きにロックされています。"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"画面は縦向きにロックされています。"</string>
@@ -272,6 +270,10 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"重要"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"すべて"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"充電中（フル充電まで<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>）"</string>
+    <!-- no translation found for user_add_user (5110251524486079492) -->
+    <skip />
+    <!-- no translation found for user_new_user_name (426540612051178753) -->
+    <skip />
     <string name="guest_nickname" msgid="8059989128963789678">"ゲスト"</string>
     <string name="guest_new_guest" msgid="4259024453643879653">"+ ゲスト"</string>
     <string name="guest_exit_guest" msgid="1619100760451149682">"ゲストを終了"</string>
@@ -290,10 +292,8 @@
     <item quantity="other" msgid="5408537517529822157">"%d時間"</item>
   </plurals>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"バッテリーセーバーがON"</string>
-    <!-- no translation found for battery_saver_notification_text (820318788126672692) -->
-    <skip />
-    <!-- no translation found for battery_saver_notification_action_text (109158658238110382) -->
-    <skip />
+    <string name="battery_saver_notification_text" msgid="820318788126672692">"パフォーマンスとバックグラウンドデータを制限します"</string>
+    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"バッテリーセーバーをOFFにします"</string>
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"コンテンツが非表示"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>で、画面に表示されているコンテンツのキャプチャを開始します。"</string>
@@ -301,26 +301,18 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"すべて消去"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"今すぐ開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"通知はありません"</string>
-    <!-- no translation found for device_owned_footer (3802752663326030053) -->
+    <string name="device_owned_footer" msgid="3802752663326030053">"端末が監視されている可能性があります"</string>
+    <string name="vpn_footer" msgid="2388611096129106812">"ネットワークが監視されている可能性があります"</string>
+    <string name="monitoring_title_device_owned" msgid="7121079311903859610">"端末の監視"</string>
+    <string name="monitoring_title" msgid="169206259253048106">"ネットワーク監視"</string>
+    <string name="open_app" msgid="4011771120339160755">"アプリを開く"</string>
+    <string name="disconnect_vpn" msgid="1324915059568548655">"VPNを切断"</string>
+    <!-- no translation found for monitoring_description_device_owned (7512371572956715493) -->
     <skip />
-    <!-- no translation found for vpn_footer (2388611096129106812) -->
+    <!-- no translation found for monitoring_description_vpn (7288268682714305659) -->
     <skip />
-    <!-- no translation found for monitoring_title_device_owned (7121079311903859610) -->
+    <!-- no translation found for monitoring_description_legacy_vpn (4740349017929725435) -->
     <skip />
-    <!-- no translation found for monitoring_title (169206259253048106) -->
-    <skip />
-    <!-- no translation found for open_app (4011771120339160755) -->
-    <skip />
-    <!-- no translation found for disconnect_vpn (1324915059568548655) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_owned (7801926679066533391) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (93140751707065515) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn (5397847778080663075) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (696121105616356493) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_device_owned (649791650224064248) -->
-    <skip />
+    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"この端末は<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理されています。\n\n\n管理者はあなたのネットワークアクティビティ（メール、アプリ、保護されたウェブサイトなど）を監視できます。詳しくは管理者にお問い合わせください。\n\nまた、「<xliff:g id="APPLICATION">%2$s</xliff:g>」にVPN接続のセットアップを許可しています。このアプリもネットワークアクティビティを監視できます。"</string>
+    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"この端末は<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理されています。\n\n\n管理者はあなたのネットワークアクティビティ（メール、アプリ、保護されたウェブサイトなど）を監視できます。詳しくは管理者にお問い合わせください。\n\nまた、VPN（「<xliff:g id="APPLICATION">%2$s</xliff:g>」）に接続しています。VPNサービスプロバイダーもネットワークアクティビティを監視できます。"</string>
 </resources>
