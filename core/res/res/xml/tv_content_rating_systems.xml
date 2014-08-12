@@ -16,7 +16,7 @@
 ** limitations under the License.
 */
 -->
-<rating-system-definitions>
+<rating-system-definitions version="1.0">
     <!-- Range specific TV content rating system for AM TV-->
     <rating-system-definition id="AM_TV_RS"
         displayName="@string/display_name_amtvrs"
