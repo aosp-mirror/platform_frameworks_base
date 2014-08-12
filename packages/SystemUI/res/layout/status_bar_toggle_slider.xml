@@ -41,6 +41,10 @@
         android:layout_alignParentEnd="true"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:thumb="@drawable/ic_brightness_thumb"
+        android:splitTrack="false"
         />
     <TextView
         android:id="@+id/label"
