@@ -1184,7 +1184,6 @@ public final class SystemServer {
                 } catch (Throwable e) {
                     reportWtf("Notifying MmsService running", e);
                 }
-                mSystemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETE);
             }
         });
     }

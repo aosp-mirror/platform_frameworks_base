@@ -5648,6 +5648,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Register receivers to handle package update events
         mPackageMonitor.register(mContext, Looper.getMainLooper(), false);
 
+        // Let system services know.
+        mSystemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+
         synchronized (this) {
             // Ensure that any processes we had put on hold are now started
             // up.
