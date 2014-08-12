@@ -33,6 +33,8 @@ import com.android.internal.telecomm.IConnectionServiceAdapter;
 oneway interface IConnectionService {
     void addConnectionServiceAdapter(in IConnectionServiceAdapter adapter);
 
+    void removeConnectionServiceAdapter(in IConnectionServiceAdapter adapter);
+
     void createConnection(
             in PhoneAccountHandle connectionManagerPhoneAccount,
             in ConnectionRequest request,
