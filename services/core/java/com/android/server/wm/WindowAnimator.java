@@ -220,6 +220,7 @@ public class WindowAnimator {
         final WindowList windows = mService.getWindowListLocked(displayId);
         ArrayList<WindowStateAnimator> unForceHiding = null;
         boolean wallpaperInUnForceHiding = false;
+        WindowState wallpaper = null;
 
         if (mKeyguardGoingAway) {
             for (int i = windows.size() - 1; i >= 0; i--) {
@@ -378,6 +379,9 @@ public class WindowAnimator {
                     appAnimator.thumbnailLayer = winAnimator.mAnimLayer;
                 }
             }
+            if (win.mIsWallpaper) {
+                wallpaper = win;
+            }
         } // end forall windows
 
         // If we have windows that are being show due to them no longer
@@ -389,7 +393,7 @@ public class WindowAnimator {
                 if (a != null) {
                     final WindowStateAnimator winAnimator = unForceHiding.get(i);
                     winAnimator.setAnimation(a);
-                    winAnimator.mAnimationIsEntrance = true;
+                    winAnimator.keyguardGoingAwayAnimation = true;
                     if (startKeyguardExit && mKeyguardGoingAway) {
                         // Do one time only.
                         mPolicy.startKeyguardExitAnimation(mCurrentTime + a.getStartOffset(),
@@ -398,6 +402,12 @@ public class WindowAnimator {
                         startKeyguardExit = false;
                     }
                 }
+            }
+
+            // Wallpaper is going away in un-force-hide motion, animate it as well.
+            if (!wallpaperInUnForceHiding && wallpaper != null) {
+                WindowStateAnimator animator = wallpaper.mWinAnimator;
+                animator.setAnimation(mPolicy.createForceHideWallpaperExitAnimation());
             }
         }
     }

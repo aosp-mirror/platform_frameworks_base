@@ -167,6 +167,16 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
     }
 
     @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        KeyguardSecurityView ksv = getSecurityView();
+        if (ksv != null) {
+            return ksv.startDisappearAnimation(finishRunnable);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
         return p instanceof LayoutParams;
     }

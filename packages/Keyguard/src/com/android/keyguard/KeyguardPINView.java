@@ -17,13 +17,10 @@
 package com.android.keyguard;
 
 import android.content.Context;
-import android.text.InputType;
-import android.text.TextWatcher;
-import android.text.method.DigitsKeyListener;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView.OnEditorActionListener;
+import android.view.animation.AnimationUtils;
 
 /**
  * Displays a PIN pad for unlocking.
@@ -37,6 +34,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     private ViewGroup mRow2;
     private ViewGroup mRow3;
     private View mDivider;
+    private int mDisappearYTranslation;
 
     public KeyguardPINView(Context context) {
         this(context, null);
@@ -45,6 +43,8 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     public KeyguardPINView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mAppearAnimationUtils = new AppearAnimationUtils(context);
+        mDisappearYTranslation = getResources().getDimensionPixelSize(
+                R.dimen.disappear_y_translation);
     }
 
     protected void resetState() {
@@ -117,6 +117,18 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                 });
     }
 
+    @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        animate()
+                .alpha(0f)
+                .translationY(mDisappearYTranslation)
+                .setInterpolator(AnimationUtils
+                        .loadInterpolator(mContext, android.R.interpolator.fast_out_linear_in))
+                .setDuration(100)
+                .withEndAction(finishRunnable);
+        return true;
+    }
+
     private void enableClipping(boolean enable) {
         mKeyguardBouncerFrame.setClipToPadding(enable);
         mKeyguardBouncerFrame.setClipChildren(enable);
@@ -124,5 +136,10 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         mRow2.setClipToPadding(enable);
         mRow3.setClipToPadding(enable);
         setClipChildren(enable);
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
     }
 }

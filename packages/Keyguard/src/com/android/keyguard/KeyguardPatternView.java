@@ -37,6 +37,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.Button;
@@ -95,6 +96,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     private Drawable mBouncerFrame;
     private ViewGroup mKeyguardBouncerFrame;
     private KeyguardMessageArea mHelpMessage;
+    private int mDisappearYTranslation;
 
     enum FooterMode {
         Normal,
@@ -113,6 +115,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 AppearAnimationUtils.DEFAULT_APPEAR_DURATION, 1.5f /* delayScale */,
                 2.0f /* transitionScale */, AnimationUtils.loadInterpolator(
                         mContext, android.R.interpolator.linear_out_slow_in));
+        mDisappearYTranslation = getResources().getDimensionPixelSize(
+                R.dimen.disappear_y_translation);
     }
 
     public void setKeyguardCallback(KeyguardSecurityCallback callback) {
@@ -412,6 +416,11 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     @Override
     public void startAppearAnimation() {
         enableClipping(false);
+        setTranslationY(mAppearAnimationUtils.getStartTranslation());
+        animate()
+                .setDuration(500)
+                .setInterpolator(mAppearAnimationUtils.getInterpolator())
+                .translationY(0);
         mAppearAnimationUtils.startAppearAnimation(
                 mLockPatternView.getCellStates(),
                 new Runnable() {
@@ -428,6 +437,19 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                     mAppearAnimationUtils.getInterpolator(),
                     null /* finishRunnable */);
         }
+    }
+
+    @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        mLockPatternView.clearPattern();
+        animate()
+                .alpha(0f)
+                .translationY(-100)
+                .setInterpolator(AnimationUtils.loadInterpolator(
+                        mContext, android.R.interpolator.fast_out_linear_in))
+                .setDuration(100)
+                .withEndAction(finishRunnable);
+        return true;
     }
 
     private void enableClipping(boolean enable) {
@@ -476,5 +498,10 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         }
         animator.start();
         mLockPatternView.invalidate();
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
     }
 }

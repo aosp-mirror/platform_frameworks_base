@@ -99,7 +99,9 @@ import android.view.WindowManagerInternal;
 import android.view.WindowManagerPolicy;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 
 import com.android.internal.R;
@@ -527,6 +529,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Fallback actions by key code.
     private final SparseArray<KeyCharacterMap.FallbackAction> mFallbackActions =
             new SparseArray<KeyCharacterMap.FallbackAction>();
+
+    private final LogDecelerateInterpolator mLogDecelerateInterpolator
+            = new LogDecelerateInterpolator(100, 0);
 
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
@@ -2060,8 +2065,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public Animation createForceHideEnterAnimation(boolean onWallpaper) {
-        return AnimationUtils.loadAnimation(mContext,
-                com.android.internal.R.anim.lock_screen_behind_enter);
+        if (onWallpaper) {
+            Animation a = AnimationUtils.loadAnimation(mContext,
+                    R.anim.lock_screen_behind_enter_wallpaper);
+            AnimationSet set = (AnimationSet) a;
+
+            // TODO: Use XML interpolators when we have log interpolators available in XML.
+            set.getAnimations().get(0).setInterpolator(mLogDecelerateInterpolator);
+            set.getAnimations().get(1).setInterpolator(mLogDecelerateInterpolator);
+            set.getAnimations().get(2).setInterpolator(mLogDecelerateInterpolator);
+            return set;
+        } else {
+            Animation a = AnimationUtils.loadAnimation(mContext,
+                    R.anim.lock_screen_behind_enter);
+            AnimationSet set = (AnimationSet) a;
+
+            // TODO: Use XML interpolators when we have log interpolators available in XML.
+            set.getAnimations().get(0).setInterpolator(mLogDecelerateInterpolator);
+            return set;
+        }
+    }
+
+
+    @Override
+    public Animation createForceHideWallpaperExitAnimation() {
+        return AnimationUtils.loadAnimation(mContext, R.anim.lock_screen_wallpaper_exit);
     }
 
     private static void awakenDreams() {

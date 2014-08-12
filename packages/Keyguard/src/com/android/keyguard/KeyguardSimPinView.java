@@ -26,14 +26,9 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.text.InputType;
-import android.text.TextWatcher;
-import android.text.method.DigitsKeyListener;
 import android.util.AttributeSet;
-import android.view.View;
 import android.util.Log;
 import android.view.WindowManager;
-import android.widget.TextView.OnEditorActionListener;
 
 /**
  * Displays a PIN pad for unlocking.
@@ -236,6 +231,11 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     @Override
     public void startAppearAnimation() {
         // noop.
+    }
+
+    @Override
+    public boolean startDisappearAnimation(Runnable finishRunnable) {
+        return false;
     }
 }
 

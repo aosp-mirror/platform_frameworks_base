@@ -91,6 +91,14 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         }
     }
 
+    public boolean startDisappearAnimation(Runnable onFinishRunnable) {
+        if (mCurrentSecuritySelection != SecurityMode.None) {
+            return getSecurityView(mCurrentSecuritySelection).startDisappearAnimation(
+                    onFinishRunnable);
+        }
+        return false;
+    }
+
     void updateSecurityViews(boolean isBouncing) {
         int children = mSecurityViewFlipper.getChildCount();
         for (int i = 0; i < children; i++) {

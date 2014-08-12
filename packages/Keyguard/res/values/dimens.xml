@@ -175,4 +175,7 @@
 
     <!-- The vertical margin between the date and the owner info. -->
     <dimen name="date_owner_info_margin">10dp</dimen>
+
+    <!-- The translation for disappearing security views after having solved them. -->
+    <dimen name="disappear_y_translation">-32dp</dimen>
 </resources>

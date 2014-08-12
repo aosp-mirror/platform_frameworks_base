@@ -24,6 +24,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
@@ -38,7 +39,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private static final boolean DEBUG = false;
 
     private static final float SCRIM_BEHIND_ALPHA = 0.62f;
-    private static final float SCRIM_BEHIND_ALPHA_KEYGUARD = 0.5f;
+    private static final float SCRIM_BEHIND_ALPHA_KEYGUARD = 0.55f;
+    private static final float SCRIM_BEHIND_ALPHA_UNLOCKING = 0.2f;
     private static final float SCRIM_IN_FRONT_ALPHA = 0.75f;
     private static final long ANIMATION_DURATION = 220;
     private static final int TAG_KEY_ANIM = R.id.scrim;
@@ -71,11 +73,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private boolean mDozing;
     private int mPulsesRemaining;
     private final Interpolator mInterpolator = new DecelerateInterpolator();
+    private final Interpolator mLinearOutSlowInInterpolator;
 
     public ScrimController(View scrimBehind, View scrimInFront) {
         mScrimBehind = scrimBehind;
         mScrimInFront = scrimInFront;
         mUnlockMethodCache = UnlockMethodCache.getInstance(scrimBehind.getContext());
+        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(scrimBehind.getContext(),
+                android.R.interpolator.linear_out_slow_in);
     }
 
     public void setKeyguardShowing(boolean showing) {
@@ -171,6 +176,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         if (mExpanding && mDarkenWhileDragging) {
             float behindFraction = Math.max(0, Math.min(mFraction, 1));
             float fraction = 1 - behindFraction;
+            fraction = (float) Math.pow(fraction, 0.8f);
+            behindFraction = (float) Math.pow(behindFraction, 0.8f);
             setScrimInFrontColor(fraction * SCRIM_IN_FRONT_ALPHA);
             setScrimBehindColor(behindFraction * SCRIM_BEHIND_ALPHA_KEYGUARD);
         } else if (mBouncerShowing) {
@@ -179,8 +186,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         } else if (mDozing) {
             setScrimInFrontColor(1);
         } else {
+            float fraction = Math.max(0, Math.min(mFraction, 1));
             setScrimInFrontColor(0f);
-            setScrimBehindColor(SCRIM_BEHIND_ALPHA_KEYGUARD);
+            setScrimBehindColor(fraction
+                    * (SCRIM_BEHIND_ALPHA_KEYGUARD - SCRIM_BEHIND_ALPHA_UNLOCKING)
+                    + SCRIM_BEHIND_ALPHA_UNLOCKING);
         }
     }
 
@@ -239,7 +249,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
                 scrim.setBackgroundColor(Color.argb(value, 0, 0, 0));
             }
         });
-        anim.setInterpolator(mInterpolator);
+        anim.setInterpolator(mAnimateKeyguardFadingOut
+                ? mLinearOutSlowInInterpolator
+                : mInterpolator);
         anim.setStartDelay(mAnimationDelay);
         anim.setDuration(mDurationOverride != -1 ? mDurationOverride : ANIMATION_DURATION);
         anim.addListener(new AnimatorListenerAdapter() {

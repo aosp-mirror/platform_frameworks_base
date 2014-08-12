@@ -36,8 +36,7 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
 
     public AppearAnimationUtils(Context ctx) {
         this(ctx, DEFAULT_APPEAR_DURATION,
-                ctx.getResources().getDimensionPixelSize(R.dimen.appear_y_translation_start),
-                1.0f,
+                1.0f, 1.0f,
                 AnimationUtils.loadInterpolator(ctx, android.R.interpolator.linear_out_slow_in));
     }
 

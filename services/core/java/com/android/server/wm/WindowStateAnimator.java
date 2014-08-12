@@ -140,6 +140,8 @@ class WindowStateAnimator {
     // an enter animation.
     boolean mEnterAnimationPending;
 
+    boolean keyguardGoingAwayAnimation;
+
     /** This is set when there is no Surface */
     static final int NO_SURFACE = 0;
     /** This is set after the Surface has been created but before the window has been drawn. During
@@ -220,6 +222,7 @@ class WindowStateAnimator {
             mLocalAnimating = false;
             mAnimation.cancel();
             mAnimation = null;
+            keyguardGoingAwayAnimation = false;
         }
     }
 
@@ -341,6 +344,7 @@ class WindowStateAnimator {
             + (mWin.mAppToken != null ? mWin.mAppToken.reportedVisible : false));
 
         mAnimating = false;
+        keyguardGoingAwayAnimation = false;
         mLocalAnimating = false;
         if (mAnimation != null) {
             mAnimation.cancel();
