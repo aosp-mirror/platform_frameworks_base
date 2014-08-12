@@ -27,7 +27,11 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static android.graphics.Typeface_Delegate.SYSTEM_FONTS;
 
@@ -50,6 +54,14 @@ public class FontFamily_Delegate {
     private static final String FONT_SUFFIX_BOLDITALIC = "BoldItalic.ttf";
     private static final String FONT_SUFFIX_BOLD = "Bold.ttf";
     private static final String FONT_SUFFIX_ITALIC = "Italic.ttf";
+
+    private static final Set<String> MISSING_FONTS =
+            Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+                    "NotoSansHans-Regular.otf",
+                    "NotoSansHant-Regular.otf",
+                    "NotoSansJP-Regular.otf",
+                    "NotoSansKR-Regular.otf"
+            )));
 
     /**
      * A class associating {@link Font} with its metadata.
@@ -82,6 +94,8 @@ public class FontFamily_Delegate {
     private FontVariant mVariant;
     // Path of fonts that haven't been created since sFontLoader hasn't been initialized.
     private List<String> mPath = new ArrayList<String>();
+    /** @see #isValid() */
+    private boolean mValid = false;
 
 
     // ---- Public helper class ----
@@ -130,6 +144,16 @@ public class FontFamily_Delegate {
 
     public FontVariant getVariant() {
         return mVariant;
+    }
+
+    /**
+     * Returns if the FontFamily should contain any fonts. If this returns true and
+     * {@link #getFont(int)} returns an empty list, it means that an error occurred while loading
+     * the fonts. However, some fonts are deliberately skipped, for example they are not bundled
+     * with the SDK. In such a case, this method returns false.
+     */
+    public boolean isValid() {
+        return mValid;
     }
 
     /*package*/ static int getFontStyle(String path) {
@@ -201,6 +225,13 @@ public class FontFamily_Delegate {
     /*package*/ static boolean nAddFont(long nativeFamily, String path) {
         FontFamily_Delegate delegate = getDelegate(nativeFamily);
         if (delegate != null) {
+            // If the font to be added is known to be missing from the SDK, don't try to load it and
+            // mark the FontFamily to be not valid.
+            if (path.startsWith(SYSTEM_FONTS) &&
+                    MISSING_FONTS.contains(path.substring(SYSTEM_FONTS.length()))) {
+                return delegate.mValid = false;
+            }
+            delegate.mValid = true;
             if (sFontLocation == null) {
                 delegate.mPath.add(path);
                 return true;
