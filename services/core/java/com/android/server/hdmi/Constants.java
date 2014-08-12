@@ -244,5 +244,26 @@ final class Constants {
     static final int DISABLED = 0;
     static final int ENABLED = 1;
 
+    // --------------------------------------------------
+    // MHL sub command message types.
+    static final int MHL_MSG_MSGE  = 0x02;
+    static final int MHL_MSG_RCP   = 0x10;
+    static final int MHL_MSG_RCPK  = 0x11;
+    static final int MHL_MSG_RCPE  = 0x12;
+    static final int MHL_MSG_RAP   = 0x20;
+    static final int MHL_MSG_RAPK  = 0x21;
+
+    // MHL RAP messages.
+    static final int MHL_RAP_ACTION_POLL = 0x00;
+    static final int MHL_RAP_ACTION_CONTENT_ON = 0x10;
+    static final int MHL_RAP_ACTION_CONTENT_OFF = 0x11;
+
+    static final int MHL_INVALID_ADOPTER_ID = -1;
+    static final int MHL_INVALID_DEVICE_ID = -1;
+
+    static final int MHL_CBUS_MODE_OCBUS = 1;
+    static final int MHL_CBUS_MODE_ECBUS_S = 2;
+    static final int MHL_CBUS_MODE_ECBUS_D = 3;
+
     private Constants() { /* cannot be instantiated */ }
 }
