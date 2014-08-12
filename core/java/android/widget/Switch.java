@@ -833,6 +833,10 @@ public class Switch extends CompoundButton {
     public void setChecked(boolean checked) {
         super.setChecked(checked);
 
+        // Calling the super method may result in setChecked() getting called
+        // recursively with a different value, so load the REAL value...
+        checked = isChecked();
+
         if (isAttachedToWindow() && isLaidOut()) {
             animateThumbToCheckedState(checked);
         } else {
