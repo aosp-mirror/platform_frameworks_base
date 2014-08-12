@@ -35,6 +35,7 @@ import com.android.systemui.qs.QSTile.DetailAdapter;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSlider;
 import com.android.systemui.statusbar.phone.QSTileHost;
+import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -103,6 +104,14 @@ public class QSPanel extends ViewGroup {
                 closeDetail();
             }
         });
+    }
+
+    public void setBrightnessMirror(BrightnessMirrorController c) {
+        super.onFinishInflate();
+        ToggleSlider brightnessSlider = (ToggleSlider) findViewById(R.id.brightness_slider);
+        ToggleSlider mirror = (ToggleSlider) c.getMirror().findViewById(R.id.brightness_slider);
+        brightnessSlider.setMirror(mirror);
+        brightnessSlider.setMirrorController(c);
     }
 
     public void setCallback(Callback callback) {
