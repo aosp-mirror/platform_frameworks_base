@@ -16,6 +16,8 @@
 
 package android.graphics.drawable;
 
+import com.android.internal.R;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -116,32 +118,27 @@ public class StateListDrawable extends DrawableContainer {
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
 
-        TypedArray a = r.obtainAttributes(attrs,
-                com.android.internal.R.styleable.StateListDrawable);
+        final TypedArray a = r.obtainAttributes(attrs, R.styleable.StateListDrawable);
 
         super.inflateWithAttributes(r, parser, a,
-                com.android.internal.R.styleable.StateListDrawable_visible);
+                R.styleable.StateListDrawable_visible);
 
         mStateListState.setVariablePadding(a.getBoolean(
-                com.android.internal.R.styleable.StateListDrawable_variablePadding, false));
+                R.styleable.StateListDrawable_variablePadding, false));
         mStateListState.setConstantSize(a.getBoolean(
-                com.android.internal.R.styleable.StateListDrawable_constantSize, false));
+                R.styleable.StateListDrawable_constantSize, false));
         mStateListState.setEnterFadeDuration(a.getInt(
-                com.android.internal.R.styleable.StateListDrawable_enterFadeDuration, 0));
+                R.styleable.StateListDrawable_enterFadeDuration, 0));
         mStateListState.setExitFadeDuration(a.getInt(
-                com.android.internal.R.styleable.StateListDrawable_exitFadeDuration, 0));
+                R.styleable.StateListDrawable_exitFadeDuration, 0));
 
-        setDither(a.getBoolean(com.android.internal.R.styleable.StateListDrawable_dither,
-                               DEFAULT_DITHER));
-
-        setAutoMirrored(a.getBoolean(
-                com.android.internal.R.styleable.StateListDrawable_autoMirrored, false));
+        setDither(a.getBoolean(R.styleable.StateListDrawable_dither, DEFAULT_DITHER));
+        setAutoMirrored(a.getBoolean(R.styleable.StateListDrawable_autoMirrored, false));
 
         a.recycle();
 
-        int type;
-
         final int innerDepth = parser.getDepth() + 1;
+        int type;
         int depth;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                 && ((depth = parser.getDepth()) >= innerDepth
@@ -163,7 +160,7 @@ public class StateListDrawable extends DrawableContainer {
             for (i = 0; i < numAttrs; i++) {
                 final int stateResId = attrs.getAttributeNameResource(i);
                 if (stateResId == 0) break;
-                if (stateResId == com.android.internal.R.attr.drawable) {
+                if (stateResId == R.attr.drawable) {
                     drawableRes = attrs.getAttributeResourceValue(i, 0);
                 } else {
                     states[j++] = attrs.getAttributeBooleanValue(i, false)
@@ -173,9 +170,9 @@ public class StateListDrawable extends DrawableContainer {
             }
             states = StateSet.trimStateSet(states, j);
 
-            Drawable dr;
+            final Drawable dr;
             if (drawableRes != 0) {
-                dr = r.getDrawable(drawableRes);
+                dr = r.getDrawable(drawableRes, theme);
             } else {
                 while ((type = parser.next()) == XmlPullParser.TEXT) {
                 }
