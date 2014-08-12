@@ -782,4 +782,7 @@
     <!-- Monitoring dialog legacy VPN with device owner text [CHAR LIMIT=300] -->
     <string name="monitoring_description_legacy_vpn_device_owned">This device is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\n\nYour administrator is capable of monitoring your network activity including emails, apps, and secure websites. For more information, contact your administrator.\n\nAlso, you\'re connected to a VPN (\"<xliff:g id="application">%2$s</xliff:g>\"). Your VPN service provider can monitor network activity too.</string>
 
+    <!-- Indication on the keyguard that appears when the user disables trust agents until the next time they unlock manually. [CHAR LIMIT=NONE] -->
+    <string name="keyguard_indication_trust_disabled">Device will stay locked until you manually unlock</string>
+
 </resources>
