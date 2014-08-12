@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.NonNull;
 import android.net.ProxyInfo;
 import android.os.Parcelable;
 import android.os.Parcel;
@@ -24,7 +25,6 @@ import android.text.TextUtils;
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
-
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -480,10 +480,13 @@ public final class LinkProperties implements Parcelable {
      * Returns all the links stacked on top of this link.
      * @hide
      */
-    public List<LinkProperties> getStackedLinks() {
+    public @NonNull List<LinkProperties> getStackedLinks() {
+        if (mStackedLinks.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
         List<LinkProperties> stacked = new ArrayList<LinkProperties>();
         for (LinkProperties link : mStackedLinks.values()) {
-          stacked.add(new LinkProperties(link));
+            stacked.add(new LinkProperties(link));
         }
         return Collections.unmodifiableList(stacked);
     }
