@@ -741,15 +741,24 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
     const SkPath* projectionReceiverOutline = properties().getOutline().getPath();
     int restoreTo = renderer.getSaveCount();
 
+    LinearAllocator& alloc = handler.allocator();
+    handler(new (alloc) SaveOp(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag),
+            PROPERTY_SAVECOUNT, properties().getClipToBounds());
+
+    // Transform renderer to match background we're projecting onto
+    // (by offsetting canvas by translationX/Y of background rendernode, since only those are set)
+    const DisplayListOp* op =
+            (mDisplayListData->displayListOps[mDisplayListData->projectionReceiveIndex]);
+    const DrawRenderNodeOp* backgroundOp = reinterpret_cast<const DrawRenderNodeOp*>(op);
+    const RenderProperties& backgroundProps = backgroundOp->mRenderNode->properties();
+    renderer.translate(backgroundProps.getTranslationX(), backgroundProps.getTranslationY());
+
     // If the projection reciever has an outline, we mask each of the projected rendernodes to it
     // Either with clipRect, or special saveLayer masking
-    LinearAllocator& alloc = handler.allocator();
     if (projectionReceiverOutline != NULL) {
         const SkRect& outlineBounds = projectionReceiverOutline->getBounds();
         if (projectionReceiverOutline->isRect(NULL)) {
             // mask to the rect outline simply with clipRect
-            handler(new (alloc) SaveOp(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag),
-                    PROPERTY_SAVECOUNT, properties().getClipToBounds());
             ClipRectOp* clipOp = new (alloc) ClipRectOp(
                     outlineBounds.left(), outlineBounds.top(),
                     outlineBounds.right(), outlineBounds.bottom(), SkRegion::kIntersect_Op);
