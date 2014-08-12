@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.Manifest;
 import android.Manifest.permission;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -24,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -86,7 +88,9 @@ public final class NetworkScorerAppManager {
         List<NetworkScorerAppData> scorers = new ArrayList<>();
 
         PackageManager pm = context.getPackageManager();
-        List<ResolveInfo> receivers = pm.queryBroadcastReceivers(SCORE_INTENT, 0 /* flags */);
+        // Only apps installed under the primary user of the device can be scorers.
+        List<ResolveInfo> receivers =
+                pm.queryBroadcastReceivers(SCORE_INTENT, 0 /* flags */, UserHandle.USER_OWNER);
         for (ResolveInfo receiver : receivers) {
             // This field is a misnomer, see android.content.pm.ResolveInfo#activityInfo
             final ActivityInfo receiverInfo = receiver.activityInfo;
@@ -186,10 +190,14 @@ public final class NetworkScorerAppManager {
         AppOpsManager appOpsMgr = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         try {
             appOpsMgr.checkPackage(callingUid, defaultApp.mPackageName);
-            return true;
         } catch (SecurityException e) {
             return false;
         }
+
+        // To be extra safe, ensure the caller holds the SCORE_NETWORKS permission. It always
+        // should, since it couldn't become the active scorer otherwise, but this can't hurt.
+        return context.checkCallingPermission(Manifest.permission.SCORE_NETWORKS) ==
+                PackageManager.PERMISSION_GRANTED;
     }
 
     /** Returns the {@link NetworkScorerAppData} for the given app, or null if it's not a scorer. */
