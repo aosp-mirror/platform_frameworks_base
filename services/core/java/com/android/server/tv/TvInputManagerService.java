@@ -17,6 +17,7 @@
 package com.android.server.tv;
 
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
+import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED_STANDBY;
 import static android.media.tv.TvInputManager.INPUT_STATE_DISCONNECTED;
 
 import android.app.ActivityManager;
@@ -36,6 +37,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.tv.ITvInputClient;
 import android.media.tv.ITvInputHardware;
@@ -2176,8 +2178,27 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void onHdmiDeviceUpdated(HdmiDeviceInfo deviceInfo) {
-            // TODO: implement here.
+        public void onHdmiDeviceUpdated(String inputId, HdmiDeviceInfo deviceInfo) {
+            synchronized (mLock) {
+                Integer state = null;
+                switch (deviceInfo.getDevicePowerStatus()) {
+                    case HdmiControlManager.POWER_STATUS_ON:
+                        state = INPUT_STATE_CONNECTED;
+                        break;
+                    case HdmiControlManager.POWER_STATUS_STANDBY:
+                    case HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON:
+                    case HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY:
+                        state = INPUT_STATE_CONNECTED_STANDBY;
+                        break;
+                    case HdmiControlManager.POWER_STATUS_UNKNOWN:
+                    default:
+                        state = null;
+                        break;
+                }
+                if (state != null) {
+                    setStateLocked(inputId, state.intValue(), mCurrentUserId);
+                }
+            }
         }
     }
 }
