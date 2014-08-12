@@ -29,6 +29,7 @@ import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.net.ScoredNetwork;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -164,7 +165,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             if (result) {
                 Intent intent = new Intent(NetworkScoreManager.ACTION_SCORER_CHANGED);
                 intent.putExtra(NetworkScoreManager.EXTRA_NEW_SCORER, packageName);
-                mContext.sendBroadcast(intent);
+                mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
             }
             return result;
         } finally {
