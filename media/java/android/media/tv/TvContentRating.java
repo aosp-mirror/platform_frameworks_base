@@ -23,6 +23,7 @@ import android.text.TextUtils;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A class representing a TV content rating.
@@ -1410,6 +1411,7 @@ public final class TvContentRating {
     private final String mRatingSystem;
     private final String mRating;
     private final String[] mSubRatings;
+    private final int mHashCode;
 
     /**
      * Creates a TvContentRating object.
@@ -1472,7 +1474,13 @@ public final class TvContentRating {
         mDomain = domain;
         mRatingSystem = ratingSystem;
         mRating = rating;
-        mSubRatings = (subRatings == null || subRatings.length == 0) ? null : subRatings;
+        if (subRatings == null || subRatings.length == 0) {
+            mSubRatings = null;
+        } else {
+            Arrays.sort(subRatings);
+            mSubRatings = subRatings;
+        }
+        mHashCode = Objects.hash(mDomain, mRating, mSubRatings);
     }
 
     /**
@@ -1567,5 +1575,31 @@ public final class TvContentRating {
         } else {
             return subRatings.containsAll(subRatingsOther);
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof TvContentRating)) {
+            return false;
+        }
+        TvContentRating other = (TvContentRating) obj;
+        if (mHashCode != other.mHashCode) {
+            return false;
+        }
+        if (!TextUtils.equals(mDomain, other.mDomain)) {
+            return false;
+        }
+        if (!TextUtils.equals(mRatingSystem, other.mRatingSystem)) {
+            return false;
+        }
+        if (!TextUtils.equals(mRating, other.mRating)) {
+            return false;
+        }
+        return Arrays.equals(mSubRatings, other.mSubRatings);
+    }
+
+    @Override
+    public int hashCode() {
+        return mHashCode;
     }
 }
