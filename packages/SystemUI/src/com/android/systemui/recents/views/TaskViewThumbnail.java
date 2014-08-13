@@ -21,11 +21,14 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
+import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.model.Task;
 
 
 /** The task thumbnail view */
 public class TaskViewThumbnail extends FixedSizeImageView {
+
+    RecentsConfiguration mConfig;
 
     // Task bar clipping
     Rect mClipRect = new Rect();
@@ -44,7 +47,13 @@ public class TaskViewThumbnail extends FixedSizeImageView {
 
     public TaskViewThumbnail(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        mConfig = RecentsConfiguration.getInstance();
         setScaleType(ScaleType.FIT_XY);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        setAlpha(0.9f);
     }
 
     /** Updates the clip rect based on the given task bar. */
@@ -100,5 +109,52 @@ public class TaskViewThumbnail extends FixedSizeImageView {
     /** Unbinds the thumbnail view from the task */
     void unbindFromTask() {
         setImageDrawable(null);
+    }
+
+    /** Handles focus changes. */
+    void onFocusChanged(boolean focused) {
+        if (focused) {
+            if (Float.compare(getAlpha(), 1f) != 0) {
+                startFadeAnimation(1f, 0, 150, null);
+            }
+        } else {
+            if (Float.compare(getAlpha(), mConfig.taskViewThumbnailAlpha) != 0) {
+                startFadeAnimation(mConfig.taskViewThumbnailAlpha, 0, 150, null);
+            }
+        }
+    }
+
+    /** Prepares for the enter recents animation. */
+    void prepareEnterRecentsAnimation(boolean isTaskViewLaunchTargetTask) {
+        if (isTaskViewLaunchTargetTask) {
+            setAlpha(1f);
+        } else {
+            setAlpha(mConfig.taskViewThumbnailAlpha);
+        }
+    }
+
+    /** Animates this task thumbnail as it enters recents */
+    void startEnterRecentsAnimation(int delay, Runnable postAnimRunnable) {
+        startFadeAnimation(mConfig.taskViewThumbnailAlpha, delay,
+                mConfig.taskBarEnterAnimDuration, postAnimRunnable);
+    }
+
+    /** Animates this task thumbnail as it exits recents */
+    void startLaunchTaskAnimation() {
+        startFadeAnimation(1f, 0, mConfig.taskBarExitAnimDuration, null);
+    }
+
+    /** Animates the thumbnail alpha. */
+    void startFadeAnimation(float finalAlpha, int delay, int duration, Runnable postAnimRunnable) {
+        if (postAnimRunnable != null) {
+            animate().withEndAction(postAnimRunnable);
+        }
+        animate()
+                .alpha(finalAlpha)
+                .setStartDelay(delay)
+                .setInterpolator(mConfig.fastOutSlowInInterpolator)
+                .setDuration(duration)
+                .withLayer()
+                .start();
     }
 }
