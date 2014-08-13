@@ -23,7 +23,6 @@ import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 /**
@@ -42,9 +41,6 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
     // Time in milliseconds we wait for the device power status to turn to 'On'.
     private static final int TIMEOUT_POWER_ON_MS = 5 * 1000;
 
-    // Time in milliseconds we wait for <Active Source>.
-    private static final int TIMEOUT_ACTIVE_SOURCE_MS = 20 * 1000;
-
     // The number of times we try to wake up the target device before we give up
     // and just send <Set Stream Path>.
     private static final int LOOP_COUNTER_MAX = 20;
@@ -61,11 +57,6 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
     // State in which we wait for the device power status to switch to 'on'. We wait
     // maximum 100 seconds (20 * 5) before we give up and just send <Set Stream Path>.
     private static final int STATE_WAIT_FOR_DEVICE_POWER_ON = 3;
-
-    // State in which we wait for the <Active Source> in response to the command
-    // <Set Stream Path> we have sent. We wait as much as TIMEOUT_ACTIVE_SOURCE_MS
-    // before we give up and mark the action as failure.
-    private static final int STATE_WAIT_FOR_ACTIVE_SOURCE = 4;
 
     private final HdmiDeviceInfo mTarget;
     private final IHdmiControlCallback mCallback;
@@ -129,16 +120,6 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
                     return handleReportPowerStatus(params[0]);
                 }
                 return false;
-            case STATE_WAIT_FOR_ACTIVE_SOURCE:
-                if (opcode == Constants.MESSAGE_ACTIVE_SOURCE) {
-                    int physicalAddress = HdmiUtils.twoBytesToInt(params);
-                    ActiveSourceHandler
-                            .create((HdmiCecLocalDeviceTv) localDevice(), mCallback)
-                            .process(ActiveSource.of(cmd.getSource(), physicalAddress));
-                    finish();
-                    return true;
-                }
-                return false;
             default:
                 break;
         }
@@ -189,8 +170,8 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
     private void sendSetStreamPath() {
         sendCommand(HdmiCecMessageBuilder.buildSetStreamPath(
                 getSourceAddress(), mTarget.getPhysicalAddress()));
-        mState = STATE_WAIT_FOR_ACTIVE_SOURCE;
-        addTimer(mState, TIMEOUT_ACTIVE_SOURCE_MS);
+        invokeCallback(HdmiControlManager.RESULT_SUCCESS);
+        finish();
     }
 
     @Override
@@ -212,10 +193,6 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
             case STATE_WAIT_FOR_DEVICE_POWER_ON:
                 mPowerStatusCounter++;
                 queryDevicePowerStatus();
-                break;
-            case STATE_WAIT_FOR_ACTIVE_SOURCE:
-                invokeCallback(HdmiControlManager.RESULT_TIMEOUT);
-                finish();
                 break;
         }
     }
