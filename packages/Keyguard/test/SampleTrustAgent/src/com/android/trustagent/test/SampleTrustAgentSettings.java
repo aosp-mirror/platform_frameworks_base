@@ -59,7 +59,7 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
         int id = v.getId();
         if (id == R.id.enable_trust) {
             SampleTrustAgent.sendGrantTrust(this, "SampleTrustAgent", TRUST_DURATION_MS,
-                    null /* extra */);
+                    false /* initiatedByUser */);
         } else if (id == R.id.revoke_trust) {
             SampleTrustAgent.sendRevokeTrust(this);
         } else if (id == R.id.crash) {
