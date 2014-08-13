@@ -68,5 +68,17 @@ public class KeyguardSimpleHostView extends KeyguardViewBase {
         public void onUserSwitchComplete(int userId) {
             getSecurityContainer().showPrimarySecurityScreen(false /* turning off */);
         }
+
+        @Override
+        public void onTrustInitiatedByUser(int userId) {
+            if (userId != mLockPatternUtils.getCurrentUser()) return;
+            if (!isAttachedToWindow()) return;
+
+            if (isVisibleToUser()) {
+                dismiss(false /* authenticated */);
+            } else {
+                // TODO: Play first half of unlock sound.
+            }
+        }
     };
 }

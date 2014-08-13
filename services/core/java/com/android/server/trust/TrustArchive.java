@@ -129,8 +129,8 @@ public class TrustArchive {
             }
             switch (ev.type) {
                 case TYPE_GRANT_TRUST:
-                    writer.printf(", message=\"%s\", duration=%s",
-                            ev.message, formatDuration(ev.duration));
+                    writer.printf(", message=\"%s\", duration=%s, initiatedByUser=%d",
+                            ev.message, formatDuration(ev.duration), ev.userInitiated ? 1 : 0);
                     break;
                 case TYPE_MANAGING_TRUST:
                     writer.printf(", managingTrust=" + ev.managingTrust);
