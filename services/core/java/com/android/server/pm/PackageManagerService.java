@@ -253,6 +253,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     // package apks to install directory.
     private static final String INSTALL_PACKAGE_SUFFIX = "-";
 
+    // Special value for {@code PackageParser.Package#cpuAbiOverride} to indicate
+    // that the cpuAbiOverride must be clear.
+    private static final String CLEAR_ABI_OVERRIDE = "-";
+
     static final int SCAN_MONITOR = 1<<0;
     static final int SCAN_NO_DEX = 1<<1;
     static final int SCAN_FORCE_DEX = 1<<2;
@@ -4093,8 +4097,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 continue;
             }
             try {
-                scanPackageLI(file, flags | PackageParser.PARSE_MUST_BE_APK, scanMode, currentTime,
-                        null, null);
+                scanPackageLI(file, flags | PackageParser.PARSE_MUST_BE_APK, scanMode, currentTime, null);
             } catch (PackageManagerException e) {
                 Slog.w(TAG, "Failed to parse " + file + ": " + e.getMessage());
 
@@ -4175,7 +4178,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      *  Returns null in case of errors and the error code is stored in mLastScanError
      */
     private PackageParser.Package scanPackageLI(File scanFile, int parseFlags, int scanMode,
-            long currentTime, UserHandle user, String abiOverride) throws PackageManagerException {
+            long currentTime, UserHandle user) throws PackageManagerException {
         if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanFile);
         parseFlags |= mDefParseFlags;
         PackageParser pp = new PackageParser();
@@ -4371,7 +4374,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // Note that we invoke the following method only if we are about to unpack an application
         PackageParser.Package scannedPkg = scanPackageLI(pkg, parseFlags, scanMode
-                | SCAN_UPDATE_SIGNATURE, currentTime, user, abiOverride);
+                | SCAN_UPDATE_SIGNATURE, currentTime, user);
 
         /*
          * If the system app should be overridden by a previously installed
@@ -4998,8 +5001,26 @@ public class PackageManagerService extends IPackageManager.Stub {
         return res;
     }
 
+    /**
+     * Derive the value of the {@code cpuAbiOverride} based on the provided
+     * value and an optional stored value from the package settings.
+     */
+    private static String deriveAbiOverride(String abiOverride, PackageSetting settings) {
+        String cpuAbiOverride = null;
+
+        if (CLEAR_ABI_OVERRIDE.equals(abiOverride)) {
+            cpuAbiOverride = null;
+        } else if (abiOverride != null) {
+            cpuAbiOverride = abiOverride;
+        } else if (settings != null) {
+            cpuAbiOverride = settings.cpuAbiOverrideString;
+        }
+
+        return cpuAbiOverride;
+    }
+
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg, int parseFlags,
-            int scanMode, long currentTime, UserHandle user, String abiOverride)
+            int scanMode, long currentTime, UserHandle user)
             throws PackageManagerException {
         final File scanFile = new File(pkg.codePath);
         if (pkg.applicationInfo.getCodePath() == null ||
@@ -5155,7 +5176,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "Package " + pkg.packageName
                         + " was transferred to another, but its .apk remains");
             }
-            
+
             // Just create the setting, don't add it yet. For already existing packages
             // the PkgSetting exists already and doesn't have to be created.
             pkgSetting = mSettings.getPackageLPw(pkg, origPackage, realName, suid, destCodeFile,
@@ -5435,6 +5456,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final String path = scanFile.getPath();
         final String codePath = pkg.applicationInfo.getCodePath();
+        final String cpuAbiOverride = deriveAbiOverride(pkg.cpuAbiOverride, pkgSetting);
         if (isSystemApp(pkg) && !isUpdatedSystemApp(pkg)) {
             setBundledAppAbisAndRoots(pkg, pkgSetting);
 
@@ -5490,7 +5512,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // Warn if we've set an abiOverride for multi-lib packages..
                     // By definition, we need to copy both 32 and 64 bit libraries for
                     // such packages.
-                    if (abiOverride != null) {
+                    if (pkg.cpuAbiOverride != null && !CLEAR_ABI_OVERRIDE.equals(pkg.cpuAbiOverride)) {
                         Slog.w(TAG, "Ignoring abiOverride for multi arch application.");
                     }
 
@@ -5533,15 +5555,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                     }
                 } else {
-                    String[] abiList = (abiOverride != null) ?
-                            new String[] { abiOverride } : Build.SUPPORTED_ABIS;
+                    String[] abiList = (cpuAbiOverride != null) ?
+                            new String[] { cpuAbiOverride } : Build.SUPPORTED_ABIS;
 
                     // Enable gross and lame hacks for apps that are built with old
                     // SDK tools. We must scan their APKs for renderscript bitcode and
                     // not launch them if it's present. Don't bother checking on devices
                     // that don't have 64 bit support.
                     boolean needsRenderScriptOverride = false;
-                    if (Build.SUPPORTED_64_BIT_ABIS.length > 0 && abiOverride == null &&
+                    if (Build.SUPPORTED_64_BIT_ABIS.length > 0 && cpuAbiOverride == null &&
                             NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
                         abiList = Build.SUPPORTED_32_BIT_ABIS;
                         needsRenderScriptOverride = true;
@@ -5562,8 +5584,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     if (copyRet >= 0) {
                         pkg.applicationInfo.primaryCpuAbi = abiList[copyRet];
-                    } else if (copyRet == PackageManager.NO_NATIVE_LIBRARIES && abiOverride != null) {
-                        pkg.applicationInfo.primaryCpuAbi = abiOverride;
+                    } else if (copyRet == PackageManager.NO_NATIVE_LIBRARIES && cpuAbiOverride != null) {
+                        pkg.applicationInfo.primaryCpuAbi = cpuAbiOverride;
                     } else if (needsRenderScriptOverride) {
                         pkg.applicationInfo.primaryCpuAbi = abiList[0];
                     }
@@ -5608,6 +5630,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         pkgSetting.primaryCpuAbiString = pkg.applicationInfo.primaryCpuAbi;
         pkgSetting.secondaryCpuAbiString = pkg.applicationInfo.secondaryCpuAbi;
+        pkgSetting.cpuAbiOverrideString = cpuAbiOverride;
+        // Copy the derived override back to the parsed package, so that we can
+        // update the package settings accordingly.
+        pkg.cpuAbiOverride = cpuAbiOverride;
 
         Slog.d(TAG, "Resolved nativeLibraryRoot for " + pkg.applicationInfo.packageName
                 + " to root=" + pkg.applicationInfo.nativeLibraryRootDir + ", isa="
@@ -9269,7 +9295,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // Warn if we've set an abiOverride for multi-lib packages..
                     // By definition, we need to copy both 32 and 64 bit libraries for
                     // such packages.
-                    if (abiOverride != null) {
+                    if (abiOverride != null &&  !CLEAR_ABI_OVERRIDE.equals(abiOverride)) {
                         Slog.w(TAG, "Ignoring abiOverride for multi arch application.");
                     }
 
@@ -9286,10 +9312,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                         maybeThrowExceptionForMultiArchCopy("Failure copying 64 bit native libraries", copyRet);
                     }
                 } else {
-                    String[] abiList = (abiOverride != null) ?
-                            new String[] { abiOverride } : Build.SUPPORTED_ABIS;
+                    final String cpuAbiOverride = deriveAbiOverride(this.abiOverride, null /* package setting */);
+                    String[] abiList = (cpuAbiOverride != null) ?
+                            new String[] { cpuAbiOverride } : Build.SUPPORTED_ABIS;
 
-                    if (Build.SUPPORTED_64_BIT_ABIS.length > 0 && abiOverride == null &&
+                    if (Build.SUPPORTED_64_BIT_ABIS.length > 0 && cpuAbiOverride == null &&
                             NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
                         abiList = Build.SUPPORTED_32_BIT_ABIS;
                     }
@@ -9557,7 +9584,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             final String newCachePath = imcs.copyPackageToContainer(
                     originFile.getAbsolutePath(), cid, getEncryptKey(), isExternal(),
-                    isFwdLocked(), abiOverride);
+                    isFwdLocked(), deriveAbiOverride(abiOverride, null /* settings */));
 
             if (newCachePath != null) {
                 setCachePath(newCachePath);
@@ -9908,7 +9935,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      */
     private void installNewPackageLI(PackageParser.Package pkg,
             int parseFlags, int scanMode, UserHandle user,
-            String installerPackageName, PackageInstalledInfo res, String abiOverride) {
+            String installerPackageName, PackageInstalledInfo res) {
         // Remember this for later, in case we need to rollback this install
         String pkgName = pkg.packageName;
 
@@ -9935,7 +9962,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         try {
             PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags, scanMode,
-                    System.currentTimeMillis(), user, abiOverride);
+                    System.currentTimeMillis(), user);
 
             updateSettingsLI(newPackage, installerPackageName, null, null, res);
             // delete the partially installed application. the data directory will have to be
@@ -9971,7 +9998,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private void replacePackageLI(PackageParser.Package pkg,
             int parseFlags, int scanMode, UserHandle user,
-            String installerPackageName, PackageInstalledInfo res, String abiOverride) {
+            String installerPackageName, PackageInstalledInfo res) {
         PackageParser.Package oldPackage;
         String pkgName = pkg.packageName;
         int[] allUsers;
@@ -10010,19 +10037,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean sysPkg = (isSystemApp(oldPackage));
         if (sysPkg) {
             replaceSystemPackageLI(oldPackage, pkg, parseFlags, scanMode,
-                    user, allUsers, perUserInstalled, installerPackageName, res,
-                    abiOverride);
+                    user, allUsers, perUserInstalled, installerPackageName, res);
         } else {
             replaceNonSystemPackageLI(oldPackage, pkg, parseFlags, scanMode,
-                    user, allUsers, perUserInstalled, installerPackageName, res,
-                    abiOverride);
+                    user, allUsers, perUserInstalled, installerPackageName, res);
         }
     }
 
     private void replaceNonSystemPackageLI(PackageParser.Package deletedPackage,
             PackageParser.Package pkg, int parseFlags, int scanMode, UserHandle user,
             int[] allUsers, boolean[] perUserInstalled,
-            String installerPackageName, PackageInstalledInfo res, String abiOverride) {
+            String installerPackageName, PackageInstalledInfo res) {
         String pkgName = deletedPackage.packageName;
         boolean deletedPkg = true;
         boolean updatedSettings = false;
@@ -10047,7 +10072,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             deleteCodeCacheDirsLI(pkgName);
             try {
                 final PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags,
-                        scanMode | SCAN_UPDATE_TIME, System.currentTimeMillis(), user, abiOverride);
+                        scanMode | SCAN_UPDATE_TIME, System.currentTimeMillis(), user);
                 updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res);
                 updatedSettings = true;
             } catch (PackageManagerException e) {
@@ -10080,8 +10105,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 int oldScanMode = (oldOnSd ? 0 : SCAN_MONITOR) | SCAN_UPDATE_SIGNATURE
                         | SCAN_UPDATE_TIME;
                 try {
-                    scanPackageLI(restoreFile, oldParseFlags, oldScanMode, origUpdateTime, null,
-                            null);
+                    scanPackageLI(restoreFile, oldParseFlags, oldScanMode, origUpdateTime, null);
                 } catch (PackageManagerException e) {
                     Slog.e(TAG, "Failed to restore package : " + pkgName + " after failed upgrade: "
                             + e.getMessage());
@@ -10103,7 +10127,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private void replaceSystemPackageLI(PackageParser.Package deletedPackage,
             PackageParser.Package pkg, int parseFlags, int scanMode, UserHandle user,
             int[] allUsers, boolean[] perUserInstalled,
-            String installerPackageName, PackageInstalledInfo res, String abiOverride) {
+            String installerPackageName, PackageInstalledInfo res) {
         if (DEBUG_INSTALL) Slog.d(TAG, "replaceSystemPackageLI: new=" + pkg
                 + ", old=" + deletedPackage);
         boolean updatedSettings = false;
@@ -10163,7 +10187,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         PackageParser.Package newPackage = null;
         try {
-            newPackage = scanPackageLI(pkg, parseFlags, scanMode, 0, user, abiOverride);
+            newPackage = scanPackageLI(pkg, parseFlags, scanMode, 0, user);
             if (newPackage.mExtras != null) {
                 final PackageSetting newPkgSetting = (PackageSetting) newPackage.mExtras;
                 newPkgSetting.firstInstallTime = oldPkgSetting.firstInstallTime;
@@ -10195,8 +10219,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             // Add back the old system package
             try {
-                scanPackageLI(oldPkg, parseFlags, SCAN_MONITOR | SCAN_UPDATE_SIGNATURE, 0, user,
-                        null);
+                scanPackageLI(oldPkg, parseFlags, SCAN_MONITOR | SCAN_UPDATE_SIGNATURE, 0, user);
             } catch (PackageManagerException e) {
                 Slog.e(TAG, "Failed to restore original package: " + e.getMessage());
             }
@@ -10327,6 +10350,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
+        // Mark that we have an install time CPU ABI override.
+        pkg.cpuAbiOverride = args.abiOverride;
+
         String pkgName = res.name = pkg.packageName;
         if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_TEST_ONLY) != 0) {
             if ((pFlags&PackageManager.INSTALL_ALLOW_TEST) == 0) {
@@ -10445,10 +10471,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if (replace) {
             replacePackageLI(pkg, parseFlags, scanMode, args.user,
-                    installerPackageName, res, args.abiOverride);
+                    installerPackageName, res);
         } else {
             installNewPackageLI(pkg, parseFlags, scanMode | SCAN_DELETE_DATA_ON_FAILURES, args.user,
-                    installerPackageName, res, args.abiOverride);
+                    installerPackageName, res);
         }
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(pkgName);
@@ -10884,8 +10910,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final PackageParser.Package newPkg;
         try {
-            newPkg = scanPackageLI(disabledPs.codePath, parseFlags, SCAN_MONITOR | SCAN_NO_PATHS, 0,
-                    null, null);
+            newPkg = scanPackageLI(disabledPs.codePath, parseFlags, SCAN_MONITOR | SCAN_NO_PATHS, 0, null);
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to restore system package:" + newPs.name + ": " + e.getMessage());
             return false;
@@ -12843,7 +12868,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 synchronized (mInstallLock) {
                     PackageParser.Package pkg = null;
                     try {
-                        pkg = scanPackageLI(new File(codePath), parseFlags, 0, 0, null, null);
+                        pkg = scanPackageLI(new File(codePath), parseFlags, 0, 0, null);
                     } catch (PackageManagerException e) {
                         Slog.w(TAG, "Failed to scan " + codePath + ": " + e.getMessage());
                     }
