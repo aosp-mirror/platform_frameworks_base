@@ -5239,7 +5239,7 @@ package android.app {
     field public static java.lang.String ACTION_EXIT_DESK_MODE;
     field public static final int DISABLE_CAR_MODE_GO_HOME = 1; // 0x1
     field public static final int ENABLE_CAR_MODE_GO_CAR_HOME = 1; // 0x1
-    field public static final int ENABLE_CAR_MODE_NO_WAKE_LOCK = 2; // 0x2
+    field public static final int ENABLE_CAR_MODE_ALLOW_SLEEP = 2; // 0x2
     field public static final int MODE_NIGHT_AUTO = 0; // 0x0
     field public static final int MODE_NIGHT_NO = 1; // 0x1
     field public static final int MODE_NIGHT_YES = 2; // 0x2
