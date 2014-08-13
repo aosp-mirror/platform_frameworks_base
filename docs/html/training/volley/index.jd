@@ -20,21 +20,6 @@ startpage=true
   <li>Android 1.6 (API Level 4) or higher</li>
 </ul>
 
-<h2>You should also see</h2>
-<ul>
-  <li>For a production quality app that uses Volley, see the 2013 Google I/O
-  <a href="https://github.com/google/iosched">schedule app</a>. In particular, see:
-    <ul>
-      <li><a
-      href="https://github.com/google/iosched/blob/master/android/src/main/java/com/google/android/apps/iosched/util/ImageLoader.java">
-      ImageLoader</a></li>
-      <li><a
-      href="https://github.com/google/iosched/blob/master/android/src/main/java/com/google/android/apps/iosched/util/BitmapCache.java">
-      BitmapCache</a></li>
-    </ul>
-  </li>
-</ul>
-
 </div>
 </div>
 
