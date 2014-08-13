@@ -132,6 +132,9 @@ public class Typeface {
      * @return The best matching typeface.
      */
     public static Typeface create(Typeface family, int style) {
+        if (style < 0 || style > 3) {
+            style = 0;
+        }
         long ni = 0;
         if (family != null) {
             // Return early if we're asked for the same face/style
