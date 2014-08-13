@@ -51,8 +51,9 @@ public class ConditionProviders extends ManagedServices {
             = new ArrayMap<IBinder, IConditionListener>();
     private final ArrayList<ConditionRecord> mRecords = new ArrayList<ConditionRecord>();
     private final CountdownConditionProvider mCountdown = new CountdownConditionProvider();
+    private final DowntimeConditionProvider mDowntime = new DowntimeConditionProvider();
 
-    private Uri mExitConditionId;
+    private Condition mExitCondition;
     private ComponentName mExitConditionComponent;
 
     public ConditionProviders(Context context, Handler handler,
@@ -97,6 +98,7 @@ public class ConditionProviders extends ManagedServices {
             }
         }
         mCountdown.dump(pw, filter);
+        mDowntime.dump(pw, filter);
     }
 
     @Override
@@ -110,6 +112,10 @@ public class ConditionProviders extends ManagedServices {
         mCountdown.attachBase(mContext);
         registerService(mCountdown.asInterface(), CountdownConditionProvider.COMPONENT,
                 UserHandle.USER_OWNER);
+        mDowntime.attachBase(mContext);
+        registerService(mDowntime.asInterface(), DowntimeConditionProvider.COMPONENT,
+                UserHandle.USER_OWNER);
+        mDowntime.setCallback(new DowntimeCallback());
     }
 
     @Override
@@ -125,7 +131,7 @@ public class ConditionProviders extends ManagedServices {
             if (info.component.equals(mExitConditionComponent)) {
                 // ensure record exists, we'll wire it up and subscribe below
                 final ConditionRecord manualRecord =
-                        getRecordLocked(mExitConditionId, mExitConditionComponent);
+                        getRecordLocked(mExitCondition.id, mExitConditionComponent);
                 manualRecord.isManual = true;
             }
             final int N = mRecords.size();
@@ -149,11 +155,11 @@ public class ConditionProviders extends ManagedServices {
             if (!r.component.equals(removed.component)) continue;
             if (r.isManual) {
                 // removing the current manual condition, exit zen
-                mZenModeHelper.setZenMode(Global.ZEN_MODE_OFF);
+                mZenModeHelper.setZenMode(Global.ZEN_MODE_OFF, "manualServiceRemoved");
             }
             if (r.isAutomatic) {
                 // removing an automatic condition, exit zen
-                mZenModeHelper.setZenMode(Global.ZEN_MODE_OFF);
+                mZenModeHelper.setZenMode(Global.ZEN_MODE_OFF, "automaticServiceRemoved");
             }
             mRecords.remove(i);
         }
@@ -249,7 +255,8 @@ public class ConditionProviders extends ManagedServices {
                         } else if (DEBUG) {
                             Slog.d(TAG, "Exit zen: manual condition false: " + c);
                         }
-                        mZenModeHelper.setZenMode(Settings.Global.ZEN_MODE_OFF);
+                        mZenModeHelper.setZenMode(Settings.Global.ZEN_MODE_OFF,
+                                "manualConditionExit");
                         unsubscribeLocked(r);
                         r.isManual = false;
                     }
@@ -263,33 +270,46 @@ public class ConditionProviders extends ManagedServices {
                         } else if (DEBUG) {
                             Slog.d(TAG, "Exit zen: automatic condition false: " + c);
                         }
-                        mZenModeHelper.setZenMode(Settings.Global.ZEN_MODE_OFF);
+                        mZenModeHelper.setZenMode(Settings.Global.ZEN_MODE_OFF,
+                                "automaticConditionExit");
                     } else if (c.state == Condition.STATE_TRUE) {
                         Slog.d(TAG, "Enter zen: automatic condition true: " + c);
-                        mZenModeHelper.setZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+                        mZenModeHelper.setZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                                "automaticConditionEnter");
                     }
                 }
             }
         }
     }
 
-    public void setZenModeCondition(Uri conditionId, String reason) {
-        if (DEBUG) Slog.d(TAG, "setZenModeCondition " + conditionId);
+    public void setZenModeCondition(Condition condition, String reason) {
+        if (DEBUG) Slog.d(TAG, "setZenModeCondition " + condition);
         synchronized(mMutex) {
             ComponentName conditionComponent = null;
-            if (ZenModeConfig.isValidCountdownConditionId(conditionId)) {
-                // constructed by the client, make sure the record exists...
-                final ConditionRecord r = getRecordLocked(conditionId,
-                        CountdownConditionProvider.COMPONENT);
-                if (r.info == null) {
-                    // ... and is associated with the in-process service
-                    r.info = checkServiceTokenLocked(mCountdown.asInterface());
+            if (condition != null) {
+                if (ZenModeConfig.isValidCountdownConditionId(condition.id)) {
+                    // constructed by the client, make sure the record exists...
+                    final ConditionRecord r = getRecordLocked(condition.id,
+                            CountdownConditionProvider.COMPONENT);
+                    if (r.info == null) {
+                        // ... and is associated with the in-process service
+                        r.info = checkServiceTokenLocked(mCountdown.asInterface());
+                    }
+                }
+                if (ZenModeConfig.isValidDowntimeConditionId(condition.id)) {
+                    // constructed by the client, make sure the record exists...
+                    final ConditionRecord r = getRecordLocked(condition.id,
+                            DowntimeConditionProvider.COMPONENT);
+                    if (r.info == null) {
+                        // ... and is associated with the in-process service
+                        r.info = checkServiceTokenLocked(mDowntime.asInterface());
+                    }
                 }
             }
             final int N = mRecords.size();
             for (int i = 0; i < N; i++) {
                 final ConditionRecord r = mRecords.get(i);
-                final boolean idEqual = r.id.equals(conditionId);
+                final boolean idEqual = condition != null && r.id.equals(condition.id);
                 if (r.isManual && !idEqual) {
                     // was previous manual condition, unsubscribe
                     unsubscribeLocked(r);
@@ -303,10 +323,10 @@ public class ConditionProviders extends ManagedServices {
                     conditionComponent = r.component;
                 }
             }
-            if (!Objects.equals(mExitConditionId, conditionId)) {
-                mExitConditionId = conditionId;
+            if (!Objects.equals(mExitCondition, condition)) {
+                mExitCondition = condition;
                 mExitConditionComponent = conditionComponent;
-                ZenLog.traceExitCondition(mExitConditionId, mExitConditionComponent, reason);
+                ZenLog.traceExitCondition(mExitCondition, mExitConditionComponent, reason);
                 saveZenConfigLocked();
             }
         }
@@ -318,6 +338,7 @@ public class ConditionProviders extends ManagedServices {
         RemoteException re = null;
         if (provider != null) {
             try {
+                Slog.d(TAG, "Subscribing to " + r.id + " with " + provider);
                 provider.onSubscribe(r.id);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Error subscribing to " + r, e);
@@ -436,12 +457,13 @@ public class ConditionProviders extends ManagedServices {
             return;
         }
         synchronized (mMutex) {
-            final boolean changingExit = !Objects.equals(mExitConditionId, config.exitConditionId);
-            mExitConditionId = config.exitConditionId;
+            final boolean changingExit = !Objects.equals(mExitCondition, config.exitCondition);
+            mExitCondition = config.exitCondition;
             mExitConditionComponent = config.exitConditionComponent;
             if (changingExit) {
-                ZenLog.traceExitCondition(mExitConditionId, mExitConditionComponent, "config");
+                ZenLog.traceExitCondition(mExitCondition, mExitConditionComponent, "config");
             }
+            mDowntime.setConfig(config);
             if (config.conditionComponents == null || config.conditionIds == null
                     || config.conditionComponents.length != config.conditionIds.length) {
                 if (DEBUG) Slog.d(TAG, "loadZenConfig: no conditions");
@@ -488,7 +510,7 @@ public class ConditionProviders extends ManagedServices {
                 config.conditionIds[i] = r.id;
             }
         }
-        config.exitConditionId = mExitConditionId;
+        config.exitCondition = mExitCondition;
         config.exitConditionComponent = mExitConditionComponent;
         if (DEBUG) Slog.d(TAG, "Setting zen config to: " + config);
         mZenModeHelper.setConfig(config);
@@ -506,6 +528,26 @@ public class ConditionProviders extends ManagedServices {
             if (mode == Global.ZEN_MODE_OFF) {
                 // ensure any manual condition is cleared
                 setZenModeCondition(null, "zenOff");
+            }
+        }
+    }
+
+    private class DowntimeCallback implements DowntimeConditionProvider.Callback {
+        @Override
+        public void onDowntimeChanged(boolean inDowntime) {
+            final int mode = mZenModeHelper.getZenMode();
+            final ZenModeConfig config = mZenModeHelper.getConfig();
+            // enter downtime
+            if (inDowntime && mode == Global.ZEN_MODE_OFF && config != null) {
+                final Condition condition = mDowntime.createCondition(config.toDowntimeInfo(),
+                        Condition.STATE_TRUE);
+                mZenModeHelper.setZenMode(Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, "downtimeEnter");
+                setZenModeCondition(condition, "downtime");
+            }
+            // exit downtime
+            if (!inDowntime && mode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+                    && mDowntime.isDowntimeCondition(mExitCondition)) {
+                mZenModeHelper.setZenMode(Global.ZEN_MODE_OFF, "downtimeExit");
             }
         }
     }
