@@ -113,6 +113,7 @@ public class UserSwitcherController {
      *
      * @param forcePictureLoadForId forces the picture of the given user to be reloaded.
      */
+    @SuppressWarnings("unchecked")
     private void refreshUsers(int forcePictureLoadForId) {
 
         SparseArray<Bitmap> bitmaps = new SparseArray<>(mUsers.size());
@@ -170,7 +171,7 @@ public class UserSwitcherController {
                 boolean canCreateGuest = (currentUserCanCreateUsers || anyoneCanCreateUsers)
                         && guestRecord == null;
                 boolean canCreateUser = (currentUserCanCreateUsers || anyoneCanCreateUsers)
-                        && records.size() < UserManager.getMaxSupportedUsers();
+                        && mUserManager.canAddMoreUsers();
                 boolean createIsRestricted = !addUsersWhenLocked;
 
                 if (!mSimpleUserSwitcher) {
