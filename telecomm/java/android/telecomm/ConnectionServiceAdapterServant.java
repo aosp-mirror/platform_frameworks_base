@@ -24,7 +24,7 @@ import android.os.RemoteException;
 
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecomm.IConnectionServiceAdapter;
-import com.android.internal.telecomm.IVideoCallProvider;
+import com.android.internal.telecomm.IVideoProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
 import java.util.List;
@@ -80,8 +80,9 @@ final class ConnectionServiceAdapterServant {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         mDelegate.handleCreateConnectionSuccessful(
-                                (ConnectionRequest) args.arg1,
-                                (ParcelableConnection) args.arg2);
+                                (String) args.arg1,
+                                (ConnectionRequest) args.arg2,
+                                (ParcelableConnection) args.arg3);
                     } finally {
                         args.recycle();
                     }
@@ -91,16 +92,24 @@ final class ConnectionServiceAdapterServant {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         mDelegate.handleCreateConnectionFailed(
-                                (ConnectionRequest) args.arg1,
+                                (String) args.arg1,
+                                (ConnectionRequest) args.arg2,
                                 args.argi1,
-                                (String) args.arg2);
+                                (String) args.arg3);
                     } finally {
                         args.recycle();
                     }
                     break;
                 }
                 case MSG_HANDLE_CREATE_CONNECTION_CANCELLED: {
-                    mDelegate.handleCreateConnectionCancelled((ConnectionRequest) msg.obj);
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        mDelegate.handleCreateConnectionCancelled(
+                                (String) args.arg1,
+                                (ConnectionRequest) args.arg2);
+                    } finally {
+                        args.recycle();
+                    }
                     break;
                 }
                 case MSG_SET_ACTIVE:
@@ -164,8 +173,8 @@ final class ConnectionServiceAdapterServant {
                 case MSG_SET_VIDEO_CALL_PROVIDER: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
-                        mDelegate.setVideoCallProvider((String) args.arg1,
-                                (IVideoCallProvider) args.arg2);
+                        mDelegate.setVideoProvider((String) args.arg1,
+                                (IVideoProvider) args.arg2);
                     } finally {
                         args.recycle();
                     }
@@ -229,26 +238,38 @@ final class ConnectionServiceAdapterServant {
     private final IConnectionServiceAdapter mStub = new IConnectionServiceAdapter.Stub() {
         @Override
         public void handleCreateConnectionSuccessful(
-                ConnectionRequest request, ParcelableConnection connection) {
+                String id,
+                ConnectionRequest request,
+                ParcelableConnection connection) {
             SomeArgs args = SomeArgs.obtain();
-            args.arg1 = request;
-            args.arg2 = connection;
+            args.arg1 = id;
+            args.arg2 = request;
+            args.arg3 = connection;
             mHandler.obtainMessage(MSG_HANDLE_CREATE_CONNECTION_SUCCESSFUL, args).sendToTarget();
         }
 
         @Override
         public void handleCreateConnectionFailed(
-                ConnectionRequest request, int errorCode, String errorMessage) {
+                String id,
+                ConnectionRequest request,
+                int errorCode,
+                String errorMessage) {
             SomeArgs args = SomeArgs.obtain();
-            args.arg1 = request;
+            args.arg1 = id;
+            args.arg2 = request;
             args.argi1 = errorCode;
-            args.arg2 = errorMessage;
+            args.arg3 = errorMessage;
             mHandler.obtainMessage(MSG_HANDLE_CREATE_CONNECTION_FAILED, args).sendToTarget();
         }
 
         @Override
-        public void handleCreateConnectionCancelled(ConnectionRequest request) {
-            mHandler.obtainMessage(MSG_HANDLE_CREATE_CONNECTION_CANCELLED, request).sendToTarget();
+        public void handleCreateConnectionCancelled(
+                String id,
+                ConnectionRequest request) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = id;
+            args.arg2 = request;
+            mHandler.obtainMessage(MSG_HANDLE_CREATE_CONNECTION_CANCELLED, args).sendToTarget();
         }
 
         @Override
@@ -330,11 +351,10 @@ final class ConnectionServiceAdapterServant {
         }
 
         @Override
-        public void setVideoCallProvider(
-                String connectionId, IVideoCallProvider videoCallProvider) {
+        public void setVideoProvider(String connectionId, IVideoProvider videoProvider) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = connectionId;
-            args.arg2 = videoCallProvider;
+            args.arg2 = videoProvider;
             mHandler.obtainMessage(MSG_SET_VIDEO_CALL_PROVIDER, args).sendToTarget();
         }
 

@@ -16,8 +16,8 @@
 
 package com.android.ims.internal;
 
-import android.telecomm.CallCameraCapabilities;
-import android.telecomm.VideoCallProfile;
+import android.telecomm.CameraCapabilities;
+import android.telecomm.VideoProfile;
 
 /**
  * Internal remote interface for IMS's video call provider.
@@ -32,10 +32,10 @@ import android.telecomm.VideoCallProfile;
  * {@hide}
  */
 oneway interface IImsVideoCallCallback {
-    void receiveSessionModifyRequest(in VideoCallProfile videoCallProfile);
+    void receiveSessionModifyRequest(in VideoProfile videoProfile);
 
-    void receiveSessionModifyResponse(int status, in VideoCallProfile requestedProfile,
-        in VideoCallProfile responseProfile);
+    void receiveSessionModifyResponse(int status, in VideoProfile requestedProfile,
+        in VideoProfile responseProfile);
 
     void handleCallSessionEvent(int event);
 
@@ -43,5 +43,5 @@ oneway interface IImsVideoCallCallback {
 
     void changeCallDataUsage(int dataUsage);
 
-    void changeCameraCapabilities(in CallCameraCapabilities callCameraCapabilities);
+    void changeCameraCapabilities(in CameraCapabilities cameraCapabilities);
 }

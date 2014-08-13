@@ -35,7 +35,8 @@ import java.lang.String;
  * This service is implemented by any app that wishes to provide the user-interface for managing
  * phone calls. Telecomm binds to this service while there exists a live (active or incoming) call,
  * and uses it to notify the in-call app of any live and and recently disconnected calls.
- * TODO: What happens if two or more apps on a given device implement this interface?
+ *
+ * {@hide}
  */
 public abstract class InCallService extends Service {
     private static final int MSG_SET_IN_CALL_ADAPTER = 1;
@@ -73,7 +74,7 @@ public abstract class InCallService extends Service {
                     break;
                 }
                 case MSG_ON_AUDIO_STATE_CHANGED:
-                    mPhone.internalAudioStateChanged((CallAudioState) msg.obj);
+                    mPhone.internalAudioStateChanged((AudioState) msg.obj);
                     break;
                 case MSG_BRING_TO_FOREGROUND:
                     mPhone.internalBringToForeground(msg.arg1 == 1);
@@ -124,7 +125,7 @@ public abstract class InCallService extends Service {
         }
 
         @Override
-        public void onAudioStateChanged(CallAudioState audioState) {
+        public void onAudioStateChanged(AudioState audioState) {
             mHandler.obtainMessage(MSG_ON_AUDIO_STATE_CHANGED, audioState).sendToTarget();
         }
 
@@ -191,56 +192,6 @@ public abstract class InCallService extends Service {
     public static abstract class VideoCall {
 
         /**
-         * Video is not being received (no protocol pause was issued).
-         */
-        public static final int SESSION_EVENT_RX_PAUSE = 1;
-
-        /**
-         * Video reception has resumed after a SESSION_EVENT_RX_PAUSE.
-         */
-        public static final int SESSION_EVENT_RX_RESUME = 2;
-
-        /**
-         * Video transmission has begun. This occurs after a negotiated start of video transmission
-         * when the underlying protocol has actually begun transmitting video to the remote party.
-         */
-        public static final int SESSION_EVENT_TX_START = 3;
-
-        /**
-         * Video transmission has stopped. This occurs after a negotiated stop of video transmission
-         * when the underlying protocol has actually stopped transmitting video to the remote party.
-         */
-        public static final int SESSION_EVENT_TX_STOP = 4;
-
-        /**
-         * A camera failure has occurred for the selected camera.  The In-Call UI can use this as a
-         * cue to inform the user the camera is not available.
-         */
-        public static final int SESSION_EVENT_CAMERA_FAILURE = 5;
-
-        /**
-         * Issued after {@code SESSION_EVENT_CAMERA_FAILURE} when the camera is once again ready for
-         * operation.  The In-Call UI can use this as a cue to inform the user that the camera has
-         * become available again.
-         */
-        public static final int SESSION_EVENT_CAMERA_READY = 6;
-
-        /**
-         * Session modify request was successful.
-         */
-        public static final int SESSION_MODIFY_REQUEST_SUCCESS = 1;
-
-        /**
-         * Session modify request failed.
-         */
-        public static final int SESSION_MODIFY_REQUEST_FAIL = 2;
-
-        /**
-         * Session modify request ignored due to invalid parameters.
-         */
-        public static final int SESSION_MODIFY_REQUEST_INVALID = 3;
-
-        /**
          * Sets a listener to invoke callback methods in the InCallUI after performing video
          * telephony actions.
          *
@@ -295,7 +246,7 @@ public abstract class InCallService extends Service {
          *
          * @param requestProfile The requested call video properties.
          */
-        public abstract void sendSessionModifyRequest(VideoCallProfile requestProfile);
+        public abstract void sendSessionModifyRequest(VideoProfile requestProfile);
 
         /**
          * Provides a response to a request to change the current call session video
@@ -307,12 +258,12 @@ public abstract class InCallService extends Service {
          *
          * @param responseProfile The response call video properties.
          */
-        public abstract void sendSessionModifyResponse(VideoCallProfile responseProfile);
+        public abstract void sendSessionModifyResponse(VideoProfile responseProfile);
 
         /**
          * Issues a request to the video provider to retrieve the camera capabilities.
          * Camera capabilities are reported back to the caller via
-         * {@link VideoCall.Listener#onCameraCapabilitiesChanged(CallCameraCapabilities)}.
+         * {@link VideoCall.Listener#onCameraCapabilitiesChanged(CameraCapabilities)}.
          */
         public abstract void requestCameraCapabilities();
 
@@ -338,43 +289,44 @@ public abstract class InCallService extends Service {
             /**
              * Called when a session modification request is received from the remote device.
              * The remote request is sent via
-             * {@link ConnectionService.VideoCallProvider#onSendSessionModifyRequest}. The InCall UI
+             * {@link Connection.VideoProvider#onSendSessionModifyRequest}. The InCall UI
              * is responsible for potentially prompting the user whether they wish to accept the new
              * call profile (e.g. prompt user if they wish to accept an upgrade from an audio to a
              * video call) and should call
-             * {@link ConnectionService.VideoCallProvider#onSendSessionModifyResponse} to indicate
+             * {@link Connection.VideoProvider#onSendSessionModifyResponse} to indicate
              * the video settings the user has agreed to.
              *
-             * @param videoCallProfile The requested video call profile.
+             * @param videoProfile The requested video call profile.
              */
-            public abstract void onSessionModifyRequestReceived(VideoCallProfile videoCallProfile);
+            public abstract void onSessionModifyRequestReceived(VideoProfile videoProfile);
 
             /**
              * Called when a response to a session modification request is received from the remote
              * device. The remote InCall UI sends the response using
-             * {@link ConnectionService.VideoCallProvider#onSendSessionModifyResponse}.
+             * {@link Connection.VideoProvider#onSendSessionModifyResponse}.
              *
              * @param status Status of the session modify request.  Valid values are
-             *               {@link VideoCall#SESSION_MODIFY_REQUEST_SUCCESS},
-             *               {@link VideoCall#SESSION_MODIFY_REQUEST_FAIL},
-             *               {@link VideoCall#SESSION_MODIFY_REQUEST_INVALID}
+             *               {@link Connection.VideoProvider#SESSION_MODIFY_REQUEST_SUCCESS},
+             *               {@link Connection.VideoProvider#SESSION_MODIFY_REQUEST_FAIL},
+             *               {@link Connection.VideoProvider#SESSION_MODIFY_REQUEST_INVALID}
              * @param requestedProfile The original request which was sent to the remote device.
              * @param responseProfile The actual profile changes made by the remote device.
              */
             public abstract void onSessionModifyResponseReceived(int status,
-                    VideoCallProfile requestedProfile, VideoCallProfile responseProfile);
+                    VideoProfile requestedProfile, VideoProfile responseProfile);
 
             /**
              * Handles events related to the current session which the client may wish to handle.
              * These are separate from requested changes to the session due to the underlying
              * protocol or connection.
              *
-             * Valid values are: {@link VideoCall#SESSION_EVENT_RX_PAUSE},
-             * {@link VideoCall#SESSION_EVENT_RX_RESUME},
-             * {@link VideoCall#SESSION_EVENT_TX_START},
-             * {@link VideoCall#SESSION_EVENT_TX_STOP},
-             * {@link VideoCall#SESSION_EVENT_CAMERA_FAILURE},
-             * {@link VideoCall#SESSION_EVENT_CAMERA_READY}
+             * Valid values are:
+             * {@link Connection.VideoProvider#SESSION_EVENT_RX_PAUSE},
+             * {@link Connection.VideoProvider#SESSION_EVENT_RX_RESUME},
+             * {@link Connection.VideoProvider#SESSION_EVENT_TX_START},
+             * {@link Connection.VideoProvider#SESSION_EVENT_TX_STOP},
+             * {@link Connection.VideoProvider#SESSION_EVENT_CAMERA_FAILURE},
+             * {@link Connection.VideoProvider#SESSION_EVENT_CAMERA_READY}
              *
              * @param event The event.
              */
@@ -399,10 +351,10 @@ public abstract class InCallService extends Service {
             /**
              * Handles a change in camera capabilities.
              *
-             * @param callCameraCapabilities The changed camera capabilities.
+             * @param cameraCapabilities The changed camera capabilities.
              */
             public abstract void onCameraCapabilitiesChanged(
-                    CallCameraCapabilities callCameraCapabilities);
+                    CameraCapabilities cameraCapabilities);
         }
     }
 }
