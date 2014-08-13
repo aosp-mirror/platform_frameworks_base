@@ -2314,6 +2314,10 @@ public class WindowManagerService extends IWindowManager.Stub
                             + attrs.token + ".  Aborting.");
                       return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
+            } else if (token.appWindowToken != null) {
+                Slog.i(TAG, "Non-null appWindowToken for system window of type=" + type);
+                // app token should be null for any other window types.
+                token.appWindowToken = null;
             }
 
             win = new WindowState(this, session, client, token,
