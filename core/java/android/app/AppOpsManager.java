@@ -451,8 +451,8 @@ public class AppOpsManager {
             null, //VIBRATE
             null, //READ_CONTACTS
             null, //WRITE_CONTACTS
-            null, //READ_CALL_LOG
-            null, //WRITE_CALL_LOG
+            UserManager.DISALLOW_OUTGOING_CALLS, //READ_CALL_LOG
+            UserManager.DISALLOW_OUTGOING_CALLS, //WRITE_CALL_LOG
             null, //READ_CALENDAR
             null, //WRITE_CALENDAR
             UserManager.DISALLOW_SHARE_LOCATION, //WIFI_SCAN
