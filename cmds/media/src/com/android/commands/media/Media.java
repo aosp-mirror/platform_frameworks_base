@@ -178,6 +178,13 @@ public class Media extends BaseCommand {
         public ControllerMonitor(ISessionController controller) {
             mController = controller;
         }
+
+        @Override
+        public void onSessionDestroyed() {
+            System.out.println("onSessionDestroyed. Enter q to quit.");
+
+        }
+
         @Override
         public void onEvent(String event, Bundle extras) {
             System.out.println("onSessionEvent event=" + event + ", extras=" + extras);
