@@ -5794,13 +5794,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public final void mediaResourcesReleased(IBinder token) {
+    public final void backgroundResourcesReleased(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
                 ActivityStack stack = ActivityRecord.getStackLocked(token);
                 if (stack != null) {
-                    stack.mediaResourcesReleased(token);
+                    stack.backgroundResourcesReleased(token);
                 }
             }
         } finally {
@@ -9662,7 +9662,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 if (r.changeWindowTranslucency(true)) {
                     mWindowManager.setAppFullscreen(token, true);
-                    r.task.stack.releaseMediaResources();
+                    r.task.stack.releaseBackgroundResources();
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
                     return true;
                 }
@@ -9703,13 +9703,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean setMediaPlaying(IBinder token, boolean playing) {
+    public boolean requestVisibleBehind(IBinder token, boolean visible) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
                 final ActivityRecord r = ActivityRecord.isInStackLocked(token);
                 if (r != null) {
-                    return mStackSupervisor.setMediaPlayingLocked(r, playing);
+                    return mStackSupervisor.requestVisibleBehindLocked(r, visible);
                 }
             }
             return false;
@@ -9719,15 +9719,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean isBackgroundMediaPlaying(IBinder token) {
+    public boolean isBackgroundVisibleBehind(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
                 final ActivityStack stack = ActivityRecord.getStackLocked(token);
-                final boolean playing = stack == null ? false : stack.isMediaPlaying();
-                if (ActivityStackSupervisor.DEBUG_MEDIA_VISIBILITY) Slog.d(TAG,
-                        "isBackgroundMediaPlaying: stack=" + stack + " playing=" + playing);
-                return playing;
+                final boolean visible = stack == null ? false : stack.hasVisibleBehindActivity();
+                if (ActivityStackSupervisor.DEBUG_VISIBLE_BEHIND) Slog.d(TAG,
+                        "isBackgroundVisibleBehind: stack=" + stack + " visible=" + visible);
+                return visible;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

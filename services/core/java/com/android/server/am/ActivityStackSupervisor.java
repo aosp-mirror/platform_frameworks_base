@@ -115,7 +115,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final boolean DEBUG_APP = DEBUG || false;
     static final boolean DEBUG_CONTAINERS = DEBUG || false;
     static final boolean DEBUG_IDLE = DEBUG || false;
-    static final boolean DEBUG_MEDIA_VISIBILITY = DEBUG || false;
+    static final boolean DEBUG_VISIBLE_BEHIND = DEBUG || false;
     static final boolean DEBUG_SAVED_STATE = DEBUG || false;
     static final boolean DEBUG_SCREENSHOTS = DEBUG || false;
     static final boolean DEBUG_STATES = DEBUG || false;
@@ -2640,21 +2640,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    boolean setMediaPlayingLocked(ActivityRecord r, boolean playing) {
+    boolean requestVisibleBehindLocked(ActivityRecord r, boolean visible) {
         final ActivityStack stack = r.task.stack;
         if (stack == null) {
-            if (DEBUG_MEDIA_VISIBILITY) Slog.d(TAG, "setMediaPlaying: r=" + r + " playing=" +
-                    playing + " stack is null");
+            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG, "requestVisibleBehind: r=" + r + " visible=" +
+                    visible + " stack is null");
             return false;
         }
-        final boolean isPlaying = stack.isMediaPlaying();
-        if (DEBUG_MEDIA_VISIBILITY) Slog.d(TAG, "setMediaPlayer: r=" + r + " playing=" +
-                playing + " isPlaying=" + isPlaying);
+        final boolean isVisible = stack.hasVisibleBehindActivity();
+        if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG, "requestVisibleBehind r=" + r + " visible=" +
+                visible + " isVisible=" + isVisible);
 
         final ActivityRecord top = topRunningActivityLocked();
-        if (top == null || top == r || (playing == isPlaying)) {
-            if (DEBUG_MEDIA_VISIBILITY) Slog.d(TAG, "setMediaPlaying: quick return");
-            stack.setMediaPlayer(playing ? r : null);
+        if (top == null || top == r || (visible == isVisible)) {
+            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG, "requestVisibleBehind: quick return");
+            stack.setVisibleBehindActivity(visible ? r : null);
             return true;
         }
 
@@ -2662,14 +2662,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (top.fullscreen || top.state != ActivityState.RESUMED || top.app == null ||
                 top.app.thread == null) {
             // Can't carry out this request.
-            if (DEBUG_MEDIA_VISIBILITY) Slog.d(TAG, "setMediaPlaying: returning top.fullscreen=" +
-                    top.fullscreen+ " top.state=" + top.state + " top.app=" + top.app +
+            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG, "requestVisibleBehind: returning top.fullscreen="
+                    + top.fullscreen+ " top.state=" + top.state + " top.app=" + top.app +
                     " top.app.thread=" + top.app.thread);
             return false;
         }
 
-        stack.setMediaPlayer(playing ? r : null);
-        if (!playing) {
+        stack.setVisibleBehindActivity(visible ? r : null);
+        if (!visible) {
             // Make the activity immediately above r opaque.
             final ActivityRecord next = stack.findNextTranslucentActivity(r);
             if (next != null) {
@@ -2677,7 +2677,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
         try {
-            top.app.thread.scheduleBackgroundMediaPlayingChanged(top.appToken, playing);
+            top.app.thread.scheduleBackgroundVisibleBehindChanged(top.appToken, visible);
         } catch (RemoteException e) {
         }
         return true;
@@ -3702,7 +3702,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
          * stacks, bottommost behind. Accessed directly by ActivityManager package classes */
         final ArrayList<ActivityStack> mStacks = new ArrayList<ActivityStack>();
 
-        ActivityRecord mMediaPlayingActivity;
+        ActivityRecord mVisibleBehindActivity;
 
         ActivityDisplay() {
         }
@@ -3735,12 +3735,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
             bounds.y = mDisplayInfo.appHeight;
         }
 
-        void setMediaPlaying(ActivityRecord r) {
-            mMediaPlayingActivity = r;
+        void setVisibleBehindActivity(ActivityRecord r) {
+            mVisibleBehindActivity = r;
         }
 
-        boolean isMediaPlaying() {
-            return mMediaPlayingActivity != null;
+        boolean hasVisibleBehindActivity() {
+            return mVisibleBehindActivity != null;
         }
 
         @Override
