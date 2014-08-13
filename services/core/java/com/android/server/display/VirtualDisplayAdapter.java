@@ -265,7 +265,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE
                             | DisplayDeviceInfo.FLAG_NEVER_BLANK;
                 }
-                if ((mInfo.flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
+                if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
                     mInfo.flags &= ~DisplayDeviceInfo.FLAG_NEVER_BLANK;
                 } else {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
