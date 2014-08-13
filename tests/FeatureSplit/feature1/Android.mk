@@ -26,7 +26,6 @@ featureOfApk := $(call intermediates-dir-for,APPS,$(featureOf))/package.apk
 localRStamp := $(call intermediates-dir-for,APPS,$(LOCAL_PACKAGE_NAME),,COMMON)/src/R.stamp
 $(localRStamp): $(featureOfApk)
 
-$(info $(localRStamp))
 LOCAL_AAPT_FLAGS := --feature-of $(featureOfApk)
 
 include $(BUILD_PACKAGE)
