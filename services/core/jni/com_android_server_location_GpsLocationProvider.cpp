@@ -28,6 +28,7 @@
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
 
+#include <arpa/inet.h>
 #include <string.h>
 #include <pthread.h>
 #include <linux/in.h>
@@ -189,8 +190,10 @@ static jbyteArray convert_to_ipv4(uint32_t ip, bool net_order)
 
     jbyte ipv4[4];
     if (net_order) {
+        ALOGV("Converting IPv4 address(net_order) %x", ip);
         memcpy(ipv4, &ip, sizeof(ipv4));
     } else {
+        ALOGV("Converting IPv4 address(host_order) %x", ip);
         //endianess transparent conversion from int to char[]
         ipv4[0] = (jbyte) (ip & 0xFF);
         ipv4[1] = (jbyte)((ip>>8) & 0xFF);
@@ -210,6 +213,7 @@ static void agps_status_callback(AGpsStatus* agps_status)
 
     size_t status_size = agps_status->size;
     if (status_size == sizeof(AGpsStatus_v3)) {
+      ALOGV("AGpsStatus is V3: %d", status_size);
       switch (agps_status->addr.ss_family)
       {
       case AF_INET:
@@ -219,6 +223,12 @@ static void agps_status_callback(AGpsStatus* agps_status)
             byteArray = convert_to_ipv4(*pAddr, true /* net_order */);
             if (byteArray != NULL) {
                 isSupported = true;
+            }
+            IF_ALOGD() {
+                // log the IP for reference in case there is a bogus value pushed by HAL
+                char str[INET_ADDRSTRLEN];
+                inet_ntop(AF_INET, &(in->sin_addr), str, INET_ADDRSTRLEN);
+                ALOGD("AGPS IP is v4: %s", str);
             }
           }
           break;
@@ -232,6 +242,12 @@ static void agps_status_callback(AGpsStatus* agps_status)
             } else {
                 ALOGE("Unable to allocate byte array for IPv6 address.");
             }
+            IF_ALOGD() {
+                // log the IP for reference in case there is a bogus value pushed by HAL
+                char str[INET6_ADDRSTRLEN];
+                inet_ntop(AF_INET6, &(in6->sin6_addr), str, INET6_ADDRSTRLEN);
+                ALOGD("AGPS IP is v6: %s", str);
+            }
           }
           break;
       default:
@@ -239,14 +255,17 @@ static void agps_status_callback(AGpsStatus* agps_status)
           break;
       }
     } else if (status_size >= sizeof(AGpsStatus_v2)) {
+      ALOGV("AGpsStatus is V2+: %d", status_size);
       // for back-compatibility reasons we check in v2 that the data structure size is greater or
       // equal to the declared size in gps.h
       uint32_t ipaddr = agps_status->ipaddr;
+      ALOGV("AGPS IP is v4: %x", ipaddr);
       byteArray = convert_to_ipv4(ipaddr, false /* net_order */);
       if (ipaddr == INADDR_NONE || byteArray != NULL) {
           isSupported = true;
       }
     } else if (status_size >= sizeof(AGpsStatus_v1)) {
+        ALOGV("AGpsStatus is V1+: %d", status_size);
         // because we have to check for >= with regards to v2, we also need to relax the check here
         // and only make sure that the size is at least what we expect
         isSupported = true;
@@ -255,6 +274,8 @@ static void agps_status_callback(AGpsStatus* agps_status)
     }
 
     if (isSupported) {
+        jsize byteArrayLength = byteArray != NULL ? env->GetArrayLength(byteArray) : 0;
+        ALOGV("Passing AGPS IP addr: size %d", byteArrayLength);
         env->CallVoidMethod(mCallbacksObj, method_reportAGpsStatus, agps_status->type,
                             agps_status->status, byteArray);
 
