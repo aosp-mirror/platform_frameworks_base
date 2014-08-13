@@ -214,6 +214,29 @@ public class RouteInfoTest extends TestCase {
       assertFalse(r.isIPv6Default());
     }
 
+    public void testTruncation() {
+      LinkAddress l;
+      RouteInfo r;
+
+      l = new LinkAddress("192.0.2.5/30");
+      r = new RouteInfo(l, Address("192.0.2.1"), "wlan0");
+      assertEquals("192.0.2.4", r.getDestination().getAddress().getHostAddress());
+
+      l = new LinkAddress("2001:db8:1:f::5/63");
+      r = new RouteInfo(l, Address("2001:db8:5::1"), "wlan0");
+      assertEquals("2001:db8:1:e::", r.getDestination().getAddress().getHostAddress());
+    }
+
+    // Make sure that creating routes to multicast addresses doesn't throw an exception. Even though
+    // there's nothing we can do with them, we don't want to crash if, e.g., someone calls
+    // requestRouteToHostAddress("230.0.0.0", MOBILE_HIPRI);
+    public void testMulticastRoute() {
+      RouteInfo r;
+      r = new RouteInfo(Prefix("230.0.0.0/32"), Address("192.0.2.1"), "wlan0");
+      r = new RouteInfo(Prefix("ff02::1/128"), Address("2001:db8::1"), "wlan0");
+      // No exceptions? Good.
+    }
+
     public RouteInfo passThroughParcel(RouteInfo r) {
         Parcel p = Parcel.obtain();
         RouteInfo r2 = null;
