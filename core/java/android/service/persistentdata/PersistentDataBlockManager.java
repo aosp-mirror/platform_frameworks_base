@@ -16,6 +16,7 @@
 
 package android.service.persistentdata;
 
+import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -30,12 +31,14 @@ import android.util.Slog;
  * {@link PersistentDataBlockManager#getDataBlockSize()}.
  *
  * Clients can query the maximum size for a block via
+ * {@link PersistentDataBlockManager#getMaximumDataBlockSize()}
  *
  * Clients can read the currently written block by invoking
  * {@link PersistentDataBlockManager#read()}.
  *
  * @hide
  */
+@SystemApi
 public class PersistentDataBlockManager {
     private static final String TAG = PersistentDataBlockManager.class.getSimpleName();
     private IPersistentDataBlockService sService;
