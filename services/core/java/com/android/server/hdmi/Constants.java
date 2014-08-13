@@ -258,6 +258,12 @@ final class Constants {
     static final int MHL_RAP_ACTION_CONTENT_ON = 0x10;
     static final int MHL_RAP_ACTION_CONTENT_OFF = 0x11;
 
+    // MHL RAPK messages.
+    static final int MHL_RAPK_NO_ERROR = 0x00;
+    static final int MHL_RAPK_UNRECOGNIZED_ACTION = 0x01;
+    static final int MHL_RAPK_UNSUPPORTED_ACTION = 0x02;
+    static final int MHL_RAPK_RESPONDER_BUSY = 0x03;
+
     static final int MHL_INVALID_ADOPTER_ID = -1;
     static final int MHL_INVALID_DEVICE_ID = -1;
 
