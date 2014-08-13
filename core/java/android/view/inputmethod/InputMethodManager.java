@@ -1655,7 +1655,12 @@ public final class InputMethodManager {
             final boolean isImmediate = (mCursorAnchorInfoMonitorMode &
                     CursorAnchorInfoRequest.FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE) != 0;
             if (!isImmediate && Objects.equals(mCursorAnchorInfo, cursorAnchorInfo)) {
-                Log.w(TAG, "Ignoring redundant updateCursorAnchorInfo: info=" + cursorAnchorInfo);
+                // TODO: Consider always emitting this message once we have addressed redundant
+                // calls of this method from android.widget.Editor.
+                if (DEBUG) {
+                    Log.w(TAG, "Ignoring redundant updateCursorAnchorInfo: info="
+                            + cursorAnchorInfo);
+                }
                 return;
             }
             if (DEBUG) Log.v(TAG, "updateCursorAnchorInfo: " + cursorAnchorInfo);
