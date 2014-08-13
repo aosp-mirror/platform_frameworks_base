@@ -140,7 +140,7 @@ public class PanelBar extends FrameLayout {
         mPanelHolder.setSelectedPanel(mTouchingPanel);
         for (PanelView pv : mPanels) {
             if (pv != panel) {
-                pv.collapse();
+                pv.collapse(false /* delayed */);
             }
         }
     }
@@ -191,7 +191,7 @@ public class PanelBar extends FrameLayout {
         boolean waiting = false;
         for (PanelView pv : mPanels) {
             if (animate && !pv.isFullyCollapsed()) {
-                pv.collapse();
+                pv.collapse(true /* delayed */);
                 waiting = true;
             } else {
                 pv.resetViews();

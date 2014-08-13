@@ -322,7 +322,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     VelocityTracker mVelocityTracker;
 
     int[] mAbsPos = new int[2];
-    Runnable mPostCollapseCleanup = null;
+    ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
 
     // for disabling the status bar
     int mDisabled = 0;
@@ -394,7 +394,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mNavigationBarMode;
     private Boolean mScreenOn;
 
-    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
     private ScrimController mScrimController;
 
@@ -574,6 +573,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         mDozeServiceHost = new DozeServiceHost();
         putComponent(DozeService.Host.class, mDozeServiceHost);
+        putComponent(PhoneStatusBar.class, this);
 
         setControllerUsers();
     }
@@ -886,14 +886,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             return;
         }
 
-        mPostCollapseCleanup = new Runnable() {
+        addPostCollapseAction(new Runnable() {
             @Override
             public void run() {
                 try {
                     mBarService.onClearAllNotifications(mCurrentUserId);
                 } catch (Exception ex) { }
             }
-        };
+        });
 
         performDismissAllAnimations(viewsToHide);
 
@@ -1364,6 +1364,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private void updateNotificationShade() {
         if (mStackScroller == null) return;
+
+        // Do not modify the notifications during collapse.
+        if (isCollapsing()) {
+            addPostCollapseAction(new Runnable() {
+                @Override
+                public void run() {
+                    updateNotificationShade();
+                }
+            });
+            return;
+        }
 
         ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
         ArrayList<ExpandableNotificationRow> toShow = new ArrayList<>(activeNotifications.size());
@@ -2003,8 +2014,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void startActivity(Intent intent) {
-        startActivityDismissingKeyguard(intent, false);
+    public void startActivity(Intent intent, boolean dismissShade) {
+        startActivityDismissingKeyguard(intent, false, dismissShade);
     }
 
     public ScrimController getScrimController() {
@@ -2125,10 +2136,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void animateCollapsePanels(int flags, boolean force) {
         if (!force &&
                 (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)) {
-            if (mPostCollapseCleanup != null) {
-                mPostCollapseCleanup.run();
-                mPostCollapseCleanup = null;
-            }
+            runPostCollapseRunnables();
             return;
         }
         if (SPEW) {
@@ -2156,6 +2164,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mStatusBarWindow.cancelExpandHelper();
             mStatusBarView.collapseAllPanels(true);
         }
+    }
+
+    private void runPostCollapseRunnables() {
+        int size = mPostCollapseRunnables.size();
+        for (int i = 0; i < size; i++) {
+            mPostCollapseRunnables.get(i).run();
+        }
+        mPostCollapseRunnables.clear();
     }
 
     public ViewPropertyAnimator setVisibilityWhenDone(
@@ -2269,11 +2285,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // Close any "App info" popups that might have snuck on-screen
         dismissPopups();
 
-        if (mPostCollapseCleanup != null) {
-            mPostCollapseCleanup.run();
-            mPostCollapseCleanup = null;
-        }
-
+        runPostCollapseRunnables();
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
         showBouncer();
         disable(mDisabledUnmodified, true /* animate */);
@@ -2873,7 +2885,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
-    public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned) {
+    public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
+            final boolean dismissShade) {
         if (onlyProvisioned && !isDeviceProvisioned()) return;
 
         final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
@@ -2883,31 +2896,26 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 AsyncTask.execute(new Runnable() {
                     public void run() {
                         try {
+                            if (keyguardShowing) {
+                                ActivityManagerNative.getDefault()
+                                        .keyguardWaitingForActivityDrawn();
+                            }
                             intent.setFlags(
                                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             mContext.startActivityAsUser(
                                     intent, new UserHandle(UserHandle.USER_CURRENT));
-                            if (keyguardShowing) {
-                                mWindowManagerService.overridePendingAppTransition(
-                                        null, 0, 0, null);
-                            }
+                            overrideActivityPendingAppTransition(keyguardShowing);
                         } catch (RemoteException e) {
                         }
                     }
                 });
-                animateCollapsePanels();
-
-                return DELAY_DISMISS_TO_ACTIVITY_LAUNCH;
+                if (dismissShade) {
+                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+                }
+                return true;
             }
         });
     }
-
-    private View.OnClickListener mClockClickListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            startActivityDismissingKeyguard(
-                    new Intent(Intent.ACTION_QUICK_CLOCK), true); // have fun, everyone
-        }
-    };
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -3219,19 +3227,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void handleStartSettingsActivity(Intent intent, boolean onlyProvisioned) {
-        if (onlyProvisioned && !isDeviceProvisioned()) return;
-        try {
-            // Dismiss the lock screen when Settings starts.
-            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-        } catch (RemoteException e) {
-        }
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
-        animateCollapsePanels();
-    }
-
-    public void startSettingsActivity(String action) {
-        postStartSettingsActivity(new Intent(action), 0);
+        startActivityDismissingKeyguard(intent, onlyProvisioned, true /* dismissShade */);
     }
 
     private static class FastColorDrawable extends Drawable {
@@ -3372,6 +3368,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mDraggedDownRow.notifyHeightChanged();
             mDraggedDownRow = null;
         }
+    }
+
+    public boolean isCollapsing() {
+        return mNotificationPanel.isCollapsing();
+    }
+
+    public void addPostCollapseAction(Runnable r) {
+        mPostCollapseRunnables.add(r);
     }
 
     public boolean isInLaunchTransition() {
@@ -3614,10 +3618,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void onTrackingStarted() {
-        if (mPostCollapseCleanup != null) {
-            mPostCollapseCleanup.run();
-            mPostCollapseCleanup = null;
-        }
+        runPostCollapseRunnables();
     }
 
     public void onUnlockHintStarted() {
