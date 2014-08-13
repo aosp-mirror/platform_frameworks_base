@@ -31,6 +31,16 @@ import android.widget.Toast;
 public class SampleTrustAgent extends TrustAgentService
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    /**
+     * If true, allows anyone to control this trust agent, e.g. using adb:
+     * <pre>
+     * $ adb shell am broadcast -a action.sample_trust_agent.grant_trust\
+     *  -e extra.message SampleTrust\
+     *  --el extra.duration 1000 --ez extra.init_by_user false
+     * </pre>
+     */
+    private static final boolean ALLOW_EXTERNAL_BROADCASTS = false;
+
     LocalBroadcastManager mLocalBroadcastManager;
 
     private static final String ACTION_GRANT_TRUST = "action.sample_trust_agent.grant_trust";
@@ -38,7 +48,7 @@ public class SampleTrustAgent extends TrustAgentService
 
     private static final String EXTRA_MESSAGE = "extra.message";
     private static final String EXTRA_DURATION = "extra.duration";
-    private static final String EXTRA_EXTRA = "extra.extra";
+    private static final String EXTRA_INITIATED_BY_USER = "extra.init_by_user";
 
     private static final String PREFERENCE_REPORT_UNLOCK_ATTEMPTS
             = "preference.report_unlock_attempts";
@@ -50,11 +60,16 @@ public class SampleTrustAgent extends TrustAgentService
     @Override
     public void onCreate() {
         super.onCreate();
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_GRANT_TRUST);
         filter.addAction(ACTION_REVOKE_TRUST);
-        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
         mLocalBroadcastManager.registerReceiver(mReceiver, filter);
+        if (ALLOW_EXTERNAL_BROADCASTS) {
+            registerReceiver(mReceiver, filter);
+        }
+
         setManagingTrust(getIsManagingTrust(this));
         PreferenceManager.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(this);
@@ -79,6 +94,9 @@ public class SampleTrustAgent extends TrustAgentService
     public void onDestroy() {
         super.onDestroy();
         mLocalBroadcastManager.unregisterReceiver(mReceiver);
+        if (ALLOW_EXTERNAL_BROADCASTS) {
+            unregisterReceiver(mReceiver);
+        }
         PreferenceManager.getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(this);
     }
@@ -91,7 +109,7 @@ public class SampleTrustAgent extends TrustAgentService
                 try {
                     grantTrust(intent.getStringExtra(EXTRA_MESSAGE),
                             intent.getLongExtra(EXTRA_DURATION, 0),
-                            false /* initiatedByUser */);
+                            intent.getBooleanExtra(EXTRA_INITIATED_BY_USER, false));
                 } catch (IllegalStateException e) {
                     Toast.makeText(context,
                             "IllegalStateException: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -103,11 +121,11 @@ public class SampleTrustAgent extends TrustAgentService
     };
 
     public static void sendGrantTrust(Context context,
-            String message, long durationMs, Bundle extra) {
+            String message, long durationMs, boolean initiatedByUser) {
         Intent intent = new Intent(ACTION_GRANT_TRUST);
         intent.putExtra(EXTRA_MESSAGE, message);
         intent.putExtra(EXTRA_DURATION, durationMs);
-        intent.putExtra(EXTRA_EXTRA, extra);
+        intent.putExtra(EXTRA_INITIATED_BY_USER, initiatedByUser);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 
