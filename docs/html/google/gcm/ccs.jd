@@ -40,8 +40,6 @@ page.title=GCM Cloud Connection Server (XMPP)
 <li><a href="{@docRoot}google/gcm/gs.html">Getting Started</a></li>
 <li><a href="{@docRoot}google/gcm/server.html">Implementing GCM Server</a></li>
 <li><a href="{@docRoot}google/gcm/client.html">Implementing GCM Client</a></li>
-<li><a href="https://services.google.com/fb/forms/gcm/" class="external-link"
-target="_android">CCS and User Notifications Signup Form</a></li>
 </ol>
 
 </div>
