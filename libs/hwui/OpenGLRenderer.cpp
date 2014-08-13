@@ -2417,6 +2417,10 @@ status_t OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
     } else if (mode == VertexBuffer::kTwoPolyRingShadow) {
         mCaches.bindShadowIndicesBuffer();
         glDrawElements(GL_TRIANGLE_STRIP, TWO_POLY_RING_SHADOW_INDEX_COUNT, GL_UNSIGNED_SHORT, 0);
+    } else if (mode == VertexBuffer::kIndices) {
+        mCaches.unbindIndicesBuffer();
+        glDrawElements(GL_TRIANGLE_STRIP, vertexBuffer.getIndexCount(), GL_UNSIGNED_SHORT,
+                vertexBuffer.getIndices());
     }
 
     if (isAA) {
