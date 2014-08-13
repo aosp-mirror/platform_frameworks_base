@@ -1372,6 +1372,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         switch (status) {
             case GPS_REQUEST_AGPS_DATA_CONN:
                 if (DEBUG) Log.d(TAG, "GPS_REQUEST_AGPS_DATA_CONN");
+                Log.v(TAG, "Received SUPL IP addr[]: " + ipaddr);
                 // Set mAGpsDataConnectionState before calling startUsingNetworkFeature
                 //  to avoid a race condition with handleUpdateNetworkState()
                 mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPENING;
@@ -1380,6 +1381,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 if (ipaddr != null) {
                     try {
                         mAGpsDataConnectionIpAddr = InetAddress.getByAddress(ipaddr);
+                        Log.v(TAG, "IP address converted to: " + mAGpsDataConnectionIpAddr);
                     } catch (UnknownHostException e) {
                         Log.e(TAG, "Bad IP Address: " + ipaddr, e);
                         mAGpsDataConnectionIpAddr = null;
@@ -1426,6 +1428,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
             case GPS_AGPS_DATA_CONN_FAILED:
                 if (DEBUG) Log.d(TAG, "GPS_AGPS_DATA_CONN_FAILED");
                 break;
+            default:
+                Log.d(TAG, "Received Unknown AGPS status: " + status);
         }
     }
 
