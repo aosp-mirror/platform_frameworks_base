@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents.misc;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 
 import java.util.ArrayList;
@@ -98,9 +100,18 @@ public class ReferenceCountedTrigger {
         }
     }
 
-    /** Convenience method to decrement this trigger as a runnable */
+    /** Convenience method to decrement this trigger as a runnable. */
     public Runnable decrementAsRunnable() {
         return mDecrementRunnable;
+    }
+    /** Convenience method to decrement this trigger as a animator listener. */
+    public Animator.AnimatorListener decrementOnAnimationEnd() {
+        return new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                decrement();
+            }
+        };
     }
 
     /** Returns the current ref count */
