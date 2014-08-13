@@ -314,13 +314,21 @@ public class UsbHostManager {
         mConnectedUsbCard = cardsParser.getNumCardRecords() - 1;
         mConnectedUsbDeviceNum = 0;
 
-        if (!waitForAlsaFile(mConnectedUsbCard, mConnectedUsbDeviceNum, false)) {
-            return;
-        }
-
         mConnectedHasPlayback = devicesParser.hasPlaybackDevices(mConnectedUsbCard);
         mConnectedHasCapture = devicesParser.hasCaptureDevices(mConnectedUsbCard);
         mConnectedHasMIDI = devicesParser.hasMIDIDevices(mConnectedUsbCard);
+
+        // Playback device file needed/present?
+        if (mConnectedHasPlayback &&
+            !waitForAlsaFile(mConnectedUsbCard, mConnectedUsbDeviceNum, false)) {
+            return;
+        }
+
+        // Capture device file needed/present?
+        if (mConnectedHasCapture &&
+            !waitForAlsaFile(mConnectedUsbCard, mConnectedUsbDeviceNum, true)) {
+            return;
+        }
 
         if (DEBUG_AUDIO) {
             Slog.d(TAG,
