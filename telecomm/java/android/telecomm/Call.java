@@ -29,6 +29,8 @@ import java.util.Objects;
 
 /**
  * Represents an ongoing phone call that the in-call app should present to the user.
+ *
+ * {@hide}
  */
 public final class Call {
     /**
@@ -84,7 +86,7 @@ public final class Call {
         private final PhoneAccountHandle mAccountHandle;
         private final int mCallCapabilities;
         private final int mDisconnectCauseCode;
-        private final String mDisconnectCauseMsg;
+        private final String mDisconnectCauseMessage;
         private final long mConnectTimeMillis;
         private final GatewayInfo mGatewayInfo;
         private final int mVideoState;
@@ -100,7 +102,7 @@ public final class Call {
 
         /**
          * @return The presentation requirements for the handle. See
-         * {@link android.telecomm.CallPropertyPresentation} for valid values.
+         * {@link PropertyPresentation} for valid values.
          */
         public int getHandlePresentation() {
             return mHandlePresentation;
@@ -115,7 +117,7 @@ public final class Call {
 
         /**
          * @return The presentation requirements for the caller display name. See
-         * {@link android.telecomm.CallPropertyPresentation} for valid values.
+         * {@link PropertyPresentation} for valid values.
          */
         public int getCallerDisplayNamePresentation() {
             return mCallerDisplayNamePresentation;
@@ -131,7 +133,7 @@ public final class Call {
 
         /**
          * @return A bitmask of the capabilities of the {@code Call}, as defined in
-         *         {@link CallCapabilities}.
+         *         {@link PhoneCapabilities}.
          */
         public int getCallCapabilities() {
             return mCallCapabilities;
@@ -149,8 +151,8 @@ public final class Call {
          * @return For a {@link #STATE_DISCONNECTED} {@code Call}, an optional reason for
          * disconnection expressed as a free text message.
          */
-        public String getDisconnectCauseMsg() {
-            return mDisconnectCauseMsg;
+        public String getDisconnectCauseMessage() {
+            return mDisconnectCauseMessage;
         }
 
         /**
@@ -197,7 +199,7 @@ public final class Call {
                         Objects.equals(mAccountHandle, d.mAccountHandle) &&
                         Objects.equals(mCallCapabilities, d.mCallCapabilities) &&
                         Objects.equals(mDisconnectCauseCode, d.mDisconnectCauseCode) &&
-                        Objects.equals(mDisconnectCauseMsg, d.mDisconnectCauseMsg) &&
+                        Objects.equals(mDisconnectCauseMessage, d.mDisconnectCauseMessage) &&
                         Objects.equals(mConnectTimeMillis, d.mConnectTimeMillis) &&
                         Objects.equals(mGatewayInfo, d.mGatewayInfo) &&
                         Objects.equals(mVideoState, d.mVideoState) &&
@@ -216,7 +218,7 @@ public final class Call {
                     Objects.hashCode(mAccountHandle) +
                     Objects.hashCode(mCallCapabilities) +
                     Objects.hashCode(mDisconnectCauseCode) +
-                    Objects.hashCode(mDisconnectCauseMsg) +
+                    Objects.hashCode(mDisconnectCauseMessage) +
                     Objects.hashCode(mConnectTimeMillis) +
                     Objects.hashCode(mGatewayInfo) +
                     Objects.hashCode(mVideoState) +
@@ -232,7 +234,7 @@ public final class Call {
                 PhoneAccountHandle accountHandle,
                 int capabilities,
                 int disconnectCauseCode,
-                String disconnectCauseMsg,
+                String disconnectCauseMessage,
                 long connectTimeMillis,
                 GatewayInfo gatewayInfo,
                 int videoState,
@@ -244,7 +246,7 @@ public final class Call {
             mAccountHandle = accountHandle;
             mCallCapabilities = capabilities;
             mDisconnectCauseCode = disconnectCauseCode;
-            mDisconnectCauseMsg = disconnectCauseMsg;
+            mDisconnectCauseMessage = disconnectCauseMessage;
             mConnectTimeMillis = connectTimeMillis;
             mGatewayInfo = gatewayInfo;
             mVideoState = videoState;
@@ -255,8 +257,6 @@ public final class Call {
     public static abstract class Listener {
         /**
          * Invoked when the state of this {@code Call} has changed. See {@link #getState()}.
-         *
-         * TODO: Provide previous state also?
          *
          * @param call The {@code Call} invoking this method.
          * @param state The new state of the {@code Call}.
@@ -459,8 +459,6 @@ public final class Call {
 
     /**
      * Notifies this {@code Call} that the phone account user interface element was touched.
-     *
-     * TODO: Figure out if and how we can generalize this
      */
     public void phoneAccountClicked() {
         mInCallAdapter.phoneAccountClicked(mTelecommCallId);
@@ -492,14 +490,6 @@ public final class Call {
      */
     public void splitFromConference() {
         mInCallAdapter.splitFromConference(mTelecommCallId);
-    }
-
-    /**
-     * Instructs this {@code Call} to swap itself with an existing background call, if one
-     * such call exists.
-     */
-    public void swapWithBackgroundCall() {
-        mInCallAdapter.swapWithBackgroundCall(mTelecommCallId);
     }
 
     /**
@@ -774,25 +764,25 @@ public final class Call {
         }
     }
 
-    private int stateFromParcelableCallState(CallState parcelableCallState) {
+    private int stateFromParcelableCallState(int parcelableCallState) {
         switch (parcelableCallState) {
-            case NEW:
+            case CallState.NEW:
                 return STATE_NEW;
-            case CONNECTING:
+            case CallState.CONNECTING:
                 return STATE_CONNECTING;
-            case PRE_DIAL_WAIT:
+            case CallState.PRE_DIAL_WAIT:
                 return STATE_PRE_DIAL_WAIT;
-            case DIALING:
+            case CallState.DIALING:
                 return STATE_DIALING;
-            case RINGING:
+            case CallState.RINGING:
                 return STATE_RINGING;
-            case ACTIVE:
+            case CallState.ACTIVE:
                 return STATE_ACTIVE;
-            case ON_HOLD:
+            case CallState.ON_HOLD:
                 return STATE_HOLDING;
-            case DISCONNECTED:
+            case CallState.DISCONNECTED:
                 return STATE_DISCONNECTED;
-            case ABORTED:
+            case CallState.ABORTED:
                 return STATE_DISCONNECTED;
             default:
                 Log.wtf(this, "Unrecognized CallState %s", parcelableCallState);

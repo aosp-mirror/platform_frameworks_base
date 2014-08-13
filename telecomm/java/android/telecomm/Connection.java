@@ -16,11 +16,20 @@
 
 package android.telecomm;
 
+import com.android.internal.telecomm.IVideoCallback;
+import com.android.internal.telecomm.IVideoProvider;
+
 import android.app.PendingIntent;
 import android.net.Uri;
-import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.RemoteException;
+import android.telephony.DisconnectCause;
+import android.view.Surface;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -30,6 +39,29 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public abstract class Connection {
 
+    public static final int STATE_INITIALIZING = 0;
+
+    public static final int STATE_NEW = 1;
+
+    public static final int STATE_RINGING = 2;
+
+    public static final int STATE_DIALING = 3;
+
+    public static final int STATE_ACTIVE = 4;
+
+    public static final int STATE_HOLDING = 5;
+
+    public static final int STATE_DISCONNECTED = 6;
+
+    public static final int STATE_FAILED = 7;
+
+    public static final int STATE_CANCELED = 8;
+
+    // Flag controlling whether PII is emitted into the logs
+    private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
+
+    private static Connection sNullConnection;
+
     /** @hide */
     public abstract static class Listener {
         public void onStateChanged(Connection c, int state) {}
@@ -37,15 +69,14 @@ public abstract class Connection {
         public void onCallerDisplayNameChanged(
                 Connection c, String callerDisplayName, int presentation) {}
         public void onVideoStateChanged(Connection c, int videoState) {}
-        public void onSignalChanged(Connection c, Bundle details) {}
         public void onDisconnected(Connection c, int cause, String message) {}
         public void onPostDialWait(Connection c, String remaining) {}
         public void onRequestingRingback(Connection c, boolean ringback) {}
         public void onDestroyed(Connection c) {}
         public void onCallCapabilitiesChanged(Connection c, int callCapabilities) {}
         public void onParentConnectionChanged(Connection c, Connection parent) {}
-        public void onVideoCallProviderChanged(
-                Connection c, ConnectionService.VideoCallProvider videoCallProvider) {}
+        public void onVideoProviderChanged(
+                Connection c, VideoProvider videoProvider) {}
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
         public void onStatusHintsChanged(Connection c, StatusHints statusHints) {}
         public void onStartActivityFromInCall(Connection c, PendingIntent intent) {}
@@ -53,19 +84,359 @@ public abstract class Connection {
                 Connection c, List<Connection> conferenceableConnections) {}
     }
 
-    public final class State {
-        private State() {}
+    public static abstract class VideoProvider {
 
-        public static final int INITIALIZING = 0;
-        public static final int NEW = 1;
-        public static final int RINGING = 2;
-        public static final int DIALING = 3;
-        public static final int ACTIVE = 4;
-        public static final int HOLDING = 5;
-        public static final int DISCONNECTED = 6;
-        public static final int FAILED = 7;
-        public static final int CANCELED = 8;
+        /**
+         * Video is not being received (no protocol pause was issued).
+         */
+        public static final int SESSION_EVENT_RX_PAUSE = 1;
 
+        /**
+         * Video reception has resumed after a SESSION_EVENT_RX_PAUSE.
+         */
+        public static final int SESSION_EVENT_RX_RESUME = 2;
+
+        /**
+         * Video transmission has begun. This occurs after a negotiated start of video transmission
+         * when the underlying protocol has actually begun transmitting video to the remote party.
+         */
+        public static final int SESSION_EVENT_TX_START = 3;
+
+        /**
+         * Video transmission has stopped. This occurs after a negotiated stop of video transmission
+         * when the underlying protocol has actually stopped transmitting video to the remote party.
+         */
+        public static final int SESSION_EVENT_TX_STOP = 4;
+
+        /**
+         * A camera failure has occurred for the selected camera.  The In-Call UI can use this as a
+         * cue to inform the user the camera is not available.
+         */
+        public static final int SESSION_EVENT_CAMERA_FAILURE = 5;
+
+        /**
+         * Issued after {@code SESSION_EVENT_CAMERA_FAILURE} when the camera is once again ready for
+         * operation.  The In-Call UI can use this as a cue to inform the user that the camera has
+         * become available again.
+         */
+        public static final int SESSION_EVENT_CAMERA_READY = 6;
+
+        /**
+         * Session modify request was successful.
+         */
+        public static final int SESSION_MODIFY_REQUEST_SUCCESS = 1;
+
+        /**
+         * Session modify request failed.
+         */
+        public static final int SESSION_MODIFY_REQUEST_FAIL = 2;
+
+        /**
+         * Session modify request ignored due to invalid parameters.
+         */
+        public static final int SESSION_MODIFY_REQUEST_INVALID = 3;
+
+        private static final int MSG_SET_VIDEO_LISTENER = 1;
+        private static final int MSG_SET_CAMERA = 2;
+        private static final int MSG_SET_PREVIEW_SURFACE = 3;
+        private static final int MSG_SET_DISPLAY_SURFACE = 4;
+        private static final int MSG_SET_DEVICE_ORIENTATION = 5;
+        private static final int MSG_SET_ZOOM = 6;
+        private static final int MSG_SEND_SESSION_MODIFY_REQUEST = 7;
+        private static final int MSG_SEND_SESSION_MODIFY_RESPONSE = 8;
+        private static final int MSG_REQUEST_CAMERA_CAPABILITIES = 9;
+        private static final int MSG_REQUEST_CALL_DATA_USAGE = 10;
+        private static final int MSG_SET_PAUSE_IMAGE = 11;
+
+        private final VideoProvider.VideoProviderHandler
+                mMessageHandler = new VideoProvider.VideoProviderHandler();
+        private final VideoProvider.VideoProviderBinder mBinder;
+        private IVideoCallback mVideoListener;
+
+        /**
+         * Default handler used to consolidate binder method calls onto a single thread.
+         */
+        private final class VideoProviderHandler extends Handler {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_SET_VIDEO_LISTENER:
+                        mVideoListener = IVideoCallback.Stub.asInterface((IBinder) msg.obj);
+                        break;
+                    case MSG_SET_CAMERA:
+                        onSetCamera((String) msg.obj);
+                        break;
+                    case MSG_SET_PREVIEW_SURFACE:
+                        onSetPreviewSurface((Surface) msg.obj);
+                        break;
+                    case MSG_SET_DISPLAY_SURFACE:
+                        onSetDisplaySurface((Surface) msg.obj);
+                        break;
+                    case MSG_SET_DEVICE_ORIENTATION:
+                        onSetDeviceOrientation(msg.arg1);
+                        break;
+                    case MSG_SET_ZOOM:
+                        onSetZoom((Float) msg.obj);
+                        break;
+                    case MSG_SEND_SESSION_MODIFY_REQUEST:
+                        onSendSessionModifyRequest((VideoProfile) msg.obj);
+                        break;
+                    case MSG_SEND_SESSION_MODIFY_RESPONSE:
+                        onSendSessionModifyResponse((VideoProfile) msg.obj);
+                        break;
+                    case MSG_REQUEST_CAMERA_CAPABILITIES:
+                        onRequestCameraCapabilities();
+                        break;
+                    case MSG_REQUEST_CALL_DATA_USAGE:
+                        onRequestCallDataUsage();
+                        break;
+                    case MSG_SET_PAUSE_IMAGE:
+                        onSetPauseImage((String) msg.obj);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        /**
+         * IVideoProvider stub implementation.
+         */
+        private final class VideoProviderBinder extends IVideoProvider.Stub {
+            public void setVideoListener(IBinder videoListenerBinder) {
+                mMessageHandler.obtainMessage(
+                        MSG_SET_VIDEO_LISTENER, videoListenerBinder).sendToTarget();
+            }
+
+            public void setCamera(String cameraId) {
+                mMessageHandler.obtainMessage(MSG_SET_CAMERA, cameraId).sendToTarget();
+            }
+
+            public void setPreviewSurface(Surface surface) {
+                mMessageHandler.obtainMessage(MSG_SET_PREVIEW_SURFACE, surface).sendToTarget();
+            }
+
+            public void setDisplaySurface(Surface surface) {
+                mMessageHandler.obtainMessage(MSG_SET_DISPLAY_SURFACE, surface).sendToTarget();
+            }
+
+            public void setDeviceOrientation(int rotation) {
+                mMessageHandler.obtainMessage(MSG_SET_DEVICE_ORIENTATION, rotation).sendToTarget();
+            }
+
+            public void setZoom(float value) {
+                mMessageHandler.obtainMessage(MSG_SET_ZOOM, value).sendToTarget();
+            }
+
+            public void sendSessionModifyRequest(VideoProfile requestProfile) {
+                mMessageHandler.obtainMessage(
+                        MSG_SEND_SESSION_MODIFY_REQUEST, requestProfile).sendToTarget();
+            }
+
+            public void sendSessionModifyResponse(VideoProfile responseProfile) {
+                mMessageHandler.obtainMessage(
+                        MSG_SEND_SESSION_MODIFY_RESPONSE, responseProfile).sendToTarget();
+            }
+
+            public void requestCameraCapabilities() {
+                mMessageHandler.obtainMessage(MSG_REQUEST_CAMERA_CAPABILITIES).sendToTarget();
+            }
+
+            public void requestCallDataUsage() {
+                mMessageHandler.obtainMessage(MSG_REQUEST_CALL_DATA_USAGE).sendToTarget();
+            }
+
+            public void setPauseImage(String uri) {
+                mMessageHandler.obtainMessage(MSG_SET_PAUSE_IMAGE, uri).sendToTarget();
+            }
+        }
+
+        public VideoProvider() {
+            mBinder = new VideoProvider.VideoProviderBinder();
+        }
+
+        /**
+         * Returns binder object which can be used across IPC methods.
+         * @hide
+         */
+        public final IVideoProvider getInterface() {
+            return mBinder;
+        }
+
+        /**
+         * Sets the camera to be used for video recording in a video call.
+         *
+         * @param cameraId The id of the camera.
+         */
+        public abstract void onSetCamera(String cameraId);
+
+        /**
+         * Sets the surface to be used for displaying a preview of what the user's camera is
+         * currently capturing.  When video transmission is enabled, this is the video signal which
+         * is sent to the remote device.
+         *
+         * @param surface The surface.
+         */
+        public abstract void onSetPreviewSurface(Surface surface);
+
+        /**
+         * Sets the surface to be used for displaying the video received from the remote device.
+         *
+         * @param surface The surface.
+         */
+        public abstract void onSetDisplaySurface(Surface surface);
+
+        /**
+         * Sets the device orientation, in degrees.  Assumes that a standard portrait orientation of
+         * the device is 0 degrees.
+         *
+         * @param rotation The device orientation, in degrees.
+         */
+        public abstract void onSetDeviceOrientation(int rotation);
+
+        /**
+         * Sets camera zoom ratio.
+         *
+         * @param value The camera zoom ratio.
+         */
+        public abstract void onSetZoom(float value);
+
+        /**
+         * Issues a request to modify the properties of the current session.  The request is
+         * sent to the remote device where it it handled by the In-Call UI.
+         * Some examples of session modification requests: upgrade call from audio to video,
+         * downgrade call from video to audio, pause video.
+         *
+         * @param requestProfile The requested call video properties.
+         */
+        public abstract void onSendSessionModifyRequest(VideoProfile requestProfile);
+
+        /**te
+         * Provides a response to a request to change the current call session video
+         * properties.
+         * This is in response to a request the InCall UI has received via the InCall UI.
+         *
+         * @param responseProfile The response call video properties.
+         */
+        public abstract void onSendSessionModifyResponse(VideoProfile responseProfile);
+
+        /**
+         * Issues a request to the video provider to retrieve the camera capabilities.
+         * Camera capabilities are reported back to the caller via the In-Call UI.
+         */
+        public abstract void onRequestCameraCapabilities();
+
+        /**
+         * Issues a request to the video telephony framework to retrieve the cumulative data usage
+         * for the current call.  Data usage is reported back to the caller via the
+         * InCall UI.
+         */
+        public abstract void onRequestCallDataUsage();
+
+        /**
+         * Provides the video telephony framework with the URI of an image to be displayed to remote
+         * devices when the video signal is paused.
+         *
+         * @param uri URI of image to display.
+         */
+        public abstract void onSetPauseImage(String uri);
+
+        /**
+         * Invokes callback method defined in In-Call UI.
+         *
+         * @param videoProfile The requested video call profile.
+         */
+        public void receiveSessionModifyRequest(VideoProfile videoProfile) {
+            if (mVideoListener != null) {
+                try {
+                    mVideoListener.receiveSessionModifyRequest(videoProfile);
+                } catch (RemoteException ignored) {
+                }
+            }
+        }
+
+        /**
+         * Invokes callback method defined in In-Call UI.
+         *
+         * @param status Status of the session modify request.  Valid values are
+         *               {@link VideoProvider#SESSION_MODIFY_REQUEST_SUCCESS},
+         *               {@link VideoProvider#SESSION_MODIFY_REQUEST_FAIL},
+         *               {@link VideoProvider#SESSION_MODIFY_REQUEST_INVALID}
+         * @param requestedProfile The original request which was sent to the remote device.
+         * @param responseProfile The actual profile changes made by the remote device.
+         */
+        public void receiveSessionModifyResponse(int status,
+                VideoProfile requestedProfile, VideoProfile responseProfile) {
+            if (mVideoListener != null) {
+                try {
+                    mVideoListener.receiveSessionModifyResponse(
+                            status, requestedProfile, responseProfile);
+                } catch (RemoteException ignored) {
+                }
+            }
+        }
+
+        /**
+         * Invokes callback method defined in In-Call UI.
+         *
+         * Valid values are: {@link VideoProvider#SESSION_EVENT_RX_PAUSE},
+         * {@link VideoProvider#SESSION_EVENT_RX_RESUME},
+         * {@link VideoProvider#SESSION_EVENT_TX_START},
+         * {@link VideoProvider#SESSION_EVENT_TX_STOP}
+         *
+         * @param event The event.
+         */
+        public void handleCallSessionEvent(int event) {
+            if (mVideoListener != null) {
+                try {
+                    mVideoListener.handleCallSessionEvent(event);
+                } catch (RemoteException ignored) {
+                }
+            }
+        }
+
+        /**
+         * Invokes callback method defined in In-Call UI.
+         *
+         * @param width  The updated peer video width.
+         * @param height The updated peer video height.
+         */
+        public void changePeerDimensions(int width, int height) {
+            if (mVideoListener != null) {
+                try {
+                    mVideoListener.changePeerDimensions(width, height);
+                } catch (RemoteException ignored) {
+                }
+            }
+        }
+
+        /**
+         * Invokes callback method defined in In-Call UI.
+         *
+         * @param dataUsage The updated data usage.
+         */
+        public void changeCallDataUsage(int dataUsage) {
+            if (mVideoListener != null) {
+                try {
+                    mVideoListener.changeCallDataUsage(dataUsage);
+                } catch (RemoteException ignored) {
+                }
+            }
+        }
+
+        /**
+         * Invokes callback method defined in In-Call UI.
+         *
+         * @param cameraCapabilities The changed camera capabilities.
+         */
+        public void changeCameraCapabilities(CameraCapabilities cameraCapabilities) {
+            if (mVideoListener != null) {
+                try {
+                    mVideoListener.changeCameraCapabilities(cameraCapabilities);
+                } catch (RemoteException ignored) {
+                }
+            }
+        }
     }
 
     private final Listener mConnectionDeathListener = new Listener() {
@@ -79,10 +450,14 @@ public abstract class Connection {
 
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
     private final List<Connection> mChildConnections = new ArrayList<>();
+    private final List<Connection> mUnmodifiableChildConnections =
+            Collections.unmodifiableList(mChildConnections);
     private final List<Connection> mConferenceableConnections = new ArrayList<>();
+    private final List<Connection> mUnmodifiableConferenceableConnections =
+            Collections.unmodifiableList(mConferenceableConnections);
 
-    private int mState = State.NEW;
-    private CallAudioState mCallAudioState;
+    private int mState = STATE_NEW;
+    private AudioState mAudioState;
     private Uri mHandle;
     private int mHandlePresentation;
     private String mCallerDisplayName;
@@ -90,7 +465,7 @@ public abstract class Connection {
     private boolean mRequestingRingback = false;
     private int mCallCapabilities;
     private Connection mParentConnection;
-    private ConnectionService.VideoCallProvider mVideoCallProvider;
+    private VideoProvider mVideoProvider;
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
     private int mVideoState;
@@ -111,7 +486,7 @@ public abstract class Connection {
     }
 
     /**
-     * @return The {@link CallPropertyPresentation} which controls how the handle is shown.
+     * @return The {@link PropertyPresentation} which controls how the handle is shown.
      */
     public final int getHandlePresentation() {
         return mHandlePresentation;
@@ -125,7 +500,7 @@ public abstract class Connection {
     }
 
     /**
-     * @return The {@link CallPropertyPresentation} which controls how the caller display name is
+     * @return The {@link PropertyPresentation} which controls how the caller display name is
      *         shown.
      */
     public final int getCallerDisplayNamePresentation() {
@@ -141,10 +516,10 @@ public abstract class Connection {
 
     /**
      * Returns the video state of the call.
-     * Valid values: {@link android.telecomm.VideoCallProfile.VideoState#AUDIO_ONLY},
-     * {@link android.telecomm.VideoCallProfile.VideoState#BIDIRECTIONAL},
-     * {@link android.telecomm.VideoCallProfile.VideoState#TX_ENABLED},
-     * {@link android.telecomm.VideoCallProfile.VideoState#RX_ENABLED}.
+     * Valid values: {@link VideoProfile.VideoState#AUDIO_ONLY},
+     * {@link VideoProfile.VideoState#BIDIRECTIONAL},
+     * {@link VideoProfile.VideoState#TX_ENABLED},
+     * {@link VideoProfile.VideoState#RX_ENABLED}.
      *
      * @return The video state of the call.
      */
@@ -157,8 +532,8 @@ public abstract class Connection {
      *         being routed by the system. This is {@code null} if this Connection
      *         does not directly know about its audio state.
      */
-    public final CallAudioState getCallAudioState() {
-        return mCallAudioState;
+    public final AudioState getAudioState() {
+        return mAudioState;
     }
 
     /**
@@ -236,36 +611,36 @@ public abstract class Connection {
      * @param state The new audio state.
      * @hide
      */
-    final void setAudioState(CallAudioState state) {
+    final void setAudioState(AudioState state) {
         Log.d(this, "setAudioState %s", state);
-        mCallAudioState = state;
+        mAudioState = state;
         onSetAudioState(state);
     }
 
     /**
-     * @param state An integer value from {@link State}.
+     * @param state An integer value of a {@code STATE_*} constant.
      * @return A string representation of the value.
      */
     public static String stateToString(int state) {
         switch (state) {
-            case State.INITIALIZING:
-                return "INITIALIZING";
-            case State.NEW:
-                return "NEW";
-            case State.RINGING:
-                return "RINGING";
-            case State.DIALING:
-                return "DIALING";
-            case State.ACTIVE:
-                return "ACTIVE";
-            case State.HOLDING:
-                return "HOLDING";
-            case State.DISCONNECTED:
+            case STATE_INITIALIZING:
+                return "STATE_INITIALIZING";
+            case STATE_NEW:
+                return "STATE_NEW";
+            case STATE_RINGING:
+                return "STATE_RINGING";
+            case STATE_DIALING:
+                return "STATE_DIALING";
+            case STATE_ACTIVE:
+                return "STATE_ACTIVE";
+            case STATE_HOLDING:
+                return "STATE_HOLDING";
+            case STATE_DISCONNECTED:
                 return "DISCONNECTED";
-            case State.FAILED:
-                return "FAILED";
-            case State.CANCELED:
-                return "CANCELED";
+            case STATE_FAILED:
+                return "STATE_FAILED";
+            case STATE_CANCELED:
+                return "STATE_CANCELED";
             default:
                 Log.wtf(Connection.class, "Unknown state %d", state);
                 return "UNKNOWN";
@@ -297,11 +672,11 @@ public abstract class Connection {
     }
 
     public final List<Connection> getChildConnections() {
-        return mChildConnections;
+        return mUnmodifiableChildConnections;
     }
 
     /**
-     * Returns the connection's {@link CallCapabilities}
+     * Returns the connection's {@link PhoneCapabilities}
      */
     public final int getCallCapabilities() {
         return mCallCapabilities;
@@ -311,7 +686,7 @@ public abstract class Connection {
      * Sets the value of the {@link #getHandle()} property.
      *
      * @param handle The new handle.
-     * @param presentation The {@link CallPropertyPresentation} which controls how the handle is
+     * @param presentation The {@link PropertyPresentation} which controls how the handle is
      *         shown.
      */
     public final void setHandle(Uri handle, int presentation) {
@@ -327,7 +702,7 @@ public abstract class Connection {
      * Sets the caller display name (CNAP).
      *
      * @param callerDisplayName The new display name.
-     * @param presentation The {@link CallPropertyPresentation} which controls how the name is
+     * @param presentation The {@link PropertyPresentation} which controls how the name is
      *         shown.
      */
     public final void setCallerDisplayName(String callerDisplayName, int presentation) {
@@ -345,17 +720,17 @@ public abstract class Connection {
      */
     public final void setCanceled() {
         Log.d(this, "setCanceled");
-        setState(State.CANCELED);
+        setState(STATE_CANCELED);
     }
 
     /**
-     * Move the {@link Connection} to the {@link State#FAILED} state, with the given code
+     * Move the {@link Connection} to the {@link #STATE_FAILED} state, with the given code
      * ({@see DisconnectCause}) and message. This message is not shown to the user, but is useful
      * for logging and debugging purposes.
      * <p>
      * After calling this, the {@link Connection} will not be used.
      *
-     * @param code The {@link android.telephony.DisconnectCause} indicating why the connection
+     * @param code The {@link DisconnectCause} indicating why the connection
      *             failed.
      * @param message A message explaining why the {@link Connection} failed.
      */
@@ -363,15 +738,15 @@ public abstract class Connection {
         Log.d(this, "setFailed (%d: %s)", code, message);
         mFailureCode = code;
         mFailureMessage = message;
-        setState(State.FAILED);
+        setState(STATE_FAILED);
     }
 
     /**
      * Set the video state for the connection.
-     * Valid values: {@link android.telecomm.VideoCallProfile.VideoState#AUDIO_ONLY},
-     * {@link android.telecomm.VideoCallProfile.VideoState#BIDIRECTIONAL},
-     * {@link android.telecomm.VideoCallProfile.VideoState#TX_ENABLED},
-     * {@link android.telecomm.VideoCallProfile.VideoState#RX_ENABLED}.
+     * Valid values: {@link VideoProfile.VideoState#AUDIO_ONLY},
+     * {@link VideoProfile.VideoState#BIDIRECTIONAL},
+     * {@link VideoProfile.VideoState#TX_ENABLED},
+     * {@link VideoProfile.VideoState#RX_ENABLED}.
      *
      * @param videoState The new video state.
      */
@@ -389,68 +764,68 @@ public abstract class Connection {
      */
     public final void setActive() {
         setRequestingRingback(false);
-        setState(State.ACTIVE);
+        setState(STATE_ACTIVE);
     }
 
     /**
      * Sets state to ringing (e.g., an inbound ringing call).
      */
     public final void setRinging() {
-        setState(State.RINGING);
+        setState(STATE_RINGING);
     }
 
     /**
      * Sets state to initializing (this Connection is not yet ready to be used).
      */
     public final void setInitializing() {
-        setState(State.INITIALIZING);
+        setState(STATE_INITIALIZING);
     }
 
     /**
      * Sets state to initialized (the Connection has been set up and is now ready to be used).
      */
     public final void setInitialized() {
-        setState(State.NEW);
+        setState(STATE_NEW);
     }
 
     /**
      * Sets state to dialing (e.g., dialing an outbound call).
      */
     public final void setDialing() {
-        setState(State.DIALING);
+        setState(STATE_DIALING);
     }
 
     /**
      * Sets state to be on hold.
      */
     public final void setOnHold() {
-        setState(State.HOLDING);
+        setState(STATE_HOLDING);
     }
 
     /**
      * Sets the video call provider.
-     * @param videoCallProvider The video call provider.
+     * @param videoProvider The video provider.
      */
-    public final void setVideoCallProvider(ConnectionService.VideoCallProvider videoCallProvider) {
-        mVideoCallProvider = videoCallProvider;
+    public final void setVideoProvider(VideoProvider videoProvider) {
+        mVideoProvider = videoProvider;
         for (Listener l : mListeners) {
-            l.onVideoCallProviderChanged(this, videoCallProvider);
+            l.onVideoProviderChanged(this, videoProvider);
         }
     }
 
-    public final ConnectionService.VideoCallProvider getVideoCallProvider() {
-        return mVideoCallProvider;
+    public final VideoProvider getVideoProvider() {
+        return mVideoProvider;
     }
 
     /**
      * Sets state to disconnected.
      *
      * @param cause The reason for the disconnection, any of
-     *         {@link android.telephony.DisconnectCause}.
+     *         {@link DisconnectCause}.
      * @param message Optional call-service-provided message about the disconnect.
      */
     public final void setDisconnected(int cause, String message) {
-        setState(State.DISCONNECTED);
+        setState(STATE_DISCONNECTED);
         Log.d(this, "Disconnected with cause %d message %s", cause, message);
         for (Listener l : mListeners) {
             l.onDisconnected(this, cause, message);
@@ -482,7 +857,7 @@ public abstract class Connection {
     }
 
     /**
-     * Sets the connection's {@link CallCapabilities}.
+     * Sets the connection's {@link PhoneCapabilities}.
      *
      * @param callCapabilities The new call capabilities.
      */
@@ -506,17 +881,6 @@ public abstract class Connection {
             if (mListeners.contains(l)) {
                 l.onDestroyed(this);
             }
-        }
-    }
-
-    /**
-     * Sets the current signal levels for the underlying data transport.
-     *
-     * @param details A {@link android.os.Bundle} containing details of the current level.
-     */
-    public final void setSignal(Bundle details) {
-        for (Listener l : mListeners) {
-            l.onSignalChanged(this, details);
         }
     }
 
@@ -563,6 +927,13 @@ public abstract class Connection {
     }
 
     /**
+     * Obtains the connections with which this connection can be conferenced.
+     */
+    public final List<Connection> getConferenceableConnections() {
+        return mUnmodifiableConferenceableConnections;
+    }
+
+    /**
      * Launches an activity for this connection on top of the in-call UI.
      *
      * @param intent The intent to use to start the activity.
@@ -577,17 +948,17 @@ public abstract class Connection {
     }
 
     /**
-     * Notifies this Connection that the {@link #getCallAudioState()} property has a new value.
+     * Notifies this Connection that the {@link #getAudioState()} property has a new value.
      *
      * @param state The new call audio state.
      */
-    public void onSetAudioState(CallAudioState state) {}
+    public void onSetAudioState(AudioState state) {}
 
     /**
      * Notifies this Connection of an internal state change. This method is called after the
      * state is changed.
      *
-     * @param state The new state, a {@link Connection.State} member.
+     * @param state The new state, one of the {@code STATE_*} constants.
      */
     public void onSetState(int state) {}
 
@@ -629,7 +1000,7 @@ public abstract class Connection {
     public void onUnhold() {}
 
     /**
-     * Notifies this Connection, which is in {@link State#RINGING}, of
+     * Notifies this Connection, which is in {@link #STATE_RINGING}, of
      * a request to accept.
      *
      * @param videoState The video state in which to answer the call.
@@ -637,7 +1008,7 @@ public abstract class Connection {
     public void onAnswer(int videoState) {}
 
     /**
-     * Notifies this Connection, which is in {@link State#RINGING}, of
+     * Notifies this Connection, which is in {@link #STATE_RINGING}, of
      * a request to reject.
      */
     public void onReject() {}
@@ -646,12 +1017,6 @@ public abstract class Connection {
      * Notifies this Connection whether the user wishes to proceed with the post-dial DTMF codes.
      */
     public void onPostDialContinue(boolean proceed) {}
-
-    /**
-     * Swap this call with a background call. This is used for calls that don't support hold,
-     * e.g. CDMA.
-     */
-    public void onSwapWithBackgroundCall() {}
 
     /**
      * TODO: Needs documentation.
@@ -673,6 +1038,38 @@ public abstract class Connection {
      */
     public void onConferenceWith(Connection otherConnection) {}
 
+    static String toLogSafePhoneNumber(String number) {
+        // For unknown number, log empty string.
+        if (number == null) {
+            return "";
+        }
+
+        if (PII_DEBUG) {
+            // When PII_DEBUG is true we emit PII.
+            return number;
+        }
+
+        // Do exactly same thing as Uri#toSafeString() does, which will enable us to compare
+        // sanitized phone numbers.
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < number.length(); i++) {
+            char c = number.charAt(i);
+            if (c == '-' || c == '@' || c == '.') {
+                builder.append(c);
+            } else {
+                builder.append('x');
+            }
+        }
+        return builder.toString();
+    }
+
+    static synchronized Connection getNullConnection() {
+        if (sNullConnection == null) {
+            sNullConnection = new Connection() {};
+        }
+        return sNullConnection;
+    }
+
     private void addChild(Connection connection) {
         Log.d(this, "adding child %s", connection);
         mChildConnections.add(connection);
@@ -686,7 +1083,7 @@ public abstract class Connection {
     }
 
     private void setState(int state) {
-        if (mState == State.FAILED || mState == State.CANCELED) {
+        if (mState == STATE_FAILED || mState == STATE_CANCELED) {
             Log.d(this, "Connection already %s; cannot transition out of this state.",
                     stateToString(mState));
             return;
@@ -711,7 +1108,7 @@ public abstract class Connection {
      * @param message A reason for why the connection failed (not intended to be shown to the user).
      * @return A {@link Connection} which indicates failure.
      */
-    public static Connection getFailedConnection(final int code, final String message) {
+    public static Connection createFailedConnection(final int code, final String message) {
         return new Connection() {{
             setFailed(code, message);
         }};
@@ -723,13 +1120,13 @@ public abstract class Connection {
 
     /**
      * Return a {@link Connection} which represents a canceled a connection attempt. The returned
-     * {@link Connection} will have state {@link State#CANCELED}, and cannot be moved out of that
+     * {@link Connection} will have state {@link #STATE_CANCELED}, and cannot be moved out of that
      * state. This connection should not be used for anything, and no other {@link Connection}s
      * should be attempted.
      *
      * @return A {@link Connection} which indicates that the underlying call should be canceled.
      */
-    public static Connection getCanceledConnection() {
+    public static Connection createCanceledConnection() {
         return CANCELED_CONNECTION;
     }
 

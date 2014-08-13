@@ -21,22 +21,27 @@ package android.telecomm;
  * have the notion of normal transitions, due to the volatile nature of telephony systems, code
  * that uses these states should be resilient to unexpected state changes outside of what is
  * considered traditional.
+ *
+ * {@hide}
  */
-public enum CallState {
+public final class CallState {
+
+    private CallState() {}
+
     /**
      * Indicates that a call is new and not connected. This is used as the default state internally
      * within Telecomm and should not be used between Telecomm and call services. Call services are
      * not expected to ever interact with NEW calls, but {@link InCallService}s will see calls in
      * this state.
      */
-    NEW,
+    public static final int NEW = 0;
 
     /**
      * The initial state of an outgoing {@code Call}.
      * Common transitions are to {@link #DIALING} state for a successful call or
      * {@link #DISCONNECTED} if it failed.
      */
-    CONNECTING,
+    public static final int CONNECTING = 1;
 
     /**
      * Indicates that the call is about to go into the outgoing and dialing state but is waiting for
@@ -44,7 +49,7 @@ public enum CallState {
      * this is the state where the InCallUI is waiting for the user to select a
      * {@link PhoneAccount} to call from.
      */
-    PRE_DIAL_WAIT,
+    public static final int PRE_DIAL_WAIT = 2;
 
     /**
      * Indicates that a call is outgoing and in the dialing state. A call transitions to this state
@@ -52,7 +57,7 @@ public enum CallState {
      * state usually transition to {@link #ACTIVE} if the call was answered or {@link #DISCONNECTED}
      * if the call was disconnected somehow (e.g., failure or cancellation of the call by the user).
      */
-    DIALING,
+    public static final int DIALING = 3;
 
     /**
      * Indicates that a call is incoming and the user still has the option of answering, rejecting,
@@ -60,14 +65,14 @@ public enum CallState {
      * ringtone. Normal transitions are to {@link #ACTIVE} if answered or {@link #DISCONNECTED}
      * otherwise.
      */
-    RINGING,
+    public static final int RINGING = 4;
 
     /**
      * Indicates that a call is currently connected to another party and a communication channel is
      * open between them. The normal transition to this state is by the user answering a
      * {@link #DIALING} call or a {@link #RINGING} call being answered by the other party.
      */
-    ACTIVE,
+    public static final int ACTIVE = 5;
 
     /**
      * Indicates that the call is currently on hold. In this state, the call is not terminated
@@ -75,7 +80,7 @@ public enum CallState {
      * to this state is by the user putting an {@link #ACTIVE} call on hold by explicitly performing
      * an action, such as clicking the hold button.
      */
-    ON_HOLD,
+    public static final int ON_HOLD = 6;
 
     /**
      * Indicates that a call is currently disconnected. All states can transition to this state
@@ -84,12 +89,36 @@ public enum CallState {
      * the disconnection or communication was lost to the call service currently responsible for
      * this call (e.g., call service crashes).
      */
-    DISCONNECTED,
+    public static final int DISCONNECTED = 7;
 
     /**
      * Indicates that the call was attempted (mostly in the context of outgoing, at least at the
      * time of writing) but cancelled before it was successfully connected.
-     * @hide
      */
-    ABORTED;
+    public static final int ABORTED = 8;
+
+    public static String toString(int callState) {
+        switch (callState) {
+            case NEW:
+                return "NEW";
+            case CONNECTING:
+                return "CONNECTING";
+            case PRE_DIAL_WAIT:
+                return "PRE_DIAL_WAIT";
+            case DIALING:
+                return "DIALING";
+            case RINGING:
+                return "RINGING";
+            case ACTIVE:
+                return "ACTIVE";
+            case ON_HOLD:
+                return "ON_HOLD";
+            case DISCONNECTED:
+                return "DISCONNECTED";
+            case ABORTED:
+                return "ABORTED";
+            default:
+                return "UNKNOWN";
+        }
+    }
 }

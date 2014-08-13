@@ -24,7 +24,7 @@ import java.util.Locale;
 /**
  *  Encapsulates all audio states during a call.
  */
-public final class CallAudioState implements Parcelable {
+public final class AudioState implements Parcelable {
     /** Direct the audio stream through the device's earpiece. */
     public static int ROUTE_EARPIECE      = 0x00000001;
 
@@ -57,14 +57,14 @@ public final class CallAudioState implements Parcelable {
     public final int supportedRouteMask;
 
     /** @hide */
-    public CallAudioState(boolean isMuted, int route, int supportedRouteMask) {
+    public AudioState(boolean isMuted, int route, int supportedRouteMask) {
         this.isMuted = isMuted;
         this.route = route;
         this.supportedRouteMask = supportedRouteMask;
     }
 
     /** @hide */
-    public CallAudioState(CallAudioState state) {
+    public AudioState(AudioState state) {
         isMuted = state.isMuted;
         route = state.route;
         supportedRouteMask = state.supportedRouteMask;
@@ -75,10 +75,10 @@ public final class CallAudioState implements Parcelable {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof CallAudioState)) {
+        if (!(obj instanceof AudioState)) {
             return false;
         }
-        CallAudioState state = (CallAudioState) obj;
+        AudioState state = (AudioState) obj;
         return isMuted == state.isMuted && route == state.route &&
                 supportedRouteMask == state.supportedRouteMask;
     }
@@ -86,7 +86,7 @@ public final class CallAudioState implements Parcelable {
     @Override
     public String toString() {
         return String.format(Locale.US,
-                "[CallAudioState isMuted: %b, route; %s, supportedRouteMask: %s]",
+                "[AudioState isMuted: %b, route; %s, supportedRouteMask: %s]",
                 isMuted, audioRouteToString(route), audioRouteToString(supportedRouteMask));
     }
 
@@ -121,22 +121,22 @@ public final class CallAudioState implements Parcelable {
     }
 
     /**
-     * Responsible for creating CallAudioState objects for deserialized Parcels.
+     * Responsible for creating AudioState objects for deserialized Parcels.
      */
-    public static final Parcelable.Creator<CallAudioState> CREATOR =
-            new Parcelable.Creator<CallAudioState> () {
+    public static final Parcelable.Creator<AudioState> CREATOR =
+            new Parcelable.Creator<AudioState> () {
 
         @Override
-        public CallAudioState createFromParcel(Parcel source) {
+        public AudioState createFromParcel(Parcel source) {
             boolean isMuted = source.readByte() == 0 ? false : true;
             int route = source.readInt();
             int supportedRouteMask = source.readInt();
-            return new CallAudioState(isMuted, route, supportedRouteMask);
+            return new AudioState(isMuted, route, supportedRouteMask);
         }
 
         @Override
-        public CallAudioState[] newArray(int size) {
-            return new CallAudioState[size];
+        public AudioState[] newArray(int size) {
+            return new AudioState[size];
         }
     };
 
@@ -149,7 +149,7 @@ public final class CallAudioState implements Parcelable {
     }
 
     /**
-     * Writes CallAudioState object into a serializeable Parcel.
+     * Writes AudioState object into a serializeable Parcel.
      */
     @Override
     public void writeToParcel(Parcel destination, int flags) {

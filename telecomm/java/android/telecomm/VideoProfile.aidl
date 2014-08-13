@@ -17,4 +17,7 @@
 
 package android.telecomm;
 
-parcelable VideoCallProfile;
+/**
+ * {@hide}
+ */
+parcelable VideoProfile;

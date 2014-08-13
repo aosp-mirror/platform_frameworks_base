@@ -25,13 +25,15 @@ import android.telecomm.InCallService.VideoCall;
 import android.view.Surface;
 
 import com.android.internal.os.SomeArgs;
-import com.android.internal.telecomm.IVideoCallCallback;
-import com.android.internal.telecomm.IVideoCallProvider;
+import com.android.internal.telecomm.IVideoCallback;
+import com.android.internal.telecomm.IVideoProvider;
 
 /**
  * Implementation of a Video Call, which allows InCallUi to communicate commands to the underlying
- * {@link ConnectionService.VideoCallProvider}, and direct callbacks from the
- * {@link ConnectionService.VideoCallProvider} to the appropriate {@link VideoCall.Listener}.
+ * {@link Connection.VideoProvider}, and direct callbacks from the
+ * {@link Connection.VideoProvider} to the appropriate {@link VideoCall.Listener}.
+ *
+ * {@hide}
  */
 public class VideoCallImpl extends VideoCall {
     private static final int MSG_RECEIVE_SESSION_MODIFY_REQUEST = 1;
@@ -41,30 +43,30 @@ public class VideoCallImpl extends VideoCall {
     private static final int MSG_CHANGE_CALL_DATA_USAGE = 5;
     private static final int MSG_CHANGE_CAMERA_CAPABILITIES = 6;
 
-    private final IVideoCallProvider mVideoCallProvider;
+    private final IVideoProvider mVideoProvider;
     private final VideoCallListenerBinder mBinder;
     private VideoCall.Listener mVideoCallListener;
 
     private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
         @Override
         public void binderDied() {
-            mVideoCallProvider.asBinder().unlinkToDeath(this, 0);
+            mVideoProvider.asBinder().unlinkToDeath(this, 0);
         }
     };
 
     /**
-     * IVideoCallCallback stub implementation.
+     * IVideoCallback stub implementation.
      */
-    private final class VideoCallListenerBinder extends IVideoCallCallback.Stub {
+    private final class VideoCallListenerBinder extends IVideoCallback.Stub {
         @Override
-        public void receiveSessionModifyRequest(VideoCallProfile videoCallProfile) {
+        public void receiveSessionModifyRequest(VideoProfile videoProfile) {
             mHandler.obtainMessage(MSG_RECEIVE_SESSION_MODIFY_REQUEST,
-                    videoCallProfile).sendToTarget();
+                    videoProfile).sendToTarget();
         }
 
         @Override
-        public void receiveSessionModifyResponse(int status, VideoCallProfile requestProfile,
-                VideoCallProfile responseProfile) {
+        public void receiveSessionModifyResponse(int status, VideoProfile requestProfile,
+                VideoProfile responseProfile) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = status;
             args.arg2 = requestProfile;
@@ -91,7 +93,7 @@ public class VideoCallImpl extends VideoCall {
         }
 
         @Override
-        public void changeCameraCapabilities(CallCameraCapabilities cameraCapabilities) {
+        public void changeCameraCapabilities(CameraCapabilities cameraCapabilities) {
             mHandler.obtainMessage(MSG_CHANGE_CAMERA_CAPABILITIES,
                     cameraCapabilities).sendToTarget();
         }
@@ -108,14 +110,14 @@ public class VideoCallImpl extends VideoCall {
             SomeArgs args;
             switch (msg.what) {
                 case MSG_RECEIVE_SESSION_MODIFY_REQUEST:
-                    mVideoCallListener.onSessionModifyRequestReceived((VideoCallProfile) msg.obj);
+                    mVideoCallListener.onSessionModifyRequestReceived((VideoProfile) msg.obj);
                     break;
                 case MSG_RECEIVE_SESSION_MODIFY_RESPONSE:
                     args = (SomeArgs) msg.obj;
                     try {
                         int status = (int) args.arg1;
-                        VideoCallProfile requestProfile = (VideoCallProfile) args.arg2;
-                        VideoCallProfile responseProfile = (VideoCallProfile) args.arg3;
+                        VideoProfile requestProfile = (VideoProfile) args.arg2;
+                        VideoProfile responseProfile = (VideoProfile) args.arg3;
 
                         mVideoCallListener.onSessionModifyResponseReceived(
                                 status, requestProfile, responseProfile);
@@ -141,7 +143,7 @@ public class VideoCallImpl extends VideoCall {
                     break;
                 case MSG_CHANGE_CAMERA_CAPABILITIES:
                     mVideoCallListener.onCameraCapabilitiesChanged(
-                            (CallCameraCapabilities) msg.obj);
+                            (CameraCapabilities) msg.obj);
                     break;
                 default:
                     break;
@@ -150,12 +152,12 @@ public class VideoCallImpl extends VideoCall {
     };
 
     /** {@hide} */
-    VideoCallImpl(IVideoCallProvider videoCallProvider) throws RemoteException {
-        mVideoCallProvider = videoCallProvider;
-        mVideoCallProvider.asBinder().linkToDeath(mDeathRecipient, 0);
+    VideoCallImpl(IVideoProvider videoProvider) throws RemoteException {
+        mVideoProvider = videoProvider;
+        mVideoProvider.asBinder().linkToDeath(mDeathRecipient, 0);
 
         mBinder = new VideoCallListenerBinder();
-        mVideoCallProvider.setVideoCallListener(mBinder);
+        mVideoProvider.setVideoListener(mBinder);
     }
 
     /** {@inheritDoc} */
@@ -166,7 +168,7 @@ public class VideoCallImpl extends VideoCall {
     /** {@inheritDoc} */
     public void setCamera(String cameraId) {
         try {
-            mVideoCallProvider.setCamera(cameraId);
+            mVideoProvider.setCamera(cameraId);
         } catch (RemoteException e) {
         }
     }
@@ -174,7 +176,7 @@ public class VideoCallImpl extends VideoCall {
     /** {@inheritDoc} */
     public void setPreviewSurface(Surface surface) {
         try {
-            mVideoCallProvider.setPreviewSurface(surface);
+            mVideoProvider.setPreviewSurface(surface);
         } catch (RemoteException e) {
         }
     }
@@ -182,7 +184,7 @@ public class VideoCallImpl extends VideoCall {
     /** {@inheritDoc} */
     public void setDisplaySurface(Surface surface) {
         try {
-            mVideoCallProvider.setDisplaySurface(surface);
+            mVideoProvider.setDisplaySurface(surface);
         } catch (RemoteException e) {
         }
     }
@@ -190,7 +192,7 @@ public class VideoCallImpl extends VideoCall {
     /** {@inheritDoc} */
     public void setDeviceOrientation(int rotation) {
         try {
-            mVideoCallProvider.setDeviceOrientation(rotation);
+            mVideoProvider.setDeviceOrientation(rotation);
         } catch (RemoteException e) {
         }
     }
@@ -198,23 +200,23 @@ public class VideoCallImpl extends VideoCall {
     /** {@inheritDoc} */
     public void setZoom(float value) {
         try {
-            mVideoCallProvider.setZoom(value);
+            mVideoProvider.setZoom(value);
         } catch (RemoteException e) {
         }
     }
 
     /** {@inheritDoc} */
-    public void sendSessionModifyRequest(VideoCallProfile requestProfile) {
+    public void sendSessionModifyRequest(VideoProfile requestProfile) {
         try {
-            mVideoCallProvider.sendSessionModifyRequest(requestProfile);
+            mVideoProvider.sendSessionModifyRequest(requestProfile);
         } catch (RemoteException e) {
         }
     }
 
     /** {@inheritDoc} */
-    public void sendSessionModifyResponse(VideoCallProfile responseProfile) {
+    public void sendSessionModifyResponse(VideoProfile responseProfile) {
         try {
-            mVideoCallProvider.sendSessionModifyResponse(responseProfile);
+            mVideoProvider.sendSessionModifyResponse(responseProfile);
         } catch (RemoteException e) {
         }
     }
@@ -222,7 +224,7 @@ public class VideoCallImpl extends VideoCall {
     /** {@inheritDoc} */
     public void requestCameraCapabilities() {
         try {
-            mVideoCallProvider.requestCameraCapabilities();
+            mVideoProvider.requestCameraCapabilities();
         } catch (RemoteException e) {
         }
     }
@@ -230,7 +232,7 @@ public class VideoCallImpl extends VideoCall {
     /** {@inheritDoc} */
     public void requestCallDataUsage() {
         try {
-            mVideoCallProvider.requestCallDataUsage();
+            mVideoProvider.requestCallDataUsage();
         } catch (RemoteException e) {
         }
     }
@@ -238,7 +240,7 @@ public class VideoCallImpl extends VideoCall {
     /** {@inheritDoc} */
     public void setPauseImage(String uri) {
         try {
-            mVideoCallProvider.setPauseImage(uri);
+            mVideoProvider.setPauseImage(uri);
         } catch (RemoteException e) {
         }
     }

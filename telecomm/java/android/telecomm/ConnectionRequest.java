@@ -20,8 +20,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.ResultReceiver;
-import android.telephony.DisconnectCause;
 
 /**
  * Simple data container encapsulating a request to some entity to
@@ -30,10 +28,7 @@ import android.telephony.DisconnectCause;
 public final class ConnectionRequest implements Parcelable {
 
     // TODO: Token to limit recursive invocations
-    // TODO: Consider upgrading "mHandle" to ordered list of handles, indicating a set of phone
-    //         numbers that would satisfy the client's needs, in order of preference
     private final PhoneAccountHandle mAccountHandle;
-    private final String mCallId;
     private final Uri mHandle;
     private final int mHandlePresentation;
     private final Bundle mExtras;
@@ -41,22 +36,19 @@ public final class ConnectionRequest implements Parcelable {
 
     /**
      * @param accountHandle The accountHandle which should be used to place the call.
-     * @param callId An identifier for this call.
      * @param handle The handle (e.g., phone number) to which the {@link Connection} is to connect.
-     * @param handlePresentation The {@link CallPropertyPresentation} which controls how the handle
+     * @param handlePresentation The {@link PropertyPresentation} which controls how the handle
      *         is shown.
      * @param extras Application-specific extra data.
      * @param videoState Determines the video state for the connection.
      */
     public ConnectionRequest(
             PhoneAccountHandle accountHandle,
-            String callId,
             Uri handle,
             int handlePresentation,
             Bundle extras,
             int videoState) {
         mAccountHandle = accountHandle;
-        mCallId = callId;
         mHandle = handle;
         mHandlePresentation = handlePresentation;
         mExtras = extras;
@@ -65,7 +57,6 @@ public final class ConnectionRequest implements Parcelable {
 
     private ConnectionRequest(Parcel in) {
         mAccountHandle = in.readParcelable(getClass().getClassLoader());
-        mCallId = in.readString();
         mHandle = in.readParcelable(getClass().getClassLoader());
         mHandlePresentation = in.readInt();
         mExtras = in.readParcelable(getClass().getClassLoader());
@@ -78,17 +69,12 @@ public final class ConnectionRequest implements Parcelable {
     public PhoneAccountHandle getAccountHandle() { return mAccountHandle; }
 
     /**
-     * An identifier for this call.
-     */
-    public String getCallId() { return mCallId; }
-
-    /**
      * The handle (e.g., phone number) to which the {@link Connection} is to connect.
      */
     public Uri getHandle() { return mHandle; }
 
     /**
-     * The {@link CallPropertyPresentation} which controls how the handle is shown.
+     * The {@link PropertyPresentation} which controls how the handle is shown.
      */
     public int getHandlePresentation() { return mHandlePresentation; }
 
@@ -100,11 +86,11 @@ public final class ConnectionRequest implements Parcelable {
     public Bundle getExtras() { return mExtras; }
 
     /**
-     * Determines the video state for the connection.
-     * Valid values: {@link VideoCallProfile.VideoState#AUDIO_ONLY},
-     * {@link VideoCallProfile.VideoState#BIDIRECTIONAL},
-     * {@link VideoCallProfile.VideoState#TX_ENABLED},
-     * {@link VideoCallProfile.VideoState#RX_ENABLED}.
+     * Describes the video states supported by the client requesting the connection.
+     * Valid values: {@link VideoProfile.VideoState#AUDIO_ONLY},
+     * {@link VideoProfile.VideoState#BIDIRECTIONAL},
+     * {@link VideoProfile.VideoState#TX_ENABLED},
+     * {@link VideoProfile.VideoState#RX_ENABLED}.
      *
      * @return The video state for the connection.
      */
@@ -114,10 +100,10 @@ public final class ConnectionRequest implements Parcelable {
 
     @Override
     public String toString() {
-        return String.format("PhoneConnectionRequest %s %s",
+        return String.format("ConnectionRequest %s %s",
                 mHandle == null
                         ? Uri.EMPTY
-                        : ConnectionService.toLogSafePhoneNumber(mHandle.toString()),
+                        : Connection.toLogSafePhoneNumber(mHandle.toString()),
                 mExtras == null ? "" : mExtras);
     }
 
@@ -144,7 +130,6 @@ public final class ConnectionRequest implements Parcelable {
     @Override
     public void writeToParcel(Parcel destination, int flags) {
         destination.writeParcelable(mAccountHandle, 0);
-        destination.writeString(mCallId);
         destination.writeParcelable(mHandle, 0);
         destination.writeInt(mHandlePresentation);
         destination.writeParcelable(mExtras, 0);
