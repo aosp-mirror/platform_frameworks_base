@@ -48,7 +48,8 @@ public class Script extends BaseObj {
     /**
      * Only to be used by generated reflected classes.
      */
-    protected KernelID createKernelID(int slot, int sig, Element ein, Element eout) {
+    protected KernelID createKernelID(int slot, int sig, Element ein,
+                                      Element eout) {
         KernelID k = mKIDs.get(slot);
         if (k != null) {
             return k;
@@ -127,59 +128,56 @@ public class Script extends BaseObj {
      * Only intended for use by generated reflected code.
      *
      */
-    protected void forEach(int slot, Allocation ain, Allocation aout, FieldPacker v) {
-        mRS.validate();
-        mRS.validateObject(ain);
-        mRS.validateObject(aout);
-        if (ain == null && aout == null) {
-            throw new RSIllegalArgumentException(
-                "At least one of ain or aout is required to be non-null.");
-        }
-        long in_id = 0;
-        if (ain != null) {
-            in_id = ain.getID(mRS);
-        }
-        long out_id = 0;
-        if (aout != null) {
-            out_id = aout.getID(mRS);
-        }
-        byte[] params = null;
-        if (v != null) {
-            params = v.getData();
-        }
-        mRS.nScriptForEach(getID(mRS), slot, in_id, out_id, params);
+    protected void forEach(int slot, Allocation ain, Allocation aout,
+                           FieldPacker v) {
+        forEach(slot, ain, aout, v, null);
     }
 
     /**
      * Only intended for use by generated reflected code.
      *
      */
-    protected void forEach(int slot, Allocation ain, Allocation aout, FieldPacker v, LaunchOptions sc) {
+    protected void forEach(int slot, Allocation ain, Allocation aout,
+                           FieldPacker v, LaunchOptions sc) {
+        // TODO: Is this necessary if nScriptForEach calls validate as well?
         mRS.validate();
         mRS.validateObject(ain);
         mRS.validateObject(aout);
+
         if (ain == null && aout == null) {
             throw new RSIllegalArgumentException(
                 "At least one of ain or aout is required to be non-null.");
         }
 
-        if (sc == null) {
-            forEach(slot, ain, aout, v);
-            return;
-        }
-        long in_id = 0;
+        long[] in_ids = null;
         if (ain != null) {
-            in_id = ain.getID(mRS);
+            in_ids    = mInIdsBuffer;
+            in_ids[0] = ain.getID(mRS);
         }
+
         long out_id = 0;
         if (aout != null) {
             out_id = aout.getID(mRS);
         }
+
         byte[] params = null;
         if (v != null) {
             params = v.getData();
         }
-        mRS.nScriptForEachClipped(getID(mRS), slot, in_id, out_id, params, sc.xstart, sc.xend, sc.ystart, sc.yend, sc.zstart, sc.zend);
+
+        int[] limits = null;
+        if (sc != null) {
+            limits = new int[6];
+
+            limits[0] = sc.xstart;
+            limits[1] = sc.xend;
+            limits[2] = sc.ystart;
+            limits[3] = sc.yend;
+            limits[4] = sc.zstart;
+            limits[5] = sc.zend;
+        }
+
+        mRS.nScriptForEach(getID(mRS), slot, in_ids, out_id, params, limits);
     }
 
     /**
@@ -187,8 +185,9 @@ public class Script extends BaseObj {
      *
      * @hide
      */
-    protected void forEach(int slot, Allocation[] ains, Allocation aout, FieldPacker v) {
-        forEach(slot, ains, aout, v, new LaunchOptions());
+    protected void forEach(int slot, Allocation[] ains, Allocation aout,
+                           FieldPacker v) {
+        forEach(slot, ains, aout, v, null);
     }
 
     /**
@@ -196,22 +195,18 @@ public class Script extends BaseObj {
      *
      * @hide
      */
-    protected void forEach(int slot, Allocation[] ains, Allocation aout, FieldPacker v, LaunchOptions sc) {
+    protected void forEach(int slot, Allocation[] ains, Allocation aout,
+                           FieldPacker v, LaunchOptions sc) {
+        // TODO: Is this necessary if nScriptForEach calls validate as well?
         mRS.validate();
-
         for (Allocation ain : ains) {
           mRS.validateObject(ain);
         }
-
         mRS.validateObject(aout);
+
         if (ains == null && aout == null) {
             throw new RSIllegalArgumentException(
                 "At least one of ain or aout is required to be non-null.");
-        }
-
-        if (sc == null) {
-            forEach(slot, ains, aout, v);
-            return;
         }
 
         long[] in_ids = new long[ains.length];
@@ -223,15 +218,33 @@ public class Script extends BaseObj {
         if (aout != null) {
             out_id = aout.getID(mRS);
         }
+
         byte[] params = null;
         if (v != null) {
             params = v.getData();
         }
-        mRS.nScriptForEachMultiClipped(getID(mRS), slot, in_ids, out_id, params, sc.xstart, sc.xend, sc.ystart, sc.yend, sc.zstart, sc.zend);
+
+        int[] limits = null;
+        if (sc != null) {
+            limits = new int[6];
+
+            limits[0] = sc.xstart;
+            limits[1] = sc.xend;
+            limits[2] = sc.ystart;
+            limits[3] = sc.yend;
+            limits[4] = sc.zstart;
+            limits[5] = sc.zend;
+        }
+
+        mRS.nScriptForEach(getID(mRS), slot, in_ids, out_id, params, limits);
     }
+
+    long[] mInIdsBuffer;
 
     Script(long id, RenderScript rs) {
         super(id, rs);
+
+        mInIdsBuffer = new long[1];
     }
 
 
@@ -243,11 +256,17 @@ public class Script extends BaseObj {
         mRS.validate();
         mRS.validateObject(va);
         if (va != null) {
-            if (mRS.getApplicationContext().getApplicationInfo().targetSdkVersion >= 20) {
+
+            android.content.Context context = mRS.getApplicationContext();
+
+            if (context.getApplicationInfo().targetSdkVersion >= 20) {
                 final Type t = va.mType;
-                if (t.hasMipmaps() || t.hasFaces() || (t.getY() != 0) || (t.getZ() != 0)) {
+                if (t.hasMipmaps() || t.hasFaces() || (t.getY() != 0) ||
+                    (t.getZ() != 0)) {
+
                     throw new RSIllegalArgumentException(
-                        "API 20+ only allows simple 1D allocations to be used with bind.");
+                        "API 20+ only allows simple 1D allocations to be " +
+                        "used with bind.");
                 }
             }
             mRS.nScriptBindAllocation(getID(mRS), va.getID(mRS), slot);
@@ -378,11 +397,14 @@ public class Script extends BaseObj {
         protected Allocation mAllocation;
 
         protected void init(RenderScript rs, int dimx) {
-            mAllocation = Allocation.createSized(rs, mElement, dimx, Allocation.USAGE_SCRIPT);
+            mAllocation = Allocation.createSized(rs, mElement, dimx,
+                                                 Allocation.USAGE_SCRIPT);
         }
 
         protected void init(RenderScript rs, int dimx, int usages) {
-            mAllocation = Allocation.createSized(rs, mElement, dimx, Allocation.USAGE_SCRIPT | usages);
+            mAllocation =
+                Allocation.createSized(rs, mElement, dimx,
+                                       Allocation.USAGE_SCRIPT | usages);
         }
 
         protected FieldBase() {
