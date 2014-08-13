@@ -161,7 +161,7 @@
     <dimen name="bottom_text_spacing_digital">-10dp</dimen>
     <dimen name="label_font_size">14dp</dimen>
     <dimen name="widget_label_font_size">16sp</dimen>
-    <dimen name="widget_big_font_size">96dp</dimen>
+    <dimen name="widget_big_font_size">88dp</dimen>
     <dimen name="big_font_size">120dp</dimen>
 
     <!-- The y translation to apply at the start in appear animations. -->
