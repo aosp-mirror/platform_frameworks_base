@@ -258,6 +258,7 @@ public abstract class PreferenceFragment extends Fragment implements
      */
     public void setPreferenceScreen(PreferenceScreen preferenceScreen) {
         if (mPreferenceManager.setPreferences(preferenceScreen) && preferenceScreen != null) {
+            onUnbindPreferences();
             mHavePrefs = true;
             if (mInitDone) {
                 postBindPreferences();
@@ -347,6 +348,10 @@ public abstract class PreferenceFragment extends Fragment implements
 
     /** @hide */
     protected void onBindPreferences() {
+    }
+
+    /** @hide */
+    protected void onUnbindPreferences() {
     }
 
     /** @hide */
