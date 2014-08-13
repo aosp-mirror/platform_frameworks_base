@@ -170,6 +170,20 @@ public final class Settings {
             "android.settings.ACCESSIBILITY_SETTINGS";
 
     /**
+     * Activity Action: Show settings to control access to usage information.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_USAGE_ACCESS_SETTINGS =
+            "android.settings.USAGE_ACCESS_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of security and
      * location privacy.
      * <p>
@@ -359,6 +373,21 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_LOCALE_SETTINGS =
             "android.settings.LOCALE_SETTINGS";
+
+    /**
+     * Activity Action: Show settings to configure input methods, in particular
+     * allowing the user to enable input methods.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_VOICE_INPUT_SETTINGS =
+            "android.settings.VOICE_INPUT_SETTINGS";
 
     /**
      * Activity Action: Show settings to configure input methods, in particular
@@ -6343,7 +6372,7 @@ public final class Settings {
 
         /**
          * Milliseconds to wait before bouncing Wi-Fi after settings is restored. Note that after
-         * the caller is done with this, they should call {@link ContentResolver#delete(Uri)} to
+         * the caller is done with this, they should call {@link ContentResolver#delete} to
          * clean up any value that they may have written.
          *
          * @hide
