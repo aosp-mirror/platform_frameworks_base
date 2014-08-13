@@ -135,8 +135,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      * disabled, using an optional handshake timeout and SSL session cache.
      *
      * <p class="caution"><b>Warning:</b> Sockets created using this factory
-     * are vulnerable to man-in-the-middle attacks!</p>. The caller must implement
-     * its own verification.
+     * are vulnerable to man-in-the-middle attacks!</p>
      *
      * @param handshakeTimeoutMillis to use for SSL connection handshake, or 0
      *         for none.  The socket timeout is reset to 0 after the handshake.
@@ -224,6 +223,8 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
             if (mInsecureFactory == null) {
                 if (mSecure) {
                     Log.w(TAG, "*** BYPASSING SSL SECURITY CHECKS (socket.relaxsslcheck=yes) ***");
+                } else {
+                    Log.w(TAG, "Bypassing SSL security checks at caller's request");
                 }
                 mInsecureFactory = makeSocketFactory(mKeyManagers, INSECURE_TRUST_MANAGER);
             }
@@ -430,7 +431,6 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         s.setAlpnProtocols(mAlpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
         s.setChannelIdPrivateKey(mChannelIdPrivateKey);
-        s.setHostname(host);
         if (mSecure) {
             verifyHostname(s, host);
         }
