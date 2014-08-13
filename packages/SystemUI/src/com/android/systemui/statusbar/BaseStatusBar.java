@@ -156,6 +156,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected int mLayoutDirection = -1; // invalid
     private Locale mLocale;
+    private float mFontScale;
+
     protected boolean mUseHeadsUp = false;
     protected boolean mHeadsUpTicker = false;
     protected boolean mDisableNotificationAlerts = false;
@@ -419,8 +421,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         mRecents = getComponent(RecentsComponent.class);
         mRecents.setCallback(this);
 
-        mLocale = mContext.getResources().getConfiguration().locale;
+        final Configuration currentConfig = mContext.getResources().getConfiguration();
+        mLocale = currentConfig.locale;
         mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
+        mFontScale = currentConfig.fontScale;
 
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
 
@@ -527,7 +531,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void onConfigurationChanged(Configuration newConfig) {
         final Locale locale = mContext.getResources().getConfiguration().locale;
         final int ld = TextUtils.getLayoutDirectionFromLocale(locale);
-        if (! locale.equals(mLocale) || ld != mLayoutDirection) {
+        final float fontScale = newConfig.fontScale;
+
+        if (! locale.equals(mLocale) || ld != mLayoutDirection || fontScale != mFontScale) {
             if (DEBUG) {
                 Log.v(TAG, String.format(
                         "config changed locale/LD: %s (%d) -> %s (%d)", mLocale, mLayoutDirection,

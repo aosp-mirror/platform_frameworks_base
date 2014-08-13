@@ -42,11 +42,6 @@
     <dimen name="status_bar_icon_size">24dip</dimen>
     <!-- Size of the giant number (unread count) in the notifications -->
     <dimen name="status_bar_content_number_size">48sp</dimen>
-    <!-- Height of the system bar (combined status & navigation); used by
-         SystemUI internally, not respected by the window manager. -->
-    <dimen name="system_bar_height">@dimen/navigation_bar_height</dimen>
-    <!-- Height of notification icons in the system bar -->
-    <dimen name="system_bar_icon_size">32dip</dimen>
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
     <dimen name="status_bar_edge_ignore">5dp</dimen>
 
@@ -220,11 +215,17 @@
     <dimen name="action_bar_stacked_tab_max_width">180dp</dimen>
 
     <!-- Size of notification text (see TextAppearance.StatusBar.EventContent) -->
-    <dimen name="notification_text_size">13dp</dimen>
+    <dimen name="notification_text_size">13sp</dimen>
     <!-- Size of notification text titles (see TextAppearance.StatusBar.EventContent.Title) -->
-    <dimen name="notification_title_text_size">16dp</dimen>
+    <dimen name="notification_title_text_size">16sp</dimen>
     <!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info, Time) -->
-    <dimen name="notification_subtext_size">12dp</dimen>
+    <dimen name="notification_subtext_size">12sp</dimen>
+
+    <!-- 8dp at the top/bottom of the notification view -->
+    <dimen name="notification_vert_pad">10dp</dimen>
+
+    <!-- Replacement for @dimen/notification_vert_pad when the text is large -->
+    <dimen name="notification_large_font_vert_pad">3dp</dimen>
 
     <!-- Keyguard dimensions -->
     <!-- TEMP -->

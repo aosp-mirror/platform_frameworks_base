@@ -108,49 +108,6 @@
     <style name="TextAppearance.StatusBar.Expanded.UserSwitcher.UserName" />
 
     <style name="TextAppearance" />
-    <style name="TextAppearance.QuickSettings" />
-
-    <style name="TextAppearance.QuickSettings.TileView">
-        <item name="android:textSize">12dp</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#CCCCCC</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:paddingStart">6dp</item>
-        <item name="android:paddingEnd">6dp</item>
-    </style>
-
-    <style name="TextAppearance.QuickSettings.TileView.AllInOne" parent="@style/TextAppearance.QuickSettings.TileView">
-        <item name="android:lines">2</item>
-        <item name="android:gravity">top</item>
-        <item name="android:paddingBottom">2dp</item>
-        <item name="android:paddingTop">16dp</item>
-        <item name="android:drawablePadding">8dp</item>
-    </style>
-
-    <style name="TextAppearance.QuickSettings.Clock" parent="@style/TextAppearance.QuickSettings.TileView">
-        <item name="android:textSize">20dp</item>
-        <item name="android:textColor">@android:color/holo_blue_light</item>
-    </style>
-
-    <style name="TextAppearance.QuickSettings.Date" parent="@style/TextAppearance.QuickSettings.TileView">
-        <item name="android:textSize">14dp</item>
-    </style>
-
-    <style name="TextAppearance.QuickSettings.Alarm" parent="@style/TextAppearance.QuickSettings.TileView">
-        <item name="android:textSize">14dp</item>
-        <item name="android:textColor">#ff3a3b39</item>
-    </style>
-
-    <style name="TextAppearance.QuickSettings.CaCertWarning" parent="@style/TextAppearance.QuickSettings.TileView">
-        <item name="android:textAllCaps">false</item>
-    </style>
-
-    <style name="TextAppearance.QuickSettings.TileView.User" parent="@style/TextAppearance.QuickSettings.TileView">
-        <item name="android:background">#CC000000</item>
-        <item name="android:padding">4dp</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:fadingEdge">horizontal</item>
-    </style>
 
     <style name="TextAppearance.QS">
         <item name="android:textStyle">normal</item>
