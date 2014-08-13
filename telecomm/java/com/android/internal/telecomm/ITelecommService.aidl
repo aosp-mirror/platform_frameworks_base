@@ -40,9 +40,9 @@ interface ITelecommService {
     PhoneAccountHandle getDefaultOutgoingPhoneAccount();
 
     /**
-     * @see TelecommManager#getEnabledPhoneAccounts
+     * @see TelecommManager#getOutgoingPhoneAccounts
      */
-    List<PhoneAccountHandle> getEnabledPhoneAccounts();
+    List<PhoneAccountHandle> getOutgoingPhoneAccounts();
 
     /**
      * @see TelecommManager#getPhoneAccount

@@ -17,26 +17,20 @@
 package android.telecomm;
 
 import android.annotation.SdkConstant;
-import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.DisconnectCause;
-import android.os.RemoteException;
-import android.view.Surface;
 
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecomm.IConnectionService;
 import com.android.internal.telecomm.IConnectionServiceAdapter;
-import com.android.internal.telecomm.IVideoCallCallback;
-import com.android.internal.telecomm.IVideoCallProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
 import java.util.ArrayList;
@@ -51,10 +45,11 @@ import java.util.Map;
  * Android device.
  */
 public abstract class ConnectionService extends Service {
+
     /**
      * The {@link Intent} that must be declared as handled by the service.
      */
-    @SdkConstant(SdkConstantType.SERVICE_ACTION)
+    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE = "android.telecomm.ConnectionService";
 
     // Flag controlling whether PII is emitted into the logs
@@ -73,12 +68,9 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_STOP_DTMF_TONE = 11;
     private static final int MSG_CONFERENCE = 12;
     private static final int MSG_SPLIT_FROM_CONFERENCE = 13;
-    private static final int MSG_SWAP_WITH_BACKGROUND_CALL = 14;
-    private static final int MSG_ON_POST_DIAL_CONTINUE = 15;
-    private static final int MSG_ON_PHONE_ACCOUNT_CLICKED = 16;
-    private static final int MSG_REMOVE_CONNECTION_SERVICE_ADAPTER = 17;
-
-    private static Connection sNullConnection;
+    private static final int MSG_ON_POST_DIAL_CONTINUE = 14;
+    private static final int MSG_ON_PHONE_ACCOUNT_CLICKED = 15;
+    private static final int MSG_REMOVE_CONNECTION_SERVICE_ADAPTER = 16;
 
     private final Map<String, Connection> mConnectionById = new HashMap<>();
     private final Map<Connection, String> mIdByConnection = new HashMap<>();
@@ -87,37 +79,6 @@ public abstract class ConnectionService extends Service {
     private boolean mAreAccountsInitialized = false;
     private final List<Runnable> mPreInitializationConnectionRequests = new ArrayList<>();
     private final ConnectionServiceAdapter mAdapter = new ConnectionServiceAdapter();
-
-    /**
-     * A callback for providing the result of creating a connection.
-     */
-    public interface CreateConnectionResponse<CONNECTION> {
-        /**
-         * Tells Telecomm that an attempt to create the connection succeeded.
-         *
-         * @param request The original request.
-         * @param connection The connection.
-         */
-        void onSuccess(ConnectionRequest request, CONNECTION connection);
-
-        /**
-         * Tells Telecomm that an attempt to create the connection failed. Telecomm will try a
-         * different service until a service cancels the process or completes it successfully.
-         *
-         * @param request The original request.
-         * @param code An integer code indicating the reason for failure.
-         * @param msg A message explaining the reason for failure.
-         */
-        void onFailure(ConnectionRequest request, int code, String msg);
-
-        /**
-         * Tells Telecomm to cancel creating the connection. Telecomm will stop trying to create
-         * the connection an no more services will be tried.
-         *
-         * @param request The original request.
-         */
-        void onCancel(ConnectionRequest request);
-    }
 
     private final IBinder mBinder = new IConnectionService.Stub() {
         @Override
@@ -132,11 +93,13 @@ public abstract class ConnectionService extends Service {
         @Override
         public void createConnection(
                 PhoneAccountHandle connectionManagerPhoneAccount,
+                String id,
                 ConnectionRequest request,
                 boolean isIncoming) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = connectionManagerPhoneAccount;
-            args.arg2 = request;
+            args.arg2 = id;
+            args.arg3 = request;
             args.argi1 = isIncoming ? 1 : 0;
             mHandler.obtainMessage(MSG_CREATE_CONNECTION, args).sendToTarget();
         }
@@ -175,7 +138,7 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onAudioStateChanged(String callId, CallAudioState audioState) {
+        public void onAudioStateChanged(String callId, AudioState audioState) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = callId;
             args.arg2 = audioState;
@@ -203,11 +166,6 @@ public abstract class ConnectionService extends Service {
         @Override
         public void splitFromConference(String callId) {
             mHandler.obtainMessage(MSG_SPLIT_FROM_CONFERENCE, callId).sendToTarget();
-        }
-
-        @Override
-        public void swapWithBackgroundCall(String callId) {
-            mHandler.obtainMessage(MSG_SWAP_WITH_BACKGROUND_CALL, callId).sendToTarget();
         }
 
         @Override
@@ -240,22 +198,27 @@ public abstract class ConnectionService extends Service {
                     try {
                         final PhoneAccountHandle connectionManagerPhoneAccount =
                                 (PhoneAccountHandle) args.arg1;
-                        final ConnectionRequest request = (ConnectionRequest) args.arg2;
+                        final String id = (String) args.arg2;
+                        final ConnectionRequest request = (ConnectionRequest) args.arg3;
                         final boolean isIncoming = args.argi1 == 1;
                         if (!mAreAccountsInitialized) {
-                            Log.d(this, "Enqueueing pre-init request %s", request.getCallId());
+                            Log.d(this, "Enqueueing pre-init request %s", id);
                             mPreInitializationConnectionRequests.add(new Runnable() {
                                 @Override
                                 public void run() {
                                     createConnection(
                                             connectionManagerPhoneAccount,
+                                            id,
                                             request,
                                             isIncoming);
                                 }
                             });
                         } else {
-                            Log.d(this, "Immediately processing request %s", request.getCallId());
-                            createConnection(connectionManagerPhoneAccount, request, isIncoming);
+                            createConnection(
+                                    connectionManagerPhoneAccount,
+                                    id,
+                                    request,
+                                    isIncoming);
                         }
                     } finally {
                         args.recycle();
@@ -292,7 +255,7 @@ public abstract class ConnectionService extends Service {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         String callId = (String) args.arg1;
-                        CallAudioState audioState = (CallAudioState) args.arg2;
+                        AudioState audioState = (AudioState) args.arg2;
                         onAudioStateChanged(callId, audioState);
                     } finally {
                         args.recycle();
@@ -318,9 +281,6 @@ public abstract class ConnectionService extends Service {
                 }
                 case MSG_SPLIT_FROM_CONFERENCE:
                     splitFromConference((String) msg.obj);
-                    break;
-                case MSG_SWAP_WITH_BACKGROUND_CALL:
-                    swapWithBackgroundCall((String) msg.obj);
                     break;
                 case MSG_ON_POST_DIAL_CONTINUE: {
                     SomeArgs args = (SomeArgs) msg.obj;
@@ -348,22 +308,22 @@ public abstract class ConnectionService extends Service {
             String id = mIdByConnection.get(c);
             Log.d(this, "Adapter set state %s %s", id, Connection.stateToString(state));
             switch (state) {
-                case Connection.State.ACTIVE:
+                case Connection.STATE_ACTIVE:
                     mAdapter.setActive(id);
                     break;
-                case Connection.State.DIALING:
+                case Connection.STATE_DIALING:
                     mAdapter.setDialing(id);
                     break;
-                case Connection.State.DISCONNECTED:
+                case Connection.STATE_DISCONNECTED:
                     // Handled in onDisconnected()
                     break;
-                case Connection.State.HOLDING:
+                case Connection.STATE_HOLDING:
                     mAdapter.setOnHold(id);
                     break;
-                case Connection.State.NEW:
+                case Connection.STATE_NEW:
                     // Nothing to tell Telecomm
                     break;
-                case Connection.State.RINGING:
+                case Connection.STATE_RINGING:
                     mAdapter.setRinging(id);
                     break;
             }
@@ -397,11 +357,6 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onSignalChanged(Connection c, Bundle details) {
-            // TODO: Unsupported yet
-        }
-
-        @Override
         public void onDestroyed(Connection c) {
             removeConnection(c);
         }
@@ -421,11 +376,11 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onCallCapabilitiesChanged(Connection c, int callCapabilities) {
+        public void onCallCapabilitiesChanged(Connection c, int capabilities) {
             String id = mIdByConnection.get(c);
-            Log.d(this, "call capabilities: parcelableconnection: %s",
-                    CallCapabilities.toString(callCapabilities));
-            mAdapter.setCallCapabilities(id, callCapabilities);
+            Log.d(this, "capabilities: parcelableconnection: %s",
+                    PhoneCapabilities.toString(capabilities));
+            mAdapter.setCallCapabilities(id, capabilities);
         }
 
         @Override
@@ -436,9 +391,9 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onVideoCallProviderChanged(Connection c, VideoCallProvider videoCallProvider) {
+        public void onVideoProviderChanged(Connection c, Connection.VideoProvider videoProvider) {
             String id = mIdByConnection.get(c);
-            mAdapter.setVideoCallProvider(id, videoCallProvider);
+            mAdapter.setVideoProvider(id, videoProvider);
         }
 
         @Override
@@ -487,6 +442,7 @@ public abstract class ConnectionService extends Service {
      */
     private void createConnection(
             final PhoneAccountHandle callManagerAccount,
+            final String callId,
             final ConnectionRequest request,
             boolean isIncoming) {
         Log.d(this, "call %s", request);
@@ -499,64 +455,79 @@ public abstract class ConnectionService extends Service {
         }
 
         if (createdConnection != null) {
-            if (createdConnection.getState() == Connection.State.INITIALIZING) {
+            Log.d(this, "adapter handleCreateConnectionSuccessful %s", callId);
+            if (createdConnection.getState() == Connection.STATE_INITIALIZING) {
                 // Wait for the connection to become initialized.
                 createdConnection.addConnectionListener(new Connection.Listener() {
                     @Override
                     public void onStateChanged(Connection c, int state) {
                         switch (state) {
-                            case Connection.State.FAILED:
+                            case Connection.STATE_FAILED:
                                 Log.d(this, "Connection (%s) failed (%d: %s)", request,
                                         c.getFailureCode(), c.getFailureMessage());
                                 Log.d(this, "adapter handleCreateConnectionFailed %s",
-                                        request.getCallId());
-                                mAdapter.handleCreateConnectionFailed(request, c.getFailureCode(),
+                                        callId);
+                                mAdapter.handleCreateConnectionFailed(
+                                        callId,
+                                        request,
+                                        c.getFailureCode(),
                                         c.getFailureMessage());
                                 break;
-                            case Connection.State.CANCELED:
+                            case Connection.STATE_CANCELED:
                                 Log.d(this, "adapter handleCreateConnectionCanceled %s",
-                                        request.getCallId());
-                                mAdapter.handleCreateConnectionCancelled(request);
+                                        callId);
+                                mAdapter.handleCreateConnectionCancelled(callId, request);
                                 break;
-                            case Connection.State.INITIALIZING:
-                                Log.d(this, "State changed to INITIALIZING; ignoring");
+                            case Connection.STATE_INITIALIZING:
+                                Log.d(this, "State changed to STATE_INITIALIZING; ignoring");
                                 return; // Don't want to stop listening on this state transition.
                             default:
                                 Log.d(this, "Connection created in state %s",
                                         Connection.stateToString(state));
-                                connectionCreated(request, createdConnection);
+                                connectionCreated(callId, request, createdConnection);
                                 break;
                         }
                         c.removeConnectionListener(this);
                     }
                 });
-            } else if (createdConnection.getState() == Connection.State.CANCELED) {
+            } else if (createdConnection.getState() == Connection.STATE_CANCELED) {
                 // Tell telecomm not to attempt any more services.
-                mAdapter.handleCreateConnectionCancelled(request);
-            } else if (createdConnection.getState() == Connection.State.FAILED) {
-                mAdapter.handleCreateConnectionFailed(request, createdConnection.getFailureCode(),
+                mAdapter.handleCreateConnectionCancelled(callId, request);
+            } else if (createdConnection.getState() == Connection.STATE_FAILED) {
+                mAdapter.handleCreateConnectionFailed(
+                        callId,
+                        request,
+                        createdConnection.getFailureCode(),
                         createdConnection.getFailureMessage());
             } else {
-                connectionCreated(request, createdConnection);
+                connectionCreated(callId, request, createdConnection);
             }
         } else {
             // Tell telecomm to try a different service.
-            Log.d(this, "adapter handleCreateConnectionFailed %s", request.getCallId());
-            mAdapter.handleCreateConnectionFailed(request, DisconnectCause.ERROR_UNSPECIFIED, null);
+            Log.d(this, "adapter handleCreateConnectionFailed %s", callId);
+            mAdapter.handleCreateConnectionFailed(
+                    callId,
+                    request,
+                    DisconnectCause.ERROR_UNSPECIFIED,
+                    null);
         }
     }
 
-    private void connectionCreated(ConnectionRequest request, Connection connection) {
-        addConnection(request.getCallId(), connection);
+    private void connectionCreated(
+            String callId,
+            ConnectionRequest request,
+            Connection connection) {
+        addConnection(callId, connection);
         Uri handle = connection.getHandle();
         String number = handle == null ? "null" : handle.getSchemeSpecificPart();
         Log.v(this, "connectionCreated, parcelableconnection: %s, %d, %s",
-                toLogSafePhoneNumber(number),
+                Connection.toLogSafePhoneNumber(number),
                 connection.getState(),
-                CallCapabilities.toString(connection.getCallCapabilities()));
+                PhoneCapabilities.toString(connection.getCallCapabilities()));
 
-        Log.d(this, "adapter handleCreateConnectionSuccessful %s", request.getCallId());
+        Log.d(this, "adapter handleCreateConnectionSuccessful %s", callId);
         mAdapter.handleCreateConnectionSuccessful(
+                callId,
                 request,
                 new ParcelableConnection(
                         request.getAccountHandle(),
@@ -566,8 +537,8 @@ public abstract class ConnectionService extends Service {
                         connection.getHandlePresentation(),
                         connection.getCallerDisplayName(),
                         connection.getCallerDisplayNamePresentation(),
-                        connection.getVideoCallProvider() == null ?
-                                null : connection.getVideoCallProvider().getInterface(),
+                        connection.getVideoProvider() == null ?
+                                null : connection.getVideoProvider().getInterface(),
                         connection.getVideoState()));
     }
 
@@ -601,7 +572,7 @@ public abstract class ConnectionService extends Service {
         findConnectionForAction(callId, "unhold").onUnhold();
     }
 
-    private void onAudioStateChanged(String callId, CallAudioState audioState) {
+    private void onAudioStateChanged(String callId, AudioState audioState) {
         Log.d(this, "onAudioStateChanged %s %s", callId, audioState);
         findConnectionForAction(callId, "onAudioStateChanged").setAudioState(audioState);
     }
@@ -620,7 +591,7 @@ public abstract class ConnectionService extends Service {
         Log.d(this, "conference %s, %s", conferenceCallId, callId);
 
         Connection connection = findConnectionForAction(callId, "conference");
-        if (connection == getNullConnection()) {
+        if (connection == Connection.getNullConnection()) {
             Log.w(this, "Connection missing in conference request %s.", callId);
             return;
         }
@@ -653,17 +624,12 @@ public abstract class ConnectionService extends Service {
         Log.d(this, "splitFromConference(%s)", callId);
 
         Connection connection = findConnectionForAction(callId, "splitFromConference");
-        if (connection == getNullConnection()) {
+        if (connection == Connection.getNullConnection()) {
             Log.w(this, "Connection missing in conference request %s.", callId);
             return;
         }
 
         // TODO: Find existing conference call and invoke split(connection).
-    }
-
-    private void swapWithBackgroundCall(String callId) {
-        Log.d(this, "swapWithBackgroundCall(%s)", callId);
-        findConnectionForAction(callId, "swapWithBackgroundCall").onSwapWithBackgroundCall();
     }
 
     private void onPostDialContinue(String callId, boolean proceed) {
@@ -792,7 +758,7 @@ public abstract class ConnectionService extends Service {
      *         making the connection.
      * @param request Details about the outgoing call.
      * @return The {@code Connection} object to satisfy this call, or the result of an invocation
-     *         of {@link Connection#getFailedConnection(int, String)} to not handle the call.
+     *         of {@link Connection#createFailedConnection(int, String)} to not handle the call.
      */
     public Connection onCreateOutgoingConnection(
             PhoneAccountHandle connectionManagerPhoneAccount,
@@ -805,6 +771,9 @@ public abstract class ConnectionService extends Service {
      * specified connection into a conference call. The specified connection can be any connection
      * which had previously specified itself as conference-capable including both simple connections
      * and connections previously returned from this method.
+     * <p>
+     * TODO: To be refactored out with conference call re-engineering<br/>
+     * TODO: Also remove class {@link Response} once this method is removed
      *
      * @param connection The connection from which the user opted to start a conference call.
      * @param token The token to be passed into the response callback.
@@ -828,31 +797,6 @@ public abstract class ConnectionService extends Service {
      * @param connection The connection which was removed.
      */
     public void onConnectionRemoved(Connection connection) {}
-
-    static String toLogSafePhoneNumber(String number) {
-        // For unknown number, log empty string.
-        if (number == null) {
-            return "";
-        }
-
-        if (PII_DEBUG) {
-            // When PII_DEBUG is true we emit PII.
-            return number;
-        }
-
-        // Do exactly same thing as Uri#toSafeString() does, which will enable us to compare
-        // sanitized phone numbers.
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < number.length(); i++) {
-            char c = number.charAt(i);
-            if (c == '-' || c == '@' || c == '.') {
-                builder.append(c);
-            } else {
-                builder.append('x');
-            }
-        }
-        return builder.toString();
-    }
 
     private void onAccountsInitialized() {
         mAreAccountsInitialized = true;
@@ -883,346 +827,7 @@ public abstract class ConnectionService extends Service {
             return mConnectionById.get(callId);
         }
         Log.w(this, "%s - Cannot find Connection %s", action, callId);
-        return getNullConnection();
+        return Connection.getNullConnection();
     }
 
-    private final static synchronized Connection getNullConnection() {
-        if (sNullConnection == null) {
-            sNullConnection = new Connection() {};
-        }
-        return sNullConnection;
-    }
-
-    /**
-     * Abstraction for a class which provides video call functionality. This class contains no base
-     * implementation for its methods. It is expected that subclasses will override these
-     * functions to provide the desired behavior if it is supported.
-     */
-    public static abstract class VideoCallProvider {
-        private static final int MSG_SET_VIDEO_CALL_LISTENER = 1;
-        private static final int MSG_SET_CAMERA = 2;
-        private static final int MSG_SET_PREVIEW_SURFACE = 3;
-        private static final int MSG_SET_DISPLAY_SURFACE = 4;
-        private static final int MSG_SET_DEVICE_ORIENTATION = 5;
-        private static final int MSG_SET_ZOOM = 6;
-        private static final int MSG_SEND_SESSION_MODIFY_REQUEST = 7;
-        private static final int MSG_SEND_SESSION_MODIFY_RESPONSE = 8;
-        private static final int MSG_REQUEST_CAMERA_CAPABILITIES = 9;
-        private static final int MSG_REQUEST_CALL_DATA_USAGE = 10;
-        private static final int MSG_SET_PAUSE_IMAGE = 11;
-
-        private final VideoCallProviderHandler mMessageHandler = new VideoCallProviderHandler();
-        private final VideoCallProviderBinder mBinder;
-        private IVideoCallCallback mVideoCallListener;
-
-        /**
-         * Default handler used to consolidate binder method calls onto a single thread.
-         */
-        private final class VideoCallProviderHandler extends Handler {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case MSG_SET_VIDEO_CALL_LISTENER:
-                        mVideoCallListener = IVideoCallCallback.Stub.asInterface((IBinder) msg.obj);
-                        break;
-                    case MSG_SET_CAMERA:
-                        onSetCamera((String) msg.obj);
-                        break;
-                    case MSG_SET_PREVIEW_SURFACE:
-                        onSetPreviewSurface((Surface) msg.obj);
-                        break;
-                    case MSG_SET_DISPLAY_SURFACE:
-                        onSetDisplaySurface((Surface) msg.obj);
-                        break;
-                    case MSG_SET_DEVICE_ORIENTATION:
-                        onSetDeviceOrientation(msg.arg1);
-                        break;
-                    case MSG_SET_ZOOM:
-                        onSetZoom((Float) msg.obj);
-                        break;
-                    case MSG_SEND_SESSION_MODIFY_REQUEST:
-                        onSendSessionModifyRequest((VideoCallProfile) msg.obj);
-                        break;
-                    case MSG_SEND_SESSION_MODIFY_RESPONSE:
-                        onSendSessionModifyResponse((VideoCallProfile) msg.obj);
-                        break;
-                    case MSG_REQUEST_CAMERA_CAPABILITIES:
-                        onRequestCameraCapabilities();
-                        break;
-                    case MSG_REQUEST_CALL_DATA_USAGE:
-                        onRequestCallDataUsage();
-                        break;
-                    case MSG_SET_PAUSE_IMAGE:
-                        onSetPauseImage((String) msg.obj);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        /**
-         * IVideoCallProvider stub implementation.
-         */
-        private final class VideoCallProviderBinder extends IVideoCallProvider.Stub {
-            public void setVideoCallListener(IBinder videoCallListenerBinder) {
-                mMessageHandler.obtainMessage(
-                        MSG_SET_VIDEO_CALL_LISTENER, videoCallListenerBinder).sendToTarget();
-            }
-
-            public void setCamera(String cameraId) {
-                mMessageHandler.obtainMessage(MSG_SET_CAMERA, cameraId).sendToTarget();
-            }
-
-            public void setPreviewSurface(Surface surface) {
-                mMessageHandler.obtainMessage(MSG_SET_PREVIEW_SURFACE, surface).sendToTarget();
-            }
-
-            public void setDisplaySurface(Surface surface) {
-                mMessageHandler.obtainMessage(MSG_SET_DISPLAY_SURFACE, surface).sendToTarget();
-            }
-
-            public void setDeviceOrientation(int rotation) {
-                mMessageHandler.obtainMessage(MSG_SET_DEVICE_ORIENTATION, rotation).sendToTarget();
-            }
-
-            public void setZoom(float value) {
-                mMessageHandler.obtainMessage(MSG_SET_ZOOM, value).sendToTarget();
-            }
-
-            public void sendSessionModifyRequest(VideoCallProfile requestProfile) {
-                mMessageHandler.obtainMessage(
-                        MSG_SEND_SESSION_MODIFY_REQUEST, requestProfile).sendToTarget();
-            }
-
-            public void sendSessionModifyResponse(VideoCallProfile responseProfile) {
-                mMessageHandler.obtainMessage(
-                        MSG_SEND_SESSION_MODIFY_RESPONSE, responseProfile).sendToTarget();
-            }
-
-            public void requestCameraCapabilities() {
-                mMessageHandler.obtainMessage(MSG_REQUEST_CAMERA_CAPABILITIES).sendToTarget();
-            }
-
-            public void requestCallDataUsage() {
-                mMessageHandler.obtainMessage(MSG_REQUEST_CALL_DATA_USAGE).sendToTarget();
-            }
-
-            public void setPauseImage(String uri) {
-                mMessageHandler.obtainMessage(MSG_SET_PAUSE_IMAGE, uri).sendToTarget();
-            }
-        }
-
-        public VideoCallProvider() {
-            mBinder = new VideoCallProviderBinder();
-        }
-
-        /**
-         * Returns binder object which can be used across IPC methods.
-         * @hide
-         */
-        public final IVideoCallProvider getInterface() {
-            return mBinder;
-        }
-
-        /**
-         * Sets the camera to be used for video recording in a video call.
-         *
-         * @param cameraId The id of the camera.
-         */
-        public void onSetCamera(String cameraId) {
-            // To be implemented by subclass.
-        }
-
-        /**
-         * Sets the surface to be used for displaying a preview of what the user's camera is
-         * currently capturing.  When video transmission is enabled, this is the video signal which
-         * is sent to the remote device.
-         *
-         * @param surface The surface.
-         */
-        public void onSetPreviewSurface(Surface surface) {
-            // To be implemented by subclass.
-        }
-
-        /**
-         * Sets the surface to be used for displaying the video received from the remote device.
-         *
-         * @param surface The surface.
-         */
-        public void onSetDisplaySurface(Surface surface) {
-            // To be implemented by subclass.
-        }
-
-        /**
-         * Sets the device orientation, in degrees.  Assumes that a standard portrait orientation of
-         * the device is 0 degrees.
-         *
-         * @param rotation The device orientation, in degrees.
-         */
-        public void onSetDeviceOrientation(int rotation) {
-            // To be implemented by subclass.
-        }
-
-        /**
-         * Sets camera zoom ratio.
-         *
-         * @param value The camera zoom ratio.
-         */
-        public void onSetZoom(float value) {
-            // To be implemented by subclass.
-        }
-
-        /**
-         * Issues a request to modify the properties of the current session.  The request is sent to
-         * the remote device where it it handled by
-         * {@link InCallService.VideoCall.Listener#onSessionModifyRequestReceived}.
-         * Some examples of session modification requests: upgrade call from audio to video, downgrade
-         * call from video to audio, pause video.
-         *
-         * @param requestProfile The requested call video properties.
-         */
-        public void onSendSessionModifyRequest(VideoCallProfile requestProfile) {
-            // To be implemented by subclass.
-        }
-
-        /**
-         * Provides a response to a request to change the current call session video
-         * properties.
-         * This is in response to a request the InCall UI has received via
-         * {@link InCallService.VideoCall.Listener#onSessionModifyRequestReceived}.
-         * The response is handled on the remove device by
-         * {@link InCallService.VideoCall.Listener#onSessionModifyResponseReceived}.
-         *
-         * @param responseProfile The response call video properties.
-         */
-        public void onSendSessionModifyResponse(VideoCallProfile responseProfile) {
-            // To be implemented by subclass.
-        }
-
-        /**
-         * Issues a request to the video provider to retrieve the camera capabilities.
-         * Camera capabilities are reported back to the caller via
-         * {@link InCallService.VideoCall.Listener#onCameraCapabilitiesChanged(CallCameraCapabilities)}.
-         */
-        public void onRequestCameraCapabilities() {
-            // To be implemented by subclass.
-        }
-
-        /**
-         * Issues a request to the video telephony framework to retrieve the cumulative data usage for
-         * the current call.  Data usage is reported back to the caller via
-         * {@link InCallService.VideoCall.Listener#onCallDataUsageChanged}.
-         */
-        public void onRequestCallDataUsage() {
-            // To be implemented by subclass.
-        }
-
-        /**
-         * Provides the video telephony framework with the URI of an image to be displayed to remote
-         * devices when the video signal is paused.
-         *
-         * @param uri URI of image to display.
-         */
-        public void onSetPauseImage(String uri) {
-            // To be implemented by subclass.
-        }
-
-        /**
-         * Invokes callback method defined in {@link InCallService.VideoCall.Listener}.
-         *
-         * @param videoCallProfile The requested video call profile.
-         */
-        public void receiveSessionModifyRequest(VideoCallProfile videoCallProfile) {
-            if (mVideoCallListener != null) {
-                try {
-                    mVideoCallListener.receiveSessionModifyRequest(videoCallProfile);
-                } catch (RemoteException ignored) {
-                }
-            }
-        }
-
-        /**
-         * Invokes callback method defined in {@link InCallService.VideoCall.Listener}.
-         *
-         * @param status Status of the session modify request.  Valid values are
-         *               {@link InCallService.VideoCall#SESSION_MODIFY_REQUEST_SUCCESS},
-         *               {@link InCallService.VideoCall#SESSION_MODIFY_REQUEST_FAIL},
-         *               {@link InCallService.VideoCall#SESSION_MODIFY_REQUEST_INVALID}
-         * @param requestedProfile The original request which was sent to the remote device.
-         * @param responseProfile The actual profile changes made by the remote device.
-         */
-        public void receiveSessionModifyResponse(
-                int status, VideoCallProfile requestedProfile, VideoCallProfile responseProfile) {
-            if (mVideoCallListener != null) {
-                try {
-                    mVideoCallListener.receiveSessionModifyResponse(
-                            status, requestedProfile, responseProfile);
-                } catch (RemoteException ignored) {
-                }
-            }
-        }
-
-        /**
-         * Invokes callback method defined in {@link InCallService.VideoCall.Listener}.
-         *
-         * Valid values are: {@link InCallService.VideoCall#SESSION_EVENT_RX_PAUSE},
-         * {@link InCallService.VideoCall#SESSION_EVENT_RX_RESUME},
-         * {@link InCallService.VideoCall#SESSION_EVENT_TX_START},
-         * {@link InCallService.VideoCall#SESSION_EVENT_TX_STOP}
-         *
-         * @param event The event.
-         */
-        public void handleCallSessionEvent(int event) {
-            if (mVideoCallListener != null) {
-                try {
-                    mVideoCallListener.handleCallSessionEvent(event);
-                } catch (RemoteException ignored) {
-                }
-            }
-        }
-
-        /**
-         * Invokes callback method defined in {@link InCallService.VideoCall.Listener}.
-         *
-         * @param width  The updated peer video width.
-         * @param height The updated peer video height.
-         */
-        public void changePeerDimensions(int width, int height) {
-            if (mVideoCallListener != null) {
-                try {
-                    mVideoCallListener.changePeerDimensions(width, height);
-                } catch (RemoteException ignored) {
-                }
-            }
-        }
-
-        /**
-         * Invokes callback method defined in {@link InCallService.VideoCall.Listener}.
-         *
-         * @param dataUsage The updated data usage.
-         */
-        public void changeCallDataUsage(int dataUsage) {
-            if (mVideoCallListener != null) {
-                try {
-                    mVideoCallListener.changeCallDataUsage(dataUsage);
-                } catch (RemoteException ignored) {
-                }
-            }
-        }
-
-        /**
-         * Invokes callback method defined in {@link InCallService.VideoCall.Listener}.
-         *
-         * @param callCameraCapabilities The changed camera capabilities.
-         */
-        public void changeCameraCapabilities(CallCameraCapabilities callCameraCapabilities) {
-            if (mVideoCallListener != null) {
-                try {
-                    mVideoCallListener.changeCameraCapabilities(callCameraCapabilities);
-                } catch (RemoteException ignored) {
-                }
-            }
-        }
-    }
 }

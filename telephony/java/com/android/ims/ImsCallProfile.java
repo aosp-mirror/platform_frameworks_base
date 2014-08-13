@@ -19,7 +19,7 @@ package com.android.ims;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telecomm.VideoCallProfile;
+import android.telecomm.VideoProfile;
 
 /**
  * Parcelable object to handle IMS call profile.
@@ -290,7 +290,7 @@ public class ImsCallProfile implements Parcelable {
 
     /**
      * Converts from the call types defined in {@link com.android.ims.ImsCallProfile} to the
-     * video state values defined in {@link android.telecomm.VideoCallProfile}.
+     * video state values defined in {@link VideoProfile}.
      *
      * @param callType The call type.
      * @return The video state.
@@ -298,32 +298,32 @@ public class ImsCallProfile implements Parcelable {
     public static int getVideoStateFromCallType(int callType) {
         switch (callType) {
             case CALL_TYPE_VT_NODIR:
-                return VideoCallProfile.VideoState.PAUSED |
-                        VideoCallProfile.VideoState.BIDIRECTIONAL;
+                return VideoProfile.VideoState.PAUSED |
+                        VideoProfile.VideoState.BIDIRECTIONAL;
             case CALL_TYPE_VT_TX:
-                return VideoCallProfile.VideoState.TX_ENABLED;
+                return VideoProfile.VideoState.TX_ENABLED;
             case CALL_TYPE_VT_RX:
-                return VideoCallProfile.VideoState.RX_ENABLED;
+                return VideoProfile.VideoState.RX_ENABLED;
             case CALL_TYPE_VT:
-                return VideoCallProfile.VideoState.BIDIRECTIONAL;
+                return VideoProfile.VideoState.BIDIRECTIONAL;
             case CALL_TYPE_VOICE:
-                return VideoCallProfile.VideoState.AUDIO_ONLY;
+                return VideoProfile.VideoState.AUDIO_ONLY;
             default:
-                return VideoCallProfile.VideoState.AUDIO_ONLY;
+                return VideoProfile.VideoState.AUDIO_ONLY;
         }
     }
 
     /**
-     * Converts from the video state values defined in {@link android.telecomm.VideoCallProfile}
+     * Converts from the video state values defined in {@link VideoProfile}
      * to the call types defined in {@link ImsCallProfile}.
      *
      * @param videoState The video state.
      * @return The call type.
      */
     public static int getCallTypeFromVideoState(int videoState) {
-        boolean videoTx = isVideoStateSet(videoState, VideoCallProfile.VideoState.TX_ENABLED);
-        boolean videoRx = isVideoStateSet(videoState, VideoCallProfile.VideoState.RX_ENABLED);
-        boolean isPaused = isVideoStateSet(videoState, VideoCallProfile.VideoState.PAUSED);
+        boolean videoTx = isVideoStateSet(videoState, VideoProfile.VideoState.TX_ENABLED);
+        boolean videoRx = isVideoStateSet(videoState, VideoProfile.VideoState.RX_ENABLED);
+        boolean isPaused = isVideoStateSet(videoState, VideoProfile.VideoState.PAUSED);
         if (isPaused) {
             return ImsCallProfile.CALL_TYPE_VT_NODIR;
         } else if (videoTx && !videoRx) {

@@ -22,11 +22,11 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.telephony.DisconnectCause;
 
-import com.android.internal.telecomm.IVideoCallProvider;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.android.internal.telecomm.IVideoProvider;
 
 /**
  * Information about a call that is used between InCallService and Telecomm.
@@ -34,7 +34,7 @@ import java.util.List;
  */
 public final class ParcelableCall implements Parcelable {
     private final String mId;
-    private final CallState mState;
+    private final int mState;
     private final int mDisconnectCauseCode;
     private final String mDisconnectCauseMsg;
     private final List<String> mCannedSmsResponses;
@@ -46,7 +46,7 @@ public final class ParcelableCall implements Parcelable {
     private final int mCallerDisplayNamePresentation;
     private final GatewayInfo mGatewayInfo;
     private final PhoneAccountHandle mAccountHandle;
-    private final IVideoCallProvider mVideoCallProvider;
+    private final IVideoProvider mVideoCallProvider;
     private InCallService.VideoCall mVideoCall;
     private final String mParentCallId;
     private final List<String> mChildCallIds;
@@ -56,7 +56,7 @@ public final class ParcelableCall implements Parcelable {
 
     public ParcelableCall(
             String id,
-            CallState state,
+            int state,
             int disconnectCauseCode,
             String disconnectCauseMsg,
             List<String> cannedSmsResponses,
@@ -68,7 +68,7 @@ public final class ParcelableCall implements Parcelable {
             int callerDisplayNamePresentation,
             GatewayInfo gatewayInfo,
             PhoneAccountHandle accountHandle,
-            IVideoCallProvider videoCallProvider,
+            IVideoProvider videoCallProvider,
             String parentCallId,
             List<String> childCallIds,
             StatusHints statusHints,
@@ -101,7 +101,7 @@ public final class ParcelableCall implements Parcelable {
     }
 
     /** The current state of the call. */
-    public CallState getState() {
+    public int getState() {
         return mState;
     }
 
@@ -143,7 +143,7 @@ public final class ParcelableCall implements Parcelable {
         return mHandle;
     }
 
-    /** The {@link CallPropertyPresentation} which controls how the handle is shown. */
+    /** The {@link PropertyPresentation} which controls how the handle is shown. */
     public int getHandlePresentation() {
         return mHandlePresentation;
     }
@@ -153,7 +153,7 @@ public final class ParcelableCall implements Parcelable {
         return mCallerDisplayName;
     }
 
-    /** The {@link CallPropertyPresentation} which controls how the caller display name is shown. */
+    /** The {@link PropertyPresentation} which controls how the caller display name is shown. */
     public int getCallerDisplayNamePresentation() {
         return mCallerDisplayNamePresentation;
     }
@@ -227,7 +227,7 @@ public final class ParcelableCall implements Parcelable {
         public ParcelableCall createFromParcel(Parcel source) {
             ClassLoader classLoader = ParcelableCall.class.getClassLoader();
             String id = source.readString();
-            CallState state = CallState.valueOf(source.readString());
+            int state = source.readInt();
             int disconnectCauseCode = source.readInt();
             String disconnectCauseMsg = source.readString();
             List<String> cannedSmsResponses = new ArrayList<>();
@@ -240,8 +240,8 @@ public final class ParcelableCall implements Parcelable {
             int callerDisplayNamePresentation = source.readInt();
             GatewayInfo gatewayInfo = source.readParcelable(classLoader);
             PhoneAccountHandle accountHandle = source.readParcelable(classLoader);
-            IVideoCallProvider videoCallProvider =
-                    IVideoCallProvider.Stub.asInterface(source.readStrongBinder());
+            IVideoProvider videoCallProvider =
+                    IVideoProvider.Stub.asInterface(source.readStrongBinder());
             String parentCallId = source.readString();
             List<String> childCallIds = new ArrayList<>();
             source.readList(childCallIds, classLoader);
@@ -272,7 +272,7 @@ public final class ParcelableCall implements Parcelable {
     @Override
     public void writeToParcel(Parcel destination, int flags) {
         destination.writeString(mId);
-        destination.writeString(mState.name());
+        destination.writeInt(mState);
         destination.writeInt(mDisconnectCauseCode);
         destination.writeString(mDisconnectCauseMsg);
         destination.writeList(mCannedSmsResponses);

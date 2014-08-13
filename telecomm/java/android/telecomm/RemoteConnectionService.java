@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- R* limitations under the License.
+ * limitations under the License.
  */
 
 package android.telecomm;
@@ -25,7 +25,7 @@ import android.telephony.DisconnectCause;
 
 import com.android.internal.telecomm.IConnectionService;
 import com.android.internal.telecomm.IConnectionServiceAdapter;
-import com.android.internal.telecomm.IVideoCallProvider;
+import com.android.internal.telecomm.IVideoProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
 import java.util.HashMap;
@@ -43,14 +43,17 @@ import java.util.UUID;
  */
 final class RemoteConnectionService {
 
-    private static final RemoteConnection NULL_CONNECTION = new RemoteConnection(null, null);
+    private static final RemoteConnection
+            NULL_CONNECTION = new RemoteConnection("NULL", null, null);
 
     private final IConnectionServiceAdapter mServantDelegate = new IConnectionServiceAdapter() {
         @Override
-        public void handleCreateConnectionSuccessful(ConnectionRequest request,
+        public void handleCreateConnectionSuccessful(
+                String id,
+                ConnectionRequest request,
                 ParcelableConnection parcel) {
-            RemoteConnection connection = findConnectionForAction(
-                    request.getCallId(), "handleCreateConnectionSuccessful");
+            RemoteConnection connection =
+                    findConnectionForAction(id, "handleCreateConnectionSuccessful");
             if (connection != NULL_CONNECTION && mPendingConnections.contains(connection)) {
                 mPendingConnections.remove(connection);
                 connection.setState(parcel.getState());
@@ -65,37 +68,40 @@ final class RemoteConnectionService {
         }
 
         @Override
-        public void handleCreateConnectionFailed(ConnectionRequest request, int errorCode,
+        public void handleCreateConnectionFailed(
+                String id,
+                ConnectionRequest request,
+                int errorCode,
                 String errorMessage) {
             // TODO: How do we propagate the failure codes?
-            findConnectionForAction(
-                    request.getCallId(), "handleCreateConnectionFailed")
+            findConnectionForAction(id, "handleCreateConnectionFailed")
                     .setDestroyed();
         }
 
         @Override
-        public void handleCreateConnectionCancelled(ConnectionRequest request) {
-            findConnectionForAction(
-                    request.getCallId(), "handleCreateConnectionCancelled")
+        public void handleCreateConnectionCancelled(
+                String id,
+                ConnectionRequest request) {
+            findConnectionForAction(id, "handleCreateConnectionCancelled")
                     .setDestroyed();
         }
 
         @Override
         public void setActive(String callId) {
             findConnectionForAction(callId, "setActive")
-                    .setState(Connection.State.ACTIVE);
+                    .setState(Connection.STATE_ACTIVE);
         }
 
         @Override
         public void setRinging(String callId) {
             findConnectionForAction(callId, "setRinging")
-                    .setState(Connection.State.RINGING);
+                    .setState(Connection.STATE_RINGING);
         }
 
         @Override
         public void setDialing(String callId) {
             findConnectionForAction(callId, "setDialing")
-                    .setState(Connection.State.DIALING);
+                    .setState(Connection.STATE_DIALING);
         }
 
         @Override
@@ -108,7 +114,7 @@ final class RemoteConnectionService {
         @Override
         public void setOnHold(String callId) {
             findConnectionForAction(callId, "setOnHold")
-                    .setState(Connection.State.HOLDING);
+                    .setState(Connection.STATE_HOLDING);
         }
 
         @Override
@@ -151,8 +157,7 @@ final class RemoteConnectionService {
         }
 
         @Override
-        public void setVideoCallProvider(String callId,
-                IVideoCallProvider videoCallProvider) {
+        public void setVideoProvider(String callId, IVideoProvider videoProvider) {
             // not supported for remote connections.
         }
 
@@ -244,9 +249,9 @@ final class RemoteConnectionService {
             PhoneAccountHandle connectionManagerPhoneAccount,
             ConnectionRequest request,
             boolean isIncoming) {
+        final String id = UUID.randomUUID().toString();
         final ConnectionRequest newRequest = new ConnectionRequest(
                 request.getAccountHandle(),
-                UUID.randomUUID().toString(),
                 request.getHandle(),
                 request.getHandlePresentation(),
                 request.getExtras(),
@@ -256,17 +261,18 @@ final class RemoteConnectionService {
                 mConnectionService.addConnectionServiceAdapter(mServant.getStub());
             }
             RemoteConnection connection =
-                    new RemoteConnection(mConnectionService, newRequest);
+                    new RemoteConnection(id, mConnectionService, newRequest);
             mPendingConnections.add(connection);
-            mConnectionById.put(newRequest.getCallId(), connection);
+            mConnectionById.put(id, connection);
             mConnectionService.createConnection(
                     connectionManagerPhoneAccount,
+                    id,
                     newRequest,
                     isIncoming);
             connection.addListener(new RemoteConnection.Listener() {
                 @Override
                 public void onDestroyed(RemoteConnection connection) {
-                    mConnectionById.remove(newRequest.getCallId());
+                    mConnectionById.remove(id);
                     if (mConnectionById.isEmpty()) {
                         try {
                             mConnectionService.removeConnectionServiceAdapter(mServant.getStub());
@@ -277,11 +283,13 @@ final class RemoteConnectionService {
             });
             return connection;
         } catch (RemoteException e) {
-            return RemoteConnection.failure(DisconnectCause.ERROR_UNSPECIFIED, e.toString());
+            return RemoteConnection
+                    .failure(DisconnectCause.ERROR_UNSPECIFIED, e.toString());
         }
     }
 
-    private RemoteConnection findConnectionForAction(String callId, String action) {
+    private RemoteConnection findConnectionForAction(
+            String callId, String action) {
         if (mConnectionById.containsKey(callId)) {
             return mConnectionById.get(callId);
         }

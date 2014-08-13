@@ -17,7 +17,7 @@
 package com.android.ims.internal;
 
 import android.view.Surface;
-import android.telecomm.VideoCallProfile;
+import android.telecomm.VideoProfile;
 
 import com.android.ims.internal.IImsVideoCallCallback;
 
@@ -52,9 +52,9 @@ oneway interface IImsVideoCallProvider {
 
     void setZoom(float value);
 
-    void sendSessionModifyRequest(in VideoCallProfile reqProfile);
+    void sendSessionModifyRequest(in VideoProfile reqProfile);
 
-    void sendSessionModifyResponse(in VideoCallProfile responseProfile);
+    void sendSessionModifyResponse(in VideoProfile responseProfile);
 
     void requestCameraCapabilities();
 

@@ -350,8 +350,8 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/tv/ITvInputServiceCallback.aidl \
 	media/java/android/media/tv/ITvInputSession.aidl \
 	media/java/android/media/tv/ITvInputSessionCallback.aidl \
-	telecomm/java/com/android/internal/telecomm/IVideoCallCallback.aidl \
-	telecomm/java/com/android/internal/telecomm/IVideoCallProvider.aidl \
+	telecomm/java/com/android/internal/telecomm/IVideoCallback.aidl \
+	telecomm/java/com/android/internal/telecomm/IVideoProvider.aidl \
 	telecomm/java/com/android/internal/telecomm/IConnectionService.aidl \
 	telecomm/java/com/android/internal/telecomm/IConnectionServiceAdapter.aidl \
 	telecomm/java/com/android/internal/telecomm/IInCallAdapter.aidl \

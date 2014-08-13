@@ -11,28 +11,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
 package android.telecomm;
 
 /**
- * Used to inform a client of asynchronously returned results.
+ * {@hide}
  */
-public interface SimpleResponse<IN, OUT> {
-
-    /**
-     * Provide a set of results.
-     *
-     * @param request The original request.
-     * @param result The results.
-     */
-    void onResult(IN request, OUT result);
-
-    /**
-     * Indicates the inability to provide results.
-     *
-     * @param request The original request.
-     */
-    void onError(IN request);
-}
+parcelable CameraCapabilities;

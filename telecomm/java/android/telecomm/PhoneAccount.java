@@ -27,7 +27,8 @@ import android.os.Parcelable;
 import java.util.MissingResourceException;
 
 /**
- * Provides user interface description information for a {@code PhoneAccount}.
+ * Describes a distinct account, line of service or call placement method that the system
+ * can use to place phone calls.
  */
 public class PhoneAccount implements Parcelable {
 
@@ -37,9 +38,9 @@ public class PhoneAccount implements Parcelable {
      * will be allowed to manage phone calls including using its own proprietary phone-call
      * implementation (like VoIP calling) to make calls instead of the telephony stack.
      * <p>
-     * When a user opts to place a call using the SIM-based telephony stack, the connection-service
-     * associated with this phone-account will be attempted first if the user has explicitly
-     * selected it to be used as the default connection manager.
+     * When a user opts to place a call using the SIM-based telephony stack, the
+     * {@link ConnectionService} associated with this {@code PhoneAccount} will be attempted first
+     * if the user has explicitly selected it to be used as the default connection manager.
      * <p>
      * See {@link #getCapabilities}
      */
@@ -53,21 +54,25 @@ public class PhoneAccount implements Parcelable {
      * calls from or use the built-in telephony stack to place its calls.
      * <p>
      * See {@link #getCapabilities}
-     *
+     * <p>
      * {@hide}
      */
     public static final int CAPABILITY_CALL_PROVIDER = 0x2;
 
     /**
-     * Flag indicating that this {@code PhoneAccount} represents  built-in PSTN SIM
+     * Flag indicating that this {@code PhoneAccount} represents a built-in PSTN SIM
      * subscription.
      * <p>
-     * Only the android framework can set this capability on a phone account.
+     * Only the Android framework can register a {@code PhoneAccount} having this capability.
+     * <p>
+     * See {@link #getCapabilities}
      */
     public static final int CAPABILITY_SIM_SUBSCRIPTION = 0x4;
 
     /**
-     * Flag indicating that this {@code PhoneAccount} is capable of video calling.
+     * Flag indicating that this {@code PhoneAccount} is capable of placing video calls.
+     * <p>
+     * See {@link #getCapabilities}
      */
     public static final int CAPABILITY_VIDEO_CALLING = 0x8;
 
@@ -79,7 +84,65 @@ public class PhoneAccount implements Parcelable {
     private final CharSequence mLabel;
     private final CharSequence mShortDescription;
 
-    public PhoneAccount(
+    public static class Builder {
+        private PhoneAccountHandle mAccountHandle;
+        private Uri mHandle;
+        private String mSubscriptionNumber;
+        private int mCapabilities;
+        private int mIconResId;
+        private CharSequence mLabel;
+        private CharSequence mShortDescription;
+
+        private Builder() {}
+
+        public Builder withAccountHandle(PhoneAccountHandle value) {
+            this.mAccountHandle = value;
+            return this;
+        }
+
+        public Builder withHandle(Uri value) {
+            this.mHandle = value;
+            return this;
+        }
+
+        public Builder withSubscriptionNumber(String value) {
+            this.mSubscriptionNumber = value;
+            return this;
+        }
+
+        public Builder withCapabilities(int value) {
+            this.mCapabilities = value;
+            return this;
+        }
+
+        public Builder withIconResId(int value) {
+            this.mIconResId = value;
+            return this;
+        }
+
+        public Builder withLabel(CharSequence value) {
+            this.mLabel = value;
+            return this;
+        }
+
+        public Builder withShortDescription(CharSequence value) {
+            this.mShortDescription = value;
+            return this;
+        }
+
+        public PhoneAccount build() {
+            return new PhoneAccount(
+                    mAccountHandle,
+                    mHandle,
+                    mSubscriptionNumber,
+                    mCapabilities,
+                    mIconResId,
+                    mLabel,
+                    mShortDescription);
+        }
+    }
+
+    private PhoneAccount(
             PhoneAccountHandle account,
             Uri handle,
             String subscriptionNumber,
@@ -96,8 +159,10 @@ public class PhoneAccount implements Parcelable {
         mShortDescription = shortDescription;
     }
 
+    public static Builder builder() { return new Builder(); }
+
     /**
-     * The {@code PhoneAccountHandle} to which this metadata pertains.
+     * The unique identifier of this {@code PhoneAccount}.
      *
      * @return A {@code PhoneAccountHandle}.
      */
@@ -118,9 +183,15 @@ public class PhoneAccount implements Parcelable {
     }
 
     /**
-     * The subscription number associated with the underlying transport. This may differ from the
-     * {@link #getHandle()} number; for example, if the number used to talk to the network is not
-     * the same number that will be on the remote party's caller ID display.
+     * The raw callback number used for this {@code PhoneAccount}, as distinct from
+     * {@link #getHandle()}. For the majority of {@code PhoneAccount}s this should be registered
+     * as {@code null}.  It is used by the system for SIM-based {@code PhoneAccount} registration
+     * where {@link android.telephony.TelephonyManager#setLine1NumberForDisplay(String, String)}
+     * or {@link android.telephony.TelephonyManager#setLine1NumberForDisplay(long, String, String)}
+     * has been used to alter the callback number.
+     * <p>
+     * TODO: Should this also be a URI, for consistency? Should it be called the
+     * "subscription handle"?
      *
      * @return The subscription number, suitable for display to the user.
      */
@@ -147,7 +218,7 @@ public class PhoneAccount implements Parcelable {
     }
 
     /**
-     * A short paragraph describing a {@code PhoneAccount}.
+     * A short paragraph describing this {@code PhoneAccount}.
      *
      * @return A description for this {@code PhoneAccount}.
      */
