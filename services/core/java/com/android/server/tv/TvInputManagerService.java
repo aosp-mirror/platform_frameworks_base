@@ -212,8 +212,6 @@ public final class TvInputManagerService extends SystemService {
 
     private void buildTvInputListLocked(int userId) {
         UserState userState = getUserStateLocked(userId);
-
-        Map<String, TvInputState> inputMap = new HashMap<String, TvInputState>();
         userState.packageSet.clear();
 
         if (DEBUG) Slog.d(TAG, "buildTvInputList");
@@ -229,41 +227,42 @@ public final class TvInputManagerService extends SystemService {
                         + android.Manifest.permission.BIND_TV_INPUT);
                 continue;
             }
-            try {
-                inputList.clear();
-                ComponentName component = new ComponentName(si.packageName, si.name);
-                if (hasHardwarePermission(pm, component)) {
-                    ServiceState serviceState = userState.serviceStateMap.get(component);
-                    if (serviceState == null) {
-                        // We see this hardware TV input service for the first time; we need to
-                        // prepare the ServiceState object so that we can connect to the service and
-                        // let it add TvInputInfo objects to mInputList if there's any.
-                        serviceState = new ServiceState(component, userId);
-                        userState.serviceStateMap.put(component, serviceState);
-                    } else {
-                        inputList.addAll(serviceState.mInputList);
-                    }
+
+            ComponentName component = new ComponentName(si.packageName, si.name);
+            if (hasHardwarePermission(pm, component)) {
+                ServiceState serviceState = userState.serviceStateMap.get(component);
+                if (serviceState == null) {
+                    // We see this hardware TV input service for the first time; we need to
+                    // prepare the ServiceState object so that we can connect to the service and
+                    // let it add TvInputInfo objects to mInputList if there's any.
+                    serviceState = new ServiceState(component, userId);
+                    userState.serviceStateMap.put(component, serviceState);
                 } else {
+                    inputList.addAll(serviceState.mInputList);
+                }
+            } else {
+                try {
                     inputList.add(TvInputInfo.createTvInputInfo(mContext, ri));
+                } catch (XmlPullParserException | IOException e) {
+                    Slog.e(TAG, "Failed to load TV input " + si.name, e);
+                    continue;
                 }
-
-                for (TvInputInfo info : inputList) {
-                    if (DEBUG) Slog.d(TAG, "add " + info.getId());
-                    TvInputState state = userState.inputMap.get(info.getId());
-                    if (state == null) {
-                        state = new TvInputState();
-                    }
-                    state.mInfo = info;
-                    inputMap.put(info.getId(), state);
-                }
-
-                // Reconnect the service if existing input is updated.
-                updateServiceConnectionLocked(component, userId);
-
-                userState.packageSet.add(si.packageName);
-            } catch (IOException | XmlPullParserException e) {
-                Slog.e(TAG, "Can't load TV input " + si.name, e);
             }
+
+            // Reconnect the service if existing input is updated.
+            updateServiceConnectionLocked(component, userId);
+            userState.packageSet.add(si.packageName);
+        }
+
+        Map<String, TvInputState> inputMap = new HashMap<String, TvInputState>();
+        for (TvInputInfo info : inputList) {
+            if (DEBUG) Slog.d(TAG, "add " + info.getId());
+            TvInputState state = userState.inputMap.get(info.getId());
+            if (state == null) {
+                state = new TvInputState();
+            }
+            state.mInfo = info;
+            inputMap.put(info.getId(), state);
         }
 
         for (String inputId : inputMap.keySet()) {
@@ -338,7 +337,6 @@ public final class TvInputManagerService extends SystemService {
                         Slog.e(TAG, "error in unregisterCallback", e);
                     }
                 }
-                serviceState.mClientTokens.clear();
                 mContext.unbindService(serviceState.mConnection);
             }
             userState.serviceStateMap.clear();
@@ -401,9 +399,7 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private static boolean shouldMaintainConnection(ServiceState serviceState) {
-        return !serviceState.mClientTokens.isEmpty()
-                || !serviceState.mSessionTokens.isEmpty()
-                || serviceState.mIsHardware;
+        return !serviceState.mSessionTokens.isEmpty() || serviceState.mIsHardware;
         // TODO: Find a way to maintain connection only when necessary.
     }
 
@@ -1611,13 +1607,6 @@ public final class TvInputManagerService extends SystemService {
 
                         pw.increaseIndent();
 
-                        pw.println("mClientTokens:");
-                        pw.increaseIndent();
-                        for (IBinder token : service.mClientTokens) {
-                            pw.println("" + token);
-                        }
-                        pw.decreaseIndent();
-
                         pw.println("mSessionTokens:");
                         pw.increaseIndent();
                         for (IBinder token : service.mSessionTokens) {
@@ -1754,7 +1743,6 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private final class ServiceState {
-        private final List<IBinder> mClientTokens = new ArrayList<IBinder>();
         private final List<IBinder> mSessionTokens = new ArrayList<IBinder>();
         private final ServiceConnection mConnection;
         private final ComponentName mComponent;
