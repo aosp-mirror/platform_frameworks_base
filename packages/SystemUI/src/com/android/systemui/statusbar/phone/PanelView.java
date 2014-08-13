@@ -99,6 +99,7 @@ public abstract class PanelView extends FrameLayout {
     };
 
     protected void onExpandingFinished() {
+        mClosing = false;
         mBar.onExpandingFinished();
     }
 
@@ -150,7 +151,7 @@ public abstract class PanelView extends FrameLayout {
                     postOnAnimation(new Runnable() {
                         @Override
                         public void run() {
-                            collapse();
+                            collapse(false /* delayed */);
                         }
                     });
                 }
@@ -651,7 +652,7 @@ public abstract class PanelView extends FrameLayout {
         mBar = panelBar;
     }
 
-    public void collapse() {
+    public void collapse(boolean delayed) {
         if (DEBUG) logf("collapse: " + this);
         if (mPeekPending || mPeekAnimator != null) {
             mCollapseAfterPeek = true;
@@ -668,7 +669,16 @@ public abstract class PanelView extends FrameLayout {
             }
             mClosing = true;
             notifyExpandingStarted();
-            fling(0, false /* expand */);
+            if (delayed) {
+                postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        fling(0, false /* expand */);
+                    }
+                }, 120);
+            } else {
+                fling(0, false /* expand */);
+            }
         }
     }
 
@@ -856,7 +866,7 @@ public abstract class PanelView extends FrameLayout {
     private final Runnable mPostCollapseRunnable = new Runnable() {
         @Override
         public void run() {
-            collapse();
+            collapse(false /* delayed */);
         }
     };
     private boolean onMiddleClicked() {

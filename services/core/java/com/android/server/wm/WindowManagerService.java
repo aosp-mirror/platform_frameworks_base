@@ -462,6 +462,9 @@ public class WindowManagerService extends IWindowManager.Stub
     int mRotation = 0;
     int mForcedAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mAltOrientation = false;
+
+    private boolean mKeyguardWaitingForActivityDrawn;
+
     class RotationWatcher {
         IRotationWatcher watcher;
         IBinder.DeathRecipient deathRecipient;
@@ -5244,6 +5247,20 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             mAnimator.mKeyguardGoingAway = true;
             requestTraversalLocked();
+        }
+    }
+
+    public void keyguardWaitingForActivityDrawn() {
+        synchronized (mWindowMap) {
+            mKeyguardWaitingForActivityDrawn = true;
+        }
+    }
+
+    public void notifyActivityDrawnForKeyguard() {
+        synchronized (mWindowMap) {
+            if (mKeyguardWaitingForActivityDrawn) {
+                mPolicy.notifyActivityDrawnForKeyguardLw();
+            }
         }
     }
 

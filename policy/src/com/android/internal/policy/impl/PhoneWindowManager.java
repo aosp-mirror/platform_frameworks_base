@@ -4766,13 +4766,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (mKeyguardDelegate.isDismissable()) {
-                        // Can we just finish the keyguard straight away?
-                        mKeyguardDelegate.keyguardDone(false, true);
-                    } else {
-                        // ask the keyguard to prompt the user to authenticate if necessary
-                        mKeyguardDelegate.dismiss();
-                    }
+                    // ask the keyguard to prompt the user to authenticate if necessary
+                    mKeyguardDelegate.dismiss();
+                }
+            });
+        }
+    }
+
+    public void notifyActivityDrawnForKeyguardLw() {
+        if (mKeyguardDelegate != null) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mKeyguardDelegate.onActivityDrawn();
                 }
             });
         }

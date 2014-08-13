@@ -198,6 +198,14 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    public void onActivityDrawn() {
+        try {
+            mService.onActivityDrawn();
+        } catch (RemoteException e) {
+            Slog.w(TAG , "Remote Exception", e);
+        }
+    }
+
     public void showAssistant() {
         // Not used by PhoneWindowManager
     }

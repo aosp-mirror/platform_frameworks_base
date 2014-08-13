@@ -167,9 +167,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
     WindowManagerService mWindowManager;
     DisplayManager mDisplayManager;
 
-    /** Dismiss the keyguard after the next activity is displayed? */
-    boolean mDismissKeyguardOnNextActivity = false;
-
     /** Identifier counter for all ActivityStacks */
     private int mLastStackId = HOME_STACK_ID;
 
@@ -363,12 +360,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void dismissKeyguard() {
+    void notifyActivityDrawnForKeyguard() {
         if (ActivityManagerService.DEBUG_LOCKSCREEN) mService.logLockScreen("");
-        if (mDismissKeyguardOnNextActivity) {
-            mDismissKeyguardOnNextActivity = false;
-            mWindowManager.dismissKeyguard();
-        }
+        mWindowManager.notifyActivityDrawnForKeyguard();
     }
 
     ActivityStack getFocusedStack() {
@@ -439,9 +433,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return mService.startHomeActivityLocked(mCurrentUser);
     }
 
-    void setDismissKeyguard(boolean dismiss) {
-        if (ActivityManagerService.DEBUG_LOCKSCREEN) mService.logLockScreen(" dismiss=" + dismiss);
-        mDismissKeyguardOnNextActivity = dismiss;
+    void keyguardWaitingForActivityDrawn() {
+        mWindowManager.keyguardWaitingForActivityDrawn();
     }
 
     TaskRecord anyTaskForIdLocked(int id) {
@@ -660,7 +653,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             w.thisTime = w.totalTime;
         }
         mService.notifyAll();
-        dismissKeyguard();
+        notifyActivityDrawnForKeyguard();
     }
 
     void reportActivityLaunchedLocked(boolean timeout, ActivityRecord r,
@@ -1371,7 +1364,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     resultRecord, resultWho, requestCode,
                     Activity.RESULT_CANCELED, null);
             }
-            setDismissKeyguard(false);
             ActivityOptions.abort(options);
             return err;
         }
@@ -1386,7 +1378,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     resultRecord, resultWho, requestCode,
                     Activity.RESULT_CANCELED, null);
             }
-            setDismissKeyguard(false);
             String msg;
             if (!aInfo.exported) {
                 msg = "Permission Denial: starting " + intent.toString()
@@ -1425,7 +1416,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
             // We pretend to the caller that it was really started, but
             // they will just get a cancel result.
-            setDismissKeyguard(false);
             ActivityOptions.abort(options);
             return ActivityManager.START_SUCCESS;
         }
@@ -1444,7 +1434,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 PendingActivityLaunch pal =
                         new PendingActivityLaunch(r, sourceRecord, startFlags, stack);
                 mPendingActivityLaunches.add(pal);
-                setDismissKeyguard(false);
                 ActivityOptions.abort(options);
                 return ActivityManager.START_SWITCHES_CANCELED;
             }
@@ -1466,12 +1455,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
         err = startActivityUncheckedLocked(r, sourceRecord, voiceSession, voiceInteractor,
                 startFlags, true, options);
 
-        if (allPausedActivitiesComplete()) {
+        if (err < 0) {
             // If someone asked to have the keyguard dismissed on the next
             // activity start, but we are not actually doing an activity
             // switch...  just dismiss the keyguard now, because we
             // probably want to see whatever is behind it.
-            dismissKeyguard();
+            notifyActivityDrawnForKeyguard();
         }
         return err;
     }
@@ -2852,8 +2841,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("mDismissKeyguardOnNextActivity=");
-                pw.println(mDismissKeyguardOnNextActivity);
         pw.print(prefix); pw.print("mFocusedStack=" + mFocusedStack);
                 pw.print(" mLastFocusedStack="); pw.println(mLastFocusedStack);
         pw.print(prefix); pw.println("mSleepTimeout=" + mSleepTimeout);

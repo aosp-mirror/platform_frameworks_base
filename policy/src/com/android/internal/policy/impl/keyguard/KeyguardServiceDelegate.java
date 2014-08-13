@@ -334,4 +334,9 @@ public class KeyguardServiceDelegate {
         mKeyguardState.bootCompleted = true;
     }
 
+    public void onActivityDrawn() {
+        if (mKeyguardService != null) {
+            mKeyguardService.onActivityDrawn();
+        }
+    }
 }
