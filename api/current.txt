@@ -30813,6 +30813,7 @@ package android.text {
   public static class InputFilter.LengthFilter implements android.text.InputFilter {
     ctor public InputFilter.LengthFilter(int);
     method public java.lang.CharSequence filter(java.lang.CharSequence, int, int, android.text.Spanned, int, int);
+    method public int getMax();
   }
 
   public abstract interface InputType {
@@ -36046,6 +36047,7 @@ package android.view.accessibility {
     method public android.view.accessibility.AccessibilityNodeInfo getLabelFor();
     method public android.view.accessibility.AccessibilityNodeInfo getLabeledBy();
     method public int getLiveRegion();
+    method public int getMaxTextLength();
     method public int getMovementGranularities();
     method public java.lang.CharSequence getPackageName();
     method public android.view.accessibility.AccessibilityNodeInfo getParent();
@@ -36109,6 +36111,7 @@ package android.view.accessibility {
     method public void setLabeledBy(android.view.View, int);
     method public void setLiveRegion(int);
     method public void setLongClickable(boolean);
+    method public void setMaxTextLength(int);
     method public void setMovementGranularities(int);
     method public void setMultiLine(boolean);
     method public void setPackageName(java.lang.CharSequence);
