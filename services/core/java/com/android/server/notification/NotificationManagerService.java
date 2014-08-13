@@ -2424,8 +2424,9 @@ public class NotificationManagerService extends SystemService {
                 // pulse repeatedly
                 mNotificationLight.setFlashing(ledARGB, Light.LIGHT_FLASH_TIMED,
                         ledOnMS, ledOffMS);
-                mStatusBar.notificationLightPulse(ledARGB, ledOnMS, ledOffMS);
             }
+            // let SystemUI make an independent decision
+            mStatusBar.notificationLightPulse(ledARGB, ledOnMS, ledOffMS);
         }
     }
 
