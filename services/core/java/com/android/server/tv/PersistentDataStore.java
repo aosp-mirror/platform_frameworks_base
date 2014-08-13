@@ -91,6 +91,7 @@ final class PersistentDataStore {
     }
 
     public void setParentalControlsEnabled(boolean enabled) {
+        loadIfNeeded();
         if (mParentalControlsEnabled != enabled) {
             mParentalControlsEnabled = enabled;
             mParentalControlsEnabledChanged = true;
@@ -114,6 +115,7 @@ final class PersistentDataStore {
     }
 
     public void addBlockedRating(TvContentRating rating) {
+        loadIfNeeded();
         if (rating != null && !mBlockedRatings.contains(rating)) {
             mBlockedRatings.add(rating);
             mBlockedRatingsChanged = true;
@@ -122,6 +124,7 @@ final class PersistentDataStore {
     }
 
     public void removeBlockedRating(TvContentRating rating) {
+        loadIfNeeded();
         if (rating != null && mBlockedRatings.contains(rating)) {
             mBlockedRatings.remove(rating);
             mBlockedRatingsChanged = true;
