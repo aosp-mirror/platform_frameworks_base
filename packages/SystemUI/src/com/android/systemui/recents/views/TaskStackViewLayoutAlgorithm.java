@@ -91,7 +91,8 @@ public class TaskStackViewLayoutAlgorithm {
 
     /** Computes the minimum and maximum scroll progress values.  This method may be called before
      * the RecentsConfiguration is set, so we need to pass in the alt-tab state. */
-    void computeMinMaxScroll(ArrayList<Task> tasks, boolean launchedWithAltTab) {
+    void computeMinMaxScroll(ArrayList<Task> tasks, boolean launchedWithAltTab,
+            boolean launchedFromHome) {
         // Clear the progress map
         mTaskProgressMap.clear();
 
@@ -101,10 +102,16 @@ public class TaskStackViewLayoutAlgorithm {
             return;
         }
 
+        // Note that we should account for the scale difference of the offsets at the screen bottom
         int taskHeight = mTaskRect.height();
         float pAtBottomOfStackRect = screenYToCurveProgress(mStackVisibleRect.bottom);
-        float pWithinAffiliateOffset = pAtBottomOfStackRect -
-                screenYToCurveProgress(mStackVisibleRect.bottom - mWithinAffiliationOffset);
+        float pWithinAffiliateTop = screenYToCurveProgress(mStackVisibleRect.bottom -
+                mWithinAffiliationOffset);
+        float scale = curveProgressToScale(pWithinAffiliateTop);
+        int scaleYOffset = (int) (((1f - scale) * taskHeight) / 2);
+        pWithinAffiliateTop = screenYToCurveProgress(mStackVisibleRect.bottom -
+                mWithinAffiliationOffset + scaleYOffset);
+        float pWithinAffiliateOffset = pAtBottomOfStackRect - pWithinAffiliateTop;
         float pBetweenAffiliateOffset = pAtBottomOfStackRect -
                 screenYToCurveProgress(mStackVisibleRect.bottom - mBetweenAffiliationOffset);
         float pTaskHeightOffset = pAtBottomOfStackRect -
@@ -133,8 +140,13 @@ public class TaskStackViewLayoutAlgorithm {
         mMaxScrollP = pAtFrontMostCardTop - ((1f - pTaskHeightOffset - pNavBarOffset));
         mMinScrollP = tasks.size() == 1 ? Math.max(mMaxScrollP, 0f) : 0f;
         if (launchedWithAltTab) {
-            // Center the second most task, since that will be focused first
-            mInitialScrollP = pAtSecondFrontMostCardTop - 0.5f;
+            if (launchedFromHome) {
+                // Center the top most task, since that will be focused first
+                mInitialScrollP = pAtSecondFrontMostCardTop - 0.5f;
+            } else {
+                // Center the second top most task, since that will be focused first
+                mInitialScrollP = pAtSecondFrontMostCardTop - 0.5f;
+            }
         } else {
             mInitialScrollP = pAtFrontMostCardTop - 0.825f;
         }
