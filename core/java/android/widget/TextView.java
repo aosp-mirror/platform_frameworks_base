@@ -8392,6 +8392,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
+        // Check for known input filter types.
+        final int numFilters = mFilters.length;
+        for (int i = 0; i < numFilters; i++) {
+            final InputFilter filter = mFilters[i];
+            if (filter instanceof InputFilter.LengthFilter) {
+                info.setMaxTextLength(((InputFilter.LengthFilter) filter).getMax());
+            }
+        }
+
         if (!isSingleLine()) {
             info.setMultiLine(true);
         }

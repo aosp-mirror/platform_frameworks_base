@@ -562,6 +562,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private LongArray mChildNodeIds;
     private ArrayList<AccessibilityAction> mActions;
 
+    private int mMaxTextLength = -1;
     private int mMovementGranularities;
 
     private int mTextSelectionStart = UNDEFINED_SELECTION_INDEX;
@@ -1042,6 +1043,36 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         return mActions.remove(action);
+    }
+
+    /**
+     * Sets the maximum text length, or -1 for no limit.
+     * <p>
+     * Typically used to indicate that an editable text field has a limit on
+     * the number of characters entered.
+     * <p>
+     * <strong>Note:</strong> Cannot be called from an
+     * {@link android.accessibilityservice.AccessibilityService}.
+     * This class is made immutable before being delivered to an AccessibilityService.
+     *
+     * @param max The maximum text length.
+     * @see #getMaxTextLength()
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setMaxTextLength(int max) {
+        enforceNotSealed();
+        mMaxTextLength = max;
+    }
+
+    /**
+     * Returns the maximum text length for this node.
+     *
+     * @return The maximum text length, or -1 for no limit.
+     * @see #setMaxTextLength(int)
+     */
+    public int getMaxTextLength() {
+        return mMaxTextLength;
     }
 
     /**
@@ -2469,8 +2500,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             parcel.writeInt(0);
         }
 
+        parcel.writeInt(mMaxTextLength);
         parcel.writeInt(mMovementGranularities);
-
         parcel.writeInt(mBooleanProperties);
 
         parcel.writeCharSequence(mPackageName);
@@ -2562,6 +2593,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         mBooleanProperties = other.mBooleanProperties;
+        mMaxTextLength = other.mMaxTextLength;
         mMovementGranularities = other.mMovementGranularities;
 
         final LongArray otherChildNodeIds = other.mChildNodeIds;
@@ -2636,8 +2668,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             }
         }
 
+        mMaxTextLength = parcel.readInt();
         mMovementGranularities = parcel.readInt();
-
         mBooleanProperties = parcel.readInt();
 
         mPackageName = parcel.readCharSequence();
@@ -2695,6 +2727,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mLabeledById = ROOT_NODE_ID;
         mWindowId = UNDEFINED_ITEM_ID;
         mConnectionId = UNDEFINED_CONNECTION_ID;
+        mMaxTextLength = -1;
         mMovementGranularities = 0;
         if (mChildNodeIds != null) {
             mChildNodeIds.clear();
@@ -2911,6 +2944,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; className: ").append(mClassName);
         builder.append("; text: ").append(mText);
         builder.append("; error: ").append(mError);
+        builder.append("; maxTextLength: ").append(mMaxTextLength);
         builder.append("; contentDescription: ").append(mContentDescription);
         builder.append("; viewIdResName: ").append(mViewIdResourceName);
 
