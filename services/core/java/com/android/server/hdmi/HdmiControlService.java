@@ -198,6 +198,10 @@ public final class HdmiControlService extends SystemService {
     @GuardedBy("mLock")
     private boolean mProhibitMode;
 
+    // Set to true while the input change by MHL is allowed.
+    @GuardedBy("mLock")
+    private boolean mMhlInputChangeEnabled;
+
     // List of listeners registered by callers that want to get notified of
     // system audio mode changes.
     private final ArrayList<IHdmiSystemAudioModeChangeListener>
@@ -269,6 +273,7 @@ public final class HdmiControlService extends SystemService {
         mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
         mProhibitMode = false;
         mHdmiControlEnabled = readBooleanSetting(Global.HDMI_CONTROL_ENABLED, true);
+        mMhlInputChangeEnabled = readBooleanSetting(Global.MHL_INPUT_SWITCHING_ENABLED, true);
 
         mCecController = HdmiCecController.create(this);
         if (mCecController != null) {
@@ -353,10 +358,12 @@ public final class HdmiControlService extends SystemService {
                     // No need to propagate to HAL.
                     break;
                 case Global.MHL_INPUT_SWITCHING_ENABLED:
-                    setOption(OPTION_MHL_INPUT_SWITCHING, toInt(enabled));
+                    setMhlInputChangeEnabled(enabled);
                     break;
                 case Global.MHL_POWER_CHARGE_ENABLED:
-                    setOption(OPTION_MHL_POWER_CHARGE, toInt(enabled));
+                    if (mMhlController != null) {
+                        mMhlController.setOption(OPTION_MHL_POWER_CHARGE, toInt(enabled));
+                    }
                     break;
             }
         }
@@ -1740,5 +1747,21 @@ public final class HdmiControlService extends SystemService {
     void setActivePortId(int portId) {
         assertRunOnServiceThread();
         mActivePortId = portId;
+    }
+
+    void setMhlInputChangeEnabled(boolean enabled) {
+        if (mMhlController != null) {
+            mMhlController.setOption(OPTION_MHL_INPUT_SWITCHING, toInt(enabled));
+        }
+
+        synchronized (mLock) {
+            mMhlInputChangeEnabled = enabled;
+        }
+    }
+
+    boolean isMhlInputChangeEnabled() {
+        synchronized (mLock) {
+            return mMhlInputChangeEnabled;
+        }
     }
 }
