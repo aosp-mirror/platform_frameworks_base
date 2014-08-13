@@ -96,6 +96,7 @@ public final class PageAdapter extends Adapter implements
     private float mUnselectedPageAlpha;
 
     private int mPreviewPageMargin;
+    private int mPreviewPageMinWidth;
     private int mPreviewListPadding;
     private int mFooterHeight;
 
@@ -141,17 +142,17 @@ public final class PageAdapter extends Adapter implements
         mPreviewPageMargin = mContext.getResources().getDimensionPixelSize(
                 R.dimen.preview_page_margin);
 
+        mPreviewPageMinWidth = mContext.getResources().getDimensionPixelSize(
+                R.dimen.preview_page_min_width);
+
         mPreviewListPadding = mContext.getResources().getDimensionPixelSize(
                 R.dimen.preview_list_padding);
 
         mColumnCount = mContext.getResources().getInteger(
                 R.integer.preview_page_per_row_count);
 
-        TypedValue outValue = new TypedValue();
-        mContext.getTheme().resolveAttribute(
-                com.android.internal.R.attr.listPreferredItemHeightSmall, outValue, true);
-        mFooterHeight = TypedValue.complexToDimensionPixelSize(outValue.data,
-                mContext.getResources().getDisplayMetrics());
+        mFooterHeight = mContext.getResources().getDimensionPixelSize(
+                R.dimen.preview_page_footer_height);
 
         mPreviewArea = previewArea;
 
@@ -428,8 +429,12 @@ public final class PageAdapter extends Adapter implements
         // Compute max page height.
         final int pageContentDesiredHeight = (int) (((float) pageContentDesiredWidth
                 / pageAspectRatio) + 0.5f);
-        final int pageContentMaxHeight = availableHeight - 2 * (mPreviewListPadding
-                + mPreviewPageMargin) - mFooterHeight;
+
+        // If the page does not fit entirely in a vertial direction,
+        // we shirk it but not less than the minimal page width.
+        final int pageContentMinHeight = (int) (mPreviewPageMinWidth / pageAspectRatio + 0.5f);
+        final int pageContentMaxHeight = Math.max(pageContentMinHeight,
+                availableHeight - 2 * (mPreviewListPadding + mPreviewPageMargin) - mFooterHeight);
 
         mPageContentHeight = Math.min(pageContentDesiredHeight, pageContentMaxHeight);
         mPageContentWidth = (int) ((mPageContentHeight * pageAspectRatio) + 0.5f);
@@ -439,10 +444,17 @@ public final class PageAdapter extends Adapter implements
 
         final int rowCount = mSelectedPageCount / columnCount
                 + ((mSelectedPageCount % columnCount) > 0 ? 1 : 0);
-        final int totalContentHeight = rowCount* (mPageContentHeight + mFooterHeight + 2
+        final int totalContentHeight = rowCount * (mPageContentHeight + mFooterHeight + 2
                 * mPreviewPageMargin);
-        final int verticalPadding = Math.max(mPreviewListPadding,
-                (availableHeight - totalContentHeight) / 2);
+
+        final int verticalPadding;
+        if (mPageContentHeight + mFooterHeight + mPreviewListPadding > availableHeight) {
+            verticalPadding = Math.max(mPreviewPageMargin,
+                    (availableHeight - totalContentHeight) / 2);
+        } else {
+            verticalPadding = Math.max(mPreviewListPadding,
+                    (availableHeight - totalContentHeight) / 2);
+        }
 
         mPreviewArea.setPadding(horizontalPadding, verticalPadding,
                 horizontalPadding, verticalPadding);

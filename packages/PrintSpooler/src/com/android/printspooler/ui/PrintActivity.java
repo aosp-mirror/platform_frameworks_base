@@ -1704,7 +1704,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (position == 0 && getPdfPrinter() != null) {
                     PrinterHolder printerHolder = (PrinterHolder) getItem(position);
                     title = printerHolder.printer.getName();
-                    icon = getResources().getDrawable(com.android.internal.R.drawable.ic_menu_save);
+                    icon = getResources().getDrawable(R.drawable.ic_savetopdf);
                 } else if (position == 1) {
                     title = getString(R.string.all_printers);
                 }
@@ -1712,7 +1712,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (position == 1 && getPdfPrinter() != null) {
                     PrinterHolder printerHolder = (PrinterHolder) getItem(position);
                     title = printerHolder.printer.getName();
-                    icon = getResources().getDrawable(com.android.internal.R.drawable.ic_menu_save);
+                    icon = getResources().getDrawable(R.drawable.ic_savetopdf);
                 } else if (position == getCount() - 1) {
                     title = getString(R.string.all_printers);
                 } else {

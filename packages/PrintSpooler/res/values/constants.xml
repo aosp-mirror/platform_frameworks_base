@@ -45,4 +45,7 @@
     <fraction name="page_selected_alpha">100%</fraction>
     <fraction name="page_unselected_alpha">50%</fraction>
 
+    <dimen name="preview_page_footer_height">32dip</dimen>
+    <dimen name="preview_page_min_width">130dip</dimen>
+
 </resources>

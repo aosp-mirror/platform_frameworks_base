@@ -267,8 +267,8 @@
              android:id="@+id/expand_collapse_icon"
              android:layout_width="wrap_content"
              android:layout_height="wrap_content"
-             android:layout_marginTop="8dip"
-             android:layout_marginBottom="8dip"
+             android:layout_marginTop="4dip"
+             android:layout_marginBottom="4dip"
              android:layout_gravity="center"
              android:background="@drawable/ic_expand_more">
          </ImageView>
