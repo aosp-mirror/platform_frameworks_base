@@ -4378,44 +4378,39 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * This function can only be called by the device owner.
      * @param components The list of components allowed to enter lock task mode.
      */
-    public void setLockTaskPackages(String[] packages) throws SecurityException {
-        // Get the package names of the caller.
-        int uid = Binder.getCallingUid();
-        String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);
-
+    public void setLockTaskPackages(ComponentName who, String[] packages) throws SecurityException {
         synchronized (this) {
-            // Check whether any of the package name is the device owner.
-            for (int i=0; i<packageNames.length; i++) {
-                String packageName = packageNames[i];
-                int userHandle = UserHandle.getUserId(uid);
-                if (isDeviceOwner(packageName)) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
-                    // If a package name is the device owner,
-                    // we update the component list.
-                    DevicePolicyData policy = getUserData(userHandle);
-                    policy.mLockTaskPackages.clear();
-                    if (packages != null) {
-                        for (int j = 0; j < packages.length; j++) {
-                            String pkg = packages[j];
-                            policy.mLockTaskPackages.add(pkg);
-                        }
-                    }
-
-                    // Store the settings persistently.
-                    saveSettingsLocked(userHandle);
-                    return;
+            int userHandle = Binder.getCallingUserHandle().getIdentifier();
+            DevicePolicyData policy = getUserData(userHandle);
+            policy.mLockTaskPackages.clear();
+            if (packages != null) {
+                for (int j = 0; j < packages.length; j++) {
+                    String pkg = packages[j];
+                    policy.mLockTaskPackages.add(pkg);
                 }
             }
+
+            // Store the settings persistently.
+            saveSettingsLocked(userHandle);
         }
-        throw new SecurityException();
     }
 
     /**
      * This function returns the list of components allowed to start the task lock mode.
      */
-    public String[] getLockTaskPackages() {
+    public String[] getLockTaskPackages(ComponentName who) {
         synchronized (this) {
-            int userHandle = UserHandle.USER_OWNER;
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+
+            int userHandle = Binder.getCallingUserHandle().getIdentifier();
             DevicePolicyData policy = getUserData(userHandle);
             return policy.mLockTaskPackages.toArray(new String[0]);
         }
@@ -4453,15 +4448,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             final DevicePolicyData policy = getUserData(userHandle);
             Bundle adminExtras = new Bundle();
-            adminExtras.putBoolean(DeviceAdminReceiver.EXTRA_LOCK_TASK_ENTERING, isEnabled);
             adminExtras.putString(DeviceAdminReceiver.EXTRA_LOCK_TASK_PACKAGE, pkg);
             for (ActiveAdmin admin : policy.mAdminList) {
                 boolean ownsDevice = isDeviceOwner(admin.info.getPackageName());
                 boolean ownsProfile = (getProfileOwner(userHandle) != null
                         && getProfileOwner(userHandle).equals(admin.info.getPackageName()));
                 if (ownsDevice || ownsProfile) {
-                    sendAdminCommandLocked(admin, DeviceAdminReceiver.ACTION_LOCK_TASK_CHANGED,
-                            adminExtras, null);
+                    if (isEnabled) {
+                        sendAdminCommandLocked(admin, DeviceAdminReceiver.ACTION_LOCK_TASK_ENTERING,
+                                adminExtras, null);
+                    } else {
+                        sendAdminCommandLocked(admin, DeviceAdminReceiver.ACTION_LOCK_TASK_EXITING);
+                    }
                 }
             }
         }
