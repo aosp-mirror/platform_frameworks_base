@@ -383,7 +383,7 @@ public interface IActivityManager extends IInterface {
 
     public void showBootMessage(CharSequence msg, boolean always) throws RemoteException;
 
-    public void dismissKeyguardOnNextActivity() throws RemoteException;
+    public void keyguardWaitingForActivityDrawn() throws RemoteException;
 
     public boolean targetTaskAffinityMatchesActivity(IBinder token, String destAffinity)
             throws RemoteException;
@@ -688,7 +688,6 @@ public interface IActivityManager extends IInterface {
     int UPDATE_PERSISTENT_CONFIGURATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+135;
     int GET_PROCESS_PSS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+136;
     int SHOW_BOOT_MESSAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+137;
-    int DISMISS_KEYGUARD_ON_NEXT_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+138;
     int KILL_ALL_BACKGROUND_PROCESSES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+139;
     int GET_CONTENT_PROVIDER_EXTERNAL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+140;
     int REMOVE_CONTENT_PROVIDER_EXTERNAL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+141;
@@ -760,4 +759,5 @@ public interface IActivityManager extends IInterface {
     int NOTIFY_LAUNCH_TASK_BEHIND_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+228;
     int START_ACTIVITY_FROM_RECENTS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 229;
     int NOTIFY_ENTER_ANIMATION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+230;
+    int KEYGUARD_WAITING_FOR_ACTIVITY_DRAWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+231;
 }

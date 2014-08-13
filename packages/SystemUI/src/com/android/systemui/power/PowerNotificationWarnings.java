@@ -38,6 +38,7 @@ import android.util.Slog;
 import android.view.View;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.io.PrintWriter;
@@ -93,10 +94,10 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private boolean mInvalidCharger;
     private SystemUIDialog mSaverConfirmation;
 
-    public PowerNotificationWarnings(Context context) {
+    public PowerNotificationWarnings(Context context, PhoneStatusBar phoneStatusBar) {
         mContext = context;
         mNoMan = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        mFallbackDialogs = new PowerDialogWarnings(context);
+        mFallbackDialogs = new PowerDialogWarnings(context, phoneStatusBar);
         mReceiver.init();
     }
 

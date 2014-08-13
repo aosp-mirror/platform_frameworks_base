@@ -237,7 +237,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     }
 
     public void startDisappearAnimation(Runnable finishRunnable) {
-        if (!mSecurityContainer.startDisappearAnimation(finishRunnable)) {
+        if (!mSecurityContainer.startDisappearAnimation(finishRunnable) && finishRunnable != null) {
             finishRunnable.run();
         }
     }

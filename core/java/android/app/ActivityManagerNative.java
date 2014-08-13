@@ -1942,9 +1942,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case DISMISS_KEYGUARD_ON_NEXT_ACTIVITY_TRANSACTION: {
+        case KEYGUARD_WAITING_FOR_ACTIVITY_DRAWN_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            dismissKeyguardOnNextActivity();
+            keyguardWaitingForActivityDrawn();
             reply.writeNoException();
             return true;
         }
@@ -4738,11 +4738,11 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public void dismissKeyguardOnNextActivity() throws RemoteException {
+    public void keyguardWaitingForActivityDrawn() throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        mRemote.transact(DISMISS_KEYGUARD_ON_NEXT_ACTIVITY_TRANSACTION, data, reply, 0);
+        mRemote.transact(KEYGUARD_WAITING_FOR_ACTIVITY_DRAWN_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
