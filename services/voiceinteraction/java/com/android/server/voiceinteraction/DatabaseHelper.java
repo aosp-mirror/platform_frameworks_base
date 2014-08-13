@@ -130,8 +130,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         synchronized(this) {
             SQLiteDatabase db = getWritableDatabase();
-            String soundModelClause = SoundModelContract.KEY_MODEL_UUID + "="
-                    + modelUuid.toString();
+            String soundModelClause = SoundModelContract.KEY_MODEL_UUID + "='"
+                    + modelUuid.toString() + "'";
 
             try {
                 return db.delete(SoundModelContract.TABLE, soundModelClause, null) != 0;
