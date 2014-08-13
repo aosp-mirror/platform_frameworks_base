@@ -2574,9 +2574,21 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews applyStandardTemplate(int resId, boolean fitIn1U) {
+            final boolean largeFontScale
+                    = mContext.getResources().getConfiguration().fontScale >= 1.25f;
+
             Bitmap profileIcon = getProfileBadge();
             RemoteViews contentView = new BuilderRemoteViews(mContext.getPackageName(),
                     mOriginatingUserId, resId);
+
+            if (largeFontScale) {
+                // Make a little extra room for the bigger text.
+                final int margin = (int) mContext.getResources()
+                        .getDimensionPixelSize(R.dimen.notification_large_font_vert_pad);
+                contentView.setViewPadding(R.id.line1, 0, margin, 0, 0);
+                contentView.setViewPadding(R.id.line3, 0, 0, 0, margin);
+            }
+
             boolean showLine3 = false;
             boolean showLine2 = false;
 
@@ -3218,7 +3230,7 @@ public class Notification implements Parcelable
         }
 
         private int getBigTextLayoutResource() {
-            return R.layout.notification_template_material_big_text;
+            return getBigBaseLayoutResource();
         }
 
         private int getInboxLayoutResource() {
