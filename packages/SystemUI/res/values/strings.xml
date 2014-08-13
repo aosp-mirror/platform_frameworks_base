@@ -685,8 +685,8 @@
     <!-- Label for adding a new guest in the user switcher [CHAR LIMIT=35] -->
     <string name="guest_new_guest">Add guest</string>
 
-    <!-- Label for exiting guest session in the user switcher [CHAR LIMIT=35] -->
-    <string name="guest_exit_guest">Exit guest</string>
+    <!-- Label for exiting and removing the  guest session in the user switcher [CHAR LIMIT=35] -->
+    <string name="guest_exit_guest">Remove guest</string>
 
     <!-- Title of the confirmation dialog when exiting guest session [CHAR LIMIT=NONE] -->
     <string name="guest_exit_guest_dialog_title">Exiting guest session?</string>
