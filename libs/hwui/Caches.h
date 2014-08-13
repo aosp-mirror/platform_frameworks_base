@@ -366,6 +366,9 @@ public:
     float propertyLightPosY;
     float propertyLightPosZ;
     float propertyAmbientRatio;
+    int propertyAmbientShadowStrength;
+    int propertySpotShadowStrength;
+
 private:
     enum OverdrawColorSet {
         kColorSet_Default = 0,

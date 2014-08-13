@@ -703,6 +703,8 @@ void Caches::initTempProperties() {
     propertyLightPosY = -1.0f;
     propertyLightPosZ = -1.0f;
     propertyAmbientRatio = -1.0f;
+    propertyAmbientShadowStrength = -1;
+    propertySpotShadowStrength = -1;
 }
 
 void Caches::setTempProperty(const char* name, const char* value) {
@@ -722,6 +724,14 @@ void Caches::setTempProperty(const char* name, const char* value) {
     } else if (!strcmp(name, "lightPosZ")) {
         propertyLightPosZ = fmin(fmax(atof(value), 0.0), 3000.0);
         ALOGD("lightPos Z = %.2f", propertyLightPosZ);
+        return;
+    } else if (!strcmp(name, "ambientShadowStrength")) {
+        propertyAmbientShadowStrength = atoi(value);
+        ALOGD("ambient shadow strength = 0x%x out of 0xff", propertyAmbientShadowStrength);
+        return;
+    } else if (!strcmp(name, "spotShadowStrength")) {
+        propertySpotShadowStrength = atoi(value);
+        ALOGD("spot shadow strength = 0x%x out of 0xff", propertySpotShadowStrength);
         return;
     }
     ALOGD("    failed");
