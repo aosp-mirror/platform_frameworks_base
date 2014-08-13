@@ -253,7 +253,7 @@ public class ActionBarContainer extends FrameLayout {
         return null;
     }
 
-    private boolean isCollapsed(View view) {
+    private static boolean isCollapsed(View view) {
         return view == null || view.getVisibility() == GONE || view.getMeasuredHeight() == 0;
     }
 
@@ -326,35 +326,33 @@ public class ActionBarContainer extends FrameLayout {
      * projection surfaces.
      */
     private class ActionBarBackgroundDrawable extends Drawable {
-        private Drawable getDrawable() {
+        @Override
+        public void draw(Canvas canvas) {
             if (mIsSplit) {
                 if (mSplitBackground != null) {
-                    return mSplitBackground;
+                    mSplitBackground.draw(canvas);
                 }
             } else {
                 if (mBackground != null) {
-                    return mBackground;
+                    mBackground.draw(canvas);
                 }
                 if (mStackedBackground != null && mIsStacked) {
-                    return mStackedBackground;
+                    mStackedBackground.draw(canvas);
                 }
-            }
-            return null;
-        }
-
-        @Override
-        public void draw(Canvas canvas) {
-            final Drawable drawable = getDrawable();
-            if (drawable != null) {
-                drawable.draw(canvas);
             }
         }
 
         @Override
         public void getOutline(@NonNull Outline outline) {
-            final Drawable drawable = getDrawable();
-            if (drawable != null) {
-                drawable.getOutline(outline);
+            if (mIsSplit) {
+                if (mSplitBackground != null) {
+                    mSplitBackground.getOutline(outline);
+                }
+            } else {
+                // ignore the stacked background for shadow casting
+                if (mBackground != null) {
+                    mBackground.getOutline(outline);
+                }
             }
         }
 
