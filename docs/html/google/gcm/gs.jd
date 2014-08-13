@@ -20,7 +20,6 @@ page.tags=cloud,push,messaging
 <ol class="toc">
 <li><a href="https://cloud.google.com/console">Google Cloud Console</a></li>
 <li><a href="https://developers.google.com/console/help/new/">Google Cloud Console Help</a></li>
-<li><a href="https://services.google.com/fb/forms/gcm/" class="external-link" target="_android">CCS and User Notifications Signup Form</a></li>
 </ol>
 
 </div>
