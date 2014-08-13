@@ -1543,6 +1543,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final Intent intent = r.intent;
         final int callingUid = r.launchedFromUid;
 
+        final boolean launchSingleTop = r.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP;
         final boolean launchSingleInstance = r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE;
         final boolean launchSingleTask = r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK;
 
@@ -1798,8 +1799,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         // If the top activity in the task is the root
                         // activity, deliver this new intent to it if it
                         // desires.
-                        if (((launchFlags&Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
-                                || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP)
+                        if (((launchFlags&Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0 || launchSingleTop)
                                 && intentActivity.realActivity.equals(r.realActivity)) {
                             ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, r,
                                     intentActivity.task);
@@ -1863,7 +1863,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 if (top.realActivity.equals(r.realActivity) && top.userId == r.userId) {
                     if (top.app != null && top.app.thread != null) {
                         if ((launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
-                            || launchSingleInstance || launchSingleTask) {
+                            || launchSingleTop || launchSingleTask) {
                             ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, top,
                                     top.task);
                             // For paranoia, make sure we have correctly
