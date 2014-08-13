@@ -16,22 +16,24 @@
 
 package com.android.internal.telecomm;
 
-import android.telecomm.CallCameraCapabilities;
-import android.telecomm.VideoCallProfile;
+import android.telecomm.CameraCapabilities;
+import android.telecomm.VideoProfile;
 
-/**
- * Internal definition of a callback interface, used for an InCallUi to respond to video telephony
- * changes.
- *
- * @see android.telecomm.InCallService.VideoCall.Listener
- *
- * {@hide}
- */
-oneway interface IVideoCallCallback {
-    void receiveSessionModifyRequest(in VideoCallProfile videoCallProfile);
+ /**
+  * Internal definition of a callback interface, used for an InCallUi to respond to video
+  * telephony changes.
+  *
+  * @see android.telecomm.InCallService.VideoCall.Listener
+  *
+  * {@hide}
+  */
+oneway interface IVideoCallback {
+    void receiveSessionModifyRequest(in VideoProfile videoProfile);
 
-    void receiveSessionModifyResponse(int status, in VideoCallProfile requestedProfile,
-        in VideoCallProfile responseProfile);
+    void receiveSessionModifyResponse(
+            int status,
+            in VideoProfile requestedProfile,
+            in VideoProfile responseProfile);
 
     void handleCallSessionEvent(int event);
 
@@ -39,5 +41,5 @@ oneway interface IVideoCallCallback {
 
     void changeCallDataUsage(int dataUsage);
 
-    void changeCameraCapabilities(in CallCameraCapabilities callCameraCapabilities);
+    void changeCameraCapabilities(in CameraCapabilities cameraCapabilities);
 }

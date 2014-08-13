@@ -17,15 +17,15 @@
 package com.android.internal.telecomm;
 
 import android.view.Surface;
-import android.telecomm.VideoCallProfile;
+import android.telecomm.VideoProfile;
 
 /**
  * Internal remote interface for a video call provider.
- * @see android.telecomm.VideoCallProvider
+ * @see android.telecomm.VideoProvider
  * @hide
  */
-oneway interface IVideoCallProvider {
-    void setVideoCallListener(IBinder videoCallListenerBinder);
+oneway interface IVideoProvider {
+    void setVideoListener(IBinder videoListenerBinder);
 
     void setCamera(String cameraId);
 
@@ -37,9 +37,9 @@ oneway interface IVideoCallProvider {
 
     void setZoom(float value);
 
-    void sendSessionModifyRequest(in VideoCallProfile reqProfile);
+    void sendSessionModifyRequest(in VideoProfile reqProfile);
 
-    void sendSessionModifyResponse(in VideoCallProfile responseProfile);
+    void sendSessionModifyResponse(in VideoProfile responseProfile);
 
     void requestCameraCapabilities();
 

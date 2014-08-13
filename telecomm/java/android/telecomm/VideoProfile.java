@@ -22,7 +22,7 @@ import android.os.Parcelable;
 /**
  * Represents attributes of video calls.
  */
-public class VideoCallProfile implements Parcelable {
+public class VideoProfile implements Parcelable {
     /**
      * "High" video quality.
      */
@@ -48,32 +48,32 @@ public class VideoCallProfile implements Parcelable {
     private final int mQuality;
 
     /**
-     * Creates an instance of the VideoCallProfile
+     * Creates an instance of the VideoProfile
      *
      * @param videoState The video state.
      */
-    public VideoCallProfile(int videoState) {
+    public VideoProfile(int videoState) {
         this(videoState, QUALITY_DEFAULT);
     }
 
     /**
-     * Creates an instance of the VideoCallProfile
+     * Creates an instance of the VideoProfile
      *
      * @param videoState The video state.
      * @param quality The video quality.
      */
-    public VideoCallProfile(int videoState, int quality) {
+    public VideoProfile(int videoState, int quality) {
         mVideoState = videoState;
         mQuality = quality;
     }
 
     /**
      * The video state of the call.
-     * Valid values: {@link VideoCallProfile.VideoState#AUDIO_ONLY},
-     * {@link VideoCallProfile.VideoState#BIDIRECTIONAL},
-     * {@link VideoCallProfile.VideoState#TX_ENABLED},
-     * {@link VideoCallProfile.VideoState#RX_ENABLED},
-     * {@link VideoCallProfile.VideoState#PAUSED}.
+     * Valid values: {@link VideoProfile.VideoState#AUDIO_ONLY},
+     * {@link VideoProfile.VideoState#BIDIRECTIONAL},
+     * {@link VideoProfile.VideoState#TX_ENABLED},
+     * {@link VideoProfile.VideoState#RX_ENABLED},
+     * {@link VideoProfile.VideoState#PAUSED}.
      */
     public int getVideoState() {
         return mVideoState;
@@ -81,18 +81,18 @@ public class VideoCallProfile implements Parcelable {
 
     /**
      * The desired video quality for the call.
-     * Valid values: {@link VideoCallProfile#QUALITY_HIGH}, {@link VideoCallProfile#QUALITY_MEDIUM},
-     * {@link VideoCallProfile#QUALITY_LOW}, {@link VideoCallProfile#QUALITY_DEFAULT}.
+     * Valid values: {@link VideoProfile#QUALITY_HIGH}, {@link VideoProfile#QUALITY_MEDIUM},
+     * {@link VideoProfile#QUALITY_LOW}, {@link VideoProfile#QUALITY_DEFAULT}.
      */
     public int getQuality() {
         return mQuality;
     }
 
     /**
-     * Responsible for creating VideoCallProfile objects from deserialized Parcels.
+     * Responsible for creating VideoProfile objects from deserialized Parcels.
      **/
-    public static final Parcelable.Creator<VideoCallProfile> CREATOR =
-            new Parcelable.Creator<VideoCallProfile> () {
+    public static final Parcelable.Creator<VideoProfile> CREATOR =
+            new Parcelable.Creator<VideoProfile> () {
                 /**
                  * Creates a MediaProfile instances from a parcel.
                  *
@@ -100,17 +100,17 @@ public class VideoCallProfile implements Parcelable {
                  * @return The MediaProfile.
                  */
                 @Override
-                public VideoCallProfile createFromParcel(Parcel source) {
+                public VideoProfile createFromParcel(Parcel source) {
                     int state = source.readInt();
                     int quality = source.readInt();
 
-                    ClassLoader classLoader = VideoCallProfile.class.getClassLoader();
-                    return new VideoCallProfile(state, quality);
+                    ClassLoader classLoader = VideoProfile.class.getClassLoader();
+                    return new VideoProfile(state, quality);
                 }
 
                 @Override
-                public VideoCallProfile[] newArray(int size) {
-                    return new VideoCallProfile[size];
+                public VideoProfile[] newArray(int size) {
+                    return new VideoProfile[size];
                 }
             };
 
