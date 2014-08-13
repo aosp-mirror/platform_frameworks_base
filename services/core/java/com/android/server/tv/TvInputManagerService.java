@@ -996,12 +996,13 @@ public final class TvInputManagerService extends SystemService {
         }
 
         private void ensureParentalControlsPermission() {
-            if (mContext.checkCallingPermission(
-                    android.Manifest.permission.MODIFY_PARENTAL_CONTROLS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(
-                        "The caller does not have parental controls permission");
-            }
+            // STOPSHIP: Uncomment when b/16984416 is resolved.
+            //if (mContext.checkCallingPermission(
+            //        android.Manifest.permission.MODIFY_PARENTAL_CONTROLS)
+            //        != PackageManager.PERMISSION_GRANTED) {
+            //    throw new SecurityException(
+            //            "The caller does not have parental controls permission");
+            //}
         }
 
         @Override
