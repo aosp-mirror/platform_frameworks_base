@@ -1165,7 +1165,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 Slog.e(TAG, "Second failure launching "
                       + r.intent.getComponent().flattenToShortString()
                       + ", giving up", e);
-                mService.appDiedLocked(app, app.pid, app.thread);
+                mService.appDiedLocked(app);
                 stack.requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
                         "2nd-crash", false);
                 return false;

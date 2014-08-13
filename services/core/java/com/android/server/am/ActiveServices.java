@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemProperties;
@@ -1424,6 +1425,9 @@ public final class ActiveServices {
                     app.repProcState);
             r.postNotification();
             created = true;
+        } catch (DeadObjectException e) {
+            Slog.w(TAG, "Application dead when creating service " + r);
+            mAm.appDiedLocked(app);
         } finally {
             if (!created) {
                 app.services.remove(r);

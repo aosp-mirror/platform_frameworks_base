@@ -4201,6 +4201,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    final void appDiedLocked(ProcessRecord app) {
+       appDiedLocked(app, app.pid, app.thread);
+    }
+
     final void appDiedLocked(ProcessRecord app, int pid,
             IApplicationThread thread) {
 
@@ -8478,7 +8482,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 "Existing provider " + cpr.name.flattenToShortString()
                                 + " is crashing; detaching " + r);
                         boolean lastRef = decProviderCountLocked(conn, cpr, token, stable);
-                        appDiedLocked(cpr.proc, cpr.proc.pid, cpr.proc.thread);
+                        appDiedLocked(cpr.proc);
                         if (!lastRef) {
                             // This wasn't the last ref our process had on
                             // the provider...  we have now been killed, bail.
@@ -8928,7 +8932,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + ") early provider death");
             final long ident = Binder.clearCallingIdentity();
             try {
-                appDiedLocked(proc, proc.pid, proc.thread);
+                appDiedLocked(proc);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
