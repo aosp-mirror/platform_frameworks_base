@@ -117,10 +117,13 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
 
         // inner ring of points
         float opacity = 1.0 / (1 + rayHeight[rayIndex] * heightFactor);
+        // NOTE: Shadow alpha values are transformed when stored in alphavertices,
+        // so that they can be consumed directly by gFS_Main_ApplyVertexAlphaShadowInterp
+        float transformedOpacity = acos(1.0f - 2.0f * opacity);
         AlphaVertex::set(&shadowVertices[rays + rayIndex],
                 intersection.x,
                 intersection.y,
-                opacity);
+                transformedOpacity);
     }
 
     if (isCasterOpaque) {
