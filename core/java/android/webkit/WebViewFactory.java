@@ -29,6 +29,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
@@ -83,26 +84,38 @@ public final class WebViewFactory {
             // us honest and minimize usage of WebView internals when binding the proxy.
             if (sProviderInstance != null) return sProviderInstance;
 
-            loadNativeLibrary();
-
-            Class<WebViewFactoryProvider> providerClass;
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getProvider()");
             try {
-                providerClass = getFactoryClass();
-            } catch (ClassNotFoundException e) {
-                Log.e(LOGTAG, "error loading provider", e);
-                throw new AndroidRuntimeException(e);
-            }
+                Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.loadNativeLibrary()");
+                loadNativeLibrary();
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
 
-            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
-            try {
-                sProviderInstance = providerClass.newInstance();
-                if (DEBUG) Log.v(LOGTAG, "Loaded provider: " + sProviderInstance);
-                return sProviderInstance;
-            } catch (Exception e) {
-                Log.e(LOGTAG, "error instantiating provider", e);
-                throw new AndroidRuntimeException(e);
+                Class<WebViewFactoryProvider> providerClass;
+                Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getFactoryClass()");
+                try {
+                    providerClass = getFactoryClass();
+                } catch (ClassNotFoundException e) {
+                    Log.e(LOGTAG, "error loading provider", e);
+                    throw new AndroidRuntimeException(e);
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+                }
+
+                StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+                Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "providerClass.newInstance()");
+                try {
+                    sProviderInstance = providerClass.newInstance();
+                    if (DEBUG) Log.v(LOGTAG, "Loaded provider: " + sProviderInstance);
+                    return sProviderInstance;
+                } catch (Exception e) {
+                    Log.e(LOGTAG, "error instantiating provider", e);
+                    throw new AndroidRuntimeException(e);
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+                    StrictMode.setThreadPolicy(oldPolicy);
+                }
             } finally {
-                StrictMode.setThreadPolicy(oldPolicy);
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
             }
         }
     }
@@ -122,8 +135,13 @@ public final class WebViewFactory {
             initialApplication.getAssets().addAssetPath(
                     webViewContext.getApplicationInfo().sourceDir);
             ClassLoader clazzLoader = webViewContext.getClassLoader();
-            return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY, true,
-                                                                 clazzLoader);
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "Class.forName()");
+            try {
+                return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY, true,
+                                                                     clazzLoader);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+            }
         } catch (PackageManager.NameNotFoundException e) {
             // If the package doesn't exist, then try loading the null WebView instead.
             // If that succeeds, then this is a device without WebView support; if it fails then
