@@ -7680,7 +7680,6 @@ package android.content {
     field public static final java.lang.String ACTION_CHOOSER = "android.intent.action.CHOOSER";
     field public static final java.lang.String ACTION_CLOSE_SYSTEM_DIALOGS = "android.intent.action.CLOSE_SYSTEM_DIALOGS";
     field public static final java.lang.String ACTION_CONFIGURATION_CHANGED = "android.intent.action.CONFIGURATION_CHANGED";
-    field public static final java.lang.String ACTION_CONFIRM_DEVICE_CREDENTIAL = "android.intent.action.CONFIRM_DEVICE_CREDENTIAL";
     field public static final java.lang.String ACTION_CREATE_DOCUMENT = "android.intent.action.CREATE_DOCUMENT";
     field public static final java.lang.String ACTION_CREATE_SHORTCUT = "android.intent.action.CREATE_SHORTCUT";
     field public static final java.lang.String ACTION_DATE_CHANGED = "android.intent.action.DATE_CHANGED";
@@ -7824,7 +7823,6 @@ package android.content {
     field public static final java.lang.String EXTRA_CHANGED_PACKAGE_LIST = "android.intent.extra.changed_package_list";
     field public static final java.lang.String EXTRA_CHANGED_UID_LIST = "android.intent.extra.changed_uid_list";
     field public static final java.lang.String EXTRA_DATA_REMOVED = "android.intent.extra.DATA_REMOVED";
-    field public static final java.lang.String EXTRA_DETAILS = "android.intent.extra.DETAILS";
     field public static final java.lang.String EXTRA_DOCK_STATE = "android.intent.extra.DOCK_STATE";
     field public static final int EXTRA_DOCK_STATE_CAR = 2; // 0x2
     field public static final int EXTRA_DOCK_STATE_DESK = 1; // 0x1
