@@ -1480,7 +1480,7 @@ public final class TvContentRating {
             Arrays.sort(subRatings);
             mSubRatings = subRatings;
         }
-        mHashCode = Objects.hash(mDomain, mRating, mSubRatings);
+        mHashCode = 31 * Objects.hash(mDomain, mRating) + Arrays.hashCode(mSubRatings);
     }
 
     /**
