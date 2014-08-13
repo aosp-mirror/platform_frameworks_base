@@ -40,13 +40,13 @@
         />
     <include layout="@layout/notification_template_material_base"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         />
   <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="208dp"
-        android:paddingStart="64dp"
+        android:paddingStart="@dimen/notification_large_icon_width"
         android:layout_gravity="bottom"
         android:background="#CCEEEEEE"
         >
