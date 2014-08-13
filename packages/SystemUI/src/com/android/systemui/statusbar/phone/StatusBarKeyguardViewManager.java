@@ -376,4 +376,12 @@ public class StatusBarKeyguardViewManager {
             mViewMediatorCallback.readyForKeyguardDone();
         }
     }
+
+    public boolean shouldDisableWindowAnimationsForUnlock() {
+        return mPhoneStatusBar.isInLaunchTransition();
+    }
+
+    public boolean isGoingToNotificationShade() {
+        return mPhoneStatusBar.isGoingToNotificationShade();
+    }
 }

@@ -88,6 +88,8 @@ public class WindowAnimator {
     boolean mInitialized = false;
 
     boolean mKeyguardGoingAway;
+    boolean mKeyguardGoingAwayToNotificationShade;
+    boolean mKeyguardGoingAwayDisableWindowAnimations;
 
     // forceHiding states.
     static final int KEYGUARD_NOT_SHOWN     = 0;
@@ -389,7 +391,11 @@ public class WindowAnimator {
         if (unForceHiding != null) {
             boolean startKeyguardExit = true;
             for (int i=unForceHiding.size()-1; i>=0; i--) {
-                Animation a = mPolicy.createForceHideEnterAnimation(wallpaperInUnForceHiding);
+                Animation a = null;
+                if (!mKeyguardGoingAwayDisableWindowAnimations) {
+                    a = mPolicy.createForceHideEnterAnimation(wallpaperInUnForceHiding,
+                            mKeyguardGoingAwayToNotificationShade);
+                }
                 if (a != null) {
                     final WindowStateAnimator winAnimator = unForceHiding.get(i);
                     winAnimator.setAnimation(a);
@@ -405,9 +411,14 @@ public class WindowAnimator {
             }
 
             // Wallpaper is going away in un-force-hide motion, animate it as well.
-            if (!wallpaperInUnForceHiding && wallpaper != null) {
-                WindowStateAnimator animator = wallpaper.mWinAnimator;
-                animator.setAnimation(mPolicy.createForceHideWallpaperExitAnimation());
+            if (!wallpaperInUnForceHiding && wallpaper != null
+                    && !mKeyguardGoingAwayDisableWindowAnimations) {
+                Animation a = mPolicy.createForceHideWallpaperExitAnimation(
+                        mKeyguardGoingAwayToNotificationShade);
+                if (a != null) {
+                    WindowStateAnimator animator = wallpaper.mWinAnimator;
+                    animator.setAnimation(a);
+                }
             }
         }
     }

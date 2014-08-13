@@ -2064,8 +2064,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public Animation createForceHideEnterAnimation(boolean onWallpaper) {
-        if (onWallpaper) {
+    public Animation createForceHideEnterAnimation(boolean onWallpaper,
+            boolean goingToNotificationShade) {
+        if (goingToNotificationShade) {
+            return AnimationUtils.loadAnimation(mContext, R.anim.lock_screen_behind_enter_fade_in);
+        } else if (onWallpaper) {
             Animation a = AnimationUtils.loadAnimation(mContext,
                     R.anim.lock_screen_behind_enter_wallpaper);
             AnimationSet set = (AnimationSet) a;
@@ -2073,7 +2076,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // TODO: Use XML interpolators when we have log interpolators available in XML.
             set.getAnimations().get(0).setInterpolator(mLogDecelerateInterpolator);
             set.getAnimations().get(1).setInterpolator(mLogDecelerateInterpolator);
-            set.getAnimations().get(2).setInterpolator(mLogDecelerateInterpolator);
             return set;
         } else {
             Animation a = AnimationUtils.loadAnimation(mContext,
@@ -2088,8 +2090,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
 
     @Override
-    public Animation createForceHideWallpaperExitAnimation() {
-        return AnimationUtils.loadAnimation(mContext, R.anim.lock_screen_wallpaper_exit);
+    public Animation createForceHideWallpaperExitAnimation(boolean goingToNotificationShade) {
+        if (goingToNotificationShade) {
+            return null;
+        } else {
+            return AnimationUtils.loadAnimation(mContext, R.anim.lock_screen_wallpaper_exit);
+        }
     }
 
     private static void awakenDreams() {
