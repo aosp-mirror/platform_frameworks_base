@@ -6855,9 +6855,11 @@
          its {@link android.service.voice.VoiceInteractionService#SERVICE_META_DATA} meta-data entry.
          Described here are the attributes that can be included in that tag. -->
     <declare-styleable name="VoiceInteractionService">
-        <!-- The service that hosts active voice interaction sessions. -->
+        <!-- The service that hosts active voice interaction sessions.  This is required. -->
         <attr name="sessionService" format="string" />
-        <!-- The service that provides voice recognition. -->
+        <!-- The service that provides voice recognition.  This is required.  When the user
+             selects this voice interaction service, they will also be implicitly selecting
+             the component here for their recognition service. -->
         <attr name="recognitionService" format="string" />
         <attr name="settingsActivity" />
     </declare-styleable>

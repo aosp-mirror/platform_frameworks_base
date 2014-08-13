@@ -99,6 +99,10 @@ public class VoiceInteractionServiceInfo {
                 mParseError = "No sessionService specified";
                 return;
             }
+            if (mRecognitionService == null) {
+                mParseError = "No recogitionService specified";
+                return;
+            }
         } catch (XmlPullParserException e) {
             mParseError = "Error parsing voice interation service meta-data: " + e;
             Log.w(TAG, "error parsing voice interaction service meta-data", e);

@@ -25886,8 +25886,10 @@ package android.provider {
     field public static final java.lang.String ACTION_SHOW_REGULATORY_INFO = "android.settings.SHOW_REGULATORY_INFO";
     field public static final java.lang.String ACTION_SOUND_SETTINGS = "android.settings.SOUND_SETTINGS";
     field public static final java.lang.String ACTION_SYNC_SETTINGS = "android.settings.SYNC_SETTINGS";
+    field public static final java.lang.String ACTION_USAGE_ACCESS_SETTINGS = "android.settings.USAGE_ACCESS_SETTINGS";
     field public static final java.lang.String ACTION_USER_DICTIONARY_SETTINGS = "android.settings.USER_DICTIONARY_SETTINGS";
     field public static final java.lang.String ACTION_VOICE_CONTROL_AIRPLANE_MODE = "android.settings.VOICE_CONTROL_AIRPLANE_MODE";
+    field public static final java.lang.String ACTION_VOICE_INPUT_SETTINGS = "android.settings.VOICE_INPUT_SETTINGS";
     field public static final java.lang.String ACTION_WIFI_IP_SETTINGS = "android.settings.WIFI_IP_SETTINGS";
     field public static final java.lang.String ACTION_WIFI_SETTINGS = "android.settings.WIFI_SETTINGS";
     field public static final java.lang.String ACTION_WIRELESS_SETTINGS = "android.settings.WIRELESS_SETTINGS";
@@ -32622,6 +32624,7 @@ package android.util {
     method public void setTo(android.util.DisplayMetrics);
     method public void setToDefaults();
     field public static final int DENSITY_400 = 400; // 0x190
+    field public static final int DENSITY_560 = 560; // 0x230
     field public static final int DENSITY_DEFAULT = 160; // 0xa0
     field public static final int DENSITY_HIGH = 240; // 0xf0
     field public static final int DENSITY_LOW = 120; // 0x78
