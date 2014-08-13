@@ -3898,10 +3898,10 @@
     <!-- Description of an application permission that lets it control keyguard. -->
     <string name="permdesc_recovery">Allows an application to interact with the recovery system and system updates.</string>
 
-    <!-- Title of an application permission that lets it create media projection sessions. -->
-    <string name="permlab_createMediaProjection">Create media projection sessions</string>
-    <!-- Description of an application permission that lets it create media projection sessions. -->
-    <string name="permdesc_createMediaProjection">Allows an application to create media projection sessions. These sessions can provide applications the ability to capture display and audio contents. Should never be needed by normal apps.</string>
+    <!-- Title of an application permission that lets it manage media projection sessions. -->
+    <string name="permlab_manageMediaProjection">Manage media projection sessions</string>
+    <!-- Description of an application permission that lets it manage media projection sessions. -->
+    <string name="permdesc_manageMediaProjection">Allows an application to manage media projection sessions. These sessions can provide applications the ability to capture display and audio contents. Should never be needed by normal apps.</string>
 
     <!-- Title of an application permission that lets it read install sessions. -->
     <string name="permlab_readInstallSessions">Read install sessions</string>

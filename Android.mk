@@ -329,6 +329,7 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/projection/IMediaProjection.aidl \
 	media/java/android/media/projection/IMediaProjectionCallback.aidl \
 	media/java/android/media/projection/IMediaProjectionManager.aidl \
+	media/java/android/media/projection/IMediaProjectionWatcherCallback.aidl \
 	media/java/android/media/routing/IMediaRouteService.aidl \
 	media/java/android/media/routing/IMediaRouteClientCallback.aidl \
 	media/java/android/media/routing/IMediaRouter.aidl \
