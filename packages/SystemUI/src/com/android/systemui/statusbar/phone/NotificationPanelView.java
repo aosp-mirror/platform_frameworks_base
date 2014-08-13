@@ -414,12 +414,12 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    public void fling(float vel, boolean always) {
+    public void fling(float vel, boolean expand) {
         GestureRecorder gr = ((PhoneStatusBarView) mBar).mBar.getGestureRecorder();
         if (gr != null) {
             gr.tag("fling " + ((vel > 0) ? "open" : "closed"), "notifications,v=" + vel);
         }
-        super.fling(vel, always);
+        super.fling(vel, expand);
     }
 
     @Override

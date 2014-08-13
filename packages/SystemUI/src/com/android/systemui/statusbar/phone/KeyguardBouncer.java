@@ -98,7 +98,7 @@ public class KeyguardBouncer {
     public void startPreHideAnimation(Runnable runnable) {
         if (mKeyguardView != null) {
             mKeyguardView.startDisappearAnimation(runnable);
-        } else {
+        } else if (runnable != null) {
             runnable.run();
         }
     }

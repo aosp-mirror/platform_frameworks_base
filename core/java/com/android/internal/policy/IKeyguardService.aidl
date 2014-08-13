@@ -65,4 +65,10 @@ interface IKeyguardService {
      * @param fadeoutDuration the duration of the exit animation, in milliseconds
      */
     oneway void startKeyguardExitAnimation(long startTime, long fadeoutDuration);
+
+    /**
+     * Notifies the Keyguard that the activity that was starting has now been drawn and it's safe
+     * to start the keyguard dismiss sequence.
+     */
+    oneway void onActivityDrawn();
 }

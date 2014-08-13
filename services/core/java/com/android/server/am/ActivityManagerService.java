@@ -5639,17 +5639,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void dismissKeyguardOnNextActivity() {
-        enforceNotIsolatedCaller("dismissKeyguardOnNextActivity");
+    public void keyguardWaitingForActivityDrawn() {
+        enforceNotIsolatedCaller("keyguardWaitingForActivityDrawn");
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
                 if (DEBUG_LOCKSCREEN) logLockScreen("");
-                if (mLockScreenShown) {
-                    mLockScreenShown = false;
-                    comeOutOfSleepIfNeededLocked();
-                }
-                mStackSupervisor.setDismissKeyguard(true);
+                mWindowManager.keyguardWaitingForActivityDrawn();
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -9263,8 +9259,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     void logLockScreen(String msg) {
         if (DEBUG_LOCKSCREEN) Slog.d(TAG, Debug.getCallers(2) + ":" + msg +
                 " mLockScreenShown=" + mLockScreenShown + " mWentToSleep=" +
-                mWentToSleep + " mSleeping=" + mSleeping + " mDismissKeyguardOnNextActivity=" +
-                mStackSupervisor.mDismissKeyguardOnNextActivity);
+                mWentToSleep + " mSleeping=" + mSleeping);
     }
 
     private void comeOutOfSleepIfNeededLocked() {

@@ -16,7 +16,6 @@
 
 package com.android.systemui.power;
 
-import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -26,15 +25,14 @@ import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.view.ContextThemeWrapper;
 import android.view.WindowManager;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.io.PrintWriter;
 
@@ -43,6 +41,7 @@ public class PowerDialogWarnings implements PowerUI.WarningsUI {
     private static final boolean DEBUG = PowerUI.DEBUG;
 
     private final Context mContext;
+    private final PhoneStatusBar mPhoneStatusBar;
 
     private int mBatteryLevel;
     private int mBucket;
@@ -52,8 +51,9 @@ public class PowerDialogWarnings implements PowerUI.WarningsUI {
     private AlertDialog mInvalidChargerDialog;
     private AlertDialog mLowBatteryDialog;
 
-    public PowerDialogWarnings(Context context) {
+    public PowerDialogWarnings(Context context, PhoneStatusBar phoneStatusBar) {
         mContext = new ContextThemeWrapper(context, android.R.style.Theme_DeviceDefault_Light);
+        mPhoneStatusBar = phoneStatusBar;
     }
 
     @Override
@@ -121,12 +121,7 @@ public class PowerDialogWarnings implements PowerUI.WarningsUI {
                         new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        try {
-                            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-                        } catch (RemoteException e) {
-                            // we tried
-                        }
-                        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                        mPhoneStatusBar.startActivity(intent, true /* dismissShade */);
                         dismissLowBatteryWarning();
                     }
                 });

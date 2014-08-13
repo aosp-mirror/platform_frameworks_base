@@ -1014,6 +1014,11 @@ public interface WindowManagerPolicy {
     public void dismissKeyguardLw();
 
     /**
+     * Notifies the keyguard that the activity has drawn it was waiting for.
+     */
+    public void notifyActivityDrawnForKeyguardLw();
+
+    /**
      * Ask the policy whether the Keyguard has drawn. If the Keyguard is disabled, this method
      * returns true as soon as we know that Keyguard is disabled.
      *

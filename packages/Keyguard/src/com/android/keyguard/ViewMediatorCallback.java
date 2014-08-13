@@ -61,4 +61,9 @@ public interface ViewMediatorCallback {
      * Report when keyguard is actually gone
      */
     void keyguardGone();
+
+    /**
+     * Report when the UI is ready for dismissing the whole Keyguard.
+     */
+    void readyForKeyguardDone();
 }

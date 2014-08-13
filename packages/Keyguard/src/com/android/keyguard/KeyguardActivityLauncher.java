@@ -36,6 +36,7 @@ import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 
@@ -214,9 +215,9 @@ public abstract class KeyguardActivityLauncher {
 
     private void dismissKeyguardOnNextActivity() {
         try {
-            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+            WindowManagerGlobal.getWindowManagerService().dismissKeyguard();
         } catch (RemoteException e) {
-            Log.w(TAG, "can't dismiss keyguard on launch");
+            Log.w(TAG, "Error dismissing keyguard", e);
         }
     }
 
