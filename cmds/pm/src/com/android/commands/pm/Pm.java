@@ -1703,6 +1703,10 @@ public final class Pm {
             throw new IllegalArgumentException("Missing ABI argument");
         }
 
+        if ("-".equals(abi)) {
+            return abi;
+        }
+
         final String[] supportedAbis = Build.SUPPORTED_ABIS;
         for (String supportedAbi : supportedAbis) {
             if (supportedAbi.equals(abi)) {
