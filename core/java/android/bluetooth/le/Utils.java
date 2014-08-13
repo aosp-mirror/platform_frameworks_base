@@ -44,7 +44,7 @@ public class Utils {
         StringBuilder buffer = new StringBuilder();
         buffer.append('{');
         for (int i = 0; i < array.size(); ++i) {
-            buffer.append(array.keyAt(i)).append("=").append(array.valueAt(i));
+            buffer.append(array.keyAt(i)).append("=").append(Arrays.toString(array.valueAt(i)));
         }
         buffer.append('}');
         return buffer.toString();
