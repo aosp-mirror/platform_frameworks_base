@@ -3874,15 +3874,15 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * By default a document created by {@link #FLAG_ACTIVITY_NEW_DOCUMENT} will
      * have its entry in recent tasks removed when the user closes it (with back
-     * or however else it may finish()).  If you would like to instead allow the
+     * or however else it may finish()). If you would like to instead allow the
      * document to be kept in recents so that it can be re-launched, you can use
-     * this flag.  When set and the task's activity is finished, the recents entry
-     * will remain in the interface for the user to re-launch it, like a recents
-     * entry for a top-level application.
-     *
-     * <p>The receiving activity can override this request with
-     * {@link android.R.styleable#AndroidManifestActivity_autoRemoveFromRecents}
-     * or by explcitly calling {@link android.app.Activity#finishAndRemoveTask()
+     * this flag. When set and the task's activity is finished, the recents
+     * entry will remain in the interface for the user to re-launch it, like a
+     * recents entry for a top-level application.
+     * <p>
+     * The receiving activity can override this request with
+     * {@link android.R.attr#autoRemoveFromRecents} or by explcitly calling
+     * {@link android.app.Activity#finishAndRemoveTask()
      * Activity.finishAndRemoveTask()}.
      */
     public static final int FLAG_ACTIVITY_RETAIN_IN_RECENTS = 0x00002000;
