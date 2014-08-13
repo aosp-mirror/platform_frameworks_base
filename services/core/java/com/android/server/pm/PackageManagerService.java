@@ -5436,13 +5436,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String path = scanFile.getPath();
         final String codePath = pkg.applicationInfo.getCodePath();
         if (isSystemApp(pkg) && !isUpdatedSystemApp(pkg)) {
-            // For the case where we had previously uninstalled an update, get rid
-            // of any native binaries we might have unpackaged. Note that this assumes
-            // that system app updates were not installed via ASEC.
-            //
-            // TODO(multiArch): Is this cleanup really necessary ?
-            NativeLibraryHelper.removeNativeBinariesFromDirLI(
-                    new File(codePath, LIB_DIR_NAME), false /* delete dirs */);
             setBundledAppAbisAndRoots(pkg, pkgSetting);
 
             // If we haven't found any native libraries for the app, check if it has
@@ -6241,7 +6234,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private static String calculateApkRoot(final String codePathString) {
+    private static String calculateBundledApkRoot(final String codePathString) {
         final File codePath = new File(codePathString);
         final File codeRoot;
         if (FileUtils.contains(Environment.getRootDirectory(), codePath)) {
@@ -6281,13 +6274,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         final ApplicationInfo info = pkg.applicationInfo;
         final String codePath = pkg.codePath;
         final File codeFile = new File(codePath);
-        // If "/system/lib64/apkname" exists, assume that is the per-package
-        // native library directory to use; otherwise use "/system/lib/apkname".
-        final String apkRoot = calculateApkRoot(info.sourceDir);
-
         final boolean bundledApp = isSystemApp(info) && !isUpdatedSystemApp(info);
         final boolean asecApp = isForwardLocked(info) || isExternal(info);
-
 
         info.nativeLibraryRootDir = null;
         info.nativeLibraryRootRequiresIsa = false;
@@ -6297,6 +6285,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (isApkFile(codeFile)) {
             // Monolithic install
             if (bundledApp) {
+                // If "/system/lib64/apkname" exists, assume that is the per-package
+                // native library directory to use; otherwise use "/system/lib/apkname".
+                final String apkRoot = calculateBundledApkRoot(info.sourceDir);
                 final boolean is64Bit = VMRuntime.is64BitInstructionSet(
                         getPrimaryInstructionSet(info));
 
@@ -6352,7 +6343,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // If "/system/lib64/apkname" exists, assume that is the per-package
         // native library directory to use; otherwise use "/system/lib/apkname".
-        final String apkRoot = calculateApkRoot(pkg.applicationInfo.sourceDir);
+        final String apkRoot = calculateBundledApkRoot(pkg.applicationInfo.sourceDir);
         setBundledAppAbi(pkg, apkRoot, apkName);
         // pkgSetting might be null during rescan following uninstall of updates
         // to a bundled app, so accommodate that possibility.  The settings in
