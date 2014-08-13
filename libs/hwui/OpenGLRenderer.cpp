@@ -3166,13 +3166,22 @@ status_t OpenGLRenderer::drawShadow(float casterAlpha,
     SkPaint paint;
     paint.setAntiAlias(true); // want to use AlphaVertex
 
-    if (ambientShadowVertexBuffer && mAmbientShadowAlpha > 0) {
-        paint.setARGB(casterAlpha * mAmbientShadowAlpha, 0, 0, 0);
+    // The caller has made sure casterAlpha > 0.
+    float ambientShadowAlpha = mAmbientShadowAlpha;
+    if (CC_UNLIKELY(mCaches.propertyAmbientShadowStrength >= 0)) {
+        ambientShadowAlpha = mCaches.propertyAmbientShadowStrength;
+    }
+    if (ambientShadowVertexBuffer && ambientShadowAlpha > 0) {
+        paint.setARGB(casterAlpha * ambientShadowAlpha, 0, 0, 0);
         drawVertexBuffer(*ambientShadowVertexBuffer, &paint, kVertexBuffer_ShadowInterp);
     }
 
-    if (spotShadowVertexBuffer && mSpotShadowAlpha > 0) {
-        paint.setARGB(casterAlpha * mSpotShadowAlpha, 0, 0, 0);
+    float spotShadowAlpha = mSpotShadowAlpha;
+    if (CC_UNLIKELY(mCaches.propertySpotShadowStrength >= 0)) {
+        spotShadowAlpha = mCaches.propertySpotShadowStrength;
+    }
+    if (spotShadowVertexBuffer && spotShadowAlpha > 0) {
+        paint.setARGB(casterAlpha * spotShadowAlpha, 0, 0, 0);
         drawVertexBuffer(*spotShadowVertexBuffer, &paint, kVertexBuffer_ShadowInterp);
     }
 
