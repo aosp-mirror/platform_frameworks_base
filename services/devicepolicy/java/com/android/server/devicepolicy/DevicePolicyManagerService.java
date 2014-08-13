@@ -18,18 +18,6 @@ package com.android.server.devicepolicy;
 
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 
-import android.app.admin.DevicePolicyManagerInternal;
-
-import com.android.internal.R;
-import com.android.internal.os.storage.ExternalStorageFormatter;
-import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.JournaledFile;
-import com.android.internal.util.XmlUtils;
-import com.android.internal.widget.LockPatternUtils;
-import com.android.org.conscrypt.TrustedCertificateStore;
-import com.android.server.LocalServices;
-import com.android.server.SystemService;
-
 import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
@@ -41,6 +29,7 @@ import android.app.PendingIntent;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -89,6 +78,16 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
 import android.view.IWindowManager;
+
+import com.android.internal.R;
+import com.android.internal.os.storage.ExternalStorageFormatter;
+import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.JournaledFile;
+import com.android.internal.util.XmlUtils;
+import com.android.internal.widget.LockPatternUtils;
+import com.android.org.conscrypt.TrustedCertificateStore;
+import com.android.server.LocalServices;
+import com.android.server.SystemService;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -146,6 +145,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String ATTR_PERMISSION_PROVIDER = "permission-provider";
     private static final String ATTR_SETUP_COMPLETE = "setup-complete";
+
+    private static final Set<String> DEVICE_OWNER_USER_RESTRICTIONS;
+    static {
+        DEVICE_OWNER_USER_RESTRICTIONS = new HashSet();
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_USB_FILE_TRANSFER);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_CONFIG_TETHERING);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_FACTORY_RESET);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_ADD_USER);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_CONFIG_CELL_BROADCASTS);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_UNMUTE_MICROPHONE);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_ADJUST_VOLUME);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_SMS);
+    }
 
     final Context mContext;
     final UserManager mUserManager;
@@ -4044,7 +4058,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
             }
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            ActiveAdmin activeAdmin =
+                    getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            boolean isDeviceOwner = isDeviceOwner(activeAdmin.info.getPackageName());
+            if (!isDeviceOwner && DEVICE_OWNER_USER_RESTRICTIONS.contains(key)) {
+                throw new SecurityException("Profile owners cannot set user restriction " + key);
+            }
 
             long id = Binder.clearCallingIdentity();
             try {
