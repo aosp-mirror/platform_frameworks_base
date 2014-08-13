@@ -410,7 +410,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
 
     /**
      * Add a new value to the array map.
-     * @param key The key under which to store the value.  <b>Must not be null.</b>  If
+     * @param key The key under which to store the value.  If
      * this key already exists in the array, its value will be replaced.
      * @param value The value to store for the given key.
      * @return Returns the old value that was stored for the given key, or null if there
