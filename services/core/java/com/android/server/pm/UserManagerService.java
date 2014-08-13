@@ -125,6 +125,10 @@ public class UserManagerService extends IUserManager.Stub {
     // Number of attempts before jumping to the next BACKOFF_TIMES slot
     private static final int BACKOFF_INC_INTERVAL = 5;
 
+    // Maximum number of managed profiles permitted is 1. This cannot be increased
+    // without first making sure that the rest of the framework is prepared for it.
+    private static final int MAX_MANAGED_PROFILES = 1;
+
     // Amount of time to force the user to wait before entering the PIN again, after failing
     // BACKOFF_INC_INTERVAL times.
     private static final int[] BACKOFF_TIMES = { 0, 30*1000, 60*1000, 5*60*1000, 30*60*1000 };
@@ -510,7 +514,8 @@ public class UserManagerService extends IUserManager.Stub {
         // Skip over users being removed
         for (int i = 0; i < totalUserCount; i++) {
             UserInfo user = mUsers.valueAt(i);
-            if (!mRemovingUserIds.get(user.id)) {
+            if (!mRemovingUserIds.get(user.id)
+                    && !user.isGuest()) {
                 aliveUserCount++;
             }
         }
@@ -1093,6 +1098,7 @@ public class UserManagerService extends IUserManager.Stub {
             Log.w(LOG_TAG, "Cannot add user. DISALLOW_ADD_USER is enabled.");
             return null;
         }
+        final boolean isGuest = (flags & UserInfo.FLAG_GUEST) != 0;
         final long ident = Binder.clearCallingIdentity();
         UserInfo userInfo = null;
         try {
@@ -1103,7 +1109,21 @@ public class UserManagerService extends IUserManager.Stub {
                         parent = getUserInfoLocked(parentId);
                         if (parent == null) return null;
                     }
-                    if (isUserLimitReachedLocked()) return null;
+                    // If we're not adding a guest user and the limit has been reached,
+                    // cannot add a user.
+                    if (!isGuest && isUserLimitReachedLocked()) {
+                        return null;
+                    }
+                    // If we're adding a guest and there already exists one, bail.
+                    if (isGuest && numberOfUsersOfTypeLocked(UserInfo.FLAG_GUEST, true) > 0) {
+                        return null;
+                    }
+                    // Limit number of managed profiles that can be created
+                    if ((flags & UserInfo.FLAG_MANAGED_PROFILE) != 0
+                            && numberOfUsersOfTypeLocked(UserInfo.FLAG_MANAGED_PROFILE, true)
+                                >= MAX_MANAGED_PROFILES) {
+                        return null;
+                    }
                     int userId = getNextAvailableIdLocked();
                     userInfo = new UserInfo(userId, name, null, flags);
                     File userPath = new File(mBaseUserPath, Integer.toString(userId));
@@ -1140,6 +1160,19 @@ public class UserManagerService extends IUserManager.Stub {
             Binder.restoreCallingIdentity(ident);
         }
         return userInfo;
+    }
+
+    private int numberOfUsersOfTypeLocked(int flags, boolean excludeDying) {
+        int count = 0;
+        for (int i = mUsers.size() - 1; i >= 0; i--) {
+            UserInfo user = mUsers.valueAt(i);
+            if (!excludeDying || !mRemovingUserIds.get(user.id)) {
+                if ((user.flags & flags) != 0) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 
     /**

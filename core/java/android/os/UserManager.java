@@ -696,6 +696,26 @@ public class UserManager {
     }
 
     /**
+     * Checks whether it's possible to add more users. Caller must hold the MANAGE_USERS
+     * permission.
+     *
+     * @return true if more users can be added, false if limit has been reached.
+     * @hide
+     */
+    public boolean canAddMoreUsers() {
+        final List<UserInfo> users = getUsers(true);
+        final int totalUserCount = users.size();
+        int aliveUserCount = 0;
+        for (int i = 0; i < totalUserCount; i++) {
+            UserInfo user = users.get(i);
+            if (!user.isGuest()) {
+                aliveUserCount++;
+            }
+        }
+        return aliveUserCount < getMaxSupportedUsers();
+    }
+
+    /**
      * Returns list of the profiles of userHandle including
      * userHandle itself.
      * Note that it this returns both enabled and not enabled profiles. See
