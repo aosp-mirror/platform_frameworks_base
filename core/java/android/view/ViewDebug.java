@@ -1107,8 +1107,7 @@ public class ViewDebug {
 
                     exportUnrolledArray(context, out, property, array, valuePrefix, suffix);
 
-                    // Probably want to return here, same as for fields.
-                    return;
+                    continue;
                 } else if (!returnType.isPrimitive()) {
                     if (property.deepExport()) {
                         dumpViewProperties(context, methodValue, out, prefix + property.prefix());
@@ -1187,8 +1186,7 @@ public class ViewDebug {
 
                     exportUnrolledArray(context, out, property, array, valuePrefix, suffix);
 
-                    // We exit here!
-                    return;
+                    continue;
                 } else if (!type.isPrimitive()) {
                     if (property.deepExport()) {
                         dumpViewProperties(context, field.get(view), out, prefix +
