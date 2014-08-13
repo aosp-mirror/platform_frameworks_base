@@ -985,12 +985,7 @@ please see themes_device_defaults.xml.
     <!-- Dialog themes for Material -->
     <eat-comment />
 
-    <!-- Material theme for dialog windows and activities, which is used by the
-         {@link android.app.Dialog} class.  This changes the window to be
-         floating (not fill the entire screen), and puts a frame around its
-         contents.  You can set this theme on an activity if you would like to
-         make an activity that looks like a Dialog. -->
-    <style name="Theme.Material.Dialog">
+    <style name="Theme.Material.BaseDialog">
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material</item>
         <item name="windowBackground">@drawable/dialog_background_material</item>
@@ -1018,6 +1013,13 @@ please see themes_device_defaults.xml.
 
         <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
     </style>
+
+    <!-- Material theme for dialog windows and activities, which is used by the
+         {@link android.app.Dialog} class.  This changes the window to be
+         floating (not fill the entire screen), and puts a frame around its
+         contents.  You can set this theme on an activity if you would like to
+         make an activity that looks like a Dialog. -->
+    <style name="Theme.Material.Dialog" parent="Theme.Material.BaseDialog"/>
 
     <!-- Variant of Theme.Material.Dialog that has a nice minimum width for
          a regular dialog. -->
@@ -1095,12 +1097,7 @@ please see themes_device_defaults.xml.
 
     <!-- Light material dialog themes -->
 
-    <!-- Material light theme for dialog windows and activities, which is used by the
-         {@link android.app.Dialog} class.  This changes the window to be
-         floating (not fill the entire screen), and puts a frame around its
-         contents.  You can set this theme on an activity if you would like to
-         make an activity that looks like a Dialog. -->
-    <style name="Theme.Material.Light.Dialog">
+    <style name="Theme.Material.Light.BaseDialog">
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material.Light</item>
         <item name="windowBackground">@drawable/dialog_background_material</item>
@@ -1128,6 +1125,13 @@ please see themes_device_defaults.xml.
 
         <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
     </style>
+
+    <!-- Material light theme for dialog windows and activities, which is used by the
+         {@link android.app.Dialog} class.  This changes the window to be
+         floating (not fill the entire screen), and puts a frame around its
+         contents.  You can set this theme on an activity if you would like to
+         make an activity that looks like a Dialog. -->
+    <style name="Theme.Material.Light.Dialog" parent="Theme.Material.Light.BaseDialog"/>
 
     <!-- Variant of Theme.Material.Light.Dialog that has a nice minimum width for
          a regular dialog. -->

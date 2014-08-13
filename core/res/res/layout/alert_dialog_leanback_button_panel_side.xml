@@ -20,13 +20,7 @@
     android:id="@+id/parentPanel"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:background="@drawable/dialog_background_material"
-    android:translationZ="@dimen/floating_window_z"
-    android:layout_marginLeft="@dimen/leanback_alert_dialog_horizontal_margin"
-    android:layout_marginTop="@dimen/leanback_alert_dialog_vertical_margin"
-    android:layout_marginRight="@dimen/leanback_alert_dialog_horizontal_margin"
-    android:layout_marginBottom="@dimen/leanback_alert_dialog_vertical_margin">
+    android:orientation="horizontal">
 
    <LinearLayout
        android:id="@+id/leftPanel"
@@ -46,14 +40,15 @@
             android:gravity="center_vertical|start"
             android:paddingStart="16dip"
             android:paddingEnd="16dip"
-            android:paddingTop="16dip">
+            android:paddingTop="16dip"
+            android:paddingBottom="8dip">
             <ImageView android:id="@+id/icon"
                 android:layout_width="32dip"
                 android:layout_height="32dip"
                 android:layout_marginEnd="8dip"
                 android:scaleType="fitCenter"
                 android:src="@null" />
-            <TextView android:id="@+id/alertTitle"
+            <com.android.internal.widget.DialogTitle android:id="@+id/alertTitle"
                 style="?attr/windowTitleStyle"
                 android:singleLine="true"
                 android:ellipsize="end"
@@ -81,7 +76,7 @@
                 android:paddingStart="16dip"
                 android:paddingEnd="16dip"
                 android:paddingTop="16dip"
-		android:paddingBottom="16dip" />
+                android:paddingBottom="16dip" />
         </ScrollView>
     </LinearLayout>
 
@@ -90,41 +85,38 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:minHeight="64dp">
-        <FrameLayout android:id="@+android:id/custom"
+        <FrameLayout android:id="@+id/custom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </FrameLayout>
     </LinearLayout>
 
     <LinearLayout android:id="@+id/buttonPanel"
+        style="?attr/buttonBarStyle"
         android:layout_width="wrap_content"
-android:background="#ffffff"
         android:layout_height="wrap_content"
-	android:layout_gravity="center_vertical"
-        android:minHeight="@dimen/alert_dialog_button_bar_height"
+        android:layout_gravity="center_vertical"
         android:orientation="vertical"
-        android:gravity="end"
-        android:padding="16dip">
+        android:gravity="end">
         <LinearLayout
-            style="?attr/buttonBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layoutDirection="locale"
-	    android:orientation="vertical">
+            android:orientation="vertical">
             <Button android:id="@+id/button3"
-                style="?attr/buttonBarButtonStyle"
+                style="?attr/buttonBarNeutralButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="2"
                 android:minHeight="@dimen/alert_dialog_button_bar_height" />
             <Button android:id="@+id/button2"
-                style="?attr/buttonBarButtonStyle"
+                style="?attr/buttonBarNegativeButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="2"
                 android:minHeight="@dimen/alert_dialog_button_bar_height" />
             <Button android:id="@+id/button1"
-                style="?attr/buttonBarButtonStyle"
+                style="?attr/buttonBarPositiveButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="2"

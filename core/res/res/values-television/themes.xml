@@ -20,4 +20,6 @@
     <style name="Theme.Holo.Light.Dialog.Alert" parent="Theme.Leanback.Light.Dialog.Alert" />
     <style name="Theme.Material.Dialog.Alert" parent="Theme.Leanback.Dialog.Alert" />
     <style name="Theme.Material.Light.Dialog.Alert" parent="Theme.Leanback.Light.Dialog.Alert" />
+    <style name="Theme.Material.Dialog" parent="Theme.Leanback.Dialog" />
+    <style name="Theme.Material.Light.Dialog" parent="Theme.Leanback.Light.Dialog" />
 </resources>
