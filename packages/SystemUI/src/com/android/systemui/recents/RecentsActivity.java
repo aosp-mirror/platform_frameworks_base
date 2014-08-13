@@ -61,6 +61,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     RecentsConfiguration mConfig;
     boolean mVisible;
+    long mLastTabKeyEventTime;
 
     // Top level views
     RecentsView mRecentsView;
@@ -512,17 +513,33 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_TAB) {
-            // Focus the next task in the stack
-            final boolean backward = event.isShiftPressed();
-            mRecentsView.focusNextTask(!backward);
-            return true;
-        } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
-            mRecentsView.focusNextTask(true);
-            return true;
-        } else if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
-            mRecentsView.focusNextTask(false);
-            return true;
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_TAB: {
+                boolean hasRepKeyTimeElapsed = (System.currentTimeMillis() -
+                        mLastTabKeyEventTime) > mConfig.altTabKeyDelay;
+                if (event.getRepeatCount() <= 0 || hasRepKeyTimeElapsed) {
+                    // Focus the next task in the stack
+                    final boolean backward = event.isShiftPressed();
+                    mRecentsView.focusNextTask(!backward);
+                    mLastTabKeyEventTime = System.currentTimeMillis();
+                }
+                return true;
+            }
+            case KeyEvent.KEYCODE_DPAD_UP: {
+                mRecentsView.focusNextTask(true);
+                return true;
+            }
+            case KeyEvent.KEYCODE_DPAD_DOWN: {
+                mRecentsView.focusNextTask(false);
+                return true;
+            }
+            case KeyEvent.KEYCODE_DEL:
+            case KeyEvent.KEYCODE_FORWARD_DEL: {
+                mRecentsView.dismissFocusedTask();
+                return true;
+            }
+            default:
+                break;
         }
         // Pass through the debug trigger
         mDebugTrigger.onKeyEvent(keyCode);
