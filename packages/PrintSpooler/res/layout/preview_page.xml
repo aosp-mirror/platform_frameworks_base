@@ -31,7 +31,7 @@
     <RelativeLayout
         android:id="@+id/page_footer"
         android:layout_width="fill_parent"
-        android:layout_height="32dip"
+        android:layout_height="@dimen/preview_page_footer_height"
         android:background="@*android:color/material_grey_500"
         android:orientation="horizontal">
 

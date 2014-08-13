@@ -162,7 +162,7 @@ public final class PrintOptionsLayout extends ViewGroup {
             }
 
             cellStart = getPaddingStart();
-            cellTop += cellTop + rowHeight;
+            cellTop += rowHeight;
         }
     }
 

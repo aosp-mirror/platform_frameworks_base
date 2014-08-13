@@ -27,7 +27,6 @@
         android:id="@+id/static_content"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:padding="16dip"
         android:elevation="@dimen/preview_controls_elevation"
         android:background="?android:attr/colorPrimary">
 
@@ -35,6 +34,7 @@
             android:id="@+id/destination_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dip"
             android:dropDownWidth="wrap_content"
             android:minHeight="?android:attr/listPreferredItemHeightSmall">
         </Spinner>
@@ -56,7 +56,6 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dip"
             android:layout_marginStart="12dip"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:labelFor="@+id/copies_count_summary"
@@ -67,7 +66,6 @@
             android:id="@+id/copies_count_summary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dip"
             android:layout_marginStart="16dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="?android:attr/textColorPrimary">
@@ -76,7 +74,6 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dip"
             android:layout_marginStart="32dip"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:labelFor="@+id/paper_size_summary"
@@ -87,7 +84,6 @@
             android:id="@+id/paper_size_summary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dip"
             android:layout_marginStart="16dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="?android:attr/textColorPrimary">
