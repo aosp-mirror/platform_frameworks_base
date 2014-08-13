@@ -152,6 +152,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         logExpansionEvent(true, wasExpanded);
     }
 
+    public void resetUserExpansion() {
+        mHasUserChangedExpansion = false;
+        mUserExpanded = false;
+    }
+
     public boolean isUserLocked() {
         return mUserLocked;
     }

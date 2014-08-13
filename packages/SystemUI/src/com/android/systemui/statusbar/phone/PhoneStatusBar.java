@@ -113,7 +113,6 @@ import com.android.systemui.R;
 import com.android.systemui.doze.DozeService;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.QSPanel;
-import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
@@ -2928,6 +2927,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 notifyHeadsUpScreenOn(false);
                 finishBarAnimations();
                 stopNotificationLogging();
+                resetUserExpandedStates();
             }
             else if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 mScreenOn = true;
@@ -2955,6 +2955,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
     };
+
+    private void resetUserExpandedStates() {
+        ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
+        final int notificationCount = activeNotifications.size();
+        for (int i = 0; i < notificationCount; i++) {
+            NotificationData.Entry entry = activeNotifications.get(i);
+            if (entry.row != null) {
+                entry.row.resetUserExpansion();
+            }
+        }
+    }
 
     @Override
     protected void dismissKeyguardThenExecute(final OnDismissAction action) {
