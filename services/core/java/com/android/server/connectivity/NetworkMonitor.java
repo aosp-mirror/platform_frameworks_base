@@ -217,6 +217,8 @@ public class NetworkMonitor extends StateMachine {
     private String mServer;
     private boolean mIsCaptivePortalCheckEnabled = false;
 
+    public boolean systemReady = false;
+
     private State mDefaultState = new DefaultState();
     private State mOfflineState = new OfflineState();
     private State mValidatedState = new ValidatedState();
@@ -708,6 +710,8 @@ public class NetworkMonitor extends StateMachine {
             if (DBG) log("Don't send network conditions - lacking user consent.");
             return;
         }
+
+        if (systemReady == false) return;
 
         Intent latencyBroadcast = new Intent(ACTION_NETWORK_CONDITIONS_MEASURED);
         switch (mNetworkAgentInfo.networkInfo.getType()) {
