@@ -426,7 +426,6 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Button" parent="Widget.Button">
         <item name="background">@drawable/btn_default_material</item>
         <item name="textAppearance">?attr/textAppearanceButton</item>
-        <item name="textColor">?attr/textColorPrimary</item>
         <item name="minHeight">48dip</item>
         <item name="minWidth">88dip</item>
         <item name="stateListAnimator">@anim/button_state_list_anim_material</item>
