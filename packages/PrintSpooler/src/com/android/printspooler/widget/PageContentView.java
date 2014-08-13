@@ -94,7 +94,7 @@ public class PageContentView extends View
         mMinMargins = minMargins;
         mContentRequested = false;
 
-        // If there is not provider we want immediately to switch to
+        // If there is no provider we want immediately to switch to
         // the empty state, so pages with no content appear blank.
         if (mProvider == null && getBackground() != mEmptyState) {
             setBackground(mEmptyState);
