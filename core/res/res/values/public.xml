@@ -2118,9 +2118,11 @@
   <public type="attr" name="transitionGroup" />
   <public type="attr" name="viewportWidth" />
   <public type="attr" name="viewportHeight" />
+  <public type="attr" name="fillOpacity" />
   <public type="attr" name="fillColor" />
   <public type="attr" name="pathData" />
   <public type="attr" name="strokeColor" />
+  <public type="attr" name="strokeOpacity" />
   <public type="attr" name="strokeWidth" />
   <public type="attr" name="trimPathStart" />
   <public type="attr" name="trimPathEnd" />
