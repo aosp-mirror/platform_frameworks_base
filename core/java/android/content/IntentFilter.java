@@ -1184,12 +1184,8 @@ public class IntentFilter implements Parcelable {
      * {@link #MATCH_CATEGORY_MASK} and {@link #MATCH_ADJUSTMENT_MASK}),
      * or one of the error codes {@link #NO_MATCH_TYPE} if the type didn't match,
      * {@link #NO_MATCH_DATA} if the scheme/path didn't match,
-     * {@link #NO_MATCH_ACTION if the action didn't match, or
+     * {@link #NO_MATCH_ACTION} if the action didn't match, or
      * {@link #NO_MATCH_CATEGORY} if one or more categories didn't match.
-     *
-     * @return How well the filter matches.  Negative if it doesn't match,
-     *         zero or positive positive value if it does with a higher
-     *         value representing a better match.
      *
      * @see #match(String, String, String, android.net.Uri , Set, String)
      */
@@ -1218,7 +1214,7 @@ public class IntentFilter implements Parcelable {
      * {@link #MATCH_CATEGORY_MASK} and {@link #MATCH_ADJUSTMENT_MASK}),
      * or one of the error codes {@link #NO_MATCH_TYPE} if the type didn't match,
      * {@link #NO_MATCH_DATA} if the scheme/path didn't match,
-     * {@link #NO_MATCH_ACTION if the action didn't match, or
+     * {@link #NO_MATCH_ACTION} if the action didn't match, or
      * {@link #NO_MATCH_CATEGORY} if one or more categories didn't match.
      *
      * @see #matchData
