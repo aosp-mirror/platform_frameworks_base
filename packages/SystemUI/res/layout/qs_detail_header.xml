@@ -15,7 +15,10 @@
      limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/BrightnessDialogContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:padding="@dimen/qs_panel_padding"
     android:background="@drawable/btn_borderless_rect" >
 
     <TextView
