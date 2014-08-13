@@ -561,7 +561,7 @@ public final class HdmiControlService extends SystemService {
         if (tv == null) {
             return null;
         }
-        return tv.getDeviceInfo(logicalAddress);
+        return tv.getCecDeviceInfo(logicalAddress);
     }
 
     /**
@@ -942,7 +942,7 @@ public final class HdmiControlService extends SystemService {
         }
 
         @Override
-        public void deviceSelect(final int logicalAddress, final IHdmiControlCallback callback) {
+        public void deviceSelect(final int deviceId, final IHdmiControlCallback callback) {
             enforceAccessPermission();
             runOnServiceThread(new Runnable() {
                 @Override
@@ -957,7 +957,7 @@ public final class HdmiControlService extends SystemService {
                         invokeCallback(callback, HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE);
                         return;
                     }
-                    tv.deviceSelect(logicalAddress, callback);
+                    tv.deviceSelect(deviceId, callback);
                 }
             });
         }

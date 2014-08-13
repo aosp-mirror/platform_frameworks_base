@@ -1971,11 +1971,11 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void addHdmiTvInput(int logicalAddress, TvInputInfo inputInfo) {
+        public void addHdmiTvInput(int id, TvInputInfo inputInfo) {
             ensureHardwarePermission();
             ensureValidInput(inputInfo);
             synchronized (mLock) {
-                mTvInputHardwareManager.addHdmiTvInput(logicalAddress, inputInfo);
+                mTvInputHardwareManager.addHdmiTvInput(id, inputInfo);
                 addTvInputLocked(inputInfo);
             }
         }

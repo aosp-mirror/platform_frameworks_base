@@ -43,7 +43,7 @@ interface IHdmiControlService {
     void addHotplugEventListener(IHdmiHotplugEventListener listener);
     void removeHotplugEventListener(IHdmiHotplugEventListener listener);
     void addDeviceEventListener(IHdmiDeviceEventListener listener);
-    void deviceSelect(int logicalAddress, IHdmiControlCallback callback);
+    void deviceSelect(int deviceId, IHdmiControlCallback callback);
     void portSelect(int portId, IHdmiControlCallback callback);
     void sendKeyEvent(int deviceType, int keyCode, boolean isPressed);
     List<HdmiPortInfo> getPortInfo();

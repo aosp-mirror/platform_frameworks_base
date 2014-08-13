@@ -284,7 +284,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         return -1;
     }
 
-    public void addHdmiTvInput(int logicalAddress, TvInputInfo info) {
+    public void addHdmiTvInput(int id, TvInputInfo info) {
         if (info.getType() != TvInputInfo.TYPE_HDMI) {
             throw new IllegalArgumentException("info (" + info + ") has non-HDMI type.");
         }
@@ -294,13 +294,13 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             if (parentIndex < 0) {
                 throw new IllegalArgumentException("info (" + info + ") has invalid parentId.");
             }
-            String oldInputId = mHdmiInputIdMap.get(logicalAddress);
+            String oldInputId = mHdmiInputIdMap.get(id);
             if (oldInputId != null) {
                 Slog.w(TAG, "Trying to override previous registration: old = "
-                        + mInputMap.get(oldInputId) + ":" + logicalAddress + ", new = "
-                        + info + ":" + logicalAddress);
+                        + mInputMap.get(oldInputId) + ":" + id + ", new = "
+                        + info + ":" + id);
             }
-            mHdmiInputIdMap.put(logicalAddress, info.getId());
+            mHdmiInputIdMap.put(id, info.getId());
             mInputMap.put(info.getId(), info);
         }
     }
