@@ -15762,11 +15762,12 @@ package android.media {
   }
 
   public class Ringtone {
-    method public int getStreamType();
+    method public deprecated int getStreamType();
     method public java.lang.String getTitle(android.content.Context);
     method public boolean isPlaying();
     method public void play();
-    method public void setStreamType(int);
+    method public void setAudioAttributes(android.media.AudioAttributes) throws java.lang.IllegalArgumentException;
+    method public deprecated void setStreamType(int);
     method public void stop();
   }
 

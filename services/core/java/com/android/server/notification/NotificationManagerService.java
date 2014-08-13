@@ -1761,26 +1761,27 @@ public class NotificationManagerService extends SystemService {
             if (hasValidSound) {
                 boolean looping =
                         (notification.flags & Notification.FLAG_INSISTENT) != 0;
-                int audioStreamType;
-                if (notification.audioStreamType >= 0) {
-                    audioStreamType = notification.audioStreamType;
+                AudioAttributes audioAttributes;
+                if (notification.audioAttributes != null) {
+                    audioAttributes = notification.audioAttributes;
                 } else {
-                    audioStreamType = DEFAULT_STREAM_TYPE;
+                    audioAttributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
                 }
                 mSoundNotification = record;
                 // do not play notifications if stream volume is 0 (typically because
                 // ringer mode is silent) or if there is a user of exclusive audio focus
-                if ((mAudioManager.getStreamVolume(audioStreamType) != 0)
-                        && !mAudioManager.isAudioFocusExclusive()) {
+                if ((mAudioManager.getStreamVolume(
+                        AudioAttributes.toLegacyStreamType(audioAttributes)) != 0)
+                            && !mAudioManager.isAudioFocusExclusive()) {
                     final long identity = Binder.clearCallingIdentity();
                     try {
                         final IRingtonePlayer player =
                                 mAudioManager.getRingtonePlayer();
                         if (player != null) {
                             if (DBG) Slog.v(TAG, "Playing sound " + soundUri
-                                    + " on stream " + audioStreamType);
+                                    + " with attributes " + audioAttributes);
                             player.playAsync(soundUri, record.sbn.getUser(), looping,
-                                    audioStreamType);
+                                    audioAttributes);
                             buzzBeepBlinked = true;
                         }
                     } catch (RemoteException e) {
