@@ -372,6 +372,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private static final int EVENT_EXPIRE_NET_TRANSITION_WAKELOCK = 24;
 
+    /**
+     * Used internally to indicate the system is ready.
+     */
+    private static final int EVENT_SYSTEM_READY = 25;
+
 
     /** Handler used for internal events. */
     final private InternalHandler mHandler;
@@ -1437,6 +1442,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             final IntentFilter filter = new IntentFilter(Intent.ACTION_USER_PRESENT);
             mContext.registerReceiver(mUserPresentReceiver, filter);
         }
+
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_SYSTEM_READY));
     }
 
     private BroadcastReceiver mUserPresentReceiver = new BroadcastReceiver() {
@@ -2268,6 +2275,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
                 case EVENT_RELEASE_NETWORK_REQUEST: {
                     handleReleaseNetworkRequest((NetworkRequest) msg.obj, msg.arg1);
+                    break;
+                }
+                case EVENT_SYSTEM_READY: {
+                    for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+                        nai.networkMonitor.systemReady = true;
+                    }
                     break;
                 }
             }
@@ -4108,6 +4121,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             new NetworkInfo(networkInfo), new LinkProperties(linkProperties),
             new NetworkCapabilities(networkCapabilities), currentScore, mContext, mTrackerHandler,
             networkMisc);
+        synchronized (this) {
+            nai.networkMonitor.systemReady = mSystemReady;
+        }
         if (VDBG) log("registerNetworkAgent " + nai);
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_AGENT, nai));
     }
