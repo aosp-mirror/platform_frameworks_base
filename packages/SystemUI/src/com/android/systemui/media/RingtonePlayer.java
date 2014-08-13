@@ -18,6 +18,7 @@ package com.android.systemui.media;
 
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.media.AudioAttributes;
 import android.media.IAudioService;
 import android.media.IRingtonePlayer;
 import android.media.Ringtone;
@@ -71,11 +72,11 @@ public class RingtonePlayer extends SystemUI {
         private final IBinder mToken;
         private final Ringtone mRingtone;
 
-        public Client(IBinder token, Uri uri, UserHandle user, int streamType) {
+        public Client(IBinder token, Uri uri, UserHandle user, AudioAttributes aa) {
             mToken = token;
 
             mRingtone = new Ringtone(getContextForUser(user), false);
-            mRingtone.setStreamType(streamType);
+            mRingtone.setAudioAttributes(aa);
             mRingtone.setUri(uri);
         }
 
@@ -91,7 +92,7 @@ public class RingtonePlayer extends SystemUI {
 
     private IRingtonePlayer mCallback = new IRingtonePlayer.Stub() {
         @Override
-        public void play(IBinder token, Uri uri, int streamType) throws RemoteException {
+        public void play(IBinder token, Uri uri, AudioAttributes aa) throws RemoteException {
             if (LOGD) {
                 Log.d(TAG, "play(token=" + token + ", uri=" + uri + ", uid="
                         + Binder.getCallingUid() + ")");
@@ -101,7 +102,7 @@ public class RingtonePlayer extends SystemUI {
                 client = mClients.get(token);
                 if (client == null) {
                     final UserHandle user = Binder.getCallingUserHandle();
-                    client = new Client(token, uri, user, streamType);
+                    client = new Client(token, uri, user, aa);
                     token.linkToDeath(client, 0);
                     mClients.put(token, client);
                 }
@@ -137,13 +138,13 @@ public class RingtonePlayer extends SystemUI {
         }
 
         @Override
-        public void playAsync(Uri uri, UserHandle user, boolean looping, int streamType) {
+        public void playAsync(Uri uri, UserHandle user, boolean looping, AudioAttributes aa) {
             if (LOGD) Log.d(TAG, "playAsync(uri=" + uri + ", user=" + user + ")");
             if (Binder.getCallingUid() != Process.SYSTEM_UID) {
                 throw new SecurityException("Async playback only available from system UID.");
             }
 
-            mAsyncPlayer.play(getContextForUser(user), uri, looping, streamType);
+            mAsyncPlayer.play(getContextForUser(user), uri, looping, aa);
         }
 
         @Override
