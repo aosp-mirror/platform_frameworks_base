@@ -93,7 +93,7 @@ public class TrustManagerService extends SystemService {
 
     private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<AgentInfo>();
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<ITrustListener>();
-    private final DevicePolicyReceiver mDevicePolicyReceiver = new DevicePolicyReceiver();
+    private final Receiver mReceiver = new Receiver();
     private final SparseBooleanArray mUserHasAuthenticatedSinceBoot = new SparseBooleanArray();
     /* package */ final TrustArchive mArchive = new TrustArchive();
     private final Context mContext;
@@ -115,7 +115,7 @@ public class TrustManagerService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY && !isSafeMode()) {
             mPackageMonitor.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
-            mDevicePolicyReceiver.register(mContext);
+            mReceiver.register(mContext);
             refreshAgentList();
         }
     }
@@ -373,7 +373,13 @@ public class TrustManagerService extends SystemService {
             }
         }
 
-        if (successful && !mUserHasAuthenticatedSinceBoot.get(userId)) {
+        if (successful) {
+            updateUserHasAuthenticated(userId);
+        }
+    }
+
+    private void updateUserHasAuthenticated(int userId) {
+        if (!mUserHasAuthenticatedSinceBoot.get(userId)) {
             mUserHasAuthenticatedSinceBoot.put(userId, true);
             updateTrust(userId, false);
         }
@@ -597,7 +603,7 @@ public class TrustManagerService extends SystemService {
         }
     };
 
-    private class DevicePolicyReceiver extends BroadcastReceiver {
+    private class Receiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -605,14 +611,18 @@ public class TrustManagerService extends SystemService {
                     intent.getAction())) {
                 refreshAgentList();
                 updateDevicePolicyFeatures(getSendingUserId());
+            } else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
+                updateUserHasAuthenticated(getSendingUserId());
             }
         }
 
         public void register(Context context) {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+            filter.addAction(Intent.ACTION_USER_PRESENT);
             context.registerReceiverAsUser(this,
                     UserHandle.ALL,
-                    new IntentFilter(
-                            DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
+                    filter,
                     null /* permission */,
                     null /* scheduler */);
         }
