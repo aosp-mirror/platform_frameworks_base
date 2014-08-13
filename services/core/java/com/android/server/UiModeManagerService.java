@@ -479,7 +479,7 @@ final class UiModeManagerService extends SystemService {
         // keep screen on when charging and in car mode
         boolean keepScreenOn = mCharging &&
                 ((mCarModeEnabled && mCarModeKeepsScreenOn &&
-                  (mCarModeEnableFlags & UiModeManager.ENABLE_CAR_MODE_NO_WAKE_LOCK) == 0) ||
+                  (mCarModeEnableFlags & UiModeManager.ENABLE_CAR_MODE_ALLOW_SLEEP) == 0) ||
                  (mCurUiMode == Configuration.UI_MODE_TYPE_DESK && mDeskModeKeepsScreenOn));
         if (keepScreenOn != mWakeLock.isHeld()) {
             if (keepScreenOn) {
