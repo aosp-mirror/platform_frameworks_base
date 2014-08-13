@@ -79,8 +79,9 @@ public class ToggleSlider extends RelativeLayout {
     public void setMirror(ToggleSlider toggleSlider) {
         mMirror = toggleSlider;
         if (mMirror != null) {
-            mMirror.mToggle.setChecked(mToggle.isChecked());
-            mMirror.mSlider.setProgress(mSlider.getProgress());
+            mMirror.setChecked(mToggle.isChecked());
+            mMirror.setMax(mSlider.getMax());
+            mMirror.setValue(mSlider.getProgress());
         }
     }
 
@@ -110,10 +111,16 @@ public class ToggleSlider extends RelativeLayout {
 
     public void setMax(int max) {
         mSlider.setMax(max);
+        if (mMirror != null) {
+            mMirror.setMax(max);
+        }
     }
 
     public void setValue(int value) {
         mSlider.setProgress(value);
+        if (mMirror != null) {
+            mMirror.setValue(value);
+        }
     }
 
     private final OnCheckedChangeListener mCheckListener = new OnCheckedChangeListener() {
@@ -141,7 +148,7 @@ public class ToggleSlider extends RelativeLayout {
             }
 
             if (mMirror != null) {
-                mMirror.mSlider.setProgress(progress);
+                mMirror.setValue(progress);
             }
         }
 
