@@ -47,6 +47,18 @@ public class UserManagerTest extends AndroidTestCase {
                 }
             }
         }, filter);
+
+        removeExistingUsers();
+    }
+
+    private void removeExistingUsers() {
+        List<UserInfo> list = mUserManager.getUsers();
+        boolean found = false;
+        for (UserInfo user : list) {
+            if (user.id != UserHandle.USER_OWNER) {
+                removeUser(user.id);
+            }
+        }
     }
 
     public void testHasPrimary() throws Exception {
@@ -93,6 +105,29 @@ public class UserManagerTest extends AndroidTestCase {
         removeUser(userInfo.id);
 
         assertFalse(findUser(userInfo.id));
+    }
+
+    public void testAddGuest() throws Exception {
+        UserInfo userInfo1 = mUserManager.createUser("Guest 1", UserInfo.FLAG_GUEST);
+        UserInfo userInfo2 = mUserManager.createUser("Guest 2", UserInfo.FLAG_GUEST);
+        assertNotNull(userInfo1);
+        assertNull(userInfo2);
+
+        // Cleanup
+        removeUser(userInfo1.id);
+    }
+
+    // Make sure only one managed profile can be created
+    public void testAddManagedProfile() throws Exception {
+        UserInfo userInfo1 = mUserManager.createProfileForUser("Managed 1",
+                UserInfo.FLAG_MANAGED_PROFILE, UserHandle.USER_OWNER);
+        UserInfo userInfo2 = mUserManager.createProfileForUser("Managed 2",
+                UserInfo.FLAG_MANAGED_PROFILE, UserHandle.USER_OWNER);
+        assertNotNull(userInfo1);
+        assertNull(userInfo2);
+
+        // Cleanup
+        removeUser(userInfo1.id);
     }
 
     private boolean findUser(int id) {
