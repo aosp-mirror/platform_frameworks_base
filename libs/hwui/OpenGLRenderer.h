@@ -96,7 +96,7 @@ enum ClipSideFlags {
 
 enum VertexBufferDisplayFlags {
     kVertexBuffer_Offset = 0x1,
-    kVertexBuffer_ShadowAA = 0x2,
+    kVertexBuffer_ShadowInterp = 0x2,
 };
 
 /**
@@ -847,7 +847,7 @@ private:
     void setupDrawWithTextureAndColor(bool isAlpha8 = false);
     void setupDrawWithExternalTexture();
     void setupDrawNoTexture();
-    void setupDrawAA(bool useShadowInterp);
+    void setupDrawVertexAlpha(bool useShadowAlphaInterp);
     void setupDrawColor(int color, int alpha);
     void setupDrawColor(float r, float g, float b, float a);
     void setupDrawAlpha8Color(int color, int alpha);

@@ -754,9 +754,13 @@ void SpotShadow::generateTriangleStrip(bool isCasterOpaque, const Vector2* penum
     AlphaVertex* shadowVertices =
             shadowTriangleStrip.alloc<AlphaVertex>(SHADOW_VERTEX_COUNT);
 
+    // NOTE: Shadow alpha values are transformed when stored in alphavertices,
+    // so that they can be consumed directly by gFS_Main_ApplyVertexAlphaShadowInterp
+    float transformedMaxAlpha = M_PI;
+
     // Calculate the vertices (x, y, alpha) in the shadow area.
     AlphaVertex centroidXYA;
-    AlphaVertex::set(&centroidXYA, centroid.x, centroid.y, 1.0f);
+    AlphaVertex::set(&centroidXYA, centroid.x, centroid.y, transformedMaxAlpha);
     for (int rayIndex = 0; rayIndex < rays; rayIndex++) {
         float dx = cosf(step * rayIndex);
         float dy = sinf(step * rayIndex);
@@ -770,14 +774,16 @@ void SpotShadow::generateTriangleStrip(bool isCasterOpaque, const Vector2* penum
         // umbra ring
         float umbraDistance = umbraDistPerRay[rayIndex];
         AlphaVertex::set(&shadowVertices[rays + rayIndex],
-                dx * umbraDistance + centroid.x, dy * umbraDistance + centroid.y, 1.0f);
+                dx * umbraDistance + centroid.x,
+                dy * umbraDistance + centroid.y,
+                transformedMaxAlpha);
 
         // occluded umbra ring
         if (hasOccludedUmbraArea) {
             float occludedUmbraDistance = occludedUmbraDistPerRay[rayIndex];
             AlphaVertex::set(&shadowVertices[2 * rays + rayIndex],
                     dx * occludedUmbraDistance + centroid.x,
-                    dy * occludedUmbraDistance + centroid.y, 1.0f);
+                    dy * occludedUmbraDistance + centroid.y, transformedMaxAlpha);
         } else {
             // Put all vertices of the occluded umbra ring at the centroid.
             shadowVertices[2 * rays + rayIndex] = centroidXYA;
