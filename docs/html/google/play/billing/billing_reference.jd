@@ -102,13 +102,26 @@ parent.link=index.html
   </tr>
   <tr>
     <td>{@code type}</td>
-    <td>Value must be “inapp” for an in-app product or "subs" for 
+    <td>Value must be “inapp” for an in-app product or "subs" for
 subscriptions.</td>
   </tr>
   <tr>
     <td>{@code price}</td>
-    <td>Formatted price of the item, including its currency sign. The price 
+    <td>Formatted price of the item, including its currency sign. The price
 does not include tax.</td>
+  </tr>
+  <tr>
+    <td>{@code price_amount_micros}</td>
+    <td>Price in micro-units, where 1,000,000 micro-units equal one unit of the
+    currency. For example, if {@code price} is {@code "€7.99"}, {@code
+    price_amount_micros} is {@code "7990000"}.</td>
+  </tr>
+  <tr>
+    <td>{@code price_currency_code}</td>
+    <td><a href="http://en.wikipedia.org/wiki/ISO_4217#Active_codes">ISO 4217
+    currency code</a> for {@code price}. For example, if {@code price} is
+    specified in British pounds sterling, {@code price_currency_code} is {@code
+    "GBP"}.</td>
   </tr>
   <tr>
     <td>{@code title}</td>
