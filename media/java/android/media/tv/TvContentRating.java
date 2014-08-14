@@ -86,9 +86,9 @@ import java.util.Objects;
  * </table>
  *
  * <u>System defined string for {@code ratingSystem}</u>
- * <table border="0" cellspacing="0" cellpadding="0">
+ * <table border="1" cellspacing="0" cellpadding="0">
  *     <tr>
- *         <td width=10%>String value</td>
+ *         <td width="10%">String value</td>
  *         <td>Comments</td>
  *     </tr>
  *     <tr>
@@ -101,111 +101,111 @@ import java.util.Objects;
  *     </tr>
  *     <tr>
  *         <td>AR_TV</td>
- *         <td>TV content rating system for Argentina TV</td>
+ *         <td>TV content rating system for Argentina</td>
  *     </tr>
  *     <tr>
  *         <td>AU_TV</td>
- *         <td>TV content rating system for Australia TV</td>
+ *         <td>TV content rating system for Australia</td>
  *     </tr>
  *     <tr>
  *         <td>BG_TV</td>
- *         <td>TV content rating system for Bulgaria TV</td>
+ *         <td>TV content rating system for Bulgaria</td>
  *     </tr>
  *     <tr>
  *         <td>BR_TV</td>
- *         <td>TV content rating system for Brazil TV</td>
+ *         <td>TV content rating system for Brazil</td>
  *     </tr>
  *     <tr>
  *         <td>CA_TV</td>
- *         <td>TV content rating system for Canada TV</td>
+ *         <td>TV content rating system for Canada</td>
  *     </tr>
  *     <tr>
  *         <td>CH_TV</td>
- *         <td>TV content rating system for Switzerland TV</td>
+ *         <td>TV content rating system for Switzerland</td>
  *     </tr>
  *     <tr>
  *         <td>CL_TV</td>
- *         <td>TV content rating system for Chile TV</td>
+ *         <td>TV content rating system for Chile</td>
  *     </tr>
  *     <tr>
  *         <td>DE_TV</td>
- *         <td>TV content rating system for Germany TV</td>
+ *         <td>TV content rating system for Germany</td>
  *     </tr>
  *     <tr>
  *         <td>DK_TV</td>
- *         <td>TV content rating system for Denmark TV</td>
+ *         <td>TV content rating system for Denmark</td>
  *     </tr>
  *     <tr>
  *         <td>ES_TV</td>
- *         <td>TV content rating system for Spain TV</td>
+ *         <td>TV content rating system for Spain</td>
  *     </tr>
  *     <tr>
  *         <td>FI_TV</td>
- *         <td>TV content rating system for Finland TV</td>
+ *         <td>TV content rating system for Finland</td>
  *     </tr>
  *     <tr>
  *         <td>FR_TV</td>
- *         <td>TV content rating system for France TV</td>
+ *         <td>TV content rating system for France</td>
  *     </tr>
  *     <tr>
  *         <td>GR_TV</td>
- *         <td>TV content rating system for Greece TV</td>
+ *         <td>TV content rating system for Greece</td>
  *     </tr>
  *     <tr>
  *         <td>HK_TV</td>
- *         <td>TV content rating system for Hong Kong TV</td>
+ *         <td>TV content rating system for Hong Kong</td>
  *     </tr>
  *     <tr>
  *         <td>HU_TV</td>
- *         <td>TV content rating system for Hungary TV</td>
+ *         <td>TV content rating system for Hungary</td>
  *     </tr>
  *     <tr>
  *         <td>ID_TV</td>
- *         <td>TV content rating system for Indonesia TV</td>
+ *         <td>TV content rating system for Indonesia</td>
  *     </tr>
  *     <tr>
  *         <td>IE_TV</td>
- *         <td>TV content rating system for Ireland TV</td>
+ *         <td>TV content rating system for Ireland</td>
  *     </tr>
  *     <tr>
  *         <td>IL_TV</td>
- *         <td>TV content rating system for Israel TV</td>
+ *         <td>TV content rating system for Israel</td>
  *     </tr>
  *     <tr>
  *         <td>IN_TV</td>
- *         <td>TV content rating system for India TV</td>
+ *         <td>TV content rating system for India</td>
  *     </tr>
  *     <tr>
  *         <td>IS_TV</td>
- *         <td>TV content rating system for Iceland TV</td>
+ *         <td>TV content rating system for Iceland</td>
  *     </tr>
  *     <tr>
  *         <td>KR_TV</td>
- *         <td>TV content rating system for South Korea TV</td>
+ *         <td>TV content rating system for South Korea</td>
  *     </tr>
  *     <tr>
  *         <td>MV_TV</td>
- *         <td>TV content rating system for Maldives TV</td>
+ *         <td>TV content rating system for Maldives</td>
  *     </tr>
  *     <tr>
  *         <td>MX_TV</td>
- *         <td>TV content rating system for Mexico TV</td>
+ *         <td>TV content rating system for Mexico</td>
  *     </tr>
  *     <tr>
  *         <td>MY_TV</td>
- *         <td>TV content rating system for Malaysia TV</td>
+ *         <td>TV content rating system for Malaysia</td>
  *     </tr>
  *     <tr>
  *         <td>NL_TV</td>
- *         <td>TV content rating system for Netherlands TV</td>
+ *         <td>TV content rating system for Netherlands</td>
  *     </tr>
  *     <tr>
  *         <td>NZ_FTV</td>
- *         <td>New Zealand\'s free-to-air TV content rating system</td>
+ *         <td>TV content rating system for free-to-air channels in New Zealand</td>
  *     </tr>
  *     <tr>
  *         <td>NZ_PTV</td>
- *         <td>New Zealand\'s pay TV content rating system</td>
+ *         <td>TV content rating system for Pay TV channels in New Zealand</td>
  *     </tr>
  *     <tr>
  *         <td>PE_TV</td>
@@ -214,87 +214,89 @@ import java.util.Objects;
  *     <tr>
  *         <td>PE_ATV</td>
  *         <td>TV content rating system for America Television in Peru that uses its own rating
- *         </td>
+ *         system</td>
  *     </tr>
  *     <tr>
  *         <td>PH_TV</td>
- *         <td>TV content rating system for Philippines TV</td>
+ *         <td>TV content rating system for Philippines</td>
  *     </tr>
  *     <tr>
  *         <td>PL_TV</td>
- *         <td>TV content rating system for Poland TV</td>
+ *         <td>TV content rating system for Poland</td>
  *     </tr>
  *     <tr>
  *         <td>PT_TV</td>
- *         <td>TV content rating system for Portugal TV</td>
+ *         <td>TV content rating system for Portugal</td>
  *     </tr>
  *     <tr>
  *         <td>RO_TV</td>
- *         <td>TV content rating system for Romania TV</td>
+ *         <td>TV content rating system for Romania</td>
  *     </tr>
  *     <tr>
  *         <td>RU_TV</td>
- *         <td>TV content rating system for Russia TV</td>
+ *         <td>TV content rating system for Russia</td>
  *     </tr>
  *     <tr>
  *         <td>RS_TV</td>
- *         <td>TV content rating system for Serbia TV</td>
+ *         <td>TV content rating system for Serbia</td>
  *     </tr>
  *     <tr>
  *         <td>SG_FTV</td>
- *         <td>TV content rating system for Singapore TV</td>
+ *         <td>TV content rating system for Singapore</td>
  *     </tr>
  *     <tr>
  *         <td>SG_PTV</td>
- *         <td>TV content rating system for Singapore TV</td>
+ *         <td>TV content rating system for Singapore</td>
  *     </tr>
  *     <tr>
  *         <td>SI_TV</td>
- *         <td>TV content rating system for Slovenia TV</td>
+ *         <td>TV content rating system for Slovenia</td>
  *     </tr>
  *     <tr>
  *         <td>TH_TV</td>
- *         <td>TV content rating system for Thailand TV</td>
+ *         <td>TV content rating system for Thailand</td>
  *     </tr>
  *     <tr>
  *         <td>TR_TV</td>
- *         <td>TV content rating system for Turkey TV</td>
+ *         <td>TV content rating system for Turkey</td>
  *     </tr>
  *     <tr>
  *         <td>TW_TV</td>
- *         <td>TV content rating system for Taiwan TV</td>
+ *         <td>TV content rating system for Taiwan</td>
  *     </tr>
  *     <tr>
  *         <td>UA_TV</td>
- *         <td>TV content rating system for Ukraine TV</td>
+ *         <td>TV content rating system for Ukraine</td>
  *     </tr>
  *     <tr>
- *         <td>US_TVPG</td>
- *         <td>The TV Parental Guidelines</td>
+ *         <td>US_TV</td>
+ *         <td>TV content rating system for United States</td>
  *     </tr>
  *     <tr>
  *         <td>VE_TV</td>
- *         <td>TV content rating system for Venezuela TV</td>
+ *         <td>TV content rating system for Venezuela</td>
  *     </tr>
  *     <tr>
  *         <td>ZA_TV</td>
- *         <td>TV content rating system for South Africa TV</td>
+ *         <td>TV content rating system for South Africa</td>
  *     </tr>
  * </table>
  *
  * <u>System defined string for {@code rating}</u>
- * <table border="0" cellspacing="0" cellpadding="0">
+ * <table border="1" cellspacing="0" cellpadding="0">
  *     <tr>
- *         <td width=10%>String value</td>
+ *         <td width="10%">RatingSystem code</td>
+ *         <td width="10%">Rating string value</td>
  *         <td>Comments</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="6">AM_TV_RS</td>
  *         <td>AM_TV_RS_Y</td>
- *         <td>Suitable for ages 2–11</td>
+ *         <td>Suitable for ages 2-11</td>
  *     </tr>
  *     <tr>
  *         <td>AM_TV_RS_Y7</td>
- *         <td>Suitable for ages 7–16</td>
+ *         <td>Suitable for ages 7-16</td>
  *     </tr>
  *     <tr>
  *         <td>AM_TV_RS_GA</td>
@@ -313,6 +315,7 @@ import java.util.Objects;
  *         <td>Suitable only for adults ages 18 and up</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="6">AM_TV_AS</td>
  *         <td>AM_TV_AS_EC</td>
  *         <td>Suitable for ages 2 and up</td>
  *     </tr>
@@ -337,26 +340,28 @@ import java.util.Objects;
  *         <td>Suitable for ages 17 and up</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="4">AR_TV</td>
  *         <td>AR_TV_ALL</td>
  *         <td>Suitable for all audiences. Programs may contain mild violence, language and mature
- *         </td>
+ *         situations</td>
  *     </tr>
  *     <tr>
  *         <td>AR_TV_13</td>
  *         <td>Suitable for ages 13 and up. Programs may contain mild to moderate language and mild
- *         and sexual references</td>
+ *         violence and sexual references</td>
  *     </tr>
  *     <tr>
  *         <td>AR_TV_16</td>
  *         <td>Suitable for ages 16 and up. Programs may contain more intensive violence and coarse
- *         partial nudity and moderate sexual references</td>
+ *         language, partial nudity and moderate sexual references</td>
  *     </tr>
  *     <tr>
  *         <td>AR_TV_18</td>
  *         <td>Suitable for mature audiences only. Programs contain strong violence, coarse language
- *         explicit sexual references</td>
+ *         and explicit sexual references</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="7">AU_TV</td>
  *         <td>AU_TV_CTC</td>
  *         <td>This has advertising approval, but is not yet classified</td>
  *     </tr>
@@ -367,17 +372,17 @@ import java.util.Objects;
  *     <tr>
  *         <td>AU_TV_PG</td>
  *         <td>The content is mild in impact, but it may contain content that children find
- *         or upsetting and may require the guidance or parents and guardians</td>
+ *         confusing or upsetting and may require the guidance or parents and guardians</td>
  *     </tr>
  *     <tr>
  *         <td>AU_TV_M</td>
  *         <td>The content is moderate in impact, and it is recommended for teenagers aged 15 years
- *         over</td>
+ *         and over</td>
  *     </tr>
  *     <tr>
  *         <td>AU_TV_MA15</td>
  *         <td>The content is strong in impact, and it is legally restricted to persons 15 years and
- *         </td>
+ *         over</td>
  *     </tr>
  *     <tr>
  *         <td>AU_TV_R18</td>
@@ -386,37 +391,39 @@ import java.util.Objects;
  *     <tr>
  *         <td>AU_TV_X18</td>
  *         <td>The content is restricted to adults. This classification is a special and legally
- *         category which contains only sexually explicit content</td>
+ *         restricted category which contains only sexually explicit content</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="5">BG_TV</td>
  *         <td>BG_TV_A</td>
  *         <td>Recommended to children. When the film confirms the ideals of humanism or popularizes
- *         national and world cultures or contributes to upbringing children</td>
+ *         the national and world cultures or contributes to upbringing children</td>
  *     </tr>
  *     <tr>
  *         <td>BG_TV_B</td>
  *         <td>No restrictive recommendations from the Committee. When the film is in no way
- *         to the universal rules of morality in this country, has no restrictive recommendations
- *         the Committee and does not fall in rating A</td>
+ *         contrary to the universal rules of morality in this country, has no restrictive
+ *         recommendations from the Committee and does not fall in rating A</td>
  *     </tr>
  *     <tr>
  *         <td>BG_TV_C</td>
  *         <td>No persons under the age of 12 are admitted unless accompanied by an adult. When the
- *         contains certain erotic scenes or scenes with drinking, taking drugs or stimulants or a
- *         scenes of violence</td>
+ *         film contains certain erotic scenes or scenes with drinking, taking drugs or stimulants
+ *         or a few scenes of violence</td>
  *     </tr>
  *     <tr>
  *         <td>BG_TV_D</td>
  *         <td>No persons under the age of 16 are admitted. When the film contains quite a number of
- *         scenes or scenes with drinking, taking drugs or stimulants or a considerable number of
- *         showing violence</td>
+ *         erotic scenes or scenes with drinking, taking drugs or stimulants or a considerable
+ *         number of scenes showing violence</td>
  *     </tr>
  *     <tr>
  *         <td>BG_TV_X</td>
  *         <td>No persons under the age of 18 are admitted. When the film is naturalistically erotic
- *         shows violence in an ostentatious manner</td>
+ *         or shows violence in an ostentatious manner</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="6">BR_TV</td>
  *         <td>BR_TV_L</td>
  *         <td>Content is suitable for all audiences</td>
  *     </tr>
@@ -441,52 +448,55 @@ import java.util.Objects;
  *         <td>Content suitable for viewers over the age of 18</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="7">CA_TV</td>
  *         <td>CA_TV_EXEMPT</td>
  *         <td>Shows which are exempt from ratings (such as news and sports programming) will not
- *         an on-screen rating at all</td>
+ *         display an on-screen rating at all</td>
  *     </tr>
  *     <tr>
  *         <td>CA_TV_C</td>
- *         <td>Programming suitable for children ages of 2–7 years. No profanity or sexual content
- *         any level allowed. Contains little violence</td>
+ *         <td>Programming suitable for children ages of 2-7 years. No profanity or sexual content
+ *         of any level allowed. Contains little violence</td>
  *     </tr>
  *     <tr>
  *         <td>CA_TV_C8</td>
  *         <td>Suitable for children ages 8+. Low level violence and fantasy horror is allowed. No
- *         language is allowed, but occasional "socially offensive and discriminatory" language is
- *         if in the context of the story. No sexual content of any level allowed</td>
+ *         foul language is allowed, but occasional "socially offensive and discriminatory" language
+ *         is allowed if in the context of the story. No sexual content of any level allowed</td>
  *     </tr>
  *     <tr>
  *         <td>CA_TV_G</td>
  *         <td>Suitable for general audiences. Programming suitable for the entire family with mild
- *         and mild profanity and/or censored language</td>
+ *         violence, and mild profanity and/or censored language</td>
  *     </tr>
  *     <tr>
  *         <td>CA_TV_PG</td>
  *         <td>Parental guidance. Moderate violence and moderate profanity is allowed, as is brief
- *         and sexual references if important to the context of the story</td>
+ *         nudity and sexual references if important to the context of the story</td>
  *     </tr>
  *     <tr>
  *         <td>CA_TV_14</td>
  *         <td>Programming intended for viewers ages 14 and older. May contain strong violence and
- *         profanity, and depictions of sexual activity as long as they are within the context of a
- *         </td>
+ *         strong profanity, and depictions of sexual activity as long as they are within the
+ *         context of a story</td>
  *     </tr>
  *     <tr>
  *         <td>CA_TV_18</td>
  *         <td>Programming intended for viewers ages 18 and older. May contain explicit violence and
- *         activity</td>
+ *         sexual activity</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="2">CH_TV</td>
  *         <td>CH_TV_ALL</td>
  *         <td>This program is suitable for all ages</td>
  *     </tr>
  *     <tr>
  *         <td>CH_TV_RED</td>
  *         <td>This program contains scenes that may hurt sensitive people, therefore the red symbol
- *         be displayed</td>
+ *         will be displayed</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="7">CL_TV</td>
  *         <td>CL_TV_I</td>
  *         <td>Programs suitable for all children</td>
  *     </tr>
@@ -513,9 +523,10 @@ import java.util.Objects;
  *     <tr>
  *         <td>CL_TV_A</td>
  *         <td>Programs suitable for adult audiences only (ages 18 or older), may contain coarse
- *         and sexual or explicit situations</td>
+ *         language, and sexual or explicit situations</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="4">DE_TV</td>
  *         <td>DE_TV_ALL</td>
  *         <td>The program is suitable for all ages</td>
  *     </tr>
@@ -532,6 +543,7 @@ import java.util.Objects;
  *         <td>The program is not suitable for viewers under the age of 18</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="4">DK_TV</td>
  *         <td>DK_TV_G</td>
  *         <td>programs suitable for all ages</td>
  *     </tr>
@@ -548,6 +560,7 @@ import java.util.Objects;
  *         <td>programs containing explicit content and strictly for adults only</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="7">ES_TV</td>
  *         <td>ES_TV_TP</td>
  *         <td>Recommended for all ages</td>
  *     </tr>
@@ -576,6 +589,7 @@ import java.util.Objects;
  *         <td>Recommended for people older than 18 years old</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="5">FI_TV</td>
  *         <td>FI_TV_S</td>
  *         <td>Allowed at all times</td>
  *     </tr>
@@ -596,6 +610,7 @@ import java.util.Objects;
  *         <td>Not recommended for children under 18</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="5">FR_TV</td>
  *         <td>FR_TV_ALL</td>
  *         <td>Appropriate for all ages</td>
  *     </tr>
@@ -616,6 +631,7 @@ import java.util.Objects;
  *         <td>Not recommended for persons under 18</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="5">GR_TV</td>
  *         <td>GR_TV_all</td>
  *         <td>Suitable for all ages</td>
  *     </tr>
@@ -634,9 +650,10 @@ import java.util.Objects;
  *     <tr>
  *         <td>GR_TV_18</td>
  *         <td>Suitable only for adults profanity before midnight is punishable by fine, except when
- *         in the context of the program</td>
+ *         used in the context of the program</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="3">HK_TV</td>
  *         <td>HK_TV_G</td>
  *         <td>For general audiences</td>
  *     </tr>
@@ -649,35 +666,37 @@ import java.util.Objects;
  *         <td>Programs are recommended only for adult viewers above the age of 18</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="6">HU_TV</td>
  *         <td>HU_TV_U</td>
  *         <td>Programs can be viewed by any age</td>
  *     </tr>
  *     <tr>
  *         <td>HU_TV_CF</td>
  *         <td>Programs recommended for children. It is an optional rating, there is no obligation
- *         broadcasters to indicate it</td>
+ *         for broadcasters to indicate it</td>
  *     </tr>
  *     <tr>
  *         <td>HU_TV_6</td>
  *         <td>Programs not recommended for children below the age of 6, may not contain any
- *         or sexual content</td>
+ *         violence or sexual content</td>
  *     </tr>
  *     <tr>
  *         <td>HU_TV_12</td>
  *         <td>Programs not recommended for children below the age of 12, may contain light sexual
- *         or explicit language</td>
+ *         content or explicit language</td>
  *     </tr>
  *     <tr>
  *         <td>HU_TV_16</td>
  *         <td>Programs not recommended for teens and children below the age of 16, may contain more
- *         violence and sexual content</td>
+ *         intensive violence and sexual content</td>
  *     </tr>
  *     <tr>
  *         <td>HU_TV_18</td>
  *         <td>The program is recommended only for adult viewers (for ages 18 and up), may contain
- *         violence and explicit sexual content</td>
+ *         explicit violence and explicit sexual content</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="8">ID_TV</td>
  *         <td>ID_TV_P</td>
  *         <td>Suitable for children from ages 2 through 11</td>
  *     </tr>
@@ -710,18 +729,19 @@ import java.util.Objects;
  *         <td>Suitable for viewers over 18 and older only</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="5">IE_TV</td>
  *         <td>IE_TV_GA</td>
  *         <td>Suitable for all ages</td>
  *     </tr>
  *     <tr>
  *         <td>IE_TV_Ch</td>
  *         <td>Suitable for children ages 5 to 10, may contain comedic violence or action fantasy
- *         </td>
+ *         violence</td>
  *     </tr>
  *     <tr>
  *         <td>IE_TV_YA</td>
  *         <td>Suitable for adolescent audiences, may contain thematic elements that would appeal to
- *         </td>
+ *         teenagers</td>
  *     </tr>
  *     <tr>
  *         <td>IE_TV_PS</td>
@@ -730,17 +750,18 @@ import java.util.Objects;
  *     <tr>
  *         <td>IE_TV_MA</td>
  *         <td>Most restrictive classification, allowing for heavy subject matter and coarse
- *         </td>
+ *         language</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="5">IL_TV</td>
  *         <td>IL_TV_G</td>
  *         <td>General audience; anyone, regardless of age, can view the program, usually news and
- *         programming</td>
+ *         children's programming</td>
  *     </tr>
  *     <tr>
  *         <td>IL_TV_12</td>
  *         <td>Suitable for teens and children ages 12 and over, no child under 12 are permitted to
- *         the program</td>
+ *         view the program</td>
  *     </tr>
  *     <tr>
  *         <td>IL_TV_15</td>
@@ -755,13 +776,14 @@ import java.util.Objects;
  *         <td>Exempt from classification</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="4">IN_TV</td>
  *         <td>IN_TV_U</td>
  *         <td>Unrestricted public exhibition</td>
  *     </tr>
  *     <tr>
  *         <td>IN_TV_U/A</td>
  *         <td>Unrestricted public exhibition, but with a caution regarding parental guidance to
- *         under 12 years of age</td>
+ *         those under 12 years of age</td>
  *     </tr>
  *     <tr>
  *         <td>IN_TV_A</td>
@@ -773,6 +795,7 @@ import java.util.Objects;
  *         </td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="7">IS_TV</td>
  *         <td>IS_TV_L</td>
  *         <td>Programs suitable for all ages</td>
  *     </tr>
@@ -801,29 +824,31 @@ import java.util.Objects;
  *         <td>Programs suitable for ages 18 and older</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="5">KR_TV</td>
  *         <td>KR_TV_All</td>
  *         <td>Appropriate for all ages</td>
  *     </tr>
  *     <tr>
  *         <td>KR_TV_7</td>
  *         <td>May contain material inappropriate for children younger than 7, and parental
- *         should be used</td>
+ *         discretion should be used</td>
  *     </tr>
  *     <tr>
  *         <td>KR_TV_12</td>
  *         <td>May deemed inappropriate for those younger than 12, and parental discretion should be
- *         </td>
+ *         used</td>
  *     </tr>
  *     <tr>
  *         <td>KR_TV_15</td>
  *         <td>May be inappropriate for children under 15, and that parental discretion should be
- *         </td>
+ *         used</td>
  *     </tr>
  *     <tr>
  *         <td>KR_TV_19</td>
  *         <td>For adults only</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="9">MV_TV</td>
  *         <td>MV_TV_Y</td>
  *         <td>Young children</td>
  *     </tr>
@@ -860,6 +885,7 @@ import java.util.Objects;
  *         <td>Most restrictive classification, only adults ages 25 and above may view</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="6">MX_TV</td>
  *         <td>MX_TV_A</td>
  *         <td>Appropriate for all ages, parental guidance is recommended for children under 7 years
  *         </td>
@@ -867,41 +893,43 @@ import java.util.Objects;
  *     <tr>
  *         <td>MX_TV_B</td>
  *         <td>Designed for ages 12 and older, may contain some sexual situations, mild violence,
- *         mild language</td>
+ *         and mild language</td>
  *     </tr>
  *     <tr>
  *         <td>MX_TV_B-15</td>
- *         <td>Designed for ages 15 and up, slightly more intensive than the \'A\' and \'B\' ratings
+ *         <td>Designed for ages 15 and up, slightly more intensive than the 'A' and 'B' ratings
  *         </td>
  *     </tr>
  *     <tr>
  *         <td>MX_TV_C</td>
  *         <td>Designed to be viewed by adults aged 18 or older only, generally more intensive
- *         </td>
+ *         content</td>
  *     </tr>
  *     <tr>
  *         <td>MX_TV_D</td>
  *         <td>Designed to be viewed only by mature adults (at least 21 years of age and over),
- *         extreme content matter</td>
+ *         contains extreme content matter</td>
  *     </tr>
  *     <tr>
  *         <td>MX_TV_RC</td>
  *         <td>Banned from public television in Mexico</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="3">MY_TV</td>
  *         <td>MY_TV_U</td>
  *         <td>General viewing for all ages, can be broadcast anytime</td>
  *     </tr>
  *     <tr>
  *         <td>MY_TV_P13</td>
  *         <td>For viewers ages 13 and above, children under 13 needs parental guidance, can be
- *         anytime, but some elements may only be broadcast at night</td>
+ *         broadcast anytime, but some elements may only be broadcast at night</td>
  *     </tr>
  *     <tr>
  *         <td>MY_TV_18</td>
  *         <td>For viewers ages 18 and above only</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="5">NL_TV</td>
  *         <td>NL_TV_AL</td>
  *         <td>All Ages</td>
  *     </tr>
@@ -922,23 +950,25 @@ import java.util.Objects;
  *         <td>Parental advisory for children under 16</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="3">NZ_FTV</td>
  *         <td>NZ_FTV_G</td>
  *         <td>These exclude material likely to harm children under 14 and can screen at any time.
- *         may not necessarily be designed for younger viewers, but must not contain material likely
- *         cause them undue distress or discomfort</td>
+ *         Programmes may not necessarily be designed for younger viewers, but must not contain
+ *         material likely to cause them undue distress or discomfort</td>
  *     </tr>
  *     <tr>
  *         <td>NZ_FTV_PGR</td>
  *         <td>Programmes more suited to more mature viewers. These are not necessarily unsuitable
- *         children, but viewer discretion is advised, and parents and guardians are encouraged to
- *         younger viewers</td>
+ *         for children, but viewer discretion is advised, and parents and guardians are encouraged
+ *         to supervise younger viewers</td>
  *     </tr>
  *     <tr>
  *         <td>NZ_FTV_AO</td>
  *         <td>Contain material of an adult nature handled in such a way that it is unsuitable for
- *         </td>
+ *         children</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="5">NZ_PTV</td>
  *         <td>NZ_PTV_G</td>
  *         <td>suitable for general audiences</td>
  *     </tr>
@@ -959,6 +989,7 @@ import java.util.Objects;
  *         <td>Suitable for viewers 18 and up</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="3">PE_TV</td>
  *         <td>PE_TV_A</td>
  *         <td>Suitable for all audiences</td>
  *     </tr>
@@ -971,6 +1002,7 @@ import java.util.Objects;
  *         <td>Suitable for people aged 18 and above only</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="4">PE_ATV</td>
  *         <td>PE_ATV_GP</td>
  *         <td>General audience</td>
  *     </tr>
@@ -987,48 +1019,52 @@ import java.util.Objects;
  *         <td>Suitable for people aged 18 and above only</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="3">PH_TV</td>
  *         <td>PH_TV_G</td>
  *         <td>Suitable for all public viewers</td>
  *     </tr>
  *     <tr>
  *         <td>PH_TV_PG</td>
  *         <td>Programmes rated PG may contain scenes or other content that are unsuitable for
- *         without the guidance of a parent</td>
+ *         children without the guidance of a parent</td>
  *     </tr>
  *     <tr>
  *         <td>PH_TV_SPG</td>
  *         <td>Contains mature themes or moderate to intense violence, which may be deemed unfit for
- *         to watch without strict parental supervision</td>
+ *         children to watch without strict parental supervision</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="5">PL_TV</td>
  *         <td>PL_TV_G</td>
  *         <td>Positive or neutral view of the world, little to no violence, non-sexual love, and no
- *         content</td>
+ *         sexual content</td>
  *     </tr>
  *     <tr>
  *         <td>PL_TV_7</td>
  *         <td>Age 7 and above. May additionally contain some mild language, bloodless violence, and
- *         more negative view of the world</td>
+ *         a more negative view of the world</td>
  *     </tr>
  *     <tr>
  *         <td>PL_TV_12</td>
  *         <td>Age 12 and above. May contain some foul language, some violence, and some sexual
- *         </td>
+ *         content</td>
  *     </tr>
  *     <tr>
  *         <td>PL_TV_16</td>
  *         <td>Age 16 and above. Deviant social behaviour, world filled with violence and sexuality,
- *         picture of adulthood, display of physical force, especially in controversial social
- *         immoral behaviour without ethic dilemma, putting the blame on the victim, excessive
- *         on material possessions</td>
+ *         simplified picture of adulthood, display of physical force, especially in controversial
+ *         social context, immoral behaviour without ethic dilemma, putting the blame on the victim,
+ *         excessive concentration on material possessions</td>
  *     </tr>
  *     <tr>
  *         <td>PL_TV_18</td>
  *         <td>Age 18 and above. One-sided display of the joys of adult life without showing
- *         social justification of violent behaviour, excessive vulgarity, use of racial slurs and
- *         stereotypes, explicit sexual content, praise of aggression or vulgarity</td>
+ *         responsibilities, social justification of violent behaviour, excessive vulgarity, use of
+ *         racial slurs and social stereotypes, explicit sexual content, praise of aggression or
+ *         vulgarity</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="4">PT_TV</td>
  *         <td>PT_TV_T</td>
  *         <td>Suitable for all</td>
  *     </tr>
@@ -1045,6 +1081,7 @@ import java.util.Objects;
  *         <td>Not suitable for children under 16</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="6">RO_TV</td>
  *         <td>RO_TV_Y</td>
  *         <td>Young Ages</td>
  *     </tr>
@@ -1069,6 +1106,7 @@ import java.util.Objects;
  *         <td>Forbidden for children under 18 years of age</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="5">RU_TV</td>
  *         <td>RU_TV_0</td>
  *         <td>Can be watched by Any Age</td>
  *     </tr>
@@ -1089,6 +1127,7 @@ import java.util.Objects;
  *         <td>Restricted to children ONLY people 18 or older</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="7">RS_TV</td>
  *         <td>RS_TV_G</td>
  *         <td>Program suitable for all ages</td>
  *     </tr>
@@ -1117,14 +1156,16 @@ import java.util.Objects;
  *         <td>Program not suitable for minors under the age of 18</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="2">SG_FTV</td>
  *         <td>SG_FTV_PG</td>
  *         <td>Suitable for most but parents should guide their young</td>
  *     </tr>
  *     <tr>
  *         <td>SG_FTV_PG13</td>
- *         <td>Parental Guidance Strongly Cautioned – Suitable for 13 And Above</td>
+ *         <td>Parental Guidance Strongly Cautioned - Suitable for 13 And Above</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="2">SG_PTV</td>
  *         <td>SG_PTV_NC16</td>
  *         <td>No Children Under 16</td>
  *     </tr>
@@ -1133,6 +1174,7 @@ import java.util.Objects;
  *         <td>Nobody under age 18 is admitted</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="4">SI_TV</td>
  *         <td>SI_TV_VS</td>
  *         <td>Parental guidance suggested (for children under 6)</td>
  *     </tr>
@@ -1149,12 +1191,13 @@ import java.util.Objects;
  *         <td>Content exclusively for adults</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="6">TH_TV</td>
  *         <td>TH_TV_P</td>
  *         <td>Content suitable for primary school aged children</td>
  *     </tr>
  *     <tr>
  *         <td>TH_TV_C</td>
- *         <td>Content suitable for children between 6–12 years old</td>
+ *         <td>Content suitable for children between 6-12 years old</td>
  *     </tr>
  *     <tr>
  *         <td>TH_TV_G</td>
@@ -1163,18 +1206,19 @@ import java.util.Objects;
  *     <tr>
  *         <td>TH_TV_PG13</td>
  *         <td>Content suitable for people aged 13 and above, but can be watched by those who are
- *         the recommended age if parental guidance is provided</td>
+ *         under the recommended age if parental guidance is provided</td>
  *     </tr>
  *     <tr>
  *         <td>TH_TV_PG18</td>
  *         <td>Content suitable for people aged above 18 years old; those who are younger that 18
- *         be provided with parental guidance</td>
+ *         must be provided with parental guidance</td>
  *     </tr>
  *     <tr>
  *         <td>TH_TV_A</td>
  *         <td>Content unsuitable for children and youngsters</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="4">TR_TV</td>
  *         <td>TR_TV_G</td>
  *         <td>General audience. Suitable for all ages</td>
  *     </tr>
@@ -1191,65 +1235,69 @@ import java.util.Objects;
  *         <td>Suitable for ages 13 and over</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="4">TW_TV</td>
  *         <td>TW_TV_G</td>
  *         <td>For all ages</td>
  *     </tr>
  *     <tr>
  *         <td>TW_TV_P</td>
  *         <td>Not suitable for children under 6 years old. People aged 6 but under 12 require
- *         from accompanying adults to watch</td>
+ *         guidance from accompanying adults to watch</td>
  *     </tr>
  *     <tr>
  *         <td>TW_TV_PG</td>
  *         <td>Not suitable for people under 12 years of age. Parental guidance is required for
- *         aged 12 but under 18</td>
+ *         people aged 12 but under 18</td>
  *     </tr>
  *     <tr>
  *         <td>TW_TV_R</td>
  *         <td>For adults only and people under 18 years of age must not watch</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="3">UA_TV</td>
  *         <td>UA_TV_G</td>
  *         <td>This program does not have age restrictions</td>
  *     </tr>
  *     <tr>
  *         <td>UA_TV_Y</td>
  *         <td>Children must view this program with parents. In it program there are fragments,
- *         unsuitable for children</td>
+ *         which unsuitable for children</td>
  *     </tr>
  *     <tr>
  *         <td>UA_TV_R</td>
  *         <td>This program is only for adult viewers. In it there are scenes with nudity, drug use,
- *         violence</td>
+ *         or violence</td>
  *     </tr>
  *     <tr>
- *         <td>US_TVPG_TV_Y</td>
+ *         <td valign="top" rowspan="6">US_TV</td>
+ *         <td>US_TV_Y</td>
  *         <td>This program is designed to be appropriate for all children</td>
  *     </tr>
  *     <tr>
- *         <td>US_TVPG_TV_Y7</td>
+ *         <td>US_TV_Y7</td>
  *         <td>This program is designed for children age 7 and above</td>
  *     </tr>
  *     <tr>
- *         <td>US_TVPG_TV_G</td>
+ *         <td>US_TV_G</td>
  *         <td>Most parents would find this program suitable for all ages</td>
  *     </tr>
  *     <tr>
- *         <td>US_TVPG_TV_PG</td>
+ *         <td>US_TV_PG</td>
  *         <td>This program contains material that parents may find unsuitable for younger children
  *         </td>
  *     </tr>
  *     <tr>
- *         <td>US_TVPG_TV_14</td>
+ *         <td>US_TV_14</td>
  *         <td>This program contains some material that many parents would find unsuitable for
- *         under 14 years of age</td>
+ *         children under 14 years of age</td>
  *     </tr>
  *     <tr>
- *         <td>US_TVPG_TV_MA</td>
+ *         <td>US_TV_MA</td>
  *         <td>This program is specifically designed to be viewed by adults and therefore may be
- *         for children under 17</td>
+ *         unsuitable for children under 17</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="3">VE_TV</td>
  *         <td>VE_TV_TU</td>
  *         <td>For all ages</td>
  *     </tr>
@@ -1262,139 +1310,153 @@ import java.util.Objects;
  *         <td>Mature viewers</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="6">ZA_TV</td>
  *         <td>ZA_TV_F</td>
  *         <td>This is a program/film that does not contain any obscenity, and is suitable for
- *         viewing. A logo must be displayed in the corner of the screen for 30 seconds after each
- *         break</td>
+ *         family viewing. A logo must be displayed in the corner of the screen for 30 seconds after
+ *         each commercial break</td>
  *     </tr>
  *     <tr>
  *         <td>ZA_TV_PG</td>
  *         <td>Children under 6 may watch this program/film, but must be accompanied by an adult.
- *         program contains an adult related theme, which might include very mild language, violence
- *         sexual innuendo. A logo must be displayed in the corner of the screen for one minute
- *         each commercial break</td>
+ *         This program contains an adult related theme, which might include very mild language,
+ *         violence and sexual innuendo. A logo must be displayed in the corner of the screen for
+ *         one minute after each commercial break</td>
  *     </tr>
  *     <tr>
  *         <td>ZA_TV_13</td>
  *         <td>Children under 13 are prohibited from watching this program/film. This program
- *         mild language, violence and sexual innuendo. A logo must be displayed in the corner of
- *         screen for two minutes after each commercial break</td>
+ *         contains mild language, violence and sexual innuendo. A logo must be displayed in the
+ *         corner of the screen for two minutes after each commercial break</td>
  *     </tr>
  *     <tr>
  *         <td>ZA_TV_16</td>
  *         <td>Children under 16 are prohibited from watching this program/film. It contains
- *         violence, language, and some sexual situations. In the case of television, this program
- *         only be broadcast after 9pm–4:30am. A logo must be displayed in the corner of the screen
- *         five minutes after each commercial break. A full-screen warning must be issued before the
- *         of the program. If the program is longer than an hour, a warning must be displayed every
- *         an hour</td>
+ *         moderate violence, language, and some sexual situations. In the case of television, this
+ *         program may only be broadcast after 9pm-4:30am. A logo must be displayed in the corner of
+ *         the screen for five minutes after each commercial break. A full-screen warning must be
+ *         issued before the start of the program. If the program is longer than an hour, a warning
+ *         must be displayed every half an hour</td>
  *     </tr>
  *     <tr>
  *         <td>ZA_TV_18</td>
  *         <td>Children under 18 are prohibited from watching this program/film. It contains extreme
- *         language and/or graphic sexual content. In the case of television, this program may only
- *         broadcast from 10pm–4:30am. A logo must be displayed in the corner of the screen for the
- *         of the program. A full-screen warning must be issued before the start of the program and
- *         each commercial break</td>
+ *         violence, language and/or graphic sexual content. In the case of television, this program
+ *         may only be broadcast from 10pm-4:30am. A logo must be displayed in the corner of the
+ *         screen for the duration of the program. A full-screen warning must be issued before the
+ *         start of the program and after each commercial break</td>
  *     </tr>
  *     <tr>
  *         <td>ZA_TV_R18</td>
  *         <td>This is reserved for films of an extreme sexual nature (pornography). R18 films may
- *         be distributed in the form of video and DVD in a controlled environment (e.g. Adult
- *         No public viewing of this film may take place. R18 films may not be broadcast on
- *         and in cinemas</td>
+ *         only be distributed in the form of video and DVD in a controlled environment (e.g. Adult
+ *         Shops). No public viewing of this film may take place. R18 films may not be broadcast on
+ *         television and in cinemas</td>
  *     </tr>
  * </table>
  *
  * <u>System defined string for {@code subRating}</u>
- * <table border="0" cellspacing="0" cellpadding="0">
+ * <table border="1" cellspacing="0" cellpadding="0">
  *     <tr>
- *         <td width=10%>String value</td>
+ *         <td width="10%">RatingSystem code</td>
+ *         <td width="10%">Rating string value</td>
  *         <td>Comments</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="6">NL_TV</td>
  *         <td>NL_TV_V</td>
- *         <td>Violence</td>
+ *         <td>Violence<br/>Applicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12, NL_TV_16</td>
  *     </tr>
  *     <tr>
  *         <td>NL_TV_F</td>
- *         <td>Scary or Disturbing Content</td>
+ *         <td>Scary or Disturbing ContentViolence<br/>Applicable to NL_TV_AL, NL_TV_6, NL_TV_9,
+ *         NL_TV_12, NL_TV_16</td>
  *     </tr>
  *     <tr>
  *         <td>NL_TV_S</td>
- *         <td>Sexual Content</td>
+ *         <td>Sexual Content<br/>Applicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12, NL_TV_16</td>
  *     </tr>
  *     <tr>
  *         <td>NL_TV_D</td>
- *         <td>Discrimination</td>
+ *         <td>Discrimination<br/>Applicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12, NL_TV_16</td>
  *     </tr>
  *     <tr>
  *         <td>NL_TV_DA</td>
- *         <td>Drug and/or Alcohol abuse</td>
+ *         <td>Drug and/or Alcohol abuse<br/>Applicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12,
+ *         NL_TV_16</td>
  *     </tr>
  *     <tr>
  *         <td>NL_TV_L</td>
- *         <td>Bad Language</td>
+ *         <td>Bad Language<br/>Applicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12, NL_TV_16</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="4">NZ_PTV</td>
  *         <td>NZ_PTV_C</td>
- *         <td>Content may offend</td>
+ *         <td>Content may offend<br/>Applicable to NZ_PTV_PG, NZ_PTV_M, NZ_PTV_16, NZ_PTV_18</td>
  *     </tr>
  *     <tr>
  *         <td>NZ_PTV_V</td>
- *         <td>Violence</td>
+ *         <td>Violence<br/>Applicable to NZ_PTV_PG, NZ_PTV_M, NZ_PTV_16, NZ_PTV_18</td>
  *     </tr>
  *     <tr>
  *         <td>NZ_PTV_L</td>
- *         <td>Language</td>
+ *         <td>Language<br/>Applicable to NZ_PTV_PG, NZ_PTV_M, NZ_PTV_16, NZ_PTV_18</td>
  *     </tr>
  *     <tr>
  *         <td>NZ_PTV_S</td>
- *         <td>Sexual content</td>
+ *         <td>Sexual content<br/>Applicable to NZ_PTV_PG, NZ_PTV_M, NZ_PTV_16, NZ_PTV_18</td>
  *     </tr>
  *     <tr>
- *         <td>US_TVPG_D</td>
- *         <td>Suggestive dialogue (Usually means talks about sex)</td>
+ *         <td valign="top" rowspan="5">US_TV</td>
+ *         <td>US_TV_D</td>
+ *         <td>Suggestive dialogue (Usually means talks about sex)<br/>Applicable to US_TV_PG,
+ *         US_TV_14, US_TV</td>
  *     </tr>
  *     <tr>
- *         <td>US_TVPG_L</td>
- *         <td>Coarse language</td>
+ *         <td>US_TV_L</td>
+ *         <td>Coarse language<br/>Applicable to US_TV_PG, US_TV_14</td>
  *     </tr>
  *     <tr>
- *         <td>US_TVPG_S</td>
- *         <td>Sexual content</td>
+ *         <td>US_TV_S</td>
+ *         <td>Sexual content<br/>Applicable to US_TV_PG, US_TV_14, US_TV_MA</td>
  *     </tr>
  *     <tr>
- *         <td>US_TVPG_V</td>
- *         <td>Violence</td>
+ *         <td>US_TV_V</td>
+ *         <td>Violence<br/>Applicable to US_TV_PG, US_TV_14, US_TV_MA</td>
  *     </tr>
  *     <tr>
- *         <td>US_TVPG_FV</td>
- *         <td>Fantasy violence (Children\'s programming only)</td>
+ *         <td>US_TV_FV</td>
+ *         <td>Fantasy violence (Children's programming only)<br/>Applicable to US_TV_Y7</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="6">ZA_TV</td>
  *         <td>ZA_TV_D</td>
- *         <td>Drug</td>
+ *         <td>Drug<br/>Applicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18
+ *         </td>
  *     </tr>
  *     <tr>
  *         <td>ZA_TV_V</td>
- *         <td>Violence</td>
+ *         <td>Violence<br/>Applicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18
+ *         </td>
  *     </tr>
  *     <tr>
  *         <td>ZA_TV_N</td>
- *         <td>Nudity</td>
+ *         <td>Nudity<br/>Applicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18
+ *         </td>
  *     </tr>
  *     <tr>
  *         <td>ZA_TV_P</td>
- *         <td>Prejudice</td>
+ *         <td>Prejudice<br/>Applicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18,
+ *         ZA_TV_R18</td>
  *     </tr>
  *     <tr>
  *         <td>ZA_TV_S</td>
- *         <td>Sex</td>
+ *         <td>Sex<br/>Applicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18</td>
  *     </tr>
  *     <tr>
  *         <td>ZA_TV_L</td>
- *         <td>Language</td>
+ *         <td>Language<br/>Applicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18
+ *         </td>
  *     </tr>
  * </table>
  */
