@@ -4618,8 +4618,8 @@ public class AudioService extends IAudioService.Stub {
                 // in SettingsObserver. Here we should log that a USB device is connected
                 // and disconnected with its address (card , device) and force the
                 // connection or disconnection when the setting changes.
-                int isDisabled = Settings.System.getInt(mContentResolver,
-                        Settings.System.USB_AUDIO_AUTOMATIC_ROUTING_DISABLED, 0);
+                int isDisabled = Settings.Secure.getInt(mContentResolver,
+                        Settings.Secure.USB_AUDIO_AUTOMATIC_ROUTING_DISABLED, 0);
                 if (isDisabled != 0) {
                     return;
                 }
