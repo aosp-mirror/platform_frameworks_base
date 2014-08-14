@@ -72,10 +72,15 @@ public final class WebViewFactory {
     private static WebViewFactoryProvider sProviderInstance;
     private static final Object sProviderLock = new Object();
     private static boolean sAddressSpaceReserved = false;
+    private static PackageInfo sPackageInfo;
 
     public static String getWebViewPackageName() {
         return AppGlobals.getInitialApplication().getString(
                 com.android.internal.R.string.config_webViewPackageName);
+    }
+
+    public static PackageInfo getLoadedPackageInfo() {
+        return sPackageInfo;
     }
 
     static WebViewFactoryProvider getProvider() {
@@ -125,9 +130,9 @@ public final class WebViewFactory {
         try {
             // First fetch the package info so we can log the webview package version.
             String packageName = getWebViewPackageName();
-            PackageInfo pi = initialApplication.getPackageManager().getPackageInfo(packageName, 0);
-            Log.i(LOGTAG, "Loading " + packageName + " version " + pi.versionName +
-                          " (code " + pi.versionCode + ")");
+            sPackageInfo = initialApplication.getPackageManager().getPackageInfo(packageName, 0);
+            Log.i(LOGTAG, "Loading " + packageName + " version " + sPackageInfo.versionName +
+                          " (code " + sPackageInfo.versionCode + ")");
 
             // Construct a package context to load the Java code into the current app.
             Context webViewContext = initialApplication.createPackageContext(packageName,
