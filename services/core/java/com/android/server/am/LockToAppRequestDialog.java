@@ -13,6 +13,7 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Slog;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.CheckBox;
 
 import com.android.internal.R;
@@ -33,8 +34,12 @@ public class LockToAppRequestDialog implements OnClickListener {
 
     private ILockSettings mLockSettingsService;
 
+    private AccessibilityManager mAccessibilityService;
+
     public LockToAppRequestDialog(Context context, ActivityManagerService activityManagerService) {
         mContext = context;
+        mAccessibilityService = (AccessibilityManager)
+                mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mService = activityManagerService;
     }
 
@@ -78,7 +83,9 @@ public class LockToAppRequestDialog implements OnClickListener {
         final int unlockStringId = getLockString(task.userId);
 
         final Resources r = Resources.getSystem();
-        final String description= r.getString(R.string.lock_to_app_description);
+        final String description= r.getString(mAccessibilityService.isEnabled()
+                ? R.string.lock_to_app_description_accessible
+                : R.string.lock_to_app_description);
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext)
                         .setTitle(r.getString(R.string.lock_to_app_title))
                         .setMessage(description)

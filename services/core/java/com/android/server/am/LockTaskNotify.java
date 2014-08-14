@@ -19,6 +19,7 @@ package com.android.server.am;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
 import com.android.internal.R;
@@ -32,9 +33,12 @@ public class LockTaskNotify {
 
     private final Context mContext;
     private final H mHandler;
+    private AccessibilityManager mAccessibilityManager;
 
     public LockTaskNotify(Context context) {
         mContext = context;
+        mAccessibilityManager = (AccessibilityManager)
+                mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mHandler = new H();
     }
 
@@ -45,6 +49,9 @@ public class LockTaskNotify {
     public void handleShowToast(boolean isLocked) {
         String text = mContext.getString(isLocked
                 ? R.string.lock_to_app_toast_locked : R.string.lock_to_app_toast);
+        if (!isLocked && mAccessibilityManager.isEnabled()) {
+            text = mContext.getString(R.string.lock_to_app_toast_accessible);
+        }
         Toast.makeText(mContext, text, Toast.LENGTH_LONG).show();
     }
 
