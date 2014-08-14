@@ -481,15 +481,12 @@ public abstract class ConnectionService extends Service {
                             case Connection.STATE_INITIALIZING:
                                 Log.d(this, "State changed to STATE_INITIALIZING; ignoring");
                                 return; // Don't want to stop listening on this state transition.
-                            default:
-                                Log.d(this, "Connection created in state %s",
-                                        Connection.stateToString(state));
-                                connectionCreated(callId, request, createdConnection);
-                                break;
                         }
                         c.removeConnectionListener(this);
                     }
                 });
+                Log.d(this, "Connection created in state INITIALIZING");
+                connectionCreated(callId, request, createdConnection);
             } else if (createdConnection.getState() == Connection.STATE_CANCELED) {
                 // Tell telecomm not to attempt any more services.
                 mAdapter.handleCreateConnectionCancelled(callId, request);
