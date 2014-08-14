@@ -343,6 +343,7 @@ public final class PowerManager {
      * permission (in addition to
      * {@link android.Manifest.permission#REBOOT}).
      * </p>
+     * @hide
      */
     public static final String REBOOT_RECOVERY = "recovery";
     
