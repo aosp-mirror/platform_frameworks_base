@@ -375,6 +375,7 @@ public class NotificationPanelView extends PanelView implements
 
     public void setQsExpansionEnabled(boolean qsExpansionEnabled) {
         mQsExpansionEnabled = qsExpansionEnabled;
+        mHeader.setClickable(qsExpansionEnabled);
     }
 
     @Override
@@ -571,7 +572,8 @@ public class NotificationPanelView extends PanelView implements
             return true;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN && getExpandedFraction() == 1f
-                && mStatusBar.getBarState() != StatusBarState.KEYGUARD && !mQsExpanded) {
+                && mStatusBar.getBarState() != StatusBarState.KEYGUARD && !mQsExpanded
+                && mQsExpansionEnabled) {
 
             // Down in the empty area while fully expanded - go to QS.
             mQsTracking = true;
@@ -594,7 +596,8 @@ public class NotificationPanelView extends PanelView implements
                 || event.getActionMasked() == MotionEvent.ACTION_UP) {
             mConflictingQsExpansionGesture = false;
         }
-        if (event.getActionMasked() == MotionEvent.ACTION_DOWN && mExpandedHeight == 0) {
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN && mExpandedHeight == 0
+                && mQsExpansionEnabled) {
             mTwoFingerQsExpandPossible = true;
         }
         if (mTwoFingerQsExpandPossible && event.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN
@@ -724,6 +727,9 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public void onOverscrollTopChanged(float amount, boolean isRubberbanded) {
         cancelAnimation();
+        if (!mQsExpansionEnabled) {
+            amount = 0f;
+        }
         float rounded = amount >= 1f ? amount : 0f;
         mStackScrollerOverscrolling = rounded != 0f && isRubberbanded;
         mQsExpansionFromOverscroll = rounded != 0f;
@@ -735,7 +741,8 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public void flingTopOverscroll(float velocity, boolean open) {
         setQsExpansion(mQsExpansionHeight);
-        flingSettings(velocity, open, new Runnable() {
+        flingSettings(!mQsExpansionEnabled && open ? 0f : velocity, open && mQsExpansionEnabled,
+                new Runnable() {
             @Override
             public void run() {
                 mStackScrollerOverscrolling = false;
