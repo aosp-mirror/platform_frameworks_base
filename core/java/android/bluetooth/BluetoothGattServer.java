@@ -519,6 +519,7 @@ public final class BluetoothGattServer implements BluetoothProfile {
      * @param characteristic The local characteristic that has been updated
      * @param confirm true to request confirmation from the client (indication),
      *                false to send a notification
+     * @throws IllegalArgumentException
      * @return true, if the notification has been triggered successfully
      */
     public boolean notifyCharacteristicChanged(BluetoothDevice device,
@@ -528,6 +529,11 @@ public final class BluetoothGattServer implements BluetoothProfile {
 
         BluetoothGattService service = characteristic.getService();
         if (service == null) return false;
+
+        if (characteristic.getValue() == null) {
+            throw new IllegalArgumentException("Chracteristic value is empty. Use "
+                    + "BluetoothGattCharacteristic#setvalue to update");
+        }
 
         try {
             mService.sendNotification(mServerIf, device.getAddress(),
