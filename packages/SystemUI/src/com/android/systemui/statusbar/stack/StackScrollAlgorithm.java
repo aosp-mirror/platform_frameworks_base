@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.stack;
 
 import android.content.Context;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,6 +74,7 @@ public class StackScrollAlgorithm {
     private int mCollapseSecondCardPadding;
     private boolean mIsSmallScreen;
     private int mMaxNotificationHeight;
+    private boolean mScaleDimmed;
 
     public StackScrollAlgorithm(Context context) {
         initConstants(context);
@@ -80,7 +82,7 @@ public class StackScrollAlgorithm {
     }
 
     private void updatePadding(boolean dimmed) {
-        mPaddingBetweenElements = dimmed
+        mPaddingBetweenElements = dimmed && mScaleDimmed
                 ? mPaddingBetweenElementsDimmed
                 : mPaddingBetweenElementsNormal;
         mTopStackTotalSize = mTopStackSlowDownLength + mPaddingBetweenElements
@@ -125,8 +127,13 @@ public class StackScrollAlgorithm {
                 R.dimen.notification_material_rounded_rect_radius);
         mCollapseSecondCardPadding = context.getResources().getDimensionPixelSize(
                 R.dimen.notification_collapse_second_card_padding);
+        mScaleDimmed = context.getResources().getDisplayMetrics().densityDpi
+                >= DisplayMetrics.DENSITY_XXHIGH;
     }
 
+    public boolean shouldScaleDimmed() {
+        return mScaleDimmed;
+    }
 
     public void getStackScrollState(AmbientState ambientState, StackScrollState resultState) {
         // The state of the local variables are saved in an algorithmState to easily subdivide it
@@ -271,7 +278,7 @@ public class StackScrollAlgorithm {
             childViewState.dark = dark;
             childViewState.hideSensitive = hideSensitive;
             boolean isActivatedChild = activatedChild == child;
-            childViewState.scale = !dimmed || isActivatedChild
+            childViewState.scale = !mScaleDimmed || !dimmed || isActivatedChild
                     ? 1.0f
                     : DIMMED_SCALE;
             if (dimmed && activatedChild != null) {
