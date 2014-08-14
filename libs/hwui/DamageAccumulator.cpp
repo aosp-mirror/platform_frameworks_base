@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "DamageAccumulator"
-
 #include "DamageAccumulator.h"
 
 #include <cutils/log.h>
@@ -25,12 +23,6 @@
 
 namespace android {
 namespace uirenderer {
-
-NullDamageAccumulator NullDamageAccumulator::sInstance;
-
-NullDamageAccumulator* NullDamageAccumulator::instance() {
-    return &sInstance;
-}
 
 enum TransformType {
     TransformInvalid = 0,
@@ -58,6 +50,30 @@ DamageAccumulator::DamageAccumulator() {
     // Create a root that we will not pop off
     mHead->prev = mHead;
     mHead->type = TransformNone;
+}
+
+static void computeTransformImpl(const DirtyStack* currentFrame, Matrix4* outMatrix) {
+    if (currentFrame->prev != currentFrame) {
+        computeTransformImpl(currentFrame->prev, outMatrix);
+    }
+    switch (currentFrame->type) {
+    case TransformRenderNode:
+        currentFrame->renderNode->applyViewPropertyTransforms(*outMatrix);
+        break;
+    case TransformMatrix4:
+        outMatrix->multiply(*currentFrame->matrix4);
+        break;
+    case TransformNone:
+        // nothing to be done
+        break;
+    default:
+        LOG_ALWAYS_FATAL("Tried to compute transform with an invalid type: %d", currentFrame->type);
+    }
+}
+
+void DamageAccumulator::computeCurrentTransform(Matrix4* outMatrix) const {
+    outMatrix->loadIdentity();
+    computeTransformImpl(mHead, outMatrix);
 }
 
 void DamageAccumulator::pushCommon() {

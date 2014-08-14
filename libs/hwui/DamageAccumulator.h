@@ -31,18 +31,7 @@ struct DirtyStack;
 class RenderNode;
 class Matrix4;
 
-class IDamageAccumulator {
-public:
-    virtual void pushTransform(const RenderNode* transform) = 0;
-    virtual void pushTransform(const Matrix4* transform) = 0;
-    virtual void popTransform() = 0;
-    virtual void dirty(float left, float top, float right, float bottom) = 0;
-    virtual void peekAtDirty(SkRect* dest) = 0;
-protected:
-    virtual ~IDamageAccumulator() {}
-};
-
-class DamageAccumulator : public IDamageAccumulator {
+class DamageAccumulator {
     PREVENT_COPY_AND_ASSIGN(DamageAccumulator);
 public:
     DamageAccumulator();
@@ -51,17 +40,19 @@ public:
     // Push a transform node onto the stack. This should be called prior
     // to any dirty() calls. Subsequent calls to dirty()
     // will be affected by the transform when popTransform() is called.
-    virtual void pushTransform(const RenderNode* transform);
-    virtual void pushTransform(const Matrix4* transform);
+    void pushTransform(const RenderNode* transform);
+    void pushTransform(const Matrix4* transform);
 
     // Pops a transform node from the stack, propagating the dirty rect
     // up to the parent node. Returns the IDamageTransform that was just applied
-    virtual void popTransform();
+    void popTransform();
 
-    virtual void dirty(float left, float top, float right, float bottom);
+    void dirty(float left, float top, float right, float bottom);
 
     // Returns the current dirty area, *NOT* transformed by pushed transforms
-    virtual void peekAtDirty(SkRect* dest);
+    void peekAtDirty(SkRect* dest);
+
+    void computeCurrentTransform(Matrix4* outMatrix) const;
 
     void finish(SkRect* totalDirty);
 
@@ -72,24 +63,6 @@ private:
 
     LinearAllocator mAllocator;
     DirtyStack* mHead;
-};
-
-class NullDamageAccumulator : public IDamageAccumulator {
-    PREVENT_COPY_AND_ASSIGN(NullDamageAccumulator);
-public:
-    virtual void pushTransform(const RenderNode* transform) { }
-    virtual void pushTransform(const Matrix4* transform) { }
-    virtual void popTransform() { }
-    virtual void dirty(float left, float top, float right, float bottom) { }
-    virtual void peekAtDirty(SkRect* dest) { dest->setEmpty(); }
-
-    ANDROID_API static NullDamageAccumulator* instance();
-
-private:
-    NullDamageAccumulator() {}
-    ~NullDamageAccumulator() {}
-
-    static NullDamageAccumulator sInstance;
 };
 
 } /* namespace uirenderer */

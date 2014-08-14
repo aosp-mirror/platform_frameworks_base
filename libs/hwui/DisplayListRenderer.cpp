@@ -66,7 +66,7 @@ status_t DisplayListRenderer::prepareDirty(float left, float top,
             "prepareDirty called a second time during a recording!");
     mDisplayListData = new DisplayListData();
 
-    initializeSaveStack(0, 0, getWidth(), getHeight());
+    initializeSaveStack(0, 0, getWidth(), getHeight(), Vector3());
 
     mDirtyClip = opaque;
     mRestoreSaveCount = -1;
