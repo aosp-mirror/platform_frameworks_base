@@ -38,7 +38,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Pair;
 import android.util.SparseIntArray;
 import android.util.Xml;
 
@@ -47,9 +46,11 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class is used to specify meta information of a TV input.
@@ -601,66 +602,61 @@ public final class TvInputInfo implements Parcelable {
         }
 
         private static String getCustomLabel(Context context, String inputId, int userId) {
-            for (Pair<String, String> pair : getCustomLabelList(context, userId)) {
-                if (pair.first.equals(inputId)) {
-                    return pair.second;
-                }
-            }
-            return null;
+            return getCustomLabels(context, userId).get(inputId);
         }
 
         /**
-         * Returns a list of TV input IDs which are marked as hidden by user in the settings.
+         * Returns a set of TV input IDs which are marked as hidden by user in the settings.
          *
          * @param context The application context
-         * @param userId The user ID for the stored hidden input list
+         * @param userId The user ID for the stored hidden input set
          * @hide
          */
         @SystemApi
-        public static List<String> getHiddenTvInputIds(Context context, int userId) {
+        public static Set<String> getHiddenTvInputIds(Context context, int userId) {
             String hiddenIdsString = Settings.Secure.getStringForUser(
                     context.getContentResolver(), Settings.Secure.TV_INPUT_HIDDEN_INPUTS, userId);
             if (TextUtils.isEmpty(hiddenIdsString)) {
-                return new ArrayList<String>();
+                return new HashSet<String>();
             }
             String[] ids = hiddenIdsString.split(TV_INPUT_SEPARATOR);
-            return new ArrayList(Arrays.asList(ids));
+            return new HashSet(Arrays.asList(ids));
         }
 
         /**
-         * Returns a list of TV input ID/custom label pairs set by the user in the settings.
+         * Returns a map of TV input ID/custom label pairs set by the user in the settings.
          *
          * @param context The application context
-         * @param userId The user ID for the stored hidden input list
+         * @param userId The user ID for the stored hidden input map
          * @hide
          */
         @SystemApi
-        public static List<Pair<String, String>> getCustomLabelList(Context context, int userId) {
+        public static Map<String, String> getCustomLabels(Context context, int userId) {
             String labelsString = Settings.Secure.getStringForUser(
                     context.getContentResolver(), Settings.Secure.TV_INPUT_CUSTOM_LABELS, userId);
-            List<Pair<String, String>> list = new ArrayList<Pair<String, String>>();
+            Map<String, String> map = new HashMap<String, String>();
             if (TextUtils.isEmpty(labelsString)) {
-                return list;
+                return map;
             }
             String[] pairs = labelsString.split(TV_INPUT_SEPARATOR);
             for (String pairString : pairs) {
                 String[] pair = pairString.split(CUSTOM_NAME_SEPARATOR);
-                list.add(new Pair<String, String>(pair[0], pair[1]));
+                map.put(pair[0], pair[1]);
             }
-            return list;
+            return map;
         }
 
         /**
-         * Stores a list of TV input IDs which are marked as hidden by user. This is expected to
+         * Stores a set of TV input IDs which are marked as hidden by user. This is expected to
          * be called from the settings app.
          *
          * @param context The application context
-         * @param hiddenInputIds A list including all the hidden TV input IDs
-         * @param userId The user ID for the stored hidden input list
+         * @param hiddenInputIds A set including all the hidden TV input IDs
+         * @param userId The user ID for the stored hidden input set
          * @hide
          */
         @SystemApi
-        public static void putHiddenTvInputList(Context context, List<String> hiddenInputIds,
+        public static void putHiddenTvInputs(Context context, Set<String> hiddenInputIds,
                 int userId) {
             StringBuilder builder = new StringBuilder();
             boolean firstItem = true;
@@ -678,30 +674,30 @@ public final class TvInputInfo implements Parcelable {
         }
 
         /**
-         * Stores a list of TV input ID/custom label pairs set by user. This is expected to be
+         * Stores a map of TV input ID/custom label set by user. This is expected to be
          * called from the settings app.
          *
          * @param context The application context.
-         * @param customLabels A list of TV input ID/custom label pairs
-         * @param userId The user ID for the stored hidden input list
+         * @param customLabels A map of TV input ID/custom label pairs
+         * @param userId The user ID for the stored hidden input map
          * @hide
          */
         @SystemApi
-        public static void putCustomLabelList(Context context,
-                List<Pair<String, String>> customLabels, int userId) {
+        public static void putCustomLabels(Context context,
+                Map<String, String> customLabels, int userId) {
             StringBuilder builder = new StringBuilder();
             boolean firstItem = true;
-            for (Pair<String, String> pair : customLabels) {
-                ensureValidField(pair.first);
-                ensureValidField(pair.second);
+            for (Map.Entry<String, String> entry: customLabels.entrySet()) {
+                ensureValidField(entry.getKey());
+                ensureValidField(entry.getValue());
                 if (firstItem) {
                     firstItem = false;
                 } else {
                     builder.append(TV_INPUT_SEPARATOR);
                 }
-                builder.append(pair.first);
+                builder.append(entry.getKey());
                 builder.append(CUSTOM_NAME_SEPARATOR);
-                builder.append(pair.second);
+                builder.append(entry.getValue());
             }
             Settings.Secure.putStringForUser(context.getContentResolver(),
                     Settings.Secure.TV_INPUT_CUSTOM_LABELS, builder.toString(), userId);
