@@ -76,17 +76,19 @@ public class IntentForwarderActivity extends Activity  {
         }
         Intent newIntent = new Intent(intentReceived);
         newIntent.setComponent(null);
+        // Apps should not be allowed to target a specific package in the target user.
+        newIntent.setPackage(null);
         newIntent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT
                 |Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
         int callingUserId = getUserId();
         IPackageManager ipm = AppGlobals.getPackageManager();
         String resolvedType = newIntent.resolveTypeIfNeeded(getContentResolver());
         boolean canForward = false;
+        Intent selector = newIntent.getSelector();
+        if (selector == null) {
+            selector = newIntent;
+        }
         try {
-            Intent selector = newIntent.getSelector();
-            if (selector == null) {
-                selector = newIntent;
-            }
             canForward = ipm.canForwardTo(selector, resolvedType, callingUserId,
                     userDest.getIdentifier());
         } catch (RemoteException e) {

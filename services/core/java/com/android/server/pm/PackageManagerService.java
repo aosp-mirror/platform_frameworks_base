@@ -3192,24 +3192,22 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (matches.get(i).getTargetUserId() == targetUserId) return true;
             }
         }
-
         ArrayList<String> packageNames = null;
         SparseArray<ArrayList<String>> fromSource =
                 mSettings.mCrossProfilePackageInfo.get(sourceUserId);
         if (fromSource != null) {
             packageNames = fromSource.get(targetUserId);
-        }
-        if (packageNames != null && packageNames.contains(intent.getPackage())) {
-            return true;
-        }
-        // We need the package name, so we try to resolve with the loosest flags possible
-        List<ResolveInfo> resolveInfos = mActivities.queryIntent(
-                intent, resolvedType, PackageManager.GET_UNINSTALLED_PACKAGES, targetUserId);
-        int count = resolveInfos.size();
-        for (int i = 0; i < count; i++) {
-            ResolveInfo resolveInfo = resolveInfos.get(i);
-            if (packageNames.contains(resolveInfo.activityInfo.packageName)) {
-                return true;
+            if (packageNames != null) {
+                // We need the package name, so we try to resolve with the loosest flags possible
+                List<ResolveInfo> resolveInfos = mActivities.queryIntent(intent, resolvedType,
+                        PackageManager.GET_UNINSTALLED_PACKAGES, targetUserId);
+                int count = resolveInfos.size();
+                for (int i = 0; i < count; i++) {
+                    ResolveInfo resolveInfo = resolveInfos.get(i);
+                    if (packageNames.contains(resolveInfo.activityInfo.packageName)) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
