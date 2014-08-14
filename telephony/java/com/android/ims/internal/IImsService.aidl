@@ -26,6 +26,8 @@ import com.android.ims.internal.IImsEcbm;
 import com.android.ims.internal.IImsUt;
 import com.android.ims.internal.IImsConfig;
 
+import android.os.Message;
+
 /**
  * {@hide}
  */
@@ -64,10 +66,13 @@ interface IImsService {
      */
     void turnOffIms();
 
-
     /**
      * ECBM interface for Emergency Callback mode mechanism.
      */
     IImsEcbm getEcbmInterface(int serviceId);
 
+   /**
+     * Used to set current TTY Mode.
+     */
+    void setUiTTYMode(int serviceId, int uiTtyMode, in Message onComplete);
 }
