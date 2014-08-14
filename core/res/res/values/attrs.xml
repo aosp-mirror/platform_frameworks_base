@@ -7276,9 +7276,8 @@
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. -->
         <attr name="settingsActivity" />
-        <!-- Component name of an xml file that describes the structure of TV content ratings that
-             this service uses. -->
-        <attr name="contentRatingSystemXml" format="reference" />
+        <!-- Reference to an XML document that describes TV content rating. -->
+        <attr name="tvContentRatingDescription" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="ResolverDrawerLayout">
