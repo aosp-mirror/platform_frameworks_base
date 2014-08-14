@@ -63,7 +63,7 @@
     <dimen name="keyguard_muliuser_selector_margin">12dp</dimen>
 
     <!-- Overload default clock widget parameters -->
-    <dimen name="widget_big_font_size">120dp</dimen>
+    <dimen name="widget_big_font_size">140dp</dimen>
     <dimen name="widget_label_font_size">16sp</dimen>
     <dimen name="bottom_text_spacing_digital">-16dp</dimen>
 

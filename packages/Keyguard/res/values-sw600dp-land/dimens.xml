@@ -25,5 +25,5 @@
     <dimen name="kg_status_line_font_right_margin">16dp</dimen>
 
     <!-- Overload default clock widget parameters -->
-    <dimen name="widget_big_font_size">88dp</dimen>
+    <dimen name="widget_big_font_size">100dp</dimen>
 </resources>
