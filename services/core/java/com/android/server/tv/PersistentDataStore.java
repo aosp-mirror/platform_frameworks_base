@@ -81,8 +81,9 @@ final class PersistentDataStore {
 
     public PersistentDataStore(Context context, int userId) {
         mContext = context;
-        mAtomicFile = new AtomicFile(new File("/data/system/tv/" + userId
-                + "/tv-input-manager-state.xml"));
+        File tvDir = new File("/data/system/tv/" + userId);
+        tvDir.mkdirs();
+        mAtomicFile = new AtomicFile(new File(tvDir, "tv-input-manager-state.xml"));
     }
 
     public boolean isParentalControlsEnabled() {
