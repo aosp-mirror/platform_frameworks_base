@@ -239,7 +239,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         return mWindow;
     }
 
-    protected ViewGroup getDecor() {
+    public ViewGroup getDecor() {
         return (mWindow == null) ? null : (ViewGroup) mWindow.getDecorView();
     }
 

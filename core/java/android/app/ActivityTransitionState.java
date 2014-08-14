@@ -17,9 +17,11 @@ package android.app;
 
 import android.os.Bundle;
 import android.os.ResultReceiver;
+import android.transition.Transition;
 import android.util.ArrayMap;
 import android.util.SparseArray;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 
 import java.lang.ref.WeakReference;
@@ -245,13 +247,23 @@ class ActivityTransitionState {
         } else {
             if (!mHasExited) {
                 mHasExited = true;
+                Transition enterViewsTransition = null;
+                ViewGroup decor = null;
                 if (mEnterTransitionCoordinator != null) {
+                    enterViewsTransition = mEnterTransitionCoordinator.getEnterViewsTransition();
+                    decor = mEnterTransitionCoordinator.getDecor();
                     mEnterTransitionCoordinator.cancelEnter();
                     mEnterTransitionCoordinator = null;
+                    if (enterViewsTransition != null && decor != null) {
+                        enterViewsTransition.pause(decor);
+                    }
                 }
 
                 ExitTransitionCoordinator exitCoordinator =
                         new ExitTransitionCoordinator(activity, mEnteringNames, null, null, true);
+                if (enterViewsTransition != null && decor != null) {
+                    enterViewsTransition.resume(decor);
+                }
                 exitCoordinator.startExit(activity.mResultCode, activity.mResultData);
             }
             return true;
