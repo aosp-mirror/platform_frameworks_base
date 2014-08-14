@@ -89,11 +89,9 @@ public final class SignalTileView extends QSTileView {
     protected void handleStateChanged(QSTile.State state) {
         super.handleStateChanged(state);
         final SignalState s = (SignalState) state;
-        mSignal.setImageDrawable(null);  // force refresh
         mSignal.setImageResource(s.iconId);
         if (s.overlayIconId > 0) {
             mOverlay.setVisibility(VISIBLE);
-            mOverlay.setImageDrawable(null);  // force refresh
             mOverlay.setImageResource(s.overlayIconId);
         } else {
             mOverlay.setVisibility(GONE);
