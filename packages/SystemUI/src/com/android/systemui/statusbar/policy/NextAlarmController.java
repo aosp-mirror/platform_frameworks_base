@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.app.AlarmClockInfo;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -33,7 +32,7 @@ public class NextAlarmController extends BroadcastReceiver {
     private final ArrayList<NextAlarmChangeCallback> mChangeCallbacks = new ArrayList<>();
 
     private AlarmManager mAlarmManager;
-    private AlarmClockInfo mNextAlarm;
+    private AlarmManager.AlarmClockInfo mNextAlarm;
 
     public NextAlarmController(Context context) {
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -79,6 +78,6 @@ public class NextAlarmController extends BroadcastReceiver {
     }
 
     public interface NextAlarmChangeCallback {
-        void onNextAlarmChanged(AlarmClockInfo nextAlarm);
+        void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm);
     }
 }

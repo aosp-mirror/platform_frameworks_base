@@ -18,7 +18,6 @@ package com.android.internal.widget;
 
 import android.Manifest;
 import android.app.ActivityManagerNative;
-import android.app.AlarmClockInfo;
 import android.app.AlarmManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
@@ -1169,7 +1168,7 @@ public class LockPatternUtils {
      * @return A formatted string of the next alarm (for showing on the lock screen),
      *   or null if there is no next alarm.
      */
-    public AlarmClockInfo getNextAlarm() {
+    public AlarmManager.AlarmClockInfo getNextAlarm() {
         AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         return alarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
     }
