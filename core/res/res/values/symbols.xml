@@ -1721,6 +1721,7 @@
   <java-symbol type="anim" name="push_up_out" />
   <java-symbol type="anim" name="lock_screen_behind_enter" />
   <java-symbol type="anim" name="lock_screen_behind_enter_wallpaper" />
+  <java-symbol type="anim" name="lock_screen_behind_enter_fade_in" />
   <java-symbol type="anim" name="lock_screen_wallpaper_exit" />
 
   <java-symbol type="bool" name="config_alwaysUseCdmaRssi" />
