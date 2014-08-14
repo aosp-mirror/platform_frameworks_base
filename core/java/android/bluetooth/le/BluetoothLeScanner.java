@@ -209,6 +209,15 @@ public final class BluetoothLeScanner {
     }
 
     /**
+     * Cleans up scan clients. Should be called when bluetooth is down.
+     *
+     * @hide
+     */
+    public void cleanup() {
+        mLeScanClients.clear();
+    }
+
+    /**
      * Bluetooth GATT interface callbacks
      */
     private static class BleScanCallbackWrapper extends BluetoothGattCallbackWrapper {
