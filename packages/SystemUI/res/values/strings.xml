@@ -418,6 +418,9 @@
     <!-- Content description of zen mode time condition minus button (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_less_time">Less time</string>
 
+    <!-- Content description of the display brightness slider (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_brightness">Display brightness</string>
+
     <!-- Title of dialog shown when 2G-3G data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
     <string name="data_usage_disabled_dialog_3g_title">2G-3G data is off</string>
     <!-- Title of dialog shown when 4G data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
