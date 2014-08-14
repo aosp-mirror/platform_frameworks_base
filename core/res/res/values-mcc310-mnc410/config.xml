@@ -24,5 +24,20 @@
     <!-- Configure mobile network MTU. Carrier specific value is set here.
     -->
     <integer name="config_mobile_mtu">1410</integer>
-
+    <!-- Show roaming icon though same named operators. -->
+    <string-array translatable="false" name="config_sameNamedOperatorConsideredRoaming">
+        <item>310110</item>
+        <item>310140</item>
+        <item>310400</item>
+        <item>310470</item>
+    </string-array>
+    <!-- BEGIN Motorola, xnk746, Feb-12-2014, IKVPREL2KK-1468 -->
+    <string-array translatable="false" name="config_operatorConsideredNonRoaming">
+        <item>311</item>
+        <item>312</item>
+        <item>313</item>
+        <item>314</item>
+        <item>315</item>
+        <item>316</item>
+    </string-array>
 </resources>
