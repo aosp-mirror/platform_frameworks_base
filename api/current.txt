@@ -114,7 +114,6 @@ package android {
     field public static final java.lang.String RECEIVE_SMS = "android.permission.RECEIVE_SMS";
     field public static final java.lang.String RECEIVE_WAP_PUSH = "android.permission.RECEIVE_WAP_PUSH";
     field public static final java.lang.String RECORD_AUDIO = "android.permission.RECORD_AUDIO";
-    field public static final java.lang.String RECOVERY = "android.permission.RECOVERY";
     field public static final java.lang.String REORDER_TASKS = "android.permission.REORDER_TASKS";
     field public static final deprecated java.lang.String RESTART_PACKAGES = "android.permission.RESTART_PACKAGES";
     field public static final java.lang.String SEND_RESPOND_VIA_MESSAGE = "android.permission.SEND_RESPOND_VIA_MESSAGE";
@@ -22810,7 +22809,6 @@ package android.os {
     field public static final deprecated int FULL_WAKE_LOCK = 26; // 0x1a
     field public static final int ON_AFTER_RELEASE = 536870912; // 0x20000000
     field public static final int PARTIAL_WAKE_LOCK = 1; // 0x1
-    field public static final java.lang.String REBOOT_RECOVERY = "recovery";
     field public static final deprecated int SCREEN_BRIGHT_WAKE_LOCK = 10; // 0xa
     field public static final deprecated int SCREEN_DIM_WAKE_LOCK = 6; // 0x6
   }

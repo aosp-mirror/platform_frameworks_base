@@ -432,7 +432,7 @@ public class RecoverySystem {
 
         // Having written the command file, go ahead and reboot
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        pm.reboot("recovery");
+        pm.reboot(PowerManager.REBOOT_RECOVERY);
 
         throw new IOException("Reboot failed (no permissions?)");
     }
