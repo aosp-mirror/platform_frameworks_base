@@ -541,6 +541,15 @@ static jint LegacyCameraDevice_nativeSetSurfaceDimens(JNIEnv* env, jobject thiz,
         ALOGE("%s: Error while setting surface dimens %s (%d).", __FUNCTION__, strerror(-err), err);
         return err;
     }
+
+    // WAR - Set user dimensions also to avoid incorrect scaling after TextureView orientation
+    // change.
+    err = native_window_set_buffers_user_dimensions(anw.get(), width, height);
+    if (err != NO_ERROR) {
+        ALOGE("%s: Error while setting surface user dimens %s (%d).", __FUNCTION__, strerror(-err),
+                err);
+        return err;
+    }
     return NO_ERROR;
 }
 
