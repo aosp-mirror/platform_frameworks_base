@@ -845,16 +845,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case SHORT_PRESS_POWER_GO_TO_SLEEP:
                 mPowerManager.goToSleep(eventTime,
-                        PowerManager.GO_TO_SLEEP_REASON_USER, 0);
+                        PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
                 break;
             case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP:
                 mPowerManager.goToSleep(eventTime,
-                        PowerManager.GO_TO_SLEEP_REASON_USER,
+                        PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON,
                         PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
                 break;
             case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME:
                 mPowerManager.goToSleep(eventTime,
-                        PowerManager.GO_TO_SLEEP_REASON_USER,
+                        PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON,
                         PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
                 launchHomeFromHotKey();
                 break;
@@ -4290,7 +4290,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                         if ((mEndcallBehavior
                                 & Settings.System.END_BUTTON_BEHAVIOR_SLEEP) != 0) {
-                            mPowerManager.goToSleep(event.getEventTime());
+                            mPowerManager.goToSleep(event.getEventTime(),
+                                    PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
                             isWakeKey = false;
                         }
                     }
@@ -4347,7 +4348,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (!mPowerManager.isInteractive()) {
                     useHapticFeedback = false; // suppress feedback if already non-interactive
                 }
-                mPowerManager.goToSleep(event.getEventTime());
+                mPowerManager.goToSleep(event.getEventTime(),
+                        PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
                 isWakeKey = false;
                 break;
             }
@@ -5252,7 +5254,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void applyLidSwitchState() {
         if (mLidState == LID_CLOSED && mLidControlsSleep) {
             mPowerManager.goToSleep(SystemClock.uptimeMillis(),
-                    PowerManager.GO_TO_SLEEP_REASON_USER,
+                    PowerManager.GO_TO_SLEEP_REASON_LID_SWITCH,
                     PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
         }
 

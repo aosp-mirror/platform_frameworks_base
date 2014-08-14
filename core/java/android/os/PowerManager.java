@@ -298,10 +298,10 @@ public final class PowerManager {
     public static final int USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS = 1 << 0;
 
     /**
-     * Go to sleep reason code: Going to sleep due by user request.
+     * Go to sleep reason code: Going to sleep due by application request.
      * @hide
      */
-    public static final int GO_TO_SLEEP_REASON_USER = 0;
+    public static final int GO_TO_SLEEP_REASON_APPLICATION = 0;
 
     /**
      * Go to sleep reason code: Going to sleep due by request of the
@@ -315,6 +315,24 @@ public final class PowerManager {
      * @hide
      */
     public static final int GO_TO_SLEEP_REASON_TIMEOUT = 2;
+
+    /**
+     * Go to sleep reason code: Going to sleep due to the lid switch being closed.
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_LID_SWITCH = 3;
+
+    /**
+     * Go to sleep reason code: Going to sleep due to the power button being pressed.
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_POWER_BUTTON = 4;
+
+    /**
+     * Go to sleep reason code: Going to sleep due to HDMI.
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_HDMI = 5;
 
     /**
      * The value to pass as the 'reason' argument to reboot() to
@@ -513,7 +531,7 @@ public final class PowerManager {
      * @see #wakeUp
      */
     public void goToSleep(long time) {
-        goToSleep(time, GO_TO_SLEEP_REASON_USER, 0);
+        goToSleep(time, GO_TO_SLEEP_REASON_APPLICATION, 0);
     }
 
     /**
