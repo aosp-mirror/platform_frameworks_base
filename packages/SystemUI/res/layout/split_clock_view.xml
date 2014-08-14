@@ -34,5 +34,15 @@
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
+        android:textSize="@dimen/qs_time_collapsed_size"
+        />
+
+    <!-- Empty text view so we have the same height when expanded/collapsed-->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
         />
 </com.android.systemui.statusbar.policy.SplitClockView>
