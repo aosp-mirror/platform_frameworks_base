@@ -15,16 +15,13 @@
   ~ limitations under the License
   -->
 
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:detachWallpaper="true" android:shareInterpolator="false" android:startOffset="100">
-    <alpha
-        android:fromAlpha="0.0" android:toAlpha="1.0"
-        android:fillEnabled="true" android:fillBefore="true"
-        android:interpolator="@interpolator/decelerate_quint"
-        android:duration="400"/>
-
-    <translate android:fromYDelta="11%" android:toYDelta="0"
-        android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-        android:interpolator="@interpolator/decelerate_quint"
-        android:duration="300" />
-</set>
+<alpha xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#ff000000"
+    android:detachWallpaper="true"
+    android:shareInterpolator="false"
+    android:interpolator="@interpolator/linear"
+    android:fromAlpha="0" android:toAlpha="1"
+    android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
+    android:duration="250"
+    android:startOffset="100">
+</alpha>
