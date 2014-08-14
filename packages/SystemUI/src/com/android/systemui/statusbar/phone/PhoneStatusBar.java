@@ -2030,6 +2030,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return mLeaveOpenOnKeyguardHide;
     }
 
+    public boolean isQsExpanded() {
+        return mNotificationPanel.isQsExpanded();
+    }
+
     /**
      * All changes to the status bar and notifications funnel through here and are batched.
      */

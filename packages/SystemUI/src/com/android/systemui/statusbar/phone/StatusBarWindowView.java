@@ -28,7 +28,6 @@ import android.view.View;
 import android.view.ViewRootImpl;
 import android.widget.FrameLayout;
 
-import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -130,7 +129,7 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         boolean handled = false;
-        if (mService.getBarState() == StatusBarState.KEYGUARD) {
+        if (mService.getBarState() == StatusBarState.KEYGUARD && !mService.isQsExpanded()) {
             handled = mDragDownHelper.onTouchEvent(ev);
         }
         if (!handled) {
