@@ -16,4 +16,4 @@
 
 package android.app;
 
-parcelable AlarmClockInfo;
+parcelable AlarmManager.AlarmClockInfo;

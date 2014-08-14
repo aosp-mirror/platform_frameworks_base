@@ -16,7 +16,7 @@
 
 package com.android.keyguard;
 
-import android.app.AlarmClockInfo;
+import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
@@ -116,7 +116,7 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     protected void refresh() {
-        AlarmClockInfo nextAlarm = mLockPatternUtils.getNextAlarm();
+        AlarmManager.AlarmClockInfo nextAlarm = mLockPatternUtils.getNextAlarm();
         Patterns.update(mContext, nextAlarm != null);
 
         mDateView.setFormat24Hour(Patterns.dateView);
@@ -128,7 +128,7 @@ public class KeyguardStatusView extends GridLayout {
         refreshAlarmStatus(nextAlarm);
     }
 
-    void refreshAlarmStatus(AlarmClockInfo nextAlarm) {
+    void refreshAlarmStatus(AlarmManager.AlarmClockInfo nextAlarm) {
         if (nextAlarm != null) {
             mAlarmStatusView.setText(formatNextAlarm(mContext, nextAlarm));
             mAlarmStatusView.setVisibility(View.VISIBLE);
@@ -137,7 +137,7 @@ public class KeyguardStatusView extends GridLayout {
         }
     }
 
-    public static String formatNextAlarm(Context context, AlarmClockInfo info) {
+    public static String formatNextAlarm(Context context, AlarmManager.AlarmClockInfo info) {
         if (info == null) {
             return "";
         }

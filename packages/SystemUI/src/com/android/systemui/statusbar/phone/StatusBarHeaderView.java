@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.AlarmClockInfo;
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -73,7 +73,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private boolean mShowEmergencyCallsOnly;
     private boolean mAlarmShowing;
-    private AlarmClockInfo mNextAlarm;
+    private AlarmManager.AlarmClockInfo mNextAlarm;
 
     private int mCollapsedHeight;
     private int mExpandedHeight;
@@ -360,7 +360,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     @Override
-    public void onNextAlarmChanged(AlarmClockInfo nextAlarm) {
+    public void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm) {
         mNextAlarm = nextAlarm;
         if (nextAlarm != null) {
             mAlarmStatus.setText(KeyguardStatusView.formatNextAlarm(getContext(), nextAlarm));
