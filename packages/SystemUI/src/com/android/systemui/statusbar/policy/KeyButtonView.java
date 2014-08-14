@@ -56,12 +56,12 @@ public class KeyButtonView extends ImageView {
         public void run() {
             if (isPressed()) {
                 // Log.d("KeyButtonView", "longpressed: " + this);
-                if (mCode != 0) {
-                    sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
-                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
-                } else {
+                if (isLongClickable()) {
                     // Just an old-fashioned ImageView
                     performLongClick();
+                } else {
+                    sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
+                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
                 }
             }
         }
@@ -216,7 +216,7 @@ public class KeyButtonView extends ImageView {
         return true;
     }
 
-    void sendEvent(int action, int flags) {
+    public void sendEvent(int action, int flags) {
         sendEvent(action, flags, SystemClock.uptimeMillis());
     }
 

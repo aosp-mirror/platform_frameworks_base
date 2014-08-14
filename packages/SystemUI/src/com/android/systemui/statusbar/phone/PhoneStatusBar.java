@@ -91,6 +91,8 @@ import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -137,6 +139,7 @@ import com.android.systemui.statusbar.policy.CastControllerImpl;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
 import com.android.systemui.statusbar.policy.HotspotControllerImpl;
+import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.LocationControllerImpl;
@@ -209,6 +212,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public static final int FADE_KEYGUARD_START_DELAY = 100;
     public static final int FADE_KEYGUARD_DURATION = 300;
+
+    /** Allow some time inbetween the long press for back and recents. */
+    private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
 
     PhoneStatusBarPolicy mIconPolicy;
 
@@ -1054,10 +1060,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     };
 
-    private View.OnLongClickListener mLockToAppClickListener = new View.OnLongClickListener() {
+    private long mLastLockToAppLongPress;
+    private AccessibilityManager mAccessibilityManager;
+    private View.OnLongClickListener mLongPressBackRecentsListener =
+            new View.OnLongClickListener() {
         @Override
         public boolean onLongClick(View v) {
-            toggleLockedApp();
+            handleLongPressBackRecents(v);
             return true;
         }
     };
@@ -1106,7 +1115,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNavigationBarView.getRecentsButton().setOnClickListener(mRecentsClickListener);
         mNavigationBarView.getRecentsButton().setOnTouchListener(mRecentsPreloadOnTouchListener);
         mNavigationBarView.getRecentsButton().setLongClickable(true);
-        mNavigationBarView.getRecentsButton().setOnLongClickListener(mLockToAppClickListener);
+        mNavigationBarView.getRecentsButton().setOnLongClickListener(mLongPressBackRecentsListener);
+        mNavigationBarView.getBackButton().setLongClickable(true);
+        mNavigationBarView.getBackButton().setOnLongClickListener(mLongPressBackRecentsListener);
         mNavigationBarView.getHomeButton().setOnTouchListener(mHomeActionListener);
         updateSearchPanel();
     }
@@ -3773,15 +3784,58 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller.setAnimationsEnabled(true);
     }
 
-    public void toggleLockedApp() {
-        Log.d(TAG, "Trying to toggle lock-to-app");
+    /**
+     * This handles long-press of both back and recents.  They are
+     * handled together to capture them both being long-pressed
+     * at the same time to exit screen pinning (lock task).
+     *
+     * When accessibility mode is on, only a long-press from recents
+     * is required to exit.
+     *
+     * In all other circumstances we try to pass through long-press events
+     * for Back, so that apps can still use it.  Which can be from two things.
+     * 1) Not currently in screen pinning (lock task).
+     * 2) Back is long-pressed without recents.
+     */
+    private void handleLongPressBackRecents(View v) {
         try {
+            boolean sendBackLongPress = false;
             IActivityManager activityManager = ActivityManagerNative.getDefault();
-            if (activityManager.isInLockTaskMode()) {
-                activityManager.stopLockTaskModeOnCurrent();
+            if (mAccessibilityManager == null) {
+                mAccessibilityManager = (AccessibilityManager)
+                        mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+            }
+            boolean isAccessiblityEnabled = mAccessibilityManager.isEnabled();
+            if (activityManager.isInLockTaskMode() && !isAccessiblityEnabled) {
+                long time = System.currentTimeMillis();
+                // If we recently long-pressed the other button then they were
+                // long-pressed 'together'
+                if ((time - mLastLockToAppLongPress) < LOCK_TO_APP_GESTURE_TOLERENCE) {
+                    activityManager.stopLockTaskModeOnCurrent();
+                } else if ((v.getId() == R.id.back)
+                        && !mNavigationBarView.getRecentsButton().isPressed()) {
+                    // If we aren't pressing recents right now then they presses
+                    // won't be together, so send the standard long-press action.
+                    sendBackLongPress = true;
+                }
+                mLastLockToAppLongPress = time;
+            } else {
+                // If this is back still need to handle sending the long-press event.
+                if (v.getId() == R.id.back) {
+                    sendBackLongPress = true;
+                } else if (isAccessiblityEnabled && activityManager.isInLockTaskMode()) {
+                    // When in accessibility mode a long press that is recents (not back)
+                    // should stop lock task.
+                    activityManager.stopLockTaskModeOnCurrent();
+                }
+            }
+            if (sendBackLongPress) {
+                KeyButtonView keyButtonView = (KeyButtonView) v;
+                keyButtonView.sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
+                keyButtonView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
             }
         } catch (RemoteException e) {
-            Log.d(TAG, "Unable to toggle Lock-to-app", e);
+            Log.d(TAG, "Unable to reach activity manager", e);
         }
     }
 
