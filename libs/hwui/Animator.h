@@ -28,6 +28,8 @@
 namespace android {
 namespace uirenderer {
 
+class AnimationContext;
+class BaseRenderNodeAnimator;
 class RenderNode;
 class RenderProperties;
 
@@ -50,15 +52,17 @@ public:
     ANDROID_API void setListener(AnimationListener* listener) {
         mListener = listener;
     }
+    AnimationListener* listener() { return mListener.get(); }
     ANDROID_API void start() { mStagingPlayState = RUNNING; onStagingPlayStateChanged(); }
     ANDROID_API void end() { mStagingPlayState = FINISHED; onStagingPlayStateChanged(); }
 
     void attach(RenderNode* target);
     virtual void onAttached() {}
     void detach() { mTarget = 0; }
-    void pushStaging(TreeInfo& info);
-    bool animate(TreeInfo& info);
+    void pushStaging(AnimationContext& context);
+    bool animate(AnimationContext& context);
 
+    bool isRunning() { return mPlayState == RUNNING; }
     bool isFinished() { return mPlayState == FINISHED; }
     float finalValue() { return mFinalValue; }
 
@@ -72,7 +76,7 @@ protected:
     virtual void setValue(RenderNode* target, float value) = 0;
     RenderNode* target() { return mTarget; }
 
-    void callOnFinishedListener(TreeInfo& info);
+    void callOnFinishedListener(AnimationContext& context);
 
     virtual void onStagingPlayStateChanged() {}
 
@@ -100,7 +104,7 @@ protected:
 
 private:
     inline void checkMutable();
-    virtual void transitionToRunning(TreeInfo& info);
+    virtual void transitionToRunning(AnimationContext& context);
     void doSetStartValue(float value);
 };
 

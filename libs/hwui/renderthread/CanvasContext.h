@@ -25,6 +25,7 @@
 
 #include "../DamageAccumulator.h"
 #include "../DrawProfiler.h"
+#include "../IContextFactory.h"
 #include "../RenderNode.h"
 #include "RenderTask.h"
 #include "RenderThread.h"
@@ -34,6 +35,7 @@
 namespace android {
 namespace uirenderer {
 
+class AnimationContext;
 class DeferredLayerUpdater;
 class OpenGLRenderer;
 class Rect;
@@ -45,9 +47,11 @@ class EglManager;
 
 // This per-renderer class manages the bridge between the global EGL context
 // and the render surface.
+// TODO: Rename to Renderer or some other per-window, top-level manager
 class CanvasContext : public IFrameCallback {
 public:
-    CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode);
+    CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
+            IContextFactory* contextFactory);
     virtual ~CanvasContext();
 
     bool initialize(ANativeWindow* window);
@@ -105,6 +109,7 @@ private:
     OpenGLRenderer* mCanvas;
     bool mHaveNewSurface;
     DamageAccumulator mDamageAccumulator;
+    AnimationContext* mAnimationContext;
 
     const sp<RenderNode> mRootRenderNode;
 
