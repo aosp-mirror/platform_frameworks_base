@@ -157,7 +157,7 @@
 
     <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
      card. -->
-    <integer name="keyguard_max_notification_count">4</integer>
+    <integer name="keyguard_max_notification_count">3</integer>
 
     <!-- Defines the implementation of the velocity tracker to be used for the panel expansion. Can
          be 'platform' or 'noisy' (i.e. for noisy touch screens). -->

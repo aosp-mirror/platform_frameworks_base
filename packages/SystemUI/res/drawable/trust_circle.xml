@@ -17,6 +17,6 @@
   -->
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="ring"
-        android:innerRadius="24dp" android:thickness="1dp">
-    <solid android:color="#66ffffff" />
+        android:innerRadius="22dp" android:thickness="2dp">
+    <solid android:color="#4cffffff" />
 </shape>

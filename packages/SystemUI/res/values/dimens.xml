@@ -425,4 +425,9 @@
     <!-- The width/height of the phone/camera/unlock icon on keyguard. -->
     <dimen name="keyguard_affordance_height">56dp</dimen>
     <dimen name="keyguard_affordance_width">56dp</dimen>
+
+    <dimen name="keyguard_indication_margin_bottom">65dp</dimen>
+
+    <!-- The text size for battery level -->
+    <dimen name="battery_level_text_size">12sp</dimen>
 </resources>
