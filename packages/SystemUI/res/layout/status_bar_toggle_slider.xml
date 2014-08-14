@@ -45,6 +45,7 @@
         android:paddingBottom="16dp"
         android:thumb="@drawable/ic_brightness_thumb"
         android:splitTrack="false"
+        android:contentDescription="@string/accessibility_brightness"
         />
     <TextView
         android:id="@+id/label"
