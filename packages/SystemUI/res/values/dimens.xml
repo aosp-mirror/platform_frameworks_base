@@ -323,7 +323,7 @@
     <dimen name="volume_panel_z">3dp</dimen>
 
     <!-- Distance between notifications and header when they are considered to be colliding. -->
-    <dimen name="header_notifications_collide_distance">24dp</dimen>
+    <dimen name="header_notifications_collide_distance">48dp</dimen>
 
     <!-- Distance the user needs to drag vertically such that a swipe is accepted to unlock the
          device. -->
