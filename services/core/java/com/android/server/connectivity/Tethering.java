@@ -15,7 +15,6 @@
  */
 
 package com.android.server.connectivity;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -72,6 +71,9 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
+import static android.system.OsConstants.AF_INET;
+import static android.system.OsConstants.AF_INET6;
+
 /**
  * @hide
  *
@@ -85,6 +87,30 @@ public class Tethering extends BaseNetworkObserver {
     private final static String TAG = "Tethering";
     private final static boolean DBG = true;
     private final static boolean VDBG = false;
+
+    /* Intent to indicate change in upstream interface change */
+    public static final String UPSTREAM_IFACE_CHANGED_ACTION =
+                         "com.android.server.connectivity.UPSTREAM_IFACE_CHANGED";
+
+    // Upstream Interface Name i.e. rmnet_data0, wlan0 etc.
+    public static final String EXTRA_UPSTREAM_IFACE = "tetheringUpstreamIface";
+
+    // Tethered Interface Name i.e. rndis0, wlan0, usb0 etc.
+    public static final String EXTRA_TETHERED_IFACE = "tetheredClientIface";
+
+    // Upstream Interface IP Type i.e IPV6 or IPV4
+    public static final String EXTRA_UPSTREAM_IP_TYPE = "tetheringUpstreamIpType";
+
+    // Update Type i.e Add upstream interface or delete upstream interface
+    public static final String EXTRA_UPSTREAM_UPDATE_TYPE = "tetheringUpstreamUpdateType";
+
+    // Default Value for Extra Infomration
+    public static final int EXTRA_UPSTREAM_INFO_DEFAULT = -1;
+
+    private enum UpstreamInfoUpdateType {
+        UPSTREAM_IFACE_REMOVED,
+        UPSTREAM_IFACE_ADDED
+    }
 
     // TODO - remove both of these - should be part of interface inspection/selection stuff
     private String[] mTetherableUsbRegexs;
@@ -451,6 +477,20 @@ public class Tethering extends BaseNetworkObserver {
         }
     }
 
+    private void sendUpstreamIfaceChangeBroadcast( String upstreamIface, String tetheredIface,
+                                                   int ip_type,
+                                                   UpstreamInfoUpdateType update_type) {
+        if (DBG) Log.d(TAG, "sendUpstreamIfaceChangeBroadcast upstreamIface:" + upstreamIface +
+                            " tetheredIface:" + tetheredIface +
+                            " IP Type: "+ ip_type + " update_type" + update_type);
+        Intent intent = new Intent(UPSTREAM_IFACE_CHANGED_ACTION);
+        intent.putExtra(EXTRA_UPSTREAM_IFACE, upstreamIface);
+        intent.putExtra(EXTRA_TETHERED_IFACE, tetheredIface);
+        intent.putExtra(EXTRA_UPSTREAM_IP_TYPE, ip_type);
+        intent.putExtra(EXTRA_UPSTREAM_UPDATE_TYPE, update_type.ordinal());
+
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+    }
     private void showTetheredNotification(int icon) {
         NotificationManager notificationManager =
                 (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -992,7 +1032,13 @@ public class Tethering extends BaseNetworkObserver {
                         if (VDBG) Log.e(TAG, "Exception in forceUpdate: " + e.toString());
                     }
                     try {
+                        if(VDBG) Log.d(TAG, "Disabling NAT - Tethered Iface = " + mIfaceName +
+                                            " mMyUpstreamIfaceName= " + mMyUpstreamIfaceName);
                         mNMService.disableNat(mIfaceName, mMyUpstreamIfaceName);
+                        sendUpstreamIfaceChangeBroadcast( mMyUpstreamIfaceName,
+                                                     mIfaceName,
+                                                     AF_INET,
+                                                     UpstreamInfoUpdateType.UPSTREAM_IFACE_REMOVED);
                     } catch (Exception e) {
                         if (VDBG) Log.e(TAG, "Exception in disableNat: " + e.toString());
                     }
@@ -1034,6 +1080,9 @@ public class Tethering extends BaseNetworkObserver {
                         break;
                     case CMD_TETHER_CONNECTION_CHANGED:
                         String newUpstreamIfaceName = (String)(message.obj);
+                        if(VDBG) Log.d(TAG, "Current Upstream Iface = " + mMyUpstreamIfaceName +
+                                            " New Upstream Iface = " + newUpstreamIfaceName +
+                                            " Tethered Iface = "+ mIfaceName);
                         if ((mMyUpstreamIfaceName == null && newUpstreamIfaceName == null) ||
                                 (mMyUpstreamIfaceName != null &&
                                 mMyUpstreamIfaceName.equals(newUpstreamIfaceName))) {
@@ -1043,7 +1092,14 @@ public class Tethering extends BaseNetworkObserver {
                         cleanupUpstream();
                         if (newUpstreamIfaceName != null) {
                             try {
+                                if(VDBG) Log.d(TAG,"Enabling NAT - Tethered Iface = " + mIfaceName +
+                                                   " newUpstreamIfaceName =" +newUpstreamIfaceName);
                                 mNMService.enableNat(mIfaceName, newUpstreamIfaceName);
+                                sendUpstreamIfaceChangeBroadcast(
+                                                       newUpstreamIfaceName,
+                                                       mIfaceName,
+                                                       AF_INET,
+                                                       UpstreamInfoUpdateType.UPSTREAM_IFACE_ADDED);
                             } catch (Exception e) {
                                 Log.e(TAG, "Exception enabling Nat: " + e.toString());
                                 try {
@@ -1639,6 +1695,7 @@ public class Tethering extends BaseNetworkObserver {
                         }
                         break;
                     case CMD_UPSTREAM_CHANGED:
+                        if(VDBG) Log.d(TAG, "CMD_UPSTREAM_CHANGED event received");
                         // need to try DUN immediately if Wifi goes down
                         NetworkInfo info = (NetworkInfo) message.obj;
                         mTryCell = !WAIT_FOR_NETWORK_TO_SETTLE;
