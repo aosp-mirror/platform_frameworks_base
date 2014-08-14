@@ -406,7 +406,7 @@ public final class TvInputInfo implements Parcelable {
      */
     @SystemApi
     public boolean isHidden(Context context) {
-        return TvInputSettings.isHidden(context, mId, UserHandle.USER_CURRENT);
+        return TvInputSettings.isHidden(context, mId, UserHandle.myUserId());
     }
 
     /**
@@ -434,7 +434,7 @@ public final class TvInputInfo implements Parcelable {
      */
     @SystemApi
     public CharSequence loadCustomLabel(Context context) {
-        return TvInputSettings.getCustomLabel(context, mId, UserHandle.USER_CURRENT);
+        return TvInputSettings.getCustomLabel(context, mId, UserHandle.myUserId());
     }
 
     /**
