@@ -648,21 +648,21 @@ public abstract class ApplicationThreadNative extends Binder
             return true;
         }
 
-        case STOP_MEDIA_PLAYING_TRANSACTION:
+        case CANCEL_VISIBLE_BEHIND_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
             IBinder token = data.readStrongBinder();
-            scheduleStopMediaPlaying(token);
+            scheduleCancelVisibleBehind(token);
             reply.writeNoException();
             return true;
         }
 
-        case BACKGROUND_MEDIA_PLAYING_CHANGED_TRANSACTION:
+        case BACKGROUND_VISIBLE_BEHIND_CHANGED_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
             IBinder token = data.readStrongBinder();
             boolean enabled = data.readInt() > 0;
-            scheduleBackgroundMediaPlayingChanged(token, enabled);
+            scheduleBackgroundVisibleBehindChanged(token, enabled);
             reply.writeNoException();
             return true;
         }
@@ -1334,21 +1334,23 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     @Override
-    public void scheduleStopMediaPlaying(IBinder token) throws RemoteException {
+    public void scheduleCancelVisibleBehind(IBinder token) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
-        mRemote.transact(STOP_MEDIA_PLAYING_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
+        mRemote.transact(CANCEL_VISIBLE_BEHIND_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 
     @Override
-    public void scheduleBackgroundMediaPlayingChanged(IBinder token, boolean enabled) throws RemoteException {
+    public void scheduleBackgroundVisibleBehindChanged(IBinder token, boolean enabled)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
         data.writeInt(enabled ? 1 : 0);
-        mRemote.transact(BACKGROUND_MEDIA_PLAYING_CHANGED_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
+        mRemote.transact(BACKGROUND_VISIBLE_BEHIND_CHANGED_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 

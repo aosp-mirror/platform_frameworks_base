@@ -248,7 +248,7 @@ final class ActivityStack {
     static final int STOP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 4;
     static final int DESTROY_ACTIVITIES_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 5;
     static final int TRANSLUCENT_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 6;
-    static final int STOP_MEDIA_PLAYING_TIMEOUT_MSG =
+    static final int RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG =
             ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 7;
 
     static class ScheduleDestroyArgs {
@@ -324,10 +324,10 @@ final class ActivityStack {
                         notifyActivityDrawnLocked(null);
                     }
                 } break;
-                case STOP_MEDIA_PLAYING_TIMEOUT_MSG: {
+                case RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG: {
                     synchronized (mService) {
-                        final ActivityRecord r = getMediaPlayer();
-                        Slog.e(TAG, "Timeout waiting for stopMediaPlaying player=" + r);
+                        final ActivityRecord r = getVisibleBehindActivity();
+                        Slog.e(TAG, "Timeout waiting for cancelVisibleBehind player=" + r);
                         if (r != null) {
                             mService.killAppAtUsersRequest(r.app, null);
                         }
@@ -934,8 +934,8 @@ final class ActivityStack {
             mHandler.removeMessages(STOP_TIMEOUT_MSG, r);
             r.stopped = true;
             r.state = ActivityState.STOPPED;
-            if (mActivityContainer.mActivityDisplay.mMediaPlayingActivity == r) {
-                mStackSupervisor.setMediaPlayingLocked(r, false);
+            if (mActivityContainer.mActivityDisplay.mVisibleBehindActivity == r) {
+                mStackSupervisor.requestVisibleBehindLocked(r, false);
             }
             if (r.finishing) {
                 r.clearOptionsLocked();
@@ -974,8 +974,8 @@ final class ActivityStack {
                     // the current instance before starting the new one.
                     if (DEBUG_PAUSE) Slog.v(TAG, "Destroying after pause: " + prev);
                     destroyActivityLocked(prev, true, "pause-config");
-                } else if (!isMediaPlaying()) {
-                    // If we were playing then resumeTopActivities will release resources before
+                } else if (!hasVisibleBehindActivity()) {
+                    // If we were visible then resumeTopActivities will release resources before
                     // stopping.
                     mStackSupervisor.mStoppingActivities.add(prev);
                     if (mStackSupervisor.mStoppingActivities.size() > 3 ||
@@ -1332,8 +1332,8 @@ final class ActivityStack {
                                 case PAUSED:
                                     // This case created for transitioning activities from
                                     // translucent to opaque {@link Activity#convertToOpaque}.
-                                    if (getMediaPlayer() == r) {
-                                        releaseMediaResources();
+                                    if (getVisibleBehindActivity() == r) {
+                                        releaseBackgroundResources();
                                     } else {
                                         if (!mStackSupervisor.mStoppingActivities.contains(r)) {
                                             mStackSupervisor.mStoppingActivities.add(r);
@@ -2936,8 +2936,8 @@ final class ActivityStack {
 
         // Get rid of any pending idle timeouts.
         removeTimeoutsForActivityLocked(r);
-        if (getMediaPlayer() == r) {
-            mStackSupervisor.setMediaPlayingLocked(r, false);
+        if (getVisibleBehindActivity() == r) {
+            mStackSupervisor.requestVisibleBehindLocked(r, false);
         }
     }
 
@@ -3159,47 +3159,48 @@ final class ActivityStack {
         }
     }
 
-    void releaseMediaResources() {
-        if (isMediaPlaying() && !mHandler.hasMessages(STOP_MEDIA_PLAYING_TIMEOUT_MSG)) {
-            final ActivityRecord r = getMediaPlayer();
-            if (DEBUG_STATES) Slog.d(TAG, "releaseMediaResources activtyDisplay=" +
-                    mActivityContainer.mActivityDisplay + " mediaPlayer=" + r + " app=" + r.app +
+    void releaseBackgroundResources() {
+        if (hasVisibleBehindActivity() &&
+                !mHandler.hasMessages(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG)) {
+            final ActivityRecord r = getVisibleBehindActivity();
+            if (DEBUG_STATES) Slog.d(TAG, "releaseBackgroundResources activtyDisplay=" +
+                    mActivityContainer.mActivityDisplay + " visibleBehind=" + r + " app=" + r.app +
                     " thread=" + r.app.thread);
             if (r != null && r.app != null && r.app.thread != null) {
                 try {
-                    r.app.thread.scheduleStopMediaPlaying(r.appToken);
+                    r.app.thread.scheduleCancelVisibleBehind(r.appToken);
                 } catch (RemoteException e) {
                 }
-                mHandler.sendEmptyMessageDelayed(STOP_MEDIA_PLAYING_TIMEOUT_MSG, 500);
+                mHandler.sendEmptyMessageDelayed(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG, 500);
             } else {
-                Slog.e(TAG, "releaseMediaResources: activity " + r + " no longer running");
-                mediaResourcesReleased(r.appToken);
+                Slog.e(TAG, "releaseBackgroundResources: activity " + r + " no longer running");
+                backgroundResourcesReleased(r.appToken);
             }
         }
     }
 
-    final void mediaResourcesReleased(IBinder token) {
-        mHandler.removeMessages(STOP_MEDIA_PLAYING_TIMEOUT_MSG);
-        final ActivityRecord r = getMediaPlayer();
+    final void backgroundResourcesReleased(IBinder token) {
+        mHandler.removeMessages(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG);
+        final ActivityRecord r = getVisibleBehindActivity();
         if (r != null) {
             mStackSupervisor.mStoppingActivities.add(r);
-            setMediaPlayer(null);
+            setVisibleBehindActivity(null);
         }
         mStackSupervisor.resumeTopActivitiesLocked();
     }
 
-    boolean isMediaPlaying() {
-        return isAttached() && mActivityContainer.mActivityDisplay.isMediaPlaying();
+    boolean hasVisibleBehindActivity() {
+        return isAttached() && mActivityContainer.mActivityDisplay.hasVisibleBehindActivity();
     }
 
-    void setMediaPlayer(ActivityRecord r) {
+    void setVisibleBehindActivity(ActivityRecord r) {
         if (isAttached()) {
-            mActivityContainer.mActivityDisplay.setMediaPlaying(r);
+            mActivityContainer.mActivityDisplay.setVisibleBehindActivity(r);
         }
     }
 
-    ActivityRecord getMediaPlayer() {
-        return isAttached() ? mActivityContainer.mActivityDisplay.mMediaPlayingActivity : null;
+    ActivityRecord getVisibleBehindActivity() {
+        return isAttached() ? mActivityContainer.mActivityDisplay.mVisibleBehindActivity : null;
     }
 
     private void removeHistoryRecordsForAppLocked(ArrayList<ActivityRecord> list,
