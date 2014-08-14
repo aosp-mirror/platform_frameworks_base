@@ -31,6 +31,7 @@ import com.android.internal.policy.PolicyManager;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
@@ -747,8 +748,8 @@ public class Activity extends ContextThemeWrapper
         }
     };
 
-    // Most recent call to setMediaPlaying().
-    boolean mMediaPlaying;
+    // Most recent call to requestVisibleBehind().
+    boolean mVisibleBehind;
 
     ArrayMap<String, LoaderManagerImpl> mAllLoaderManagers;
     LoaderManagerImpl mLoaderManager;
@@ -5314,6 +5315,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @hide
      */
+    @SystemApi
     public void convertFromTranslucent() {
         try {
             mTranslucentCallback = null;
@@ -5350,6 +5352,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @hide
      */
+    @SystemApi
     public boolean convertToTranslucent(TranslucentConversionListener callback,
             ActivityOptions options) {
         boolean drawComplete;
@@ -5406,12 +5409,13 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Activities that want to show media behind a translucent activity above them must call this
-     * method anytime before a return from {@link #onPause()}. If this call is successful
-     * then the activity should continue to play media when {@link #onPause()} is called, but must
-     * stop playing and release resources prior to or within the call to
-     * {@link #onStopMediaPlaying()}. If this call returns false the activity must stop
-     * playing and release resources immediately.
+     * Activities that want to remain visible behind a translucent activity above them must call
+     * this method anytime before a return from {@link #onPause()}. If this call is successful
+     * then the activity will remain visible when {@link #onPause()} is called, and can continue to
+     * play media in the background, but it must stop playing and release resources prior to or
+     * within the call to {@link #onVisibleBehindCancelled()}. If this call returns false, the 
+     * activity will not be visible in the background, and must release any media resources 
+     * immediately.
      *
      * <p>Only fullscreen opaque activities may make this call. I.e. this call is a nop
      * for dialog and translucent activities.
@@ -5419,85 +5423,86 @@ public class Activity extends ContextThemeWrapper
      * <p>False will be returned any time this method is call between the return of onPause and
      *      the next call to onResume.
      *
-     * @param playing true to notify the system that media is starting or continuing playing,
-     *                false to indicate that media has stopped or is stopping. Resources must
-     *                be released when passing false to this method.
-     * @return the resulting play state. If true the activity may continue playing media beyond
-     *      {@link #onPause()}, if false then the caller must stop playing and immediately
-     *      release all media resources. Returning false may occur in lieu of a call to
-     *      onReleaseMediaResources() so the return value must be checked.
+     * @param visible true to notify the system that the activity wishes to be visible behind other
+     *                translucent activities, false to indicate otherwise. Resources must be
+     *                released when passing false to this method.
+     * @return the resulting visibiity state. If true the activity may remain visible beyond
+     *      {@link #onPause()}. If false then the activity may not count on being visible behind
+     *      other translucent activities, and must stop any media playback and release resources.
+     *      Returning false may occur in lieu of a call to onVisibleBehindCancelled() so the return
+     *      value must be checked.
      *
-     * @see #isBackgroundMediaPlaying()
-     * @see #onStopMediaPlaying()
-     * @see #onBackgroundMediaPlayingChanged(boolean)
+     * @see #onVisibleBehindCancelled()
+     * @see #onBackgroundVisibleBehindChanged(boolean)
      */
-    public boolean setMediaPlaying(boolean playing) {
+    public boolean requestVisibleBehind(boolean visible) {
         if (!mResumed) {
-            // Do not permit paused or stopped activities to start playing.
-            playing = false;
+            // Do not permit paused or stopped activities to do this.
+            visible = false;
         }
         try {
-            mMediaPlaying = ActivityManagerNative.getDefault().setMediaPlaying(mToken, playing) &&
-                    playing;
+            mVisibleBehind = ActivityManagerNative.getDefault()
+                    .requestVisibleBehind(mToken, visible) && visible;
         } catch (RemoteException e) {
-            mMediaPlaying = false;
+            mVisibleBehind = false;
         }
-        return mMediaPlaying;
+        return mVisibleBehind;
     }
 
     /**
-     * Called when a translucent activity over playing media is becoming opaque or another
-     * activity is being launched. Activities that call {@link #setMediaPlaying(boolean)}
-     * must implement this method to at the minimum call
-     * <code>super.onStopMediaPlayback()</code>.
+     * Called when a translucent activity over this activity is becoming opaque or another
+     * activity is being launched. Activities that override this method must call
+     * <code>super.onVisibleBehindCancelled()</code> or a SuperNotCalledException will be thrown.
      *
-     * <p>When this method is called the activity has 500 msec to release the media resources.
+     * <p>When this method is called the activity has 500 msec to release any resources it may be
+     * using while visible in the background.
      * If the activity has not returned from this method in 500 msec the system will destroy
-     * the activity and kill the process in order to recover the media resources for another
+     * the activity and kill the process in order to recover the resources for another
      * process. Otherwise {@link #onStop()} will be called following return.
      *
-     * @see #setMediaPlaying(boolean)
-     * @see #isBackgroundMediaPlaying()
-     * @see #onBackgroundMediaPlayingChanged(boolean)
+     * @see #requestVisibleBehind(boolean)
+     * @see #onBackgroundVisibleBehindChanged(boolean)
      */
-    public void onStopMediaPlaying() {
+    public void onVisibleBehindCancelled() {
         mCalled = true;
     }
 
     /**
-     * Translucent activities may call this to determine if there is an activity below it that
-     * is playing media.
+     * Translucent activities may call this to determine if there is an activity below them that
+     * is currently set to be visible in the background.
      *
-     * @return true if media is playing according to the most recent call to
-     * {@link #setMediaPlaying(boolean)}, false otherwise.
+     * @return true if an activity below is set to visible according to the most recent call to
+     * {@link #requestVisibleBehind(boolean)}, false otherwise.
      *
-     * @see #setMediaPlaying(boolean)
-     * @see #onStopMediaPlaying()
-     * @see #onBackgroundMediaPlayingChanged(boolean)
+     * @see #requestVisibleBehind(boolean)
+     * @see #onVisibleBehindCancelled()
+     * @see #onBackgroundVisibleBehindChanged(boolean)
      * @hide
      */
-    public boolean isBackgroundMediaPlaying() {
+    @SystemApi
+    public boolean isBackgroundVisibleBehind() {
         try {
-            return ActivityManagerNative.getDefault().isBackgroundMediaPlaying(mToken);
+            return ActivityManagerNative.getDefault().isBackgroundVisibleBehind(mToken);
         } catch (RemoteException e) {
         }
         return false;
     }
 
     /**
-     * The topmost foreground activity will receive this call when an activity below it either
-     * starts or stops playing media.
+     * The topmost foreground activity will receive this call when the background visibility state
+     * of the activity below it changes.
      *
-     * This call may be a consequence of {@link #setMediaPlaying(boolean)} or might be
+     * This call may be a consequence of {@link #requestVisibleBehind(boolean)} or might be
      * due to a background activity finishing itself.
      *
-     * @param playing true if media playback is starting, false if it is stopping.
+     * @param visible true if a background activity is visible, false otherwise.
      *
-     * @see #setMediaPlaying(boolean)
-     * @see #isBackgroundMediaPlaying()
-     * @see #onStopMediaPlaying()
+     * @see #requestVisibleBehind(boolean)
+     * @see #onVisibleBehindCancelled()
+     * @hide
      */
-    public void onBackgroundMediaPlayingChanged(boolean playing) {
+    @SystemApi
+    public void onBackgroundVisibleBehindChanged(boolean visible) {
     }
 
     /**

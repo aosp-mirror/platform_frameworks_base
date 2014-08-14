@@ -443,9 +443,9 @@ public interface IActivityManager extends IInterface {
     public void setTaskDescription(IBinder token, ActivityManager.TaskDescription values)
             throws RemoteException;
 
-    public boolean setMediaPlaying(IBinder token, boolean playing) throws RemoteException;
-    public boolean isBackgroundMediaPlaying(IBinder token) throws RemoteException;
-    public void mediaResourcesReleased(IBinder token) throws RemoteException;
+    public boolean requestVisibleBehind(IBinder token, boolean visible) throws RemoteException;
+    public boolean isBackgroundVisibleBehind(IBinder token) throws RemoteException;
+    public void backgroundResourcesReleased(IBinder token) throws RemoteException;
 
     public void notifyLaunchTaskBehindComplete(IBinder token) throws RemoteException;
     public void notifyEnterAnimationComplete(IBinder token) throws RemoteException;
@@ -753,9 +753,9 @@ public interface IActivityManager extends IInterface {
     int STOP_LOCK_TASK_BY_CURRENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+222;
     int FINISH_VOICE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+223;
     int IS_TOP_OF_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+224;
-    int SET_MEDIA_PLAYING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+225;
-    int IS_BG_MEDIA_PLAYING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+226;
-    int MEDIA_RESOURCES_RELEASED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+227;
+    int REQUEST_VISIBLE_BEHIND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+225;
+    int IS_BACKGROUND_VISIBLE_BEHIND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+226;
+    int BACKGROUND_RESOURCES_RELEASED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+227;
     int NOTIFY_LAUNCH_TASK_BEHIND_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+228;
     int START_ACTIVITY_FROM_RECENTS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 229;
     int NOTIFY_ENTER_ANIMATION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+230;
