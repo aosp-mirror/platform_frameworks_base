@@ -3438,7 +3438,6 @@ package android.app {
     method public void onAttachFragment(android.app.Fragment);
     method public void onAttachedToWindow();
     method public void onBackPressed();
-    method public void onBackgroundMediaPlayingChanged(boolean);
     method protected void onChildTitleChanged(android.app.Activity, java.lang.CharSequence);
     method public void onConfigurationChanged(android.content.res.Configuration);
     method public void onContentChanged();
@@ -3495,13 +3494,13 @@ package android.app {
     method public boolean onSearchRequested();
     method protected void onStart();
     method protected void onStop();
-    method public void onStopMediaPlaying();
     method protected void onTitleChanged(java.lang.CharSequence, int);
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
     method public void onTrimMemory(int);
     method public void onUserInteraction();
     method protected void onUserLeaveHint();
+    method public void onVisibleBehindCancelled();
     method public void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
     method public void onWindowFocusChanged(boolean);
     method public android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
@@ -3513,6 +3512,7 @@ package android.app {
     method public void registerForContextMenu(android.view.View);
     method public final deprecated void removeDialog(int);
     method public void reportFullyDrawn();
+    method public boolean requestVisibleBehind(boolean);
     method public final boolean requestWindowFeature(int);
     method public final void runOnUiThread(java.lang.Runnable);
     method public void setActionBar(android.widget.Toolbar);
@@ -3531,7 +3531,6 @@ package android.app {
     method public void setImmersive(boolean);
     method public void setIntent(android.content.Intent);
     method public final void setMediaController(android.media.session.MediaController);
-    method public boolean setMediaPlaying(boolean);
     method public final void setProgress(int);
     method public final void setProgressBarIndeterminate(boolean);
     method public final void setProgressBarIndeterminateVisibility(boolean);
@@ -5238,8 +5237,8 @@ package android.app {
     field public static java.lang.String ACTION_EXIT_CAR_MODE;
     field public static java.lang.String ACTION_EXIT_DESK_MODE;
     field public static final int DISABLE_CAR_MODE_GO_HOME = 1; // 0x1
-    field public static final int ENABLE_CAR_MODE_GO_CAR_HOME = 1; // 0x1
     field public static final int ENABLE_CAR_MODE_ALLOW_SLEEP = 2; // 0x2
+    field public static final int ENABLE_CAR_MODE_GO_CAR_HOME = 1; // 0x1
     field public static final int MODE_NIGHT_AUTO = 0; // 0x0
     field public static final int MODE_NIGHT_NO = 1; // 0x1
     field public static final int MODE_NIGHT_YES = 2; // 0x2

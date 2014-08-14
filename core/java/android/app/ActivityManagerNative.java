@@ -2197,29 +2197,29 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case SET_MEDIA_PLAYING_TRANSACTION: {
+        case REQUEST_VISIBLE_BEHIND_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
             boolean enable = data.readInt() > 0;
-            boolean success = setMediaPlaying(token, enable);
+            boolean success = requestVisibleBehind(token, enable);
             reply.writeNoException();
             reply.writeInt(success ? 1 : 0);
             return true;
         }
 
-        case IS_BG_MEDIA_PLAYING_TRANSACTION: {
+        case IS_BACKGROUND_VISIBLE_BEHIND_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
-            final boolean enabled = isBackgroundMediaPlaying(token);
+            final boolean enabled = isBackgroundVisibleBehind(token);
             reply.writeNoException();
             reply.writeInt(enabled ? 1 : 0);
             return true;
         }
 
-        case MEDIA_RESOURCES_RELEASED_TRANSACTION: {
+        case BACKGROUND_RESOURCES_RELEASED_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
-            mediaResourcesReleased(token);
+            backgroundResourcesReleased(token);
             reply.writeNoException();
             return true;
         }
@@ -5101,13 +5101,13 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public boolean setMediaPlaying(IBinder token, boolean playing) throws RemoteException {
+    public boolean requestVisibleBehind(IBinder token, boolean visible) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
-        data.writeInt(playing ? 1 : 0);
-        mRemote.transact(SET_MEDIA_PLAYING_TRANSACTION, data, reply, 0);
+        data.writeInt(visible ? 1 : 0);
+        mRemote.transact(REQUEST_VISIBLE_BEHIND_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean success = reply.readInt() > 0;
         data.recycle();
@@ -5116,26 +5116,27 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public boolean isBackgroundMediaPlaying(IBinder token) throws RemoteException {
+    public boolean isBackgroundVisibleBehind(IBinder token) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
-        mRemote.transact(IS_BG_MEDIA_PLAYING_TRANSACTION, data, reply, 0);
+        mRemote.transact(IS_BACKGROUND_VISIBLE_BEHIND_TRANSACTION, data, reply, 0);
         reply.readException();
-        final boolean playing = reply.readInt() > 0;
+        final boolean visible = reply.readInt() > 0;
         data.recycle();
         reply.recycle();
-        return playing;
+        return visible;
     }
 
     @Override
-    public void mediaResourcesReleased(IBinder token) throws RemoteException {
+    public void backgroundResourcesReleased(IBinder token) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
-        mRemote.transact(MEDIA_RESOURCES_RELEASED_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
+        mRemote.transact(BACKGROUND_RESOURCES_RELEASED_TRANSACTION, data, reply,
+                IBinder.FLAG_ONEWAY);
         reply.readException();
         data.recycle();
         reply.recycle();

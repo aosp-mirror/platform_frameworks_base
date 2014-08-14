@@ -1155,13 +1155,13 @@ public final class ActivityThread {
         }
 
         @Override
-        public void scheduleStopMediaPlaying(IBinder token) {
-            sendMessage(H.STOP_MEDIA_PLAYING, token);
+        public void scheduleCancelVisibleBehind(IBinder token) {
+            sendMessage(H.CANCEL_VISIBLE_BEHIND, token);
         }
 
         @Override
-        public void scheduleBackgroundMediaPlayingChanged(IBinder token, boolean playing) {
-            sendMessage(H.BACKGROUND_MEDIA_PLAYING_CHANGED, token, playing ? 1 : 0);
+        public void scheduleBackgroundVisibleBehindChanged(IBinder token, boolean visible) {
+            sendMessage(H.BACKGROUND_VISIBLE_BEHIND_CHANGED, token, visible ? 1 : 0);
         }
 
         public void scheduleEnterAnimationComplete(IBinder token) {
@@ -1217,8 +1217,8 @@ public final class ActivityThread {
         public static final int TRANSLUCENT_CONVERSION_COMPLETE = 144;
         public static final int INSTALL_PROVIDER        = 145;
         public static final int ON_NEW_ACTIVITY_OPTIONS = 146;
-        public static final int STOP_MEDIA_PLAYING = 147;
-        public static final int BACKGROUND_MEDIA_PLAYING_CHANGED = 148;
+        public static final int CANCEL_VISIBLE_BEHIND = 147;
+        public static final int BACKGROUND_VISIBLE_BEHIND_CHANGED = 148;
         public static final int ENTER_ANIMATION_COMPLETE = 149;
 
         String codeToString(int code) {
@@ -1270,8 +1270,8 @@ public final class ActivityThread {
                     case TRANSLUCENT_CONVERSION_COMPLETE: return "TRANSLUCENT_CONVERSION_COMPLETE";
                     case INSTALL_PROVIDER: return "INSTALL_PROVIDER";
                     case ON_NEW_ACTIVITY_OPTIONS: return "ON_NEW_ACTIVITY_OPTIONS";
-                    case STOP_MEDIA_PLAYING: return "STOP_MEDIA_PLAYING";
-                    case BACKGROUND_MEDIA_PLAYING_CHANGED: return "BACKGROUND_MEDIA_PLAYING_CHANGED";
+                    case CANCEL_VISIBLE_BEHIND: return "CANCEL_VISIBLE_BEHIND";
+                    case BACKGROUND_VISIBLE_BEHIND_CHANGED: return "BACKGROUND_VISIBLE_BEHIND_CHANGED";
                     case ENTER_ANIMATION_COMPLETE: return "ENTER_ANIMATION_COMPLETE";
                 }
             }
@@ -1491,11 +1491,11 @@ public final class ActivityThread {
                     Pair<IBinder, ActivityOptions> pair = (Pair<IBinder, ActivityOptions>) msg.obj;
                     onNewActivityOptions(pair.first, pair.second);
                     break;
-                case STOP_MEDIA_PLAYING:
-                    handleStopMediaPlaying((IBinder) msg.obj);
+                case CANCEL_VISIBLE_BEHIND:
+                    handleCancelVisibleBehind((IBinder) msg.obj);
                     break;
-                case BACKGROUND_MEDIA_PLAYING_CHANGED:
-                    handleOnBackgroundMediaPlayingChanged((IBinder) msg.obj, msg.arg1 > 0);
+                case BACKGROUND_VISIBLE_BEHIND_CHANGED:
+                    handleOnBackgroundVisibleBehindChanged((IBinder) msg.obj, msg.arg1 > 0);
                     break;
                 case ENTER_ANIMATION_COMPLETE:
                     handleEnterAnimationComplete((IBinder) msg.obj);
@@ -2488,31 +2488,31 @@ public final class ActivityThread {
         }
     }
 
-    public void handleStopMediaPlaying(IBinder token) {
+    public void handleCancelVisibleBehind(IBinder token) {
         ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
             final Activity activity = r.activity;
-            if (activity.mMediaPlaying) {
+            if (activity.mVisibleBehind) {
                 activity.mCalled = false;
-                activity.onStopMediaPlaying();
+                activity.onVisibleBehindCancelled();
                 // Tick, tick, tick. The activity has 500 msec to return or it will be destroyed.
                 if (!activity.mCalled) {
                     throw new SuperNotCalledException("Activity " + activity.getLocalClassName() +
-                            " did not call through to super.onStopMediaPlayback()");
+                            " did not call through to super.onVisibleBehindCancelled()");
                 }
-                activity.mMediaPlaying = false;
+                activity.mVisibleBehind = false;
             }
         }
         try {
-            ActivityManagerNative.getDefault().mediaResourcesReleased(token);
+            ActivityManagerNative.getDefault().backgroundResourcesReleased(token);
         } catch (RemoteException e) {
         }
     }
 
-    public void handleOnBackgroundMediaPlayingChanged(IBinder token, boolean playing) {
+    public void handleOnBackgroundVisibleBehindChanged(IBinder token, boolean visible) {
         ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
-            r.activity.onBackgroundMediaPlayingChanged(playing);
+            r.activity.onBackgroundVisibleBehindChanged(visible);
         }
     }
 
