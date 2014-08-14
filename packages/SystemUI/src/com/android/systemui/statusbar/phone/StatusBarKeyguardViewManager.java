@@ -188,6 +188,7 @@ public class StatusBarKeyguardViewManager {
                             @Override
                             public void run() {
                                 mStatusBarWindowManager.setKeyguardOccluded(true);
+                                reset();
                             }
                         });
                 return;
