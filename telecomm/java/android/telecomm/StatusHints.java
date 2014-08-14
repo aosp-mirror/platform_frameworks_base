@@ -121,7 +121,7 @@ public final class StatusHints implements Parcelable {
             return null;
         }
         try {
-            return packageContext.getResources().getDrawable(resId);
+            return packageContext.getDrawable(resId);
         } catch (MissingResourceException e) {
             Log.e(this, e, "Cannot find icon %d in package %s",
                     resId, mComponentName.getPackageName());

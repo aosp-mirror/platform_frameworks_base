@@ -436,7 +436,7 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
                 com.android.internal.R.styleable.RotateDrawable_drawable, 0);
         Drawable drawable = null;
         if (res > 0) {
-            drawable = r.getDrawable(res);
+            drawable = r.getDrawable(res, theme);
         }
 
         a.recycle();

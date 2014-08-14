@@ -313,7 +313,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
 
             Drawable dr;
             if (drawableRes != 0) {
-                dr = r.getDrawable(drawableRes);
+                dr = r.getDrawable(drawableRes, theme);
             } else {
                 while ((type=parser.next()) == XmlPullParser.TEXT) {
                     // Empty

@@ -221,8 +221,7 @@ public class RecentsCreateFragment extends Fragment {
             final DocumentStack stack = getItem(position);
             iconMime.setImageDrawable(stack.root.loadIcon(context));
 
-            final Drawable crumb = context.getResources()
-                    .getDrawable(R.drawable.ic_breadcrumb_arrow);
+            final Drawable crumb = context.getDrawable(R.drawable.ic_breadcrumb_arrow);
             crumb.setBounds(0, 0, crumb.getIntrinsicWidth(), crumb.getIntrinsicHeight());
 
             final SpannableStringBuilder builder = new SpannableStringBuilder();
