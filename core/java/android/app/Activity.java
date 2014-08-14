@@ -6119,6 +6119,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @hide
      */
+    @SystemApi
     public interface TranslucentConversionListener {
         /**
          * Callback made following {@link Activity#convertToTranslucent} once all visible Activities
