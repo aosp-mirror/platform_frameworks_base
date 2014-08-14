@@ -771,7 +771,7 @@ public final class PowerManagerService extends com.android.server.SystemService
                 notifyAcquire = true;
             }
 
-            applyWakeLockFlagsOnAcquireLocked(wakeLock);
+            applyWakeLockFlagsOnAcquireLocked(wakeLock, uid);
             mDirty |= DIRTY_WAKE_LOCKS;
             updatePowerStateLocked();
             if (notifyAcquire) {
@@ -796,10 +796,10 @@ public final class PowerManagerService extends com.android.server.SystemService
         return false;
     }
 
-    private void applyWakeLockFlagsOnAcquireLocked(WakeLock wakeLock) {
+    private void applyWakeLockFlagsOnAcquireLocked(WakeLock wakeLock, int uid) {
         if ((wakeLock.mFlags & PowerManager.ACQUIRE_CAUSES_WAKEUP) != 0
                 && isScreenLock(wakeLock)) {
-            wakeUpNoUpdateLocked(SystemClock.uptimeMillis());
+            wakeUpNoUpdateLocked(SystemClock.uptimeMillis(), uid);
         }
     }
 
@@ -994,17 +994,17 @@ public final class PowerManagerService extends com.android.server.SystemService
         return false;
     }
 
-    private void wakeUpInternal(long eventTime) {
+    private void wakeUpInternal(long eventTime, int uid) {
         synchronized (mLock) {
-            if (wakeUpNoUpdateLocked(eventTime)) {
+            if (wakeUpNoUpdateLocked(eventTime, uid)) {
                 updatePowerStateLocked();
             }
         }
     }
 
-    private boolean wakeUpNoUpdateLocked(long eventTime) {
+    private boolean wakeUpNoUpdateLocked(long eventTime, int uid) {
         if (DEBUG_SPEW) {
-            Slog.d(TAG, "wakeUpNoUpdateLocked: eventTime=" + eventTime);
+            Slog.d(TAG, "wakeUpNoUpdateLocked: eventTime=" + eventTime + ", uid=" + uid);
         }
 
         if (eventTime < mLastSleepTime || mWakefulness == WAKEFULNESS_AWAKE
@@ -1014,13 +1014,13 @@ public final class PowerManagerService extends com.android.server.SystemService
 
         switch (mWakefulness) {
             case WAKEFULNESS_ASLEEP:
-                Slog.i(TAG, "Waking up from sleep...");
+                Slog.i(TAG, "Waking up from sleep (uid " + uid +")...");
                 break;
             case WAKEFULNESS_DREAMING:
-                Slog.i(TAG, "Waking up from dream...");
+                Slog.i(TAG, "Waking up from dream (uid " + uid +")...");
                 break;
             case WAKEFULNESS_DOZING:
-                Slog.i(TAG, "Waking up from dozing...");
+                Slog.i(TAG, "Waking up from dozing (uid " + uid +")...");
                 break;
         }
 
@@ -1030,13 +1030,13 @@ public final class PowerManagerService extends com.android.server.SystemService
         setInteractiveStateLocked(true, 0);
 
         userActivityNoUpdateLocked(
-                eventTime, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
+                eventTime, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, uid);
         return true;
     }
 
-    private void goToSleepInternal(long eventTime, int reason, int flags) {
+    private void goToSleepInternal(long eventTime, int reason, int flags, int uid) {
         synchronized (mLock) {
-            if (goToSleepNoUpdateLocked(eventTime, reason, flags)) {
+            if (goToSleepNoUpdateLocked(eventTime, reason, flags, uid)) {
                 updatePowerStateLocked();
             }
         }
@@ -1045,10 +1045,10 @@ public final class PowerManagerService extends com.android.server.SystemService
     // This method is called goToSleep for historical reasons but we actually start
     // dozing before really going to sleep.
     @SuppressWarnings("deprecation")
-    private boolean goToSleepNoUpdateLocked(long eventTime, int reason, int flags) {
+    private boolean goToSleepNoUpdateLocked(long eventTime, int reason, int flags, int uid) {
         if (DEBUG_SPEW) {
             Slog.d(TAG, "goToSleepNoUpdateLocked: eventTime=" + eventTime
-                    + ", reason=" + reason + ", flags=" + flags);
+                    + ", reason=" + reason + ", flags=" + flags + ", uid=" + uid);
         }
 
         if (eventTime < mLastWakeTime
@@ -1060,14 +1060,24 @@ public final class PowerManagerService extends com.android.server.SystemService
 
         switch (reason) {
             case PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN:
-                Slog.i(TAG, "Going to sleep due to device administration policy...");
+                Slog.i(TAG, "Going to sleep due to device administration policy "
+                        + "(uid " + uid +")...");
                 break;
             case PowerManager.GO_TO_SLEEP_REASON_TIMEOUT:
-                Slog.i(TAG, "Going to sleep due to screen timeout...");
+                Slog.i(TAG, "Going to sleep due to screen timeout (uid " + uid +")...");
+                break;
+            case PowerManager.GO_TO_SLEEP_REASON_LID_SWITCH:
+                Slog.i(TAG, "Going to sleep due to lid switch (uid " + uid +")...");
+                break;
+            case PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON:
+                Slog.i(TAG, "Going to sleep due to power button (uid " + uid +")...");
+                break;
+            case PowerManager.GO_TO_SLEEP_REASON_HDMI:
+                Slog.i(TAG, "Going to sleep due to HDMI standby (uid " + uid +")...");
                 break;
             default:
-                Slog.i(TAG, "Going to sleep by user request...");
-                reason = PowerManager.GO_TO_SLEEP_REASON_USER;
+                Slog.i(TAG, "Going to sleep by application request (uid " + uid +")...");
+                reason = PowerManager.GO_TO_SLEEP_REASON_APPLICATION;
                 break;
         }
 
@@ -1094,22 +1104,22 @@ public final class PowerManagerService extends com.android.server.SystemService
 
         // Skip dozing if requested.
         if ((flags & PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE) != 0) {
-            reallyGoToSleepNoUpdateLocked(eventTime);
+            reallyGoToSleepNoUpdateLocked(eventTime, uid);
         }
         return true;
     }
 
-    private void napInternal(long eventTime) {
+    private void napInternal(long eventTime, int uid) {
         synchronized (mLock) {
-            if (napNoUpdateLocked(eventTime)) {
+            if (napNoUpdateLocked(eventTime, uid)) {
                 updatePowerStateLocked();
             }
         }
     }
 
-    private boolean napNoUpdateLocked(long eventTime) {
+    private boolean napNoUpdateLocked(long eventTime, int uid) {
         if (DEBUG_SPEW) {
-            Slog.d(TAG, "napNoUpdateLocked: eventTime=" + eventTime);
+            Slog.d(TAG, "napNoUpdateLocked: eventTime=" + eventTime + ", uid=" + uid);
         }
 
         if (eventTime < mLastWakeTime || mWakefulness != WAKEFULNESS_AWAKE
@@ -1117,7 +1127,7 @@ public final class PowerManagerService extends com.android.server.SystemService
             return false;
         }
 
-        Slog.i(TAG, "Nap time...");
+        Slog.i(TAG, "Nap time (uid " + uid +")...");
 
         mDirty |= DIRTY_WAKEFULNESS;
         mWakefulness = WAKEFULNESS_DREAMING;
@@ -1127,9 +1137,10 @@ public final class PowerManagerService extends com.android.server.SystemService
     }
 
     // Done dozing, drop everything and go to sleep.
-    private boolean reallyGoToSleepNoUpdateLocked(long eventTime) {
+    private boolean reallyGoToSleepNoUpdateLocked(long eventTime, int uid) {
         if (DEBUG_SPEW) {
-            Slog.d(TAG, "reallyGoToSleepNoUpdateLocked: eventTime=" + eventTime);
+            Slog.d(TAG, "reallyGoToSleepNoUpdateLocked: eventTime=" + eventTime
+                    + ", uid=" + uid);
         }
 
         if (eventTime < mLastWakeTime || mWakefulness == WAKEFULNESS_ASLEEP
@@ -1137,7 +1148,7 @@ public final class PowerManagerService extends com.android.server.SystemService
             return false;
         }
 
-        Slog.i(TAG, "Sleeping...");
+        Slog.i(TAG, "Sleeping (uid " + uid +")...");
 
         mDirty |= DIRTY_WAKEFULNESS;
         mWakefulness = WAKEFULNESS_ASLEEP;
@@ -1251,7 +1262,7 @@ public final class PowerManagerService extends com.android.server.SystemService
                 final long now = SystemClock.uptimeMillis();
                 if (shouldWakeUpWhenPluggedOrUnpluggedLocked(wasPowered, oldPlugType,
                         dockedOnWirelessCharger)) {
-                    wakeUpNoUpdateLocked(now);
+                    wakeUpNoUpdateLocked(now, Process.SYSTEM_UID);
                 }
                 userActivityNoUpdateLocked(
                         now, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
@@ -1509,10 +1520,10 @@ public final class PowerManagerService extends com.android.server.SystemService
                 }
                 final long time = SystemClock.uptimeMillis();
                 if (shouldNapAtBedTimeLocked()) {
-                    changed = napNoUpdateLocked(time);
+                    changed = napNoUpdateLocked(time, Process.SYSTEM_UID);
                 } else {
                     changed = goToSleepNoUpdateLocked(time,
-                            PowerManager.GO_TO_SLEEP_REASON_TIMEOUT, 0);
+                            PowerManager.GO_TO_SLEEP_REASON_TIMEOUT, 0, Process.SYSTEM_UID);
                 }
             }
         }
@@ -1659,10 +1670,10 @@ public final class PowerManagerService extends com.android.server.SystemService
                 // Dream has ended or will be stopped.  Update the power state.
                 if (isItBedTimeYetLocked()) {
                     goToSleepNoUpdateLocked(SystemClock.uptimeMillis(),
-                            PowerManager.GO_TO_SLEEP_REASON_TIMEOUT, 0);
+                            PowerManager.GO_TO_SLEEP_REASON_TIMEOUT, 0, Process.SYSTEM_UID);
                     updatePowerStateLocked();
                 } else {
-                    wakeUpNoUpdateLocked(SystemClock.uptimeMillis());
+                    wakeUpNoUpdateLocked(SystemClock.uptimeMillis(), Process.SYSTEM_UID);
                     updatePowerStateLocked();
                 }
             } else if (wakefulness == WAKEFULNESS_DOZING) {
@@ -1671,7 +1682,7 @@ public final class PowerManagerService extends com.android.server.SystemService
                 }
 
                 // Doze has ended or will be stopped.  Update the power state.
-                reallyGoToSleepNoUpdateLocked(SystemClock.uptimeMillis());
+                reallyGoToSleepNoUpdateLocked(SystemClock.uptimeMillis(), Process.SYSTEM_UID);
                 updatePowerStateLocked();
             }
         }
@@ -2852,9 +2863,10 @@ public final class PowerManagerService extends com.android.server.SystemService
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.DEVICE_POWER, null);
 
+            final int uid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
-                wakeUpInternal(eventTime);
+                wakeUpInternal(eventTime, uid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2869,9 +2881,10 @@ public final class PowerManagerService extends com.android.server.SystemService
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.DEVICE_POWER, null);
 
+            final int uid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
-                goToSleepInternal(eventTime, reason, flags);
+                goToSleepInternal(eventTime, reason, flags, uid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2886,9 +2899,10 @@ public final class PowerManagerService extends com.android.server.SystemService
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.DEVICE_POWER, null);
 
+            final int uid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
-                napInternal(eventTime);
+                napInternal(eventTime, uid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
