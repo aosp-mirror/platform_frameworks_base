@@ -88,6 +88,9 @@ import static android.net.wifi.WifiManager.WIFI_AP_STATE_CHANGED_ACTION;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 
+import static android.system.OsConstants.AF_INET;
+import static android.system.OsConstants.AF_INET6;
+
 /**
  * @hide
  *
