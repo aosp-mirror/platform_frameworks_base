@@ -59,5 +59,5 @@ interface INfcAdapter
 
     void registerLockscreenDispatch(INfcLockscreenDispatch lockscreenDispatch, in int[] techList);
     void addNfcUnlockHandler(INfcUnlockHandler unlockHandler, in int[] techList);
-    void removeNfcUnlockHandler(IBinder b);
+    void removeNfcUnlockHandler(INfcUnlockHandler unlockHandler);
 }
