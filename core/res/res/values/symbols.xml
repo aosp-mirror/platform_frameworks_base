@@ -1981,4 +1981,7 @@
   <java-symbol type="string" name="time_picker_am_label" />
   <java-symbol type="string" name="time_picker_pm_label" />
   <java-symbol type="dimen" name="text_size_small_material" />
+  <java-symbol type="attr" name="checkMarkGravity" />
+  <java-symbol type="layout" name="select_dialog_singlechoice_material" />
+  <java-symbol type="layout" name="select_dialog_multichoice_material" />
 </resources>
