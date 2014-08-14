@@ -79,4 +79,6 @@
     <!-- The width of the region on the left/right edge of the screen for performing the camera/
      phone hints. -->
     <dimen name="edge_tap_area_width">80dp</dimen>
+
+    <dimen name="keyguard_indication_margin_bottom">90dp</dimen>
 </resources>

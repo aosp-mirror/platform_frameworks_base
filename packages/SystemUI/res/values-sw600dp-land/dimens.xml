@@ -27,4 +27,6 @@
 
     <dimen name="keyguard_clock_notifications_margin_min">36dp</dimen>
     <dimen name="keyguard_clock_notifications_margin_max">36dp</dimen>
+
+    <dimen name="keyguard_indication_margin_bottom">80dp</dimen>
 </resources>

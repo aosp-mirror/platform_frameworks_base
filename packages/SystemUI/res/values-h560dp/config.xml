@@ -15,9 +15,8 @@
   ~ limitations under the License
   -->
 <resources>
-    <!-- The fraction of the screen height where the clock on the Keyguard has its center. The
-         min value is used when no notifications are displaying, and the max value is when the
-         highest possible number of notifications are showing. -->
-    <fraction name="keyguard_clock_y_fraction_max">35%</fraction>
-    <fraction name="keyguard_clock_y_fraction_min">24%</fraction>
+    <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
+     card. -->
+    <integer name="keyguard_max_notification_count">4</integer>
 </resources>
+
