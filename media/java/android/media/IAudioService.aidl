@@ -37,8 +37,6 @@ import android.view.KeyEvent;
  */
 interface IAudioService {
 
-    boolean isLocalOrRemoteMusicActive();
-
     void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
             String callingPackage);
 

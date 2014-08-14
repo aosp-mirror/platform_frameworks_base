@@ -1672,24 +1672,6 @@ public class AudioManager {
 
     /**
      * @hide
-     * Checks whether any local or remote media playback is active.
-     * Local playback refers to playback for instance on the device's speakers or wired headphones.
-     * Remote playback refers to playback for instance on a wireless display mirroring the
-     *    devices's, or on a device using a Cast-like protocol.
-     * @return true if media playback, from which the device is aware, is active.
-     */
-    public boolean isLocalOrRemoteMusicActive() {
-        IAudioService service = getService();
-        try {
-            return service.isLocalOrRemoteMusicActive();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in isLocalOrRemoteMusicActive()", e);
-            return false;
-        }
-    }
-
-    /**
-     * @hide
      * Checks whether the current audio focus is exclusive.
      * @return true if the top of the audio focus stack requested focus
      *     with {@link #AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE}
