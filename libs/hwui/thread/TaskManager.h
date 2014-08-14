@@ -84,6 +84,7 @@ private:
         void exit();
 
     private:
+        virtual status_t readyToRun();
         virtual bool threadLoop();
 
         // Lock for the list of tasks
