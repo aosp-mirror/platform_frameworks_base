@@ -27,6 +27,7 @@ import android.os.Bundle;
  */
 oneway interface ISessionControllerCallback {
     void onEvent(String event, in Bundle extras);
+    void onSessionDestroyed();
 
     // These callbacks are for the TransportController
     void onPlaybackStateChanged(in PlaybackState state);
