@@ -435,6 +435,8 @@ public class UsbDeviceManager {
             Message msg = Message.obtain(this, MSG_UPDATE_STATE);
             msg.arg1 = connected;
             msg.arg2 = configured;
+            StorageManager storageManager = StorageManager.from(mContext);
+            storageManager.setUsbMassStorageEnabled(mConnected);
             // debounce disconnects to avoid problems bringing up USB tethering
             sendMessageDelayed(msg, (connected == 0) ? UPDATE_DELAY : 0);
         }
