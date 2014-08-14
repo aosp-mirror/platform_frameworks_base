@@ -1852,7 +1852,8 @@
         android:description="@string/permdesc_manageCaCertificates" />
 
     <!-- @SystemApi Allows an application to do certain operations needed for
-         interacting with the recovery (system update) system. -->
+         interacting with the recovery (system update) system.
+         @hide -->
     <permission android:name="android.permission.RECOVERY"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signature|system"
