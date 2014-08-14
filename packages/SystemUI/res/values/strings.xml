@@ -645,7 +645,7 @@
     <string name="speed_bump_explanation">Less urgent notifications below</string>
 
     <!-- Shows to explain the double tap interaction with notifications: After tapping a notification on Keyguard, this will explain users to tap again to launch a notification. [CHAR LIMIT=60] -->
-    <string name="notification_tap_again">Tap again to open</string>
+    <string name="notification_tap_again">Touch again to open</string>
 
     <!-- Shows when people have pressed the unlock icon to explain how to unlock. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to unlock</string>
