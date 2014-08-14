@@ -8587,9 +8587,6 @@ package android.content.pm {
     field public java.lang.String targetPackage;
   }
 
-  public class KeySet {
-  }
-
   public class LabeledIntent extends android.content.Intent {
     ctor public LabeledIntent(android.content.Intent, java.lang.String, int, int);
     ctor public LabeledIntent(android.content.Intent, java.lang.String, java.lang.CharSequence, int);
@@ -8792,7 +8789,6 @@ package android.content.pm {
     method public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackages(int);
     method public abstract java.lang.String getInstallerPackageName(java.lang.String);
     method public abstract android.content.pm.InstrumentationInfo getInstrumentationInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public abstract android.content.pm.KeySet getKeySetByAlias(java.lang.String, java.lang.String);
     method public abstract android.content.Intent getLaunchIntentForPackage(java.lang.String);
     method public abstract android.content.Intent getLeanbackLaunchIntentForPackage(java.lang.String);
     method public abstract java.lang.String getNameForUid(int);
@@ -8812,15 +8808,12 @@ package android.content.pm {
     method public abstract android.content.res.Resources getResourcesForApplication(android.content.pm.ApplicationInfo) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.res.Resources getResourcesForApplication(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.pm.ServiceInfo getServiceInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public abstract android.content.pm.KeySet getSigningKeySet(java.lang.String);
     method public abstract android.content.pm.FeatureInfo[] getSystemAvailableFeatures();
     method public abstract java.lang.String[] getSystemSharedLibraryNames();
     method public abstract java.lang.CharSequence getText(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public abstract android.content.res.XmlResourceParser getXml(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public abstract boolean hasSystemFeature(java.lang.String);
     method public abstract boolean isSafeMode();
-    method public abstract boolean isSignedBy(java.lang.String, android.content.pm.KeySet);
-    method public abstract boolean isSignedByExactly(java.lang.String, android.content.pm.KeySet);
     method public abstract java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(android.content.Intent, int);
     method public abstract java.util.List<android.content.pm.ProviderInfo> queryContentProviders(java.lang.String, int, int);
     method public abstract java.util.List<android.content.pm.InstrumentationInfo> queryInstrumentation(java.lang.String, int);
@@ -30541,7 +30534,6 @@ package android.test.mock {
     method public java.util.List<android.content.pm.PackageInfo> getInstalledPackages(int);
     method public java.lang.String getInstallerPackageName(java.lang.String);
     method public android.content.pm.InstrumentationInfo getInstrumentationInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public android.content.pm.KeySet getKeySetByAlias(java.lang.String, java.lang.String);
     method public android.content.Intent getLaunchIntentForPackage(java.lang.String);
     method public android.content.Intent getLeanbackLaunchIntentForPackage(java.lang.String);
     method public java.lang.String getNameForUid(int);
@@ -30560,15 +30552,12 @@ package android.test.mock {
     method public android.content.res.Resources getResourcesForApplication(android.content.pm.ApplicationInfo);
     method public android.content.res.Resources getResourcesForApplication(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.pm.ServiceInfo getServiceInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public android.content.pm.KeySet getSigningKeySet(java.lang.String);
     method public android.content.pm.FeatureInfo[] getSystemAvailableFeatures();
     method public java.lang.String[] getSystemSharedLibraryNames();
     method public java.lang.CharSequence getText(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public android.content.res.XmlResourceParser getXml(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public boolean hasSystemFeature(java.lang.String);
     method public boolean isSafeMode();
-    method public boolean isSignedBy(java.lang.String, android.content.pm.KeySet);
-    method public boolean isSignedByExactly(java.lang.String, android.content.pm.KeySet);
     method public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(android.content.Intent, int);
     method public java.util.List<android.content.pm.ProviderInfo> queryContentProviders(java.lang.String, int, int);
     method public java.util.List<android.content.pm.InstrumentationInfo> queryInstrumentation(java.lang.String, int);

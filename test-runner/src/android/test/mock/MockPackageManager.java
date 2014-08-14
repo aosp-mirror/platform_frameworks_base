@@ -617,21 +617,25 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
     @Override
     public KeySet getKeySetByAlias(String packageName, String alias) {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
     @Override
     public KeySet getSigningKeySet(String packageName) {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
     @Override
     public boolean isSignedBy(String packageName, KeySet ks) {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
     @Override
     public boolean isSignedByExactly(String packageName, KeySet ks) {
         throw new UnsupportedOperationException();

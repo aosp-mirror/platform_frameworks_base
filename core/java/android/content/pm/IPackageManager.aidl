@@ -32,6 +32,7 @@ import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.KeySet;
 import android.content.pm.PackageInfo;
 import android.content.pm.ManifestDigest;
 import android.content.pm.PackageCleanItem;
@@ -446,8 +447,8 @@ interface IPackageManager {
     boolean setBlockUninstallForUser(String packageName, boolean blockUninstall, int userId);
     boolean getBlockUninstallForUser(String packageName, int userId);
 
-    IBinder getKeySetByAlias(String packageName, String alias);
-    IBinder getSigningKeySet(String packageName);
-    boolean isPackageSignedByKeySet(String packageName, IBinder ks);
-    boolean isPackageSignedByKeySetExactly(String packageName, IBinder ks);
+    KeySet getKeySetByAlias(String packageName, String alias);
+    KeySet getSigningKeySet(String packageName);
+    boolean isPackageSignedByKeySet(String packageName, in KeySet ks);
+    boolean isPackageSignedByKeySetExactly(String packageName, in KeySet ks);
 }

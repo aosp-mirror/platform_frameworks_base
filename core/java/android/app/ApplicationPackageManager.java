@@ -1494,57 +1494,52 @@ final class ApplicationPackageManager extends PackageManager {
         return false;
     }
 
+    /** @hide */
     @Override
     public KeySet getKeySetByAlias(String packageName, String alias) {
         Preconditions.checkNotNull(packageName);
         Preconditions.checkNotNull(alias);
-        IBinder keySetToken;
+        KeySet ks;
         try {
-            keySetToken = mPM.getKeySetByAlias(packageName, alias);
+            ks = mPM.getKeySetByAlias(packageName, alias);
         } catch (RemoteException e) {
             return null;
         }
-        if (keySetToken == null) {
-            return null;
-        }
-        return new KeySet(keySetToken);
+        return ks;
     }
 
+    /** @hide */
     @Override
     public KeySet getSigningKeySet(String packageName) {
         Preconditions.checkNotNull(packageName);
-        IBinder keySetToken;
+        KeySet ks;
         try {
-            keySetToken = mPM.getSigningKeySet(packageName);
+            ks = mPM.getSigningKeySet(packageName);
         } catch (RemoteException e) {
             return null;
         }
-        if (keySetToken == null) {
-            return null;
-        }
-        return new KeySet(keySetToken);
+        return ks;
     }
 
-
+    /** @hide */
     @Override
     public boolean isSignedBy(String packageName, KeySet ks) {
         Preconditions.checkNotNull(packageName);
         Preconditions.checkNotNull(ks);
-        IBinder keySetToken = ks.getToken();
         try {
-            return mPM.isPackageSignedByKeySet(packageName, keySetToken);
+            return mPM.isPackageSignedByKeySet(packageName, ks);
         } catch (RemoteException e) {
             return false;
         }
     }
 
+    /** @hide */
     @Override
     public boolean isSignedByExactly(String packageName, KeySet ks) {
         Preconditions.checkNotNull(packageName);
         Preconditions.checkNotNull(ks);
-        IBinder keySetToken = ks.getToken();
         try {
-            return mPM.isPackageSignedByKeySetExactly(packageName, keySetToken);
+            return mPM.isPackageSignedByKeySetExactly(packageName, ks);
         } catch (RemoteException e) {
             return false;
         }

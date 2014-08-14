@@ -109,6 +109,7 @@ import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstallSessionParams;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.KeySet;
 import android.content.pm.ManifestDigest;
 import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfo;
@@ -13402,7 +13403,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public KeySetHandle getKeySetByAlias(String packageName, String alias) {
+    public KeySet getKeySetByAlias(String packageName, String alias) {
         if (packageName == null || alias == null) {
             return null;
         }
@@ -13412,18 +13413,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "KeySet requested for unknown package:" + packageName);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
-            if (pkg.applicationInfo.uid != Binder.getCallingUid()
-                    && Process.SYSTEM_UID != Binder.getCallingUid()) {
-                throw new SecurityException("May not access KeySets defined by"
-                        + " aliases in other applications.");
-            }
             KeySetManagerService ksms = mSettings.mKeySetManagerService;
-            return ksms.getKeySetByAliasAndPackageNameLPr(packageName, alias);
+            return new KeySet(ksms.getKeySetByAliasAndPackageNameLPr(packageName, alias));
         }
     }
 
     @Override
-    public KeySetHandle getSigningKeySet(String packageName) {
+    public KeySet getSigningKeySet(String packageName) {
         if (packageName == null) {
             return null;
         }
@@ -13438,12 +13434,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 throw new SecurityException("May not access signing KeySet of other apps.");
             }
             KeySetManagerService ksms = mSettings.mKeySetManagerService;
-            return ksms.getSigningKeySetByPackageNameLPr(packageName);
+            return new KeySet(ksms.getSigningKeySetByPackageNameLPr(packageName));
         }
     }
 
     @Override
-    public boolean isPackageSignedByKeySet(String packageName, IBinder ks) {
+    public boolean isPackageSignedByKeySet(String packageName, KeySet ks) {
         if (packageName == null || ks == null) {
             return false;
         }
@@ -13453,16 +13449,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "KeySet requested for unknown package:" + packageName);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
-            if (ks instanceof KeySetHandle) {
+            IBinder ksh = ks.getToken();
+            if (ksh instanceof KeySetHandle) {
                 KeySetManagerService ksms = mSettings.mKeySetManagerService;
-                return ksms.packageIsSignedByLPr(packageName, (KeySetHandle) ks);
+                return ksms.packageIsSignedByLPr(packageName, (KeySetHandle) ksh);
             }
             return false;
         }
     }
 
     @Override
-    public boolean isPackageSignedByKeySetExactly(String packageName, IBinder ks) {
+    public boolean isPackageSignedByKeySetExactly(String packageName, KeySet ks) {
         if (packageName == null || ks == null) {
             return false;
         }
@@ -13472,9 +13469,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "KeySet requested for unknown package:" + packageName);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
-            if (ks instanceof KeySetHandle) {
+            IBinder ksh = ks.getToken();
+            if (ksh instanceof KeySetHandle) {
                 KeySetManagerService ksms = mSettings.mKeySetManagerService;
-                return ksms.packageIsSignedByExactlyLPr(packageName, (KeySetHandle) ks);
+                return ksms.packageIsSignedByExactlyLPr(packageName, (KeySetHandle) ksh);
             }
             return false;
         }

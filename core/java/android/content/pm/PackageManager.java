@@ -3683,10 +3683,13 @@ public abstract class PackageManager {
      *
      * @param alias The alias for a given {@link KeySet} as defined in the
      *        application's AndroidManifest.xml.
+     * @hide
      */
     public abstract KeySet getKeySetByAlias(String packageName, String alias);
 
-    /** Return the signing {@link KeySet} for this application. */
+    /** Return the signing {@link KeySet} for this application. 
+     * @hide
+     */
     public abstract KeySet getSigningKeySet(String packageName);
 
     /**
@@ -3694,6 +3697,7 @@ public abstract class PackageManager {
      * of the keys specified by the {@link KeySet} ks.  This will return true if
      * the package has been signed by additional keys (a superset) as well.
      * Compare to {@link #isSignedByExactly(String packageName, KeySet ks)}.
+     * @hide
      */
     public abstract boolean isSignedBy(String packageName, KeySet ks);
 
@@ -3701,6 +3705,7 @@ public abstract class PackageManager {
      * Return whether the package denoted by packageName has been signed by all
      * of, and only, the keys specified by the {@link KeySet} ks. Compare to
      * {@link #isSignedBy(String packageName, KeySet ks)}.
+     * @hide
      */
     public abstract boolean isSignedByExactly(String packageName, KeySet ks);
 
