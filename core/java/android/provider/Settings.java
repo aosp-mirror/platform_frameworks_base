@@ -6411,6 +6411,14 @@ public final class Settings {
         public static final String GUEST_USER_ENABLED = "guest_user_enabled";
 
         /**
+         * Whether the NetworkScoringService has been first initialized.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         * @hide
+         */
+        public static final String NETWORK_SCORING_PROVISIONED = "network_scoring_provisioned";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
