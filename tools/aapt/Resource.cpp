@@ -937,8 +937,8 @@ status_t generateAndroidManifestForSplit(Bundle* bundle, const sp<AaptAssets>& a
     }
 
     // Add the 'split' attribute which describes the configurations included.
-    String8 splitName("config_");
-    splitName.append(split->getDirectorySafeName());
+    String8 splitName("config.");
+    splitName.append(split->getPackageSafeName());
     manifest->addAttribute(String16(), String16("split"), String16(splitName));
 
     // Build an empty <application> tag (required).

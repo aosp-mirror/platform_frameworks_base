@@ -95,6 +95,10 @@ public:
         return mDirName;
     }
 
+    const android::String8& getPackageSafeName() const {
+        return mPackageSafeName;
+    }
+
     bool isBase() const {
         return mIsBase;
     }
@@ -111,6 +115,7 @@ private:
     const bool mIsBase;
     String8 mName;
     String8 mDirName;
+    String8 mPackageSafeName;
     std::set<OutputEntry> mFiles;
 };
 
