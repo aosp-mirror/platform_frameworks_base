@@ -2267,7 +2267,7 @@
   <public type="attr" name="windowReenterTransition" />
   <public type="attr" name="windowSharedElementReturnTransition" />
   <public type="attr" name="windowSharedElementReenterTransition" />
-  <public type="attr" name="contentRatingSystemXml"/>
+  <public type="attr" name="tvContentRatingDescription"/>
   <public type="attr" name="datePickerMode"/>
   <public type="attr" name="timePickerMode"/>
   <public type="attr" name="inset" />
