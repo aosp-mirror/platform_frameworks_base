@@ -175,6 +175,15 @@ public final class BluetoothLeAdvertiser {
         }
     }
 
+    /**
+     * Cleans up advertise clients. Should be called when bluetooth is down.
+     *
+     * @hide
+     */
+    public void cleanup() {
+        mLeAdvertisers.clear();
+    }
+
     // Compute the size of the advertise data.
     private int totalBytes(AdvertiseData data) {
         if (data == null) {

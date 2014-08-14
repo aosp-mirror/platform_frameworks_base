@@ -1428,6 +1428,9 @@ public final class BluetoothAdapter {
                 if (VDBG) Log.d(TAG, "onBluetoothServiceDown: " + mService);
                 synchronized (mManagerCallback) {
                     mService = null;
+                    mLeScanClients.clear();
+                    if (sBluetoothLeAdvertiser != null) sBluetoothLeAdvertiser.cleanup();
+                    if (sBluetoothLeScanner != null) sBluetoothLeScanner.cleanup();
                     for (IBluetoothManagerCallback cb : mProxyServiceStateCallbacks ){
                         try {
                             if (cb != null) {
