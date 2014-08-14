@@ -17,7 +17,6 @@
 package com.android.systemui.recents.views;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -55,6 +54,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     float mTaskProgress;
     ObjectAnimator mTaskProgressAnimator;
+    ObjectAnimator mDimAnimator;
     float mMaxDimScale;
     int mDim;
     AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator(1.25f);
@@ -222,6 +222,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
      * first layout because the actual animation into recents may take a long time. */
     void prepareEnterRecentsAnimation(boolean isTaskViewLaunchTargetTask,
                                              boolean occludesLaunchTarget, int offscreenY) {
+        int initialDim = getDim();
         if (mConfig.launchedFromAppWithScreenshot) {
             if (isTaskViewLaunchTargetTask) {
                 mHeaderView.prepareEnterRecentsAnimation();
@@ -240,7 +241,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 // Hide the action button if it exists
                 mActionButtonView.setAlpha(0f);
                 // Set the dim to 0 so we can animate it in
-                setDim(0);
+                initialDim = 0;
             } else if (occludesLaunchTarget) {
                 // Move the task view off screen (below) so we can animate it in
                 setTranslationY(offscreenY);
@@ -255,6 +256,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             setScaleX(1f);
             setScaleY(1f);
         }
+        // Apply the current dim
+        setDim(initialDim);
+        // Prepare the thumbnail view alpha
+        mThumbnailView.prepareEnterRecentsAnimation(isTaskViewLaunchTargetTask);
     }
 
     /** Animates this task view as it enters recents */
@@ -340,20 +345,24 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 // Animate the task bar of the first task view
                 mHeaderView.startEnterRecentsAnimation(mConfig.taskBarEnterAnimDelay,
                         mThumbnailView.enableTaskBarClipAsRunnable(mHeaderView));
-
-                // Animate the dim into view as well
-                ObjectAnimator anim = ObjectAnimator.ofInt(this, "dim", getDimFromTaskProgress());
-                anim.setStartDelay(mConfig.taskBarEnterAnimDelay);
-                anim.setDuration(mConfig.taskBarEnterAnimDuration);
-                anim.setInterpolator(mConfig.fastOutLinearInInterpolator);
-                anim.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        // Decrement the post animation trigger
-                        ctx.postAnimationTrigger.decrement();
-                    }
-                });
-                anim.start();
+                // Animate the dim/overlay
+                if (Constants.DebugFlags.App.EnableThumbnailAlphaOnFrontmost) {
+                    // Animate the thumbnail alpha before the dim animation (to prevent updating the
+                    // hardware layer)
+                    mThumbnailView.startEnterRecentsAnimation(mConfig.taskBarEnterAnimDelay,
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    animateDimToProgress(0, mConfig.taskBarEnterAnimDuration,
+                                            ctx.postAnimationTrigger.decrementOnAnimationEnd());
+                                }
+                            });
+                } else {
+                    // Immediately start the dim animation
+                    animateDimToProgress(mConfig.taskBarEnterAnimDelay,
+                            mConfig.taskBarEnterAnimDuration,
+                            ctx.postAnimationTrigger.decrementOnAnimationEnd());
+                }
                 ctx.postAnimationTrigger.increment();
 
                 // Animate the footer into view
@@ -459,8 +468,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     void startLaunchTaskAnimation(final Runnable r, boolean isLaunchingTask,
             boolean occludesLaunchTarget) {
         if (isLaunchingTask) {
-            // Disable the thumbnail clip and animate the bar out
+            // Disable the thumbnail clip and animate the bar out for the window animation out
             mHeaderView.startLaunchTaskAnimation(mThumbnailView.disableTaskBarClipAsRunnable(), r);
+            // Animate the thumbnail alpha back into full opacity for the window animation out
+            mThumbnailView.startLaunchTaskAnimation();
 
             // Animate the dim
             if (mDim > 0) {
@@ -612,15 +623,38 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /** Returns the current dim. */
     public void setDim(int dim) {
         mDim = dim;
-        int inverse = 255 - mDim;
-        mDimColorFilter.setColor(Color.argb(0xFF, inverse, inverse, inverse));
-        mLayerPaint.setColorFilter(mDimColorFilter);
-        setLayerType(LAYER_TYPE_HARDWARE, mLayerPaint);
+        // Defer setting hardware layers if we have not yet measured, or there is no dim to draw
+        if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0 && dim > 0) {
+            if (mDimAnimator != null) {
+                mDimAnimator.removeAllListeners();
+                mDimAnimator.cancel();
+            }
+
+            int inverse = 255 - mDim;
+            mDimColorFilter.setColor(Color.argb(0xFF, inverse, inverse, inverse));
+            mLayerPaint.setColorFilter(mDimColorFilter);
+            setLayerType(LAYER_TYPE_HARDWARE, mLayerPaint);
+        }
     }
 
     /** Returns the current dim. */
     public int getDim() {
         return mDim;
+    }
+
+    /** Animates the dim to the task progress. */
+    void animateDimToProgress(int delay, int duration, Animator.AnimatorListener postAnimRunnable) {
+        // Animate the dim into view as well
+        int toDim = getDimFromTaskProgress();
+        if (toDim != getDim()) {
+            ObjectAnimator anim = ObjectAnimator.ofInt(TaskView.this, "dim", toDim);
+            anim.setStartDelay(delay);
+            anim.setDuration(duration);
+            if (postAnimRunnable != null) {
+                anim.addListener(postAnimRunnable);
+            }
+            anim.start();
+        }
     }
 
     /** Compute the dim as a function of the scale of this view. */
@@ -647,6 +681,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             // Focus the header bar
             mHeaderView.onTaskViewFocusChanged(true);
         }
+        // Update the thumbnail alpha with the focus
+        mThumbnailView.onFocusChanged(true);
         // Call the callback
         mCb.onTaskViewFocusChanged(this, true);
         // Workaround, we don't always want it focusable in touch mode, but we want the first task
@@ -670,6 +706,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 // Un-focus the header bar
                 mHeaderView.onTaskViewFocusChanged(false);
             }
+            // Update the thumbnail alpha with the focus
+            mThumbnailView.onFocusChanged(false);
             // Call the callback
             mCb.onTaskViewFocusChanged(this, false);
             invalidate();

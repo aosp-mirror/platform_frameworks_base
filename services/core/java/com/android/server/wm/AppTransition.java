@@ -159,7 +159,7 @@ public class AppTransition implements Dump {
     private final int mConfigShortAnimTime;
     private final Interpolator mDecelerateInterpolator;
     private final Interpolator mThumbnailFadeoutInterpolator;
-    private final Interpolator mThumbnailCubicInterpolator;
+    private final Interpolator mThumbnailFastOutSlowInInterpolator;
 
     private int mCurrentUserId = 0;
 
@@ -170,7 +170,7 @@ public class AppTransition implements Dump {
                 com.android.internal.R.integer.config_shortAnimTime);
         mDecelerateInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.decelerate_cubic);
-        mThumbnailCubicInterpolator = AnimationUtils.loadInterpolator(context,
+        mThumbnailFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_slow_in);
         mThumbnailFadeoutInterpolator = new Interpolator() {
             @Override
@@ -635,7 +635,7 @@ public class AppTransition implements Dump {
         }
 
         return prepareThumbnailAnimationWithDuration(a, appWidth, appHeight,
-                THUMBNAIL_APP_TRANSITION_DURATION, mThumbnailCubicInterpolator);
+                THUMBNAIL_APP_TRANSITION_DURATION, mThumbnailFastOutSlowInInterpolator);
     }
 
     /**

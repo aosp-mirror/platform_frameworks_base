@@ -222,6 +222,9 @@
     <!-- The amount to offset when animating into an affiliate group. -->
     <dimen name="recents_task_view_affiliate_group_enter_offset">64dp</dimen>
 
+    <!-- The alpha to apply to a task thumbnail. -->
+    <item name="recents_task_view_thumbnail_alpha" format="float" type="dimen">0.9</item>
+
     <!-- The height of a task view bar. -->
     <dimen name="recents_task_bar_height">56dp</dimen>
 
