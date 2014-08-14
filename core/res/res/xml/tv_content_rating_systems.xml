@@ -1549,75 +1549,75 @@
     </rating-system-definition>
 
     <!-- TV content rating system for US TV -->
-    <rating-system-definition id="US_TVPG"
-        displayName="@string/display_name_ustvpg"
-        description="@string/description_ustvpg"
+    <rating-system-definition id="US_TV"
+        displayName="@string/display_name_ustv"
+        description="@string/description_ustv"
         country="US">
-        <sub-rating-definition id="US_TVPG_D"
-            displayName="@string/display_name_ustvpg_d"
-            description="@string/description_ustvpg_d" />
-        <sub-rating-definition id="US_TVPG_L"
-            displayName="@string/display_name_ustvpg_l"
-            description="@string/description_ustvpg_l" />
-        <sub-rating-definition id="US_TVPG_S"
-            displayName="@string/display_name_ustvpg_s"
-            description="@string/description_ustvpg_s" />
-        <sub-rating-definition id="US_TVPG_V"
-            displayName="@string/display_name_ustvpg_v"
-            description="@string/description_ustvpg_v" />
-        <sub-rating-definition id="US_TVPG_FV"
-            displayName="@string/display_name_ustvpg_fv"
-            description="@string/description_ustvpg_fv" />
+        <sub-rating-definition id="US_TV_D"
+            displayName="@string/display_name_ustv_d"
+            description="@string/description_ustv_d" />
+        <sub-rating-definition id="US_TV_L"
+            displayName="@string/display_name_ustv_l"
+            description="@string/description_ustv_l" />
+        <sub-rating-definition id="US_TV_S"
+            displayName="@string/display_name_ustv_s"
+            description="@string/description_ustv_s" />
+        <sub-rating-definition id="US_TV_V"
+            displayName="@string/display_name_ustv_v"
+            description="@string/description_ustv_v" />
+        <sub-rating-definition id="US_TV_FV"
+            displayName="@string/display_name_ustv_fv"
+            description="@string/description_ustv_fv" />
 
-        <rating-definition id="US_TVPG_TV_Y"
-            displayName="@string/display_name_ustvpg_y"
-            description="@string/description_ustvpg_y"
+        <rating-definition id="US_TV_Y"
+            displayName="@string/display_name_ustv_y"
+            description="@string/description_ustv_y"
             ageHint="0" />
-        <rating-definition id="US_TVPG_TV_Y7"
-            displayName="@string/display_name_ustvpg_y7"
-            description="@string/description_ustvpg_y7"
+        <rating-definition id="US_TV_Y7"
+            displayName="@string/display_name_ustv_y7"
+            description="@string/description_ustv_y7"
             ageHint="7">
-            <sub-rating id="US_TVPG_FV" />
+            <sub-rating id="US_TV_FV" />
         </rating-definition>
-        <rating-definition id="US_TVPG_TV_G"
-            displayName="@string/display_name_ustvpg_g"
-            description="@string/description_ustvpg_g"
+        <rating-definition id="US_TV_G"
+            displayName="@string/display_name_ustv_g"
+            description="@string/description_ustv_g"
             ageHint="0" />
-        <rating-definition id="US_TVPG_TV_PG"
-            displayName="@string/display_name_ustvpg_pg"
-            description="@string/description_ustvpg_pg"
+        <rating-definition id="US_TV_PG"
+            displayName="@string/display_name_ustv_pg"
+            description="@string/description_ustv_pg"
             ageHint="14">
-            <sub-rating id="US_TVPG_D" />
-            <sub-rating id="US_TVPG_L" />
-            <sub-rating id="US_TVPG_S" />
-            <sub-rating id="US_TVPG_V" />
+            <sub-rating id="US_TV_D" />
+            <sub-rating id="US_TV_L" />
+            <sub-rating id="US_TV_S" />
+            <sub-rating id="US_TV_V" />
         </rating-definition>
-        <rating-definition id="US_TVPG_TV_14"
-            displayName="@string/display_name_ustvpg_14"
-            description="@string/description_ustvpg_14"
+        <rating-definition id="US_TV_14"
+            displayName="@string/display_name_ustv_14"
+            description="@string/description_ustv_14"
             ageHint="14">
-            <sub-rating id="US_TVPG_D" />
-            <sub-rating id="US_TVPG_L" />
-            <sub-rating id="US_TVPG_S" />
-            <sub-rating id="US_TVPG_V" />
+            <sub-rating id="US_TV_D" />
+            <sub-rating id="US_TV_L" />
+            <sub-rating id="US_TV_S" />
+            <sub-rating id="US_TV_V" />
         </rating-definition>
-        <rating-definition id="US_TVPG_TV_MA"
-            displayName="@string/display_name_ustvpg_ma"
-            description="@string/description_ustvpg_ma"
+        <rating-definition id="US_TV_MA"
+            displayName="@string/display_name_ustv_ma"
+            description="@string/description_ustv_ma"
             ageHint="17">
-            <sub-rating id="US_TVPG_L" />
-            <sub-rating id="US_TVPG_S" />
-            <sub-rating id="US_TVPG_V" />
+            <sub-rating id="US_TV_L" />
+            <sub-rating id="US_TV_S" />
+            <sub-rating id="US_TV_V" />
         </rating-definition>
         <order>
-            <rating id="US_TVPG_TV_Y" />
-            <rating id="US_TVPG_TV_Y7" />
+            <rating id="US_TV_Y" />
+            <rating id="US_TV_Y7" />
         </order>
         <order>
-            <rating id="US_TVPG_TV_G" />
-            <rating id="US_TVPG_TV_PG" />
-            <rating id="US_TVPG_TV_14" />
-            <rating id="US_TVPG_TV_MA" />
+            <rating id="US_TV_G" />
+            <rating id="US_TV_PG" />
+            <rating id="US_TV_14" />
+            <rating id="US_TV_MA" />
         </order>
     </rating-system-definition>
 

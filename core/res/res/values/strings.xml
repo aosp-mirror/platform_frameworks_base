@@ -4874,8 +4874,8 @@
     <string name="display_name_amtvrs_tw" translatable="false">TW</string>
     <string name="display_name_amtvrs_t" translatable="false">T</string>
     <string name="display_name_amtvrs_a" translatable="false">A</string>
-    <string name="description_amtvrs_y">Suitable for ages 2–11</string>
-    <string name="description_amtvrs_y7">Suitable for ages 7–16</string>
+    <string name="description_amtvrs_y">Suitable for ages 2-11</string>
+    <string name="description_amtvrs_y7">Suitable for ages 7-16</string>
     <string name="description_amtvrs_ga">Suitable for general audiences</string>
     <string name="description_amtvrs_tw">Suitable for teens ages 9 and up</string>
     <string name="description_amtvrs_t">Suitable for teens ages 12 and up</string>
@@ -4963,7 +4963,7 @@
     <string name="display_name_catv_14" translatable="false">14+</string>
     <string name="display_name_catv_18" translatable="false">18+</string>
     <string name="description_catv_exempt">Shows which are exempt from ratings (such as news and sports programming) will not display an on-screen rating at all</string>
-    <string name="description_catv_c">Programming suitable for children ages of 2–7 years. No profanity or sexual content of any level allowed. Contains little violence</string>
+    <string name="description_catv_c">Programming suitable for children ages of 2-7 years. No profanity or sexual content of any level allowed. Contains little violence</string>
     <string name="description_catv_c8">Suitable for children ages 8+. Low level violence and fantasy horror is allowed. No foul language is allowed, but occasional "socially offensive and discriminatory" language is allowed if in the context of the story. No sexual content of any level allowed</string>
     <string name="description_catv_g">Suitable for general audiences. Programming suitable for the entire family with mild violence, and mild profanity and/or censored language</string>
     <string name="description_catv_pg">Parental guidance. Moderate violence and moderate profanity is allowed, as is brief nudity and sexual references if important to the context of the story</string>
@@ -5240,12 +5240,12 @@
     <string name="display_name_nltv_9" translatable="false">Let op met kinderen tot 9 jaar</string>
     <string name="display_name_nltv_12" translatable="false">Let op met kinderen tot 12 jaar</string>
     <string name="display_name_nltv_16" translatable="false">Let op met kinderen tot 16 jaar</string>
-    <string name="description_nltv_v">Violence</string>
-    <string name="description_nltv_f">Scary or Disturbing Content </string>
-    <string name="description_nltv_s">Sexual Content</string>
-    <string name="description_nltv_d">Discrimination</string>
-    <string name="description_nltv_da">Drug and/or Alcohol abuse</string>
-    <string name="description_nltv_l">Bad Language</string>
+    <string name="description_nltv_v">Violence\nApplicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12, NL_TV_16</string>
+    <string name="description_nltv_f">Scary or Disturbing ContentViolence\nApplicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12, NL_TV_16</string>
+    <string name="description_nltv_s">Sexual Content\nApplicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12, NL_TV_16</string>
+    <string name="description_nltv_d">Discrimination\nApplicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12, NL_TV_16</string>
+    <string name="description_nltv_da">Drug and/or Alcohol abuse\nApplicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12, NL_TV_16</string>
+    <string name="description_nltv_l">Bad Language\nApplicable to NL_TV_AL, NL_TV_6, NL_TV_9, NL_TV_12, NL_TV_16</string>
     <string name="description_nltv_al">All Ages</string>
     <string name="description_nltv_6">Parental advisory for children under 6</string>
     <string name="description_nltv_9">Parental advisory for children under 9</string>
@@ -5254,7 +5254,7 @@
 
     <!-- TV content rating system strings for NZF(Free) TV -->
     <string name="display_name_nzftv" translatable="false">NZ-Free-TV</string>
-    <string name="description_nzftv">New Zealand\'s free-to-air TV content rating system</string>
+    <string name="description_nzftv">TV content rating system for free-to-air channels in New Zealand</string>
     <string name="display_name_nzftv_g" translatable="false">G</string>
     <string name="display_name_nzftv_pgr" translatable="false">PGR</string>
     <string name="display_name_nzftv_ao" translatable="false">AO</string>
@@ -5264,7 +5264,7 @@
 
     <!-- TV content rating system strings for NZP(Pay) TV -->
     <string name="display_name_nzptv" translatable="false">NZ-Pay-TV</string>
-    <string name="description_nzptv">New Zealand\'s pay TV content rating system</string>
+    <string name="description_nzptv">TV content rating system for Pay TV channels in New Zealand</string>
     <string name="display_name_nzptv_c" translatable="false">C</string>
     <string name="display_name_nzptv_v" translatable="false">V</string>
     <string name="display_name_nzptv_l" translatable="false">L</string>
@@ -5274,10 +5274,10 @@
     <string name="display_name_nzptv_m" translatable="false">M</string>
     <string name="display_name_nzptv_16" translatable="false">16</string>
     <string name="display_name_nzptv_18" translatable="false">18</string>
-    <string name="description_nzptv_c">Content may offend</string>
-    <string name="description_nzptv_v">Violence</string>
-    <string name="description_nzptv_l">Language</string>
-    <string name="description_nzptv_s">Sexual content</string>
+    <string name="description_nzptv_c">Content may offend\nApplicable to NZ_PTV_PG, NZ_PTV_M, NZ_PTV_16, NZ_PTV_18</string>
+    <string name="description_nzptv_v">Violence\nApplicable to NZ_PTV_PG, NZ_PTV_M, NZ_PTV_16, NZ_PTV_18</string>
+    <string name="description_nzptv_l">Language\nApplicable to NZ_PTV_PG, NZ_PTV_M, NZ_PTV_16, NZ_PTV_18</string>
+    <string name="description_nzptv_s">Sexual content\nApplicable to NZ_PTV_PG, NZ_PTV_M, NZ_PTV_16, NZ_PTV_18</string>
     <string name="description_nzptv_g">suitable for general audiences</string>
     <string name="description_nzptv_pg">Parental guidance recommended for under 10</string>
     <string name="description_nzptv_m">Suitable for mature audiences 13 and up</string>
@@ -5389,7 +5389,7 @@
     <string name="display_name_sgftv_pg" translatable="false">PG</string>
     <string name="display_name_sgftv_pg13" translatable="false">PG13</string>
     <string name="description_sgftv_pg">Suitable for most but parents should guide their young</string>
-    <string name="description_sgftv_pg13">Parental Guidance Strongly Cautioned – Suitable for 13 And Above</string>
+    <string name="description_sgftv_pg13">Parental Guidance Strongly Cautioned - Suitable for 13 And Above</string>
 
     <!-- TV content rating system strings for SGP(Pay TV) TV -->
     <string name="display_name_sgptv" translatable="false">SG-Pay-TV</string>
@@ -5418,7 +5418,7 @@
     <string name="display_name_thtv_pg18" translatable="false">PG18</string>
     <string name="display_name_thtv_adults" translatable="false">Adults</string>
     <string name="description_thtv_primary">Content suitable for primary school aged children</string>
-    <string name="description_thtv_children">Content suitable for children between 6–12 years old</string>
+    <string name="description_thtv_children">Content suitable for children between 6-12 years old</string>
     <string name="description_thtv_general">Content suitable for general audiences</string>
     <string name="description_thtv_pg13">Content suitable for people aged 13 and above, but can be watched by those who are under the recommended age if parental guidance is provided</string>
     <string name="description_thtv_pg18">Content suitable for people aged above 18 years old; those who are younger that 18 must be provided with parental guidance</string>
@@ -5456,30 +5456,30 @@
     <string name="description_uatv_red square">This program is only for adult viewers. In it there are scenes with nudity, drug use, or violence</string>
 
     <!-- TV content rating system strings for US TV -->
-    <string name="display_name_ustvpg" translatable="false">US-TV</string>
-    <string name="description_ustvpg">The TV Parental Guidelines</string>
-    <string name="display_name_ustvpg_d" translatable="false">D</string>
-    <string name="display_name_ustvpg_l" translatable="false">L</string>
-    <string name="display_name_ustvpg_s" translatable="false">S</string>
-    <string name="display_name_ustvpg_v" translatable="false">V</string>
-    <string name="display_name_ustvpg_fv" translatable="false">FV</string>
-    <string name="display_name_ustvpg_y" translatable="false">TV-Y</string>
-    <string name="display_name_ustvpg_y7" translatable="false">TV-Y7</string>
-    <string name="display_name_ustvpg_g" translatable="false">TV-G</string>
-    <string name="display_name_ustvpg_pg" translatable="false">TV-PG</string>
-    <string name="display_name_ustvpg_14" translatable="false">TV-14</string>
-    <string name="display_name_ustvpg_ma" translatable="false">TV-MA</string>
-    <string name="description_ustvpg_d">Suggestive dialogue (Usually means talks about sex)</string>
-    <string name="description_ustvpg_l">Coarse language</string>
-    <string name="description_ustvpg_s">Sexual content</string>
-    <string name="description_ustvpg_v">Violence</string>
-    <string name="description_ustvpg_fv">Fantasy violence (Children\'s programming only)</string>
-    <string name="description_ustvpg_y">This program is designed to be appropriate for all children</string>
-    <string name="description_ustvpg_y7">This program is designed for children age 7 and above</string>
-    <string name="description_ustvpg_g">Most parents would find this program suitable for all ages</string>
-    <string name="description_ustvpg_pg">This program contains material that parents may find unsuitable for younger children</string>
-    <string name="description_ustvpg_14">This program contains some material that many parents would find unsuitable for children under 14 years of age</string>
-    <string name="description_ustvpg_ma">This program is specifically designed to be viewed by adults and therefore may be unsuitable for children under 17</string>
+    <string name="display_name_ustv" translatable="false">US-TV</string>
+    <string name="description_ustv">TV content rating system for United States</string>
+    <string name="display_name_ustv_d" translatable="false">D</string>
+    <string name="display_name_ustv_l" translatable="false">L</string>
+    <string name="display_name_ustv_s" translatable="false">S</string>
+    <string name="display_name_ustv_v" translatable="false">V</string>
+    <string name="display_name_ustv_fv" translatable="false">FV</string>
+    <string name="display_name_ustv_y" translatable="false">TV-Y</string>
+    <string name="display_name_ustv_y7" translatable="false">TV-Y7</string>
+    <string name="display_name_ustv_g" translatable="false">TV-G</string>
+    <string name="display_name_ustv_pg" translatable="false">TV-PG</string>
+    <string name="display_name_ustv_14" translatable="false">TV-14</string>
+    <string name="display_name_ustv_ma" translatable="false">TV-MA</string>
+    <string name="description_ustv_d">Suggestive dialogue (Usually means talks about sex)\nApplicable to US_TV_PG, US_TV_14, US_TV</string>
+    <string name="description_ustv_l">Coarse language\nApplicable to US_TV_PG, US_TV_14</string>
+    <string name="description_ustv_s">Sexual content\nApplicable to US_TV_PG, US_TV_14, US_TV_MA</string>
+    <string name="description_ustv_v">Violence\nApplicable to US_TV_PG, US_TV_14, US_TV_MA</string>
+    <string name="description_ustv_fv">Fantasy violence (Children\'s programming only)\nApplicable to US_TV_Y7</string>
+    <string name="description_ustv_y">This program is designed to be appropriate for all children</string>
+    <string name="description_ustv_y7">This program is designed for children age 7 and above</string>
+    <string name="description_ustv_g">Most parents would find this program suitable for all ages</string>
+    <string name="description_ustv_pg">This program contains material that parents may find unsuitable for younger children</string>
+    <string name="description_ustv_14">This program contains some material that many parents would find unsuitable for children under 14 years of age</string>
+    <string name="description_ustv_ma">This program is specifically designed to be viewed by adults and therefore may be unsuitable for children under 17</string>
 
     <!-- TV content rating system strings for VE TV -->
     <string name="display_name_vetv" translatable="false">VE-TV</string>
@@ -5504,17 +5504,17 @@
     <string name="display_name_zatv_16" translatable="false">16</string>
     <string name="display_name_zatv_18" translatable="false">18</string>
     <string name="display_name_zatv_r18" translatable="false">R18</string>
-    <string name="description_zatv_d">Drug</string>
-    <string name="description_zatv_v">Violence</string>
-    <string name="description_zatv_n">Nudity</string>
-    <string name="description_zatv_p">Prejudice</string>
-    <string name="description_zatv_s">Sex</string>
-    <string name="description_zatv_l">Language</string>
+    <string name="description_zatv_d">Drug\nApplicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18</string>
+    <string name="description_zatv_v">Violence\nApplicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18</string>
+    <string name="description_zatv_n">Nudity\nApplicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18</string>
+    <string name="description_zatv_p">Prejudice\nApplicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18</string>
+    <string name="description_zatv_s">Sex\nApplicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18</string>
+    <string name="description_zatv_l">Language\nApplicable to ZA_TV_F, ZA_TV_PG, ZA_TV_13, ZA_TV_16, ZA_TV_18, ZA_TV_R18</string>
     <string name="description_zatv_f">This is a program/film that does not contain any obscenity, and is suitable for family viewing. A logo must be displayed in the corner of the screen for 30 seconds after each commercial break</string>
     <string name="description_zatv_pg">Children under 6 may watch this program/film, but must be accompanied by an adult. This program contains an adult related theme, which might include very mild language, violence and sexual innuendo. A logo must be displayed in the corner of the screen for one minute after each commercial break</string>
     <string name="description_zatv_13">Children under 13 are prohibited from watching this program/film. This program contains mild language, violence and sexual innuendo. A logo must be displayed in the corner of the screen for two minutes after each commercial break</string>
-    <string name="description_zatv_16">Children under 16 are prohibited from watching this program/film. It contains moderate violence, language, and some sexual situations. In the case of television, this program may only be broadcast after 9pm–4:30am. A logo must be displayed in the corner of the screen for five minutes after each commercial break. A full-screen warning must be issued before the start of the program. If the program is longer than an hour, a warning must be displayed every half an hour</string>
-    <string name="description_zatv_18">Children under 18 are prohibited from watching this program/film. It contains extreme violence, language and/or graphic sexual content. In the case of television, this program may only be broadcast from 10pm–4:30am. A logo must be displayed in the corner of the screen for the duration of the program. A full-screen warning must be issued before the start of the program and after each commercial break</string>
+    <string name="description_zatv_16">Children under 16 are prohibited from watching this program/film. It contains moderate violence, language, and some sexual situations. In the case of television, this program may only be broadcast after 9pm-4:30am. A logo must be displayed in the corner of the screen for five minutes after each commercial break. A full-screen warning must be issued before the start of the program. If the program is longer than an hour, a warning must be displayed every half an hour</string>
+    <string name="description_zatv_18">Children under 18 are prohibited from watching this program/film. It contains extreme violence, language and/or graphic sexual content. In the case of television, this program may only be broadcast from 10pm-4:30am. A logo must be displayed in the corner of the screen for the duration of the program. A full-screen warning must be issued before the start of the program and after each commercial break</string>
     <string name="description_zatv_r18">This is reserved for films of an extreme sexual nature (pornography). R18 films may only be distributed in the form of video and DVD in a controlled environment (e.g. Adult Shops). No public viewing of this film may take place. R18 films may not be broadcast on television and in cinemas</string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description -->
