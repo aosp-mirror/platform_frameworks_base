@@ -464,7 +464,6 @@ package android {
     field public static final int contentInsetLeft = 16843861; // 0x1010455
     field public static final int contentInsetRight = 16843862; // 0x1010456
     field public static final int contentInsetStart = 16843859; // 0x1010453
-    field public static final int contentRatingSystemXml = 16843955; // 0x10104b3
     field public static final int controlX1 = 16843798; // 0x1010416
     field public static final int controlX2 = 16843800; // 0x1010418
     field public static final int controlY1 = 16843799; // 0x1010417
@@ -1355,6 +1354,7 @@ package android {
     field public static final int trimPathEnd = 16843811; // 0x1010423
     field public static final int trimPathOffset = 16843812; // 0x1010424
     field public static final int trimPathStart = 16843810; // 0x1010422
+    field public static final int tvContentRatingDescription = 16843955; // 0x10104b3
     field public static final int type = 16843169; // 0x10101a1
     field public static final int typeface = 16842902; // 0x1010096
     field public static final int uiOptions = 16843672; // 0x1010398
