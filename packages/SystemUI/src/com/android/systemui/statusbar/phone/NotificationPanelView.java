@@ -117,6 +117,7 @@ public class NotificationPanelView extends PanelView implements
     private int mQsPeekHeight;
     private boolean mStackScrollerOverscrolling;
     private boolean mQsExpansionFromOverscroll;
+    private float mLastOverscroll;
     private boolean mQsExpansionEnabled = true;
     private ValueAnimator mQsExpansionAnimator;
     private FlingAnimationUtils mFlingAnimationUtils;
@@ -273,9 +274,7 @@ public class NotificationPanelView extends PanelView implements
                 requestScrollerTopPaddingUpdate(false /* animate */);
             }
         } else {
-            if (!mStackScrollerOverscrolling) {
-                setQsExpansion(mQsMinExpansionHeight);
-            }
+            setQsExpansion(mQsMinExpansionHeight + mLastOverscroll);
             positionClockAndNotifications();
             mNotificationStackScroller.setStackHeight(getExpandedHeight());
         }
@@ -552,8 +551,8 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private float getQsExpansionFraction() {
-        return (mQsExpansionHeight - mQsMinExpansionHeight)
-                / (getTempQsMaxExpansion() - mQsMinExpansionHeight);
+        return Math.min(1f, (mQsExpansionHeight - mQsMinExpansionHeight)
+                / (getTempQsMaxExpansion() - mQsMinExpansionHeight));
     }
 
     @Override
@@ -727,6 +726,7 @@ public class NotificationPanelView extends PanelView implements
         float rounded = amount >= 1f ? amount : 0f;
         mStackScrollerOverscrolling = rounded != 0f && isRubberbanded;
         mQsExpansionFromOverscroll = rounded != 0f;
+        mLastOverscroll = rounded;
         updateQsState();
         setQsExpansion(mQsMinExpansionHeight + rounded);
     }
@@ -1034,7 +1034,9 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private float calculateQsTopPadding() {
-        if (mKeyguardShowing) {
+        // We can only do the smoother transition on Keyguard when we also are not collapsing from a
+        // scrolled quick settings.
+        if (mKeyguardShowing && mScrollYOverride == -1) {
             return interpolate(getQsExpansionFraction(),
                     mNotificationStackScroller.getIntrinsicPadding() - mNotificationTopPadding,
                     mQsMaxExpansionHeight);
@@ -1090,6 +1092,7 @@ public class NotificationPanelView extends PanelView implements
             }
             return;
         }
+        mScrollView.setBlockFlinging(true);
         ValueAnimator animator = ValueAnimator.ofFloat(mQsExpansionHeight, target);
         mFlingAnimationUtils.apply(animator, mQsExpansionHeight, target, vel);
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -1101,6 +1104,7 @@ public class NotificationPanelView extends PanelView implements
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
+                mScrollView.setBlockFlinging(false);
                 mScrollYOverride = -1;
                 mQsExpansionAnimator = null;
                 if (onFinishRunnable != null) {

@@ -33,6 +33,7 @@ public class ObservableScrollView extends ScrollView {
     private boolean mHandlingTouchEvent;
     private float mLastX;
     private float mLastY;
+    private boolean mBlockFlinging;
 
     public ObservableScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -107,6 +108,17 @@ public class ObservableScrollView extends ScrollView {
         mLastOverscrollAmount = Math.max(0, scrollY + deltaY - getMaxScrollY());
         return super.overScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX, scrollRangeY,
                         maxOverScrollX, maxOverScrollY, isTouchEvent);
+    }
+
+    public void setBlockFlinging(boolean blockFlinging) {
+        mBlockFlinging = blockFlinging;
+    }
+
+    @Override
+    public void fling(int velocityY) {
+        if (!mBlockFlinging) {
+            super.fling(velocityY);
+        }
     }
 
     @Override
