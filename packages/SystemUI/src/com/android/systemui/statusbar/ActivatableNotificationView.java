@@ -662,7 +662,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     public void reset() {
-        super.reset();
         setTintColor(0);
         setShowingLegacyBackground(false);
         setBelowSpeedBump(false);

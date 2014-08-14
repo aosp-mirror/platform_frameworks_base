@@ -255,7 +255,7 @@ public abstract class ExpandableView extends FrameLayout {
     public void setBelowSpeedBump(boolean below) {
     }
 
-    public void reset() {
+    public void onHeightReset() {
         if (mOnHeightChangedListener != null) {
             mOnHeightChangedListener.onReset(this);
         }
