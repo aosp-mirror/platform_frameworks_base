@@ -26,11 +26,12 @@ import android.content.res.AssetManager;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 
 import static android.graphics.Typeface_Delegate.SYSTEM_FONTS;
@@ -54,14 +55,7 @@ public class FontFamily_Delegate {
     private static final String FONT_SUFFIX_BOLDITALIC = "BoldItalic.ttf";
     private static final String FONT_SUFFIX_BOLD = "Bold.ttf";
     private static final String FONT_SUFFIX_ITALIC = "Italic.ttf";
-
-    private static final Set<String> MISSING_FONTS =
-            Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-                    "NotoSansHans-Regular.otf",
-                    "NotoSansHant-Regular.otf",
-                    "NotoSansJP-Regular.otf",
-                    "NotoSansKR-Regular.otf"
-            )));
+    private static final String FN_ALL_FONTS_LIST = "fontsInSdk.txt";
 
     /**
      * A class associating {@link Font} with its metadata.
@@ -80,6 +74,7 @@ public class FontFamily_Delegate {
     private static String sFontLocation;
     private static final List<FontFamily_Delegate> sPostInitDelegate = new
             ArrayList<FontFamily_Delegate>();
+    private static Set<String> SDK_FONTS;
 
 
     // ---- delegate data ----
@@ -113,6 +108,31 @@ public class FontFamily_Delegate {
 
     public static synchronized void setFontLocation(String fontLocation) {
         sFontLocation = fontLocation;
+        // init list of bundled fonts.
+        File allFonts = new File(fontLocation, FN_ALL_FONTS_LIST);
+        // Current number of fonts is 103. Use the next round number to leave scope for more fonts
+        // in the future.
+        Set<String> allFontsList = new HashSet<String>(128);
+        Scanner scanner = null;
+        try {
+            scanner = new Scanner(allFonts);
+            while (scanner.hasNext()) {
+                String name = scanner.next();
+                // Skip font configuration files.
+                if (!name.endsWith(".xml")) {
+                    allFontsList.add(name);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            Bridge.getLog().error(LayoutLog.TAG_BROKEN,
+                    "Unable to load the list of fonts. Try re-installing the SDK Platform from the SDK Manager.",
+                    e, null);
+        } finally {
+            if (scanner != null) {
+                scanner.close();
+            }
+        }
+        SDK_FONTS = Collections.unmodifiableSet(allFontsList);
         for (FontFamily_Delegate fontFamily : sPostInitDelegate) {
             fontFamily.init();
         }
@@ -225,13 +245,6 @@ public class FontFamily_Delegate {
     /*package*/ static boolean nAddFont(long nativeFamily, String path) {
         FontFamily_Delegate delegate = getDelegate(nativeFamily);
         if (delegate != null) {
-            // If the font to be added is known to be missing from the SDK, don't try to load it and
-            // mark the FontFamily to be not valid.
-            if (path.startsWith(SYSTEM_FONTS) &&
-                    MISSING_FONTS.contains(path.substring(SYSTEM_FONTS.length()))) {
-                return delegate.mValid = false;
-            }
-            delegate.mValid = true;
             if (sFontLocation == null) {
                 delegate.mPath.add(path);
                 return true;
@@ -259,6 +272,14 @@ public class FontFamily_Delegate {
     }
 
     private boolean addFont(String path) {
+        // If the font is not in the list of fonts bundled with the SDK, don't try to load it and
+        // mark the FontFamily to be not valid.
+        if (path.startsWith(SYSTEM_FONTS) &&
+                !SDK_FONTS.contains(path.substring(SYSTEM_FONTS.length()))) {
+            return mValid = false;
+        }
+        // Set valid to true, even if the font fails to load.
+        mValid = true;
         Font font = loadFont(path);
         if (font == null) {
             return false;
