@@ -35,4 +35,10 @@
          "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
     <string translatable="false" name="config_tether_apndata">Orangeweb,orangeweb,,,orange,orange,,,,,340,01,1,DUN</string>
+
+    <string-array translatable="false" name="config_operatorConsideredNonRoaming">
+        <item>20801</item>
+        <item>20815</item>
+    </string-array>
+
 </resources>

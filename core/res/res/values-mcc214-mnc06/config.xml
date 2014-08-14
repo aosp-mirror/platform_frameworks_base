@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
-** Copyright 2009, The Android Open Source Project
+** Copyright 2013, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
-** You my obtain a copy of the License at
+** You may obtain a copy of the License at
 **
 **     http://www.apache.org/licenses/LICENSE-2.0
 **
@@ -17,31 +17,13 @@
 */
 -->
 
-<!-- These resources are around just to allow their values to be customized
-     for different hardware and product builds. -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-
-    <!-- Array of ConnectivityManager.TYPE_xxxx values allowable for tethering -->
-    <!-- Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
-    <!== [0,1,5,7] for TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI and TYPE_BLUETOOTH -->
-    <integer-array translatable="false" name="config_tether_upstream_types">
-      <item>1</item>
-      <item>4</item>
-    </integer-array>
-
-    <!-- String containing the apn value for tethering.  May be overriden by secure settings
-         TETHER_DUN_APN.  Value is a comma separated series of strings:
-         "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
-         note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
-    <string translatable="false" name="config_tether_apndata">SFR option modem,websfr,,,,,,,,,208,10,,DUN</string>
-
+<resources>
     <string-array translatable="false" name="config_operatorConsideredNonRoaming">
         <item>21401</item>
         <item>21402</item>
         <item>21403</item>
         <item>21404</item>
         <item>21405</item>
-        <item>21406</item>
         <item>21407</item>
         <item>21408</item>
         <item>21409</item>
@@ -58,5 +40,4 @@
         <item>21420</item>
         <item>21421</item>
     </string-array>
-
 </resources>
