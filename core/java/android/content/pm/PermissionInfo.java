@@ -70,7 +70,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
 
     /**
      * Additional flag for {@link #protectionLevel}, corresponding
-     * to the <code>development</code> value of
+     * to the <code>appop</code> value of
      * {@link android.R.attr#protectionLevel}.
      */
     public static final int PROTECTION_FLAG_APPOP = 0x40;
