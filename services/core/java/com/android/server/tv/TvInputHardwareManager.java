@@ -55,6 +55,7 @@ import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 import android.view.Surface;
 
+import com.android.internal.os.SomeArgs;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
@@ -877,7 +878,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         public void onHardwareDeviceRemoved(TvInputHardwareInfo info);
         public void onHdmiDeviceAdded(HdmiDeviceInfo device);
         public void onHdmiDeviceRemoved(HdmiDeviceInfo device);
-        public void onHdmiDeviceUpdated(HdmiDeviceInfo device);
+        public void onHdmiDeviceUpdated(String inputId, HdmiDeviceInfo device);
     }
 
     private class ListenerHandler extends Handler {
@@ -918,8 +919,11 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     break;
                 }
                 case HDMI_DEVICE_UPDATED: {
-                    HdmiDeviceInfo info = (HdmiDeviceInfo) msg.obj;
-                    mListener.onHdmiDeviceUpdated(info);
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String inputId = (String) args.arg1;
+                    HdmiDeviceInfo info = (HdmiDeviceInfo) args.arg2;
+                    args.recycle();
+                    mListener.onHdmiDeviceUpdated(inputId, info);
                 }
                 default: {
                     Slog.w(TAG, "Unhandled message: " + msg);
@@ -956,6 +960,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         public void onStatusChanged(HdmiDeviceInfo deviceInfo, int status) {
             synchronized (mLock) {
                 int messageType = 0;
+                Object obj = null;
                 switch (status) {
                     case HdmiControlManager.DEVICE_EVENT_ADD_DEVICE: {
                         if (!mHdmiDeviceList.contains(deviceInfo)) {
@@ -965,6 +970,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                             return;
                         }
                         messageType = ListenerHandler.HDMI_DEVICE_ADDED;
+                        obj = deviceInfo;
                         break;
                     }
                     case HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE: {
@@ -973,6 +979,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                             return;
                         }
                         messageType = ListenerHandler.HDMI_DEVICE_REMOVED;
+                        obj = deviceInfo;
                         break;
                     }
                     case HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE: {
@@ -982,11 +989,16 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                         }
                         mHdmiDeviceList.add(deviceInfo);
                         messageType = ListenerHandler.HDMI_DEVICE_UPDATED;
+                        String inputId = mHdmiInputIdMap.get(deviceInfo.getLogicalAddress());
+                        SomeArgs args = SomeArgs.obtain();
+                        args.arg1 = inputId;
+                        args.arg2 = deviceInfo;
+                        obj = args;
                         break;
                     }
                 }
 
-                Message msg = mHandler.obtainMessage(messageType, 0, 0, deviceInfo);
+                Message msg = mHandler.obtainMessage(messageType, 0, 0, obj);
                 if (findHardwareInfoForHdmiPortLocked(deviceInfo.getPortId()) != null) {
                     msg.sendToTarget();
                 } else {
