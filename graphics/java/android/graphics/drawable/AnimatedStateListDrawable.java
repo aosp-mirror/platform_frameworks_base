@@ -427,7 +427,7 @@ public class AnimatedStateListDrawable extends StateListDrawable {
 
         final Drawable dr;
         if (drawableRes != 0) {
-            dr = r.getDrawable(drawableRes);
+            dr = r.getDrawable(drawableRes, theme);
         } else {
             int type;
             while ((type = parser.next()) == XmlPullParser.TEXT) {
@@ -473,7 +473,7 @@ public class AnimatedStateListDrawable extends StateListDrawable {
 
         final Drawable dr;
         if (drawableRes != 0) {
-            dr = r.getDrawable(drawableRes);
+            dr = r.getDrawable(drawableRes, theme);
         } else {
             int type;
             while ((type = parser.next()) == XmlPullParser.TEXT) {
