@@ -184,6 +184,8 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
                 Build.VERSION_CODES.KITKAT;
 
         mFlingEstimator = new OverScroller(context);
+
+        setFocusableInTouchMode(true);
     }
 
     @Override
