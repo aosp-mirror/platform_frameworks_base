@@ -444,7 +444,8 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void keyguardGoingAway() throws RemoteException {
+    public void keyguardGoingAway(boolean disableWindowAnimations,
+            boolean keyguardGoingToNotificationShade) throws RemoteException {
     }
 
     @Override

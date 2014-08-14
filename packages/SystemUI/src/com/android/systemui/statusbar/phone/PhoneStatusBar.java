@@ -2026,6 +2026,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStatusBarWindowManager.setQsExpanded(expanded);
     }
 
+    public boolean isGoingToNotificationShade() {
+        return mLeaveOpenOnKeyguardHide;
+    }
+
     /**
      * All changes to the status bar and notifications funnel through here and are batched.
      */
