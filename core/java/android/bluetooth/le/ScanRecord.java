@@ -257,9 +257,11 @@ public final class ScanRecord {
             }
             return new ScanRecord(serviceUuids, manufacturerData, serviceData,
                     advertiseFlag, txPowerLevel, localName, scanRecord);
-        } catch (IndexOutOfBoundsException e) {
+        } catch (Exception e) {
             Log.e(TAG, "unable to parse scan record: " + Arrays.toString(scanRecord));
-            return null;
+            // As the record is invalid, ignore all the parsed results for this packet
+            // and return an empty record with raw scanRecord bytes in results
+            return new ScanRecord(null, null, null, -1, Integer.MIN_VALUE, null, scanRecord);
         }
     }
 
