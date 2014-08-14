@@ -254,7 +254,7 @@ public class PhoneAccount implements Parcelable {
             return null;
         }
         try {
-            return packageContext.getResources().getDrawable(resId);
+            return packageContext.getDrawable(resId);
         } catch (NotFoundException|MissingResourceException e) {
             Log.e(this, e, "Cannot find icon %d in package %s",
                     resId, mAccountHandle.getComponentName().getPackageName());
