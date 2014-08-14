@@ -19,7 +19,6 @@ package com.android.server;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
-import android.app.AlarmClockInfo;
 import android.app.AlarmManager;
 import android.app.IAlarmManager;
 import android.app.PendingIntent;
@@ -129,14 +128,17 @@ class AlarmManagerService extends SystemService {
     long mStartCurrentDelayTime;
     long mNextNonWakeupDeliveryTime;
 
-    private final SparseArray<AlarmClockInfo> mNextAlarmClockForUser = new SparseArray<>();
-    private final SparseArray<AlarmClockInfo> mTmpSparseAlarmClockArray = new SparseArray<>();
+    private final SparseArray<AlarmManager.AlarmClockInfo> mNextAlarmClockForUser =
+            new SparseArray<>();
+    private final SparseArray<AlarmManager.AlarmClockInfo> mTmpSparseAlarmClockArray =
+            new SparseArray<>();
     private final SparseBooleanArray mPendingSendNextAlarmClockChangedForUser =
             new SparseBooleanArray();
     private boolean mNextAlarmClockMayChange;
 
     // May only use on mHandler's thread, locking not required.
-    private final SparseArray<AlarmClockInfo> mHandlerSparseAlarmClockArray = new SparseArray<>();
+    private final SparseArray<AlarmManager.AlarmClockInfo> mHandlerSparseAlarmClockArray =
+            new SparseArray<>();
 
     class WakeupEvent {
         public long when;
@@ -619,7 +621,7 @@ class AlarmManagerService extends SystemService {
 
     void setImpl(int type, long triggerAtTime, long windowLength, long interval,
             PendingIntent operation, boolean isStandalone, WorkSource workSource,
-            AlarmClockInfo alarmClock) {
+            AlarmManager.AlarmClockInfo alarmClock) {
         if (operation == null) {
             Slog.w(TAG, "set/setRepeating ignored because there is no intent");
             return;
@@ -672,7 +674,8 @@ class AlarmManagerService extends SystemService {
 
     private void setImplLocked(int type, long when, long whenElapsed, long windowLength,
             long maxWhen, long interval, PendingIntent operation, boolean isStandalone,
-            boolean doValidate, WorkSource workSource, AlarmClockInfo alarmClock, int userId) {
+            boolean doValidate, WorkSource workSource, AlarmManager.AlarmClockInfo alarmClock,
+            int userId) {
         Alarm a = new Alarm(type, when, whenElapsed, windowLength, maxWhen, interval,
                 operation, workSource, alarmClock, userId);
         removeLocked(operation);
@@ -714,7 +717,8 @@ class AlarmManagerService extends SystemService {
     private final IBinder mService = new IAlarmManager.Stub() {
         @Override
         public void set(int type, long triggerAtTime, long windowLength, long interval,
-                PendingIntent operation, WorkSource workSource, AlarmClockInfo alarmClock) {
+                PendingIntent operation, WorkSource workSource,
+                AlarmManager.AlarmClockInfo alarmClock) {
             if (workSource != null) {
                 getContext().enforceCallingPermission(
                         android.Manifest.permission.UPDATE_DEVICE_STATS,
@@ -762,7 +766,7 @@ class AlarmManagerService extends SystemService {
         }
 
         @Override
-        public AlarmClockInfo getNextAlarmClock(int userId) {
+        public AlarmManager.AlarmClockInfo getNextAlarmClock(int userId) {
             userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), userId, false /* allowAll */, false /* requireFull */,
                     "getNextAlarmClock", null);
@@ -1009,7 +1013,7 @@ class AlarmManagerService extends SystemService {
         return null;
     }
 
-    private AlarmClockInfo getNextAlarmClockImpl(int userId) {
+    private AlarmManager.AlarmClockInfo getNextAlarmClockImpl(int userId) {
         synchronized (mLock) {
             return mNextAlarmClockForUser.get(userId);
         }
@@ -1024,7 +1028,7 @@ class AlarmManagerService extends SystemService {
         }
         mNextAlarmClockMayChange = false;
 
-        SparseArray<AlarmClockInfo> nextForUser = mTmpSparseAlarmClockArray;
+        SparseArray<AlarmManager.AlarmClockInfo> nextForUser = mTmpSparseAlarmClockArray;
         nextForUser.clear();
 
         final int N = mAlarmBatches.size();
@@ -1054,9 +1058,9 @@ class AlarmManagerService extends SystemService {
         // Update mNextAlarmForUser with new values.
         final int NN = nextForUser.size();
         for (int i = 0; i < NN; i++) {
-            AlarmClockInfo newAlarm = nextForUser.valueAt(i);
+            AlarmManager.AlarmClockInfo newAlarm = nextForUser.valueAt(i);
             int userId = nextForUser.keyAt(i);
-            AlarmClockInfo currentAlarm = mNextAlarmClockForUser.get(userId);
+            AlarmManager.AlarmClockInfo currentAlarm = mNextAlarmClockForUser.get(userId);
             if (!newAlarm.equals(currentAlarm)) {
                 updateNextAlarmInfoForUserLocked(userId, newAlarm);
             }
@@ -1072,7 +1076,8 @@ class AlarmManagerService extends SystemService {
         }
     }
 
-    private void updateNextAlarmInfoForUserLocked(int userId, AlarmClockInfo alarmClock) {
+    private void updateNextAlarmInfoForUserLocked(int userId,
+            AlarmManager.AlarmClockInfo alarmClock) {
         if (alarmClock != null) {
             if (DEBUG_ALARM_CLOCK) {
                 Log.v(TAG, "Next AlarmClockInfoForUser(" + userId + "): " +
@@ -1100,7 +1105,7 @@ class AlarmManagerService extends SystemService {
      * @see AlarmHandler#SEND_NEXT_ALARM_CLOCK_CHANGED
      */
     private void sendNextAlarmClockChanged() {
-        SparseArray<AlarmClockInfo> pendingUsers = mHandlerSparseAlarmClockArray;
+        SparseArray<AlarmManager.AlarmClockInfo> pendingUsers = mHandlerSparseAlarmClockArray;
         pendingUsers.clear();
 
         synchronized (mLock) {
@@ -1115,7 +1120,7 @@ class AlarmManagerService extends SystemService {
         final int N = pendingUsers.size();
         for (int i = 0; i < N; i++) {
             int userId = pendingUsers.keyAt(i);
-            AlarmClockInfo alarmClock = pendingUsers.valueAt(i);
+            AlarmManager.AlarmClockInfo alarmClock = pendingUsers.valueAt(i);
             Settings.System.putStringForUser(getContext().getContentResolver(),
                     Settings.System.NEXT_ALARM_FORMATTED,
                     formatNextAlarm(getContext(), alarmClock),
@@ -1129,7 +1134,7 @@ class AlarmManagerService extends SystemService {
     /**
      * Formats an alarm like platform/packages/apps/DeskClock used to.
      */
-    private static String formatNextAlarm(final Context context, AlarmClockInfo info) {
+    private static String formatNextAlarm(final Context context, AlarmManager.AlarmClockInfo info) {
         String skeleton = DateFormat.is24HourFormat(context) ? "EHm" : "Ehma";
         String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
         return (info == null) ? "" :
@@ -1414,12 +1419,12 @@ class AlarmManagerService extends SystemService {
         public long whenElapsed;    // 'when' in the elapsed time base
         public long maxWhen;        // also in the elapsed time base
         public long repeatInterval;
-        public final AlarmClockInfo alarmClock;
+        public final AlarmManager.AlarmClockInfo alarmClock;
         public final int userId;
 
         public Alarm(int _type, long _when, long _whenElapsed, long _windowLength, long _maxWhen,
-                long _interval, PendingIntent _op, WorkSource _ws, AlarmClockInfo _info,
-                int _userId) {
+                long _interval, PendingIntent _op, WorkSource _ws,
+                AlarmManager.AlarmClockInfo _info, int _userId) {
             type = _type;
             wakeup = _type == AlarmManager.ELAPSED_REALTIME_WAKEUP
                     || _type == AlarmManager.RTC_WAKEUP;

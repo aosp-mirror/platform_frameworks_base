@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.app.AlarmClockInfo;
 import android.app.AlarmManager;
 import android.app.INotificationManager;
 import android.content.BroadcastReceiver;
@@ -146,7 +145,7 @@ public class ZenModeControllerImpl implements ZenModeController {
 
     @Override
     public long getNextAlarm() {
-        final AlarmClockInfo info = mAlarmManager.getNextAlarmClock(mUserId);
+        final AlarmManager.AlarmClockInfo info = mAlarmManager.getNextAlarmClock(mUserId);
         return info != null ? info.getTriggerTime() : 0;
     }
 

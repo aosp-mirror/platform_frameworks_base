@@ -3771,20 +3771,11 @@ package android.app {
     method public void update(android.app.ActivityOptions);
   }
 
-  public class AlarmClockInfo implements android.os.Parcelable {
-    ctor public AlarmClockInfo(long, android.app.PendingIntent);
-    method public int describeContents();
-    method public android.app.PendingIntent getShowIntent();
-    method public long getTriggerTime();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
   public class AlarmManager {
     method public void cancel(android.app.PendingIntent);
-    method public android.app.AlarmClockInfo getNextAlarmClock();
+    method public android.app.AlarmManager.AlarmClockInfo getNextAlarmClock();
     method public void set(int, long, android.app.PendingIntent);
-    method public void setAlarmClock(android.app.AlarmClockInfo, android.app.PendingIntent);
+    method public void setAlarmClock(android.app.AlarmManager.AlarmClockInfo, android.app.PendingIntent);
     method public void setExact(int, long, android.app.PendingIntent);
     method public void setInexactRepeating(int, long, long, android.app.PendingIntent);
     method public void setRepeating(int, long, long, android.app.PendingIntent);
@@ -3801,6 +3792,15 @@ package android.app {
     field public static final long INTERVAL_HOUR = 3600000L; // 0x36ee80L
     field public static final int RTC = 1; // 0x1
     field public static final int RTC_WAKEUP = 0; // 0x0
+  }
+
+  public static final class AlarmManager.AlarmClockInfo implements android.os.Parcelable {
+    ctor public AlarmManager.AlarmClockInfo(long, android.app.PendingIntent);
+    method public int describeContents();
+    method public android.app.PendingIntent getShowIntent();
+    method public long getTriggerTime();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public class AlertDialog extends android.app.Dialog implements android.content.DialogInterface {
