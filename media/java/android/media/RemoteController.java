@@ -793,7 +793,7 @@ import java.util.List;
         final ComponentName listenerComponent = new ComponentName(mContext,
                 mOnClientUpdateListener.getClass());
         mSessionManager.addActiveSessionsListener(mSessionListener, listenerComponent,
-                UserHandle.myUserId());
+                UserHandle.myUserId(), null);
         mSessionListener.onActiveSessionsChanged(mSessionManager
                 .getActiveSessions(listenerComponent));
         if (DEBUG) {
