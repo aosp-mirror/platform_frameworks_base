@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.tv.TvContentRating;
 import android.media.tv.TvInputManager;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -81,9 +82,13 @@ final class PersistentDataStore {
 
     public PersistentDataStore(Context context, int userId) {
         mContext = context;
-        File tvDir = new File("/data/system/tv/" + userId);
-        tvDir.mkdirs();
-        mAtomicFile = new AtomicFile(new File(tvDir, "tv-input-manager-state.xml"));
+        File userDir = Environment.getUserSystemDirectory(userId);
+        if (!userDir.exists()) {
+            if (!userDir.mkdirs()) {
+                throw new IllegalStateException("User dir cannot be created: " + userDir);
+            }
+        }
+        mAtomicFile = new AtomicFile(new File(userDir, "tv-input-manager-state.xml"));
     }
 
     public boolean isParentalControlsEnabled() {
