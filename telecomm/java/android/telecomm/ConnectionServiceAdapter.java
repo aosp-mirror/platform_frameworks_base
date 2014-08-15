@@ -36,8 +36,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * @hide
  */
 final class ConnectionServiceAdapter implements DeathRecipient {
+    /**
+     * ConcurrentHashMap constructor params: 8 is initial table size, 0.9f is
+     * load factor before resizing, 1 means we only expect a single thread to
+     * access the map so make only a single shard
+     */
     private final Set<IConnectionServiceAdapter> mAdapters = Collections.newSetFromMap(
-            new ConcurrentHashMap<IConnectionServiceAdapter, Boolean>(2));
+            new ConcurrentHashMap<IConnectionServiceAdapter, Boolean>(8, 0.9f, 1));
 
     ConnectionServiceAdapter() {
     }
@@ -53,7 +58,7 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     }
 
     void removeAdapter(IConnectionServiceAdapter adapter) {
-        if (mAdapters.remove(adapter)) {
+        if (adapter != null && mAdapters.remove(adapter)) {
             adapter.asBinder().unlinkToDeath(this, 0);
         }
     }
