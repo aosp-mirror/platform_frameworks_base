@@ -189,8 +189,8 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"अपने भौतिक स्‍थान पर नज़र रखें."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"नेटवर्क संचार"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"विभिन्‍न नेटवर्क सुविधाओं पर पहुंचें."</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Bluetooth के माध्‍यम से उपकरणों और नेटवर्क पर पहुंचें."</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"ब्लूटूथ"</string>
+    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"ब्लूटूथ के माध्‍यम से उपकरणों और नेटवर्क पर पहुंचें."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"ऑडियो सेटिंग"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"ऑडियो सेटिंग बदलें."</string>
     <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"बैटरी प्रभावित होती है"</string>
@@ -448,11 +448,11 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण समाप्त होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, टेबलेट की बहुत अधिक स्मृति का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"ऐप्स को स्‍टिकी प्रसारण भेजने देता है, जो प्रसारण समाप्त होने के बाद भी बने रहते हैं. अत्यधिक उपयोग, फ़ोन की बहुत अधिक स्मृति का उपयोग करके उसे धीमा या अस्‍थिर कर सकता है."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"अपने संपर्क पढ़ें"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"ऐप्स  को आपके टेबलेट में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से संवाद करने की आवृत्ति को पढ़ने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को सहेजने देती है, और दुर्भावनापूर्ण ऐप्स  आपकी जानकारी के बिना संपर्क डेटा को साझा कर सकते हैं."</string>
-    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"ऐप्स  को आपके फ़ोन में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से संवाद करने की आवृत्ति को पढ़ने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को सहेजने देती है, और दुर्भावनापूर्ण ऐप्स  आपकी जानकारी के बिना संपर्क डेटा को साझा कर सकते हैं."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"ऐप्स  को आपके टेबलेट में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से डॉयलॉग करने की आवृत्ति को पढ़ने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को सहेजने देती है, और दुर्भावनापूर्ण ऐप्स  आपकी जानकारी के बिना संपर्क डेटा को साझा कर सकते हैं."</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"ऐप्स  को आपके फ़ोन में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से डॉयलॉग करने की आवृत्ति को पढ़ने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को सहेजने देती है, और दुर्भावनापूर्ण ऐप्स  आपकी जानकारी के बिना संपर्क डेटा को साझा कर सकते हैं."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"अपने संपर्क बदलें"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"ऐप्स  को आपके टेबलेट में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से संवाद करने की आवृत्ति को संशोधित करने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को हटाने देती है."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"ऐप्स  को आपके फ़ोन में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से संवाद करने की आवृत्ति को संशोधित करने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को हटाने देती है."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"ऐप्स  को आपके टेबलेट में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से डॉयलॉग करने की आवृत्ति को संशोधित करने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को हटाने देती है."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"ऐप्स  को आपके फ़ोन में संग्रहीत संपर्कों के डेटा को, साथ ही आपके द्वारा विशिष्ट व्यक्तियों को कॉल करने, ईमेल करने, या अन्‍य तरीके से डॉयलॉग करने की आवृत्ति को संशोधित करने देता है. यह अनुमति ऐप्स  को आपके संपर्क डेटा को हटाने देती है."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"कॉल लॉग पढ़ें"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"ऐप्स  को आपके फ़ोन का कॉल लॉग पढ़ने देता है, जिसमें इनकमिंग और आउटगोइंग कॉल का डेटा शामिल है. यह अनुमति ऐप्स  को आपके कॉल लॉग डेटा को सहेजने देती है, और दुर्भावनापूर्ण ऐप्स  आपकी जानकारी के बिना कॉल लॉग डेटा को साझा कर सकते हैं."</string>
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"ऐप्स  को आपके फ़ोन का कॉल लॉग पढ़ने देता है, जिसमें इनकमिंग और आउटगोइंग कॉल का डेटा शामिल है. यह अनुमति ऐप्स  को आपके कॉल लॉग डेटा को सहेजने देती है, और दुर्भावनापूर्ण ऐप्स  आपकी जानकारी के बिना कॉल लॉग डेटा को साझा कर सकते हैं."</string>
@@ -482,9 +482,9 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"किसी स्‍थान प्रदाता को इंस्‍टॉल करने की अनुमति"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"परीक्षण के लिए कृत्रिम स्थान स्रोत बनाएं या एक नए स्थान प्रदाता को इंस्‍टॉल करें. यह ऐप्स  को स्‍थान और/या अन्‍य स्थान स्रोतों जैसे GPS या स्‍थान प्रदाताओं द्वारा लौटाई गई स्थिति को ओवरराइड करने देता है."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"सटीक स्थान (GPS और नेटवर्क-आधारित)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"ऐप्स  को ग्लोबल पोज़िशनिंग सिस्टम (GPS) या सेल टॉवर और Wi-Fi जैसे नेटवर्क स्थान स्रोतों का उपयोग करके आपका सटीक स्थान प्राप्त करने देती है. ऐप्स  द्वारा इन स्थान सेवाओं का उपयोग किए जाने के लिए इन्हें चालू होना चाहिए और आपके उपकरण पर उपलब्ध होना चाहिए. ऐप्स  इसका उपयोग यह पता करने में कर सकते हैं कि आप कहां पर हैं, और अतिरिक्त बैटरी की खपत कर सकते हैं."</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"ऐप्स  को ग्लोबल पोज़िशनिंग सिस्टम (GPS) या सेल टॉवर और वाई-फ़ाई  जैसे नेटवर्क स्थान स्रोतों का उपयोग करके आपका सटीक स्थान प्राप्त करने देती है. ऐप्स  द्वारा इन स्थान सेवाओं का उपयोग किए जाने के लिए इन्हें चालू होना चाहिए और आपके उपकरण पर उपलब्ध होना चाहिए. ऐप्स  इसका उपयोग यह पता करने में कर सकते हैं कि आप कहां पर हैं, और अतिरिक्त बैटरी की खपत कर सकते हैं."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"अनुमानित स्थान (नेटवर्क-आधारित)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ऐप्स  को आपका अनुमानित स्थान प्राप्त करने देती है. इस स्थान को सेल टॉवर और Wi-Fi जैसे नेटवर्क स्थान स्रोतों का उपयोग करके स्थान सेवाओं द्वारा प्राप्त किया गया है. ऐप्स  द्वारा इन स्थान सेवाओं का उपयोग करने के लिए इन्हें चालू होना चाहिए और आपके उपकरण में उपलब्ध होना चाहिए. ऐप्स  इसका उपयोग यह पता लगाने में कर सकते हैं कि आप लगभग कहां पर हैं."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ऐप्स  को आपका अनुमानित स्थान प्राप्त करने देती है. इस स्थान को सेल टॉवर और वाई-फ़ाई  जैसे नेटवर्क स्थान स्रोतों का उपयोग करके स्थान सेवाओं द्वारा प्राप्त किया गया है. ऐप्स  द्वारा इन स्थान सेवाओं का उपयोग करने के लिए इन्हें चालू होना चाहिए और आपके उपकरण में उपलब्ध होना चाहिए. ऐप्स  इसका उपयोग यह पता लगाने में कर सकते हैं कि आप लगभग कहां पर हैं."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"SurfaceFlinger में पहुंचें"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"ऐप्स को SurfaceFlinger निम्‍न-स्‍तर सुविधाएं उपयोग करने देता है."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"फ़्रेम बफ़र पढ़ें"</string>
@@ -611,17 +611,17 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"ऐप्स को टेदर की गई नेटवर्क कनेक्‍टिविटी की स्‍थिति बदलने देता है."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"पृष्ठभूमि डेटा उपयोग सेटिंग बदलें"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"ऐप्स को पृष्ठभूमि डेटा उपयोग सेटिंग बदलने देता है."</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi कनेक्‍शन देखें"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"ऐप्स  को Wi-Fi नेटवर्क के बारे में जानकारी, जैसे WI-Fi सक्षम है या नहीं और कनेक्‍ट किए गए Wi-Fi उपकरणों के नाम, देखने देता है."</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi से कनेक्‍ट और डिस्‍कनेक्‍ट करें"</string>
-    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"ऐप्स  को Wi-Fi पहुंच बिंदुओं से कनेक्ट और डिस्कनेक्ट करने और Wi-Fi नेटवर्क के लिए उपकरण कॉन्फ़िगरेशन में परिवर्तन करने देता है."</string>
-    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi मल्‍टीकास्‍ट प्राप्ति को अनुमति दें"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"ऐप्स  को Wi-Fi नेटवर्क पर मल्टीकास्ट पते के उपयोग से केवल आपके टेबलेट पर ही नहीं, बल्कि सभी उपकरणों पर भेजे गए पैकेट प्राप्‍त करने देता है. यह गैर-मल्टीकास्ट मोड से अधिक पावर का उपयोग करता है."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"ऐप्स  को Wi-Fi नेटवर्क पर मल्टीकास्ट पते के उपयोग से केवल आपके फ़ोन पर ही नहीं, बल्कि सभी उपकरणों पर भेजे गए पैकेट प्राप्‍त करने देता है. यह गैर-मल्टीकास्ट मोड से अधिक पावर का उपयोग करता है."</string>
-    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth सेटिंग पर पहुंचें"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"किसी ऐप्स को स्‍थानीय Bluetooth टेबलेट कॉन्‍फ़िगर करने की और रिमोट उपकरणों के साथ खोजने और युग्‍मित करने देता है."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ऐप्स को स्‍थानीय Bluetooth फ़ोन कॉन्‍फ़िगर करने देता है, और रिमोट उपकरणों के साथ खोजने और युग्‍मित करने देता है."</string>
-    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"एप्‍लिकेशन के द्वारा Bluetooth युग्‍मन करने देती है"</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"वाई-फ़ाई  कनेक्‍शन देखें"</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"ऐप्स  को वाई-फ़ाई  नेटवर्क के बारे में जानकारी, जैसे WI-Fi सक्षम है या नहीं और कनेक्‍ट किए गए वाई-फ़ाई  उपकरणों के नाम, देखने देता है."</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"वाई-फ़ाई  से कनेक्‍ट और डिस्‍कनेक्‍ट करें"</string>
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"ऐप्स  को वाई-फ़ाई  पहुंच बिंदुओं से कनेक्ट और डिस्कनेक्ट करने और वाई-फ़ाई  नेटवर्क के लिए उपकरण कॉन्फ़िगरेशन में परिवर्तन करने देता है."</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"वाई-फ़ाई  मल्‍टीकास्‍ट प्राप्ति को अनुमति दें"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"ऐप्स  को वाई-फ़ाई  नेटवर्क पर मल्टीकास्ट पते के उपयोग से केवल आपके टेबलेट पर ही नहीं, बल्कि सभी उपकरणों पर भेजे गए पैकेट प्राप्‍त करने देता है. यह गैर-मल्टीकास्ट मोड से अधिक पावर का उपयोग करता है."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"ऐप्स  को वाई-फ़ाई  नेटवर्क पर मल्टीकास्ट पते के उपयोग से केवल आपके फ़ोन पर ही नहीं, बल्कि सभी उपकरणों पर भेजे गए पैकेट प्राप्‍त करने देता है. यह गैर-मल्टीकास्ट मोड से अधिक पावर का उपयोग करता है."</string>
+    <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ब्लूटूथ सेटिंग पर पहुंचें"</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"किसी ऐप्स को स्‍थानीय ब्लूटूथ टेबलेट कॉन्‍फ़िगर करने की और रिमोट उपकरणों के साथ खोजने और युग्‍मित करने देता है."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ऐप्स को स्‍थानीय ब्लूटूथ फ़ोन कॉन्‍फ़िगर करने देता है, और रिमोट उपकरणों के साथ खोजने और युग्‍मित करने देता है."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"एप्‍लिकेशन के द्वारा ब्लूटूथ युग्‍मन करने देती है"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"एप्‍लिकेशन को उपयोगकर्ता के इंटरैक्शन के बिना दूरस्‍थ उपकरणों के साथ युग्‍मित करने देती है."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"एप्‍लिकेशन को उपयोगकर्ता के इंटरैक्शन के बिना दूरस्‍थ उपकरणों के साथ युग्‍मित करने देती है."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX से कनेक्ट और डिस्कनेक्ट करें"</string>
@@ -629,9 +629,9 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX स्‍थिति बदलें"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"ऐप्स को WiMAX नेटवर्क से टेबलेट को कनेक्‍ट और डिस्‍कनेक्‍ट करने देता है."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"ऐप्स को WiMAX नेटवर्क से फ़ोन को कनेक्‍ट और डिस्‍कनेक्‍ट करने देता है."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth उपकरणों के साथ युग्मित करें"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"ऐप्स को टेबलेट पर Bluetooth का कॉन्‍फ़िगरेशन देखने, और युग्‍मित उपकरणों के साथ कनेक्‍शन बनाने और स्‍वीकार करने देता है."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"ऐप्स को फ़ोन पर Bluetooth का कॉन्‍फ़िगरेशन देखने, और युग्‍मित उपकरणों के साथ कनेक्‍शन बनाने और स्‍वीकार करने देता है."</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"ब्लूटूथ उपकरणों के साथ युग्मित करें"</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"ऐप्स को टेबलेट पर ब्लूटूथ का कॉन्‍फ़िगरेशन देखने, और युग्‍मित उपकरणों के साथ कनेक्‍शन बनाने और स्‍वीकार करने देता है."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"ऐप्स को फ़ोन पर ब्लूटूथ का कॉन्‍फ़िगरेशन देखने, और युग्‍मित उपकरणों के साथ कनेक्‍शन बनाने और स्‍वीकार करने देता है."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"नियर फ़ील्‍ड कम्‍यूनिकेशन नियंत्रित करें"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"ऐप्स  को नियर फ़ील्ड कम्यूनिकेशन (NFC) टैग, कार्ड, और रीडर के साथ संचार करने देता है."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"अपना स्‍क्रीन लॉक अक्षम करें"</string>
@@ -993,8 +993,8 @@
     <string name="searchview_description_submit" msgid="2688450133297983542">"क्वेरी सबमिट करें"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"बोलकर खोजें"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"स्‍पर्श के द्वारा अन्‍वेषण करें सक्षम करें?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> स्‍पर्श के द्वारा अन्‍वेषण करें सक्षम करना चाहती है. स्‍पर्श के द्वारा अन्‍वेष करें चालू होने पर, आप अपनी अंगुली के नीचे क्या है उसका विवरण सुन सकते हैं या देख सकते हैं या टेबलेट से संवाद करने के लिए जेस्‍चर निष्‍पादित कर सकते हैं."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> स्‍पर्श के द्वारा अन्‍वेषण करें सक्षम करना चाहती है. स्‍पर्श के द्वारा अन्‍वेष करें चालू होने पर, आप अपनी अंगुली के नीचे क्या है उसका विवरण सुन सकते हैं या देख सकते हैं या फ़ोन से संवाद करने के लिए जेस्‍चर निष्‍पादित कर सकते हैं."</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> स्‍पर्श के द्वारा अन्‍वेषण करें सक्षम करना चाहती है. स्‍पर्श के द्वारा अन्‍वेष करें चालू होने पर, आप अपनी अंगुली के नीचे क्या है उसका विवरण सुन सकते हैं या देख सकते हैं या टेबलेट से डॉयलॉग करने के लिए जेस्‍चर निष्‍पादित कर सकते हैं."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> स्‍पर्श के द्वारा अन्‍वेषण करें सक्षम करना चाहती है. स्‍पर्श के द्वारा अन्‍वेष करें चालू होने पर, आप अपनी अंगुली के नीचे क्या है उसका विवरण सुन सकते हैं या देख सकते हैं या फ़ोन से डॉयलॉग करने के लिए जेस्‍चर निष्‍पादित कर सकते हैं."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 माह पहले"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 माह से पहले"</string>
   <plurals name="num_seconds_ago">
@@ -1171,14 +1171,14 @@
     <string name="sendText" msgid="5209874571959469142">"पाठ के लिए किसी क्रिया को चुनें"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"रिंगर वॉल्‍यूम"</string>
     <string name="volume_music" msgid="5421651157138628171">"मीडिया वॉल्‍यूम"</string>
-    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth द्वारा चलाया जा रहा है"</string>
+    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"ब्लूटूथ द्वारा चलाया जा रहा है"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"मौन रिंगटोन सेट है"</string>
     <string name="volume_call" msgid="3941680041282788711">"कॉल के दौरान वॉल्‍यूम"</string>
-    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Bluetooth कॉल के दौरान वॉल्‍यूम"</string>
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"ब्लूटूथ कॉल के दौरान वॉल्‍यूम"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"अलार्म आवाज़"</string>
     <string name="volume_notification" msgid="2422265656744276715">"सूचना वॉल्‍यूम"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"आवाज़"</string>
-    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth वॉल्‍यूम"</string>
+    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"ब्लूटूथ वॉल्‍यूम"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"रिंगटोन वॉल्‍यूम"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"कॉल वॉल्‍यूम"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"मीडिया वॉल्‍यूम"</string>
@@ -1189,23 +1189,23 @@
     <string name="ringtone_picker_title" msgid="3515143939175119094">"रिंगटोन"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"अज्ञात रिंगटोन"</string>
   <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Wi-Fi नेटवर्क उपलब्‍ध"</item>
-    <item quantity="other" msgid="4192424489168397386">"Wi-Fi नेटवर्क उपलब्‍ध"</item>
+    <item quantity="one" msgid="6654123987418168693">"वाई-फ़ाई  नेटवर्क उपलब्‍ध"</item>
+    <item quantity="other" msgid="4192424489168397386">"वाई-फ़ाई  नेटवर्क उपलब्‍ध"</item>
   </plurals>
   <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"उपलब्‍ध Wi-Fi नेटवर्क खोलें"</item>
-    <item quantity="other" msgid="7915895323644292768">"खुले Wi-Fi नेटवर्क उपलब्‍ध है"</item>
+    <item quantity="one" msgid="1634101450343277345">"उपलब्‍ध वाई-फ़ाई  नेटवर्क खोलें"</item>
+    <item quantity="other" msgid="7915895323644292768">"खुले वाई-फ़ाई  नेटवर्क उपलब्‍ध है"</item>
   </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Wi-Fi नेटवर्क में प्रवेश करें"</string>
+    <string name="wifi_available_sign_in" msgid="4029489716605255386">"वाई-फ़ाई  नेटवर्क में प्रवेश करें"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"नेटवर्क में प्रवेश करें"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi से कनेक्‍ट नहीं हो सका"</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"वाई-फ़ाई  से कनेक्‍ट नहीं हो सका"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" के पास एक कमज़ोर इंटरनेट कनेक्‍शन है."</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi प्रत्यक्ष"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi डायरेक्ट प्रारंभ करें. इससे Wi-Fi क्‍लाइंट/हॉटस्पॉट कार्यवाही बंद हो जाएगी."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi डायरेक्ट प्रारंभ नहीं किया जा सका."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi प्रत्यक्ष चालू है"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"वाई-फ़ाई  प्रत्यक्ष"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"वाई-फ़ाई  डायरेक्ट प्रारंभ करें. इससे वाई-फ़ाई  क्‍लाइंट/हॉटस्पॉट कार्यवाही बंद हो जाएगी."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"वाई-फ़ाई  डायरेक्ट प्रारंभ नहीं किया जा सका."</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"वाई-फ़ाई  प्रत्यक्ष चालू है"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"सेटिंग के लिए स्‍पर्श करें"</string>
     <string name="accept" msgid="1645267259272829559">"स्वीकार करें"</string>
     <string name="decline" msgid="2112225451706137894">"अस्वीकार करें"</string>
@@ -1215,8 +1215,8 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"प्रति:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"आवश्‍यक पिन लिखें:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"पिन:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> से कनेक्ट रहने पर टेबलेट Wi-Fi से अस्थायी रूप से डिस्कनेक्ट हो जाएगा"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"फ़ोन <xliff:g id="DEVICE_NAME">%1$s</xliff:g> से कनेक्ट रहते समय Wi-Fi से अस्थायी रूप से डिस्कनेक्ट हो जाएगा"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> से कनेक्ट रहने पर टेबलेट वाई-फ़ाई  से अस्थायी रूप से डिस्कनेक्ट हो जाएगा"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"फ़ोन <xliff:g id="DEVICE_NAME">%1$s</xliff:g> से कनेक्ट रहते समय वाई-फ़ाई  से अस्थायी रूप से डिस्कनेक्ट हो जाएगा"</string>
     <string name="select_character" msgid="3365550120617701745">"वर्ण सम्‍मिलित करें"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS संदेश भेज रहा है"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; बड़ी संख्या में SMS संदेश भेज रहा है. क्या आप इस ऐप्स  को संदेश भेजना जारी रखने देना चाहते हैं?"</string>
@@ -1459,12 +1459,12 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G डेटा अक्षम किया गया"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G डेटा अक्षम किया गया"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"मोबाइल डेटा अक्षम किया गया"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi डेटा अक्षम हो गया"</string>
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"वाई-फ़ाई  डेटा अक्षम हो गया"</string>
     <string name="data_usage_limit_body" msgid="3317964706973601386">"सक्षम करने के लिए स्‍पर्श करें."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G डेटा सीमा पार हो गई है"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G डेटा सीमा पार हो गई है"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"मोबाइल डेटा सीमा पार हो गई है"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi डेटा सीमा पार हो गई है"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"वाई-फ़ाई  डेटा सीमा पार हो गई है"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> निर्दिष्ट सीमा से अधिक."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"पृष्ठभूमि डेटा प्रतिबंधित है"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"प्रतिबंध निकालने हेतु स्‍पर्श करें."</string>
@@ -1497,7 +1497,7 @@
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"डॉक स्‍पीकर"</string>
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"सिस्‍टम"</string>
-    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth ऑडियो"</string>
+    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"ब्लूटूथ ऑडियो"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"वायरलेस प्रदर्शन"</string>
     <string name="media_route_button_content_description" msgid="5758553567065145276">"मीडिया आउटपुट"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"उपकरण से कनेक्ट करें"</string>

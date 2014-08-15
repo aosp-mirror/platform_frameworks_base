@@ -1459,7 +1459,7 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G–3G-andmeside on keelatud"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G-andmeside on keelatud"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobiilne andmeside on keelatud"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"WiFi-andmed on keelatud"</string>
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"WiFi-andmeside on keelatud"</string>
     <string name="data_usage_limit_body" msgid="3317964706973601386">"Lubamiseks puudutage."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G andmemahupiirang ületatud"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G andmemahupiirang ületatud"</string>

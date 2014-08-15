@@ -287,7 +287,7 @@
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"leseni kamili ili kushirikiana na watumiaji"</string>
     <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Inaruhusu miingialiano yote inayowezekana kwa watumiaji."</string>
     <string name="permlab_manageUsers" msgid="1676150911672282428">"dhibiti watumiaji"</string>
-    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Inaruhusu programu kudhibiti watumiaji kwenye kifaa, pamoja na hoji, uundaji na ufutaji."</string>
+    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Huruhusu programu kudhibiti watumiaji kwenye kifaa, ikiwa ni pamoja na hoja, uundaji na ufutaji."</string>
     <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"epua maelezo ya programu zinazoendeshwa"</string>
     <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Huruhusu programu kuepua maelezo tondoti kuhusu kazi za sasa na zinazoendelea hivi karibuni. Programu hasidi huenda zikagundua maelezo ya kibinafsi kuhusu programu zingine."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"Agiza tena programu za kuendeshwa"</string>
@@ -390,9 +390,9 @@
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"funga kwenye huduma ya widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Inaruhusu mmiliki kushurutisha kusano ya kiwango cha juu ya huduma ya wijeti. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"jiunge na msimamizi wa kifaa"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Inamruhusu mmiliki kutuma malengo kwa msimamizi wa kifaa. Haipaswi kuhitajika kwa programu za kawaida."</string>
+    <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Humruhusu mmiliki kutuma kidhibiti cha kifaa malengo. Programu za kawaida hazikihitaji."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"ongeza au ondoa msimamizi wa kifaa"</string>
-    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Inaruhusu mmiliki kuongeza au kuondoa wasimamizi wa kifaa waliopo. Kamwe kisihitajike kwa ajili ya programu za kawaida."</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Huruhusu mmiliki kuongeza au kuondoa vidhibiti vya kifaa vinavyotumika. Programu za kawaida hazivihitaji."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"badilisha uelekezo wa skrini"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Inaruhusu programu kubadilisha mzunguko wa skrini wakati wowote. Kamwe hazihitajiki kwa programu za kawaida."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"Badilisha kasi ya pointa"</string>
@@ -1137,8 +1137,8 @@
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Chagua programu ya kifaa cha USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Hakuna programu zinazoweza kufanya tendo hili."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"Kwa bahati mbaya, <xliff:g id="APPLICATION">%1$s</xliff:g> imekoma."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"Kwa bahati mbaya, mchakato <xliff:g id="PROCESS">%1$s</xliff:g> umekoma."</string>
+    <string name="aerr_application" msgid="932628488013092776">"Kwa bahati mbaya, <xliff:g id="APPLICATION">%1$s</xliff:g> imeacha kufanya kazi."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"Kwa bahati mbaya, mchakato wa <xliff:g id="PROCESS">%1$s</xliff:g> umekoma."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> haifanyi kazi.\n\nUnataka kuifunga?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"Shughuli <xliff:g id="ACTIVITY">%1$s</xliff:g> haijibu. \n\n Unataka kuifunga?"</string>

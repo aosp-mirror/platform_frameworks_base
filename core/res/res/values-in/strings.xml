@@ -761,7 +761,7 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Faks Rumah"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Pager"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Lainnya"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"Panggil balik"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Telepon balik"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Mobil"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Utama Perusahaan"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
@@ -1329,7 +1329,7 @@
     <string name="ime_action_done" msgid="8971516117910934605">"Selesai"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Sebelumnya"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Lakukan"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Panggil nomor \nmenggunakan<xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Telepon nomor \nmenggunakan<xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Buat kontak \nmenggunakan <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Satu atau beberapa apl meminta izin untuk mengakses akun Anda, sekarang dan di masa mendatang."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Apakah Anda ingin mengizinkan permintaan ini?"</string>

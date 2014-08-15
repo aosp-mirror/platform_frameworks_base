@@ -23,7 +23,7 @@
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
     <string name="kilobyteShort" msgid="5973789783504771878">"KB"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"‏GB‏‏"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>

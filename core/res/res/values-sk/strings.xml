@@ -116,7 +116,7 @@
     <string name="fcError" msgid="3327560126588500777">"Problém s pripojením alebo neplatný kód funkcie."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
     <string name="httpError" msgid="7956392511146698522">"Vyskytla sa chyba siete."</string>
-    <string name="httpErrorLookup" msgid="4711687456111963163">"Adresu URL sa nepodarilo nájsť."</string>
+    <string name="httpErrorLookup" msgid="4711687456111963163">"Webovú adresu sa nepodarilo nájsť."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Schéma overenia webových stránok nie je podporovaná."</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"Nepodarilo sa overiť totožnosť."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Overenie pomocou servera proxy bolo neúspešné."</string>
@@ -126,7 +126,7 @@
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Stránka obsahuje príliš veľa presmerovaní servera."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Protokol nie je podporovaný."</string>
     <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"Zabezpečené spojenie sa nepodarilo nadviazať."</string>
-    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Stránku sa nepodarilo otvoriť pretože adresa URL je neplatná."</string>
+    <string name="httpErrorBadUrl" msgid="3636929722728881972">"Stránku sa nepodarilo otvoriť pretože webová adresa je neplatná."</string>
     <string name="httpErrorFile" msgid="2170788515052558676">"Prístup k súboru sa nepodarilo získať."</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Požadovaný súbor sa nepodarilo nájsť."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Je spracovávaných príliš veľa žiadostí. Opakujte akciu neskôr."</string>
@@ -640,7 +640,7 @@
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Umožňuje aplikácii čítať nastavenia synchronizácie v účte. Môže napríklad určiť, či je s účtom synchronizovaná aplikácia Ľudia."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"zapnúť alebo vypnúť synchronizáciu"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Umožňuje aplikácii upraviť nastavenia synchronizácie v účte. Pomocou tohto povolenia je možné napríklad povoliť synchronizáciu aplikácie Ľudia s účtom."</string>
-    <string name="permlab_readSyncStats" msgid="7396577451360202448">"čítanie štatistických údajov o synchronizácii"</string>
+    <string name="permlab_readSyncStats" msgid="7396577451360202448">"čítať štatistické údaje o synchronizácii"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Umožňuje aplikácii čítať štatistické informácie o synchronizácii v účte vrátane histórie uskutočnených synchronizácií a informácií o množstve synchronizovaných údajov."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čítať odoberané informačné kanály"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Umožňuje aplikácii získať podrobnosti o aktuálne synchronizovaných informačných kanáloch."</string>
@@ -955,7 +955,7 @@
     <string name="autofill_area" msgid="3547409050889952423">"Oblasť"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirát"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"čítať webové záložky a históriu"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Umožňuje aplikácii čítať všetky adresy URL navštívené prehliadačom a všetky záložky prehliadača. Poznámka: Toto povolenie nemôžu vynucovať prehliadače tretej strany ani iné aplikácie umožňujúce prehliadanie webu."</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Umožňuje aplikácii čítať všetky webové adresy navštívené prehliadačom a všetky záložky prehliadača. Poznámka: Toto povolenie nemôžu vynucovať prehliadače tretej strany ani iné aplikácie umožňujúce prehliadanie webu."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"zapisovať webové záložky a históriu"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Umožňuje aplikácii upraviť históriu prehliadača alebo záložky uložené v tablete. Aplikácia s týmto povolením môže vymazať alebo upraviť údaje prehliadača. Poznámka: Toto povolenie nemôžu vynucovať prehliadače tretích strán ani žiadne ďalšie aplikácie umožňujúce prehliadanie webu."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Umožňuje aplikácii upraviť históriu prehliadača alebo záložky uložené v telefóne. Aplikácia s týmto povolením môže vymazať alebo upraviť údaje prehliadača. Poznámka: Toto povolenie nemôžu vynucovať prehliadače tretích strán ani žiadne ďalšie aplikácie umožňujúce prehliadanie webu."</string>
@@ -1110,7 +1110,7 @@
     <string name="paste" msgid="5629880836805036433">"Prilepiť"</string>
     <string name="replace" msgid="5781686059063148930">"Nahradiť•"</string>
     <string name="delete" msgid="6098684844021697789">"Odstrániť"</string>
-    <string name="copyUrl" msgid="2538211579596067402">"Skopírovať adresu URL"</string>
+    <string name="copyUrl" msgid="2538211579596067402">"Skopírovať webovú adresu"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Vybrať text"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Výber textu"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Pridať do slovníka"</string>

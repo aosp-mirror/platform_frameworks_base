@@ -243,7 +243,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"بازیابی محتوای پنجره"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"محتوای پنجره‌ای را که در حال تعامل با آن هستید بررسی کنید."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"فعال‌سازی کاوش لمسی"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"موارد لمس شده با صدای بلند خوانده می‌شوند و با استفاده از حرکات لمسی می‌توانید صفحه را کاوش کنید."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"موارد لمس شده با صدای بلند خوانده می‌شوند و با استفاده از حرکات می‌توانید صفحه را کاوش کنید."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"فعال‌سازی دسترس‌پذیری پیشرفته برای وب"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ممکن است جهت افزایش دسترس‌پذیری به محتوای برنامه، اسکریپت‌هایی نصب شود."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"نوشتاری را که تایپ می‌کنید مشاهده نمایید"</string>
@@ -993,8 +993,8 @@
     <string name="searchview_description_submit" msgid="2688450133297983542">"ارسال عبارت جستجو"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"جستجوی صوتی"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"فعال کردن «کاوش با لمس»؟"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> می‌خواهد «کاوش با لمس» را فعال کند. وقتی «کاوش با لمس» فعال است، می‌توانید توضیحاتی را برای آنچه که زیر انگشت شما است مشاهده کرده یا بشنوید یا برای استفاده از رایانهٔ لوحی از حرکات اشاره استفاده کنید."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> می‌خواهد «کاوش با لمس» را فعال کند. وقتی «کاوش با لمس» فعال است، می‌توانید توضیحاتی را برای آنچه که زیر انگشت شما است مشاهده کرده یا بشنوید یا برای استفاده از تلفن خود از حرکات اشاره استفاده کنید."</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> می‌خواهد «کاوش با لمس» را فعال کند. وقتی «کاوش با لمس» فعال است، می‌توانید توضیحاتی را برای آنچه که زیر انگشت شما است مشاهده کرده یا بشنوید یا برای استفاده از رایانهٔ لوحی از حرکات استفاده کنید."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> می‌خواهد «کاوش با لمس» را فعال کند. وقتی «کاوش با لمس» فعال است، می‌توانید توضیحاتی را برای آنچه که زیر انگشت شما است مشاهده کرده یا بشنوید یا برای استفاده از تلفن خود از حرکات استفاده کنید."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"۱ ماه قبل"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"قبل از ۱ ماه گذشته"</string>
   <plurals name="num_seconds_ago">

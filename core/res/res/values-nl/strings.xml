@@ -1145,7 +1145,7 @@
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> reageert niet. Wilt u deze app sluiten?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> reageert niet.\n\nWilt u het sluiten?"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
-    <string name="report" msgid="4060218260984795706">"Rapport"</string>
+    <string name="report" msgid="4060218260984795706">"Melden"</string>
     <string name="wait" msgid="7147118217226317732">"Wachten"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"De pagina reageert niet meer.\n\nWilt u de pagina sluiten?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"App verplaatst"</string>
@@ -1310,7 +1310,7 @@
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB-opslag verwijderd. Plaats nieuw medium."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD-kaart verwijderd. Plaats een nieuwe."</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Geen overeenkomende activiteiten gevonden."</string>
-    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"gebruiksstatistieken van component bijwerken"</string>
+    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"gebruiksstatistieken van component updaten"</string>
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Hiermee kan de app verzamelde gebruiksstatistieken van componenten wijzigen. Niet voor gebruik door normale apps."</string>
     <string name="permlab_copyProtectedData" msgid="4341036311211406692">"inhoud kopiëren"</string>
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Hiermee kan de app de standaard containerservice aanroepen om inhoud te kopiëren. Niet voor gebruik door normale apps."</string>

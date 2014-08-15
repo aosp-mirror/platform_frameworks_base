@@ -563,7 +563,7 @@
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"читати статус та ідентифікаційну інформацію телефону"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Дозволяє програмі отримувати доступ до телефонних функцій пристрою. Такий дозвіл дає програмі змогу визначати номер телефону й ідентифікатори пристрою, активність виклику, а також віддалений номер, на який здійснюється виклик."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"не доп.перехід пристр.в реж.сну"</string>
-    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"недоп. перехід тел. в реж. сну"</string>
+    <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"Вимкнення режиму сну"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Дозволяє програмі не допускати перехід планшетного ПК у режим сну."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Дозволяє програмі не допускати перехід телефону в режим сну."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"передавати в інфрачервоному діапазоні"</string>
@@ -640,7 +640,7 @@
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Дозволяє програмі читати налаштування синхронізації для облікового запису, наприклад, визначати, чи програма Люди синхронізується з обліковим записом."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"вмикати й вимикати синхронізацію"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Дозволяє програмі змінювати налаштування синхронізації для облікового запису, наприклад, вмикати синхронізацію програми Люди з обліковим записом."</string>
-    <string name="permlab_readSyncStats" msgid="7396577451360202448">"читати стат-ку синхрон."</string>
+    <string name="permlab_readSyncStats" msgid="7396577451360202448">"Перегляд статистики синхронізації"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Дозволяє програмі читати статистику синхронізації облікового запису, зокрема історію синхронізацій і обсяг синхронізованих даних."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"читати підписані канали"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Дозволяє програмі отримувати відомості про поточно синхронізовані канали."</string>
