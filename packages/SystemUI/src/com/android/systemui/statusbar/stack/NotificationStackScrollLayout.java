@@ -280,7 +280,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updatePadding(boolean dimmed) {
-        mPaddingBetweenElements = dimmed
+        mPaddingBetweenElements = dimmed && mStackScrollAlgorithm.shouldScaleDimmed()
                 ? mPaddingBetweenElementsDimmed
                 : mPaddingBetweenElementsNormal;
         mBottomStackSlowDownHeight = mStackScrollAlgorithm.getBottomStackSlowDownLength();
