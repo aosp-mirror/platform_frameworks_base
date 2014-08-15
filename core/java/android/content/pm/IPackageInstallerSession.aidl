@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.content.pm.IPackageInstallObserver2;
+import android.content.IntentSender;
 import android.os.ParcelFileDescriptor;
 
 /** {@hide} */
@@ -24,11 +25,11 @@ interface IPackageInstallerSession {
     void setClientProgress(float progress);
     void addClientProgress(float progress);
 
-    String[] list();
+    String[] getNames();
     ParcelFileDescriptor openWrite(String name, long offsetBytes, long lengthBytes);
     ParcelFileDescriptor openRead(String name);
 
     void close();
-    void commit(in IPackageInstallObserver2 observer);
+    void commit(in IntentSender statusReceiver);
     void abandon();
 }
