@@ -764,12 +764,9 @@ int doDump(Bundle* bundle)
         return 1;
     }
 
+    // The dynamicRefTable can be null if there are no resources for this asset cookie.
+    // This fine.
     const DynamicRefTable* dynamicRefTable = res.getDynamicRefTableForCookie(assetsCookie);
-    if (dynamicRefTable == NULL) {
-        fprintf(stderr, "ERROR: failed to find dynamic reference table for asset cookie %d\n",
-                assetsCookie);
-        return 1;
-    }
 
     Asset* asset = NULL;
 

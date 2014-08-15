@@ -6212,11 +6212,6 @@ void ResTable::print(bool inclValues) const
     if (mError != 0) {
         printf("mError=0x%x (%s)\n", mError, strerror(mError));
     }
-#if 0
-    char localeStr[RESTABLE_MAX_LOCALE_LEN];
-    mParams.getBcp47Locale(localeStr);
-    printf("mParams=%s,\n" localeStr);
-#endif
     size_t pgCount = mPackageGroups.size();
     printf("Package Groups (%d)\n", (int)pgCount);
     for (size_t pgIndex=0; pgIndex<pgCount; pgIndex++) {
