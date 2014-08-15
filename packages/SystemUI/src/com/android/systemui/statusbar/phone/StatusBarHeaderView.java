@@ -366,7 +366,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             mAlarmStatus.setText(KeyguardStatusView.formatNextAlarm(getContext(), nextAlarm));
         }
         mAlarmShowing = nextAlarm != null;
-        updateVisibilities();
+        updateEverything();
         requestCaptureValues();
     }
 
@@ -512,10 +512,13 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     public void setShowEmergencyCallsOnly(boolean show) {
-        mShowEmergencyCallsOnly = show;
-        if (mExpanded) {
-            updateVisibilities();
-            requestCaptureValues();
+        boolean changed = show != mShowEmergencyCallsOnly;
+        if (changed) {
+            mShowEmergencyCallsOnly = show;
+            if (mExpanded) {
+                updateEverything();
+                requestCaptureValues();
+            }
         }
     }
 
@@ -552,7 +555,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     private void applyAlpha(View v, float alpha) {
-        if (v == null) {
+        if (v == null || v.getVisibility() == View.GONE) {
             return;
         }
         if (alpha == 0f) {
