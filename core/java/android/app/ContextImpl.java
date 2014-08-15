@@ -2301,8 +2301,8 @@ class ContextImpl extends Context {
         }
     }
 
-    void installSystemApplicationInfo(ApplicationInfo info) {
-        mPackageInfo.installSystemApplicationInfo(info);
+    void installSystemApplicationInfo(ApplicationInfo info, ClassLoader classLoader) {
+        mPackageInfo.installSystemApplicationInfo(info, classLoader);
     }
 
     final void scheduleFinalCleanup(String who, String what) {
