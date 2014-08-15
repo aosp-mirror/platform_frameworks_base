@@ -180,7 +180,7 @@ public class PackageInfo implements Parcelable {
      * {@link android.R.styleable#AndroidManifestUsesConfiguration
      * &lt;uses-configuration&gt;} tags included under &lt;manifest&gt;,
      * or null if there were none. This is only filled in if the flag
-     * {@link PackageManager#GET_CONFIGURATIONS} was set.  
+     * {@link PackageManager#GET_CONFIGURATIONS} was set.
      */
     public ConfigurationInfo[] configPreferences;
 
@@ -190,6 +190,16 @@ public class PackageInfo implements Parcelable {
      * @see FeatureInfo#FLAG_REQUIRED
      */
     public FeatureInfo[] reqFeatures;
+
+    /**
+     * Groups of features that this application has requested.
+     * Each group contains a set of features that are required.
+     * A device must match the features listed in {@link #reqFeatures} and one
+     * or more FeatureGroups in order to have satisfied the feature requirement.
+     *
+     * @see FeatureInfo#FLAG_REQUIRED
+     */
+    public FeatureGroupInfo[] featureGroups;
 
     /**
      * Constant corresponding to <code>auto</code> in
@@ -300,6 +310,7 @@ public class PackageInfo implements Parcelable {
         dest.writeTypedArray(signatures, parcelableFlags);
         dest.writeTypedArray(configPreferences, parcelableFlags);
         dest.writeTypedArray(reqFeatures, parcelableFlags);
+        dest.writeTypedArray(featureGroups, parcelableFlags);
         dest.writeInt(installLocation);
         dest.writeInt(requiredForAllUsers ? 1 : 0);
         dest.writeInt(requiredForProfile);
@@ -344,6 +355,7 @@ public class PackageInfo implements Parcelable {
         signatures = source.createTypedArray(Signature.CREATOR);
         configPreferences = source.createTypedArray(ConfigurationInfo.CREATOR);
         reqFeatures = source.createTypedArray(FeatureInfo.CREATOR);
+        featureGroups = source.createTypedArray(FeatureGroupInfo.CREATOR);
         installLocation = source.readInt();
         requiredForAllUsers = source.readInt() != 0;
         requiredForProfile = source.readInt();
