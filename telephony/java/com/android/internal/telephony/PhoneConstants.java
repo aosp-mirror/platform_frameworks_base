@@ -187,4 +187,7 @@ public class PhoneConstants {
         REASON_RADIO_UNAVAILABLE,
         REASON_SIM_REFRESH_RESET
     };
+
+    // Initial MTU value.
+    public static final int UNSET_MTU = 0;
 }
