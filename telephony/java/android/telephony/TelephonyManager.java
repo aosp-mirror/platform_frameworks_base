@@ -3025,6 +3025,42 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    public String getCdmaMdn() {
+        return getCdmaMdn(getDefaultSubscription());
+    }
+
+    /** @hide */
+    @SystemApi
+    public String getCdmaMdn(long subId) {
+        try {
+            return getITelephony().getCdmaMdn(subId);
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            return null;
+        }
+    }
+
+    /** @hide */
+    @SystemApi
+    public String getCdmaMin() {
+        return getCdmaMin(getDefaultSubscription());
+    }
+
+    /** @hide */
+    @SystemApi
+    public String getCdmaMin(long subId) {
+        try {
+            return getITelephony().getCdmaMin(subId);
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            return null;
+        }
+    }
+
+    /** @hide */
+    @SystemApi
     public int checkCarrierPrivilegesForPackage(String pkgname) {
         try {
             return getITelephony().checkCarrierPrivilegesForPackage(pkgname);
