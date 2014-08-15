@@ -23,7 +23,7 @@
         </activity>
         <service
             android:name="com.android.onemedia.OnePlayerService"
-            android:exported="false"
+            android:exported="true"
             android:process="com.android.onemedia.service" />
         <service
             android:name=".provider.OneMediaRouteProvider"

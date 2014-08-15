@@ -17,19 +17,34 @@ package com.android.onemedia;
 
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaMetadata;
 import android.media.session.PlaybackState;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.io.IOException;
 
 public class OnePlayerActivity extends Activity {
     private static final String TAG = "OnePlayerActivity";
+
+    private static final int READ_REQUEST_CODE = 42;
 
     protected PlayerController mPlayer;
 
@@ -41,8 +56,10 @@ public class OnePlayerActivity extends Activity {
     private EditText mContentText;
     private EditText mNextContentText;
     private CheckBox mHasVideo;
+    private ImageView mArtView;
 
-    private int mPlaybackState;
+    private PlaybackState mPlaybackState;
+    private Bitmap mAlbumArtBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +75,10 @@ public class OnePlayerActivity extends Activity {
         mContentText = (EditText) findViewById(R.id.content);
         mNextContentText = (EditText) findViewById(R.id.next_content);
         mHasVideo = (CheckBox) findViewById(R.id.has_video);
+        mArtView = (ImageView) findViewById(R.id.art);
+
+        final Button artPicker = (Button) findViewById(R.id.art_picker);
+        artPicker.setOnClickListener(mButtonListener);
 
         mStartButton.setOnClickListener(mButtonListener);
         mPlayButton.setOnClickListener(mButtonListener);
@@ -86,6 +107,31 @@ public class OnePlayerActivity extends Activity {
         super.onPause();
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode,
+            Intent resultData) {
+        if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            Uri uri = null;
+            if (resultData != null) {
+                uri = resultData.getData();
+                Log.i(TAG, "Uri: " + uri.toString());
+                mAlbumArtBitmap = null;
+                try {
+                    mAlbumArtBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+                } catch (IOException e) {
+                    Log.v(TAG, "Couldn't load album art", e);
+                }
+                mArtView.setImageBitmap(mAlbumArtBitmap);
+                if (mAlbumArtBitmap != null) {
+                    mArtView.setVisibility(View.VISIBLE);
+                } else {
+                    mArtView.setVisibility(View.GONE);
+                }
+                mPlayer.setArt(mAlbumArtBitmap);
+            }
+        }
+    }
+
     private void setControlsEnabled(boolean enabled) {
         mStartButton.setEnabled(enabled);
         mPlayButton.setEnabled(enabled);
@@ -94,22 +140,30 @@ public class OnePlayerActivity extends Activity {
     private View.OnClickListener mButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            final int state = mPlaybackState.getState();
             switch (v.getId()) {
                 case R.id.play_button:
-                    Log.d(TAG, "Play button pressed, in state " + mPlaybackState);
-                    if (mPlaybackState == PlaybackState.STATE_PAUSED
-                            || mPlaybackState == PlaybackState.STATE_STOPPED) {
+                    Log.d(TAG, "Play button pressed, in state " + state);
+                    if (state == PlaybackState.STATE_PAUSED
+                            || state == PlaybackState.STATE_STOPPED) {
                         mPlayer.play();
-                    } else if (mPlaybackState == PlaybackState.STATE_PLAYING) {
+                    } else if (state == PlaybackState.STATE_PLAYING) {
                         mPlayer.pause();
                     }
                     break;
                 case R.id.start_button:
-                    Log.d(TAG, "Start button pressed, in state " + mPlaybackState);
+                    Log.d(TAG, "Start button pressed, in state " + state);
                     mPlayer.setContent(mContentText.getText().toString());
                     break;
                 case R.id.route_button:
                     mPlayer.showRoutePicker();
+                    break;
+                case R.id.art_picker:
+                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType("image/*");
+
+                    startActivityForResult(intent, READ_REQUEST_CODE);
                     break;
             }
 
@@ -117,13 +171,15 @@ public class OnePlayerActivity extends Activity {
     };
 
     private PlayerController.Listener mListener = new PlayerController.Listener() {
+        public MediaMetadata mMetadata;
+
         @Override
         public void onPlaybackStateChange(PlaybackState state) {
-            mPlaybackState = state.getState();
+            mPlaybackState = state;
             boolean enablePlay = false;
             boolean enableControls = true;
             StringBuilder statusBuilder = new StringBuilder();
-            switch (mPlaybackState) {
+            switch (mPlaybackState.getState()) {
                 case PlaybackState.STATE_PLAYING:
                     statusBuilder.append("playing");
                     mPlayButton.setText("Pause");
@@ -172,7 +228,7 @@ public class OnePlayerActivity extends Activity {
 
         @Override
         public void onMetadataChange(MediaMetadata metadata) {
-            Log.d(TAG, "Metadata update! Title: " + metadata);
+            mMetadata = metadata;
         }
     };
 }
