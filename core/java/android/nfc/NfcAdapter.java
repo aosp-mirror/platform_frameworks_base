@@ -311,7 +311,7 @@ public final class NfcAdapter {
 
     final NfcActivityManager mNfcActivityManager;
     final Context mContext;
-    final HashMap<NfcUnlockHandler, IBinder> mNfcUnlockHandlers;
+    final HashMap<NfcUnlockHandler, INfcUnlockHandler> mNfcUnlockHandlers;
     final Object mLock;
 
     /**
@@ -542,7 +542,7 @@ public final class NfcAdapter {
     NfcAdapter(Context context) {
         mContext = context;
         mNfcActivityManager = new NfcActivityManager(this);
-        mNfcUnlockHandlers = new HashMap<NfcUnlockHandler, IBinder>();
+        mNfcUnlockHandlers = new HashMap<NfcUnlockHandler, INfcUnlockHandler>();
         mLock = new Object();
     }
 
@@ -1498,27 +1498,37 @@ public final class NfcAdapter {
      * <p /> The parameter {@code tagTechnologies} determines which Tag technologies will be polled for
      * at the lockscreen. Polling for less tag technologies reduces latency, and so it is
      * strongly recommended to only provide the Tag technologies that the handler is expected to
-     * receive.
+     * receive. There must be at least one tag technology provided, otherwise the unlock handler
+     * is ignored.
      *
      * @hide
      */
     @SystemApi
     public boolean addNfcUnlockHandler(final NfcUnlockHandler unlockHandler,
                                        String[] tagTechnologies) {
-        try {
-            INfcUnlockHandler.Stub iHandler = new INfcUnlockHandler.Stub() {
-                @Override
-                public boolean onUnlockAttempted(Tag tag) throws RemoteException {
-                    return unlockHandler.onUnlockAttempted(tag);
-                }
-            };
+        // If there are no tag technologies, don't bother adding unlock handler
+        if (tagTechnologies.length == 0) {
+            return false;
+        }
 
+        try {
             synchronized (mLock) {
                 if (mNfcUnlockHandlers.containsKey(unlockHandler)) {
-                    return true;
+                    // update the tag technologies
+                    sService.removeNfcUnlockHandler(mNfcUnlockHandlers.get(unlockHandler));
+                    mNfcUnlockHandlers.remove(unlockHandler);
                 }
-                sService.addNfcUnlockHandler(iHandler, Tag.getTechCodesFromStrings(tagTechnologies));
-                mNfcUnlockHandlers.put(unlockHandler, iHandler.asBinder());
+
+                INfcUnlockHandler.Stub iHandler = new INfcUnlockHandler.Stub() {
+                    @Override
+                    public boolean onUnlockAttempted(Tag tag) throws RemoteException {
+                        return unlockHandler.onUnlockAttempted(tag);
+                    }
+                };
+
+                sService.addNfcUnlockHandler(iHandler,
+                        Tag.getTechCodesFromStrings(tagTechnologies));
+                mNfcUnlockHandlers.put(unlockHandler, iHandler);
             }
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
@@ -1542,8 +1552,7 @@ public final class NfcAdapter {
         try {
             synchronized (mLock) {
                 if (mNfcUnlockHandlers.containsKey(unlockHandler)) {
-                    sService.removeNfcUnlockHandler(mNfcUnlockHandlers.get(unlockHandler));
-                    mNfcUnlockHandlers.remove(unlockHandler);
+                    sService.removeNfcUnlockHandler(mNfcUnlockHandlers.remove(unlockHandler));
                 }
 
                 return true;
