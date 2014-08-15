@@ -3,18 +3,17 @@
 //
 // Build resource files from raw assets.
 //
-#include "Main.h"
 #include "AaptAssets.h"
-#include "StringPool.h"
-#include "XMLNode.h"
-#include "ResourceTable.h"
-#include "Images.h"
-
+#include "CacheUpdater.h"
 #include "CrunchCache.h"
 #include "FileFinder.h"
-#include "CacheUpdater.h"
-
+#include "Images.h"
+#include "IndentPrinter.h"
+#include "Main.h"
+#include "ResourceTable.h"
+#include "StringPool.h"
 #include "WorkQueue.h"
+#include "XMLNode.h"
 
 #if HAVE_PRINTF_ZD
 #  define ZD "%zd"
@@ -1801,6 +1800,112 @@ static String16 getAttributeComment(const sp<AaptAssets>& assets,
     return String16();
 }
 
+static void writeResourceLoadedCallback(FILE* fp, int indent) {
+    IndentPrinter p(fp, 4);
+    p.indent(indent);
+    p.println("private static void rewriteIntArrayField(java.lang.reflect.Field field, int packageId) throws IllegalAccessException {");
+    {
+        p.indent();
+        p.println("int requiredModifiers = java.lang.reflect.Modifier.STATIC | java.lang.reflect.Modifier.PUBLIC;");
+        p.println("if ((field.getModifiers() & requiredModifiers) != requiredModifiers) {");
+        {
+            p.indent();
+            p.println("throw new IllegalArgumentException(\"Field \" + field.getName() + \" is not rewritable\");");
+            p.indent(-1);
+        }
+        p.println("}");
+        p.println("if (field.getType() != int[].class) {");
+        {
+            p.indent();
+            p.println("throw new IllegalArgumentException(\"Field \" + field.getName() + \" is not an int array\");");
+            p.indent(-1);
+        }
+        p.println("}");
+        p.println("int[] array = (int[]) field.get(null);");
+        p.println("for (int i = 0; i < array.length; i++) {");
+        {
+            p.indent();
+            p.println("array[i] = (array[i] & 0x00ffffff) | (packageId << 24);");
+            p.indent(-1);
+        }
+        p.println("}");
+        p.indent(-1);
+    }
+    p.println("}");
+    p.println();
+    p.println("private static void rewriteIntField(java.lang.reflect.Field field, int packageId) throws IllegalAccessException {");
+    {
+        p.indent();
+        p.println("int requiredModifiers = java.lang.reflect.Modifier.STATIC | java.lang.reflect.Modifier.PUBLIC;");
+        p.println("int bannedModifiers = java.lang.reflect.Modifier.FINAL;");
+        p.println("int mod = field.getModifiers();");
+        p.println("if ((mod & requiredModifiers) != requiredModifiers || (mod & bannedModifiers) != 0) {");
+        {
+            p.indent();
+            p.println("throw new IllegalArgumentException(\"Field \" + field.getName() + \" is not rewritable\");");
+            p.indent(-1);
+        }
+        p.println("}");
+        p.println("if (field.getType() != int.class && field.getType() != Integer.class) {");
+        {
+            p.indent();
+            p.println("throw new IllegalArgumentException(\"Field \" + field.getName() + \" is not an int\");");
+            p.indent(-1);
+        }
+        p.println("}");
+        p.println("int resId = field.getInt(null);");
+        p.println("field.setInt(null, (resId & 0x00ffffff) | (packageId << 24));");
+        p.indent(-1);
+    }
+    p.println("}");
+    p.println();
+    p.println("public static void onResourcesLoaded(int assignedPackageId) throws Exception {");
+    {
+        p.indent();
+        p.println("Class<?>[] declaredClasses = R.class.getDeclaredClasses();");
+        p.println("for (Class<?> clazz : declaredClasses) {");
+        {
+            p.indent();
+            p.println("if (clazz.getSimpleName().equals(\"styleable\")) {");
+            {
+                p.indent();
+                p.println("for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {");
+                {
+                    p.indent();
+                    p.println("if (field.getType() == int[].class) {");
+                    {
+                        p.indent();
+                        p.println("rewriteIntArrayField(field, assignedPackageId);");
+                        p.indent(-1);
+                    }
+                    p.println("}");
+                    p.indent(-1);
+                }
+                p.println("}");
+                p.indent(-1);
+            }
+            p.println("} else {");
+            {
+                p.indent();
+                p.println("for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {");
+                {
+                    p.indent();
+                    p.println("rewriteIntField(field, assignedPackageId);");
+                    p.indent(-1);
+                }
+                p.println("}");
+                p.indent(-1);
+            }
+            p.println("}");
+            p.indent(-1);
+        }
+        p.println("}");
+        p.indent(-1);
+    }
+    p.println("}");
+    p.println();
+}
+
 static status_t writeLayoutClasses(
     FILE* fp, const sp<AaptAssets>& assets,
     const sp<AaptSymbols>& symbols, int indent, bool includePrivate, bool nonConstantId)
@@ -2138,7 +2243,7 @@ static status_t writeTextLayoutClasses(
 static status_t writeSymbolClass(
     FILE* fp, const sp<AaptAssets>& assets, bool includePrivate,
     const sp<AaptSymbols>& symbols, const String8& className, int indent,
-    bool nonConstantId)
+    bool nonConstantId, bool emitCallback)
 {
     fprintf(fp, "%spublic %sfinal class %s {\n",
             getIndentSpace(indent),
@@ -2238,7 +2343,8 @@ static status_t writeSymbolClass(
         if (nclassName == "styleable") {
             styleableSymbols = nsymbols;
         } else {
-            err = writeSymbolClass(fp, assets, includePrivate, nsymbols, nclassName, indent, nonConstantId);
+            err = writeSymbolClass(fp, assets, includePrivate, nsymbols, nclassName,
+                    indent, nonConstantId, false);
         }
         if (err != NO_ERROR) {
             return err;
@@ -2250,6 +2356,10 @@ static status_t writeSymbolClass(
         if (err != NO_ERROR) {
             return err;
         }
+    }
+
+    if (emitCallback) {
+        writeResourceLoadedCallback(fp, indent);
     }
 
     indent--;
@@ -2299,7 +2409,7 @@ static status_t writeTextSymbolClass(
 }
 
 status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
-    const String8& package, bool includePrivate)
+    const String8& package, bool includePrivate, bool emitCallback)
 {
     if (!bundle->getRClassDir()) {
         return NO_ERROR;
@@ -2355,7 +2465,7 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
             "package %s;\n\n", package.string());
 
         status_t err = writeSymbolClass(fp, assets, includePrivate, symbols,
-                className, 0, bundle->getNonConstantId());
+                className, 0, bundle->getNonConstantId(), emitCallback);
         fclose(fp);
         if (err != NO_ERROR) {
             return err;
