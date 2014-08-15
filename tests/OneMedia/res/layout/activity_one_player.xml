@@ -33,6 +33,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/has_video" />
+    <ImageView
+            android:id="@+id/art"
+            android:layout_width="match_parent"
+            android:layout_height="96dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            />
+    <Button
+            android:id="@+id/art_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/art_picker"
+            />
     <LinearLayout
             android:id="@+id/controls"
             android:layout_width="match_parent"

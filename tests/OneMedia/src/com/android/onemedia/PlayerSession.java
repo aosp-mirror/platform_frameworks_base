@@ -17,6 +17,8 @@ package com.android.onemedia;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.media.MediaMetadata;
 import android.media.routing.MediaRouteSelector;
 import android.media.routing.MediaRouter;
 import android.media.routing.MediaRouter.ConnectionRequest;
@@ -50,6 +52,7 @@ public class PlayerSession {
     protected Renderer mRenderer;
     protected MediaSession.Callback mCallback;
     protected Renderer.Listener mRenderListener;
+    protected MediaMetadata.Builder mMetadataBuilder;
 
     protected PlaybackState mPlaybackState;
     protected Listener mListener;
@@ -66,6 +69,8 @@ public class PlayerSession {
         mPlaybackState = psBob.build();
 
         mRenderer.registerListener(mRenderListener);
+
+        initMetadata();
     }
 
     public void createSession() {
@@ -92,6 +97,7 @@ public class PlayerSession {
                 | MediaSession.FLAG_HANDLES_MEDIA_BUTTONS);
         mSession.setMediaRouter(mRouter);
         mSession.setActive(true);
+        updateMetadata();
     }
 
     public void onDestroy() {
@@ -130,6 +136,19 @@ public class PlayerSession {
         mRenderer.setNextContent(request);
     }
 
+    public void setIcon(Bitmap icon) {
+        mMetadataBuilder.putBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON, icon);
+        updateMetadata();
+    }
+
+    private void updateMetadata() {
+        // This is a mild abuse of metadata and shouldn't be duplicated in real
+        // code
+        if (mSession != null && mSession.isActive()) {
+            mSession.setMetadata(mMetadataBuilder.build());
+        }
+    }
+
     private void updateState(int newState) {
         float rate = newState == PlaybackState.STATE_PLAYING ? 1 : 0;
         long position = mRenderer == null ? -1 : mRenderer.getSeekPosition();
@@ -138,6 +157,14 @@ public class PlayerSession {
         bob.setErrorMessage(null);
         mPlaybackState = bob.build();
         mSession.setPlaybackState(mPlaybackState);
+    }
+
+    private void initMetadata() {
+        mMetadataBuilder = new MediaMetadata.Builder();
+        mMetadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE,
+                "OneMedia display title");
+        mMetadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE,
+                "OneMedia display subtitle");
     }
 
     public interface Listener {
