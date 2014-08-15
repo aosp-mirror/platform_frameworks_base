@@ -1807,9 +1807,9 @@ public final class ActivityThread {
         }
     }
 
-    public void installSystemApplicationInfo(ApplicationInfo info) {
+    public void installSystemApplicationInfo(ApplicationInfo info, ClassLoader classLoader) {
         synchronized (this) {
-            getSystemContext().installSystemApplicationInfo(info);
+            getSystemContext().installSystemApplicationInfo(info, classLoader);
 
             // give ourselves a default profiler
             mProfiler = new Profiler();
