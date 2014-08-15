@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A unified virtual device providing a means of voice (and other) communication on a device.
@@ -89,7 +90,7 @@ public final class Phone {
 
     private AudioState mAudioState;
 
-    private final List<Listener> mListeners = new ArrayList<>();
+    private final List<Listener> mListeners = new CopyOnWriteArrayList<>();
 
     /** {@hide} */
     Phone(InCallAdapter adapter) {
@@ -171,7 +172,9 @@ public final class Phone {
      * @param listener A {@code Listener} object.
      */
     public final void removeListener(Listener listener) {
-        mListeners.remove(listener);
+        if (listener != null) {
+            mListeners.remove(listener);
+        }
     }
 
     /**
@@ -236,30 +239,26 @@ public final class Phone {
     }
 
     private void fireCallAdded(Call call) {
-        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
-        for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onCallAdded(this, call);
+        for (Listener listener : mListeners) {
+            listener.onCallAdded(this, call);
         }
     }
 
     private void fireCallRemoved(Call call) {
-        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
-        for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onCallRemoved(this, call);
+        for (Listener listener : mListeners) {
+            listener.onCallRemoved(this, call);
         }
     }
 
     private void fireAudioStateChanged(AudioState audioState) {
-        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
-        for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onAudioStateChanged(this, audioState);
+        for (Listener listener : mListeners) {
+            listener.onAudioStateChanged(this, audioState);
         }
     }
 
     private void fireBringToForeground(boolean showDialpad) {
-        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
-        for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onBringToForeground(this, showDialpad);
+        for (Listener listener : mListeners) {
+            listener.onBringToForeground(this, showDialpad);
         }
     }
 
