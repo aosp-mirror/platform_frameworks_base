@@ -2691,6 +2691,9 @@ String8 ResTable_config::toString() const {
             case ResTable_config::DENSITY_XXHIGH:
                 res.append("xxhdpi");
                 break;
+            case ResTable_config::DENSITY_XXXHIGH:
+                res.append("xxxhdpi");
+                break;
             case ResTable_config::DENSITY_NONE:
                 res.append("nodpi");
                 break;
