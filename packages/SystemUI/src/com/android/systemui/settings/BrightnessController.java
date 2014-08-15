@@ -59,6 +59,7 @@ public class BrightnessController implements ToggleSlider.Listener {
 
     private boolean mAutomatic;
     private boolean mListening;
+    private boolean mExternalChange;
 
     public interface BrightnessStateChangeCallback {
         public void onBrightnessLevelChanged();
@@ -86,19 +87,24 @@ public class BrightnessController implements ToggleSlider.Listener {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             if (selfChange) return;
-            if (BRIGHTNESS_MODE_URI.equals(uri)) {
-                updateMode();
-                updateSlider();
-            } else if (BRIGHTNESS_URI.equals(uri) && !mAutomatic) {
-                updateSlider();
-            } else if (BRIGHTNESS_ADJ_URI.equals(uri) && mAutomatic) {
-                updateSlider();
-            } else {
-                updateMode();
-                updateSlider();
-            }
-            for (BrightnessStateChangeCallback cb : mChangeCallbacks) {
-                cb.onBrightnessLevelChanged();
+            try {
+                mExternalChange = true;
+                if (BRIGHTNESS_MODE_URI.equals(uri)) {
+                    updateMode();
+                    updateSlider();
+                } else if (BRIGHTNESS_URI.equals(uri) && !mAutomatic) {
+                    updateSlider();
+                } else if (BRIGHTNESS_ADJ_URI.equals(uri) && mAutomatic) {
+                    updateSlider();
+                } else {
+                    updateMode();
+                    updateSlider();
+                }
+                for (BrightnessStateChangeCallback cb : mChangeCallbacks) {
+                    cb.onBrightnessLevelChanged();
+                }
+            } finally {
+                mExternalChange = false;
             }
         }
 
@@ -191,6 +197,8 @@ public class BrightnessController implements ToggleSlider.Listener {
     @Override
     public void onChanged(ToggleSlider view, boolean tracking, boolean automatic, int value) {
         updateIcon(mAutomatic);
+        if (mExternalChange) return;
+
         if (!mAutomatic) {
             final int val = value + mMinimumBacklight;
             setBrightness(val);
