@@ -49,7 +49,7 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 /**
- * This lets you create a drawable based on an XML vector graphic It can be
+ * This lets you create a drawable based on an XML vector graphic. It can be
  * defined in an XML file with the <code>&lt;vector></code> element.
  * <p/>
  * The vector drawable has the following elements:

@@ -119,11 +119,11 @@ public class AnimatedStateListDrawable extends StateListDrawable {
      *
      * @param fromId Unique identifier of the starting keyframe
      * @param toId Unique identifier of the ending keyframe
-     * @param transition An animatable drawable to use as a transition, may not be null
+     * @param transition An {@link Animatable} drawable to use as a transition, may not be null
      * @param reversible Whether the transition can be reversed
      */
-    public void addTransition(int fromId, int toId, @NonNull Drawable transition,
-            boolean reversible) {
+    public <T extends Drawable & Animatable> void addTransition(int fromId, int toId,
+            @NonNull T transition, boolean reversible) {
         if (transition == null) {
             throw new IllegalArgumentException("Transition drawable must not be null");
         }

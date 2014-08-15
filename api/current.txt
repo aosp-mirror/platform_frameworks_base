@@ -11655,7 +11655,7 @@ package android.graphics.drawable {
   public class AnimatedStateListDrawable extends android.graphics.drawable.StateListDrawable {
     ctor public AnimatedStateListDrawable();
     method public void addState(int[], android.graphics.drawable.Drawable, int);
-    method public void addTransition(int, int, android.graphics.drawable.Drawable, boolean);
+    method public void addTransition(int, int, T, boolean);
   }
 
   public class AnimatedVectorDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Animatable {
