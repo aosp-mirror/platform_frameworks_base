@@ -59,6 +59,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private boolean mIsViewsTransitionComplete;
     private boolean mIsSharedElementTransitionComplete;
     private ArrayList<Matrix> mSharedElementParentMatrices;
+    private Transition mEnterViewsTransition;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
             ArrayList<String> sharedElementNames, boolean isReturning) {
@@ -102,6 +103,10 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
 
     public void namedViewsReady(ArrayList<String> accepted, ArrayList<String> localNames) {
         triggerViewsReady(mapNamedElements(accepted, localNames));
+    }
+
+    public Transition getEnterViewsTransition() {
+        return mEnterViewsTransition;
     }
 
     @Override
@@ -399,10 +404,17 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 viewTransitionComplete();
             } else {
                 viewsTransition.forceVisibility(View.INVISIBLE, true);
-                setTransitionAlpha(mTransitioningViews, 1);
                 viewsTransition.addListener(new ContinueTransitionListener() {
                     @Override
+                    public void onTransitionStart(Transition transition) {
+                        mEnterViewsTransition = transition;
+                        setTransitionAlpha(mTransitioningViews, 1);
+                        super.onTransitionStart(transition);
+                    }
+
+                    @Override
                     public void onTransitionEnd(Transition transition) {
+                        mEnterViewsTransition = null;
                         transition.removeListener(this);
                         viewTransitionComplete();
                         super.onTransitionEnd(transition);
