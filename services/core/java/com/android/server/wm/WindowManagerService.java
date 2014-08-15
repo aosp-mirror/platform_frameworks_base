@@ -3592,7 +3592,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             final Task oldTask = mTaskIdToTask.get(atoken.groupId);
-            removeAppFromTaskLocked(atoken);
+            oldTask.removeAppToken(atoken);
 
             atoken.groupId = groupId;
             Task newTask = mTaskIdToTask.get(groupId);
@@ -4634,6 +4634,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void removeAppFromTaskLocked(AppWindowToken wtoken) {
+        wtoken.removeAllWindows();
+
         final Task task = mTaskIdToTask.get(wtoken.groupId);
         if (task != null) {
             if (!task.removeAppToken(wtoken)) {
