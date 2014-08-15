@@ -395,7 +395,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
             // Scroll the view into position (just center it in the curve)
             if (scrollToNewPosition) {
-                float newScroll = mLayoutAlgorithm.getStackScrollForTaskIndex(t) - 0.5f;
+                float newScroll = mLayoutAlgorithm.getStackScrollForTask(t) - 0.5f;
                 newScroll = mStackScroller.getBoundedStackScroll(newScroll);
                 mStackScroller.animateScroll(mStackScroller.getStackScroll(), newScroll, postScrollRunnable);
             } else {
@@ -681,8 +681,28 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Notify the callback that we've removed the task and it can clean up after it
         mCb.onTaskViewDismissed(removedTask);
 
+        // Get the stack scroll of the task to anchor to (since we are removing something, the front
+        // most task will be our anchor task)
+        Task anchorTask = null;
+        float prevAnchorTaskScroll = 0;
+        boolean pullStackForward = stack.getTaskCount() > 0;
+        if (pullStackForward) {
+            anchorTask = mStack.getFrontMostTask();
+            prevAnchorTaskScroll = mLayoutAlgorithm.getStackScrollForTask(anchorTask);
+        }
+
         // Update the min/max scroll and animate other task views into their new positions
         updateMinMaxScroll(true, mConfig.launchedWithAltTab, mConfig.launchedFromHome);
+
+        // Offset the stack by as much as the anchor task would otherwise move back
+        if (pullStackForward) {
+            float anchorTaskScroll = mLayoutAlgorithm.getStackScrollForTask(anchorTask);
+            mStackScroller.setStackScroll(mStackScroller.getStackScroll() + (anchorTaskScroll
+                    - prevAnchorTaskScroll));
+            mStackScroller.boundScroll();
+        }
+
+        // Animate all the tasks into place
         requestSynchronizeStackViewsWithModel(200);
 
         // Update the new front most task
