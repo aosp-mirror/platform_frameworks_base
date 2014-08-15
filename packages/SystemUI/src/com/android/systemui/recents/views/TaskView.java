@@ -57,7 +57,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     ObjectAnimator mDimAnimator;
     float mMaxDimScale;
     int mDim;
-    AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator(1.25f);
+    AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator(1f);
     PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.MULTIPLY);
 
     Task mTask;
