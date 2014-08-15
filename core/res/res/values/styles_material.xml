@@ -724,6 +724,10 @@ please see styles_device_defaults.xml.
         <item name="overlapAnchor">true</item>
     </style>
 
+    <style name="Widget.Material.Spinner.Form">
+        <item name="background">@drawable/spinner_textfield_background_material</item>
+    </style>
+
     <style name="Widget.Material.TabWidget" parent="Widget.TabWidget">
         <item name="tabStripLeft">@null</item>
         <item name="tabStripRight">@null</item>
@@ -973,6 +977,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.Spinner" parent="Widget.Material.Spinner" />
     <style name="Widget.Material.Light.Spinner.DropDown" parent="Widget.Material.Spinner.DropDown"/>
     <style name="Widget.Material.Light.Spinner.DropDown.ActionBar" parent="Widget.Material.Spinner.DropDown.ActionBar"/>
+    <style name="Widget.Material.Light.Spinner.Form" parent="Widget.Material.Spinner.Form" />
     <style name="Widget.Material.Light.TabWidget" parent="Widget.Material.TabWidget"/>
     <style name="Widget.Material.Light.WebTextView" parent="Widget.Material.WebTextView"/>
     <style name="Widget.Material.Light.WebView" parent="Widget.Material.WebView"/>

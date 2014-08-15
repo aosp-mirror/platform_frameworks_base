@@ -2558,6 +2558,7 @@ package android {
     field public static final int Widget_Material_Light_SeekBar = 16974534; // 0x10302c6
     field public static final int Widget_Material_Light_SegmentedButton = 16974535; // 0x10302c7
     field public static final int Widget_Material_Light_Spinner = 16974537; // 0x10302c9
+    field public static final int Widget_Material_Light_Spinner_Form = 16974567; // 0x10302e7
     field public static final int Widget_Material_Light_StackView = 16974536; // 0x10302c8
     field public static final int Widget_Material_Light_Tab = 16974538; // 0x10302ca
     field public static final int Widget_Material_Light_TabWidget = 16974539; // 0x10302cb
@@ -2584,6 +2585,7 @@ package android {
     field public static final int Widget_Material_SeekBar = 16974471; // 0x1030287
     field public static final int Widget_Material_SegmentedButton = 16974472; // 0x1030288
     field public static final int Widget_Material_Spinner = 16974474; // 0x103028a
+    field public static final int Widget_Material_Spinner_Form = 16974566; // 0x10302e6
     field public static final int Widget_Material_StackView = 16974473; // 0x1030289
     field public static final int Widget_Material_Tab = 16974475; // 0x103028b
     field public static final int Widget_Material_TabWidget = 16974476; // 0x103028c
