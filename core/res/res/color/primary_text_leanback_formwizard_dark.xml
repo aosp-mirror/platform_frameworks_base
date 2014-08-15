@@ -14,16 +14,9 @@
      limitations under the License.
 -->
 
-<!-- Colors specific to Leanback themes. -->
-<resources>
-    <color name="background_leanback_dark">#ff324248</color>
-    <color name="background_leanback_light">#ffeeeeee</color>
-
-    <color name="primary_text_leanback_dark">#cceeeeee</color>
-    <color name="secondary_text_leanback_dark">#99eeeeee</color>
-
-    <color name="primary_text_leanback_light">#cc222222</color>
-    <color name="secondary_text_leanback_light">#99222222</color>
-
-    <color name="primary_text_leanback_formwizard_default_dark">#ffeeeeee</color>
-</resources>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false"
+        android:alpha="@dimen/disabled_alpha_leanback_formwizard"
+        android:color="@color/primary_text_leanback_formwizard_default_dark"/>
+    <item android:color="@color/primary_text_leanback_formwizard_default_dark"/>
+</selector>
