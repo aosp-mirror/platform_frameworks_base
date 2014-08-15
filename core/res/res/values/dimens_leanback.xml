@@ -13,17 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<!-- Colors specific to Leanback themes. -->
 <resources>
-    <color name="background_leanback_dark">#ff324248</color>
-    <color name="background_leanback_light">#ffeeeeee</color>
-
-    <color name="primary_text_leanback_dark">#cceeeeee</color>
-    <color name="secondary_text_leanback_dark">#99eeeeee</color>
-
-    <color name="primary_text_leanback_light">#cc222222</color>
-    <color name="secondary_text_leanback_light">#99222222</color>
-
-    <color name="primary_text_leanback_formwizard_default_dark">#ffeeeeee</color>
+    <!-- Default alpha value for disabled elements. -->
+    <item name="disabled_alpha_leanback_formwizard" format="float" type="dimen">0.2</item>
 </resources>
