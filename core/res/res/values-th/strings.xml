@@ -40,7 +40,7 @@
     <string name="serviceEnabledFor" msgid="6856228140453471041">"เปิดการใช้งานบริการสำหรับ:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"ปิดใช้งานบริการไว้"</string>
     <string name="serviceRegistered" msgid="6275019082598102493">"การลงทะเบียนสำเร็จแล้ว"</string>
-    <string name="serviceErased" msgid="1288584695297200972">"นำออกเรียบร้อยแล้ว"</string>
+    <string name="serviceErased" msgid="1288584695297200972">"ลบเรียบร้อยแล้ว"</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"รหัสผ่านไม่ถูกต้อง"</string>
     <string name="mmiComplete" msgid="8232527495411698359">"MMI เสร็จสมบูรณ์"</string>
     <string name="badPin" msgid="9015277645546710014">"PIN เก่าที่คุณพิมพ์ไม่ถูกต้อง"</string>
@@ -134,9 +134,9 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"ซิงค์"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"ซิงค์"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"มีการนำออก <xliff:g id="CONTENT_TYPE">%s</xliff:g> มากเกินไป"</string>
-    <string name="low_memory" product="tablet" msgid="6494019234102154896">"ที่จัดเก็บข้อมูลของแท็บเล็ตเต็ม นำออกไฟล์บางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
-    <string name="low_memory" product="watch" msgid="4415914910770005166">"ที่เก็บข้อมูลนาฬิกาเต็ม โปรดนำออกไฟล์บางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
-    <string name="low_memory" product="default" msgid="3475999286680000541">"ที่เก็บข้อมูลโทรศัพท์เต็ม นำออกบางไฟล์เพื่อเพิ่มที่ว่าง"</string>
+    <string name="low_memory" product="tablet" msgid="6494019234102154896">"ที่จัดเก็บข้อมูลของแท็บเล็ตเต็ม ลบไฟล์บางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"ที่เก็บข้อมูลนาฬิกาเต็ม โปรดลบไฟล์บางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
+    <string name="low_memory" product="default" msgid="3475999286680000541">"ที่เก็บข้อมูลโทรศัพท์เต็ม ลบบางไฟล์เพื่อเพิ่มที่ว่าง"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"เครือข่ายอาจได้รับการตรวจสอบ"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"โดยบุคคลที่สามที่ไม่รู้จัก"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"โดย <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -151,7 +151,7 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"ปิดเสียง"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"เสียงเรียกเข้าแบบสั่น"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"เปิดเสียง"</string>
-    <string name="shutdown_progress" msgid="2281079257329981203">"กำลังปิดระบบ..."</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"กำลังปิด..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"แท็บเล็ตของคุณจะปิดการทำงาน"</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"นาฬิกาจะปิดการทำงาน"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"โทรศัพท์ของคุณจะปิดเครื่อง"</string>
@@ -257,13 +257,13 @@
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"ติดตั้งทางลัด"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"อนุญาตให้แอปพลิเคชันเพิ่มทางลัดหน้าจอหลักโดยไม่ต้องให้ผู้ใช้จัดการ"</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ถอนการติดตั้งทางลัด"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"อนุญาตให้แอปพลิเคชันนำออกทางลัดหน้าจอหลักโดยไม่ต้องให้ผู้ใช้จัดการ"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"อนุญาตให้แอปพลิเคชันลบทางลัดหน้าจอหลักโดยไม่ต้องให้ผู้ใช้จัดการ"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"จัดเส้นทางการโทรออกใหม่"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"อนุญาตให้แอปพลิเคชันประมวลผลการโทรออกและเปลี่ยนแปลงหมายเลขที่จะโทรไป การอนุญาตนี้จะทำให้แอปพลิเคชันสามารถตรวจสอบ เปลี่ยนเส้นทาง หรือกีดขวางไม่ให้โทรออกได้"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"รับข้อความ (SMS)"</string>
-    <string name="permdesc_receiveSms" msgid="6424387754228766939">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ SMS ซึ่งหมายความว่าแอปพลิเคชันจะสามารถตรวจสอบหรือนำออกข้อความที่ส่งมายังอุปกรณ์ของคุณได้โดยไม่ต้องแสดงให้คุณเห็น"</string>
+    <string name="permdesc_receiveSms" msgid="6424387754228766939">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ SMS ซึ่งหมายความว่าแอปพลิเคชันจะสามารถตรวจสอบหรือลบข้อความที่ส่งมายังอุปกรณ์ของคุณได้โดยไม่ต้องแสดงให้คุณเห็น"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"รับข้อความ (MMS)"</string>
-    <string name="permdesc_receiveMms" msgid="533019437263212260">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ MMS ซึ่งหมายความว่าแอปพลิเคชันจะสามารถตรวจสอบหรือนำออกข้อความที่ส่งมายังอุปกรณ์ของคุณได้โดยไม่ต้องแสดงให้คุณเห็น"</string>
+    <string name="permdesc_receiveMms" msgid="533019437263212260">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ MMS ซึ่งหมายความว่าแอปพลิเคชันจะสามารถตรวจสอบหรือลบข้อความที่ส่งมายังอุปกรณ์ของคุณได้โดยไม่ต้องแสดงให้คุณเห็น"</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"ได้รับการกระจายข้อความฉุกเฉิน"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความที่เผยแพร่กรณีฉุกเฉิน การอนุญาตนี้ใช้ได้เฉพาะกับแอปพลิเคชันระบบเท่านั้น"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"อ่านข้อความที่ได้รับจากสถานีมือถือ"</string>
@@ -276,10 +276,10 @@
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"อนุญาตให้แอปพลิเคชันอ่านข้อความ SMS ที่จัดเก็บไว้ในแท็บเล็ตหรือซิมการ์ด ซึ่งจะทำให้แอปพลิเคชันสามารถอ่านข้อความ SMS ทั้งหมดได้ไม่ว่าจะเป็นเนื้อหาใดหรือมีการรักษาข้อมูลที่เป็นความลับแบบใด"</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"อนุญาตให้แอปพลิเคชันอ่านข้อความ SMS ที่จัดเก็บไว้ในโทรศัพท์หรือซิมการ์ด ซึ่งจะทำให้แอปพลิเคชันสามารถอ่านข้อความ SMS ทั้งหมดได้ไม่ว่าจะเป็นเนื้อหาใดหรือมีการรักษาข้อมูลที่เป็นความลับแบบใด"</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"แก้ไขข้อความของคุณ (SMS หรือ MMS)"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"อนุญาตให้แอปพลิเคชันเขียนลงในข้อความ SMS ที่เก็บไว้ในแท็บเล็ตหรือซิมการ์ดของคุณ แอปพลิเคชันที่เป็นอันตรายอาจนำออกข้อความของคุณทิ้ง"</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"อนุญาตให้แอปพลิเคชันเขียนลงในข้อความ SMS ที่เก็บไว้ในโทรศัพท์หรือซิมการ์ดของคุณ แอปพลิเคชันที่เป็นอันตรายอาจนำออกข้อความของคุณทิ้ง"</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"อนุญาตให้แอปพลิเคชันเขียนลงในข้อความ SMS ที่เก็บไว้ในแท็บเล็ตหรือซิมการ์ดของคุณ แอปพลิเคชันที่เป็นอันตรายอาจลบข้อความของคุณทิ้ง"</string>
+    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"อนุญาตให้แอปพลิเคชันเขียนลงในข้อความ SMS ที่เก็บไว้ในโทรศัพท์หรือซิมการ์ดของคุณ แอปพลิเคชันที่เป็นอันตรายอาจลบข้อความของคุณทิ้ง"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"รับข้อความ (WAP)"</string>
-    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ WAP การอนุญาตนี้รวมถึงความสามารถในการตรวจสอบหรือนำออกข้อความที่ส่งมาให้คุณโดยไม่ต้องแสดงให้คุณเห็น"</string>
+    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ WAP การอนุญาตนี้รวมถึงความสามารถในการตรวจสอบหรือลบข้อความที่ส่งมาให้คุณโดยไม่ต้องแสดงให้คุณเห็น"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"เรียกแอปพลิเคชันที่ทำงานอยู่"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"อนุญาตให้แอปพลิเคชันเรียกดูข้อมูลเกี่ยวกับงานที่ดำเนินการอยู่ในขณะนี้และเมื่อเร็วๆ นี้ ซึ่งอาจทำให้แอปพลิเคชันสามารถค้นข้อมูลได้ว่าอุปกรณ์นี้ใช้แอปพลิเคชันใดบ้าง"</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"โต้ตอบระหว่างผู้ใช้"</string>
@@ -293,9 +293,9 @@
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"จัดลำดับแอปพลิเคชันที่ทำงานอยู่ใหม่"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"อนุญาตให้แอปพลิเคชันย้ายงานไปยังส่วนหน้าและพื้นหลัง แอปพลิเคชันอาจดำเนินการโดยไม่รอคำสั่งจากคุณ"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"หยุดแอปพลิเคชันที่ทำงานอยู่"</string>
-    <string name="permdesc_removeTasks" msgid="1394714352062635493">"อนุญาตให้แอปพลิเคชันนำออกงานออกและยุติแอปพลิเคชันต่างๆ ของงานนั้น แอปพลิเคชันที่เป็นอันตรายอาจทำให้แอปพลิเคชันอื่นๆ ทำงานได้ไม่ถูกต้อง"</string>
+    <string name="permdesc_removeTasks" msgid="1394714352062635493">"อนุญาตให้แอปพลิเคชันลบงานออกและยุติแอปพลิเคชันต่างๆ ของงานนั้น แอปพลิเคชันที่เป็นอันตรายอาจทำให้แอปพลิเคชันอื่นๆ ทำงานได้ไม่ถูกต้อง"</string>
     <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"จัดการชุดรายการกิจกรรม"</string>
-    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"อนุญาตให้แอปเพิ่ม นำออก และแก้ไขชุดรายการกิจกรรมที่แอปอื่นใช้งาน แอปที่อันตรายอาจรบกวนการทำงานของแอปอื่น"</string>
+    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"อนุญาตให้แอปเพิ่ม ลบ และแก้ไขชุดรายการกิจกรรมที่แอปอื่นใช้งาน แอปที่อันตรายอาจรบกวนการทำงานของแอปอื่น"</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"เริ่มต้นกิจกรรมใดๆ"</string>
     <string name="permdesc_startAnyActivity" msgid="997823695343584001">"อนุญาตให้แอปพลิเคชันเริ่มกิจกรรม ไม่ว่าการอนุญาตหรือสถานะที่ส่งออกจะเป็นอย่างไรก็ตาม"</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"ตั้งค่าความเข้ากันได้ของหน้าจอ"</string>
@@ -333,7 +333,7 @@
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"ตรวจสอบและควบคุมแอปพลิเคชันทั้งหมดที่เปิดใช้งาน"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"อนุญาตให้แอปพลิเคชันตรวจสอบและควบคุมวิธีการที่ระบบเปิดกิจกรรมต่างๆ แอปพลิเคชันที่เป็นอันตรายอาจทำอันตรายแก่ระบบได้อย่างสิ้นเชิง การอนุญาตนี้จำเป็นสำหรับการพัฒนาเท่านั้น ไม่ใช้สำหรับแอปพลิเคชันทั่วไปโดยเด็ดขาด"</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"ส่งการกระจายข้อมูลว่ามีการนำแพ็กเกจออก"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"อนุญาตให้แอปพลิเคชันกระจายข้อมูลการแจ้งเตือนว่าแพ็กเกจของแอปพลิเคชันหนึ่งๆ ได้ถูกนำออกไปแล้ว แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ยุติแอปพลิเคชันอื่นๆ ที่กำลังทำงานอยู่"</string>
+    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"อนุญาตให้แอปพลิเคชันกระจายข้อมูลการแจ้งเตือนว่าแพ็กเกจของแอปพลิเคชันหนึ่งๆ ได้ถูกลบไปแล้ว แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ยุติแอปพลิเคชันอื่นๆ ที่กำลังทำงานอยู่"</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"ส่งการกระจายข้อมูลว่าได้รับ SMS"</string>
     <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"อนุญาตให้แอปพลิเคชันกระจายข้อมูลการแจ้งเตือนว่าได้รับข้อความ SMS แล้ว แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ปลอมข้อความ SMS ที่เข้ามา"</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"ส่งการกระจายข้อมูลว่าได้รับ WAP-PUSH"</string>
@@ -391,8 +391,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"อนุญาตให้ผู้ใช้เชื่อมโยงกับส่วนติดต่อผู้ใช้ระดับสูงสุดของบริการวิดเจ็ต ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"ติดต่อกับผู้ดูแลอุปกรณ์"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"อนุญาตให้ผู้ใช้ส่งการติดต่อไปยังโปรแกรมควบคุมอุปกรณ์ ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
-    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"เพิ่มหรือนำออกผู้ดูแลระบบอุปกรณ์"</string>
-    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"อนุญาตให้เจ้าของเพิ่มหรือนำออกผู้ดูแลระบบอุปกรณ์ที่ใช้งาน ไม่ควรต้องใช้สำหรับแอปปกติ"</string>
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"เพิ่มหรือลบผู้ดูแลระบบอุปกรณ์"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"อนุญาตให้เจ้าของเพิ่มหรือลบผู้ดูแลระบบอุปกรณ์ที่ใช้งาน ไม่ควรต้องใช้สำหรับแอปปกติ"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"เปลี่ยนการวางแนวหน้าจอ"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"อนุญาตให้แอปพลิเคชันเปลี่ยนการหมุนของหน้าจอได้ตลอดเวลา ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"เปลี่ยนความเร็วของตัวชี้"</string>
@@ -404,19 +404,19 @@
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ทำให้แอปพลิเคชันทำงานเสมอ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"อนุญาตให้แอปพลิเคชันทำให้ส่วนหนึ่งของตัวเองคงอยู่ถาวรในหน่วยความจำ ซึ่งจะจำกัดพื้นที่หน่วยความจำที่ใช้งานได้ของแอปพลิเคชันอื่นๆ และทำให้แท็บเล็ตทำงานช้าลง"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"อนุญาตให้แอปพลิเคชันทำให้ส่วนหนึ่งของตัวเองคงอยู่ถาวรในหน่วยความจำ ซึ่งจะจำกัดพื้นที่หน่วยความจำที่ใช้งานได้ของแอปพลิเคชันอื่นๆ และทำให้โทรศัพท์ทำงานช้าลง"</string>
-    <string name="permlab_deletePackages" msgid="184385129537705938">"นำออกแอปพลิเคชัน"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"อนุญาตให้แอปพลิเคชันนำออกแพ็กเกจ Android แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้นำออกแอปพลิเคชันที่สำคัญ"</string>
-    <string name="permlab_clearAppUserData" msgid="274109191845842756">"นำออกข้อมูลของแอปพลิเคชันอื่น"</string>
+    <string name="permlab_deletePackages" msgid="184385129537705938">"ลบแอปพลิเคชัน"</string>
+    <string name="permdesc_deletePackages" msgid="7411480275167205081">"อนุญาตให้แอปพลิเคชันลบแพ็กเกจ Android แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ลบแอปพลิเคชันที่สำคัญ"</string>
+    <string name="permlab_clearAppUserData" msgid="274109191845842756">"ลบข้อมูลของแอปพลิเคชันอื่น"</string>
     <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"อนุญาตให้แอปพลิเคชันล้างข้อมูลผู้ใช้"</string>
-    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"นำออกแคชของแอปพลิเคชันอื่น"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"อนุญาตให้แอปพลิเคชันนำออกไฟล์แคช"</string>
+    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"ลบแคชของแอปพลิเคชันอื่น"</string>
+    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"อนุญาตให้แอปพลิเคชันลบไฟล์แคช"</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"วัดพื้นที่เก็บข้อมูลของแอปพลิเคชัน"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"อนุญาตให้แอปพลิเคชันเรียกดูรหัส ข้อมูล และขนาดแคชของตน"</string>
     <string name="permlab_installPackages" msgid="2199128482820306924">"ติดตั้งแอปพลิเคชันโดยตรง"</string>
     <string name="permdesc_installPackages" msgid="5628530972548071284">"อนุญาตให้แอปพลิเคชันติดตั้งแพ็กเกจ Android ใหม่หรือที่อัปเดต แอปพลิเคชันที่เป็นอันตรายอาจใช้การอนุญาตนี้ในการเพิ่มแอปพลิเคชันใหม่ๆ ด้วยสิทธิ์ที่สูงนี้ได้ตามต้องการ"</string>
-    <string name="permlab_clearAppCache" msgid="7487279391723526815">"นำออกข้อมูลแคชของแอปพลิเคชันทั้งหมด"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"อนุญาตให้แอปพลิเคชันสร้างพื้นที่ว่างในที่จัดเก็บข้อมูลของแท็บเล็ต โดยนำออกไฟล์ในไดเรกทอรีแคชของแอปพลิเคชันอื่นๆ ซึ่งอาจทำให้แอปพลิเคชันอื่นเริ่มทำงานช้ากว่าเดิมเนื่องจากต้องดึงข้อมูลของตนซ้ำ"</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"อนุญาตให้แอปพลิเคชันสร้างพื้นที่ว่างในที่จัดเก็บข้อมูลของโทรศัพท์ โดยนำออกไฟล์ในไดเรกทอรีแคชของแอปพลิเคชันอื่นๆ ซึ่งอาจทำให้แอปพลิเคชันอื่นเริ่มทำงานช้ากว่าเดิมเนื่องจากต้องดึงข้อมูลของตนซ้ำ"</string>
+    <string name="permlab_clearAppCache" msgid="7487279391723526815">"ลบข้อมูลแคชของแอปพลิเคชันทั้งหมด"</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"อนุญาตให้แอปพลิเคชันสร้างพื้นที่ว่างในที่จัดเก็บข้อมูลของแท็บเล็ต โดยลบไฟล์ในไดเรกทอรีแคชของแอปพลิเคชันอื่นๆ ซึ่งอาจทำให้แอปพลิเคชันอื่นเริ่มทำงานช้ากว่าเดิมเนื่องจากต้องดึงข้อมูลของตนซ้ำ"</string>
+    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"อนุญาตให้แอปพลิเคชันสร้างพื้นที่ว่างในที่จัดเก็บข้อมูลของโทรศัพท์ โดยลบไฟล์ในไดเรกทอรีแคชของแอปพลิเคชันอื่นๆ ซึ่งอาจทำให้แอปพลิเคชันอื่นเริ่มทำงานช้ากว่าเดิมเนื่องจากต้องดึงข้อมูลของตนซ้ำ"</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"ย้ายแหล่งข้อมูลแอปพลิเคชัน"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"อนุญาตให้แอปพลิเคชันย้ายแหล่งข้อมูลแอปพลิเคชันจากภายในไปยังสื่อภายนอกและกลับกัน"</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"อ่านข้อมูลบันทึกที่สำคัญ"</string>
@@ -451,14 +451,14 @@
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"อนุญาตให้แอปพลิเคชันอ่านข้อมูลผู้ติดต่อที่จัดเก็บไว้ในแท็บเล็ต ซึ่งรวมถึงความถี่ในการโทร ส่งอีเมล หรือการติดต่อด้วยวิธีอื่นๆ กับบุคคลใดบุคคลหนึ่ง การอนุญาตนี้ทำให้แอปพลิเคชันสามารถบันทึกข้อมูลผู้ติดต่อของคุณ และแอปพลิเคชันที่เป็นอันตรายอาจแชร์ข้อมูลผู้ติดต่อโดยไม่แจ้งให้คุณทราบ"</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"อนุญาตให้แอปพลิเคชันอ่านข้อมูลผู้ติดต่อที่จัดเก็บไว้ในโทรศัพท์ ซึ่งรวมถึงความถี่ในการโทร ส่งอีเมล หรือการติดต่อด้วยวิธีอื่นๆ กับบุคคลใดบุคคลหนึ่ง การอนุญาตนี้ทำให้แอปพลิเคชันสามารถบันทึกข้อมูลผู้ติดต่อของคุณ และแอปพลิเคชันที่เป็นอันตรายอาจแชร์ข้อมูลผู้ติดต่อโดยไม่แจ้งให้คุณทราบ"</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"แก้ไขผู้ติดต่อของคุณ"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงข้อมูลผู้ติดต่อที่จัดเก็บไว้ในแท็บเล็ต ซึ่งรวมถึงความถี่ในการโทร ส่งอีเมล หรือการติดต่อด้วยวิธีอื่นๆ กับบุคคลใดบุคคลหนึ่ง การอนุญาตนี้ทำให้แอปพลิเคชันสามารถนำออกข้อมูลผู้ติดต่อได้"</string>
-    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงข้อมูลผู้ติดต่อที่จัดเก็บไว้ในโทรศัพท์ ซึ่งรวมถึงความถี่ในการโทร ส่งอีเมล หรือการติดต่อด้วยวิธีอื่นๆ กับบุคคลใดบุคคลหนึ่ง การอนุญาตนี้ทำให้แอปพลิเคชันสามารถนำออกข้อมูลผู้ติดต่อได้"</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงข้อมูลผู้ติดต่อที่จัดเก็บไว้ในแท็บเล็ต ซึ่งรวมถึงความถี่ในการโทร ส่งอีเมล หรือการติดต่อด้วยวิธีอื่นๆ กับบุคคลใดบุคคลหนึ่ง การอนุญาตนี้ทำให้แอปพลิเคชันสามารถลบข้อมูลผู้ติดต่อได้"</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงข้อมูลผู้ติดต่อที่จัดเก็บไว้ในโทรศัพท์ ซึ่งรวมถึงความถี่ในการโทร ส่งอีเมล หรือการติดต่อด้วยวิธีอื่นๆ กับบุคคลใดบุคคลหนึ่ง การอนุญาตนี้ทำให้แอปพลิเคชันสามารถลบข้อมูลผู้ติดต่อได้"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"อ่านประวัติการโทร"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"อนุญาตให้แอปพลิเคชันอ่านบันทึกการโทรของแท็บเล็ต ซึ่งรวมถึงข้อมูลเกี่ยวกับการโทรเข้าและโทรออก การอนุญาตนี้ทำให้แอปพลิเคชันสามารถบันทึกข้อมูลบันทึกการโทรของคุณได้ และแอปพลิเคชันที่เป็นอันตรายอาจแชร์ข้อมูลบันทึกการโทรนี้โดยไม่แจ้งให้คุณทราบ"</string>
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"อนุญาตให้แอปพลิเคชันอ่านบันทึกการโทรของโทรศัพท์ ซึ่งรวมถึงข้อมูลเกี่ยวกับการโทรเข้าและโทรออก การอนุญาตนี้ทำให้แอปพลิเคชันสามารถบันทึกข้อมูลบันทึกการโทรของคุณได้ และแอปพลิเคชันที่เป็นอันตรายอาจแชร์ข้อมูลบันทึกการโทรนี้โดยไม่แจ้งให้คุณทราบ"</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"เขียนประวัติการโทร"</string>
-    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"อนุญาตให้แอปแก้ไขประวัติการโทรจากแท็บเล็ตของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อนำออกหรือแก้ไขประวัติการโทรของคุณ"</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"อนุญาตให้แอปแก้ไขประวัติการโทรจากโทรศัพท์ของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อนำออกหรือแก้ไขประวัติการโทรของคุณ"</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"อนุญาตให้แอปแก้ไขประวัติการโทรจากแท็บเล็ตของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อลบหรือแก้ไขประวัติการโทรของคุณ"</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"อนุญาตให้แอปแก้ไขประวัติการโทรจากโทรศัพท์ของคุณ รวมถึงข้อมูลเกี่ยวกับสายเรียกเข้าและการโทรออก แอปที่เป็นอันตรายอาจใช้สิ่งนี้เพื่อลบหรือแก้ไขประวัติการโทรของคุณ"</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"อ่านบัตรผู้ติดต่อของคุณเอง"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"อนุญาตให้แอปพลิเคชันอ่านข้อมูลส่วนตัวในโปรไฟล์ที่จัดเก็บไว้ในอุปกรณ์ของคุณ เช่น ชื่อและข้อมูลติดต่อของคุณ ซึ่งหมายความว่าแอปพลิเคชันสามารถระบุตัวคุณและอาจส่งข้อมูลโปรไฟล์ของคุณให้ผู้อื่น"</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"แก้ไขบัตรผู้ติดต่อของคุณเอง"</string>
@@ -473,8 +473,8 @@
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"อนุญาตให้แอปพลิเคชันอ่านกิจกรรมในปฏิทินทั้งหมดที่จัดเก็บไว้ในแท็บเล็ตของคุณ ซึ่งรวมถึงกิจกรรมของเพื่อนหรือเพื่อนร่วมงานด้วย ซึ่งอาจทำให้แอปพลิเคชันสามารถแชร์หรือบันทึกข้อมูลในปฏิทินของคุณได้ไม่ว่าจะมีการรักษาข้อมูลที่เป็นความลับหรือหรือข้อมูลที่อ่อนไหวแบบใดก็ตาม"</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"อนุญาตให้แอปพลิเคชันอ่านกิจกรรมในปฏิทินทั้งหมดที่จัดเก็บไว้ในโทรศัพท์ของคุณ ซึ่งรวมถึงกิจกรรมของเพื่อนหรือเพื่อนร่วมงานด้วย ซึ่งอาจทำให้แอปพลิเคชันสามารถแชร์หรือบันทึกข้อมูลในปฏิทินของคุณได้ไม่ว่าจะมีการรักษาข้อมูลที่เป็นความลับหรือหรือข้อมูลที่อ่อนไหวแบบใดก็ตาม"</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"เพิ่มหรือแก้ไขกิจกรรมบนปฏิทินและส่งอีเมลให้ผู้เข้าร่วมโดยที่เจ้าของไม่ทราบ"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"อนุญาตให้แอปพลิเคชันเพิ่ม นำออก เปลี่ยนกิจกรรมที่คุณสามารถเปลี่ยนแปลงในแท็บเล็ตได้ รวมถึงกิจกรรมของเพื่อนหรือเพื่อนร่วมงานด้วย การอนุญาตนี้อาจทำให้แอปพลิเคชันสามารถส่งข้อความที่มาจากเจ้าของปฏิทิน หรือเปลี่ยนแปลงกิจกรรมโดยที่เจ้าของไม่ทราบ"</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"อนุญาตให้แอปพลิเคชันเพิ่ม นำออก เปลี่ยนกิจกรรมที่คุณสามารถเปลี่ยนแปลงในโทรศัพท์ได้ รวมถึงกิจกรรมของเพื่อนหรือเพื่อนร่วมงานด้วย การอนุญาตนี้อาจทำให้แอปพลิเคชันสามารถส่งข้อความที่มาจากเจ้าของปฏิทิน หรือเปลี่ยนแปลงกิจกรรมโดยที่เจ้าของไม่ทราบ"</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"อนุญาตให้แอปพลิเคชันเพิ่ม ลบ เปลี่ยนกิจกรรมที่คุณสามารถเปลี่ยนแปลงในแท็บเล็ตได้ รวมถึงกิจกรรมของเพื่อนหรือเพื่อนร่วมงานด้วย การอนุญาตนี้อาจทำให้แอปพลิเคชันสามารถส่งข้อความที่มาจากเจ้าของปฏิทิน หรือเปลี่ยนแปลงกิจกรรมโดยที่เจ้าของไม่ทราบ"</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"อนุญาตให้แอปพลิเคชันเพิ่ม ลบ เปลี่ยนกิจกรรมที่คุณสามารถเปลี่ยนแปลงในโทรศัพท์ได้ รวมถึงกิจกรรมของเพื่อนหรือเพื่อนร่วมงานด้วย การอนุญาตนี้อาจทำให้แอปพลิเคชันสามารถส่งข้อความที่มาจากเจ้าของปฏิทิน หรือเปลี่ยนแปลงกิจกรรมโดยที่เจ้าของไม่ทราบ"</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"จำลองที่มาของตำแหน่งเพื่อทดสอบ"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"สร้างต้นทางของตำแหน่งจำลองสำหรับการทดสอบหรือติดตั้งผู้ให้บริการตำแหน่งรายใหม่ ซึ่งจะทำให้แอปพลิเคชันสามารถแทนที่ตำแหน่งและ/หรือสถานะที่ส่งกลับมาจากต้นทางของตำแหน่งอื่นๆ เช่น GPS หรือผู้ให้บริการตำแหน่งได้"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"เข้าถึงคำสั่งของโปรแกรมแจ้งตำแหน่งพิเศษ"</string>
@@ -522,8 +522,8 @@
     <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"เข้าถึงระบบไฟล์ของ USB"</string>
     <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"เข้าถึงระบบไฟล์ของการ์ด SD"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"อนุญาตให้แอปพลิเคชันต่อเชื่อมและยกเลิกการต่อเชื่อมระบบไฟล์สำหรับที่เก็บข้อมูลแบบถอดได้"</string>
-    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"นำออกที่จัดเก็บข้อมูล USB"</string>
-    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"นำออกการ์ด SD"</string>
+    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"ลบที่จัดเก็บข้อมูล USB"</string>
+    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"ลบการ์ด SD"</string>
     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"อนุญาตให้แอปพลิเคชันฟอร์แมตที่เก็บข้อมูลแบบถอดได้"</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"รับข้อมูลบนที่เก็บข้อมูลภายใน"</string>
     <string name="permdesc_asec_access" msgid="3094563844593878548">"อนุญาตให้แอปพลิเคชันดึงข้อมูลจากที่จัดเก็บข้อมูลภายใน"</string>
@@ -581,7 +581,7 @@
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"ปรับขนาดวอลเปเปอร์ของคุณ"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"อนุญาตให้แอปพลิเคชันตั้งค่าคำแนะนำขนาดวอลเปเปอร์ของระบบ"</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"รีเซ็ตระบบเป็นค่าเริ่มต้นจากโรงงาน"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"อนุญาตให้แอปพลิเคชันรีเซ็ตระบบทั้งหมดเป็นค่าเริ่มต้นจากโรงงาน นำออกข้อมูลทั้งหมด การกำหนดค่า และแอปพลิเคชันที่ติดตั้งไว้"</string>
+    <string name="permdesc_masterClear" msgid="3665380492633910226">"อนุญาตให้แอปพลิเคชันรีเซ็ตระบบทั้งหมดเป็นค่าเริ่มต้นจากโรงงาน ลบข้อมูลทั้งหมด การกำหนดค่า และแอปพลิเคชันที่ติดตั้งไว้"</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"ตั้งเวลา"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"อนุญาตให้แอปพลิเคชันเปลี่ยนเวลานาฬิกาของแท็บเล็ต"</string>
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"อนุญาตให้แอปพลิเคชันเปลี่ยนเวลานาฬิกาของโทรศัพท์"</string>
@@ -654,11 +654,11 @@
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"อ่านเนื้อหาในการ์ด SD ของคุณ"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"อนุญาตให้แอปอ่านเนื้อหาในที่จัดเก็บข้อมูล USB"</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"อนุญาตให้แอปอ่านเนื้อหาในการ์ด SD"</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"แก้ไขหรือนำออกเนื้อหาใน USB"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"แก้ไขหรือนำออกเนื้อหาในการ์ด SD ของคุณ"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"แก้ไขหรือลบเนื้อหาใน USB"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"แก้ไขหรือลบเนื้อหาในการ์ด SD ของคุณ"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"อนุญาตให้แอปฯ เขียนลงใน USB"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"อนุญาตให้แอปพลิเคชันเขียนลงบนการ์ด SD"</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"แก้/นำออกเนื้อหาข้อมูลสื่อภายใน"</string>
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"แก้/ลบเนื้อหาข้อมูลสื่อภายใน"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"อนุญาตให้แอปพลิเคชันแก้ไขเนื้อหาของที่เก็บข้อมูลสื่อภายใน"</string>
     <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"จัดการที่เก็บเอกสาร"</string>
     <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"อนุญาตให้แอปจัดการที่เก็บเอกสาร"</string>
@@ -691,15 +691,15 @@
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ตั้งค่ากฎรหัสผ่าน"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"ควบคุมความยาวและอักขระที่อนุญาตให้ใช้ในรหัสผ่านการปลดล็อกหน้าจอ"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ตรวจสอบจำนวนของรหัสผ่านที่พิมพ์ไม่ถูกต้องขณะปลดล็อกหน้าจอ และล็อกแท็บเล็ตหรือนำออกข้อมูลทั้งหมดในแท็บเล็ตถ้ามีการพิมพ์รหัสผ่านที่ไม่ถูกต้องมากเกินไป"</string>
-    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"ตรวจสอบจำนวนการพิมพ์รหัสผ่านที่ไม่ถูกต้องขณะปลดล็อกหน้าจอ และล็อกโทรศัพท์หรือนำออกข้อมูลทั้งหมดในโทรศัพท์ถ้ามีการพิมพ์รหัสผ่านที่ไม่ถูกต้องมากเกินไป"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ตรวจสอบจำนวนของรหัสผ่านที่พิมพ์ไม่ถูกต้องขณะปลดล็อกหน้าจอ และล็อกแท็บเล็ตหรือลบข้อมูลทั้งหมดในแท็บเล็ตถ้ามีการพิมพ์รหัสผ่านที่ไม่ถูกต้องมากเกินไป"</string>
+    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"ตรวจสอบจำนวนการพิมพ์รหัสผ่านที่ไม่ถูกต้องขณะปลดล็อกหน้าจอ และล็อกโทรศัพท์หรือลบข้อมูลทั้งหมดในโทรศัพท์ถ้ามีการพิมพ์รหัสผ่านที่ไม่ถูกต้องมากเกินไป"</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"เปลี่ยนรหัสผ่านการปลดล็อกหน้าจอ"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"เปลี่ยนรหัสผ่านการปลดล็อกหน้าจอ"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"ล็อกหน้าจอ"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"ควบคุมว่าหน้าจอจะล็อกอย่างไรและเมื่อใด"</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"นำออกข้อมูลทั้งหมด"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"นำออกข้อมูลของแท็บเล็ตโดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"นำออกข้อมูลของโทรศัพท์โดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"ลบข้อมูลทั้งหมด"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ลบข้อมูลของแท็บเล็ตโดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ลบข้อมูลของโทรศัพท์โดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์ที่จะใช้ขณะเปิดการใช้งานนโยบาย เฉพาะผู้ดูแลอุปกรณ์คนแรกเท่านั้นที่ตั้งค่าพร็อกซีส่วนกลางที่มีผลบังคับ"</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"ตั้งค่าวันหมดอายุของรหัสผ่านล็อกหน้าจอ"</string>
@@ -906,7 +906,7 @@
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"การควบคุมสื่อ"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"เริ่มเรียงลำดับวิดเจ็ตใหม่"</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"เรียงลำดับวิดเจ็ตใหม่เสร็จแล้ว"</string>
-    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"นำออกวิดเจ็ต <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> แล้ว"</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"ลบวิดเจ็ต <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> แล้ว"</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"ขยายพื้นที่ปลดล็อก"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"การปลดล็อกด้วยการเลื่อน"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"การปลดล็อกด้วยรูปแบบ"</string>
@@ -957,8 +957,8 @@
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"อ่านบุ๊กมาร์กและประวัติเว็บของคุณ"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"อนุญาตให้แอปพลิเคชันอ่านประวัติของ URL ทั้งหมดที่เบราว์เซอร์เคยไป และบุ๊กมาร์กทั้งหมดของเบราว์เซอร์ หมายเหตุ: การอนุญาตนี้อาจไม่สามารถใช้งานได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นๆ ที่มีความสามารถในการเรียกดูบนเว็บ"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"เขียนบุ๊กมาร์กและประวัติเว็บ"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงประวัติหรือบุ๊กมาร์กของเบราว์เซอร์ที่จัดเก็บไว้ในแท็บเล็ต ซึ่งทำให้แอปพลิเคชันสามารถนำออกหรือเปลี่ยนข้อมูลเบราว์เซอร์ได้ หมายเหตุ: การอนุญาตนี้อาจไม่สามารถใช้งานได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นๆ ที่มีความสามารถในการเรียกดูบนเว็บ"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงประวัติหรือบุ๊กมาร์กของเบราว์เซอร์ที่จัดเก็บไว้ในโทรศัพท์ ซึ่งทำให้แอปพลิเคชันสามารถนำออกหรือเปลี่ยนข้อมูลเบราว์เซอร์ได้ หมายเหตุ: การอนุญาตนี้อาจไม่สามารถใช้งานได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นๆ ที่มีความสามารถในการเรียกดูบนเว็บ"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงประวัติหรือบุ๊กมาร์กของเบราว์เซอร์ที่จัดเก็บไว้ในแท็บเล็ต ซึ่งทำให้แอปพลิเคชันสามารถลบหรือเปลี่ยนข้อมูลเบราว์เซอร์ได้ หมายเหตุ: การอนุญาตนี้อาจไม่สามารถใช้งานได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นๆ ที่มีความสามารถในการเรียกดูบนเว็บ"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"อนุญาตให้แอปพลิเคชันเปลี่ยนแปลงประวัติหรือบุ๊กมาร์กของเบราว์เซอร์ที่จัดเก็บไว้ในโทรศัพท์ ซึ่งทำให้แอปพลิเคชันสามารถลบหรือเปลี่ยนข้อมูลเบราว์เซอร์ได้ หมายเหตุ: การอนุญาตนี้อาจไม่สามารถใช้งานได้กับเบราว์เซอร์ของบุคคลที่สามหรือแอปพลิเคชันอื่นๆ ที่มีความสามารถในการเรียกดูบนเว็บ"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ตั้งปลุก"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"อนุญาตให้แอปพลิเคชันตั้งเวลาปลุกในแอปพลิเคชันนาฬิกาปลุกที่ติดตั้ง แอปพลิเคชันนาฬิกาปลุกบางรายการอาจไม่ใช้คุณลักษณะนี้"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"เพิ่มข้อวามเสียง"</string>
@@ -985,7 +985,7 @@
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"เมนู+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"Space"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"Enter"</string>
-    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"นำออก"</string>
+    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"ลบ"</string>
     <string name="search_go" msgid="8298016669822141719">"ค้นหา"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"ค้นหา"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"คำค้นหา"</string>
@@ -1109,12 +1109,12 @@
     <string name="copy" msgid="2681946229533511987">"คัดลอก"</string>
     <string name="paste" msgid="5629880836805036433">"วาง"</string>
     <string name="replace" msgid="5781686059063148930">"แทนที่..."</string>
-    <string name="delete" msgid="6098684844021697789">"นำออก"</string>
+    <string name="delete" msgid="6098684844021697789">"ลบ"</string>
     <string name="copyUrl" msgid="2538211579596067402">"คัดลอก URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"เลือกข้อความ"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"การเลือกข้อความ"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"เพิ่มในพจนานุกรม"</string>
-    <string name="deleteText" msgid="6979668428458199034">"นำออก"</string>
+    <string name="deleteText" msgid="6979668428458199034">"ลบ"</string>
     <string name="inputMethod" msgid="1653630062304567879">"วิธีป้อนข้อมูล"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"การทำงานของข้อความ"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"พื้นที่จัดเก็บเหลือน้อย"</string>
@@ -1257,8 +1257,8 @@
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"ปิดที่เก็บข้อมูล USB"</string>
     <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"แตะเพื่อปิดที่จัดเก็บข้อมูล USB"</string>
     <string name="usb_storage_stop_title" msgid="660129851708775853">"ใช้การจัดเก็บใน USB"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"ก่อนปิดที่จัดเก็บข้อมูล USB ให้ยกเลิกการต่อเชื่อม (“นำออก”) ที่จัดเก็บข้อมูล USB ของ Android จากคอมพิวเตอร์แล้ว"</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"ก่อนปิดที่จัดเก็บข้อมูล USB ให้ยกเลิกการต่อเชื่อม (\"นำออก\") การ์ด SD ของ Android จากคอมพิวเตอร์"</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"ก่อนปิดที่จัดเก็บข้อมูล USB ให้ยกเลิกการต่อเชื่อม (“ลบ”) ที่จัดเก็บข้อมูล USB ของ Android จากคอมพิวเตอร์แล้ว"</string>
+    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"ก่อนปิดที่จัดเก็บข้อมูล USB ให้ยกเลิกการต่อเชื่อม (\"ลบ\") การ์ด SD ของ Android จากคอมพิวเตอร์"</string>
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"ปิดที่เก็บข้อมูล USB"</string>
     <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"เกิดปัญหาในการปิดที่จัดเก็บข้อมูล USB ตรวจสอบให้แน่ใจว่าคุณได้ยกเลิกการต่อเชื่อมโฮสต์ USB แล้ว จากนั้นลองใหม่อีกครั้ง"</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"เปิดที่เก็บข้อมูล USB"</string>
@@ -1272,7 +1272,7 @@
     <string name="usb_notification_message" msgid="2290859399983720271">"แตะสำหรับตัวเลือก USB อื่นๆ"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"ฟอร์แมต USB หรือไม่"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"ฟอร์แมตการ์ด SD หรือไม่"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"ไฟล์ทั้งหมดที่เก็บไว้ในที่จัดเก็บข้อมูล USB ของคุณจะถูกนำออกทิ้ง การทำงานนี้ไม่สามารถย้อนกลับได้!"</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"ไฟล์ทั้งหมดที่เก็บไว้ในที่จัดเก็บข้อมูล USB ของคุณจะถูกลบทิ้ง การทำงานนี้ไม่สามารถย้อนกลับได้!"</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"ข้อมูลทั้งหมดในการ์ดของคุณจะหายไป"</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"รูปแบบ"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"เชื่อมต่อการแก้ไขข้อบกพร่อง USB แล้ว"</string>
@@ -1297,18 +1297,18 @@
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"การ์ด SD เสียหาย"</string>
     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"ที่จัดเก็บข้อมูล USB เสียหาย ลองฟอร์แมตอีกครั้ง"</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"การ์ด SD เสียหาย ลองฟอร์แมตอีกครั้ง"</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"ที่เก็บข้อมูล USB ถูกนำออกโดยไม่คาดคิด"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"การ์ด SD ถูกนำออกโดยไม่คาดหมาย"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"ยกเลิกการต่อเชื่อมที่เก็บข้อมูล USB ก่อนนำออกเพื่อป้องกันข้อมูลสูญหาย"</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"ยกเลิกการต่อเชื่อมการ์ด SD ก่อนนำออกเพื่อหลีกเลี่ยงข้อมูลสูญหาย"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"ที่เก็บข้อมูล USB ถูกลบโดยไม่คาดคิด"</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"การ์ด SD ถูกลบโดยไม่คาดหมาย"</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"ยกเลิกการต่อเชื่อมที่เก็บข้อมูล USB ก่อนลบเพื่อป้องกันข้อมูลสูญหาย"</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"ยกเลิกการต่อเชื่อมการ์ด SD ก่อนลบเพื่อหลีกเลี่ยงข้อมูลสูญหาย"</string>
     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"นำที่เก็บข้อมูล USB ออกอย่างปลอดภัย"</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"นำการ์ด SD ออกได้อย่างปลอดภัย"</string>
     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"คุณสามารถนำที่เก็บข้อมูล USB ออกได้อย่างปลอดภัย"</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"คุณสามารถนำการ์ด SD ออกได้อย่างปลอดภัย"</string>
     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"นำที่เก็บข้อมูล USB ออกแล้ว"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"นำการ์ด SD ออกแล้ว"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"ที่เก็บข้อมูล USB ถูกนำออกแล้ว ใส่สื่อใหม่"</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"การ์ด SD ถูกนำออก ใส่การ์ดใหม่"</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"ที่เก็บข้อมูล USB ถูกลบแล้ว ใส่สื่อใหม่"</string>
+    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"การ์ด SD ถูกลบ ใส่การ์ดใหม่"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"ไม่พบกิจกรรมที่ตรงกัน"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"อัปเดตสถิติการใช้ส่วนประกอบ"</string>
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"อนุญาตให้แอปพลิเคชันแก้ไขสถิติการใช้งานของส่วนประกอบที่เก็บรวบรวมไว้ ไม่ใช้สำหรับแอปพลิเคชันทั่วไป"</string>
@@ -1376,14 +1376,14 @@
     <string name="action_mode_done" msgid="7217581640461922289">"เสร็จสิ้น"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"กำลังยกเลิกการต่อเชื่อมที่จัดเก็บข้อมูล USB..."</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"กำลังยกเลิกการต่อเชื่อมการ์ด SD..."</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"กำลังนำออกที่จัดเก็บข้อมูล USB..."</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"กำลังนำออกการ์ด SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"ไม่สามารถนำออกที่เก็บข้อมูล USB"</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"ไม่สามารถนำออกการ์ด SD"</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"การ์ด SD ถูกนำออกก่อนที่จะยกเลิกการต่อเชื่อม"</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"กำลังลบที่จัดเก็บข้อมูล USB..."</string>
+    <string name="progress_erasing" product="default" msgid="6596988875507043042">"กำลังลบการ์ด SD..."</string>
+    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"ไม่สามารถลบที่เก็บข้อมูล USB"</string>
+    <string name="format_error" product="default" msgid="7315248696644510935">"ไม่สามารถลบการ์ด SD"</string>
+    <string name="media_bad_removal" msgid="7960864061016603281">"การ์ด SD ถูกลบก่อนที่จะยกเลิกการต่อเชื่อม"</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"กำลังตรวจสอบที่เก็บข้อมูล USB อยู่ในขณะนี้"</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"กำลังตรวจสอบการ์ด SD อยู่ในขณะนี้"</string>
-    <string name="media_removed" msgid="7001526905057952097">"การ์ด SD ถูกนำออกแล้ว"</string>
+    <string name="media_removed" msgid="7001526905057952097">"การ์ด SD ถูกลบแล้ว"</string>
     <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"ขณะนี้ที่เก็บข้อมูล USB ถูกใช้งานอยู่โดยคอมพิวเตอร์"</string>
     <string name="media_shared" product="default" msgid="5706130568133540435">"ขณะนี้การ์ด SD มีการใช้งานอยู่โดยคอมพิวเตอร์"</string>
     <string name="media_unknown_state" msgid="729192782197290385">"สื่อภายนอกอยู่ในสถานะที่ไม่รู้จัก"</string>
@@ -1398,8 +1398,8 @@
     <string name="gpsVerifYes" msgid="2346566072867213563">"ใช่"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"ไม่"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"เกินจำนวนการนำออกสูงสุด"</string>
-    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"มีรายการที่จะนำออก <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> รายการสำหรับ <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> ในบัญชี <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> คุณต้องการทำสิ่งใด"</string>
-    <string name="sync_really_delete" msgid="2572600103122596243">"นำออกรายการ"</string>
+    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"มีรายการที่จะลบ <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> รายการสำหรับ <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> ในบัญชี <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> คุณต้องการทำสิ่งใด"</string>
+    <string name="sync_really_delete" msgid="2572600103122596243">"ลบรายการ"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"เลิกทำการนำออก"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"ไม่ต้องทำอะไรในขณะนี้"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"เลือกบัญชี"</string>
@@ -1423,7 +1423,7 @@
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"ลดปี"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ยกเลิก"</string>
-    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"นำออก"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ลบ"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"เสร็จสิ้น"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"เปลี่ยนโหมด"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
@@ -1557,7 +1557,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้บัญชีอีเมล\n\n โปรดลองอีกครั้งใน <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้ับัญชีอีเมล\n\n โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"นำออก"</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ลบ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"ในกรณีที่ต้องการเพิ่มระดับเสียงจนเกินระดับที่แนะนำ\nการฟังเสียงดังเป็นเวลานานอาจทำให้การได้ยินของคุณบกพร่องได้"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ใช้สองนิ้วแตะค้างไว้เพื่อเปิดใช้งานการเข้าถึง"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"เปิดใช้งานการเข้าถึงแล้ว"</string>

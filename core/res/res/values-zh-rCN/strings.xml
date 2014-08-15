@@ -44,16 +44,16 @@
     <string name="passwordIncorrect" msgid="7612208839450128715">"密码不正确。"</string>
     <string name="mmiComplete" msgid="8232527495411698359">"MMI 码已完成。"</string>
     <string name="badPin" msgid="9015277645546710014">"您输入的旧 PIN 不正确。"</string>
-    <string name="badPuk" msgid="5487257647081132201">"您输入的 PUK 码不正确。"</string>
+    <string name="badPuk" msgid="5487257647081132201">"您输入的PUK码不正确。"</string>
     <string name="mismatchPin" msgid="609379054496863419">"您输入的 PIN 码不一致。"</string>
     <string name="invalidPin" msgid="3850018445187475377">"输入一个 4 至 8 位数的 PIN 码。"</string>
-    <string name="invalidPuk" msgid="8761456210898036513">"请键入至少 8 位数字的 PUK 码。"</string>
-    <string name="needPuk" msgid="919668385956251611">"已对 SIM 卡进行 PUK 码锁定。键入 PUK 码将其解锁。"</string>
-    <string name="needPuk2" msgid="4526033371987193070">"输入 PUK2 码以解锁 SIM 卡。"</string>
-    <string name="enablePin" msgid="209412020907207950">"失败，请启用 SIM/RUIM 卡锁定设置。"</string>
+    <string name="invalidPuk" msgid="8761456210898036513">"请输入至少8位数字的PUK码。"</string>
+    <string name="needPuk" msgid="919668385956251611">"已对SIM卡进行PUK码锁定。键入PUK码将其解锁。"</string>
+    <string name="needPuk2" msgid="4526033371987193070">"输入PUK2码以解锁SIM卡。"</string>
+    <string name="enablePin" msgid="209412020907207950">"失败，请启用SIM/RUIM 卡锁定设置。"</string>
   <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"您还有<xliff:g id="NUMBER">%d</xliff:g>次尝试机会。如果仍然失败，SIM 卡将被锁定。"</item>
-    <item quantity="other" msgid="7530597808358774740">"您还有<xliff:g id="NUMBER">%d</xliff:g>次尝试机会。如果仍然失败，SIM 卡将被锁定。"</item>
+    <item quantity="one" msgid="6596245285809790142">"您还有<xliff:g id="NUMBER">%d</xliff:g>次尝试机会。如果仍然失败，SIM卡将被锁定。"</item>
+    <item quantity="other" msgid="7530597808358774740">"您还有<xliff:g id="NUMBER">%d</xliff:g>次尝试机会。如果仍然失败，SIM卡将被锁定。"</item>
   </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
@@ -109,7 +109,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"正在搜索服务"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
-    <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="TIME_DELAY">{2}</xliff:g> 秒后<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
+    <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="TIME_DELAY">{2}</xliff:g>秒后<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="fcComplete" msgid="3118848230966886575">"功能代码已拨完。"</string>
@@ -176,7 +176,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"设置"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Android系统"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"需要您付费的服务"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"执行可能需要您付费的操作。"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"您的信息"</string>
@@ -197,10 +197,10 @@
     <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"使用耗电量较大的功能。"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"日历"</string>
     <string name="permgroupdesc_calendar" msgid="5777534316982184416">"直接访问日历和活动。"</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"读取用户词典"</string>
-    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"读取用户词典中的字词。"</string>
-    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"写入用户词典"</string>
-    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"将字词添加到用户词典。"</string>
+    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"读取用户字典"</string>
+    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"读取用户字典中的字词。"</string>
+    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"写入用户字典"</string>
+    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"将字词添加到用户字典。"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"书签和历史记录"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"直接访问书签和浏览器历史记录。"</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"闹钟"</string>
@@ -227,7 +227,7 @@
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"访问可用的帐户。"</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"硬件控制"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"直接访问手机上的硬件。"</string>
-    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"手机通话"</string>
+    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"电话"</string>
     <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"监管、记录和处理电话呼叫。"</string>
     <string name="permgrouplab_systemTools" msgid="4652191644082714048">"系统工具"</string>
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"对系统进行低级访问和控制。"</string>
@@ -236,8 +236,8 @@
     <string name="permgrouplab_display" msgid="4279909676036402636">"其他应用的用户界面"</string>
     <string name="permgroupdesc_display" msgid="6051002031933013714">"影响其他应用的用户界面。"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"存储"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"访问 USB 存储设备。"</string>
-    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"访问 SD 卡。"</string>
+    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"访问USB存储设备。"</string>
+    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"访问SD卡。"</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"辅助功能"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"辅助技术可请求启用的功能。"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"检索窗口内容"</string>
@@ -273,11 +273,11 @@
     <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"发送“通过信息回复”事件"</string>
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"允许应用向其他信息应用发送请求，以便处理来电的“通过信息回复”事件。"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"读取您的讯息（短信或彩信）"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"允许该应用读取您平板电脑或 SIM 卡上存储的短信。此权限可让该应用读取所有短信，而不考虑短信内容或机密性。"</string>
-    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"允许该应用读取您手机或 SIM 卡上存储的短信。此权限可让该应用读取所有短信，而不考虑短信内容或机密性。"</string>
+    <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"允许该应用读取您平板电脑或SIM卡上存储的短信。此权限可让该应用读取所有短信，而不考虑短信内容或机密性。"</string>
+    <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"允许该应用读取您手机或SIM卡上存储的短信。此权限可让该应用读取所有短信，而不考虑短信内容或机密性。"</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"编辑您的讯息（短信或彩信）"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"允许应用对平板电脑或 SIM 卡上存储的短信执行写入操作。恶意应用可能会删除您的短信。"</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"允许应用对手机或 SIM 卡上存储的短信执行写入操作。恶意应用可能会删除您的短信。"</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"允许应用对平板电脑或SIM卡上存储的短信执行写入操作。恶意应用可能会删除您的短信。"</string>
+    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"允许应用对手机或SIM卡上存储的短信执行写入操作。恶意应用可能会删除您的短信。"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"接收讯息 (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"允许该应用接收和处理 WAP 消息。此权限包括监视发送给您的消息或删除发送给您的消息而不向您显示的功能。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"检索正在运行的应用"</string>
@@ -381,7 +381,7 @@
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"允许应用绑定到模拟 NFC 卡的应用。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"绑定至文字服务"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"允许应用绑定至文本服务（如 SpellCheckerService）的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindVpnService" msgid="4708596021161473255">"绑定到 VPN 服务"</string>
+    <string name="permlab_bindVpnService" msgid="4708596021161473255">"绑定到VPN服务"</string>
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"允许应用绑定到VPN服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"绑定到壁纸"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"允许应用绑定到壁纸的顶级接口。普通应用绝不需要此权限。"</string>
@@ -439,8 +439,8 @@
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"允许应用修改系统的设置数据。恶意应用可能会破坏您的系统配置。"</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"修改安全系统设置"</string>
     <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"允许应用修改系统的安全设置数据。普通应用不应使用此权限。"</string>
-    <string name="permlab_writeGservices" msgid="2149426664226152185">"修改 Google 服务地图"</string>
-    <string name="permdesc_writeGservices" msgid="1287309437638380229">"允许应用修改 Google 服务地图。普通应用不应使用此权限。"</string>
+    <string name="permlab_writeGservices" msgid="2149426664226152185">"修改Google服务地图"</string>
+    <string name="permdesc_writeGservices" msgid="1287309437638380229">"允许应用修改Google服务地图。普通应用不应使用此权限。"</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"开机启动"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"允许应用在系统完成引导后立即自动启动。这样可能会延长平板电脑的启动时间，并允许应用始终运行，从而导致平板电脑总体运行速度减慢。"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"允许应用在系统完成引导后立即自动启动。这样可能会延长手机的启动时间，并允许应用始终运行，从而导致手机总体运行速度减慢。"</string>
@@ -476,12 +476,12 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"允许该应用添加、删除、更改您可在平板电脑上修改的活动，包括朋友或同事的活动。此权限可让该应用冒充日历所有者发送消息，或在所有者不知情的情况下修改活动。"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"允许该应用添加、删除、更改您可在手机上修改的活动，包括朋友或同事的活动。此权限可让该应用冒充日历所有者发送消息，或在所有者不知情的情况下修改活动。"</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"使用模拟地点来源进行测试"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"创建用于测试的模拟位置源或安装新的位置提供程序。此权限可让该应用覆盖由其他位置源（如 GPS）或位置提供程序返回的位置和/或状态信息。"</string>
+    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"创建用于测试的模拟位置源或安装新的位置提供程序。此权限可让该应用覆盖由其他位置源（如GPS）或位置提供程序返回的位置和/或状态信息。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"获取额外的位置信息提供程序命令"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"允许该应用访问额外的位置提供程序命令。此权限可让该应用干扰 GPS 或其他位置源的运行。"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"允许该应用访问额外的位置提供程序命令。此权限可让该应用干扰GPS或其他位置源的运行。"</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"允许安装位置信息提供程序"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"创建用于测试的模拟位置源或安装新的位置提供程序。此权限可让该应用覆盖由其他位置源（如 GPS）或位置提供程序返回的位置和/或状态信息。"</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"精确位置（基于 GPS 和网络）"</string>
+    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"创建用于测试的模拟位置源或安装新的位置提供程序。此权限可让该应用覆盖由其他位置源（如GPS）或位置提供程序返回的位置和/或状态信息。"</string>
+    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"精确位置（基于GPS和网络）"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"允许该应用通过全球定位系统(GPS)或网络位置信息源（例如基站和WLAN）获取您的精确位置信息。您必须在设备上开启这些位置信息服务，应用才能获得位置信息。应用会使用此类服务确定您的位置，这可能会消耗更多电量。"</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"大致位置（基于网络）"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"允许该应用获取您的大致位置信息。这类位置信息来自于使用网络位置信息源（例如基站和WLAN）的位置信息服务。您必须在设备上开启这些位置信息服务，应用才能获得位置信息。应用会使用此类服务确定您的大概位置。"</string>
@@ -489,10 +489,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"允许应用使用 SurfaceFlinger 低级功能。"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"读取帧缓冲区"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"允许应用读取帧缓冲区的内容。"</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"配置 WLAN 显示设备"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"允许应用配置并连接到 WLAN 显示设备。"</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"控制 WLAN 显示设备"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允许应用控制 WLAN 显示设备的基础功能。"</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"配置WLAN显示设备"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"允许应用配置并连接到WLAN显示设备。"</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"控制WLAN显示设备"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允许应用控制WLAN显示设备的基础功能。"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"捕获音频输出"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"允许该应用捕获和重定向音频输出。"</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"启动指令检测"</string>
@@ -519,30 +519,30 @@
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"强行重新启动手机"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"允许应用强行重新启动平板电脑。"</string>
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"允许应用强行重新启动手机。"</string>
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"访问 USB 存储设备的文件系统"</string>
-    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"访问 SD 卡文件系统"</string>
+    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"访问USB存储设备的文件系统"</string>
+    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"访问SD卡文件系统"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"允许应用装载和卸载可移动存储设备的文件系统。"</string>
-    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"清除 USB 存储设备内容"</string>
-    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"清除 SD 卡内容"</string>
+    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"清除USB存储设备内容"</string>
+    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"清除SD卡内容"</string>
     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"允许应用格式化可移动存储设备。"</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"获取有关内部存储设备的信息"</string>
-    <string name="permdesc_asec_access" msgid="3094563844593878548">"允许应用获取有关内存设备的信息。"</string>
+    <string name="permdesc_asec_access" msgid="3094563844593878548">"允许应用获取有关内部存储设备的信息。"</string>
     <string name="permlab_asec_create" msgid="6414757234789336327">"创建内部存储设备"</string>
-    <string name="permdesc_asec_create" msgid="4558869273585856876">"允许应用创建内存设备。"</string>
+    <string name="permdesc_asec_create" msgid="4558869273585856876">"允许应用创建内部存储设备。"</string>
     <string name="permlab_asec_destroy" msgid="526928328301618022">"清除内部存储设备"</string>
-    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"允许应用清除内存设备。"</string>
-    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"装载/卸载内存设备"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"允许应用装载/卸载内存设备。"</string>
+    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"允许应用清除内部存储设备。"</string>
+    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"装载/卸载内部存储设备"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"允许应用装载/卸载内部存储设备。"</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"重命名内部存储设备"</string>
-    <string name="permdesc_asec_rename" msgid="1794757588472127675">"允许应用重命名内存设备。"</string>
+    <string name="permdesc_asec_rename" msgid="1794757588472127675">"允许应用重命名内部存储设备。"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"控制振动"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"允许应用控制振动器。"</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"控制闪光灯"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"允许应用控制闪光灯。"</string>
-    <string name="permlab_manageUsb" msgid="1113453430645402723">"管理 USB 设备的偏好设置和权限"</string>
-    <string name="permdesc_manageUsb" msgid="7776155430218239833">"允许应用管理针对 USB 设备的偏好设置和权限。"</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"管理USB设备的偏好设置和权限"</string>
+    <string name="permdesc_manageUsb" msgid="7776155430218239833">"允许应用管理针对USB设备的偏好设置和权限。"</string>
     <string name="permlab_accessMtp" msgid="4953468676795917042">"应用 MTP 协议"</string>
-    <string name="permdesc_accessMtp" msgid="6532961200486791570">"允许访问内核 MTP 驱动程序，以便应用 MTP USB 协议。"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"允许访问内核 MTP 驱动程序，以便应用 MTPUSB协议。"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"测试硬件"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"允许应用控制各种外围设备以进行硬件测试。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接拨打电话号码"</string>
@@ -609,15 +609,15 @@
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"允许应用更改网络连接的状态。"</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"更改网络共享连接"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"允许应用更改绑定网络连接的状态。"</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"更改后台数据使用设置"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"允许应用更改后台数据使用设置。"</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"查看 WLAN 连接"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"允许该应用查看 WLAN 网络的相关信息，例如是否启用了 WLAN 以及连接的 WLAN 设备的名称。"</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"连接 WLAN 和断开连接"</string>
-    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"允许该应用与 WLAN 接入点建立和断开连接，以及更改 WLAN 网络的设备配置。"</string>
-    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"允许接收 WLAN 多播"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"允许该应用使用多播地址接收发送到 WLAN 网络上所有设备（而不仅仅是您的平板电脑）的数据包。该操作的耗电量比非多播模式要大。"</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"允许该应用使用多播地址接收发送到 WLAN 网络上所有设备（而不仅仅是您的手机）的数据包。该操作的耗电量比非多播模式要大。"</string>
+    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"更改后台流量设置"</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"允许应用更改后台流量设置。"</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"查看WLAN连接"</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"允许该应用查看WLAN网络的相关信息，例如是否启用了WLAN以及连接的WLAN设备的名称。"</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"连接WLAN网络和断开连接"</string>
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"允许该应用与WLAN接入点建立和断开连接，以及更改WLAN网络的设备配置。"</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"允许接收WLAN多播"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"允许该应用使用多播地址接收发送到WLAN网络上所有设备（而不仅仅是您的平板电脑）的数据包。该操作的耗电量比非多播模式要大。"</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"允许该应用使用多播地址接收发送到WLAN网络上所有设备（而不仅仅是您的手机）的数据包。该操作的耗电量比非多播模式要大。"</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"访问蓝牙设置"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"允许应用配置本地蓝牙平板电脑，以及发现远程设备并进行配对。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"允许应用配置本地蓝牙手机，以及发现远程设备并进行配对。"</string>
@@ -646,18 +646,18 @@
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"允许应用获取有关当前同步的 Feed 的详情。"</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"写入订阅的供稿"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"允许应用修改您当前同步的 Feed。恶意应用可能会更改您的同步 Feed。"</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"读取您添加到词典的字词"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"允许该应用读取用户可能已在用户词典中存储的所有字词、名称和词组。"</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"向用户定义的词典添加字词"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"允许应用向用户词典中写入新词。"</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"读取您的 USB 存储设备中的内容"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"读取您的 SD 卡中的内容"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"允许应用读取您 USB 存储设备中的内容。"</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"允许应用读取您 SD 卡的内容。"</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"修改或删除您的 USB 存储设备中的内容"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"修改或删除您的 SD 卡中的内容"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"允许应用写入 USB 存储设备。"</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"允许应用写入 SD 卡。"</string>
+    <string name="permlab_readDictionary" msgid="4107101525746035718">"读取您添加到字典的字词"</string>
+    <string name="permdesc_readDictionary" msgid="659614600338904243">"允许该应用读取用户可能已在用户字典中存储的所有字词、名称和词组。"</string>
+    <string name="permlab_writeDictionary" msgid="2183110402314441106">"向用户定义的字典添加字词"</string>
+    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"允许应用向用户字典中写入新词。"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"读取您的USB存储设备中的内容"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"读取您的SD卡中的内容"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"允许应用读取您USB存储设备中的内容。"</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"允许应用读取您SD卡的内容。"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"修改或删除您的USB存储设备中的内容"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"修改或删除您的SD卡中的内容"</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"允许应用写入USB存储设备。"</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"允许应用写入SD卡。"</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"修改/删除内部媒体存储设备的内容"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"允许应用修改内部媒体存储设备的内容。"</string>
     <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"管理文档存储空间"</string>
@@ -825,8 +825,8 @@
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"其他"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"找不到可用来查看此联系人的应用。"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"输入 PIN 码"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"请输入 PUK 码和新的 PIN 码"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK 码"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"请输入PUK码和新的PIN码"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK码"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"新的 PIN 码"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"触摸可输入密码"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"输入密码以解锁"</string>
@@ -849,13 +849,13 @@
     <string name="lockscreen_charged" msgid="321635745684060624">"充电完成"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"连接您的充电器。"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"没有 SIM 卡"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"平板电脑中没有 SIM 卡。"</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"手机中无 SIM 卡"</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"请插入 SIM 卡"</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM 卡缺失或无法读取。请插入 SIM 卡。"</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"SIM 卡无法使用。"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"您的 SIM 卡已永久停用。\n请与您的无线服务提供商联系，以便重新获取一张 SIM 卡。"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"没有SIM卡"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"平板电脑中没有SIM卡。"</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"手机中无SIM卡"</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"请插入SIM卡"</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM卡缺失或无法读取。请插入SIM卡。"</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"SIM卡无法使用。"</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"您的SIM卡已永久停用。\n请与您的无线服务提供商联系，以便重新获取一张SIM卡。"</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"“上一曲目”按钮"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"“下一曲目”按钮"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"“暂停”按钮"</string>
@@ -863,29 +863,29 @@
     <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"“停止”按钮"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"只能拨打紧急呼救电话"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"网络已锁定"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM 卡已用 PUK 码锁定"</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM卡已用PUK码锁定。"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"请参阅《用户指南》或与客服人员联系。"</string>
-    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM 卡被锁定"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"正在解锁 SIM 卡..."</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM卡被锁定"</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"正在解锁SIM卡..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。\n\n请在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地输入了密码。\n\n请在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地输入了 PIN。\n\n请在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后重试。"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的 Google 登录信息解锁平板电脑。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统会要求您使用自己的 Google 登录信息解锁手机。\n\n 请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"您已经<xliff:g id="NUMBER_0">%d</xliff:g>次错误地绘制了解锁图案。如果再尝试<xliff:g id="NUMBER_1">%d</xliff:g>次后仍不成功，系统就会要求您使用自己的Google登录信息解锁平板电脑。\n\n请在<xliff:g id="NUMBER_2">%d</xliff:g>秒后重试。"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"您已经<xliff:g id="NUMBER_0">%d</xliff:g>次错误地绘制了解锁图案。如果再尝试<xliff:g id="NUMBER_1">%d</xliff:g>次后仍不成功，系统会要求您使用自己的Google登录信息解锁手机。\n\n请在<xliff:g id="NUMBER_2">%d</xliff:g>秒后重试。"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地尝试解锁平板电脑。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，平板电脑将重置为出厂默认设置，所有用户数据将会丢失。"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地尝试解锁手机。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，手机将重置为出厂默认设置，所有用户数据将会丢失。"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁平板电脑。平板电脑现在将重置为出厂默认设置。"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁手机。手机现在将重置为出厂默认设置。"</string>
-    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> 秒后重试。"</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g>秒后重试。"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"忘记了图案？"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"帐户解锁"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"图案尝试次数过多"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"要解除锁定，请使用您的 Google 帐户登录。"</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"要解除锁定，请使用您的Google帐户登录。"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"用户名（电子邮件）"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"密码"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"登录"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"用户名或密码无效。"</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"忘记了用户名或密码？\n请访问 "<b>"google.com/accounts/recovery"</b>"。"</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"忘记了用户名或密码？\n请访问"<b>"google.com/accounts/recovery"</b>"。"</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"正在检查..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"解锁"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"打开声音"</string>
@@ -998,69 +998,69 @@
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 个月前"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 个月前"</string>
   <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"1 秒前"</item>
-    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g> 秒前"</item>
+    <item quantity="one" msgid="4869870056547896011">"1秒前"</item>
+    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g>秒前"</item>
   </plurals>
   <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"1 分钟前"</item>
-    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> 分钟前"</item>
+    <item quantity="one" msgid="3306787433088810191">"1分钟前"</item>
+    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g>分钟前"</item>
   </plurals>
   <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"1 小时前"</item>
-    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> 小时前"</item>
+    <item quantity="one" msgid="9150797944610821849">"1小时前"</item>
+    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g>小时前"</item>
   </plurals>
   <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"过去 <xliff:g id="COUNT">%d</xliff:g> 天"</item>
+    <item quantity="other" msgid="3069992808164318268">"过去<xliff:g id="COUNT">%d</xliff:g>天"</item>
   </plurals>
-    <string name="last_month" msgid="3959346739979055432">"上月"</string>
+    <string name="last_month" msgid="3959346739979055432">"上个月"</string>
     <string name="older" msgid="5211975022815554840">"往前"</string>
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"昨天"</item>
-    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> 天前"</item>
+    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g>天前"</item>
   </plurals>
   <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"1 秒后"</item>
-    <item quantity="other" msgid="1241926116443974687">"<xliff:g id="COUNT">%d</xliff:g> 秒后"</item>
+    <item quantity="one" msgid="2729745560954905102">"1秒后"</item>
+    <item quantity="other" msgid="1241926116443974687">"<xliff:g id="COUNT">%d</xliff:g>秒后"</item>
   </plurals>
   <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"1 分钟后"</item>
-    <item quantity="other" msgid="3330713936399448749">"<xliff:g id="COUNT">%d</xliff:g> 分钟后"</item>
+    <item quantity="one" msgid="8793095251325200395">"1分钟后"</item>
+    <item quantity="other" msgid="3330713936399448749">"<xliff:g id="COUNT">%d</xliff:g>分钟后"</item>
   </plurals>
   <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"1 小时后"</item>
-    <item quantity="other" msgid="547290677353727389">"<xliff:g id="COUNT">%d</xliff:g> 小时后"</item>
+    <item quantity="one" msgid="7164353342477769999">"1小时后"</item>
+    <item quantity="other" msgid="547290677353727389">"<xliff:g id="COUNT">%d</xliff:g>小时后"</item>
   </plurals>
   <plurals name="in_num_days">
     <item quantity="one" msgid="5413088743009839518">"明天"</item>
     <item quantity="other" msgid="5109449375100953247">"<xliff:g id="COUNT">%d</xliff:g> 天后"</item>
   </plurals>
   <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"1 秒前"</item>
-    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> 秒前"</item>
+    <item quantity="one" msgid="1849036840200069118">"1秒前"</item>
+    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g>秒前"</item>
   </plurals>
   <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"1 分钟前"</item>
-    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g> 分钟前"</item>
+    <item quantity="one" msgid="6361490147113871545">"1分钟前"</item>
+    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g>分钟前"</item>
   </plurals>
   <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"1 小时前"</item>
-    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g> 小时前"</item>
+    <item quantity="one" msgid="4796212039724722116">"1小时前"</item>
+    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g>小时前"</item>
   </plurals>
   <plurals name="abbrev_num_days_ago">
     <item quantity="one" msgid="8463161711492680309">"昨天"</item>
-    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g> 天前"</item>
+    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g>天前"</item>
   </plurals>
   <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"1 秒后"</item>
-    <item quantity="other" msgid="5495880108825805108">"<xliff:g id="COUNT">%d</xliff:g> 秒后"</item>
+    <item quantity="one" msgid="5842225370795066299">"1秒后"</item>
+    <item quantity="other" msgid="5495880108825805108">"<xliff:g id="COUNT">%d</xliff:g>秒后"</item>
   </plurals>
   <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"1 分钟后"</item>
-    <item quantity="other" msgid="4216113292706568726">"<xliff:g id="COUNT">%d</xliff:g> 分钟后"</item>
+    <item quantity="one" msgid="562786149928284878">"1分钟后"</item>
+    <item quantity="other" msgid="4216113292706568726">"<xliff:g id="COUNT">%d</xliff:g>分钟后"</item>
   </plurals>
   <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"1 小时后"</item>
-    <item quantity="other" msgid="3705373766798013406">"<xliff:g id="COUNT">%d</xliff:g> 小时后"</item>
+    <item quantity="one" msgid="3274708118124045246">"1小时后"</item>
+    <item quantity="other" msgid="3705373766798013406">"<xliff:g id="COUNT">%d</xliff:g>小时后"</item>
   </plurals>
   <plurals name="abbrev_in_num_days">
     <item quantity="one" msgid="2178576254385739855">"明天"</item>
@@ -1082,16 +1082,16 @@
     <string name="year" msgid="4001118221013892076">"年"</string>
     <string name="years" msgid="6881577717993213522">"年"</string>
   <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 秒"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> 秒"</item>
+    <item quantity="one" msgid="6962015528372969481">"1秒"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g>秒"</item>
   </plurals>
   <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 分钟"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> 分钟"</item>
+    <item quantity="one" msgid="4915414002546085617">"1分钟"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g>分钟"</item>
   </plurals>
   <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 小时"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> 小时"</item>
+    <item quantity="one" msgid="8917467491248809972">"1小时"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g>小时"</item>
   </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"视频问题"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"抱歉，该视频不适合在此设备上播放。"</string>
@@ -1113,7 +1113,7 @@
     <string name="copyUrl" msgid="2538211579596067402">"复制网址"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"选择文字"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"文字选择"</string>
-    <string name="addToDictionary" msgid="4352161534510057874">"添加到词典"</string>
+    <string name="addToDictionary" msgid="4352161534510057874">"添加到字典"</string>
     <string name="deleteText" msgid="6979668428458199034">"删除"</string>
     <string name="inputMethod" msgid="1653630062304567879">"输入法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字操作"</string>
@@ -1134,7 +1134,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"设为默认选项。"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"在“系统设置”&gt;“应用”&gt;“已下载”中清除默认设置。"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"选择操作"</string>
-    <string name="chooseUsbActivity" msgid="6894748416073583509">"为 USB 设备选择一个应用"</string>
+    <string name="chooseUsbActivity" msgid="6894748416073583509">"为USB设备选择一个应用"</string>
     <string name="noApplications" msgid="2991814273936504689">"没有应用可执行此操作。"</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"很抱歉，“<xliff:g id="APPLICATION">%1$s</xliff:g>”已停止运行。"</string>
@@ -1156,7 +1156,7 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"在“系统设置”&gt;“应用”&gt;“已下载”中重新启用此模式。"</string>
     <string name="smv_application" msgid="3307209192155442829">"“<xliff:g id="APPLICATION">%1$s</xliff:g>”应用（<xliff:g id="PROCESS">%2$s</xliff:g> 进程）违反了自我强制执行的严格模式 (StrictMode) 政策。"</string>
     <string name="smv_process" msgid="5120397012047462446">"进程 <xliff:g id="PROCESS">%1$s</xliff:g> 违反了自我强制执行的严格模式 (StrictMode) 政策。"</string>
-    <string name="android_upgrading_title" msgid="1584192285441405746">"Android 正在升级..."</string>
+    <string name="android_upgrading_title" msgid="1584192285441405746">"Android正在升级..."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"正在优化第 <xliff:g id="NUMBER_0">%1$d</xliff:g> 个应用（共 <xliff:g id="NUMBER_1">%2$d</xliff:g> 个）。"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"正在启动应用。"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"即将完成启动。"</string>
@@ -1189,23 +1189,23 @@
     <string name="ringtone_picker_title" msgid="3515143939175119094">"铃声"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"未知铃声"</string>
   <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"有可用的 WLAN 网络"</item>
-    <item quantity="other" msgid="4192424489168397386">"有可用的 WLAN 网络"</item>
+    <item quantity="one" msgid="6654123987418168693">"有可用的WLAN网络"</item>
+    <item quantity="other" msgid="4192424489168397386">"有可用的WLAN网络"</item>
   </plurals>
   <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"打开可用的 WLAN 网络"</item>
-    <item quantity="other" msgid="7915895323644292768">"打开可用的 WLAN 网络"</item>
+    <item quantity="one" msgid="1634101450343277345">"打开可用的WLAN网络"</item>
+    <item quantity="other" msgid="7915895323644292768">"打开可用的WLAN网络"</item>
   </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"登录到 WLAN 网络"</string>
+    <string name="wifi_available_sign_in" msgid="4029489716605255386">"登录到WLAN网络"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"登录网络"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"无法连接到 WLAN"</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"无法连接到WLAN"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" 互联网连接状况不佳。"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"WLAN 直连"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"启动 WLAN 直连。此操作将会关闭 WLAN 客户端/热点。"</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"无法启动 WLAN 直连。"</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"已启用 WLAN 直连"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"WLAN直连"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"启动WLAN直连。此操作将会关闭WLAN客户端/热点。"</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"无法启动WLAN直连。"</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"已启用WLAN直连"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"通过触摸进行设置"</string>
     <string name="accept" msgid="1645267259272829559">"接受"</string>
     <string name="decline" msgid="2112225451706137894">"拒绝"</string>
@@ -1215,8 +1215,8 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"收件人："</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"键入所需的 PIN："</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN："</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"平板电脑连接到“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”时会暂时断开与 WLAN 的连接"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"手机连接到<xliff:g id="DEVICE_NAME">%1$s</xliff:g>时会暂时断开与 WLAN 的连接。"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"平板电脑连接到“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”时会暂时断开与WLAN的连接"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"手机连接到<xliff:g id="DEVICE_NAME">%1$s</xliff:g>时会暂时断开与WLAN的连接。"</string>
     <string name="select_character" msgid="3365550120617701745">"插入字符"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"正在发送短信"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;在发送大量短信。是否允许该应用继续发送短信？"</string>
@@ -1231,10 +1231,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"之后，您可以在“设置”&gt;“应用”中更改此设置"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"始终允许"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"永不允许"</string>
-    <string name="sim_removed_title" msgid="6227712319223226185">"已移除 SIM 卡"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"移动网络不可用。请插入有效的 SIM 卡并重新启动。"</string>
+    <string name="sim_removed_title" msgid="6227712319223226185">"已移除SIM卡"</string>
+    <string name="sim_removed_message" msgid="2333164559970958645">"移动网络不可用。请插入有效的SIM卡并重新启动。"</string>
     <string name="sim_done_button" msgid="827949989369963775">"完成"</string>
-    <string name="sim_added_title" msgid="3719670512889674693">"已添加 SIM 卡"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"已添加SIM卡"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"请重新启动您的设备，以便访问移动网络。"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"重新启动"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"设置时间"</string>
@@ -1245,38 +1245,38 @@
     <string name="perms_description_app" msgid="5139836143293299417">"由“<xliff:g id="APP_NAME">%1$s</xliff:g>”提供。"</string>
     <string name="no_permissions" msgid="7283357728219338112">"不需要任何权限"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"这可能会产生费用"</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB 大容量存储设备"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"已连接 USB"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"您已通过 USB 连接至计算机。如果您要在计算机与 Android 设备的 USB 存储设备之间复制文件，请触摸下面的按钮。"</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"您已通过 USB 连接至计算机。如果您要在计算机和 Android 设备的 SD 卡之间复制文件，请触摸下面的按钮。"</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"打开 USB 存储设备"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"使用 USB 存储设备作为 USB 大容量存储设备时出现问题。"</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"使用 SD 卡作为 USB 大容量存储设备时出现问题。"</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"已连接 USB"</string>
+    <string name="usb_storage_activity_title" msgid="4465055157209648641">"USB大容量存储设备"</string>
+    <string name="usb_storage_title" msgid="5901459041398751495">"已连接USB"</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"您已通过USB连接至计算机。如果您要在计算机与Android设备的USB存储设备之间复制文件，请按下面的按钮。"</string>
+    <string name="usb_storage_message" product="default" msgid="805351000446037811">"您已通过USB连接至计算机。如果您要在计算机和Android设备的SD卡之间复制文件，请按下面的按钮。"</string>
+    <string name="usb_storage_button_mount" msgid="1052259930369508235">"打开USB存储设备"</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"使用USB存储设备作为USB大容量存储设备时出现问题。"</string>
+    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"使用SD卡作为USB大容量存储设备时出现问题。"</string>
+    <string name="usb_storage_notification_title" msgid="8175892554757216525">"已连接USB"</string>
     <string name="usb_storage_notification_message" msgid="939822783828183763">"触摸可将文件复制到计算机或从计算机复制到存储设备。"</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"关闭 USB 存储设备"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"触摸可关闭 USB 存储设备。"</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB 存储设备正在使用中"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"在关闭 USB 存储设备前，请从计算机中卸载（“弹出”）Android 设备的 USB 存储设备。"</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"在关闭 USB 存储设备前，请从计算机中卸载（“弹出”）Android 设备的 SD 卡。"</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"关闭 USB 存储设备"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"关闭 USB 存储设备时遇到问题。请检查您是否已卸载了 USB 主设备，然后重试。"</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"打开 USB 存储设备"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"如果您打开 USB 存储设备，您正在使用的某些应用将会停止，并且在您关闭 USB 存储设备前都将无法使用。"</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"USB 操作失败"</string>
+    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"关闭USB存储设备"</string>
+    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"触摸可关闭USB存储设备。"</string>
+    <string name="usb_storage_stop_title" msgid="660129851708775853">"USB存储设备正在使用中"</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"在关闭USB存储设备前，请从计算机中卸载（“弹出”）Android设备的USB存储设备。"</string>
+    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"在关闭USB存储设备前，请从计算机中卸载（“弹出”）Android设备的SD卡。"</string>
+    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"关闭USB存储设备"</string>
+    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"关闭USB存储设备时遇到问题。请检查您是否已卸载了USB主设备，然后重试。"</string>
+    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"打开USB存储设备"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"如果您打开USB存储设备，您正在使用的某些应用将会停止，并且在您关闭USB存储设备前都将无法使用。"</string>
+    <string name="dlg_error_title" msgid="7323658469626514207">"USB操作失败"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"确定"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"已作为媒体设备连接"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"作为相机连接"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"作为安装程序连接"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"已连接到 USB 配件"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"触摸可显示其他 USB 选项。"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"格式化 USB 存储设备吗？"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"要格式化 SD 卡吗？"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"您的 USB 存储设备中存储的所有文件都将清除。该操作无法撤消！"</string>
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"已连接到USB配件"</string>
+    <string name="usb_notification_message" msgid="2290859399983720271">"触摸可显示其他USB选项。"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"格式化USB存储设备吗？"</string>
+    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"要格式化SD卡吗？"</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"您的USB存储设备中存储的所有文件都将清除。该操作无法撤消！"</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"您卡上的所有数据都会丢失。"</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"格式化"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接 USB 调试"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"触摸可停用 USB 调试。"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接到USB调试"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"触摸可停用USB调试。"</string>
     <string name="select_input_method" msgid="4653387336791222978">"选择输入法"</string>
     <string name="configure_input_methods" msgid="9091652157722495116">"设置输入法"</string>
     <string name="use_physical_keyboard" msgid="6203112478095117625">"物理键盘"</string>
@@ -1286,29 +1286,29 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"候选"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"正在准备 USB 存储设备"</string>
-    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"正在准备 SD 卡"</string>
+    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"正在准备USB存储设备"</string>
+    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"正在准备SD卡"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"正在检查是否有错误。"</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"USB 存储设备中无文件"</string>
-    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"空 SD 卡"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB 存储设备中没有任何文件或使用了不支持的文件系统。"</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"SD 卡中没有任何文件或使用了不支持的文件系统。"</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"USB 存储设备已损坏"</string>
-    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"SD 卡受损"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USB 存储设备已损坏，请尝试重新格式化。"</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"SD 卡已损坏，请尝试重新格式化。"</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB 存储设备已意外移除"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD 卡未正常移除"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"请先卸载 USB 存储设备，再将其移除，以防数据丢失。"</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"请先卸载 SD 卡，再将其移除，以防数据丢失。"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB 存储设备已安全移除"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD 卡已安全移除"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"您可以安全地移除 USB 存储设备。"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"您现在可以安全移除 SD 卡。"</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"USB 存储设备已移除"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"已移除 SD 卡"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB 存储设备已移除。请插入新媒体。"</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD 卡已移除。请插入新的 SD 卡。"</string>
+    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"USB存储设备中无文件"</string>
+    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"空SD卡"</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB存储设备中没有任何文件或使用了不支持的文件系统。"</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"SD卡中没有任何文件或使用了不支持的文件系统。"</string>
+    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"USB存储设备已损坏"</string>
+    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"SD卡受损"</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USB存储设备已损坏，请尝试重新格式化。"</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"SD卡已损坏，请尝试重新格式化。"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB存储设备已意外移除"</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD卡未正常移除"</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"请先卸载USB存储设备，再将其移除，以防数据丢失。"</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"请先卸载SD卡，再将其移除，以防数据丢失。"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB存储设备已安全移除"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD卡已安全移除"</string>
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"您可以安全地移除USB存储设备。"</string>
+    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"您现在可以安全移除SD卡。"</string>
+    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"USB存储设备已移除"</string>
+    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"已移除SD卡"</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB存储设备已移除。请插入新媒体。"</string>
+    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD卡已移除。请插入新的SD卡。"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"未找到匹配的活动。"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"更新组件使用情况统计"</string>
     <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"允许应用修改收集到的组件使用情况统计信息。普通应用不应使用此权限。"</string>
@@ -1344,13 +1344,13 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"壁纸"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"更改壁纸"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"通知侦听器"</string>
-    <string name="vpn_title" msgid="19615213552042827">"VPN 已激活"</string>
-    <string name="vpn_title_long" msgid="6400714798049252294">"“<xliff:g id="APP">%s</xliff:g>”已激活 VPN"</string>
+    <string name="vpn_title" msgid="19615213552042827">"已激活VPN"</string>
+    <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g>已激活VPN"</string>
     <string name="vpn_text" msgid="3011306607126450322">"触摸可管理网络。"</string>
     <string name="vpn_text_long" msgid="6407351006249174473">"已连接到“<xliff:g id="SESSION">%s</xliff:g>”。触摸可管理网络。"</string>
-    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"正在连接到始终开启的 VPN…"</string>
-    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"已连接到始终开启的 VPN"</string>
-    <string name="vpn_lockdown_error" msgid="6009249814034708175">"始终开启的 VPN 出现错误"</string>
+    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"正在连接到始终开启的VPN…"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"已连接到始终开启的VPN"</string>
+    <string name="vpn_lockdown_error" msgid="6009249814034708175">"始终开启的VPN出现错误"</string>
     <string name="vpn_lockdown_config" msgid="6415899150671537970">"触摸即可进行配置"</string>
     <string name="upload_file" msgid="2897957172366730416">"选择文件"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"未选定任何文件"</string>
@@ -1374,18 +1374,18 @@
     <item quantity="other" msgid="4641872797067609177">"第 <xliff:g id="INDEX">%d</xliff:g> 项，共 <xliff:g id="TOTAL">%d</xliff:g> 项"</item>
   </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"完成"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"正在卸载 USB 存储设备..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"正在卸载 SD 卡..."</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"正在清除 USB 存储设备的数据..."</string>
-    <string name="progress_erasing" product="default" msgid="6596988875507043042">"正在清除 SD 卡的数据..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"无法清除 USB 存储设备。"</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"无法清除 SD 卡。"</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD 卡尚未卸载就被移除。"</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"系统正在检查 USB 存储设备。"</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"目前正在检查 SD 卡。"</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD 卡已移除。"</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"某台计算机正在使用 USB 存储设备。"</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"目前有计算机正在使用 SD 卡。"</string>
+    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"正在卸载USB存储设备..."</string>
+    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"正在卸载SD卡..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"正在清除USB存储设备的数据..."</string>
+    <string name="progress_erasing" product="default" msgid="6596988875507043042">"正在清除SD卡的数据..."</string>
+    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"无法清除USB存储设备。"</string>
+    <string name="format_error" product="default" msgid="7315248696644510935">"无法清除SD卡。"</string>
+    <string name="media_bad_removal" msgid="7960864061016603281">"SD卡尚未卸载就被移除。"</string>
+    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"系统正在检查USB存储设备。"</string>
+    <string name="media_checking" product="default" msgid="7334762503904827481">"目前正在检查SD卡。"</string>
+    <string name="media_removed" msgid="7001526905057952097">"SD卡已移除。"</string>
+    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"某台计算机正在使用USB存储设备。"</string>
+    <string name="media_shared" product="default" msgid="5706130568133540435">"目前有计算机正在使用SD卡。"</string>
     <string name="media_unknown_state" msgid="729192782197290385">"外部媒体处于未知状态。"</string>
     <string name="share" msgid="1778686618230011964">"分享"</string>
     <string name="find" msgid="4808270900322985960">"查找"</string>
@@ -1450,23 +1450,23 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"更多选项"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s：%2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s - %2$s：%3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"内存设备"</string>
-    <string name="storage_sd_card" msgid="3282948861378286745">"SD 卡"</string>
-    <string name="storage_usb" msgid="3017954059538517278">"USB 存储器"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"内部存储设备"</string>
+    <string name="storage_sd_card" msgid="3282948861378286745">"SD卡"</string>
+    <string name="storage_usb" msgid="3017954059538517278">"USB存储器"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"修改"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"流量使用警告"</string>
+    <string name="data_usage_warning_title" msgid="1955638862122232342">"流量警告"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"触摸可查看使用情况和设置。"</string>
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G 数据网络已停用"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G 数据网络已停用"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"移动数据网络已停用"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"WLAN 数据网络已停用"</string>
+    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"WLAN数据网络已停用"</string>
     <string name="data_usage_limit_body" msgid="3317964706973601386">"触摸可启用。"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"已超出 2G-3G 数据流量限制"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"已超出 4G 数据使用上限"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"已超出移动数据流量上限"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"超出了 WLAN 数据流量上限"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"超出了WLAN数据流量上限"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"超出规定上限 <xliff:g id="SIZE">%s</xliff:g>。"</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"后台数据受限制"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"后台流量受限制"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"触摸可去除限制。"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"安全证书"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"该证书有效。"</string>
@@ -1485,7 +1485,7 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"查看全部"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"选择活动"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"分享方式"</string>
-    <string name="list_delimeter" msgid="3975117572185494152">"、 "</string>
+    <string name="list_delimeter" msgid="3975117572185494152">"， "</string>
     <string name="sending" msgid="3245653681008218030">"正在发送..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"要启动浏览器吗？"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"要接听电话吗？"</string>
@@ -1527,20 +1527,20 @@
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN 有误"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"请在 <xliff:g id="NUMBER">%1$d</xliff:g> 秒后重试。"</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"绘制您的图案"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"输入 SIM PIN"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"输入SIM卡PIN码"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"输入 PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"输入密码"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM 卡已被停用，需要输入 PUK 码才能继续使用。有关详情，请联系您的运营商。"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM卡已被停用，需要输入PUK码才能继续使用。有关详情，请联系您的运营商。"</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"请输入所需 PIN 码"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"请确认所需 PIN 码"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"正在解锁 SIM 卡..."</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"正在解锁SIM卡..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"PIN 码有误。"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"请输入 4 至 8 位数的 PIN。"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK码应包含8位数字。"</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"请重新输入正确的 PUK 码。如果尝试错误次数过多，SIM 卡将永久停用。"</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"请重新输入正确的PUK码。如果尝试错误次数过多，SIM卡将永久停用。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN 码不匹配"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"图案尝试次数过多"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"要解锁，请登录您的 Google 帐户。"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"要解锁，请登录您的Google帐户。"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"用户名（电子邮件地址）"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"密码"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"登录"</string>
@@ -1558,7 +1558,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐户解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"删除"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"将音量调高到推荐级别以上？\n长时间聆听高音量可能会损伤听力。"</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"要将音量调高到推荐水平以上吗？\n长时间保持高音量可能会损伤听力。"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"持续按住双指即可启用辅助功能。"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"辅助功能已启用。"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"已取消辅助功能。"</string>

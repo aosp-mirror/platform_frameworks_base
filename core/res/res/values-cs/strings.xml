@@ -119,7 +119,7 @@
     <string name="httpErrorLookup" msgid="4711687456111963163">"Adresu URL nelze najít."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Schéma ověření webu není podporováno."</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"Nelze provést ověření."</string>
-    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Ověření pomocí serveru proxy bylo neúspěšné."</string>
+    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Ověření pomocí proxy serveru bylo neúspěšné."</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"K serveru se nelze připojit."</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"Se serverem nelze komunikovat. Zkuste to později."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Spojení se serverem vypršelo."</string>
@@ -604,7 +604,7 @@
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"úplný přístup k síti"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Umožňuje aplikaci vytvářet síťové sokety a používat vlastní síťové protokoly. K odesílání údajů na internet toto oprávnění není nutné, protože údaje lze na internet odesílat prostřednictvím prohlížečů a dalších aplikací."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"měnit/zachytávat nastavení sítě a síťové přenosy"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Umožňuje aplikaci změnit nastavení sítě a zachytit a prozkoumat síťové přenosy, například za účelem změny serveru proxy a portu jakéhokoli názvu přístupového bodu. Škodlivé aplikace mohou bez vašeho vědomí sledovat, přesměrovat nebo upravit síťové pakety."</string>
+    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Umožňuje aplikaci změnit nastavení sítě a zachytit a prozkoumat síťové přenosy, například za účelem změny proxy serveru a portu jakéhokoli názvu přístupového bodu. Škodlivé aplikace mohou bez vašeho vědomí sledovat, přesměrovat nebo upravit síťové pakety."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"změna připojení k síti"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Umožňuje aplikaci změnit stav připojení k síti."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"změnit sdílené datové připojení"</string>

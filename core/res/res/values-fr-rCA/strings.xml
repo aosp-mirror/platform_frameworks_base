@@ -1043,7 +1043,7 @@
     <item quantity="other" msgid="851164968597150710">"il y a <xliff:g id="COUNT">%d</xliff:g> minutes"</item>
   </plurals>
   <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"Il y a 1 h."</item>
+    <item quantity="one" msgid="4796212039724722116">"Il y a 1 h"</item>
     <item quantity="other" msgid="6889970745748538901">"il y a <xliff:g id="COUNT">%d</xliff:g> heures"</item>
   </plurals>
   <plurals name="abbrev_num_days_ago">

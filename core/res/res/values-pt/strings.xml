@@ -545,9 +545,9 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Permite acesso ao driver MTP do núcleo para implementar o protocolo USB MTP."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testar hardware"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Permite que o aplicativo controle diversos periféricos para teste do hardware."</string>
-    <string name="permlab_callPhone" msgid="3925836347681847954">"chamar diretamente os números de telefone"</string>
+    <string name="permlab_callPhone" msgid="3925836347681847954">"ligar diretamente para números de telefone"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite que o aplicativo ligue para números de telefone sem sua intervenção. Isso pode resultar em cobranças ou chamadas inesperadas. Esta opção não permite que o aplicativo ligue para números de emergência. Aplicativos maliciosos podem gerar custos com chamadas feitas sem sua confirmação."</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"chamar diretamente quaisquer números de telefone"</string>
+    <string name="permlab_callPrivileged" msgid="4198349211108497879">"ligar diretamente para quaisquer números de telefone"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Permite que o aplicativo chame qualquer número de telefone, incluindo números de emergência, sem sua intervenção. Aplicativos maliciosos podem fazer chamadas desnecessárias e ilegais para os serviços de emergência."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"iniciar a configuração do tablet CDMA diretamente"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"iniciar a configuração do telefone CDMA diretamente"</string>
@@ -861,7 +861,7 @@
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Botão \"Pausar\""</string>
     <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Botão \"Reproduzir\""</string>
     <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Botão \"Parar\""</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Apenas chamadas de emergência"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Só chamadas de emergência"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Rede bloqueada"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"O cartão SIM está bloqueado pelo PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Consulte o Guia do usuário ou entre em contato com o Serviço de atendimento ao cliente."</string>

@@ -863,7 +863,7 @@
     <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Leállítás gomb"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Csak segélyhívások"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"A hálózat lezárva"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"A SIM-kártya le van zárva a PUK-kóddal."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"A SIM kártya le van zárva a PUK kóddal."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Nézze meg a felhasználói útmutatót, vagy vegye fel a kapcsolatot az ügyfélszolgálattal."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"A SIM kártya le van zárva."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM kártya feloldása..."</string>

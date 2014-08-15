@@ -959,8 +959,8 @@
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"scrittura segnalibri e cronologia web"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Consente all\'applicazione di modificare la cronologia o i segnalibri del Browser memorizzati sul tablet. Ciò potrebbe consentire all\'applicazione di cancellare o modificare i dati del Browser. Nota. È possibile che questa autorizzazione non sia applicabile da browser di terze parti o altre applicazioni con funzionalità di navigazione web."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Consente all\'applicazione di modificare la cronologia o i segnalibri del Browser memorizzati sul telefono. Ciò potrebbe consentire all\'applicazione di cancellare o modificare i dati del Browser. Nota. È possibile che questa autorizzazione non sia applicabile da browser di terze parti o altre applicazioni con funzionalità di navigazione web."</string>
-    <string name="permlab_setAlarm" msgid="1379294556362091814">"impostazione allarme"</string>
-    <string name="permdesc_setAlarm" msgid="316392039157473848">"Consente all\'applicazione di impostare un allarme in un\'applicazione sveglia installata. È possibile che alcune applicazioni sveglia non possano implementare questa funzione."</string>
+    <string name="permlab_setAlarm" msgid="1379294556362091814">"impostazione sveglia"</string>
+    <string name="permdesc_setAlarm" msgid="316392039157473848">"Consente all\'applicazione di impostare una sveglia in un\'applicazione sveglia installata. È possibile che alcune applicazioni sveglia non possano implementare questa funzione."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"aggiunta di un messaggio vocale"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Consente all\'applicazione di aggiungere messaggi alla casella della segreteria."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"modifica delle autorizzazioni di localizzazione geografica del browser"</string>
@@ -1175,7 +1175,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Suoneria silenziosa impostata"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volume chiamate"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume chiamate Bluetooth"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Volume allarme"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Volume sveglia"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volume notifiche"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Volume Bluetooth"</string>

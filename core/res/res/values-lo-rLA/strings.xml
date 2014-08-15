@@ -1358,7 +1358,7 @@
     <string name="submit" msgid="1602335572089911941">"ສົ່ງຂໍ້ມູນ"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"ໂຫມດຂັບລົດຖືກເປີດແລ້ວ"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"ກົດເພື່ອປິດໂຫມດຂັບລົດ."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"ການປ່ອຍສັນຍານ ຫຼືຮັອດສະປອດທີ່ເຮັດວຽກຢູ່"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"ເປີດ​ການ​ປ່ອຍ​ສັນຍານ ຫຼື​ຮັອດສະປອດ​ແລ້ວ"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"ແຕະເພື່ອຕິດຕັ້ງ."</string>
     <string name="back_button_label" msgid="2300470004503343439">"ກັບຄືນ"</string>
     <string name="next_button_label" msgid="1080555104677992408">"ຕໍ່ໄປ"</string>
@@ -1558,7 +1558,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກໂທລະສັບຂອງທ່ານດ້ວຍບັນຊີອີເມວ.\n\n ລອງໃໝ່ອີກຄັ້ງໃນ <xliff:g id="NUMBER_2">%d</xliff:g> ວິນາທີ."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ລຶບອອກ"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"ຕ້ອງການເພີ່ມລະດັບສຽງຈົນເກີນລະດັບທີ່ແນະນຳ?\nການຟັງໃນລະດັບສຽງດັງເປັນເວລາດົນ ອາດທຳລາຍການໄດ້ຍິນສຽງຂອງທ່ານໄດ້."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"ຕ້ອງການ​ເພີ່ມ​ລະດັບ​ສຽງ​ຈົນ​ເກີນ​ລະດັບ​ທີ່​ແນະນຳ​ບໍ?\nການຟັງ​ສຽງ​ໃນ​ລະດັບ​ທີ່​ດັງ​ເປັນ​ເວລາ​ດົນ​ອາດ​ທຳລາຍ​ການ​ໄດ້​ຍິນ​ຂອງ​ທ່ານ​ໄດ້."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ກົດສອງນິ້ວຄ້າງໄວ້ເພື່ອເປີດໃຊ້ການຊ່ວຍເຂົ້າເຖິງ"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"ເປີດການຊ່ວຍເຂົ້າເຖິງແລ້ວ."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ຍົກເລີກໂຕຊ່ວຍການເຂົ້າເຖິງແລ້ວ."</string>
@@ -1663,7 +1663,7 @@
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ປະ​ຈຸ​ບັນ"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"ລະຫັດ PIN ໃໝ່"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"ຢືນຢັນລະຫັດ PIN ໃໝ່"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ​"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN ບໍ່​ກົງກັນ. ລອງໃໝ່ອີກຄັ້ງ​."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ​ສັ້ນ​ເກີນ​ໄປ​. ຕ້ອງມີຢ່າງໜ້ອຍ 4 ຫຼັກ​."</string>
   <plurals name="restr_pin_countdown">
