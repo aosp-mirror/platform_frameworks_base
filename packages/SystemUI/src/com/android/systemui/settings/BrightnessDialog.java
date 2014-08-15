@@ -40,35 +40,27 @@ public class BrightnessDialog extends Activity {
         super.onCreate(savedInstanceState);
 
         final Window window = getWindow();
-        final WindowManager.LayoutParams lp = window.getAttributes();
 
-        // Offset from the top
-        lp.y = getResources().getDimensionPixelOffset(R.dimen.volume_panel_top);
-        lp.type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
-        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-
-        window.setAttributes(lp);
         window.setGravity(Gravity.TOP);
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         window.requestFeature(Window.FEATURE_NO_TITLE);
 
         setContentView(R.layout.quick_settings_brightness_dialog);
+
+        final ImageView icon = (ImageView) findViewById(R.id.brightness_icon);
+        final ToggleSlider slider = (ToggleSlider) findViewById(R.id.brightness_slider);
+        mBrightnessController = new BrightnessController(this, icon, slider);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
-        final ImageView icon = (ImageView) findViewById(R.id.brightness_icon);
-        final ToggleSlider slider = (ToggleSlider) findViewById(R.id.brightness_slider);
-        mBrightnessController = new BrightnessController(this, icon, slider);
         mBrightnessController.registerCallbacks();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-
         mBrightnessController.unregisterCallbacks();
     }
 
