@@ -53,6 +53,8 @@ public class CheckedTextView extends TextView implements Checkable {
 
     private int mBasePadding;
     private int mCheckMarkWidth;
+    private int mCheckMarkGravity = Gravity.END;
+
     private boolean mNeedRequestlayout;
 
     private static final int[] CHECKED_STATE_SET = {
@@ -83,14 +85,16 @@ public class CheckedTextView extends TextView implements Checkable {
         }
 
         mCheckMarkTintMode = Drawable.parseTintMode(a.getInt(
-                R.styleable.CompoundButton_buttonTintMode, -1), mCheckMarkTintMode);
+                R.styleable.CheckedTextView_checkMarkTintMode, -1), mCheckMarkTintMode);
 
-        if (a.hasValue(R.styleable.CompoundButton_buttonTint)) {
-            mCheckMarkTintList = a.getColorStateList(R.styleable.CompoundButton_buttonTint);
+        if (a.hasValue(R.styleable.CheckedTextView_checkMarkTint)) {
+            mCheckMarkTintList = a.getColorStateList(R.styleable.CheckedTextView_checkMarkTint);
             mHasCheckMarkTint = true;
 
             applyCheckMarkTint();
         }
+
+        mCheckMarkGravity = a.getInt(R.styleable.CheckedTextView_checkMarkGravity, Gravity.END);
 
         boolean checked = a.getBoolean(R.styleable.CheckedTextView_checked, false);
         setChecked(checked);
@@ -293,7 +297,7 @@ public class CheckedTextView extends TextView implements Checkable {
     @Override
     protected void internalSetPadding(int left, int top, int right, int bottom) {
         super.internalSetPadding(left, top, right, bottom);
-        setBasePadding(isLayoutRtl());
+        setBasePadding(isCheckMarkAtStart());
     }
 
     @Override
@@ -306,7 +310,7 @@ public class CheckedTextView extends TextView implements Checkable {
         resetPaddingToInitialValues();
         int newPadding = (mCheckMarkDrawable != null) ?
                 mCheckMarkWidth + mBasePadding : mBasePadding;
-        if (isLayoutRtl()) {
+        if (isCheckMarkAtStart()) {
             mNeedRequestlayout |= (mPaddingLeft != newPadding);
             mPaddingLeft = newPadding;
         } else {
@@ -319,12 +323,18 @@ public class CheckedTextView extends TextView implements Checkable {
         }
     }
 
-    private void setBasePadding(boolean isLayoutRtl) {
-        if (isLayoutRtl) {
+    private void setBasePadding(boolean checkmarkAtStart) {
+        if (checkmarkAtStart) {
             mBasePadding = mPaddingLeft;
         } else {
             mBasePadding = mPaddingRight;
         }
+    }
+
+    private boolean isCheckMarkAtStart() {
+        final int gravity = Gravity.getAbsoluteGravity(mCheckMarkGravity, getLayoutDirection());
+        final int hgrav = gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+        return hgrav == Gravity.LEFT;
     }
 
     @Override
@@ -347,13 +357,13 @@ public class CheckedTextView extends TextView implements Checkable {
                     break;
             }
             
-            final boolean isLayoutRtl = isLayoutRtl();
+            final boolean checkMarkAtStart = isCheckMarkAtStart();
             final int width = getWidth();
             final int top = y;
             final int bottom = top + height;
             final int left;
             final int right;
-            if (isLayoutRtl) {
+            if (checkMarkAtStart) {
                 left = mBasePadding;
                 right = left + mCheckMarkWidth;
             } else {
