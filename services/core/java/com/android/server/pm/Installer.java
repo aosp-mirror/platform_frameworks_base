@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.os.Build;
 import com.android.server.SystemService;
 
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.content.pm.PackageStats;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.util.Slog;
+import dalvik.system.VMRuntime;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -214,6 +216,11 @@ public final class Installer extends SystemService {
 
     public int patchoat(String apkPath, int uid, boolean isPublic, String pkgName,
             String instructionSet) {
+        if (!isValidInstructionSet(instructionSet)) {
+            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
+            return -1;
+        }
+
         StringBuilder builder = new StringBuilder("patchoat");
         builder.append(' ');
         builder.append(apkPath);
@@ -228,6 +235,11 @@ public final class Installer extends SystemService {
     }
 
     public int patchoat(String apkPath, int uid, boolean isPublic, String instructionSet) {
+        if (!isValidInstructionSet(instructionSet)) {
+            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
+            return -1;
+        }
+
         StringBuilder builder = new StringBuilder("patchoat");
         builder.append(' ');
         builder.append(apkPath);
@@ -241,6 +253,11 @@ public final class Installer extends SystemService {
     }
 
     public int dexopt(String apkPath, int uid, boolean isPublic, String instructionSet) {
+        if (!isValidInstructionSet(instructionSet)) {
+            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
+            return -1;
+        }
+
         StringBuilder builder = new StringBuilder("dexopt");
         builder.append(' ');
         builder.append(apkPath);
@@ -255,6 +272,11 @@ public final class Installer extends SystemService {
 
     public int dexopt(String apkPath, int uid, boolean isPublic, String pkgName,
             String instructionSet) {
+        if (!isValidInstructionSet(instructionSet)) {
+            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
+            return -1;
+        }
+
         StringBuilder builder = new StringBuilder("dexopt");
         builder.append(' ');
         builder.append(apkPath);
@@ -280,6 +302,11 @@ public final class Installer extends SystemService {
     }
 
     public int movedex(String srcPath, String dstPath, String instructionSet) {
+        if (!isValidInstructionSet(instructionSet)) {
+            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
+            return -1;
+        }
+
         StringBuilder builder = new StringBuilder("movedex");
         builder.append(' ');
         builder.append(srcPath);
@@ -291,6 +318,11 @@ public final class Installer extends SystemService {
     }
 
     public int rmdex(String codePath, String instructionSet) {
+        if (!isValidInstructionSet(instructionSet)) {
+            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
+            return -1;
+        }
+
         StringBuilder builder = new StringBuilder("rmdex");
         builder.append(' ');
         builder.append(codePath);
@@ -403,6 +435,13 @@ public final class Installer extends SystemService {
 
     public int getSizeInfo(String pkgName, int persona, String apkPath, String libDirPath,
             String fwdLockApkPath, String asecPath, String[] instructionSets, PackageStats pStats) {
+        for (String instructionSet : instructionSets) {
+            if (!isValidInstructionSet(instructionSet)) {
+                Slog.e(TAG, "Invalid instruction set: " + instructionSet);
+                return -1;
+            }
+        }
+
         StringBuilder builder = new StringBuilder("getsize");
         builder.append(' ');
         builder.append(pkgName);
@@ -479,5 +518,22 @@ public final class Installer extends SystemService {
         builder.append(' ');
         builder.append(uid);
         return (execute(builder.toString()) == 0);
+    }
+
+    /**
+     * Returns true iff. {@code instructionSet} is a valid instruction set.
+     */
+    private static boolean isValidInstructionSet(String instructionSet) {
+        if (instructionSet == null) {
+            return false;
+        }
+
+        for (String abi : Build.SUPPORTED_ABIS) {
+            if (instructionSet.equals(VMRuntime.getInstructionSet(abi))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
