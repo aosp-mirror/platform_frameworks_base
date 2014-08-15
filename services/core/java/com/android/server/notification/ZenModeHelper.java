@@ -169,26 +169,29 @@ public class ZenModeHelper {
                     return false;
                 }
             }
-            // audience has veto power over all following rules
-            if (!audienceMatches(record)) {
-                ZenLog.traceIntercepted(record, "!audienceMatches");
-                return true;
-            }
             if (isCall(record)) {
                 if (!mConfig.allowCalls) {
                     ZenLog.traceIntercepted(record, "!allowCalls");
                     return true;
                 }
-                return false;
+                return shouldInterceptAudience(record);
             }
             if (isMessage(record)) {
                 if (!mConfig.allowMessages) {
                     ZenLog.traceIntercepted(record, "!allowMessages");
                     return true;
                 }
-                return false;
+                return shouldInterceptAudience(record);
             }
             ZenLog.traceIntercepted(record, "!allowed");
+            return true;
+        }
+        return false;
+    }
+
+    private boolean shouldInterceptAudience(NotificationRecord record) {
+        if (!audienceMatches(record)) {
+            ZenLog.traceIntercepted(record, "!audienceMatches");
             return true;
         }
         return false;
