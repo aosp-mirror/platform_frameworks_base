@@ -26,4 +26,5 @@
     android:paddingStart="16dip"
     android:paddingEnd="16dip"
     android:checkMark="?android:attr/listChoiceIndicatorSingle"
+    android:checkMarkGravity="start"
     android:ellipsize="marquee" />
