@@ -34,42 +34,87 @@ import java.util.Objects;
  * strings, or a TV input service defined strings.
  * TV input service defined strings are in an xml file defined in <code>&lt;{@link
  * android.R.styleable#TvInputService tv-input}&gt;</code> with the {@link
- * android.R.attr#contentRatingSystemXml contentRatingSystemXml} attribute by the TV input service.
+ * android.R.attr#tvContentRatingDescription tvContentRatingDescription} attribute by the TV input
+ * service.
  *
- * <h3> Content Rating System XML format </h3>
- * The XML file for publishing content rating system should follow the DTD bellow:
+ * <h3> Example: Rating system definition for the TV Parental Guidelines</h3>
+ * The following XML example shows how the TV Parental Guidelines in United States can be defined:
  * <p><pre class="prettyprint">
- * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
- * &lt;!DOCTYPE rating-systems [
- *     &lt;!ELEMENT rating-system-definitions (rating-system-definition+)&gt;
- *     &lt;!ATTLIST rating-system-definitions
- *         version     CDATA #REQUIRED&gt;
- *     &lt;!ELEMENT rating-system-definition (
- *         (sub-rating-definition*, rating-definition, sub-rating-definition*)+, order*)&gt;
- *     &lt;!ATTLIST rating-system-definition
- *         id          ID    #REQUIRED
- *         displayName CDATA #IMPLIED
- *         description CDATA #IMPLIED
- *         country     CDATA #IMPLIED&gt;
- *     &lt;!ELEMENT sub-rating-definition EMPTY&gt;
- *     &lt;!ATTLIST sub-rating-definition
- *         id          ID    #REQUIRED
- *         displayName CDATA #IMPLIED
- *         icon        CDATA #IMPLIED
- *         description CDATA #IMPLIED&gt;
- *     &lt;!ELEMENT rating-definition (sub-rating*))&gt;
- *     &lt;!ATTLIST rating-definition
- *         id          ID    #REQUIRED
- *         displayName CDATA #IMPLIED
- *         icon        CDATA #IMPLIED
- *         description CDATA #IMPLIED&gt;
- *     &lt;!ELEMENT sub-rating EMPTY&gt;
- *     &lt;!ATTLIST sub-rating id IDREF #REQUIRED&gt;
- *     &lt;!ELEMENT order (rating, rating+)&gt;
- *     &lt;!ELEMENT rating EMPTY&gt;
- *     &lt;!ATTLIST rating id IDREF #REQUIRED&gt;
- * ]&gt;
- * </pre></p>
+ * {@literal
+ * <?xml version="1.0" encoding="UTF-8"?>
+ * <rating-system-definitions version="1.0">
+ *     <rating-system-definition id="US_TV"
+ *         displayName="US-TV"
+ *         description="The TV Parental Guidelines"
+ *         country="US">
+ *         <sub-rating-definition id="US_TV_D"
+ *             displayName="D"
+ *             description="Suggestive dialogue (Usually means talks about sex)" />
+ *         <sub-rating-definition id="US_TV_L"
+ *             displayName="L"
+ *             description="Coarse language" />
+ *         <sub-rating-definition id="US_TV_S"
+ *             displayName="S"
+ *             description="Sexual content" />
+ *         <sub-rating-definition id="US_TV_V"
+ *             displayName="V"
+ *             description="Violence" />
+ *         <sub-rating-definition id="US_TV_FV"
+ *             displayName="FV"
+ *             description="Fantasy violence (Children\'s programming only)" />
+ *
+ *         <rating-definition id="US_TV_Y"
+ *             displayName="TV-Y"
+ *             description="This program is designed to be appropriate for all children"
+ *             ageHint="0" />
+ *         <rating-definition id="US_TV_Y7"
+ *             displayName="TV-Y7"
+ *             description="This program is designed for children age 7 and above"
+ *             ageHint="7">
+ *             <sub-rating id="US_TV_FV" />
+ *         </rating-definition>
+ *         <rating-definition id="US_TV_G"
+ *             displayName="TV-G"
+ *             description="Most parents would find this program suitable for all ages"
+ *             ageHint="0" />
+ *         <rating-definition id="US_TV_PG"
+ *             displayName="TV-PG"
+ *             description="This program contains material that parents may find unsuitable for younger children"
+ *             ageHint="14">
+ *             <sub-rating id="US_TV_D" />
+ *             <sub-rating id="US_TV_L" />
+ *             <sub-rating id="US_TV_S" />
+ *             <sub-rating id="US_TV_V" />
+ *         </rating-definition>
+ *         <rating-definition id="US_TV_14"
+ *             displayName="TV-14"
+ *             description="This program contains some material that many parents would find unsuitable for children under 14 years of age"
+ *             ageHint="14">
+ *             <sub-rating id="US_TV_D" />
+ *             <sub-rating id="US_TV_L" />
+ *             <sub-rating id="US_TV_S" />
+ *             <sub-rating id="US_TV_V" />
+ *         </rating-definition>
+ *         <rating-definition id="US_TV_MA"
+ *             displayName="TV-MA"
+ *             description="This program is specifically designed to be viewed by adults and therefore may be unsuitable for children under 17"
+ *             ageHint="17">
+ *             <sub-rating id="US_TV_L" />
+ *             <sub-rating id="US_TV_S" />
+ *             <sub-rating id="US_TV_V" />
+ *         </rating-definition>
+ *         <order>
+ *             <rating id="US_TV_Y" />
+ *             <rating id="US_TV_Y7" />
+ *         </order>
+ *         <order>
+ *             <rating id="US_TV_G" />
+ *             <rating id="US_TV_PG" />
+ *             <rating id="US_TV_14" />
+ *             <rating id="US_TV_MA" />
+ *         </order>
+ *     </rating-system-definition>
+ * </rating-system-definitions>}</pre></p>
  *
  * <h3>System defined rating strings</h3>
  *
