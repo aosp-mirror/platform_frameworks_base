@@ -218,7 +218,7 @@ public class Media extends BaseCommand {
         void printUsageMessage() {
             try {
                 System.out.println("V2Monitoring session " + mController.getTag()
-                        + "...  available commands:");
+                        + "...  available commands: play, pause, next, previous");
             } catch (RemoteException e) {
                 System.out.println("Error trying to monitor session!");
             }
@@ -250,6 +250,14 @@ public class Media extends BaseCommand {
                         addNewline = false;
                     } else if ("q".equals(line) || "quit".equals(line)) {
                         break;
+                    } else if ("play".equals(line)) {
+                        mController.play();
+                    } else if ("pause".equals(line)) {
+                        mController.pause();
+                    } else if ("next".equals(line)) {
+                        mController.next();
+                    } else if ("previous".equals(line)) {
+                        mController.previous();
                     } else {
                         System.out.println("Invalid command: " + line);
                     }

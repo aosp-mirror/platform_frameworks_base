@@ -290,7 +290,6 @@ public class MediaSessionLegacyHelper {
             if (DEBUG) {
                 Log.d(TAG, "addMediaButtonListener already added " + pi);
             }
-            return;
         }
         holder.mMediaButtonListener = new MediaButtonListener(pi, context);
         // TODO determine if handling transport performer commands should also
@@ -468,7 +467,11 @@ public class MediaSessionLegacyHelper {
                 mSessions.remove(mPi);
             } else if (mCb == null) {
                 mCb = new SessionCallback();
-                mSession.setCallback(mCb);
+                Handler handler = null;
+                if (Looper.myLooper() == null) {
+                    handler = new Handler(Looper.getMainLooper());
+                }
+                mSession.setCallback(mCb, handler);
             }
         }
 
