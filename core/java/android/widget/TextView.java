@@ -1320,8 +1320,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 attrs, com.android.internal.R.styleable.View, defStyleAttr, defStyleRes);
 
         boolean focusable = mMovement != null || getKeyListener() != null;
-        boolean clickable = focusable;
-        boolean longClickable = focusable;
+        boolean clickable = focusable || isClickable();
+        boolean longClickable = focusable || isLongClickable();
 
         n = a.getIndexCount();
         for (int i = 0; i < n; i++) {
