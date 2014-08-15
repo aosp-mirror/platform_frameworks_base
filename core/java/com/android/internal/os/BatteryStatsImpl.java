@@ -45,6 +45,7 @@ import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.LogWriter;
@@ -3744,6 +3745,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteNetworkInterfaceTypeLocked(String iface, int networkType) {
+        if (TextUtils.isEmpty(iface)) return;
         if (ConnectivityManager.isNetworkTypeMobile(networkType)) {
             mMobileIfaces = includeInStringArray(mMobileIfaces, iface);
             if (DEBUG) Slog.d(TAG, "Note mobile iface " + iface + ": " + mMobileIfaces);

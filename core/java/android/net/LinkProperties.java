@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.net.ProxyInfo;
 import android.os.Parcelable;
 import android.os.Parcel;
@@ -124,7 +125,7 @@ public final class LinkProperties implements Parcelable {
      *
      * @return The interface name set for this link or {@code null}.
      */
-    public String getInterfaceName() {
+    public @Nullable String getInterfaceName() {
         return mIfaceName;
     }
 
