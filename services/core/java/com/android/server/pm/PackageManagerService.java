@@ -107,12 +107,12 @@ import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
-import android.content.pm.InstallSessionParams;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.ManifestDigest;
 import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageParser.ActivityIntentInfo;
@@ -7846,7 +7846,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     void installStage(String packageName, File stageDir, IPackageInstallObserver2 observer,
-            InstallSessionParams params, String installerPackageName, int installerUid,
+            PackageInstaller.SessionParams params, String installerPackageName, int installerUid,
             UserHandle user) {
         final VerificationParams verifParams = new VerificationParams(null, params.originatingUri,
                 params.referrerUri, installerUid, null);

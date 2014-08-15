@@ -24,7 +24,7 @@ import android.os.Parcelable;
 /**
  * Represents verification parameters used to verify packages to be installed.
  *
- * @deprecated callers should migrate to {@link PackageInstallerParams}.
+ * @deprecated callers should migrate to {@link PackageInstaller}.
  * @hide
  */
 @Deprecated

@@ -25,13 +25,15 @@ import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstallerSession;
-import android.content.pm.InstallSessionInfo;
-import android.content.pm.InstallSessionParams;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageInstaller.SessionInfo;
+import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ApkLite;
@@ -59,6 +61,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.server.pm.PackageInstallerService.PackageInstallObserverAdapter;
 
 import libcore.io.Libcore;
 
@@ -81,13 +84,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     // TODO: treat INHERIT_EXISTING as installExistingPackage()
 
     private final PackageInstallerService.InternalCallback mCallback;
+    private final Context mContext;
     private final PackageManagerService mPm;
     private final Handler mHandler;
 
     final int sessionId;
     final int userId;
     final String installerPackageName;
-    final InstallSessionParams params;
+    final SessionParams params;
     final long createdMillis;
     final File sessionStageDir;
 
@@ -159,10 +163,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     };
 
     public PackageInstallerSession(PackageInstallerService.InternalCallback callback,
-            PackageManagerService pm, Looper looper, int sessionId, int userId,
-            String installerPackageName, InstallSessionParams params, long createdMillis,
+            Context context, PackageManagerService pm, Looper looper, int sessionId, int userId,
+            String installerPackageName, SessionParams params, long createdMillis,
             File sessionStageDir, boolean sealed) {
         mCallback = callback;
+        mContext = context;
         mPm = pm;
         mHandler = new Handler(looper, mHandlerCallback);
 
@@ -188,8 +193,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         computeProgressLocked();
     }
 
-    public InstallSessionInfo generateInfo() {
-        final InstallSessionInfo info = new InstallSessionInfo();
+    public SessionInfo generateInfo() {
+        final SessionInfo info = new SessionInfo();
 
         info.sessionId = sessionId;
         info.installerPackageName = installerPackageName;
@@ -246,8 +251,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @Override
-    public String[] list() {
-        assertNotSealed("list");
+    public String[] getNames() {
+        assertNotSealed("getNames");
         return sessionStageDir.list();
     }
 
@@ -337,9 +342,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @Override
-    public void commit(IPackageInstallObserver2 observer) {
-        Preconditions.checkNotNull(observer);
-        mHandler.obtainMessage(MSG_COMMIT, observer).sendToTarget();
+    public void commit(IntentSender statusReceiver) {
+        Preconditions.checkNotNull(statusReceiver);
+
+        final PackageInstallObserverAdapter adapter = new PackageInstallObserverAdapter(mContext,
+                statusReceiver);
+        mHandler.obtainMessage(MSG_COMMIT, adapter.getBinder()).sendToTarget();
     }
 
     private void commitLocked() throws PackageManagerException {
@@ -385,7 +393,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Inherit any packages and native libraries from existing install that
         // haven't been overridden.
-        if (params.mode == InstallSessionParams.MODE_INHERIT_EXISTING) {
+        if (params.mode == SessionParams.MODE_INHERIT_EXISTING) {
             spliceExistingFilesIntoStage();
         }
 
@@ -396,7 +404,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // We've reached point of no return; call into PMS to install the stage.
         // Regardless of success or failure we always destroy session.
-        final IPackageInstallObserver2 remoteObserver = mRemoteObserver;
         final IPackageInstallObserver2 localObserver = new IPackageInstallObserver2.Stub() {
             @Override
             public void onUserActionRequired(Intent intent) {
@@ -488,7 +495,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // currently relying on PMS to do this.
         // TODO: teach about compatible upgrade keysets.
 
-        if (params.mode == InstallSessionParams.MODE_FULL_INSTALL) {
+        if (params.mode == SessionParams.MODE_FULL_INSTALL) {
             // Full installs must include a base package
             if (!seenSplits.contains(null)) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
