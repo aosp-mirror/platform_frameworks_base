@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.Manifest;
 import android.annotation.SdkConstant;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -26,6 +27,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.RemoteException;
 import android.telephony.DisconnectCause;
 
 import com.android.internal.os.SomeArgs;
@@ -45,7 +48,6 @@ import java.util.Map;
  * Android device.
  */
 public abstract class ConnectionService extends Service {
-
     /**
      * The {@link Intent} that must be declared as handled by the service.
      */
@@ -81,6 +83,18 @@ public abstract class ConnectionService extends Service {
     private final ConnectionServiceAdapter mAdapter = new ConnectionServiceAdapter();
 
     private final IBinder mBinder = new IConnectionService.Stub() {
+        /**
+         * Enforces the requirement that all calls into the ConnectionService require the
+         * {@code BIND_CONNECTION_SERVICE} permission.
+         */
+        @Override
+        public boolean onTransact(int code, Parcel data, Parcel reply,
+                int flags) throws RemoteException
+        {
+            enforceBindConnectionServicePermission();
+            return super.onTransact(code, data, reply, flags);
+        }
+
         @Override
         public void addConnectionServiceAdapter(IConnectionServiceAdapter adapter) {
             mHandler.obtainMessage(MSG_ADD_CONNECTION_SERVICE_ADAPTER, adapter).sendToTarget();
@@ -617,7 +631,8 @@ public abstract class ConnectionService extends Service {
                     public void onError(String request, int code, String reason) {
                         // no-op
                     }
-                });
+                }
+        );
     }
 
     private void splitFromConference(String callId) {
@@ -830,4 +845,10 @@ public abstract class ConnectionService extends Service {
         return Connection.getNullConnection();
     }
 
+    /**
+     * Enforces the {@code BIND_CONNECTION_SERVICE} permission for connection service calls.
+     */
+    private void enforceBindConnectionServicePermission() {
+        enforceCallingPermission(Manifest.permission.BIND_CONNECTION_SERVICE, null);
+    }
 }
