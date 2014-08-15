@@ -262,10 +262,6 @@ public final class LoadedApk {
                 if (!Objects.equals(mPackageName, ActivityThread.currentPackageName())) {
                     final String isa = VMRuntime.getRuntime().vmInstructionSet();
                     try {
-                        // TODO: We can probably do away with the isa argument since
-                        // the AM and PM have enough information to figure this out
-                        // themselves. If we do need it, we should match it against the
-                        // list of devices ISAs before sending it down to installd.
                         ActivityThread.getPackageManager().performDexOptIfNeeded(mPackageName, isa);
                     } catch (RemoteException re) {
                         // Ignored.
