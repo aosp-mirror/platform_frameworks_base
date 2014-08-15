@@ -58,8 +58,6 @@ import android.os.SystemProperties;
 import android.os.SystemService;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.os.Parcel;
-import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.util.EventLog;
@@ -709,7 +707,6 @@ public final class PowerManagerService extends com.android.server.SystemService
         if (mLowPowerModeEnabled != lowPowerModeEnabled) {
             mLowPowerModeEnabled = lowPowerModeEnabled;
             powerHintInternal(POWER_HINT_LOW_POWER_MODE, lowPowerModeEnabled ? 1 : 0);
-            setSurfaceFlingerLowPowerMode(lowPowerModeEnabled ? 1 : 0);
             mLowPowerModeEnabled = lowPowerModeEnabled;
             BackgroundThread.getHandler().post(new Runnable() {
                 @Override
@@ -2196,21 +2193,6 @@ public final class PowerManagerService extends com.android.server.SystemService
 
     private void powerHintInternal(int hintId, int data) {
         nativeSendPowerHint(hintId, data);
-    }
-
-    private static void setSurfaceFlingerLowPowerMode(int enabled) {
-        try {
-            final IBinder flinger = ServiceManager.getService("SurfaceFlinger");
-            if (flinger != null) {
-                final Parcel data = Parcel.obtain();
-                data.writeInterfaceToken("android.ui.ISurfaceComposer");
-                data.writeInt(enabled);
-                flinger.transact(1016, data, null, 0);
-                data.recycle();
-            }
-        } catch (RemoteException ex) {
-            Slog.e(TAG, "Failed to reduce refresh rate", ex);
-        }
     }
 
     /**
