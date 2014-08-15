@@ -229,6 +229,28 @@ public class BackupManager {
     }
 
     /**
+     * Enable/disable data restore at application install time.  When enabled, app
+     * installation will include an attempt to fetch the app's historical data from
+     * the archival restore dataset (if any).  When disabled, no such attempt will
+     * be made.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void setAutoRestore(boolean isEnabled) {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                sService.setAutoRestore(isEnabled);
+            } catch (RemoteException e) {
+                Log.e(TAG, "setAutoRestore() couldn't connect");
+            }
+        }
+    }
+
+    /**
      * Identify the currently selected transport.  Callers must hold the
      * android.permission.BACKUP permission to use this method.
      * @return The name of the currently active backup transport.  In case of
