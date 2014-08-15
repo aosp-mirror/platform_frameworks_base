@@ -88,9 +88,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mExpansionDisabled = false;
         mPublicLayout.reset();
         mPrivateLayout.reset();
+        resetHeight();
+        logExpansionEvent(false, wasExpanded);
+    }
+
+    public void resetHeight() {
         mMaxExpandHeight = 0;
         mWasReset = true;
-        logExpansionEvent(false, wasExpanded);
+        onHeightReset();
     }
 
     @Override
@@ -178,20 +183,26 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @param expand whether the system wants this notification to be expanded.
      */
     public void setSystemExpanded(boolean expand) {
-        final boolean wasExpanded = isExpanded();
-        mIsSystemExpanded = expand;
-        notifyHeightChanged();
-        logExpansionEvent(false, wasExpanded);
+        if (expand != mIsSystemExpanded) {
+            final boolean wasExpanded = isExpanded();
+            mIsSystemExpanded = expand;
+            notifyHeightChanged();
+            logExpansionEvent(false, wasExpanded);
+        }
     }
 
     /**
      * @param expansionDisabled whether to prevent notification expansion
      */
     public void setExpansionDisabled(boolean expansionDisabled) {
-        final boolean wasExpanded = isExpanded();
-        mExpansionDisabled = expansionDisabled;
-        logExpansionEvent(false, wasExpanded);
-        notifyHeightChanged();
+        if (expansionDisabled != mExpansionDisabled) {
+            final boolean wasExpanded = isExpanded();
+            mExpansionDisabled = expansionDisabled;
+            logExpansionEvent(false, wasExpanded);
+            if (wasExpanded != isExpanded()) {
+                notifyHeightChanged();
+            }
+        }
     }
 
     /**
@@ -368,9 +379,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mPrivateLayout.notifyContentUpdated();
     }
 
-    public boolean isShowingLayoutLayouted() {
-        NotificationContentView showingLayout = getShowingLayout();
-        return showingLayout.getWidth() != 0;
+    public boolean isMaxExpandHeightInitialized() {
+        return mMaxExpandHeight != 0;
     }
 
     private NotificationContentView getShowingLayout() {
