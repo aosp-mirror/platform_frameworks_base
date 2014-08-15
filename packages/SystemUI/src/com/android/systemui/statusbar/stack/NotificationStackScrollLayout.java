@@ -1914,6 +1914,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     public void onReset(ExpandableView view) {
         mRequestViewResizeAnimationOnLayout = true;
+        mStackScrollAlgorithm.onReset(view);
     }
 
     private void updateScrollPositionOnExpandInBottom(ExpandableView view) {

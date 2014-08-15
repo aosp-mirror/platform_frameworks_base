@@ -121,6 +121,7 @@ public class StatusBarWindowView extends FrameLayout {
             MotionEvent cancellation = MotionEvent.obtain(ev);
             cancellation.setAction(MotionEvent.ACTION_CANCEL);
             mStackScrollLayout.onInterceptTouchEvent(cancellation);
+            mNotificationPanel.onInterceptTouchEvent(cancellation);
             cancellation.recycle();
         }
         return intercept;
