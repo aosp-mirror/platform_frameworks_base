@@ -195,4 +195,21 @@ TEST(ResTableTest, resourceIsOverridenWithBetterConfig) {
     ASSERT_EQ(uint32_t(400), val.data);
 }
 
+TEST(ResTableTest, emptyTableHasSensibleDefaults) {
+    const int32_t expectedCookie = 1;
+
+    ResTable table;
+    ASSERT_EQ(NO_ERROR, table.addEmpty(expectedCookie));
+
+    ASSERT_EQ(uint32_t(1), table.getTableCount());
+    ASSERT_EQ(uint32_t(1), table.getBasePackageCount());
+    ASSERT_EQ(expectedCookie, table.getTableCookie(0));
+
+    const DynamicRefTable* dynamicRefTable = table.getDynamicRefTableForCookie(expectedCookie);
+    ASSERT_TRUE(dynamicRefTable != NULL);
+
+    Res_value val;
+    ASSERT_LT(table.getResource(base::R::integer::number1, &val, MAY_NOT_BE_BAG), 0);
+}
+
 }
