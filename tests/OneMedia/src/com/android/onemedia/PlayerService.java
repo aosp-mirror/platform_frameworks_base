@@ -17,6 +17,7 @@ package com.android.onemedia;
 
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
@@ -34,6 +35,7 @@ public class PlayerService extends Service {
 
     private PlayerBinder mBinder;
     private PlayerSession mSession;
+    private NotificationHelper mNotifyHelper;
     private Intent mIntent;
     private boolean mStarted = false;
 
@@ -47,6 +49,7 @@ public class PlayerService extends Service {
             mSession = onCreatePlayerController();
             mSession.createSession();
             mSession.setListener(mPlayerListener);
+            mNotifyHelper = new NotificationHelper(this, mSession.mSession);
         }
     }
 
@@ -75,6 +78,7 @@ public class PlayerService extends Service {
         if (!mStarted) {
             Log.d(TAG, "Starting self");
             startService(onCreateServiceIntent());
+            mNotifyHelper.onStart();
             mStarted = true;
         }
     }
@@ -82,6 +86,7 @@ public class PlayerService extends Service {
     public void onPlaybackEnded() {
         if (mStarted) {
             Log.d(TAG, "Stopping self");
+            mNotifyHelper.onStop();
             stopSelf();
             mStarted = false;
         }
@@ -150,7 +155,16 @@ public class PlayerService extends Service {
 
         @Override
         public MediaSession.Token getSessionToken() throws RemoteException {
+            if (mSession == null) {
+                Log.e(TAG, "Error in PlayerService: mSession=null in getSessionToken()");
+                return null;
+            }
             return mSession.getSessionToken();
+        }
+
+        @Override
+        public void setIcon(Bitmap icon) {
+            mSession.setIcon(icon);
         }
     }
 
