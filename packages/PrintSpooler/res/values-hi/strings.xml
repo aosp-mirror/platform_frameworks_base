@@ -34,7 +34,7 @@
     <string name="generating_print_job" msgid="3119608742651698916">"प्रिंट कार्य जनरेट हो रहा है"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF के रूप में सहेजें"</string>
     <string name="all_printers" msgid="5018829726861876202">"सभी प्रिंटर..."</string>
-    <string name="print_dialog" msgid="32628687461331979">"प्रिंट संवाद"</string>
+    <string name="print_dialog" msgid="32628687461331979">"प्रिंट डॉयलॉग"</string>
     <string name="search" msgid="5421724265322228497">"खोजें"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"सभी प्रिंटर"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"सेवा जोड़ें"</string>
