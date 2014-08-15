@@ -92,7 +92,7 @@ public class AudioTrack
     /** Minimum value for sample rate */
     private static final int SAMPLE_RATE_HZ_MIN = 4000;
     /** Maximum value for sample rate */
-    private static final int SAMPLE_RATE_HZ_MAX = 48000;
+    private static final int SAMPLE_RATE_HZ_MAX = 96000;
 
     /** Maximum value for AudioTrack channel count */
     private static final int CHANNEL_COUNT_MAX = 8;
