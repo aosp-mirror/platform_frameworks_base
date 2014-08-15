@@ -1811,6 +1811,10 @@ public final class ActivityThread {
         synchronized (this) {
             getSystemContext().installSystemApplicationInfo(info, classLoader);
 
+            // The code package for "android" in the system server needs
+            // to be the system context's package.
+            mPackages.put("android", new WeakReference<LoadedApk>(getSystemContext().mPackageInfo));
+
             // give ourselves a default profiler
             mProfiler = new Profiler();
         }
