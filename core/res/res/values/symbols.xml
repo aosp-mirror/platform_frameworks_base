@@ -1870,8 +1870,6 @@
   <java-symbol type="id" name="ampm_label" />
   <java-symbol type="id" name="radial_picker" />
   <java-symbol type="id" name="separator" />
-  <java-symbol type="id" name="layout_buttons" />
-  <java-symbol type="id" name="done_button" />
   <java-symbol type="id" name="date_picker_header" />
   <java-symbol type="id" name="date_picker_month_and_day_layout" />
   <java-symbol type="id" name="day_picker_selector_layout" />
@@ -1879,7 +1877,6 @@
   <java-symbol type="id" name="date_picker_day" />
   <java-symbol type="id" name="date_picker_year" />
   <java-symbol type="id" name="animator" />
-  <java-symbol type="id" name="done" />
 
   <java-symbol type="string" name="done_label" />
   <java-symbol type="string" name="hour_picker_description" />

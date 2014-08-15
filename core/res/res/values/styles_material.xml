@@ -343,37 +343,37 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Material.TimePicker.TimeLabel" parent="TextAppearance.Material">
         <item name="textSize">@dimen/timepicker_time_label_size</item>
-        <item name="textColor">?attr/textColorPrimary</item>
+        <item name="textColor">?attr/textColorSecondaryInverse</item>
     </style>
 
     <style name="TextAppearance.Material.TimePicker.AmPmLabel" parent="TextAppearance.Material">
         <item name="textSize">@dimen/timepicker_ampm_label_size</item>
         <item name="textAllCaps">true</item>
-        <item name="textColor">?attr/textColorPrimary</item>
+        <item name="textColor">?attr/textColorSecondaryInverse</item>
         <item name="textStyle">bold</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.DayOfWeekLabel" parent="TextAppearance.Material">
         <item name="includeFontPadding">false</item>
-        <item name="textColor">?attr/textColorPrimary</item>
+        <item name="textColor">?attr/textColorPrimaryInverse</item>
         <item name="textSize">@dimen/datepicker_header_text_size</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.MonthLabel" parent="TextAppearance.Material">
         <item name="includeFontPadding">false</item>
-        <item name="textColor">?attr/textColorPrimary</item> <!-- selected should be accent -->
+        <item name="textColor">?attr/textColorSecondaryInverse</item> <!-- selected should be accent -->
         <item name="textSize">@dimen/datepicker_selected_date_month_size</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.DayOfMonthLabel" parent="TextAppearance.Material">
         <item name="includeFontPadding">false</item>
-        <item name="textColor">?attr/textColorPrimary</item> <!-- selected should be accent -->
+        <item name="textColor">?attr/textColorSecondaryInverse</item> <!-- selected should be accent -->
         <item name="textSize">@dimen/datepicker_selected_date_day_size</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.YearLabel" parent="TextAppearance.Material">
         <item name="includeFontPadding">false</item>
-        <item name="textColor">?attr/textColorPrimary</item> <!-- selected should be accent -->
+        <item name="textColor">?attr/textColorSecondaryInverse</item> <!-- selected should be accent -->
         <item name="textSize">@dimen/datepicker_selected_date_year_size</item>
     </style>
 
@@ -471,6 +471,10 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.ButtonBar.AlertDialog">
         <item name="background">@null</item>
+        <item name="paddingStart">16dp</item>
+        <item name="paddingEnd">16dp</item>
+        <item name="paddingBottom">16dp</item>
+        <item name="minHeight">@dimen/alert_dialog_button_bar_height</item>
     </style>
 
     <style name="Widget.Material.SearchView">
@@ -592,10 +596,10 @@ please see styles_device_defaults.xml.
         <item name="internalLayout">@layout/time_picker_holo</item>
         <item name="headerTimeTextAppearance">@style/TextAppearance.Material.TimePicker.TimeLabel</item>
         <item name="headerAmPmTextAppearance">@style/TextAppearance.Material.TimePicker.AmPmLabel</item>
-        <item name="headerSelectedTextColor">?attr/colorControlActivated</item>
-        <item name="headerBackgroundColor">@color/transparent</item>
+        <item name="headerSelectedTextColor">?attr/textColorPrimaryInverse</item>
+        <item name="headerBackgroundColor">?attr/colorAccent</item>
         <item name="numbersTextColor">?attr/textColorSecondary</item>
-        <item name="numbersBackgroundColor">@color/transparent</item>
+        <item name="numbersBackgroundColor">#10ffffff</item>
         <item name="amPmTextColor">?attr/textColorSecondary</item>
         <item name="amPmBackgroundColor">@color/transparent</item>
         <item name="amPmSelectedBackgroundColor">?attr/colorControlActivated</item>
@@ -608,13 +612,13 @@ please see styles_device_defaults.xml.
         <!-- Attributes for new-style DatePicker. -->
         <item name="internalLayout">@layout/date_picker_holo</item>
         <item name="calendarViewShown">true</item>
-        <item name="dayOfWeekBackgroundColor">@color/transparent</item>
+        <item name="dayOfWeekBackgroundColor">#10000000</item>
         <item name="dayOfWeekTextAppearance">@style/TextAppearance.Material.DatePicker.DayOfWeekLabel</item>
         <item name="headerMonthTextAppearance">@style/TextAppearance.Material.DatePicker.MonthLabel</item>
         <item name="headerDayOfMonthTextAppearance">@style/TextAppearance.Material.DatePicker.DayOfMonthLabel</item>
         <item name="headerYearTextAppearance">@style/TextAppearance.Material.DatePicker.YearLabel</item>
-        <item name="headerSelectedTextColor">?attr/colorControlActivated</item>
-        <item name="headerBackgroundColor">@color/transparent</item>
+        <item name="headerSelectedTextColor">?attr/textColorPrimaryInverse</item>
+        <item name="headerBackgroundColor">?attr/colorAccent</item>
         <item name="yearListItemTextAppearance">@style/TextAppearance.Material.DatePicker.List.YearLabel</item>
         <item name="yearListSelectorColor">?attr/colorControlActivated</item>
         <item name="calendarTextColor">?attr/textColorSecondary</item>
@@ -935,7 +939,11 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.Light.NumberPicker" parent="Widget.Material.NumberPicker"/>
-    <style name="Widget.Material.Light.TimePicker" parent="Widget.Material.TimePicker" />
+
+    <style name="Widget.Material.Light.TimePicker" parent="Widget.Material.TimePicker">
+        <item name="numbersBackgroundColor">#10000000</item>
+    </style>
+
     <style name="Widget.Material.Light.DatePicker" parent="Widget.Material.DatePicker" />
     <style name="Widget.Material.Light.ActivityChooserView" parent="Widget.Material.ActivityChooserView" />
     <style name="Widget.Material.Light.ImageWell" parent="Widget.Material.ImageWell"/>

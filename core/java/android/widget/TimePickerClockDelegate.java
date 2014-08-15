@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.format.DateFormat;
@@ -35,7 +34,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import com.android.internal.R;
 
-import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -46,29 +44,20 @@ import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
  * A delegate implementing the basic TimePicker
  */
 class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
-
     private static final boolean DEFAULT_ENABLED_STATE = true;
-
     private static final int HOURS_IN_HALF_DAY = 12;
 
     // state
     private boolean mIs24HourView;
-
     private boolean mIsAm;
 
     // ui components
     private final NumberPicker mHourSpinner;
-
     private final NumberPicker mMinuteSpinner;
-
     private final NumberPicker mAmPmSpinner;
-
     private final EditText mHourSpinnerInput;
-
     private final EditText mMinuteSpinnerInput;
-
     private final EditText mAmPmSpinnerInput;
-
     private final TextView mDivider;
 
     // Note that the legacy implementation of the TimePicker is
@@ -77,17 +66,10 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
     // accommodates these two cases to be backwards compatible.
     private final Button mAmPmButton;
 
-    // May be null if layout has no done button
-    private final View mDoneButton;
-    private boolean mShowDoneButton;
-    private TimePicker.TimePickerDismissCallback mDismissCallback;
-
     private final String[] mAmPmStrings;
 
     private boolean mIsEnabled = DEFAULT_ENABLED_STATE;
-
     private Calendar mTempCalendar;
-
     private boolean mHourWithTwoDigit;
     private char mHourFormat;
 
@@ -227,20 +209,6 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
             }
         }
 
-        mDoneButton = delegator.findViewById(R.id.done_button);
-        mShowDoneButton = (mDoneButton != null);
-        if (mShowDoneButton) {
-            mDoneButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mDismissCallback != null) {
-                        mDismissCallback.dismiss(mDelegator, false, getCurrentHour(),
-                                                 getCurrentMinute());
-                    }
-                }
-            });
-        }
-
         getHourFormatData();
 
         // update controls to initial state
@@ -265,8 +233,6 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
         if (mDelegator.getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             mDelegator.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
-
-        updateDoneButton();
     }
 
     private void getHourFormatData() {
@@ -432,30 +398,6 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public void setShowDoneButton(boolean showDoneButton) {
-        if (mDoneButton != null) {
-            mShowDoneButton = showDoneButton;
-            updateDoneButton();
-        }
-    }
-
-    @Override
-    public boolean isShowDoneButton() {
-        return mShowDoneButton;
-    }
-
-    private void updateDoneButton() {
-        if (mDoneButton != null) {
-            mDoneButton.setVisibility(mShowDoneButton ? View.VISIBLE : View.GONE);
-        }
-    }
-
-    @Override
-    public void setDismissCallback(TimePicker.TimePickerDismissCallback callback) {
-        mDismissCallback = callback;
-    }
-
-    @Override
     public int getBaseline() {
         return mHourSpinner.getBaseline();
     }
@@ -467,8 +409,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
 
     @Override
     public Parcelable onSaveInstanceState(Parcelable superState) {
-        return new SavedState(superState, getCurrentHour(), getCurrentMinute(),
-                isShowDoneButton());
+        return new SavedState(superState, getCurrentHour(), getCurrentMinute());
     }
 
     @Override
@@ -476,7 +417,6 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
         SavedState ss = (SavedState) state;
         setCurrentHour(ss.getHour());
         setCurrentMinute(ss.getMinute());
-        setShowDoneButton(ss.isShowDoneButton());
     }
 
     @Override
@@ -632,25 +572,19 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
      * Used to save / restore state of time picker
      */
     private static class SavedState extends View.BaseSavedState {
-
         private final int mHour;
-
         private final int mMinute;
 
-        private final boolean mShowDoneButton;
-
-        private SavedState(Parcelable superState, int hour, int minute, boolean showDoneButton) {
+        private SavedState(Parcelable superState, int hour, int minute) {
             super(superState);
             mHour = hour;
             mMinute = minute;
-            mShowDoneButton = showDoneButton;
         }
 
         private SavedState(Parcel in) {
             super(in);
             mHour = in.readInt();
             mMinute = in.readInt();
-            mShowDoneButton = (in.readInt() == 1);
         }
 
         public int getHour() {
@@ -661,16 +595,11 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
             return mMinute;
         }
 
-        public boolean isShowDoneButton() {
-            return mShowDoneButton;
-        }
-
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             super.writeToParcel(dest, flags);
             dest.writeInt(mHour);
             dest.writeInt(mMinute);
-            dest.writeInt(mShowDoneButton ? 1 : 0);
         }
 
         @SuppressWarnings({"unused", "hiding"})

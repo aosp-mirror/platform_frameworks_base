@@ -79,14 +79,4 @@
         android:focusableInTouchMode="true"
         />
 
-    <!-- Width fixed here because TextView doesn't set MEASURED_STATE_TOO_SMALL -->
-    <Button
-        android:id="@+id/done_button"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:text="@string/done_label"
-        android:textSize="@dimen/timepicker_done_label_size"
-        style="?android:attr/buttonBarButtonStyle" />
-
 </LinearLayout>
