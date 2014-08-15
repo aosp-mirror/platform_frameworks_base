@@ -28,7 +28,6 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.util.AsyncChannel;
-import com.android.internal.util.ParcelableString;
 import com.android.internal.util.Protocol;
 
 import java.util.ArrayList;
@@ -295,6 +294,34 @@ public class WifiPasspointManager {
             }
         }
 
+    }
+
+    public static class ParcelableString implements Parcelable {
+        public String string;
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeString(string);
+        }
+
+        public static final Parcelable.Creator<ParcelableString> CREATOR =
+                new Parcelable.Creator<ParcelableString>() {
+                    @Override
+                    public ParcelableString createFromParcel(Parcel in) {
+                        ParcelableString ret = new ParcelableString();
+                        ret.string = in.readString();
+                        return ret;
+                    }
+                    @Override
+                    public ParcelableString[] newArray(int size) {
+                        return new ParcelableString[size];
+                    }
+        };
     }
 
     private static final int BASE = Protocol.BASE_WIFI_PASSPOINT_MANAGER;
