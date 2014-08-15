@@ -28,7 +28,7 @@
     <string name="menu_open" msgid="432922957274920903">"เปิด"</string>
     <string name="menu_save" msgid="2394743337684426338">"บันทึก"</string>
     <string name="menu_share" msgid="3075149983979628146">"แชร์"</string>
-    <string name="menu_delete" msgid="8138799623850614177">"นำออก"</string>
+    <string name="menu_delete" msgid="8138799623850614177">"ลบ"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"เลือกไว้ <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"ตามชื่อ"</string>
     <string name="sort_date" msgid="586080032956151448">"ตามวันที่ที่ปรับเปลี่ยน"</string>
@@ -49,6 +49,6 @@
     <string name="pref_device_size" msgid="3542106883278997222">"แสดงขนาดของอุปกรณ์"</string>
     <string name="empty" msgid="7858882803708117596">"ไม่มีรายการ"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"ไม่สามารถเปิดไฟล์ได้"</string>
-    <string name="toast_failed_delete" msgid="2180678019407244069">"ไม่สามารถนำออกเอกสารบางรายการ"</string>
+    <string name="toast_failed_delete" msgid="2180678019407244069">"ไม่สามารถลบเอกสารบางรายการ"</string>
     <string name="share_via" msgid="8966594246261344259">"แชร์ผ่าน"</string>
 </resources>

@@ -39,7 +39,7 @@
     <string name="create_error" msgid="3735649141335444215">"Složku se nepodařilo vytvořit"</string>
     <string name="query_error" msgid="1222448261663503501">"Seznam dokumentů se nepodařilo načíst"</string>
     <string name="root_recent" msgid="4470053704320518133">"Poslední"</string>
-    <string name="root_available_bytes" msgid="8568452858617033281">"Volný prostor: <xliff:g id="SIZE">%1$s</xliff:g>"</string>
+    <string name="root_available_bytes" msgid="8568452858617033281">"Volné místo: <xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Služby úložiště"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"Klávesové zkratky"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Zařízení"</string>

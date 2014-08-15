@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Документи"</string>
-    <string name="title_open" msgid="4353228937663917801">"Відкрити в"</string>
+    <string name="title_open" msgid="4353228937663917801">"Відкрити"</string>
     <string name="title_save" msgid="2433679664882857999">"Зберегти в"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"Створити папку"</string>
     <string name="menu_grid" msgid="6878021334497835259">"Режим таблиці"</string>
@@ -44,7 +44,7 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"Ярлики"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Пристрої"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Інші програми"</string>
-    <string name="pref_advanced_devices" msgid="903257239609301276">"Показати покращені пристрої"</string>
+    <string name="pref_advanced_devices" msgid="903257239609301276">"Показати інші пристрої"</string>
     <string name="pref_file_size" msgid="2826879315743961459">"Показати розмір файлу"</string>
     <string name="pref_device_size" msgid="3542106883278997222">"Показати розмір пристрою"</string>
     <string name="empty" msgid="7858882803708117596">"Немає елементів"</string>

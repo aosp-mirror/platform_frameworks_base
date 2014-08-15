@@ -20,7 +20,7 @@
     <string name="title_open" msgid="4353228937663917801">"Открыть"</string>
     <string name="title_save" msgid="2433679664882857999">"Сохранить"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"Новая папка"</string>
-    <string name="menu_grid" msgid="6878021334497835259">"Таблица"</string>
+    <string name="menu_grid" msgid="6878021334497835259">"Сетка"</string>
     <string name="menu_list" msgid="7279285939892417279">"Список"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Сортировать"</string>
     <string name="menu_search" msgid="3816712084502856974">"Поиск"</string>
