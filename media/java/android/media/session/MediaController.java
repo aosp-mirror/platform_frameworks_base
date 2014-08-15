@@ -63,6 +63,7 @@ public final class MediaController {
     private static final int MSG_UPDATE_QUEUE = 5;
     private static final int MSG_UPDATE_QUEUE_TITLE = 6;
     private static final int MSG_UPDATE_EXTRAS = 7;
+    private static final int MSG_DESTROYED = 8;
 
     private final ISessionController mSessionBinder;
 
@@ -508,6 +509,13 @@ public final class MediaController {
      */
     public static abstract class Callback {
         /**
+         * Override to handle the session being destroyed. The session is no
+         * longer valid after this call and calls to it will be ignored.
+         */
+        public void onSessionDestroyed() {
+        }
+
+        /**
          * Override to handle custom events sent by the session owner without a
          * specified interface. Controllers should only handle these for
          * sessions they own.
@@ -863,6 +871,14 @@ public final class MediaController {
         }
 
         @Override
+        public void onSessionDestroyed() {
+            MediaController controller = mController.get();
+            if (controller != null) {
+                controller.postMessage(MSG_DESTROYED, null, null);
+            }
+        }
+
+        @Override
         public void onEvent(String event, Bundle extras) {
             MediaController controller = mController.get();
             if (controller != null) {
@@ -954,6 +970,9 @@ public final class MediaController {
                     break;
                 case MSG_UPDATE_VOLUME:
                     mCallback.onVolumeInfoChanged((VolumeInfo) msg.obj);
+                    break;
+                case MSG_DESTROYED:
+                    mCallback.onSessionDestroyed();
                     break;
             }
         }

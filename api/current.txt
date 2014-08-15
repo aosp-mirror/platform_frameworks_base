@@ -16721,6 +16721,7 @@ package android.media.session {
     method public void onPlaybackStateChanged(android.media.session.PlaybackState);
     method public void onQueueChanged(java.util.List<android.media.session.MediaSession.Track>);
     method public void onQueueTitleChanged(java.lang.CharSequence);
+    method public void onSessionDestroyed();
     method public void onSessionEvent(java.lang.String, android.os.Bundle);
     method public void onVolumeInfoChanged(android.media.session.MediaController.VolumeInfo);
   }

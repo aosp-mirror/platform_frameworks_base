@@ -397,6 +397,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 return;
             }
             mDestroyed = true;
+            mHandler.post(MessageHandler.MSG_DESTROYED);
         }
     }
 
@@ -572,6 +573,29 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                     Log.w(TAG, "unexpected exception in pushEvent.", e);
                 }
             }
+        }
+    }
+
+    private void pushSessionDestroyed() {
+        synchronized (mLock) {
+            // This is the only method that may be (and can only be) called
+            // after the session is destroyed.
+            if (!mDestroyed) {
+                return;
+            }
+            for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
+                ISessionControllerCallback cb = mControllerCallbacks.get(i);
+                try {
+                    cb.onSessionDestroyed();
+                } catch (DeadObjectException e) {
+                    Log.w(TAG, "Removing dead callback in pushEvent.", e);
+                    mControllerCallbacks.remove(i);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "unexpected exception in pushEvent.", e);
+                }
+            }
+            // After notifying clear all listeners
+            mControllerCallbacks.clear();
         }
     }
 
@@ -919,6 +943,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         @Override
         public void registerCallbackListener(ISessionControllerCallback cb) {
             synchronized (mLock) {
+                // If this session is already destroyed tell the caller and
+                // don't add them.
+                if (mDestroyed) {
+                    try {
+                        cb.onSessionDestroyed();
+                    } catch (Exception e) {
+                        // ignored
+                    }
+                    return;
+                }
                 if (getControllerCbIndexForCb(cb) < 0) {
                     mControllerCallbacks.add(cb);
                     if (DEBUG) {
@@ -1123,6 +1157,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         private static final int MSG_SEND_EVENT = 6;
         private static final int MSG_UPDATE_SESSION_STATE = 7;
         private static final int MSG_UPDATE_VOLUME = 8;
+        private static final int MSG_DESTROYED = 9;
 
         public MessageHandler(Looper looper) {
             super(looper);
@@ -1154,6 +1189,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 case MSG_UPDATE_VOLUME:
                     pushVolumeUpdate();
                     break;
+                case MSG_DESTROYED:
+                    pushSessionDestroyed();
             }
         }
 
