@@ -53,6 +53,7 @@ Layer::Layer(RenderState& renderState, const uint32_t layerWidth, const uint32_t
     deferredList = NULL;
     convexMask = NULL;
     caches.resourceCache.incrementRefcount(this);
+    rendererLightPosDirty = true;
 }
 
 Layer::~Layer() {
@@ -77,6 +78,17 @@ void Layer::requireRenderer() {
     if (!renderer) {
         renderer = new LayerRenderer(renderState, this);
         renderer->initProperties();
+    }
+}
+
+void Layer::updateLightPosFromRenderer(const OpenGLRenderer& rootRenderer) {
+    if (renderer && rendererLightPosDirty) {
+        // re-init renderer's light position, based upon last cached location in window
+        Vector3 lightPos = rootRenderer.getLightCenter();
+        cachedInvTransformInWindow.mapPoint3d(lightPos);
+        renderer->initLight(lightPos, rootRenderer.getLightRadius(),
+                rootRenderer.getAmbientShadowAlpha(), rootRenderer.getSpotShadowAlpha());
+        rendererLightPosDirty = false;
     }
 }
 
@@ -203,7 +215,8 @@ void Layer::allocateTexture() {
     }
 }
 
-void Layer::defer() {
+void Layer::defer(const OpenGLRenderer& rootRenderer) {
+    updateLightPosFromRenderer(rootRenderer);
     const float width = layer.getWidth();
     const float height = layer.getHeight();
 
@@ -253,7 +266,8 @@ void Layer::flush() {
     }
 }
 
-void Layer::render() {
+void Layer::render(const OpenGLRenderer& rootRenderer) {
+    updateLightPosFromRenderer(rootRenderer);
     renderer->setViewport(layer.getWidth(), layer.getHeight());
     renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,
             !isBlend());

@@ -86,6 +86,11 @@ public:
         regionRect.translate(layer.left, layer.top);
     }
 
+    void setWindowTransform(Matrix4& windowTransform) {
+        cachedInvTransformInWindow.loadInverse(windowTransform);
+        rendererLightPosDirty = true;
+    }
+
     void updateDeferred(RenderNode* renderNode, int left, int top, int right, int bottom);
 
     inline uint32_t getWidth() const {
@@ -257,10 +262,10 @@ public:
         return transform;
     }
 
-    void defer();
+    void defer(const OpenGLRenderer& rootRenderer);
     void cancelDefer();
     void flush();
-    void render();
+    void render(const OpenGLRenderer& rootRenderer);
 
     /**
      * Bounds of the layer.
@@ -304,6 +309,7 @@ public:
 
 private:
     void requireRenderer();
+    void updateLightPosFromRenderer(const OpenGLRenderer& rootRenderer);
 
     Caches& caches;
 
@@ -381,6 +387,12 @@ private:
      * Optional transform.
      */
     mat4 transform;
+
+    /**
+     * Cached transform of layer in window, updated only on creation / resize
+     */
+    mat4 cachedInvTransformInWindow;
+    bool rendererLightPosDirty;
 
     /**
      * Used to defer display lists when the layer is updated with a

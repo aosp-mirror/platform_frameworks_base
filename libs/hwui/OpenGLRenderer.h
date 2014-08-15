@@ -345,8 +345,10 @@ public:
     }
 #endif
 
-    const Vector3& getLightCenter() const { return mLightCenter; }
+    const Vector3& getLightCenter() const { return currentSnapshot()->getRelativeLightCenter(); }
     float getLightRadius() const { return mLightRadius; }
+    uint8_t getAmbientShadowAlpha() const { return mAmbientShadowAlpha; }
+    uint8_t getSpotShadowAlpha() const { return mSpotShadowAlpha; }
 
 protected:
     /**

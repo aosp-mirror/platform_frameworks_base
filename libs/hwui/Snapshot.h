@@ -161,6 +161,9 @@ public:
     int getViewportHeight() const { return mViewportData.mHeight; }
     const Matrix4& getOrthoMatrix() const { return mViewportData.mOrthoMatrix; }
 
+    const Vector3& getRelativeLightCenter() const { return mRelativeLightCenter; }
+    void setRelativeLightCenter(const Vector3& lightCenter) { mRelativeLightCenter = lightCenter; }
+
     /**
      * Sets (and replaces) the current clipping outline
      */
@@ -302,6 +305,7 @@ private:
 
     SkRegion mClipRegionRoot;
     ViewportData mViewportData;
+    Vector3 mRelativeLightCenter;
 
 }; // class Snapshot
 

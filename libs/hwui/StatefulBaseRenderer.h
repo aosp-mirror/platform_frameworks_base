@@ -52,7 +52,8 @@ public:
      * the render target.
      */
     virtual void setViewport(int width, int height);
-    void initializeSaveStack(float clipLeft, float clipTop, float clipRight, float clipBottom);
+    void initializeSaveStack(float clipLeft, float clipTop, float clipRight, float clipBottom,
+            const Vector3& lightCenter);
 
     // getters
     bool hasRectToRectTransform() const {
