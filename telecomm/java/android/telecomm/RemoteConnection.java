@@ -184,8 +184,13 @@ public final class RemoteConnection {
 
     private IConnectionService mConnectionService;
     private final String mConnectionId;
+    /**
+     * ConcurrentHashMap constructor params: 8 is initial table size, 0.9f is
+     * load factor before resizing, 1 means we only expect a single thread to
+     * access the map so make only a single shard
+     */
     private final Set<Listener> mListeners = Collections.newSetFromMap(
-            new ConcurrentHashMap<Listener, Boolean>(2));
+            new ConcurrentHashMap<Listener, Boolean>(8, 0.9f, 1));
     private final Set<RemoteConnection> mConferenceableConnections = new HashSet<>();
 
     private int mState = Connection.STATE_NEW;
@@ -248,7 +253,9 @@ public final class RemoteConnection {
      * @param listener A {@code Listener}.
      */
     public void removeListener(Listener listener) {
-        mListeners.remove(listener);
+        if (listener != null) {
+            mListeners.remove(listener);
+        }
     }
 
     /**
@@ -588,11 +595,10 @@ public final class RemoteConnection {
                 setDisconnected(DisconnectCause.ERROR_UNSPECIFIED, "Connection destroyed.");
             }
 
-            Set<Listener> listeners = new HashSet<Listener>(mListeners);
-            mListeners.clear();
-            for (Listener l : listeners) {
+            for (Listener l : mListeners) {
                 l.onDestroyed(this);
             }
+            mListeners.clear();
 
             mConnected = false;
         }
