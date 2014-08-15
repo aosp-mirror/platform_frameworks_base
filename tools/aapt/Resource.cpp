@@ -1470,6 +1470,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     String16 action16("action");
     String16 category16("category");
     String16 data16("scheme");
+    String16 feature_group16("feature-group");
+    String16 uses_feature16("uses-feature");
     const char* packageIdentChars = "abcdefghijklmnopqrstuvwxyz"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ._0123456789";
     const char* packageIdentCharsWithTheStupid = "abcdefghijklmnopqrstuvwxyz"
@@ -1680,8 +1682,41 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
                                  schemeIdentChars, true) != ATTR_OKAY) {
                     hasErrors = true;
                 }
+            } else if (strcmp16(block.getElementName(&len), feature_group16.string()) == 0) {
+                int depth = 1;
+                while ((code=block.next()) != ResXMLTree::END_DOCUMENT
+                       && code > ResXMLTree::BAD_DOCUMENT) {
+                    if (code == ResXMLTree::START_TAG) {
+                        depth++;
+                        if (strcmp16(block.getElementName(&len), uses_feature16.string()) == 0) {
+                            ssize_t idx = block.indexOfAttribute(
+                                    RESOURCES_ANDROID_NAMESPACE, "required");
+                            if (idx < 0) {
+                                continue;
+                            }
+
+                            int32_t data = block.getAttributeData(idx);
+                            if (data == 0) {
+                                fprintf(stderr, "%s:%d: Tag <uses-feature> can not have "
+                                        "android:required=\"false\" when inside a "
+                                        "<feature-group> tag.\n",
+                                        manifestPath.string(), block.getLineNumber());
+                                hasErrors = true;
+                            }
+                        }
+                    } else if (code == ResXMLTree::END_TAG) {
+                        depth--;
+                        if (depth == 0) {
+                            break;
+                        }
+                    }
+                }
             }
         }
+    }
+
+    if (hasErrors) {
+        return UNKNOWN_ERROR;
     }
 
     if (resFile != NULL) {

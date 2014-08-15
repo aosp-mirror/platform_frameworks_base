@@ -8526,6 +8526,15 @@ package android.content.pm {
     field public int reqTouchScreen;
   }
 
+  public final class FeatureGroupInfo implements android.os.Parcelable {
+    ctor public FeatureGroupInfo();
+    ctor public FeatureGroupInfo(android.content.pm.FeatureGroupInfo);
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public android.content.pm.FeatureInfo[] features;
+  }
+
   public class FeatureInfo implements android.os.Parcelable {
     ctor public FeatureInfo();
     ctor public FeatureInfo(android.content.pm.FeatureInfo);
@@ -8617,6 +8626,7 @@ package android.content.pm {
     field public android.content.pm.ActivityInfo[] activities;
     field public android.content.pm.ApplicationInfo applicationInfo;
     field public android.content.pm.ConfigurationInfo[] configPreferences;
+    field public android.content.pm.FeatureGroupInfo[] featureGroups;
     field public long firstInstallTime;
     field public int[] gids;
     field public int installLocation;
