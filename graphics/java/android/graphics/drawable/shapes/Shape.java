@@ -16,6 +16,7 @@
 
 package android.graphics.drawable.shapes;
 
+import android.annotation.NonNull;
 import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Paint;
@@ -93,11 +94,12 @@ public abstract class Shape implements Cloneable {
     protected void onResize(float width, float height) {}
 
     /**
-     * Compute the Outline of the shape.
+     * Compute the Outline of the shape and return it in the supplied Outline
+     * parameter. The default implementation does nothing and {@code outline} is not changed.
      *
-     * The default implementation does not supply an outline.
+     * @param outline The Outline to be populated with the result. Should not be null.
      */
-    public void getOutline(Outline outline) {}
+    public void getOutline(@NonNull Outline outline) {}
 
     @Override
     public Shape clone() throws CloneNotSupportedException {
