@@ -13590,7 +13590,7 @@ package android.inputmethodservice {
 
   public class InputMethodService extends android.inputmethodservice.AbstractInputMethodService {
     ctor public InputMethodService();
-    method public boolean enableHardwareAcceleration();
+    method public deprecated boolean enableHardwareAcceleration();
     method public int getBackDisposition();
     method public int getCandidatesHiddenVisibility();
     method public android.view.inputmethod.InputBinding getCurrentInputBinding();
