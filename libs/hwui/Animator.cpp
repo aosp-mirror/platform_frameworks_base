@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "RT-Animator"
-
 #include "Animator.h"
 
 #include <inttypes.h>

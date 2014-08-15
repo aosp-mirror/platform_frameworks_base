@@ -116,6 +116,7 @@ int RenderNode::getDebugSize() {
 
 void RenderNode::prepareTree(TreeInfo& info) {
     ATRACE_CALL();
+    LOG_ALWAYS_FATAL_IF(!info.damageAccumulator, "DamageAccumulator missing");
 
     prepareTreeImpl(info);
 }
@@ -163,16 +164,26 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         return;
     }
 
+    bool transformUpdateNeeded = false;
     if (!mLayer) {
         mLayer = LayerRenderer::createRenderLayer(info.renderState, getWidth(), getHeight());
         applyLayerPropertiesToLayer(info);
         damageSelf(info);
+        transformUpdateNeeded = true;
     } else if (mLayer->layer.getWidth() != getWidth() || mLayer->layer.getHeight() != getHeight()) {
         if (!LayerRenderer::resizeLayer(mLayer, getWidth(), getHeight())) {
             LayerRenderer::destroyLayer(mLayer);
             mLayer = 0;
         }
         damageSelf(info);
+        transformUpdateNeeded = true;
+    }
+
+    if (transformUpdateNeeded) {
+        // update the transform in window of the layer to reset its origin wrt light source position
+        Matrix4 windowTransform;
+        info.damageAccumulator->computeCurrentTransform(&windowTransform);
+        mLayer->setWindowTransform(windowTransform);
     }
 
     SkRect dirty;
@@ -406,7 +417,7 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
  * If true3dTransform is set to true, the transform applied to the input matrix will use true 4x4
  * matrix computation instead of the Skia 3x3 matrix + camera hackery.
  */
-void RenderNode::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform) {
+void RenderNode::applyViewPropertyTransforms(mat4& matrix, bool true3dTransform) const {
     if (properties().getLeft() != 0 || properties().getTop() != 0) {
         matrix.translate(properties().getLeft(), properties().getTop());
     }

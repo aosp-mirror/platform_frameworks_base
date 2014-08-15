@@ -174,6 +174,8 @@ public:
     // UI thread only!
     ANDROID_API void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
 
+    void applyViewPropertyTransforms(mat4& matrix, bool true3dTransform = false) const;
+
 private:
     typedef key_value_pair_t<float, DrawRenderNodeOp*> ZDrawRenderNodeOpPair;
 
@@ -188,8 +190,6 @@ private:
         kNegativeZChildren,
         kPositiveZChildren
     };
-
-    void applyViewPropertyTransforms(mat4& matrix, bool true3dTransform = false);
 
     void computeOrderingImpl(DrawRenderNodeOp* opState,
             const SkPath* outlineOfProjectionSurface,

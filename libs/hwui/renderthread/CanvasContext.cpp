@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "CanvasContext"
-
 #include "CanvasContext.h"
 
 #include <private/hwui/DrawGlInfo.h>

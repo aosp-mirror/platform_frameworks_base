@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "RenderThread"
-
 #include "RenderThread.h"
 
 #if defined(HAVE_PTHREADS)
