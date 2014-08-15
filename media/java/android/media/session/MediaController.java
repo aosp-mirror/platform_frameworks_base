@@ -311,7 +311,7 @@ public final class MediaController {
      */
     public void setVolumeTo(int value, int flags) {
         try {
-            mSessionBinder.setVolumeTo(value, flags);
+            mSessionBinder.setVolumeTo(value, flags, mContext.getPackageName());
         } catch (RemoteException e) {
             Log.wtf(TAG, "Error calling setVolumeTo.", e);
         }
@@ -332,7 +332,7 @@ public final class MediaController {
      */
     public void adjustVolume(int direction, int flags) {
         try {
-            mSessionBinder.adjustVolume(direction, flags);
+            mSessionBinder.adjustVolume(direction, flags, mContext.getPackageName());
         } catch (RemoteException e) {
             Log.wtf(TAG, "Error calling adjustVolumeBy.", e);
         }

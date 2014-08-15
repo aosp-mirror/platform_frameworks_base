@@ -812,7 +812,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                     Log.e(TAG, "Error adjusting default volume.", e);
                 }
             } else {
-                session.adjustVolume(direction, flags);
+                session.adjustVolume(direction, flags, getContext().getPackageName(),
+                        UserHandle.myUserId());
                 if (session.getPlaybackType() == MediaSession.PLAYBACK_TYPE_REMOTE
                         && mRvc != null) {
                     try {
