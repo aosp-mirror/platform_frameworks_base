@@ -26,6 +26,12 @@ import java.util.Map;
 public class RequestUtils {
     public static final String ACTION_SET_CONTENT = "set_content";
     public static final String ACTION_SET_NEXT_CONTENT = "set_next_content";
+    public static final String ACTION_PAUSE = "com.android.onemedia.pause";
+    public static final String ACTION_PLAY = "com.android.onemedia.play";
+    public static final String ACTION_REW = "com.android.onemedia.rew";
+    public static final String ACTION_FFWD = "com.android.onemedia.ffwd";
+    public static final String ACTION_PREV = "com.android.onemedia.prev";
+    public static final String ACTION_NEXT = "com.android.onemedia.next";
 
     public static final String EXTRA_KEY_SOURCE = "source";
     public static final String EXTRA_KEY_METADATA = "metadata";

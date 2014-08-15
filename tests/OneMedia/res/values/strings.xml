@@ -12,5 +12,5 @@
     <string name="media_next_hint">Next content</string>
     <string name="has_video">Is video</string>
     <string name="has_duration">Has duration</string>
-
+    <string name="art_picker">Choose artwork</string>
 </resources>
