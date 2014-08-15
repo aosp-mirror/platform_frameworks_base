@@ -1341,9 +1341,13 @@ public class Allocation extends BaseObj {
      * @param dimX The new size of the allocation.
      *
      * @deprecated RenderScript objects should be immutable once created.  The
-     * replacement is to create a new allocation and copy the contents.
+     * replacement is to create a new allocation and copy the contents. This
+     * function will throw an exception if API 21 or higher is used.
      */
     public synchronized void resize(int dimX) {
+        if (mRS.getApplicationContext().getApplicationInfo().targetSdkVersion >= 21) {
+            throw new RSRuntimeException("Resize is not allowed in API 21+.");
+        }
         if ((mType.getY() > 0)|| (mType.getZ() > 0) || mType.hasFaces() || mType.hasMipmaps()) {
             throw new RSInvalidStateException("Resize only support for 1D allocations at this time.");
         }
