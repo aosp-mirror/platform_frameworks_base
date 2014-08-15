@@ -57,7 +57,7 @@
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"การควบคุมสื่อ"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"เริ่มเรียงลำดับวิดเจ็ตใหม่"</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"เรียงลำดับวิดเจ็ตใหม่เสร็จแล้ว"</string>
-    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"นำออกวิดเจ็ต <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> แล้ว"</string>
+    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"ลบวิดเจ็ต <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> แล้ว"</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"ขยายพื้นที่ปลดล็อก"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"การปลดล็อกด้วยการเลื่อน"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"การปลดล็อกด้วยรูปแบบ"</string>
@@ -76,14 +76,14 @@
     <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"หัวใจ"</string>
     <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"ปลดล็อกเพื่อดำเนินการต่อ"</string>
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"ยกเลิกการเปิดใช้งานแล้ว"</string>
-    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"ลาก <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> เพื่อนำออก"</string>
-    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> จะไม่ถูกนำออก"</string>
+    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"ลาก <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> เพื่อลบ"</string>
+    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> จะไม่ถูกลบ"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ยกเลิก"</string>
-    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"นำออก"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ลบ"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"เสร็จสิ้น"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"เปลี่ยนโหมด"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
@@ -134,7 +134,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้บัญชีอีเมล\n\n โปรดลองอีกครั้งใน <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้ับัญชีอีเมล\n\n โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"นำออก"</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ลบ"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"รหัส PIN ของซิมไม่ถูกต้อง ตอนนี้คุณต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์ของคุณ"</string>
   <plurals name="kg_password_wrong_pin_code">
     <item quantity="one" msgid="8134313997799638254">"รหัส PIN ของซิมไม่ถูกต้อง คุณพยายามได้อีก <xliff:g id="NUMBER">%d</xliff:g> ครั้งก่อนที่จะต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์ของคุณ"</item>

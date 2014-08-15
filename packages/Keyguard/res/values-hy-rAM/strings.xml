@@ -105,7 +105,7 @@
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Սխալ PIN"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Փորձեք կրկին <xliff:g id="NUMBER">%d</xliff:g> վայրկյանից:"</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Հավաքեք ձեր սխեման"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Մուտքագրեք SIM-ի PIN-ը"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Մուտքագրեք SIM-քարտի PIN-կոդը"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Մուտքագրեք PIN-ը"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Մուտքագրեք գաղտնաբառը"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-ը այս պահին անջատված է: Մուտքագրեք PUK կոդը շարունակելու համար: Մանրամասների համար կապվեք օպերատորի հետ:"</string>
