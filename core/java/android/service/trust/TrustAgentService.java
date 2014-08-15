@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.Slog;
 
@@ -37,7 +38,10 @@ import android.util.Slog;
  * A service that notifies the system about whether it believes the environment of the device
  * to be trusted.
  *
- * <p>Trust agents may only be provided by the platform.</p>
+ * <p>Trust agents may only be provided by the platform. It is expected that there is only
+ * one trust agent installed on the platform. In the event there is more than one,
+ * either trust agent can enable trust.
+ * </p>
  *
  * <p>To extend this class, you must declare the service in your manifest file with
  * the {@link android.Manifest.permission#BIND_TRUST_AGENT} permission
@@ -90,6 +94,7 @@ public class TrustAgentService extends Service {
 
     private static final int MSG_UNLOCK_ATTEMPT = 1;
     private static final int MSG_SET_TRUST_AGENT_FEATURES_ENABLED = 2;
+    private static final int MSG_TRUST_TIMEOUT = 3;
 
     private ITrustAgentServiceCallback mCallback;
 
@@ -118,6 +123,9 @@ public class TrustAgentService extends Service {
                         onError("calling onSetTrustAgentFeaturesEnabledCompleted()");
                     }
                     break;
+                case MSG_TRUST_TIMEOUT:
+                    onTrustTimeout();
+                    break;
             }
         }
     };
@@ -139,11 +147,22 @@ public class TrustAgentService extends Service {
     }
 
     /**
-     * Called when the user attempted to authenticate on the device.
+     * Called after the user attempts to authenticate in keyguard with their device credentials,
+     * such as pin, pattern or password.
      *
-     * @param successful true if the attempt succeeded
+     * @param successful true if the user successfully completed the challenge.
      */
     public void onUnlockAttempt(boolean successful) {
+    }
+
+    /**
+     * Called when the timeout provided by the agent expires.  Note that this may be called earlier
+     * than requested by the agent if the trust timeout is adjusted by the system or
+     * {@link DevicePolicyManager}.  The agent is expected to re-evaluate the trust state and only
+     * call {@link #grantTrust(CharSequence, long, boolean)} if the trust state should be
+     * continued.
+     */
+    public void onTrustTimeout() {
     }
 
     private void onError(String msg) {
@@ -151,9 +170,9 @@ public class TrustAgentService extends Service {
     }
 
     /**
-     * Called when device policy wants to restrict features in the TrustAgent in response to
+     * Called when device policy wants to restrict features in the agent in response to
      * {@link DevicePolicyManager#setTrustAgentFeaturesEnabled(ComponentName, ComponentName, java.util.List) }.
-     * TrustAgents that support this feature should overload this method and return 'true'.
+     * Agents that support this feature should overload this method and return 'true'.
      *
      * The list of options can be obtained by calling
      * options.getStringArrayList({@link #KEY_FEATURES}). Presence of a feature string in the list
@@ -174,10 +193,19 @@ public class TrustAgentService extends Service {
      * Call to grant trust on the device.
      *
      * @param message describes why the device is trusted, e.g. "Trusted by location".
-     * @param durationMs amount of time in milliseconds to keep the device in a trusted state. Trust
-     *                   for this agent will automatically be revoked when the timeout expires.
-     * @param initiatedByUser indicates that the user has explicitly initiated an action that proves
-     *                        the user is about to use the device.
+     * @param durationMs amount of time in milliseconds to keep the device in a trusted state.
+     *    Trust for this agent will automatically be revoked when the timeout expires unless
+     *    extended by a subsequent call to this function. The timeout is measured from the
+     *    invocation of this function as dictated by {@link SystemClock#elapsedRealtime())}.
+     *    For security reasons, the value should be no larger than necessary.
+     *    The value may be adjusted by the system as necessary to comply with a policy controlled
+     *    by the system or {@link DevicePolicyManager} restrictions. See {@link #onTrustTimeout()}
+     *    for determining when trust expires.
+     * @param initiatedByUser this is a hint to the system that trust is being granted as the
+     *    direct result of user action - such as solving a security challenge. The hint is used
+     *    by the system to optimize the experience. Behavior may vary by device and release, so
+     *    one should only set this parameter if it meets the above criteria rather than relying on
+     *    the behavior of any particular device or release.
      * @throws IllegalStateException if the agent is not currently managing trust.
      */
     public final void grantTrust(
@@ -254,13 +282,17 @@ public class TrustAgentService extends Service {
     }
 
     private final class TrustAgentServiceWrapper extends ITrustAgentService.Stub {
-        @Override
+        @Override /* Binder API */
         public void onUnlockAttempt(boolean successful) {
-            mHandler.obtainMessage(MSG_UNLOCK_ATTEMPT, successful ? 1 : 0, 0)
-                    .sendToTarget();
+            mHandler.obtainMessage(MSG_UNLOCK_ATTEMPT, successful ? 1 : 0, 0).sendToTarget();
         }
 
-        @Override
+        @Override /* Binder API */
+        public void onTrustTimeout() {
+            mHandler.sendEmptyMessage(MSG_TRUST_TIMEOUT);
+        }
+
+        @Override /* Binder API */
         public void setCallback(ITrustAgentServiceCallback callback) {
             synchronized (mLock) {
                 mCallback = callback;
@@ -280,7 +312,7 @@ public class TrustAgentService extends Service {
             }
         }
 
-        @Override
+        @Override /* Binder API */
         public void setTrustAgentFeaturesEnabled(Bundle features, IBinder token) {
             Message msg = mHandler.obtainMessage(MSG_SET_TRUST_AGENT_FEATURES_ENABLED, token);
             msg.setData(features);
