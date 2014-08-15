@@ -1419,21 +1419,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_UNINSTALL_PACKAGE = "android.intent.action.UNINSTALL_PACKAGE";
 
     /**
-     * Activity Action: Prompt the user to confirm credentials (pin, pattern or password)
-     * for the current user of the device. Launch this activity using
-     * {@link android.app.Activity#startActivityForResult(Intent, int)} and check if the
-     * result is {@link android.app.Activity#RESULT_OK} for a successful response to the
-     * challenge.<p/>
-     * This intent is handled by the system at a high priority and applications cannot intercept
-     * it.<p/>
-     * You can use {@link android.app.KeyguardManager#isKeyguardSecure()} to determine if the user will be
-     * prompted.
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_CONFIRM_DEVICE_CREDENTIAL = "android.intent.action.CONFIRM_DEVICE_CREDENTIAL";
-
-
-    /**
      * Specify whether the package should be uninstalled for all users.
      * @hide because these should not be part of normal application flow.
      */
@@ -3192,15 +3177,9 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * A CharSequence dialog title to provide to the user when used with a
-     * {@link #ACTION_CHOOSER} or {@link #ACTION_CONFIRM_DEVICE_CREDENTIAL}.
+     * {@link #ACTION_CHOOSER}.
      */
     public static final String EXTRA_TITLE = "android.intent.extra.TITLE";
-
-    /**
-     * A CharSequence description to provide to the user when used with
-     * {@link #ACTION_CONFIRM_DEVICE_CREDENTIAL}.
-     */
-    public static final String EXTRA_DETAILS = "android.intent.extra.DETAILS";
 
     /**
      * A Parcelable[] of {@link Intent} or
