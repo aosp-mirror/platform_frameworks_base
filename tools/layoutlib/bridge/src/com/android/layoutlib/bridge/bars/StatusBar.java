@@ -16,22 +16,38 @@
 
 package com.android.layoutlib.bridge.bars;
 
+import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.android.BridgeContext;
+import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
+import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.resources.Density;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.Gravity;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public class StatusBar extends CustomBar {
+
+    private final Context mContext;
+    private final int mSimulatedPlatformVersion;
 
     public StatusBar(Context context, Density density, int direction, boolean RtlEnabled,
             int simulatedPlatformVersion) throws XmlPullParserException {
         // FIXME: if direction is RTL but it's not enabled in application manifest, mirror this bar.
         super(context, LinearLayout.HORIZONTAL, "/bars/status_bar.xml", "status_bar.xml",
                 simulatedPlatformVersion);
+        mContext = context;
+        mSimulatedPlatformVersion = simulatedPlatformVersion;
 
         // FIXME: use FILL_H?
         setGravity(Gravity.START | Gravity.TOP | Gravity.RIGHT);
@@ -41,8 +57,44 @@ public class StatusBar extends CustomBar {
         // created for them.
         // We do know the order though.
         // 0 is the spacer
-        loadIcon(1, "stat_sys_wifi_signal_4_fully.png", density);
+        loadIcon(1, "stat_sys_wifi_signal_4_fully."
+                        + Config.getWifiIconType(simulatedPlatformVersion), density);
         loadIcon(2, "stat_sys_battery_100.png", density);
+        setText(3, Config.getTime(simulatedPlatformVersion), false)
+                .setTextColor(Config.getTimeColor(simulatedPlatformVersion));
+    }
+
+    @Override
+    protected void loadIcon(int index, String iconName, Density density) {
+        if (!iconName.endsWith(".xml")) {
+            super.loadIcon(index, iconName, density);
+            return;
+        }
+        View child = getChildAt(index);
+        if (child instanceof ImageView) {
+            ImageView imageView = (ImageView) child;
+            // The xml is stored only in xhdpi.
+            IconLoader iconLoader = new IconLoader(iconName, Density.XHIGH,
+                    mSimulatedPlatformVersion, null);
+            InputStream stream = iconLoader.getIcon();
+
+            if (stream != null) {
+                try {
+                    BridgeXmlBlockParser parser = new BridgeXmlBlockParser(
+                            ParserFactory.create(stream, null), (BridgeContext) mContext, true);
+                    Drawable drawable = Drawable.createFromXml(mContext.getResources(), parser);
+                    if (drawable != null) {
+                        imageView.setImageDrawable(drawable);
+                    }
+                } catch (XmlPullParserException e) {
+                    Bridge.getLog().error(LayoutLog.TAG_BROKEN, "Unable to draw wifi icon", e,
+                            null);
+                } catch (IOException e) {
+                    Bridge.getLog().error(LayoutLog.TAG_BROKEN, "Unable to draw wifi icon", e,
+                            null);
+                }
+            }
+        }
     }
 
     @Override

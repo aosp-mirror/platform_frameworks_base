@@ -127,24 +127,25 @@ abstract class CustomBar extends LinearLayout {
         }
     }
 
-    protected TextView setText(int index, String stringReference) {
+    protected TextView setText(int index, String string, boolean reference) {
         View child = getChildAt(index);
         if (child instanceof TextView) {
             TextView textView = (TextView) child;
-            setText(textView, stringReference);
+            setText(textView, string, reference);
             return textView;
         }
 
         return null;
     }
 
-    private void setText(TextView textView, String stringReference) {
-        ResourceValue value = getResourceValue(stringReference);
-        if (value != null) {
-            textView.setText(value.getValue());
-        } else {
-            textView.setText(stringReference);
+    private void setText(TextView textView, String string, boolean reference) {
+        if (reference) {
+            ResourceValue value = getResourceValue(string);
+            if (value != null) {
+                string = value.getValue();
+            }
         }
+        textView.setText(string);
     }
 
     protected void setStyle(String themeEntryName) {

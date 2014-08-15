@@ -34,7 +34,7 @@ public class TitleBar extends CustomBar {
         // Cannot access the inside items through id because no R.id values have been
         // created for them.
         // We do know the order though.
-        mTextView = setText(0, label);
+        mTextView = setText(0, label, true);
 
         setStyle("windowTitleBackgroundStyle");
     }
