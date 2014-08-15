@@ -74,7 +74,7 @@
     <string name="installer_cd_button_title" msgid="2312667578562201583">"Cài đặt ư.d Truyền tệp của Android dành cho Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Quay lại"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Trang chủ"</string>
-    <string name="accessibility_menu" msgid="316839303324695949">"Trình đơn"</string>
+    <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"Ứng dụng gần đây"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Tìm kiếm"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Máy ảnh"</string>

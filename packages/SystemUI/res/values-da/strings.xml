@@ -24,7 +24,7 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Fjern fra listen"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Oplysninger om appen"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Der er ingen seneste apps"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Afvis de seneste apps"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Luk de seneste apps"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 seneste app"</item>
     <item quantity="other" msgid="1040784359794890744">"%d seneste apps"</item>

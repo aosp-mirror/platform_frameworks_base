@@ -45,7 +45,7 @@
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"自動"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"通知"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"已經由藍牙進行網絡共享"</string>
-    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"設定輸入方式"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"設定輸入法"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"實體鍵盤"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」應用程式存取 USB 裝置嗎？"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」應用程式存取 USB 配件嗎？"</string>
@@ -61,13 +61,13 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"一律允許透過這部電腦進行"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"放大為全螢幕"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"放大為全螢幕"</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在儲存屏幕擷取畫面..."</string>
-    <string name="screenshot_saving_title" msgid="8242282144535555697">"正在儲存屏幕擷取畫面..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"正在儲存屏幕擷取畫面。"</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"已擷取屏幕畫面。"</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"輕觸即可查看屏幕擷取畫面。"</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"無法擷取屏幕畫面。"</string>
-    <string name="screenshot_failed_text" msgid="8134011269572415402">"無法儲存屏幕擷取畫面，儲存裝置可能正在使用。"</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在儲存螢幕擷取畫面..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"正在儲存螢幕擷取畫面..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"正在儲存螢幕擷取畫面。"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"已擷取螢幕畫面。"</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"輕觸即可查看螢幕擷取畫面。"</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"無法擷取螢幕畫面。"</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"無法儲存螢幕擷取畫面，儲存裝置可能正在使用。"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB 檔案傳輸選項"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"掛接為媒體播放器 (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"掛接為相機 (PTP)"</string>
@@ -131,7 +131,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"無 SIM 卡。"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"藍牙數據連線。"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"藍牙網絡共享。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飛航模式。"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
@@ -170,9 +170,9 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"位置要求啟動中"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"清除所有通知。"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"應用程式資訊"</string>
-    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"屏幕會自動旋轉。"</string>
-    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"屏幕已鎖定為橫向模式。"</string>
-    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"屏幕已鎖定為垂直模式。"</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"螢幕會自動旋轉。"</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"螢幕已鎖定為橫向模式。"</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"螢幕已鎖定為垂直模式。"</string>
     <string name="dessert_case" msgid="1295161776223959221">"Dessert Case"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Daydream"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"以太網"</string>
@@ -184,7 +184,7 @@
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"藍牙關閉"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"亮度"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"自動旋轉"</string>
-    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"已鎖定屏幕旋轉功能"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"已鎖定螢幕旋轉功能"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"輸入法"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"位置"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"位置關閉"</string>

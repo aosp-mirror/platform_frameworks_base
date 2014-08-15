@@ -196,7 +196,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"No conectado"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"No hay red."</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi desactivado"</string>
-    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Enviar contenido a pantalla"</string>
+    <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"Enviar pantalla"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brillo"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"La red se\npuede supervisar"</string>
