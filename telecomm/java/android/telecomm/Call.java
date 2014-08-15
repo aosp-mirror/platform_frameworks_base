@@ -18,6 +18,7 @@ package android.telecomm;
 
 import android.app.PendingIntent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.telephony.DisconnectCause;
 
 import java.lang.String;
@@ -91,6 +92,7 @@ public final class Call {
         private final GatewayInfo mGatewayInfo;
         private final int mVideoState;
         private final StatusHints mStatusHints;
+        private final Bundle mExtras;
 
         /**
          * @return The handle (e.g., phone number) to which the {@code Call} is currently
@@ -186,6 +188,13 @@ public final class Call {
             return mStatusHints;
         }
 
+        /**
+         * @return A bundle extras to pass with the call
+         */
+        public Bundle getExtras() {
+            return mExtras;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o instanceof Details) {
@@ -203,7 +212,8 @@ public final class Call {
                         Objects.equals(mConnectTimeMillis, d.mConnectTimeMillis) &&
                         Objects.equals(mGatewayInfo, d.mGatewayInfo) &&
                         Objects.equals(mVideoState, d.mVideoState) &&
-                        Objects.equals(mStatusHints, d.mStatusHints);
+                        Objects.equals(mStatusHints, d.mStatusHints) &&
+                        Objects.equals(mExtras, d.mExtras);
             }
             return false;
         }
@@ -222,7 +232,8 @@ public final class Call {
                     Objects.hashCode(mConnectTimeMillis) +
                     Objects.hashCode(mGatewayInfo) +
                     Objects.hashCode(mVideoState) +
-                    Objects.hashCode(mStatusHints);
+                    Objects.hashCode(mStatusHints) +
+                    Objects.hashCode(mExtras);
         }
 
         /** {@hide} */
@@ -238,7 +249,8 @@ public final class Call {
                 long connectTimeMillis,
                 GatewayInfo gatewayInfo,
                 int videoState,
-                StatusHints statusHints) {
+                StatusHints statusHints,
+                Bundle extras) {
             mHandle = handle;
             mHandlePresentation = handlePresentation;
             mCallerDisplayName = callerDisplayName;
@@ -251,6 +263,7 @@ public final class Call {
             mGatewayInfo = gatewayInfo;
             mVideoState = videoState;
             mStatusHints = statusHints;
+            mExtras = extras;
         }
     }
 
@@ -607,7 +620,8 @@ public final class Call {
                 parcelableCall.getConnectTimeMillis(),
                 parcelableCall.getGatewayInfo(),
                 parcelableCall.getVideoState(),
-                parcelableCall.getStatusHints());
+                parcelableCall.getStatusHints(),
+                parcelableCall.getExtras());
         boolean detailsChanged = !Objects.equals(mDetails, details);
         if (detailsChanged) {
             mDetails = details;
