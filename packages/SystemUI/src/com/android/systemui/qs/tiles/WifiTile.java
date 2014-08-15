@@ -132,8 +132,12 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         }
         state.contentDescription = mContext.getString(
                 R.string.accessibility_quick_settings_wifi,
-                signalContentDescription,
-                state.connected ? state.label : "");
+                signalContentDescription);
+        String wifiName = state.label;
+        if (state.connected) {
+            wifiName = r.getString(R.string.accessibility_wifi_name, state.label);
+        }
+        state.dualLabelContentDescription = wifiName;
     }
 
     private static String removeDoubleQuotes(String string) {

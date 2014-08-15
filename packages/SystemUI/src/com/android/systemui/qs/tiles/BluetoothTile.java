@@ -114,6 +114,12 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         }
         state.contentDescription = mContext.getString(
                 R.string.accessibility_quick_settings_bluetooth, stateContentDescription);
+        String bluetoothName = state.label;
+        if (connected) {
+            bluetoothName = state.dualLabelContentDescription = mContext.getString(
+                    R.string.accessibility_bluetooth_name, state.label);
+        }
+        state.dualLabelContentDescription = bluetoothName;
     }
 
     private final BluetoothController.Callback mCallback = new BluetoothController.Callback() {

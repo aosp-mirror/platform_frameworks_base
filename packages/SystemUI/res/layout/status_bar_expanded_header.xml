@@ -72,7 +72,8 @@
             android:layout_marginStart="@dimen/header_battery_margin_expanded"
             android:paddingEnd="@dimen/battery_level_padding_end"
             android:textColor="#ffffff"
-            android:textSize="@dimen/battery_level_text_size"/>
+            android:textSize="@dimen/battery_level_text_size"
+            android:importantForAccessibility="noHideDescendants"/>
     </LinearLayout>
 
     <TextView
