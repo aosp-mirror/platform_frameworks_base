@@ -185,7 +185,7 @@ public final class MediaController {
      *
      * @return The current play queue or null.
      */
-    public @Nullable List<MediaSession.Track> getQueue() {
+    public @Nullable List<MediaSession.Item> getQueue() {
         try {
             ParceledListSlice queue = mSessionBinder.getQueue();
             if (queue != null) {
@@ -259,18 +259,18 @@ public final class MediaController {
     }
 
     /**
-     * Get the current volume info for this session.
+     * Get the current audio info for this session.
      *
-     * @return The current volume info or null.
+     * @return The current audio info or null.
      */
-    public @Nullable VolumeInfo getVolumeInfo() {
+    public @Nullable AudioInfo getAudioInfo() {
         try {
             ParcelableVolumeInfo result = mSessionBinder.getVolumeAttributes();
-            return new VolumeInfo(result.volumeType, result.audioAttrs, result.controlType,
+            return new AudioInfo(result.volumeType, result.audioAttrs, result.controlType,
                     result.maxVolume, result.currentVolume);
 
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Error calling getVolumeInfo.", e);
+            Log.wtf(TAG, "Error calling getAudioInfo.", e);
         }
         return null;
     }
@@ -305,7 +305,7 @@ public final class MediaController {
      * {@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}. The flags in
      * {@link AudioManager} may be used to affect the handling.
      *
-     * @see #getVolumeInfo()
+     * @see #getAudioInfo()
      * @param value The value to set it to, between 0 and the reported max.
      * @param flags Any flags to pass with the command.
      */
@@ -326,7 +326,7 @@ public final class MediaController {
      * {@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}. The flags in
      * {@link AudioManager} may be used to affect the handling.
      *
-     * @see #getVolumeInfo()
+     * @see #getAudioInfo()
      * @param direction The direction to adjust the volume in.
      * @param flags Any flags to pass with the command.
      */
@@ -544,13 +544,14 @@ public final class MediaController {
         }
 
         /**
-         * Override to handle changes to tracks in the queue.
+         * Override to handle changes to items in the queue.
          *
-         * @param queue A list of tracks in the current play queue. It should include the currently
-         *              playing track as well as previous and upcoming tracks if applicable.
-         * @see MediaSession.Track
+         * @param queue A list of items in the current play queue. It should
+         *            include the currently playing item as well as previous and
+         *            upcoming items if applicable.
+         * @see MediaSession.Item
          */
-        public void onQueueChanged(@Nullable List<MediaSession.Track> queue) {
+        public void onQueueChanged(@Nullable List<MediaSession.Item> queue) {
         }
 
         /**
@@ -572,11 +573,11 @@ public final class MediaController {
         }
 
         /**
-         * Override to handle changes to the volume info.
+         * Override to handle changes to the audio info.
          *
-         * @param info The current volume info for this session.
+         * @param info The current audio info for this session.
          */
-        public void onVolumeInfoChanged(VolumeInfo info) {
+        public void onAudioInfoChanged(AudioInfo info) {
         }
     }
 
@@ -638,14 +639,14 @@ public final class MediaController {
         }
 
         /**
-         * Play a track with a specific id in the play queue.
-         * If you specify an id that is not in the play queue, the behavior is undefined.
+         * Play an item with a specific id in the play queue. If you specify an
+         * id that is not in the play queue, the behavior is undefined.
          */
-        public void skipToTrack(long id) {
+        public void skipToItem(long id) {
             try {
                 mSessionBinder.skipToTrack(id);
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling skipToTrack(" + id + ").", e);
+                Log.wtf(TAG, "Error calling skipToItem(" + id + ").", e);
             }
         }
 
@@ -784,9 +785,9 @@ public final class MediaController {
     }
 
     /**
-     * Holds information about the way volume is handled for this session.
+     * Holds information about the way audio is handled for this session.
      */
-    public static final class VolumeInfo {
+    public static final class AudioInfo {
         private final int mVolumeType;
         private final int mVolumeControl;
         private final int mMaxVolume;
@@ -796,7 +797,7 @@ public final class MediaController {
         /**
          * @hide
          */
-        public VolumeInfo(int type, AudioAttributes attrs, int control, int max, int current) {
+        public AudioInfo(int type, AudioAttributes attrs, int control, int max, int current) {
             mVolumeType = type;
             mAudioAttrs = attrs;
             mVolumeControl = control;
@@ -904,7 +905,7 @@ public final class MediaController {
 
         @Override
         public void onQueueChanged(ParceledListSlice parceledQueue) {
-            List<MediaSession.Track> queue = parceledQueue.getList();
+            List<MediaSession.Item> queue = parceledQueue.getList();
             MediaController controller = mController.get();
             if (controller != null) {
                 controller.postMessage(MSG_UPDATE_QUEUE, queue, null);
@@ -931,7 +932,7 @@ public final class MediaController {
         public void onVolumeInfoChanged(ParcelableVolumeInfo pvi) {
             MediaController controller = mController.get();
             if (controller != null) {
-                VolumeInfo info = new VolumeInfo(pvi.volumeType, pvi.audioAttrs, pvi.controlType,
+                AudioInfo info = new AudioInfo(pvi.volumeType, pvi.audioAttrs, pvi.controlType,
                         pvi.maxVolume, pvi.currentVolume);
                 controller.postMessage(MSG_UPDATE_VOLUME, info, null);
             }
@@ -960,7 +961,7 @@ public final class MediaController {
                     mCallback.onMetadataChanged((MediaMetadata) msg.obj);
                     break;
                 case MSG_UPDATE_QUEUE:
-                    mCallback.onQueueChanged((List<MediaSession.Track>) msg.obj);
+                    mCallback.onQueueChanged((List<MediaSession.Item>) msg.obj);
                     break;
                 case MSG_UPDATE_QUEUE_TITLE:
                     mCallback.onQueueTitleChanged((CharSequence) msg.obj);
@@ -969,7 +970,7 @@ public final class MediaController {
                     mCallback.onExtrasChanged((Bundle) msg.obj);
                     break;
                 case MSG_UPDATE_VOLUME:
-                    mCallback.onVolumeInfoChanged((VolumeInfo) msg.obj);
+                    mCallback.onAudioInfoChanged((AudioInfo) msg.obj);
                     break;
                 case MSG_DESTROYED:
                     mCallback.onSessionDestroyed();

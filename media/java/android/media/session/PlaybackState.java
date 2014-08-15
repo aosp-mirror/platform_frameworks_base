@@ -120,11 +120,11 @@ public final class PlaybackState implements Parcelable {
     public static final long ACTION_PLAY_FROM_SEARCH = 1 << 11;
 
     /**
-     * Indicates this performer supports the skip to track command.
+     * Indicates this performer supports the skip to item command.
      *
      * @see Builder#setActions(long)
      */
-    public static final long ACTION_SKIP_TO_TRACK = 1 << 12;
+    public static final long ACTION_SKIP_TO_ITEM = 1 << 12;
 
     /**
      * This is the default playback state and indicates that no media has been
@@ -223,11 +223,11 @@ public final class PlaybackState implements Parcelable {
     private List<PlaybackState.CustomAction> mCustomActions;
     private final CharSequence mErrorMessage;
     private final long mUpdateTime;
-    private final long mActiveTrackId;
+    private final long mActiveItemId;
 
     private PlaybackState(int state, long position, long updateTime, float speed,
             long bufferPosition, long transportControls,
-            List<PlaybackState.CustomAction> customActions, long activeTrackId,
+            List<PlaybackState.CustomAction> customActions, long activeItemId,
             CharSequence error) {
         mState = state;
         mPosition = position;
@@ -236,7 +236,7 @@ public final class PlaybackState implements Parcelable {
         mBufferPosition = bufferPosition;
         mActions = transportControls;
         mCustomActions = new ArrayList<>(customActions);
-        mActiveTrackId = activeTrackId;
+        mActiveItemId = activeItemId;
         mErrorMessage = error;
     }
 
@@ -248,7 +248,7 @@ public final class PlaybackState implements Parcelable {
         mBufferPosition = in.readLong();
         mActions = in.readLong();
         mCustomActions = in.createTypedArrayList(CustomAction.CREATOR);
-        mActiveTrackId = in.readLong();
+        mActiveItemId = in.readLong();
         mErrorMessage = in.readCharSequence();
 
     }
@@ -263,7 +263,7 @@ public final class PlaybackState implements Parcelable {
         bob.append(", updated=").append(mUpdateTime);
         bob.append(", actions=").append(mActions);
         bob.append(", custom actions=").append(mCustomActions);
-        bob.append(", active track id=").append(mActiveTrackId);
+        bob.append(", active item id=").append(mActiveItemId);
         bob.append(", error=").append(mErrorMessage);
         bob.append("}");
         return bob.toString();
@@ -283,7 +283,7 @@ public final class PlaybackState implements Parcelable {
         dest.writeLong(mBufferPosition);
         dest.writeLong(mActions);
         dest.writeTypedList(mCustomActions);
-        dest.writeLong(mActiveTrackId);
+        dest.writeLong(mActiveItemId);
         dest.writeCharSequence(mErrorMessage);
     }
 
@@ -716,7 +716,7 @@ public final class PlaybackState implements Parcelable {
         private long mActions;
         private CharSequence mErrorMessage;
         private long mUpdateTime;
-        private long mActiveTrackId = MediaSession.Track.UNKNOWN_ID;
+        private long mActiveItemId = MediaSession.Item.UNKNOWN_ID;
 
         /**
          * Creates an initially empty state builder.
@@ -744,14 +744,14 @@ public final class PlaybackState implements Parcelable {
             }
             mErrorMessage = from.mErrorMessage;
             mUpdateTime = from.mUpdateTime;
-            mActiveTrackId = from.mActiveTrackId;
+            mActiveItemId = from.mActiveItemId;
         }
 
         /**
          * Set the current state of playback.
          * <p>
          * The position must be in ms and indicates the current playback
-         * position within the track. If the position is unknown use
+         * position within the item. If the position is unknown use
          * {@link #PLAYBACK_POSITION_UNKNOWN}. When not using an unknown
          * position the time at which the position was updated must be provided.
          * It is okay to use {@link SystemClock#elapsedRealtime()} if the
@@ -773,7 +773,7 @@ public final class PlaybackState implements Parcelable {
          * </ul>
          *
          * @param state The current state of playback.
-         * @param position The position in the current track in ms.
+         * @param position The position in the current item in ms.
          * @param playbackSpeed The current speed of playback as a multiple of
          *            normal playback.
          * @param updateTime The time in the {@link SystemClock#elapsedRealtime}
@@ -792,7 +792,7 @@ public final class PlaybackState implements Parcelable {
          * Set the current state of playback.
          * <p>
          * The position must be in ms and indicates the current playback
-         * position within the track. If the position is unknown use
+         * position within the item. If the position is unknown use
          * {@link #PLAYBACK_POSITION_UNKNOWN}. The update time will be set to
          * the current {@link SystemClock#elapsedRealtime()}.
          * <p>
@@ -812,7 +812,7 @@ public final class PlaybackState implements Parcelable {
          * </ul>
          *
          * @param state The current state of playback.
-         * @param position The position in the current track in ms.
+         * @param position The position in the current item in ms.
          * @param playbackSpeed The current speed of playback as a multiple of
          *            normal playback.
          * @return this
@@ -902,14 +902,14 @@ public final class PlaybackState implements Parcelable {
         }
 
         /**
-         * Set the active track in the play queue by specifying its id.
-         * The default value is {@link MediaSession.Track#UNKNOWN_ID}
+         * Set the active item in the play queue by specifying its id. The
+         * default value is {@link MediaSession.Item#UNKNOWN_ID}
          *
-         * @param id The id of the active track.
+         * @param id The id of the active item.
          * @return this
          */
-        public Builder setActiveTrack(long id) {
-            mActiveTrackId = id;
+        public Builder setActiveItem(long id) {
+            mActiveItemId = id;
             return this;
         }
 
@@ -932,7 +932,7 @@ public final class PlaybackState implements Parcelable {
          */
         public PlaybackState build() {
             return new PlaybackState(mState, mPosition, mUpdateTime, mSpeed, mBufferPosition,
-                    mActions, mCustomActions, mActiveTrackId, mErrorMessage);
+                    mActions, mCustomActions, mActiveItemId, mErrorMessage);
         }
     }
 }
