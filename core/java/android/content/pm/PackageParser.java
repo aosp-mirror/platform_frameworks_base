@@ -434,6 +434,11 @@ public class PackageParser {
                 pi.reqFeatures = new FeatureInfo[N];
                 p.reqFeatures.toArray(pi.reqFeatures);
             }
+            N = p.featureGroups != null ? p.featureGroups.size() : 0;
+            if (N > 0) {
+                pi.featureGroups = new FeatureGroupInfo[N];
+                p.featureGroups.toArray(pi.featureGroups);
+            }
         }
         if ((flags&PackageManager.GET_ACTIVITIES) != 0) {
             int N = p.activities.size();
@@ -1502,24 +1507,7 @@ public class PackageParser {
                 XmlUtils.skipCurrentTag(parser);
 
             } else if (tagName.equals("uses-feature")) {
-                FeatureInfo fi = new FeatureInfo();
-                sa = res.obtainAttributes(attrs,
-                        com.android.internal.R.styleable.AndroidManifestUsesFeature);
-                // Note: don't allow this value to be a reference to a resource
-                // that may change.
-                fi.name = sa.getNonResourceString(
-                        com.android.internal.R.styleable.AndroidManifestUsesFeature_name);
-                if (fi.name == null) {
-                    fi.reqGlEsVersion = sa.getInt(
-                            com.android.internal.R.styleable.AndroidManifestUsesFeature_glEsVersion,
-                            FeatureInfo.GL_ES_VERSION_UNDEFINED);
-                }
-                if (sa.getBoolean(
-                        com.android.internal.R.styleable.AndroidManifestUsesFeature_required,
-                        true)) {
-                    fi.flags |= FeatureInfo.FLAG_REQUIRED;
-                }
-                sa.recycle();
+                FeatureInfo fi = parseUsesFeature(res, attrs);
                 pkg.reqFeatures = ArrayUtils.add(pkg.reqFeatures, fi);
 
                 if (fi.name == null) {
@@ -1531,9 +1519,35 @@ public class PackageParser {
                 XmlUtils.skipCurrentTag(parser);
 
             } else if (tagName.equals("feature-group")) {
-                // Skip this for now until we know what to do with it.
+                FeatureGroupInfo group = new FeatureGroupInfo();
+                ArrayList<FeatureInfo> features = null;
+                final int innerDepth = parser.getDepth();
+                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                        && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
+                    if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                        continue;
+                    }
 
-                XmlUtils.skipCurrentTag(parser);
+                    final String innerTagName = parser.getName();
+                    if (innerTagName.equals("uses-feature")) {
+                        FeatureInfo featureInfo = parseUsesFeature(res, attrs);
+                        // FeatureGroups are stricter and mandate that
+                        // any <uses-feature> declared are mandatory.
+                        featureInfo.flags |= FeatureInfo.FLAG_REQUIRED;
+                        features = ArrayUtils.add(features, featureInfo);
+                    } else {
+                        Slog.w(TAG, "Unknown element under <feature-group>: " + innerTagName +
+                                " at " + mArchiveSourcePath + " " +
+                                parser.getPositionDescription());
+                    }
+                    XmlUtils.skipCurrentTag(parser);
+                }
+
+                if (features != null) {
+                    group.features = new FeatureInfo[features.size()];
+                    group.features = features.toArray(group.features);
+                }
+                pkg.featureGroups = ArrayUtils.add(pkg.featureGroups, group);
 
             } else if (tagName.equals("uses-sdk")) {
                 if (SDK_VERSION > 0) {
@@ -1849,6 +1863,28 @@ public class PackageParser {
         }
 
         return pkg;
+    }
+
+    private FeatureInfo parseUsesFeature(Resources res, AttributeSet attrs)
+            throws XmlPullParserException, IOException {
+        FeatureInfo fi = new FeatureInfo();
+        TypedArray sa = res.obtainAttributes(attrs,
+                com.android.internal.R.styleable.AndroidManifestUsesFeature);
+        // Note: don't allow this value to be a reference to a resource
+        // that may change.
+        fi.name = sa.getNonResourceString(
+                com.android.internal.R.styleable.AndroidManifestUsesFeature_name);
+        if (fi.name == null) {
+            fi.reqGlEsVersion = sa.getInt(
+                        com.android.internal.R.styleable.AndroidManifestUsesFeature_glEsVersion,
+                        FeatureInfo.GL_ES_VERSION_UNDEFINED);
+        }
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestUsesFeature_required, true)) {
+            fi.flags |= FeatureInfo.FLAG_REQUIRED;
+        }
+        sa.recycle();
+        return fi;
     }
 
     private boolean parseUsesPermission(Package pkg, Resources res, XmlResourceParser parser,
@@ -4224,6 +4260,9 @@ public class PackageParser {
 
         // Applications requested features
         public ArrayList<FeatureInfo> reqFeatures = null;
+
+        // Applications requested feature groups
+        public ArrayList<FeatureGroupInfo> featureGroups = null;
 
         public int installLocation;
 

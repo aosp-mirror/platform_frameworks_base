@@ -22,7 +22,7 @@ import android.os.Parcelable;
 /**
  * A single feature that can be requested by an application. This corresponds
  * to information collected from the
- * AndroidManifest.xml's &lt;uses-feature&gt; tag.
+ * AndroidManifest.xml's {@code <uses-feature>} tag.
  */
 public class FeatureInfo implements Parcelable {
     /**
