@@ -718,7 +718,7 @@ public class UserManager {
     /**
      * Returns list of the profiles of userHandle including
      * userHandle itself.
-     * Note that it this returns both enabled and not enabled profiles. See
+     * Note that this returns both enabled and not enabled profiles. See
      * {@link #getUserProfiles()} if you need only the enabled ones.
      *
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.

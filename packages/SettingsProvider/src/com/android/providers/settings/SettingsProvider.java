@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -94,6 +95,9 @@ public class SettingsProvider extends ContentProvider {
     // Each defined user has their own settings
     protected final SparseArray<DatabaseHelper> mOpenHelpers = new SparseArray<DatabaseHelper>();
 
+    // Keep the list of managed profiles synced here
+    private List<UserInfo> mManagedProfiles = null;
+
     // Over this size we don't reject loading or saving settings but
     // we do consider them broken/malicious and don't keep them in
     // memory at least:
@@ -119,6 +123,9 @@ public class SettingsProvider extends ContentProvider {
 
     private static final String DROPBOX_TAG_USERLOG = "restricted_profile_ssaid";
 
+    static final HashSet<String> sSecureCloneToManagedKeys;
+    static final HashSet<String> sSystemCloneToManagedKeys;
+
     static {
         // Keys (name column) from the 'secure' table that are now in the owner user's 'global'
         // table, shared across all users
@@ -142,6 +149,15 @@ public class SettingsProvider extends ContentProvider {
                 UserManager.ENSURE_VERIFY_APPS);
         sRestrictedKeys.put(Settings.Global.PREFERRED_NETWORK_MODE,
                 UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS);
+
+        sSecureCloneToManagedKeys = new HashSet<String>();
+        for (int i = 0; i < Settings.Secure.CLONE_TO_MANAGED_PROFILE.length; i++) {
+            sSecureCloneToManagedKeys.add(Settings.Secure.CLONE_TO_MANAGED_PROFILE[i]);
+        }
+        sSystemCloneToManagedKeys = new HashSet<String>();
+        for (int i = 0; i < Settings.System.CLONE_TO_MANAGED_PROFILE.length; i++) {
+            sSystemCloneToManagedKeys.add(Settings.System.CLONE_TO_MANAGED_PROFILE[i]);
+        }
     }
 
     private boolean settingMovedToGlobal(final String name) {
@@ -362,18 +378,22 @@ public class SettingsProvider extends ContentProvider {
 
         IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        userFilter.addAction(Intent.ACTION_USER_ADDED);
         getContext().registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                        UserHandle.USER_OWNER);
                 if (intent.getAction().equals(Intent.ACTION_USER_REMOVED)) {
-                    final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
-                            UserHandle.USER_OWNER);
-                    if (userHandle != UserHandle.USER_OWNER) {
-                        onUserRemoved(userHandle);
-                    }
+                    onUserRemoved(userHandle);
+                } else if (intent.getAction().equals(Intent.ACTION_USER_ADDED)) {
+                    onProfilesChanged();
                 }
             }
         }, userFilter);
+
+        onProfilesChanged();
+
         return true;
     }
 
@@ -391,6 +411,32 @@ public class SettingsProvider extends ContentProvider {
             sSystemCaches.delete(userHandle);
             sSecureCaches.delete(userHandle);
             sKnownMutationsInFlight.delete(userHandle);
+            onProfilesChanged();
+        }
+    }
+
+    /**
+     * Updates the list of managed profiles. It assumes that only the primary user
+     * can have managed profiles. Modify this code if that changes in the future.
+     */
+    void onProfilesChanged() {
+        synchronized (this) {
+            mManagedProfiles = mUserManager.getProfiles(UserHandle.USER_OWNER);
+            if (mManagedProfiles != null) {
+                // Remove the primary user from the list
+                for (int i = mManagedProfiles.size() - 1; i >= 0; i--) {
+                    if (mManagedProfiles.get(i).id == UserHandle.USER_OWNER) {
+                        mManagedProfiles.remove(i);
+                    }
+                }
+                // If there are no managed profiles, reset the variable
+                if (mManagedProfiles.size() == 0) {
+                    mManagedProfiles = null;
+                }
+            }
+            if (LOCAL_LOGV) {
+                Slog.d(TAG, "Managed Profiles = " + mManagedProfiles);
+            }
         }
     }
 
@@ -601,6 +647,24 @@ public class SettingsProvider extends ContentProvider {
     }
 
     /**
+     * Checks if the calling user is a managed profile of the primary user.
+     * Currently only the primary user (USER_OWNER) can have managed profiles.
+     * @param callingUser the user trying to read/write settings
+     * @return true if it is a managed profile of the primary user
+     */
+    private boolean isManagedProfile(int callingUser) {
+        synchronized (this) {
+            if (mManagedProfiles == null) return false;
+            for (int i = mManagedProfiles.size() - 1; i >= 0; i--) {
+                if (mManagedProfiles.get(i).id == callingUser) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    /**
      * Fast path that avoids the use of chatty remoted Cursors.
      */
     @Override
@@ -625,12 +689,18 @@ public class SettingsProvider extends ContentProvider {
         // Get methods
         if (Settings.CALL_METHOD_GET_SYSTEM.equals(method)) {
             if (LOCAL_LOGV) Slog.v(TAG, "call(system:" + request + ") for " + callingUser);
+            if (isManagedProfile(callingUser) && sSystemCloneToManagedKeys.contains(request)) {
+                callingUser = UserHandle.USER_OWNER;
+            }
             dbHelper = getOrEstablishDatabase(callingUser);
             cache = sSystemCaches.get(callingUser);
             return lookupValue(dbHelper, TABLE_SYSTEM, cache, request);
         }
         if (Settings.CALL_METHOD_GET_SECURE.equals(method)) {
             if (LOCAL_LOGV) Slog.v(TAG, "call(secure:" + request + ") for " + callingUser);
+            if (isManagedProfile(callingUser) && sSecureCloneToManagedKeys.contains(request)) {
+                callingUser = UserHandle.USER_OWNER;
+            }
             dbHelper = getOrEstablishDatabase(callingUser);
             cache = sSecureCaches.get(callingUser);
             return lookupValue(dbHelper, TABLE_SECURE, cache, request);
@@ -667,13 +737,70 @@ public class SettingsProvider extends ContentProvider {
         values.put(Settings.NameValueTable.NAME, request);
         values.put(Settings.NameValueTable.VALUE, newValue);
         if (Settings.CALL_METHOD_PUT_SYSTEM.equals(method)) {
-            if (LOCAL_LOGV) Slog.v(TAG, "call_put(system:" + request + "=" + newValue + ") for " + callingUser);
+            if (LOCAL_LOGV) {
+                Slog.v(TAG, "call_put(system:" + request + "=" + newValue + ") for "
+                        + callingUser);
+            }
+            // Extra check for USER_OWNER to optimize for the 99%
+            if (callingUser != UserHandle.USER_OWNER && isManagedProfile(callingUser)) {
+                if (sSystemCloneToManagedKeys.contains(request)) {
+                    // Don't write these settings
+                    return null;
+                }
+            }
             insertForUser(Settings.System.CONTENT_URI, values, callingUser);
+            // Clone the settings to the managed profiles so that notifications can be sent out
+            if (callingUser == UserHandle.USER_OWNER && mManagedProfiles != null
+                    && sSystemCloneToManagedKeys.contains(request)) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    for (int i = mManagedProfiles.size() - 1; i >= 0; i--) {
+                        if (LOCAL_LOGV) {
+                            Slog.v(TAG, "putting to additional user "
+                                    + mManagedProfiles.get(i).id);
+                        }
+                        insertForUser(Settings.System.CONTENT_URI, values,
+                                mManagedProfiles.get(i).id);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
         } else if (Settings.CALL_METHOD_PUT_SECURE.equals(method)) {
-            if (LOCAL_LOGV) Slog.v(TAG, "call_put(secure:" + request + "=" + newValue + ") for " + callingUser);
+            if (LOCAL_LOGV) {
+                Slog.v(TAG, "call_put(secure:" + request + "=" + newValue + ") for "
+                        + callingUser);
+            }
+            // Extra check for USER_OWNER to optimize for the 99%
+            if (callingUser != UserHandle.USER_OWNER && isManagedProfile(callingUser)) {
+                if (sSecureCloneToManagedKeys.contains(request)) {
+                    // Don't write these settings
+                    return null;
+                }
+            }
             insertForUser(Settings.Secure.CONTENT_URI, values, callingUser);
+            // Clone the settings to the managed profiles so that notifications can be sent out
+            if (callingUser == UserHandle.USER_OWNER && mManagedProfiles != null
+                    && sSecureCloneToManagedKeys.contains(request)) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    for (int i = mManagedProfiles.size() - 1; i >= 0; i--) {
+                        if (LOCAL_LOGV) {
+                            Slog.v(TAG, "putting to additional user "
+                                    + mManagedProfiles.get(i).id);
+                        }
+                        insertForUser(Settings.Secure.CONTENT_URI, values,
+                                mManagedProfiles.get(i).id);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
         } else if (Settings.CALL_METHOD_PUT_GLOBAL.equals(method)) {
-            if (LOCAL_LOGV) Slog.v(TAG, "call_put(global:" + request + "=" + newValue + ") for " + callingUser);
+            if (LOCAL_LOGV) {
+                Slog.v(TAG, "call_put(global:" + request + "=" + newValue + ") for "
+                        + callingUser);
+            }
             insertForUser(Settings.Global.CONTENT_URI, values, callingUser);
         } else {
             Slog.w(TAG, "call() with invalid method: " + method);
