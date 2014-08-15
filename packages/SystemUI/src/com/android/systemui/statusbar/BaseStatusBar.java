@@ -1735,6 +1735,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 : null;
 
         // Reapply the RemoteViews
+        if (entry.row != null) {
+            entry.row.resetHeight();
+        }
         contentView.reapply(mContext, entry.expanded, mOnClickHandler);
         if (bigContentView != null && entry.getBigContentView() != null) {
             bigContentView.reapply(mContext, entry.getBigContentView(),
