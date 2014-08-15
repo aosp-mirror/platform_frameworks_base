@@ -85,11 +85,24 @@ ApkSplit::ApkSplit(const std::set<ConfigDescription>& configs, const sp<Resource
         if (mName.size() > 0) {
             mName.append(",");
             mDirName.append("_");
+            mPackageSafeName.append(".");
         }
 
         String8 configStr = iter->toString();
+        String8 packageConfigStr(configStr);
+        size_t len = packageConfigStr.length();
+        if (len > 0) {
+            char* buf = packageConfigStr.lockBuffer(len);
+            for (char* end = buf + len; buf < end; ++buf) {
+                if (*buf == '-') {
+                    *buf = '_';
+                }
+            }
+            packageConfigStr.unlockBuffer(len);
+        }
         mName.append(configStr);
         mDirName.append(configStr);
+        mPackageSafeName.append(packageConfigStr);
     }
 }
 
