@@ -406,7 +406,6 @@ final class Notifier {
 
     private void sendNextBroadcast() {
         final int powerState;
-        final int goToSleepReason;
         synchronized (mLock) {
             if (mBroadcastedPowerState == POWER_STATE_UNKNOWN) {
                 // Broadcasted power state is unknown.  Send wake up.
