@@ -1534,8 +1534,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return;
         }
 
-        if (mtu < 68 || mtu > 10000) {
+        if (LinkProperties.isValidMtu(mtu, newLp.hasGlobalIPv6Address())) {
             loge("Unexpected mtu value: " + mtu + ", " + iface);
+            return;
+        }
+
+        // Cannot set MTU without interface name
+        if (TextUtils.isEmpty(iface)) {
+            loge("Setting MTU size with null iface.");
             return;
         }
 
