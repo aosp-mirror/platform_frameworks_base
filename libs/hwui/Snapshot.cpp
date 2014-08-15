@@ -55,7 +55,8 @@ Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags)
         , empty(false)
         , alpha(s->alpha)
         , roundRectClipState(s->roundRectClipState)
-        , mViewportData(s->mViewportData) {
+        , mViewportData(s->mViewportData)
+        , mRelativeLightCenter(s->mRelativeLightCenter) {
     if (saveFlags & SkCanvas::kMatrix_SaveFlag) {
         mTransformRoot.load(*s->transform);
         transform = &mTransformRoot;
@@ -200,6 +201,13 @@ void Snapshot::resetClip(float left, float top, float right, float bottom) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Snapshot::resetTransform(float x, float y, float z) {
+    // before resetting, map current light pos with inverse of current transform
+    Vector3 center = mRelativeLightCenter;
+    mat4 inverse;
+    inverse.loadInverse(*transform);
+    inverse.mapPoint3d(center);
+    mRelativeLightCenter = center;
+
     transform = &mTransformRoot;
     transform->loadTranslate(x, y, z);
 }

@@ -65,7 +65,7 @@ public:
         , frameTimeMs(0)
         , animationHook(NULL)
         , prepareTextures(mode == MODE_FULL)
-        , damageAccumulator(NullDamageAccumulator::instance())
+        , damageAccumulator(NULL)
         , renderState(renderState)
         , renderer(NULL)
         , errorHandler(NULL)
@@ -88,8 +88,9 @@ public:
     // TODO: Remove this? Currently this is used to signal to stop preparing
     // textures if we run out of cache space.
     bool prepareTextures;
-    // Must not be null
-    IDamageAccumulator* damageAccumulator;
+
+    // Must not be null during actual usage
+    DamageAccumulator* damageAccumulator;
     RenderState& renderState;
     // The renderer that will be drawing the next frame. Use this to push any
     // layer updates or similar. May be NULL.

@@ -188,8 +188,7 @@ void OpenGLRenderer::onViewportInitialized() {
 void OpenGLRenderer::setupFrameState(float left, float top,
         float right, float bottom, bool opaque) {
     mCaches.clearGarbage();
-
-    initializeSaveStack(left, top, right, bottom);
+    initializeSaveStack(left, top, right, bottom, mLightCenter);
     mOpaque = opaque;
     mTilingClip.set(left, top, right, bottom);
 }
@@ -481,9 +480,9 @@ bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
         }
 
         if (CC_UNLIKELY(inFrame || mCaches.drawDeferDisabled)) {
-            layer->render();
+            layer->render(*this);
         } else {
-            layer->defer();
+            layer->defer(*this);
         }
 
         if (inFrame) {
