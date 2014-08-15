@@ -73,9 +73,14 @@ public class ZenModeConfig implements Parcelable {
     private static final String CONDITION_TAG = "condition";
     private static final String CONDITION_ATT_COMPONENT = "component";
     private static final String CONDITION_ATT_ID = "id";
+    private static final String CONDITION_ATT_SUMMARY = "summary";
+    private static final String CONDITION_ATT_LINE1 = "line1";
+    private static final String CONDITION_ATT_LINE2 = "line2";
+    private static final String CONDITION_ATT_ICON = "icon";
+    private static final String CONDITION_ATT_STATE = "state";
+    private static final String CONDITION_ATT_FLAGS = "flags";
 
     private static final String EXIT_CONDITION_TAG = "exitCondition";
-    private static final String EXIT_CONDITION_ATT_ID = "id";
     private static final String EXIT_CONDITION_ATT_COMPONENT = "component";
 
     public boolean allowCalls;
@@ -83,13 +88,13 @@ public class ZenModeConfig implements Parcelable {
     public int allowFrom = SOURCE_ANYONE;
 
     public String sleepMode;
-    public int sleepStartHour;
-    public int sleepStartMinute;
+    public int sleepStartHour;   // 0-23
+    public int sleepStartMinute; // 0-59
     public int sleepEndHour;
     public int sleepEndMinute;
     public ComponentName[] conditionComponents;
     public Uri[] conditionIds;
-    public Uri exitConditionId;
+    public Condition exitCondition;
     public ComponentName exitConditionComponent;
 
     public ZenModeConfig() { }
@@ -115,7 +120,7 @@ public class ZenModeConfig implements Parcelable {
             source.readTypedArray(conditionIds, Uri.CREATOR);
         }
         allowFrom = source.readInt();
-        exitConditionId = source.readParcelable(null);
+        exitCondition = source.readParcelable(null);
         exitConditionComponent = source.readParcelable(null);
     }
 
@@ -146,7 +151,7 @@ public class ZenModeConfig implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeInt(allowFrom);
-        dest.writeParcelable(exitConditionId, 0);
+        dest.writeParcelable(exitCondition, 0);
         dest.writeParcelable(exitConditionComponent, 0);
     }
 
@@ -163,7 +168,7 @@ public class ZenModeConfig implements Parcelable {
             .append(conditionComponents == null ? null : TextUtils.join(",", conditionComponents))
             .append(",conditionIds=")
             .append(conditionIds == null ? null : TextUtils.join(",", conditionIds))
-            .append(",exitConditionId=").append(exitConditionId)
+            .append(",exitCondition=").append(exitCondition)
             .append(",exitConditionComponent=").append(exitConditionComponent)
             .append(']').toString();
     }
@@ -196,7 +201,7 @@ public class ZenModeConfig implements Parcelable {
                 && other.sleepEndMinute == sleepEndMinute
                 && Objects.deepEquals(other.conditionComponents, conditionComponents)
                 && Objects.deepEquals(other.conditionIds, conditionIds)
-                && Objects.equals(other.exitConditionId, exitConditionId)
+                && Objects.equals(other.exitCondition, exitCondition)
                 && Objects.equals(other.exitConditionComponent, exitConditionComponent);
     }
 
@@ -205,7 +210,7 @@ public class ZenModeConfig implements Parcelable {
         return Objects.hash(allowCalls, allowMessages, allowFrom, sleepMode,
                 sleepStartHour, sleepStartMinute, sleepEndHour, sleepEndMinute,
                 Arrays.hashCode(conditionComponents), Arrays.hashCode(conditionIds),
-                exitConditionId, exitConditionComponent);
+                exitCondition, exitConditionComponent);
     }
 
     public boolean isValid() {
@@ -294,9 +299,11 @@ public class ZenModeConfig implements Parcelable {
                         conditionIds.add(conditionId);
                     }
                 } else if (EXIT_CONDITION_TAG.equals(tag)) {
-                    rt.exitConditionId = safeUri(parser, EXIT_CONDITION_ATT_ID);
-                    rt.exitConditionComponent =
-                            safeComponentName(parser, EXIT_CONDITION_ATT_COMPONENT);
+                    rt.exitCondition = readConditionXml(parser);
+                    if (rt.exitCondition != null) {
+                        rt.exitConditionComponent =
+                                safeComponentName(parser, EXIT_CONDITION_ATT_COMPONENT);
+                    }
                 }
             }
         }
@@ -333,14 +340,40 @@ public class ZenModeConfig implements Parcelable {
                 out.endTag(null, CONDITION_TAG);
             }
         }
-        if (exitConditionId != null && exitConditionComponent != null) {
+        if (exitCondition != null && exitConditionComponent != null) {
             out.startTag(null, EXIT_CONDITION_TAG);
-            out.attribute(null, EXIT_CONDITION_ATT_ID, exitConditionId.toString());
             out.attribute(null, EXIT_CONDITION_ATT_COMPONENT,
                     exitConditionComponent.flattenToString());
+            writeConditionXml(exitCondition, out);
             out.endTag(null, EXIT_CONDITION_TAG);
         }
         out.endTag(null, ZEN_TAG);
+    }
+
+    public static Condition readConditionXml(XmlPullParser parser) {
+        final Uri id = safeUri(parser, CONDITION_ATT_ID);
+        final String summary = parser.getAttributeValue(null, CONDITION_ATT_SUMMARY);
+        final String line1 = parser.getAttributeValue(null, CONDITION_ATT_LINE1);
+        final String line2 = parser.getAttributeValue(null, CONDITION_ATT_LINE2);
+        final int icon = safeInt(parser, CONDITION_ATT_ICON, -1);
+        final int state = safeInt(parser, CONDITION_ATT_STATE, -1);
+        final int flags = safeInt(parser, CONDITION_ATT_FLAGS, -1);
+        try {
+            return new Condition(id, summary, line1, line2, icon, state, flags);
+        } catch (IllegalArgumentException e) {
+            Slog.w(TAG, "Unable to read condition xml", e);
+            return null;
+        }
+    }
+
+    public static void writeConditionXml(Condition c, XmlSerializer out) throws IOException {
+        out.attribute(null, CONDITION_ATT_ID, c.id.toString());
+        out.attribute(null, CONDITION_ATT_SUMMARY, c.summary);
+        out.attribute(null, CONDITION_ATT_LINE1, c.line1);
+        out.attribute(null, CONDITION_ATT_LINE2, c.line2);
+        out.attribute(null, CONDITION_ATT_ICON, Integer.toString(c.icon));
+        out.attribute(null, CONDITION_ATT_STATE, Integer.toString(c.state));
+        out.attribute(null, CONDITION_ATT_FLAGS, Integer.toString(c.flags));
     }
 
     public static boolean isValidHour(int val) {
@@ -403,21 +436,31 @@ public class ZenModeConfig implements Parcelable {
         }
     };
 
-    // Built-in countdown conditions, e.g. condition://android/countdown/1399917958951
+    public DowntimeInfo toDowntimeInfo() {
+        final DowntimeInfo downtime = new DowntimeInfo();
+        downtime.startHour = sleepStartHour;
+        downtime.startMinute = sleepStartMinute;
+        downtime.endHour = sleepEndHour;
+        downtime.endMinute = sleepEndMinute;
+        return downtime;
+    }
 
-    private static final String COUNTDOWN_AUTHORITY = "android";
+    // For built-in conditions
+    private static final String SYSTEM_AUTHORITY = "android";
+
+    // Built-in countdown conditions, e.g. condition://android/countdown/1399917958951
     private static final String COUNTDOWN_PATH = "countdown";
 
     public static Uri toCountdownConditionId(long time) {
         return new Uri.Builder().scheme(Condition.SCHEME)
-                .authority(COUNTDOWN_AUTHORITY)
+                .authority(SYSTEM_AUTHORITY)
                 .appendPath(COUNTDOWN_PATH)
                 .appendPath(Long.toString(time))
                 .build();
     }
 
     public static long tryParseCountdownConditionId(Uri conditionId) {
-        if (!Condition.isValidId(conditionId, COUNTDOWN_AUTHORITY)) return 0;
+        if (!Condition.isValidId(conditionId, SYSTEM_AUTHORITY)) return 0;
         if (conditionId.getPathSegments().size() != 2
                 || !COUNTDOWN_PATH.equals(conditionId.getPathSegments().get(0))) return 0;
         try {
@@ -430,5 +473,69 @@ public class ZenModeConfig implements Parcelable {
 
     public static boolean isValidCountdownConditionId(Uri conditionId) {
         return tryParseCountdownConditionId(conditionId) != 0;
+    }
+
+    // Built-in downtime conditions, e.g. condition://android/downtime?start=10.00&end=7.00
+    private static final String DOWNTIME_PATH = "downtime";
+
+    public static Uri toDowntimeConditionId(DowntimeInfo downtime) {
+        return new Uri.Builder().scheme(Condition.SCHEME)
+                .authority(SYSTEM_AUTHORITY)
+                .appendPath(DOWNTIME_PATH)
+                .appendQueryParameter("start", downtime.startHour + "." + downtime.startMinute)
+                .appendQueryParameter("end", downtime.endHour + "." + downtime.endMinute)
+                .build();
+    }
+
+    public static DowntimeInfo tryParseDowntimeConditionId(Uri conditionId) {
+        if (!Condition.isValidId(conditionId, SYSTEM_AUTHORITY)
+                || conditionId.getPathSegments().size() != 1
+                || !DOWNTIME_PATH.equals(conditionId.getPathSegments().get(0))) {
+            return null;
+        }
+        final int[] start = tryParseHourAndMinute(conditionId.getQueryParameter("start"));
+        final int[] end = tryParseHourAndMinute(conditionId.getQueryParameter("end"));
+        if (start == null || end == null) return null;
+        final DowntimeInfo downtime = new DowntimeInfo();
+        downtime.startHour = start[0];
+        downtime.startMinute = start[1];
+        downtime.endHour = end[0];
+        downtime.endMinute = end[1];
+        return downtime;
+    }
+
+    private static int[] tryParseHourAndMinute(String value) {
+        if (TextUtils.isEmpty(value)) return null;
+        final int i = value.indexOf('.');
+        if (i < 1 || i >= value.length() - 1) return null;
+        final int hour = tryParseInt(value.substring(0, i), -1);
+        final int minute = tryParseInt(value.substring(i + 1), -1);
+        return isValidHour(hour) && isValidMinute(minute) ? new int[] { hour, minute } : null;
+    }
+
+    public static boolean isValidDowntimeConditionId(Uri conditionId) {
+        return tryParseDowntimeConditionId(conditionId) != null;
+    }
+
+    public static class DowntimeInfo {
+        public int startHour;   // 0-23
+        public int startMinute; // 0-59
+        public int endHour;
+        public int endMinute;
+
+        @Override
+        public int hashCode() {
+            return 0;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof DowntimeInfo)) return false;
+            final DowntimeInfo other = (DowntimeInfo) o;
+            return startHour == other.startHour
+                    && startMinute == other.startMinute
+                    && endHour == other.endHour
+                    && endMinute == other.endMinute;
+        }
     }
 }
