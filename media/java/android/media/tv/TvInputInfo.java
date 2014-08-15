@@ -246,17 +246,17 @@ public final class TvInputInfo implements Parcelable {
                 Log.d(TAG, "Settings activity loaded. [" + input.mSettingsActivity + "] for "
                         + si.name);
             }
-            int contentRatingSystemXml = sa.getResourceId(
-                    com.android.internal.R.styleable.TvInputService_contentRatingSystemXml, -1);
-            if (contentRatingSystemXml != -1) {
+            int tvContentRatingDescription = sa.getResourceId(
+                    com.android.internal.R.styleable.TvInputService_tvContentRatingDescription, -1);
+            if (tvContentRatingDescription != -1) {
                 input.mRatingSystemXmlUri = new Uri.Builder()
                         .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
                         .authority(si.packageName)
-                        .appendPath(Integer.toString(contentRatingSystemXml))
+                        .appendPath(Integer.toString(tvContentRatingDescription))
                         .build();
                 if (DEBUG) {
-                    Log.d(TAG, "Content rating xml loaded. [" + contentRatingSystemXml + "] for "
-                            + si.name);
+                    Log.d(TAG, "Content rating xml loaded. [" + tvContentRatingDescription
+                            + "] for " + si.name);
                 }
             }
             sa.recycle();
