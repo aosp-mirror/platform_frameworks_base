@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.annotation.NonNull;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -27,6 +28,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Insets;
 import android.graphics.Matrix;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
@@ -595,6 +597,16 @@ public class BitmapDrawable extends Drawable {
         final int right = bounds.right - mDstRect.right;
         final int bottom = bounds.bottom - mDstRect.bottom;
         mOpticalInsets = Insets.of(left, top, right, bottom);
+    }
+
+    @Override
+    public void getOutline(@NonNull Outline outline) {
+        super.getOutline(outline);
+        if (mBitmapState.mBitmap.hasAlpha()) {
+            // Bitmaps with alpha can't report a non-0 alpha,
+            // since they may not fill their rectangular bounds
+            outline.setAlpha(0.0f);
+        }
     }
 
     @Override
