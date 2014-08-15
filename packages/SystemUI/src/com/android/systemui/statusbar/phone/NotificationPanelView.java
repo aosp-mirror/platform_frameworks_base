@@ -24,6 +24,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
+import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -104,7 +105,6 @@ public class NotificationPanelView extends PanelView implements
     private boolean mQsFullyExpanded;
     private boolean mKeyguardShowing;
     private boolean mDozing;
-    private boolean mKeyguardStatusBarTransparent;
     private int mStatusBarState;
     private float mInitialHeightOnTouch;
     private float mInitialTouchX;
@@ -277,6 +277,7 @@ public class NotificationPanelView extends PanelView implements
             setQsExpansion(mQsMinExpansionHeight + mLastOverscroll);
             positionClockAndNotifications();
             mNotificationStackScroller.setStackHeight(getExpandedHeight());
+            updateHeader();
         }
         mNotificationStackScroller.updateIsSmallScreen(
                 mHeader.getCollapsedHeight() + mQsPeekHeight);
@@ -993,15 +994,7 @@ public class NotificationPanelView extends PanelView implements
         requestScrollerTopPaddingUpdate(false /* animate */);
         updateNotificationScrim(height);
         if (mKeyguardShowing) {
-            float alpha = getQsExpansionFraction();
-            alpha *= 2;
-            alpha = Math.min(1, alpha);
-            alpha = 1 - alpha;
-            mKeyguardStatusBarTransparent = alpha == 0f;
-            updateKeyguardStatusBarVisibility();
-            if (!mKeyguardStatusBarTransparent) {
-                mKeyguardStatusBar.setAlpha(alpha);
-            }
+            updateHeaderKeyguard();
         }
         if (mStatusBarState == StatusBarState.SHADE && mQsExpanded
                 && !mStackScrollerOverscrolling && mQsScrimEnabled) {
@@ -1352,27 +1345,25 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void updateHeaderKeyguard() {
-        float alpha;
+        float alphaNotifications;
         if (mStatusBar.getBarState() == StatusBarState.KEYGUARD) {
 
             // When on Keyguard, we hide the header as soon as the top card of the notification
             // stack scroller is close enough (collision distance) to the bottom of the header.
-            alpha = getNotificationsTopY()
+            alphaNotifications = getNotificationsTopY()
                     /
-                    (mQsMinExpansionHeight + mNotificationsHeaderCollideDistance);
-
+                    (mKeyguardStatusBar.getHeight() + mNotificationsHeaderCollideDistance);
         } else {
 
             // In SHADE_LOCKED, the top card is already really close to the header. Hide it as
             // soon as we start translating the stack.
-            alpha = getNotificationsTopY() / mQsMinExpansionHeight;
+            alphaNotifications = getNotificationsTopY() / mKeyguardStatusBar.getHeight();
         }
-        alpha = Math.max(0, Math.min(alpha, 1));
-        alpha = (float) Math.pow(alpha, 0.75);
-        if (!mQsExpanded) {
-            mKeyguardStatusBar.setAlpha(alpha);
-        }
-        mKeyguardBottomArea.setAlpha(alpha);
+        alphaNotifications = MathUtils.constrain(alphaNotifications, 0, 1);
+        alphaNotifications = (float) Math.pow(alphaNotifications, 0.75);
+        float alphaQsExpansion = 1 - Math.min(1, getQsExpansionFraction() * 2);
+        mKeyguardStatusBar.setAlpha(Math.min(alphaNotifications, alphaQsExpansion));
+        mKeyguardBottomArea.setAlpha(Math.min(1 - getQsExpansionFraction(), alphaNotifications));
         setQsTranslation(mQsExpansionHeight);
     }
 
@@ -1716,8 +1707,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void updateKeyguardStatusBarVisibility() {
-        mKeyguardStatusBar.setVisibility(mKeyguardShowing && !mKeyguardStatusBarTransparent
-                && !mDozing ? VISIBLE : INVISIBLE);
+        mKeyguardStatusBar.setVisibility(mKeyguardShowing && !mDozing ? VISIBLE : INVISIBLE);
     }
 
     public void setDozing(boolean dozing) {
