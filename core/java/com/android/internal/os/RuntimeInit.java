@@ -192,13 +192,14 @@ public class RuntimeInit {
      *
      * @param className Fully-qualified class name
      * @param argv Argument vector for main()
+     * @param classLoader the classLoader to load {@className} with
      */
-    private static void invokeStaticMain(String className, String[] argv)
+    private static void invokeStaticMain(String className, String[] argv, ClassLoader classLoader)
             throws ZygoteInit.MethodAndArgsCaller {
         Class<?> cl;
 
         try {
-            cl = Class.forName(className);
+            cl = Class.forName(className, true, classLoader);
         } catch (ClassNotFoundException ex) {
             throw new RuntimeException(
                     "Missing class when invoking static main " + className,
@@ -263,7 +264,7 @@ public class RuntimeInit {
      * @param targetSdkVersion target SDK version
      * @param argv arg strings
      */
-    public static final void zygoteInit(int targetSdkVersion, String[] argv)
+    public static final void zygoteInit(int targetSdkVersion, String[] argv, ClassLoader classLoader)
             throws ZygoteInit.MethodAndArgsCaller {
         if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application from zygote");
 
@@ -272,7 +273,7 @@ public class RuntimeInit {
         commonInit();
         nativeZygoteInit();
 
-        applicationInit(targetSdkVersion, argv);
+        applicationInit(targetSdkVersion, argv, classLoader);
     }
 
     /**
@@ -290,10 +291,10 @@ public class RuntimeInit {
             throws ZygoteInit.MethodAndArgsCaller {
         if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application from wrapper");
 
-        applicationInit(targetSdkVersion, argv);
+        applicationInit(targetSdkVersion, argv, null);
     }
 
-    private static void applicationInit(int targetSdkVersion, String[] argv)
+    private static void applicationInit(int targetSdkVersion, String[] argv, ClassLoader classLoader)
             throws ZygoteInit.MethodAndArgsCaller {
         // If the application calls System.exit(), terminate the process
         // immediately without running any shutdown hooks.  It is not possible to
@@ -317,7 +318,7 @@ public class RuntimeInit {
         }
 
         // Remaining arguments are passed to the start class's static main
-        invokeStaticMain(args.startClass, args.startArgs);
+        invokeStaticMain(args.startClass, args.startArgs, classLoader);
     }
 
     /**

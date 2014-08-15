@@ -1394,14 +1394,25 @@ public class PackageManagerService extends IPackageManager.Stub {
              * list of process files because dexopt will have been run
              * if necessary during zygote startup.
              */
-            String bootClassPath = System.getProperty("java.boot.class.path");
+            final String bootClassPath = System.getenv("BOOTCLASSPATH");
+            final String systemServerClassPath = System.getenv("SYSTEMSERVERCLASSPATH");
+
             if (bootClassPath != null) {
-                String[] paths = splitString(bootClassPath, ':');
-                for (int i=0; i<paths.length; i++) {
-                    alreadyDexOpted.add(paths[i]);
+                String[] bootClassPathElements = splitString(bootClassPath, ':');
+                for (String element : bootClassPathElements) {
+                    alreadyDexOpted.add(element);
                 }
             } else {
                 Slog.w(TAG, "No BOOTCLASSPATH found!");
+            }
+
+            if (systemServerClassPath != null) {
+                String[] systemServerClassPathElements = splitString(systemServerClassPath, ':');
+                for (String element : systemServerClassPathElements) {
+                    alreadyDexOpted.add(element);
+                }
+            } else {
+                Slog.w(TAG, "No SYSTEMSERVERCLASSPATH found!");
             }
 
             boolean didDexOptLibraryOrTool = false;

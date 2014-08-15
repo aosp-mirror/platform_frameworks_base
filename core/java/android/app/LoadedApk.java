@@ -199,9 +199,10 @@ public final class LoadedApk {
     /**
      * Sets application info about the system package.
      */
-    void installSystemApplicationInfo(ApplicationInfo info) {
+    void installSystemApplicationInfo(ApplicationInfo info, ClassLoader classLoader) {
         assert info.packageName.equals("android");
         mApplicationInfo = info;
+        mClassLoader = classLoader;
     }
 
     public String getPackageName() {
