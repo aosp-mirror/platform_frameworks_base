@@ -205,7 +205,7 @@ public class RootInfo implements Durable, Parcelable {
 
     public Drawable loadIcon(Context context) {
         if (derivedIcon != 0) {
-            return context.getResources().getDrawable(derivedIcon);
+            return context.getDrawable(derivedIcon);
         } else {
             return IconUtils.loadPackageIcon(context, authority, icon);
         }

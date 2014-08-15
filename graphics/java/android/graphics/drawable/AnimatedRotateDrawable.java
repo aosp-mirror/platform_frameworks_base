@@ -275,7 +275,7 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
         final int res = a.getResourceId(R.styleable.AnimatedRotateDrawable_drawable, 0);
         Drawable drawable = null;
         if (res > 0) {
-            drawable = r.getDrawable(res);
+            drawable = r.getDrawable(res, theme);
         }
 
         a.recycle();
