@@ -499,7 +499,12 @@ public class UserManager {
      * Sets all the user-wide restrictions for this user.
      * Requires the MANAGE_USERS permission.
      * @param restrictions the Bundle containing all the restrictions.
+     * @deprecated use {@link android.app.admin.DevicePolicyManager#addUserRestriction(
+     * android.content.ComponentName, String)} or
+     * {@link android.app.admin.DevicePolicyManager#clearUserRestriction(
+     * android.content.ComponentName, String)} instead.
      */
+    @Deprecated
     public void setUserRestrictions(Bundle restrictions) {
         setUserRestrictions(restrictions, Process.myUserHandle());
     }
@@ -509,7 +514,12 @@ public class UserManager {
      * Requires the MANAGE_USERS permission.
      * @param restrictions the Bundle containing all the restrictions.
      * @param userHandle the UserHandle of the user for whom to set the restrictions.
+     * @deprecated use {@link android.app.admin.DevicePolicyManager#addUserRestriction(
+     * android.content.ComponentName, String)} or
+     * {@link android.app.admin.DevicePolicyManager#clearUserRestriction(
+     * android.content.ComponentName, String)} instead.
      */
+    @Deprecated
     public void setUserRestrictions(Bundle restrictions, UserHandle userHandle) {
         try {
             mService.setUserRestrictions(restrictions, userHandle.getIdentifier());
@@ -523,7 +533,12 @@ public class UserManager {
      * Requires the MANAGE_USERS permission.
      * @param key the key of the restriction
      * @param value the value for the restriction
+     * @deprecated use {@link android.app.admin.DevicePolicyManager#addUserRestriction(
+     * android.content.ComponentName, String)} or
+     * {@link android.app.admin.DevicePolicyManager#clearUserRestriction(
+     * android.content.ComponentName, String)} instead.
      */
+    @Deprecated
     public void setUserRestriction(String key, boolean value) {
         Bundle bundle = getUserRestrictions();
         bundle.putBoolean(key, value);
@@ -537,7 +552,12 @@ public class UserManager {
      * @param key the key of the restriction
      * @param value the value for the restriction
      * @param userHandle the user whose restriction is to be changed.
+     * @deprecated use {@link android.app.admin.DevicePolicyManager#addUserRestriction(
+     * android.content.ComponentName, String)} or
+     * {@link android.app.admin.DevicePolicyManager#clearUserRestriction(
+     * android.content.ComponentName, String)} instead.
      */
+    @Deprecated
     public void setUserRestriction(String key, boolean value, UserHandle userHandle) {
         Bundle bundle = getUserRestrictions(userHandle);
         bundle.putBoolean(key, value);
