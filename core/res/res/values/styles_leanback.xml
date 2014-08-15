@@ -65,4 +65,10 @@
         <item name="fontFamily">sans-serif-condensed</item>
     </style>
 
+    <style name="WindowAnimationStyle.Leanback.Setup" parent="@style/Animation.Material.Activity">
+        <item name="android:fragmentOpenEnterAnimation">@animator/leanback_setup_fragment_open_enter</item>
+        <item name="android:fragmentOpenExitAnimation">@animator/leanback_setup_fragment_open_exit</item>
+        <item name="android:fragmentCloseEnterAnimation">@animator/leanback_setup_fragment_close_enter</item>
+        <item name="android:fragmentCloseExitAnimation">@animator/leanback_setup_fragment_close_exit</item>
+    </style>
 </resources>
