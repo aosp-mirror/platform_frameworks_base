@@ -539,7 +539,10 @@ public abstract class ConnectionService extends Service {
                         connection.getCallerDisplayNamePresentation(),
                         connection.getVideoProvider() == null ?
                                 null : connection.getVideoProvider().getInterface(),
-                        connection.getVideoState()));
+                        connection.getVideoState(),
+                        connection.isRequestingRingback(),
+                        connection.getAudioModeIsVoip(),
+                        connection.getStatusHints()));
     }
 
     private void abort(String callId) {
