@@ -256,7 +256,9 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     public void reset() {
-        mOnHeightChangedListener.onReset(this);
+        if (mOnHeightChangedListener != null) {
+            mOnHeightChangedListener.onReset(this);
+        }
     }
 
     /**
