@@ -201,13 +201,12 @@ public class StaticLayout extends Layout {
                     restWidth -= sp[i].getLeadingMargin(false);
 
                     // LeadingMarginSpan2 is odd.  The count affects all
-                    // leading margin spans, not just this particular one,
-                    // and start from the top of the span, not the top of the
-                    // paragraph.
+                    // leading margin spans, not just this particular one
                     if (lms instanceof LeadingMarginSpan2) {
                         LeadingMarginSpan2 lms2 = (LeadingMarginSpan2) lms;
                         int lmsFirstLine = getLineForOffset(spanned.getSpanStart(lms2));
-                        firstWidthLineLimit = lmsFirstLine + lms2.getLeadingMarginLineCount();
+                        firstWidthLineLimit = Math.max(firstWidthLineLimit,
+                                lmsFirstLine + lms2.getLeadingMarginLineCount());
                     }
                 }
 
