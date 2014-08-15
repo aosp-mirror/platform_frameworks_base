@@ -1223,7 +1223,7 @@ public final class TvInputManagerService extends SystemService {
                     try {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId).tune(
                                 channelUri, params);
-                        if (TvContract.isChannelUriForPassthroughTvInput(channelUri)) {
+                        if (TvContract.isChannelUriForPassthroughInput(channelUri)) {
                             // Do not log the watch history for passthrough inputs.
                             return;
                         }

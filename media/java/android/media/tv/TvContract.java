@@ -119,12 +119,12 @@ public final class TvContract {
     }
 
     /**
-     * Build a special channel URI intended to be used with pass-through type inputs. (e.g. HDMI)
+     * Build a special channel URI intended to be used with pass-through inputs. (e.g. HDMI)
      *
-     * @param inputId The ID of the TV input to build a channels URI for.
-     * @see TvInputInfo#isPassthroughInputType()
+     * @param inputId The ID of the pass-through input to build a channels URI for.
+     * @see TvInputInfo#isPassthroughInput()
      */
-    public static final Uri buildChannelUriForPassthroughTvInput(String inputId) {
+    public static final Uri buildChannelUriForPassthroughInput(String inputId) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY)
                 .appendPath(PATH_PASSTHROUGH).appendPath(inputId).build();
     }
@@ -144,7 +144,7 @@ public final class TvContract {
      * @param channelUri The URI of the channel whose logo is pointed to.
      */
     public static final Uri buildChannelLogoUri(Uri channelUri) {
-        if (!isChannelUriForTunerTvInput(channelUri)) {
+        if (!isChannelUriForTunerInput(channelUri)) {
             throw new IllegalArgumentException("Not a channel: " + channelUri);
         }
         return Uri.withAppendedPath(channelUri, Channels.Logo.CONTENT_DIRECTORY);
@@ -230,7 +230,7 @@ public final class TvContract {
      * @param channelUri The URI of the channel to return programs for.
      */
     public static final Uri buildProgramsUriForChannel(Uri channelUri) {
-        if (!isChannelUriForTunerTvInput(channelUri)) {
+        if (!isChannelUriForTunerInput(channelUri)) {
             throw new IllegalArgumentException("Not a channel: " + channelUri);
         }
         return buildProgramsUriForChannel(ContentUris.parseId(channelUri));
@@ -265,7 +265,7 @@ public final class TvContract {
      */
     public static final Uri buildProgramsUriForChannel(Uri channelUri, long startTime,
             long endTime) {
-        if (!isChannelUriForTunerTvInput(channelUri)) {
+        if (!isChannelUriForTunerInput(channelUri)) {
             throw new IllegalArgumentException("Not a channel: " + channelUri);
         }
         return buildProgramsUriForChannel(ContentUris.parseId(channelUri), startTime, endTime);
@@ -296,23 +296,23 @@ public final class TvContract {
      * @hide
      */
     public static final boolean isChannelUri(Uri uri) {
-        return isChannelUriForTunerTvInput(uri) || isChannelUriForPassthroughTvInput(uri);
+        return isChannelUriForTunerInput(uri) || isChannelUriForPassthroughInput(uri);
     }
 
     /**
-     * Returns true, if {@code uri} is a channel URI for a tuner TV input.
+     * Returns true, if {@code uri} is a channel URI for a tuner input.
      * @hide
      */
-    public static final boolean isChannelUriForTunerTvInput(Uri uri) {
+    public static final boolean isChannelUriForTunerInput(Uri uri) {
         return isTvUri(uri) && isTwoSegmentUriStartingWith(uri, PATH_CHANNEL);
     }
 
     /**
-     * Returns true, if {@code uri} is a channel URI for a passthrough TV input.
+     * Returns true, if {@code uri} is a channel URI for a passthrough input.
      * @hide
      */
     @SystemApi
-    public static final boolean isChannelUriForPassthroughTvInput(Uri uri) {
+    public static final boolean isChannelUriForPassthroughInput(Uri uri) {
         return isTvUri(uri) && isTwoSegmentUriStartingWith(uri, PATH_PASSTHROUGH);
     }
 
