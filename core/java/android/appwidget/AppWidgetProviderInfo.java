@@ -271,13 +271,13 @@ public class AppWidgetProviderInfo implements Parcelable {
      * @return The provider icon.
      */
     public final Drawable loadIcon(@NonNull Context context, int density) {
-        return loadDrawable(context, density, providerInfo.getIconResource());
+        return loadDrawable(context, density, providerInfo.getIconResource(), true);
     }
 
     /**
      * Loads a preview of what the AppWidget will look like after it's configured.
-     * If not supplied, the AppWidget's icon will be used. A client can optionally
-     * provide a desired deinsity such as {@link android.util.DisplayMetrics#DENSITY_LOW}
+     * A client can optionally provide a desired density such as
+     * {@link android.util.DisplayMetrics#DENSITY_LOW}
      * {@link android.util.DisplayMetrics#DENSITY_MEDIUM}, etc. If no density is
      * provided, the density of the current display will be used.
      * <p>
@@ -288,10 +288,10 @@ public class AppWidgetProviderInfo implements Parcelable {
      * @param context Context for accessing resources.
      * @param density The optional desired density as per
      *         {@link android.util.DisplayMetrics#densityDpi}.
-     * @return The widget preview image.
+     * @return The widget preview image or {@null} if preview image is not available.
      */
     public final Drawable loadPreviewImage(@NonNull Context context, int density) {
-        return loadDrawable(context, density, previewImage);
+        return loadDrawable(context, density, previewImage, false);
     }
 
     /**
@@ -361,7 +361,8 @@ public class AppWidgetProviderInfo implements Parcelable {
         return 0;
     }
 
-    private Drawable loadDrawable(Context context, int density, int resourceId) {
+    private Drawable loadDrawable(Context context, int density, int resourceId,
+            boolean loadDefaultIcon) {
         try {
             Resources resources = context.getPackageManager().getResourcesForApplication(
                     providerInfo.applicationInfo);
@@ -374,7 +375,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
             /* ignore */
         }
-        return providerInfo.loadIcon(context.getPackageManager());
+        return loadDefaultIcon ? providerInfo.loadIcon(context.getPackageManager()) : null;
     }
 
     /**
