@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"文件"</string>
-    <string name="title_open" msgid="4353228937663917801">"開啟自"</string>
+    <string name="title_open" msgid="4353228937663917801">"開啟檔案"</string>
     <string name="title_save" msgid="2433679664882857999">"儲存至"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"建立資料夾"</string>
     <string name="menu_grid" msgid="6878021334497835259">"格狀檢視"</string>
