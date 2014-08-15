@@ -22,8 +22,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.RemoteException;
 import android.provider.Settings.Global;
+import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
 import android.service.notification.ZenModeConfig;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import java.io.PrintWriter;
@@ -52,13 +54,14 @@ public class ZenLog {
     private static final int TYPE_ALLOW_DISABLE = 2;
     private static final int TYPE_SET_RINGER_MODE = 3;
     private static final int TYPE_DOWNTIME = 4;
-    private static final int TYPE_ZEN_MODE = 5;
-    private static final int TYPE_EXIT_CONDITION = 6;
-    private static final int TYPE_SUBSCRIBE = 7;
-    private static final int TYPE_UNSUBSCRIBE = 8;
-    private static final int TYPE_CONFIG = 9;
-    private static final int TYPE_FOLLOW_RINGER_MODE = 10;
-    private static final int TYPE_NOT_INTERCEPTED = 11;
+    private static final int TYPE_SET_ZEN_MODE = 5;
+    private static final int TYPE_UPDATE_ZEN_MODE = 6;
+    private static final int TYPE_EXIT_CONDITION = 7;
+    private static final int TYPE_SUBSCRIBE = 8;
+    private static final int TYPE_UNSUBSCRIBE = 9;
+    private static final int TYPE_CONFIG = 10;
+    private static final int TYPE_FOLLOW_RINGER_MODE = 11;
+    private static final int TYPE_NOT_INTERCEPTED = 12;
 
     private static int sNext;
     private static int sSize;
@@ -82,17 +85,20 @@ public class ZenLog {
         append(TYPE_SET_RINGER_MODE, ringerModeToString(ringerMode));
     }
 
-    public static void traceDowntime(boolean enter, int day, int[] days) {
-        append(TYPE_DOWNTIME, enter + ",day=" + day + ",days=" + (days != null ? Arrays.asList(days)
-                : null));
+    public static void traceDowntime(boolean inDowntime, int day, ArraySet<Integer> days) {
+        append(TYPE_DOWNTIME, inDowntime + ",day=" + day + ",days=" + days);
+    }
+
+    public static void traceSetZenMode(int mode, String reason) {
+        append(TYPE_SET_ZEN_MODE, zenModeToString(mode) + "," + reason);
     }
 
     public static void traceUpdateZenMode(int fromMode, int toMode) {
-        append(TYPE_ZEN_MODE, zenModeToString(fromMode) + " -> " + zenModeToString(toMode));
+        append(TYPE_UPDATE_ZEN_MODE, zenModeToString(fromMode) + " -> " + zenModeToString(toMode));
     }
 
-    public static void traceExitCondition(Uri id, ComponentName component, String reason) {
-        append(TYPE_EXIT_CONDITION, id + "," + componentToString(component) + "," + reason);
+    public static void traceExitCondition(Condition c, ComponentName component, String reason) {
+        append(TYPE_EXIT_CONDITION, c + "," + componentToString(component) + "," + reason);
     }
 
     public static void traceSubscribe(Uri uri, IConditionProvider provider, RemoteException e) {
@@ -122,7 +128,8 @@ public class ZenLog {
             case TYPE_ALLOW_DISABLE: return "allow_disable";
             case TYPE_SET_RINGER_MODE: return "set_ringer_mode";
             case TYPE_DOWNTIME: return "downtime";
-            case TYPE_ZEN_MODE: return "zen_mode";
+            case TYPE_SET_ZEN_MODE: return "set_zen_mode";
+            case TYPE_UPDATE_ZEN_MODE: return "update_zen_mode";
             case TYPE_EXIT_CONDITION: return "exit_condition";
             case TYPE_SUBSCRIBE: return "subscribe";
             case TYPE_UNSUBSCRIBE: return "unsubscribe";
