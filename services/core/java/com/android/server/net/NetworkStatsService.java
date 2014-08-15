@@ -896,10 +896,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 // Traffic occurring on the base interface is always counted for
                 // both total usage and UID details.
                 final String baseIface = state.linkProperties.getInterfaceName();
-                findOrCreateNetworkIdentitySet(mActiveIfaces, baseIface).add(ident);
-                findOrCreateNetworkIdentitySet(mActiveUidIfaces, baseIface).add(ident);
-                if (isMobile) {
-                    mobileIfaces.add(baseIface);
+                if (baseIface != null) {
+                    findOrCreateNetworkIdentitySet(mActiveIfaces, baseIface).add(ident);
+                    findOrCreateNetworkIdentitySet(mActiveUidIfaces, baseIface).add(ident);
+                    if (isMobile) {
+                        mobileIfaces.add(baseIface);
+                    }
                 }
 
                 // Traffic occurring on stacked interfaces is usually clatd,
@@ -909,15 +911,16 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 final List<LinkProperties> stackedLinks = state.linkProperties.getStackedLinks();
                 for (LinkProperties stackedLink : stackedLinks) {
                     final String stackedIface = stackedLink.getInterfaceName();
-                    findOrCreateNetworkIdentitySet(mActiveUidIfaces, stackedIface).add(ident);
-                    if (isMobile) {
-                        mobileIfaces.add(stackedIface);
+                    if (stackedIface != null) {
+                        findOrCreateNetworkIdentitySet(mActiveUidIfaces, stackedIface).add(ident);
+                        if (isMobile) {
+                            mobileIfaces.add(stackedIface);
+                        }
                     }
                 }
             }
         }
 
-        mobileIfaces.remove(null);
         mMobileIfaces = mobileIfaces.toArray(new String[mobileIfaces.size()]);
     }
 
