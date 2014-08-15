@@ -38,6 +38,9 @@ public final class ParcelableConnection implements Parcelable {
     private int mCallerDisplayNamePresentation;
     private IVideoProvider mVideoProvider;
     private int mVideoState;
+    private boolean mRequestingRingback;
+    private boolean mAudioModeIsVoip;
+    private StatusHints mStatusHints;
 
     /** @hide */
     public ParcelableConnection(
@@ -49,7 +52,10 @@ public final class ParcelableConnection implements Parcelable {
             String callerDisplayName,
             int callerDisplayNamePresentation,
             IVideoProvider videoProvider,
-            int videoState) {
+            int videoState,
+            boolean requestingRingback,
+            boolean audioModeIsVoip,
+            StatusHints statusHints) {
         mPhoneAccount = phoneAccount;
         mState = state;
         mCapabilities = capabilities;
@@ -59,6 +65,9 @@ public final class ParcelableConnection implements Parcelable {
         mCallerDisplayNamePresentation = callerDisplayNamePresentation;
         mVideoProvider = videoProvider;
         mVideoState = videoState;
+        mRequestingRingback = requestingRingback;
+        mAudioModeIsVoip = audioModeIsVoip;
+        mStatusHints = statusHints;
     }
 
     public PhoneAccountHandle getPhoneAccount() {
@@ -98,6 +107,18 @@ public final class ParcelableConnection implements Parcelable {
         return mVideoState;
     }
 
+    public boolean isRequestingRingback() {
+        return mRequestingRingback;
+    }
+
+    public boolean getAudioModeIsVoip() {
+        return mAudioModeIsVoip;
+    }
+
+    public final StatusHints getStatusHints() {
+        return mStatusHints;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder()
@@ -126,6 +147,9 @@ public final class ParcelableConnection implements Parcelable {
             IVideoProvider videoCallProvider =
                     IVideoProvider.Stub.asInterface(source.readStrongBinder());
             int videoState = source.readInt();
+            boolean requestingRingback = source.readByte() == 1;
+            boolean audioModeIsVoip = source.readByte() == 1;
+            StatusHints statusHints = source.readParcelable(classLoader);
 
             return new ParcelableConnection(
                     phoneAccount,
@@ -136,7 +160,10 @@ public final class ParcelableConnection implements Parcelable {
                     callerDisplayName,
                     callerDisplayNamePresentation,
                     videoCallProvider,
-                    videoState);
+                    videoState,
+                    requestingRingback,
+                    audioModeIsVoip,
+                    statusHints);
         }
 
         @Override
@@ -164,5 +191,8 @@ public final class ParcelableConnection implements Parcelable {
         destination.writeStrongBinder(
                 mVideoProvider != null ? mVideoProvider.asBinder() : null);
         destination.writeInt(mVideoState);
+        destination.writeByte((byte) (mRequestingRingback ? 1 : 0));
+        destination.writeByte((byte) (mAudioModeIsVoip ? 1 : 0));
+        destination.writeParcelable(mStatusHints, 0);
     }
 }
