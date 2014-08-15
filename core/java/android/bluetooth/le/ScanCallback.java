@@ -47,8 +47,8 @@ public abstract class ScanCallback {
     /**
      * Callback when a BLE advertisement has been found.
      *
-     * @param callbackType Determines if this callback was triggered because of first match, a lost
-     *            match indication or a regular scan result.
+     * @param callbackType Determines how this callback was triggered. Currently could only be
+     *            {@link ScanSettings#CALLBACK_TYPE_ALL_MATCHES}.
      * @param result A Bluetooth LE scan result.
      */
     public void onScanResult(int callbackType, ScanResult result) {
@@ -64,6 +64,7 @@ public abstract class ScanCallback {
 
     /**
      * Callback when scan could not be started.
+     *
      * @param errorCode Error code (one of SCAN_FAILED_*) for scan failure.
      */
     public void onScanFailed(int errorCode) {

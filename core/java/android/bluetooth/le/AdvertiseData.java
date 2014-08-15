@@ -172,9 +172,6 @@ public final class AdvertiseData implements Parcelable {
         dest.writeByte((byte) (getIncludeDeviceName() ? 1 : 0));
     }
 
-    /**
-     * @hide
-     */
     public static final Parcelable.Creator<AdvertiseData> CREATOR =
             new Creator<AdvertiseData>() {
             @Override

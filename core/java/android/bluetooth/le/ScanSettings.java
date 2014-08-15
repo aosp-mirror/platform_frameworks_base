@@ -52,19 +52,28 @@ public final class ScanSettings implements Parcelable {
     /**
      * A result callback is only triggered for the first advertisement packet received that matches
      * the filter criteria.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int CALLBACK_TYPE_FIRST_MATCH = 2;
 
     /**
      * Receive a callback when advertisements are no longer received from a device that has been
      * previously reported by a first match callback.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int CALLBACK_TYPE_MATCH_LOST = 4;
 
     /**
      * Request full scan results which contain the device, rssi, advertising data, scan response as
      * well as the scan timestamp.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int SCAN_RESULT_TYPE_FULL = 0;
 
     /**
@@ -137,9 +146,6 @@ public final class ScanSettings implements Parcelable {
         return 0;
     }
 
-    /**
-     * @hide
-     */
     public static final Parcelable.Creator<ScanSettings>
             CREATOR = new Creator<ScanSettings>() {
                     @Override
@@ -183,7 +189,9 @@ public final class ScanSettings implements Parcelable {
          *
          * @param callbackType The callback type flags for the scan.
          * @throws IllegalArgumentException If the {@code callbackType} is invalid.
+         * @hide
          */
+        @SystemApi
         public Builder setCallbackType(int callbackType) {
 
             if (!isValidCallbackType(callbackType)) {
@@ -226,14 +234,14 @@ public final class ScanSettings implements Parcelable {
         /**
          * Set report delay timestamp for Bluetooth LE scan.
          *
-         * @param reportDelayMillis Set to 0 to be notified of results immediately. Values &gt; 0
-         *            causes the scan results to be queued up and delivered after the requested
-         *            delay or when the internal buffers fill up.
+         * @param reportDelayMillis Delay of report in milliseconds. Set to 0 to be notified of
+         *            results immediately. Values &gt; 0 causes the scan results to be queued up and
+         *            delivered after the requested delay or when the internal buffers fill up.
          * @throws IllegalArgumentException If {@code reportDelayMillis} &lt; 0.
          */
-        public Builder setReportDelayMillis(long reportDelayMillis) {
+        public Builder setReportDelay(long reportDelayMillis) {
             if (reportDelayMillis < 0) {
-                throw new IllegalArgumentException("reportDelayMillis must be > 0");
+                throw new IllegalArgumentException("reportDelay must be > 0");
             }
             mReportDelayMillis = reportDelayMillis;
             return this;

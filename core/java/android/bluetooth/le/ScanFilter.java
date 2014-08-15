@@ -138,8 +138,6 @@ public final class ScanFilter implements Parcelable {
 
     /**
      * A {@link android.os.Parcelable.Creator} to create {@link ScanFilter} from parcel.
-     *
-     * @hide
      */
     public static final Creator<ScanFilter>
             CREATOR = new Creator<ScanFilter>() {
