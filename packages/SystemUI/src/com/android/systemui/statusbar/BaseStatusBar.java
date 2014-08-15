@@ -1220,8 +1220,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         row.setClearable(sbn.isClearable());
 
-        row.setDrawingCacheEnabled(true);
-
         if (MULTIUSER_DEBUG) {
             TextView debug = (TextView) row.findViewById(R.id.debug_info);
             if (debug != null) {
