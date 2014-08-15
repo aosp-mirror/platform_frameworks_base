@@ -2855,17 +2855,16 @@ struct ResTable::Type
 struct ResTable::Package
 {
     Package(ResTable* _owner, const Header* _header, const ResTable_package* _package)
-        : owner(_owner), header(_header), package(_package), typeIdOffset(0) {
-        if (dtohs(package->header.headerSize) == sizeof(package)) {
+        : owner(_owner), header(_header), typeIdOffset(0) {
+        if (_package != NULL && dtohs(_package->header.headerSize) == sizeof(_package)) {
             // The package structure is the same size as the definition.
             // This means it contains the typeIdOffset field.
-            typeIdOffset = package->typeIdOffset;
+            typeIdOffset = _package->typeIdOffset;
         }
     }
 
     const ResTable* const           owner;
     const Header* const             header;
-    const ResTable_package* const   package;
 
     ResStringPool                   typeStrings;
     ResStringPool                   keyStrings;
@@ -3364,6 +3363,10 @@ status_t ResTable::addEmpty(const int32_t cookie) {
 
     header->header = (const ResTable_header*) resHeader;
     mHeaders.add(header);
+
+    PackageGroup* pg = new PackageGroup(this, String16(), 0);
+    pg->packages.add(new Package(this, header, NULL));
+    mPackageGroups.add(pg);
     return (mError=NO_ERROR);
 }
 
@@ -5932,7 +5935,7 @@ status_t ResTable::createIdmap(const ResTable& overlay,
     *outSize += 2 * sizeof(uint16_t);
 
     // overlay packages are assumed to contain only one package group
-    const String16 overlayPackage(overlay.mPackageGroups[0]->packages[0]->package->name);
+    const String16 overlayPackage(overlay.mPackageGroups[0]->name);
 
     for (size_t typeIndex = 0; typeIndex < pg->types.size(); ++typeIndex) {
         const TypeList& typeList = pg->types[typeIndex];
@@ -6207,11 +6210,6 @@ void ResTable::print(bool inclValues) const
     if (mError != 0) {
         printf("mError=0x%x (%s)\n", mError, strerror(mError));
     }
-#if 0
-    char localeStr[RESTABLE_MAX_LOCALE_LEN];
-    mParams.getBcp47Locale(localeStr);
-    printf("mParams=%s,\n" localeStr);
-#endif
     size_t pgCount = mPackageGroups.size();
     printf("Package Groups (%d)\n", (int)pgCount);
     for (size_t pgIndex=0; pgIndex<pgCount; pgIndex++) {
@@ -6219,13 +6217,6 @@ void ResTable::print(bool inclValues) const
         printf("Package Group %d id=%d packageCount=%d name=%s\n",
                 (int)pgIndex, pg->id, (int)pg->packages.size(),
                 String8(pg->name).string());
-
-        size_t pkgCount = pg->packages.size();
-        for (size_t pkgIndex=0; pkgIndex<pkgCount; pkgIndex++) {
-            const Package* pkg = pg->packages[pkgIndex];
-            printf("  Package %d id=%d name=%s\n", (int)pkgIndex,
-                    pkg->package->id, String8(String16(pkg->package->name)).string());
-        }
 
         for (size_t typeIndex=0; typeIndex < pg->types.size(); typeIndex++) {
             const TypeList& typeList = pg->types[typeIndex];
