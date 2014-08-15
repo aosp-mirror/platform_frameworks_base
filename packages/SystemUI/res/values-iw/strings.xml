@@ -144,7 +144,7 @@
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"צלצול שקט."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> נדחה."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"הודעה נדחתה."</string>
-    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"תריס התראות."</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"לוח הודעות."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"הגדרות מהירות."</string>
     <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"אפליקציות אחרונות"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"משתמש <xliff:g id="USER">%s</xliff:g>."</string>

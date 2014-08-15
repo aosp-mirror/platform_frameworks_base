@@ -156,7 +156,7 @@
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Modalità aereo: <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth: <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"Posizione: <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Allarme impostato per: <xliff:g id="TIME">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Sveglia impostata per le <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Dati 2G-3G disattivati"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Dati 4G disattivati"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Dati mobili disattivati"</string>

@@ -21,7 +21,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"ส่วนติดต่อผู้ใช้ของระบบ"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"ล้างข้อมูล"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"นำออกจากรายการ"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ลบจากรายการ"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ข้อมูลแอปพลิเคชัน"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"ไม่มีแอปพลิเคชันล่าสุด"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ปิดแอปพลิเคชันล่าสุด"</string>
@@ -142,7 +142,7 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"เปิดใช้งาน TeleTypewriter อยู่"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"เสียงเรียกเข้าแบบสั่น"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"เสียงเรียกเข้าแบบปิดเสียง"</string>
-    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> ถูกนำออกไปแล้ว"</string>
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> ถูกลบไปแล้ว"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"ปิดการแจ้งเตือนแล้ว"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"หน้าต่างแจ้งเตือน"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"การตั้งค่าด่วน"</string>

@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7164937344850004466">"系统用户界面"</string>
+    <string name="app_label" msgid="7164937344850004466">"系统界面"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"清除"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"从列表中删除"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"应用信息"</string>
@@ -35,7 +35,7 @@
     <string name="battery_low_title" msgid="2783104807551211639">"请连接充电器"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"电池电量低。"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"还剩 <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"不支持 USB 充电功能。\n只能使用随附的充电器充电。"</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"不支持USB充电功能。\n只能使用随附的充电器充电。"</string>
     <string name="battery_low_why" msgid="7279169609518386372">"电量使用情况"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"设置"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WLAN"</string>
@@ -47,16 +47,16 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"已通过蓝牙共享网络"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"设置输入法"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"物理键盘"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"允许应用“<xliff:g id="APPLICATION">%1$s</xliff:g>”访问该 USB 设备吗？"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"允许应用“<xliff:g id="APPLICATION">%1$s</xliff:g>”访问该 USB 配件吗？"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"要在连接此 USB 设备时打开<xliff:g id="ACTIVITY">%1$s</xliff:g>吗？"</string>
-    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"要在连接此 USB 配件时打开<xliff:g id="ACTIVITY">%1$s</xliff:g>吗？"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"未安装此 USB 配件适用的应用。要了解此配件的详情，请访问：<xliff:g id="URL">%1$s</xliff:g>"</string>
-    <string name="title_usb_accessory" msgid="4966265263465181372">"USB 配件"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"允许应用“<xliff:g id="APPLICATION">%1$s</xliff:g>”访问该USB设备吗？"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"允许应用“<xliff:g id="APPLICATION">%1$s</xliff:g>”访问该USB配件吗？"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"要在连接此USB设备时打开<xliff:g id="ACTIVITY">%1$s</xliff:g>吗？"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"要在连接此USB配件时打开<xliff:g id="ACTIVITY">%1$s</xliff:g>吗？"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"未安装此USB配件适用的应用。要了解此配件的详情，请访问：<xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"USB配件"</string>
     <string name="label_view" msgid="6304565553218192990">"查看"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"默认情况下用于该 USB 设备"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"默认情况下用于该 USB 配件"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"允许 USB 调试吗？"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"默认情况下用于该USB设备"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"默认情况下用于该USB配件"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"允许USB调试吗？"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"这台计算机的 RSA 密钥指纹如下：\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"一律允许使用这台计算机进行调试"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"缩放以填满屏幕"</string>
@@ -68,10 +68,10 @@
     <string name="screenshot_saved_text" msgid="1152839647677558815">"触摸可查看您的屏幕截图。"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"无法抓取屏幕截图。"</string>
     <string name="screenshot_failed_text" msgid="8134011269572415402">"无法保存屏幕截图。存储设备可能正在使用中。"</string>
-    <string name="usb_preference_title" msgid="6551050377388882787">"USB 文件传输选项"</string>
+    <string name="usb_preference_title" msgid="6551050377388882787">"USB文件传输选项"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"作为媒体播放器 (MTP) 装载"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"作为摄像头 (PTP) 装载"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"安装适用于 Mac 的 Android 文件传输应用"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"安装适用于Mac的Android文件传输应用"</string>
     <string name="accessibility_back" msgid="567011538994429120">"返回"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"主屏幕"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"菜单"</string>
@@ -98,12 +98,12 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"数据信号强度为两格。"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"数据信号强度为三格。"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"数据信号满格。"</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"已关闭 WLAN。"</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"WLAN 连接已断开。"</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"WLAN 信号强度为一格。"</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"WLAN 信号强度为两格。"</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"WLAN 信号强度为三格。"</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"WLAN 信号满格。"</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"已关闭WLAN。"</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"WLAN连接已断开。"</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"WLAN信号强度为一格。"</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"WLAN信号强度为两格。"</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"WLAN信号强度为三格。"</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"WLAN信号满格。"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"无 WiMAX 信号。"</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX 信号强度为一格。"</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX 信号强度为两格。"</string>
@@ -130,7 +130,7 @@
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"漫游中"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"WLAN"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"无 SIM 卡。"</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"无SIM卡。"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"蓝牙网络共享。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飞行模式。"</string>
     <!-- String.format failed for translation -->
@@ -139,8 +139,8 @@
     <string name="accessibility_settings_button" msgid="799583911231893380">"系统设置。"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"通知。"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"清除通知。"</string>
-    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS 已启用。"</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"正在获取 GPS 信号。"</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS已启用。"</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"正在获取GPS信号。"</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"电传打字机已启用。"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"振铃器振动。"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"振铃器静音。"</string>
@@ -164,9 +164,9 @@
     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"您已达到指定的数据流量上限。\n\n如果您重新启用数据，运营商可能会收取相应的费用。"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"重新启用数据连接"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"未连接互联网"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"WLAN 已连接"</string>
-    <string name="gps_notification_searching_text" msgid="8574247005642736060">"正在搜索 GPS"</string>
-    <string name="gps_notification_found_text" msgid="4619274244146446464">"已通过 GPS 确定位置"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"已连接到WLAN网络"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"正在搜索GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"已通过GPS确定位置"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"应用发出了有效位置信息请求"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"清除所有通知。"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"应用信息"</string>
@@ -175,7 +175,7 @@
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"屏幕锁定为纵向模式。"</string>
     <string name="dessert_case" msgid="1295161776223959221">"甜品盒"</string>
     <string name="start_dreams" msgid="7219575858348719790">"互动屏保"</string>
-    <string name="ethernet_label" msgid="7967563676324087464">"以太网"</string>
+    <string name="ethernet_label" msgid="7967563676324087464">"有线网络"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"飞行模式"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"正在充电：<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"充电完成"</string>

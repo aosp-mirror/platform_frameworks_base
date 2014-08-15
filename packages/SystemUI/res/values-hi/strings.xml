@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"सिस्‍टम UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"साफ़ करें"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"सूची से निकालें"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ऐप्स जानकारी"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ऐप्स की जानकारी"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"कोई हाल ही के ऐप्स  नहीं"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"हाल ही के ऐप्स  खारिज करें"</string>
   <plurals name="status_bar_accessibility_recent_apps">
@@ -38,13 +38,13 @@
     <string name="invalid_charger" msgid="4549105996740522523">"USB चार्जिंग समर्थित नहीं है.\nकेवल आपूर्ति किए गए चार्जर का उपयोग करें."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"बैटरी उपयोग"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"सेटिंग"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"वाई-फ़ाई"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"हवाई जहाज मोड"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"स्‍क्रीन अपनेआप घुमाएं"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"म्यूट करें"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"स्वत:"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"सूचनाएं"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth टीदर किया गया"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"ब्लूटूथ टीदर किया गया"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"इनपुट पद्धति सेट करें"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"भौतिक कीबोर्ड"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"ऐप्स  <xliff:g id="APPLICATION">%1$s</xliff:g> को USB उपकरण तक पहुंचने दें?"</string>
@@ -81,8 +81,8 @@
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"इनपुट पद्धति‍ बटन स्विच करें."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"संगतता ज़ूम बटन."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"छोटी से बड़ी स्‍क्रीन पर ज़ूम करें."</string>
-    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth कनेक्ट किया गया."</string>
-    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth डि‍स्‍कनेक्‍ट कि‍या गया."</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ब्लूटूथ कनेक्ट किया गया."</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"ब्लूटूथ डि‍स्‍कनेक्‍ट कि‍या गया."</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"कोई बैटरी नहीं."</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"बैटरी एक बार."</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"बैटरी दो बार."</string>
@@ -129,9 +129,9 @@
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"रोमिंग"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"किनारा"</string>
-    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"वाई-फ़ाई"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"कोई सिम नहीं."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth टेदरिंग."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब्लूटूथ टेदरिंग."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"हवाई जहाज मोड."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> प्रति‍शत बैटरी."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"सिस्टम सेटिंग."</string>
@@ -152,7 +152,7 @@
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"मोबाइल <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"बैटरी <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"हवाई जहाज़ मोड <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"ब्लूटूथ <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"स्थान <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"<xliff:g id="TIME">%s</xliff:g> के लिए अलार्म सेट किया गया."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G डेटा अक्षम"</string>
@@ -162,12 +162,12 @@
     <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"आप निर्दिष्ट डेटा उपयोग सीमा तक पहुंच चुके हैं.\n\nयदि आप डेटा को पुनः सक्षम करते हैं, तो ऑपरेटर द्वारा आपसे शुल्क लिया जा सकता है."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"डेटा पुन: सक्षम करें"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"कोई इंटरनेट कनेक्शन नहीं"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi कनेक्‍ट किया गया"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"वाई-फ़ाई  कनेक्‍ट किया गया"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS को खोजा जा रहा है"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS द्वारा सेट किया गया स्‍थान"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"स्थान अनुरोध सक्रिय"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सभी सूचनाएं साफ़ करें."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"ऐप्स जानकारी"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"ऐप्स की जानकारी"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"स्‍क्रीन स्‍वचालित रूप से घूमेगी."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"स्‍क्रीन लैंडस्केप अभिविन्यास में लॉक है."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"स्‍क्रीन पोर्ट्रेट अभिविन्‍यास में लॉक है."</string>
@@ -177,9 +177,9 @@
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"हवाई जहाज़ मोड"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"चार्ज हो रही है, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"चार्ज हो गई है"</string>
-    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
-    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> उपकरण)"</string>
-    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth बंद"</string>
+    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ब्लूटूथ"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ब्लूटूथ (<xliff:g id="NUMBER">%d</xliff:g> उपकरण)"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ब्लूटूथ बंद"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"स्क्रीन की रोशनी"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"स्वत: रोटेट"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"रोटेशन लॉक किया गया"</string>
@@ -192,10 +192,10 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"सेटिंग"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"समय"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"मुझे"</string>
-    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"वाई-फ़ाई"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"कनेक्ट नहीं है"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"कोई नेटवर्क नहीं"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi बंद"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"वाई-फ़ाई  बंद"</string>
     <string name="quick_settings_remote_display_no_connection_label" msgid="372107699274391290">"स्क्रीन कास्ट करें"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"स्क्रीन की रोशनी"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"स्वत:"</string>
