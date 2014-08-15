@@ -1060,9 +1060,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state);
 
                 final String baseIface = state.linkProperties.getInterfaceName();
-                connIdents.add(Pair.create(baseIface, ident));
-                if (powerSave) {
-                    connIfaces.add(baseIface);
+                if (baseIface != null) {
+                    connIdents.add(Pair.create(baseIface, ident));
+                    if (powerSave) {
+                        connIfaces.add(baseIface);
+                    }
                 }
 
                 // Stacked interfaces are considered to have same identity as
@@ -1070,9 +1072,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final List<LinkProperties> stackedLinks = state.linkProperties.getStackedLinks();
                 for (LinkProperties stackedLink : stackedLinks) {
                     final String stackedIface = stackedLink.getInterfaceName();
-                    connIdents.add(Pair.create(stackedIface, ident));
-                    if (powerSave) {
-                        connIfaces.add(stackedIface);
+                    if (stackedIface != null) {
+                        connIdents.add(Pair.create(stackedIface, ident));
+                        if (powerSave) {
+                            connIfaces.add(stackedIface);
+                        }
                     }
                 }
             }
