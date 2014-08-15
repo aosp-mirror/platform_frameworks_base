@@ -24,9 +24,11 @@ import android.os.RemoteException;
 import android.telephony.DisconnectCause;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A connection provided to a {@link ConnectionService} by another {@code ConnectionService}
@@ -182,7 +184,8 @@ public final class RemoteConnection {
 
     private IConnectionService mConnectionService;
     private final String mConnectionId;
-    private final Set<Listener> mListeners = new HashSet<>();
+    private final Set<Listener> mListeners = Collections.newSetFromMap(
+            new ConcurrentHashMap<Listener, Boolean>(2));
     private final Set<RemoteConnection> mConferenceableConnections = new HashSet<>();
 
     private int mState = Connection.STATE_NEW;
