@@ -802,11 +802,16 @@ const char* ResStringPool::string8At(size_t idx, size_t* outLen) const
 const String8 ResStringPool::string8ObjectAt(size_t idx) const
 {
     size_t len;
-    const char *str = (const char*)string8At(idx, &len);
+    const char *str = string8At(idx, &len);
     if (str != NULL) {
-        return String8(str);
+        return String8(str, len);
     }
-    return String8(stringAt(idx, &len));
+
+    const char16_t *str16 = stringAt(idx, &len);
+    if (str16 != NULL) {
+        return String8(str16, len);
+    }
+    return String8();
 }
 
 const ResStringPool_span* ResStringPool::styleAt(const ResStringPool_ref& ref) const
