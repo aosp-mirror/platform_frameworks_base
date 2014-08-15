@@ -69,12 +69,6 @@ public class TrustAgentService extends Service {
             "[" + getClass().getSimpleName() + "]";
     private static final boolean DEBUG = false;
 
-    // Temporary workaround to allow current trust agent implementations to continue working.
-    // This and the code guarded by this should be removed before shipping.
-    // If true, calls setManagingTrust(true) after onCreate, if it wasn't already set.
-    // TODO: Remove this once all agents are updated.
-    private static final boolean SET_MANAGED_FOR_LEGACY_AGENTS = true;
-
     /**
      * The {@link Intent} that must be declared as handled by the service.
      */
@@ -130,11 +124,6 @@ public class TrustAgentService extends Service {
 
     @Override
     public void onCreate() {
-        // TODO: Remove this once all agents are updated.
-        if (SET_MANAGED_FOR_LEGACY_AGENTS) {
-            setManagingTrust(true);
-        }
-
         super.onCreate();
         ComponentName component = new ComponentName(this, getClass());
         try {
@@ -175,7 +164,7 @@ public class TrustAgentService extends Service {
      * set.
      *
      * @param options Option feature bundle.
-     * @return true if the {@link #TrustAgentService()} supports this feature.
+     * @return true if the {@link TrustAgentService} supports this feature.
      */
     public boolean onSetTrustAgentFeaturesEnabled(Bundle options) {
         return false;
