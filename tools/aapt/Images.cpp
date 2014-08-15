@@ -485,9 +485,13 @@ static void get_outline(image_info* image)
     find_max_opacity(image->rows, innerStartX, innerStartY, innerMidX, innerMidY, 1, 1,
             &diagonalInset);
 
-    // Determine source radius based upon inset
-    // radius = 1 / (sqrt(2) - 1) * inset
-    image->outlineRadius = 2.4142f * diagonalInset;
+    /* Determine source radius based upon inset:
+     *     sqrt(r^2 + r^2) = sqrt(i^2 + i^2) + r
+     *     sqrt(2) * r = sqrt(2) * i + r
+     *     (sqrt(2) - 1) * r = sqrt(2) * i
+     *     r = sqrt(2) / (sqrt(2) - 1) * i
+     */
+    image->outlineRadius = 3.4142f * diagonalInset;
 
     NOISY(printf("outline insets %d %d %d %d, rad %f, alpha %x\n",
             image->outlineInsetsLeft,
