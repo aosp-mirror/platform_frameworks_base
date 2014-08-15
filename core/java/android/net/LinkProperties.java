@@ -56,6 +56,10 @@ public final class LinkProperties implements Parcelable {
     private ProxyInfo mHttpProxy;
     private int mMtu;
 
+    private static final int MIN_MTU    = 68;
+    private static final int MIN_MTU_V6 = 1280;
+    private static final int MAX_MTU    = 10000;
+
     // Stores the properties of links that are "stacked" above this link.
     // Indexed by interface name to allow modification and to prevent duplicates being added.
     private Hashtable<String, LinkProperties> mStackedLinks =
@@ -996,4 +1000,17 @@ public final class LinkProperties implements Parcelable {
                 return new LinkProperties[size];
             }
         };
+
+        /**
+         * Check the valid MTU range based on IPv4 or IPv6.
+         * @hide
+         */
+        public static boolean isValidMtu(int mtu, boolean ipv6) {
+            if (ipv6) {
+                if ((mtu >= MIN_MTU_V6 && mtu <= MAX_MTU)) return true;
+            } else {
+                if ((mtu >= MIN_MTU && mtu <= MAX_MTU)) return true;
+            }
+            return false;
+        }
 }
