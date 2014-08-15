@@ -2667,6 +2667,16 @@ public final class Settings {
         };
 
         /**
+         * These entries are considered common between the personal and the managed profile,
+         * since the managed profile doesn't get to change them.
+         * @hide
+         */
+        public static final String[] CLONE_TO_MANAGED_PROFILE = {
+            DATE_FORMAT,
+            TIME_12_24
+        };
+
+        /**
          * When to use Wi-Fi calling
          *
          * @see android.telephony.TelephonyManager.WifiCallingChoices
@@ -4794,6 +4804,26 @@ public final class Settings {
             MOUNT_UMS_PROMPT,
             MOUNT_UMS_NOTIFY_ENABLED,
             UI_NIGHT_MODE
+        };
+
+        /**
+         * These entries are considered common between the personal and the managed profile,
+         * since the managed profile doesn't get to change them.
+         * @hide
+         */
+        public static final String[] CLONE_TO_MANAGED_PROFILE = {
+            ACCESSIBILITY_ENABLED,
+            ALLOW_MOCK_LOCATION,
+            ALLOWED_GEOLOCATION_ORIGINS,
+            DEFAULT_INPUT_METHOD,
+            ENABLED_ACCESSIBILITY_SERVICES,
+            ENABLED_INPUT_METHODS,
+            LOCATION_MODE,
+            LOCATION_PROVIDERS_ALLOWED,
+            LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
+            SELECTED_INPUT_METHOD_SUBTYPE,
+            SELECTED_SPELL_CHECKER,
+            SELECTED_SPELL_CHECKER_SUBTYPE
         };
 
         /**
