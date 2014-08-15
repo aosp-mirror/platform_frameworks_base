@@ -36,19 +36,23 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.PackageDeleteObserver;
+import android.app.PackageInstallObserver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.IPackageDeleteObserver2;
+import android.content.IntentSender;
+import android.content.IntentSender.SendIntentException;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
-import android.content.pm.InstallSessionInfo;
-import android.content.pm.InstallSessionParams;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageInstaller.SessionInfo;
+import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -63,6 +67,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -279,8 +284,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         final File sessionStageDir = new File(readStringAttribute(in, ATTR_SESSION_STAGE_DIR));
         final boolean sealed = readBooleanAttribute(in, ATTR_SEALED);
 
-        final InstallSessionParams params = new InstallSessionParams(
-                InstallSessionParams.MODE_INVALID);
+        final SessionParams params = new SessionParams(
+                SessionParams.MODE_INVALID);
         params.mode = readIntAttribute(in, ATTR_MODE);
         params.installFlags = readIntAttribute(in, ATTR_INSTALL_FLAGS);
         params.installLocation = readIntAttribute(in, ATTR_INSTALL_LOCATION);
@@ -292,9 +297,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         params.referrerUri = readUriAttribute(in, ATTR_REFERRER_URI);
         params.abiOverride = readStringAttribute(in, ATTR_ABI_OVERRIDE);
 
-        return new PackageInstallerSession(mInternalCallback, mPm, mInstallThread.getLooper(),
-                sessionId, userId, installerPackageName, params, createdMillis, sessionStageDir,
-                sealed);
+        return new PackageInstallerSession(mInternalCallback, mContext, mPm,
+                mInstallThread.getLooper(), sessionId, userId, installerPackageName, params,
+                createdMillis, sessionStageDir, sealed);
     }
 
     private void writeSessionsLocked() {
@@ -326,7 +331,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     private void writeSessionLocked(XmlSerializer out, PackageInstallerSession session)
             throws IOException {
-        final InstallSessionParams params = session.params;
+        final SessionParams params = session.params;
         final Snapshot snapshot = session.snapshot();
 
         out.startTag(null, TAG_SESSION);
@@ -366,7 +371,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public int createSession(InstallSessionParams params, String installerPackageName, int userId) {
+    public int createSession(SessionParams params, String installerPackageName, int userId) {
         final int callingUid = Binder.getCallingUid();
         mPm.enforceCrossUserPermission(callingUid, userId, true, "createSession");
 
@@ -389,8 +394,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         }
 
         switch (params.mode) {
-            case InstallSessionParams.MODE_FULL_INSTALL:
-            case InstallSessionParams.MODE_INHERIT_EXISTING:
+            case SessionParams.MODE_FULL_INSTALL:
+            case SessionParams.MODE_INHERIT_EXISTING:
                 break;
             default:
                 throw new IllegalArgumentException("Params must have valid mode set");
@@ -437,7 +442,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             final long createdMillis = System.currentTimeMillis();
             final File sessionStageDir = prepareSessionStageDir(sessionId);
 
-            session = new PackageInstallerSession(mInternalCallback, mPm,
+            session = new PackageInstallerSession(mInternalCallback, mContext, mPm,
                     mInstallThread.getLooper(), sessionId, userId, installerPackageName, params,
                     createdMillis, sessionStageDir, false);
             mSessions.put(sessionId, session);
@@ -501,7 +506,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public InstallSessionInfo getSessionInfo(int sessionId) {
+    public SessionInfo getSessionInfo(int sessionId) {
         synchronized (mSessions) {
             final PackageInstallerSession session = mSessions.get(sessionId);
             if (!isCallingUidOwner(session)) {
@@ -512,11 +517,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public List<InstallSessionInfo> getAllSessions(int userId) {
+    public List<SessionInfo> getAllSessions(int userId) {
         mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "getAllSessions");
         enforceCallerCanReadSessions();
 
-        final List<InstallSessionInfo> result = new ArrayList<>();
+        final List<SessionInfo> result = new ArrayList<>();
         synchronized (mSessions) {
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
@@ -529,11 +534,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public List<InstallSessionInfo> getMySessions(String installerPackageName, int userId) {
+    public List<SessionInfo> getMySessions(String installerPackageName, int userId) {
         mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "getMySessions");
         mAppOps.checkPackage(Binder.getCallingUid(), installerPackageName);
 
-        final List<InstallSessionInfo> result = new ArrayList<>();
+        final List<SessionInfo> result = new ArrayList<>();
         synchronized (mSessions) {
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
@@ -547,34 +552,23 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public void uninstall(String packageName, int flags, IPackageDeleteObserver2 observer,
-            int userId) {
+    public void uninstall(String packageName, int flags, IntentSender statusReceiver, int userId) {
         mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "uninstall");
 
+        final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
+                statusReceiver);
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DELETE_PACKAGES)
                 == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
-            mPm.deletePackage(packageName, observer, userId, flags);
+            mPm.deletePackage(packageName, adapter.getBinder(), userId, flags);
 
         } else {
             // Take a short detour to confirm with user
             final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
             intent.setData(Uri.fromParts("package", packageName, null));
-            intent.putExtra(PackageInstaller.EXTRA_CALLBACK, observer.asBinder());
-            try {
-                observer.onUserActionRequired(intent);
-            } catch (RemoteException ignored) {
-            }
+            intent.putExtra(PackageInstaller.EXTRA_CALLBACK, adapter.getBinder().asBinder());
+            adapter.onUserActionRequired(intent);
         }
-    }
-
-    @Override
-    public void uninstallSplit(String basePackageName, String overlayName, int flags,
-            IPackageDeleteObserver2 observer, int userId) {
-        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "uninstallSplit");
-
-        // TODO: flesh out once PM has split support
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -633,6 +627,87 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             return;
         } else {
             throw new SecurityException("Caller must be current home app to read install sessions");
+        }
+    }
+
+    static class PackageDeleteObserverAdapter extends PackageDeleteObserver {
+        private final Context mContext;
+        private final IntentSender mTarget;
+
+        public PackageDeleteObserverAdapter(Context context, IntentSender target) {
+            mContext = context;
+            mTarget = target;
+        }
+
+        @Override
+        public void onUserActionRequired(Intent intent) {
+            final Intent fillIn = new Intent();
+            fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
+                    PackageInstaller.STATUS_USER_ACTION_REQUIRED);
+            fillIn.putExtra(Intent.EXTRA_INTENT, intent);
+            try {
+                mTarget.sendIntent(mContext, 0, fillIn, null, null);
+            } catch (SendIntentException ignored) {
+            }
+        }
+
+        @Override
+        public void onPackageDeleted(String basePackageName, int returnCode, String msg) {
+            final Intent fillIn = new Intent();
+            fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
+                    PackageManager.deleteStatusToPublicStatus(returnCode));
+            fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
+                    PackageManager.deleteStatusToString(returnCode, msg));
+            fillIn.putExtra(PackageInstaller.EXTRA_LEGACY_STATUS, returnCode);
+            try {
+                mTarget.sendIntent(mContext, 0, fillIn, null, null);
+            } catch (SendIntentException ignored) {
+            }
+        }
+    }
+
+    static class PackageInstallObserverAdapter extends PackageInstallObserver {
+        private final Context mContext;
+        private final IntentSender mTarget;
+
+        public PackageInstallObserverAdapter(Context context, IntentSender target) {
+            mContext = context;
+            mTarget = target;
+        }
+
+        @Override
+        public void onUserActionRequired(Intent intent) {
+            final Intent fillIn = new Intent();
+            fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
+                    PackageInstaller.STATUS_USER_ACTION_REQUIRED);
+            fillIn.putExtra(Intent.EXTRA_INTENT, intent);
+            try {
+                mTarget.sendIntent(mContext, 0, fillIn, null, null);
+            } catch (SendIntentException ignored) {
+            }
+        }
+
+        @Override
+        public void onPackageInstalled(String basePackageName, int returnCode, String msg,
+                Bundle extras) {
+            final Intent fillIn = new Intent();
+            fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
+                    PackageManager.installStatusToPublicStatus(returnCode));
+            fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
+                    PackageManager.installStatusToString(returnCode, msg));
+            fillIn.putExtra(PackageInstaller.EXTRA_LEGACY_STATUS, returnCode);
+            if (extras != null) {
+                final String existing = extras.getString(
+                        PackageManager.EXTRA_FAILURE_EXISTING_PACKAGE);
+                if (!TextUtils.isEmpty(existing)) {
+                    fillIn.putExtra(PackageInstaller.EXTRA_PACKAGE_NAMES, new String[] {
+                            existing });
+                }
+            }
+            try {
+                mTarget.sendIntent(mContext, 0, fillIn, null, null);
+            } catch (SendIntentException ignored) {
+            }
         }
     }
 

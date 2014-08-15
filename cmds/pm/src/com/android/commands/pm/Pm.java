@@ -19,21 +19,22 @@ package com.android.commands.pm;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
-import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
-import android.content.pm.InstallSessionInfo;
-import android.content.pm.InstallSessionParams;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
-import android.content.pm.PackageInstaller.CommitCallback;
+import android.content.pm.PackageInstaller.SessionInfo;
+import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
@@ -74,6 +75,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.WeakHashMap;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.TimeUnit;
 
 public final class Pm {
     private static final String TAG = "Pm";
@@ -776,36 +779,6 @@ public final class Pm {
         }
     }
 
-    class LocalCommitCallback extends CommitCallback {
-        boolean finished;
-        boolean success;
-        String msg;
-
-        private void setResult(boolean success, String msg) {
-            synchronized (this) {
-                this.finished = true;
-                this.success = success;
-                this.msg = msg;
-                notifyAll();
-            }
-        }
-
-        @Override
-        public void onUserActionRequired(Intent intent) {
-            setResult(false, "Unexepected user action required!");
-        }
-
-        @Override
-        public void onSuccess() {
-            setResult(true, null);
-        }
-
-        @Override
-        public void onFailure(int failureReason, String msg, Bundle extras) {
-            setResult(false, msg);
-        }
-    }
-
     /**
      * Converts a failure code into a string by using reflection to find a matching constant
      * in PackageManager.
@@ -1007,8 +980,7 @@ public final class Pm {
     private void runInstallCreate() throws RemoteException {
         String installerPackageName = null;
 
-        final InstallSessionParams params = new InstallSessionParams(
-                InstallSessionParams.MODE_FULL_INSTALL);
+        final SessionParams params = new SessionParams(SessionParams.MODE_FULL_INSTALL);
         params.installFlags = PackageManager.INSTALL_ALL_USERS;
 
         String opt;
@@ -1031,7 +1003,7 @@ public final class Pm {
             } else if (opt.equals("-d")) {
                 params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
             } else if (opt.equals("-p")) {
-                params.mode = InstallSessionParams.MODE_INHERIT_EXISTING;
+                params.mode = SessionParams.MODE_INHERIT_EXISTING;
             } else if (opt.equals("-S")) {
                 params.setSize(Long.parseLong(nextOptionData()));
             } else if (opt.equals("--abi")) {
@@ -1073,7 +1045,7 @@ public final class Pm {
             }
         }
 
-        final InstallSessionInfo info = mInstaller.getSessionInfo(sessionId);
+        final SessionInfo info = mInstaller.getSessionInfo(sessionId);
 
         PackageInstaller.Session session = null;
         InputStream in = null;
@@ -1117,22 +1089,20 @@ public final class Pm {
         try {
             session = new PackageInstaller.Session(mInstaller.openSession(sessionId));
 
-            final LocalCommitCallback callback = new LocalCommitCallback();
-            session.commit(callback);
+            final LocalIntentReceiver receiver = new LocalIntentReceiver();
+            session.commit(receiver.getIntentSender());
 
-            synchronized (callback) {
-                while (!callback.finished) {
-                    try {
-                        callback.wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
-                if (!callback.success) {
-                    throw new IllegalStateException("Failure [" + callback.msg + "]");
-                }
+            final Intent result = receiver.getResult();
+            final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                    PackageInstaller.STATUS_FAILURE);
+            if (status == PackageInstaller.STATUS_SUCCESS) {
+                System.out.println("Success");
+            } else {
+                Log.e(TAG, "Failure details: " + result.getExtras());
+                System.out.println("Failure ["
+                        + result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) + "]");
+                return;
             }
-
-            System.out.println("Success");
         } finally {
             IoUtils.closeQuietly(session);
         }
@@ -1274,28 +1244,14 @@ public final class Pm {
         }
     }
 
-    class LocalPackageDeleteObserver extends PackageDeleteObserver {
-        boolean finished;
-        boolean result;
-
-        @Override
-        public void onPackageDeleted(String name, int returnCode, String msg) {
-            synchronized (this) {
-                finished = true;
-                result = returnCode == PackageManager.DELETE_SUCCEEDED;
-                notifyAll();
-            }
-        }
-    }
-
-    private void runUninstall() {
-        int unInstallFlags = 0;
+    private void runUninstall() throws RemoteException {
+        int flags = 0;
         int userId = UserHandle.USER_ALL;
 
         String opt;
         while ((opt=nextOption()) != null) {
             if (opt.equals("-k")) {
-                unInstallFlags |= PackageManager.DELETE_KEEP_DATA;
+                flags |= PackageManager.DELETE_KEEP_DATA;
             } else if (opt.equals("--user")) {
                 String param = nextArg();
                 if (isNumber(param)) {
@@ -1320,7 +1276,7 @@ public final class Pm {
 
         if (userId == UserHandle.USER_ALL) {
             userId = UserHandle.USER_OWNER;
-            unInstallFlags |= PackageManager.DELETE_ALL_USERS;
+            flags |= PackageManager.DELETE_ALL_USERS;
         } else {
             PackageInfo info;
             try {
@@ -1340,36 +1296,23 @@ public final class Pm {
             // user set flag so it disables rather than reverting to system
             // version of the app.
             if (isSystem) {
-                unInstallFlags |= PackageManager.DELETE_SYSTEM_APP;
+                flags |= PackageManager.DELETE_SYSTEM_APP;
             }
         }
 
-        boolean result = deletePackage(pkg, unInstallFlags, userId);
-        if (result) {
+        final LocalIntentReceiver receiver = new LocalIntentReceiver();
+        mInstaller.uninstall(pkg, flags, receiver.getIntentSender(), userId);
+
+        final Intent result = receiver.getResult();
+        final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                PackageInstaller.STATUS_FAILURE);
+        if (status == PackageInstaller.STATUS_SUCCESS) {
             System.out.println("Success");
         } else {
-            System.out.println("Failure");
+            Log.e(TAG, "Failure details: " + result.getExtras());
+            System.out.println("Failure ["
+                    + result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) + "]");
         }
-    }
-
-    private boolean deletePackage(String packageName, int flags, int userId) {
-        LocalPackageDeleteObserver obs = new LocalPackageDeleteObserver();
-        try {
-            mInstaller.uninstall(packageName, flags, obs.getBinder(), userId);
-
-            synchronized (obs) {
-                while (!obs.finished) {
-                    try {
-                        obs.wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
-            }
-        } catch (RemoteException e) {
-            System.err.println(e.toString());
-            System.err.println(PM_NOT_RUNNING_ERR);
-        }
-        return obs.result;
     }
 
     static class ClearDataObserver extends IPackageDataObserver.Stub {
@@ -1384,7 +1327,6 @@ public final class Pm {
                 notifyAll();
             }
         }
-
     }
 
     private void runClear() {
@@ -1715,6 +1657,35 @@ public final class Pm {
         }
 
         throw new IllegalArgumentException("ABI " + abi + " not supported on this device");
+    }
+
+    private static class LocalIntentReceiver {
+        private final SynchronousQueue<Intent> mResult = new SynchronousQueue<>();
+
+        private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
+            @Override
+            public int send(int code, Intent intent, String resolvedType,
+                    IIntentReceiver finishedReceiver, String requiredPermission) {
+                try {
+                    mResult.offer(intent, 5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                return 0;
+            }
+        };
+
+        public IntentSender getIntentSender() {
+            return new IntentSender((IIntentSender) mLocalSender);
+        }
+
+        public Intent getResult() {
+            try {
+                return mResult.poll(30, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private String nextOption() {
