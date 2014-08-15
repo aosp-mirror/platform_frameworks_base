@@ -1257,6 +1257,14 @@
         android:description="@string/permdesc_bind_call_service"
         android:label="@string/permlab_bind_call_service" />
 
+    <!-- @SystemApi Allows an application to bind to ConnectionService implementations.
+         @hide -->
+    <permission android:name="android.permission.BIND_CONNECTION_SERVICE"
+                android:permissionGroup="android.permission-group.PHONE_CALLS"
+                android:protectionLevel="system|signature"
+                android:description="@string/permdesc_bind_connection_service"
+                android:label="@string/permlab_bind_connection_service" />
+
     <!-- ================================== -->
     <!-- Permissions for sdcard interaction -->
     <!-- ================================== -->

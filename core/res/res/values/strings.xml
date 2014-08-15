@@ -2117,6 +2117,11 @@
     <string name="permdesc_bind_call_service">Allows the app to control when and how the user sees the in-call screen.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bind_connection_service">interact with telephony services</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bind_connection_service">Allows the app to interact with telephony services to make/receive calls.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readNetworkUsageHistory">read historical network usage</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readNetworkUsageHistory">Allows the app to read historical network usage for specific networks and apps.</string>
