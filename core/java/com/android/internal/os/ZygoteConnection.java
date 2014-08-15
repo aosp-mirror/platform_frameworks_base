@@ -863,7 +863,7 @@ class ZygoteConnection {
                         pipeFd, parsedArgs.remainingArgs);
             } else {
                 RuntimeInit.zygoteInit(parsedArgs.targetSdkVersion,
-                        parsedArgs.remainingArgs);
+                        parsedArgs.remainingArgs, null /* classLoader */);
             }
         } else {
             String className;
