@@ -195,4 +195,20 @@ TEST(ResTableTest, resourceIsOverridenWithBetterConfig) {
     ASSERT_EQ(uint32_t(400), val.data);
 }
 
+TEST(ResTableTest, emptyTableHasSensibleDefaults) {
+    const int32_t assetCookie = 1;
+
+    ResTable table;
+    ASSERT_EQ(NO_ERROR, table.addEmpty(assetCookie));
+
+    // Adding an empty table gives us one table!
+    ASSERT_EQ(uint32_t(1), table.getTableCount());
+
+    // Adding an empty table doesn't mean we get packages.
+    ASSERT_EQ(uint32_t(0), table.getBasePackageCount());
+
+    Res_value val;
+    ASSERT_LT(table.getResource(base::R::integer::number1, &val, MAY_NOT_BE_BAG), 0);
+}
+
 }
