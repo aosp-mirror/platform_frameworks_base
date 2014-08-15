@@ -758,39 +758,42 @@ public class StackScrollAlgorithm {
                 // current height.
                 mFirstChildMaxHeight = mFirstChildWhileExpanding.getActualHeight();
             } else {
-
-                // We are expanding the shade, expand it to its full height.
-                if (!isMaxSizeInitialized(mFirstChildWhileExpanding)) {
-
-                    // This child was not layouted yet, wait for a layout pass
-                    mFirstChildWhileExpanding
-                            .addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-                                @Override
-                                public void onLayoutChange(View v, int left, int top, int right,
-                                        int bottom, int oldLeft, int oldTop, int oldRight,
-                                        int oldBottom) {
-                                    if (mFirstChildWhileExpanding != null) {
-                                        mFirstChildMaxHeight = getMaxAllowedChildHeight(
-                                                mFirstChildWhileExpanding);
-                                    } else {
-                                        mFirstChildMaxHeight = 0;
-                                    }
-                                    v.removeOnLayoutChangeListener(this);
-                                }
-                            });
-                } else {
-                    mFirstChildMaxHeight = getMaxAllowedChildHeight(mFirstChildWhileExpanding);
-                }
+                updateFirstChildMaxSizeToMaxHeight();
             }
         } else {
             mFirstChildMaxHeight = 0;
         }
     }
 
+    private void updateFirstChildMaxSizeToMaxHeight() {
+        // We are expanding the shade, expand it to its full height.
+        if (!isMaxSizeInitialized(mFirstChildWhileExpanding)) {
+
+            // This child was not layouted yet, wait for a layout pass
+            mFirstChildWhileExpanding
+                    .addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                        @Override
+                        public void onLayoutChange(View v, int left, int top, int right,
+                                int bottom, int oldLeft, int oldTop, int oldRight,
+                                int oldBottom) {
+                            if (mFirstChildWhileExpanding != null) {
+                                mFirstChildMaxHeight = getMaxAllowedChildHeight(
+                                        mFirstChildWhileExpanding);
+                            } else {
+                                mFirstChildMaxHeight = 0;
+                            }
+                            v.removeOnLayoutChangeListener(this);
+                        }
+                    });
+        } else {
+            mFirstChildMaxHeight = getMaxAllowedChildHeight(mFirstChildWhileExpanding);
+        }
+    }
+
     private boolean isMaxSizeInitialized(ExpandableView child) {
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            return row.isShowingLayoutLayouted();
+            return row.isMaxExpandHeightInitialized();
         }
         return child == null || child.getWidth() != 0;
     }
@@ -823,6 +826,12 @@ public class StackScrollAlgorithm {
 
     public void setDimmed(boolean dimmed) {
         updatePadding(dimmed);
+    }
+
+    public void onReset(ExpandableView view) {
+        if (view.equals(mFirstChildWhileExpanding)) {
+            updateFirstChildMaxSizeToMaxHeight();
+        }
     }
 
     class StackScrollAlgorithmState {

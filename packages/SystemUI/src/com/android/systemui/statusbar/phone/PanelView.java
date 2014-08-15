@@ -54,6 +54,11 @@ public abstract class PanelView extends FrameLayout {
     private float mInitialOffsetOnTouch;
     private float mExpandedFraction = 0;
     protected float mExpandedHeight = 0;
+    private boolean mPanelClosedOnDown;
+    private boolean mHasLayoutedSinceDown;
+    private float mUpdateFlingVelocity;
+    private boolean mUpdateFlingOnLayout;
+    private boolean mTouching;
     private boolean mJustPeeked;
     private boolean mClosing;
     protected boolean mTracking;
@@ -76,7 +81,6 @@ public abstract class PanelView extends FrameLayout {
 
     PanelBar mBar;
 
-    protected int mMaxPanelHeight = -1;
     private String mViewName;
     private float mInitialTouchY;
     private float mInitialTouchX;
@@ -226,6 +230,10 @@ public abstract class PanelView extends FrameLayout {
                 mInitialOffsetOnTouch = mExpandedHeight;
                 mTouchSlopExceeded = false;
                 mJustPeeked = false;
+                mPanelClosedOnDown = mExpandedHeight == 0.0f;
+                mHasLayoutedSinceDown = false;
+                mUpdateFlingOnLayout = false;
+                mTouching = true;
                 if (mVelocityTracker == null) {
                     initVelocityTracker();
                 }
@@ -316,6 +324,10 @@ public abstract class PanelView extends FrameLayout {
                     boolean expand = flingExpands(vel, vectorVel);
                     onTrackingStopped(expand);
                     fling(vel, expand);
+                    mUpdateFlingOnLayout = expand && mPanelClosedOnDown && !mHasLayoutedSinceDown;
+                    if (mUpdateFlingOnLayout) {
+                        mUpdateFlingVelocity = vel;
+                    }
                 } else {
                     boolean expands = onEmptySpaceClick(mInitialTouchX);
                     onTrackingStopped(expands);
@@ -325,6 +337,7 @@ public abstract class PanelView extends FrameLayout {
                     mVelocityTracker.recycle();
                     mVelocityTracker = null;
                 }
+                mTouching = false;
                 break;
         }
         return !waitForTouchSlop || mTracking;
@@ -383,6 +396,10 @@ public abstract class PanelView extends FrameLayout {
                 mInitialTouchX = x;
                 mTouchSlopExceeded = false;
                 mJustPeeked = false;
+                mPanelClosedOnDown = mExpandedHeight == 0.0f;
+                mHasLayoutedSinceDown = false;
+                mUpdateFlingOnLayout = false;
+                mTouching = true;
                 initVelocityTracker();
                 trackMovement(event);
                 break;
@@ -415,6 +432,10 @@ public abstract class PanelView extends FrameLayout {
                     }
                 }
                 break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                mTouching = false;
+                break;
         }
         return false;
     }
@@ -444,7 +465,6 @@ public abstract class PanelView extends FrameLayout {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         loadDimens();
-        mMaxPanelHeight = -1;
     }
 
     /**
@@ -524,27 +544,6 @@ public abstract class PanelView extends FrameLayout {
         return mViewName;
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-        if (DEBUG) logf("onMeasure(%d, %d) -> (%d, %d)",
-                widthMeasureSpec, heightMeasureSpec, getMeasuredWidth(), getMeasuredHeight());
-
-        // Did one of our children change size?
-        int newHeight = getMeasuredHeight();
-        if (newHeight > mMaxPanelHeight) {
-            // we only adapt the max height if it's bigger
-            mMaxPanelHeight = newHeight;
-            // If the user isn't actively poking us, let's rubberband to the content
-            if (!mTracking && mHeightAnimator == null
-                    && mExpandedHeight > 0 && mExpandedHeight != mMaxPanelHeight
-                    && mMaxPanelHeight > 0 && mPeekAnimator == null) {
-                mExpandedHeight = mMaxPanelHeight;
-            }
-        }
-    }
-
     public void setExpandedHeight(float height) {
         if (DEBUG) logf("setExpandedHeight(%.1f)", height);
         setExpandedHeightInternal(height + getOverExpansionPixels());
@@ -552,10 +551,14 @@ public abstract class PanelView extends FrameLayout {
 
     @Override
     protected void onLayout (boolean changed, int left, int top, int right, int bottom) {
-        if (DEBUG) logf("onLayout: changed=%s, bottom=%d eh=%d fh=%d", changed?"T":"f", bottom,
-                (int)mExpandedHeight, mMaxPanelHeight);
         super.onLayout(changed, left, top, right, bottom);
         requestPanelHeightUpdate();
+        mHasLayoutedSinceDown = true;
+        if (mUpdateFlingOnLayout) {
+            abortAnimations();
+            fling(mUpdateFlingVelocity, true);
+            mUpdateFlingOnLayout = false;
+        }
     }
 
     protected void requestPanelHeightUpdate() {
@@ -567,7 +570,8 @@ public abstract class PanelView extends FrameLayout {
                 && mExpandedHeight > 0
                 && currentMaxPanelHeight != mExpandedHeight
                 && !mPeekPending
-                && mPeekAnimator == null) {
+                && mPeekAnimator == null
+                && !mTouching) {
             setExpandedHeight(currentMaxPanelHeight);
         }
     }
@@ -615,10 +619,7 @@ public abstract class PanelView extends FrameLayout {
      *
      * @return the default implementation simply returns the maximum height.
      */
-    protected int getMaxPanelHeight() {
-        mMaxPanelHeight = Math.max(mMaxPanelHeight, getHeight());
-        return mMaxPanelHeight;
-    }
+    protected abstract int getMaxPanelHeight();
 
     public void setExpandedFraction(float frac) {
         setExpandedHeight(getMaxPanelHeight() * frac);
