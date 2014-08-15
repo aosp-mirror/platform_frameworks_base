@@ -804,7 +804,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
                                    "-Xmx", "-Xcompiler-option");
         if (skip_compilation) {
             addOption("-Xcompiler-option");
-            addOption("--compiler-filter=interpret-only");
+            addOption("--compiler-filter=verify-none");
         } else {
             parseCompilerOption("dalvik.vm.dex2oat-filter", dex2oatCompilerFilterBuf,
                                 "--compiler-filter=", "-Xcompiler-option");
