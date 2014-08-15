@@ -210,7 +210,7 @@ public class IconUtils {
                     return pm.getDrawable(info.packageName, icon, info.applicationInfo);
                 }
             } else {
-                return context.getResources().getDrawable(icon);
+                return context.getDrawable(icon);
             }
         }
         return null;
@@ -218,19 +218,17 @@ public class IconUtils {
 
     public static Drawable loadMimeIcon(
             Context context, String mimeType, String authority, String docId, int mode) {
-        final Resources res = context.getResources();
-
         if (Document.MIME_TYPE_DIR.equals(mimeType)) {
             // TODO: eventually move these hacky assets into that package
             if ("com.android.providers.media.documents".equals(authority)
                     && docId.startsWith("album")) {
-                return res.getDrawable(R.drawable.ic_doc_album);
+                return context.getDrawable(R.drawable.ic_doc_album);
             }
 
             if (mode == DocumentsActivity.State.MODE_GRID) {
-                return res.getDrawable(R.drawable.ic_grid_folder);
+                return context.getDrawable(R.drawable.ic_grid_folder);
             } else {
-                return res.getDrawable(R.drawable.ic_doc_folder);
+                return context.getDrawable(R.drawable.ic_doc_folder);
             }
         }
 
@@ -238,16 +236,14 @@ public class IconUtils {
     }
 
     public static Drawable loadMimeIcon(Context context, String mimeType) {
-        final Resources res = context.getResources();
-
         if (Document.MIME_TYPE_DIR.equals(mimeType)) {
-            return res.getDrawable(R.drawable.ic_doc_folder);
+            return context.getDrawable(R.drawable.ic_doc_folder);
         }
 
         // Look for exact match first
         Integer resId = sMimeIcons.get(mimeType);
         if (resId != null) {
-            return res.getDrawable(resId);
+            return context.getDrawable(resId);
         }
 
         if (mimeType == null) {
@@ -258,15 +254,15 @@ public class IconUtils {
         // Otherwise look for partial match
         final String typeOnly = mimeType.split("/")[0];
         if ("audio".equals(typeOnly)) {
-            return res.getDrawable(R.drawable.ic_doc_audio);
+            return context.getDrawable(R.drawable.ic_doc_audio);
         } else if ("image".equals(typeOnly)) {
-            return res.getDrawable(R.drawable.ic_doc_image);
+            return context.getDrawable(R.drawable.ic_doc_image);
         } else if ("text".equals(typeOnly)) {
-            return res.getDrawable(R.drawable.ic_doc_text);
+            return context.getDrawable(R.drawable.ic_doc_text);
         } else if ("video".equals(typeOnly)) {
-            return res.getDrawable(R.drawable.ic_doc_video);
+            return context.getDrawable(R.drawable.ic_doc_video);
         } else {
-            return res.getDrawable(R.drawable.ic_doc_generic);
+            return context.getDrawable(R.drawable.ic_doc_generic);
         }
     }
 
@@ -276,7 +272,7 @@ public class IconUtils {
         final TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(tintAttrId, outValue, true);
 
-        final Drawable icon = res.getDrawable(drawableId);
+        final Drawable icon = context.getDrawable(drawableId);
         icon.mutate();
         icon.setTintList(res.getColorStateList(outValue.resourceId));
         return icon;
