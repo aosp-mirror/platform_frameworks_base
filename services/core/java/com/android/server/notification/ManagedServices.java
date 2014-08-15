@@ -41,6 +41,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -64,7 +65,7 @@ import java.util.Set;
  */
 abstract public class ManagedServices {
     protected final String TAG = getClass().getSimpleName();
-    protected static final boolean DEBUG = true;
+    protected final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final String ENABLED_SERVICES_SEPARATOR = ":";
 

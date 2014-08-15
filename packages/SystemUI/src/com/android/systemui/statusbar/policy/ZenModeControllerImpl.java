@@ -122,20 +122,20 @@ public class ZenModeControllerImpl implements ZenModeController {
     }
 
     @Override
-    public void setExitConditionId(Uri exitConditionId) {
+    public void setExitCondition(Condition exitCondition) {
         try {
-            mNoMan.setZenModeCondition(exitConditionId);
+            mNoMan.setZenModeCondition(exitCondition);
         } catch (RemoteException e) {
             // noop
         }
     }
 
     @Override
-    public Uri getExitConditionId() {
+    public Condition getExitCondition() {
         try {
             final ZenModeConfig config = mNoMan.getZenModeConfig();
             if (config != null) {
-                return config.exitConditionId;
+                return config.exitCondition;
             }
         } catch (RemoteException e) {
             // noop
@@ -186,10 +186,10 @@ public class ZenModeControllerImpl implements ZenModeController {
     }
 
     private void fireExitConditionChanged() {
-        final Uri exitConditionId = getExitConditionId();
-        if (DEBUG) Slog.d(TAG, "exitConditionId changed: " + exitConditionId);
+        final Condition exitCondition = getExitCondition();
+        if (DEBUG) Slog.d(TAG, "exitCondition changed: " + exitCondition);
         for (Callback cb : mCallbacks) {
-            cb.onExitConditionChanged(exitConditionId);
+            cb.onExitConditionChanged(exitCondition);
         }
     }
 

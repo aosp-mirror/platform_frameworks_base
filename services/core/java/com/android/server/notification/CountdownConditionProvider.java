@@ -29,6 +29,7 @@ import android.service.notification.ConditionProviderService;
 import android.service.notification.IConditionProvider;
 import android.service.notification.ZenModeConfig;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.server.notification.NotificationManagerService.DumpFilter;
@@ -38,8 +39,8 @@ import java.util.Date;
 
 /** Built-in zen condition provider for simple time-based conditions */
 public class CountdownConditionProvider extends ConditionProviderService {
-    private static final String TAG = "CountdownConditionProvider";
-    private static final boolean DEBUG = false;
+    private static final String TAG = "CountdownConditions";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public static final ComponentName COMPONENT =
             new ComponentName("android", CountdownConditionProvider.class.getName());

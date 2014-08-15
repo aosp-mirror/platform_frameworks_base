@@ -20,10 +20,8 @@ import static android.media.AudioAttributes.USAGE_ALARM;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 import static android.media.AudioAttributes.USAGE_UNKNOWN;
 
-import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.Notification;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -44,6 +42,7 @@ import android.provider.Settings.Secure;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
 import android.telecomm.TelecommManager;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -57,8 +56,6 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -66,12 +63,7 @@ import java.util.Objects;
  */
 public class ZenModeHelper {
     private static final String TAG = "ZenModeHelper";
-
-    private static final String ACTION_ENTER_ZEN = "enter_zen";
-    private static final int REQUEST_CODE_ENTER = 100;
-    private static final String ACTION_EXIT_ZEN = "exit_zen";
-    private static final int REQUEST_CODE_EXIT = 101;
-    private static final String EXTRA_TIME = "time";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;
     private final Handler mHandler;
@@ -96,10 +88,8 @@ public class ZenModeHelper {
         mSettingsObserver.observe();
 
         final IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_ENTER_ZEN);
-        filter.addAction(ACTION_EXIT_ZEN);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
-        mContext.registerReceiver(new ZenBroadcastReceiver(), filter);
+        mContext.registerReceiver(mReceiver, filter);
     }
 
     public static ZenModeConfig readDefaultConfig(Resources resources) {
@@ -156,7 +146,7 @@ public class ZenModeHelper {
     public void requestFromListener(int hints) {
         final int newZen = zenFromListenerHint(hints, -1);
         if (newZen != -1) {
-            setZenMode(newZen);
+            setZenMode(newZen, "listener");
         }
     }
 
@@ -208,7 +198,8 @@ public class ZenModeHelper {
         return mZenMode;
     }
 
-    public void setZenMode(int zenModeValue) {
+    public void setZenMode(int zenModeValue, String reason) {
+        ZenLog.traceSetZenMode(zenModeValue, reason);
         Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, zenModeValue);
     }
 
@@ -216,9 +207,6 @@ public class ZenModeHelper {
         final int mode = Global.getInt(mContext.getContentResolver(),
                 Global.ZEN_MODE, Global.ZEN_MODE_OFF);
         if (mode != mZenMode) {
-            Slog.d(TAG, String.format("updateZenMode: %s -> %s",
-                    Global.zenModeToString(mZenMode),
-                    Global.zenModeToString(mode)));
             ZenLog.traceUpdateZenMode(mZenMode, mode);
         }
         mZenMode = mode;
@@ -255,12 +243,12 @@ public class ZenModeHelper {
             if (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
                 if (ringerMode != AudioManager.RINGER_MODE_SILENT) {
                     mPreviousRingerMode = ringerMode;
-                    Slog.d(TAG, "Silencing ringer");
+                    if (DEBUG) Slog.d(TAG, "Silencing ringer");
                     forcedRingerMode = AudioManager.RINGER_MODE_SILENT;
                 }
             } else {
                 if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
-                    Slog.d(TAG, "Unsilencing ringer");
+                    if (DEBUG) Slog.d(TAG, "Unsilencing ringer");
                     forcedRingerMode = mPreviousRingerMode != -1 ? mPreviousRingerMode
                             : AudioManager.RINGER_MODE_NORMAL;
                     mPreviousRingerMode = -1;
@@ -318,7 +306,6 @@ public class ZenModeHelper {
         dispatchOnConfigChanged();
         final String val = Integer.toString(mConfig.hashCode());
         Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_CONFIG_ETAG, val);
-        updateAlarms();
         updateZenMode();
         return true;
     }
@@ -339,7 +326,7 @@ public class ZenModeHelper {
             }
             if (newZen != -1) {
                 ZenLog.traceFollowRingerMode(ringerMode, mZenMode, newZen);
-                setZenMode(newZen);
+                setZenMode(newZen, "ringerMode");
             }
         }
     }
@@ -377,7 +364,7 @@ public class ZenModeHelper {
             final TelecommManager telecomm =
                     (TelecommManager) mContext.getSystemService(Context.TELECOMM_SERVICE);
             mDefaultPhoneApp = telecomm != null ? telecomm.getDefaultPhoneApp() : null;
-            Slog.d(TAG, "Default phone app: " + mDefaultPhoneApp);
+            if (DEBUG) Slog.d(TAG, "Default phone app: " + mDefaultPhoneApp);
         }
         return pkg != null && mDefaultPhoneApp != null
                 && pkg.equals(mDefaultPhoneApp.getPackageName());
@@ -407,40 +394,6 @@ public class ZenModeHelper {
                 Slog.w(TAG, "Encountered unknown source: " + mConfig.allowFrom);
                 return true;
         }
-    }
-
-    private void updateAlarms() {
-        updateAlarm(ACTION_ENTER_ZEN, REQUEST_CODE_ENTER,
-                mConfig.sleepStartHour, mConfig.sleepStartMinute);
-        updateAlarm(ACTION_EXIT_ZEN, REQUEST_CODE_EXIT,
-                mConfig.sleepEndHour, mConfig.sleepEndMinute);
-    }
-
-    private void updateAlarm(String action, int requestCode, int hr, int min) {
-        final AlarmManager alarms = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        final long now = System.currentTimeMillis();
-        final Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(now);
-        c.set(Calendar.HOUR_OF_DAY, hr);
-        c.set(Calendar.MINUTE, min);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
-        if (c.getTimeInMillis() <= now) {
-            c.add(Calendar.DATE, 1);
-        }
-        final long time = c.getTimeInMillis();
-        final PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, requestCode,
-                new Intent(action).putExtra(EXTRA_TIME, time), PendingIntent.FLAG_UPDATE_CURRENT);
-        alarms.cancel(pendingIntent);
-        if (mConfig.sleepMode != null) {
-            Slog.d(TAG, String.format("Scheduling %s for %s, %s in the future, now=%s",
-                    action, ts(time), time - now, ts(now)));
-            alarms.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent);
-        }
-    }
-
-    private static String ts(long time) {
-        return new Date(time) + " (" + time + ")";
     }
 
     private final Runnable mRingerModeChanged = new Runnable() {
@@ -475,47 +428,12 @@ public class ZenModeHelper {
         }
     }
 
-    private class ZenBroadcastReceiver extends BroadcastReceiver {
-        private final Calendar mCalendar = Calendar.getInstance();
-
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (ACTION_ENTER_ZEN.equals(intent.getAction())) {
-                setZenMode(intent, Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
-            } else if (ACTION_EXIT_ZEN.equals(intent.getAction())) {
-                setZenMode(intent, Global.ZEN_MODE_OFF);
-            } else if (AudioManager.RINGER_MODE_CHANGED_ACTION.equals(intent.getAction())) {
-                mHandler.post(mRingerModeChanged);
-            }
+            mHandler.post(mRingerModeChanged);
         }
-
-        private void setZenMode(Intent intent, int zenModeValue) {
-            final long schTime = intent.getLongExtra(EXTRA_TIME, 0);
-            final long now = System.currentTimeMillis();
-            Slog.d(TAG, String.format("%s scheduled for %s, fired at %s, delta=%s",
-                    intent.getAction(), ts(schTime), ts(now), now - schTime));
-
-            final int[] days = ZenModeConfig.tryParseDays(mConfig.sleepMode);
-            boolean enter = false;
-            final int day = getDayOfWeek(schTime);
-            if (days != null) {
-                for (int i = 0; i < days.length; i++) {
-                    if (days[i] == day) {
-                        enter = true;
-                        ZenModeHelper.this.setZenMode(zenModeValue);
-                        break;
-                    }
-                }
-            }
-            ZenLog.traceDowntime(enter, day, days);
-            updateAlarms();
-        }
-
-        private int getDayOfWeek(long time) {
-            mCalendar.setTimeInMillis(time);
-            return mCalendar.get(Calendar.DAY_OF_WEEK);
-        }
-    }
+    };
 
     public static class Callback {
         void onConfigChanged() {}
