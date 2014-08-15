@@ -8599,7 +8599,15 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             skip = true;
         }
 
-        if (!skip && mAutoRestore && mProvisioned) {
+        if (!mAutoRestore || !mProvisioned) {
+            if (DEBUG) {
+                Slog.w(TAG, "Non-restorable state: auto=" + mAutoRestore
+                        + " prov=" + mProvisioned);
+            }
+            skip = true;
+        }
+
+        if (!skip) {
             try {
                 // okay, we're going to attempt a restore of this package from this restore set.
                 // The eventual message back into the Package Manager to run the post-install
@@ -8632,7 +8640,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         if (skip) {
             // Auto-restore disabled or no way to attempt a restore; just tell the Package
             // Manager to proceed with the post-install handling for this package.
-            if (DEBUG) Slog.v(TAG, "Skipping");
+            if (DEBUG) Slog.v(TAG, "Finishing install immediately");
             try {
                 mPackageManagerBinder.finishPackageInstall(token);
             } catch (RemoteException e) { /* can't happen */ }
