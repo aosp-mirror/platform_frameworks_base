@@ -17,9 +17,9 @@
 package com.android.server;
 
 import android.Manifest.permission;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.INetworkScoreCache;
 import android.net.INetworkScoreService;
@@ -30,6 +30,7 @@ import android.net.ScoredNetwork;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -51,9 +52,6 @@ import java.util.Set;
 public class NetworkScoreService extends INetworkScoreService.Stub {
     private static final String TAG = "NetworkScoreService";
 
-    /** SharedPreference bit set to true after the service is first initialized. */
-    private static final String PREF_SCORING_PROVISIONED = "is_provisioned";
-
     private final Context mContext;
 
     private final Map<Integer, INetworkScoreCache> mScoreCaches;
@@ -65,8 +63,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     /** Called when the system is ready to run third-party code but before it actually does so. */
     void systemReady() {
-        SharedPreferences prefs = mContext.getSharedPreferences(TAG, Context.MODE_PRIVATE);
-        if (!prefs.getBoolean(PREF_SCORING_PROVISIONED, false)) {
+        ContentResolver cr = mContext.getContentResolver();
+        if (Settings.Global.getInt(cr, Settings.Global.NETWORK_SCORING_PROVISIONED, 0) == 0) {
             // On first run, we try to initialize the scorer to the one configured at build time.
             // This will be a no-op if the scorer isn't actually valid.
             String defaultPackage = mContext.getResources().getString(
@@ -74,7 +72,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             if (!TextUtils.isEmpty(defaultPackage)) {
                 NetworkScorerAppManager.setActiveScorer(mContext, defaultPackage);
             }
-            prefs.edit().putBoolean(PREF_SCORING_PROVISIONED, true).apply();
+            Settings.Global.putInt(cr, Settings.Global.NETWORK_SCORING_PROVISIONED, 1);
         }
     }
 
