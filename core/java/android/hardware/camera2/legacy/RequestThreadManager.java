@@ -190,7 +190,8 @@ public class RequestThreadManager {
                 try {
                     if (RequestHolder.jpegType(s)) {
                         Log.i(TAG, "Producing jpeg buffer...");
-                        LegacyCameraDevice.setSurfaceDimens(s, data.length, /*height*/1);
+                        LegacyCameraDevice.setSurfaceDimens(s, data.length +
+                                LegacyCameraDevice.nativeGetJpegFooterSize(), /*height*/1);
                         LegacyCameraDevice.setNextTimestamp(s, timestamp);
                         LegacyCameraDevice.produceFrame(s, data, data.length, /*height*/1,
                                 CameraMetadataNative.NATIVE_JPEG_FORMAT);
@@ -665,10 +666,6 @@ public class RequestThreadManager {
                                 }
                                 mReceivedJpeg.close();
                                 doJpegCapturePrepare(holder);
-                                if (!mReceivedJpeg.block(JPEG_FRAME_TIMEOUT)) {
-                                    // TODO: report error to CameraDevice
-                                    Log.e(TAG, "Hit timeout for jpeg callback!");
-                                }
                             }
 
                             /*

@@ -28,6 +28,7 @@ import android.hardware.camera2.legacy.ParameterUtils.ZoomData;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.utils.ListUtils;
 import android.hardware.camera2.utils.ParamsUtils;
+import android.location.Location;
 import android.util.Log;
 import android.util.Size;
 
@@ -248,6 +249,29 @@ public class LegacyResultMapper {
         {
             // Unconditionally no test patterns
             result.set(SENSOR_TEST_PATTERN_MODE, SENSOR_TEST_PATTERN_MODE_OFF);
+        }
+
+        /*
+         * jpeg
+         */
+        // jpeg.gpsLocation
+        result.set(JPEG_GPS_LOCATION, request.get(CaptureRequest.JPEG_GPS_LOCATION));
+
+        // jpeg.orientation
+        result.set(JPEG_ORIENTATION, request.get(CaptureRequest.JPEG_ORIENTATION));
+
+        // jpeg.quality
+        result.set(JPEG_QUALITY, (byte) params.getJpegQuality());
+
+        // jpeg.thumbnailQuality
+        result.set(JPEG_THUMBNAIL_QUALITY, (byte) params.getJpegThumbnailQuality());
+
+        // jpeg.thumbnailSize
+        Camera.Size s = params.getJpegThumbnailSize();
+        if (s != null) {
+            result.set(JPEG_THUMBNAIL_SIZE, ParameterUtils.convertSize(s));
+        } else {
+            Log.w(TAG, "Null thumbnail size received from parameters.");
         }
 
         // TODO: Remaining result metadata tags conversions.
