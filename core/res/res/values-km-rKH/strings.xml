@@ -68,7 +68,7 @@
   </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"លេខ​សម្គាល់​អ្នក​ហៅ​​ចូល​"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"លេខ​សម្គាល់​អ្នក​ហៅ​​ចូល"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"លេខ​សម្គាល់​អ្នក​ហៅ​ចេញ"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"បាន​ភ្ជាប់​លេខ​សម្គាល់​បន្ទាត់"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"បាន​ភ្ជាប់​ការ​ដាក់កម្រិត​លេខ​សម្គាល់​បន្ទាត់"</string>
@@ -127,7 +127,7 @@
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> ៖ មិន​បាន​បញ្ជូន​បន្ត"</string>
     <string name="fcComplete" msgid="3118848230966886575">"កូដ​លក្ខណៈ​ពេញលេញ។"</string>
     <string name="fcError" msgid="3327560126588500777">"បញ្ហា​ការ​តភ្ជាប់​ ឬ​កូដ​លក្ខណៈ​​​មិន​ត្រឹមត្រូវ​។"</string>
-    <string name="httpErrorOk" msgid="1191919378083472204">"យល់​ព្រម​"</string>
+    <string name="httpErrorOk" msgid="1191919378083472204">"យល់​ព្រម"</string>
     <string name="httpError" msgid="7956392511146698522">"មាន​កំហុស​បណ្ដាញ។"</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"រក​មិន​ឃើញ URL ។"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"គ្រោងការណ៍​ផ្ទៀងផ្ទាត់​តំបន់បណ្ដាញ​មិន​ត្រូវ​បាន​គាំទ្រ។"</string>
@@ -185,7 +185,7 @@
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"បើក​សំឡេង"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"ពេល​ជិះ​យន្តហោះ"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"បាន​បើក​របៀប​ពេល​ជិះ​យន្ត​ហោះ"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"បាន​បិទ​របៀបពេលជិះ​យន្តហោះ​"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"បាន​បិទ​របៀបពេលជិះ​យន្តហោះ"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"ការ​កំណត់"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ចាក់សោ​ឥឡូវនេះ"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -198,7 +198,7 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"សារ​របស់​អ្នក"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"អាន និង​សរសេរ​សារ SMS, អ៊ីមែល និង​សារ​ផ្សេងៗ​ទៀត​របស់​អ្នក។"</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"ព័ត៌មាន​ផ្ទាល់ខ្លួន​របស់​អ្នក"</string>
-    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"ចូល​ដំណើរការ​ព័ត៌មាន​ដោយ​ផ្ទាល់​អំពី​អ្នក​ ដែល​បា​ន​រក្សាទុក​ក្នុង​កាត​ទំនាក់ទំនង​របស់​អ្នក។​"</string>
+    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"ចូល​ដំណើរការ​ព័ត៌មាន​ដោយ​ផ្ទាល់​អំពី​អ្នក​ ដែល​បា​ន​រក្សាទុក​ក្នុង​កាត​ទំនាក់ទំនង​របស់​អ្នក។"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ព័ត៌មាន​សង្គម​របស់​អ្នក"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ចូល​ដំណើរការ​ព័ត៌មាន​ដោយ​ផ្ទាល់​អំពី​ទំនាក់ទំនង និង​ការ​ភ្ជាប់​សង្គម​របស់​អ្នក។"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"ទីតាំង​របស់​អ្នក"</string>
@@ -391,7 +391,7 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"ឲ្យ​កម្មវិធី​មើល​គ្រាប់​ចុច​ដែល​អ្នក​ចុច​ពេល​មាន​អន្តរកម្ម​ជា​មួយ​កម្មវិធី​ផ្សេង (ដូចជា បញ្ចូល​ពាក្យ​សម្ងាត់)។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"ចង​ទៅ​វិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​វិធី​សាស្ត្រ​បញ្ចូល។ មិន​គួរ​​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"ចង​សេវា​កម្ម​ភាព​មធ្យោបាយ​ងាយស្រួល​"</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"ចង​សេវា​កម្ម​ភាព​មធ្យោបាយ​ងាយស្រួល"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"ឲ្យ​​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​ភាព​ងាយស្រួល។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"ចង​សេវាកម្ម​​បោះពុម្ព"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​ធាតុ​ក្រាហ្វិក។ មិន​គួរ​​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
@@ -411,7 +411,7 @@
     <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​គ្រប់គ្រង​ឃ្លា​​សម្រាប់​​ការ​រក​ឃើញ​​​ពាក្យ​​ជា​សំឡេង។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"ភ្ជាប់​ទៅ​ការ​បង្ហាញ​ពី​ចម្ងាយ"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​ការ​បង្ហាញ​ពី​ចម្ងាយ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ចង​សេវា​កម្ម​ធាតុ​ក្រាហ្វិក​"</string>
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ចង​សេវា​កម្ម​ធាតុ​ក្រាហ្វិក"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​ធាតុ​ក្រាហ្វិក។ មិន​គួរ​​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"ភ្ជាប់​ទៅ​សេវាកម្ម​ក្រុមហ៊ុន​ផ្ដល់​ច្រក"</string>
     <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​ទៅ​ក្រុមហ៊ុន​ផ្ដល់​​ច្រក​ដែល​បាន​ចុះ​ឈ្មោះ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
@@ -421,7 +421,7 @@
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​ទៅ​ចំណុចប្រទាក់​កម្រិត​ខ្ពស់​នៃ​ការ​បញ្ចូល​ទូរទស្សន៍។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"កែប្រែ​ការ​ត្រួតពិនិត្យ​មាតាបិតា"</string>
     <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​​កែប្រែ​ទិន្នន័យ​ការ​ត្រួតពិនិត្យ​មាតាបិតា​​របស់​ប្រព័ន្ធ​។ គួរ​តែ​មិន​ត្រូវការ​សម្រាប់​កម្មវិធី​ធម្មតា​។"</string>
-    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"បន្ថែម​ ឬ​លុប​កម្មវិធី​គ្រប់គ្រង​​​ឧបករណ៍​​"</string>
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"បន្ថែម​ ឬ​លុប​កម្មវិធី​គ្រប់គ្រង​​​ឧបករណ៍"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"អនុញ្ញាត​​​ឲ្យ​ម្ចាស់​​​បន្ថែម​ ឬ​លុប​កម្មវិធី​គ្រប់គ្រង​ឧបករណ៍​សកម្ម​ចេញ​។ មិន​គួរ​ប្រើ​សម្រាប់​កម្មវិធី​​ធម្មតា​ទេ​។"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ប្ដូរ​ទិស​អេក្រង់"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"ឲ្យ​កម្មវិធី​ប្ដូរ​ការ​បង្វិល​អេក្រង់​នៅ​ពេល​ណា​មួយ។ មិន​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
@@ -433,9 +433,9 @@
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"ឲ្យ​កម្មវិធី​ស្នើ​​សញ្ញា​ដែល​បាន​ផ្ដល់​ត្រូវ​ផ្ញើ​ទៅ​ដំណើរការ​ស្ថិតស្ថេរ​​ទាំង​អស់។"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ធ្វើ​ឲ្យ​កម្មវិធី​ដំណើរការ​ជា​និច្ច"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"ឲ្យ​កម្មវិធី​ធ្វើជា​ផ្នែក​​ស្ថិតស្ថេរ​ដោយ​ខ្លួន​ឯង​ក្នុង​អង្គ​ចងចាំ។ វា​អាច​កំណត់​អង្គ​ចងចាំ​ដែល​អាច​ប្រើ​បាន​ចំពោះ​កម្មវិធី​ផ្សេងៗ​ ដោយ​ធ្វើឲ្យ​កុំព្យូទ័រ​បន្ទះ​យឺត។"</string>
-    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"ឲ្យ​កម្មវិធី ធ្វើជា​ផ្នែក​អចិន្ត្រៃយ៍​នៃ​ខ្លួន​ក្នុង​អង្គ​ចងចាំ។ វា​អាច​កម្រិត​អង្គ​ចងចាំ​អាច​ប្រើ​បាន​ ដើម្បី​ធ្វើ​ឲ្យ​កម្មវិធី​ផ្សេង​ធ្វើ​ឲ្យ​ទូរស័ព្ទ​របស់​អ្នក​យឺត។​"</string>
+    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"ឲ្យ​កម្មវិធី ធ្វើជា​ផ្នែក​អចិន្ត្រៃយ៍​នៃ​ខ្លួន​ក្នុង​អង្គ​ចងចាំ។ វា​អាច​កម្រិត​អង្គ​ចងចាំ​អាច​ប្រើ​បាន​ ដើម្បី​ធ្វើ​ឲ្យ​កម្មវិធី​ផ្សេង​ធ្វើ​ឲ្យ​ទូរស័ព្ទ​របស់​អ្នក​យឺត។"</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"លុប​កម្មវិធី"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"ឲ្យ​កម្មវិធី​លុប​កញ្ចប់ Android ។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​លុប​កម្មវិធី​សំខាន់​ៗ។ ​"</string>
+    <string name="permdesc_deletePackages" msgid="7411480275167205081">"ឲ្យ​កម្មវិធី​លុប​កញ្ចប់ Android ។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​លុប​កម្មវិធី​សំខាន់​ៗ។"</string>
     <string name="permlab_clearAppUserData" msgid="274109191845842756">"លុប​ទិន្នន័យ​របស់​​កម្មវិធី​ផ្សេង"</string>
     <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"ឲ្យ​កម្មវិធី​សម្អាត​ទិន្នន័យ​អ្នក​ប្រើ។"</string>
     <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"លុប​ឃ្លាំង​សម្ងាត់​កម្មវិធី​ផ្សេងៗ"</string>
@@ -486,7 +486,7 @@
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"ឲ្យ​កម្មវិធី​កែ​ទិន្នន័យ​អំពី​ទំនាក់ទំនង​របស់​អ្នក​ដែល​បាន​រក្សាទុក​ក្នុង​កុំព្យូទ័រ​បន្ទះ រួមមាន​ប្រេកង់​​ដែល​អ្នក​បាន​ហៅ អ៊ីមែល ឬ​ទាក់ទង​តាម​វិធី​ផ្សេងៗ​ជា​មួយ​ទំនាក់ទំនង​ជាក់លាក់។ សិទ្ធិ​​នេះ​អនុញ្ញាត​ឲ្យ​​​កម្មវិធី​លុប​ទិន្នន័យ​ទំនាក់ទំនង​របស់​អ្នក។"</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"ឲ្យ​កម្មវិធី​កែ​ទិន្នន័យ​អំពី​ទំនាក់ទំនង​របស់​អ្នក​ដែល​បាន​រក្សាទុក​ក្នុង​ទូរស័ព្ទ​របស់​អ្នក រួមមាន​ប្រេកង់​ដែល​អ្នក​បាន​ហៅ អ៊ីមែល ឬ​បាន​ទាក់ទង​​តាម​វិធី​ផ្សេងៗ​ជា​មួយ​ទំនាក់​ទំនាក់​ជាក់លាក់។ សិទ្ធិ​នេះ​ឲ្យ​កម្មវិធី​លុប​ទិន្នន័យ​ទំនាក់ទំនង។"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"អាន​​កំណត់​ហេតុ​​​ហៅ"</string>
-    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"ឲ្យ​កម្មវិធី​អាន​បញ្ជី​ហៅ​កុំព្យូទ័រ​បន្ទះ​របស់​អ្នក រួមមាន​ទិន្នន័យ​អំពី​ការ​ហៅ​ចូល និង​ចេញ។ សិទ្ធិ​នេះ​អនុញ្ញាត​ឲ្យ​កម្មវិធី​រក្សាទុក​ទិន្នន័យ​បញ្ជី​ហៅ​របស់​អ្នក ហើយ​កម្មវិធី​ព្យាបាទ​អាច​ចែករំលែក​ទិន្នន័យ​បញ្ជី​ហៅ​ដោយ​មិន​ឲ្យ​អ្នក​ដឹង។​"</string>
+    <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"ឲ្យ​កម្មវិធី​អាន​បញ្ជី​ហៅ​កុំព្យូទ័រ​បន្ទះ​របស់​អ្នក រួមមាន​ទិន្នន័យ​អំពី​ការ​ហៅ​ចូល និង​ចេញ។ សិទ្ធិ​នេះ​អនុញ្ញាត​ឲ្យ​កម្មវិធី​រក្សាទុក​ទិន្នន័យ​បញ្ជី​ហៅ​របស់​អ្នក ហើយ​កម្មវិធី​ព្យាបាទ​អាច​ចែករំលែក​ទិន្នន័យ​បញ្ជី​ហៅ​ដោយ​មិន​ឲ្យ​អ្នក​ដឹង។"</string>
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"ឲ្យ​កម្មវិធី​អាន​​​បញ្ជី​ហៅ​ទូរស័ព្ទ​របស់​អ្នក រួមមាន​ទិន្នន័យ​អំពី​ការ​ហៅ​ចូល និង​ចេញ។ សិទ្ធិ​នេះ​អនុញ្ញាត​ឲ្យ​កម្មវិធី​រក្សាទុក​ទិន្នន័យ​បញ្ជី​ហៅ​របស់​អ្នក ហើយ​កម្មវិធី​ព្យាបាទ​អាច​ចែករំលែក​ទិន្នន័យ​បញ្ជី​ហៅ​ដោយ​មិន​ឲ្យ​អ្នកដឹង។"</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"សរសេរ​បញ្ជី​ហៅ"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ឲ្យ​កម្មវិធី​កែ​បញ្ជី​ហៅ​កុំព្យូទ័រ​បន្ទះ​របស់​អ្នក​រួមមាន​ទិន្នន័យ​អំពី​ការ​ហៅ​ចូល និង​ចេញ។​កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​លុប ឬ​កែ​បញ្ជី​ហៅ​របស់​អ្នក។"</string>
@@ -622,7 +622,7 @@
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"ឲ្យ​កម្មវិធី​កំណត់​ជំនួយ​ទំហំ​ផ្ទាំង​រូបភាព​ប្រព័ន្ធ។"</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"កំណត់​ប្រព័ន្ធ​ទៅ​លំនាំដើម​រោងចក្រ​ឡើងវិញ"</string>
     <string name="permdesc_masterClear" msgid="3665380492633910226">"ឲ្យ​កម្មវិធី​កំណត់​ប្រព័ន្ធ​​ដូច​ការ​កំណត់​ចេញ​ពី​រោងចក្រ​ឡើងវិញ​ពេញលេញ ដោយ​លុប​ទិន្នន័យ ការ​កំណត់​រចនាសម្ព័ន្ធ និង​កម្មវិធី​បាន​ដំឡើង។"</string>
-    <string name="permlab_setTime" msgid="2021614829591775646">"កំណត់​​ម៉ោង​"</string>
+    <string name="permlab_setTime" msgid="2021614829591775646">"កំណត់​​ម៉ោង"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"ឲ្យ​កម្មវិធី​ប្ដូរ​ម៉ោង​កុំព្យូទ័រ​បន្ទះ។"</string>
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"ឲ្យ​កម្មវិធី​ប្ដូរ​ម៉ោង​ទូរស័ព្ទ។"</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"កំណត់​តំបន់​ពេលវេលា"</string>
@@ -713,9 +713,13 @@
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"ចូល​ដំណើរការ​ប្រព័ន្ធ​​​ឯកសារ​ឃ្លាំង​សម្ងាត់"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ឲ្យ​កម្មវិធី​អាន និង​សរសេរ​ប្រព័ន្ធ​ឯកសារ​ឃ្លាំង​សម្ងាត់។"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"បង្កើត/ទទួល ការ​ហៅ SIP"</string>
-    <string name="permdesc_use_sip" msgid="2297804849860225257">"អនុញ្ញាត​ឲ្យ​​កម្មវិធី បង្កើត និង​ទទួល​ការ​ហៅ SIP ។"</string>
+    <string name="permdesc_use_sip" msgid="2297804849860225257">"​ឲ្យ​​កម្មវិធី បង្កើត និង​ទទួល​ការ​ហៅ SIP ។"</string>
     <string name="permlab_bind_call_service" msgid="6724009726671246551">"ទាក់ទង​ជា​មួយ​អេក្រង់​ហៅ​ចូល"</string>
     <string name="permdesc_bind_call_service" msgid="8732547662442572435">"ឲ្យ​កម្មវិធី​ពិនិត្យ​ពេលវេលា និង​វិធី​ដែល​អ្នកប្រើ​មើល​ឃើញ​អេក្រង់​ហៅ​ចូល។"</string>
+    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
+    <skip />
+    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
+    <skip />
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"អាន​ការ​ប្រើ​បណ្ដាញ​ពិសេស"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"ឲ្យ​កម្មវិធី​អាន​ការ​ប្រើ​បណ្ដាញ​ជា​ប្រវត្តិ​សាស្ត្រ​សម្រាប់​បណ្ដាញ និង​កម្មវិធី​ជាក់លាក់។"</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"គ្រប់គ្រង​គោលនយោបាយ​បណ្ដាញ"</string>
@@ -797,7 +801,7 @@
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"កន្លែង​ធ្វើការ"</item>
     <item msgid="4378074129049520373">"ផ្សេងៗ"</item>
-    <item msgid="3455047468583965104">"តាម​តម្រូវ​ការ​"</item>
+    <item msgid="3455047468583965104">"តាម​តម្រូវ​ការ"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
@@ -813,7 +817,7 @@
     <string name="phoneTypeHome" msgid="2570923463033985887">"ផ្ទះ"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"​ចល័ត"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"កន្លែង​ធ្វើការ"</string>
-    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"ទូរសារ​កន្លែង​ធ្វើការ​"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"ទូរសារ​កន្លែង​ធ្វើការ"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"ទូរសារ​ផ្ទះ"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"ភេយ័រ"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"ផ្សេងៗ"</string>
@@ -940,7 +944,7 @@
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"ព្យាយាម​លំនាំ​ច្រើន​ពេក"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"ដើម្បី​ដោះ​សោ ចូល​គណនី Google របស់​អ្នក។"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"ឈ្មោះ​អ្នក​ប្រើ (អ៊ីមែល​)"</string>
-    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"ពាក្យសម្ងាត់​"</string>
+    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"ពាក្យសម្ងាត់"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ចូល"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"ឈ្មោះ​អ្នកប្រើ ឬ​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ។"</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"ភ្លេច​ឈ្មោះ​អ្នក​ប្រើ ឬ​ពាក្យ​សម្ងាត់​របស់​អ្នក?\nមើល "<b>"google.com/accounts/recovery"</b>" ។"</string>
@@ -985,7 +989,7 @@
     <string name="factorytest_failed" msgid="5410270329114212041">"បាន​បរាជ័យ​ក្នុង​ការ​សាកល្បង​រោងចក្រ"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"សកម្មភាព FACTORY_TEST ត្រូវ​បាន​គាំទ្រ​សម្រាប់​តែ​កញ្ចប់​បាន​ដំឡើង​ក្នុង /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"រក​មិន​ឃើញ​កញ្ចប់​ដែល​ផ្ដល់​សកម្មភាព FACTORY_TEST ។"</string>
-    <string name="factorytest_reboot" msgid="6320168203050791643">"ចាប់​ផ្ដើម​ឡើង​វិញ​"</string>
+    <string name="factorytest_reboot" msgid="6320168203050791643">"ចាប់​ផ្ដើម​ឡើង​វិញ"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"ទំព័រ​មាន​ចំណងជើង \"<xliff:g id="TITLE">%s</xliff:g>\" សរសេរ៖"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"បញ្ជាក់​ការ​រុករក"</string>
@@ -1047,7 +1051,7 @@
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"ម៉ឺនុយ +"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"ដកឃ្លា"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
-    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"លុប​"</string>
+    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"លុប"</string>
     <string name="search_go" msgid="8298016669822141719">"ស្វែងរក"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"ស្វែងរក"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"ស្វែងរក​សំណួរ"</string>
@@ -1131,18 +1135,18 @@
     <string name="preposition_for_date" msgid="9093949757757445117">"នៅ <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"នៅ​ម៉ោង <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"ក្នុង​ឆ្នាំ <xliff:g id="YEAR">%s</xliff:g>"</string>
-    <string name="day" msgid="8144195776058119424">"ថ្ងៃ​"</string>
+    <string name="day" msgid="8144195776058119424">"ថ្ងៃ"</string>
     <string name="days" msgid="4774547661021344602">"​ថ្ងៃ"</string>
     <string name="hour" msgid="2126771916426189481">"ម៉ោង"</string>
     <string name="hours" msgid="894424005266852993">"ម៉ោង"</string>
-    <string name="minute" msgid="9148878657703769868">"នាទី​"</string>
+    <string name="minute" msgid="9148878657703769868">"នាទី"</string>
     <string name="minutes" msgid="5646001005827034509">"នាទី"</string>
-    <string name="second" msgid="3184235808021478">"វិនាទី​"</string>
+    <string name="second" msgid="3184235808021478">"វិនាទី"</string>
     <string name="seconds" msgid="3161515347216589235">"វិនាទី"</string>
-    <string name="week" msgid="5617961537173061583">"សប្ដាហ៍​"</string>
-    <string name="weeks" msgid="6509623834583944518">"សប្ដាហ៍​"</string>
-    <string name="year" msgid="4001118221013892076">"ឆ្នាំ​"</string>
-    <string name="years" msgid="6881577717993213522">"ឆ្នាំ​"</string>
+    <string name="week" msgid="5617961537173061583">"សប្ដាហ៍"</string>
+    <string name="weeks" msgid="6509623834583944518">"សប្ដាហ៍"</string>
+    <string name="year" msgid="4001118221013892076">"ឆ្នាំ"</string>
+    <string name="years" msgid="6881577717993213522">"ឆ្នាំ"</string>
   <plurals name="duration_seconds">
     <item quantity="one" msgid="6962015528372969481">"1 វិនាទី"</item>
     <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> វិនាទី"</item>
@@ -1158,12 +1162,12 @@
     <string name="VideoView_error_title" msgid="3534509135438353077">"បញ្ហា​វីដេអូ"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"វីដេអូ​នេះ​មិន​ត្រឹមត្រូវ​សម្រាប់​​ចរន្ត​ចូល​ឧបករណ៍​នេះ។"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"មិន​អាច​ចាក់​វីដេអូ​នេះ។"</string>
-    <string name="VideoView_error_button" msgid="2822238215100679592">"យល់​ព្រម​"</string>
+    <string name="VideoView_error_button" msgid="2822238215100679592">"យល់​ព្រម"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"រសៀល"</string>
     <string name="Noon" msgid="3342127745230013127">"រសៀល"</string>
     <string name="midnight" msgid="7166259508850457595">"កណ្ដាលអធ្រាត្រ"</string>
-    <string name="Midnight" msgid="5630806906897892201">"កណ្ដាល​អធ្រាត្រ​"</string>
+    <string name="Midnight" msgid="5630806906897892201">"កណ្ដាល​អធ្រាត្រ"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"ជ្រើស​ទាំងអស់"</string>
@@ -1180,13 +1184,13 @@
     <string name="inputMethod" msgid="1653630062304567879">"វិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"សកម្មភាព​អត្ថបទ"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"អស់​ទំហំ​ផ្ទុក"</string>
-    <string name="low_internal_storage_view_text" msgid="6640505817617414371">"មុខងារ​ប្រព័ន្ធ​មួយ​ចំនួន​អាច​មិន​ដំណើរការ​"</string>
+    <string name="low_internal_storage_view_text" msgid="6640505817617414371">"មុខងារ​ប្រព័ន្ធ​មួយ​ចំនួន​អាច​មិន​ដំណើរការ"</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុង​ដំណើរការ"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"ប៉ះ​ ដើម្បី​មើល​ព័ត៌មាន​បន្ថែម ឬ​បញ្ឈប់​កម្មវិធី។"</string>
-    <string name="ok" msgid="5970060430562524910">"យល់​ព្រម​"</string>
-    <string name="cancel" msgid="6442560571259935130">"បោះ​បង់​"</string>
-    <string name="yes" msgid="5362982303337969312">"យល់​ព្រម​"</string>
-    <string name="no" msgid="5141531044935541497">"បោះ​បង់​"</string>
+    <string name="ok" msgid="5970060430562524910">"យល់​ព្រម"</string>
+    <string name="cancel" msgid="6442560571259935130">"បោះ​បង់"</string>
+    <string name="yes" msgid="5362982303337969312">"យល់​ព្រម"</string>
+    <string name="no" msgid="5141531044935541497">"បោះ​បង់"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"ប្រយ័ត្ន"</string>
     <string name="loading" msgid="7933681260296021180">"កំពុង​ផ្ទុក..."</string>
     <string name="capital_on" msgid="1544682755514494298">"បើក"</string>
@@ -1204,7 +1208,7 @@
     <string name="whichHomeApplication" msgid="4616420172727326782">"ជ្រើស​កម្មវិធី​ដើម"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ប្រើ​តាម​លំនាំដើម​សម្រាប់​សកម្មភាព​នេះ។"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"សម្អាត​លំនាំដើម​ក្នុង​ការកំណត់​ប្រព័ន្ធ &gt; កម្មវិធី &gt; ទាញ​យក។"</string>
-    <string name="chooseActivity" msgid="7486876147751803333">"ជ្រើស​សកម្មភាព​​"</string>
+    <string name="chooseActivity" msgid="7486876147751803333">"ជ្រើស​សកម្មភាព"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"ជ្រើស​កម្មវិធី​សម្រាប់​ឧបករណ៍​យូអេសប៊ី"</string>
     <string name="noApplications" msgid="2991814273936504689">"គ្មាន​កម្មវិធី​អាច​អនុវត្ត​សកម្មភាព​នេះ។"</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
@@ -1215,7 +1219,7 @@
     <string name="anr_activity_process" msgid="5776209883299089767">"សកម្មភាព <xliff:g id="ACTIVITY">%1$s</xliff:g> មិន​ឆ្លើយតប។\n\nតើ​អ្នក​ចង់​បិទ​វា?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> មិន​ឆ្លើយតប។ តើ​អ្នក​ចង់​បិទ​វា?"</string>
     <string name="anr_process" msgid="6513209874880517125">"ដំណើរការ <xliff:g id="PROCESS">%1$s</xliff:g> មិន​ឆ្លើយតប។ \n\nតើ​អ្នក​ចង់​បិទ​វា​ឬ?"</string>
-    <string name="force_close" msgid="8346072094521265605">"យល់​ព្រម​"</string>
+    <string name="force_close" msgid="8346072094521265605">"យល់​ព្រម"</string>
     <string name="report" msgid="4060218260984795706">"រាយការណ៍"</string>
     <string name="wait" msgid="7147118217226317732">"រង់ចាំ"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"ទំព័រ​ក្លាយ​ជា​មិន​ឆ្លើយតប។\n\nតើ​អ្នក​​ចង់​បិទ​វា?"</string>
@@ -1297,7 +1301,7 @@
     <string name="sms_short_code_details" msgid="3492025719868078457"><font fgcolor="#ffffb060">"នេះ​អាច​កាត់​លុយ"</font>" លើ​គណនី​ចល័ត​របស់​អ្នក។"</string>
     <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"វា​នឹង​គិត​ថ្លៃ​សេវាកម្ម​លើ​គណនី​ចល័ត​របស់​អ្នក។"</font></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"ផ្ញើ"</string>
-    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"បោះ​បង់​"</string>
+    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"បោះ​បង់"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"ចងចាំ​ជម្រើស​របស់​ខ្ញុំ"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"អ្នក​អាច​ប្ដូរ​វា​ពេល​ក្រោយ​ក្នុង​ការ​កំណត់ &gt; កម្មវិធី"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"អនុញ្ញាត​ជា​និច្ច"</string>
@@ -1308,8 +1312,8 @@
     <string name="sim_added_title" msgid="3719670512889674693">"បាន​បន្ថែម​ស៊ីម​កាត"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"ចាប់ផ្ដើម​ឧបករណ៍​របស់​អ្នក​ឡើងវិញ ដើម្បី​ចូល​ប្រើ​បណ្ដាញ​ចល័ត។"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"ចាប់ផ្ដើម​ឡើងវិញ"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"កំណត់​ម៉ោង​"</string>
-    <string name="date_picker_dialog_title" msgid="5879450659453782278">"កំណត់​កាល​បរិច្ឆេទ​"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"កំណត់​ម៉ោង"</string>
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"កំណត់​កាល​បរិច្ឆេទ"</string>
     <string name="date_time_set" msgid="5777075614321087758">"កំណត់"</string>
     <string name="date_time_done" msgid="2507683751759308828">"រួចរាល់"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"ថ្មី៖ "</font></string>
@@ -1387,18 +1391,18 @@
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"ឲ្យ​កម្មវិធី​ដក​សេវាកម្ម​នៃ​កម្មវិធី​ផ្ទុក​​លំនាំដើម ដើម្បី​ចម្លង​មាតិកា។​ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​លំនាំដើម។"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"នាំ​ផ្លូវ​លទ្ធផល​មេឌៀ"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"ឲ្យ​កម្មវិធី​នាំ​ផ្លូវ​លទ្ធផល​មេឌៀ​ទៅ​ឧបករណ៍​​ខាង​ក្រៅ​ផ្សេង។"</string>
-    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"ចូល​ដំណើរការ​ឧបករណ៍​ផ្ទុក​សុវត្ថិភាព​"</string>
+    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"ចូល​ដំណើរការ​ឧបករណ៍​ផ្ទុក​សុវត្ថិភាព"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"ឲ្យ​កម្មវិធី​ចូល​​ការ​ផ្ទុក​មាន​សុវត្ថិភាព keguard ។"</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"ពិនិត្យ​ការ​បង្ហាញ និង​លាក់​ការ​ការពារ"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង keguard ។"</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"ស្ដាប់​ការ​ផ្លាស់ប្ដូរ​ស្ថានភាព​ដែល​ទុកចិត្ត។"</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"ឲ្យ​កម្មវិធី​ស្ដាប់​ការ​ផ្លាស់ប្ដូរ​ក្នុង​ស្ថានភាព​ដែល​​ទុកចិត្ត។"</string>
     <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"ផ្ដល់​ភ្នាក់ងារ​ដែល​ទុកចិត្ត។"</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"ឲ្យ​កម្មវិធី​ផ្ដល់​ភ្នាក់ងារ​ដែល​ទុកចិត្ត។"</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​ផ្ដល់​​ភ្នាក់ងារ​ដែល​ទុក​ចិត្ត។"</string>
     <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"ចាប់ផ្ដើម​ម៉ឺនុយ​ការ​កំណត់​ភ្នាក់ងារ​ដែល​ទុក​ចិត្ត"</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"ឲ្យ​កម្មវិធី​ចាប់ផ្ដើម​សកម្មភាព​ដែល​ប្ដូរ​ឥរិយាបថ​ភ្នាក់ងារ​ដែល​ទុក​ចិត្ត។"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​ចាប់ផ្ដើម​សកម្មភាព​ដែល​ប្ដូរ​ឥរិយាបថ​ភ្នាក់ងារ​ដែល​ទុក​ចិត្ត។"</string>
     <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"ភ្ជាប់​ទៅ​សេវាកម្ម​ភ្នាក់ងារ​ដែល​ទុកចិត្ត"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"ឲ្យ​កម្មវិធី​ភ្ជាប់​សេវាកម្ម​ភ្នាក់ងារ​ដែល​ទុក​ចិត្ត។"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​ភ្ជាប់​សេវាកម្ម​ភ្នាក់ងារ​ដែល​ទុក​ចិត្ត។"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"អន្តរកម្ម​ជា​មួយ​បច្ចុប្បន្នភាព និង​ប្រព័ន្ធ​សង្គ្រោះ"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"ឲ្យ​កម្មវិធី​មាន​អន្តរកម្ម​ជា​មួយ​ប្រព័ន្ធ​សង្គ្រោះ និង​បច្ចុប្បន្នភាព​ប្រព័ន្ធ។"</string>
     <string name="permlab_createMediaProjection" msgid="4941338725487978112">"បង្កើត​សម័យ​គម្រោង​មេឌៀ"</string>
@@ -1410,7 +1414,7 @@
     <string name="ime_action_go" msgid="8320845651737369027">"ទៅ"</string>
     <string name="ime_action_search" msgid="658110271822807811">"ស្វែងរក"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"ផ្ញើ"</string>
-    <string name="ime_action_next" msgid="3138843904009813834">"បន្ទាប់​"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"បន្ទាប់"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"រួចរាល់"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"មុន"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"អនុវត្ត"</string>
@@ -1419,7 +1423,7 @@
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"កម្មវិធី​មួយ ឬ​ច្រើន​ដូច​ខាង​ក្រោម​ស្នើ​សិទ្ធិ ដើម្បី​ចូល​គណនី​របស់​អ្នក​ឥឡូវ និង​ពេល​អនាគត។"</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"តើ​អ្នក​ចង់​អនុញ្ញាត​សំណើ​នេះ?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"ស្នើ​ចូល"</string>
-    <string name="allow" msgid="7225948811296386551">"អនុញ្ញាត​"</string>
+    <string name="allow" msgid="7225948811296386551">"អនុញ្ញាត"</string>
     <string name="deny" msgid="2081879885755434506">"បដិសេធ"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"បាន​ស្នើ​សិទ្ធិ"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"បាន​ស្នើ​សិទ្ធិ\nសម្រាប់​គណនី <xliff:g id="ACCOUNT">%s</xliff:g> ។"</string>
@@ -1444,12 +1448,12 @@
     <string name="no_file_chosen" msgid="6363648562170759465">"គ្មាន​ឯកសារ​បាន​ជ្រើស"</string>
     <string name="reset" msgid="2448168080964209908">"កំណត់​ឡើងវិញ"</string>
     <string name="submit" msgid="1602335572089911941">"ដាក់​ស្នើ"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"បាន​បើក​របៀប​រថយន្ត​"</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"បាន​បើក​របៀប​រថយន្ត"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"ប៉ះ​ ដើម្បី​ចេញ​ពី​របៀប​រថយន្ត​។"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"ភ្ជាប់ ឬ​ហតស្ពត​សកម្ម"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"ប៉ះ​ ដើម្បី​រៀបចំ។"</string>
     <string name="back_button_label" msgid="2300470004503343439">"ថយក្រោយ"</string>
-    <string name="next_button_label" msgid="1080555104677992408">"បន្ទាប់​"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"បន្ទាប់"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"រំលង"</string>
     <string name="no_matches" msgid="8129421908915840737">"គ្មាន​ការ​ផ្គូផ្គង"</string>
     <string name="find_on_page" msgid="1946799233822820384">"រក​ក្នុង​ទំព័រ"</string>
@@ -1471,7 +1475,7 @@
     <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"ឧបករណ៍​ផ្ទុក​យូអេសប៊ី​បច្ចុប្បន្ន​កំពុង​ប្រើ​ដោយ​កុំព្យូទ័រ។"</string>
     <string name="media_shared" product="default" msgid="5706130568133540435">"បច្ចុប្បន្ន​កាត​អេសឌី​កំពុង​ប្រើ​ដោយ​កុំព្យូទ័រ"</string>
     <string name="media_unknown_state" msgid="729192782197290385">"មិន​ស្គាល់​ស្ថានភាព​មេឌៀ​ខាង​ក្រៅ។"</string>
-    <string name="share" msgid="1778686618230011964">"ចែក​រំលែក​"</string>
+    <string name="share" msgid="1778686618230011964">"ចែក​រំលែក"</string>
     <string name="find" msgid="4808270900322985960">"រក"</string>
     <string name="websearch" msgid="4337157977400211589">"ស្វែងរក​តាម​បណ្ដាញ"</string>
     <string name="find_next" msgid="5742124618942193978">"រក​បន្ទាប់"</string>
@@ -1487,7 +1491,7 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"មិន​ធ្វើ​ការ​លុប​វិញ"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"មិន​ធ្វើអ្វី​ទេ​ឥឡូវ"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"ជ្រើស​គណនី"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"បន្ថែម​គណនី​ថ្មី​​"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"បន្ថែម​គណនី​ថ្មី"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"បន្ថែម​គណនី"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"បង្កើន"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"បន្ថយ"</string>
@@ -1508,15 +1512,15 @@
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"បង្កើន​​ឆ្នាំ"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"បន្ថយ​ឆ្នាំ"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"បោះ​បង់​"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"បោះ​បង់"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"លុប"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"រួចរាល់"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"ប្ដូរ​របៀប"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
-    <string name="activitychooserview_choose_application" msgid="2125168057199941199">"ជ្រើស​កម្មវិធី​​"</string>
+    <string name="activitychooserview_choose_application" msgid="2125168057199941199">"ជ្រើស​កម្មវិធី"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"មិន​អាច​ចាប់ផ្ដើម <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="shareactionprovider_share_with" msgid="806688056141131819">"ចែករំលែក​ជា​មួយ​"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"ចែករំលែក​ជា​មួយ"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"ចែក​រំលែក​ជា​មួយ <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"គ្រប់គ្រង​ការ​រុញ។ ប៉ះ &amp; សង្កត់។"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"អូស​ ដើម្បី​ដោះ​សោ។"</string>
@@ -1530,7 +1534,7 @@
     <string name="storage_internal" msgid="4891916833657929263">"ឧបករណ៍​ផ្ទុក​ខាង​ក្នុង"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"កាត​អេសឌី"</string>
     <string name="storage_usb" msgid="3017954059538517278">"ឧបករណ៍​ផ្ទុក​យូអេសប៊ី"</string>
-    <string name="extract_edit_menu_button" msgid="8940478730496610137">"កែសម្រួល​"</string>
+    <string name="extract_edit_menu_button" msgid="8940478730496610137">"កែសម្រួល"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ការព្រមាន​ប្រើ​ទិន្នន័យ"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"ប៉ះ ដើម្បី​មើល​ការ​ប្រើ និង​ការ​កំណត់។"</string>
     <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"ទិន្នន័យ 2G-3G បាន​បិទ"</string>
@@ -1588,7 +1592,7 @@
     <string name="media_route_status_available" msgid="6983258067194649391">"ទំនេរ"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"មិន​ទំនេរ"</string>
     <string name="media_route_status_in_use" msgid="4533786031090198063">"កំពុង​ប្រើ"</string>
-    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"អេក្រង់​ជាប់​"</string>
+    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"អេក្រង់​ជាប់"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"អេក្រង់ HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"#<xliff:g id="ID">%1$d</xliff:g> ត្រួត​គ្នា"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
@@ -1620,7 +1624,7 @@
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"ព្យាយាម​លំនាំ​ច្រើន​ពេក"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"ដើម្បី​ដោះ​សោ ចូល​ក្នុង​គណនី Google ។"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"ឈ្មោះ​អ្នក​ប្រើ (អ៊ី​ម៉ែ​ល​)"</string>
-    <string name="kg_login_password_hint" msgid="9057289103827298549">"ពាក្យសម្ងាត់​"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"ពាក្យសម្ងាត់"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"ចូល"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"ឈ្មោះ​អ្នកប្រើ ឬ​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ។"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"ភ្លេច​ឈ្មោះ​អ្នកប្រើ ឬ​ពាក្យ​សម្ងាត់​របស់​អ្នក?\nមើល "<b>"google.com/accounts/recovery"</b>" ។"</string>
@@ -1729,7 +1733,7 @@
     <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
     <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"​មិន​ស្គាល់​បញ្ឈរ"</string>
     <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"មិន​ស្គាល់​ទេសភាព"</string>
-    <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"បាន​បោះ​បង់​"</string>
+    <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"បាន​បោះ​បង់"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"កំហុស​ក្នុង​ការ​សរសេរ​មាតិកា"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"មិន​ស្គាល់"</string>
     <string name="reason_service_unavailable" msgid="7824008732243903268">"មិន​បា​ន​បើក​សេវាកម្ម​បោះពុម្ព"</string>
@@ -1762,530 +1766,31 @@
     <string name="item_is_selected" msgid="949687401682476608">"បាន​ជ្រើស <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"បាន​លុប <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"កន្លែង​ធ្វើការ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="2126866321272822564">"អ្នក​គឺ​​នៅ​ក្នុង​​របៀប​ចាក់សោ​ទៅ​កម្មវិធី​។ ដើម្បី​ចេញ​ពី​, ប៉ះ ​និង​សង្កត់​ប៊ូតុង​ថ្មីៗ"</string>
-    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"អ្នក​ស្ថិត​ក្នុង​របៀប​ចាក់សោ​ទៅ​កម្មវិធី។"</string>
-    <string name="lock_to_app_title" msgid="5895142291937470019">"ប្រើ​ការ​ចាក់សោ​កម្មវិធី?"</string>
-    <string name="lock_to_app_description" msgid="2800403592608529611">"ចាក់​សោ​ទៅ​កម្មវិធី​បង្ហាញ​នៅ​ក្នុង​កម្មវិធី​តែ​មួយ​។\n\nដើម្បី​ចេញ​ពី, ប៉ះ ​និង​សង្កត់​ប៊ូតុង​ថ្មីៗ​។"</string>
+    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
+    <skip />
+    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
+    <skip />
+    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
+    <skip />
+    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
+    <skip />
+    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
+    <skip />
+    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
+    <skip />
     <string name="lock_to_app_negative" msgid="2259143719362732728">"ទេ, ​​អរគុណ!"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ចាប់ផ្ដើម"</string>
-    <string name="lock_to_app_start" msgid="3074665051586318340">"បាន​ចាក់​សោ​សម្រាប់​កម្មវិធី"</string>
-    <string name="lock_to_app_exit" msgid="8967089657201849300">"មិន​បាន​ចាក់សោ​​​សម្រាប់​កម្ម​វិធី​ទៀត​ឡើយ"</string>
-    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"សួរ %1$s មុន​ពេល​ចាកចេញ"</string>
+    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
+    <skip />
+    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
+    <skip />
+    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"កូដ PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"លំនាំ​ដោះ​សោ​"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"លំនាំ​ដោះ​សោ"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"ពាក្យ​សម្ងាត់"</string>
-    <!-- no translation found for description_amtvrs (8725404332673690032) -->
-    <skip />
-    <!-- no translation found for description_amtvrs_y (4535932507762824125) -->
-    <skip />
-    <!-- no translation found for description_amtvrs_y7 (4843157405053727570) -->
-    <skip />
-    <!-- no translation found for description_amtvrs_ga (8280008424151423133) -->
-    <skip />
-    <!-- no translation found for description_amtvrs_tw (2578136749233401367) -->
-    <skip />
-    <!-- no translation found for description_amtvrs_t (345761291919031095) -->
-    <skip />
-    <!-- no translation found for description_amtvrs_a (6457819648253336739) -->
-    <skip />
-    <!-- no translation found for description_amtvas (2864199922297854008) -->
-    <skip />
-    <!-- no translation found for description_amtvas_ec (7983817930744979095) -->
-    <skip />
-    <!-- no translation found for description_amtvas_e (3756149542498884183) -->
-    <skip />
-    <!-- no translation found for description_amtvas_e9 (5456413573244777003) -->
-    <skip />
-    <!-- no translation found for description_amtvas_t (7944661452049158964) -->
-    <skip />
-    <!-- no translation found for description_amtvas_m (7223239588624385377) -->
-    <skip />
-    <!-- no translation found for description_amtvas_ao (9151873011261050673) -->
-    <skip />
-    <!-- no translation found for description_artv_all (364978047754520239) -->
-    <skip />
-    <!-- no translation found for description_artv_13 (2899455922796919350) -->
-    <skip />
-    <!-- no translation found for description_artv_16 (7307425436483512910) -->
-    <skip />
-    <!-- no translation found for description_artv_18 (9209927176612264497) -->
-    <skip />
-    <!-- no translation found for description_autv_ctc (580007133665370344) -->
-    <skip />
-    <!-- no translation found for description_autv_g (8766137647646009788) -->
-    <skip />
-    <!-- no translation found for description_autv_pg (1120374039233559514) -->
-    <skip />
-    <!-- no translation found for description_autv_m (5699878848170834347) -->
-    <skip />
-    <!-- no translation found for description_autv_ma15 (1649811423937841031) -->
-    <skip />
-    <!-- no translation found for description_autv_r18 (4731492357626559718) -->
-    <skip />
-    <!-- no translation found for description_autv_x18 (7471360113223867348) -->
-    <skip />
-    <!-- no translation found for description_bgtv_a (4080107560220623980) -->
-    <skip />
-    <!-- no translation found for description_bgtv_b (3562986880206334536) -->
-    <skip />
-    <!-- no translation found for description_bgtv_c (2118865606515175311) -->
-    <skip />
-    <!-- no translation found for description_bgtv_d (2154327256494352024) -->
-    <skip />
-    <!-- no translation found for description_bgtv_x (8152747703122141371) -->
-    <skip />
-    <!-- no translation found for description_brtv_l (1556506348989197233) -->
-    <skip />
-    <!-- no translation found for description_brtv_10 (6482474511057295426) -->
-    <skip />
-    <!-- no translation found for description_brtv_12 (3866073463174552388) -->
-    <skip />
-    <!-- no translation found for description_brtv_14 (8000276408382866766) -->
-    <skip />
-    <!-- no translation found for description_brtv_16 (1763867402144709767) -->
-    <skip />
-    <!-- no translation found for description_brtv_18 (9024148588030726309) -->
-    <skip />
-    <!-- no translation found for description_catv_exempt (3972646497134886470) -->
-    <skip />
-    <!-- no translation found for description_catv_c (4440403088748913964) -->
-    <skip />
-    <!-- no translation found for description_catv_c8 (7157242552288918297) -->
-    <skip />
-    <!-- no translation found for description_catv_g (2109878777115073829) -->
-    <skip />
-    <!-- no translation found for description_catv_pg (7456573695346477726) -->
-    <skip />
-    <!-- no translation found for description_catv_14 (8094604146081463304) -->
-    <skip />
-    <!-- no translation found for description_catv_18 (8687145835253664143) -->
-    <skip />
-    <!-- no translation found for description_chtv_all (5703231298914686594) -->
-    <skip />
-    <!-- no translation found for description_chtv_red (2679063110716813555) -->
-    <skip />
-    <!-- no translation found for description_cltv_i (2317348591464039386) -->
-    <skip />
-    <!-- no translation found for description_cltv_i7 (1245948898081838683) -->
-    <skip />
-    <!-- no translation found for description_cltv_i10 (8140128283736708519) -->
-    <skip />
-    <!-- no translation found for description_cltv_i12 (2739127525854644613) -->
-    <skip />
-    <!-- no translation found for description_cltv_f (3308749622248009751) -->
-    <skip />
-    <!-- no translation found for description_cltv_r (157103876726801377) -->
-    <skip />
-    <!-- no translation found for description_cltv_a (9203004232685495868) -->
-    <skip />
-    <!-- no translation found for description_detv_all (1483249406177422724) -->
-    <skip />
-    <!-- no translation found for description_detv_12 (746518079154668613) -->
-    <skip />
-    <!-- no translation found for description_detv_16 (5690413821191509580) -->
-    <skip />
-    <!-- no translation found for description_detv_18 (44599484534787974) -->
-    <skip />
-    <!-- no translation found for description_dktv_g (610947014192685528) -->
-    <skip />
-    <!-- no translation found for description_dktv_y (4095688983501700645) -->
-    <skip />
-    <!-- no translation found for description_dktv_r (8739285813310386515) -->
-    <skip />
-    <!-- no translation found for description_dktv_b (1304947265634583906) -->
-    <skip />
-    <!-- no translation found for description_estv_tp (1822759030871350269) -->
-    <skip />
-    <!-- no translation found for description_estv_i (3766033620124690961) -->
-    <skip />
-    <!-- no translation found for description_estv_7 (8721492435509764830) -->
-    <skip />
-    <!-- no translation found for description_estv_7i (2711729455452401897) -->
-    <skip />
-    <!-- no translation found for description_estv_12 (8896931636297130592) -->
-    <skip />
-    <!-- no translation found for description_estv_16 (2274142720185871523) -->
-    <skip />
-    <!-- no translation found for description_estv_18 (7368459302885513167) -->
-    <skip />
-    <!-- no translation found for description_fitv_s (3268310758566961295) -->
-    <skip />
-    <!-- no translation found for description_fitv_k7 (693997427905447973) -->
-    <skip />
-    <!-- no translation found for description_fitv_k12 (1373617371750927627) -->
-    <skip />
-    <!-- no translation found for description_fitv_k16 (1531284982003733718) -->
-    <skip />
-    <!-- no translation found for description_fitv_k18 (5440994306974743812) -->
-    <skip />
-    <!-- no translation found for description_frtv_all (4729285903163682811) -->
-    <skip />
-    <!-- no translation found for description_frtv_10 (6760888448355386128) -->
-    <skip />
-    <!-- no translation found for description_frtv_12 (6018370898859283738) -->
-    <skip />
-    <!-- no translation found for description_frtv_16 (1319508720505160960) -->
-    <skip />
-    <!-- no translation found for description_frtv_18 (7855486306004041345) -->
-    <skip />
-    <!-- no translation found for description_grtv_all (3165430975737819024) -->
-    <skip />
-    <!-- no translation found for description_grtv_10 (1318157499799932505) -->
-    <skip />
-    <!-- no translation found for description_grtv_12 (7932432868625690829) -->
-    <skip />
-    <!-- no translation found for description_grtv_15 (2697965728032342040) -->
-    <skip />
-    <!-- no translation found for description_grtv_18 (5844024066808386696) -->
-    <skip />
-    <!-- no translation found for description_hktv_g (2081098882211904799) -->
-    <skip />
-    <!-- no translation found for description_hktv_pg (4236656058591150501) -->
-    <skip />
-    <!-- no translation found for description_hktv_m (1910266085395443787) -->
-    <skip />
-    <!-- no translation found for description_hutv_u (7724340821106780225) -->
-    <skip />
-    <!-- no translation found for description_hutv_cf (5713307405730628949) -->
-    <skip />
-    <!-- no translation found for description_hutv_6 (7875008778965005549) -->
-    <skip />
-    <!-- no translation found for description_hutv_12 (9156725113080219882) -->
-    <skip />
-    <!-- no translation found for description_hutv_16 (7544556481624667701) -->
-    <skip />
-    <!-- no translation found for description_hutv_18 (1626521112701123265) -->
-    <skip />
-    <!-- no translation found for description_idtv_p (6272206399910862405) -->
-    <skip />
-    <!-- no translation found for description_idtv_a (8800388643843782465) -->
-    <skip />
-    <!-- no translation found for description_idtv_a_bo (911576922969663462) -->
-    <skip />
-    <!-- no translation found for description_idtv_su (4369633040930258866) -->
-    <skip />
-    <!-- no translation found for description_idtv_bo (1431146686564849087) -->
-    <skip />
-    <!-- no translation found for description_idtv_r (5827962472458912713) -->
-    <skip />
-    <!-- no translation found for description_idtv_r_bo (7858447328910604156) -->
-    <skip />
-    <!-- no translation found for description_idtv_d (7541888404887779669) -->
-    <skip />
-    <!-- no translation found for description_ietv_ga (4642321747715248533) -->
-    <skip />
-    <!-- no translation found for description_ietv_ch (3330402268385961544) -->
-    <skip />
-    <!-- no translation found for description_ietv_ya (4069454081494515303) -->
-    <skip />
-    <!-- no translation found for description_ietv_ps (7824457229783420380) -->
-    <skip />
-    <!-- no translation found for description_ietv_ma (2007155969306777422) -->
-    <skip />
-    <!-- no translation found for description_iltv_g (4043213262243305262) -->
-    <skip />
-    <!-- no translation found for description_iltv_12 (7780022228603138844) -->
-    <skip />
-    <!-- no translation found for description_iltv_15 (1539578320983136379) -->
-    <skip />
-    <!-- no translation found for description_iltv_18 (7970124287967053441) -->
-    <skip />
-    <!-- no translation found for description_iltv_e (7270515027851109174) -->
-    <skip />
-    <!-- no translation found for description_intv_u (4409067314659441506) -->
-    <skip />
-    <!-- no translation found for description_intv_u/a (5184979938382735615) -->
-    <skip />
-    <!-- no translation found for description_intv_a (4069232615702497582) -->
-    <skip />
-    <!-- no translation found for description_intv_s (8992315906331100367) -->
-    <skip />
-    <!-- no translation found for description_istv_l (2060831828024455393) -->
-    <skip />
-    <!-- no translation found for description_istv_7 (1844519280360863121) -->
-    <skip />
-    <!-- no translation found for description_istv_10 (4203217618341110046) -->
-    <skip />
-    <!-- no translation found for description_istv_12 (4834042725603037283) -->
-    <skip />
-    <!-- no translation found for description_istv_14 (4406801385726606683) -->
-    <skip />
-    <!-- no translation found for description_istv_16 (365432629005229347) -->
-    <skip />
-    <!-- no translation found for description_istv_18 (8376140537243510405) -->
-    <skip />
-    <!-- no translation found for description_krtv_all (1483913188733515440) -->
-    <skip />
-    <!-- no translation found for description_krtv_7 (8682276932541234333) -->
-    <skip />
-    <!-- no translation found for description_krtv_12 (6963065489873976068) -->
-    <skip />
-    <!-- no translation found for description_krtv_15 (6916394374284107977) -->
-    <skip />
-    <!-- no translation found for description_krtv_19 (7954273383199778597) -->
-    <skip />
-    <!-- no translation found for description_mvtv_y (3943277859471637549) -->
-    <skip />
-    <!-- no translation found for description_mvtv_g (4657828520346609827) -->
-    <skip />
-    <!-- no translation found for description_mvtv_pg (3864658391850426197) -->
-    <skip />
-    <!-- no translation found for description_mvtv_pg-12 (2216350829013720553) -->
-    <skip />
-    <!-- no translation found for description_mvtv_12 (5276461870956711977) -->
-    <skip />
-    <!-- no translation found for description_mvtv_15 (7106953260329293776) -->
-    <skip />
-    <!-- no translation found for description_mvtv_18 (7006573852262189406) -->
-    <skip />
-    <!-- no translation found for description_mvtv_21 (7476284001838921253) -->
-    <skip />
-    <!-- no translation found for description_mvtv_x (6499801610415924301) -->
-    <skip />
-    <!-- no translation found for description_mxtv_a (7174608035829320762) -->
-    <skip />
-    <!-- no translation found for description_mxtv_b (3670477404589260152) -->
-    <skip />
-    <!-- no translation found for description_mxtv_b-15 (8819354848127579747) -->
-    <skip />
-    <!-- no translation found for description_mxtv_c (3553641627415667328) -->
-    <skip />
-    <!-- no translation found for description_mxtv_d (3878980934298154757) -->
-    <skip />
-    <!-- no translation found for description_mxtv_rc (4968210486942321347) -->
-    <skip />
-    <!-- no translation found for description_mytv_u (7992019130820426014) -->
-    <skip />
-    <!-- no translation found for description_mytv_p13 (2006920076949391912) -->
-    <skip />
-    <!-- no translation found for description_mytv_18 (1958247530905842382) -->
-    <skip />
-    <!-- no translation found for description_nltv_v (1483555324354422551) -->
-    <skip />
-    <!-- no translation found for description_nltv_f (255578123439921739) -->
-    <skip />
-    <!-- no translation found for description_nltv_s (6193927829534523304) -->
-    <skip />
-    <!-- no translation found for description_nltv_d (3374553904035308871) -->
-    <skip />
-    <!-- no translation found for description_nltv_da (1749379319390419150) -->
-    <skip />
-    <!-- no translation found for description_nltv_l (4940772416975329234) -->
-    <skip />
-    <!-- no translation found for description_nltv_al (5041932203459682871) -->
-    <skip />
-    <!-- no translation found for description_nltv_6 (3546423755489923885) -->
-    <skip />
-    <!-- no translation found for description_nltv_9 (7376993909159390832) -->
-    <skip />
-    <!-- no translation found for description_nltv_12 (5978017871069609209) -->
-    <skip />
-    <!-- no translation found for description_nltv_16 (1179906153900651722) -->
-    <skip />
-    <!-- no translation found for description_nzftv (146041741052337733) -->
-    <skip />
-    <!-- no translation found for description_nzftv_g (7541885472155817369) -->
-    <skip />
-    <!-- no translation found for description_nzftv_pgr (6784787939626550110) -->
-    <skip />
-    <!-- no translation found for description_nzftv_ao (658380192140260039) -->
-    <skip />
-    <!-- no translation found for description_nzptv (241701402496277362) -->
-    <skip />
-    <!-- no translation found for description_nzptv_c (6475200916428978507) -->
-    <skip />
-    <!-- no translation found for description_nzptv_v (5240133670204303166) -->
-    <skip />
-    <!-- no translation found for description_nzptv_l (7918327057227193483) -->
-    <skip />
-    <!-- no translation found for description_nzptv_s (273281440427641308) -->
-    <skip />
-    <!-- no translation found for description_nzptv_g (973626491011050055) -->
-    <skip />
-    <!-- no translation found for description_nzptv_pg (4758011078051581792) -->
-    <skip />
-    <!-- no translation found for description_nzptv_m (1567051823394181103) -->
-    <skip />
-    <!-- no translation found for description_nzptv_16 (5669667948991057907) -->
-    <skip />
-    <!-- no translation found for description_nzptv_18 (1657260722016869371) -->
-    <skip />
-    <!-- no translation found for description_petv (5559685180480404628) -->
-    <skip />
-    <!-- no translation found for description_petv_a (5173645608432271582) -->
-    <skip />
-    <!-- no translation found for description_petv_14 (5966087674663742056) -->
-    <skip />
-    <!-- no translation found for description_petv_18 (7019630766403420130) -->
-    <skip />
-    <!-- no translation found for description_peatv (3634656795668410617) -->
-    <skip />
-    <!-- no translation found for description_peatv_gp (3618385648727054626) -->
-    <skip />
-    <!-- no translation found for description_peatv_pg (7593142528684761505) -->
-    <skip />
-    <!-- no translation found for description_peatv_14 (5859459560298362393) -->
-    <skip />
-    <!-- no translation found for description_peatv_18 (2553706587014952987) -->
-    <skip />
-    <!-- no translation found for description_phtv_g (2881516809627264027) -->
-    <skip />
-    <!-- no translation found for description_phtv_pg (7482341361410927180) -->
-    <skip />
-    <!-- no translation found for description_phtv_spg (3887913591843612878) -->
-    <skip />
-    <!-- no translation found for description_pltv_g (3565351590443748263) -->
-    <skip />
-    <!-- no translation found for description_pltv_7 (366413712101571629) -->
-    <skip />
-    <!-- no translation found for description_pltv_12 (4035426913452019902) -->
-    <skip />
-    <!-- no translation found for description_pltv_16 (7597517415447468821) -->
-    <skip />
-    <!-- no translation found for description_pltv_18 (2897280907055051640) -->
-    <skip />
-    <!-- no translation found for description_pttv_t (4742028020170896717) -->
-    <skip />
-    <!-- no translation found for description_pttv_10 (8272045717843749489) -->
-    <skip />
-    <!-- no translation found for description_pttv_12 (6944802687353314948) -->
-    <skip />
-    <!-- no translation found for description_pttv_16 (8071670633939250916) -->
-    <skip />
-    <!-- no translation found for description_rotv_y (969324821485320166) -->
-    <skip />
-    <!-- no translation found for description_rotv_g (8500146486438254738) -->
-    <skip />
-    <!-- no translation found for description_rotv_ap (216575414175684221) -->
-    <skip />
-    <!-- no translation found for description_rotv_12 (323979906483875270) -->
-    <skip />
-    <!-- no translation found for description_rotv_15 (6469399617455125913) -->
-    <skip />
-    <!-- no translation found for description_rotv_18 (3592554928967418416) -->
-    <skip />
-    <!-- no translation found for description_rutv_0 (1189359151352757515) -->
-    <skip />
-    <!-- no translation found for description_rutv_6 (2353995318569336577) -->
-    <skip />
-    <!-- no translation found for description_rutv_12 (5771361352056507174) -->
-    <skip />
-    <!-- no translation found for description_rutv_16 (972213177494629509) -->
-    <skip />
-    <!-- no translation found for description_rutv_18 (638034451405144583) -->
-    <skip />
-    <!-- no translation found for description_rstv_g (3170795792938872243) -->
-    <skip />
-    <!-- no translation found for description_rstv_12 (8439136546593367639) -->
-    <skip />
-    <!-- no translation found for description_rstv_14 (4100191434896490937) -->
-    <skip />
-    <!-- no translation found for description_rstv_15 (6603766886727865412) -->
-    <skip />
-    <!-- no translation found for description_rstv_16 (8270956181386948273) -->
-    <skip />
-    <!-- no translation found for description_rstv_17 (297444503123795521) -->
-    <skip />
-    <!-- no translation found for description_rstv_18 (7698675837977377422) -->
-    <skip />
-    <!-- no translation found for description_sgftv_pg (3870004698989791235) -->
-    <skip />
-    <!-- no translation found for description_sgftv_pg13 (4704866814396800249) -->
-    <skip />
-    <!-- no translation found for description_sgptv_nc16 (545097661241350415) -->
-    <skip />
-    <!-- no translation found for description_sgptv_m18 (7070031962847685837) -->
-    <skip />
-    <!-- no translation found for description_sitv_vs (6029303058492749615) -->
-    <skip />
-    <!-- no translation found for description_sitv_12 (1562265508790961396) -->
-    <skip />
-    <!-- no translation found for description_sitv_15 (814397053035102343) -->
-    <skip />
-    <!-- no translation found for description_sitv_ad (1165818216176162192) -->
-    <skip />
-    <!-- no translation found for description_thtv_primary (6512252166876553779) -->
-    <skip />
-    <!-- no translation found for description_thtv_children (1594272832954693188) -->
-    <skip />
-    <!-- no translation found for description_thtv_general (5808557138959815577) -->
-    <skip />
-    <!-- no translation found for description_thtv_pg13 (889956538395653454) -->
-    <skip />
-    <!-- no translation found for description_thtv_pg18 (4562428332758892578) -->
-    <skip />
-    <!-- no translation found for description_thtv_adults (8538542343641784979) -->
-    <skip />
-    <!-- no translation found for description_trtv_g (814709416798352432) -->
-    <skip />
-    <!-- no translation found for description_trtv_7 (4013069254406734945) -->
-    <skip />
-    <!-- no translation found for description_trtv_13 (1547262200213469515) -->
-    <skip />
-    <!-- no translation found for description_trtv_18 (7226520040857228271) -->
-    <skip />
-    <!-- no translation found for description_twtv_g (8446951247865479252) -->
-    <skip />
-    <!-- no translation found for description_twtv_p (853443650448817932) -->
-    <skip />
-    <!-- no translation found for description_twtv_pg (7158733234441280037) -->
-    <skip />
-    <!-- no translation found for description_twtv_r (7722190018180631998) -->
-    <skip />
-    <!-- no translation found for description_uatv_green circle (4230191850030083669) -->
-    <skip />
-    <!-- no translation found for description_uatv_yellow triangle (8849499067175997748) -->
-    <skip />
-    <!-- no translation found for description_uatv_red square (4082028234845100357) -->
-    <skip />
-    <string name="description_ustvpg" msgid="3666171166900312727">"នេះ​ជា​គោលការណ៍​ណែនាំ​មាតាបិតា​​តាម​ទូរទស្សន៍"</string>
-    <string name="description_ustvpg_d" msgid="6552868431924879897">"ការពិគ្រោះ​យោបល់ (ជា​ធម្មតា​មាន​ន័យ​ថា​ការ​ពិភាក្សា​អំពី​ផ្លូវ​ភេទ​)"</string>
-    <string name="description_ustvpg_l" msgid="2427588153488291892">"ភាសា​អាក្រក់"</string>
-    <string name="description_ustvpg_s" msgid="2556047043212535339">"មាតិកា​ផ្លូវ​ភេទ"</string>
-    <string name="description_ustvpg_v" msgid="6647466085048806213">"អំពើ​ហិង្សា"</string>
-    <string name="description_ustvpg_fv" msgid="4015953953338931020">"អំពើ​ហិង្សា​ធ្ងន់ធ្ងរ​ (ការ​សរសេរ​កម្មវិធី​របស់​កុមារ​ប៉ុណ្ណោះ​)"</string>
-    <!-- no translation found for description_ustvpg_y (6547820726370164424) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_y7 (2874291795165074132) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_g (7919375742191053371) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_pg (8225983744703834021) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_14 (7397655878454282341) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_ma (3697701573351883304) -->
-    <skip />
-    <!-- no translation found for description_vetv_tu (8003039623029896661) -->
-    <skip />
-    <!-- no translation found for description_vetv_su (5264501691167249797) -->
-    <skip />
-    <!-- no translation found for description_vetv_a (544323071374454118) -->
-    <skip />
-    <!-- no translation found for description_zatv_d (6571984174827591259) -->
-    <skip />
-    <!-- no translation found for description_zatv_v (4679866575541703635) -->
-    <skip />
-    <!-- no translation found for description_zatv_n (7765574098989944543) -->
-    <skip />
-    <!-- no translation found for description_zatv_p (1893150762583767795) -->
-    <skip />
-    <!-- no translation found for description_zatv_s (8564722716580038312) -->
-    <skip />
-    <!-- no translation found for description_zatv_l (3031691623802167108) -->
-    <skip />
-    <!-- no translation found for description_zatv_f (5412201271650571415) -->
-    <skip />
-    <!-- no translation found for description_zatv_pg (6944138875310807057) -->
-    <skip />
-    <!-- no translation found for description_zatv_13 (2245766192902590932) -->
-    <skip />
-    <!-- no translation found for description_zatv_16 (7129501987396433120) -->
-    <skip />
-    <!-- no translation found for description_zatv_18 (3374729017790665930) -->
-    <skip />
-    <!-- no translation found for description_zatv_r18 (6316770789529705936) -->
-    <skip />
     <!-- no translation found for battery_saver_description (725676363406667978) -->
+    <skip />
+    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
     <skip />
 </resources>
