@@ -1568,7 +1568,7 @@ final class ApplicationPackageManager extends PackageManager {
         synchronized (mLock) {
             if (mInstaller == null) {
                 try {
-                    mInstaller = new PackageInstaller(this, mPM.getPackageInstaller(),
+                    mInstaller = new PackageInstaller(mContext, this, mPM.getPackageInstaller(),
                             mContext.getPackageName(), mContext.getUserId());
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();

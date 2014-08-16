@@ -8544,36 +8544,6 @@ package android.content.pm {
     field public int reqGlEsVersion;
   }
 
-  public class InstallSessionInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method public android.graphics.Bitmap getAppIcon();
-    method public java.lang.CharSequence getAppLabel();
-    method public java.lang.String getAppPackageName();
-    method public android.content.Intent getDetailsIntent();
-    method public java.lang.String getInstallerPackageName();
-    method public float getProgress();
-    method public int getSessionId();
-    method public boolean isOpen();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public class InstallSessionParams implements android.os.Parcelable {
-    ctor public InstallSessionParams(int);
-    method public int describeContents();
-    method public void setAppIcon(android.graphics.Bitmap);
-    method public void setAppLabel(java.lang.CharSequence);
-    method public void setAppPackageName(java.lang.String);
-    method public void setInstallLocation(int);
-    method public void setOriginatingUri(android.net.Uri);
-    method public void setReferrerUri(android.net.Uri);
-    method public void setSize(long);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int MODE_FULL_INSTALL = 1; // 0x1
-    field public static final int MODE_INHERIT_EXISTING = 2; // 0x2
-  }
-
   public class InstrumentationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     ctor public InstrumentationInfo();
     ctor public InstrumentationInfo(android.content.pm.InstrumentationInfo);
@@ -8675,37 +8645,35 @@ package android.content.pm {
   public class PackageInstaller {
     method public void addSessionCallback(android.content.pm.PackageInstaller.SessionCallback);
     method public void addSessionCallback(android.content.pm.PackageInstaller.SessionCallback, android.os.Handler);
-    method public int createSession(android.content.pm.InstallSessionParams) throws java.io.IOException;
-    method public java.util.List<android.content.pm.InstallSessionInfo> getAllSessions();
-    method public java.util.List<android.content.pm.InstallSessionInfo> getMySessions();
-    method public android.content.pm.InstallSessionInfo getSessionInfo(int);
+    method public int createSession(android.content.pm.PackageInstaller.SessionParams) throws java.io.IOException;
+    method public java.util.List<android.content.pm.PackageInstaller.SessionInfo> getAllSessions();
+    method public java.util.List<android.content.pm.PackageInstaller.SessionInfo> getMySessions();
+    method public android.content.pm.PackageInstaller.SessionInfo getSessionInfo(int);
     method public android.content.pm.PackageInstaller.Session openSession(int);
     method public void removeSessionCallback(android.content.pm.PackageInstaller.SessionCallback);
-    method public void uninstall(java.lang.String, android.content.pm.PackageInstaller.UninstallCallback);
+    method public void uninstall(java.lang.String, android.content.IntentSender);
     field public static final java.lang.String ACTION_SESSION_DETAILS = "android.content.pm.action.SESSION_DETAILS";
+    field public static final java.lang.String EXTRA_PACKAGE_NAMES = "android.content.pm.extra.PACKAGE_NAMES";
     field public static final java.lang.String EXTRA_SESSION_ID = "android.content.pm.extra.SESSION_ID";
-  }
-
-  public static abstract class PackageInstaller.CommitCallback {
-    ctor public PackageInstaller.CommitCallback();
-    method public abstract void onFailure(int, java.lang.String, android.os.Bundle);
-    method public abstract void onSuccess();
-    method public abstract void onUserActionRequired(android.content.Intent);
-    field public static final java.lang.String EXTRA_PACKAGE_NAME = "android.content.pm.extra.PACKAGE_NAME";
-    field public static final int FAILURE_ABORTED = 5; // 0x5
-    field public static final int FAILURE_CONFLICT = 2; // 0x2
-    field public static final int FAILURE_INCOMPATIBLE = 4; // 0x4
-    field public static final int FAILURE_INVALID = 1; // 0x1
-    field public static final int FAILURE_STORAGE = 3; // 0x3
-    field public static final int FAILURE_UNKNOWN = 0; // 0x0
+    field public static final java.lang.String EXTRA_STATUS = "android.content.pm.extra.STATUS";
+    field public static final java.lang.String EXTRA_STATUS_MESSAGE = "android.content.pm.extra.STATUS_MESSAGE";
+    field public static final int STATUS_FAILURE = 1; // 0x1
+    field public static final int STATUS_FAILURE_ABORTED = 2; // 0x2
+    field public static final int STATUS_FAILURE_BLOCKED = 1; // 0x1
+    field public static final int STATUS_FAILURE_CONFLICT = 4; // 0x4
+    field public static final int STATUS_FAILURE_INCOMPATIBLE = 6; // 0x6
+    field public static final int STATUS_FAILURE_INVALID = 3; // 0x3
+    field public static final int STATUS_FAILURE_STORAGE = 5; // 0x5
+    field public static final int STATUS_SUCCESS = 0; // 0x0
+    field public static final int STATUS_USER_ACTION_REQUIRED = -1; // 0xffffffff
   }
 
   public static class PackageInstaller.Session implements java.io.Closeable {
     method public void abandon();
     method public void close();
-    method public void commit(android.content.pm.PackageInstaller.CommitCallback);
+    method public void commit(android.content.IntentSender);
     method public void fsync(java.io.OutputStream) throws java.io.IOException;
-    method public java.lang.String[] list();
+    method public java.lang.String[] getNames();
     method public java.io.InputStream openRead(java.lang.String) throws java.io.IOException;
     method public java.io.OutputStream openWrite(java.lang.String, long, long) throws java.io.IOException;
     method public void setProgress(float);
@@ -8720,14 +8688,34 @@ package android.content.pm {
     method public abstract void onProgressChanged(int, float);
   }
 
-  public static abstract class PackageInstaller.UninstallCallback {
-    ctor public PackageInstaller.UninstallCallback();
-    method public abstract void onFailure(int, java.lang.String, android.os.Bundle);
-    method public abstract void onSuccess();
-    method public abstract void onUserActionRequired(android.content.Intent);
-    field public static final int FAILURE_ABORTED = 2; // 0x2
-    field public static final int FAILURE_BLOCKED = 1; // 0x1
-    field public static final int FAILURE_UNKNOWN = 0; // 0x0
+  public static class PackageInstaller.SessionInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.graphics.Bitmap getAppIcon();
+    method public java.lang.CharSequence getAppLabel();
+    method public java.lang.String getAppPackageName();
+    method public android.content.Intent getDetailsIntent();
+    method public java.lang.String getInstallerPackageName();
+    method public float getProgress();
+    method public int getSessionId();
+    method public boolean isOpen();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public static class PackageInstaller.SessionParams implements android.os.Parcelable {
+    ctor public PackageInstaller.SessionParams(int);
+    method public int describeContents();
+    method public void setAppIcon(android.graphics.Bitmap);
+    method public void setAppLabel(java.lang.CharSequence);
+    method public void setAppPackageName(java.lang.String);
+    method public void setInstallLocation(int);
+    method public void setOriginatingUri(android.net.Uri);
+    method public void setReferrerUri(android.net.Uri);
+    method public void setSize(long);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int MODE_FULL_INSTALL = 1; // 0x1
+    field public static final int MODE_INHERIT_EXISTING = 2; // 0x2
   }
 
   public class PackageItemInfo {
