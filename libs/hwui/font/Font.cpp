@@ -140,11 +140,11 @@ void Font::invalidateTextureCache(CacheTexture* cacheTexture) {
 
 void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
         uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos) {
-    int nPenX = x + glyph->mBitmapLeft;
-    int nPenY = y + glyph->mBitmapTop;
-
     int width = (int) glyph->mBitmapWidth;
     int height = (int) glyph->mBitmapHeight;
+
+    int nPenX = x + glyph->mBitmapLeft;
+    int nPenY = y + glyph->mBitmapTop;
 
     if (bounds->bottom > nPenY) {
         bounds->bottom = nPenY;
@@ -162,11 +162,11 @@ void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
 
 void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
         uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos) {
-    float nPenX = x + glyph->mBitmapLeft;
-    float nPenY = y + glyph->mBitmapTop + glyph->mBitmapHeight;
-
     float width = (float) glyph->mBitmapWidth;
     float height = (float) glyph->mBitmapHeight;
+
+    float nPenX = x + glyph->mBitmapLeft;
+    float nPenY = y + glyph->mBitmapTop + height;
 
     float u1 = glyph->mBitmapMinU;
     float u2 = glyph->mBitmapMaxU;
@@ -181,10 +181,13 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
 
 void Font::drawCachedGlyphTransformed(CachedGlyphInfo* glyph, int x, int y,
         uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos) {
+    float width = (float) glyph->mBitmapWidth;
+    float height = (float) glyph->mBitmapHeight;
+
     SkPoint p[4];
-    p[0].iset(glyph->mBitmapLeft, glyph->mBitmapTop + glyph->mBitmapHeight);
-    p[1].iset(glyph->mBitmapLeft + glyph->mBitmapWidth, glyph->mBitmapTop + glyph->mBitmapHeight);
-    p[2].iset(glyph->mBitmapLeft + glyph->mBitmapWidth, glyph->mBitmapTop);
+    p[0].iset(glyph->mBitmapLeft, glyph->mBitmapTop + height);
+    p[1].iset(glyph->mBitmapLeft + width, glyph->mBitmapTop + height);
+    p[2].iset(glyph->mBitmapLeft + width, glyph->mBitmapTop);
     p[3].iset(glyph->mBitmapLeft, glyph->mBitmapTop);
 
     mDescription.mInverseLookupTransform.mapPoints(p, 4);
