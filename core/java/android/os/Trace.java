@@ -36,6 +36,7 @@ public final class Trace {
     private static final String TAG = "Trace";
 
     // These tags must be kept in sync with system/core/include/cutils/trace.h.
+    // They should also be added to frameworks/native/cmds/atrace/atrace.cpp.
     /** @hide */
     public static final long TRACE_TAG_NEVER = 0;
     /** @hide */
@@ -72,6 +73,8 @@ public final class Trace {
     public static final long TRACE_TAG_RS = 1L << 15;
     /** @hide */
     public static final long TRACE_TAG_BIONIC = 1L << 16;
+    /** @hide */
+    public static final long TRACE_TAG_POWER = 1L << 17;
 
     private static final long TRACE_TAG_NOT_READY = 1L << 63;
     private static final int MAX_SECTION_NAME_LEN = 127;

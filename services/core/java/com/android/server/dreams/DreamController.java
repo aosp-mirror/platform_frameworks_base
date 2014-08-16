@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.IBinder.DeathRecipient;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamService;
@@ -111,41 +112,46 @@ final class DreamController {
             boolean isTest, boolean canDoze, int userId) {
         stopDream(true /*immediate*/);
 
-        // Close the notification shade. Don't need to send to all, but better to be explicit.
-        mContext.sendBroadcastAsUser(mCloseNotificationShadeIntent, UserHandle.ALL);
-
-        Slog.i(TAG, "Starting dream: name=" + name
-                + ", isTest=" + isTest + ", canDoze=" + canDoze
-                + ", userId=" + userId);
-
-        mCurrentDream = new DreamRecord(token, name, isTest, canDoze, userId);
-
+        Trace.traceBegin(Trace.TRACE_TAG_POWER, "startDream");
         try {
-            mIWindowManager.addWindowToken(token, WindowManager.LayoutParams.TYPE_DREAM);
-        } catch (RemoteException ex) {
-            Slog.e(TAG, "Unable to add window token for dream.", ex);
-            stopDream(true /*immediate*/);
-            return;
-        }
+            // Close the notification shade. Don't need to send to all, but better to be explicit.
+            mContext.sendBroadcastAsUser(mCloseNotificationShadeIntent, UserHandle.ALL);
 
-        Intent intent = new Intent(DreamService.SERVICE_INTERFACE);
-        intent.setComponent(name);
-        intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        try {
-            if (!mContext.bindServiceAsUser(intent, mCurrentDream,
-                    Context.BIND_AUTO_CREATE, new UserHandle(userId))) {
-                Slog.e(TAG, "Unable to bind dream service: " + intent);
+            Slog.i(TAG, "Starting dream: name=" + name
+                    + ", isTest=" + isTest + ", canDoze=" + canDoze
+                    + ", userId=" + userId);
+
+            mCurrentDream = new DreamRecord(token, name, isTest, canDoze, userId);
+
+            try {
+                mIWindowManager.addWindowToken(token, WindowManager.LayoutParams.TYPE_DREAM);
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "Unable to add window token for dream.", ex);
                 stopDream(true /*immediate*/);
                 return;
             }
-        } catch (SecurityException ex) {
-            Slog.e(TAG, "Unable to bind dream service: " + intent, ex);
-            stopDream(true /*immediate*/);
-            return;
-        }
 
-        mCurrentDream.mBound = true;
-        mHandler.postDelayed(mStopUnconnectedDreamRunnable, DREAM_CONNECTION_TIMEOUT);
+            Intent intent = new Intent(DreamService.SERVICE_INTERFACE);
+            intent.setComponent(name);
+            intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            try {
+                if (!mContext.bindServiceAsUser(intent, mCurrentDream,
+                        Context.BIND_AUTO_CREATE, new UserHandle(userId))) {
+                    Slog.e(TAG, "Unable to bind dream service: " + intent);
+                    stopDream(true /*immediate*/);
+                    return;
+                }
+            } catch (SecurityException ex) {
+                Slog.e(TAG, "Unable to bind dream service: " + intent, ex);
+                stopDream(true /*immediate*/);
+                return;
+            }
+
+            mCurrentDream.mBound = true;
+            mHandler.postDelayed(mStopUnconnectedDreamRunnable, DREAM_CONNECTION_TIMEOUT);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_POWER);
+        }
     }
 
     public void stopDream(boolean immediate) {
@@ -153,71 +159,76 @@ final class DreamController {
             return;
         }
 
-        if (!immediate) {
-            if (mCurrentDream.mWakingGently) {
-                return; // already waking gently
-            }
+        Trace.traceBegin(Trace.TRACE_TAG_POWER, "stopDream");
+        try {
+            if (!immediate) {
+                if (mCurrentDream.mWakingGently) {
+                    return; // already waking gently
+                }
 
-            if (mCurrentDream.mService != null) {
-                // Give the dream a moment to wake up and finish itself gently.
-                mCurrentDream.mWakingGently = true;
-                try {
-                    mCurrentDream.mService.wakeUp();
-                    mHandler.postDelayed(mStopStubbornDreamRunnable, DREAM_FINISH_TIMEOUT);
-                    return;
-                } catch (RemoteException ex) {
-                    // oh well, we tried, finish immediately instead
+                if (mCurrentDream.mService != null) {
+                    // Give the dream a moment to wake up and finish itself gently.
+                    mCurrentDream.mWakingGently = true;
+                    try {
+                        mCurrentDream.mService.wakeUp();
+                        mHandler.postDelayed(mStopStubbornDreamRunnable, DREAM_FINISH_TIMEOUT);
+                        return;
+                    } catch (RemoteException ex) {
+                        // oh well, we tried, finish immediately instead
+                    }
                 }
             }
-        }
 
-        final DreamRecord oldDream = mCurrentDream;
-        mCurrentDream = null;
-        Slog.i(TAG, "Stopping dream: name=" + oldDream.mName
-                + ", isTest=" + oldDream.mIsTest + ", canDoze=" + oldDream.mCanDoze
-                + ", userId=" + oldDream.mUserId);
+            final DreamRecord oldDream = mCurrentDream;
+            mCurrentDream = null;
+            Slog.i(TAG, "Stopping dream: name=" + oldDream.mName
+                    + ", isTest=" + oldDream.mIsTest + ", canDoze=" + oldDream.mCanDoze
+                    + ", userId=" + oldDream.mUserId);
 
-        mHandler.removeCallbacks(mStopUnconnectedDreamRunnable);
-        mHandler.removeCallbacks(mStopStubbornDreamRunnable);
+            mHandler.removeCallbacks(mStopUnconnectedDreamRunnable);
+            mHandler.removeCallbacks(mStopStubbornDreamRunnable);
 
-        if (oldDream.mSentStartBroadcast) {
-            mContext.sendBroadcastAsUser(mDreamingStoppedIntent, UserHandle.ALL);
-        }
+            if (oldDream.mSentStartBroadcast) {
+                mContext.sendBroadcastAsUser(mDreamingStoppedIntent, UserHandle.ALL);
+            }
 
-        if (oldDream.mService != null) {
-            // Tell the dream that it's being stopped so that
-            // it can shut down nicely before we yank its window token out from
-            // under it.
+            if (oldDream.mService != null) {
+                // Tell the dream that it's being stopped so that
+                // it can shut down nicely before we yank its window token out from
+                // under it.
+                try {
+                    oldDream.mService.detach();
+                } catch (RemoteException ex) {
+                    // we don't care; this thing is on the way out
+                }
+
+                try {
+                    oldDream.mService.asBinder().unlinkToDeath(oldDream, 0);
+                } catch (NoSuchElementException ex) {
+                    // don't care
+                }
+                oldDream.mService = null;
+            }
+
+            if (oldDream.mBound) {
+                mContext.unbindService(oldDream);
+            }
+
             try {
-                oldDream.mService.detach();
+                mIWindowManager.removeWindowToken(oldDream.mToken);
             } catch (RemoteException ex) {
-                // we don't care; this thing is on the way out
+                Slog.w(TAG, "Error removing window token for dream.", ex);
             }
 
-            try {
-                oldDream.mService.asBinder().unlinkToDeath(oldDream, 0);
-            } catch (NoSuchElementException ex) {
-                // don't care
-            }
-            oldDream.mService = null;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mListener.onDreamStopped(oldDream.mToken);
+                }
+            });
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
-
-        if (oldDream.mBound) {
-            mContext.unbindService(oldDream);
-        }
-
-        try {
-            mIWindowManager.removeWindowToken(oldDream.mToken);
-        } catch (RemoteException ex) {
-            Slog.w(TAG, "Error removing window token for dream.", ex);
-        }
-
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mListener.onDreamStopped(oldDream.mToken);
-            }
-        });
     }
 
     private void attach(IDreamService service) {

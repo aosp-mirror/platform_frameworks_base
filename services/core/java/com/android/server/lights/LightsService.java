@@ -23,6 +23,7 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.IHardwareService;
 import android.os.Message;
+import android.os.Trace;
 import android.util.Slog;
 
 import java.io.FileInputStream;
@@ -105,7 +106,12 @@ public class LightsService extends SystemService {
                 mMode = mode;
                 mOnMS = onMS;
                 mOffMS = offMS;
-                setLight_native(mNativePointer, mId, color, mode, onMS, offMS, brightnessMode);
+                Trace.traceBegin(Trace.TRACE_TAG_POWER, "setLight(" + mId + ", " + color + ")");
+                try {
+                    setLight_native(mNativePointer, mId, color, mode, onMS, offMS, brightnessMode);
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                }
             }
         }
 
