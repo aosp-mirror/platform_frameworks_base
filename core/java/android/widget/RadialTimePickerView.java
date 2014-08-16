@@ -85,7 +85,7 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
     private static final int ALPHA_TRANSPARENT = 0;
 
     // Alpha level of color for selector.
-    private static final int ALPHA_SELECTOR = 255; // was 51
+    private static final int ALPHA_SELECTOR = 60; // was 51
 
     // Alpha level of color for selected circle.
     private static final int ALPHA_AMPM_SELECTED = ALPHA_SELECTOR;
@@ -105,7 +105,7 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
 
     private static final int CENTER_RADIUS = 2;
 
-    private static final int[] STATE_SET_SELECTED = new int[] { R.attr.state_selected };
+    private static final int[] STATE_SET_SELECTED = new int[] {R.attr.state_selected};
 
     private static int[] sSnapPrefer30sMap = new int[361];
 
@@ -337,6 +337,9 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         // list doesn't have a state for selected, we'll use this color.
         final int amPmSelectedColor = a.getColor(R.styleable.TimePicker_amPmSelectedBackgroundColor,
                 res.getColor(R.color.timepicker_default_ampm_selected_background_color_material));
+        amPmBackgroundColor = ColorStateList.addFirstIfMissing(
+                amPmBackgroundColor, R.attr.state_selected, amPmSelectedColor);
+
         mAmPmSelectedColor = amPmBackgroundColor.getColorForState(
                 STATE_SET_SELECTED, amPmSelectedColor);
         mAmPmUnselectedColor = amPmBackgroundColor.getDefaultColor();

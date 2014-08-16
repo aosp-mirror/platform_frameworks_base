@@ -30,39 +30,18 @@
             android:layout_width="@dimen/timepicker_left_side_width"
             android:layout_height="match_parent"
             android:orientation="vertical">
-        <FrameLayout
+        <include
+                layout="@layout/time_header_label"
                 android:layout_width="match_parent"
                 android:layout_height="0dip"
-                android:layout_weight="1">
-            <include
-                    layout="@layout/time_header_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/timepicker_header_height"
-                    android:layout_gravity="center" />
-        </FrameLayout>
-        <LinearLayout
-                android:id="@+id/layout_buttons"
-                style="?android:attr/buttonBarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:divider="?android:attr/dividerHorizontal"
-                android:showDividers="beginning">
-            <Button
-                    android:id="@+id/done_button"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="48dp"
-                    android:text="@string/done_label"
-                    android:textSize="@dimen/timepicker_done_label_size" />
-        </LinearLayout>
+                android:layout_weight="1"
+                android:layout_gravity="center" />
     </LinearLayout>
     <android.widget.RadialTimePickerView
-            android:id="@+id/radial_picker"
-            android:layout_width="@dimen/timepicker_radial_picker_dimen"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:focusable="true"
-            android:focusableInTouchMode="true" />
+        android:id="@+id/radial_picker"
+        android:layout_width="@dimen/timepicker_radial_picker_dimen"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
 </LinearLayout>

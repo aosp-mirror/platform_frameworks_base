@@ -20,25 +20,10 @@
               android:gravity="center"
               android:orientation="horizontal" >
 
-    <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:orientation="vertical" >
-
-        <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="0dip"
-                android:layout_weight="1"
-                android:orientation="vertical" >
-
-            <include layout="@layout/date_picker_header_view" />
-
-            <include layout="@layout/date_picker_selected_date" />
-        </LinearLayout>
-
-        <include layout="@layout/date_picker_done_button" />
-    </LinearLayout>
+    <include
+        layout="@layout/date_picker_selected_date"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" />
 
     <include layout="@layout/date_picker_view_animator" />
 
