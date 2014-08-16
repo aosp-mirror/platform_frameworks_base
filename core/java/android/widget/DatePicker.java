@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.Nullable;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -123,7 +124,7 @@ public class DatePicker extends FrameLayout {
 
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DatePicker,
                 defStyleAttr, defStyleRes);
-        int mode = a.getInt(R.styleable.DatePicker_datePickerMode, MODE_SPINNER);
+        final int mode = a.getInt(R.styleable.DatePicker_datePickerMode, MODE_SPINNER);
         a.recycle();
 
         switch (mode) {
@@ -146,20 +147,6 @@ public class DatePicker extends FrameLayout {
             int defStyleAttr, int defStyleRes) {
         return new DatePickerCalendarDelegate(this, context, attrs, defStyleAttr,
                 defStyleRes);
-    }
-
-    /**
-     * @hide
-     */
-    public void setShowDoneButton(boolean showDoneButton) {
-        mDelegate.setShowDoneButton(showDoneButton);
-    }
-
-    /**
-     * @hide
-     */
-    public void setDismissCallback(DatePickerDismissCallback callback) {
-        mDelegate.setDismissCallback(callback);
     }
 
     /**
@@ -257,6 +244,16 @@ public class DatePicker extends FrameLayout {
      */
     public void setMaxDate(long maxDate) {
         mDelegate.setMaxDate(maxDate);
+    }
+
+    /**
+     * Sets the callback that indicates the current date is valid.
+     *
+     * @param callback the callback, may be null
+     * @hide
+     */
+    public void setValidationCallback(@Nullable ValidationCallback callback) {
+        mDelegate.setValidationCallback(callback);
     }
 
     @Override
@@ -402,8 +399,7 @@ public class DatePicker extends FrameLayout {
         void setSpinnersShown(boolean shown);
         boolean getSpinnersShown();
 
-        void setShowDoneButton(boolean showDoneButton);
-        void setDismissCallback(DatePickerDismissCallback callback);
+        void setValidationCallback(ValidationCallback callback);
 
         void onConfigurationChanged(Configuration newConfig);
 
@@ -431,7 +427,8 @@ public class DatePicker extends FrameLayout {
         protected Locale mCurrentLocale;
 
         // Callbacks
-        protected  OnDateChangedListener mOnDateChangedListener;
+        protected OnDateChangedListener mOnDateChangedListener;
+        protected ValidationCallback mValidationCallback;
 
         public AbstractDatePickerDelegate(DatePicker delegator, Context context) {
             mDelegator = delegator;
@@ -447,15 +444,27 @@ public class DatePicker extends FrameLayout {
             }
             mCurrentLocale = locale;
         }
+
+        @Override
+        public void setValidationCallback(ValidationCallback callback) {
+            mValidationCallback = callback;
+        }
+
+        protected void onValidationChanged(boolean valid) {
+            if (mValidationCallback != null) {
+                mValidationCallback.onValidationChanged(valid);
+            }
+        }
     }
 
     /**
-     * A callback interface for dismissing the DatePicker when included into a Dialog
+     * A callback interface for updating input validity when the date picker
+     * when included into a dialog.
      *
      * @hide
      */
-    public static interface DatePickerDismissCallback {
-        void dismiss(DatePicker view, boolean isCancel, int year, int month, int dayOfMonth);
+    public static interface ValidationCallback {
+        void onValidationChanged(boolean valid);
     }
 
     /**
@@ -772,16 +781,6 @@ public class DatePicker extends FrameLayout {
         @Override
         public boolean getSpinnersShown() {
             return mSpinners.isShown();
-        }
-
-        @Override
-        public void setShowDoneButton(boolean showDoneButton) {
-            // Nothing to do
-        }
-
-        @Override
-        public void setDismissCallback(DatePickerDismissCallback callback) {
-            // Nothing to do
         }
 
         @Override

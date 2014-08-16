@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.Nullable;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -80,7 +81,7 @@ public class TimePicker extends FrameLayout {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.TimePicker, defStyleAttr, defStyleRes);
-        int mode = a.getInt(R.styleable.TimePicker_timePickerMode, MODE_SPINNER);
+        final int mode = a.getInt(R.styleable.TimePicker_timePickerMode, MODE_SPINNER);
         a.recycle();
 
         switch (mode) {
@@ -149,6 +150,16 @@ public class TimePicker extends FrameLayout {
         mDelegate.setOnTimeChangedListener(onTimeChangedListener);
     }
 
+    /**
+     * Sets the callback that indicates the current time is valid.
+     *
+     * @param callback the callback, may be null
+     * @hide
+     */
+    public void setValidationCallback(@Nullable ValidationCallback callback) {
+        mDelegate.setValidationCallback(callback);
+    }
+
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
@@ -158,27 +169,6 @@ public class TimePicker extends FrameLayout {
     @Override
     public boolean isEnabled() {
         return mDelegate.isEnabled();
-    }
-
-    /**
-     * @hide
-     */
-    public void setShowDoneButton(boolean showDoneButton) {
-        mDelegate.setShowDoneButton(showDoneButton);
-    }
-
-    /**
-     * @hide
-     */
-    public boolean isShowDoneButton() {
-        return mDelegate.isShowDoneButton();
-    }
-
-    /**
-     * @hide
-     */
-    public void setDismissCallback(TimePickerDismissCallback callback) {
-        mDelegate.setDismissCallback(callback);
     }
 
     @Override
@@ -244,13 +234,10 @@ public class TimePicker extends FrameLayout {
         boolean is24HourView();
 
         void setOnTimeChangedListener(OnTimeChangedListener onTimeChangedListener);
+        void setValidationCallback(ValidationCallback callback);
 
         void setEnabled(boolean enabled);
         boolean isEnabled();
-
-        boolean isShowDoneButton();
-        void setShowDoneButton(boolean showDoneButton);
-        void setDismissCallback(TimePickerDismissCallback callback);
 
         int getBaseline();
 
@@ -266,12 +253,13 @@ public class TimePicker extends FrameLayout {
     }
 
     /**
-     * A callback interface for dismissing the TimePicker when included into a Dialog
+     * A callback interface for updating input validity when the TimePicker
+     * when included into a Dialog.
      *
      * @hide
      */
-    public static interface TimePickerDismissCallback {
-        void dismiss(TimePicker view, boolean isCancel, int hourOfDay, int minute);
+    public static interface ValidationCallback {
+        void onValidationChanged(boolean valid);
     }
 
     /**
@@ -288,7 +276,8 @@ public class TimePicker extends FrameLayout {
         protected Locale mCurrentLocale;
 
         // Callbacks
-        protected  OnTimeChangedListener mOnTimeChangedListener;
+        protected OnTimeChangedListener mOnTimeChangedListener;
+        protected ValidationCallback mValidationCallback;
 
         public AbstractTimePickerDelegate(TimePicker delegator, Context context) {
             mDelegator = delegator;
@@ -303,6 +292,17 @@ public class TimePicker extends FrameLayout {
                 return;
             }
             mCurrentLocale = locale;
+        }
+
+        @Override
+        public void setValidationCallback(ValidationCallback callback) {
+            mValidationCallback = callback;
+        }
+
+        protected void onValidationChanged(boolean valid) {
+            if (mValidationCallback != null) {
+                mValidationCallback.onValidationChanged(valid);
+            }
         }
     }
 }

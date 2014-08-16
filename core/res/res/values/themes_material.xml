@@ -354,10 +354,10 @@ please see themes_device_defaults.xml.
         <item name="timePickerStyle">@style/Widget.Material.TimePicker</item>
 
         <!-- TimePicker dialog theme -->
-        <item name="timePickerDialogTheme">?attr/alertDialogTheme</item>
+        <item name="timePickerDialogTheme">?attr/dialogTheme</item>
 
         <!-- DatePicker style -->
-        <item name="datePickerStyle">?attr/alertDialogTheme</item>
+        <item name="datePickerStyle">?attr/dialogTheme</item>
 
         <!-- DatePicker dialog theme -->
         <item name="datePickerDialogTheme">@style/Theme.Material.Dialog.Alert</item>
@@ -697,13 +697,13 @@ please see themes_device_defaults.xml.
         <item name="timePickerStyle">@style/Widget.Material.Light.TimePicker</item>
 
         <!-- TimePicker dialog theme -->
-        <item name="timePickerDialogTheme">?attr/alertDialogTheme</item>
+        <item name="timePickerDialogTheme">?attr/dialogTheme</item>
 
         <!-- DatePicker style -->
         <item name="datePickerStyle">@style/Widget.Material.Light.DatePicker</item>
 
         <!-- DatePicker dialog theme -->
-        <item name="datePickerDialogTheme">?attr/alertDialogTheme</item>
+        <item name="datePickerDialogTheme">?attr/dialogTheme</item>
 
         <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_material</item>
         <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_light</item>
@@ -1186,19 +1186,6 @@ please see themes_device_defaults.xml.
          For applications targeting Honeycomb or newer, this is the default
          AlertDialog theme. -->
     <style name="Theme.Material.Light.Dialog.Alert" parent="Theme.Material.Light.Dialog.BaseAlert"/>
-
-    <!-- Base theme used to prevent circular references in Leanback overrides. -->
-    <style name="Theme.Material.Light.Dialog.BaseTimePicker" />
-
-    <!-- Material Light theme for the TimePicker dialog windows, which is used by the
-         {@link android.app.TimePickerDialog} class. -->
-    <style name="Theme.Material.Light.Dialog.TimePicker" parent="Theme.Material.Light.Dialog.BaseTimePicker" />
-
-    <style name="Theme.Material.Light.Dialog.BaseDatePicker" />
-
-    <!-- Material Light theme for the DatePicker dialog windows, which is used by the
-         {@link android.app.DatePickerDialog} class. -->
-    <style name="Theme.Material.Light.Dialog.DatePicker" parent="Theme.Material.Light.Dialog.BaseDatePicker"/>
 
     <!-- Theme for a presentation window on a secondary display. -->
     <style name="Theme.Material.Light.Dialog.Presentation" parent="@style/Theme.Material.Light.NoActionBar.Fullscreen" />
