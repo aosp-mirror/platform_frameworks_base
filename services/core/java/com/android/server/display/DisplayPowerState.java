@@ -23,6 +23,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.os.Trace;
 import android.util.FloatProperty;
 import android.util.IntProperty;
 import android.util.Slog;
@@ -405,18 +406,37 @@ final class DisplayPowerState {
                     }
                     boolean suspending = Display.isSuspendedState(state);
                     if (stateChanged && !suspending) {
-                        mBlanker.requestDisplayState(state);
+                        requestDisplayState(state);
                     }
                     if (backlightChanged) {
-                        mBacklight.setBrightness(backlight);
+                        setBrightness(backlight);
                     }
                     if (stateChanged && suspending) {
-                        mBlanker.requestDisplayState(state);
+                        requestDisplayState(state);
                     }
                 }
 
                 // Let the outer class know that all changes have been applied.
                 postScreenUpdateThreadSafe();
+            }
+
+            private void requestDisplayState(int state) {
+                Trace.traceBegin(Trace.TRACE_TAG_POWER, "requestDisplayState("
+                        + Display.stateToString(state) + ")");
+                try {
+                    mBlanker.requestDisplayState(state);
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                }
+            }
+
+            private void setBrightness(int backlight) {
+                Trace.traceBegin(Trace.TRACE_TAG_POWER, "setBrightness(" + backlight + ")");
+                try {
+                    mBacklight.setBrightness(backlight);
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                }
             }
         };
     }

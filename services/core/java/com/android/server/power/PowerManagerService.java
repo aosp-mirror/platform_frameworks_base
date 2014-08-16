@@ -56,6 +56,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.SystemService;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
@@ -817,17 +818,12 @@ public final class PowerManagerService extends com.android.server.SystemService
                         + " [" + wakeLock.mTag + "], flags=0x" + Integer.toHexString(flags));
             }
 
-            mWakeLocks.remove(index);
-            notifyWakeLockReleasedLocked(wakeLock);
-            wakeLock.mLock.unlinkToDeath(wakeLock, 0);
-
             if ((flags & PowerManager.WAIT_FOR_PROXIMITY_NEGATIVE) != 0) {
                 mRequestWaitForNegativeProximity = true;
             }
 
-            applyWakeLockFlagsOnReleaseLocked(wakeLock);
-            mDirty |= DIRTY_WAKE_LOCKS;
-            updatePowerStateLocked();
+            wakeLock.mLock.unlinkToDeath(wakeLock, 0);
+            removeWakeLockLocked(wakeLock, index);
         }
     }
 
@@ -843,13 +839,17 @@ public final class PowerManagerService extends com.android.server.SystemService
                 return;
             }
 
-            mWakeLocks.remove(index);
-            notifyWakeLockReleasedLocked(wakeLock);
-
-            applyWakeLockFlagsOnReleaseLocked(wakeLock);
-            mDirty |= DIRTY_WAKE_LOCKS;
-            updatePowerStateLocked();
+            removeWakeLockLocked(wakeLock, index);
         }
+    }
+
+    private void removeWakeLockLocked(WakeLock wakeLock, int index) {
+        mWakeLocks.remove(index);
+        notifyWakeLockReleasedLocked(wakeLock);
+
+        applyWakeLockFlagsOnReleaseLocked(wakeLock);
+        mDirty |= DIRTY_WAKE_LOCKS;
+        updatePowerStateLocked();
     }
 
     private void applyWakeLockFlagsOnReleaseLocked(WakeLock wakeLock) {
@@ -972,21 +972,26 @@ public final class PowerManagerService extends com.android.server.SystemService
             return false;
         }
 
-        mNotifier.onUserActivity(event, uid);
+        Trace.traceBegin(Trace.TRACE_TAG_POWER, "userActivity");
+        try {
+            mNotifier.onUserActivity(event, uid);
 
-        if ((flags & PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS) != 0) {
-            if (eventTime > mLastUserActivityTimeNoChangeLights
-                    && eventTime > mLastUserActivityTime) {
-                mLastUserActivityTimeNoChangeLights = eventTime;
-                mDirty |= DIRTY_USER_ACTIVITY;
-                return true;
+            if ((flags & PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS) != 0) {
+                if (eventTime > mLastUserActivityTimeNoChangeLights
+                        && eventTime > mLastUserActivityTime) {
+                    mLastUserActivityTimeNoChangeLights = eventTime;
+                    mDirty |= DIRTY_USER_ACTIVITY;
+                    return true;
+                }
+            } else {
+                if (eventTime > mLastUserActivityTime) {
+                    mLastUserActivityTime = eventTime;
+                    mDirty |= DIRTY_USER_ACTIVITY;
+                    return true;
+                }
             }
-        } else {
-            if (eventTime > mLastUserActivityTime) {
-                mLastUserActivityTime = eventTime;
-                mDirty |= DIRTY_USER_ACTIVITY;
-                return true;
-            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
         return false;
     }
@@ -1009,25 +1014,30 @@ public final class PowerManagerService extends com.android.server.SystemService
             return false;
         }
 
-        switch (mWakefulness) {
-            case WAKEFULNESS_ASLEEP:
-                Slog.i(TAG, "Waking up from sleep (uid " + uid +")...");
-                break;
-            case WAKEFULNESS_DREAMING:
-                Slog.i(TAG, "Waking up from dream (uid " + uid +")...");
-                break;
-            case WAKEFULNESS_DOZING:
-                Slog.i(TAG, "Waking up from dozing (uid " + uid +")...");
-                break;
+        Trace.traceBegin(Trace.TRACE_TAG_POWER, "wakeUp");
+        try {
+            switch (mWakefulness) {
+                case WAKEFULNESS_ASLEEP:
+                    Slog.i(TAG, "Waking up from sleep (uid " + uid +")...");
+                    break;
+                case WAKEFULNESS_DREAMING:
+                    Slog.i(TAG, "Waking up from dream (uid " + uid +")...");
+                    break;
+                case WAKEFULNESS_DOZING:
+                    Slog.i(TAG, "Waking up from dozing (uid " + uid +")...");
+                    break;
+            }
+
+            mLastWakeTime = eventTime;
+            mDirty |= DIRTY_WAKEFULNESS;
+            mWakefulness = WAKEFULNESS_AWAKE;
+            setInteractiveStateLocked(true, 0);
+
+            userActivityNoUpdateLocked(
+                    eventTime, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, uid);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
-
-        mLastWakeTime = eventTime;
-        mDirty |= DIRTY_WAKEFULNESS;
-        mWakefulness = WAKEFULNESS_AWAKE;
-        setInteractiveStateLocked(true, 0);
-
-        userActivityNoUpdateLocked(
-                eventTime, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, uid);
         return true;
     }
 
@@ -1055,53 +1065,58 @@ public final class PowerManagerService extends com.android.server.SystemService
             return false;
         }
 
-        switch (reason) {
-            case PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN:
-                Slog.i(TAG, "Going to sleep due to device administration policy "
-                        + "(uid " + uid +")...");
-                break;
-            case PowerManager.GO_TO_SLEEP_REASON_TIMEOUT:
-                Slog.i(TAG, "Going to sleep due to screen timeout (uid " + uid +")...");
-                break;
-            case PowerManager.GO_TO_SLEEP_REASON_LID_SWITCH:
-                Slog.i(TAG, "Going to sleep due to lid switch (uid " + uid +")...");
-                break;
-            case PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON:
-                Slog.i(TAG, "Going to sleep due to power button (uid " + uid +")...");
-                break;
-            case PowerManager.GO_TO_SLEEP_REASON_HDMI:
-                Slog.i(TAG, "Going to sleep due to HDMI standby (uid " + uid +")...");
-                break;
-            default:
-                Slog.i(TAG, "Going to sleep by application request (uid " + uid +")...");
-                reason = PowerManager.GO_TO_SLEEP_REASON_APPLICATION;
-                break;
-        }
-
-        mLastSleepTime = eventTime;
-        mDirty |= DIRTY_WAKEFULNESS;
-        mWakefulness = WAKEFULNESS_DOZING;
-        mSandmanSummoned = true;
-        setInteractiveStateLocked(false, reason);
-
-        // Report the number of wake locks that will be cleared by going to sleep.
-        int numWakeLocksCleared = 0;
-        final int numWakeLocks = mWakeLocks.size();
-        for (int i = 0; i < numWakeLocks; i++) {
-            final WakeLock wakeLock = mWakeLocks.get(i);
-            switch (wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK) {
-                case PowerManager.FULL_WAKE_LOCK:
-                case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
-                case PowerManager.SCREEN_DIM_WAKE_LOCK:
-                    numWakeLocksCleared += 1;
+        Trace.traceBegin(Trace.TRACE_TAG_POWER, "goToSleep");
+        try {
+            switch (reason) {
+                case PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN:
+                    Slog.i(TAG, "Going to sleep due to device administration policy "
+                            + "(uid " + uid +")...");
+                    break;
+                case PowerManager.GO_TO_SLEEP_REASON_TIMEOUT:
+                    Slog.i(TAG, "Going to sleep due to screen timeout (uid " + uid +")...");
+                    break;
+                case PowerManager.GO_TO_SLEEP_REASON_LID_SWITCH:
+                    Slog.i(TAG, "Going to sleep due to lid switch (uid " + uid +")...");
+                    break;
+                case PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON:
+                    Slog.i(TAG, "Going to sleep due to power button (uid " + uid +")...");
+                    break;
+                case PowerManager.GO_TO_SLEEP_REASON_HDMI:
+                    Slog.i(TAG, "Going to sleep due to HDMI standby (uid " + uid +")...");
+                    break;
+                default:
+                    Slog.i(TAG, "Going to sleep by application request (uid " + uid +")...");
+                    reason = PowerManager.GO_TO_SLEEP_REASON_APPLICATION;
                     break;
             }
-        }
-        EventLog.writeEvent(EventLogTags.POWER_SLEEP_REQUESTED, numWakeLocksCleared);
 
-        // Skip dozing if requested.
-        if ((flags & PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE) != 0) {
-            reallyGoToSleepNoUpdateLocked(eventTime, uid);
+            mLastSleepTime = eventTime;
+            mDirty |= DIRTY_WAKEFULNESS;
+            mWakefulness = WAKEFULNESS_DOZING;
+            mSandmanSummoned = true;
+            setInteractiveStateLocked(false, reason);
+
+            // Report the number of wake locks that will be cleared by going to sleep.
+            int numWakeLocksCleared = 0;
+            final int numWakeLocks = mWakeLocks.size();
+            for (int i = 0; i < numWakeLocks; i++) {
+                final WakeLock wakeLock = mWakeLocks.get(i);
+                switch (wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK) {
+                    case PowerManager.FULL_WAKE_LOCK:
+                    case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
+                    case PowerManager.SCREEN_DIM_WAKE_LOCK:
+                        numWakeLocksCleared += 1;
+                        break;
+                }
+            }
+            EventLog.writeEvent(EventLogTags.POWER_SLEEP_REQUESTED, numWakeLocksCleared);
+
+            // Skip dozing if requested.
+            if ((flags & PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE) != 0) {
+                reallyGoToSleepNoUpdateLocked(eventTime, uid);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
         return true;
     }
@@ -1124,12 +1139,17 @@ public final class PowerManagerService extends com.android.server.SystemService
             return false;
         }
 
-        Slog.i(TAG, "Nap time (uid " + uid +")...");
+        Trace.traceBegin(Trace.TRACE_TAG_POWER, "nap");
+        try {
+            Slog.i(TAG, "Nap time (uid " + uid +")...");
 
-        mDirty |= DIRTY_WAKEFULNESS;
-        mWakefulness = WAKEFULNESS_DREAMING;
-        mSandmanSummoned = true;
-        setInteractiveStateLocked(true, 0);
+            mDirty |= DIRTY_WAKEFULNESS;
+            mWakefulness = WAKEFULNESS_DREAMING;
+            mSandmanSummoned = true;
+            setInteractiveStateLocked(true, 0);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_POWER);
+        }
         return true;
     }
 
@@ -1145,11 +1165,16 @@ public final class PowerManagerService extends com.android.server.SystemService
             return false;
         }
 
-        Slog.i(TAG, "Sleeping (uid " + uid +")...");
+        Trace.traceBegin(Trace.TRACE_TAG_POWER, "reallyGoToSleep");
+        try {
+            Slog.i(TAG, "Sleeping (uid " + uid +")...");
 
-        mDirty |= DIRTY_WAKEFULNESS;
-        mWakefulness = WAKEFULNESS_ASLEEP;
-        setInteractiveStateLocked(false, PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+            mDirty |= DIRTY_WAKEFULNESS;
+            mWakefulness = WAKEFULNESS_ASLEEP;
+            setInteractiveStateLocked(false, PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_POWER);
+        }
         return true;
     }
 
@@ -1186,40 +1211,45 @@ public final class PowerManagerService extends com.android.server.SystemService
             Slog.wtf(TAG, "Power manager lock was not held when calling updatePowerStateLocked");
         }
 
-        // Phase 0: Basic state updates.
-        updateIsPoweredLocked(mDirty);
-        updateStayOnLocked(mDirty);
+        Trace.traceBegin(Trace.TRACE_TAG_POWER, "updatePowerState");
+        try {
+            // Phase 0: Basic state updates.
+            updateIsPoweredLocked(mDirty);
+            updateStayOnLocked(mDirty);
 
-        // Phase 1: Update wakefulness.
-        // Loop because the wake lock and user activity computations are influenced
-        // by changes in wakefulness.
-        final long now = SystemClock.uptimeMillis();
-        int dirtyPhase2 = 0;
-        for (;;) {
-            int dirtyPhase1 = mDirty;
-            dirtyPhase2 |= dirtyPhase1;
-            mDirty = 0;
+            // Phase 1: Update wakefulness.
+            // Loop because the wake lock and user activity computations are influenced
+            // by changes in wakefulness.
+            final long now = SystemClock.uptimeMillis();
+            int dirtyPhase2 = 0;
+            for (;;) {
+                int dirtyPhase1 = mDirty;
+                dirtyPhase2 |= dirtyPhase1;
+                mDirty = 0;
 
-            updateWakeLockSummaryLocked(dirtyPhase1);
-            updateUserActivitySummaryLocked(now, dirtyPhase1);
-            if (!updateWakefulnessLocked(dirtyPhase1)) {
-                break;
+                updateWakeLockSummaryLocked(dirtyPhase1);
+                updateUserActivitySummaryLocked(now, dirtyPhase1);
+                if (!updateWakefulnessLocked(dirtyPhase1)) {
+                    break;
+                }
             }
+
+            // Phase 2: Update dreams and display power state.
+            updateDreamLocked(dirtyPhase2);
+            updateDisplayPowerStateLocked(dirtyPhase2);
+
+            // Phase 3: Send notifications, if needed.
+            if (mDisplayReady) {
+                finishInteractiveStateChangeLocked();
+            }
+
+            // Phase 4: Update suspend blocker.
+            // Because we might release the last suspend blocker here, we need to make sure
+            // we finished everything else first!
+            updateSuspendBlockerLocked();
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
-
-        // Phase 2: Update dreams and display power state.
-        updateDreamLocked(dirtyPhase2);
-        updateDisplayPowerStateLocked(dirtyPhase2);
-
-        // Phase 3: Send notifications, if needed.
-        if (mDisplayReady) {
-            finishInteractiveStateChangeLocked();
-        }
-
-        // Phase 4: Update suspend blocker.
-        // Because we might release the last suspend blocker here, we need to make sure
-        // we finished everything else first!
-        updateSuspendBlockerLocked();
     }
 
     /**
@@ -1990,7 +2020,12 @@ public final class PowerManagerService extends com.android.server.SystemService
                 Slog.d(TAG, "Setting HAL auto-suspend mode to " + enable);
             }
             mHalAutoSuspendModeEnabled = enable;
-            nativeSetAutoSuspend(enable);
+            Trace.traceBegin(Trace.TRACE_TAG_POWER, "setHalAutoSuspend(" + enable + ")");
+            try {
+                nativeSetAutoSuspend(enable);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_POWER);
+            }
         }
     }
 
@@ -2000,7 +2035,12 @@ public final class PowerManagerService extends com.android.server.SystemService
                 Slog.d(TAG, "Setting HAL interactive mode to " + enable);
             }
             mHalInteractiveModeEnabled = enable;
-            nativeSetInteractive(enable);
+            Trace.traceBegin(Trace.TRACE_TAG_POWER, "setHalInteractive(" + enable + ")");
+            try {
+                nativeSetInteractive(enable);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_POWER);
+            }
         }
     }
 
@@ -2587,20 +2627,23 @@ public final class PowerManagerService extends com.android.server.SystemService
 
     private final class SuspendBlockerImpl implements SuspendBlocker {
         private final String mName;
+        private final String mTraceName;
         private int mReferenceCount;
 
         public SuspendBlockerImpl(String name) {
             mName = name;
+            mTraceName = "SuspendBlocker (" + name + ")";
         }
 
         @Override
         protected void finalize() throws Throwable {
             try {
                 if (mReferenceCount != 0) {
-                    Log.wtf(TAG, "Suspend blocker \"" + mName
+                    Slog.wtf(TAG, "Suspend blocker \"" + mName
                             + "\" was finalized without being released!");
                     mReferenceCount = 0;
                     nativeReleaseSuspendBlocker(mName);
+                    Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, mTraceName, 0);
                 }
             } finally {
                 super.finalize();
@@ -2615,6 +2658,7 @@ public final class PowerManagerService extends com.android.server.SystemService
                     if (DEBUG_SPEW) {
                         Slog.d(TAG, "Acquiring suspend blocker \"" + mName + "\".");
                     }
+                    Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, mTraceName, 0);
                     nativeAcquireSuspendBlocker(mName);
                 }
             }
@@ -2629,8 +2673,9 @@ public final class PowerManagerService extends com.android.server.SystemService
                         Slog.d(TAG, "Releasing suspend blocker \"" + mName + "\".");
                     }
                     nativeReleaseSuspendBlocker(mName);
+                    Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, mTraceName, 0);
                 } else if (mReferenceCount < 0) {
-                    Log.wtf(TAG, "Suspend blocker \"" + mName
+                    Slog.wtf(TAG, "Suspend blocker \"" + mName
                             + "\" was released without being acquired!", new Throwable());
                     mReferenceCount = 0;
                 }
@@ -2646,6 +2691,8 @@ public final class PowerManagerService extends com.android.server.SystemService
     }
 
     private final class ScreenOnBlockerImpl implements ScreenOnBlocker {
+        private static final String TRACE_NAME = "ScreenOnBlocker";
+
         private int mNestCount;
 
         public boolean isHeld() {
@@ -2658,8 +2705,11 @@ public final class PowerManagerService extends com.android.server.SystemService
         public void acquire() {
             synchronized (this) {
                 mNestCount += 1;
-                if (DEBUG) {
+                if (DEBUG || true) {
                     Slog.d(TAG, "Screen on blocked: mNestCount=" + mNestCount);
+                }
+                if (mNestCount == 1) {
+                    Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, TRACE_NAME, 0);
                 }
             }
         }
@@ -2668,16 +2718,16 @@ public final class PowerManagerService extends com.android.server.SystemService
         public void release() {
             synchronized (this) {
                 mNestCount -= 1;
-                if (mNestCount < 0) {
-                    Log.wtf(TAG, "Screen on blocker was released without being acquired!",
+                if (mNestCount == 0) {
+                    if (DEBUG || true) {
+                        Slog.d(TAG, "Screen on unblocked: mNestCount=" + mNestCount);
+                    }
+                    mHandler.sendEmptyMessage(MSG_SCREEN_ON_BLOCKER_RELEASED);
+                    Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, TRACE_NAME, 0);
+                } else if (mNestCount < 0) {
+                    Slog.wtf(TAG, "Screen on blocker was released without being acquired!",
                             new Throwable());
                     mNestCount = 0;
-                }
-                if (mNestCount == 0) {
-                    mHandler.sendEmptyMessage(MSG_SCREEN_ON_BLOCKER_RELEASED);
-                }
-                if (DEBUG) {
-                    Slog.d(TAG, "Screen on unblocked: mNestCount=" + mNestCount);
                 }
             }
         }
