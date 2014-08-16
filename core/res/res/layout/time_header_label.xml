@@ -14,20 +14,21 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/time_header"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center" >
-
-    <TextView
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/time_header"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center">
+        <TextView
             android:id="@+id/hours"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@+id/separator"
-            android:layout_alignBaseline="@+id/separator"/>
-
-    <TextView
+            android:layout_alignBaseline="@+id/separator" />
+        <TextView
             android:id="@+id/separator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -35,15 +36,13 @@
             android:paddingRight="@dimen/timepicker_separator_padding"
             android:layout_centerInParent="true"
             android:importantForAccessibility="no" />
-
-    <TextView
+        <TextView
             android:id="@+id/minutes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/separator"
             android:layout_alignBaseline="@+id/separator" />
-
-    <TextView
+        <TextView
             android:id="@+id/ampm_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -51,5 +50,5 @@
             android:paddingRight="@dimen/timepicker_ampm_left_padding"
             android:layout_toRightOf="@+id/separator"
             android:layout_alignBaseline="@+id/separator" />
-
-</RelativeLayout>
+    </RelativeLayout>
+</FrameLayout>

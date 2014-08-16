@@ -17,22 +17,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="wrap_content"
               android:layout_height="match_parent"
-              android:background="@color/datepicker_default_view_animator_color_holo_light"
               android:gravity="center"
               android:orientation="vertical" >
 
-    <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/datepicker_selected_calendar_layout_height"
-            android:orientation="vertical" >
-
-        <include layout="@layout/date_picker_header_view" />
-
-        <include layout="@layout/date_picker_selected_date" />
-    </LinearLayout>
+    <include
+        layout="@layout/date_picker_selected_date"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/datepicker_selected_calendar_layout_height" />
 
     <include layout="@layout/date_picker_view_animator" />
-
-    <include layout="@layout/date_picker_done_button" />
 
 </LinearLayout>

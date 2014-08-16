@@ -31,11 +31,9 @@ import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.SparseArray;
-import android.util.StateSet;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AlphaAnimation;
@@ -83,8 +81,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     private DayPickerView mDayPickerView;
     private YearPickerView mYearPickerView;
 
-    private ViewGroup mLayoutButtons;
-
     private boolean mIsEnabled = true;
 
     // Accessibility strings.
@@ -105,11 +101,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     private Calendar mTempDate;
     private Calendar mMinDate;
     private Calendar mMaxDate;
-
-    // For showing the done button when in a Dialog
-    private Button mDoneButton;
-    private boolean mShowDoneButton;
-    private DatePicker.DatePickerDismissCallback mDismissCallback;
 
     private HashSet<OnDateChangedListener> mListeners = new HashSet<OnDateChangedListener>();
 
@@ -165,7 +156,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
                 R.styleable.DatePicker_headerSelectedTextColor, defaultHighlightColor);
         final int headerBackgroundColor = a.getColor(R.styleable.DatePicker_headerBackgroundColor,
                 Color.TRANSPARENT);
-        mMonthAndDayLayout.setBackgroundColor(headerBackgroundColor);
+        mDateLayout.setBackgroundColor(headerBackgroundColor);
 
         final int monthTextAppearanceResId = a.getResourceId(
                 R.styleable.DatePicker_headerMonthTextAppearance, -1);
@@ -220,20 +211,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         Animation animation2 = new AlphaAnimation(1.0f, 0.0f);
         animation2.setDuration(ANIMATION_DURATION);
         mAnimator.setOutAnimation(animation2);
-
-        mLayoutButtons = (ViewGroup) mainView.findViewById(R.id.layout_buttons);
-        mDoneButton = (Button) mainView.findViewById(R.id.done);
-        mDoneButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                tryVibrate();
-                if (mDismissCallback != null) {
-                    mDismissCallback.dismiss(mDelegator, false, mCurrentDate.get(Calendar.YEAR),
-                            mCurrentDate.get(Calendar.MONTH),
-                            mCurrentDate.get(Calendar.DAY_OF_MONTH));
-                }
-            }
-        });
 
         updateDisplay(false);
         setCurrentView(MONTH_AND_DAY_VIEW);
@@ -311,9 +288,9 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
 
         // Position the Year View at the correct location
         if (viewIndices[YEAR_INDEX] == 0) {
-            mDateLayout.addView(mHeaderYearTextView, 0);
-        } else {
             mDateLayout.addView(mHeaderYearTextView, 1);
+        } else {
+            mDateLayout.addView(mHeaderYearTextView, 2);
         }
 
         // Position Day and Month Views
@@ -545,21 +522,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     }
 
     @Override
-    public void setShowDoneButton(boolean showDoneButton) {
-        mShowDoneButton = showDoneButton;
-        updateDoneButtonVisibility();
-    }
-
-    private void updateDoneButtonVisibility() {
-        mLayoutButtons.setVisibility(mShowDoneButton ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
-    public void setDismissCallback(DatePicker.DatePickerDismissCallback callback) {
-        mDismissCallback = callback;
-    }
-
-    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         mYearFormat = new SimpleDateFormat("y", newConfig.locale);
         mDayFormat = new SimpleDateFormat("d", newConfig.locale);
@@ -640,7 +602,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         updatePickers();
         setCurrentView(MONTH_AND_DAY_VIEW);
         updateDisplay(true);
-        updateDoneButtonEnableState();
     }
 
     // If the newly selected month / year does not contain the currently selected day number,
@@ -684,16 +645,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         mCurrentDate.set(Calendar.DAY_OF_MONTH, day);
         updatePickers();
         updateDisplay(true);
-        updateDoneButtonEnableState();
-    }
-
-    private void updateDoneButtonEnableState() {
-        if (mShowDoneButton) {
-            final boolean enabled = mCurrentDate.equals(mMinDate) ||
-                    mCurrentDate.equals(mMaxDate) ||
-                    (mCurrentDate.after(mMinDate) && mCurrentDate.before(mMaxDate));
-            mDoneButton.setEnabled(enabled);
-        }
     }
 
     private void updatePickers() {
