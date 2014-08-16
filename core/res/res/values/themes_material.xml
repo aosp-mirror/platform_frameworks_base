@@ -364,10 +364,10 @@ please see themes_device_defaults.xml.
 
         <!-- TODO: This belongs in a FastScroll style -->
         <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_material</item>
-        <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_dark</item>
-        <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_holo_dark</item>
+        <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_material</item>
+        <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_material</item>
         <item name="fastScrollTrackDrawable">@drawable/fastscroll_track_material</item>
-        <item name="fastScrollOverlayPosition">atThumb</item>
+        <item name="fastScrollOverlayPosition">aboveThumb</item>
 
         <!-- Color palette -->
         <item name="colorPrimaryDark">@color/material_blue_grey_900</item>
@@ -706,10 +706,10 @@ please see themes_device_defaults.xml.
         <item name="datePickerDialogTheme">?attr/alertDialogTheme</item>
 
         <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_material</item>
-        <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_holo_light</item>
-        <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_holo_light</item>
+        <item name="fastScrollPreviewBackgroundLeft">@drawable/fastscroll_label_left_material</item>
+        <item name="fastScrollPreviewBackgroundRight">@drawable/fastscroll_label_right_material</item>
         <item name="fastScrollTrackDrawable">@drawable/fastscroll_track_material</item>
-        <item name="fastScrollOverlayPosition">atThumb</item>
+        <item name="fastScrollOverlayPosition">aboveThumb</item>
 
         <!-- Color palette -->
         <item name="colorPrimaryDark">@color/material_blue_grey_100</item>
