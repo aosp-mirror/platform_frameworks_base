@@ -40,6 +40,7 @@ import android.os.StrictMode;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.AndroidRuntimeException;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayAdjustments;
@@ -643,8 +644,17 @@ public final class LoadedApk {
     }
 
     private void rewriteRValues(ClassLoader cl, String packageName, int id) {
+        final Class<?> rClazz;
         try {
-            final Class<?> rClazz = cl.loadClass(packageName + ".R");
+            rClazz = cl.loadClass(packageName + ".R");
+        } catch (ClassNotFoundException e) {
+            // This is not necessarily an error, as some packages do not ship with resources
+            // (or they do not need rewriting).
+            Log.i(TAG, "Could not find R class for package '" + packageName + "'");
+            return;
+        }
+
+        try {
             Class<?>[] declaredClasses = rClazz.getDeclaredClasses();
             for (Class<?> clazz : declaredClasses) {
                 try {
