@@ -132,14 +132,33 @@ public class VoiceInteractionManagerService extends SystemService {
 
         public void initForUser(int userHandle) {
             if (DEBUG) Slog.i(TAG, "initForUser user=" + userHandle);
-            ComponentName curInteractor = getCurInteractor(userHandle);
+            String curInteractorStr = Settings.Secure.getStringForUser(
+                    mContext.getContentResolver(),
+                    Settings.Secure.VOICE_INTERACTION_SERVICE, userHandle);
             ComponentName curRecognizer = getCurRecognizer(userHandle);
+            VoiceInteractionServiceInfo curInteractorInfo = null;
+            if (curInteractorStr == null && curRecognizer != null) {
+                // If there is no interactor setting, that means we are upgrading
+                // from an older platform version.  If the current recognizer is not
+                // set or matches the preferred recognizer, then we want to upgrade
+                // the user to have the default voice interaction service enabled.
+                curInteractorInfo = findAvailInteractor(userHandle, curRecognizer);
+                if (curInteractorInfo != null) {
+                    // Looks good!  We'll apply this one.  To make it happen, we clear the
+                    // recognizer so that we don't think we have anything set and will
+                    // re-apply the settings.
+                    curRecognizer = null;
+                }
+            }
+
             if (curRecognizer != null) {
                 // If we already have at least a recognizer, then we probably want to
                 // leave things as they are...  unless something has disappeared.
                 IPackageManager pm = AppGlobals.getPackageManager();
                 ServiceInfo interactorInfo = null;
                 ServiceInfo recognizerInfo = null;
+                ComponentName curInteractor = !TextUtils.isEmpty(curInteractorStr)
+                        ? ComponentName.unflattenFromString(curInteractorStr) : null;
                 try {
                     recognizerInfo = pm.getServiceInfo(curRecognizer, 0, userHandle);
                     if (curInteractor != null) {
@@ -154,32 +173,27 @@ public class VoiceInteractionManagerService extends SystemService {
             }
 
             // Initializing settings, look for an interactor first.
-            curInteractor = findAvailInteractor(userHandle);
-            if (curInteractor != null) {
-                try {
-                    VoiceInteractionServiceInfo info = new VoiceInteractionServiceInfo(
-                            mContext.getPackageManager(), curInteractor, userHandle);
-                    if (info.getParseError() == null) {
-                        setCurInteractor(curInteractor, userHandle);
-                        if (info.getRecognitionService() != null) {
-                            // Eventually it will be an error to not specify this.
-                            curRecognizer = new ComponentName(info.getServiceInfo().packageName,
-                                    info.getRecognitionService());
-                            setCurRecognizer(curRecognizer, userHandle);
-                            return;
-                        }
-                    } else {
-                        Slog.w(TAG, "Bad interaction service " + curInteractor + ": "
-                                + info.getParseError());
-                    }
-                } catch (PackageManager.NameNotFoundException e) {
-                } catch (RemoteException e) {
+            if (curInteractorInfo == null) {
+                curInteractorInfo = findAvailInteractor(userHandle, null);
+            }
+            if (curInteractorInfo != null) {
+                // Eventually it will be an error to not specify this.
+                setCurInteractor(new ComponentName(curInteractorInfo.getServiceInfo().packageName,
+                        curInteractorInfo.getServiceInfo().name), userHandle);
+                if (curInteractorInfo.getRecognitionService() != null) {
+                    setCurRecognizer(
+                            new ComponentName(curInteractorInfo.getServiceInfo().packageName,
+                                    curInteractorInfo.getRecognitionService()), userHandle);
+                    return;
                 }
             }
 
             // No voice interactor, we'll just set up a simple recognizer.
             curRecognizer = findAvailRecognizer(null, userHandle);
             if (curRecognizer != null) {
+                if (curInteractorInfo == null) {
+                    setCurInteractor(null, userHandle);
+                }
                 setCurRecognizer(curRecognizer, userHandle);
             }
         }
@@ -234,7 +248,7 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
-        ComponentName findAvailInteractor(int userHandle) {
+        VoiceInteractionServiceInfo findAvailInteractor(int userHandle, ComponentName recognizer) {
             List<ResolveInfo> available =
                     mContext.getPackageManager().queryIntentServicesAsUser(
                             new Intent(VoiceInteractionService.SERVICE_INTERFACE), 0, userHandle);
@@ -246,23 +260,41 @@ public class VoiceInteractionManagerService extends SystemService {
             } else {
                 // Find first system package.  We never want to allow third party services to
                 // be automatically selected, because those require approval of the user.
-                ServiceInfo serviceInfo = null;
+                VoiceInteractionServiceInfo foundInfo = null;
                 for (int i=0; i<numAvailable; i++) {
                     ServiceInfo cur = available.get(i).serviceInfo;
                     if ((cur.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
-                        if (serviceInfo == null) {
-                            serviceInfo = cur;
-                        } else {
-                            Slog.w(TAG, "more than one voice interaction service, picking first "
-                                    + new ComponentName(serviceInfo.packageName, serviceInfo.name)
-                                    + " over "
-                                    + new ComponentName(cur.packageName, cur.name));
+                        ComponentName comp = new ComponentName(cur.packageName, cur.name);
+                        try {
+                            VoiceInteractionServiceInfo info = new VoiceInteractionServiceInfo(
+                                    mContext.getPackageManager(), comp, userHandle);
+                            if (info.getParseError() == null) {
+                                if (recognizer == null || info.getServiceInfo().packageName.equals(
+                                        recognizer.getPackageName())) {
+                                    if (foundInfo == null) {
+                                        foundInfo = info;
+                                    } else {
+                                        Slog.w(TAG, "More than one voice interaction service, "
+                                                + "picking first "
+                                                + new ComponentName(
+                                                        foundInfo.getServiceInfo().packageName,
+                                                        foundInfo.getServiceInfo().name)
+                                                + " over "
+                                                + new ComponentName(cur.packageName, cur.name));
+                                    }
+                                }
+                            } else {
+                                Slog.w(TAG, "Bad interaction service " + comp + ": "
+                                        + info.getParseError());
+                            }
+                        } catch (PackageManager.NameNotFoundException e) {
+                            Slog.w(TAG, "Failure looking up interaction service " + comp);
+                        } catch (RemoteException e) {
                         }
                     }
                 }
 
-                return serviceInfo != null ?
-                        new ComponentName(serviceInfo.packageName, serviceInfo.name) : null;
+                return foundInfo;
             }
         }
 
