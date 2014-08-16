@@ -23,10 +23,10 @@
     <string name="font_family_headline_material">sans-serif</string>
     <string name="font_family_title_material">sans-serif-medium</string>
     <string name="font_family_subhead_material">sans-serif</string>
+    <string name="font_family_menu_material">sans-serif</string>
     <string name="font_family_body_2_material">sans-serif-medium</string>
     <string name="font_family_body_1_material">sans-serif</string>
     <string name="font_family_caption_material">sans-serif</string>
-    <string name="font_family_menu_material">sans-serif-medium</string>
     <string name="font_family_button_material">sans-serif-medium</string>
 
 </resources>

@@ -632,7 +632,10 @@ please see styles_device_defaults.xml.
         <item name="listSelector">?attr/listChoiceBackgroundIndicator</item>
     </style>
 
-    <style name="Widget.Material.ListView.DropDown"/>
+    <style name="Widget.Material.ListView.DropDown">
+        <item name="divider">@null</item>
+    </style>
+
     <style name="Widget.Material.ListView.White"/>
 
     <style name="Widget.Material.PopupWindow" parent="Widget.PopupWindow"/>
