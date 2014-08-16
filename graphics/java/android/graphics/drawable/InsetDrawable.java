@@ -26,13 +26,10 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
-import android.graphics.Insets;
-import android.graphics.Outline;
+import android.graphics.*;
 import android.graphics.PorterDuff.Mode;
-import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -53,6 +50,8 @@ import java.io.IOException;
  * @attr ref android.R.styleable#InsetDrawable_insetBottom
  */
 public class InsetDrawable extends Drawable implements Drawable.Callback {
+    private static final String LOG_TAG = "InsetDrawable";
+
     private final Rect mTmpRect = new Rect();
 
     private InsetState mInsetState;
@@ -87,6 +86,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
         final TypedArray a = r.obtainAttributes(attrs, R.styleable.InsetDrawable);
         super.inflateWithAttributes(r, parser, a, R.styleable.InsetDrawable_visible);
         updateStateFromTypedArray(a);
+        a.recycle();
 
         // Load inner XML elements.
         if (mInsetState.mDrawable == null) {
@@ -104,19 +104,9 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
             dr.setCallback(this);
         }
 
-        verifyRequiredAttributes(a);
-        a.recycle();
-    }
-
-    private void verifyRequiredAttributes(TypedArray a) throws XmlPullParserException {
-        // If we're not waiting on a theme, verify required attributes.
-        if (mInsetState.mThemeAttrs == null) {
-            if (mInsetState.mThemeAttrs[R.styleable.InsetDrawable_drawable] != 0
-                    && mInsetState.mDrawable == null) {
-                throw new XmlPullParserException(a.getPositionDescription() +
-                        ": <inset> tag requires a 'drawable' attribute or "
-                        + "child tag defining a drawable");
-            }
+        // Verify state.
+        if (mInsetState.mDrawable == null) {
+            Log.w(LOG_TAG, "No drawable specified for <inset>");
         }
     }
 
@@ -177,7 +167,6 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
         final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.InsetDrawable);
         try {
             updateStateFromTypedArray(a);
-            verifyRequiredAttributes(a);
         } catch (XmlPullParserException e) {
             throw new RuntimeException(e);
         } finally {
@@ -235,8 +224,12 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
         padding.top += mInsetState.mInsetTop;
         padding.bottom += mInsetState.mInsetBottom;
 
-        return pad || (mInsetState.mInsetLeft | mInsetState.mInsetRight |
-                mInsetState.mInsetTop | mInsetState.mInsetBottom) != 0;
+        if (pad || (mInsetState.mInsetLeft | mInsetState.mInsetRight |
+                    mInsetState.mInsetTop | mInsetState.mInsetBottom) != 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /** @hide */
