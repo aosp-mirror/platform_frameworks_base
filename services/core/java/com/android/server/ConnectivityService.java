@@ -1534,7 +1534,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return;
         }
 
-        if (LinkProperties.isValidMtu(mtu, newLp.hasGlobalIPv6Address())) {
+        if (LinkProperties.isValidMtu(mtu, newLp.hasGlobalIPv6Address()) == false) {
             loge("Unexpected mtu value: " + mtu + ", " + iface);
             return;
         }
