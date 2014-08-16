@@ -44,11 +44,12 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
+import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.net.ProxyInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
@@ -3551,8 +3552,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mUserManager.setUserRestrictions(new Bundle(),
-                        new UserHandle(UserHandle.USER_OWNER));
+                clearUserRestrictions(new UserHandle(UserHandle.USER_OWNER));
                 if (mDeviceOwner != null) {
                     mDeviceOwner.clearDeviceOwner();
                     mDeviceOwner.writeOwnerFile();
@@ -3615,7 +3615,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mUserManager.setUserRestrictions(new Bundle(), callingUser);
+                clearUserRestrictions(callingUser);
                 if (mDeviceOwner != null) {
                     mDeviceOwner.removeProfileOwner(callingUser.getIdentifier());
                     mDeviceOwner.writeOwnerFile();
@@ -3623,6 +3623,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+    }
+
+    private void clearUserRestrictions(UserHandle userHandle) {
+        AudioManager audioManager =
+                (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        Bundle userRestrictions = mUserManager.getUserRestrictions();
+        mUserManager.setUserRestrictions(new Bundle(), userHandle);
+        if (userRestrictions.getBoolean(UserManager.DISALLOW_ADJUST_VOLUME)) {
+            audioManager.setMasterMute(false);
+        }
+        if (userRestrictions.getBoolean(UserManager.DISALLOW_UNMUTE_MICROPHONE)) {
+            audioManager.setMicrophoneMute(false);
         }
     }
 
@@ -4168,7 +4181,57 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             long id = Binder.clearCallingIdentity();
             try {
+                AudioManager audioManager =
+                        (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+                boolean alreadyRestricted = mUserManager.hasUserRestriction(key);
+
+                if (enabled && !alreadyRestricted) {
+                    if (UserManager.DISALLOW_CONFIG_WIFI.equals(key)) {
+                        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                                Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 0,
+                                userHandle.getIdentifier());
+                    } else if (UserManager.DISALLOW_USB_FILE_TRANSFER.equals(key)) {
+                        UsbManager manager =
+                                (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
+                        manager.setCurrentFunction("none", false);
+                    } else if (UserManager.DISALLOW_SHARE_LOCATION.equals(key)) {
+                        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                                Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF,
+                                userHandle.getIdentifier());
+                        Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                                Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "",
+                                userHandle.getIdentifier());
+                    } else if (UserManager.DISALLOW_DEBUGGING_FEATURES.equals(key)) {
+                        Settings.Global.putStringForUser(mContext.getContentResolver(),
+                                Settings.Global.ADB_ENABLED, "0", userHandle.getIdentifier());
+                    } else if (UserManager.ENSURE_VERIFY_APPS.equals(key)) {
+                        Settings.Global.putStringForUser(mContext.getContentResolver(),
+                                Settings.Global.PACKAGE_VERIFIER_ENABLE, "1",
+                                userHandle.getIdentifier());
+                        Settings.Global.putStringForUser(mContext.getContentResolver(),
+                                Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, "1",
+                                userHandle.getIdentifier());
+                    } else if (UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES.equals(key)) {
+                        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                                Settings.Secure.INSTALL_NON_MARKET_APPS, 0,
+                                userHandle.getIdentifier());
+                    } else if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
+                        audioManager.setMicrophoneMute(true);
+                    } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
+                        audioManager.setMasterMute(true);
+                    }
+                }
+
                 mUserManager.setUserRestriction(key, enabled, userHandle);
+
+                if (!enabled && alreadyRestricted) {
+                    if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
+                        audioManager.setMicrophoneMute(false);
+                    } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
+                        audioManager.setMasterMute(false);
+                    }
+                }
+
             } finally {
                 restoreCallingIdentity(id);
             }
