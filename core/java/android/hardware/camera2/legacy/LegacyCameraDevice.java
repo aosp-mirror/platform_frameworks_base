@@ -510,4 +510,6 @@ public class LegacyCameraDevice implements AutoCloseable {
             /*out*/int[/*2*/] dimens);
 
     private static native int nativeSetNextTimestamp(Surface surface, long timestamp);
+
+    static native int nativeGetJpegFooterSize();
 }
