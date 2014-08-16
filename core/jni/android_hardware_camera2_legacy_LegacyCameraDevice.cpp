@@ -633,6 +633,11 @@ static jint LegacyCameraDevice_nativeSetNextTimestamp(JNIEnv* env, jobject thiz,
     return NO_ERROR;
 }
 
+static jint LegacyCameraDevice_nativeGetJpegFooterSize(JNIEnv* env, jobject thiz) {
+    ALOGV("nativeGetJpegFooterSize");
+    return static_cast<jint>(sizeof(struct camera3_jpeg_blob));
+}
+
 } // extern "C"
 
 static JNINativeMethod gCameraDeviceMethods[] = {
@@ -666,6 +671,9 @@ static JNINativeMethod gCameraDeviceMethods[] = {
     { "nativeSetNextTimestamp",
     "(Landroid/view/Surface;J)I",
     (void *)LegacyCameraDevice_nativeSetNextTimestamp },
+    { "nativeGetJpegFooterSize",
+    "()I",
+    (void *)LegacyCameraDevice_nativeGetJpegFooterSize },
 };
 
 // Get all the required offsets in java class and register native functions
