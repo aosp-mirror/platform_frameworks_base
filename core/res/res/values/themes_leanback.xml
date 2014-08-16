@@ -58,5 +58,6 @@
         <item name="textAppearanceListItem">@style/TextAppearance.Leanback.FormWizard.ListItem</item>
         <item name="textAppearance">@style/TextAppearance.Leanback.FormWizard</item>
         <item name="textColorPrimary">@color/primary_text_leanback_formwizard_dark</item>
+        <item name="windowAnimationStyle">@style/WindowAnimationStyle.Leanback.Setup</item>
     </style>
 </resources>
