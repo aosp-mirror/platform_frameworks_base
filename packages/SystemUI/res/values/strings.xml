@@ -709,13 +709,13 @@
     <string name="guest_wipe_session_title">Welcome back, guest!</string>
 
     <!-- Message of the notification when resuming an existing guest session [CHAR LIMIT=NONE] -->
-    <string name="guest_wipe_session_message">Do you want to start a new session?</string>
+    <string name="guest_wipe_session_message">Do you want to continue your session?</string>
 
     <!-- Notification when resuming an existing guest session: Action that starts a new session [CHAR LIMIT=35] -->
-    <string name="guest_wipe_session_wipe">Yes</string>
+    <string name="guest_wipe_session_wipe">Start over</string>
 
     <!-- Notification when resuming an existing guest session: Action that continues with the current session [CHAR LIMIT=35] -->
-    <string name="guest_wipe_session_dontwipe">No, thanks</string>
+    <string name="guest_wipe_session_dontwipe">Yes, continue</string>
 
 
     <!-- Zen mode condition: time duration in minutes. [CHAR LIMIT=NONE] -->
