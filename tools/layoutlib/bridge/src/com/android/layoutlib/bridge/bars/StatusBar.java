@@ -45,7 +45,7 @@ public class StatusBar extends CustomBar {
         // We do know the order though.
         // 0 is the spacer
         loadIcon(1, "stat_sys_wifi_signal_4_fully.png", density);
-        loadIcon(2, "stat_sys_battery_charge_anim100.png", density);
+        loadIcon(2, "stat_sys_battery_100.png", density);
     }
 
     @Override
