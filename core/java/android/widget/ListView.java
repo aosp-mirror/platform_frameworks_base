@@ -1161,7 +1161,7 @@ public class ListView extends AbsListView {
 
             if (recycleOnMeasure() && mRecycler.shouldRecycleViewType(
                     ((LayoutParams) child.getLayoutParams()).viewType)) {
-                mRecycler.addScrapView(child, -1);
+                mRecycler.addScrapView(child, 0);
             }
         }
 
