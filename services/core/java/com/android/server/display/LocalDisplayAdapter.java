@@ -21,7 +21,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemProperties;
-import android.util.Pair;
+import android.os.Trace;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -224,8 +224,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         @Override
         public void requestDisplayStateLocked(int state) {
             if (mState != state) {
-                SurfaceControl.setDisplayPowerMode(getDisplayTokenLocked(),
-                        getPowerModeForState(state));
+                final int mode = getPowerModeForState(state);
+                Trace.traceBegin(Trace.TRACE_TAG_POWER, "requestDisplayState("
+                        + Display.stateToString(state) + ", id=" + mBuiltInDisplayId + ")");
+                try {
+                    SurfaceControl.setDisplayPowerMode(getDisplayTokenLocked(), mode);
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                }
                 mState = state;
                 updateDeviceInfoLocked();
             }

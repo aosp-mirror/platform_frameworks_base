@@ -37,7 +37,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.text.format.DateUtils;
+import android.os.Trace;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.Spline;
@@ -73,6 +73,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private static boolean DEBUG = false;
     private static final boolean DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT = false;
+
+    private static final String SCREEN_ON_BLOCKED_TRACE_NAME = "Screen on blocked";
 
     // If true, uses the electron beam on animation.
     // We might want to turn this off if we cannot get a guarantee that the screen
@@ -714,11 +716,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private void blockScreenOn() {
         if (!mScreenOnWasBlocked) {
+            Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, SCREEN_ON_BLOCKED_TRACE_NAME, 0);
             mScreenOnWasBlocked = true;
             mScreenOnBlockStartRealTime = SystemClock.elapsedRealtime();
-            if (DEBUG) {
-                Slog.d(TAG, "Blocked screen on.");
-            }
+            Slog.i(TAG, "Blocking screen on until initial contents have been drawn.");
         }
     }
 
@@ -726,9 +727,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mScreenOnWasBlocked) {
             mScreenOnWasBlocked = false;
             long delay = SystemClock.elapsedRealtime() - mScreenOnBlockStartRealTime;
-            if (delay > 1000 || DEBUG) {
-                Slog.d(TAG, "Unblocked screen on after " + delay + " ms");
-            }
+            Slog.i(TAG, "Unblocked screen on after " + delay + " ms");
+            Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, SCREEN_ON_BLOCKED_TRACE_NAME, 0);
         }
     }
 
