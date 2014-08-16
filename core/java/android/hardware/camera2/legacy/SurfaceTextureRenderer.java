@@ -16,6 +16,7 @@
 package android.hardware.camera2.legacy;
 
 import android.graphics.ImageFormat;
+import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.os.Environment;
 import android.opengl.EGL14;
@@ -194,6 +195,9 @@ public class SurfaceTextureRenderer {
         checkGlError("onDrawFrame start");
         st.getTransformMatrix(mSTMatrix);
 
+        Matrix.setIdentityM(mMVPMatrix, /*smOffset*/0);
+
+        // Find intermediate buffer dimensions
         Size dimens;
         try {
             dimens = LegacyCameraDevice.getTextureSize(st);
@@ -201,9 +205,6 @@ public class SurfaceTextureRenderer {
             // Should never hit this.
             throw new IllegalStateException("Surface abandoned, skipping drawFrame...", e);
         }
-
-        Matrix.setIdentityM(mMVPMatrix, /*smOffset*/0);
-
         float texWidth = dimens.getWidth();
         float texHeight = dimens.getHeight();
 
@@ -211,32 +212,30 @@ public class SurfaceTextureRenderer {
             throw new IllegalStateException("Illegal intermediate texture with dimension of 0");
         }
 
-        // Find largest scaling factor from the intermediate texture dimension to the
-        // output surface dimension.  Scaling the intermediate texture by this allows
-        // us to letterbox/pillerbox the output surface into the intermediate texture.
-        float widthRatio = width / texWidth;
-        float heightRatio = height / texHeight;
-        float actual = (widthRatio < heightRatio) ? heightRatio : widthRatio;
+        // Letterbox or pillerbox output dimensions into intermediate dimensions.
+        RectF intermediate = new RectF(/*left*/0, /*top*/0, /*right*/texWidth, /*bottom*/texHeight);
+        RectF output = new RectF(/*left*/0, /*top*/0, /*right*/width, /*bottom*/height);
+        android.graphics.Matrix boxingXform = new android.graphics.Matrix();
+        boxingXform.setRectToRect(output, intermediate, android.graphics.Matrix.ScaleToFit.CENTER);
+        boxingXform.mapRect(output);
+
+        // Find scaling factor from pillerboxed/letterboxed output dimensions to intermediate
+        // buffer dimensions.
+        float scaleX = intermediate.width() / output.width();
+        float scaleY = intermediate.height() / output.height();
+
+        // Scale opposite dimension in clip coordinates so output is letterboxed/pillerboxed into
+        // the intermediate dimensions (rather than vice-versa).
+        Matrix.scaleM(mMVPMatrix, /*offset*/0, /*x*/scaleY, /*y*/scaleX, /*z*/1);
 
         if (DEBUG) {
-            Log.d(TAG, "Scaling factor " + actual + " used for " + width + "x" + height +
-                    " surface, intermediate buffer size is " + texWidth + "x" + texHeight);
+            Log.d(TAG, "Scaling factors (S_x = " + scaleX + ",S_y = " + scaleY + ") used for " +
+                    width + "x" + height + " surface, intermediate buffer size is " + texWidth +
+                    "x" + texHeight);
         }
 
-        // Set the viewport height and width to be the scaled intermediate texture dimensions.
-        int viewportW = (int) (actual * texWidth);
-        int viewportH = (int) (actual * texHeight);
-
-        // Set the offset of the viewport so that the output surface is centered in the viewport.
-        float dx = (width - viewportW) / 2f;
-        float dy = (height - viewportH) / 2f;
-
-        if (DEBUG) {
-            Log.d(TAG, "Translation " + dx + "," + dy + " used for " + width + "x" + height +
-                    " surface");
-        }
-
-        GLES20.glViewport((int) dx, (int) dy, viewportW, viewportH);
+        // Set viewport to be output buffer dimensions
+        GLES20.glViewport(0, 0, width, height);
 
         if (DEBUG) {
             GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
@@ -251,7 +250,7 @@ public class SurfaceTextureRenderer {
 
         mTriangleVertices.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
         GLES20.glVertexAttribPointer(maPositionHandle, VERTEX_POS_SIZE, GLES20.GL_FLOAT,
-                /*normalized*/ false,TRIANGLE_VERTICES_DATA_STRIDE_BYTES, mTriangleVertices);
+                /*normalized*/ false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, mTriangleVertices);
         checkGlError("glVertexAttribPointer maPosition");
         GLES20.glEnableVertexAttribArray(maPositionHandle);
         checkGlError("glEnableVertexAttribArray maPositionHandle");
@@ -654,6 +653,8 @@ public class SurfaceTextureRenderer {
             if (LegacyCameraDevice.containsSurfaceId(holder.surface, targetSurfaceIds)) {
                 makeCurrent(holder.eglSurface);
                 try {
+                    LegacyCameraDevice.setSurfaceDimens(holder.surface, holder.width,
+                            holder.height);
                     LegacyCameraDevice.setNextTimestamp(holder.surface, captureHolder.second);
                     drawFrame(mSurfaceTexture, holder.width, holder.height);
                     swapBuffers(holder.eglSurface);
