@@ -989,6 +989,10 @@ int doDump(Bundle* bundle)
             bool hasReadCallLogPermission = false;
             bool hasWriteCallLogPermission = false;
 
+            // If an app declares itself as multiArch, we report the
+            // native libraries differently.
+            bool hasMultiArch = false;
+
             // This next group of variables is used to implement a group of
             // backward-compatibility heuristics necessitated by the addition of
             // some new uses-feature constants in 2.1 and 2.2. In most cases, the
@@ -1232,6 +1236,20 @@ int doDump(Bundle* bundle)
                         }
                         if (debuggable != 0) {
                             printf("application-debuggable\n");
+                        }
+
+                        // We must search by name because the multiArch flag hasn't been API
+                        // frozen yet.
+                        int32_t multiArchIndex = tree.indexOfAttribute(RESOURCES_ANDROID_NAMESPACE,
+                                "multiArch");
+                        if (multiArchIndex >= 0) {
+                            Res_value value;
+                            if (tree.getAttributeValue(multiArchIndex, &value) != NO_ERROR) {
+                                if (value.dataType >= Res_value::TYPE_FIRST_INT &&
+                                        value.dataType <= Res_value::TYPE_LAST_INT) {
+                                    hasMultiArch = value.data;
+                                }
+                            }
                         }
                     } else if (tag == "uses-sdk") {
                         int32_t code = getIntegerAttribute(tree, MIN_SDK_VERSION_ATTR, &error);
@@ -2044,12 +2062,54 @@ int doDump(Bundle* bundle)
             AssetDir* dir = assets.openNonAssetDir(assetsCookie, "lib");
             if (dir != NULL) {
                 if (dir->getFileCount() > 0) {
-                    printf("native-code:");
+                    SortedVector<String8> architectures;
                     for (size_t i=0; i<dir->getFileCount(); i++) {
-                        printf(" '%s'", ResTable::normalizeForOutput(
-                                dir->getFileName(i).string()).string());
+                        architectures.add(ResTable::normalizeForOutput(
+                                dir->getFileName(i).string()));
                     }
-                    printf("\n");
+
+                    bool outputAltNativeCode = false;
+                    // A multiArch package is one that contains 64-bit and
+                    // 32-bit versions of native code and expects 3rd-party
+                    // apps to load these native code libraries. Since most
+                    // 64-bit systems also support 32-bit apps, the apps
+                    // loading this multiArch package's code may be either
+                    // 32-bit or 64-bit.
+                    if (hasMultiArch) {
+                        // If this is a multiArch package, report the 64-bit
+                        // version only. Then as a separate entry, report the
+                        // rest.
+                        //
+                        // If we report the 32-bit architecture, this APK will
+                        // be installed on a 32-bit device, causing a large waste
+                        // of bandwidth and disk space. This assumes that
+                        // the developer of the multiArch package has also
+                        // made a version that is 32-bit only.
+                        String8 intel64("x86_64");
+                        String8 arm64("arm64-v8a");
+                        ssize_t index = architectures.indexOf(intel64);
+                        if (index < 0) {
+                            index = architectures.indexOf(arm64);
+                        }
+
+                        if (index >= 0) {
+                            printf("native-code: '%s'\n", architectures[index].string());
+                            architectures.removeAt(index);
+                            outputAltNativeCode = true;
+                        }
+                    }
+
+                    const size_t archCount = architectures.size();
+                    if (archCount > 0) {
+                        if (outputAltNativeCode) {
+                            printf("alt-");
+                        }
+                        printf("native-code:");
+                        for (size_t i = 0; i < archCount; i++) {
+                            printf(" '%s'", architectures[i].string());
+                        }
+                        printf("\n");
+                    }
                 }
                 delete dir;
             }
