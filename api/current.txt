@@ -16913,7 +16913,7 @@ package android.media.tv {
     method public static final android.net.Uri buildChannelLogoUri(long);
     method public static final android.net.Uri buildChannelLogoUri(android.net.Uri);
     method public static final android.net.Uri buildChannelUri(long);
-    method public static final android.net.Uri buildChannelUriForPassthroughTvInput(java.lang.String);
+    method public static final android.net.Uri buildChannelUriForPassthroughInput(java.lang.String);
     method public static final android.net.Uri buildChannelsUriForInput(java.lang.String);
     method public static final java.lang.String buildInputId(android.content.ComponentName);
     method public static final android.net.Uri buildProgramUri(long);
@@ -17045,7 +17045,7 @@ package android.media.tv {
     method public java.lang.String getParentId();
     method public android.content.pm.ServiceInfo getServiceInfo();
     method public int getType();
-    method public boolean isPassthroughInputType();
+    method public boolean isPassthroughInput();
     method public android.graphics.drawable.Drawable loadIcon(android.content.Context);
     method public java.lang.CharSequence loadLabel(android.content.Context);
     method public void writeToParcel(android.os.Parcel, int);
