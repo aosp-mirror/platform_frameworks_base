@@ -395,8 +395,12 @@ public class RippleDrawable extends LayerDrawable {
             mState.mColor = color;
         }
 
-        // If we're not waiting on a theme, verify required attributes.
-        if (state.mTouchThemeAttrs == null && mState.mColor == null) {
+        verifyRequiredAttributes(a);
+    }
+
+    private void verifyRequiredAttributes(TypedArray a) throws XmlPullParserException {
+        if (mState.mColor == null && (mState.mTouchThemeAttrs == null
+                || mState.mTouchThemeAttrs[R.styleable.RippleDrawable_color] == 0)) {
             throw new XmlPullParserException(a.getPositionDescription() +
                     ": <ripple> requires a valid color attribute");
         }
@@ -891,7 +895,7 @@ public class RippleDrawable extends LayerDrawable {
 
     static class RippleState extends LayerState {
         int[] mTouchThemeAttrs;
-        ColorStateList mColor = null;
+        ColorStateList mColor = ColorStateList.valueOf(Color.MAGENTA);
         int mMaxRadius = RADIUS_AUTO;
 
         public RippleState(RippleState orig, RippleDrawable owner, Resources res) {
