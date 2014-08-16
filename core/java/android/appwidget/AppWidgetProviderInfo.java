@@ -288,7 +288,7 @@ public class AppWidgetProviderInfo implements Parcelable {
      * @param context Context for accessing resources.
      * @param density The optional desired density as per
      *         {@link android.util.DisplayMetrics#densityDpi}.
-     * @return The widget preview image or {@null} if preview image is not available.
+     * @return The widget preview image or null if preview image is not available.
      */
     public final Drawable loadPreviewImage(@NonNull Context context, int density) {
         return loadDrawable(context, density, previewImage, false);
