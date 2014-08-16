@@ -380,9 +380,9 @@ public final class TvInputInfo implements Parcelable {
      * Returns {@code true} if this TV input is pass-though which does not have any real channels
      * in TvProvider. {@code false} otherwise.
      *
-     * @see TvContract#buildChannelUriForPassthroughTvInput(String)
+     * @see TvContract#buildChannelUriForPassthroughInput(String)
      */
-    public boolean isPassthroughInputType() {
+    public boolean isPassthroughInput() {
         return mType != TYPE_TUNER;
     }
 
