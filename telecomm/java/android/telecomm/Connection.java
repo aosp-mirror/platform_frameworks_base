@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents a connection to a remote endpoint that carries voice traffic.
@@ -448,7 +448,13 @@ public abstract class Connection {
         }
     };
 
-    private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
+    /**
+     * ConcurrentHashMap constructor params: 8 is initial table size, 0.9f is
+     * load factor before resizing, 1 means we only expect a single thread to
+     * access the map so make only a single shard
+     */
+    private final Set<Listener> mListeners = Collections.newSetFromMap(
+            new ConcurrentHashMap<Listener, Boolean>(8, 0.9f, 1));
     private final List<Connection> mChildConnections = new ArrayList<>();
     private final List<Connection> mUnmodifiableChildConnections =
             Collections.unmodifiableList(mChildConnections);
@@ -587,7 +593,9 @@ public abstract class Connection {
      * @hide
      */
     public final Connection removeConnectionListener(Listener l) {
-        mListeners.remove(l);
+        if (l != null) {
+            mListeners.remove(l);
+        }
         return this;
     }
 
@@ -874,13 +882,8 @@ public abstract class Connection {
      * Tears down the Connection object.
      */
     public final void destroy() {
-        // It is possible that onDestroy() will trigger the listener to remove itself which will
-        // result in a concurrent modification exception. To counteract this we make a copy of the
-        // listeners and iterate on that.
-        for (Listener l : new ArrayList<>(mListeners)) {
-            if (mListeners.contains(l)) {
-                l.onDestroyed(this);
-            }
+        for (Listener l : mListeners) {
+            l.onDestroyed(this);
         }
     }
 

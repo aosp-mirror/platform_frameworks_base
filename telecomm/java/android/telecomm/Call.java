@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Represents an ongoing phone call that the in-call app should present to the user.
@@ -364,7 +365,7 @@ public final class Call {
     private final InCallAdapter mInCallAdapter;
     private final List<Call> mChildren = new ArrayList<>();
     private final List<Call> mUnmodifiableChildren = Collections.unmodifiableList(mChildren);
-    private final List<Listener> mListeners = new ArrayList<>();
+    private final List<Listener> mListeners = new CopyOnWriteArrayList<>();
     private final List<Call> mConferenceableCalls = new ArrayList<>();
     private final List<Call> mUnmodifiableConferenceableCalls =
             Collections.unmodifiableList(mConferenceableCalls);
@@ -589,7 +590,9 @@ public final class Call {
      * @param listener A {@code Listener}.
      */
     public void removeListener(Listener listener) {
-        mListeners.remove(listener);
+        if (listener != null) {
+            mListeners.remove(listener);
+        }
     }
 
     /** {@hide} */
@@ -709,72 +712,62 @@ public final class Call {
     }
 
     private void fireStateChanged(int newState) {
-        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
-        for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onStateChanged(this, newState);
+        for (Listener listener : mListeners) {
+            listener.onStateChanged(this, newState);
         }
     }
 
     private void fireParentChanged(Call newParent) {
-        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
-        for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onParentChanged(this, newParent);
+        for (Listener listener : mListeners) {
+            listener.onParentChanged(this, newParent);
         }
     }
 
     private void fireChildrenChanged(List<Call> children) {
-        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
-        for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onChildrenChanged(this, children);
+        for (Listener listener : mListeners) {
+            listener.onChildrenChanged(this, children);
         }
     }
 
     private void fireDetailsChanged(Details details) {
-        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
-        for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onDetailsChanged(this, details);
+        for (Listener listener : mListeners) {
+            listener.onDetailsChanged(this, details);
         }
     }
 
     private void fireCannedTextResponsesLoaded(List<String> cannedTextResponses) {
-        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
-        for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onCannedTextResponsesLoaded(this, cannedTextResponses);
+        for (Listener listener : mListeners) {
+            listener.onCannedTextResponsesLoaded(this, cannedTextResponses);
         }
     }
 
     private void fireVideoCallChanged(InCallService.VideoCall videoCall) {
-        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
-        for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onVideoCallChanged(this, videoCall);
+        for (Listener listener : mListeners) {
+            listener.onVideoCallChanged(this, videoCall);
         }
     }
 
     private void firePostDialWait(String remainingPostDialSequence) {
-        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
-        for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onPostDialWait(this, remainingPostDialSequence);
+        for (Listener listener : mListeners) {
+            listener.onPostDialWait(this, remainingPostDialSequence);
         }
     }
 
     private void fireStartActivity(PendingIntent intent) {
-        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
-        for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onStartActivity(this, intent);
+        for (Listener listener : mListeners) {
+            listener.onStartActivity(this, intent);
         }
     }
 
     private void fireCallDestroyed() {
-        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
-        for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onCallDestroyed(this);
+        for (Listener listener : mListeners) {
+            listener.onCallDestroyed(this);
         }
     }
 
     private void fireConferenceableCallsChanged() {
-        Listener[] listeners = mListeners.toArray(new Listener[mListeners.size()]);
-        for (int i = 0; i < listeners.length; i++) {
-            listeners[i].onConferenceableCallsChanged(this, mUnmodifiableConferenceableCalls);
+        for (Listener listener : mListeners) {
+            listener.onConferenceableCallsChanged(this, mUnmodifiableConferenceableCalls);
         }
     }
 
