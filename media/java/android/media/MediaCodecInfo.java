@@ -450,10 +450,16 @@ public final class MediaCodecInfo {
             }
 
             private void applyLevelLimits() {
-                if (mParent.getMime().equalsIgnoreCase(
-                        MediaFormat.MIMETYPE_AUDIO_FLAC)) {
+                String mime = mParent.getMime();
+                if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_FLAC)) {
                     mComplexityRange = Range.create(0, 8);
                     mBitControl = (1 << BITRATE_MODE_CQ);
+                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AMR_NB)
+                        || mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AMR_WB)
+                        || mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_G711_ALAW)
+                        || mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_G711_MLAW)
+                        || mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_MSGSM)) {
+                    mBitControl = (1 << BITRATE_MODE_CBR);
                 }
             }
 
@@ -514,11 +520,12 @@ public final class MediaCodecInfo {
 
             /** @hide */
             public void setDefaultFormat(MediaFormat format) {
-                if (mQualityRange.getUpper() != mQualityRange.getLower()
+                // don't list trivial quality/complexity as default for now
+                if (!mQualityRange.getUpper().equals(mQualityRange.getLower())
                         && mDefaultQuality != null) {
                     format.setInteger(MediaFormat.KEY_QUALITY, mDefaultQuality);
                 }
-                if (mComplexityRange.getUpper() != mComplexityRange.getLower()
+                if (!mComplexityRange.getUpper().equals(mComplexityRange.getLower())
                         && mDefaultComplexity != null) {
                     format.setInteger(MediaFormat.KEY_COMPLEXITY, mDefaultComplexity);
                 }
@@ -985,34 +992,34 @@ public final class MediaCodecInfo {
 
                 if ((mParent.mError & ERROR_UNSUPPORTED) != 0) {
                     // codec supports profiles that we don't know.
-                    // Extend ranges clipped to platform limits.
+                    // Use supplied values clipped to platform limits
                     if (widths != null) {
-                        mWidthRange = mWidthRange.extend(widths);
+                        mWidthRange = SIZE_RANGE.intersect(widths);
                     }
                     if (heights != null) {
-                        mHeightRange = mHeightRange.extend(heights);
+                        mHeightRange = SIZE_RANGE.intersect(heights);
                     }
                     if (counts != null) {
-                        mBlockCountRange = mBlockCountRange.extend(
+                        mBlockCountRange = POSITIVE_INTEGERS.intersect(
                                 Utils.factorRange(counts, mBlockWidth * mBlockHeight
                                         / blockSize.getWidth() / blockSize.getHeight()));
                     }
                     if (blockRates != null) {
-                        mBlocksPerSecondRange = mBlocksPerSecondRange.extend(
+                        mBlocksPerSecondRange = POSITIVE_LONGS.intersect(
                                 Utils.factorRange(blockRates, mBlockWidth * mBlockHeight
                                         / blockSize.getWidth() / blockSize.getHeight()));
                     }
                     if (blockRatios != null) {
-                        mBlockAspectRatioRange = mBlockAspectRatioRange.extend(
+                        mBlockAspectRatioRange = POSITIVE_RATIONALS.intersect(
                                 Utils.scaleRange(blockRatios,
                                         mBlockHeight / blockSize.getHeight(),
                                         mBlockWidth / blockSize.getWidth()));
                     }
                     if (ratios != null) {
-                        mAspectRatioRange = mAspectRatioRange.extend(ratios);
+                        mAspectRatioRange = POSITIVE_RATIONALS.intersect(ratios);
                     }
                     if (frameRates != null) {
-                        mFrameRateRange = mFrameRateRange.extend(frameRates);
+                        mFrameRateRange = FRAME_RATE_RANGE.intersect(frameRates);
                     }
                 } else {
                     // no unsupported profile/levels, so restrict values to known limits
@@ -1235,7 +1242,6 @@ public final class MediaCodecInfo {
                                 Log.w(TAG, "Unrecognized level "
                                         + profileLevel.level + " for " + mime);
                                 errors |= ERROR_UNRECOGNIZED;
-                                supported = false;
                         }
                         switch (profileLevel.profile) {
                             case CodecProfileLevel.AVCProfileHigh:
@@ -1245,7 +1251,7 @@ public final class MediaCodecInfo {
                             case CodecProfileLevel.AVCProfileExtended:
                             case CodecProfileLevel.AVCProfileHigh422:
                             case CodecProfileLevel.AVCProfileHigh444:
-                                Log.w(TAG, "Unrecognized profile "
+                                Log.w(TAG, "Unsupported profile "
                                         + profileLevel.profile + " for " + mime);
                                 errors |= ERROR_UNSUPPORTED;
                                 supported = false;
@@ -1271,7 +1277,9 @@ public final class MediaCodecInfo {
                     int maxLengthInBlocks = (int)(Math.sqrt(maxBlocks * 8));
                     applyMacroBlockLimits(
                             maxLengthInBlocks, maxLengthInBlocks,
-                            maxBlocks, maxBlocksPerSecond, 16, 16, 1, 1);
+                            maxBlocks, maxBlocksPerSecond,
+                            16 /* blockWidth */, 16 /* blockHeight */,
+                            1 /* widthAlignment */, 1 /* heightAlignment */);
                 } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_MPEG4)) {
                     int maxWidth = 11, maxHeight = 9, maxRate = 15;
                     maxBlocks = 99;
@@ -1369,7 +1377,9 @@ public final class MediaCodecInfo {
                         maxRate = Math.max(FR, maxRate);
                     }
                     applyMacroBlockLimits(maxWidth, maxHeight,
-                            maxBlocks, maxBlocksPerSecond, 16, 16, 1, 1);
+                            maxBlocks, maxBlocksPerSecond,
+                            16 /* blockWidth */, 16 /* blockHeight */,
+                            1 /* widthAlignment */, 1 /* heightAlignment */);
                     mFrameRateRange = mFrameRateRange.intersect(12, maxRate);
                 } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_H263)) {
                     int maxWidth = 11, maxHeight = 9, maxRate = 15;
@@ -1432,7 +1442,9 @@ public final class MediaCodecInfo {
                         maxRate = Math.max(FR, maxRate);
                     }
                     applyMacroBlockLimits(maxWidth, maxHeight,
-                            maxBlocks, maxBlocksPerSecond, 16, 16, 1, 1);
+                            maxBlocks, maxBlocksPerSecond,
+                            16 /* blockWidth */, 16 /* blockHeight */,
+                            1 /* widthAlignment */, 1 /* heightAlignment */);
                     mFrameRateRange = Range.create(1, maxRate);
                 } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_VP8) ||
                         mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_VP9)) {
@@ -1465,6 +1477,12 @@ public final class MediaCodecInfo {
                         }
                         errors &= ~ERROR_NONE_SUPPORTED;
                     }
+
+                    final int blockSize =
+                        mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_VP8) ? 16 : 8;
+                    applyMacroBlockLimits(Short.MAX_VALUE, Short.MAX_VALUE,
+                            maxBlocks, maxBlocksPerSecond, blockSize, blockSize,
+                            1 /* widthAlignment */, 1 /* heightAlignment */);
                 } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_HEVC)) {
                     maxBlocks = 36864;
                     maxBlocksPerSecond = maxBlocks * 15;
@@ -1493,17 +1511,17 @@ public final class MediaCodecInfo {
                                 FR =    30; FS =  2228224; BR =  12000; break;
                             case CodecProfileLevel.HEVCHighTierLevel4:
                                 FR =    30; FS =  2228224; BR =  30000; break;
-                            case CodecProfileLevel.HEVCHighTierLevel41:
-                                FR =    60; FS =  2228224; BR =  20000; break;
                             case CodecProfileLevel.HEVCMainTierLevel41:
+                                FR =    60; FS =  2228224; BR =  20000; break;
+                            case CodecProfileLevel.HEVCHighTierLevel41:
                                 FR =    60; FS =  2228224; BR =  50000; break;
-                            case CodecProfileLevel.HEVCHighTierLevel5:
-                                FR =    30; FS =  8912896; BR =  25000; break;
                             case CodecProfileLevel.HEVCMainTierLevel5:
+                                FR =    30; FS =  8912896; BR =  25000; break;
+                            case CodecProfileLevel.HEVCHighTierLevel5:
                                 FR =    30; FS =  8912896; BR = 100000; break;
-                            case CodecProfileLevel.HEVCHighTierLevel51:
-                                FR =    60; FS =  8912896; BR =  40000; break;
                             case CodecProfileLevel.HEVCMainTierLevel51:
+                                FR =    60; FS =  8912896; BR =  40000; break;
+                            case CodecProfileLevel.HEVCHighTierLevel51:
                                 FR =    60; FS =  8912896; BR = 160000; break;
                             case CodecProfileLevel.HEVCMainTierLevel52:
                                 FR =   120; FS =  8912896; BR =  60000; break;
@@ -1513,13 +1531,13 @@ public final class MediaCodecInfo {
                                 FR =    30; FS = 35651584; BR =  60000; break;
                             case CodecProfileLevel.HEVCHighTierLevel6:
                                 FR =    30; FS = 35651584; BR = 240000; break;
-                            case CodecProfileLevel.HEVCHighTierLevel61:
-                                FR =    60; FS = 35651584; BR = 120000; break;
                             case CodecProfileLevel.HEVCMainTierLevel61:
+                                FR =    60; FS = 35651584; BR = 120000; break;
+                            case CodecProfileLevel.HEVCHighTierLevel61:
                                 FR =    60; FS = 35651584; BR = 480000; break;
-                            case CodecProfileLevel.HEVCHighTierLevel62:
-                                FR =   120; FS = 35651584; BR = 240000; break;
                             case CodecProfileLevel.HEVCMainTierLevel62:
+                                FR =   120; FS = 35651584; BR = 240000; break;
+                            case CodecProfileLevel.HEVCHighTierLevel62:
                                 FR =   120; FS = 35651584; BR = 800000; break;
                             default:
                                 Log.w(TAG, "Unrecognized level "
@@ -1557,9 +1575,13 @@ public final class MediaCodecInfo {
 
                     applyMacroBlockLimits(
                             maxLengthInBlocks, maxLengthInBlocks,
-                            maxBlocks, maxBlocksPerSecond, 8, 8, 1, 1);
+                            maxBlocks, maxBlocksPerSecond,
+                            8 /* blockWidth */, 8 /* blockHeight */,
+                            1 /* widthAlignment */, 1 /* heightAlignment */);
                 } else {
                     Log.w(TAG, "Unsupported mime " + mime);
+                    // using minimal bitrate here.  should be overriden by
+                    // info from media_codecs.xml
                     maxBps = 64000;
                     errors |= ERROR_UNSUPPORTED;
                 }
@@ -1628,21 +1650,26 @@ public final class MediaCodecInfo {
 
             if (mMime.toLowerCase().startsWith("audio/")) {
                 mAudioCaps = AudioCapabilities.create(info, this);
+                mAudioCaps.setDefaultFormat(mDefaultFormat);
             } else if (mMime.toLowerCase().startsWith("video/")) {
                 mVideoCaps = VideoCapabilities.create(info, this);
             }
             if (encoder) {
                 mEncoderCaps = EncoderCapabilities.create(info, this);
+                mEncoderCaps.setDefaultFormat(mDefaultFormat);
             }
 
             for (Feature feat: getValidFeatures()) {
-                Integer yesNo = (Integer)map.get(MediaFormat.KEY_FEATURE_ + feat.mName);
+                String key = MediaFormat.KEY_FEATURE_ + feat.mName;
+                Integer yesNo = (Integer)map.get(key);
                 if (yesNo == null) {
                     continue;
                 } else if (yesNo > 0) {
                     mFlagsRequired |= feat.mValue;
+                    mDefaultFormat.setInteger(key, 1);
                 } else {
                     mFlagsSupported |= feat.mValue;
+                    mDefaultFormat.setInteger(key, 1);
                 }
                 // TODO restrict features by mFlagsVerified once all codecs reliably verify them
             }
@@ -1652,9 +1679,13 @@ public final class MediaCodecInfo {
          * A class that supports querying the audio capabilities of a codec.
          */
         public static final class AudioCapabilities extends BaseCapabilities {
+            private static final String TAG = "AudioCapabilities";
+
             private int[] mSampleRates;
             private Range<Integer>[] mSampleRateRanges;
             private int mMaxInputChannelCount;
+
+            private static final int MAX_INPUT_CHANNEL_COUNT = 30;
 
             /**
              * Returns the array of supported sample rates if the codec
@@ -1702,7 +1733,7 @@ public final class MediaCodecInfo {
             }
 
             private void initWithPlatformLimits() {
-                mMaxInputChannelCount = 30;
+                mMaxInputChannelCount = MAX_INPUT_CHANNEL_COUNT;
                 // mBitrateRange = Range.create(1, 320000);
                 mSampleRateRanges = new Range[] { Range.create(8000, 96000) };
                 mSampleRates = null;
@@ -1758,7 +1789,7 @@ public final class MediaCodecInfo {
 
                 // check if all values are discrete
                 for (Range<Integer> range: mSampleRateRanges) {
-                    if (range.getLower() != range.getUpper()) {
+                    if (!range.getLower().equals(range.getUpper())) {
                         mSampleRates = null;
                         return;
                     }
@@ -1777,7 +1808,7 @@ public final class MediaCodecInfo {
                             8000, 11025, 12000,
                             16000, 22050, 24000,
                             32000, 44100, 48000 };
-                    bitRates = Range.create(8192, 327680);
+                    bitRates = Range.create(8000, 320000);
                     maxChannels = 2;
                 } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AMR_NB)) {
                     sampleRates = new int[] { 8000 };
@@ -1807,11 +1838,23 @@ public final class MediaCodecInfo {
                 } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_RAW)) {
                     sampleRateRange = Range.create(1, 96000);
                     bitRates = Range.create(1, 10000000);
-                    maxChannels = 6;
+                    maxChannels = 8;
                 } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_FLAC)) {
                     sampleRateRange = Range.create(1, 655350);
                     // lossless codec, so bitrate is ignored
                     maxChannels = 255;
+                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_G711_ALAW)
+                        || mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_G711_MLAW)) {
+                    sampleRates = new int[] { 8000 };
+                    bitRates = Range.create(64000, 64000);
+                    // platform allows multiple channels for this format
+                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_MSGSM)) {
+                    sampleRates = new int[] { 8000 };
+                    bitRates = Range.create(13000, 13000);
+                    maxChannels = 1;
+                } else {
+                    Log.w(TAG, "Unsupported mime " + mime);
+                    mParent.mError |= ERROR_UNSUPPORTED;
                 }
 
                 // restrict ranges
@@ -1832,7 +1875,7 @@ public final class MediaCodecInfo {
             }
 
             private void parseFromInfo(MediaFormat info) {
-                int maxInputChannels = 1;
+                int maxInputChannels = MAX_INPUT_CHANNEL_COUNT;
                 Range<Integer> bitRates = POSITIVE_INTEGERS;
 
                 if (info.containsKey("sample-rate-ranges")) {
@@ -1844,13 +1887,29 @@ public final class MediaCodecInfo {
                     limitSampleRates(rateRanges);
                 }
                 if (info.containsKey("max-channel-count")) {
-                    maxInputChannels = info.getInteger("max-channel-count");
+                    maxInputChannels = Utils.parseIntSafely(
+                            info.getString("max-channel-count"), maxInputChannels);
                 }
                 if (info.containsKey("bitrate-range")) {
                     bitRates = bitRates.intersect(
                             Utils.parseIntRange(info.getString("bitrate"), bitRates));
                 }
                 applyLimits(maxInputChannels, bitRates);
+            }
+
+            /** @hide */
+            public void setDefaultFormat(MediaFormat format) {
+                // report settings that have only a single choice
+                if (mBitrateRange.getLower().equals(mBitrateRange.getUpper())) {
+                    format.setInteger(MediaFormat.KEY_BIT_RATE, mBitrateRange.getLower());
+                }
+                if (mMaxInputChannelCount == 1) {
+                    // mono-only format
+                    format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
+                }
+                if (mSampleRates != null && mSampleRates.length == 1) {
+                    format.setInteger(MediaFormat.KEY_SAMPLE_RATE, mSampleRates[0]);
+                }
             }
 
             /** @hide */
