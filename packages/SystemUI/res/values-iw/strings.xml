@@ -23,7 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"נקה"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"הסר מהרשימה"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"פרטי אפליקציה"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"אין אפליקציות אחרונות"</string>
+    <!-- no translation found for status_bar_no_recent_apps (7374907845131203189) -->
+    <skip />
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"סגור אפליקציות אחרונות"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"אפליקציה אחרונה אחת"</item>
@@ -80,7 +81,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"הקודם"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"בית"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"תפריט"</string>
-    <string name="accessibility_recent" msgid="8571350598987952883">"אפליקציות אחרונות"</string>
+    <!-- no translation found for accessibility_recent (1606470783629913980) -->
+    <skip />
     <string name="accessibility_search_light" msgid="1103867596330271848">"חפש"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"מצלמה"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"טלפון"</string>
@@ -155,7 +157,9 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"הודעה נדחתה."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"לוח הודעות."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"הגדרות מהירות."</string>
-    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"אפליקציות אחרונות"</string>
+    <string name="accessibility_desc_settings" msgid="3417884241751434521">"הגדרות"</string>
+    <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
+    <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"משתמש <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>‏. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"נייד <xliff:g id="SIGNAL">%1$s</xliff:g>.‏ <xliff:g id="TYPE">%2$s</xliff:g>.‏ <xliff:g id="NETWORK">%3$s</xliff:g>.‏"</string>
@@ -167,6 +171,8 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"סגור חלונית"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"יותר זמן"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"פחות זמן"</string>
+    <!-- no translation found for accessibility_brightness (8003681285547803095) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"‏נתונים בחיבור 2G-3G כובו"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"‏נתונים בחיבור 4G כובו"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"נתונים בחיבור סלולרי כובו"</string>
@@ -238,7 +244,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> בשימוש"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"הגבלה של <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"אזהרה - <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="recents_empty_message" msgid="7883614615463619450">"אין אפליקציות אחרונות"</string>
+    <!-- no translation found for recents_empty_message (8682129509540827999) -->
+    <skip />
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"מידע על האפליקציה"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"נעל לאפליקציה"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"חפש"</string>
@@ -258,26 +265,35 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"לא תשמע את ההתראה שלך ב-<xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"הודעות בדחיפות נמוכה יותר בהמשך"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"הקש שוב כדי לפתוח"</string>
+    <!-- no translation found for notification_tap_again (8524949573675922138) -->
+    <skip />
     <string name="keyguard_unlock" msgid="8043466894212841998">"החלק מעלה כדי לבטל את הנעילה"</string>
     <string name="phone_hint" msgid="3101468054914424646">"החלק ימינה להפעלת הטלפון"</string>
-    <string name="camera_hint" msgid="5241441720959174226">"החלק שמאלה להפעלת המצלמה"</string>
+    <string name="camera_hint" msgid="5241441720959174226">"החלק ימינה להפעלת המצלמה"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"ללא הגבלה"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"ללא"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"עדיפות"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"הכל"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"טוען (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> עד לסיום)"</string>
+    <!-- no translation found for accessibility_multi_user_switch_switcher (7305948938141024937) -->
+    <skip />
+    <!-- no translation found for accessibility_multi_user_switch_quick_contact (3020367729287990475) -->
+    <skip />
     <string name="user_add_user" msgid="5110251524486079492">"הוסף משתמש"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"משתמש חדש"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"אורח"</string>
-    <string name="guest_new_guest" msgid="4259024453643879653">"+ אורח"</string>
-    <string name="guest_exit_guest" msgid="1619100760451149682">"צא ממצב אורח"</string>
+    <!-- no translation found for guest_new_guest (600537543078847803) -->
+    <skip />
+    <string name="guest_exit_guest" msgid="7187359342030096885">"הסר אורח"</string>
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"האם לצאת מהפעלת האורח?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"יציאה מהפעלת האורח תסיר נתונים מקומיים."</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"ברוך שובך, אורח!"</string>
-    <string name="guest_wipe_session_message" msgid="5369763062345463297">"האם ברצונך להתחיל הפעלה חדשה?"</string>
-    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"כן"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"לא, תודה"</string>
+    <!-- no translation found for guest_wipe_session_message (8476238178270112811) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (5065558566939858884) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (1401113462524894716) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"למשך דקה אחת"</item>
     <item quantity="other" msgid="6924190729213550991">"‏למשך %d דקות"</item>
@@ -305,6 +321,8 @@
     <string name="monitoring_description_device_owned" msgid="7512371572956715493">"המכשיר הזה מנוהל על ידי:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nמנהל המערכת שלך יכול לעקוב אחר המכשיר והפעילות שלך ברשת, כולל הודעות דוא\"ל, אפליקציות ואתרים מאובטחים.\n\nלמידע נוסף, צור קשר עם מנהל המערכת."</string>
     <string name="monitoring_description_vpn" msgid="7288268682714305659">"‏נתת ל-\"<xliff:g id="APPLICATION">%1$s</xliff:g>\" הרשאה להגדרת חיבור VPN‏‏.\n\nהאפליקציה הזו יכולה לעקוב אחר המכשיר והפעילות שלך ברשת, כולל הודעות דוא\"ל, אפליקציות, ואתרים מאובטחים."</string>
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"‏אתה מחובר ל-VPN ‏‏(\"<xliff:g id="APPLICATION">%1$s</xliff:g>\")‏‏.\n\nספק שירות ה-VPN שלך יכול לעקוב אחר המכשיר והפעילות שלך ברשת, כולל הודעות דוא\"ל, אפליקציות ואתרים מאובטחים."</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"‏מכשיר זה מנוהל  על ידי:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nמנהל המערכת שלך יכול לעקוב אחר הפעילות שלך ברשת, כולל הודעות דוא\"ל, אפליקציות, ואתרים מאובטחים. למידע נוסף, צור קשר עם מנהל המערכת שלך.\n\nכמו כן, נתת ל-\"<xliff:g id="APPLICATION">%2$s</xliff:g>\" הרשאה להגדרת חיבור VPN. גם אפליקציה זו יכולה לעקוב אחר הפעילות שלך ברשת."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"‏מכשיר זה מנוהל על ידי:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nמנהל המערכת שלך יכול לעקוב אחר הפעילות שלך ברשת, כולל הודעות דוא\"ל, אפליקציות, ואתרים מאובטחים. למידע נוסף, צור קשר עם מנהל המערכת שלך.\n\nכמו כן, נתת ל-\"<xliff:g id="APPLICATION">%2$s</xliff:g>\" הרשאה להגדרת חיבור VPN. גם אפליקציה זו יכולה לעקוב אחר הפעילות שלך ברשת."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"‏מכשיר זה מנוהל על ידי:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nמנהל המערכת שלך יכול לעקוב אחר הפעילות שלך ברשת, כולל הודעות דוא\"ל, אפליקציות, ואתרים מאובטחים. למידע נוסף, צור קשר עם מנהל המערכת שלך.\n\nכמו כן, אתה מחובר ל-VPN ‏‏(\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). גם ספק שירות ה-VPN שלך יכול לעקוב אחר הפעילות שלך ברשת."</string>
+    <!-- no translation found for keyguard_indication_trust_disabled (7412534203633528135) -->
+    <skip />
 </resources>

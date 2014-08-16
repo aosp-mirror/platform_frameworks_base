@@ -23,7 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Limpar"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Remover da lista"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informações do aplicativo"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Nenhum aplicativo recente"</string>
+    <!-- no translation found for status_bar_no_recent_apps (7374907845131203189) -->
+    <skip />
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Dispensar aplicativos recentes"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 aplicativo recente"</item>
@@ -80,7 +81,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"Voltar"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Página inicial"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
-    <string name="accessibility_recent" msgid="8571350598987952883">"Aplicativos recentes"</string>
+    <!-- no translation found for accessibility_recent (1606470783629913980) -->
+    <skip />
     <string name="accessibility_search_light" msgid="1103867596330271848">"Pesquisar"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Câmera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefone"</string>
@@ -157,7 +159,10 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notificação dispensada."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Aba de notificações."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Configurações rápidas."</string>
-    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"Aplicativos recentes."</string>
+    <!-- no translation found for accessibility_desc_settings (3417884241751434521) -->
+    <skip />
+    <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
+    <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Usuário <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Celular <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
@@ -169,6 +174,8 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"Fechar painel"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"Mais tempo"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"Menos tempo"</string>
+    <!-- no translation found for accessibility_brightness (8003681285547803095) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Os dados 2G-3G foram desativados"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Os dados 4G foram desativados"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Os dados da rede celular foram desativados"</string>
@@ -240,7 +247,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Usados: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Limite: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Aviso de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="recents_empty_message" msgid="7883614615463619450">"Nenhum app recente"</string>
+    <!-- no translation found for recents_empty_message (8682129509540827999) -->
+    <skip />
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informações do aplicativo"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"bloquear no app"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"pesquisar"</string>
@@ -260,7 +268,8 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"Você não ouvirá o alarme às <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificações menos urgentes abaixo"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"Toque novamente para abrir"</string>
+    <!-- no translation found for notification_tap_again (8524949573675922138) -->
+    <skip />
     <string name="keyguard_unlock" msgid="8043466894212841998">"Deslize para cima para desbloquear"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Deslize para a esquerda para usar o telefone"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Deslize para a esquerda para usar a câmera"</string>
@@ -269,17 +278,26 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"Prioridade"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Tudo"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Carregando (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> até concluir)"</string>
+    <!-- no translation found for accessibility_multi_user_switch_switcher (7305948938141024937) -->
+    <skip />
+    <!-- no translation found for accessibility_multi_user_switch_quick_contact (3020367729287990475) -->
+    <skip />
     <string name="user_add_user" msgid="5110251524486079492">"Adicionar usuário"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Novo usuário"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Convidado"</string>
-    <string name="guest_new_guest" msgid="4259024453643879653">"+ convidado"</string>
-    <string name="guest_exit_guest" msgid="1619100760451149682">"Remover convidado"</string>
+    <!-- no translation found for guest_new_guest (600537543078847803) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest (7187359342030096885) -->
+    <skip />
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"Sair da sessão de convidado?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"Sair da sessão de convidado removerá os dados locais."</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Bem-vindo, convidado."</string>
-    <string name="guest_wipe_session_message" msgid="5369763062345463297">"Deseja iniciar uma nova sessão?"</string>
-    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"Sim"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"Não, obrigado."</string>
+    <!-- no translation found for guest_wipe_session_message (8476238178270112811) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (5065558566939858884) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (1401113462524894716) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Por 1 minuto"</item>
     <item quantity="other" msgid="6924190729213550991">"Por %d minutos"</item>
@@ -309,4 +327,6 @@
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Você está conectado a uma VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\").\n\nO provedor de serviços de VPN pode monitorar seu dispositivo e a atividade na rede, incluindo e-mails, apps e websites seguros."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Este dispositivo é gerenciado por:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nO administrador pode monitorar sua atividade na rede, incluindo e-mails, apps e websites seguros. Para mais informações, entre em contato com o administrador.\n\nAlém disso, você autorizou \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" a configurar uma conexão VPN. Esse app também pode monitorar a atividade na rede."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Este dispositivo é gerenciado por:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nO administrador pode monitorar sua atividade na rede, incluindo e-mails, apps e websites seguros. Para mais informações, entre em contato com o administrador.\n\nAlém disso, você está conectado a uma VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). O provedor de serviços de VPN também pode monitorar a atividade na rede."</string>
+    <!-- no translation found for keyguard_indication_trust_disabled (7412534203633528135) -->
+    <skip />
 </resources>

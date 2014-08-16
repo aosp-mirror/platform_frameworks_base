@@ -23,7 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Xóa"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Xóa khỏi danh sách"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Thông tin về ứng dụng"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Không có ứng dụng nào gần đây"</string>
+    <!-- no translation found for status_bar_no_recent_apps (7374907845131203189) -->
+    <skip />
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Loại bỏ các ứng dụng gần đây"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 ứng dụng gần đây"</item>
@@ -80,7 +81,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"Quay lại"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Trang chủ"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
-    <string name="accessibility_recent" msgid="8571350598987952883">"Ứng dụng gần đây"</string>
+    <!-- no translation found for accessibility_recent (1606470783629913980) -->
+    <skip />
     <string name="accessibility_search_light" msgid="1103867596330271848">"Tìm kiếm"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Máy ảnh"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Điện thoại"</string>
@@ -155,7 +157,9 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Đã loại bỏ thông báo."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Bóng thông báo."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Cài đặt nhanh."</string>
-    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"Ứng dụng gần đây."</string>
+    <string name="accessibility_desc_settings" msgid="3417884241751434521">"Cài đặt"</string>
+    <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
+    <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Người dùng <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Di động <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
@@ -167,6 +171,8 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"Đóng bảng điều khiển"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"Nhiều thời gian hơn"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"Ít thời gian hơn"</string>
+    <!-- no translation found for accessibility_brightness (8003681285547803095) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Dữ liệu 2G-3G bị tắt"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Dữ liệu 4G bị tắt"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Dữ liệu di động bị tắt"</string>
@@ -238,7 +244,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Đã sử dụng <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Giới hạn <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Cảnh báo <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="recents_empty_message" msgid="7883614615463619450">"Không có ứng dụng nào gần đây"</string>
+    <!-- no translation found for recents_empty_message (8682129509540827999) -->
+    <skip />
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Thông tin ứng dụng"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"khóa trong ứng dụng"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"tìm kiếm"</string>
@@ -258,7 +265,8 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"Bạn sẽ không nghe thấy báo thức lúc <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Thông báo ít khẩn cấp hơn bên dưới"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"Nhấn lại để mở"</string>
+    <!-- no translation found for notification_tap_again (8524949573675922138) -->
+    <skip />
     <string name="keyguard_unlock" msgid="8043466894212841998">"Vuốt lên để mở khóa"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Vuốt sang phải để mở điện thoại"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Vuốt sang trái để mở máy ảnh"</string>
@@ -267,17 +275,25 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"Ưu tiên"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Tất cả"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Đang sạc (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> cho đến khi đầy)"</string>
+    <!-- no translation found for accessibility_multi_user_switch_switcher (7305948938141024937) -->
+    <skip />
+    <!-- no translation found for accessibility_multi_user_switch_quick_contact (3020367729287990475) -->
+    <skip />
     <string name="user_add_user" msgid="5110251524486079492">"Thêm người dùng"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Người dùng mới"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Khách"</string>
-    <string name="guest_new_guest" msgid="4259024453643879653">"+ Khách"</string>
-    <string name="guest_exit_guest" msgid="1619100760451149682">"Thoát chế độ khách"</string>
+    <!-- no translation found for guest_new_guest (600537543078847803) -->
+    <skip />
+    <string name="guest_exit_guest" msgid="7187359342030096885">"Xóa phiên khách"</string>
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"Bạn có muốn thoát khỏi phiên khách không?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"Thoát khỏi phiên khách sẽ xóa dữ liệu cục bộ."</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Chào mừng bạn trở lại!"</string>
-    <string name="guest_wipe_session_message" msgid="5369763062345463297">"Bạn có muốn bắt đầu phiên mới không?"</string>
-    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"Có"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"Không, xin cảm ơn"</string>
+    <!-- no translation found for guest_wipe_session_message (8476238178270112811) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (5065558566939858884) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (1401113462524894716) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Trong một phút"</item>
     <item quantity="other" msgid="6924190729213550991">"Trong %d phút"</item>
@@ -306,5 +322,7 @@
     <string name="monitoring_description_vpn" msgid="7288268682714305659">"Bạn đã cấp cho \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" quyền thiết lập kết nối VPN.\n\nỨng dụng này có thể giám sát hoạt động mạng và thiết bị của bạn, bao gồm email, ứng dụng và các trang web an toàn."</string>
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Bạn đang kết nối với VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\").\n\nNhà cung cấp dịch vụ VPN có thể giám sát hoạt động mạng và thiết bị của bạn bao gồm email, ứng dụng và các trang web an toàn."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Thiết bị này được quản lý bởi:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nQuản trị viên có thể giám sát hoạt động mạng gồm email, ứng dụng và trang web an toàn. Để biết thêm thông tin, hãy liên hệ với quản trị viên.\n\nNgoài ra, bạn đã cấp cho \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" quyền thiết lập kết nối VPN. Ứng dụng này có thể giám sát hoạt động mạng."</string>
-    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Thiết bị này được quản lý bởi:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nQuản trị viên có thể giám sát hoạt động mạng của bạn bao gồm email, ứng dụng và các trang web an toàn. Để biết thêm thông tin, hãy liên hệ với quản trị viên của bạn.\n\nNgoài ra, bạn đang kết nối với VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). Nhà cung cấp dịch vụ VPN cũng có thể giám sát hoạt động mạng."</string>
+    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Thiết bị này được quản lý bởi:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nQuản trị viên có thể giám sát hoạt động mạng của bạn bao gồm email, ứng dụng và các trang web an toàn. Để biết thêm thông tin, hãy liên hệ với quản trị viên của bạn.\n\nNgoài ra, bạn được kết nối với VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). Nhà cung cấp dịch vụ VPN cũng có thể giám sát hoạt động mạng."</string>
+    <!-- no translation found for keyguard_indication_trust_disabled (7412534203633528135) -->
+    <skip />
 </resources>

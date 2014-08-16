@@ -23,7 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"সাফ করুন"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"তালিকা থেকে সরান"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"অ্যাপ্লিকেশানের তথ্য"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"কোনো সাম্প্রতিক অ্যাপ্লিকেশান নেই"</string>
+    <!-- no translation found for status_bar_no_recent_apps (7374907845131203189) -->
+    <skip />
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"সাম্প্রতিক অ্যাপ্লিকেশানগুলি খারিজ করুন"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"১টি সাম্প্রতিক অ্যাপ্লিকেশান"</item>
@@ -80,7 +81,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"ফিরুন"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"হোম"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"মেনু"</string>
-    <string name="accessibility_recent" msgid="8571350598987952883">"সাম্প্রতিক অ্যাপ্লিকেশানগুলি"</string>
+    <!-- no translation found for accessibility_recent (1606470783629913980) -->
+    <skip />
     <string name="accessibility_search_light" msgid="1103867596330271848">"অনুসন্ধান করুন"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ক্যামেরা"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ফোন"</string>
@@ -155,7 +157,9 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"বিজ্ঞপ্তি খারিজ করা হয়েছে৷"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"বিজ্ঞপ্তি শেড৷"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"দ্রুত সেটিংস৷"</string>
-    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"সাম্প্রতিক অ্যাপ্লিকেশানগুলি৷"</string>
+    <string name="accessibility_desc_settings" msgid="3417884241751434521">"সেটিংস"</string>
+    <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
+    <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ব্যবহারকারী <xliff:g id="USER">%s</xliff:g>৷"</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>৷ <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"মোবাইল <xliff:g id="SIGNAL">%1$s</xliff:g>৷ <xliff:g id="TYPE">%2$s</xliff:g>৷ <xliff:g id="NETWORK">%3$s</xliff:g>৷"</string>
@@ -167,6 +171,8 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"প্যানেল বন্ধ করুন"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"বেশি সময়"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"কম সময়"</string>
+    <!-- no translation found for accessibility_brightness (8003681285547803095) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G ডেটা বন্ধ"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G ডেটা বন্ধ"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"সেলুলার ডেটা বন্ধ"</string>
@@ -238,7 +244,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> ব্যবহৃত হয়েছে"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"সীমা <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> সতর্কতা"</string>
-    <string name="recents_empty_message" msgid="7883614615463619450">"কোনো সাম্প্রতিক অ্যাপ্লিকেশান নেই"</string>
+    <!-- no translation found for recents_empty_message (8682129509540827999) -->
+    <skip />
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"অ্যাপ্লিকেশানের তথ্য"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"অ্যাপ্লিকেশানে লক করুন"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"অনুসন্ধান"</string>
@@ -258,7 +265,8 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"<xliff:g id="ALARM_TIME">%s</xliff:g> বাজলে আপনি অ্যালার্ম শুনতে পাবেন না"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"নিচে অপেক্ষাকৃত কম জরুরী বিজ্ঞপ্তিগুলি"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"খোলার জন্য আবার আলতো চাপুন"</string>
+    <!-- no translation found for notification_tap_again (8524949573675922138) -->
+    <skip />
     <string name="keyguard_unlock" msgid="8043466894212841998">"আনলক করতে উপরের দিকে সোয়াইপ করুন"</string>
     <string name="phone_hint" msgid="3101468054914424646">"ফোনের জন্য ডানদিকে সোয়াইপ করুন"</string>
     <string name="camera_hint" msgid="5241441720959174226">"ক্যামেরার জন্য ডানদিকে সোয়াইপ করুন"</string>
@@ -267,17 +275,25 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"অগ্রাধিকার"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"সমস্ত"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"চার্জ হচ্ছে (পূর্ণ হতে <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> সময় বাকি)"</string>
+    <!-- no translation found for accessibility_multi_user_switch_switcher (7305948938141024937) -->
+    <skip />
+    <!-- no translation found for accessibility_multi_user_switch_quick_contact (3020367729287990475) -->
+    <skip />
     <string name="user_add_user" msgid="5110251524486079492">"ব্যবহারকারী জুড়ুন"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"নতুন ব্যবহারকারী"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"অতিথি"</string>
-    <string name="guest_new_guest" msgid="4259024453643879653">"+ অতিথি"</string>
-    <string name="guest_exit_guest" msgid="1619100760451149682">"অতিথির প্রস্থান"</string>
+    <!-- no translation found for guest_new_guest (600537543078847803) -->
+    <skip />
+    <string name="guest_exit_guest" msgid="7187359342030096885">"অতিথি সরান"</string>
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"অতিথি সেশন ত্যাগ করছেন?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"অতিথি সেশন থেকে প্রস্থান করা হলে স্থানীয় ডেটা মুছে যাবে।"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"অতিথি, আপনি ফিরে আসায় আপনাকে স্বাগত!"</string>
-    <string name="guest_wipe_session_message" msgid="5369763062345463297">"আপনি কি একটি নতুন সেশন শুরু করতে চান?"</string>
-    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"হ্যাঁ"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"না, থাক"</string>
+    <!-- no translation found for guest_wipe_session_message (8476238178270112811) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (5065558566939858884) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (1401113462524894716) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"এক মিনিটের জন্য"</item>
     <item quantity="other" msgid="6924190729213550991">"%d মিনিটের জন্য"</item>
@@ -307,4 +323,6 @@
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"আপনি একটি VPN (“<xliff:g id="APPLICATION">%1$s</xliff:g>”) এর সঙ্গে সংযুক্ত আছেন।\n\nআপনার VPN পরিষেবা প্রদানকারী ইমেল, অ্যাপ্লিকেশান ও নিরাপদ ওয়েবসাইটগুলি সহ আপনার নেটওয়ার্ক ক্রিয়াকলাপ নিরীক্ষণ করতে পারেন।"</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"ডিভাইসটি পরিচালনা করছে:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nআপনার প্রশাসক ইমেল, অ্যাপ্লিকেশান ও নিরাপদ ওয়েবসাইটগুলি সহ আপনার নেটওয়ার্ক ক্রিয়াকলাপ নিরীক্ষণ করতে সক্ষম। আরো তথ্যের জন্য, আপনার প্রশাসকের সঙ্গে যোগাযোগ করুন।\n\nআপনি \"<xliff:g id="APPLICATION">%2$s</xliff:g>\"-কে একটি VPN সংযোগ সেট আপ করার অনুমতি দিয়েছেন। এই অ্যাপ্লিকেশান নেটওয়ার্ক ক্রিয়াকলাপও নিরীক্ষণ করতে পারে।"</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"ডিভাইসটি পরিচালনা করছে:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nআপনার প্রশাসক ইমেল, অ্যাপ্লিকেশান ও নিরাপদ ওয়েবসাইটগুলি সহ আপনার নেটওয়ার্ক ক্রিয়াকলাপ নিরীক্ষণ করতে সক্ষম। আরো তথ্যের জন্য, আপনার প্রশাসকের সঙ্গে যোগাযোগ করুন।\n\nএছাড়াও, আপনি একটি VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") এ সংযুক্ত আছেন। আপনার VPN পরিষেবা প্রদানকারী নেটওয়ার্ক ক্রিয়াকলাপও নিরীক্ষণ করতে পারে।"</string>
+    <!-- no translation found for keyguard_indication_trust_disabled (7412534203633528135) -->
+    <skip />
 </resources>

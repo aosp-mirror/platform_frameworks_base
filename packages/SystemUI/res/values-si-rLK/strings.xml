@@ -23,7 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"හිස් කරන්න"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ලැයිස්තුවෙන් ඉවත් කරන්න"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"යෙදුම් තොරතුරු"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"මෑත උපාංග නැත"</string>
+    <!-- no translation found for status_bar_no_recent_apps (7374907845131203189) -->
+    <skip />
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"මෑත යෙදුම් ඉවතලන්න"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"මෑත යෙදුම් 1 ක්"</item>
@@ -80,7 +81,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"ආපසු"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"මුල් පිටුව"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"මෙනුව"</string>
-    <string name="accessibility_recent" msgid="8571350598987952883">"මෑත යෙදුම්"</string>
+    <!-- no translation found for accessibility_recent (1606470783629913980) -->
+    <skip />
     <string name="accessibility_search_light" msgid="1103867596330271848">"සොයන්න"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"කැමරාව"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"දුරකථනය"</string>
@@ -155,7 +157,10 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"දැනුම්දීම නිෂ්ප්‍රභා කරඇත."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"දැනුම්දීම් ආවරණය."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ක්ෂණික සැකසීම්."</string>
-    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"මෑත කාලීන යෙදුම්."</string>
+    <!-- no translation found for accessibility_desc_settings (3417884241751434521) -->
+    <skip />
+    <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
+    <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"පරිශීලකයා <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"ජංගම <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
@@ -167,6 +172,8 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"පැනලය වහන්න"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"වේලාව වැඩියෙන්"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"වේලාව අඩුවෙන්"</string>
+    <!-- no translation found for accessibility_brightness (8003681285547803095) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G දත්ත අක්‍රියයි"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G දත්ත අක්‍රියයි"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"සෙලියුලර් දත්ත අක්‍රියයි"</string>
@@ -179,8 +186,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS මඟින් ස්ථානය සකසා ඇත"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"පිහිටීම් ඉල්ලීම් සක්‍රියයි"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"සියලු දැනුම්දීම් හිස් කරන්න."</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5386295743469882227) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"සැකසීම්"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"තිරය ස්වයංක්‍රීයව කරකැවේ."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"තිරය තිරස් දිශානතියෙහි අගුළු දමා ඇත."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"තිරය සිරස් දිශානතිය තුළ අගුළු වැටී ඇත."</string>
@@ -239,9 +245,10 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> භාවිතා කර තිබේ"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> සීමිත"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> අවවාද කිරීම"</string>
-    <string name="recents_empty_message" msgid="7883614615463619450">"මෑත යෙදුම් නැත"</string>
+    <!-- no translation found for recents_empty_message (8682129509540827999) -->
+    <skip />
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"යෙදුම් තොරතුරු"</string>
-    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"අගුළු යෙදුම"</string>
+    <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"යෙදුමට අඟුළු දැමීම"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"සෙවීම"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"අරෝපිතයි"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"ආරෝපණය වෙමින්"</string>
@@ -259,7 +266,8 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"<xliff:g id="ALARM_TIME">%s</xliff:g> හි තිබෙන ඔබගේ සීනුව ඔබට ඇසෙන්නේ නැත"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"හදිසිය අඩු දැනුම් දීම් පහත"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"විවෘත කිරීමට නැවත තට්ටු කරන්න"</string>
+    <!-- no translation found for notification_tap_again (8524949573675922138) -->
+    <skip />
     <string name="keyguard_unlock" msgid="8043466894212841998">"අගුළු ඇරීමට ස්වයිප් කරන්න."</string>
     <string name="phone_hint" msgid="3101468054914424646">"දුරකථන සඳහා දකුණට ස්වයිප් කරන්න"</string>
     <string name="camera_hint" msgid="5241441720959174226">"කැමරාව සඳහා දකුණට ස්වයිප් කරන්න"</string>
@@ -268,19 +276,26 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"ප්‍රමුඛතාව"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"සියලු"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ආරෝපණය වෙමින් (සම්පුර්ණ වන තෙක් <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
-    <!-- no translation found for user_add_user (5110251524486079492) -->
+    <!-- no translation found for accessibility_multi_user_switch_switcher (7305948938141024937) -->
     <skip />
-    <!-- no translation found for user_new_user_name (426540612051178753) -->
+    <!-- no translation found for accessibility_multi_user_switch_quick_contact (3020367729287990475) -->
     <skip />
+    <string name="user_add_user" msgid="5110251524486079492">"පරිශීලකයෙක් එක් කරන්න"</string>
+    <string name="user_new_user_name" msgid="426540612051178753">"නව පරිශීලකයා"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"අමුත්තා"</string>
-    <string name="guest_new_guest" msgid="4259024453643879653">"+ අමුත්තා"</string>
-    <string name="guest_exit_guest" msgid="1619100760451149682">"අමුත්තා පිටවීම"</string>
+    <!-- no translation found for guest_new_guest (600537543078847803) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest (7187359342030096885) -->
+    <skip />
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"අමුත්තාගේ සැසියෙන් පිටවෙයිද?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"අමුත්තාගේ සැසිය අවසන් කිරීමෙන් පෙදෙසි දත්ත සියල්ලම පිට කරයි."</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"නැවත සාදරයෙන් පිළිගනිමු, අමුත්තා!"</string>
-    <string name="guest_wipe_session_message" msgid="5369763062345463297">"අලුත් සැසියක් ආරම්භ කිරීමට ඔබට අවශ්‍යද?"</string>
-    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"ඔව්"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"එපා, ස්තූතියි"</string>
+    <!-- no translation found for guest_wipe_session_message (8476238178270112811) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (5065558566939858884) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (1401113462524894716) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"විනාඩි එකක් සඳහා"</item>
     <item quantity="other" msgid="6924190729213550991">"විනාඩි %d සඳහා"</item>
@@ -305,12 +320,11 @@
     <string name="monitoring_title" msgid="169206259253048106">"ජාල නිරීක්ෂණය"</string>
     <string name="open_app" msgid="4011771120339160755">"යෙදුම විවෘත කරන්න"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN විසන්ධි කරන්න"</string>
-    <!-- no translation found for monitoring_description_device_owned (7512371572956715493) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (7288268682714305659) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn (4740349017929725435) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="7512371572956715493">"මෙම උපාංගය කළමනාකරණය කරනු ලබන්නේ:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nඊ-මේල්, යෙදුම්, සහ ආරක්ෂාකාරී වෙබ් අඩවි ඇතුළු, ඔබගේ ජාල ක්‍රියාකාරකම නිරීක්ෂණය කිරීමට ඔබගේ පරිපාලකට හැක.\n\nවැඩිදුර විස්තර සඳහා, ඔබගේ පරිපාලක අමතන්න."</string>
+    <string name="monitoring_description_vpn" msgid="7288268682714305659">"VPN සම්බන්ධතාව සකස් කරගැනීමට \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" අවසර ඔබ දෙන ලදි.\n\nඊ-තැපැල්, යෙදුම්, සහ අරක්ෂිත වෙබ් අඩවි ඇතුළුව ඔබගේ ජාලයේ ක්‍රියාකාරකම් නිරීක්ෂණය කිරීමට මෙම යෙදුමට හැකිය."</string>
+    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\") වෙත ඔබ සම්බන්ධ වී තිබේ.\n\nඊ-තැපැල්, යෙදුම්, සහ අරක්ෂිත වෙබ් අඩවි ඇතුළුව ඔබගේ VPN සේවාවේ සපයන්නාට ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැක."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"මෙම උපාංගය පාලනය කරන්නේ:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nඊ-තැපැල්, යෙදුම්, සහ අරක්ෂිත වෙබ් අඩවි ඇතුළුව ඔබගේ ජාලයේ ක්‍රියාකාරකම් නිරීක්ෂණය කිරීමට ඔබගේ පාලකයාට හැකියාව තිබේ. වැඩිපුර තොරතුරු සඳහා ඔබගේ පාලකයා සම්බන්ධ කර ගන්න.\n\nතවද, VPN සම්බන්ධතාව සකස් කරගැනීමට \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" අවසර ඔබ දෙන ලදි. මෙම යෙදුම ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කරයි."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"මෙම උපාංගය පාලනය කරන්නේ:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nඊ-තැපැල්, යෙදුම්, සහ අරක්ෂිත වෙබ් අඩවි ඇතුළුව ඔබගේ ජාලයේ ක්‍රියාකාරකම් නිරීක්ෂණය කිරීමට ඔබගේ පාලකයාට හැකියාව තිබේ. වැඩිපුර තොරතුරු සඳහා ඔබගේ පාලකයා සම්බන්ධ කර ගන්න.\n\nතවද, VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") වෙත ඔබ සම්බන්ධ වී තිබේ. තවද ඔබගේ VPN සේවාවේ සපයන්නාට ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැක."</string>
+    <!-- no translation found for keyguard_indication_trust_disabled (7412534203633528135) -->
+    <skip />
 </resources>
