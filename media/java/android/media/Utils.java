@@ -210,6 +210,19 @@ class Utils {
         return fallback;
     }
 
+    static int parseIntSafely(Object o, int fallback) {
+        try {
+            String s = (String)o;
+            return Integer.parseInt(s);
+        } catch (ClassCastException e) {
+        } catch (NumberFormatException e) {
+        } catch (NullPointerException e) {
+            return fallback;
+        }
+        Log.w(TAG, "could not parse integer '" + o + "'");
+        return fallback;
+    }
+
     static Range<Integer> parseIntRange(Object o, Range<Integer> fallback) {
         try {
             String s = (String)o;
