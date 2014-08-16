@@ -33,12 +33,5 @@
         <uses-feature android:name="android.hardware.opengles.aep" />
     </feature-group>
 
-    <application android:label="@string/app_title">
-        <activity android:name="ActivityMain">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-    </application>
+    <application android:label="@string/app_title" android:hasCode="false" />
 </manifest>

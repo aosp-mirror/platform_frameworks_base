@@ -1250,7 +1250,9 @@
          application.
 
          <p>This appears as a child tag of the root
-         {@link #AndroidManifest manifest} tag. -->
+         {@link #AndroidManifest manifest} tag.
+
+         @deprecated Use <code>feature-group</code> instead.-->
     <declare-styleable name="AndroidManifestUsesConfiguration" parent="AndroidManifest">
         <!-- The type of touch screen used by an application. -->
         <attr name="reqTouchScreen" />
