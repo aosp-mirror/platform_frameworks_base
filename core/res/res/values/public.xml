@@ -2518,6 +2518,19 @@
   <public type="style" name="Widget.Material.Button.Borderless.Colored" />
   <public type="style" name="Widget.Material.Light.Button.Borderless.Colored" />
 
+  <public type="style" name="Theme.Leanback.FormWizard"/>
+
+  <public type="style" name="TextAppearance.StatusBar.Material" />
+  <public type="style" name="TextAppearance.StatusBar.Material.EventContent" />
+  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Title" />
+  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Line2" />
+  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Info" />
+  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Time" />
+  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Emphasis" />
+
+  <public type="style" name="Widget.Material.Spinner.Form" />
+  <public type="style" name="Widget.Material.Light.Spinner.Form" />
+
   <public-padding type="string" name="l_resource_pad" end="0x01040030" />
 
   <public type="string" name="config_webSettingsDefaultTextEncoding" />
@@ -2527,8 +2540,6 @@
   <public type="array" name="config_keySystemUuidMapping" />
 
   <public-padding type="interpolator" name="l_resource_pad" end="0x010c0010" />
-
-  <public type="style" name="Theme.Leanback.FormWizard"/>
 
   <!-- An interpolator which accelerates fast but decelerates slowly. -->
   <public type="interpolator" name="fast_out_slow_in" />
@@ -2564,23 +2575,4 @@
   <public type="raw" name="loaderror" id="0x01100000"/>
   <!-- WebView error page for when domain lookup fails. @hide @SystemApi -->
   <public type="raw" name="nodomain"/>
-
-  <!-- Base text appearance for SystemUI elements -->
-  <public type="style" name="TextAppearance.StatusBar.Material" />
-  <!-- Base text appearance for notifications -->
-  <public type="style" name="TextAppearance.StatusBar.Material.EventContent" />
-  <!-- Notification text appearance: title -->
-  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Title" />
-  <!-- Notification text appearance: additional line of text sandwiched
-       between the title and content -->
-  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Line2" />
-  <!-- Notification text appearance: an annotation, e.g. the
-       number of messages in your inbox -->
-  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Info" />
-  <!-- Notification text appearance: timestamp -->
-  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Time" />
-  <!-- Notification text appearance: a way to highlight a bit of text (for
-       example, to separate the sender from the subject of an email if they
-       are all on the same line) -->
-  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Emphasis" />
 </resources>
