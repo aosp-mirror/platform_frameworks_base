@@ -38,10 +38,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import com.android.internal.R;
 import com.android.internal.widget.ExploreByTouchHelper;
 
-import java.security.InvalidParameterException;
 import java.util.Calendar;
 import java.util.Formatter;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -52,8 +50,8 @@ import java.util.Locale;
 class SimpleMonthView extends View {
     private static final String TAG = "SimpleMonthView";
 
-    private static int DEFAULT_HEIGHT = 32;
-    private static int MIN_HEIGHT = 10;
+    private static final int DEFAULT_HEIGHT = 32;
+    private static final int MIN_HEIGHT = 10;
 
     private static final int DEFAULT_SELECTED_DAY = -1;
     private static final int DEFAULT_WEEK_START = Calendar.SUNDAY;
@@ -63,13 +61,13 @@ class SimpleMonthView extends View {
 
     private static final int SELECTED_CIRCLE_ALPHA = 60;
 
-    private static int DAY_SEPARATOR_WIDTH = 1;
+    private static final int DAY_SEPARATOR_WIDTH = 1;
 
-    private int mMiniDayNumberTextSize;
-    private int mMonthLabelTextSize;
-    private int mMonthDayLabelTextSize;
-    private int mMonthHeaderSize;
-    private int mDaySelectedCircleSize;
+    private final int mMiniDayNumberTextSize;
+    private final int mMonthLabelTextSize;
+    private final int mMonthDayLabelTextSize;
+    private final int mMonthHeaderSize;
+    private final int mDaySelectedCircleSize;
 
     // used for scaling to the device density
     private static float mScale = 0;
@@ -289,7 +287,7 @@ class SimpleMonthView extends View {
         drawDays(canvas);
     }
 
-    private static boolean isValidDay(int day) {
+    private static boolean isValidDayOfWeek(int day) {
         return (day >= Time.SUNDAY && day <= Time.SATURDAY);
     }
 
@@ -299,7 +297,7 @@ class SimpleMonthView extends View {
      * default to no focus month if no value is passed in. The only required parameter is the
      * week start.
      *
-     * @param selectedDay the selected day.
+     * @param selectedDay the selected day of the month, or -1 for no selection.
      * @param month the month.
      * @param year the year.
      * @param weekStart which day the week should start on. {@link Time#SUNDAY} through
@@ -313,9 +311,7 @@ class SimpleMonthView extends View {
             mRowHeight = MIN_HEIGHT;
         }
 
-        if (isValidDay(selectedDay)) {
-            mSelectedDay = selectedDay;
-        }
+        mSelectedDay = selectedDay;
 
         if (month >= Calendar.JANUARY && month <= Calendar.DECEMBER) {
             mMonth = month;
@@ -333,7 +329,7 @@ class SimpleMonthView extends View {
         mCalendar.set(Calendar.DAY_OF_MONTH, 1);
         mDayOfWeekStart = mCalendar.get(Calendar.DAY_OF_WEEK);
 
-        if (isValidDay(weekStart)) {
+        if (isValidDayOfWeek(weekStart)) {
             mWeekStart = weekStart;
         } else {
             mWeekStart = mCalendar.getFirstDayOfWeek();
@@ -424,8 +420,8 @@ class SimpleMonthView extends View {
     }
 
     private void drawMonthTitle(Canvas canvas) {
-        int x = (mWidth + 2 * mPadding) / 2;
-        int y = (mMonthHeaderSize - mMonthDayLabelTextSize) / 2 + (mMonthLabelTextSize / 3);
+        final float x = (mWidth + 2 * mPadding) / 2f;
+        final float y = (mMonthHeaderSize - mMonthDayLabelTextSize) / 2f;
         canvas.drawText(getMonthAndYearString(), x, y, mMonthTitlePaint);
     }
 
@@ -437,9 +433,9 @@ class SimpleMonthView extends View {
             int calendarDay = (i + mWeekStart) % mNumDays;
             int x = (2 * i + 1) * dayWidthHalf + mPadding;
             mDayLabelCalendar.set(Calendar.DAY_OF_WEEK, calendarDay);
-            canvas.drawText(mDayLabelCalendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT,
-                    Locale.getDefault()).toUpperCase(Locale.getDefault()), x, y,
-                    mMonthDayLabelPaint);
+            canvas.drawText("" + mDayLabelCalendar.getDisplayName(Calendar.DAY_OF_WEEK,
+                    Calendar.SHORT, Locale.getDefault()).toUpperCase(Locale.getDefault()).charAt(0),
+                    x, y, mMonthDayLabelPaint);
         }
     }
 

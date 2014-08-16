@@ -16,46 +16,53 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/day_picker_selector_layout"
-              android:layout_width="@dimen/datepicker_component_width"
-              android:layout_height="0dip"
-              android:layout_weight="1"
-              android:paddingTop="8dip"
-              android:paddingBottom="8dip"
-              android:gravity="center"
-              android:orientation="vertical">
+    android:id="@+id/day_picker_selector_layout"
+    android:layout_width="@dimen/datepicker_component_width"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:paddingBottom="8dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/date_picker_header"
+        android:layout_width="@dimen/datepicker_component_width"
+        android:layout_height="@dimen/datepicker_header_height"
+        android:gravity="center"
+        android:importantForAccessibility="no"
+        android:layout_marginBottom="8dp" />
 
     <LinearLayout
-            android:id="@+id/date_picker_month_and_day_layout"
+        android:id="@+id/date_picker_month_and_day_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="center"
+        android:clickable="true"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/date_picker_month"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:duplicateParentState="true"
+            android:gravity="center_horizontal|bottom" />
+
+        <TextView
+            android:id="@+id/date_picker_day"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:clickable="true"
-            android:orientation="vertical">
-
-        <TextView
-                android:id="@+id/date_picker_month"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:duplicateParentState="true"
-                android:gravity="center_horizontal|bottom" />
-
-        <TextView
-                android:id="@+id/date_picker_day"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginBottom="-10dip"
-                android:layout_marginTop="-10dip"
-                android:duplicateParentState="true"
-                android:gravity="center" />
+            android:layout_marginBottom="-10dip"
+            android:layout_marginTop="-10dip"
+            android:duplicateParentState="true"
+            android:gravity="center" />
     </LinearLayout>
 
     <TextView
-            android:id="@+id/date_picker_year"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center_horizontal|top" />
+        android:id="@+id/date_picker_year"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal|top" />
 
 </LinearLayout>

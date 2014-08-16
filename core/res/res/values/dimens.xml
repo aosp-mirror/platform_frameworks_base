@@ -355,7 +355,6 @@
     <dimen name="timepicker_time_label_size">60sp</dimen>
     <dimen name="timepicker_extra_time_label_margin">-30dp</dimen>
     <dimen name="timepicker_ampm_label_size">16sp</dimen>
-    <dimen name="timepicker_done_label_size">14sp</dimen>
     <dimen name="timepicker_ampm_left_padding">6dip</dimen>
     <dimen name="timepicker_separator_padding">4dip</dimen>
     <dimen name="timepicker_header_height">96dip</dimen>
@@ -363,13 +362,14 @@
     <dimen name="timepicker_minimum_margin_top_bottom">24dip</dimen>
     <dimen name="timepicker_radial_picker_dimen">270dip</dimen>
 
-    <dimen name="datepicker_done_label_size">14sp</dimen>
-    <dimen name="datepicker_day_number_size">16sp</dimen>
+    <!-- Used by SimpleMonthView -->
+    <dimen name="datepicker_day_number_size">12sp</dimen>
     <dimen name="datepicker_month_label_size">16sp</dimen>
-    <dimen name="datepicker_month_day_label_text_size">10sp</dimen>
+    <dimen name="datepicker_month_day_label_text_size">12sp</dimen>
+    <dimen name="datepicker_month_list_item_header_height">48dp</dimen>
     <dimen name="datepicker_day_number_select_circle_radius">16dp</dimen>
-    <dimen name="datepicker_month_list_item_header_height">50dp</dimen>
-    <dimen name="datepicker_view_animator_height">270dp</dimen>
+    <dimen name="datepicker_view_animator_height">250dp</dimen>
+
     <dimen name="datepicker_year_picker_padding_top">8dp</dimen>
     <dimen name="datepicker_year_label_height">64dp</dimen>
     <dimen name="datepicker_year_label_text_size">22dp</dimen>

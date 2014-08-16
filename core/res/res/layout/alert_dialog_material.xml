@@ -68,7 +68,8 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="16dip"
                 android:paddingEnd="16dip"
-                android:paddingTop="16dip" />
+                android:paddingTop="16dip"
+                android:paddingBottom="16dip" />
         </ScrollView>
     </LinearLayout>
 
@@ -83,14 +84,12 @@
     </FrameLayout>
 
     <LinearLayout android:id="@+id/buttonPanel"
+        style="?attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="@dimen/alert_dialog_button_bar_height"
         android:orientation="vertical"
-        android:gravity="end"
-        android:padding="16dip">
+        android:gravity="end">
         <LinearLayout
-            style="?attr/buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layoutDirection="locale">

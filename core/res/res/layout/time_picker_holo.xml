@@ -34,21 +34,4 @@
             android:layout_gravity="center"
             android:focusable="true"
             android:focusableInTouchMode="true" />
-    <LinearLayout
-            android:id="@+id/layout_buttons"
-            style="?android:attr/buttonBarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:divider="?android:attr/dividerHorizontal"
-            android:showDividers="beginning">
-        <Button
-                android:id="@+id/done_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="48dp"
-                android:text="@string/done_label"
-                android:textSize="@dimen/timepicker_done_label_size"
-                style="?android:attr/buttonBarButtonStyle" />
-    </LinearLayout>
 </LinearLayout>

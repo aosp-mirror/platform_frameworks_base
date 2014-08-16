@@ -43,7 +43,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.R;
 
-import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
@@ -86,8 +85,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
     private RadialTimePickerView mRadialTimePickerView;
     private TextView mSeparatorView;
 
-    private ViewGroup mLayoutButtons;
-
     private String mAmText;
     private String mPmText;
 
@@ -101,15 +98,11 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
     private String mDoublePlaceholderText;
     private String mDeletedKeyFormat;
     private boolean mInKbMode;
+    private boolean mIsTimeValid = true;
     private ArrayList<Integer> mTypedTimes = new ArrayList<Integer>();
     private Node mLegalTimesTree;
     private int mAmKeyCode;
     private int mPmKeyCode;
-
-    // For showing the done button when in a Dialog
-    private Button mDoneButton;
-    private boolean mShowDoneButton;
-    private TimePicker.TimePickerDismissCallback mDismissCallback;
 
     // Accessibility strings.
     private String mHourPickerDescription;
@@ -146,7 +139,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         mSeparatorView = (TextView) mainView.findViewById(R.id.separator);
         mMinuteView = (TextView) mainView.findViewById(R.id.minutes);
         mAmPmTextView = (TextView) mainView.findViewById(R.id.ampm_label);
-        mLayoutButtons = (ViewGroup) mainView.findViewById(R.id.layout_buttons);
 
         // Set up text appearances from style.
         final int headerTimeTextAppearance = a.getResourceId(
@@ -174,7 +166,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         final int headerBackgroundColor = a.getColor(
                 R.styleable.TimePicker_headerBackgroundColor, Color.TRANSPARENT);
         if (headerBackgroundColor != Color.TRANSPARENT) {
-            mLayoutButtons.setBackgroundColor(headerBackgroundColor);
             mainView.findViewById(R.id.time_header).setBackgroundColor(headerBackgroundColor);
         }
 
@@ -182,7 +173,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
 
         mRadialTimePickerView = (RadialTimePickerView) mainView.findViewById(
                 R.id.radial_picker);
-        mDoneButton = (Button) mainView.findViewById(R.id.done_button);
 
         setupListeners();
 
@@ -199,16 +189,14 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         final Calendar calendar = Calendar.getInstance(mCurrentLocale);
         final int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
         final int currentMinute = calendar.get(Calendar.MINUTE);
-        initialize(currentHour, currentMinute, false /* 12h */, HOUR_INDEX, false);
+        initialize(currentHour, currentMinute, false /* 12h */, HOUR_INDEX);
     }
 
-    private void initialize(int hourOfDay, int minute, boolean is24HourView, int index,
-                            boolean showDoneButton) {
+    private void initialize(int hourOfDay, int minute, boolean is24HourView, int index) {
         mInitialHourOfDay = hourOfDay;
         mInitialMinute = minute;
         mIs24HourView = is24HourView;
         mInKbMode = false;
-        mShowDoneButton = showDoneButton;
         updateUI(index);
     }
 
@@ -236,21 +224,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
                 tryVibrate();
             }
         });
-        mDoneButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mInKbMode && isTypedTimeFullyLegal()) {
-                    finishKbMode(false);
-                } else {
-                    tryVibrate();
-                }
-                if (mDismissCallback != null) {
-                    mDismissCallback.dismiss(mDelegator, false, getCurrentHour(),
-                            getCurrentMinute());
-                }
-            }
-        });
-        mDoneButton.setOnKeyListener(keyboardListener);
     }
 
     private void updateUI(int index) {
@@ -258,8 +231,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         updateRadialPicker(index);
         // Enable or disable the AM/PM view.
         updateHeaderAmPm();
-        // Show or hide Done button
-        updateDoneButton();
         // Update Hour and Minutes
         updateHeaderHour(mInitialHourOfDay, true);
         // Update time separator
@@ -334,10 +305,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
                 }
             });
         }
-    }
-
-    private void updateDoneButton() {
-        mLayoutButtons.setVisibility(mShowDoneButton ? View.VISIBLE : View.GONE);
     }
 
     /**
@@ -447,17 +414,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
     }
 
     @Override
-    public void setShowDoneButton(boolean showDoneButton) {
-        mShowDoneButton = showDoneButton;
-        updateDoneButton();
-    }
-
-    @Override
-    public void setDismissCallback(TimePicker.TimePickerDismissCallback callback) {
-        mDismissCallback = callback;
-    }
-
-    @Override
     public int getBaseline() {
         // does not support baseline alignment
         return -1;
@@ -471,8 +427,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
     @Override
     public Parcelable onSaveInstanceState(Parcelable superState) {
         return new SavedState(superState, getCurrentHour(), getCurrentMinute(),
-                is24HourView(), inKbMode(), getTypedTimes(), getCurrentItemShowing(),
-                isShowDoneButton());
+                is24HourView(), inKbMode(), getTypedTimes(), getCurrentItemShowing());
     }
 
     @Override
@@ -480,8 +435,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         SavedState ss = (SavedState) state;
         setInKbMode(ss.inKbMode());
         setTypedTimes(ss.getTypesTimes());
-        initialize(ss.getHour(), ss.getMinute(), ss.is24HourMode(), ss.getCurrentItemShowing(),
-                ss.isShowDoneButton());
+        initialize(ss.getHour(), ss.getMinute(), ss.is24HourMode(), ss.getCurrentItemShowing());
         mRadialTimePickerView.invalidate();
         if (mInKbMode) {
             tryStartingKbMode(-1);
@@ -560,11 +514,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         return mRadialTimePickerView.getCurrentItemShowing();
     }
 
-    @Override
-    public boolean isShowDoneButton() {
-        return mShowDoneButton;
-    }
-
     /**
      * Propagate the time change
      */
@@ -587,11 +536,10 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         private final boolean mInKbMode;
         private final ArrayList<Integer> mTypedTimes;
         private final int mCurrentItemShowing;
-        private final boolean mShowDoneButton;
 
         private SavedState(Parcelable superState, int hour, int minute, boolean is24HourMode,
                            boolean isKbMode, ArrayList<Integer> typedTimes,
-                           int currentItemShowing, boolean showDoneButton) {
+                           int currentItemShowing) {
             super(superState);
             mHour = hour;
             mMinute = minute;
@@ -599,7 +547,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
             mInKbMode = isKbMode;
             mTypedTimes = typedTimes;
             mCurrentItemShowing = currentItemShowing;
-            mShowDoneButton = showDoneButton;
         }
 
         private SavedState(Parcel in) {
@@ -610,7 +557,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
             mInKbMode = (in.readInt() == 1);
             mTypedTimes = in.readArrayList(getClass().getClassLoader());
             mCurrentItemShowing = in.readInt();
-            mShowDoneButton = (in.readInt() == 1);
         }
 
         public int getHour() {
@@ -637,10 +583,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
             return mCurrentItemShowing;
         }
 
-        public boolean isShowDoneButton() {
-            return mShowDoneButton;
-        }
-
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             super.writeToParcel(dest, flags);
@@ -650,7 +592,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
             dest.writeInt(mInKbMode ? 1 : 0);
             dest.writeList(mTypedTimes);
             dest.writeInt(mCurrentItemShowing);
-            dest.writeInt(mShowDoneButton ? 1 : 0);
         }
 
         @SuppressWarnings({"unused", "hiding"})
@@ -852,12 +793,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
      * @return true if the key was successfully processed, false otherwise.
      */
     private boolean processKeyUp(int keyCode) {
-        if (keyCode == KeyEvent.KEYCODE_ESCAPE || keyCode == KeyEvent.KEYCODE_BACK) {
-            if (mDismissCallback != null) {
-                mDismissCallback.dismiss(mDelegator, true, getCurrentHour(), getCurrentMinute());
-            }
-            return true;
-        } else if (keyCode == KeyEvent.KEYCODE_TAB) {
+        if (keyCode == KeyEvent.KEYCODE_ESCAPE || keyCode == KeyEvent.KEYCODE_TAB) {
             if(mInKbMode) {
                 if (isTypedTimeFullyLegal()) {
                     finishKbMode(true);
@@ -875,9 +811,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
                 mOnTimeChangedListener.onTimeChanged(mDelegator,
                         mRadialTimePickerView.getCurrentHour(),
                         mRadialTimePickerView.getCurrentMinute());
-            }
-            if (mDismissCallback != null) {
-                mDismissCallback.dismiss(mDelegator, false, getCurrentHour(), getCurrentMinute());
             }
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_DEL) {
@@ -933,7 +866,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
     private void tryStartingKbMode(int keyCode) {
         if (keyCode == -1 || addKeyIfLegal(keyCode)) {
             mInKbMode = true;
-            mDoneButton.setEnabled(false);
+            onValidationChanged(false);
             updateDisplay(false);
             mRadialTimePickerView.setInputEnabled(false);
         }
@@ -961,7 +894,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
                 mTypedTimes.add(mTypedTimes.size() - 1, KeyEvent.KEYCODE_0);
                 mTypedTimes.add(mTypedTimes.size() - 1, KeyEvent.KEYCODE_0);
             }
-            mDoneButton.setEnabled(true);
+            onValidationChanged(true);
         }
 
         return true;
@@ -1002,7 +935,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
     private int deleteLastTypedKey() {
         int deleted = mTypedTimes.remove(mTypedTimes.size() - 1);
         if (!isTypedTimeFullyLegal()) {
-            mDoneButton.setEnabled(false);
+            onValidationChanged(false);
         }
         return deleted;
     }
@@ -1046,7 +979,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
                 updateAmPmDisplay(hour < 12 ? AM : PM);
             }
             setCurrentItemShowing(mRadialTimePickerView.getCurrentItemShowing(), true, true, true);
-            mDoneButton.setEnabled(true);
+            onValidationChanged(true);
         } else {
             boolean[] enteredZeros = {false, false};
             int[] values = getEnteredTime(enteredZeros);
