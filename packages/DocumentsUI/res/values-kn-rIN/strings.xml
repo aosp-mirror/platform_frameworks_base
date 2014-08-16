@@ -30,18 +30,12 @@
     <string name="menu_share" msgid="3075149983979628146">"ಹಂಚು"</string>
     <string name="menu_delete" msgid="8138799623850614177">"ಅಳಿಸು"</string>
     <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" ಆಯ್ಕೆಮಾಡಿ"</string>
-    <!-- no translation found for menu_advanced_show (4693652895715631401) -->
-    <skip />
-    <!-- no translation found for menu_advanced_show (5792182900084144261) -->
-    <skip />
-    <!-- no translation found for menu_advanced_hide (4218809952721972589) -->
-    <skip />
-    <!-- no translation found for menu_advanced_hide (4845869969015718848) -->
-    <skip />
-    <!-- no translation found for menu_file_size_show (3240323619260823076) -->
-    <skip />
-    <!-- no translation found for menu_file_size_hide (8881975928502581042) -->
-    <skip />
+    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"ಆಂತರಿಕ ಸಂಗ್ರಹಣೆಯನ್ನು ತೋರಿಸು"</string>
+    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD ಕಾಡ್‌ ಅನ್ನು ತೋರಿಸು"</string>
+    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"ಆಂತರಿಕ ಸಂಗ್ರಹಣೆಯನ್ನು ಮರೆಮಾಡಿ"</string>
+    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD ಕಾರ್ಡ್‌ ಅನ್ನು ಮರೆಮಾಡಿ"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"ಫೈಲ್‌ ಗಾತ್ರವನ್ನು ತೋರಿಸು"</string>
+    <string name="menu_file_size_hide" msgid="8881975928502581042">"ಫೈಲ್‌ ಗಾತ್ರವನ್ನು ಮರೆಮಾಡಿ"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="sort_name" msgid="9183560467917256779">"ಹೆಸರಿನ ಪ್ರಕಾರ"</string>
     <string name="sort_date" msgid="586080032956151448">"ಮಾರ್ಪಡಿಸಿರುವ ದಿನಾಂಕದ ಪ್ರಕಾರ"</string>
