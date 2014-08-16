@@ -715,7 +715,13 @@ public class Resources {
      * @see #getDrawable(int, Theme)
      */
     public Drawable getDrawable(int id) throws NotFoundException {
-        return getDrawable(id, null);
+        final Drawable d = getDrawable(id, null);
+        if (d.canApplyTheme()) {
+            Log.w(TAG, "Drawable " + getResourceName(id) + " has unresolved theme "
+                    + "attributes! Consider using Resources.getDrawable(int, Theme) or "
+                    + "Context.getDrawable(int).", new RuntimeException());
+        }
+        return d;
     }
 
     /**
