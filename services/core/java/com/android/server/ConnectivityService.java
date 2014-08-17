@@ -264,6 +264,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private INetworkManagementService mNetd;
     private INetworkPolicyManager mPolicyManager;
 
+    private String mCurrentTcpBufferSizes;
+
     private static final int ENABLED  = 1;
     private static final int DISABLED = 0;
 
@@ -1553,30 +1555,40 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    /**
-     * Reads the network specific TCP buffer sizes from SystemProperties
-     * net.tcp.buffersize.[default|wifi|umts|edge|gprs] and set them for system
-     * wide use
-     */
-    private void updateNetworkSettings(NetworkStateTracker nt) {
-        String key = nt.getTcpBufferSizesPropName();
-        String bufferSizes = key == null ? null : SystemProperties.get(key);
+    private static final String DEFAULT_TCP_BUFFER_SIZES = "4096,87380,110208,4096,16384,110208";
 
-        if (TextUtils.isEmpty(bufferSizes)) {
-            if (VDBG) log(key + " not found in system properties. Using defaults");
-
-            // Setting to default values so we won't be stuck to previous values
-            key = "net.tcp.buffersize.default";
-            bufferSizes = SystemProperties.get(key);
+    private void updateTcpBufferSizes(NetworkAgentInfo nai) {
+        if (isDefaultNetwork(nai) == false) {
+            return;
         }
 
-        // Set values in kernel
-        if (bufferSizes.length() != 0) {
-            if (VDBG) {
-                log("Setting TCP values: [" + bufferSizes
-                        + "] which comes from [" + key + "]");
-            }
-            setBufferSize(bufferSizes);
+        String tcpBufferSizes = nai.linkProperties.getTcpBufferSizes();
+        String[] values = null;
+        if (tcpBufferSizes != null) {
+            values = tcpBufferSizes.split(",");
+        }
+
+        if (values == null || values.length != 6) {
+            if (VDBG) log("Invalid tcpBufferSizes string: " + tcpBufferSizes +", using defaults");
+            tcpBufferSizes = DEFAULT_TCP_BUFFER_SIZES;
+            values = tcpBufferSizes.split(",");
+        }
+
+        if (tcpBufferSizes.equals(mCurrentTcpBufferSizes)) return;
+
+        try {
+            if (VDBG) Slog.d(TAG, "Setting tx/rx TCP buffers to " + tcpBufferSizes);
+
+            final String prefix = "/sys/kernel/ipv4/tcp_";
+            FileUtils.stringToFile(prefix + "rmem_min", values[0]);
+            FileUtils.stringToFile(prefix + "rmem_def", values[1]);
+            FileUtils.stringToFile(prefix + "rmem_max", values[2]);
+            FileUtils.stringToFile(prefix + "wmem_min", values[3]);
+            FileUtils.stringToFile(prefix + "wmem_def", values[4]);
+            FileUtils.stringToFile(prefix + "wmem_max", values[5]);
+            mCurrentTcpBufferSizes = tcpBufferSizes;
+        } catch (IOException e) {
+            loge("Can't set TCP buffer sizes:" + e);
         }
 
         final String defaultRwndKey = "net.tcp.default_init_rwnd";
@@ -1586,33 +1598,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         final String sysctlKey = "sys.sysctl.tcp_def_init_rwnd";
         if (rwndValue != 0) {
             SystemProperties.set(sysctlKey, rwndValue.toString());
-        }
-    }
-
-    /**
-     * Writes TCP buffer sizes to /sys/kernel/ipv4/tcp_[r/w]mem_[min/def/max]
-     * which maps to /proc/sys/net/ipv4/tcp_rmem and tcpwmem
-     *
-     * @param bufferSizes in the format of "readMin, readInitial, readMax,
-     *        writeMin, writeInitial, writeMax"
-     */
-    private void setBufferSize(String bufferSizes) {
-        try {
-            String[] values = bufferSizes.split(",");
-
-            if (values.length == 6) {
-              final String prefix = "/sys/kernel/ipv4/tcp_";
-                FileUtils.stringToFile(prefix + "rmem_min", values[0]);
-                FileUtils.stringToFile(prefix + "rmem_def", values[1]);
-                FileUtils.stringToFile(prefix + "rmem_max", values[2]);
-                FileUtils.stringToFile(prefix + "wmem_min", values[3]);
-                FileUtils.stringToFile(prefix + "wmem_def", values[4]);
-                FileUtils.stringToFile(prefix + "wmem_max", values[5]);
-            } else {
-                loge("Invalid buffersize string: " + bufferSizes);
-            }
-        } catch (IOException e) {
-            loge("Can't set tcp buffer sizes:" + e);
         }
     }
 
@@ -1976,12 +1961,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     handleConnectivityChange(info.getType(), mCurrentLinkProperties[info.getType()],
                             false);
                     */
-                    break;
-                }
-                case NetworkStateTracker.EVENT_NETWORK_SUBTYPE_CHANGED: {
-                    info = (NetworkInfo) msg.obj;
-                    int type = info.getType();
-                    if (mNetConfigs[type].isDefault()) updateNetworkSettings(mNetTrackers[type]);
                     break;
                 }
             }
@@ -4152,6 +4131,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         updateInterfaces(newLp, oldLp, netId);
         updateMtu(newLp, oldLp);
+        updateTcpBufferSizes(networkAgent);
         // TODO - figure out what to do for clat
 //        for (LinkProperties lp : newLp.getStackedLinks()) {
 //            updateMtu(lp, null);
@@ -4377,6 +4357,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             loge("Exception setting default network :" + e);
         }
         handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
+        updateTcpBufferSizes(newNetwork);
     }
 
     private void handleConnectionValidated(NetworkAgentInfo newNetwork) {
@@ -4434,6 +4415,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         isNewDefault = true;
                         updateActiveDefaultNetwork(newNetwork);
                         if (newNetwork.linkProperties != null) {
+                            updateTcpBufferSizes(newNetwork);
                             setDefaultDnsSystemProperties(
                                     newNetwork.linkProperties.getDnsServers());
                         } else {
@@ -4492,8 +4474,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 1000);
                     }
                 }
-                // TODO - read the tcp buffer size config string from somewhere
-                // updateNetworkSettings();
             }
 
             // Notify battery stats service about this network, both the normal
