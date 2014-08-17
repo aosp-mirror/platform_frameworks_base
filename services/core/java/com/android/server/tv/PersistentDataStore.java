@@ -45,6 +45,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -69,7 +70,8 @@ final class PersistentDataStore {
     // The atomic file used to safely read or write the file.
     private final AtomicFile mAtomicFile;
 
-    private final List<TvContentRating> mBlockedRatings = new ArrayList<TvContentRating>();
+    private final List<TvContentRating> mBlockedRatings =
+            Collections.synchronizedList(new ArrayList<TvContentRating>());
 
     private boolean mBlockedRatingsChanged;
 
@@ -107,9 +109,11 @@ final class PersistentDataStore {
 
     public boolean isRatingBlocked(TvContentRating rating) {
         loadIfNeeded();
-        for (TvContentRating blcokedRating : mBlockedRatings) {
-            if (rating.contains(blcokedRating)) {
-                return true;
+        synchronized (mBlockedRatings) {
+            for (TvContentRating blcokedRating : mBlockedRatings) {
+                if (rating.contains(blcokedRating)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -271,10 +275,12 @@ final class PersistentDataStore {
         serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
         serializer.startTag(null, TAG_TV_INPUT_MANAGER_STATE);
         serializer.startTag(null, TAG_BLOCKED_RATINGS);
-        for (TvContentRating rating : mBlockedRatings) {
-            serializer.startTag(null, TAG_RATING);
-            serializer.attribute(null, ATTR_STRING, rating.flattenToString());
-            serializer.endTag(null, TAG_RATING);
+        synchronized (mBlockedRatings) {
+            for (TvContentRating rating : mBlockedRatings) {
+                serializer.startTag(null, TAG_RATING);
+                serializer.attribute(null, ATTR_STRING, rating.flattenToString());
+                serializer.endTag(null, TAG_RATING);
+            }
         }
         serializer.endTag(null, TAG_BLOCKED_RATINGS);
         serializer.startTag(null, TAG_PARENTAL_CONTROLS);
