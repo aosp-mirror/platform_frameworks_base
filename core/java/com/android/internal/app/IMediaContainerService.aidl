@@ -25,10 +25,7 @@ interface IMediaContainerService {
             boolean isExternal, boolean isForwardLocked, String abiOverride);
     int copyPackage(String packagePath, in IParcelFileDescriptorFactory target);
 
-    PackageInfoLite getMinimalPackageInfo(String packagePath, int flags, long threshold,
-            String abiOverride);
-    boolean checkInternalFreeStorage(String packagePath, boolean isForwardLocked, long threshold);
-    boolean checkExternalFreeStorage(String packagePath, boolean isForwardLocked, String abiOverride);
+    PackageInfoLite getMinimalPackageInfo(String packagePath, int flags, String abiOverride);
     ObbInfo getObbInfo(String filename);
     long calculateDirectorySize(String directory);
     /** Return file system stats: [0] is total bytes, [1] is available bytes */

@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.content.pm.PackageManager.INSTALL_ALL_USERS;
 import static android.content.pm.PackageManager.INSTALL_FROM_ADB;
 import static android.content.pm.PackageManager.INSTALL_REPLACE_EXISTING;
+import static android.net.TrafficStats.MB_IN_BYTES;
 import static com.android.internal.util.XmlUtils.readBitmapAttribute;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -42,6 +43,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
@@ -65,6 +67,7 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
@@ -75,13 +78,14 @@ import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.content.PackageHelper;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
-import com.android.server.pm.PackageInstallerSession.Snapshot;
 import com.google.android.collect.Sets;
 
 import libcore.io.IoUtils;
@@ -108,6 +112,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     // TODO: remove outstanding sessions when installer package goes away
     // TODO: notify listeners in other users when package has been installed there
+    // TODO: purge expired sessions periodically in addition to at reboot
 
     /** XML constants used in {@link #mSessionsFile} */
     private static final String TAG_SESSIONS = "sessions";
@@ -117,6 +122,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private static final String ATTR_INSTALLER_PACKAGE_NAME = "installerPackageName";
     private static final String ATTR_CREATED_MILLIS = "createdMillis";
     private static final String ATTR_SESSION_STAGE_DIR = "sessionStageDir";
+    private static final String ATTR_SESSION_STAGE_CID = "sessionStageCid";
     private static final String ATTR_SEALED = "sealed";
     private static final String ATTR_MODE = "mode";
     private static final String ATTR_INSTALL_FLAGS = "installFlags";
@@ -139,6 +145,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private final Context mContext;
     private final PackageManagerService mPm;
     private final AppOpsManager mAppOps;
+    private final StorageManager mStorage;
 
     private final File mStagingDir;
     private final HandlerThread mInstallThread;
@@ -165,10 +172,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     @GuardedBy("mSessions")
     private final SparseArray<PackageInstallerSession> mHistoricalSessions = new SparseArray<>();
 
+    /** Sessions allocated to legacy users */
+    @GuardedBy("mSessions")
+    private final SparseBooleanArray mLegacySessions = new SparseBooleanArray();
+
     private static final FilenameFilter sStageFilter = new FilenameFilter() {
         @Override
         public boolean accept(File dir, String name) {
-            return name.startsWith("vmdl") && name.endsWith(".tmp");
+            return isStageName(name);
         }
     };
 
@@ -176,6 +187,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         mContext = context;
         mPm = pm;
         mAppOps = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+        mStorage = StorageManager.from(mContext);
 
         mStagingDir = stagingDir;
 
@@ -190,13 +202,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         synchronized (mSessions) {
             readSessionsLocked();
 
-            // Clean up orphaned staging directories
-            final ArraySet<File> stages = Sets.newArraySet(mStagingDir.listFiles(sStageFilter));
+            final ArraySet<File> unclaimed = Sets.newArraySet(mStagingDir.listFiles(sStageFilter));
+
+            // Ignore stages claimed by active sessions
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
-                stages.remove(session.sessionStageDir);
+                unclaimed.remove(session.internalStageDir);
             }
-            for (File stage : stages) {
+
+            // Clean up orphaned staging directories
+            for (File stage : unclaimed) {
                 Slog.w(TAG, "Deleting orphan stage " + stage);
                 if (stage.isDirectory()) {
                     FileUtils.deleteContents(stage);
@@ -206,19 +221,61 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         }
     }
 
-    public static boolean isStageFile(File file) {
-        return sStageFilter.accept(null, file.getName());
+    public void onSecureContainersAvailable() {
+        synchronized (mSessions) {
+            final ArraySet<String> unclaimed = new ArraySet<>();
+            for (String cid : PackageHelper.getSecureContainerList()) {
+                if (isStageName(cid)) {
+                    unclaimed.add(cid);
+                }
+            }
+
+            // Ignore stages claimed by active sessions
+            for (int i = 0; i < mSessions.size(); i++) {
+                final PackageInstallerSession session = mSessions.valueAt(i);
+                final String cid = session.externalStageCid;
+
+                if (unclaimed.remove(cid)) {
+                    // Claimed by active session, mount it
+                    PackageHelper.mountSdDir(cid, PackageManagerService.getEncryptKey(),
+                            Process.SYSTEM_UID);
+                }
+            }
+
+            // Clean up orphaned staging containers
+            for (String cid : unclaimed) {
+                Slog.w(TAG, "Deleting orphan container " + cid);
+                PackageHelper.destroySdDir(cid);
+            }
+        }
+    }
+
+    public static boolean isStageName(String name) {
+        final boolean isFile = name.startsWith("vmdl") && name.endsWith(".tmp");
+        final boolean isContainer = name.startsWith("smdl") && name.endsWith(".tmp");
+        final boolean isLegacyContainer = name.startsWith("smdl2tmp");
+        return isFile || isContainer || isLegacyContainer;
     }
 
     @Deprecated
-    public File allocateSessionDir() throws IOException {
+    public File allocateInternalStageDirLegacy() throws IOException {
         synchronized (mSessions) {
             try {
                 final int sessionId = allocateSessionIdLocked();
-                return prepareSessionStageDir(sessionId);
+                mLegacySessions.put(sessionId, true);
+                return prepareInternalStageDir(sessionId);
             } catch (IllegalStateException e) {
                 throw new IOException(e);
             }
+        }
+    }
+
+    @Deprecated
+    public String allocateExternalStageCidLegacy() {
+        synchronized (mSessions) {
+            final int sessionId = allocateSessionIdLocked();
+            mLegacySessions.put(sessionId, true);
+            return "smdl" + sessionId + ".tmp";
         }
     }
 
@@ -246,9 +303,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                             Slog.w(TAG, "Abandoning old session first created at "
                                     + session.createdMillis);
                             valid = false;
-                        } else if (!session.sessionStageDir.exists()) {
-                            Slog.w(TAG, "Abandoning session with missing stage "
-                                    + session.sessionStageDir);
+                        } else if (session.internalStageDir != null
+                                && !session.internalStageDir.exists()) {
+                            Slog.w(TAG, "Abandoning internal session with missing stage "
+                                    + session.internalStageDir);
                             valid = false;
                         } else {
                             valid = true;
@@ -281,7 +339,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         final int userId = readIntAttribute(in, ATTR_USER_ID);
         final String installerPackageName = readStringAttribute(in, ATTR_INSTALLER_PACKAGE_NAME);
         final long createdMillis = readLongAttribute(in, ATTR_CREATED_MILLIS);
-        final File sessionStageDir = new File(readStringAttribute(in, ATTR_SESSION_STAGE_DIR));
+        final String stageDirRaw = readStringAttribute(in, ATTR_SESSION_STAGE_DIR);
+        final File stageDir = (stageDirRaw != null) ? new File(stageDirRaw) : null;
+        final String stageCid = readStringAttribute(in, ATTR_SESSION_STAGE_CID);
         final boolean sealed = readBooleanAttribute(in, ATTR_SEALED);
 
         final SessionParams params = new SessionParams(
@@ -299,7 +359,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
         return new PackageInstallerSession(mInternalCallback, mContext, mPm,
                 mInstallThread.getLooper(), sessionId, userId, installerPackageName, params,
-                createdMillis, sessionStageDir, sealed);
+                createdMillis, stageDir, stageCid, sealed);
     }
 
     private void writeSessionsLocked() {
@@ -332,7 +392,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private void writeSessionLocked(XmlSerializer out, PackageInstallerSession session)
             throws IOException {
         final SessionParams params = session.params;
-        final Snapshot snapshot = session.snapshot();
 
         out.startTag(null, TAG_SESSION);
 
@@ -341,9 +400,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         writeStringAttribute(out, ATTR_INSTALLER_PACKAGE_NAME,
                 session.installerPackageName);
         writeLongAttribute(out, ATTR_CREATED_MILLIS, session.createdMillis);
-        writeStringAttribute(out, ATTR_SESSION_STAGE_DIR,
-                session.sessionStageDir.getAbsolutePath());
-        writeBooleanAttribute(out, ATTR_SEALED, snapshot.sealed);
+        if (session.internalStageDir != null) {
+            writeStringAttribute(out, ATTR_SESSION_STAGE_DIR,
+                    session.internalStageDir.getAbsolutePath());
+        }
+        if (session.externalStageCid != null) {
+            writeStringAttribute(out, ATTR_SESSION_STAGE_CID, session.externalStageCid);
+        }
+        writeBooleanAttribute(out, ATTR_SEALED, session.isSealed());
 
         writeIntAttribute(out, ATTR_MODE, params.mode);
         writeIntAttribute(out, ATTR_INSTALL_FLAGS, params.installFlags);
@@ -372,6 +436,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     @Override
     public int createSession(SessionParams params, String installerPackageName, int userId) {
+        try {
+            return createSessionInternal(params, installerPackageName, userId);
+        } catch (IOException e) {
+            throw ExceptionUtils.wrap(e);
+        }
+    }
+
+    private int createSessionInternal(SessionParams params, String installerPackageName, int userId)
+            throws IOException {
         final int callingUid = Binder.getCallingUid();
         mPm.enforceCrossUserPermission(callingUid, userId, true, "createSession");
 
@@ -393,14 +466,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             params.installFlags |= INSTALL_REPLACE_EXISTING;
         }
 
-        switch (params.mode) {
-            case SessionParams.MODE_FULL_INSTALL:
-            case SessionParams.MODE_INHERIT_EXISTING:
-                break;
-            default:
-                throw new IllegalArgumentException("Params must have valid mode set");
-        }
-
         // Defensively resize giant app icons
         if (params.appIcon != null) {
             final ActivityManager am = (ActivityManager) mContext.getSystemService(
@@ -413,13 +478,41 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             }
         }
 
-        // Sanity check that install could fit
-        if (params.sizeBytes > 0) {
-            try {
-                mPm.freeStorage(params.sizeBytes);
-            } catch (IOException e) {
-                throw ExceptionUtils.wrap(e);
+        // Figure out where we're going to be staging session data
+        final boolean stageInternal;
+
+        if (params.mode == SessionParams.MODE_FULL_INSTALL) {
+            // Brand new install, use best resolved location. This also verifies
+            // that target has enough free space for the install.
+            final int resolved = PackageHelper.resolveInstallLocation(mContext,
+                    params.installLocation, params.sizeBytes, params.installFlags);
+            if (resolved == PackageHelper.RECOMMEND_INSTALL_INTERNAL) {
+                stageInternal = true;
+            } else if (resolved == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
+                stageInternal = false;
+            } else {
+                throw new IOException("No storage with enough free space; res=" + resolved);
             }
+
+        } else if (params.mode == SessionParams.MODE_INHERIT_EXISTING) {
+            // We always stage inheriting sessions on internal storage first,
+            // since we don't want to grow containers until we're sure that
+            // everything looks legit.
+            stageInternal = true;
+            checkInternalStorage(params.sizeBytes);
+
+            // If we have a good hunch we'll end up on external storage, verify
+            // free space there too.
+            final ApplicationInfo info = mPm.getApplicationInfo(params.appPackageName, 0,
+                    userId);
+            if (info != null && (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
+                checkExternalStorage(params.sizeBytes);
+
+                throw new UnsupportedOperationException("TODO: finish fleshing out ASEC support");
+            }
+
+        } else {
+            throw new IllegalArgumentException("Invalid install mode: " + params.mode);
         }
 
         final int sessionId;
@@ -437,20 +530,50 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                         "Too many historical sessions for UID " + callingUid);
             }
 
+            final long createdMillis = System.currentTimeMillis();
             sessionId = allocateSessionIdLocked();
 
-            final long createdMillis = System.currentTimeMillis();
-            final File sessionStageDir = prepareSessionStageDir(sessionId);
+            // We're staging to exactly one location
+            File stageDir = null;
+            String stageCid = null;
+            if (stageInternal) {
+                stageDir = prepareInternalStageDir(sessionId);
+            } else {
+                stageCid = prepareExternalStageCid(sessionId, params.sizeBytes);
+            }
 
             session = new PackageInstallerSession(mInternalCallback, mContext, mPm,
                     mInstallThread.getLooper(), sessionId, userId, installerPackageName, params,
-                    createdMillis, sessionStageDir, false);
+                    createdMillis, stageDir, stageCid, false);
             mSessions.put(sessionId, session);
         }
 
         mCallbacks.notifySessionCreated(session.sessionId, session.userId);
         writeSessionsAsync();
         return sessionId;
+    }
+
+    private void checkInternalStorage(long sizeBytes) throws IOException {
+        if (sizeBytes <= 0) return;
+
+        final File target = Environment.getDataDirectory();
+        final long targetBytes = sizeBytes + mStorage.getStorageLowBytes(target);
+
+        mPm.freeStorage(targetBytes);
+        if (target.getUsableSpace() < targetBytes) {
+            throw new IOException("Not enough internal space to write " + sizeBytes + " bytes");
+        }
+    }
+
+    private void checkExternalStorage(long sizeBytes) throws IOException {
+        if (sizeBytes <= 0) return;
+
+        final File target = Environment.getExternalStorageDirectory();
+        final long targetBytes = sizeBytes + mStorage.getStorageLowBytes(target);
+
+        if (target.getUsableSpace() < targetBytes) {
+            throw new IOException("Not enough external space to write " + sizeBytes + " bytes");
+        }
     }
 
     @Override
@@ -463,9 +586,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             if (!isCallingUidOwner(session)) {
                 throw new SecurityException("Caller has no access to session " + sessionId);
             }
-            if (session.openCount.getAndIncrement() == 0) {
-                mCallbacks.notifySessionOpened(sessionId, session.userId);
-            }
+            session.open();
             return session;
         }
     }
@@ -475,7 +596,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         int sessionId;
         do {
             sessionId = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
-            if (mSessions.get(sessionId) == null && mHistoricalSessions.get(sessionId) == null) {
+            if (mSessions.get(sessionId) == null && mHistoricalSessions.get(sessionId) == null
+                    && !mLegacySessions.get(sessionId, false)) {
                 return sessionId;
             }
         } while (n++ < 32);
@@ -483,11 +605,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         throw new IllegalStateException("Failed to allocate session ID");
     }
 
-    private File prepareSessionStageDir(int sessionId) {
+    private File prepareInternalStageDir(int sessionId) throws IOException {
         final File file = new File(mStagingDir, "vmdl" + sessionId + ".tmp");
 
         if (file.exists()) {
-            throw new IllegalStateException("Session dir already exists: " + file);
+            throw new IOException("Session dir already exists: " + file);
         }
 
         try {
@@ -495,14 +617,32 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             Os.chmod(file.getAbsolutePath(), 0755);
         } catch (ErrnoException e) {
             // This purposefully throws if directory already exists
-            throw new IllegalStateException("Failed to prepare session dir", e);
+            throw new IOException("Failed to prepare session dir", e);
         }
 
         if (!SELinux.restorecon(file)) {
-            throw new IllegalStateException("Failed to restorecon session dir");
+            throw new IOException("Failed to restorecon session dir");
         }
 
         return file;
+    }
+
+    private String prepareExternalStageCid(int sessionId, long sizeBytes) throws IOException {
+        if (sizeBytes <= 0) {
+            throw new IOException("Session must provide valid size for ASEC");
+        }
+
+        final String cid = "smdl" + sessionId + ".tmp";
+
+        // Round up to nearest MB, plus another MB for filesystem overhead
+        final int sizeMb = (int) ((sizeBytes + MB_IN_BYTES) / MB_IN_BYTES) + 1;
+
+        if (PackageHelper.createSdDir(sizeMb, cid, PackageManagerService.getEncryptKey(),
+                Process.SYSTEM_UID, true) == null) {
+            throw new IOException("Failed to create ASEC");
+        }
+
+        return cid;
     }
 
     @Override
@@ -643,7 +783,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         public void onUserActionRequired(Intent intent) {
             final Intent fillIn = new Intent();
             fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
-                    PackageInstaller.STATUS_USER_ACTION_REQUIRED);
+                    PackageInstaller.STATUS_PENDING_USER_ACTION);
             fillIn.putExtra(Intent.EXTRA_INTENT, intent);
             try {
                 mTarget.sendIntent(mContext, 0, fillIn, null, null);
@@ -679,7 +819,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         public void onUserActionRequired(Intent intent) {
             final Intent fillIn = new Intent();
             fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
-                    PackageInstaller.STATUS_USER_ACTION_REQUIRED);
+                    PackageInstaller.STATUS_PENDING_USER_ACTION);
             fillIn.putExtra(Intent.EXTRA_INTENT, intent);
             try {
                 mTarget.sendIntent(mContext, 0, fillIn, null, null);
@@ -817,12 +957,21 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             }
             pw.println();
             pw.decreaseIndent();
+
+            pw.println("Legacy install sessions:");
+            pw.increaseIndent();
+            pw.println(mLegacySessions.toString());
+            pw.decreaseIndent();
         }
     }
 
     class InternalCallback {
         public void onSessionProgressChanged(PackageInstallerSession session, float progress) {
             mCallbacks.notifySessionProgressChanged(session.sessionId, session.userId, progress);
+        }
+
+        public void onSessionOpened(PackageInstallerSession session) {
+            mCallbacks.notifySessionOpened(session.sessionId, session.userId);
         }
 
         public void onSessionClosed(PackageInstallerSession session) {
