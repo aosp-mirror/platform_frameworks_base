@@ -865,7 +865,8 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
     }
 
-    private void updateWakeLockWorkSourceInternal(IBinder lock, WorkSource ws, String historyTag) {
+    private void updateWakeLockWorkSourceInternal(IBinder lock, WorkSource ws, String historyTag,
+            int callingUid) {
         synchronized (mLock) {
             int index = findWakeLockIndexLocked(lock);
             if (index < 0) {
@@ -873,7 +874,8 @@ public final class PowerManagerService extends com.android.server.SystemService
                     Slog.d(TAG, "updateWakeLockWorkSourceInternal: lock=" + Objects.hashCode(lock)
                             + " [not found], ws=" + ws);
                 }
-                throw new IllegalArgumentException("Wake lock not active");
+                throw new IllegalArgumentException("Wake lock not active: " + lock
+                        + " from uid " + callingUid);
             }
 
             WakeLock wakeLock = mWakeLocks.get(index);
@@ -2802,9 +2804,10 @@ public final class PowerManagerService extends com.android.server.SystemService
                 ws = null;
             }
 
+            final int callingUid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
-                updateWakeLockWorkSourceInternal(lock, ws, historyTag);
+                updateWakeLockWorkSourceInternal(lock, ws, historyTag, callingUid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

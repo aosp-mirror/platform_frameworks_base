@@ -39,6 +39,7 @@ import android.telephony.TelephonyManager;
 import android.util.Slog;
 
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.PowerProfile;
 import com.android.server.LocalServices;
@@ -867,6 +868,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
         if (noOutput) {
             return;
+        }
+        if (BatteryStatsHelper.checkWifiOnly(mContext)) {
+            flags |= BatteryStats.DUMP_DEVICE_WIFI_ONLY;
         }
         if (useCheckinFormat) {
             List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(0);
