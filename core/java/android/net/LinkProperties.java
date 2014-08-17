@@ -55,6 +55,8 @@ public final class LinkProperties implements Parcelable {
     private ArrayList<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
     private ProxyInfo mHttpProxy;
     private int mMtu;
+    // in the format "rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max"
+    private String mTcpBufferSizes;
 
     private static final int MIN_MTU    = 68;
     private static final int MIN_MTU_V6 = 1280;
@@ -105,6 +107,7 @@ public final class LinkProperties implements Parcelable {
                 addStackedLink(l);
             }
             setMtu(source.getMtu());
+            mTcpBufferSizes = source.mTcpBufferSizes;
         }
     }
 
@@ -351,6 +354,29 @@ public final class LinkProperties implements Parcelable {
         return mMtu;
     }
 
+    /**
+     * Sets the tcp buffers sizes to be used when this link is the system default.
+     * Should be of the form "rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max".
+     *
+     * @param tcpBufferSizes The tcp buffers sizes to use.
+     *
+     * @hide
+     */
+    public void setTcpBufferSizes(String tcpBufferSizes) {
+        mTcpBufferSizes = tcpBufferSizes;
+    }
+
+    /**
+     * Gets the tcp buffer sizes.
+     *
+     * @return the tcp buffer sizes to use when this link is the system default.
+     *
+     * @hide
+     */
+    public String getTcpBufferSizes() {
+        return mTcpBufferSizes;
+    }
+
     private RouteInfo routeWithInterface(RouteInfo route) {
         return new RouteInfo(
             route.getDestination(),
@@ -509,6 +535,7 @@ public final class LinkProperties implements Parcelable {
         mHttpProxy = null;
         mStackedLinks.clear();
         mMtu = 0;
+        mTcpBufferSizes = null;
     }
 
     /**
@@ -534,6 +561,11 @@ public final class LinkProperties implements Parcelable {
 
         String mtu = " MTU: " + mMtu;
 
+        String tcpBuffSizes = "";
+        if (mTcpBufferSizes != null) {
+            tcpBuffSizes = " TcpBufferSizes: " + mTcpBufferSizes;
+        }
+
         String routes = " Routes: [";
         for (RouteInfo route : mRoutes) routes += route.toString() + ",";
         routes += "] ";
@@ -548,7 +580,7 @@ public final class LinkProperties implements Parcelable {
             stacked += "] ";
         }
         return "{" + ifaceName + linkAddresses + routes + dns + domainName + mtu
-            + proxy + stacked + "}";
+            + tcpBuffSizes + proxy + stacked + "}";
     }
 
     /**
@@ -756,6 +788,17 @@ public final class LinkProperties implements Parcelable {
         return getMtu() == target.getMtu();
     }
 
+    /**
+     * Compares this {@code LinkProperties} Tcp buffer sizes against the target.
+     *
+     * @param target LinkProperties to compare.
+     * @return {@code true} if both are identical, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isIdenticalTcpBufferSizes(LinkProperties target) {
+        return Objects.equals(mTcpBufferSizes, target.mTcpBufferSizes);
+    }
+
     @Override
     /**
      * Compares this {@code LinkProperties} instance against the target
@@ -788,7 +831,8 @@ public final class LinkProperties implements Parcelable {
                 isIdenticalRoutes(target) &&
                 isIdenticalHttpProxy(target) &&
                 isIdenticalStackedLinks(target) &&
-                isIdenticalMtu(target);
+                isIdenticalMtu(target) &&
+                isIdenticalTcpBufferSizes(target);
     }
 
     /**
@@ -923,7 +967,8 @@ public final class LinkProperties implements Parcelable {
                 + mRoutes.size() * 41
                 + ((null == mHttpProxy) ? 0 : mHttpProxy.hashCode())
                 + mStackedLinks.hashCode() * 47)
-                + mMtu * 51;
+                + mMtu * 51
+                + ((null == mTcpBufferSizes) ? 0 : mTcpBufferSizes.hashCode());
     }
 
     /**
@@ -942,6 +987,7 @@ public final class LinkProperties implements Parcelable {
         }
         dest.writeString(mDomains);
         dest.writeInt(mMtu);
+        dest.writeString(mTcpBufferSizes);
         dest.writeInt(mRoutes.size());
         for(RouteInfo route : mRoutes) {
             dest.writeParcelable(route, flags);
@@ -981,6 +1027,7 @@ public final class LinkProperties implements Parcelable {
                 }
                 netProp.setDomains(in.readString());
                 netProp.setMtu(in.readInt());
+                netProp.setTcpBufferSizes(in.readString());
                 addressCount = in.readInt();
                 for (int i=0; i<addressCount; i++) {
                     netProp.addRoute((RouteInfo)in.readParcelable(null));
