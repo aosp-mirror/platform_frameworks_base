@@ -26,5 +26,5 @@
     <string name="duration" msgid="3584782459928719435">"Durasi:"</string>
     <string name="data_transmitted" msgid="7988167672982199061">"Terkirim:"</string>
     <string name="data_received" msgid="4062776929376067820">"Diterima:"</string>
-    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> byte / <xliff:g id="NUMBER_1">%2$s</xliff:g> paket"</string>
+    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> bita / <xliff:g id="NUMBER_1">%2$s</xliff:g> paket"</string>
 </resources>
