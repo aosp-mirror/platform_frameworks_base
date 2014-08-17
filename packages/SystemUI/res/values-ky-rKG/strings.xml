@@ -25,7 +25,8 @@
     <skip />
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Тизмеден алып салуу"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Колдонмо тууралуу"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Акыркы колдонмолор табылган жок"</string>
+    <!-- no translation found for status_bar_no_recent_apps (7374907845131203189) -->
+    <skip />
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Акыркы колдонмолорду жок кылуу"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 акыркы колдонмо"</item>
@@ -106,7 +107,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"Артка"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Үйгө"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Меню"</string>
-    <string name="accessibility_recent" msgid="8571350598987952883">"Акыркы колдонмолор"</string>
+    <!-- no translation found for accessibility_recent (1606470783629913980) -->
+    <skip />
     <string name="accessibility_search_light" msgid="1103867596330271848">"Издөө"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Камера"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Телефон"</string>
@@ -181,7 +183,9 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Эскертме жок кылынды."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Эскертмелер көшөгөсү."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Тез тууралоолор."</string>
-    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"Акыркы колдонмолор."</string>
+    <string name="accessibility_desc_settings" msgid="3417884241751434521">"Жөндөөлөр"</string>
+    <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
+    <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Колдонуучу <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Мобилдик түйүн <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
@@ -193,6 +197,8 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"Тактаны жабуу"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"Көбүрөөк убакыт"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"Азыраак убакыт"</string>
+    <!-- no translation found for accessibility_brightness (8003681285547803095) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2Гб-3Гб көлөмдөгү дайындар өчүрүлдү."</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4Гб көлөмдөгү дайындар өчүрүлдү"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Уюктук дайындар тармагы өчүк"</string>
@@ -264,7 +270,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> колдонулду"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> чектөө"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> эскертүү"</string>
-    <string name="recents_empty_message" msgid="7883614615463619450">"Акыркы колдонмолор жок"</string>
+    <!-- no translation found for recents_empty_message (8682129509540827999) -->
+    <skip />
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Колдонмо жөнүндө маалымат"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"колдонмого кулпулоо"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"издөө"</string>
@@ -284,7 +291,8 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"Саат <xliff:g id="ALARM_TIME">%s</xliff:g> үн ишаратын укпайсыз."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Анчейин шашылыш эмес эскертмелер төмөндө"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"Ачуу үчүн кайра таптап коюңуз"</string>
+    <!-- no translation found for notification_tap_again (8524949573675922138) -->
+    <skip />
     <string name="keyguard_unlock" msgid="8043466894212841998">"Кулпуну ачуу үчүн серпип коюңуз"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Телефонду колдонуу үчүн оңго серпип коюңуз"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Камераны ачуу үчүн солго серпип коюңуз"</string>
@@ -293,17 +301,25 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"Артыкчылыктуу"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Бардыгы"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Кубатталууда (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> толгонго чейин)"</string>
+    <!-- no translation found for accessibility_multi_user_switch_switcher (7305948938141024937) -->
+    <skip />
+    <!-- no translation found for accessibility_multi_user_switch_quick_contact (3020367729287990475) -->
+    <skip />
     <string name="user_add_user" msgid="5110251524486079492">"Колдонуучу кошуу"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Жаңы колдонуучу"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Конок"</string>
-    <string name="guest_new_guest" msgid="4259024453643879653">"+ Конок"</string>
-    <string name="guest_exit_guest" msgid="1619100760451149682">"Конок режиминен чыгуу"</string>
+    <!-- no translation found for guest_new_guest (600537543078847803) -->
+    <skip />
+    <string name="guest_exit_guest" msgid="7187359342030096885">"Конокту алып салуу"</string>
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"Конок сеансынан чыгасызбы?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"Конок сеансынан чыкканда, жергиликтүү дайындар өчүрүлөт."</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Кайтып келишиңиз менен, конок!"</string>
-    <string name="guest_wipe_session_message" msgid="5369763062345463297">"Жаңы сеанс баштайсызбы?"</string>
-    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"Ооба"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"Жок, рахмат"</string>
+    <!-- no translation found for guest_wipe_session_message (8476238178270112811) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (5065558566939858884) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (1401113462524894716) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Бир мүнөткө"</item>
     <item quantity="other" msgid="6924190729213550991">"%d мүнөткө"</item>
@@ -333,4 +349,6 @@
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Сиз VPN-ге туташкансыз (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\").\n\nVPN кызмат камсыздоочуңуз түзмөгүңүздү жана тармактагы аракетиңизди, анын ичинде email-дер, колдонмолор жана коопсуз вебсайттарды көзөмөлдөй алат."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Бул түзмөк төмөнкүчө башкарылат:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nАдминистратор электрондук почталар, колдонмолор жана коопсуз вебсайттар сыяктуу тармактгы аракеттрге көз салып турт. Көбүрөөк билүү үчн, администратрго кайрылңз.\n\nОшондой эле \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" VPN туташуусн орнотууга урукст бердиңз. Бул колдонмо тармактгы аракеттерңзге дагы көз салат."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Бул түзмөк төмөнкүчө башкарылат:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nАдминистратор электрондук почта, колдонмолор жана коопсуз вебсайттар сыяктуу тармактагы аракеттериңизге көз салып турат. Көбүрөөк билүү үчүн, администраторго кайрылыңыз.\n\nОшондой эле VPN\'ге туташып турасыз. (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). VPN кызмат көрсөтүүчү тармактагы аракетиңизге көз салат."</string>
+    <!-- no translation found for keyguard_indication_trust_disabled (7412534203633528135) -->
+    <skip />
 </resources>

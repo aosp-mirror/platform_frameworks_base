@@ -23,7 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"அழி"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"பட்டியலில் இருந்து அகற்று"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"பயன்பாட்டுத் தகவல்"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"சமீபத்திய பயன்பாடுகள் எதுவுமில்லை"</string>
+    <!-- no translation found for status_bar_no_recent_apps (7374907845131203189) -->
+    <skip />
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"சமீபத்திய பயன்பாடுகளை நிராகரி"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 சமீபத்திய பயன்பாடு"</item>
@@ -38,11 +39,11 @@
     <string name="invalid_charger" msgid="4549105996740522523">"USB மூலம் சார்ஜ் செய்வது ஆதரிக்கப்படவில்லை.\nவழங்கப்பட்ட சார்ஜரை மட்டும் பயன்படுத்தவும்."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB சார்ஜிங் ஆதரிக்கப்படவில்லை."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"வழங்கப்பட்ட சார்ஜரை மட்டும் பயன்படுத்துக."</string>
-    <string name="battery_low_why" msgid="4553600287639198111">"அமைப்புகள்"</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"அமைப்பு"</string>
     <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"பேட்டரி சேமிப்பானை இயக்கவா?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"இயக்கு"</string>
     <string name="battery_saver_start_action" msgid="5576697451677486320">"பேட்டரி சேமிப்பானை இயக்கு"</string>
-    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"அமைப்புகள்"</string>
+    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"அமைப்பு"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"வைஃபை"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"விமானப் பயன்முறை"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"திரையைத் தானாகச் சுழற்று"</string>
@@ -80,7 +81,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"பின்செல்"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"முகப்பு"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"மெனு"</string>
-    <string name="accessibility_recent" msgid="8571350598987952883">"சமீபத்திய பயன்பாடுகள்"</string>
+    <!-- no translation found for accessibility_recent (1606470783629913980) -->
+    <skip />
     <string name="accessibility_search_light" msgid="1103867596330271848">"தேடு"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"கேமரா"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"மொபைல்"</string>
@@ -141,7 +143,7 @@
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"புளூடூத் இணைப்பு முறை."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"விமானப் பயன்முறை."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"பேட்டரி சக்தி <xliff:g id="NUMBER">%d</xliff:g> சதவிகிதம் உள்ளது."</string>
-    <string name="accessibility_settings_button" msgid="799583911231893380">"கணினி அமைப்புகள்."</string>
+    <string name="accessibility_settings_button" msgid="799583911231893380">"கணினி அமைப்பு."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"அறிவிப்புகள்."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"அறிவிப்பை அழி."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS இயக்கப்பட்டது."</string>
@@ -154,8 +156,10 @@
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> ஐத் தொடங்குகிறது."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"அறிவிப்பு நிராகரிக்கப்பட்டது."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"அறிவிப்பு விவரம்."</string>
-    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"உடனடி அமைப்புகள்."</string>
-    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"சமீபத்திய பயன்பாடுகள்."</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"உடனடி அமைப்பு."</string>
+    <string name="accessibility_desc_settings" msgid="3417884241751434521">"அமைப்புகள்"</string>
+    <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
+    <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"பயனர் <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"மொபைல் <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
@@ -167,6 +171,8 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"பேனலை மூடு"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"நேரத்தை அதிகரி"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"நேரத்தைக் குறை"</string>
+    <!-- no translation found for accessibility_brightness (8003681285547803095) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G தரவு முடக்கப்பட்டது"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G தரவு முடக்கப்பட்டது"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"செல்லுலார் தரவு முடக்கப்பட்டது"</string>
@@ -204,7 +210,7 @@
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"மீடியா சாதனம்"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"அவசரகால அழைப்புகள் மட்டும்"</string>
-    <string name="quick_settings_settings_label" msgid="5326556592578065401">"அமைப்புகள்"</string>
+    <string name="quick_settings_settings_label" msgid="5326556592578065401">"அமைப்பு"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"நேரம்"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"நான்"</string>
     <string name="quick_settings_user_title" msgid="4467690427642392403">"பயனர்"</string>
@@ -223,7 +229,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"தானியங்கு"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"வண்ணங்களை மாற்று"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"வண்ணத்தைச் சரிப்படுத்தும் முறை"</string>
-    <string name="quick_settings_more_settings" msgid="326112621462813682">"மேலும் அமைப்புகள்"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"மேலும் அமைப்பு"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"முடிந்தது"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"இணைக்கப்பட்டது"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"இணைக்கிறது..."</string>
@@ -238,7 +244,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"பயன்படுத்தியது - <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> வரம்பு"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> எச்சரிக்கை"</string>
-    <string name="recents_empty_message" msgid="7883614615463619450">"சமீபத்திய பயன்பாடுகள் எதுவுமில்லை"</string>
+    <!-- no translation found for recents_empty_message (8682129509540827999) -->
+    <skip />
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"பயன்பாட்டு தகவல்"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"லாக்-டு-ஆப்"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"தேடு"</string>
@@ -258,7 +265,8 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"<xliff:g id="ALARM_TIME">%s</xliff:g> க்கு அலாரத்தைக் கேட்க மாட்டீர்கள்"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"அவசர நிலைக் குறைவான அறிவிப்புகள் கீழே உள்ளன"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"திறக்க, மீண்டும் தட்டவும்"</string>
+    <!-- no translation found for notification_tap_again (8524949573675922138) -->
+    <skip />
     <string name="keyguard_unlock" msgid="8043466894212841998">"திறக்க, மேலே ஸ்வைப் செய்யவும்"</string>
     <string name="phone_hint" msgid="3101468054914424646">"ஃபோனுக்கு, வலப்புறம் ஸ்வைப் செய்க"</string>
     <string name="camera_hint" msgid="5241441720959174226">"கேமராவிற்கு இடப்புறம் ஸ்வைப் செய்க"</string>
@@ -267,17 +275,25 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"முன்னுரிமை"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"எல்லாம்"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"சார்ஜாகிறது (முழு சார்ஜிற்கு <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ஆகும்)"</string>
+    <!-- no translation found for accessibility_multi_user_switch_switcher (7305948938141024937) -->
+    <skip />
+    <!-- no translation found for accessibility_multi_user_switch_quick_contact (3020367729287990475) -->
+    <skip />
     <string name="user_add_user" msgid="5110251524486079492">"பயனரைச் சேர்"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"புதியவர்"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"அழைக்கப்பட்டவர்"</string>
-    <string name="guest_new_guest" msgid="4259024453643879653">"+ அழைக்கப்பட்டவர்"</string>
-    <string name="guest_exit_guest" msgid="1619100760451149682">"விருந்தினரிலிருந்து வெளியேறு"</string>
+    <!-- no translation found for guest_new_guest (600537543078847803) -->
+    <skip />
+    <string name="guest_exit_guest" msgid="7187359342030096885">"அழைக்கப்பட்டவரை அகற்று"</string>
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"விருந்தினர் அமர்விலிருந்து வெளியேறவா?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"விருந்தினர் அமர்விலிருந்து வெளியேறுவது அகத் தரவை அகற்றும்."</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"வரவேற்கிறோம்!"</string>
-    <string name="guest_wipe_session_message" msgid="5369763062345463297">"புதிய அமர்வைத் தொடங்க விருப்பமா?"</string>
-    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"ஆம்"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"வேண்டாம், நன்றி"</string>
+    <!-- no translation found for guest_wipe_session_message (8476238178270112811) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (5065558566939858884) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (1401113462524894716) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"ஒரு நிமிடம்"</item>
     <item quantity="other" msgid="6924190729213550991">"%d நிமிடங்கள்"</item>
@@ -307,4 +323,6 @@
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\") உடன் இணைக்கப்பட்டீர்கள்.\n\nமின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் பாதுகாப்பான இணையதளங்கள் உள்ளிட்ட சாதனம் மற்றும் நெட்வொர்க் செயல்பாட்டை உங்கள் VPN சேவை வழங்குநரால் கண்காணிக்க முடியும்."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"சாதனத்தை நிர்வகிப்பது:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nமின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் பாதுகாப்பான இணையதளங்கள் உட்பட நெட்வொர்க் செயல்பாட்டை உங்கள் நிர்வாகியால் கண்காணிக்க முடியும். மேலும் தகவலுக்கு உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்.\n\nமேலும் VPN இணைப்பை அமைக்க, \"<xliff:g id="APPLICATION">%2$s</xliff:g>\"க்கு அனுமதி வழங்கியுள்ளீர்கள். இந்தப் பயன்பாட்டினால் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"சாதனத்தை நிர்வகிப்பது:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nமின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் பாதுகாப்பான இணையதளங்கள் உட்பட நெட்வொர்க் செயல்பாட்டை உங்கள் நிர்வாகியால் கண்காணிக்க முடியும். மேலும் தகவலுக்கு உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்.\n\nமேலும் (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") உடன் இணைக்கப்பட்டீர்கள். VPN சேவை வழங்குநரும் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
+    <!-- no translation found for keyguard_indication_trust_disabled (7412534203633528135) -->
+    <skip />
 </resources>

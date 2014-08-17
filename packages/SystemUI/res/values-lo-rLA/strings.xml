@@ -23,7 +23,7 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"ລຶບ"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ເອົາອອກຈາກລາຍການ"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ຂໍ້ມູນແອັບຯ"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"ບໍ່ມີແອັບຯທີ່ຫາກໍໃຊ້"</string>
+    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Your recent screens appear here"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ປິດແອັບຯຫຼ້າສຸດທີ່ໃຊ້"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 ແອັບຯຫຼ້າສຸດ"</item>
@@ -80,7 +80,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"ກັບຄືນ"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"ໜ້າທຳອິດ"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"ເມນູ"</string>
-    <string name="accessibility_recent" msgid="8571350598987952883">"ແອັບຯຫຼ້າສຸດ"</string>
+    <string name="accessibility_recent" msgid="1606470783629913980">"ໜ້າ​ຈໍ​​ເມື່ອບໍ່​ດົນ​ມາ​ນີ້"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"ຊອກຫາ"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ກ້ອງ"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ໂທລະສັບ"</string>
@@ -155,7 +155,8 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"ປິດການແຈ້ງເຕືອນແລ້ວ."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"ໜ້າຈໍແຈ້ງເຕືອນ."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ການຕັ້ງຄ່າດ່ວນ."</string>
-    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"ແອັບຯທີ່ຫາກໍໃຊ້."</string>
+    <string name="accessibility_desc_settings" msgid="3417884241751434521">"ການ​ຕັ້ງ​ຄ່າ"</string>
+    <string name="accessibility_desc_recent_apps" msgid="8376953390514779637">"ໜ້າ​ຈໍ​​ເມື່ອບໍ່​ດົນ​ມາ​ນີ້."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ຜູ່ໃຊ້ <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"ມືຖື <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
@@ -167,6 +168,8 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"​ປິດ​ແຖບ"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"​ເພີ່ມ​ເວ​ລາ"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"ຫຼຸດ​ເວ​ລາ"</string>
+    <!-- no translation found for accessibility_brightness (8003681285547803095) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"ຂໍ້​ມູນ 2G-3G ​ແມ່ນ​ປິດ"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"ຂໍ້​ມູນ 4G ແມ່ນ​ປິດ"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"ຂໍ້​ມູ​ນມ​ື​ຖື​ຖືກ​ປິດ"</string>
@@ -238,7 +241,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"ໃຊ້​ໄປ​ແລ້ວ <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"ຈຳ​ກັດ <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"ຄຳ​ເຕືອນ <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="recents_empty_message" msgid="7883614615463619450">"ບໍ່​ມີ​ແອັບຯ​ທີ່​ຫາ​ກໍ​ໃຊ້"</string>
+    <string name="recents_empty_message" msgid="8682129509540827999">"Your recent screens appear here"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"​ຂໍ້​ມູນ​ແອັບ​ພ​ລິ​ເຄ​ຊັນ"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"lock to app"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ຊອກຫາ"</string>
@@ -258,7 +261,8 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"ທ່ານ​ຈະ​ບໍ່​ໄດ້​ຍິນ​ສຽງ​ໂມງ​ປຸກ​ໃນ​ເວ​ລາ <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ການ​ແຈ້ງເຕືອນ​ທີ່​ສຳຄັນ​ໜ້ອຍ​ກວ່າ​ຢູ່​ດ້ານ​ລຸ່ມ"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"ແຕະ​ອີກ​ຄັ້ງ​ເພື່ອ​ເປີດ"</string>
+    <!-- no translation found for notification_tap_again (8524949573675922138) -->
+    <skip />
     <string name="keyguard_unlock" msgid="8043466894212841998">"ເລື່ອນ​ຂຶ້ນ​ເພື່ອ​ປົດ​ລັອກ"</string>
     <string name="phone_hint" msgid="3101468054914424646">"ປັດ​ຂວາ​ເພື່ອ​ໃຊ້​ໂທ​ລະ​ສັບ"</string>
     <string name="camera_hint" msgid="5241441720959174226">"ປັດ​ຊ້າຍ​ເພື່ອ​ໃຊ້​ກ້ອງ"</string>
@@ -267,17 +271,24 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"ລະດັບຄວາມສຳຄັນ"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"ທັງໝົດ"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ກຳ​ລັງ​ສາກ​ໄຟ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ກວ່າ​ຈ​ະ​ເຕັມ)"</string>
+    <!-- no translation found for accessibility_multi_user_switch_switcher (7305948938141024937) -->
+    <skip />
+    <!-- no translation found for accessibility_multi_user_switch_quick_contact (3020367729287990475) -->
+    <skip />
     <string name="user_add_user" msgid="5110251524486079492">"ເພີ່ມຜູ່ໃຊ້"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"ຜູ່ໃຊ້ໃໝ່"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"ແຂກ"</string>
-    <string name="guest_new_guest" msgid="4259024453643879653">"+ ແຂກ"</string>
-    <string name="guest_exit_guest" msgid="1619100760451149682">"​ອອກ​ຈາກ​ຜູ່​ມາ​ຢາມ"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"Add guest"</string>
+    <string name="guest_exit_guest" msgid="7187359342030096885">"​ລຶບ​ແຂກ"</string>
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"ສິ້ນ​ສຸດ​ການ​ນຳ​ໃຊ້​ຂອງ​ຜູ່​ຢ້ຽມ​ຢາມບໍ່?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"​ການ​ອອກ​ຈາກ​ເຊດ​ຊັນ​ຜູ່​ຢ້ຽມ​ຢາມ​ຈະ​ເປັນ​ການ​ລຶບ​ຂໍ້​ມູນ​ໃນ​ເຄື່ອງອອ."</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"ຍິນ​ດີ​ຕ້ອນ​ຮັບ​ກັບ​ມາ, ຜູ່​ຢ້ຽມ​ຢາມ!"</string>
-    <string name="guest_wipe_session_message" msgid="5369763062345463297">"ທ່ານ​ຕ້ອງ​ການ​ເລີ່ມ​ເຊດ​ຊັນ​ໃໝ່​ບໍ່?"</string>
-    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"​ແມ່ນ​ແລ້ວ"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"ບໍ່, ຂອບໃຈ"</string>
+    <!-- no translation found for guest_wipe_session_message (8476238178270112811) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (5065558566939858884) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (1401113462524894716) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"ເປັນ​ເວລາ​ນຶ່ງ​ນາ​ທີ"</item>
     <item quantity="other" msgid="6924190729213550991">"ເປັນ​ເວລາ %d ນາ​ທີ"</item>
@@ -307,4 +318,5 @@
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"ທ່ານ​ເຊື່ອມ​ຕ​ໍ່​ຫາ VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\") ແລ້ວ.\n\n​ຜູ່​ໃຫ້​ບໍ​ລິ​ການ VPN ຂອງ​ທ່ານ​ສາ​ມາດ​ເຝົ້າ​ຕິດ​ຕາມອຸ​ປະ​ກອນ​ແລະ​ການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ​ໄດ້ ຮວມ​ເຖິງອີ​ເມວ, ແອັບຯ ແລະ​ເວັບ​ໄຊ​ທີ່​ເຂົ້າ​ລະ​ຫັດ."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຖືກ​ຈັດ​ການ​ໂດຍ:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n​ຜູ່​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານ​ສາ​ມາດ​ເຝົ້າ​ຕິດ​ຕາມ​ການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ​ໄດ້ ຮວມ​ເຖິງ​ອີ​ເມວ, ແອັບຯ ແລະ​ເວັບ​ໄຊ​ທີ່​ເຂົ້າ​ລະ​​ຫັດ. ສຳ​ລັບ​ຂໍ້​ມູນ​ເພີ່ມ​ເຕີມ, ໃຫ້​ຕິດ​ຕໍ່​ຜູ່​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານ.\n\nອີກ​ຢ່າງ​ນຶ່ງ, ທ່ານມອບ​ສິດ​ອະ​ນຸ​ຍາດໃຫ້ \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" ເພື່ອ​ຕັ້ງ​ຄ່າ​ການ​ເຊື່ອມ​ຕໍ່ VPN. ແອັບຯ​ນີ້​ສາ​ມາດ​ເຝົ້າ​ຕິດ​ຕາມ​ການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ​ໄດ້."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຖືກ​ຈັດ​ການ​ໂດຍ:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n​ຜູ່​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານ​ສາ​ມາດ​ເຝົ້າ​ຕິດ​ຕາມ​ການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ​ໄດ້ ຮວມ​ເຖິງ​ອີ​ເມວ, ແອັບຯ ແລະ​ເວັບ​ໄຊ​ທີ່​ເຂົ້າ​ລະ​​ຫັດ. ສຳ​ລັບ​ຂໍ້​ມູນ​ເພີ່ມ​ເຕີມ, ໃຫ້​ຕິດ​ຕໍ່​ຜູ່​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານ.\n\nນອກ​ຈາກ​ນັ້ນ, ທ່ານ​​ໄດ້​ເຊື່ອມ​ຕໍ່​ຫາ VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). ຜູ່​ໃຫ້​ບໍ​ລິ​ການ VPN ຂອງ​ທ່ານ​ສາ​ມາດ​ເຝົ້າ​ຕິດ​ຕາມ​ການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ​ໄດ້​ເຊັ່ນ​ກັນ."</string>
+    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Device will stay locked until you manually unlock"</string>
 </resources>

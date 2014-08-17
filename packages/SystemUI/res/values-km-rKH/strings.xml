@@ -23,7 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"សម្អាត"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"យក​ចេញ​ពី​បញ្ជី"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ព័ត៌មាន​កម្មវិធី"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"គ្មាន​កម្មវិធី​ថ្មីៗ"</string>
+    <!-- no translation found for status_bar_no_recent_apps (7374907845131203189) -->
+    <skip />
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"បដិសេធ​កម្មវិធី​ថ្មីៗ"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"កម្មវិធី​ថ្មី ១"</item>
@@ -69,7 +70,7 @@
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"រូបថត​អេក្រង់​កំពុង​ត្រូវ​បាន​រក្សាទុក។"</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"បាន​ចាប់​យក​រូបថត​អេក្រង់។​"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"បាន​ចាប់​យក​រូបថត​អេក្រង់។"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"ប៉ះ ​ដើម្បី​មើល​រូបថត​អេក្រង់​របស់​អ្នក​។"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"មិន​អាច​ចាប់​យក​រូប​ថត​អេក្រង់​។"</string>
     <string name="screenshot_failed_text" msgid="1260203058661337274">"មិនអាចថតអេក្រង់ដោយសារតែទំហំផ្ទុកមានដែនកំណត់ ឬវាមិនត្រូវបានអនុញ្ញាត​ដោយកម្មវិធី ឬ​ស្ថាប័ន​របស់​អ្នក។"</string>
@@ -80,7 +81,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"ថយក្រោយ"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"គេហ​ទំព័រ"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"ម៉ឺនុយ"</string>
-    <string name="accessibility_recent" msgid="8571350598987952883">"កម្មវិធី​ថ្មីៗ"</string>
+    <!-- no translation found for accessibility_recent (1606470783629913980) -->
+    <skip />
     <string name="accessibility_search_light" msgid="1103867596330271848">"ស្វែងរក"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ម៉ាស៊ីន​ថត"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ទូរស័ព្ទ"</string>
@@ -146,7 +148,7 @@
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"សម្អាត​ការ​ជូន​ដំណឹង។"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"បាន​បើក GPS ។"</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"ទទួល​​ GPS ។"</string>
-    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"បាន​បើក​ម៉ាស៊ីន​អង្គុលីលេខ​"</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"បាន​បើក​ម៉ាស៊ីន​អង្គុលីលេខ"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"កម្មវិធី​រោទ៍​ញ័រ។"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"កម្មវិធី​រោទ៍​ស្ងាត់។"</string>
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"បោះបង់ <xliff:g id="APP">%s</xliff:g> ។"</string>
@@ -155,7 +157,10 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"បាន​បដិសេធ​ការ​ជូនដំណឹង"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"ពណ៌​ការ​ជូន​ដំណឹង"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ការ​កំណត់​រហ័ស។"</string>
-    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"កម្មវិធី​ថ្មី​ៗ។"</string>
+    <!-- no translation found for accessibility_desc_settings (3417884241751434521) -->
+    <skip />
+    <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
+    <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"អ្នក​ប្រើ <xliff:g id="USER">%s</xliff:g> ។"</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"ចល័ត <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
@@ -167,6 +172,8 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"បិទ​បន្ទះ"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"ពេល​ច្រើនជាង"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"ពេល​តិចជាង"</string>
+    <!-- no translation found for accessibility_brightness (8003681285547803095) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"ទិន្នន័យ 2G-3G បាន​បិទ"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"ទិន្នន័យ 4G បាន​បិទ"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"ទិន្នន័យ​ចល័ត​បាន​បិទ"</string>
@@ -199,7 +206,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"បញ្ឈរ"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"ទេសភាព"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"វិធីសាស្ត្រ​បញ្ចូល"</string>
-    <string name="quick_settings_location_label" msgid="5011327048748762257">"ទី​តាំង​"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"ទី​តាំង"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"ទីតាំង​បាន​បិទ"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"ឧបករណ៍​មេឌៀ"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
@@ -238,15 +245,16 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"បាន​ប្រើ <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"ដែន​កំណត់ <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ការ​ព្រមាន"</string>
-    <string name="recents_empty_message" msgid="7883614615463619450">"មិនមាន​​កម្មវិធី​ថ្មីៗ"</string>
+    <!-- no translation found for recents_empty_message (8682129509540827999) -->
+    <skip />
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"ព័ត៌មាន​កម្មវិធី"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"ចាក់​សោ​ទៅ​កម្មវិធី"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ស្វែងរក"</string>
-    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"បាន​បញ្ចូល​ថ្ម​​"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"បាន​បញ្ចូល​ថ្ម"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"កំពុង​បញ្ចូល​ថ្ម"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> រហូត​ដល់ពេញ"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"មិន​កំពុង​បញ្ចូល​ថ្ម"</string>
-    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"បណ្ដាញ​អាច​\nត្រូវ​បាន​ត្រួតពិនិត្យ​"</string>
+    <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"បណ្ដាញ​អាច​\nត្រូវ​បាន​ត្រួតពិនិត្យ"</string>
     <string name="description_target_search" msgid="3091587249776033139">"ស្វែងរក"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"រុញ​ឡើង​លើ​ដើម្បី <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ។"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"រុញ​ទៅ​ឆ្វេង​ដើម្បី <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ។"</string>
@@ -258,7 +266,8 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"អ្នកនឹងមិនឮការជូន​ដំណឹងរបស់អ្នកនៅម៉ោង <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ការ​ជូន​ដំណឹង​​មិន​សូវ​បន្ទាន់​ខាង​ក្រោម"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"ប៉ះ​ម្ដង​ទៀត ដើម្បី​បើក"</string>
+    <!-- no translation found for notification_tap_again (8524949573675922138) -->
+    <skip />
     <string name="keyguard_unlock" msgid="8043466894212841998">"អូស​ឡើង​លើ ដើម្បី​ដោះ​សោ"</string>
     <string name="phone_hint" msgid="3101468054914424646">"អូស​ទៅ​ស្ដាំ​ដើម្បី​បើក​​ទូរស័ព្ទ"</string>
     <string name="camera_hint" msgid="5241441720959174226">"អូស​ទៅ​ឆ្វេង​​ដើម្បី​ប្រើ​​ម៉ាស៊ីន​ថត"</string>
@@ -267,17 +276,26 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"អាទិភាព"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"ទាំងអស់"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"កំពុង​បញ្ចូល​ថ្ម (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ទើប​ពេញ)"</string>
+    <!-- no translation found for accessibility_multi_user_switch_switcher (7305948938141024937) -->
+    <skip />
+    <!-- no translation found for accessibility_multi_user_switch_quick_contact (3020367729287990475) -->
+    <skip />
     <string name="user_add_user" msgid="5110251524486079492">"បន្ថែម​អ្នកប្រើ"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"អ្នកប្រើ​ថ្មី"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"ភ្ញៀវ"</string>
-    <string name="guest_new_guest" msgid="4259024453643879653">"+ ភ្ញៀវ"</string>
-    <string name="guest_exit_guest" msgid="1619100760451149682">"ភ្ញៀវ​ចាកចេញ"</string>
+    <!-- no translation found for guest_new_guest (600537543078847803) -->
+    <skip />
+    <!-- no translation found for guest_exit_guest (7187359342030096885) -->
+    <skip />
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"ចេញ​ពី​សម័យ​ភ្ញៀវ?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"ការ​ចេញ​ពី​សម័យ​ភ្ញៀវ​នឹង​លុប​ទិន្នន័យ​មូលដ្ឋាន។"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"សូម​ស្វាគមន៍​ការ​ត្រឡប់​មកវិញ, ភ្ញៀវ!"</string>
-    <string name="guest_wipe_session_message" msgid="5369763062345463297">"តើ​អ្នក​ចង់​ចាប់ផ្ដើម​សម័យ​ថ្មី?"</string>
-    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"បាទ/ចាស"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"ទេ, អរគុណ!"</string>
+    <!-- no translation found for guest_wipe_session_message (8476238178270112811) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (5065558566939858884) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (1401113462524894716) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"សម្រាប់​មួយ​នាទី"</item>
     <item quantity="other" msgid="6924190729213550991">"សម្រាប់ %d នាទី"</item>
@@ -304,7 +322,9 @@
     <string name="disconnect_vpn" msgid="1324915059568548655">"ផ្ដាច់ VPN"</string>
     <string name="monitoring_description_device_owned" msgid="7512371572956715493">"ឧបករណ៍​នេះ​ត្រូវ​បាន​គ្រប់គ្រង​ដោយ៖\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nអ្នកគ្រប់គ្រង​របស់​អ្នក​អាច​ពិនិត្យ​ឧបករណ៍ និង​សកម្មភាព​បណ្ដាញ​របស់​អ្នក​រួម​មាន​​ អ៊ីមែល, កម្មវិធី និង​តំបន់បណ្ដាញ​មាន​សុវត្ថិភាព។\n\nចំពោះ​ព័ត៌មាន​បន្ថែម សូម​ទាក់ទង​អ្នក​គ្រប់គ្រង​របស់​អ្នក។"</string>
     <string name="monitoring_description_vpn" msgid="7288268682714305659">"អ្នក​បាន​ផ្ដល់​សិទ្ធិ \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" ដើម្បី​រៀបចំ​ការ​ភ្ជាប់ VPN ។\n\nកម្មវិធី​នេះ​អាច​ពិនិត្យ​ឧបករណ៍ និង​សកម្មភាព​បណ្ដាញ​របស់​អ្នក​រួមមាន អ៊ីមែល, កម្មវិធី និង​តំបន់បណ្ដាញ​មាន​សុវត្ថិភាព។"</string>
-    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"អ្នក​ត្រូវ​បាន​ភ្ជាប់​ទៅ VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\")។\n\nក្រុមហ៊ុន​ផ្ដល់​សេវាកម្ម VPN របស់​អ្នក​​អាច​ពិនិត្យ​ឧបករណ៍ និង​សកម្មភាព​បណ្ដាញ​របស់​អ្នក​​រួមមាន អ៊ីមែល, កម្មវិធី និង​តំបន់​បណ្ដាញ​មាន​សុវត្ថិភាព។"</string>
+    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"អ្នក​​បាន​ភ្ជាប់​ទៅ VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\")។\n\nក្រុមហ៊ុន​ផ្ដល់​សេវាកម្ម VPN របស់​អ្នក​​អាច​ពិនិត្យ​ឧបករណ៍ និង​សកម្មភាព​បណ្ដាញ​របស់​អ្នក​​រួមមាន អ៊ីមែល, កម្មវិធី និង​តំបន់​បណ្ដាញ​មាន​សុវត្ថិភាព។"</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"ឧបករណ៍នេះត្រូវបានគ្រប់គ្រងដោយ​ \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n អ្នកគ្រប់គ្រងរបស់អ្នកមានសមត្ថភាពក្នុងការត្រួតពិនិត្យសកម្មភាពបណ្ដាញរបស់អ្នក រួមមានអ៊ីមែល​, កម្មវិធី​, និងតំបន់បណ្ដាញសុវត្ថិភាព​។ សម្រាប់ព័ត៌មានបន្ថែមសូមទាក់ទងអ្នកគ្រប់គ្រងរបស់អ្នក​។ \n\n អ្នកបានផ្ដល់សិទ្ធិ\"<xliff:g id="APPLICATION">%2$s</xliff:g>\" ដើម្បីរៀបចំការតភ្ជាប់ VPN ។ កម្មវិធីនេះអាចតាមដានសកម្មភាពបណ្ដាញ។"</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"ឧបករណ៍នេះត្រូវបានគ្រប់គ្រងដោយ \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n អ្នកគ្រប់គ្រងរបស់អ្នកមានសមត្ថភាពក្នុងការត្រួតពិនិត្យសកម្មភាពបណ្ដាញរបស់អ្នករួមមានអ៊ីមែល​, កម្មវិធី និងតំបន់បណ្ដាញសុវត្ថិភាព។ សម្រាប់ព័ត៌មានបន្ថែមសូមទាក់ទងអ្នកគ្រប់គ្រងរបស់អ្នក។ \n\n ​អ្នកត្រូវបានតភ្ជាប់ទៅ VPN (\" <xliff:g id="APPLICATION">%2$s</xliff:g> \") ។ ក្រុមហ៊ុនផ្ដល់​សេវា VPN របស់អ្នកអាចតាមដានសកម្មភាពរបស់​អ្នក។"</string>
+    <!-- no translation found for keyguard_indication_trust_disabled (7412534203633528135) -->
+    <skip />
 </resources>
