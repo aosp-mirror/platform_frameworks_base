@@ -71,4 +71,6 @@
 
     <!-- Default alpha value for disabled elements. -->
     <item name="disabled_alpha_material" format="float" type="dimen">0.26</item>
+
+    <dimen name="alert_dialog_padding_material">12dp</dimen>
 </resources>
