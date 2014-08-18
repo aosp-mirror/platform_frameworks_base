@@ -871,6 +871,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                                 BackupManagerService.this, mActiveRestoreSession));
                     }
                 }
+                break;
             }
 
             case MSG_FULL_CONFIRMATION_TIMEOUT:
@@ -7538,6 +7539,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 }
             }
 
+            // Clear any ongoing session timeout.
+            mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+
             // If we have a PM token, we must under all circumstances be sure to
             // handshake when we've finished.
             if (mPmToken > 0) {
@@ -7545,6 +7549,11 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 try {
                     mPackageManagerBinder.finishPackageInstall(mPmToken);
                 } catch (RemoteException e) { /* can't happen */ }
+            } else {
+                // We were invoked via an active restore session, not by the Package
+                // Manager, so start up the session timeout again.
+                mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_TIMEOUT,
+                        TIMEOUT_RESTORE_INTERVAL);
             }
 
             // Kick off any work that may be needed regarding app widget restores
@@ -7557,11 +7566,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 mAncestralToken = mToken;
                 writeRestoreTokens();
             }
-
-            // Furthermore we need to reset the session timeout clock
-            mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
-            mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_TIMEOUT,
-                    TIMEOUT_RESTORE_INTERVAL);
 
             // done; we can finally release the wakelock and be legitimately done.
             Slog.i(TAG, "Restore complete.");
