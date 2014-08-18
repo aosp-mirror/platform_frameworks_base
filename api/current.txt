@@ -16433,7 +16433,6 @@ package android.media.projection {
 
   public final class MediaProjection {
     method public void addCallback(android.media.projection.MediaProjection.Callback, android.os.Handler);
-    method public android.media.AudioRecord createAudioRecord(int, int, int, int);
     method public android.hardware.display.VirtualDisplay createVirtualDisplay(java.lang.String, int, int, int, int, android.view.Surface, android.hardware.display.VirtualDisplay.Callbacks, android.os.Handler);
     method public void removeCallback(android.media.projection.MediaProjection.Callback);
     method public void stop();
