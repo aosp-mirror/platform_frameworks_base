@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Outline;
 import android.graphics.Rect;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -68,6 +69,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private View mQsDetailHeader;
     private TextView mQsDetailHeaderTitle;
     private Switch mQsDetailHeaderSwitch;
+    private ImageView mQsDetailHeaderProgress;
     private View mEmergencyCallsOnly;
     private TextView mBatteryLevel;
     private TextView mAlarmStatus;
@@ -137,6 +139,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mQsDetailHeader.setAlpha(0);
         mQsDetailHeaderTitle = (TextView) mQsDetailHeader.findViewById(android.R.id.title);
         mQsDetailHeaderSwitch = (Switch) mQsDetailHeader.findViewById(android.R.id.toggle);
+        mQsDetailHeaderProgress = (ImageView) findViewById(R.id.qs_detail_header_progress);
         mEmergencyCallsOnly = findViewById(R.id.header_emergency_calls_only);
         mBatteryLevel = (TextView) findViewById(R.id.battery_level);
         mAlarmStatus = (TextView) findViewById(R.id.alarm_status);
@@ -658,6 +661,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     private final QSPanel.Callback mQsPanelCallback = new QSPanel.Callback() {
+        private boolean mScanState;
+
         @Override
         public void onToggleStateChanged(final boolean state) {
             post(new Runnable() {
@@ -693,7 +698,16 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
 
         private void handleScanStateChanged(boolean state) {
-            // TODO - waiting on framework asset
+            if (mScanState == state) return;
+            mScanState = state;
+            final Animatable anim = (Animatable) mQsDetailHeaderProgress.getDrawable();
+            if (state) {
+                mQsDetailHeaderProgress.animate().alpha(1f);
+                anim.start();
+            } else {
+                mQsDetailHeaderProgress.animate().alpha(0f);
+                anim.stop();
+            }
         }
 
         private void handleShowingDetail(final QSTile.DetailAdapter detail) {
