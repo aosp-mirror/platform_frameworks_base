@@ -139,6 +139,7 @@ public final class MediaProjection {
 
     /**
      * Creates an AudioRecord to capture audio played back by the system.
+     * @hide
      */
     public AudioRecord createAudioRecord(
             int sampleRateInHz, int channelConfig,
