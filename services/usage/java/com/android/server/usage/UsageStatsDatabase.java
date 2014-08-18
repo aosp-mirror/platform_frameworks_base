@@ -39,6 +39,7 @@ class UsageStatsDatabase {
 
     private static final String TAG = "UsageStatsDatabase";
     private static final boolean DEBUG = UsageStatsService.DEBUG;
+    private static final String BAK_SUFFIX = ".bak";
 
     private final Object mLock = new Object();
     private final File[] mIntervalDirs;
@@ -95,11 +96,71 @@ class UsageStatsDatabase {
         }
     }
 
+    public interface CheckinAction {
+        boolean checkin(IntervalStats stats);
+    }
+
+    /**
+     * Calls {@link CheckinAction#checkin(IntervalStats)} on the given {@link CheckinAction}
+     * for all {@link IntervalStats} that haven't been checked-in.
+     * If any of the calls to {@link CheckinAction#checkin(IntervalStats)} returns false or throws
+     * an exception, the check-in will be aborted.
+     *
+     * @param checkinAction The callback to run when checking-in {@link IntervalStats}.
+     * @return true if the check-in succeeded.
+     */
+    public boolean checkinDailyFiles(CheckinAction checkinAction) {
+        synchronized (mLock) {
+            final TimeSparseArray<AtomicFile> files =
+                    mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY];
+            final int fileCount = files.size();
+            int start = 0;
+            while (start < fileCount - 1) {
+                if (!files.valueAt(start).getBaseFile().getName().endsWith("-c")) {
+                    break;
+                }
+            }
+
+            if (start == fileCount - 1) {
+                return true;
+            }
+
+            try {
+                IntervalStats stats = new IntervalStats();
+                for (int i = start; i < fileCount - 1; i++) {
+                    UsageStatsXml.read(files.valueAt(i), stats);
+                    if (!checkinAction.checkin(stats)) {
+                        return false;
+                    }
+                }
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to check-in", e);
+                return false;
+            }
+
+            // We have successfully checked-in the stats, so rename the files so that they
+            // are marked as checked-in.
+            for (int i = start; i < fileCount - 1; i++) {
+                final AtomicFile file = files.valueAt(i);
+                final File checkedInFile = new File(file.getBaseFile().getParent(),
+                        file.getBaseFile().getName() + "-c");
+                if (!file.getBaseFile().renameTo(checkedInFile)) {
+                    // We must return success, as we've already marked some files as checked-in.
+                    // It's better to repeat ourselves than to lose data.
+                    Slog.e(TAG, "Failed to mark file " + file.getBaseFile().getPath()
+                            + " as checked-in");
+                    return true;
+                }
+            }
+        }
+        return true;
+    }
+
     private void indexFilesLocked() {
         final FilenameFilter backupFileFilter = new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                return !name.endsWith(".bak");
+                return !name.endsWith(BAK_SUFFIX);
             }
         };
 
@@ -383,10 +444,10 @@ class UsageStatsDatabase {
         if (files != null) {
             for (File f : files) {
                 String path = f.getPath();
-                if (path.endsWith(".bak")) {
-                    f = new File(path.substring(0, path.length() - 4));
+                if (path.endsWith(BAK_SUFFIX)) {
+                    f = new File(path.substring(0, path.length() - BAK_SUFFIX.length()));
                 }
-                long beginTime = Long.parseLong(f.getName());
+                long beginTime = UsageStatsXml.parseBeginTime(f);
                 if (beginTime < expiryTime) {
                     new AtomicFile(f).delete();
                 }
