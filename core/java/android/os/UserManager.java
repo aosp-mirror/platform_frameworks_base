@@ -973,7 +973,7 @@ public class UserManager {
 
         if (badgeLocation != null) {
             if (badgeLocation.left < 0 || badgeLocation.top < 0
-                    || badgeLocation.right > badgedWidth || badgeLocation.bottom > badgedHeight) {
+                    || badgeLocation.width() > badgedWidth || badgeLocation.height() > badgedHeight) {
                 throw new IllegalArgumentException("Badge location " + badgeLocation
                         + " not in badged drawable bounds "
                         + new Rect(0, 0, badgedWidth, badgedHeight));
