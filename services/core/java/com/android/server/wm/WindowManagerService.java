@@ -428,7 +428,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Stores for each user whether screencapture is disabled
      * This array is essentially a cache for all userId for
-     * {@link android.app.admin.DevicePolicyManager#getScreenCaptureDisabled(null, userId)}
+     * {@link android.app.admin.DevicePolicyManager#getScreenCaptureDisabled}
      */
     SparseArray<Boolean> mScreenCaptureDisabled = new SparseArray<Boolean>();
 
@@ -2315,9 +2315,12 @@ public class WindowManagerService extends IWindowManager.Stub
                       return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
             } else if (token.appWindowToken != null) {
-                Slog.i(TAG, "Non-null appWindowToken for system window of type=" + type);
-                // app token should be null for any other window types.
-                token.appWindowToken = null;
+                Slog.w(TAG, "Non-null appWindowToken for system window of type=" + type);
+                // It is not valid to use an app token with other system types; we will
+                // instead make a new token for it (as if null had been passed in for the token).
+                attrs.token = null;
+                token = new WindowToken(this, null, -1, false);
+                addToken = true;
             }
 
             win = new WindowState(this, session, client, token,
