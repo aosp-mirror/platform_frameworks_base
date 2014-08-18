@@ -45,6 +45,7 @@
     <color name="qs_subhead">#99FFFFFF</color><!-- 60% white -->
     <color name="qs_detail_empty">#24B0BEC5</color><!-- 14% blue grey 200-->
     <color name="qs_detail_transition">#66FFFFFF</color>
+    <color name="qs_detail_progress_track">#99009688</color><!-- 60% deep teal 500 -->
     <color name="data_usage_secondary">#99FFFFFF</color><!-- 60% white -->
     <color name="data_usage_graph_track">#33FFFFFF</color><!-- 20% white -->
     <color name="data_usage_graph_warning">#FFFFFFFF</color>

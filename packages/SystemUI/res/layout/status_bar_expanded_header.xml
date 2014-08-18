@@ -148,6 +148,16 @@
         android:layout_alignParentBottom="true"
         />
 
+    <ImageView
+        android:id="@+id/qs_detail_header_progress"
+        android:src="@drawable/indeterminate_anim"
+        android:alpha="0"
+        android:background="@color/qs_detail_progress_track"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        />
+
     <TextView
         android:id="@+id/header_debug_info"
         android:visibility="invisible"
