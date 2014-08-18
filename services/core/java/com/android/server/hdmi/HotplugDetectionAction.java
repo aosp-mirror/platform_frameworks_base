@@ -207,7 +207,7 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
     }
 
     private void mayChangeRoutingPath(int address) {
-        HdmiDeviceInfo info = tv().getDeviceInfo(address);
+        HdmiDeviceInfo info = tv().getCecDeviceInfo(address);
         if (info != null) {
             tv().handleRemoveActiveRoutingPath(info.getPhysicalAddress());
         }

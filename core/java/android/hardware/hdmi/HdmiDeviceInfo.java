@@ -77,11 +77,18 @@ public class HdmiDeviceInfo implements Parcelable {
     /** Invalid port ID */
     public static final int PORT_INVALID = -1;
 
-    private static final int HDMI_DEVICE_TYPE_OTHER = 0;
-    private static final int HDMI_DEVICE_TYPE_CEC = 1;
-    private static final int HDMI_DEVICE_TYPE_MHL = 2;
+    private static final int HDMI_DEVICE_TYPE_CEC = 0;
+    private static final int HDMI_DEVICE_TYPE_MHL = 1;
+    private static final int HDMI_DEVICE_TYPE_HARDWARE = 2;
+
+    // Offset used for id value. MHL devices, for instance, will be assigned the value from
+    // ID_OFFSET_MHL.
+    private static final int ID_OFFSET_CEC = 0x0;
+    private static final int ID_OFFSET_MHL = 0x80;
+    private static final int ID_OFFSET_HARDWARE = 0xC0;
 
     // Common parameters for all device.
+    private final int mId;
     private final int mHdmiDeviceType;
     private final int mPhysicalAddress;
     private final int mPortId;
@@ -121,7 +128,7 @@ public class HdmiDeviceInfo implements Parcelable {
                             int deviceId = source.readInt();
                             int adopterId = source.readInt();
                             return new HdmiDeviceInfo(physicalAddress, portId, adopterId, deviceId);
-                        case HDMI_DEVICE_TYPE_OTHER:
+                        case HDMI_DEVICE_TYPE_HARDWARE:
                             return new HdmiDeviceInfo(physicalAddress, portId);
                         default:
                             return null;
@@ -152,6 +159,7 @@ public class HdmiDeviceInfo implements Parcelable {
         mPhysicalAddress = physicalAddress;
         mPortId = portId;
 
+        mId = idForCecDevice(logicalAddress);
         mLogicalAddress = logicalAddress;
         mDeviceType = deviceType;
         mVendorId = vendorId;
@@ -180,17 +188,18 @@ public class HdmiDeviceInfo implements Parcelable {
     }
 
     /**
-     * Constructor. Used to initialize the instance for other device.
+     * Constructor. Used to initialize the instance for device representing hardware port.
      *
-     * @param physicalAddress physical address of HDMI device
+     * @param physicalAddress physical address of the port
      * @param portId HDMI port ID (1 for HDMI1)
      * @hide
      */
     public HdmiDeviceInfo(int physicalAddress, int portId) {
-        mHdmiDeviceType = HDMI_DEVICE_TYPE_OTHER;
+        mHdmiDeviceType = HDMI_DEVICE_TYPE_HARDWARE;
         mPhysicalAddress = physicalAddress;
         mPortId = portId;
 
+        mId = idForHardware(portId);
         mLogicalAddress = -1;
         mDeviceType = DEVICE_RESERVED;
         mVendorId = 0;
@@ -216,6 +225,7 @@ public class HdmiDeviceInfo implements Parcelable {
         mPhysicalAddress = physicalAddress;
         mPortId = portId;
 
+        mId = idForMhlDevice(portId);
         mLogicalAddress = -1;
         mDeviceType = DEVICE_RESERVED;
         mVendorId = 0;
@@ -224,6 +234,45 @@ public class HdmiDeviceInfo implements Parcelable {
 
         mDeviceId = adopterId;
         mAdopterId = deviceId;
+    }
+
+    /**
+     * Return the id of the device.
+     */
+    public int getId() {
+        return mId;
+    }
+
+    /**
+     * Return the id to be used for CEC device.
+     *
+     * @param address logical address of CEC device
+     * @return id for CEC device
+     */
+    public static int idForCecDevice(int address) {
+        // The id is generated based on the logical address.
+        return ID_OFFSET_CEC + address;
+    }
+
+    /**
+     * Return the id to be used for MHL device.
+     *
+     * @param portId port which the MHL device is connected to
+     * @return id for MHL device
+     */
+    public static int idForMhlDevice(int portId) {
+        // The id is generated based on the port id since there can be only one MHL device per port.
+        return ID_OFFSET_MHL + portId;
+    }
+
+    /**
+     * Return the id to be used for hardware port.
+     *
+     * @param portId port id
+     * @return id for hardware port
+     */
+    public static int idForHardware(int portId) {
+        return ID_OFFSET_HARDWARE + portId;
     }
 
     /**
@@ -367,25 +416,25 @@ public class HdmiDeviceInfo implements Parcelable {
         switch (mHdmiDeviceType) {
             case HDMI_DEVICE_TYPE_CEC:
                 s.append("CEC: ");
-                s.append("logical_address: ").append(mLogicalAddress).append(", ");
-                s.append("device_type: ").append(mDeviceType).append(", ");
-                s.append("vendor_id: ").append(mVendorId).append(", ");
-                s.append("display_name: ").append(mDisplayName).append(", ");
-                s.append("power_status: ").append(mDevicePowerStatus).append(", ");
+                s.append("logical_address: ").append(mLogicalAddress).append(" ");
+                s.append("device_type: ").append(mDeviceType).append(" ");
+                s.append("vendor_id: ").append(mVendorId).append(" ");
+                s.append("display_name: ").append(mDisplayName).append(" ");
+                s.append("power_status: ").append(mDevicePowerStatus).append(" ");
                 break;
             case HDMI_DEVICE_TYPE_MHL:
                 s.append("MHL: ");
+                s.append("device_id: ").append(mDeviceId).append(" ");
+                s.append("adopter_id: ").append(mAdopterId).append(" ");
                 break;
 
-            case HDMI_DEVICE_TYPE_OTHER:
-                s.append("Other: ");
-                s.append("device_id: ").append(mDeviceId).append(", ");
-                s.append("adopter_id: ").append(mAdopterId).append(", ");
+            case HDMI_DEVICE_TYPE_HARDWARE:
+                s.append("Hardware: ");
                 break;
             default:
                 return "";
         }
-        s.append("physical_address: ").append(mPhysicalAddress).append(", ");
+        s.append("physical_address: ").append(String.format("0x04X", mPhysicalAddress)).append(" ");
         s.append("port_id: ").append(mPortId);
         return s.toString();
     }
