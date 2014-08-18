@@ -140,6 +140,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
+import android.os.storage.StorageManager;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
@@ -211,6 +212,7 @@ import dalvik.system.StaleDexCacheError;
 import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
+import libcore.util.EmptyArray;
 
 /**
  * Keep track of all those .apks everywhere.
@@ -310,8 +312,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final String LIB64_DIR_NAME = "lib64";
 
     private static final String VENDOR_OVERLAY_DIR = "/vendor/overlay";
-
-    static final String mTempContainerPrefix = "smdl2tmp";
 
     private static String sPreferredInstructionSet;
 
@@ -4101,21 +4101,24 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         for (File file : files) {
             final boolean isPackage = (isApkFile(file) || file.isDirectory())
-                    && !PackageInstallerService.isStageFile(file);
+                    && !PackageInstallerService.isStageName(file.getName());
             if (!isPackage) {
-                // Ignore entries which are not apk's
+                // Ignore entries which are not packages
                 continue;
             }
             try {
-                scanPackageLI(file, flags | PackageParser.PARSE_MUST_BE_APK, scanMode, currentTime, null);
+                scanPackageLI(file, flags | PackageParser.PARSE_MUST_BE_APK,
+                        scanMode, currentTime, null);
             } catch (PackageManagerException e) {
                 Slog.w(TAG, "Failed to parse " + file + ": " + e.getMessage());
 
-                // Don't mess around with apps in system partition.
+                // Delete invalid userdata apps
                 if ((flags & PackageParser.PARSE_IS_SYSTEM) == 0 &&
                         e.error == PackageManager.INSTALL_FAILED_INVALID_APK) {
-                    // Delete the apk
-                    Slog.w(TAG, "Cleaning up failed install of " + file);
+                    Slog.w(TAG, "Deleting invalid package at " + file);
+                    if (file.isDirectory()) {
+                        FileUtils.deleteContents(file);
+                    }
                     file.delete();
                 }
             }
@@ -7839,19 +7842,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         verificationParams.setInstallerUid(uid);
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
-        msg.obj = new InstallParams(originFile, false, observer, filteredFlags,
+        msg.obj = new InstallParams(originFile, null, false, observer, filteredFlags,
                 installerPackageName, verificationParams, user, packageAbiOverride);
         mHandler.sendMessage(msg);
     }
 
-    void installStage(String packageName, File stageDir, IPackageInstallObserver2 observer,
-            PackageInstaller.SessionParams params, String installerPackageName, int installerUid,
-            UserHandle user) {
+    void installStage(String packageName, File stagedDir, String stagedCid,
+            IPackageInstallObserver2 observer, PackageInstaller.SessionParams params,
+            String installerPackageName, int installerUid, UserHandle user) {
         final VerificationParams verifParams = new VerificationParams(null, params.originatingUri,
                 params.referrerUri, installerUid, null);
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
-        msg.obj = new InstallParams(stageDir, true, observer, params.installFlags,
+        msg.obj = new InstallParams(stagedDir, stagedCid, true, observer, params.installFlags,
                 installerPackageName, verifParams, user, params.abiOverride);
         mHandler.sendMessage(msg);
     }
@@ -8551,10 +8554,12 @@ public class PackageManagerService extends IPackageManager.Stub {
          * file, or a cluster directory. This location may be untrusted.
          */
         final File originFile;
+        final String originCid;
 
         /**
-         * Flag indicating that {@link #originFile} has already been staged,
-         * meaning downstream users don't need to defensively copy the contents.
+         * Flag indicating that {@link #originFile} or {@link #originCid} has
+         * already been staged, meaning downstream users don't need to
+         * defensively copy the contents.
          */
         boolean originStaged;
 
@@ -8567,11 +8572,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String packageAbiOverride;
         boolean multiArch;
 
-        InstallParams(File originFile, boolean originStaged, IPackageInstallObserver2 observer,
-                int flags, String installerPackageName, VerificationParams verificationParams,
-                UserHandle user, String packageAbiOverride) {
+        InstallParams(File originFile, String originCid, boolean originStaged,
+                IPackageInstallObserver2 observer, int flags, String installerPackageName,
+                VerificationParams verificationParams, UserHandle user, String packageAbiOverride) {
             super(user);
-            this.originFile = Preconditions.checkNotNull(originFile);
+            this.originFile = originFile;
+            this.originCid = originCid;
             this.originStaged = originStaged;
             this.observer = observer;
             this.flags = flags;
@@ -8582,9 +8588,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         @Override
         public String toString() {
-            return "InstallParams{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " " + originFile + "}";
+            return "InstallParams{" + Integer.toHexString(System.identityHashCode(this))
+                    + " file=" + originFile + " cid=" + originCid + "}";
         }
 
         public ManifestDigest getManifestDigest() {
@@ -8653,15 +8658,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             return pkgLite.recommendedInstallLocation;
         }
 
-        private long getMemoryLowThreshold() {
-            final DeviceStorageMonitorInternal
-                    dsm = LocalServices.getService(DeviceStorageMonitorInternal.class);
-            if (dsm == null) {
-                return 0L;
-            }
-            return dsm.getMemoryLowThreshold();
-        }
-
         /*
          * Invoke remote method to get package information and install
          * location values. Override install location based on default
@@ -8679,14 +8675,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "Conflicting flags specified for installing on both internal and external");
                 ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
             } else {
-                final long lowThreshold = getMemoryLowThreshold();
-                if (lowThreshold == 0L) {
-                    Log.w(TAG, "Couldn't get low memory threshold; no free limit imposed");
-                }
-
                 // Remote call to find out default install location
                 final String originPath = originFile.getAbsolutePath();
-                pkgLite = mContainerService.getMinimalPackageInfo(originPath, flags, lowThreshold,
+                pkgLite = mContainerService.getMinimalPackageInfo(originPath, flags,
                         packageAbiOverride);
                 // Keep track of whether this package is a multiArch package until
                 // we perform a full scan of it. We need to do this because we might
@@ -8700,12 +8691,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                  */
                 if (pkgLite.recommendedInstallLocation
                         == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
-                    final long size = mContainerService.calculateInstalledSize(
+                    // TODO: focus freeing disk space on the target device
+                    final StorageManager storage = StorageManager.from(mContext);
+                    final long lowThreshold = storage.getStorageLowBytes(
+                            Environment.getDataDirectory());
+
+                    final long sizeBytes = mContainerService.calculateInstalledSize(
                             originPath, isForwardLocked(), packageAbiOverride);
-                    if (mInstaller.freeCache(size + lowThreshold) >= 0) {
+
+                    if (mInstaller.freeCache(sizeBytes + lowThreshold) >= 0) {
                         pkgLite = mContainerService.getMinimalPackageInfo(originPath, flags,
-                                lowThreshold, packageAbiOverride);
+                                packageAbiOverride);
                     }
+
                     /*
                      * The cache free must have deleted the file we
                      * downloaded to install.
@@ -9235,24 +9233,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
-            final long lowThreshold;
+            final long sizeBytes = imcs.calculateInstalledSize(originFile.getAbsolutePath(),
+                    isFwdLocked(), abiOverride);
 
-            final DeviceStorageMonitorInternal
-                    dsm = LocalServices.getService(DeviceStorageMonitorInternal.class);
-            if (dsm == null) {
-                Log.w(TAG, "Couldn't get low memory threshold; no free limit imposed");
-                lowThreshold = 0L;
-            } else {
-                if (dsm.isMemoryLow()) {
-                    Log.w(TAG, "Memory is reported as being too low; aborting package install");
-                    return false;
-                }
-
-                lowThreshold = dsm.getMemoryLowThreshold();
-            }
-
-            return imcs.checkInternalFreeStorage(originFile.getAbsolutePath(), isFwdLocked(),
-                    lowThreshold);
+            final StorageManager storage = StorageManager.from(mContext);
+            return (sizeBytes <= storage.getStorageBytesUntilLow(Environment.getDataDirectory()));
         }
 
         int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
@@ -9264,7 +9249,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 resourceFile = originFile;
             } else {
                 try {
-                    final File tempDir = mInstallerService.allocateSessionDir();
+                    final File tempDir = mInstallerService.allocateInternalStageDirLegacy();
                     codeFile = tempDir;
                     resourceFile = tempDir;
                 } catch (IOException e) {
@@ -9569,12 +9554,22 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         void createCopyFile() {
-            cid = getTempContainerId();
+            cid = mInstallerService.allocateExternalStageCidLegacy();
         }
 
         boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
-            return imcs.checkExternalFreeStorage(originFile.getAbsolutePath(), isFwdLocked(),
+            final long sizeBytes = imcs.calculateInstalledSize(packagePath, isFwdLocked(),
                     abiOverride);
+
+            final File target;
+            if (isExternal()) {
+                target = Environment.getExternalStorageDirectory();
+            } else {
+                target = Environment.getDataDirectory();
+            }
+
+            final StorageManager storage = StorageManager.from(mContext);
+            return (sizeBytes <= storage.getStorageBytesUntilLow(target));
         }
 
         private final boolean isExternal() {
@@ -12653,7 +12648,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private boolean mMediaMounted = false;
 
-    private String getEncryptKey() {
+    static String getEncryptKey() {
         try {
             String sdEncKey = SystemKeyStore.getInstance().retrieveKeyHexString(
                     SD_ENCRYPTION_KEYSTORE_NAME);
@@ -12673,30 +12668,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.e(TAG, "Failed to retrieve encryption keys with exception: " + ioe);
             return null;
         }
-
-    }
-
-    /* package */static String getTempContainerId() {
-        int tmpIdx = 1;
-        String list[] = PackageHelper.getSecureContainerList();
-        if (list != null) {
-            for (final String name : list) {
-                // Ignore null and non-temporary container entries
-                if (name == null || !name.startsWith(mTempContainerPrefix)) {
-                    continue;
-                }
-
-                String subStr = name.substring(mTempContainerPrefix.length());
-                try {
-                    int cid = Integer.parseInt(subStr);
-                    if (cid >= tmpIdx) {
-                        tmpIdx = cid + 1;
-                    }
-                } catch (NumberFormatException e) {
-                }
-            }
-        }
-        return mTempContainerPrefix + tmpIdx;
     }
 
     /*
@@ -12754,31 +12725,27 @@ public class PackageManagerService extends IPackageManager.Stub {
      */
     private void updateExternalMediaStatusInner(boolean isMounted, boolean reportStatus,
             boolean externalStorage) {
-        // Collection of uids
-        int uidArr[] = null;
-        // Collection of stale containers
-        HashSet<String> removeCids = new HashSet<String>();
-        // Collection of packages on external media with valid containers.
-        HashMap<AsecInstallArgs, String> processCids = new HashMap<AsecInstallArgs, String>();
-        // Get list of secure containers.
-        final String list[] = PackageHelper.getSecureContainerList();
-        if (list == null || list.length == 0) {
-            Log.i(TAG, "No secure containers on sdcard");
+        ArrayMap<AsecInstallArgs, String> processCids = new ArrayMap<>();
+        int[] uidArr = EmptyArray.INT;
+
+        final String[] list = PackageHelper.getSecureContainerList();
+        if (ArrayUtils.isEmpty(list)) {
+            Log.i(TAG, "No secure containers found");
         } else {
             // Process list of secure containers and categorize them
             // as active or stale based on their package internal state.
-            int uidList[] = new int[list.length];
-            int num = 0;
+
             // reader
             synchronized (mPackages) {
                 for (String cid : list) {
+                    // Leave stages untouched for now; installer service owns them
+                    if (PackageInstallerService.isStageName(cid)) continue;
+
                     if (DEBUG_SD_INSTALL)
                         Log.i(TAG, "Processing container " + cid);
                     String pkgName = getAsecPackageName(cid);
                     if (pkgName == null) {
-                        if (DEBUG_SD_INSTALL)
-                            Log.i(TAG, "Container : " + cid + " stale");
-                        removeCids.add(cid);
+                        Slog.i(TAG, "Found stale container " + cid + " with no package name");
                         continue;
                     }
                     if (DEBUG_SD_INSTALL)
@@ -12786,8 +12753,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     final PackageSetting ps = mSettings.mPackages.get(pkgName);
                     if (ps == null) {
-                        Log.i(TAG, "Deleting container with no matching settings " + cid);
-                        removeCids.add(cid);
+                        Slog.i(TAG, "Found stale container " + cid + " with no matching settings");
                         continue;
                     }
 
@@ -12813,35 +12779,25 @@ public class PackageManagerService extends IPackageManager.Stub {
                         processCids.put(args, ps.codePathString);
                         final int uid = ps.appId;
                         if (uid != -1) {
-                            uidList[num++] = uid;
+                            uidArr = ArrayUtils.appendInt(uidArr, uid);
                         }
                     } else {
-                        Log.i(TAG, "Deleting stale container for " + cid);
-                        removeCids.add(cid);
+                        Slog.i(TAG, "Found stale container " + cid + ": expected codePath="
+                                + ps.codePathString);
                     }
                 }
             }
 
-            if (num > 0) {
-                // Sort uid list
-                Arrays.sort(uidList, 0, num);
-                // Throw away duplicates
-                uidArr = new int[num];
-                uidArr[0] = uidList[0];
-                int di = 0;
-                for (int i = 1; i < num; i++) {
-                    if (uidList[i - 1] != uidList[i]) {
-                        uidArr[di++] = uidList[i];
-                    }
-                }
-            }
+            Arrays.sort(uidArr);
         }
+
         // Process packages with valid entries.
         if (isMounted) {
             if (DEBUG_SD_INSTALL)
                 Log.i(TAG, "Loading packages");
-            loadMediaPackages(processCids, uidArr, removeCids);
+            loadMediaPackages(processCids, uidArr);
             startCleaningPackages();
+            mInstallerService.onSecureContainersAvailable();
         } else {
             if (DEBUG_SD_INSTALL)
                 Log.i(TAG, "Unloading packages");
@@ -12849,8 +12805,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-   private void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
-           ArrayList<String> pkgList, int uidArr[], IIntentReceiver finishedReceiver) {
+    private void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
+            ArrayList<String> pkgList, int uidArr[], IIntentReceiver finishedReceiver) {
         int size = pkgList.size();
         if (size > 0) {
             // Send broadcasts here
@@ -12875,11 +12831,10 @@ public class PackageManagerService extends IPackageManager.Stub {
      * the cid is added to list of removeCids. We currently don't delete stale
      * containers.
      */
-   private void loadMediaPackages(HashMap<AsecInstallArgs, String> processCids, int uidArr[],
-            HashSet<String> removeCids) {
+    private void loadMediaPackages(ArrayMap<AsecInstallArgs, String> processCids, int[] uidArr) {
         ArrayList<String> pkgList = new ArrayList<String>();
         Set<AsecInstallArgs> keys = processCids.keySet();
-        boolean doGc = false;
+
         for (AsecInstallArgs args : keys) {
             String codePath = processCids.get(args);
             if (DEBUG_SD_INSTALL)
@@ -12907,7 +12862,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     parseFlags |= PackageParser.PARSE_FORWARD_LOCK;
                 }
 
-                doGc = true;
                 synchronized (mInstallLock) {
                     PackageParser.Package pkg = null;
                     try {
@@ -12937,9 +12891,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             } finally {
                 if (retCode != PackageManager.INSTALL_SUCCEEDED) {
-                    // Don't destroy container here. Wait till gc clears things
-                    // up.
-                    removeCids.add(args.cid);
+                    Log.w(TAG, "Container " + args.cid + " is stale, retCode=" + retCode);
                 }
             }
         }
@@ -12974,21 +12926,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (pkgList.size() > 0) {
             sendResourcesChangedBroadcast(true, false, pkgList, uidArr, null);
         }
-        // Force gc to avoid any stale parser references that we might have.
-        if (doGc) {
-            Runtime.getRuntime().gc();
-        }
-        // List stale containers and destroy stale temporary containers.
-        if (removeCids != null) {
-            for (String cid : removeCids) {
-                if (cid.startsWith(mTempContainerPrefix)) {
-                    Log.i(TAG, "Destroying stale temporary container " + cid);
-                    PackageHelper.destroySdDir(cid);
-                } else {
-                    Log.w(TAG, "Container " + cid + " is stale");
-               }
-           }
-        }
     }
 
    /*
@@ -13012,7 +12949,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      * that we always have to post this message if status has been requested no
      * matter what.
      */
-    private void unloadMediaPackages(HashMap<AsecInstallArgs, String> processCids, int uidArr[],
+    private void unloadMediaPackages(ArrayMap<AsecInstallArgs, String> processCids, int uidArr[],
             final boolean reportStatus) {
         if (DEBUG_SD_INSTALL)
             Log.i(TAG, "unloading media packages");

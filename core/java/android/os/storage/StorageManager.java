@@ -619,6 +619,16 @@ public class StorageManager {
     private static final long DEFAULT_FULL_THRESHOLD_BYTES = MB_IN_BYTES;
 
     /**
+     * Return the number of available bytes until the given path is considered
+     * running low on storage.
+     *
+     * @hide
+     */
+    public long getStorageBytesUntilLow(File path) {
+        return path.getUsableSpace() - getStorageFullBytes(path);
+    }
+
+    /**
      * Return the number of available bytes at which the given path is
      * considered running low on storage.
      *
