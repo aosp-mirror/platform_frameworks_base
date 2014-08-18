@@ -23,6 +23,7 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.MANAGE_USERS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <application android:label="ActivityTest">
         <activity android:name="ActivityTestMain">
             <intent-filter>

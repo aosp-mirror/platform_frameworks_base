@@ -34,6 +34,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.graphics.Bitmap;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -130,6 +131,12 @@ public class ActivityTestMain extends Activity {
                 mSecondUser = ui.id;
             }
         }
+
+        /*
+        AlertDialog ad = new AlertDialog.Builder(this).setTitle("title").setMessage("message").create();
+        ad.getWindow().getAttributes().type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+        ad.show();
+        */
     }
 
     @Override
