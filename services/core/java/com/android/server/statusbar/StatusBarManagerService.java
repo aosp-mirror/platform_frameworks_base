@@ -48,9 +48,7 @@ import java.util.Map;
  * A note on locking:  We rely on the fact that calls onto mBar are oneway or
  * if they are local, that they just enqueue messages to not deadlock.
  */
-public class StatusBarManagerService extends IStatusBarService.Stub
-    implements WindowManagerService.OnHardKeyboardStatusChangeListener
-{
+public class StatusBarManagerService extends IStatusBarService.Stub {
     private static final String TAG = "StatusBarManagerService";
     private static final boolean SPEW = false;
 
@@ -95,7 +93,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     public StatusBarManagerService(Context context, WindowManagerService windowManager) {
         mContext = context;
         mWindowManager = windowManager;
-        mWindowManager.setOnHardKeyboardStatusChangeListener(this);
 
         final Resources res = context.getResources();
         mIcons.defineSlots(res.getStringArray(com.android.internal.R.array.config_statusBarIcons));
@@ -394,29 +391,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     @Override
-    public void setHardKeyboardEnabled(final boolean enabled) {
-        mHandler.post(new Runnable() {
-            public void run() {
-                mWindowManager.setHardKeyboardEnabled(enabled);
-            }
-        });
-    }
-
-    @Override
-    public void onHardKeyboardStatusChange(final boolean available, final boolean enabled) {
-        mHandler.post(new Runnable() {
-            public void run() {
-                if (mBar != null) {
-                    try {
-                        mBar.setHardKeyboardStatus(available, enabled);
-                    } catch (RemoteException ex) {
-                    }
-                }
-            }
-        });
-    }
-
-    @Override
     public void toggleRecentApps() {
         if (mBar != null) {
             try {
@@ -510,11 +484,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             switches[2] = mMenuVisible ? 1 : 0;
             switches[3] = mImeWindowVis;
             switches[4] = mImeBackDisposition;
-            switches[7] = mShowImeSwitcher ? 1 : 0;
+            switches[5] = mShowImeSwitcher ? 1 : 0;
             binders.add(mImeToken);
         }
-        switches[5] = mWindowManager.isHardKeyboardAvailable() ? 1 : 0;
-        switches[6] = mWindowManager.isHardKeyboardEnabled() ? 1 : 0;
     }
 
     /**

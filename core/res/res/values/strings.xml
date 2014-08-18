@@ -3783,8 +3783,9 @@
     <string name="select_input_method">Change keyboard</string>
     <!-- Title of a button to open the settings to enable or disable keyboards, also known as input methods [CHAR LIMIT=30] -->
     <string name="configure_input_methods">Choose keyboards</string>
-    <!-- Summary text of a toggle switch to enable/disable use of the physical keyboard in the input method selector [CHAR LIMIT=25] -->
-    <string name="use_physical_keyboard">Physical keyboard</string>
+    <!-- Summary text of a toggle switch to enable/disable use of the IME while a physical
+         keyboard is connected[CHAR LIMIT=25] -->
+    <string name="show_ime">Show input method</string>
     <!-- Title of the physical keyboard category in the input method selector [CHAR LIMIT=10] -->
     <string name="hardware">Hardware</string>
 

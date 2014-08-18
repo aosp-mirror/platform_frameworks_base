@@ -537,7 +537,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<WindowState> mInputMethodDialogs = new ArrayList<WindowState>();
 
     boolean mHardKeyboardAvailable;
-    boolean mHardKeyboardEnabled;
+    boolean mShowImeWithHardKeyboard;
     OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
 
     final ArrayList<WindowToken> mWallpaperTokens = new ArrayList<WindowToken>();
@@ -7015,11 +7015,11 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
             if (hardKeyboardAvailable != mHardKeyboardAvailable) {
                 mHardKeyboardAvailable = hardKeyboardAvailable;
-                mHardKeyboardEnabled = hardKeyboardAvailable;
+                mShowImeWithHardKeyboard = !hardKeyboardAvailable;
                 mH.removeMessages(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
                 mH.sendEmptyMessage(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
             }
-            if (!mHardKeyboardEnabled) {
+            if (mShowImeWithHardKeyboard) {
                 config.keyboard = Configuration.KEYBOARD_NOKEYS;
             }
 
@@ -7039,16 +7039,16 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public boolean isHardKeyboardEnabled() {
+    public boolean isShowImeWithHardKeyboardEnabled() {
         synchronized (mWindowMap) {
-            return mHardKeyboardEnabled;
+            return mShowImeWithHardKeyboard;
         }
     }
 
-    public void setHardKeyboardEnabled(boolean enabled) {
+    public void setShowImeWithHardKeyboard(boolean enabled) {
         synchronized (mWindowMap) {
-            if (mHardKeyboardEnabled != enabled) {
-                mHardKeyboardEnabled = enabled;
+            if (mShowImeWithHardKeyboard != enabled) {
+                mShowImeWithHardKeyboard = enabled;
                 mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
             }
         }
@@ -7062,15 +7062,15 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void notifyHardKeyboardStatusChange() {
-        final boolean available, enabled;
+        final boolean available, showImeWithHardKeyboard;
         final OnHardKeyboardStatusChangeListener listener;
         synchronized (mWindowMap) {
             listener = mHardKeyboardStatusChangeListener;
             available = mHardKeyboardAvailable;
-            enabled = mHardKeyboardEnabled;
+            showImeWithHardKeyboard = mShowImeWithHardKeyboard;
         }
         if (listener != null) {
-            listener.onHardKeyboardStatusChange(available, enabled);
+            listener.onHardKeyboardStatusChange(available, showImeWithHardKeyboard);
         }
     }
 
@@ -11053,7 +11053,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public interface OnHardKeyboardStatusChangeListener {
-        public void onHardKeyboardStatusChange(boolean available, boolean enabled);
+        public void onHardKeyboardStatusChange(boolean available, boolean showIme);
     }
 
     void debugLayoutRepeats(final String msg, int pendingLayoutChanges) {
