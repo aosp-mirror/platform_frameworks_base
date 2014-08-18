@@ -1316,7 +1316,7 @@ the search is for an artist name or song name.</p>
 <dt>{@link android.provider.MediaStore#EXTRA_MEDIA_FOCUS MediaStore.EXTRA_MEDIA_FOCUS} (required)</dt>
 <dd>
 <p>Indicates the search mode (whether the user is looking for a particular artist, album, song,
-playlist, or radio channel). Most search modes take additional extras. For example, if the user
+or playlist). Most search modes take additional extras. For example, if the user
 is interested in listening to a particular song, the intent might have three additional extras:
 the song title, the artist, and the album. This intent supports the following search modes for
 each value of {@link android.provider.MediaStore#EXTRA_MEDIA_FOCUS}:</p>
@@ -1399,24 +1399,6 @@ listen to. Apps should use more specific search modes when possible.</p>
       intent as an unstructured search.</li>
 </ul>
 </dd>
-<dt><p><em>Radio channel</em> - <code>"vnd.android.cursor.item/radio"</code></p></dt>
-<dd>
-<p>Play a particular radio channel or a radio channel that matches some criteria specified
-by additional extras.</p>
-<p>Additional extras:</p>
-<ul>
-  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ALBUM} - The album.</li>
-  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_ARTIST} - The artist.</li>
-  <li><code>"android.intent.extra.genre"</code> - The genre.</li>
-  <li><code>"android.intent.extra.radio_channel"</code> - The radio channel.</li>
-  <li>{@link android.provider.MediaStore#EXTRA_MEDIA_TITLE} - The song name that the radio
-      channel is based on.</li>
-  <li>{@link android.app.SearchManager#QUERY} (required) - A string that contains any combination
-      of: the album, the artist, the genre, the radio channel, or the title. This extra is
-      always provided for backward compatibility: existing apps that do not know about search
-      modes can process this intent as an unstructured search.</li>
-</ul>
-</dd>
 <dt><p><em>Playlist</em> - {@link android.provider.MediaStore.Audio.Playlists#ENTRY_CONTENT_TYPE Audio.Playlists.ENTRY_CONTENT_TYPE}</p></dt>
 <dd>
 <p>Play a particular playlist or a playlist that matches some criteria specified
@@ -1444,13 +1426,13 @@ by additional extras.</p>
 
 
 <p><b>Example intent:</b></p>
-<p>If the user wants to listen to a radio station that plays songs from a particular artist,
-a search app may generate the following intent:</p>
+<p>If the user wants to listen to music from a particular artist, a search app may generate the
+following intent:</p>
 <pre>
-public void playSearchRadioByArtist(String artist) {
+public void playSearchArtist(String artist) {
     Intent intent = new Intent(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH);
     intent.putExtra(MediaStore.EXTRA_MEDIA_FOCUS,
-                    "vnd.android.cursor.item/radio");
+                    MediaStore.Audio.Artists.ENTRY_CONTENT_TYPE);
     intent.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, artist);
     intent.putExtra(SearchManager.QUERY, artist);
     if (intent.resolveActivity(getPackageManager()) != null) {
@@ -1488,7 +1470,6 @@ protected void onCreate(Bundle savedInstanceState) {
         String artist = intent.getStringExtra(MediaStore.EXTRA_MEDIA_ARTIST);
         String genre = intent.getStringExtra("android.intent.extra.genre");
         String playlist = intent.getStringExtra("android.intent.extra.playlist");
-        String rchannel = intent.getStringExtra("android.intent.extra.radio_channel");
         String title = intent.getStringExtra(MediaStore.EXTRA_MEDIA_TITLE);
 
         // Determine the search mode and use the corresponding extras
@@ -1520,10 +1501,6 @@ protected void onCreate(Bundle savedInstanceState) {
         } else if (mediaFocus.compareTo("vnd.android.cursor.item/audio") == 0) {
             // 'Song' search mode
             playSong(album, artist, genre, title);
-
-        } else if (mediaFocus.compareTo("vnd.android.cursor.item/radio") == 0) {
-            // 'Radio channel' search mode
-            playRadioChannel(album, artist, genre, rchannel, title);
 
         } else if (mediaFocus.compareTo(MediaStore.Audio.Playlists.ENTRY_CONTENT_TYPE) == 0) {
             // 'Playlist' search mode
