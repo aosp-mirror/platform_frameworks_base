@@ -564,6 +564,11 @@ public class IntentFilter implements Parcelable {
         return mDataTypes != null && findMimeType(type);
     }
 
+    /** @hide */
+    public final boolean hasExactDataType(String type) {
+        return mDataTypes != null && mDataTypes.contains(type);
+    }
+
     /**
      * Return the number of data types in the filter.
      */
@@ -681,6 +686,20 @@ public class IntentFilter implements Parcelable {
             return mPort;
         }
 
+        /** @hide */
+        public boolean match(AuthorityEntry other) {
+            if (mWild != other.mWild) {
+                return false;
+            }
+            if (!mHost.equals(other.mHost)) {
+                return false;
+            }
+            if (mPort != other.mPort) {
+                return false;
+            }
+            return true;
+        }
+
         /**
          * Determine whether this AuthorityEntry matches the given data Uri.
          * <em>Note that this comparison is case-sensitive, unlike formal
@@ -792,6 +811,21 @@ public class IntentFilter implements Parcelable {
         return false;
     }
 
+    /** @hide */
+    public final boolean hasDataSchemeSpecificPart(PatternMatcher ssp) {
+        if (mDataSchemeSpecificParts == null) {
+            return false;
+        }
+        final int numDataSchemeSpecificParts = mDataSchemeSpecificParts.size();
+        for (int i = 0; i < numDataSchemeSpecificParts; i++) {
+            final PatternMatcher pe = mDataSchemeSpecificParts.get(i);
+            if (pe.getType() == ssp.getType() && pe.getPath().equals(ssp.getPath())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Return an iterator over the filter's data scheme specific parts.
      */
@@ -858,6 +892,20 @@ public class IntentFilter implements Parcelable {
      */
     public final boolean hasDataAuthority(Uri data) {
         return matchDataAuthority(data) >= 0;
+    }
+
+    /** @hide */
+    public final boolean hasDataAuthority(AuthorityEntry auth) {
+        if (mDataAuthorities == null) {
+            return false;
+        }
+        final int numDataAuthorities = mDataAuthorities.size();
+        for (int i = 0; i < numDataAuthorities; i++) {
+            if (mDataAuthorities.get(i).match(auth)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -936,6 +984,21 @@ public class IntentFilter implements Parcelable {
         for (int i = 0; i < numDataPaths; i++) {
             final PatternMatcher pe = mDataPaths.get(i);
             if (pe.match(data)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** @hide */
+    public final boolean hasDataPath(PatternMatcher path) {
+        if (mDataPaths == null) {
+            return false;
+        }
+        final int numDataPaths = mDataPaths.size();
+        for (int i = 0; i < numDataPaths; i++) {
+            final PatternMatcher pe = mDataPaths.get(i);
+            if (pe.getType() == path.getType() && pe.getPath().equals(path.getPath())) {
                 return true;
             }
         }
