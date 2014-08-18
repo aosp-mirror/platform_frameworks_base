@@ -413,7 +413,6 @@ public class PackageParser {
         if ((pi.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0
                 || (pi.applicationInfo.flags&ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
             pi.requiredForAllUsers = p.mRequiredForAllUsers;
-            pi.requiredForProfile = p.mRequiredForProfile;
         }
         pi.restrictedAccountType = p.mRestrictedAccountType;
         pi.requiredAccountType = p.mRequiredAccountType;
@@ -2477,8 +2476,6 @@ public class PackageParser {
                 false)) {
             owner.mRequiredForAllUsers = true;
         }
-        owner.mRequiredForProfile = sa.getInt(
-                com.android.internal.R.styleable.AndroidManifestApplication_requiredForProfile, 0);
 
         String restrictedAccountType = sa.getString(com.android.internal.R.styleable
                 .AndroidManifestApplication_restrictedAccountType);
@@ -4268,9 +4265,6 @@ public class PackageParser {
 
         /* An app that's required for all users and cannot be uninstalled for a user */
         public boolean mRequiredForAllUsers;
-
-        /* For which types of profile this app is required */
-        public int mRequiredForProfile;
 
         /* The restricted account authenticator type that is used by this application */
         public String mRestrictedAccountType;

@@ -277,17 +277,6 @@
          applications can request this feature. Default value is false. -->
     <attr name="requiredForAllUsers" format="boolean" />
 
-    <!-- Flag to specifiy for which types of profile this application needs to be present.
-         Only pre-installed applications can request this feature. Default is none. -->
-    <attr name="requiredForProfile">
-        <!-- This application needs to be present for restricted profiles -->
-        <flag name="restricted" value="0x0001" />
-        <!-- This application needs to be present for managed profiles -->
-        <flag name="managed" value="0x0002" />
-        <!-- This application needs to be present for all types of profiles -->
-        <flag name="all" value="0xFFFF" />
-    </attr>
-
     <!-- Flag indicating whether the application can be debugged, even when
          running on a device that is running in user mode. -->
     <attr name="debuggable" format="boolean" />
@@ -1073,7 +1062,6 @@
         <attr name="hasCode" format="boolean" />
         <attr name="persistent" />
         <attr name="requiredForAllUsers" />
-        <attr name="requiredForProfile" />
         <!-- Specify whether the components in this application are enabled or not (that is, can be
              instantiated by the system).
              If "false", it overrides any component specific values (a value of "true" will not

@@ -2128,8 +2128,7 @@
   <public type="attr" name="strokeLineCap" />
   <public type="attr" name="strokeLineJoin" />
   <public type="attr" name="strokeMiterLimit" />
-  <public type="attr" name="requiredForProfile"/>
-  <public type="attr" name="colorControlNormal" />
+  <public type="attr" name="colorControlNormal" id="0x1010429"/>
   <public type="attr" name="colorControlActivated" />
   <public type="attr" name="colorButtonNormal" />
   <public type="attr" name="colorControlHighlight" />
