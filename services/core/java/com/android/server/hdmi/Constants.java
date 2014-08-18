@@ -173,6 +173,10 @@ final class Constants {
     static final int SYSTEM_AUDIO_STATUS_OFF = 0;
     static final int SYSTEM_AUDIO_STATUS_ON = 1;
 
+    // [Menu State]
+    static final int MENU_STATE_ACTIVATED = 0;
+    static final int MENU_STATE_DEACTIVATED = 1;
+
     // Bit mask used to get the routing path of the top level device.
     // When &'d with the path 1.2.2.0 (0x1220), for instance, gives 1.0.0.0.
     static final int ROUTING_PATH_TOP_MASK = 0xF000;
