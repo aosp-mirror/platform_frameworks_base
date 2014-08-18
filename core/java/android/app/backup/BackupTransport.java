@@ -51,7 +51,7 @@ public class BackupTransport {
     public static final int AGENT_UNKNOWN = -1004;
 
     IBackupTransport mBinderImpl = new TransportImpl();
-    /** @hide */
+
     public IBinder getBinder() {
         return mBinderImpl.asBinder();
     }
