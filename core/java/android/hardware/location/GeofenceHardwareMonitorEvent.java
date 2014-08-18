@@ -16,13 +16,17 @@
 
 package android.hardware.location;
 
+import android.annotation.SystemApi;
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
  * A class that represents an event for each change in the state of a monitoring system.
+ *
+ * @hide
  */
+@SystemApi
 public class GeofenceHardwareMonitorEvent implements Parcelable {
     private final int mMonitoringType;
     private final int mMonitoringStatus;
