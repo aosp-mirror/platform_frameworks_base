@@ -79,6 +79,7 @@ class FastScroller {
     // Positions for preview image and text.
     private static final int OVERLAY_FLOATING = 0;
     private static final int OVERLAY_AT_THUMB = 1;
+    private static final int OVERLAY_ABOVE_THUMB = 2;
 
     // Indices for mPreviewResId.
     private static final int PREVIEW_LEFT = 0;
@@ -189,8 +190,9 @@ class FastScroller {
     /**
      * Position for the preview image and text. One of:
      * <ul>
-     * <li>{@link #OVERLAY_AT_THUMB}
      * <li>{@link #OVERLAY_FLOATING}
+     * <li>{@link #OVERLAY_AT_THUMB}
+     * <li>{@link #OVERLAY_ABOVE_THUMB}
      * </ul>
      */
     private int mOverlayPosition;
@@ -310,8 +312,10 @@ class FastScroller {
         final int textMinSize = Math.max(0, mPreviewMinHeight);
         mPrimaryText.setMinimumWidth(textMinSize);
         mPrimaryText.setMinimumHeight(textMinSize);
+        mPrimaryText.setIncludeFontPadding(false);
         mSecondaryText.setMinimumWidth(textMinSize);
         mSecondaryText.setMinimumHeight(textMinSize);
+        mSecondaryText.setIncludeFontPadding(false);
 
         refreshDrawablePressedState();
     }
@@ -595,10 +599,10 @@ class FastScroller {
         margins.right = mPreviewImage.getPaddingRight();
         margins.bottom = mPreviewImage.getPaddingBottom();
 
-        if (mOverlayPosition == OVERLAY_AT_THUMB) {
-            measureViewToSide(v, mThumbImage, margins, out);
-        } else {
+        if (mOverlayPosition == OVERLAY_FLOATING) {
             measureFloating(v, margins, out);
+        } else {
+            measureViewToSide(v, mThumbImage, margins, out);
         }
     }
 
@@ -1147,11 +1151,23 @@ class FastScroller {
         final float thumbMiddle = position * range + offset;
         thumbImage.setTranslationY(thumbMiddle - thumbImage.getHeight() / 2);
 
-        final float previewPos = mOverlayPosition == OVERLAY_AT_THUMB ? thumbMiddle : 0;
-
-        // Center the preview on the thumb, constrained to the list bounds.
         final View previewImage = mPreviewImage;
         final float previewHalfHeight = previewImage.getHeight() / 2f;
+        final float previewPos;
+        switch (mOverlayPosition) {
+            case OVERLAY_AT_THUMB:
+                previewPos = thumbMiddle;
+                break;
+            case OVERLAY_ABOVE_THUMB:
+                previewPos = thumbMiddle - previewHalfHeight;
+                break;
+            case OVERLAY_FLOATING:
+            default:
+                previewPos = 0;
+                break;
+        }
+
+        // Center the preview on the thumb, constrained to the list bounds.
         final float minP = top + previewHalfHeight;
         final float maxP = bottom - previewHalfHeight;
         final float previewMiddle = MathUtils.constrain(previewPos, minP, maxP);
