@@ -733,6 +733,7 @@
         <attr name="fastScrollOverlayPosition">
             <enum name="floating" value="0" />
             <enum name="atThumb" value="1" />
+            <enum name="aboveThumb" value="2" />
         </attr>
         <!-- Text color for the fast scroll index overlay. Make sure it
              plays nicely with fastScrollPreviewBackground[Left|Right]. -->
@@ -3196,6 +3197,8 @@
             <enum name="floating" value="0" />
             <!-- Pinned alongside the thumb. -->
             <enum name="atThumb" value="1" />
+            <!-- Pinned above the thumb. -->
+            <enum name="aboveThumb" value="2" />
         </attr>
         <attr name="textAppearance" />
         <attr name="textColor" />
