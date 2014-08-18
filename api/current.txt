@@ -28813,6 +28813,8 @@ package android.system {
 package android.telecomm {
 
   public final class AudioState implements android.os.Parcelable {
+    ctor public AudioState(boolean, int, int);
+    ctor public AudioState(android.telecomm.AudioState);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
