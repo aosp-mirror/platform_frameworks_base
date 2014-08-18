@@ -57,8 +57,7 @@ public class WifiAssociationTestRunner extends InstrumentationTestRunner {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        Bundle arguments = icicle;
-        String mFrequencyBand = arguments.getString("frequency-band");
+        String mFrequencyBand = icicle.getString("frequency-band");
         if (mFrequencyBand != null) {
             setFrequencyBand(mFrequencyBand);
         }

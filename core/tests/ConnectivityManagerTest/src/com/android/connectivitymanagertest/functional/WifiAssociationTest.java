@@ -16,23 +16,21 @@
 
 package com.android.connectivitymanagertest.functional;
 
-import com.android.connectivitymanagertest.ConnectivityManagerTestBase;
-import com.android.connectivitymanagertest.WifiAssociationTestRunner;
-
-import android.content.Context;
-import android.os.Bundle;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiConfiguration.KeyMgmt;
-import android.net.wifi.WifiConfiguration.AuthAlgorithm;
-import android.net.wifi.WifiConfiguration.GroupCipher;
-import android.net.wifi.WifiConfiguration.PairwiseCipher;
-import android.net.wifi.WifiConfiguration.Protocol;
-import android.net.wifi.WifiManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo.State;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiConfiguration.AuthAlgorithm;
+import android.net.wifi.WifiConfiguration.GroupCipher;
+import android.net.wifi.WifiConfiguration.KeyMgmt;
+import android.net.wifi.WifiConfiguration.PairwiseCipher;
+import android.net.wifi.WifiConfiguration.Protocol;
+import android.net.wifi.WifiInfo;
+import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
+
+import com.android.connectivitymanagertest.ConnectivityManagerTestBase;
+import com.android.connectivitymanagertest.WifiAssociationTestRunner;
 
 /**
  * Test Wi-Fi connection with different configuration
@@ -41,8 +39,7 @@ import android.util.Log;
  * -e security-type [OPEN|WEP64|WEP128|WPA_TKIP|WPA2_AES] -e frequency-band [2.4|5.0|auto]
  * -w com.android.connectivitymanagertest/.WifiAssociationTestRunner"
  */
-public class WifiAssociationTest
-        extends ConnectivityManagerTestBase {
+public class WifiAssociationTest extends ConnectivityManagerTestBase {
     private static final String TAG = "WifiAssociationTest";
     private String mSsid = null;
     private String mPassword = null;
@@ -55,65 +52,35 @@ public class WifiAssociationTest
     }
 
     @Override
-    public void setUp() throws Exception {
+    protected void setUp() throws Exception {
         super.setUp();
-        WifiAssociationTestRunner mRunner = (WifiAssociationTestRunner)getInstrumentation();
-        Bundle arguments = mRunner.getArguments();
+        WifiAssociationTestRunner runner = (WifiAssociationTestRunner)getInstrumentation();
+        Bundle arguments = runner.getArguments();
         mSecurityType = arguments.getString("security-type");
         mSsid = arguments.getString("ssid");
         mPassword = arguments.getString("password");
         mFrequencyBand = arguments.getString("frequency-band");
-        mBand = mRunner.mBand;
-        assertNotNull("Security type is empty", mSecurityType);
-        assertNotNull("Ssid is empty", mSsid);
+        mBand = runner.mBand;
+        assertNotNull("security type is empty", mSecurityType);
+        assertNotNull("ssid is empty", mSsid);
         validateFrequencyBand();
-        // enable Wifi and verify wpa_supplicant is started
-        assertTrue("enable Wifi failed", enableWifi());
-        sleep(2 * SHORT_TIMEOUT, "interrupted while waiting for WPA_SUPPLICANT to start");
-        WifiInfo mConnection = mWifiManager.getConnectionInfo();
-        assertNotNull(mConnection);
-        assertTrue("wpa_supplicant is not started ", mWifiManager.pingSupplicant());
-    }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
+        // enable wifi and verify wpa_supplicant is started
+        assertTrue("enable Wifi failed", enableWifi());
+        assertTrue("wifi not connected", waitForNetworkState(
+                ConnectivityManager.TYPE_WIFI, State.CONNECTED, LONG_TIMEOUT));
+        WifiInfo wi = mWifiManager.getConnectionInfo();
+        assertNotNull("no active wifi info", wi);
+        assertTrue("failed to ping wpa_supplicant ", mWifiManager.pingSupplicant());
     }
 
     private void validateFrequencyBand() {
         if (mFrequencyBand != null) {
             int currentFreq = mWifiManager.getFrequencyBand();
             Log.v(TAG, "read frequency band: " + currentFreq);
-            assertTrue("device frequency band is not set successfully", (mBand == currentFreq));
+            assertEquals("specified frequency band does not match operational band of WifiManager",
+                    currentFreq, mBand);
          }
-    }
-
-    /**
-     * Connect to the provided Wi-Fi network
-     * @param config is the network configuration
-     * @return true if the connection is successful.
-     */
-    private void connectToWifi(WifiConfiguration config) {
-        // step 1: connect to the test access point
-        assertTrue("failed to associate with " + config.SSID,
-                connectToWifiWithConfiguration(config));
-
-        // step 2: verify Wifi state and network state;
-        assertTrue("failed to connect with " + config.SSID,
-                waitForNetworkState(ConnectivityManager.TYPE_WIFI,
-                State.CONNECTED, WIFI_CONNECTION_TIMEOUT));
-
-        // step 3: verify the current connected network is the given SSID
-        assertNotNull("Wifi connection returns null", mWifiManager.getConnectionInfo());
-        assertTrue(config.SSID.contains(mWifiManager.getConnectionInfo().getSSID()));
-    }
-
-    private void sleep(long sometime, String errorMsg) {
-        try {
-            Thread.sleep(sometime);
-        } catch (InterruptedException e) {
-            fail(errorMsg);
-        }
     }
 
     private void log(String message) {
@@ -133,42 +100,37 @@ public class WifiAssociationTest
                 config.allowedKeyManagement.set(KeyMgmt.NONE);
                 break;
             case WEP64:
-                // always use hex pair for WEP-40
-                assertTrue("not a WEP64 security type?", mPassword.length() == 10);
+                assertNotNull("password is empty", mPassword);
                 config.allowedKeyManagement.set(KeyMgmt.NONE);
                 config.allowedAuthAlgorithms.set(AuthAlgorithm.OPEN);
                 config.allowedAuthAlgorithms.set(AuthAlgorithm.SHARED);
                 config.allowedGroupCiphers.set(GroupCipher.WEP40);
                 if (mPassword != null) {
-                    int length = mPassword.length();
-                    // WEP-40
-                    if (mPassword.matches("[0-9A-Fa-f]*")) {
+                    // always use hex pair for WEP-40
+                    if (isHex(mPassword, 10)) {
                         config.wepKeys[0] = mPassword;
                     } else {
-                        fail("Please type hex pair for the password");
+                        fail("password should be 10-character hex");
                     }
                 }
                 break;
             case WEP128:
                 assertNotNull("password is empty", mPassword);
-                // always use hex pair for WEP-104
-                assertTrue("not a WEP128 security type?", mPassword.length() == 26);
                 config.allowedKeyManagement.set(KeyMgmt.NONE);
                 config.allowedAuthAlgorithms.set(AuthAlgorithm.OPEN);
                 config.allowedAuthAlgorithms.set(AuthAlgorithm.SHARED);
                 config.allowedGroupCiphers.set(GroupCipher.WEP104);
                 if (mPassword != null) {
-                    int length = mPassword.length();
-                    // WEP-40
-                    if (mPassword.matches("[0-9A-Fa-f]*")) {
+                    // always use hex pair for WEP-104
+                    if (isHex(mPassword, 26)) {
                         config.wepKeys[0] = mPassword;
                     } else {
-                        fail("Please type hex pair for the password");
+                        fail("password should be 26-character hex");
                     }
                 }
                 break;
             case WPA_TKIP:
-                assertNotNull("missing password", mPassword);
+                assertNotNull("password is empty", mPassword);
                 config.allowedKeyManagement.set(KeyMgmt.WPA_PSK);
                 config.allowedAuthAlgorithms.set(AuthAlgorithm.OPEN);
                 config.allowedProtocols.set(Protocol.WPA);
@@ -181,7 +143,7 @@ public class WifiAssociationTest
                 }
                 break;
             case WPA2_AES:
-                assertNotNull("missing password", mPassword);
+                assertNotNull("password is empty", mPassword);
                 config.allowedKeyManagement.set(KeyMgmt.WPA_PSK);
                 config.allowedAuthAlgorithms.set(AuthAlgorithm.OPEN);
                 config.allowedProtocols.set(Protocol.RSN);
@@ -200,5 +162,7 @@ public class WifiAssociationTest
         }
         Log.v(TAG, "network config: " + config.toString());
         connectToWifi(config);
+        // verify that connection actually works
+        assertTrue("no network connectivity at end of test", checkNetworkConnectivity());
     }
 }

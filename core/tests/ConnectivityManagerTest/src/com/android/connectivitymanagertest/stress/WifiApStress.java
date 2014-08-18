@@ -33,7 +33,7 @@ import java.io.File;
 import java.io.FileWriter;
 
 /**
- * Stress the wifi driver as access point.
+ * Stress test setting up device as wifi hotspot
  */
 public class WifiApStress
     extends ConnectivityManagerTestBase {
@@ -41,27 +41,28 @@ public class WifiApStress
     private static String NETWORK_ID = "AndroidAPTest";
     private static String PASSWD = "androidwifi";
     private final static String OUTPUT_FILE = "WifiStressTestOutput.txt";
-    private int iterations;
+    private int mTotalIterations;
     private BufferedWriter mOutputWriter = null;
     private int mLastIteration = 0;
     private boolean mWifiOnlyFlag;
 
     @Override
-    public void setUp() throws Exception {
+    protected void setUp() throws Exception {
         super.setUp();
         ConnectivityManagerStressTestRunner mRunner =
             (ConnectivityManagerStressTestRunner)getInstrumentation();
-        iterations = mRunner.mSoftapIterations;
-        mWifiOnlyFlag = mRunner.mWifiOnlyFlag;
+        mTotalIterations = mRunner.getSoftApInterations();
+        mWifiOnlyFlag = mRunner.isWifiOnly();
         turnScreenOn();
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         // write the total number of iterations into output file
         mOutputWriter = new BufferedWriter(new FileWriter(new File(
                 Environment.getExternalStorageDirectory(), OUTPUT_FILE)));
-        mOutputWriter.write(String.format("iteration %d out of %d\n", mLastIteration, iterations));
+        mOutputWriter.write(String.format("iteration %d out of %d\n",
+                mLastIteration + 1, mTotalIterations));
         mOutputWriter.flush();
         mOutputWriter.close();
         super.tearDown();
@@ -79,40 +80,44 @@ public class WifiApStress
         config.allowedAuthAlgorithms.set(AuthAlgorithm.OPEN);
         config.preSharedKey = PASSWD;
 
-        // If Wifi is enabled, disable it
+        // if wifiap enabled, disable it
+        assertTrue("failed to disable wifi hotspot",
+                mWifiManager.setWifiApEnabled(config, false));
+        assertTrue("wifi hotspot not enabled", waitForWifiApState(
+                WifiManager.WIFI_AP_STATE_DISABLED, 2 * LONG_TIMEOUT));
+
+        // if Wifi is enabled, disable it
         if (mWifiManager.isWifiEnabled()) {
-            disableWifi();
+            assertTrue("failed to disable wifi", disableWifi());
+            // wait for the wifi state to be DISABLED
+            assertTrue("wifi state not disabled", waitForWifiState(
+                    WifiManager.WIFI_STATE_DISABLED, LONG_TIMEOUT));
         }
         int i;
-        for (i = 0; i < iterations; i++) {
+        for (i = 0; i < mTotalIterations; i++) {
             Log.v(TAG, "iteration: " + i);
             mLastIteration = i;
             // enable Wifi tethering
-            assertTrue(mWifiManager.setWifiApEnabled(config, true));
-            // Wait for wifi ap state to be ENABLED
-            assertTrue(waitForWifiAPState(WifiManager.WIFI_AP_STATE_ENABLED, 2 * LONG_TIMEOUT));
-            // Wait for wifi tethering result
-            assertEquals(SUCCESS, waitForTetherStateChange(2 * SHORT_TIMEOUT));
-            // Allow the wifi tethering to be enabled for 10 seconds
+            assertTrue("failed to enable wifi hotspot",
+                    mWifiManager.setWifiApEnabled(config, true));
+            // wait for wifi ap state to be ENABLED
+            assertTrue("wifi hotspot not enabled", waitForWifiApState(
+                    WifiManager.WIFI_AP_STATE_ENABLED, 2 * LONG_TIMEOUT));
+            // wait for wifi tethering result
+            assertTrue("tether state not changed", waitForTetherStateChange(LONG_TIMEOUT));
+            // allow the wifi tethering to be enabled for 10 seconds
             try {
                 Thread.sleep(2 * SHORT_TIMEOUT);
             } catch (Exception e) {
-                fail("thread in sleep is interrupted");
+                // ignore
             }
             assertTrue("no uplink data connection after Wi-Fi tethering", pingTest(null));
-            // Disable soft AP
-            assertTrue(mWifiManager.setWifiApEnabled(config, false));
-            // Wait for 30 seconds until Wi-Fi tethering is stopped
-            try {
-                Thread.sleep(30 * 1000);
-                Log.v(TAG, "wait for Wi-Fi tethering to be disabled.");
-            } catch (Exception e) {
-                fail("thread in sleep is interrupted");
-            }
-            assertFalse("Wi-Fi AP disable failed", mWifiManager.isWifiApEnabled());
-        }
-        if (i == iterations) {
-            mLastIteration = iterations;
+            // disable wifi hotspot
+            assertTrue("failed to disable wifi hotspot",
+                    mWifiManager.setWifiApEnabled(config, false));
+            assertTrue("wifi hotspot not enabled", waitForWifiApState(
+                    WifiManager.WIFI_AP_STATE_DISABLED, 2 * LONG_TIMEOUT));
+            assertFalse("wifi hotspot still enabled", mWifiManager.isWifiApEnabled());
         }
     }
 
