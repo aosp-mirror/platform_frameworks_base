@@ -328,8 +328,7 @@ const char* gFS_Main_ApplyColorOp[3] = {
         "",
         // Matrix
         "    fragColor *= colorMatrix;\n"
-        "    fragColor += colorMatrixVector;\n"
-        "    fragColor.rgb *= fragColor.a;\n",
+        "    fragColor += colorMatrixVector;\n",
         // PorterDuff
         "    fragColor = blendColors(colorBlend, fragColor);\n"
 };
