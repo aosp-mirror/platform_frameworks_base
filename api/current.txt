@@ -8670,14 +8670,14 @@ package android.content.pm {
     field public static final java.lang.String EXTRA_STATUS = "android.content.pm.extra.STATUS";
     field public static final java.lang.String EXTRA_STATUS_MESSAGE = "android.content.pm.extra.STATUS_MESSAGE";
     field public static final int STATUS_FAILURE = 1; // 0x1
-    field public static final int STATUS_FAILURE_ABORTED = 2; // 0x2
-    field public static final int STATUS_FAILURE_BLOCKED = 1; // 0x1
-    field public static final int STATUS_FAILURE_CONFLICT = 4; // 0x4
-    field public static final int STATUS_FAILURE_INCOMPATIBLE = 6; // 0x6
-    field public static final int STATUS_FAILURE_INVALID = 3; // 0x3
-    field public static final int STATUS_FAILURE_STORAGE = 5; // 0x5
+    field public static final int STATUS_FAILURE_ABORTED = 3; // 0x3
+    field public static final int STATUS_FAILURE_BLOCKED = 2; // 0x2
+    field public static final int STATUS_FAILURE_CONFLICT = 5; // 0x5
+    field public static final int STATUS_FAILURE_INCOMPATIBLE = 7; // 0x7
+    field public static final int STATUS_FAILURE_INVALID = 4; // 0x4
+    field public static final int STATUS_FAILURE_STORAGE = 6; // 0x6
+    field public static final int STATUS_PENDING_USER_ACTION = -1; // 0xffffffff
     field public static final int STATUS_SUCCESS = 0; // 0x0
-    field public static final int STATUS_USER_ACTION_REQUIRED = -1; // 0xffffffff
   }
 
   public static class PackageInstaller.Session implements java.io.Closeable {
@@ -8685,7 +8685,7 @@ package android.content.pm {
     method public void close();
     method public void commit(android.content.IntentSender);
     method public void fsync(java.io.OutputStream) throws java.io.IOException;
-    method public java.lang.String[] getNames();
+    method public java.lang.String[] getNames() throws java.io.IOException;
     method public java.io.InputStream openRead(java.lang.String) throws java.io.IOException;
     method public java.io.OutputStream openWrite(java.lang.String, long, long) throws java.io.IOException;
     method public void setProgress(float);

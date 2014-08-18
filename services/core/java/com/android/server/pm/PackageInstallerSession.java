@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_ABORTED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
+import static android.content.pm.PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
@@ -58,6 +59,7 @@ import android.util.MathUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -79,7 +81,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     // TODO: enforce INSTALL_ALLOW_TEST
     // TODO: enforce INSTALL_ALLOW_DOWNGRADE
-    // TODO: handle INSTALL_EXTERNAL, INSTALL_INTERNAL
 
     // TODO: treat INHERIT_EXISTING as installExistingPackage()
 
@@ -93,12 +94,24 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     final String installerPackageName;
     final SessionParams params;
     final long createdMillis;
-    final File sessionStageDir;
+
+    /** Internal location where staged data is written. */
+    final File internalStageDir;
+    /** External container where staged data is written. */
+    final String externalStageCid;
+
+    /**
+     * When a {@link SessionParams#MODE_INHERIT_EXISTING} session is installed
+     * into an ASEC, this is the container where the stage is combined with the
+     * existing install.
+     */
+    // TODO: persist this cid once we start splicing
+    String combinedCid;
 
     /** Note that UID is not persisted; it's always derived at runtime. */
     final int installerUid;
 
-    AtomicInteger openCount = new AtomicInteger();
+    private final AtomicInteger mOpenCount = new AtomicInteger();
 
     private final Object mLock = new Object();
 
@@ -118,6 +131,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private int mFinalStatus;
     private String mFinalMessage;
+
+    @GuardedBy("mLock")
+    private File mResolvedStageDir;
 
     /**
      * Path to the resolved base APK for this session, which may point at an APK
@@ -165,7 +181,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public PackageInstallerSession(PackageInstallerService.InternalCallback callback,
             Context context, PackageManagerService pm, Looper looper, int sessionId, int userId,
             String installerPackageName, SessionParams params, long createdMillis,
-            File sessionStageDir, boolean sealed) {
+            File internalStageDir, String externalStageCid, boolean sealed) {
         mCallback = callback;
         mContext = context;
         mPm = pm;
@@ -176,7 +192,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         this.installerPackageName = installerPackageName;
         this.params = params;
         this.createdMillis = createdMillis;
-        this.sessionStageDir = sessionStageDir;
+        this.internalStageDir = internalStageDir;
+        this.externalStageCid = externalStageCid;
 
         mSealed = sealed;
 
@@ -195,21 +212,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     public SessionInfo generateInfo() {
         final SessionInfo info = new SessionInfo();
+        synchronized (mLock) {
+            info.sessionId = sessionId;
+            info.installerPackageName = installerPackageName;
+            info.resolvedBaseCodePath = mResolvedBaseCodePath;
+            info.progress = mProgress;
+            info.sealed = mSealed;
+            info.open = mOpenCount.get() > 0;
 
-        info.sessionId = sessionId;
-        info.installerPackageName = installerPackageName;
-        info.resolvedBaseCodePath = mResolvedBaseCodePath;
-        info.progress = mProgress;
-        info.sealed = mSealed;
-        info.open = openCount.get() > 0;
-
-        info.mode = params.mode;
-        info.sizeBytes = params.sizeBytes;
-        info.appPackageName = params.appPackageName;
-        info.appIcon = params.appIcon;
-        info.appLabel = params.appLabel;
-
+            info.mode = params.mode;
+            info.sizeBytes = params.sizeBytes;
+            info.appPackageName = params.appPackageName;
+            info.appIcon = params.appIcon;
+            info.appLabel = params.appLabel;
+        }
         return info;
+    }
+
+    public boolean isSealed() {
+        synchronized (mLock) {
+            return mSealed;
+        }
     }
 
     private void assertNotSealed(String cookie) {
@@ -217,6 +240,30 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (mSealed) {
                 throw new SecurityException(cookie + " not allowed after commit");
             }
+        }
+    }
+
+    /**
+     * Resolve the actual location where staged data should be written. This
+     * might point at an ASEC mount point, which is why we delay path resolution
+     * until someone actively works with the session.
+     */
+    private File getStageDir() throws IOException {
+        synchronized (mLock) {
+            if (mResolvedStageDir == null) {
+                if (internalStageDir != null) {
+                    mResolvedStageDir = internalStageDir;
+                } else {
+                    final String path = PackageHelper.getSdDir(externalStageCid);
+                    if (path != null) {
+                        mResolvedStageDir = new File(path);
+                    } else {
+                        throw new IOException(
+                                "Failed to resolve container path for " + externalStageCid);
+                    }
+                }
+            }
+            return mResolvedStageDir;
         }
     }
 
@@ -253,7 +300,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Override
     public String[] getNames() {
         assertNotSealed("getNames");
-        return sessionStageDir.list();
+        try {
+            return getStageDir().list();
+        } catch (IOException e) {
+            throw ExceptionUtils.wrap(e);
+        }
     }
 
     @Override
@@ -267,8 +318,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private ParcelFileDescriptor openWriteInternal(String name, long offsetBytes, long lengthBytes)
             throws IOException {
-        // TODO: relay over to DCS when installing to ASEC
-
         // Quick sanity check of state, and allocate a pipe for ourselves. We
         // then do heavy disk allocation outside the lock, but this open pipe
         // will block any attempted install transitions.
@@ -285,7 +334,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (!FileUtils.isValidExtFilename(name)) {
                 throw new IllegalArgumentException("Invalid name: " + name);
             }
-            final File target = new File(sessionStageDir, name);
+            final File target = new File(getStageDir(), name);
 
             final FileDescriptor targetFd = Libcore.os.open(target.getAbsolutePath(),
                     O_CREAT | O_WRONLY, 0644);
@@ -331,7 +380,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (!FileUtils.isValidExtFilename(name)) {
                 throw new IllegalArgumentException("Invalid name: " + name);
             }
-            final File target = new File(sessionStageDir, name);
+            final File target = new File(getStageDir(), name);
 
             final FileDescriptor targetFd = Libcore.os.open(target.getAbsolutePath(), O_RDONLY, 0);
             return new ParcelFileDescriptor(targetFd);
@@ -369,10 +418,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // beyond this point we may have hardlinks to the valid install
         }
 
+        final File stageDir;
+        try {
+            stageDir = getStageDir();
+        } catch (IOException e) {
+            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
+                    "Failed to resolve stage dir", e);
+        }
+
         // Verify that stage looks sane with respect to existing application.
         // This currently only ensures packageName, versionCode, and certificate
         // consistency.
-        validateInstallLocked();
+        validateInstallLocked(stageDir);
 
         Preconditions.checkNotNull(mPackageName);
         Preconditions.checkNotNull(mSignatures);
@@ -394,7 +451,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Inherit any packages and native libraries from existing install that
         // haven't been overridden.
         if (params.mode == SessionParams.MODE_INHERIT_EXISTING) {
-            spliceExistingFilesIntoStage();
+            // TODO: implement splicing into existing ASEC
+            spliceExistingFilesIntoStage(stageDir);
         }
 
         // TODO: surface more granular state from dexopt
@@ -418,7 +476,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         };
 
-        mPm.installStage(mPackageName, this.sessionStageDir, localObserver, params,
+        // TODO: send ASEC cid if that's where we staged things
+        mPm.installStage(mPackageName, this.internalStageDir, null, localObserver, params,
                 installerPackageName, installerUid, new UserHandle(userId));
     }
 
@@ -428,13 +487,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * <p>
      * Renames package files in stage to match split names defined inside.
      */
-    private void validateInstallLocked() throws PackageManagerException {
+    private void validateInstallLocked(File stageDir) throws PackageManagerException {
         mPackageName = null;
         mVersionCode = -1;
         mSignatures = null;
         mResolvedBaseCodePath = null;
 
-        final File[] files = sessionStageDir.listFiles();
+        final File[] files = stageDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
         }
@@ -480,7 +539,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         "Invalid filename: " + targetName);
             }
 
-            final File targetFile = new File(sessionStageDir, targetName);
+            final File targetFile = new File(stageDir, targetName);
             if (!file.equals(targetFile)) {
                 file.renameTo(targetFile);
             }
@@ -550,7 +609,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * Application is already installed; splice existing files that haven't been
      * overridden into our stage.
      */
-    private void spliceExistingFilesIntoStage() throws PackageManagerException {
+    private void spliceExistingFilesIntoStage(File stageDir) throws PackageManagerException {
         final ApplicationInfo app = mPm.getApplicationInfo(mPackageName, 0, userId);
 
         int n = 0;
@@ -559,7 +618,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             for (File oldFile : oldFiles) {
                 if (!PackageParser.isApkFile(oldFile)) continue;
 
-                final File newFile = new File(sessionStageDir, oldFile.getName());
+                final File newFile = new File(stageDir, oldFile.getName());
                 try {
                     Os.link(oldFile.getAbsolutePath(), newFile.getAbsolutePath());
                     n++;
@@ -588,9 +647,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    public void open() {
+        if (mOpenCount.getAndIncrement() == 0) {
+            mCallback.onSessionOpened(this);
+        }
+    }
+
     @Override
     public void close() {
-        if (openCount.decrementAndGet() == 0) {
+        if (mOpenCount.decrementAndGet() == 0) {
             mCallback.onSessionClosed(this);
         }
     }
@@ -621,11 +686,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mSealed = true;
             mDestroyed = true;
         }
-        FileUtils.deleteContents(sessionStageDir);
-        sessionStageDir.delete();
+        if (internalStageDir != null) {
+            FileUtils.deleteContents(internalStageDir);
+            internalStageDir.delete();
+        }
+        if (externalStageCid != null) {
+            PackageHelper.destroySdDir(externalStageCid);
+        }
     }
 
     void dump(IndentingPrintWriter pw) {
+        synchronized (mLock) {
+            dumpLocked(pw);
+        }
+    }
+
+    private void dumpLocked(IndentingPrintWriter pw) {
         pw.println("Session " + sessionId + ":");
         pw.increaseIndent();
 
@@ -633,7 +709,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.printPair("installerPackageName", installerPackageName);
         pw.printPair("installerUid", installerUid);
         pw.printPair("createdMillis", createdMillis);
-        pw.printPair("sessionStageDir", sessionStageDir);
+        pw.printPair("internalStageDir", internalStageDir);
+        pw.printPair("externalStageCid", externalStageCid);
         pw.println();
 
         params.dump(pw);
@@ -649,19 +726,5 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.println();
 
         pw.decreaseIndent();
-    }
-
-    Snapshot snapshot() {
-        return new Snapshot(this);
-    }
-
-    static class Snapshot {
-        final float clientProgress;
-        final boolean sealed;
-
-        public Snapshot(PackageInstallerSession session) {
-            clientProgress = session.mClientProgress;
-            sealed = session.mSealed;
-        }
     }
 }

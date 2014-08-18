@@ -129,7 +129,7 @@ public class PackageInstaller {
      *
      * @see Intent#getParcelableExtra(String)
      */
-    public static final int STATUS_USER_ACTION_REQUIRED = -1;
+    public static final int STATUS_PENDING_USER_ACTION = -1;
 
     /**
      * The operation succeeded.
@@ -152,7 +152,7 @@ public class PackageInstaller {
      *
      * @see #EXTRA_STATUS_MESSAGE
      */
-    public static final int STATUS_FAILURE_BLOCKED = 1;
+    public static final int STATUS_FAILURE_BLOCKED = 2;
 
     /**
      * The operation failed because it was actively aborted. For example, the
@@ -161,7 +161,7 @@ public class PackageInstaller {
      *
      * @see #EXTRA_STATUS_MESSAGE
      */
-    public static final int STATUS_FAILURE_ABORTED = 2;
+    public static final int STATUS_FAILURE_ABORTED = 3;
 
     /**
      * The operation failed because one or more of the APKs was invalid. For
@@ -170,7 +170,7 @@ public class PackageInstaller {
      *
      * @see #EXTRA_STATUS_MESSAGE
      */
-    public static final int STATUS_FAILURE_INVALID = 3;
+    public static final int STATUS_FAILURE_INVALID = 4;
 
     /**
      * The operation failed because it conflicts (or is inconsistent with) with
@@ -183,7 +183,7 @@ public class PackageInstaller {
      *
      * @see #EXTRA_STATUS_MESSAGE
      */
-    public static final int STATUS_FAILURE_CONFLICT = 4;
+    public static final int STATUS_FAILURE_CONFLICT = 5;
 
     /**
      * The operation failed because of storage issues. For example, the device
@@ -192,7 +192,7 @@ public class PackageInstaller {
      *
      * @see #EXTRA_STATUS_MESSAGE
      */
-    public static final int STATUS_FAILURE_STORAGE = 5;
+    public static final int STATUS_FAILURE_STORAGE = 6;
 
     /**
      * The operation failed because it is fundamentally incompatible with this
@@ -202,7 +202,7 @@ public class PackageInstaller {
      *
      * @see #EXTRA_STATUS_MESSAGE
      */
-    public static final int STATUS_FAILURE_INCOMPATIBLE = 6;
+    public static final int STATUS_FAILURE_INCOMPATIBLE = 7;
 
     private final Context mContext;
     private final PackageManager mPm;
@@ -584,9 +584,12 @@ public class PackageInstaller {
          * This returns all names which have been previously written through
          * {@link #openWrite(String, long, long)} as part of this session.
          */
-        public @NonNull String[] getNames() {
+        public @NonNull String[] getNames() throws IOException {
             try {
                 return mSession.getNames();
+            } catch (RuntimeException e) {
+                ExceptionUtils.maybeUnwrapIOException(e);
+                throw e;
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             }
