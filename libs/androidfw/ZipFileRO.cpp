@@ -50,8 +50,7 @@ public:
     ZipEntryName name;
     void *cookie;
 
-    _ZipEntryRO() : cookie(NULL) {
-    }
+    _ZipEntryRO() : cookie(NULL) {}
 
     ~_ZipEntryRO() {
       EndIteration(cookie);
@@ -87,14 +86,14 @@ ZipFileRO::~ZipFileRO() {
 ZipEntryRO ZipFileRO::findEntryByName(const char* entryName) const
 {
     _ZipEntryRO* data = new _ZipEntryRO;
-    const int32_t error = FindEntry(mHandle, entryName, &(data->entry));
+
+    data->name = ZipEntryName(entryName);
+
+    const int32_t error = FindEntry(mHandle, data->name, &(data->entry));
     if (error) {
         delete data;
         return NULL;
     }
-
-    data->name.name = entryName;
-    data->name.name_length = strlen(entryName);
 
     return (ZipEntryRO) data;
 }
