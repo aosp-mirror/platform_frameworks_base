@@ -30,18 +30,12 @@
     <string name="menu_share" msgid="3075149983979628146">"分享"</string>
     <string name="menu_delete" msgid="8138799623850614177">"刪除"</string>
     <string name="menu_select" msgid="8711270657353563424">"選取「<xliff:g id="DIRECTORY">^1</xliff:g>」"</string>
-    <!-- no translation found for menu_advanced_show (4693652895715631401) -->
-    <skip />
-    <!-- no translation found for menu_advanced_show (5792182900084144261) -->
-    <skip />
-    <!-- no translation found for menu_advanced_hide (4218809952721972589) -->
-    <skip />
-    <!-- no translation found for menu_advanced_hide (4845869969015718848) -->
-    <skip />
-    <!-- no translation found for menu_file_size_show (3240323619260823076) -->
-    <skip />
-    <!-- no translation found for menu_file_size_hide (8881975928502581042) -->
-    <skip />
+    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"顯示內部儲存空間"</string>
+    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"顯示 SD 卡"</string>
+    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"隱藏內部儲存空間"</string>
+    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"隱藏 SD 卡"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"顯示檔案大小"</string>
+    <string name="menu_file_size_hide" msgid="8881975928502581042">"隱藏檔案大小"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"已選取 <xliff:g id="COUNT">%1$d</xliff:g> 個"</string>
     <string name="sort_name" msgid="9183560467917256779">"按名稱"</string>
     <string name="sort_date" msgid="586080032956151448">"按修改日期"</string>
