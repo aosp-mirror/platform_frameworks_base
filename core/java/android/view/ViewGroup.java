@@ -279,9 +279,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected static final int FLAG_SUPPORT_STATIC_TRANSFORMATIONS = 0x800;
 
-    // When the previous drawChild() invocation used an alpha value that was lower than
-    // 1.0 and set it in mCachePaint
-    static final int FLAG_ALPHA_LOWER_THAN_ONE = 0x1000;
+    // UNUSED FLAG VALUE: 0x1000;
 
     /**
      * When set, this ViewGroup's drawable states also include those
