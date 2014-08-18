@@ -268,7 +268,7 @@ static void android_os_Process_setCanSelfBackground(JNIEnv* env, jobject clazz, 
     // Establishes the calling thread as illegal to put into the background.
     // Typically used only for the system process's main looper.
 #if GUARD_THREAD_PRIORITY
-    ALOGV("Process.setCanSelfBackground(%d) : tid=%d", bgOk, androidGetTid());
+    ALOGV("Process.setCanSelfBackground(%d) : tid=%d", bgOk, gettid());
     {
         Mutex::Autolock _l(gKeyCreateMutex);
         if (gBgKey == -1) {
@@ -303,7 +303,7 @@ void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
     // if we're putting the current thread into the background, check the TLS
     // to make sure this thread isn't guarded.  If it is, raise an exception.
     if (pri >= ANDROID_PRIORITY_BACKGROUND) {
-        if (pid == androidGetTid()) {
+        if (pid == gettid()) {
             void* bgOk = pthread_getspecific(gBgKey);
             if (bgOk == ((void*)0xbaad)) {
                 ALOGE("Thread marked fg-only put self in background!");
@@ -330,7 +330,7 @@ void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
 void android_os_Process_setCallingThreadPriority(JNIEnv* env, jobject clazz,
                                                         jint pri)
 {
-    android_os_Process_setThreadPriority(env, clazz, androidGetTid(), pri);
+    android_os_Process_setThreadPriority(env, clazz, gettid(), pri);
 }
 
 jint android_os_Process_getThreadPriority(JNIEnv* env, jobject clazz,
