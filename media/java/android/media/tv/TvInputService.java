@@ -213,7 +213,7 @@ public abstract class TvInputService extends Service {
     }
 
     /**
-     * Returns the input ID for {@code logicalAddress} if it is handled by this service; otherwise,
+     * Returns the input ID for {@code deviceInfo} if it is handled by this service; otherwise,
      * return {@code null}. Override to modify default behavior of ignoring all HDMI logical input
      * device.
      *
@@ -1178,11 +1178,11 @@ public abstract class TvInputService extends Service {
             mCallbacks.finishBroadcast();
         }
 
-        private void broadcastAddHdmiTvInput(int logicalAddress, TvInputInfo inputInfo) {
+        private void broadcastAddHdmiTvInput(int id, TvInputInfo inputInfo) {
             int n = mCallbacks.beginBroadcast();
             for (int i = 0; i < n; ++i) {
                 try {
-                    mCallbacks.getBroadcastItem(i).addHdmiTvInput(logicalAddress, inputInfo);
+                    mCallbacks.getBroadcastItem(i).addHdmiTvInput(id, inputInfo);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error while broadcasting.", e);
                 }
@@ -1289,7 +1289,7 @@ public abstract class TvInputService extends Service {
                     HdmiDeviceInfo deviceInfo = (HdmiDeviceInfo) msg.obj;
                     TvInputInfo inputInfo = onHdmiDeviceAdded(deviceInfo);
                     if (inputInfo != null) {
-                        broadcastAddHdmiTvInput(deviceInfo.getLogicalAddress(), inputInfo);
+                        broadcastAddHdmiTvInput(deviceInfo.getId(), inputInfo);
                     }
                     return;
                 }
