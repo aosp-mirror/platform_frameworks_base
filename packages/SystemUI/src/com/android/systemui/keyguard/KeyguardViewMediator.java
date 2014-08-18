@@ -262,6 +262,7 @@ public class KeyguardViewMediator extends SystemUI {
     private SoundPool mLockSounds;
     private int mLockSoundId;
     private int mUnlockSoundId;
+    private int mTrustedSoundId;
     private int mLockSoundStreamId;
 
     /**
@@ -451,6 +452,11 @@ public class KeyguardViewMediator extends SystemUI {
                 KeyguardViewMediator.this.keyguardDone(true /* authenticated */, true /* wakeUp */);
             }
         }
+
+        @Override
+        public void playTrustedSound() {
+            KeyguardViewMediator.this.playTrustedSound();
+        }
     };
 
     public void userActivity() {
@@ -500,6 +506,14 @@ public class KeyguardViewMediator extends SystemUI {
         if (soundPath == null || mUnlockSoundId == 0) {
             Log.w(TAG, "failed to load unlock sound from " + soundPath);
         }
+        soundPath = Settings.Global.getString(cr, Settings.Global.TRUSTED_SOUND);
+        if (soundPath != null) {
+            mTrustedSoundId = mLockSounds.load(soundPath, 1);
+        }
+        if (soundPath == null || mTrustedSoundId == 0) {
+            Log.w(TAG, "failed to load trusted sound from " + soundPath);
+        }
+
         int lockSoundDefaultAttenuation = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lockSoundVolumeDb);
         mLockSoundVolume = (float)Math.pow(10, (float)lockSoundDefaultAttenuation/20);
@@ -1155,11 +1169,14 @@ public class KeyguardViewMediator extends SystemUI {
             return;
         }
 
+        playSound(locked ? mLockSoundId : mUnlockSoundId);
+    }
+
+    private void playSound(int soundId) {
+        if (soundId == 0) return;
         final ContentResolver cr = mContext.getContentResolver();
         if (Settings.System.getInt(cr, Settings.System.LOCKSCREEN_SOUNDS_ENABLED, 1) == 1) {
-            final int whichSound = locked
-                ? mLockSoundId
-                : mUnlockSoundId;
+
             mLockSounds.stop(mLockSoundStreamId);
             // Init mAudioManager
             if (mAudioManager == null) {
@@ -1170,9 +1187,16 @@ public class KeyguardViewMediator extends SystemUI {
             // If the stream is muted, don't play the sound
             if (mAudioManager.isStreamMute(mMasterStreamType)) return;
 
-            mLockSoundStreamId = mLockSounds.play(whichSound,
+            mLockSoundStreamId = mLockSounds.play(soundId,
                     mLockSoundVolume, mLockSoundVolume, 1/*priortiy*/, 0/*loop*/, 1.0f/*rate*/);
         }
+    }
+
+    private void playTrustedSound() {
+        if (mSuppressNextLockSound) {
+            return;
+        }
+        playSound(mTrustedSoundId);
     }
 
     private void updateActivityLockScreenState() {

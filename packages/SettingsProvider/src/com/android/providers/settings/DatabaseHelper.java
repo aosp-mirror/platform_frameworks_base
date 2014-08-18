@@ -70,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 106;
+    private static final int DATABASE_VERSION = 107;
 
     private Context mContext;
     private int mUserHandle;
@@ -1694,6 +1694,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 106;
         }
+
+        if (upgradeVersion < 107) {
+            // Add trusted sound setting
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                SQLiteStatement stmt = null;
+                try {
+                    stmt = db.compileStatement("INSERT OR REPLACE INTO global(name,value)"
+                            + " VALUES(?,?);");
+                    loadStringSetting(stmt, Settings.Global.TRUSTED_SOUND,
+                            R.string.def_trusted_sound);
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                    if (stmt != null) stmt.close();
+                }
+            }
+            upgradeVersion = 107;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -2373,6 +2393,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     R.string.def_lock_sound);
             loadStringSetting(stmt, Settings.Global.UNLOCK_SOUND,
                     R.string.def_unlock_sound);
+            loadStringSetting(stmt, Settings.Global.TRUSTED_SOUND,
+                    R.string.def_trusted_sound);
             loadIntegerSetting(stmt, Settings.Global.POWER_SOUNDS_ENABLED,
                     R.integer.def_power_sounds_enabled);
             loadStringSetting(stmt, Settings.Global.LOW_BATTERY_SOUND,
