@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.annotation.SystemApi;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 
@@ -66,6 +67,7 @@ public class BackupDataOutput {
     long mBackupWriter;
 
     /** @hide */
+    @SystemApi
     public BackupDataOutput(FileDescriptor fd) {
         if (fd == null) throw new NullPointerException();
         mBackupWriter = ctor(fd);
@@ -115,6 +117,7 @@ public class BackupDataOutput {
     }
 
     /** @hide */
+    @Override
     protected void finalize() throws Throwable {
         try {
             dtor(mBackupWriter);
