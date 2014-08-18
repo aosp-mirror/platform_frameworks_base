@@ -16,6 +16,7 @@
 
 package com.android.internal.policy.impl;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -104,8 +105,9 @@ public class PolicyControl {
     }
 
     public static boolean disableImmersiveConfirmation(String pkg) {
-        return sImmersivePreconfirmationsFilter != null
-                && sImmersivePreconfirmationsFilter.matches(pkg);
+        return (sImmersivePreconfirmationsFilter != null
+                && sImmersivePreconfirmationsFilter.matches(pkg))
+                || ActivityManager.isRunningInTestHarness();
     }
 
     public static void reloadFromSetting(Context context) {
