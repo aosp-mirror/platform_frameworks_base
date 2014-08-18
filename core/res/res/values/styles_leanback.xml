@@ -15,8 +15,7 @@
 -->
 <resources>
     <style name="AlertDialog.Leanback" parent="AlertDialog.Material">
-        <item name="layout">@android:layout/alert_dialog_leanback</item>
-        <item name="buttonPanelSideLayout">@android:layout/alert_dialog_leanback_button_panel_right</item>
+        <item name="buttonPanelSideLayout">@android:layout/alert_dialog_leanback_button_panel_side</item>
     </style>
 
     <style name="AlertDialog.Leanback.Light">
@@ -24,7 +23,6 @@
 
     <style name="Widget.Leanback.TimePicker" parent="Widget.Material.TimePicker">
         <item name="timePickerMode">spinner</item>
-        <item name="legacyLayout">@layout/time_picker_legacy_leanback</item>
     </style>
 
     <style name="Widget.Leanback.DatePicker" parent="Widget.Material.DatePicker">
