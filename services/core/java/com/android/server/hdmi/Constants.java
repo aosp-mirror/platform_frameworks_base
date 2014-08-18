@@ -276,5 +276,10 @@ final class Constants {
     //     values which denotes the device type in HDMI Spec 1.4.
     static final String PROPERTY_DEVICE_TYPE = "ro.hdmi.device_type";
 
+    // MHL RCPE messages
+    static final int MHL_RCPE_NO_ERROR = 0x00;
+    static final int MHL_RCPE_INEFFECTIVE_KEYCODE = 0x01;
+    static final int MHL_RCPE_RESPONDER_BUSY = 0x02;
+
     private Constants() { /* cannot be instantiated */ }
 }
