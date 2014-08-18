@@ -49,6 +49,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.LogWriter;
+import android.util.MutableInt;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
@@ -105,8 +106,6 @@ public final class BatteryStatsImpl extends BatteryStats {
     // per uid; once the limit is reached, we batch the remaining wakelocks
     // in to one common name.
     private static final int MAX_WAKELOCKS_PER_UID = 50;
-
-    private static final String BATCHED_WAKELOCK_NAME = "*overflow*";
 
     private static int sNumSpeedSteps;
 
@@ -1549,6 +1548,140 @@ public final class BatteryStatsImpl extends BatteryStats {
             super.readSummaryFromParcelLocked(in);
             mNesting = 0;
         }
+    }
+
+    public abstract class OverflowArrayMap<T> {
+        private static final String OVERFLOW_NAME = "*overflow*";
+
+        final ArrayMap<String, T> mMap = new ArrayMap<>();
+        T mCurOverflow;
+        ArrayMap<String, MutableInt> mActiveOverflow;
+
+        public OverflowArrayMap() {
+        }
+
+        public ArrayMap<String, T> getMap() {
+            return mMap;
+        }
+
+        public void clear() {
+            mMap.clear();
+            mCurOverflow = null;
+            mActiveOverflow = null;
+        }
+
+        public void add(String name, T obj) {
+            mMap.put(name, obj);
+            if (OVERFLOW_NAME.equals(name)) {
+                mCurOverflow = obj;
+            }
+        }
+
+        public void cleanup() {
+            if (mActiveOverflow != null) {
+                if (mActiveOverflow.size() == 0) {
+                    mActiveOverflow = null;
+                }
+            }
+            if (mActiveOverflow == null) {
+                // There is no currently active overflow, so we should no longer have
+                // an overflow entry.
+                if (mMap.containsKey(OVERFLOW_NAME)) {
+                    Slog.wtf(TAG, "Cleaning up with no active overflow, but have overflow entry "
+                            + mMap.get(OVERFLOW_NAME));
+                    mMap.remove(OVERFLOW_NAME);
+                }
+                mCurOverflow = null;
+            } else {
+                // There is currently active overflow, so we should still have an overflow entry.
+                if (mCurOverflow == null || !mMap.containsKey(OVERFLOW_NAME)) {
+                    Slog.wtf(TAG, "Cleaning up with active overflow, but no overflow entry: cur="
+                            + mCurOverflow + " map=" + mMap.get(OVERFLOW_NAME));
+                }
+            }
+        }
+
+        public T startObject(String name) {
+            T obj = mMap.get(name);
+            if (obj != null) {
+                return obj;
+            }
+
+            // No object exists for the given name, but do we currently have it
+            // running as part of the overflow?
+            if (mActiveOverflow != null) {
+                MutableInt over = mActiveOverflow.get(name);
+                if (over != null) {
+                    // We are already actively counting this name in the overflow object.
+                    obj = mCurOverflow;
+                    if (obj == null) {
+                        // Shouldn't be here, but we'll try to recover.
+                        Slog.wtf(TAG, "Have active overflow " + name + " but null overflow");
+                        obj = mCurOverflow = instantiateObject();
+                        mMap.put(OVERFLOW_NAME, obj);
+                    }
+                    over.value++;
+                    return obj;
+                }
+            }
+
+            // No object exists for given name nor in the overflow; we need to make
+            // a new one.
+            final int N = mMap.size();
+            if (N >= MAX_WAKELOCKS_PER_UID) {
+                // Went over the limit on number of objects to track; this one goes
+                // in to the overflow.
+                obj = mCurOverflow;
+                if (obj == null) {
+                    // Need to start overflow now...
+                    obj = mCurOverflow = instantiateObject();
+                    mMap.put(OVERFLOW_NAME, obj);
+                }
+                if (mActiveOverflow == null) {
+                    mActiveOverflow = new ArrayMap<>();
+                }
+                mActiveOverflow.put(name, new MutableInt(1));
+                return obj;
+            }
+
+            // Normal case where we just need to make a new object.
+            obj = instantiateObject();
+            mMap.put(name, obj);
+            return obj;
+        }
+
+        public T stopObject(String name) {
+            T obj = mMap.get(name);
+            if (obj != null) {
+                return obj;
+            }
+
+            // No object exists for the given name, but do we currently have it
+            // running as part of the overflow?
+            if (mActiveOverflow != null) {
+                MutableInt over = mActiveOverflow.get(name);
+                if (over != null) {
+                    // We are already actively counting this name in the overflow object.
+                    obj = mCurOverflow;
+                    if (obj != null) {
+                        over.value--;
+                        if (over.value <= 0) {
+                            mActiveOverflow.remove(name);
+                        }
+                        return obj;
+                    }
+                }
+            }
+
+            // Huh, they are stopping an active operation but we can't find one!
+            // That's not good.
+            Slog.wtf(TAG, "Unable to find object for " + name + " mapsize="
+                    + mMap.size() + " activeoverflow=" + mActiveOverflow
+                    + " curoverflow=" + mCurOverflow);
+            return null;
+        }
+
+        public abstract T instantiateObject();
     }
 
     /*
@@ -3995,17 +4128,27 @@ public final class BatteryStatsImpl extends BatteryStats {
         /**
          * The statistics we have collected for this uid's wake locks.
          */
-        final ArrayMap<String, Wakelock> mWakelockStats = new ArrayMap<String, Wakelock>();
+        final OverflowArrayMap<Wakelock> mWakelockStats = new OverflowArrayMap<Wakelock>() {
+            @Override public Wakelock instantiateObject() { return new Wakelock(); }
+        };
 
         /**
          * The statistics we have collected for this uid's syncs.
          */
-        final ArrayMap<String, StopwatchTimer> mSyncStats = new ArrayMap<String, StopwatchTimer>();
+        final OverflowArrayMap<StopwatchTimer> mSyncStats = new OverflowArrayMap<StopwatchTimer>() {
+            @Override public StopwatchTimer instantiateObject() {
+                return new StopwatchTimer(Uid.this, SYNC, null, mOnBatteryTimeBase);
+            }
+        };
 
         /**
          * The statistics we have collected for this uid's jobs.
          */
-        final ArrayMap<String, StopwatchTimer> mJobStats = new ArrayMap<String, StopwatchTimer>();
+        final OverflowArrayMap<StopwatchTimer> mJobStats = new OverflowArrayMap<StopwatchTimer>() {
+            @Override public StopwatchTimer instantiateObject() {
+                return new StopwatchTimer(Uid.this, JOB, null, mOnBatteryTimeBase);
+            }
+        };
 
         /**
          * The statistics we have collected for this uid's sensor activations.
@@ -4043,17 +4186,17 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         @Override
         public Map<String, ? extends BatteryStats.Uid.Wakelock> getWakelockStats() {
-            return mWakelockStats;
+            return mWakelockStats.getMap();
         }
 
         @Override
         public Map<String, ? extends BatteryStats.Timer> getSyncStats() {
-            return mSyncStats;
+            return mSyncStats.getMap();
         }
 
         @Override
         public Map<String, ? extends BatteryStats.Timer> getJobStats() {
-            return mJobStats;
+            return mJobStats.getMap();
         }
 
         @Override
@@ -4567,32 +4710,38 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mMobileRadioActiveCount.reset(false);
             }
 
-            for (int iw=mWakelockStats.size()-1; iw>=0; iw--) {
-                Wakelock wl = mWakelockStats.valueAt(iw);
+            final ArrayMap<String, Wakelock> wakeStats = mWakelockStats.getMap();
+            for (int iw=wakeStats.size()-1; iw>=0; iw--) {
+                Wakelock wl = wakeStats.valueAt(iw);
                 if (wl.reset()) {
-                    mWakelockStats.removeAt(iw);
+                    wakeStats.removeAt(iw);
                 } else {
                     active = true;
                 }
             }
-            for (int is=mSyncStats.size()-1; is>=0; is--) {
-                StopwatchTimer timer = mSyncStats.valueAt(is);
+            mWakelockStats.cleanup();
+            final ArrayMap<String, StopwatchTimer> syncStats = mSyncStats.getMap();
+            for (int is=syncStats.size()-1; is>=0; is--) {
+                StopwatchTimer timer = syncStats.valueAt(is);
                 if (timer.reset(false)) {
-                    mSyncStats.removeAt(is);
+                    syncStats.removeAt(is);
                     timer.detach();
                 } else {
                     active = true;
                 }
             }
-            for (int ij=mJobStats.size()-1; ij>=0; ij--) {
-                StopwatchTimer timer = mJobStats.valueAt(ij);
+            mSyncStats.cleanup();
+            final ArrayMap<String, StopwatchTimer> jobStats = mJobStats.getMap();
+            for (int ij=jobStats.size()-1; ij>=0; ij--) {
+                StopwatchTimer timer = jobStats.valueAt(ij);
                 if (timer.reset(false)) {
-                    mJobStats.removeAt(ij);
+                    jobStats.removeAt(ij);
                     timer.detach();
                 } else {
                     active = true;
                 }
             }
+            mJobStats.cleanup();
             for (int ise=mSensorStats.size()-1; ise>=0; ise--) {
                 Sensor s = mSensorStats.valueAt(ise);
                 if (s.reset()) {
@@ -4687,27 +4836,30 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         void writeToParcelLocked(Parcel out, long elapsedRealtimeUs) {
-            int NW = mWakelockStats.size();
+            final ArrayMap<String, Wakelock> wakeStats = mWakelockStats.getMap();
+            int NW = wakeStats.size();
             out.writeInt(NW);
             for (int iw=0; iw<NW; iw++) {
-                out.writeString(mWakelockStats.keyAt(iw));
-                Uid.Wakelock wakelock = mWakelockStats.valueAt(iw);
+                out.writeString(wakeStats.keyAt(iw));
+                Uid.Wakelock wakelock = wakeStats.valueAt(iw);
                 wakelock.writeToParcelLocked(out, elapsedRealtimeUs);
             }
 
-            int NS = mSyncStats.size();
+            final ArrayMap<String, StopwatchTimer> syncStats = mSyncStats.getMap();
+            int NS = syncStats.size();
             out.writeInt(NS);
             for (int is=0; is<NS; is++) {
-                out.writeString(mSyncStats.keyAt(is));
-                StopwatchTimer timer = mSyncStats.valueAt(is);
+                out.writeString(syncStats.keyAt(is));
+                StopwatchTimer timer = syncStats.valueAt(is);
                 Timer.writeTimerToParcel(out, timer, elapsedRealtimeUs);
             }
 
-            int NJ = mJobStats.size();
+            final ArrayMap<String, StopwatchTimer> jobStats = mJobStats.getMap();
+            int NJ = jobStats.size();
             out.writeInt(NJ);
             for (int ij=0; ij<NJ; ij++) {
-                out.writeString(mJobStats.keyAt(ij));
-                StopwatchTimer timer = mJobStats.valueAt(ij);
+                out.writeString(jobStats.keyAt(ij));
+                StopwatchTimer timer = jobStats.valueAt(ij);
                 Timer.writeTimerToParcel(out, timer, elapsedRealtimeUs);
             }
 
@@ -4826,10 +4978,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 String wakelockName = in.readString();
                 Uid.Wakelock wakelock = new Wakelock();
                 wakelock.readFromParcelLocked(timeBase, screenOffTimeBase, in);
-                // We will just drop some random set of wakelocks if
-                // the previous run of the system was an older version
-                // that didn't impose a limit.
-                mWakelockStats.put(wakelockName, wakelock);
+                mWakelockStats.add(wakelockName, wakelock);
             }
 
             int numSyncs = in.readInt();
@@ -4837,7 +4986,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             for (int j = 0; j < numSyncs; j++) {
                 String syncName = in.readString();
                 if (in.readInt() != 0) {
-                    mSyncStats.put(syncName,
+                    mSyncStats.add(syncName,
                             new StopwatchTimer(Uid.this, SYNC, null, timeBase, in));
                 }
             }
@@ -4847,7 +4996,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             for (int j = 0; j < numJobs; j++) {
                 String jobName = in.readString();
                 if (in.readInt() != 0) {
-                    mJobStats.put(jobName, new StopwatchTimer(Uid.this, JOB, null, timeBase, in));
+                    mJobStats.add(jobName, new StopwatchTimer(Uid.this, JOB, null, timeBase, in));
                 }
             }
 
@@ -5056,6 +5205,38 @@ public final class BatteryStatsImpl extends BatteryStats {
                 case WAKE_TYPE_PARTIAL: return mTimerPartial;
                 case WAKE_TYPE_WINDOW: return mTimerWindow;
                 default: throw new IllegalArgumentException("type = " + type);
+                }
+            }
+
+            public StopwatchTimer getStopwatchTimer(int type) {
+                StopwatchTimer t;
+                switch (type) {
+                    case WAKE_TYPE_PARTIAL:
+                        t = mTimerPartial;
+                        if (t == null) {
+                            t = new StopwatchTimer(Uid.this, WAKE_TYPE_PARTIAL,
+                                    mPartialTimers, mOnBatteryScreenOffTimeBase);
+                            mTimerPartial = t;
+                        }
+                        return t;
+                    case WAKE_TYPE_FULL:
+                        t = mTimerFull;
+                        if (t == null) {
+                            t = new StopwatchTimer(Uid.this, WAKE_TYPE_FULL,
+                                    mFullTimers, mOnBatteryTimeBase);
+                            mTimerFull = t;
+                        }
+                        return t;
+                    case WAKE_TYPE_WINDOW:
+                        t = mTimerWindow;
+                        if (t == null) {
+                            t = new StopwatchTimer(Uid.this, WAKE_TYPE_WINDOW,
+                                    mWindowTimers, mOnBatteryTimeBase);
+                            mTimerWindow = t;
+                        }
+                        return t;
+                    default:
+                        throw new IllegalArgumentException("type=" + type);
                 }
             }
         }
@@ -5925,79 +6106,29 @@ public final class BatteryStatsImpl extends BatteryStats {
             return ss;
         }
 
-        public StopwatchTimer getSyncTimerLocked(String name) {
-            StopwatchTimer t = mSyncStats.get(name);
-            if (t == null) {
-                final int N = mSyncStats.size();
-                if (N > MAX_WAKELOCKS_PER_UID) {
-                    name = BATCHED_WAKELOCK_NAME;
-                    t = mSyncStats.get(name);
-                }
-                if (t == null) {
-                    t = new StopwatchTimer(Uid.this, SYNC, null, mOnBatteryTimeBase);
-                    mSyncStats.put(name, t);
-                }
-            }
-            return t;
+        public void readSyncSummaryFromParcelLocked(String name, Parcel in) {
+            StopwatchTimer timer = mSyncStats.instantiateObject();
+            timer.readSummaryFromParcelLocked(in);
+            mSyncStats.add(name, timer);
         }
 
-        public StopwatchTimer getJobTimerLocked(String name) {
-            StopwatchTimer t = mJobStats.get(name);
-            if (t == null) {
-                final int N = mJobStats.size();
-                if (N > MAX_WAKELOCKS_PER_UID) {
-                    name = BATCHED_WAKELOCK_NAME;
-                    t = mJobStats.get(name);
-                }
-                if (t == null) {
-                    t = new StopwatchTimer(Uid.this, JOB, null, mOnBatteryTimeBase);
-                    mJobStats.put(name, t);
-                }
-            }
-            return t;
+        public void readJobSummaryFromParcelLocked(String name, Parcel in) {
+            StopwatchTimer timer = mJobStats.instantiateObject();
+            timer.readSummaryFromParcelLocked(in);
+            mJobStats.add(name, timer);
         }
 
-        public StopwatchTimer getWakeTimerLocked(String name, int type) {
-            Wakelock wl = mWakelockStats.get(name);
-            if (wl == null) {
-                final int N = mWakelockStats.size();
-                if (N > MAX_WAKELOCKS_PER_UID) {
-                    name = BATCHED_WAKELOCK_NAME;
-                    wl = mWakelockStats.get(name);
-                }
-                if (wl == null) {
-                    wl = new Wakelock();
-                    mWakelockStats.put(name, wl);
-                }
+        public void readWakeSummaryFromParcelLocked(String wlName, Parcel in) {
+            Wakelock wl = new Wakelock();
+            mWakelockStats.add(wlName, wl);
+            if (in.readInt() != 0) {
+                wl.getStopwatchTimer(WAKE_TYPE_FULL).readSummaryFromParcelLocked(in);
             }
-            StopwatchTimer t = null;
-            switch (type) {
-                case WAKE_TYPE_PARTIAL:
-                    t = wl.mTimerPartial;
-                    if (t == null) {
-                        t = new StopwatchTimer(Uid.this, WAKE_TYPE_PARTIAL,
-                                mPartialTimers, mOnBatteryScreenOffTimeBase);
-                        wl.mTimerPartial = t;
-                    }
-                    return t;
-                case WAKE_TYPE_FULL:
-                    t = wl.mTimerFull;
-                    if (t == null) {
-                        t = new StopwatchTimer(Uid.this, WAKE_TYPE_FULL,
-                                mFullTimers, mOnBatteryTimeBase);
-                        wl.mTimerFull = t;
-                    }
-                    return t;
-                case WAKE_TYPE_WINDOW:
-                    t = wl.mTimerWindow;
-                    if (t == null) {
-                        t = new StopwatchTimer(Uid.this, WAKE_TYPE_WINDOW,
-                                mWindowTimers, mOnBatteryTimeBase);
-                        wl.mTimerWindow = t;
-                    }
-                    return t;
-                default:
-                    throw new IllegalArgumentException("type=" + type);
+            if (in.readInt() != 0) {
+                wl.getStopwatchTimer(WAKE_TYPE_PARTIAL).readSummaryFromParcelLocked(in);
+            }
+            if (in.readInt() != 0) {
+                wl.getStopwatchTimer(WAKE_TYPE_WINDOW).readSummaryFromParcelLocked(in);
             }
         }
 
@@ -6025,37 +6156,37 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         public void noteStartSyncLocked(String name, long elapsedRealtimeMs) {
-            StopwatchTimer t = getSyncTimerLocked(name);
+            StopwatchTimer t = mSyncStats.startObject(name);
             if (t != null) {
                 t.startRunningLocked(elapsedRealtimeMs);
             }
         }
 
         public void noteStopSyncLocked(String name, long elapsedRealtimeMs) {
-            StopwatchTimer t = getSyncTimerLocked(name);
+            StopwatchTimer t = mSyncStats.stopObject(name);
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
             }
         }
 
         public void noteStartJobLocked(String name, long elapsedRealtimeMs) {
-            StopwatchTimer t = getJobTimerLocked(name);
+            StopwatchTimer t = mJobStats.stopObject(name);
             if (t != null) {
                 t.startRunningLocked(elapsedRealtimeMs);
             }
         }
 
         public void noteStopJobLocked(String name, long elapsedRealtimeMs) {
-            StopwatchTimer t = getJobTimerLocked(name);
+            StopwatchTimer t = mJobStats.stopObject(name);
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
             }
         }
 
         public void noteStartWakeLocked(int pid, String name, int type, long elapsedRealtimeMs) {
-            StopwatchTimer t = getWakeTimerLocked(name, type);
-            if (t != null) {
-                t.startRunningLocked(elapsedRealtimeMs);
+            Wakelock wl = mWakelockStats.startObject(name);
+            if (wl != null) {
+                wl.getStopwatchTimer(type).startRunningLocked(elapsedRealtimeMs);
             }
             if (pid >= 0 && type == WAKE_TYPE_PARTIAL) {
                 Pid p = getPidStatsLocked(pid);
@@ -6066,9 +6197,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         public void noteStopWakeLocked(int pid, String name, int type, long elapsedRealtimeMs) {
-            StopwatchTimer t = getWakeTimerLocked(name, type);
-            if (t != null) {
-                t.stopRunningLocked(elapsedRealtimeMs);
+            Wakelock wl = mWakelockStats.stopObject(name);
+            if (wl != null) {
+                wl.getStopwatchTimer(type).stopRunningLocked(elapsedRealtimeMs);
             }
             if (pid >= 0 && type == WAKE_TYPE_PARTIAL) {
                 Pid p = mPids.get(pid);
@@ -7774,15 +7905,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             for (int iw = 0; iw < NW; iw++) {
                 String wlName = in.readString();
-                if (in.readInt() != 0) {
-                    u.getWakeTimerLocked(wlName, WAKE_TYPE_FULL).readSummaryFromParcelLocked(in);
-                }
-                if (in.readInt() != 0) {
-                    u.getWakeTimerLocked(wlName, WAKE_TYPE_PARTIAL).readSummaryFromParcelLocked(in);
-                }
-                if (in.readInt() != 0) {
-                    u.getWakeTimerLocked(wlName, WAKE_TYPE_WINDOW).readSummaryFromParcelLocked(in);
-                }
+                u.readWakeSummaryFromParcelLocked(wlName, in);
             }
 
             int NS = in.readInt();
@@ -7792,7 +7915,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             for (int is = 0; is < NS; is++) {
                 String name = in.readString();
-                u.getSyncTimerLocked(name).readSummaryFromParcelLocked(in);
+                u.readSyncSummaryFromParcelLocked(name, in);
             }
 
             int NJ = in.readInt();
@@ -7802,7 +7925,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             for (int ij = 0; ij < NJ; ij++) {
                 String name = in.readString();
-                u.getJobTimerLocked(name).readSummaryFromParcelLocked(in);
+                u.readJobSummaryFromParcelLocked(name, in);
             }
 
             int NP = in.readInt();
@@ -8066,11 +8189,12 @@ public final class BatteryStatsImpl extends BatteryStats {
                 u.mMobileRadioActiveCount.writeSummaryFromParcelLocked(out);
             }
 
-            int NW = u.mWakelockStats.size();
+            final ArrayMap<String, Uid.Wakelock> wakeStats = u.mWakelockStats.getMap();
+            int NW = wakeStats.size();
             out.writeInt(NW);
             for (int iw=0; iw<NW; iw++) {
-                out.writeString(u.mWakelockStats.keyAt(iw));
-                Uid.Wakelock wl = u.mWakelockStats.valueAt(iw);
+                out.writeString(wakeStats.keyAt(iw));
+                Uid.Wakelock wl = wakeStats.valueAt(iw);
                 if (wl.mTimerFull != null) {
                     out.writeInt(1);
                     wl.mTimerFull.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
@@ -8091,18 +8215,20 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
             }
 
-            int NS = u.mSyncStats.size();
+            final ArrayMap<String, StopwatchTimer> syncStats = u.mSyncStats.getMap();
+            int NS = syncStats.size();
             out.writeInt(NS);
             for (int is=0; is<NS; is++) {
-                out.writeString(u.mSyncStats.keyAt(is));
-                u.mSyncStats.valueAt(is).writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+                out.writeString(syncStats.keyAt(is));
+                syncStats.valueAt(is).writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             }
 
-            int NJ = u.mJobStats.size();
+            final ArrayMap<String, StopwatchTimer> jobStats = u.mJobStats.getMap();
+            int NJ = jobStats.size();
             out.writeInt(NJ);
             for (int ij=0; ij<NJ; ij++) {
-                out.writeString(u.mJobStats.keyAt(ij));
-                u.mJobStats.valueAt(ij).writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+                out.writeString(jobStats.keyAt(ij));
+                jobStats.valueAt(ij).writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             }
 
             int NSE = u.mSensorStats.size();
