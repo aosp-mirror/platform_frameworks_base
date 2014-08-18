@@ -1249,13 +1249,13 @@
         android:description="@string/permdesc_use_sip"
         android:label="@string/permlab_use_sip" />
 
-    <!-- @SystemApi Allows an application to request CallHandlerService implementations.
+    <!-- @SystemApi Allows an application to bind to InCallService implementations.
          @hide -->
-    <permission android:name="android.permission.BIND_CALL_SERVICE"
+    <permission android:name="android.permission.BIND_INCALL_SERVICE"
         android:permissionGroup="android.permission-group.PHONE_CALLS"
         android:protectionLevel="system|signature"
-        android:description="@string/permdesc_bind_call_service"
-        android:label="@string/permlab_bind_call_service" />
+        android:description="@string/permdesc_bind_incall_service"
+        android:label="@string/permlab_bind_incall_service" />
 
     <!-- @SystemApi Allows an application to bind to ConnectionService implementations.
          @hide -->
@@ -1264,6 +1264,14 @@
                 android:protectionLevel="system|signature"
                 android:description="@string/permdesc_bind_connection_service"
                 android:label="@string/permlab_bind_connection_service" />
+
+    <!-- @SystemApi Allows an application to control the in-call experience.
+         @hide -->
+    <permission android:name="android.permission.CONTROL_INCALL_EXPERIENCE"
+                android:permissionGroup="android.permission-group.PHONE_CALLS"
+                android:protectionLevel="system|signature"
+                android:description="@string/permdesc_control_incall_experience"
+                android:label="@string/permlab_control_incall_experience" />
 
     <!-- ================================== -->
     <!-- Permissions for sdcard interaction -->
