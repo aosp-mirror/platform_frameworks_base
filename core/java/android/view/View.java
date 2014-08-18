@@ -89,7 +89,6 @@ import static java.lang.Math.max;
 import com.android.internal.R;
 import com.android.internal.util.Predicate;
 import com.android.internal.view.menu.MenuBuilder;
-
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -14704,8 +14703,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (layerType == LAYER_TYPE_HARDWARE && !usingRenderNodeProperties) {
                 final HardwareLayer layer = getHardwareLayer();
                 if (layer != null && layer.isValid()) {
+                    int restoreAlpha = mLayerPaint.getAlpha();
                     mLayerPaint.setAlpha((int) (alpha * 255));
                     ((HardwareCanvas) canvas).drawHardwareLayer(layer, 0, 0, mLayerPaint);
+                    mLayerPaint.setAlpha(restoreAlpha);
                     layerRendered = true;
                 } else {
                     final int scrollX = hasDisplayList ? 0 : sx;
@@ -14733,6 +14734,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else if (cache != null) {
             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
             Paint cachePaint;
+            int restoreAlpha = 0;
 
             if (layerType == LAYER_TYPE_NONE) {
                 cachePaint = parent.mCachePaint;
@@ -14741,18 +14743,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     cachePaint.setDither(false);
                     parent.mCachePaint = cachePaint;
                 }
-                if (alpha < 1) {
-                    cachePaint.setAlpha((int) (alpha * 255));
-                    parent.mGroupFlags |= ViewGroup.FLAG_ALPHA_LOWER_THAN_ONE;
-                } else if  ((flags & ViewGroup.FLAG_ALPHA_LOWER_THAN_ONE) != 0) {
-                    cachePaint.setAlpha(255);
-                    parent.mGroupFlags &= ~ViewGroup.FLAG_ALPHA_LOWER_THAN_ONE;
-                }
             } else {
                 cachePaint = mLayerPaint;
-                cachePaint.setAlpha((int) (alpha * 255));
+                restoreAlpha = mLayerPaint.getAlpha();
             }
+            cachePaint.setAlpha((int) (alpha * 255));
             canvas.drawBitmap(cache, 0.0f, 0.0f, cachePaint);
+            cachePaint.setAlpha(restoreAlpha);
         }
 
         if (restoreTo >= 0) {
