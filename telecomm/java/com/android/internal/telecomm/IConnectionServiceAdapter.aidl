@@ -20,6 +20,7 @@ import android.app.PendingIntent;
 import android.net.Uri;
 import android.telecomm.ConnectionRequest;
 import android.telecomm.ParcelableConnection;
+import android.telecomm.ParcelableConference;
 import android.telecomm.StatusHints;
 
 import com.android.internal.telecomm.IVideoProvider;
@@ -63,7 +64,7 @@ oneway interface IConnectionServiceAdapter {
 
     void setIsConferenced(String callId, String conferenceCallId);
 
-    void addConferenceCall(String callId);
+    void addConferenceCall(String callId, in ParcelableConference conference);
 
     void removeCall(String callId);
 
