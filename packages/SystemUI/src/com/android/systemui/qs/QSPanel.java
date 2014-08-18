@@ -234,8 +234,9 @@ public class QSPanel extends ViewGroup {
             }
             @Override
             public void onScanStateChanged(boolean state) {
+                r.scanState = state;
                 if (mDetailRecord == r) {
-                    fireScanStateChanged(state);
+                    fireScanStateChanged(r.scanState);
                 }
             }
         };
@@ -310,9 +311,10 @@ public class QSPanel extends ViewGroup {
             mDetailContent.removeAllViews();
             mDetail.bringToFront();
             mDetailContent.addView(r.detailView);
-            mDetailRecord = r;
+            setDetailRecord(r);
         } else {
             listener = mTeardownDetailWhenDone;
+            fireScanStateChanged(false);
         }
         fireShowingDetail(show ? detailAdapter : null);
         mClipper.animateCircularClip(x, y, show, listener);
@@ -425,6 +427,14 @@ public class QSPanel extends ViewGroup {
         }
     }
 
+    private void setDetailRecord(Record r) {
+        if (r == mDetailRecord) return;
+        mDetailRecord = r;
+        final boolean scanState = mDetailRecord instanceof TileRecord
+                && ((TileRecord) mDetailRecord).scanState;
+        fireScanStateChanged(scanState);
+    }
+
     private class H extends Handler {
         private static final int SHOW_DETAIL = 1;
         private static final int SET_TILE_VISIBILITY = 2;
@@ -448,12 +458,13 @@ public class QSPanel extends ViewGroup {
         QSTileView tileView;
         int row;
         int col;
+        boolean scanState;
     }
 
     private final AnimatorListenerAdapter mTeardownDetailWhenDone = new AnimatorListenerAdapter() {
         public void onAnimationEnd(Animator animation) {
             mDetailContent.removeAllViews();
-            mDetailRecord = null;
+            setDetailRecord(null);
         };
     };
 
