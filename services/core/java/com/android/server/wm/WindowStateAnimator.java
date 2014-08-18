@@ -1211,6 +1211,12 @@ class WindowStateAnimator {
                 || w.mDecorFrame.isEmpty()) {
             // The universe background isn't cropped, nor windows without policy decor.
             w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
+        } else if (w.mAttrs.type == LayoutParams.TYPE_WALLPAPER && mAnimator.mAnimating) {
+            // If we're animating, the wallpaper crop should only be updated at the end of the
+            // animation.
+            mTmpClipRect.set(w.mSystemDecorRect);
+            applyDecorRect(w.mDecorFrame);
+            w.mSystemDecorRect.union(mTmpClipRect);
         } else {
             // Crop to the system decor specified by policy.
             applyDecorRect(w.mDecorFrame);
