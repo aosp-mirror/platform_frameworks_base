@@ -51,7 +51,6 @@ interface IStatusBarService
             in String[] newlyVisibleKeys, in String[] noLongerVisibleKeys);
     void onNotificationExpansionChanged(in String key, in boolean userAction, in boolean expanded);
     void setSystemUiVisibility(int vis, int mask);
-    void setHardKeyboardEnabled(boolean enabled);
     void setWindowState(int window, int state);
 
     void showRecentApps(boolean triggeredFromAltTab);
