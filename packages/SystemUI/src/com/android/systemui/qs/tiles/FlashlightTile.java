@@ -94,6 +94,19 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
         state.iconId = state.value
                 ? R.drawable.ic_qs_flashlight_on : R.drawable.ic_qs_flashlight_off;
+        int onOrOffId = state.value
+                ? R.string.accessibility_quick_settings_flashlight_on
+                : R.string.accessibility_quick_settings_flashlight_off;
+        state.contentDescription = mContext.getString(onOrOffId);
+    }
+
+    @Override
+    protected String composeChangeAnnouncement() {
+        if (mState.value) {
+            return mContext.getString(R.string.accessibility_quick_settings_flashlight_changed_on);
+        } else {
+            return mContext.getString(R.string.accessibility_quick_settings_flashlight_changed_off);
+        }
     }
 
     @Override

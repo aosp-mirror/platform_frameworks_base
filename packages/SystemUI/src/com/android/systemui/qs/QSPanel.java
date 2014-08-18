@@ -239,6 +239,11 @@ public class QSPanel extends ViewGroup {
                     fireScanStateChanged(r.scanState);
                 }
             }
+
+            @Override
+            public void onAnnouncementRequested(CharSequence announcement) {
+                announceForAccessibility(announcement);
+            }
         };
         r.tile.setCallback(callback);
         final View.OnClickListener click = new View.OnClickListener() {

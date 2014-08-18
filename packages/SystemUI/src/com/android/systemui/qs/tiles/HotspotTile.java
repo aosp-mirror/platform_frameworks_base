@@ -74,6 +74,15 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
                 : R.drawable.ic_qs_hotspot_off;
     }
 
+    @Override
+    protected String composeChangeAnnouncement() {
+        if (mState.value) {
+            return mContext.getString(R.string.accessibility_quick_settings_hotspot_changed_on);
+        } else {
+            return mContext.getString(R.string.accessibility_quick_settings_hotspot_changed_off);
+        }
+    }
+
     private final class Callback implements HotspotController.Callback {
         @Override
         public void onHotspotChanged(boolean enabled) {
