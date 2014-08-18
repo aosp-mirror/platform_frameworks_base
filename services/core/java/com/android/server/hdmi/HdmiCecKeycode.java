@@ -21,7 +21,7 @@ import android.view.KeyEvent;
 /**
  * Helper class to translate android keycode to hdmi cec keycode and vice versa.
  */
-public class HdmiCecKeycode {
+final class HdmiCecKeycode {
     public static final int UNSUPPORTED_KEYCODE = -1;
     public static final int NO_PARAM = -1;
 
