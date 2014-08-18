@@ -69,6 +69,124 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         }
     }
 
+    private boolean filterEquals(IntentFilter f1, IntentFilter f2) {
+        int s1 = f1.countActions();
+        int s2 = f2.countActions();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasAction(f1.getAction(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countCategories();
+        s2 = f2.countCategories();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasCategory(f1.getCategory(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countDataTypes();
+        s2 = f2.countDataTypes();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasExactDataType(f1.getDataType(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countDataSchemes();
+        s2 = f2.countDataSchemes();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasDataScheme(f1.getDataScheme(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countDataAuthorities();
+        s2 = f2.countDataAuthorities();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasDataAuthority(f1.getDataAuthority(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countDataPaths();
+        s2 = f2.countDataPaths();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasDataPath(f1.getDataPath(i))) {
+                return false;
+            }
+        }
+        s1 = f1.countDataSchemeSpecificParts();
+        s2 = f2.countDataSchemeSpecificParts();
+        if (s1 != s2) {
+            return false;
+        }
+        for (int i=0; i<s1; i++) {
+            if (!f2.hasDataSchemeSpecificPart(f1.getDataSchemeSpecificPart(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private ArrayList<F> collectFilters(F[] array, IntentFilter matching) {
+        ArrayList<F> res = null;
+        if (array != null) {
+            for (int i=0; i<array.length; i++) {
+                F cur = array[i];
+                if (cur == null) {
+                    break;
+                }
+                if (filterEquals(cur, matching)) {
+                    if (res == null) {
+                        res = new ArrayList<>();
+                    }
+                    res.add(cur);
+                }
+            }
+        }
+        return res;
+    }
+
+    public ArrayList<F> findFilters(IntentFilter matching) {
+        if (matching.countDataSchemes() == 1) {
+            // Fast case.
+            return collectFilters(mSchemeToFilter.get(matching.getDataScheme(0)), matching);
+        } else if (matching.countDataTypes() != 0 && matching.countActions() == 1) {
+            // Another fast case.
+            return collectFilters(mTypedActionToFilter.get(matching.getAction(0)), matching);
+        } else if (matching.countDataTypes() == 0 && matching.countDataSchemes() == 0
+                && matching.countActions() == 1) {
+            // Last fast case.
+            return collectFilters(mActionToFilter.get(matching.getAction(0)), matching);
+        } else {
+            ArrayList<F> res = null;
+            for (F cur : mFilters) {
+                if (filterEquals(cur, matching)) {
+                    if (res == null) {
+                        res = new ArrayList<>();
+                    }
+                    res.add(cur);
+                }
+            }
+            return res;
+        }
+    }
+
     public void removeFilter(F f) {
         removeFilterInternal(f);
         mFilters.remove(f);
