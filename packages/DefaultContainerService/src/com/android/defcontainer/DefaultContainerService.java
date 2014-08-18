@@ -16,11 +16,13 @@
 
 package com.android.defcontainer;
 
+import static android.net.TrafficStats.MB_IN_BYTES;
+
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageCleanItem;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
@@ -37,8 +39,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.StatFs;
-import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStatVfs;
@@ -50,13 +50,11 @@ import com.android.internal.content.PackageHelper;
 import com.android.internal.os.IParcelFileDescriptorFactory;
 import com.android.internal.util.ArrayUtils;
 
-import dalvik.system.VMRuntime;
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -155,10 +153,12 @@ public class DefaultContainerService extends IntentService {
          *            containing one or more APKs.
          */
         @Override
-        public PackageInfoLite getMinimalPackageInfo(final String packagePath, int flags,
-                long threshold, String abiOverride) {
-            PackageInfoLite ret = new PackageInfoLite();
+        public PackageInfoLite getMinimalPackageInfo(String packagePath, int flags,
+                String abiOverride) {
+            final Context context = DefaultContainerService.this;
+            final boolean isForwardLocked = (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
 
+            PackageInfoLite ret = new PackageInfoLite();
             if (packagePath == null) {
                 Slog.i(TAG, "Invalid package file " + packagePath);
                 ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
@@ -167,10 +167,12 @@ public class DefaultContainerService extends IntentService {
 
             final File packageFile = new File(packagePath);
             final PackageParser.PackageLite pkg;
+            final long sizeBytes;
             try {
                 pkg = PackageParser.parsePackageLite(packageFile, 0);
-            } catch (PackageParserException e) {
-                Slog.w(TAG, "Failed to parse package at " + packagePath);
+                sizeBytes = calculateInstalledSizeInner(pkg, isForwardLocked, abiOverride);
+            } catch (PackageParserException | IOException e) {
+                Slog.w(TAG, "Failed to parse package at " + packagePath + ": " + e);
 
                 if (!packageFile.exists()) {
                     ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_URI;
@@ -185,53 +187,11 @@ public class DefaultContainerService extends IntentService {
             ret.versionCode = pkg.versionCode;
             ret.installLocation = pkg.installLocation;
             ret.verifiers = pkg.verifiers;
-            ret.recommendedInstallLocation = recommendAppInstallLocation(pkg, flags, threshold,
-                    abiOverride);
+            ret.recommendedInstallLocation = PackageHelper.resolveInstallLocation(context,
+                    pkg.installLocation, sizeBytes, flags);
             ret.multiArch = pkg.multiArch;
 
             return ret;
-        }
-
-        /**
-         * Determine if package will fit on internal storage.
-         *
-         * @param packagePath absolute path to the package to be copied. Can be
-         *            a single monolithic APK file or a cluster directory
-         *            containing one or more APKs.
-         */
-        @Override
-        public boolean checkInternalFreeStorage(String packagePath, boolean isForwardLocked,
-                long threshold) throws RemoteException {
-            final File packageFile = new File(packagePath);
-            final PackageParser.PackageLite pkg;
-            try {
-                pkg = PackageParser.parsePackageLite(packageFile, 0);
-                return isUnderInternalThreshold(pkg, isForwardLocked, threshold);
-            } catch (PackageParserException | IOException e) {
-                Slog.w(TAG, "Failed to parse package at " + packagePath);
-                return false;
-            }
-        }
-
-        /**
-         * Determine if package will fit on external storage.
-         *
-         * @param packagePath absolute path to the package to be copied. Can be
-         *            a single monolithic APK file or a cluster directory
-         *            containing one or more APKs.
-         */
-        @Override
-        public boolean checkExternalFreeStorage(String packagePath, boolean isForwardLocked,
-                String abiOverride) throws RemoteException {
-            final File packageFile = new File(packagePath);
-            final PackageParser.PackageLite pkg;
-            try {
-                pkg = PackageParser.parsePackageLite(packageFile, 0);
-                return isUnderExternalThreshold(pkg, isForwardLocked, abiOverride);
-            } catch (PackageParserException | IOException e) {
-                Slog.w(TAG, "Failed to parse package at " + packagePath);
-                return false;
-            }
         }
 
         @Override
@@ -295,13 +255,10 @@ public class DefaultContainerService extends IntentService {
             final PackageParser.PackageLite pkg;
             try {
                 pkg = PackageParser.parsePackageLite(packageFile, 0);
-                return calculateContainerSize(pkg, isForwardLocked, abiOverride) * 1024 * 1024;
+                return calculateInstalledSizeInner(pkg, isForwardLocked, abiOverride);
             } catch (PackageParserException | IOException e) {
-                /*
-                 * Okay, something failed, so let's just estimate it to be 2x
-                 * the file size. Note this will be 0 if the file doesn't exist.
-                 */
-                return packageFile.length() * 2;
+                Slog.w(TAG, "Failed to calculate installed size: " + e);
+                return Long.MAX_VALUE;
             }
         }
     };
@@ -381,10 +338,12 @@ public class DefaultContainerService extends IntentService {
             return null;
         }
 
-        // Calculate size of container needed to hold base APK.
+        // Calculate size of container needed to hold base APK. Round up to
+        // nearest MB, and tack on an extra MB for filesystem overhead.
         final int sizeMb;
         try {
-            sizeMb = calculateContainerSize(pkg, handle, isForwardLocked, abis);
+            final long sizeBytes = calculateInstalledSizeInner(pkg, handle, isForwardLocked, abis);
+            sizeMb = ((int) ((sizeBytes + MB_IN_BYTES) / MB_IN_BYTES)) + 1;
         } catch (IOException e) {
             Slog.w(TAG, "Problem when trying to copy " + codeFile.getPath());
             return null;
@@ -523,124 +482,23 @@ public class DefaultContainerService extends IntentService {
         }
     }
 
-    private static final int PREFER_INTERNAL = 1;
-    private static final int PREFER_EXTERNAL = 2;
-
-    private int recommendAppInstallLocation(PackageLite pkg, int flags, long threshold,
-            String abiOverride) {
-        int prefer;
-        boolean checkBoth = false;
-
-        final boolean isForwardLocked = (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
-
-        check_inner : {
-            /*
-             * Explicit install flags should override the manifest settings.
-             */
-            if ((flags & PackageManager.INSTALL_INTERNAL) != 0) {
-                prefer = PREFER_INTERNAL;
-                break check_inner;
-            } else if ((flags & PackageManager.INSTALL_EXTERNAL) != 0) {
-                prefer = PREFER_EXTERNAL;
-                break check_inner;
-            }
-
-            /* No install flags. Check for manifest option. */
-            if (pkg.installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
-                prefer = PREFER_INTERNAL;
-                break check_inner;
-            } else if (pkg.installLocation == PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL) {
-                prefer = PREFER_EXTERNAL;
-                checkBoth = true;
-                break check_inner;
-            } else if (pkg.installLocation == PackageInfo.INSTALL_LOCATION_AUTO) {
-                // We default to preferring internal storage.
-                prefer = PREFER_INTERNAL;
-                checkBoth = true;
-                break check_inner;
-            }
-
-            // Pick user preference
-            int installPreference = Settings.Global.getInt(getApplicationContext()
-                    .getContentResolver(),
-                    Settings.Global.DEFAULT_INSTALL_LOCATION,
-                    PackageHelper.APP_INSTALL_AUTO);
-            if (installPreference == PackageHelper.APP_INSTALL_INTERNAL) {
-                prefer = PREFER_INTERNAL;
-                break check_inner;
-            } else if (installPreference == PackageHelper.APP_INSTALL_EXTERNAL) {
-                prefer = PREFER_EXTERNAL;
-                break check_inner;
-            }
-
-            /*
-             * Fall back to default policy of internal-only if nothing else is
-             * specified.
-             */
-            prefer = PREFER_INTERNAL;
-        }
-
-        final boolean emulated = Environment.isExternalStorageEmulated();
-
-        boolean fitsOnInternal = false;
-        if (checkBoth || prefer == PREFER_INTERNAL) {
-            try {
-                fitsOnInternal = isUnderInternalThreshold(pkg, isForwardLocked, threshold);
-            } catch (IOException e) {
-                return PackageHelper.RECOMMEND_FAILED_INVALID_URI;
-            }
-        }
-
-        boolean fitsOnSd = false;
-        if (!emulated && (checkBoth || prefer == PREFER_EXTERNAL)) {
-            try {
-                fitsOnSd = isUnderExternalThreshold(pkg, isForwardLocked, abiOverride);
-            } catch (IOException e) {
-                return PackageHelper.RECOMMEND_FAILED_INVALID_URI;
-            }
-        }
-
-        if (prefer == PREFER_INTERNAL) {
-            if (fitsOnInternal) {
-                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
-            }
-        } else if (!emulated && prefer == PREFER_EXTERNAL) {
-            if (fitsOnSd) {
-                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
-            }
-        }
-
-        if (checkBoth) {
-            if (fitsOnInternal) {
-                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
-            } else if (!emulated && fitsOnSd) {
-                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
-            }
-        }
-
-        /*
-         * If they requested to be on the external media by default, return that
-         * the media was unavailable. Otherwise, indicate there was insufficient
-         * storage space available.
-         */
-        if (!emulated && (checkBoth || prefer == PREFER_EXTERNAL)
-                && !Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            return PackageHelper.RECOMMEND_MEDIA_UNAVAILABLE;
-        } else {
-            return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
+    private long calculateInstalledSizeInner(PackageLite pkg, boolean isForwardLocked,
+            String abiOverride) throws IOException {
+        NativeLibraryHelper.Handle handle = null;
+        try {
+            handle = NativeLibraryHelper.Handle.create(pkg);
+            return calculateInstalledSizeInner(pkg, handle, isForwardLocked,
+                    calculateAbiList(handle, abiOverride, pkg.multiArch));
+        } finally {
+            IoUtils.closeQuietly(handle);
         }
     }
 
-    /**
-     * Measure a file to see if it fits within the free space threshold.
-     *
-     * @param threshold byte threshold to compare against
-     * @return true if file fits under threshold
-     * @throws FileNotFoundException when APK does not exist
-     */
-    private boolean isUnderInternalThreshold(PackageLite pkg, boolean isForwardLocked,
-            long threshold) throws IOException {
+    private long calculateInstalledSizeInner(PackageLite pkg, NativeLibraryHelper.Handle handle,
+            boolean isForwardLocked, String[] abis) throws IOException {
         long sizeBytes = 0;
+
+        // Include raw APKs, and possibly unpacked resources
         for (String codePath : pkg.getAllCodePaths()) {
             sizeBytes += new File(codePath).length();
 
@@ -649,47 +507,12 @@ public class DefaultContainerService extends IntentService {
             }
         }
 
-        final StatFs stat = new StatFs(Environment.getDataDirectory().getPath());
-        final long availBytes = stat.getAvailableBytes();
-        return (availBytes - sizeBytes) > threshold;
-    }
-
-    /**
-     * Measure a file to see if it fits in the external free space.
-     *
-     * @return true if file fits
-     * @throws IOException when file does not exist
-     */
-    private boolean isUnderExternalThreshold(PackageLite pkg, boolean isForwardLocked,
-            String abiOverride) throws IOException {
-        if (Environment.isExternalStorageEmulated()) {
-            return false;
+        // Include all relevant native code
+        if (!ArrayUtils.isEmpty(abis)) {
+            sizeBytes += NativeLibraryHelper.sumNativeBinariesLI(handle, abis);
         }
 
-        final int sizeMb = calculateContainerSize(pkg, isForwardLocked, abiOverride);
-
-        final int availSdMb;
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            final StatFs sdStats = new StatFs(Environment.getExternalStorageDirectory().getPath());
-            final int blocksToMb = (1 << 20) / sdStats.getBlockSize();
-            availSdMb = sdStats.getAvailableBlocks() * blocksToMb;
-        } else {
-            availSdMb = -1;
-        }
-
-        return availSdMb > sizeMb;
-    }
-
-    private int calculateContainerSize(PackageLite pkg, boolean isForwardLocked, String abiOverride)
-            throws IOException {
-        NativeLibraryHelper.Handle handle = null;
-        try {
-            handle = NativeLibraryHelper.Handle.create(pkg);
-            return calculateContainerSize(pkg, handle, isForwardLocked,
-                    calculateAbiList(handle, abiOverride, pkg.multiArch));
-        } finally {
-            IoUtils.closeQuietly(handle);
-        }
+        return sizeBytes;
     }
 
     private String[] calculateAbiList(NativeLibraryHelper.Handle handle, String abiOverride,
@@ -730,44 +553,5 @@ public class DefaultContainerService extends IntentService {
         }
 
         return null;
-    }
-
-    /**
-     * Calculate the container size for a package.
-     * 
-     * @return size in megabytes (2^20 bytes)
-     * @throws IOException when there is a problem reading the file
-     */
-    private int calculateContainerSize(PackageLite pkg, NativeLibraryHelper.Handle handle,
-            boolean isForwardLocked, String[] abis) throws IOException {
-        // Calculate size of container needed to hold APKs.
-        long sizeBytes = 0;
-        for (String codePath : pkg.getAllCodePaths()) {
-            sizeBytes += new File(codePath).length();
-
-            if (isForwardLocked) {
-                sizeBytes += PackageHelper.extractPublicFiles(codePath, null);
-            }
-        }
-
-        // Check all the native files that need to be copied and add that to the
-        // container size.
-        if (abis != null) {
-            sizeBytes += NativeLibraryHelper.sumNativeBinariesLI(handle, abis);
-        }
-
-        int sizeMb = (int) (sizeBytes >> 20);
-        if ((sizeBytes - (sizeMb * 1024 * 1024)) > 0) {
-            sizeMb++;
-        }
-
-        /*
-         * Add buffer size because we don't have a good way to determine the
-         * real FAT size. Your FAT size varies with how many directory entries
-         * you need, how big the whole filesystem is, and other such headaches.
-         */
-        sizeMb++;
-
-        return sizeMb;
     }
 }

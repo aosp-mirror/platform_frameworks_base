@@ -16,13 +16,20 @@
 
 package com.android.internal.content;
 
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.storage.IMountService;
+import android.os.storage.StorageManager;
 import android.os.storage.StorageResultCode;
 import android.util.Log;
+
+import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,8 +39,6 @@ import java.util.Collections;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-
-import libcore.io.IoUtils;
 
 /**
  * Constants used internally between the PackageManager
@@ -297,5 +302,79 @@ public class PackageHelper {
             Log.e(TAG, "Failed to fixperms container " + cid + " with exception " + e);
         }
         return false;
+    }
+
+    /**
+     * Given a requested {@link PackageInfo#installLocation} and calculated
+     * install size, pick the actual location to install the app.
+     */
+    public static int resolveInstallLocation(Context context, int installLocation, long sizeBytes,
+            int installFlags) {
+        final int prefer;
+        final boolean checkBoth;
+        if ((installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
+            prefer = RECOMMEND_INSTALL_INTERNAL;
+            checkBoth = false;
+        } else if ((installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
+            prefer = RECOMMEND_INSTALL_EXTERNAL;
+            checkBoth = false;
+        } else if (installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+            prefer = RECOMMEND_INSTALL_INTERNAL;
+            checkBoth = false;
+        } else if (installLocation == PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL) {
+            prefer = RECOMMEND_INSTALL_EXTERNAL;
+            checkBoth = true;
+        } else if (installLocation == PackageInfo.INSTALL_LOCATION_AUTO) {
+            prefer = RECOMMEND_INSTALL_INTERNAL;
+            checkBoth = true;
+        } else {
+            prefer = RECOMMEND_INSTALL_INTERNAL;
+            checkBoth = false;
+        }
+
+        final boolean emulated = Environment.isExternalStorageEmulated();
+        final StorageManager storage = StorageManager.from(context);
+
+        boolean fitsOnInternal = false;
+        if (checkBoth || prefer == RECOMMEND_INSTALL_INTERNAL) {
+            fitsOnInternal = (sizeBytes
+                    <= storage.getStorageBytesUntilLow(Environment.getDataDirectory()));
+        }
+
+        boolean fitsOnExternal = false;
+        if (!emulated && (checkBoth || prefer == RECOMMEND_INSTALL_EXTERNAL)) {
+            fitsOnExternal = (sizeBytes
+                    <= storage.getStorageBytesUntilLow(Environment.getExternalStorageDirectory()));
+        }
+
+        if (prefer == RECOMMEND_INSTALL_INTERNAL) {
+            if (fitsOnInternal) {
+                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+            }
+        } else if (!emulated && prefer == RECOMMEND_INSTALL_EXTERNAL) {
+            if (fitsOnExternal) {
+                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+            }
+        }
+
+        if (checkBoth) {
+            if (fitsOnInternal) {
+                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+            } else if (!emulated && fitsOnExternal) {
+                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+            }
+        }
+
+        /*
+         * If they requested to be on the external media by default, return that
+         * the media was unavailable. Otherwise, indicate there was insufficient
+         * storage space available.
+         */
+        if (!emulated && (checkBoth || prefer == RECOMMEND_INSTALL_EXTERNAL)
+                && !Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            return PackageHelper.RECOMMEND_MEDIA_UNAVAILABLE;
+        } else {
+            return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
+        }
     }
 }
