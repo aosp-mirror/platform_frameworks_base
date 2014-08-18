@@ -256,10 +256,10 @@ final class ConnectionServiceAdapter implements DeathRecipient {
      *
      * @param callId The unique ID of the conference call.
      */
-    void addConferenceCall(String callId) {
+    void addConferenceCall(String callId, ParcelableConference parcelableConference) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.addConferenceCall(callId);
+                adapter.addConferenceCall(callId, parcelableConference);
             } catch (RemoteException ignored) {
             }
         }
