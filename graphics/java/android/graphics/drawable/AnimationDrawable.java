@@ -114,7 +114,9 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
         final boolean changed = super.setVisible(visible, restart);
         if (visible) {
             if (restart || changed) {
-                setFrame(restart ? 0 : mCurFrame, true, mAnimating);
+                boolean startFromZero = restart || mCurFrame < 0 ||
+                        mCurFrame >= mAnimationState.getChildCount();
+                setFrame(startFromZero ? 0 : mCurFrame, true, mAnimating);
             }
         } else {
             unscheduleSelf(this);
