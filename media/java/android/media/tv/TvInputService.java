@@ -504,12 +504,13 @@ public abstract class TvInputService extends Service {
 
         /**
          * Assigns a position of the {@link Surface} passed by {@link #onSetSurface}. The position
-         * is relative to an overlay view. {@see #onOverlayViewSizeChanged}.
+         * is relative to an overlay view.
          *
          * @param left Left position in pixels, relative to the overlay view.
          * @param top Top position in pixels, relative to the overlay view.
          * @param right Right position in pixels, relative to the overlay view.
          * @param bottm Bottom position in pixels, relative to the overlay view.
+         * @see #onOverlayViewSizeChanged
          * @hide
          */
         @SystemApi

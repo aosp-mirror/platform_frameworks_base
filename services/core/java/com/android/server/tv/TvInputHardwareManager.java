@@ -20,14 +20,12 @@ import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
 import static android.media.tv.TvInputManager.INPUT_STATE_DISCONNECTED;
 
 import android.content.Context;
-import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiHotplugEvent;
 import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
-import android.hardware.hdmi.IHdmiInputChangeListener;
 import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
 import android.media.AudioDevicePort;
 import android.media.AudioFormat;
@@ -39,7 +37,6 @@ import android.media.AudioPort;
 import android.media.AudioPortConfig;
 import android.media.tv.ITvInputHardware;
 import android.media.tv.ITvInputHardwareCallback;
-import android.media.tv.TvContract;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvStreamConfig;
@@ -77,7 +74,6 @@ import java.util.Map;
 class TvInputHardwareManager implements TvInputHal.Callback {
     private static final String TAG = TvInputHardwareManager.class.getSimpleName();
 
-    private final Context mContext;
     private final Listener mListener;
     private final TvInputHal mHal = new TvInputHal(this);
     private final SparseArray<Connection> mConnections = new SparseArray<>();
@@ -107,7 +103,6 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final Object mLock = new Object();
 
     public TvInputHardwareManager(Context context, Listener listener) {
-        mContext = context;
         mListener = listener;
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mHal.init();

@@ -158,17 +158,17 @@ public final class TvInputInfo implements Parcelable {
     }
 
     /**
-     * Create a new instance of the TvInputInfo class,
-     * instantiating it from the given Context, ResolveInfo, and HdmiDeviceInfo.
+     * Create a new instance of the TvInputInfo class, instantiating it from the given Context,
+     * ResolveInfo, and HdmiDeviceInfo.
      *
      * @param service The ResolveInfo returned from the package manager about this TV input service.
      * @param deviceInfo The HdmiDeviceInfo for a HDMI CEC logical device.
      * @param parentId The ID of this TV input's parent input. {@code null} if none exists.
-     * @param iconUri The {@link android.net.Uri} to load the icon image.
-     *        {@see android.content.ContentResolver#openInputStream}. If it is null, the application
-     *        icon of {@code service} will be loaded.
-     * @param label The label of this TvInputInfo. If it is null or empty, {@code service} label
-     *        will be loaded.
+     * @param iconUri The {@link android.net.Uri} to load the icon image. See
+     *            {@link android.content.ContentResolver#openInputStream}. If it is {@code null},
+     *            the application icon of {@code service} will be loaded.
+     * @param label The label of this TvInputInfo. If it is {@code null} or empty, {@code service}
+     *            label will be loaded.
      * @hide
      */
     @SystemApi
@@ -182,16 +182,16 @@ public final class TvInputInfo implements Parcelable {
     }
 
     /**
-     * Create a new instance of the TvInputInfo class,
-     * instantiating it from the given Context, ResolveInfo, and TvInputHardwareInfo.
+     * Create a new instance of the TvInputInfo class, instantiating it from the given Context,
+     * ResolveInfo, and TvInputHardwareInfo.
      *
      * @param service The ResolveInfo returned from the package manager about this TV input service.
      * @param hardwareInfo The TvInputHardwareInfo for a TV input hardware device.
-     * @param iconUri The {@link android.net.Uri} to load the icon image.
-     *        {@see android.content.ContentResolver#openInputStream}. If it is null, the application
-     *        icon of {@code service} will be loaded.
-     * @param label The label of this TvInputInfo. If it is null or empty, {@code service} label
-     *        will be loaded.
+     * @param iconUri The {@link android.net.Uri} to load the icon image. See
+     *            {@link android.content.ContentResolver#openInputStream}. If it is {@code null},
+     *            the application icon of {@code service} will be loaded.
+     * @param label The label of this TvInputInfo. If it is {@code null} or empty, {@code service}
+     *            label will be loaded.
      * @hide
      */
     @SystemApi
@@ -620,7 +620,7 @@ public final class TvInputInfo implements Parcelable {
                 return new HashSet<String>();
             }
             String[] ids = hiddenIdsString.split(TV_INPUT_SEPARATOR);
-            return new HashSet(Arrays.asList(ids));
+            return new HashSet<>(Arrays.asList(ids));
         }
 
         /**
