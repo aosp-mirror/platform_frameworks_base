@@ -29,6 +29,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowCallbackWrapper;
 import android.widget.SpinnerAdapter;
 import android.widget.Toolbar;
 import com.android.internal.view.menu.MenuBuilder;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 public class ToolbarActionBar extends ActionBar {
     private Toolbar mToolbar;
     private DecorToolbar mDecorToolbar;
+    private boolean mToolbarMenuPrepared;
     private Window.Callback mWindowCallback;
 
     private boolean mLastMenuVisibility;
@@ -64,10 +66,14 @@ public class ToolbarActionBar extends ActionBar {
     public ToolbarActionBar(Toolbar toolbar, CharSequence title, Window.Callback windowCallback) {
         mToolbar = toolbar;
         mDecorToolbar = new ToolbarWidgetWrapper(toolbar, false);
-        mWindowCallback = windowCallback;
+        mWindowCallback = new ToolbarCallbackWrapper(windowCallback);
         mDecorToolbar.setWindowCallback(mWindowCallback);
         toolbar.setOnMenuItemClickListener(mMenuClicker);
         mDecorToolbar.setWindowTitle(title);
+    }
+
+    public Window.Callback getWrappedWindowCallback() {
+        return mWindowCallback;
     }
 
     @Override
@@ -463,6 +469,22 @@ public class ToolbarActionBar extends ActionBar {
         final int count = mMenuVisibilityListeners.size();
         for (int i = 0; i < count; i++) {
             mMenuVisibilityListeners.get(i).onMenuVisibilityChanged(isVisible);
+        }
+    }
+
+    private class ToolbarCallbackWrapper extends WindowCallbackWrapper {
+        public ToolbarCallbackWrapper(Window.Callback wrapped) {
+            super(wrapped);
+        }
+
+        @Override
+        public boolean onPreparePanel(int featureId, View view, Menu menu) {
+            final boolean result = super.onPreparePanel(featureId, view, menu);
+            if (result && !mToolbarMenuPrepared) {
+                mDecorToolbar.setMenuPrepared();
+                mToolbarMenuPrepared = true;
+            }
+            return result;
         }
     }
 }
