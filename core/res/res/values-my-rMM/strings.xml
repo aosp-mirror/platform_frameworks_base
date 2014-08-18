@@ -716,10 +716,8 @@
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်နှင့် လက်ခံနိုင်ရန် app ကို ခွင့်ပြုပါ။"</string>
     <string name="permlab_bind_call_service" msgid="6724009726671246551">"တခါတည်း ခေါ်ဆိုနိုင်သော ဖန်သားပြင်နဲ့ ဆက်ဆံရန်"</string>
     <string name="permdesc_bind_call_service" msgid="8732547662442572435">"ဖုန်းကိုင်သူ ဘယ်အချိန် ဘယ်လိုမှာ အပလီကေးရှင်းအတွင်း ဖုန်းခေါ်မှုကို မြင်ရခြင်းအား ထိန်းချုပ်ခွင့်ပေးခြင်း"</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"တယ်လီဖုန်း ဝန်ဆောင်မှုများနှင့် အပြန်အလှန် တုံ့ပြန်မှု"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"appအား ခေါ်ဆိုမှုများ လုပ်ခြင်း/လက်ခံခြင်း ပြုလုပ်နိုင်ရန် တယ်လီဖုန်း ဝန်ဆောင်မှုများနှင့် အပြန်အလှန် တုံ့ပြန်မှုကို ခွင့်ပြုသည်။"</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ရာဇဝင်အလိုက် ကွန်ယက်သုံစွဲမှုအား ဖတ်ခြင်း"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"appအား အထူး ကွန်ရက်များ နှင့် appများ အတွက် ကွန်ရက် အသုံးပြုမှု မှတ်တမ်းကို ဖတ်ကြားခွင့် ပြုသည်။"</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"ကွန်ယက်မူဝါဒအား စီမံခြင်း"</string>
@@ -1352,7 +1350,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ဒီဘာဂင် ပိတ်ရန် ထိပါ။"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ကီးဘုတ် ပြောင်းလဲရန်"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"ကီးဘုတ်များကို ရွေးရန်"</string>
-    <string name="use_physical_keyboard" msgid="6203112478095117625">"ခလုတ်ပါဝင်သော ကီးဘုတ်"</string>
+    <!-- no translation found for show_ime (9157568568695230830) -->
+    <skip />
     <string name="hardware" msgid="7517821086888990278">"ဟာ့ဒ်ဝဲ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"လက်ကွက် အပြင်အဆင်ရွေးရန်"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"လက်ကွက် အပြင်အဆင်ရွေးရန် တို့ထိပါ"</string>
@@ -1481,7 +1480,7 @@
     <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g>မှ တည်နေရာအား တောင်းခံသည်"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"တည်နေရာအား တောင်းခံသည်"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)မှတောင်းခံသည်"</string>
-    <string name="gpsVerifYes" msgid="2346566072867213563">"ဟုတ်သည်"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"ဟုတ်ကဲ့"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"မဟုတ်ပါ"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"ပယ်ဖျက်မည့်ကန့်သတ်နှုန်းကျော်လွန်သည်"</string>
     <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>၊  account <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> အတွက် စုစုပေါင်း <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> အရာဖျက်ထားပါသည်။ သင်ဘာလုပ်ချင်ပါလဲ?"</string>
@@ -1764,31 +1763,20 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ခုရွေးချယ်ထားပြီး"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ကို ဖျက်ပြီးပါပြီ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"အလုပ် <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"ဒီမျက်နှာပြင် ပင်ထိုးထားမှုကို ဖြုတ်ရန် နောက် နှင့် မကြာမီတုန်းက ခလုတ်များကို တစ်ချိန်တည်း ထိလျက် ကိုင်ထားပါ။"</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"ဒီမျက်နှာပြင် ပင်ထိုးထားမှုကို ဖြုတ်ရန် နောက် နှင့် မကြာမီတုန်းက ခလုတ်များကို ထိလျက် ကိုင်ထားပါ။."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"မျက်နှာပြင်ကို ပင်ထိုးထားသည်။ ပင်ထိုးထားမှု ဖြုတ်ခြင်းကို သင့် အဖွဲ့အစည်းက ခွင့် မပြုပါ။"</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"မျက်နှာပြင် ပင်ထိုးမှုကို သုံးမလား?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"မျက်နှာပြင်ကို ပင်ထိုးလိုက်ခြင်းက ပြကွက်ကို တစ်ခုတည်းသော မြင်းကွင်းသို့ သော့ပိတ်ထားမည်။ \n\nထွက်လိုက်ရန်၊ နောက် နှင့် မကြာမီတုန်းက ခလုတ်များကို တစ်ချိန်တည်း ထိလျက် ကိုင်ထားပါ။"</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"မျက်နှာပြင်ကို ပင်ထိုးလိုက်ခြင်းက ပြကွက်ကို တစ်ခုတည်းသော မြင်းကွင်းသို့ သော့ပိတ်ထားမည်။ \n\nထွက်လိုက်ရန်၊ နောက် နှင့် မကြာမီတုန်းက ခလုတ်များကို ထိလျက် ကိုင်ထားပါ။"</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"မလို၊ ကျေးဇူးပါပဲ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"စတင်ရန်"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"မျက်နှာပြင်ကို ပင်ထိုးထား"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"မျက်နှာပြင် ပင်ထိုးမှု ဖြတ်လိုက်ပြီ"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="5732663305876339596">"ပင်ထိုးမှုကို မဖြုတ်မီမှာ %1$sကို မေးကြည့်ပါ"</string>
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"သော့ဖွင့် ပုံစံဒီဇိုင်း"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"စကားဝှက်"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="battery_saver_description" msgid="725676363406667978">"ဘက်ထရီ သက်တမ်းကို တိုးပေးရန်၊ ဘက်ထရီ ချွေတာသူက သင့်ကိရိယာ၏ လုပ်ကိုင်မှုများကို လျှော့ချလျက် တုန်ခါမှု နှင့် နောက်ခံ ဒေတာ အများစုကို ကန့်သတ်ပေးသည်။ စင့်ကို အားကိုးကြရသည့် အီးမေးလ်၊ စာပို့စနစ်၊ နှင့် အခြား appများသည် သင်က ၎င်းတို့ကို မဖွင့်မချင်း မွမ်းမံဖြစ်မည် မဟုတ်ပါ။ \n\nသင်၏ ကိရိယာက အားသွင်း နေချိန်မှာ ဘက်ထရီ ချွေတာသူကို အလိုအလျောက် ပိတ်ထားမည်။"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"သင်၏ စက်ရပ်ချိန် <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> မှာ ပြီးဆုံးသည့် အထိ။"</string>
 </resources>

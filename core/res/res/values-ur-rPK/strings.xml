@@ -1352,7 +1352,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"‏USB ڈیبگنگ کو غیر فعال کرنے کیلئے ٹچ کریں۔"</string>
     <string name="select_input_method" msgid="8547250819326693584">"کی بورڈ تبدیل کریں"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"کی بورڈز منتخب کریں"</string>
-    <string name="use_physical_keyboard" msgid="6203112478095117625">"طبعی کی بورڈ"</string>
+    <!-- no translation found for show_ime (9157568568695230830) -->
+    <skip />
     <string name="hardware" msgid="7517821086888990278">"ہارڈ ویئر"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"کی بورڈ کا خاکہ منتخب کریں"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"ایک کی بورڈ کا خاکہ منتخب کرنے کیلئے چھوئیں۔"</string>

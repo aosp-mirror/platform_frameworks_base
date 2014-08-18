@@ -716,10 +716,8 @@
     <string name="permdesc_use_sip" msgid="2297804849860225257">"ອະນຸຍາດ​ໃຫ້ແອັບຯ​ສາມາດ​ຮັບສາຍ ແລະໂທອອກ​ຜ່ານ SIP ໄດ້"</string>
     <string name="permlab_bind_call_service" msgid="6724009726671246551">"ໂຕ້ຕອບກັບໜ້າຈໍການໂທ"</string>
     <string name="permdesc_bind_call_service" msgid="8732547662442572435">"ອະນຸຍາດໃຫ້ແອັບຯ ຄວບຄຸມເວລາ ແລະວິທີການທີ່ຜູ່ໃຊ້ເຫັນໜ້າຈໍການໂທໄດ້."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"ສັ່ງ​ບໍ​ລິ​ການ​ໂທ​ລະ​ສັບ"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ສັ່ງ​​ບໍ​ລິ​ການ​ໂທ​ລະ​ສັບ​ເພື່ອ​ໂທຫຼື​ຮັບ​ສາຍ​ໄດ້."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ອ່ານປະຫວັດການນຳໃຊ້ເຄືອຂ່າຍ"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານປະຫວັດການນຳໃຊ້ເຄືອຂ່າຍຂອງແອັບຯ ແລະເຄືອຂ່າຍໃດນຶ່ງ."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"ຈັດການນະໂຍບາຍເຄືອຂ່າຍ"</string>
@@ -1352,7 +1350,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"ແຕະເພື່ອປິດການດີບັ໊ກຜ່ານ USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"​ປ່ຽນ​ແປ້ນ​ພິມ"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"​ເລືອກ​ແປ້ນ​ພິມ"</string>
-    <string name="use_physical_keyboard" msgid="6203112478095117625">"ແປ້ນພິມແທ້"</string>
+    <!-- no translation found for show_ime (9157568568695230830) -->
+    <skip />
     <string name="hardware" msgid="7517821086888990278">"ຮາດແວ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"ເລືອກຮູບແບບແປ້ນພິມ"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"ກົດເພື່ອເລືອກຮູບແບບແປ້ນພິມ."</string>
@@ -1764,30 +1763,20 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ຖືກເລືອກແລ້ວ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ຖືກລຶບແລ້ວ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"​ບ່ອນ​ເຮັດ​ວຽກ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"ເພື່ອ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ນີ້, ໃຫ້​ແຕະ​ປຸ່ມ​ກັບ​ຄືນ​​ແລະ​ປຸ່ມ​ແອັບຯ​​ທີ່​ຫາ​ກໍ​ໃຊ້​ຄ້າງໄວ້​ພ້ອມ​ກັນ."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"ເພື່ອ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ນີ້, ໃຫ້​ແຕະ​ປຸ່ມ​ແອັບຯ​ທີ່​ຫາ​ກໍ​ໃຊ້​ຄ້າງ​ໄວ້."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"ໜ້າ​ຈໍ​ຖືກ​ປັກ​ໝຸດ​ໄວ້. ​ອົງ​ກອນ​ຂອງ​ທ່ານບໍ່​​ອະ​ນຸ​ຍາດ​ໃຫ້​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ​ໄດ້."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"ໃຊ້​ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ບໍ່?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ຈະ​ລັອກ​ໜ້າ​ຈໍ​ໄວ້​ທີ່​ມຸມມອງ​ໃດ​ນຶ່ງ.\n\nເພື່ອ​ອອກ, ໃຫ້​ແຕະ​ປຸ່ມ​ກັບ​ຄືນ​​ແລະ​ປຸ່ມ​ແອັບຯ​​ທີ່​ຫາ​ກໍ​ໃຊ້​ຄ້າງໄວ້​ພ້ອມ​ກັນ."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ຈະ​ລັອກ​ໜ້າ​ຈໍ​ໄວ້​ທີ່​ມຸມມອງ​ໃດ​ນຶ່ງ.\n\nເພື່​ອ​ອອກ, ໃຫ້​ແຕະ​ປຸ່ມ​ແອັບຯ​ທີ່​ຫາ​ກໍ​ໃຊ້​ຄ້າງ​ໄວ້."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"ບໍ່, ຂອບ​ໃຈ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"​ເລີ່ມ"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ແລ້ວ"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"ຍົກ​ເລີກ​ການ​ປັກ​ໝຸນ​​ຫນ້າ​ຈໍ​ແລ້ວ"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="5732663305876339596">"ຖາມ %1$s ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"ຮູບແບບປົດລັອກ"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"​ລະ​ຫັດ​ຜ່ານ"</string>
     <string name="battery_saver_description" msgid="725676363406667978">"ເພື່ອ​ຊ່ວຍ​ປັບ​ປຸ​ງ​ອາ​ຍຸ​ແບັດ​ເຕີ​ຣີ, ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະຫຼຸດ​ປະ​ສິດ​ທິ​ພາບ​ຂອງ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ລົງ ແລະ​ຈຳ​ກັດ​ການ​ສັ່ນ​ເຕືອນ ຮວມ​​ທັງ​ຂໍ້​ມູນ​ພື້ນຫຼັງ​ສ່ວນ​ໃຫຍ່. ອີ​ເມວ, ການ​ສົ່ງ​ຂໍ້​ຄ​ວາມ ແລະ​ແອັບຯ​ອື່ນໆ​ທີ່​ອີງ​ອາ​ໃສ​ການ​ຊິ້ງ​ຂໍ້​ມູນ​ອາດບໍ່​ມີ​ການ​ອັບ​ເດດ​ຈົນ​ກວ່າ​ທ່ານ​ຈະ​ເປີດ​ແອັບຯ​ເຫຼົ່າ​ນັ້ນ.\n\nໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະ​ປິດ​ໂຕ​ເອງ​​ອັດ​ຕະ​ໂນ​ມັດ​ໃນ​ເວ​ລາ​ທີ່​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ສາກ​ໄຟ​ຢູ່"</string>
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"ຈົນ​ກວ່າ​ດາວ​ທາມ​ຂອງ​ທ່ານ​ຈະ​ສິ້ນ​ສຸດ​ທີ່ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

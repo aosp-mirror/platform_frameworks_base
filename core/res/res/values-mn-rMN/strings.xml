@@ -716,10 +716,8 @@
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Апп-д SIP дуудлага хийх болон хүлээн авахыг зөвшөөрөх."</string>
     <string name="permlab_bind_call_service" msgid="6724009726671246551">"дуудлагын дэлгэцтэй харьцах"</string>
     <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Апп-д дуудлагын дэлгэцийг хэрэглэгчид хэзээ хэрхэн харуулахыг удирдахыг зөвшөөрнө."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"телефоны үйлчилгээтэй харилцах"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Апп-д телефон үйлчилгээтэй харилцаж дуудлага хийх/авахыг зөвшөөрнө."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"сүлжээний ашиглалтын түүхийг унших"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Апп нь тусгай сүлжээ болон апп-н сүлжээ ашиглалтын түүхийг унших боломжтой."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"сүлжээний бодлогыг удирдах"</string>
@@ -1352,7 +1350,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB дебаг хийхийг идэвхгүй болгох бол хүрнэ үү."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Гарыг өөрчлөх"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Гар сонгох"</string>
-    <string name="use_physical_keyboard" msgid="6203112478095117625">"Бодит гар"</string>
+    <!-- no translation found for show_ime (9157568568695230830) -->
+    <skip />
     <string name="hardware" msgid="7517821086888990278">"Хардвер"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Гарын схемийг сонгох"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Гарын схемийг сонгох бол хүрнэ үү."</string>
@@ -1764,30 +1763,20 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> сонгогдсон"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> устсан"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Ажлын <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"Дэлгэцийг суллахын тулд Буцах болон Саяхных-г зэрэг дараад барина уу."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Дэлгэцийг суллахын тулд Саяхных-д хүрээд барина уу."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Дэлгэцийг тогтоосон. Дэлгэц суллахыг таны байгууллага зөвшөөрөөгүй."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Дэлгэц тогтоогчийг ашиглах уу?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Дэлгэц тогтоогч нь дэлгэцийг нэг янзаар түгжинэ.\n\nГарахын тулд Буцах болон Саяхных-д зэрэг хүрээд барина уу."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Дэлгэц тогтоогч нь дэлгэцийг нэг янзаар түгжинэ.\n\nГарахын тулд Буцах болон Саяхных-д зэрэг хүрээд барина уу."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"ҮГҮЙ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ЭХЛҮҮЛЭХ"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Дэлгэцийг тогтоосон"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Дэлгэцийг сулласан"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="5732663305876339596">"Суллахаас өмнө %1$s хүснэ үү"</string>
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"тайлах хээ"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"нууц үг"</string>
     <string name="battery_saver_description" msgid="725676363406667978">"Батерейны ашиглалтыг уртасгахын тулд батерей хэмнэгч нь таны төхөөрөмжийн ажиллагааг бууруулж, чичрэлт болон далд датаны ихэнх хувийг хязгаарлана. Имэйл, зурвас гэх мэт синк хийгддэг бусад апп-ууд таныг нээхээс нааш шинэчлэгдэхгүй байж болно.\n\nТаныг төхөөрөмжөө цэнэглэх үед батерей хэмнэгч автоматаар унтарна."</string>
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Таны уйтгартай байдал <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-д дуусах хүртэл"</string>
 </resources>
