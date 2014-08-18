@@ -56,14 +56,12 @@ public final class AudioState implements Parcelable {
     /** Bit vector of all routes supported by this call. */
     public final int supportedRouteMask;
 
-    /** @hide */
     public AudioState(boolean isMuted, int route, int supportedRouteMask) {
         this.isMuted = isMuted;
         this.route = route;
         this.supportedRouteMask = supportedRouteMask;
     }
 
-    /** @hide */
     public AudioState(AudioState state) {
         isMuted = state.isMuted;
         route = state.route;
