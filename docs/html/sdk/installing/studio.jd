@@ -251,36 +251,36 @@ download (or continue to use)
     <td>Windows</td>
     <td>
   <a onclick="return onDownload(this)" id="win-studio"
-      href="http://dl.google.com/android/studio/install/0.8.0/android-studio-bundle-135.1245622-windows.exe">
-      android-studio-bundle-135.1245622-windows.exe
+      href="http://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-windows.exe">
+      android-studio-bundle-135.1339820-windows.exe
       </a>
     </td>
-    <td>380000036 bytes</td>
-    <td>5720baef7d492f2df7398a38dae2fa92</td>
+    <td>379497130 bytes</td>
+    <td>024e002b8c8fa7dcd2ff69fd69e06e56</td>
   </tr>
 
   <tr>
     <td><nobr>Mac OS X</nobr></td>
     <td>
   <a onclick="return onDownload(this)" id="mac-studio"
-    href="http://dl.google.com/android/studio/install/0.8.0/android-studio-bundle-135.1245622-mac.dmg">
-    android-studio-bundle-135.1245622-mac.dmg
+    href="http://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-mac.dmg">
+    android-studio-bundle-135.1339820-mac.dmg
     </a>
     </td>
-    <td>368451923 bytes</td>
-    <td>fa9da3625db44687576c5c4e8f96280e</td>
+    <td>368507143 bytes</td>
+    <td>4143f2aa556634eae91701965d88899b</td>
   </tr>
 
   <tr>
     <td>Linux</td>
     <td>
   <a onclick="return onDownload(this)" id="linux-studio"
-    href="http://dl.google.com/android/studio/install/0.8.0/android-studio-bundle-135.1245622-linux.tgz">
-    android-studio-bundle-135.1245622-linux.tgz
+    href="http://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-linux.tgz">
+    android-studio-bundle-135.1339820-linux.tgz
     </a>
     </td>
-    <td>417756987 bytes</td>
-    <td>c70dd2e4035484b84f0ad0046a34f136</td>
+    <td>417631443 bytes</td>
+    <td>fa403762ecd0a5da87acbeff485f81cc</td>
   </tr>
   </table>
 
@@ -450,6 +450,17 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Studio v0.8.6</a> <em>(August 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <p>See <a href="http://tools.android.com/recent">tools.android.com</a> for a full list of changes.</p>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Studio v0.8.0</a> <em>(June 2014)</em>
   </p>
 
@@ -636,7 +647,7 @@ for possible resolutions to known issues: <a href="http://tools.android.com/know
   if (os) {
     /* set up primary ACE download button */
     $('#download-ide-button').show();
-    $('#download-ide-button').append("Download Android Studio Beta <span class='small'>v0.8.0</span>"
+    $('#download-ide-button').append("Download Android Studio Beta <span class='small'>v0.8.6</span>"
         + "<br/> <span class='small'>with the Android SDK for " + os + "</span>");
     $('#download-ide-button').click(function() {return onDownload(this,true);}).attr('href', bundlename);
 
