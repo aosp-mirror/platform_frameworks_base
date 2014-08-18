@@ -3820,6 +3820,29 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Start a new activity as if it was started by the activity that started our
+     * current activity.  This is for the resolver and chooser activities, which operate
+     * as intermediaries that dispatch their intent to the target the user selects -- to
+     * do this, they must perform all security checks including permission grants as if
+     * their launch had come from the original activity.
+     * @hide
+     */
+    public void startActivityAsCaller(Intent intent, @Nullable Bundle options) {
+        if (mParent != null) {
+            throw new RuntimeException("Can't be called from a child");
+        }
+        Instrumentation.ActivityResult ar =
+                mInstrumentation.execStartActivityAsCaller(
+                        this, mMainThread.getApplicationThread(), mToken, this,
+                        intent, -1, options);
+        if (ar != null) {
+            mMainThread.sendActivityResult(
+                mToken, mEmbeddedID, -1, ar.getResultCode(),
+                ar.getResultData());
+        }
+    }
+
+    /**
      * Same as calling {@link #startIntentSenderForResult(IntentSender, int,
      * Intent, int, int, int, Bundle)} with no options.
      *

@@ -17,10 +17,13 @@
 package com.android.internal.app;
 
 import android.app.Activity;
+import android.app.ActivityThread;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.os.AsyncTask;
+import android.provider.Settings;
 import android.util.ArrayMap;
+import android.util.Slog;
 import android.widget.AbsListView;
 import android.widget.GridView;
 import com.android.internal.R;
@@ -83,6 +86,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     private int mLaunchedFromUid;
     private ResolveListAdapter mAdapter;
     private PackageManager mPm;
+    private boolean mSafeForwardingMode;
     private boolean mAlwaysUseOption;
     private boolean mShowExtended;
     private GridView mGridView;
@@ -175,6 +179,8 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             titleResource = 0;
         }
 
+        setSafeForwardingMode(true);
+
         onCreate(savedInstanceState, intent,
                 titleResource != 0 ? getResources().getText(titleResource) : null, titleResource,
                 null, null, true);
@@ -247,7 +253,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
             resizeGrid();
         } else if (count == 1) {
-            startActivity(mAdapter.intentForPosition(0, false));
+            safelyStartActivity(mAdapter.intentForPosition(0, false));
             mPackageMonitor.unregister();
             mRegistered = false;
             finish();
@@ -301,6 +307,22 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             setAlwaysButtonEnabled(true, mAdapter.getFilteredPosition(), false);
             mOnceButton.setEnabled(true);
         }
+    }
+
+    /**
+     * Turn on launch mode that is safe to use when forwarding intents received from
+     * applications and running in system processes.  This mode uses Activity.startActivityAsCaller
+     * instead of the normal Activity.startActivity for launching the activity selected
+     * by the user.
+     *
+     * <p>This mode is set to true by default if the activity is initialized through
+     * {@link #onCreate(android.os.Bundle)}.  If a subclass calls one of the other onCreate
+     * methods, it is set to false by default.  You must set it before calling one of the
+     * more detailed onCreate methods, so that it will be set correctly in the case where
+     * there is only one intent to resolve and it is thus started immediately.</p>
+     */
+    public void setSafeForwardingMode(boolean safeForwarding) {
+        mSafeForwardingMode = safeForwarding;
     }
 
     protected CharSequence getTitleForAction(String action, int defaultTitleRes) {
@@ -605,12 +627,33 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
 
         if (intent != null) {
+            safelyStartActivity(intent);
+        }
+    }
+
+    public void safelyStartActivity(Intent intent) {
+        if (!mSafeForwardingMode) {
             startActivity(intent);
+            return;
+        }
+        try {
+            startActivityAsCaller(intent, null);
+        } catch (RuntimeException e) {
+            String launchedFromPackage;
+            try {
+                launchedFromPackage = ActivityManagerNative.getDefault().getLaunchedFromPackage(
+                        getActivityToken());
+            } catch (RemoteException e2) {
+                launchedFromPackage = "??";
+            }
+            Slog.wtf(TAG, "Unable to launch as uid " + mLaunchedFromUid
+                    + " package " + launchedFromPackage + ", while running in "
+                    + ActivityThread.currentProcessName(), e);
         }
     }
 
     void showAppDetails(ResolveInfo ri) {
-        Intent in = new Intent().setAction("android.settings.APPLICATION_DETAILS_SETTINGS")
+        Intent in = new Intent().setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 .setData(Uri.fromParts("package", ri.activityInfo.packageName, null))
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         startActivity(in);

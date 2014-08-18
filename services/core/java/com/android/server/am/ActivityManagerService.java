@@ -3434,6 +3434,70 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public final int startActivityAsCaller(IApplicationThread caller, String callingPackage,
+            Intent intent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, int startFlags,
+            String profileFile, ParcelFileDescriptor profileFd, Bundle options) {
+
+        // This is very dangerous -- it allows you to perform a start activity (including
+        // permission grants) as any app that may launch one of your own activities.  So
+        // we will only allow this to be done from activities that are part of the core framework,
+        // and then only when they are running as the system.
+        final ActivityRecord sourceRecord;
+        final int targetUid;
+        final String targetPackage;
+        synchronized (this) {
+            if (resultTo == null) {
+                throw new SecurityException("Must be called from an activity");
+            }
+            sourceRecord = mStackSupervisor.isInAnyStackLocked(resultTo);
+            if (sourceRecord == null) {
+                throw new SecurityException("Called with bad activity token: " + resultTo);
+            }
+            if (!sourceRecord.info.packageName.equals("android")) {
+                throw new SecurityException(
+                        "Must be called from an activity that is declared in the android package");
+            }
+            if (sourceRecord.app == null) {
+                throw new SecurityException("Called without a process attached to activity");
+            }
+            if (sourceRecord.app.uid != Process.SYSTEM_UID) {
+                // This is still okay, as long as this activity is running under the
+                // uid of the original calling activity.
+                if (sourceRecord.app.uid != sourceRecord.launchedFromUid) {
+                    throw new SecurityException(
+                            "Calling activity in uid " + sourceRecord.app.uid
+                                    + " must be system uid or original calling uid "
+                                    + sourceRecord.launchedFromUid);
+                }
+            }
+            targetUid = sourceRecord.launchedFromUid;
+            targetPackage = sourceRecord.launchedFromPackage;
+        }
+
+        // TODO: Switch to user app stacks here.
+        try {
+            int ret = mStackSupervisor.startActivityMayWait(null, targetUid, targetPackage, intent,
+                    resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
+                    null, null, null, null, options, UserHandle.getUserId(targetUid), null);
+            return ret;
+        } catch (SecurityException e) {
+            // XXX need to figure out how to propagate to original app.
+            // A SecurityException here is generally actually a fault of the original
+            // calling activity (such as a fairly granting permissions), so propagate it
+            // back to them.
+            /*
+            StringBuilder msg = new StringBuilder();
+            msg.append("While launching");
+            msg.append(intent.toString());
+            msg.append(": ");
+            msg.append(e.getMessage());
+            */
+            throw e;
+        }
+    }
+
+    @Override
     public final WaitResult startActivityAndWait(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, String profileFile,
@@ -11402,6 +11466,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("  [-a] [-c] [-h] [cmd] ...");
                 pw.println("  cmd may be one of:");
                 pw.println("    a[ctivities]: activity stack state");
+                pw.println("    r[recents]: recent activities state");
                 pw.println("    b[roadcasts] [PACKAGE_NAME] [history [-s]]: broadcast state");
                 pw.println("    i[ntents] [PACKAGE_NAME]: pending intent state");
                 pw.println("    p[rocesses] [PACKAGE_NAME]: process state");
@@ -11434,6 +11499,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             if ("activities".equals(cmd) || "a".equals(cmd)) {
                 synchronized (this) {
                     dumpActivitiesLocked(fd, pw, args, opti, true, dumpClient, null);
+                }
+            } else if ("recents".equals(cmd) || "r".equals(cmd)) {
+                synchronized (this) {
+                    dumpRecentsLocked(fd, pw, args, opti, true, null);
                 }
             } else if ("broadcasts".equals(cmd) || "b".equals(cmd)) {
                 String[] newArgs;
@@ -11578,6 +11647,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
+            dumpRecentsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
             dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
             pw.println();
             if (dumpAll) {
@@ -11612,6 +11686,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             mStackSupervisor.dump(pw, "  ");
         }
 
+        if (!printedAnything) {
+            pw.println("  (nothing)");
+        }
+    }
+
+    void dumpRecentsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll, String dumpPackage) {
+        pw.println("ACTIVITY MANAGER RECENT ACTIVITIES (dumpsys activity recents)");
+
+        boolean printedAnything = false;
+
         if (mRecentTasks.size() > 0) {
             boolean printedHeader = false;
 
@@ -11625,9 +11710,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
                 if (!printedHeader) {
-                    if (needSep) {
-                        pw.println();
-                    }
                     pw.println("  Recent tasks:");
                     printedHeader = true;
                     printedAnything = true;
