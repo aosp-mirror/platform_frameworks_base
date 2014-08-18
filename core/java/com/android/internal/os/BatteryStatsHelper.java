@@ -74,6 +74,7 @@ public final class BatteryStatsHelper {
 
     final private Context mContext;
     final private boolean mCollectBatteryBroadcast;
+    final private boolean mWifiOnly;
 
     private IBatteryStats mBatteryInfo;
     private BatteryStats mStats;
@@ -123,6 +124,19 @@ public final class BatteryStatsHelper {
     public BatteryStatsHelper(Context context, boolean collectBatteryBroadcast) {
         mContext = context;
         mCollectBatteryBroadcast = collectBatteryBroadcast;
+        mWifiOnly = checkWifiOnly(context);
+    }
+
+    public BatteryStatsHelper(Context context, boolean collectBatteryBroadcast, boolean wifiOnly) {
+        mContext = context;
+        mCollectBatteryBroadcast = collectBatteryBroadcast;
+        mWifiOnly = wifiOnly;
+    }
+
+    public static boolean checkWifiOnly(Context context) {
+        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(
+                Context.CONNECTIVITY_SERVICE);
+        return !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
     }
 
     public void storeStatsHistoryInFile(String fname) {
@@ -870,9 +884,7 @@ public final class BatteryStatsHelper {
         addBluetoothUsage();
         addIdleUsage(); // Not including cellular idle power
         // Don't compute radio usage if it's a wifi-only device
-        ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(
-                Context.CONNECTIVITY_SERVICE);
-        if (cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)) {
+        if (!mWifiOnly) {
             addRadioUsage();
         }
     }
