@@ -116,8 +116,10 @@ public class TvView extends ViewGroup {
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            Log.d(TAG, "surfaceChanged(holder=" + holder + ", format=" + format + ", width=" + width
-                    + ", height=" + height + ")");
+            if (DEBUG) {
+                Log.d(TAG, "surfaceChanged(holder=" + holder + ", format=" + format + ", width="
+                    + width + ", height=" + height + ")");
+            }
             mSurfaceFormat = format;
             mSurfaceWidth = width;
             mSurfaceHeight = height;
@@ -188,24 +190,27 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Sets this as main TvView.
+     * Sets this as the main {@link TvView}.
      * <p>
-     * Main TvView is the TvView which user is watching and interacting mainly.  It is used for
-     * determining internal behavior of hardware TV input devices. For example, this influences
-     * how HDMI-CEC active source will be managed.
+     * The main {@link TvView} is a {@link TvView} whose corresponding TV input determines the
+     * HDMI-CEC active source device. For an HDMI port input, one of source devices that is
+     * connected to that HDMI port becomes the active source. For an HDMI-CEC logical device input,
+     * the corresponding HDMI-CEC logical device becomes the active source. For any non-HDMI input
+     * (including the tuner, composite, S-Video, etc.), the internal device (= TV itself) becomes
+     * the active source.
      * </p><p>
-     * First tuned TvView becomes main automatically, and keeps to be main until setMainTvView() is
-     * called for other TvView. Note that main TvView won't be reset even when current main TvView
-     * is removed from view hierarchy.
+     * First tuned {@link TvView} becomes main automatically, and keeps to be main until {@link
+     * #setMain} is called for other {@link TvView}. Note that main {@link TvView} won't be reset
+     * even when current main {@link TvView} is removed from view hierarchy.
      * </p>
      * @hide
      */
     @SystemApi
-    public void setMainTvView() {
+    public void setMain() {
         synchronized (sMainTvViewLock) {
             sMainTvView = this;
             if (hasWindowFocus() && mSession != null) {
-                mSession.setMainSession();
+                mSession.setMain();
             }
         }
     }
@@ -327,6 +332,7 @@ public class TvView extends ViewGroup {
      * This method is primarily used to un-tune the current TvView.
      */
     public void reset() {
+        if (DEBUG) Log.d(TAG, "reset()");
         if (mSession != null) {
             release();
             resetSurfaceView();
@@ -538,7 +544,7 @@ public class TvView extends ViewGroup {
         // Set main again to regain main session.
         synchronized (sMainTvViewLock) {
             if (hasFocus && this == sMainTvView && mSession != null) {
-                mSession.setMainSession();
+                mSession.setMain();
             }
         }
     }
@@ -596,6 +602,7 @@ public class TvView extends ViewGroup {
             mSurfaceView.getHolder().removeCallback(mSurfaceHolderCallback);
             removeView(mSurfaceView);
         }
+        mSurface = null;
         mSurfaceView = new SurfaceView(getContext(), mAttrs, mDefStyleAttr) {
             @Override
             protected void updateWindow(boolean force, boolean redrawNeeded) {
@@ -821,11 +828,14 @@ public class TvView extends ViewGroup {
                 }
                 return;
             }
+            if (DEBUG) {
+                Log.d(TAG, "onSessionCreated()");
+            }
             mSession = session;
             if (session != null) {
                 synchronized (sMainTvViewLock) {
                     if (hasWindowFocus() && TvView.this == sMainTvView) {
-                        mSession.setMainSession();
+                        mSession.setMain();
                     }
                 }
                 // mSurface may not be ready yet as soon as starting an application.

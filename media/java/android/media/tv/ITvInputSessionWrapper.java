@@ -42,7 +42,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final String TAG = "TvInputSessionWrapper";
 
     private static final int DO_RELEASE = 1;
-    private static final int DO_SET_MAIN_SESSION = 2;
+    private static final int DO_SET_MAIN = 2;
     private static final int DO_SET_SURFACE = 3;
     private static final int DO_DISPATCH_SURFACE_CHANGED = 4;
     private static final int DO_SET_STREAM_VOLUME = 5;
@@ -91,8 +91,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 }
                 return;
             }
-            case DO_SET_MAIN_SESSION: {
-                mTvInputSessionImpl.setMainSession((Boolean) msg.obj);
+            case DO_SET_MAIN: {
+                mTvInputSessionImpl.setMain((Boolean) msg.obj);
                 return;
             }
             case DO_SET_SURFACE: {
@@ -162,8 +162,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void setMainSession(boolean isMain) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_MAIN_SESSION, isMain));
+    public void setMain(boolean isMain) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_MAIN, isMain));
     }
 
     @Override
