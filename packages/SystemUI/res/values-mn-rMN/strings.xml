@@ -23,7 +23,7 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Цэвэрлэх"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Жагсаалтаас устгах"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Апп мэдээлэл"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Сүүлийн апп хоосон"</string>
+    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Таны саяхны дэлгэц энд харагдах болно"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Сүүлийн апп-уудыг хаах"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 сүүлийн апп"</item>
@@ -80,7 +80,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Буцах"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Гэрийн"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Цэс"</string>
-    <string name="accessibility_recent" msgid="8571350598987952883">"Сүүлийн апп"</string>
+    <string name="accessibility_recent" msgid="1606470783629913980">"Саяхны дэлгэцүүд"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Хайх"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Камер"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Утас"</string>
@@ -155,7 +155,8 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Мэдэгдэл хаагдсан."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Мэдэгдлийн хураангуй самбар"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Шуурхай тохиргоо."</string>
-    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"Сүүлийн апп"</string>
+    <string name="accessibility_desc_settings" msgid="3417884241751434521">"Тохиргоо"</string>
+    <string name="accessibility_desc_recent_apps" msgid="8376953390514779637">"Саяхны дэлгэцүүд."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Хэрэглэгч <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Мобайл <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
@@ -167,6 +168,7 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"Самбарыг хаах"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"Цаг нэмэх"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"Цаг хасах"</string>
+    <string name="accessibility_brightness" msgid="8003681285547803095">"Дэлгэцийн гэрэлтэлт"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G дата идэвхгүй"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G дата идэвхгүй"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Үүрэн дата идэвхгүй"</string>
@@ -238,7 +240,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> ашигласан"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> хязгаар"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> анхааруулга"</string>
-    <string name="recents_empty_message" msgid="7883614615463619450">"Сүүлд ашигласан апп байхгүй"</string>
+    <string name="recents_empty_message" msgid="8682129509540827999">"Таны саяхны дэлгэц энд харагдах болно"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Аппликешны мэдээлэл"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"Апп-дотор-түгжих"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"хайх"</string>
@@ -258,7 +260,7 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"Та <xliff:g id="ALARM_TIME">%s</xliff:g>-д өөрийн сэрүүлгээ сонсохгүй"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Яаралтай биш мэдэгдлүүдийг доор"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"Нээхийн тулд дахин товшино уу"</string>
+    <string name="notification_tap_again" msgid="8524949573675922138">"Нээхийн тулд дахин хүрнэ үү"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Түгжээг тайлах бол шудрана уу"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Утас гаргахын тулд баруун шударна уу"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Камер гаргахын тулд зүүн шударна уу"</string>
@@ -267,17 +269,19 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"Нэн тэргүүний"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Бүгд"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Цэнэглэж байна (дүүргэхэд <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Хэрэглэгчийг сэлгэх"</string>
+    <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Профайлыг харуулах"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Хэрэглэгч нэмэх"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Шинэ хэрэглэгч"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Зочин"</string>
-    <string name="guest_new_guest" msgid="4259024453643879653">"+ Зочин"</string>
-    <string name="guest_exit_guest" msgid="1619100760451149682">"Зочноос гарах"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"Зочин нэмэх"</string>
+    <string name="guest_exit_guest" msgid="7187359342030096885">"Зочныг хасах"</string>
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"Зочны нэвтрэлтээс гарч байна уу?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"Зочны нэвтрэлтээс гарснаар локал датаг арилгах болно."</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Тавтай морилно уу!"</string>
-    <string name="guest_wipe_session_message" msgid="5369763062345463297">"Та шинээр нэвтрэх гэж байна уу?"</string>
-    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"Тийм"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"Үгүй, баярлалаа"</string>
+    <string name="guest_wipe_session_message" msgid="8476238178270112811">"Та үргэлжлүүлэхийг хүсэж байна уу?"</string>
+    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Дахин эхлүүлэх"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Тийм, үргэлжлүүлэх"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Нэг минутын турш"</item>
     <item quantity="other" msgid="6924190729213550991">"%d минутын турш"</item>
@@ -307,4 +311,5 @@
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Та VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\") холбогдсон байна.\n\nТаны VPN үйлчилгээ үзүүлэгч нь таны төхөөрөмж болон имэйл, апп-ууд болон аюулгүй вэбсайтууд зэрэг таны сүлжээний үйл ажиллагааг хянах боломжтой."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Энэ төхөөрөмжийг \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n удирдаж байна \n Танай админ имэйл, апп-ууд, аюулгүй вэбсайтууд зэргийг оруулан таны сүлжээний үйл ажиллагааг хянах боломжтой. Дэлгэрэнгүй мэдээллийг админаас авна уу.\n\nМөн та <xliff:g id="APPLICATION">%2$s</xliff:g>-д VPN холболт үүсгэх зөвшөөрөл өгсөн байна. Энэ апп мөн сүлжээний үйл ажиллагааг хянах боломжтой."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Энэ төхөөрөмжийг \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n удирдаж байна \nТанай админ имэйл, апп-ууд, аюулгүй вэбсайтууд зэргийг оруулан таны сүлжээний үйл ажиллагааг хянах боломжтой. Дэлгэрэнгүй мэдээллийг админаас авна уу.\n\nМөн та VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\")-д холбогдсон байна. VPN үйлчилгээ үзүүлэгч таны сүлжээний үйл ажиллагааг мөн хянах боломжтой."</string>
+    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Таныг гараар онгойлгох хүртэл төхөөрөмж түгжээтэй байх болно"</string>
 </resources>
