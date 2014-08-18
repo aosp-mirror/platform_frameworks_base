@@ -665,6 +665,9 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     }
 
     protected void moveSharedElementsToOverlay() {
+        if (!mWindow.getSharedElementsUseOverlay()) {
+            return;
+        }
         int numSharedElements = mSharedElements.size();
         ViewGroup decor = getDecor();
         if (decor != null) {
@@ -700,6 +703,17 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     }
 
     protected void moveSharedElementsFromOverlay() {
+        int numListeners = mGhostViewListeners.size();
+        for (int i = 0; i < numListeners; i++) {
+            GhostViewListeners listener = mGhostViewListeners.get(i);
+            ViewGroup parent = (ViewGroup) listener.getView().getParent();
+            parent.getViewTreeObserver().removeOnPreDrawListener(listener);
+        }
+        mGhostViewListeners.clear();
+
+        if (mWindow == null || !mWindow.getSharedElementsUseOverlay()) {
+            return;
+        }
         ViewGroup decor = getDecor();
         if (decor != null) {
             ViewGroupOverlay overlay = decor.getOverlay();
@@ -709,13 +723,6 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 GhostView.removeGhost(sharedElement);
             }
         }
-        int numListeners = mGhostViewListeners.size();
-        for (int i = 0; i < numListeners; i++) {
-            GhostViewListeners listener = mGhostViewListeners.get(i);
-            ViewGroup parent = (ViewGroup) listener.getView().getParent();
-            parent.getViewTreeObserver().removeOnPreDrawListener(listener);
-        }
-        mGhostViewListeners.clear();
     }
 
     protected void setGhostVisibility(int visibility) {

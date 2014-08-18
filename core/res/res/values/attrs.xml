@@ -517,6 +517,10 @@
              {@link android.view.Window#setAllowExitTransitionOverlap(boolean)}. -->
         <attr name="windowAllowExitTransitionOverlap" format="boolean"/>
 
+        <!-- Indicates whether or not shared elements should use an overlay
+             during transitions. The default value is true. -->
+        <attr name="windowSharedElementsUseOverlay" format="boolean"/>
+
         <!-- Internal layout used internally for window decor -->
         <attr name="windowActionBarFullscreenDecorLayout" format="reference" />
 
@@ -1835,6 +1839,10 @@
              finishes. Corresponds to
              {@link android.view.Window#setAllowExitTransitionOverlap(boolean)}. -->
         <attr name="windowAllowExitTransitionOverlap"/>
+
+        <!-- Indicates whether or not shared elements should use an overlay
+             during transitions. The default value is true. -->
+        <attr name="windowSharedElementsUseOverlay"/>
 
         <!-- Flag indicating whether this Window is responsible for drawing the background for the
              system bars. If true and the window is not floating, the system bars are drawn with a
