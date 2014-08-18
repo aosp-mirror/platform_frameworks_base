@@ -135,7 +135,7 @@ final class RemoteConnectionService {
         }
 
         @Override
-        public void addConferenceCall(String callId) {
+        public void addConferenceCall(String callId, ParcelableConference parcelableConference) {
             // not supported for remote connections.
         }
 
