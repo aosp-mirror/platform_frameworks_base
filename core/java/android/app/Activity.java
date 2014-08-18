@@ -2095,7 +2095,9 @@ public class Activity extends ContextThemeWrapper
                     "by the window decor. Do not request Window.FEATURE_ACTION_BAR and set " +
                     "android:windowActionBar to false in your theme to use a Toolbar instead.");
         }
-        mActionBar = new ToolbarActionBar(toolbar, getTitle(), this);
+        ToolbarActionBar tbab = new ToolbarActionBar(toolbar, getTitle(), this);
+        mActionBar = tbab;
+        mWindow.setCallback(tbab.getWrappedWindowCallback());
         mActionBar.invalidateOptionsMenu();
     }
 
