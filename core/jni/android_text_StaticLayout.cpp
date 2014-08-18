@@ -131,6 +131,185 @@ class LineBreaker {
         const LineWidth& mLineWidth;
 };
 
+class OptimizingLineBreaker : public LineBreaker {
+    public:
+        OptimizingLineBreaker(const std::vector<Primitive>& primitives, const LineWidth& lineWidth) :
+                LineBreaker(primitives, lineWidth) {}
+        void computeBreaks(std::vector<int>* breaks, std::vector<float>* widths,
+                           std::vector<unsigned char>* flags) const {
+            int numBreaks = mPrimitives.size();
+            Node* opt = new Node[numBreaks];
+            opt[0].prev = -1;
+            opt[0].prevCount = 0;
+            opt[0].width = 0;
+            opt[0].demerits = 0;
+            opt[0].flags = false;
+            opt[numBreaks - 1].prev = -1;
+            opt[numBreaks - 1].prevCount = 0;
+
+            std::list<int> active;
+            active.push_back(0);
+            int lastBreak = 0;
+            for (int i = 0; i < numBreaks; i++) {
+                const Primitive& p = mPrimitives[i];
+                if (p.type == kPrimitiveType_Penalty) {
+                    const bool finalBreak = (i + 1 == numBreaks);
+                    bool breakFound = false;
+                    Node bestBreak;
+                    for (std::list<int>::iterator it = active.begin(); it != active.end(); /* incrementing done in loop */) {
+                        const int pos = *it;
+                        bool flags;
+                        float width, printedWidth;
+                        const int lines = opt[pos].prevCount;
+                        const float maxWidth = mLineWidth.getLineWidth(lines);
+                        // we have to compute metrics every time --
+                        // we can't really precompute this stuff and just deal with breaks
+                        // because of the way tab characters work, this makes it computationally
+                        // harder, but this way, we can still optimize while treating tab characters
+                        // correctly
+                        computeMetrics(pos, i, &width, &printedWidth, &flags);
+                        if (printedWidth <= maxWidth) {
+                            float demerits = computeDemerits(maxWidth, printedWidth,
+                                    finalBreak, p.penalty) + opt[pos].demerits;
+                            if (!breakFound || demerits < bestBreak.demerits) {
+                                bestBreak.prev = pos;
+                                bestBreak.prevCount = opt[pos].prevCount + 1;
+                                bestBreak.demerits = demerits;
+                                bestBreak.width = printedWidth;
+                                bestBreak.flags = flags;
+                                breakFound = true;
+                            }
+                            ++it;
+                        } else {
+                            active.erase(it++); // safe to delete like this
+                        }
+                    }
+                    if (p.penalty == -PENALTY_INFINITY) {
+                        active.clear();
+                    }
+                    if (breakFound) {
+                        opt[i] = bestBreak;
+                        active.push_back(i);
+                        lastBreak = i;
+                    }
+                    if (active.empty()) {
+                        // we can't give up!
+                        float width, printedWidth;
+                        bool flags;
+                        const int lines = opt[lastBreak].prevCount;
+                        const float maxWidth = mLineWidth.getLineWidth(lines);
+                        const int breakIndex = desperateBreak(lastBreak, numBreaks, maxWidth, &width, &printedWidth, &flags);
+
+                        opt[breakIndex].prev = lastBreak;
+                        opt[breakIndex].prevCount = lines + 1;
+                        opt[breakIndex].demerits = 0; // doesn't matter, it's the only one
+                        opt[breakIndex].width = width;
+                        opt[breakIndex].flags = flags;
+
+                        active.push_back(breakIndex);
+                        lastBreak = breakIndex;
+                        i = breakIndex; // incremented by i++
+                    }
+                }
+            }
+
+            int idx = numBreaks - 1;
+            int count = opt[idx].prevCount;
+            breaks->resize(count);
+            widths->resize(count);
+            flags->resize(count);
+            while (opt[idx].prev != -1) {
+                --count;
+
+                (*breaks)[count] = mPrimitives[idx].location;
+                (*widths)[count] = opt[idx].width;
+                (*flags)[count] = opt[idx].flags;
+
+                idx = opt[idx].prev;
+            }
+            delete[] opt;
+        }
+    private:
+        inline void computeMetrics(int start, int end, float* width, float* printedWidth, bool* flags) const {
+            bool f = false;
+            float w = 0, pw = 0;
+            for (int i = start; i < end; i++) {
+                const Primitive& p = mPrimitives[i];
+                if (p.type == kPrimitiveType_Box || p.type == kPrimitiveType_Glue) {
+                    w += p.width;
+                    if (p.type == kPrimitiveType_Box) {
+                        pw = w;
+                    }
+                } else if (p.type == kPrimitiveType_Variable) {
+                    w = p.tabStop->width(w);
+                    f = true;
+                }
+            }
+            *width = w;
+            *printedWidth = pw;
+            *flags = f;
+        }
+
+        inline float computeDemerits(float maxWidth, float width, bool finalBreak, float penalty) const {
+            float deviation = finalBreak ? 0 : maxWidth - width;
+            return (deviation * deviation) + penalty;
+        }
+
+        // returns end pos (chosen break), -1 if fail
+        inline int desperateBreak(int start, int limit, float maxWidth, float* width, float* printedWidth, bool* flags) const {
+            float w = 0, pw = 0;
+            bool breakFound = false;
+            int breakIndex = 0, firstTabIndex = INT_MAX;
+            float breakWidth, breakPrintedWidth;
+            for (int i = start; i < limit; i++) {
+                const Primitive& p = mPrimitives[i];
+
+                if (p.type == kPrimitiveType_Box || p.type == kPrimitiveType_Glue) {
+                    w += p.width;
+                    if (p.type == kPrimitiveType_Box) {
+                        pw = w;
+                    }
+                } else if (p.type == kPrimitiveType_Variable) {
+                    w = p.tabStop->width(w);
+                    firstTabIndex = std::min(firstTabIndex, i);
+                }
+
+                if (pw > maxWidth) {
+                    if (breakFound) {
+                        break;
+                    } else {
+                        // no choice, keep going
+                    }
+                }
+
+                // must make progress
+                if (i > start && (p.type == kPrimitiveType_Penalty || p.type == kPrimitiveType_Wordbreak)) {
+                    breakFound = true;
+                    breakIndex = i;
+                    breakWidth = w;
+                    breakPrintedWidth = pw;
+                }
+            }
+
+            if (breakFound) {
+                *width = w;
+                *printedWidth = pw;
+                *flags = (start <= firstTabIndex && firstTabIndex < breakIndex);
+                return breakIndex;
+            } else {
+                return -1;
+            }
+        }
+
+        struct Node {
+            int prev; // set to sentinel value (-1) for initial node
+            int prevCount; // number of breaks so far
+            float demerits;
+            float width;
+            bool flags;
+        };
+};
+
 class GreedyLineBreaker : public LineBreaker {
     public:
         GreedyLineBreaker(const std::vector<Primitive>& primitives, const LineWidth& lineWidth) :
@@ -353,7 +532,7 @@ void computePrimitives(const jchar* textArr, const jfloat* widthsArr, jint lengt
 static jint nComputeLineBreaks(JNIEnv* env, jclass, jstring javaLocaleName,
                                jcharArray inputText, jfloatArray widths, jint length,
                                jfloat firstWidth, jint firstWidthLineLimit, jfloat restWidth,
-                               jintArray variableTabStops, jint defaultTabStop,
+                               jintArray variableTabStops, jint defaultTabStop, jboolean optimize,
                                jobject recycle, jintArray recycleBreaks,
                                jfloatArray recycleWidths, jbooleanArray recycleFlags,
                                jint recycleLength) {
@@ -391,13 +570,20 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jstring javaLocaleName,
 
     GreedyLineBreaker breaker(primitives, lineWidth);
     breaker.computeBreaks(&computedBreaks, &computedWidths, &computedFlags);
+    if (optimize) {
+        OptimizingLineBreaker breaker(primitives, lineWidth);
+        breaker.computeBreaks(&computedBreaks, &computedWidths, &computedFlags);
+    } else {
+        GreedyLineBreaker breaker(primitives, lineWidth);
+        breaker.computeBreaks(&computedBreaks, &computedWidths, &computedFlags);
+    }
 
     return recycleCopy(env, recycle, recycleBreaks, recycleWidths, recycleFlags, recycleLength,
             computedBreaks, computedWidths, computedFlags);
 }
 
 static JNINativeMethod gMethods[] = {
-    {"nComputeLineBreaks", "(Ljava/lang/String;[C[FIFIF[IILandroid/text/StaticLayout$LineBreaks;[I[F[ZI)I", (void*) nComputeLineBreaks}
+    {"nComputeLineBreaks", "(Ljava/lang/String;[C[FIFIF[IIZLandroid/text/StaticLayout$LineBreaks;[I[F[ZI)I", (void*) nComputeLineBreaks}
 };
 
 int register_android_text_StaticLayout(JNIEnv* env)
