@@ -60,6 +60,7 @@ public class ChooserActivity extends ResolverActivity {
                 initialIntents[i] = in;
             }
         }
+        setSafeForwardingMode(true);
         super.onCreate(savedInstanceState, target, title, defaultTitleRes, initialIntents,
                 null, false);
     }
