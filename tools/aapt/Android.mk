@@ -66,6 +66,8 @@ aaptHostStaticLibs := \
     libexpat \
     libziparchive-host
 
+aaptCFlags := -DAAPT_VERSION=\"$(BUILD_NUMBER)\"
+
 ifeq ($(HOST_OS),linux)
     aaptHostLdLibs += -lrt -ldl -lpthread
 endif
@@ -91,6 +93,7 @@ LOCAL_C_INCLUDES += $(aaptCIncludes)
 
 LOCAL_CFLAGS += -Wno-format-y2k
 LOCAL_CFLAGS += -DSTATIC_ANDROIDFW_FOR_TOOLS
+LOCAL_CFLAGS += $(aaptCFlags)
 ifeq (darwin,$(HOST_OS))
 LOCAL_CFLAGS += -D_DARWIN_UNLIMITED_STREAMS
 endif
@@ -110,7 +113,9 @@ LOCAL_SRC_FILES := $(aaptMain)
 LOCAL_STATIC_LIBRARIES += \
     libaapt \
     $(aaptHostStaticLibs)
+
 LOCAL_LDLIBS += $(aaptHostLdLibs)
+LOCAL_CFLAGS += $(aaptCFlags)
 
 include $(BUILD_HOST_EXECUTABLE)
 
@@ -128,7 +133,9 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)
 LOCAL_STATIC_LIBRARIES += \
     libaapt \
     $(aaptHostStaticLibs)
+
 LOCAL_LDLIBS += $(aaptHostLdLibs)
+LOCAL_CFLAGS += $(aaptCFlags)
 
 include $(BUILD_HOST_NATIVE_TEST)
 
@@ -159,6 +166,7 @@ LOCAL_STATIC_LIBRARIES := \
     libstlport_static \
     libexpat_static
 
+LOCAL_CFLAGS += $(aaptCFlags)
 LOCAL_CPPFLAGS += -Wno-non-virtual-dtor
 
 include $(BUILD_EXECUTABLE)
