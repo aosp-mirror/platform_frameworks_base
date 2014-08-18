@@ -1843,13 +1843,21 @@ public abstract class BatteryStats implements Parcelable {
         }
         pw.println();
     }
-    
+
+    /**
+     * Temporary for settings.
+     */
+    public final void dumpCheckinLocked(Context context, PrintWriter pw, int which, int reqUid) {
+        dumpCheckinLocked(context, pw, which, reqUid, BatteryStatsHelper.checkWifiOnly(context));
+    }
+
     /**
      * Checkin server version of dump to produce more compact, computer-readable log.
      * 
      * NOTE: all times are expressed in 'ms'.
      */
-    public final void dumpCheckinLocked(Context context, PrintWriter pw, int which, int reqUid) {
+    public final void dumpCheckinLocked(Context context, PrintWriter pw, int which, int reqUid,
+            boolean wifiOnly) {
         final long rawUptime = SystemClock.uptimeMillis() * 1000;
         final long rawRealtime = SystemClock.elapsedRealtime() * 1000;
         final long batteryUptime = getBatteryUptime(rawUptime);
@@ -2046,7 +2054,7 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
         
-        BatteryStatsHelper helper = new BatteryStatsHelper(context, false);
+        BatteryStatsHelper helper = new BatteryStatsHelper(context, false, wifiOnly);
         helper.create(this);
         helper.refreshStats(which, UserHandle.USER_ALL);
         List<BatterySipper> sippers = helper.getUsageList();
@@ -2315,9 +2323,17 @@ public abstract class BatteryStats implements Parcelable {
         printer.print(BatteryStatsHelper.makemAh(power));
     }
 
+    /**
+     * Temporary for settings.
+     */
+    public final void dumpLocked(Context context, PrintWriter pw, String prefix, int which,
+            int reqUid) {
+        dumpLocked(context, pw, prefix, which, reqUid, BatteryStatsHelper.checkWifiOnly(context));
+    }
+
     @SuppressWarnings("unused")
     public final void dumpLocked(Context context, PrintWriter pw, String prefix, final int which,
-            int reqUid) {
+            int reqUid, boolean wifiOnly) {
         final long rawUptime = SystemClock.uptimeMillis() * 1000;
         final long rawRealtime = SystemClock.elapsedRealtime() * 1000;
         final long batteryUptime = getBatteryUptime(rawUptime);
@@ -2746,7 +2762,7 @@ public abstract class BatteryStats implements Parcelable {
             pw.println();
         }
 
-        BatteryStatsHelper helper = new BatteryStatsHelper(context, false);
+        BatteryStatsHelper helper = new BatteryStatsHelper(context, false, wifiOnly);
         helper.create(this);
         helper.refreshStats(which, UserHandle.USER_ALL);
         List<BatterySipper> sippers = helper.getUsageList();
@@ -3723,6 +3739,7 @@ public abstract class BatteryStats implements Parcelable {
     public static final int DUMP_HISTORY_ONLY = 1<<2;
     public static final int DUMP_INCLUDE_HISTORY = 1<<3;
     public static final int DUMP_VERBOSE = 1<<4;
+    public static final int DUMP_DEVICE_WIFI_ONLY = 1<<5;
 
     private void dumpHistoryLocked(PrintWriter pw, int flags, long histStart, boolean checkin) {
         final HistoryPrinter hprinter = new HistoryPrinter();
@@ -3918,12 +3935,14 @@ public abstract class BatteryStats implements Parcelable {
             pw.println("Statistics since last charge:");
             pw.println("  System starts: " + getStartCount()
                     + ", currently on battery: " + getIsOnBattery());
-            dumpLocked(context, pw, "", STATS_SINCE_CHARGED, reqUid);
+            dumpLocked(context, pw, "", STATS_SINCE_CHARGED, reqUid,
+                    (flags&DUMP_DEVICE_WIFI_ONLY) != 0);
             pw.println();
         }
         if (!filtering || (flags&DUMP_UNPLUGGED_ONLY) != 0) {
             pw.println("Statistics since last unplugged:");
-            dumpLocked(context, pw, "", STATS_SINCE_UNPLUGGED, reqUid);
+            dumpLocked(context, pw, "", STATS_SINCE_UNPLUGGED, reqUid,
+                    (flags&DUMP_DEVICE_WIFI_ONLY) != 0);
         }
     }
     
@@ -4013,10 +4032,12 @@ public abstract class BatteryStats implements Parcelable {
                 dumpLine(pw, 0 /* uid */, "i" /* category */, CHARGE_TIME_REMAIN_DATA,
                         (Object[])lineArgs);
             }
-            dumpCheckinLocked(context, pw, STATS_SINCE_CHARGED, -1);
+            dumpCheckinLocked(context, pw, STATS_SINCE_CHARGED, -1,
+                    (flags&DUMP_DEVICE_WIFI_ONLY) != 0);
         }
         if (!filtering || (flags&DUMP_UNPLUGGED_ONLY) != 0) {
-            dumpCheckinLocked(context, pw, STATS_SINCE_UNPLUGGED, -1);
+            dumpCheckinLocked(context, pw, STATS_SINCE_UNPLUGGED, -1,
+                    (flags&DUMP_DEVICE_WIFI_ONLY) != 0);
         }
     }
 }
