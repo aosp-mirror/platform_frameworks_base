@@ -2636,9 +2636,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void setHardKeyboardStatus(boolean available, boolean enabled) {}
-
-    @Override
     protected void tick(StatusBarNotification n, boolean firstTime) {
         if (!mTickerEnabled) return;
 
