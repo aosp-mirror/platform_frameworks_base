@@ -96,7 +96,7 @@ public final class SelectPrinterActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getActionBar().setIcon(R.drawable.ic_menu_print);
+        getActionBar().setIcon(R.drawable.ic_print);
 
         setContentView(R.layout.select_printer_activity);
 
