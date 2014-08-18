@@ -2931,7 +2931,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         findPreferredActivity(intent, resolvedType,
                 flags, query, 0, false, true, false, userId);
         // Add the new activity as the last chosen for this filter
-        addPreferredActivityInternal(filter, match, null, activity, false, userId);
+        addPreferredActivityInternal(filter, match, null, activity, false, userId,
+                "Setting last chosen");
     }
 
     @Override
@@ -11473,11 +11474,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public void addPreferredActivity(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity, int userId) {
-        addPreferredActivityInternal(filter, match, set, activity, true, userId);
+        addPreferredActivityInternal(filter, match, set, activity, true, userId,
+                "Adding preferred");
     }
 
     private void addPreferredActivityInternal(IntentFilter filter, int match,
-            ComponentName[] set, ComponentName activity, boolean always, int userId) {
+            ComponentName[] set, ComponentName activity, boolean always, int userId,
+            String opname) {
         // writer
         int callingUid = Binder.getCallingUid();
         enforceCrossUserPermission(callingUid, userId, true, "add preferred activity");
@@ -11499,10 +11502,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                         android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
             }
 
-            Slog.i(TAG, "Adding preferred activity " + activity + " for user " + userId + " :");
+            PreferredIntentResolver pir = mSettings.editPreferredActivitiesLPw(userId);
+            Slog.i(TAG, opname + " activity " + activity.flattenToShortString() + " for user "
+                    + userId + ":");
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
-            mSettings.editPreferredActivitiesLPw(userId).addFilter(
-                    new PreferredActivity(filter, match, set, activity, always));
+            pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
             mSettings.writePackageRestrictionsLPr(userId);
         }
     }
@@ -11525,7 +11529,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final int callingUid = Binder.getCallingUid();
         enforceCrossUserPermission(callingUid, userId, true, "replace preferred activity");
-        final int callingUserId = UserHandle.getUserId(callingUid);
         synchronized (mPackages) {
             if (mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
@@ -11540,30 +11543,61 @@ public class PackageManagerService extends IPackageManager.Stub {
                         android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
             }
 
-            PreferredIntentResolver pir = mSettings.mPreferredActivities.get(callingUserId);
+            PreferredIntentResolver pir = mSettings.mPreferredActivities.get(userId);
             if (pir != null) {
-                Intent intent = new Intent(filter.getAction(0)).addCategory(filter.getCategory(0));
-                if (filter.countDataSchemes() == 1) {
-                    Uri.Builder builder = new Uri.Builder();
-                    builder.scheme(filter.getDataScheme(0));
-                    intent.setData(builder.build());
-                }
-                List<PreferredActivity> matches = pir.queryIntent(
-                        intent, null, true, callingUserId);
-                if (DEBUG_PREFERRED) {
-                    Slog.i(TAG, matches.size() + " preferred matches for " + intent);
-                }
-                for (int i = 0; i < matches.size(); i++) {
-                    PreferredActivity pa = matches.get(i);
+                // Get all of the existing entries that exactly match this filter.
+                ArrayList<PreferredActivity> existing = pir.findFilters(filter);
+                if (existing != null && existing.size() == 1) {
+                    PreferredActivity cur = existing.get(0);
                     if (DEBUG_PREFERRED) {
-                        Slog.i(TAG, "Removing preferred activity "
-                                + pa.mPref.mComponent + ":");
+                        Slog.i(TAG, "Checking replace of preferred:");
                         filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
+                        if (!cur.mPref.mAlways) {
+                            Slog.i(TAG, "  -- CUR; not mAlways!");
+                        } else {
+                            Slog.i(TAG, "  -- CUR: mMatch=" + cur.mPref.mMatch);
+                            Slog.i(TAG, "  -- CUR: mSet="
+                                    + Arrays.toString(cur.mPref.mSetComponents));
+                            Slog.i(TAG, "  -- CUR: mComponent=" + cur.mPref.mShortComponent);
+                            Slog.i(TAG, "  -- NEW: mMatch="
+                                    + (match&IntentFilter.MATCH_CATEGORY_MASK));
+                            Slog.i(TAG, "  -- CUR: mSet=" + Arrays.toString(set));
+                            Slog.i(TAG, "  -- CUR: mComponent=" + activity.flattenToShortString());
+                        }
+                    }
+                    if (cur.mPref.mAlways && cur.mPref.mComponent.equals(activity)
+                            && cur.mPref.mMatch == (match&IntentFilter.MATCH_CATEGORY_MASK)
+                            && cur.mPref.sameSet(set)) {
+                        if (DEBUG_PREFERRED) {
+                            Slog.i(TAG, "Replacing with same preferred activity "
+                                    + cur.mPref.mShortComponent + " for user "
+                                    + userId + ":");
+                            filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
+                        } else {
+                            Slog.i(TAG, "Replacing with same preferred activity "
+                                    + cur.mPref.mShortComponent + " for user "
+                                    + userId);
+                        }
+                        return;
+                    }
+                }
+
+                if (DEBUG_PREFERRED) {
+                    Slog.i(TAG, existing.size() + " existing preferred matches for:");
+                    filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
+                }
+                for (int i = 0; i < existing.size(); i++) {
+                    PreferredActivity pa = existing.get(i);
+                    if (DEBUG_PREFERRED) {
+                        Slog.i(TAG, "Removing existing preferred activity "
+                                + pa.mPref.mComponent + ":");
+                        pa.dump(new LogPrinter(Log.INFO, TAG), "  ");
                     }
                     pir.removeFilter(pa);
                 }
             }
-            addPreferredActivityInternal(filter, match, set, activity, true, callingUserId);
+            addPreferredActivityInternal(filter, match, set, activity, true, userId,
+                    "Replacing preferred");
         }
     }
 

@@ -44,10 +44,10 @@ public class PreferredComponent {
     // Whether this is to be the one that's always chosen. If false, it's the most recently chosen.
     public boolean mAlways;
 
-    private final String[] mSetPackages;
-    private final String[] mSetClasses;
-    private final String[] mSetComponents;
-    private final String mShortComponent;
+    final String[] mSetPackages;
+    final String[] mSetClasses;
+    final String[] mSetComponents;
+    final String mShortComponent;
     private String mParseError;
 
     private final Callbacks mCallbacks;
@@ -193,7 +193,12 @@ public class PreferredComponent {
     }
 
     public boolean sameSet(List<ResolveInfo> query, int priority) {
-        if (mSetPackages == null) return false;
+        if (mSetPackages == null) {
+            return query == null;
+        }
+        if (query == null) {
+            return false;
+        }
         final int NQ = query.size();
         final int NS = mSetPackages.length;
         int numMatch = 0;
@@ -205,6 +210,27 @@ public class PreferredComponent {
             for (int j=0; j<NS; j++) {
                 if (mSetPackages[j].equals(ai.packageName)
                         && mSetClasses[j].equals(ai.name)) {
+                    numMatch++;
+                    good = true;
+                    break;
+                }
+            }
+            if (!good) return false;
+        }
+        return numMatch == NS;
+    }
+
+    public boolean sameSet(ComponentName[] comps) {
+        if (mSetPackages == null) return false;
+        final int NQ = comps.length;
+        final int NS = mSetPackages.length;
+        int numMatch = 0;
+        for (int i=0; i<NQ; i++) {
+            ComponentName cn = comps[i];
+            boolean good = false;
+            for (int j=0; j<NS; j++) {
+                if (mSetPackages[j].equals(cn.getPackageName())
+                        && mSetClasses[j].equals(cn.getClassName())) {
                     numMatch++;
                     good = true;
                     break;
