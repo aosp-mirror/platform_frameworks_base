@@ -77,6 +77,7 @@ public class WifiP2pWfdInfo implements Parcelable {
 
     public boolean setDeviceType(int deviceType) {
         if (deviceType >= WFD_SOURCE && deviceType <= SOURCE_OR_PRIMARY_SINK) {
+            mDeviceInfo &= ~DEVICE_TYPE;
             mDeviceInfo |= deviceType;
             return true;
         }
