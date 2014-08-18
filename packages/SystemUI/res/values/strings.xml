@@ -397,6 +397,8 @@
     <string name="accessibility_desc_notification_shade">Notification shade.</string>
     <!-- Content description for the quick settings panel (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_quick_settings">Quick settings.</string>
+    <!-- Content description for the lock screen (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_desc_lock_screen">Lock screen.</string>
     <!-- Content description for the settings button in the status bar header. [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_settings">Settings</string>
     <!-- Content description for the recent apps panel (not shown on the screen). [CHAR LIMIT=NONE] -->
