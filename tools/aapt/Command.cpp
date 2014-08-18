@@ -32,7 +32,7 @@ int doVersion(Bundle* bundle)
     if (bundle->getFileSpecCount() != 0) {
         printf("(ignoring extra arguments)\n");
     }
-    printf("Android Asset Packaging Tool, v0.2\n");
+    printf("Android Asset Packaging Tool, v0.2-" AAPT_VERSION "\n");
 
     return 0;
 }
