@@ -1656,4 +1656,11 @@
     <!-- Package name providing WebView implementation. -->
     <string name="config_webViewPackageName" translatable="false">com.android.webview</string>
 
+    <!-- If EMS is not supported, framework breaks down EMS into single segment SMS
+         and adds page info " x/y". This config is used to set which carrier doesn't
+         support EMS and whether page info should be added at the beginning or the end.
+         We use tag 'prefix' for position beginning and 'suffix' for position end.
+         Examples: <item>311480;prefix</item> <item>310260;suffix</item>
+    -->
+    <string-array translatable="false" name="no_ems_support_sim_operators" />
 </resources>

@@ -1982,4 +1982,5 @@
   <java-symbol type="attr" name="checkMarkGravity" />
   <java-symbol type="layout" name="select_dialog_singlechoice_material" />
   <java-symbol type="layout" name="select_dialog_multichoice_material" />
+  <java-symbol type="array" name="no_ems_support_sim_operators" />
 </resources>
