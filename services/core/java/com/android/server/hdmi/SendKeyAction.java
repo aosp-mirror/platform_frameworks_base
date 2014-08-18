@@ -109,12 +109,12 @@ final class SendKeyAction extends HdmiCecFeatureAction {
     }
 
     private void sendKeyDown(int keycode) {
-        byte[] keycodeAndParam = getCecKeycodeAndParam(keycode);
-        if (keycodeAndParam == null) {
+        int cecKeycode = HdmiCecKeycode.androidKeyToCecKey(keycode);
+        if (cecKeycode == HdmiCecKeycode.UNSUPPORTED_KEYCODE) {
             return;
         }
         sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(getSourceAddress(),
-                mTargetAddress, keycodeAndParam));
+                mTargetAddress, new byte[] { (byte) (cecKeycode & 0xFF) }));
     }
 
     private void sendKeyUp() {
@@ -140,14 +140,5 @@ final class SendKeyAction extends HdmiCecFeatureAction {
         }
         sendKeyDown(mLastKeycode);
         addTimer(mState, IRT_MS);
-    }
-
-    // Converts the Android key code to corresponding CEC key code definition. Those CEC keys
-    // with additional parameters should be mapped from individual Android key code. 'Select
-    // Broadcast' with the parameter 'cable', for instance, shall have its counterpart such as
-    // KeyEvent.KEYCODE_TV_BROADCAST_CABLE.
-    // The return byte array contains both UI command (keycode) and optional parameter.
-    private byte[] getCecKeycodeAndParam(int keycode) {
-        return HdmiCecKeycode.androidKeyToCecKey(keycode);
     }
 }
