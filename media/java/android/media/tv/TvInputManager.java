@@ -235,14 +235,14 @@ public final class TvInputManager {
         }
 
         /**
-         * This is called when {@link TvInputService.Session#layoutSurface} is called to
-         * change the layout of surface.
+         * This is called when {@link TvInputService.Session#layoutSurface} is called to change the
+         * layout of surface.
          *
          * @param session A {@link TvInputManager.Session} associated with this callback
-         * @param l Left position.
-         * @param t Top position.
-         * @param r Right position.
-         * @param b Bottom position.
+         * @param left Left position.
+         * @param top Top position.
+         * @param right Right position.
+         * @param bottom Bottom position.
          * @hide
          */
         @SystemApi
@@ -1164,7 +1164,7 @@ public final class TvInputManager {
          *            {@link TvTrackInfo#TYPE_SUBTITLE}.
          * @param trackId The ID of the track to select. When {@code null}, the currently selected
          *            track of the given type will be unselected.
-         * @see #getTracks()
+         * @see #getTracks
          */
         public void selectTrack(int type, String trackId) {
             if (type == TvTrackInfo.TYPE_AUDIO) {
@@ -1462,14 +1462,14 @@ public final class TvInputManager {
         // Assumes the event has already been removed from the queue.
         void invokeFinishedInputEventCallback(PendingEvent p, boolean handled) {
             p.mHandled = handled;
-            if (p.mHandler.getLooper().isCurrentThread()) {
+            if (p.mEventHandler.getLooper().isCurrentThread()) {
                 // Already running on the callback handler thread so we can send the callback
                 // immediately.
                 p.run();
             } else {
                 // Post the event to the callback handler thread.
                 // In this case, the callback will be responsible for recycling the event.
-                Message msg = Message.obtain(p.mHandler, p);
+                Message msg = Message.obtain(p.mEventHandler, p);
                 msg.setAsynchronous(true);
                 msg.sendToTarget();
             }
@@ -1494,9 +1494,9 @@ public final class TvInputManager {
                 p = new PendingEvent();
             }
             p.mEvent = event;
-            p.mToken = token;
+            p.mEventToken = token;
             p.mCallback = callback;
-            p.mHandler = handler;
+            p.mEventHandler = handler;
             return p;
         }
 
@@ -1568,24 +1568,24 @@ public final class TvInputManager {
 
         private final class PendingEvent implements Runnable {
             public InputEvent mEvent;
-            public Object mToken;
+            public Object mEventToken;
             public FinishedInputEventCallback mCallback;
-            public Handler mHandler;
+            public Handler mEventHandler;
             public boolean mHandled;
 
             public void recycle() {
                 mEvent = null;
-                mToken = null;
+                mEventToken = null;
                 mCallback = null;
-                mHandler = null;
+                mEventHandler = null;
                 mHandled = false;
             }
 
             @Override
             public void run() {
-                mCallback.onFinishedInputEvent(mToken, mHandled);
+                mCallback.onFinishedInputEvent(mEventToken, mHandled);
 
-                synchronized (mHandler) {
+                synchronized (mEventHandler) {
                     recyclePendingEventLocked(this);
                 }
             }

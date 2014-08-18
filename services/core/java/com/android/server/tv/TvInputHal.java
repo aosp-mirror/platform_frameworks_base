@@ -19,12 +19,11 @@ package com.android.server.tv;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvStreamConfig;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Message;
-import android.view.Surface;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.view.Surface;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -64,12 +63,12 @@ final class TvInputHal implements Handler.Callback {
             int generation);
     private static native void nativeClose(long ptr);
 
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
     private long mPtr = 0;
     private final Callback mCallback;
     private final Handler mHandler;
-    private SparseIntArray mStreamConfigGenerations = new SparseIntArray();
-    private SparseArray<TvStreamConfig[]> mStreamConfigs = new SparseArray<>();;
+    private final SparseIntArray mStreamConfigGenerations = new SparseIntArray();
+    private final SparseArray<TvStreamConfig[]> mStreamConfigs = new SparseArray<>();
 
     public TvInputHal(Callback callback) {
         mCallback = callback;
@@ -153,7 +152,7 @@ final class TvInputHal implements Handler.Callback {
 
     // Handler.Callback implementation
 
-    private Queue<Message> mPendingMessageQueue = new LinkedList<Message>();
+    private final Queue<Message> mPendingMessageQueue = new LinkedList<Message>();
 
     @Override
     public boolean handleMessage(Message msg) {
