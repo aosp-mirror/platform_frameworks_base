@@ -5132,6 +5132,13 @@ public final class Settings {
         public static final String UNLOCK_SOUND = "unlock_sound";
 
         /**
+         * URI for the "device is trusted" sound, which is played when the device enters the trusted
+         * state without unlocking.
+         * @hide
+         */
+        public static final String TRUSTED_SOUND = "trusted_sound";
+
+        /**
          * URI for the low battery sound file.
          * @hide
          */

@@ -77,7 +77,7 @@ public class KeyguardSimpleHostView extends KeyguardViewBase {
             if (isVisibleToUser()) {
                 dismiss(false /* authenticated */);
             } else {
-                // TODO: Play first half of unlock sound.
+                mViewMediatorCallback.playTrustedSound();
             }
         }
     };

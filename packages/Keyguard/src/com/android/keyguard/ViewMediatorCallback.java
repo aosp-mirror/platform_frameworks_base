@@ -66,4 +66,9 @@ public interface ViewMediatorCallback {
      * Report when the UI is ready for dismissing the whole Keyguard.
      */
     void readyForKeyguardDone();
+
+    /**
+     * Play the "device trusted" sound.
+     */
+    void playTrustedSound();
 }
