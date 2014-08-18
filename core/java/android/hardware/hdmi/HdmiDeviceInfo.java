@@ -230,7 +230,7 @@ public class HdmiDeviceInfo implements Parcelable {
         mDeviceType = DEVICE_RESERVED;
         mVendorId = 0;
         mDevicePowerStatus = HdmiControlManager.POWER_STATUS_UNKNOWN;
-        mDisplayName = "MHL";
+        mDisplayName = "Mobile";
 
         mDeviceId = adopterId;
         mAdopterId = deviceId;
