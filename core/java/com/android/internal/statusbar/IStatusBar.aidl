@@ -32,7 +32,6 @@ oneway interface IStatusBar
     void topAppWindowChanged(boolean menuVisible);
     void setImeWindowStatus(in IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher);
-    void setHardKeyboardStatus(boolean available, boolean enabled);
     void setWindowState(int window, int state);
     void buzzBeepBlinked();
     void notificationLightOff();

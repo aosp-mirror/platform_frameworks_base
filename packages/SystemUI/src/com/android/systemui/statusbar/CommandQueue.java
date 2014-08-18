@@ -47,16 +47,15 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_SET_SYSTEMUI_VISIBILITY    = 6 << MSG_SHIFT;
     private static final int MSG_TOP_APP_WINDOW_CHANGED     = 7 << MSG_SHIFT;
     private static final int MSG_SHOW_IME_BUTTON            = 8 << MSG_SHIFT;
-    private static final int MSG_SET_HARD_KEYBOARD_STATUS   = 9 << MSG_SHIFT;
-    private static final int MSG_TOGGLE_RECENT_APPS         = 10 << MSG_SHIFT;
-    private static final int MSG_PRELOAD_RECENT_APPS        = 11 << MSG_SHIFT;
-    private static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 12 << MSG_SHIFT;
-    private static final int MSG_SET_WINDOW_STATE           = 13 << MSG_SHIFT;
-    private static final int MSG_SHOW_RECENT_APPS           = 14 << MSG_SHIFT;
-    private static final int MSG_HIDE_RECENT_APPS           = 15 << MSG_SHIFT;
-    private static final int MSG_BUZZ_BEEP_BLINKED          = 16 << MSG_SHIFT;
-    private static final int MSG_NOTIFICATION_LIGHT_OFF     = 17 << MSG_SHIFT;
-    private static final int MSG_NOTIFICATION_LIGHT_PULSE   = 18 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_RECENT_APPS         = 9 << MSG_SHIFT;
+    private static final int MSG_PRELOAD_RECENT_APPS        = 10 << MSG_SHIFT;
+    private static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 11 << MSG_SHIFT;
+    private static final int MSG_SET_WINDOW_STATE           = 12 << MSG_SHIFT;
+    private static final int MSG_SHOW_RECENT_APPS           = 13 << MSG_SHIFT;
+    private static final int MSG_HIDE_RECENT_APPS           = 14 << MSG_SHIFT;
+    private static final int MSG_BUZZ_BEEP_BLINKED          = 15 << MSG_SHIFT;
+    private static final int MSG_NOTIFICATION_LIGHT_OFF     = 16 << MSG_SHIFT;
+    private static final int MSG_NOTIFICATION_LIGHT_PULSE   = 17 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -87,7 +86,6 @@ public class CommandQueue extends IStatusBar.Stub {
         public void topAppWindowChanged(boolean visible);
         public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
                 boolean showImeSwitcher);
-        public void setHardKeyboardStatus(boolean available, boolean enabled);
         public void showRecentApps(boolean triggeredFromAltTab);
         public void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
         public void toggleRecentApps();
@@ -172,14 +170,6 @@ public class CommandQueue extends IStatusBar.Stub {
             Message m = mHandler.obtainMessage(MSG_SHOW_IME_BUTTON, vis, backDisposition, token);
             m.getData().putBoolean(SHOW_IME_SWITCHER_KEY, showImeSwitcher);
             m.sendToTarget();
-        }
-    }
-
-    public void setHardKeyboardStatus(boolean available, boolean enabled) {
-        synchronized (mList) {
-            mHandler.removeMessages(MSG_SET_HARD_KEYBOARD_STATUS);
-            mHandler.obtainMessage(MSG_SET_HARD_KEYBOARD_STATUS,
-                    available ? 1 : 0, enabled ? 1 : 0).sendToTarget();
         }
     }
 
@@ -299,9 +289,6 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_SHOW_IME_BUTTON:
                     mCallbacks.setImeWindowStatus((IBinder) msg.obj, msg.arg1, msg.arg2,
                             msg.getData().getBoolean(SHOW_IME_SWITCHER_KEY, false));
-                    break;
-                case MSG_SET_HARD_KEYBOARD_STATUS:
-                    mCallbacks.setHardKeyboardStatus(msg.arg1 != 0, msg.arg2 != 0);
                     break;
                 case MSG_SHOW_RECENT_APPS:
                     mCallbacks.showRecentApps(msg.arg1 != 0);
