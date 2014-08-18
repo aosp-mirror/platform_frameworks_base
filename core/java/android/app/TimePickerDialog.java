@@ -110,6 +110,7 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
         setView(view);
         setButton(BUTTON_POSITIVE, themeContext.getString(R.string.ok), this);
         setButton(BUTTON_NEGATIVE, themeContext.getString(R.string.cancel), this);
+        setButtonPanelLayoutHint(LAYOUT_HINT_SIDE);
 
         mTimePicker = (TimePicker) view.findViewById(R.id.timePicker);
         mTimePicker.setIs24HourView(mIs24HourView);
