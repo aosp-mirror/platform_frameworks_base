@@ -1091,159 +1091,82 @@ nScriptInvokeV(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot, 
 }
 
 static void
-nScriptForEach(JNIEnv *_env, jobject _this, jlong con,
-               jlong script, jint slot, jlong ain, jlong aout)
+nScriptForEach(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot,
+               jlongArray ains, jlong aout, jbyteArray params,
+               jintArray limits)
 {
-    LOG_API("nScriptForEach, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
-    rsScriptForEach((RsContext)con, (RsScript)script, slot, (RsAllocation)ain, (RsAllocation)aout, NULL, 0, NULL, 0);
-}
-static void
-nScriptForEachV(JNIEnv *_env, jobject _this, jlong con,
-                jlong script, jint slot, jlong ain, jlong aout, jbyteArray params)
-{
-    LOG_API("nScriptForEach, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
-    jint len = _env->GetArrayLength(params);
-    jbyte *ptr = _env->GetByteArrayElements(params, NULL);
-    rsScriptForEach((RsContext)con, (RsScript)script, slot, (RsAllocation)ain, (RsAllocation)aout, ptr, len, NULL, 0);
-    _env->ReleaseByteArrayElements(params, ptr, JNI_ABORT);
-}
+    LOG_API("nScriptForEach, con(%p), s(%p), slot(%i)", (RsContext)con,
+            (void *)script, slot);
 
-static void
-nScriptForEachClipped(JNIEnv *_env, jobject _this, jlong con,
-                      jlong script, jint slot, jlong ain, jlong aout,
-                      jint xstart, jint xend,
-                      jint ystart, jint yend, jint zstart, jint zend)
-{
-    LOG_API("nScriptForEachClipped, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
-    RsScriptCall sc;
-    sc.xStart = xstart;
-    sc.xEnd = xend;
-    sc.yStart = ystart;
-    sc.yEnd = yend;
-    sc.zStart = zstart;
-    sc.zEnd = zend;
-    sc.strategy = RS_FOR_EACH_STRATEGY_DONT_CARE;
-    sc.arrayStart = 0;
-    sc.arrayEnd = 0;
-    rsScriptForEach((RsContext)con, (RsScript)script, slot, (RsAllocation)ain, (RsAllocation)aout, NULL, 0, &sc, sizeof(sc));
-}
-
-static void
-nScriptForEachClippedV(JNIEnv *_env, jobject _this, jlong con,
-                       jlong script, jint slot, jlong ain, jlong aout,
-                       jbyteArray params, jint xstart, jint xend,
-                       jint ystart, jint yend, jint zstart, jint zend)
-{
-    LOG_API("nScriptForEachClipped, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
-    jint len = _env->GetArrayLength(params);
-    jbyte *ptr = _env->GetByteArrayElements(params, NULL);
-    RsScriptCall sc;
-    sc.xStart = xstart;
-    sc.xEnd = xend;
-    sc.yStart = ystart;
-    sc.yEnd = yend;
-    sc.zStart = zstart;
-    sc.zEnd = zend;
-    sc.strategy = RS_FOR_EACH_STRATEGY_DONT_CARE;
-    sc.arrayStart = 0;
-    sc.arrayEnd = 0;
-    rsScriptForEach((RsContext)con, (RsScript)script, slot, (RsAllocation)ain, (RsAllocation)aout, ptr, len, &sc, sizeof(sc));
-    _env->ReleaseByteArrayElements(params, ptr, JNI_ABORT);
-}
-
-static void
-nScriptForEachMultiClipped(JNIEnv *_env, jobject _this, jlong con,
-                      jlong script, jint slot, jlongArray ains, jlong aout,
-                      jint xstart, jint xend,
-                      jint ystart, jint yend, jint zstart, jint zend)
-{
-    LOG_API("nScriptForEachMultiClipped, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
-
-    jint   in_len = _env->GetArrayLength(ains);
-    jlong* in_ptr = _env->GetLongArrayElements(ains, NULL);
+    jint   in_len = 0;
+    jlong *in_ptr = NULL;
 
     RsAllocation *in_allocs = NULL;
 
-    if (sizeof(RsAllocation) == sizeof(jlong)) {
-      in_allocs = (RsAllocation*)in_ptr;
+    if (ains != NULL) {
+        in_len = _env->GetArrayLength(ains);
+        in_ptr = _env->GetLongArrayElements(ains, NULL);
 
-    } else {
-      // Convert from 64-bit jlong types to the native pointer type.
+        if (sizeof(RsAllocation) == sizeof(jlong)) {
+            in_allocs = (RsAllocation*)in_ptr;
 
-      in_allocs = new RsAllocation[in_len];
+        } else {
+            // Convert from 64-bit jlong types to the native pointer type.
 
-      for (int index = in_len; --index >= 0;) {
-        in_allocs[index] = (RsAllocation)in_ptr[index];
-      }
+            in_allocs = (RsAllocation*)alloca(in_len * sizeof(RsAllocation));
+
+            for (int index = in_len; --index >= 0;) {
+                in_allocs[index] = (RsAllocation)in_ptr[index];
+            }
+        }
     }
 
-    RsScriptCall sc;
-    sc.xStart = xstart;
-    sc.xEnd = xend;
-    sc.yStart = ystart;
-    sc.yEnd = yend;
-    sc.zStart = zstart;
-    sc.zEnd = zend;
-    sc.strategy = RS_FOR_EACH_STRATEGY_DONT_CARE;
-    sc.arrayStart = 0;
-    sc.arrayEnd = 0;
+    jint   param_len = 0;
+    jbyte *param_ptr = NULL;
 
-    rsScriptForEachMulti((RsContext)con, (RsScript)script, slot, in_allocs, in_len, (RsAllocation)aout, NULL, 0, &sc, sizeof(sc));
-
-    if (sizeof(RsAllocation) != sizeof(jlong)) {
-      delete[] in_allocs;
+    if (params != NULL) {
+        param_len = _env->GetArrayLength(params);
+        param_ptr = _env->GetByteArrayElements(params, NULL);
     }
 
-    _env->ReleaseLongArrayElements(ains, in_ptr, JNI_ABORT);
-}
+    RsScriptCall sc, *sca = NULL;
+    uint32_t sc_size = 0;
 
-static void
-nScriptForEachMultiClippedV(JNIEnv *_env, jobject _this, jlong con,
-                       jlong script, jint slot, jlongArray ains, jlong aout,
-                       jbyteArray params, jint xstart, jint xend,
-                       jint ystart, jint yend, jint zstart, jint zend)
-{
-    LOG_API("nScriptForEachMultiClippedV, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
+    jint  limit_len = 0;
+    jint *limit_ptr = NULL;
 
-    jint   in_len = _env->GetArrayLength(ains);
-    jlong* in_ptr = _env->GetLongArrayElements(ains, NULL);
+    if (limits != NULL) {
+        limit_len = _env->GetArrayLength(limits);
+        limit_ptr = _env->GetIntArrayElements(limits, NULL);
 
-    RsAllocation *in_allocs = NULL;
+        assert(limit_len == 6);
 
-    if (sizeof(RsAllocation) == sizeof(jlong)) {
-      in_allocs = (RsAllocation*)in_ptr;
+        sc.xStart     = limit_ptr[0];
+        sc.xEnd       = limit_ptr[1];
+        sc.yStart     = limit_ptr[2];
+        sc.yEnd       = limit_ptr[3];
+        sc.zStart     = limit_ptr[4];
+        sc.zEnd       = limit_ptr[5];
+        sc.strategy   = RS_FOR_EACH_STRATEGY_DONT_CARE;
 
-    } else {
-      // Convert from 64-bit jlong types to the native pointer type.
-
-      in_allocs = new RsAllocation[in_len];
-
-      for (int index = in_len; --index >= 0;) {
-        in_allocs[index] = (RsAllocation)in_ptr[index];
-      }
+        sca = &sc;
     }
 
-    jint   param_len = _env->GetArrayLength(params);
-    jbyte* param_ptr = _env->GetByteArrayElements(params, NULL);
+    rsScriptForEachMulti((RsContext)con, (RsScript)script, slot,
+                         in_allocs, in_len, (RsAllocation)aout,
+                         param_ptr, param_len, sca, sc_size);
 
-    RsScriptCall sc;
-    sc.xStart = xstart;
-    sc.xEnd = xend;
-    sc.yStart = ystart;
-    sc.yEnd = yend;
-    sc.zStart = zstart;
-    sc.zEnd = zend;
-    sc.strategy = RS_FOR_EACH_STRATEGY_DONT_CARE;
-    sc.arrayStart = 0;
-    sc.arrayEnd = 0;
-    rsScriptForEachMulti((RsContext)con, (RsScript)script, slot, in_allocs, in_len, (RsAllocation)aout, param_ptr, param_len, &sc, sizeof(sc));
-
-    if (sizeof(RsAllocation) != sizeof(jlong)) {
-      delete[] in_allocs;
+    if (ains != NULL) {
+        _env->ReleaseLongArrayElements(ains, in_ptr, JNI_ABORT);
     }
 
-    _env->ReleaseLongArrayElements(ains, in_ptr, JNI_ABORT);
-    _env->ReleaseByteArrayElements(params, param_ptr, JNI_ABORT);
+    if (params != NULL) {
+        _env->ReleaseByteArrayElements(params, param_ptr, JNI_ABORT);
+    }
+
+    if (limits != NULL) {
+        _env->ReleaseIntArrayElements(limits, limit_ptr, JNI_ABORT);
+    }
 }
 
 // -----------------------------------
@@ -1757,12 +1680,9 @@ static JNINativeMethod methods[] = {
 {"rsnScriptSetTimeZone",             "(JJ[B)V",                               (void*)nScriptSetTimeZone },
 {"rsnScriptInvoke",                  "(JJI)V",                                (void*)nScriptInvoke },
 {"rsnScriptInvokeV",                 "(JJI[B)V",                              (void*)nScriptInvokeV },
-{"rsnScriptForEach",                 "(JJIJJ)V",                              (void*)nScriptForEach },
-{"rsnScriptForEach",                 "(JJIJJ[B)V",                            (void*)nScriptForEachV },
-{"rsnScriptForEachClipped",          "(JJIJJIIIIII)V",                        (void*)nScriptForEachClipped },
-{"rsnScriptForEachClipped",          "(JJIJJ[BIIIIII)V",                      (void*)nScriptForEachClippedV },
-{"rsnScriptForEachMultiClipped",     "(JJI[JJIIIIII)V",                       (void*)nScriptForEachMultiClipped },
-{"rsnScriptForEachMultiClipped",     "(JJI[JJ[BIIIIII)V",                     (void*)nScriptForEachMultiClippedV },
+
+{"rsnScriptForEach",                 "(JJI[JJ[B[I)V",                         (void*)nScriptForEach },
+
 {"rsnScriptSetVarI",                 "(JJII)V",                               (void*)nScriptSetVarI },
 {"rsnScriptGetVarI",                 "(JJI)I",                                (void*)nScriptGetVarI },
 {"rsnScriptSetVarJ",                 "(JJIJ)V",                               (void*)nScriptSetVarJ },
