@@ -2992,15 +2992,17 @@ public class DevicePolicyManager {
      *
      * This function can only be called by the device owner.
      * @param packages The list of packages allowed to enter lock task mode
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      *
      * @see Activity#startLockTask()
      * @see DeviceAdminReceiver#onLockTaskModeChanged(Context, Intent, boolean, String)
      * @see UserManager#DISALLOW_CREATE_WINDOWS
      */
-    public void setLockTaskPackages(String[] packages) throws SecurityException {
+    public void setLockTaskPackages(ComponentName admin, String[] packages)
+            throws SecurityException {
         if (mService != null) {
             try {
-                mService.setLockTaskPackages(packages);
+                mService.setLockTaskPackages(admin, packages);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -3009,12 +3011,14 @@ public class DevicePolicyManager {
 
     /**
      * This function returns the list of packages allowed to start the lock task mode.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @hide
      */
-    public String[] getLockTaskPackages() {
+    public String[] getLockTaskPackages(ComponentName admin) {
         if (mService != null) {
             try {
-                return mService.getLockTaskPackages();
+                return mService.getLockTaskPackages(admin);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }

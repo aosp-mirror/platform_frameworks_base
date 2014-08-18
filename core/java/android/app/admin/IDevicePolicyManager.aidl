@@ -160,8 +160,8 @@ interface IDevicePolicyManager {
     String[] getAccountTypesWithManagementDisabled();
     String[] getAccountTypesWithManagementDisabledAsUser(int userId);
 
-    void setLockTaskPackages(in String[] packages);
-    String[] getLockTaskPackages();
+    void setLockTaskPackages(in ComponentName who, in String[] packages);
+    String[] getLockTaskPackages(in ComponentName who);
     boolean isLockTaskPermitted(in String pkg);
 
     void setGlobalSetting(in ComponentName who, in String setting, in String value);
