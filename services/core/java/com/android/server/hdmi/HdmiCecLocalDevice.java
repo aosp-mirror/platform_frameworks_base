@@ -17,10 +17,15 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Slog;
+import android.view.InputDevice;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
@@ -39,15 +44,21 @@ abstract class HdmiCecLocalDevice {
     private static final String TAG = "HdmiCecLocalDevice";
 
     private static final int MSG_DISABLE_DEVICE_TIMEOUT = 1;
+    private static final int MSG_USER_CONTROL_RELEASE_TIMEOUT = 2;
     // Timeout in millisecond for device clean up (5s).
     // Normal actions timeout is 2s but some of them would have several sequence of timeout.
     private static final int DEVICE_CLEANUP_TIMEOUT = 5000;
+    // Within the timer, a received <User Control Pressed> will start "Press and Hold" behavior.
+    // When it expires, we can assume <User Control Release> is received.
+    private static final int FOLLOWER_SAFETY_TIMEOUT = 550;
 
     protected final HdmiControlService mService;
     protected final int mDeviceType;
     protected int mAddress;
     protected int mPreferredAddress;
     protected HdmiDeviceInfo mDeviceInfo;
+    protected int mLastKeycode = HdmiCecKeycode.UNSUPPORTED_KEYCODE;
+    protected int mLastKeyRepeatCount = 0;
 
     static class ActiveSource {
         int logicalAddress;
@@ -110,6 +121,9 @@ abstract class HdmiCecLocalDevice {
             switch (msg.what) {
                 case MSG_DISABLE_DEVICE_TIMEOUT:
                     handleDisableDeviceTimeout();
+                    break;
+                case MSG_USER_CONTROL_RELEASE_TIMEOUT:
+                    handleUserControlReleased();
                     break;
             }
         }
@@ -230,10 +244,14 @@ abstract class HdmiCecLocalDevice {
                 return handleImageViewOn(message);
             case Constants.MESSAGE_USER_CONTROL_PRESSED:
                 return handleUserControlPressed(message);
+            case Constants.MESSAGE_USER_CONTROL_RELEASED:
+                return handleUserControlReleased();
             case Constants.MESSAGE_SET_STREAM_PATH:
                 return handleSetStreamPath(message);
             case Constants.MESSAGE_GIVE_DEVICE_POWER_STATUS:
                 return handleGiveDevicePowerStatus(message);
+            case Constants.MESSAGE_MENU_REQUEST:
+                return handleGiveDeviceMenuStatus(message);
             case Constants.MESSAGE_VENDOR_COMMAND:
                 return handleVendorCommand(message);
             case Constants.MESSAGE_VENDOR_COMMAND_WITH_ID:
@@ -376,6 +394,7 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleUserControlPressed(HdmiCecMessage message) {
         assertRunOnServiceThread();
+        mHandler.removeMessages(MSG_USER_CONTROL_RELEASE_TIMEOUT);
         if (mService.isPowerOnOrTransient() && isPowerOffOrToggleCommand(message)) {
             mService.standby();
             return true;
@@ -383,8 +402,53 @@ abstract class HdmiCecLocalDevice {
             mService.wakeUp();
             return true;
         }
+
+        final long downTime = SystemClock.uptimeMillis();
+        final byte[] params = message.getParams();
+        final int keycode = HdmiCecKeycode.cecKeyToAndroidKey(params[0],
+                params.length > 1 ? params[1] : HdmiCecKeycode.NO_PARAM);
+        int keyRepeatCount = 0;
+        if (mLastKeycode != HdmiCecKeycode.UNSUPPORTED_KEYCODE) {
+            if (keycode == mLastKeycode) {
+                keyRepeatCount = mLastKeyRepeatCount + 1;
+            } else {
+                injectKeyEvent(downTime, KeyEvent.ACTION_UP, mLastKeycode, 0);
+            }
+        }
+        mLastKeycode = keycode;
+        mLastKeyRepeatCount = keyRepeatCount;
+
+        if (keycode != HdmiCecKeycode.UNSUPPORTED_KEYCODE) {
+            injectKeyEvent(downTime, KeyEvent.ACTION_DOWN, keycode, keyRepeatCount);
+            mHandler.sendMessageDelayed(Message.obtain(mHandler, MSG_USER_CONTROL_RELEASE_TIMEOUT),
+                    FOLLOWER_SAFETY_TIMEOUT);
+            return true;
+        }
         return false;
     }
+
+    @ServiceThreadOnly
+    protected boolean handleUserControlReleased() {
+        assertRunOnServiceThread();
+        mHandler.removeMessages(MSG_USER_CONTROL_RELEASE_TIMEOUT);
+        mLastKeyRepeatCount = 0;
+        if (mLastKeycode != HdmiCecKeycode.UNSUPPORTED_KEYCODE) {
+            final long upTime = SystemClock.uptimeMillis();
+            injectKeyEvent(upTime, KeyEvent.ACTION_UP, mLastKeycode, 0);
+            mLastKeycode = HdmiCecKeycode.UNSUPPORTED_KEYCODE;
+            return true;
+        }
+        return false;
+    }
+
+    static void injectKeyEvent(long time, int action, int keycode, int repeat) {
+        KeyEvent keyEvent = KeyEvent.obtain(time, time, action, keycode,
+                repeat, 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FROM_SYSTEM,
+                InputDevice.SOURCE_HDMI, null);
+        InputManager.getInstance().injectInputEvent(keyEvent,
+                InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+        keyEvent.recycle();
+   }
 
     static boolean isPowerOnOrToggleCommand(HdmiCecMessage message) {
         byte[] params = message.getParams();
@@ -417,6 +481,13 @@ abstract class HdmiCecLocalDevice {
     protected boolean handleGiveDevicePowerStatus(HdmiCecMessage message) {
         mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPowerStatus(
                 mAddress, message.getSource(), mService.getPowerStatus()));
+        return true;
+    }
+
+    protected boolean handleGiveDeviceMenuStatus(HdmiCecMessage message) {
+        // Always report menu active to receive Remote Control.
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildReportMenuStatus(
+                mAddress, message.getSource(), Constants.MENU_STATE_ACTIVATED));
         return true;
     }
 

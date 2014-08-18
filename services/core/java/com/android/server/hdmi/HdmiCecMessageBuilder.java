@@ -338,6 +338,21 @@ public class HdmiCecMessageBuilder {
     }
 
     /**
+     * Build &lt;Report Menu Status&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @param menuStatus menu status of the device
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildReportMenuStatus(int src, int dest, int menuStatus) {
+        byte[] param = new byte[] {
+                (byte) (menuStatus)
+        };
+        return buildCommand(src, dest, Constants.MESSAGE_MENU_STATUS, param);
+    }
+
+    /**
      * Build &lt;System Audio Mode Request&gt; command.
      *
      * @param src source address of command
