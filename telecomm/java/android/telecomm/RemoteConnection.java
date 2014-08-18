@@ -233,9 +233,9 @@ public final class RemoteConnection {
     RemoteConnection(int failureCode, String failureMessage) {
         this("NULL", null, null);
         mConnected = false;
-        mState = Connection.STATE_FAILED;
-        mFailureCode = failureCode;
-        mFailureMessage = failureMessage;
+        mState = Connection.STATE_DISCONNECTED;
+        mFailureCode = DisconnectCause.OUTGOING_FAILURE;
+        mFailureMessage = failureMessage + " original code = " + failureCode;
     }
 
     /**
@@ -675,8 +675,9 @@ public final class RemoteConnection {
     }
 
     /**
-     * Create a RemoteConnection which is in the {@link Connection#STATE_FAILED} state. Attempting
-     * to use it for anything will almost certainly result in bad things happening. Do not do this.
+     * Create a RemoteConnection represents a failure, and which will be in
+     * {@link Connection#STATE_DISCONNECTED}. Attempting to use it for anything will almost
+     * certainly result in bad things happening. Do not do this.
      *
      * @return a failed {@link RemoteConnection}
      *

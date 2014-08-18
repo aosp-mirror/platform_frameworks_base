@@ -28818,12 +28818,10 @@ package android.telecomm {
     method public final void setAudioModeIsVoip(boolean);
     method public final void setCallCapabilities(int);
     method public final void setCallerDisplayName(java.lang.String, int);
-    method public final void setCanceled();
     method public final void setConferenceableConnections(java.util.List<android.telecomm.Connection>);
     method public final void setConnectionService(android.telecomm.ConnectionService);
     method public final void setDialing();
     method public final void setDisconnected(int, java.lang.String);
-    method public final void setFailed(int, java.lang.String);
     method public final void setHandle(android.net.Uri, int);
     method public final void setInitialized();
     method public final void setInitializing();
@@ -28837,10 +28835,8 @@ package android.telecomm {
     method public final void startActivityFromInCall(android.app.PendingIntent);
     method public static java.lang.String stateToString(int);
     field public static final int STATE_ACTIVE = 4; // 0x4
-    field public static final int STATE_CANCELED = 8; // 0x8
     field public static final int STATE_DIALING = 3; // 0x3
     field public static final int STATE_DISCONNECTED = 6; // 0x6
-    field public static final int STATE_FAILED = 7; // 0x7
     field public static final int STATE_HOLDING = 5; // 0x5
     field public static final int STATE_INITIALIZING = 0; // 0x0
     field public static final int STATE_NEW = 1; // 0x1
