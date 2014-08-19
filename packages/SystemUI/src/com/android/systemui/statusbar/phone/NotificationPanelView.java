@@ -36,7 +36,6 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.ExpandableView;
@@ -160,6 +159,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mShadeEmpty;
 
     private boolean mQsScrimEnabled = true;
+    private boolean mLastAnnouncementWasQuickSettings;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -425,8 +425,8 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            event.getText()
-                    .add(getContext().getString(R.string.accessibility_desc_notification_shade));
+            event.getText().add(getKeyguardOrLockScreenString());
+            mLastAnnouncementWasQuickSettings = false;
             return true;
         }
 
@@ -987,6 +987,10 @@ public class NotificationPanelView extends PanelView implements
             setQsExpanded(true);
         } else if (height <= mQsMinExpansionHeight && mQsExpanded) {
             setQsExpanded(false);
+            if (mLastAnnouncementWasQuickSettings && !mTracking) {
+                announceForAccessibility(getKeyguardOrLockScreenString());
+                mLastAnnouncementWasQuickSettings = false;
+            }
         }
         mQsExpansionHeight = height;
         mHeader.setExpansion(getHeaderExpansionFraction());
@@ -999,6 +1003,22 @@ public class NotificationPanelView extends PanelView implements
         if (mStatusBarState == StatusBarState.SHADE && mQsExpanded
                 && !mStackScrollerOverscrolling && mQsScrimEnabled) {
             mQsNavbarScrim.setAlpha(getQsExpansionFraction());
+        }
+
+        // Upon initialisation when we are not layouted yet we don't want to announce that we are
+        // fully expanded, hence the != 0.0f check.
+        if (height != 0.0f && mQsFullyExpanded && !mLastAnnouncementWasQuickSettings) {
+            announceForAccessibility(getContext().getString(
+                    R.string.accessibility_desc_quick_settings));
+            mLastAnnouncementWasQuickSettings = true;
+        }
+    }
+
+    private String getKeyguardOrLockScreenString() {
+        if (mStatusBarState == StatusBarState.KEYGUARD) {
+            return getContext().getString(R.string.accessibility_desc_lock_screen);
+        } else {
+            return getContext().getString(R.string.accessibility_desc_notification_shade);
         }
     }
 
