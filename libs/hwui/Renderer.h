@@ -67,6 +67,18 @@ public:
         return resultMode;
     }
 
+    // TODO: move to a method on android:Paint
+    static inline bool paintWillNotDraw(const SkPaint& paint) {
+        return paint.getAlpha() == 0
+                && getXfermode(paint.getXfermode()) != SkXfermode::kClear_Mode;
+    }
+
+    // TODO: move to a method on android:Paint
+    static inline bool paintWillNotDrawText(const SkPaint& paint) {
+        return paint.getAlpha() == 0
+                && paint.getLooper() == NULL
+                && getXfermode(paint.getXfermode()) == SkXfermode::kSrcOver_Mode;
+    }
 // ----------------------------------------------------------------------------
 // Frame state operations
 // ----------------------------------------------------------------------------
