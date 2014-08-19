@@ -1109,9 +1109,16 @@ public class Paint {
      * This draws a shadow layer below the main layer, with the specified
      * offset and color, and blur radius. If radius is 0, then the shadow
      * layer is removed.
+     * <p>
+     * Can be used to create a blurred shadow underneath text. Support for use
+     * with other drawing operations is constrained to the software rendering
+     * pipeline.
+     * <p>
+     * The alpha of the shadow will be the paint's alpha if the shadow color is
+     * opaque, or the alpha from the shadow color if not.
      */
-    public void setShadowLayer(float radius, float dx, float dy, int color) {
-      native_setShadowLayer(mNativePaint, radius, dx, dy, color);
+    public void setShadowLayer(float radius, float dx, float dy, int shadowColor) {
+      native_setShadowLayer(mNativePaint, radius, dx, dy, shadowColor);
     }
 
     /**
