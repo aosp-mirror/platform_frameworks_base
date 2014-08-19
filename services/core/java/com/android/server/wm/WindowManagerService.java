@@ -51,6 +51,7 @@ import android.app.StatusBarManager;
 import android.app.admin.DevicePolicyManager;
 import android.animation.ValueAnimator;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -58,6 +59,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -539,6 +541,21 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mHardKeyboardAvailable;
     boolean mShowImeWithHardKeyboard;
     OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
+    SettingsObserver mSettingsObserver;
+
+    private final class SettingsObserver extends ContentObserver {
+        public SettingsObserver() {
+            super(new Handler());
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD), false, this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            updateShowImeWithHardKeyboard();
+        }
+    }
 
     final ArrayList<WindowToken> mWallpaperTokens = new ArrayList<WindowToken>();
 
@@ -837,6 +854,9 @@ public class WindowManagerService extends IWindowManager.Stub
         IntentFilter filter = new IntentFilter();
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
+
+        mSettingsObserver = new SettingsObserver();
+        updateShowImeWithHardKeyboard();
 
         mHoldingScreenWakeLock = mPowerManager.newWakeLock(
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, TAG);
@@ -7018,7 +7038,6 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
             if (hardKeyboardAvailable != mHardKeyboardAvailable) {
                 mHardKeyboardAvailable = hardKeyboardAvailable;
-                mShowImeWithHardKeyboard = !hardKeyboardAvailable;
                 mH.removeMessages(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
                 mH.sendEmptyMessage(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
             }
@@ -7042,18 +7061,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public boolean isShowImeWithHardKeyboardEnabled() {
+    public void updateShowImeWithHardKeyboard() {
+        boolean showImeWithHardKeyboard = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(), Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 0,
+                mCurrentUserId) == 1;
         synchronized (mWindowMap) {
-            return mShowImeWithHardKeyboard;
-        }
-    }
-
-    public void setShowImeWithHardKeyboard(boolean enabled) {
-        synchronized (mWindowMap) {
-            if (mShowImeWithHardKeyboard != enabled) {
-                mShowImeWithHardKeyboard = enabled;
-                mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
-            }
+            mShowImeWithHardKeyboard = showImeWithHardKeyboard;
         }
     }
 
@@ -7065,15 +7078,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void notifyHardKeyboardStatusChange() {
-        final boolean available, showImeWithHardKeyboard;
+        final boolean available;
         final OnHardKeyboardStatusChangeListener listener;
         synchronized (mWindowMap) {
             listener = mHardKeyboardStatusChangeListener;
             available = mHardKeyboardAvailable;
-            showImeWithHardKeyboard = mShowImeWithHardKeyboard;
         }
         if (listener != null) {
-            listener.onHardKeyboardStatusChange(available, showImeWithHardKeyboard);
+            listener.onHardKeyboardStatusChange(available);
         }
     }
 
@@ -11056,7 +11068,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public interface OnHardKeyboardStatusChangeListener {
-        public void onHardKeyboardStatusChange(boolean available, boolean showIme);
+        public void onHardKeyboardStatusChange(boolean available);
     }
 
     void debugLayoutRepeats(final String msg, int pendingLayoutChanges) {
