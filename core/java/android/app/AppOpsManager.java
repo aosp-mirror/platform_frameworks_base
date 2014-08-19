@@ -1046,7 +1046,10 @@ public class AppOpsManager {
         return packageName + " from uid " + uid + " not allowed to perform " + sOpNames[op];
     }
 
-    private int strOpToOp(String op) {
+    /**
+     * {@hide}
+     */
+    public static int strOpToOp(String op) {
         Integer val = sOpStrToOp.get(op);
         if (val == null) {
             throw new IllegalArgumentException("Unknown operation string: " + op);
