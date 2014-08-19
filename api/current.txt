@@ -32039,6 +32039,8 @@ package android.transition {
     method public void captureEndValues(android.transition.TransitionValues);
     method public void captureStartValues(android.transition.TransitionValues);
     method public int getOrdering();
+    method public android.transition.Transition getTransitionAt(int);
+    method public int getTransitionCount();
     method public android.transition.TransitionSet removeTransition(android.transition.Transition);
     method public android.transition.TransitionSet setOrdering(int);
     field public static final int ORDERING_SEQUENTIAL = 1; // 0x1

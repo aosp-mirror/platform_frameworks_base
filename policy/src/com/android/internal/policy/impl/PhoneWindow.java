@@ -3559,6 +3559,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (transitionId != -1 && transitionId != R.transition.no_transition) {
             TransitionInflater inflater = TransitionInflater.from(getContext());
             transition = inflater.inflateTransition(transitionId);
+            if (transition instanceof TransitionSet &&
+                    ((TransitionSet)transition).getTransitionCount() == 0) {
+                transition = null;
+            }
         }
         return transition;
     }
