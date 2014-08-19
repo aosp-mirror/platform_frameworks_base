@@ -3292,6 +3292,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         intent, resolvedType, flags, userId);
                 if (resolveInfo != null) {
                     result.add(resolveInfo);
+                    Collections.sort(result, mResolvePrioritySorter);
                 }
                 return result;
             }
