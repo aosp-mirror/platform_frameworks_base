@@ -1558,6 +1558,26 @@ public class Camera {
         return _enableShutterSound(enabled);
     }
 
+    /**
+     * Disable the shutter sound unconditionally.
+     *
+     * <p>
+     * This is only guaranteed to work for legacy cameras
+     * (i.e. initialized with {@link #cameraInitUnspecified}). Trying to call this on
+     * a regular camera will force a conditional check in the camera service.
+     * </p>
+     *
+     * @return {@code true} if the shutter sound state was successfully
+     *         changed. {@code false} if the shutter sound state could not be
+     *         changed. {@code true} is also returned if shutter sound playback
+     *         is already set to the requested state.
+     *
+     * @hide
+     */
+    public final boolean disableShutterSound() {
+        return _enableShutterSound(/*enabled*/false);
+    }
+
     private native final boolean _enableShutterSound(boolean enabled);
 
     /**
