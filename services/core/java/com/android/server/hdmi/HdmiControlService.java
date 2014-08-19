@@ -320,7 +320,6 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-
     private void registerContentObserver() {
         ContentResolver resolver = getContext().getContentResolver();
         String[] settings = new String[] {
@@ -330,7 +329,7 @@ public final class HdmiControlService extends SystemService {
                 Global.MHL_INPUT_SWITCHING_ENABLED,
                 Global.MHL_POWER_CHARGE_ENABLED
         };
-        for (String s: settings) {
+        for (String s : settings) {
             resolver.registerContentObserver(Global.getUriFor(s), false, mSettingsObserver,
                     UserHandle.USER_ALL);
         }
