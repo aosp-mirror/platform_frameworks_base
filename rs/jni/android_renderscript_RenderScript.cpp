@@ -222,7 +222,7 @@ static jlong
 nDeviceCreate(JNIEnv *_env, jobject _this)
 {
     LOG_API("nDeviceCreate");
-    return (jlong)rsDeviceCreate();
+    return (jlong)(uintptr_t)rsDeviceCreate();
 }
 
 static void
@@ -243,7 +243,7 @@ static jlong
 nContextCreate(JNIEnv *_env, jobject _this, jlong dev, jint ver, jint sdkVer, jint ct)
 {
     LOG_API("nContextCreate");
-    return (jlong)rsContextCreate((RsDevice)dev, ver, sdkVer, (RsContextType)ct, 0);
+    return (jlong)(uintptr_t)rsContextCreate((RsDevice)dev, ver, sdkVer, (RsContextType)ct, 0);
 }
 
 static jlong
@@ -267,7 +267,7 @@ nContextCreateGL(JNIEnv *_env, jobject _this, jlong dev, jint ver, jint sdkVer,
     sc.samplesQ = samplesQ;
 
     LOG_API("nContextCreateGL");
-    return (jlong)rsContextCreateGL((RsDevice)dev, ver, sdkVer, sc, dpi);
+    return (jlong)(uintptr_t)rsContextCreateGL((RsDevice)dev, ver, sdkVer, sc, dpi);
 }
 
 static void
@@ -409,7 +409,7 @@ static jlong
 nElementCreate(JNIEnv *_env, jobject _this, jlong con, jlong type, jint kind, jboolean norm, jint size)
 {
     LOG_API("nElementCreate, con(%p), type(%i), kind(%i), norm(%i), size(%i)", (RsContext)con, type, kind, norm, size);
-    return (jlong)rsElementCreate((RsContext)con, (RsDataType)type, (RsDataKind)kind, norm, size);
+    return (jlong)(uintptr_t)rsElementCreate((RsContext)con, (RsDataType)type, (RsDataKind)kind, norm, size);
 }
 
 static jlong
@@ -435,7 +435,7 @@ nElementCreate2(JNIEnv *_env, jobject _this, jlong con,
     const char **nameArray = names.c_str();
     size_t *sizeArray = names.c_str_len();
 
-    jlong id = (jlong)rsElementCreate2((RsContext)con,
+    jlong id = (jlong)(uintptr_t)rsElementCreate2((RsContext)con,
                                      (const RsElement *)ids, fieldCount,
                                      nameArray, fieldCount * sizeof(size_t),  sizeArray,
                                      (const uint32_t *)arraySizes, fieldCount);
@@ -445,7 +445,7 @@ nElementCreate2(JNIEnv *_env, jobject _this, jlong con,
     _env->ReleaseLongArrayElements(_ids, jIds, JNI_ABORT);
     _env->ReleaseIntArrayElements(_arraySizes, jArraySizes, JNI_ABORT);
 
-    return (jlong)id;
+    return (jlong)(uintptr_t)id;
 }
 
 static void
@@ -483,7 +483,7 @@ nElementGetSubElements(JNIEnv *_env, jobject _this, jlong con, jlong id,
     rsaElementGetSubElements((RsContext)con, (RsElement)id, ids, names, arraySizes, (uint32_t)dataSize);
 
     for(uint32_t i = 0; i < dataSize; i++) {
-        const jlong id = (jlong)ids[i];
+        const jlong id = (jlong)(uintptr_t)ids[i];
         const jint arraySize = (jint)arraySizes[i];
         _env->SetObjectArrayElement(_names, i, _env->NewStringUTF(names[i]));
         _env->SetLongArrayRegion(_IDs, i, 1, &id);
@@ -504,7 +504,7 @@ nTypeCreate(JNIEnv *_env, jobject _this, jlong con, jlong eid,
     LOG_API("nTypeCreate, con(%p) eid(%p), x(%i), y(%i), z(%i), mips(%i), faces(%i), yuv(%i)",
             (RsContext)con, eid, dimx, dimy, dimz, mips, faces, yuv);
 
-    return (jlong)rsTypeCreate((RsContext)con, (RsElement)eid, dimx, dimy, dimz, mips, faces, yuv);
+    return (jlong)(uintptr_t)rsTypeCreate((RsContext)con, (RsElement)eid, dimx, dimy, dimz, mips, faces, yuv);
 }
 
 static void
@@ -521,7 +521,7 @@ nTypeGetNativeData(JNIEnv *_env, jobject _this, jlong con, jlong id, jlongArray 
     rsaTypeGetNativeData((RsContext)con, (RsType)id, typeData, 6);
 
     for(jint i = 0; i < elementCount; i ++) {
-        const jlong data = (jlong)typeData[i];
+        const jlong data = (jlong)(uintptr_t)typeData[i];
         _env->SetLongArrayRegion(_typeData, i, 1, &data);
     }
 }
@@ -532,7 +532,7 @@ static jlong
 nAllocationCreateTyped(JNIEnv *_env, jobject _this, jlong con, jlong type, jint mips, jint usage, jlong pointer)
 {
     LOG_API("nAllocationCreateTyped, con(%p), type(%p), mip(%i), usage(%i), ptr(%p)", (RsContext)con, (RsElement)type, mips, usage, (void *)pointer);
-    return (jlong) rsAllocationCreateTyped((RsContext)con, (RsType)type, (RsAllocationMipmapControl)mips, (uint32_t)usage, (uintptr_t)pointer);
+    return (jlong)(uintptr_t) rsAllocationCreateTyped((RsContext)con, (RsType)type, (RsAllocationMipmapControl)mips, (uint32_t)usage, (uintptr_t)pointer);
 }
 
 static void
@@ -600,7 +600,7 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong type, 
 
     bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
-    jlong id = (jlong)rsAllocationCreateFromBitmap((RsContext)con,
+    jlong id = (jlong)(uintptr_t)rsAllocationCreateFromBitmap((RsContext)con,
                                                   (RsType)type, (RsAllocationMipmapControl)mip,
                                                   ptr, bitmap.getSize(), usage);
     bitmap.unlockPixels();
@@ -616,7 +616,7 @@ nAllocationCreateBitmapBackedAllocation(JNIEnv *_env, jobject _this, jlong con, 
 
     bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
-    jlong id = (jlong)rsAllocationCreateTyped((RsContext)con,
+    jlong id = (jlong)(uintptr_t)rsAllocationCreateTyped((RsContext)con,
                                             (RsType)type, (RsAllocationMipmapControl)mip,
                                             (uint32_t)usage, (uintptr_t)ptr);
     bitmap.unlockPixels();
@@ -632,7 +632,7 @@ nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong ty
 
     bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
-    jlong id = (jlong)rsAllocationCubeCreateFromBitmap((RsContext)con,
+    jlong id = (jlong)(uintptr_t)rsAllocationCubeCreateFromBitmap((RsContext)con,
                                                       (RsType)type, (RsAllocationMipmapControl)mip,
                                                       ptr, bitmap.getSize(), usage);
     bitmap.unlockPixels();
@@ -810,7 +810,7 @@ static jlong
 nAllocationGetType(JNIEnv *_env, jobject _this, jlong con, jlong a)
 {
     LOG_API("nAllocationGetType, con(%p), a(%p)", (RsContext)con, (RsAllocation)a);
-    return (jlong) rsaAllocationGetType((RsContext)con, (RsAllocation)a);
+    return (jlong)(uintptr_t) rsaAllocationGetType((RsContext)con, (RsAllocation)a);
 }
 
 static void
@@ -828,7 +828,7 @@ nFileA3DCreateFromAssetStream(JNIEnv *_env, jobject _this, jlong con, jlong nati
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
     ALOGV("______nFileA3D %p", asset);
 
-    jlong id = (jlong)rsaFileA3DCreateFromMemory((RsContext)con, asset->getBuffer(false), asset->getLength());
+    jlong id = (jlong)(uintptr_t)rsaFileA3DCreateFromMemory((RsContext)con, asset->getBuffer(false), asset->getLength());
     return id;
 }
 
@@ -846,7 +846,7 @@ nFileA3DCreateFromAsset(JNIEnv *_env, jobject _this, jlong con, jobject _assetMg
         return 0;
     }
 
-    jlong id = (jlong)rsaFileA3DCreateFromAsset((RsContext)con, asset);
+    jlong id = (jlong)(uintptr_t)rsaFileA3DCreateFromAsset((RsContext)con, asset);
     return id;
 }
 
@@ -854,7 +854,7 @@ static jlong
 nFileA3DCreateFromFile(JNIEnv *_env, jobject _this, jlong con, jstring fileName)
 {
     AutoJavaStringToUTF8 fileNameUTF(_env, fileName);
-    jlong id = (jlong)rsaFileA3DCreateFromFile((RsContext)con, fileNameUTF.c_str());
+    jlong id = (jlong)(uintptr_t)rsaFileA3DCreateFromFile((RsContext)con, fileNameUTF.c_str());
 
     return id;
 }
@@ -887,7 +887,7 @@ static jlong
 nFileA3DGetEntryByIndex(JNIEnv *_env, jobject _this, jlong con, jlong fileA3D, jint index)
 {
     ALOGV("______nFileA3D %p", (RsFile) fileA3D);
-    jlong id = (jlong)rsaFileA3DGetEntryByIndex((RsContext)con, (uint32_t)index, (RsFile)fileA3D);
+    jlong id = (jlong)(uintptr_t)rsaFileA3DGetEntryByIndex((RsContext)con, (uint32_t)index, (RsFile)fileA3D);
     return id;
 }
 
@@ -898,7 +898,7 @@ nFontCreateFromFile(JNIEnv *_env, jobject _this, jlong con,
                     jstring fileName, jfloat fontSize, jint dpi)
 {
     AutoJavaStringToUTF8 fileNameUTF(_env, fileName);
-    jlong id = (jlong)rsFontCreateFromFile((RsContext)con,
+    jlong id = (jlong)(uintptr_t)rsFontCreateFromFile((RsContext)con,
                                          fileNameUTF.c_str(), fileNameUTF.length(),
                                          fontSize, dpi);
 
@@ -912,7 +912,7 @@ nFontCreateFromAssetStream(JNIEnv *_env, jobject _this, jlong con,
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
     AutoJavaStringToUTF8 nameUTF(_env, name);
 
-    jlong id = (jlong)rsFontCreateFromMemory((RsContext)con,
+    jlong id = (jlong)(uintptr_t)rsFontCreateFromMemory((RsContext)con,
                                            nameUTF.c_str(), nameUTF.length(),
                                            fontSize, dpi,
                                            asset->getBuffer(false), asset->getLength());
@@ -934,7 +934,7 @@ nFontCreateFromAsset(JNIEnv *_env, jobject _this, jlong con, jobject _assetMgr, 
         return 0;
     }
 
-    jlong id = (jlong)rsFontCreateFromMemory((RsContext)con,
+    jlong id = (jlong)(uintptr_t)rsFontCreateFromMemory((RsContext)con,
                                            str.c_str(), str.length(),
                                            fontSize, dpi,
                                            asset->getBuffer(false), asset->getLength());
@@ -1206,7 +1206,7 @@ nScriptCCreate(JNIEnv *_env, jobject _this, jlong con,
 
     //rsScriptCSetText((RsContext)con, (const char *)script_ptr, length);
 
-    ret = (jlong)rsScriptCCreate((RsContext)con,
+    ret = (jlong)(uintptr_t)rsScriptCCreate((RsContext)con,
                                 resNameUTF.c_str(), resNameUTF.length(),
                                 cacheDirUTF.c_str(), cacheDirUTF.length(),
                                 (const char *)script_ptr, length);
@@ -1217,28 +1217,28 @@ exit:
                 _exception ? JNI_ABORT: 0);
     }
 
-    return (jlong)ret;
+    return (jlong)(uintptr_t)ret;
 }
 
 static jlong
 nScriptIntrinsicCreate(JNIEnv *_env, jobject _this, jlong con, jint id, jlong eid)
 {
     LOG_API("nScriptIntrinsicCreate, con(%p) id(%i) element(%p)", (RsContext)con, id, (void *)eid);
-    return (jlong)rsScriptIntrinsicCreate((RsContext)con, id, (RsElement)eid);
+    return (jlong)(uintptr_t)rsScriptIntrinsicCreate((RsContext)con, id, (RsElement)eid);
 }
 
 static jlong
 nScriptKernelIDCreate(JNIEnv *_env, jobject _this, jlong con, jlong sid, jint slot, jint sig)
 {
     LOG_API("nScriptKernelIDCreate, con(%p) script(%p), slot(%i), sig(%i)", (RsContext)con, (void *)sid, slot, sig);
-    return (jlong)rsScriptKernelIDCreate((RsContext)con, (RsScript)sid, slot, sig);
+    return (jlong)(uintptr_t)rsScriptKernelIDCreate((RsContext)con, (RsScript)sid, slot, sig);
 }
 
 static jlong
 nScriptFieldIDCreate(JNIEnv *_env, jobject _this, jlong con, jlong sid, jint slot)
 {
     LOG_API("nScriptFieldIDCreate, con(%p) script(%p), slot(%i)", (RsContext)con, (void *)sid, slot);
-    return (jlong)rsScriptFieldIDCreate((RsContext)con, (RsScript)sid, slot);
+    return (jlong)(uintptr_t)rsScriptFieldIDCreate((RsContext)con, (RsScript)sid, slot);
 }
 
 static jlong
@@ -1282,7 +1282,7 @@ nScriptGroupCreate(JNIEnv *_env, jobject _this, jlong con, jlongArray _kernels, 
         typesPtr[i] = (RsType)jTypesPtr[i];
     }
 
-    jlong id = (jlong)rsScriptGroupCreate((RsContext)con,
+    jlong id = (jlong)(uintptr_t)rsScriptGroupCreate((RsContext)con,
                                (RsScriptKernelID *)kernelsPtr, kernelsLen * sizeof(RsScriptKernelID),
                                (RsScriptKernelID *)srcPtr, srcLen * sizeof(RsScriptKernelID),
                                (RsScriptKernelID *)dstkPtr, dstkLen * sizeof(RsScriptKernelID),
@@ -1335,7 +1335,7 @@ nProgramStoreCreate(JNIEnv *_env, jobject _this, jlong con,
                     jint depthFunc)
 {
     LOG_API("nProgramStoreCreate, con(%p)", (RsContext)con);
-    return (jlong)rsProgramStoreCreate((RsContext)con, colorMaskR, colorMaskG, colorMaskB, colorMaskA,
+    return (jlong)(uintptr_t)rsProgramStoreCreate((RsContext)con, colorMaskR, colorMaskG, colorMaskB, colorMaskA,
                                       depthMask, ditherEnable, (RsBlendSrcFunc)srcFunc,
                                       (RsBlendDstFunc)destFunc, (RsDepthFunc)depthFunc);
 }
@@ -1384,7 +1384,7 @@ nProgramFragmentCreate(JNIEnv *_env, jobject _this, jlong con, jstring shader,
     for(int i = 0; i < paramLen; ++i) {
         paramPtr[i] = (uintptr_t)jParamPtr[i];
     }
-    jlong ret = (jlong)rsProgramFragmentCreate((RsContext)con, shaderUTF.c_str(), shaderUTF.length(),
+    jlong ret = (jlong)(uintptr_t)rsProgramFragmentCreate((RsContext)con, shaderUTF.c_str(), shaderUTF.length(),
                                              nameArray, texCount, sizeArray,
                                              paramPtr, paramLen);
 
@@ -1416,7 +1416,7 @@ nProgramVertexCreate(JNIEnv *_env, jobject _this, jlong con, jstring shader,
         paramPtr[i] = (uintptr_t)jParamPtr[i];
     }
 
-    jlong ret = (jlong)rsProgramVertexCreate((RsContext)con, shaderUTF.c_str(), shaderUTF.length(),
+    jlong ret = (jlong)(uintptr_t)rsProgramVertexCreate((RsContext)con, shaderUTF.c_str(), shaderUTF.length(),
                                            nameArray, texCount, sizeArray,
                                            paramPtr, paramLen);
 
@@ -1431,7 +1431,7 @@ static jlong
 nProgramRasterCreate(JNIEnv *_env, jobject _this, jlong con, jboolean pointSprite, jint cull)
 {
     LOG_API("nProgramRasterCreate, con(%p), pointSprite(%i), cull(%i)", (RsContext)con, pointSprite, cull);
-    return (jlong)rsProgramRasterCreate((RsContext)con, pointSprite, (RsCullMode)cull);
+    return (jlong)(uintptr_t)rsProgramRasterCreate((RsContext)con, pointSprite, (RsCullMode)cull);
 }
 
 
@@ -1480,7 +1480,7 @@ nSamplerCreate(JNIEnv *_env, jobject _this, jlong con, jint magFilter, jint minF
                jint wrapS, jint wrapT, jint wrapR, jfloat aniso)
 {
     LOG_API("nSamplerCreate, con(%p)", (RsContext)con);
-    return (jlong)rsSamplerCreate((RsContext)con,
+    return (jlong)(uintptr_t)rsSamplerCreate((RsContext)con,
                                  (RsSamplerValue)magFilter,
                                  (RsSamplerValue)minFilter,
                                  (RsSamplerValue)wrapS,
@@ -1495,7 +1495,7 @@ static jlong
 nPathCreate(JNIEnv *_env, jobject _this, jlong con, jint prim, jboolean isStatic, jlong _vtx, jlong _loop, jfloat q) {
     LOG_API("nPathCreate, con(%p)", (RsContext)con);
 
-    jlong id = (jlong)rsPathCreate((RsContext)con, (RsPathPrimitive)prim, isStatic,
+    jlong id = (jlong)(uintptr_t)rsPathCreate((RsContext)con, (RsPathPrimitive)prim, isStatic,
                                    (RsAllocation)_vtx,
                                    (RsAllocation)_loop, q);
     return id;
@@ -1523,7 +1523,7 @@ nMeshCreate(JNIEnv *_env, jobject _this, jlong con, jlongArray _vtx, jlongArray 
     jint primLen = _env->GetArrayLength(_prim);
     jint *primPtr = _env->GetIntArrayElements(_prim, NULL);
 
-    jlong id = (jlong)rsMeshCreate((RsContext)con,
+    jlong id = (jlong)(uintptr_t)rsMeshCreate((RsContext)con,
                                (RsAllocation *)vtxPtr, vtxLen,
                                (RsAllocation *)idxPtr, idxLen,
                                (uint32_t *)primPtr, primLen);
@@ -1563,7 +1563,7 @@ nMeshGetVertices(JNIEnv *_env, jobject _this, jlong con, jlong mesh, jlongArray 
     rsaMeshGetVertices((RsContext)con, (RsMesh)mesh, allocs, (uint32_t)numVtxIDs);
 
     for(jint i = 0; i < numVtxIDs; i ++) {
-        const jlong alloc = (jlong)allocs[i];
+        const jlong alloc = (jlong)(uintptr_t)allocs[i];
         _env->SetLongArrayRegion(_ids, i, 1, &alloc);
     }
 
@@ -1581,7 +1581,7 @@ nMeshGetIndices(JNIEnv *_env, jobject _this, jlong con, jlong mesh, jlongArray _
     rsaMeshGetIndices((RsContext)con, (RsMesh)mesh, allocs, prims, (uint32_t)numIndices);
 
     for(jint i = 0; i < numIndices; i ++) {
-        const jlong alloc = (jlong)allocs[i];
+        const jlong alloc = (jlong)(uintptr_t)allocs[i];
         const jint prim = (jint)prims[i];
         _env->SetLongArrayRegion(_idxIds, i, 1, &alloc);
         _env->SetIntArrayRegion(_primitives, i, 1, &prim);
