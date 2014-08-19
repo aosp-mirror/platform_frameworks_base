@@ -18775,25 +18775,8 @@ package android.net.wifi.p2p.nsd {
 package android.net.wifi.passpoint {
 
   public abstract interface IWifiPasspointManager implements android.os.IInterface {
-    method public abstract boolean addCredential(android.net.wifi.passpoint.WifiPasspointCredential) throws android.os.RemoteException;
-    method public abstract java.util.List<android.net.wifi.passpoint.WifiPasspointCredential> getCredentials() throws android.os.RemoteException;
     method public abstract android.os.Messenger getMessenger() throws android.os.RemoteException;
     method public abstract int getPasspointState() throws android.os.RemoteException;
-    method public abstract boolean removeCredential(android.net.wifi.passpoint.WifiPasspointCredential) throws android.os.RemoteException;
-    method public abstract java.util.List<android.net.wifi.passpoint.WifiPasspointPolicy> requestCredentialMatch(java.util.List<android.net.wifi.ScanResult>) throws android.os.RemoteException;
-    method public abstract boolean updateCredential(android.net.wifi.passpoint.WifiPasspointCredential) throws android.os.RemoteException;
-  }
-
-  public class WifiPasspointCredential implements android.os.Parcelable {
-    ctor public WifiPasspointCredential(java.lang.String, java.lang.String, android.net.wifi.WifiEnterpriseConfig);
-    method public int describeContents();
-    method public android.net.wifi.WifiEnterpriseConfig getEnterpriseConfig();
-    method public java.lang.String getHomeSpFqdn();
-    method public java.lang.String getRealm();
-    method public void setEnterpriseConfig(android.net.wifi.WifiEnterpriseConfig);
-    method public void setHomeFqdn(java.lang.String);
-    method public void setRealm(java.lang.String);
-    method public void writeToParcel(android.os.Parcel, int);
   }
 
   public class WifiPasspointInfo implements android.os.Parcelable {
@@ -18964,17 +18947,6 @@ package android.net.wifi.passpoint {
     field public java.lang.String osuNai;
     field public java.lang.String osuService;
     field public java.lang.String ssid;
-  }
-
-  public class WifiPasspointPolicy implements android.os.Parcelable {
-    method public android.net.wifi.WifiConfiguration createWifiConfiguration();
-    method public int describeContents();
-    method public java.lang.String getBssid();
-    method public android.net.wifi.passpoint.WifiPasspointCredential getCredential();
-    method public int getCredentialPriority();
-    method public int getRoamingPriority();
-    method public java.lang.String getSsid();
-    method public void writeToParcel(android.os.Parcel, int);
   }
 
 }
