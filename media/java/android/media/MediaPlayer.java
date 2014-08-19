@@ -1049,8 +1049,17 @@ public class MediaPlayer implements SubtitleController.Listener
     private void setDataSource(String path, String[] keys, String[] values)
             throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
         final Uri uri = Uri.parse(path);
-        if ("file".equals(uri.getScheme())) {
+        final String scheme = uri.getScheme();
+        if ("file".equals(scheme)) {
             path = uri.getPath();
+        } else if (scheme != null) {
+            // handle non-file sources
+            nativeSetDataSource(
+                MediaHTTPService.createHttpServiceBinderIfNecessary(path),
+                path,
+                keys,
+                values);
+            return;
         }
 
         final File file = new File(path);
@@ -1060,18 +1069,8 @@ public class MediaPlayer implements SubtitleController.Listener
             setDataSource(fd);
             is.close();
         } else {
-            _setDataSource(path, keys, values);
+            throw new IOException("setDataSource failed.");
         }
-    }
-
-    private void _setDataSource(
-        String path, String[] keys, String[] values)
-        throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
-        nativeSetDataSource(
-                MediaHTTPService.createHttpServiceBinderIfNecessary(path),
-                path,
-                keys,
-                values);
     }
 
     private native void nativeSetDataSource(
