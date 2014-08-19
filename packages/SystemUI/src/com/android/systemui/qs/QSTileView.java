@@ -87,6 +87,7 @@ public class QSTileView extends ViewGroup {
 
     private void recreateLabel() {
         CharSequence labelText = null;
+        CharSequence labelDescription = null;
         if (mLabel != null) {
             labelText = mLabel.getText();
             removeView(mLabel);
@@ -94,6 +95,7 @@ public class QSTileView extends ViewGroup {
         }
         if (mDualLabel != null) {
             labelText = mDualLabel.getText();
+            labelDescription = mLabel.getContentDescription();
             removeView(mDualLabel);
             mDualLabel = null;
         }
@@ -112,6 +114,9 @@ public class QSTileView extends ViewGroup {
             mDualLabel.setOnClickListener(mClickSecondary);
             if (labelText != null) {
                 mDualLabel.setText(labelText);
+            }
+            if (labelDescription != null) {
+                mDualLabel.setContentDescription(labelDescription);
             }
             addView(mDualLabel);
         } else {
@@ -228,6 +233,7 @@ public class QSTileView extends ViewGroup {
         }
         if (mDual) {
             mDualLabel.setText(state.label);
+            mDualLabel.setContentDescription(state.dualLabelContentDescription);
         } else {
             mLabel.setText(state.label);
         }

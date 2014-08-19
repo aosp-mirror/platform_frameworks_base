@@ -347,8 +347,8 @@ public class QSPanel extends ViewGroup {
         }
 
         for (TileRecord record : mRecords) {
-            if (record.tileView.getVisibility() == GONE) continue;
             record.tileView.setDual(record.tile.supportsDualTargets());
+            if (record.tileView.getVisibility() == GONE) continue;
             final int cw = record.row == 0 ? mLargeCellWidth : mCellWidth;
             final int ch = record.row == 0 ? mLargeCellHeight : mCellHeight;
             record.tileView.measure(exactly(cw), exactly(ch));
