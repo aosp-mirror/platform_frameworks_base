@@ -16,12 +16,16 @@
 
 package android.hardware.location;
 
+import android.annotation.SystemApi;
+
 /**
  * This class represents the characteristics of the geofence.
  *
  * <p> Use this in conjunction with {@link GeofenceHardware} APIs.
+ *
+ * @hide
  */
-
+@SystemApi
 public final class GeofenceHardwareRequest {
     static final int GEOFENCE_TYPE_CIRCLE = 0;
     private int mType;

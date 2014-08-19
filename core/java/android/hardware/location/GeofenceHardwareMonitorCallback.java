@@ -16,12 +16,16 @@
 
 package android.hardware.location;
 
+import android.annotation.SystemApi;
 import android.location.Location;
 
 /**
  * The callback class associated with the status change of hardware monitors
  * in {@link GeofenceHardware}
+ *
+ * @hide
  */
+@SystemApi
 public abstract class GeofenceHardwareMonitorCallback {
     /**
      * The callback called when the state of a monitoring system changes.

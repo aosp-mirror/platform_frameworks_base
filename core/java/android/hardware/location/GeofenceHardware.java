@@ -15,6 +15,7 @@
  */
 package android.hardware.location;
 
+import android.annotation.SystemApi;
 import android.location.Location;
 import android.os.Build;
 import android.os.RemoteException;
@@ -43,7 +44,10 @@ import java.util.HashMap;
  * an appropriate transition would be triggered. The "reasonably confident" parameter
  * depends on the hardware system and the positioning algorithms used.
  * For instance, {@link #MONITORING_TYPE_GPS_HARDWARE} uses 95% as a confidence level.
+ *
+ * @hide
  */
+@SystemApi
 public final class GeofenceHardware {
     private IGeofenceHardware mService;
 
@@ -162,9 +166,7 @@ public final class GeofenceHardware {
     private HashMap<GeofenceHardwareMonitorCallback, GeofenceHardwareMonitorCallbackWrapper>
             mMonitorCallbacks = new HashMap<GeofenceHardwareMonitorCallback,
                     GeofenceHardwareMonitorCallbackWrapper>();
-    /**
-     * @hide
-     */
+
     public GeofenceHardware(IGeofenceHardware service) {
         mService = service;
     }
