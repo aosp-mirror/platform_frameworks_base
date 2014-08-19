@@ -69,6 +69,7 @@
         android:layout_gravity="bottom|right"
         android:layout_marginRight="15dp"
         android:layout_marginBottom="15dp"
+        android:translationZ="3dp"
         android:contentDescription="@string/recents_lock_to_app_button_label"
         android:background="@drawable/recents_lock_to_task_button_bg">
         <ImageView

@@ -18,7 +18,9 @@ package com.android.systemui.recents.views;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -59,7 +61,8 @@ class TaskViewHeader extends FrameLayout {
     ColorDrawable mBackgroundColor;
     Drawable mLightDismissDrawable;
     Drawable mDarkDismissDrawable;
-    ValueAnimator mBackgroundColorAnimator;
+    AnimatorSet mFocusAnimator;
+    ValueAnimator backgroundColorAnimator;
 
     boolean mIsFullscreen;
     boolean mCurrentPrimaryColorIsDark;
@@ -117,6 +120,14 @@ class TaskViewHeader extends FrameLayout {
 
     @Override
     protected void onFinishInflate() {
+        // Set the outline provider
+        setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                outline.setRect(0, 0, getMeasuredWidth(), getMeasuredHeight());
+            }
+        });
+
         // Initialize the icon and description views
         mApplicationIcon = (ImageView) findViewById(R.id.application_icon);
         mActivityDescription = (TextView) findViewById(R.id.activity_description);
@@ -222,7 +233,12 @@ class TaskViewHeader extends FrameLayout {
     }
 
     /** Animates this task bar as it exits recents */
-    void startLaunchTaskAnimation(Runnable preAnimRunnable, final Runnable postAnimRunnable) {
+    void startLaunchTaskAnimation(Runnable preAnimRunnable, final Runnable postAnimRunnable,
+            boolean isFocused) {
+        if (isFocused) {
+            onTaskViewFocusChanged(false);
+        }
+
         // Animate the task bar out of the first task view
         animate()
                 .translationY(-getMeasuredHeight())
@@ -278,10 +294,10 @@ class TaskViewHeader extends FrameLayout {
     /** Notifies the associated TaskView has been focused. */
     void onTaskViewFocusChanged(boolean focused) {
         boolean isRunning = false;
-        if (mBackgroundColorAnimator != null) {
-            isRunning = mBackgroundColorAnimator.isRunning();
-            mBackgroundColorAnimator.removeAllUpdateListeners();
-            mBackgroundColorAnimator.cancel();
+        if (mFocusAnimator != null) {
+            isRunning = mFocusAnimator.isRunning();
+            mFocusAnimator.removeAllListeners();
+            mFocusAnimator.cancel();
         }
         if (focused) {
             int secondaryColor = getSecondaryColor(mCurrentPrimaryColor, mCurrentPrimaryColorIsDark);
@@ -302,42 +318,54 @@ class TaskViewHeader extends FrameLayout {
             // Pulse the background color
             int currentColor = mBackgroundColor.getColor();
             int lightPrimaryColor = getSecondaryColor(mCurrentPrimaryColor, mCurrentPrimaryColorIsDark);
-            mBackgroundColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), lightPrimaryColor,
-                    currentColor);
-            mBackgroundColorAnimator.addListener(new AnimatorListenerAdapter() {
+            ValueAnimator backgroundColor = ValueAnimator.ofObject(new ArgbEvaluator(),
+                    lightPrimaryColor, currentColor);
+            backgroundColor.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
-                    mBackground.setState(new int[] {});
+                    mBackground.setState(new int[]{});
                 }
             });
-            mBackgroundColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            backgroundColor.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
                     mBackgroundColor.setColor((Integer) animation.getAnimatedValue());
                 }
             });
-            mBackgroundColorAnimator.setRepeatCount(ValueAnimator.INFINITE);
-            mBackgroundColorAnimator.setRepeatMode(ValueAnimator.REVERSE);
-            mBackgroundColorAnimator.setStartDelay(750);
-            mBackgroundColorAnimator.setDuration(750);
-            mBackgroundColorAnimator.start();
+            backgroundColor.setRepeatCount(ValueAnimator.INFINITE);
+            backgroundColor.setRepeatMode(ValueAnimator.REVERSE);
+            // Pulse the translation
+            ObjectAnimator translation = ObjectAnimator.ofFloat(this, "translationZ", 15f);
+            translation.setRepeatCount(ValueAnimator.INFINITE);
+            translation.setRepeatMode(ValueAnimator.REVERSE);
+
+            mFocusAnimator = new AnimatorSet();
+            mFocusAnimator.playTogether(backgroundColor, translation);
+            mFocusAnimator.setStartDelay(750);
+            mFocusAnimator.setDuration(750);
+            mFocusAnimator.start();
         } else {
             if (isRunning) {
                 // Restore the background color
                 int currentColor = mBackgroundColor.getColor();
-                mBackgroundColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), currentColor,
-                        mCurrentPrimaryColor);
-                mBackgroundColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                ValueAnimator backgroundColor = ValueAnimator.ofObject(new ArgbEvaluator(),
+                        currentColor, mCurrentPrimaryColor);
+                backgroundColor.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
                         mBackgroundColor.setColor((Integer) animation.getAnimatedValue());
                     }
                 });
-                mBackgroundColorAnimator.setRepeatCount(0);
-                mBackgroundColorAnimator.setDuration(150);
-                mBackgroundColorAnimator.start();
+                // Restore the translation
+                ObjectAnimator translation = ObjectAnimator.ofFloat(this, "translationZ", 0f);
+
+                mFocusAnimator = new AnimatorSet();
+                mFocusAnimator.playTogether(backgroundColor, translation);
+                mFocusAnimator.setDuration(150);
+                mFocusAnimator.start();
             } else {
                 mBackground.setState(new int[] {});
+                setTranslationZ(0f);
             }
         }
     }
