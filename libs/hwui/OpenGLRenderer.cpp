@@ -2518,8 +2518,9 @@ status_t OpenGLRenderer::drawShape(float left, float top, const PathTexture* tex
 
 status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float bottom,
         float rx, float ry, const SkPaint* p) {
-    if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
-            (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
+    if (currentSnapshot()->isIgnored()
+            || quickRejectSetupScissor(left, top, right, bottom, p)
+            || paintWillNotDraw(*p)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2536,9 +2537,9 @@ status_t OpenGLRenderer::drawRoundRect(float left, float top, float right, float
 }
 
 status_t OpenGLRenderer::drawCircle(float x, float y, float radius, const SkPaint* p) {
-    if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(x - radius, y - radius,
-            x + radius, y + radius, p) ||
-            (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
+    if (currentSnapshot()->isIgnored()
+            || quickRejectSetupScissor(x - radius, y - radius, x + radius, y + radius, p)
+            || paintWillNotDraw(*p)) {
         return DrawGlInfo::kStatusDone;
     }
     if (p->getPathEffect() != 0) {
@@ -2558,8 +2559,9 @@ status_t OpenGLRenderer::drawCircle(float x, float y, float radius, const SkPain
 
 status_t OpenGLRenderer::drawOval(float left, float top, float right, float bottom,
         const SkPaint* p) {
-    if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
-            (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
+    if (currentSnapshot()->isIgnored()
+            || quickRejectSetupScissor(left, top, right, bottom, p)
+            || paintWillNotDraw(*p)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2580,8 +2582,9 @@ status_t OpenGLRenderer::drawOval(float left, float top, float right, float bott
 
 status_t OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
         float startAngle, float sweepAngle, bool useCenter, const SkPaint* p) {
-    if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
-            (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
+    if (currentSnapshot()->isIgnored()
+            || quickRejectSetupScissor(left, top, right, bottom, p)
+            || paintWillNotDraw(*p)) {
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2614,8 +2617,9 @@ status_t OpenGLRenderer::drawArc(float left, float top, float right, float botto
 
 status_t OpenGLRenderer::drawRect(float left, float top, float right, float bottom,
         const SkPaint* p) {
-    if (currentSnapshot()->isIgnored() || quickRejectSetupScissor(left, top, right, bottom, p) ||
-            (p->getAlpha() == 0 && getXfermode(p->getXfermode()) != SkXfermode::kClear_Mode)) {
+    if (currentSnapshot()->isIgnored()
+            || quickRejectSetupScissor(left, top, right, bottom, p)
+            || paintWillNotDraw(*p)) {
         return DrawGlInfo::kStatusDone;
     }
 
