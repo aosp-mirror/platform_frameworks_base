@@ -1612,7 +1612,7 @@ public abstract class ContentResolver {
      * @see #requestSync(android.accounts.Account, String, android.os.Bundle)
      */
     public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork) {
-        notifyChange(uri, observer, syncToNetwork, UserHandle.getCallingUserId());
+        notifyChange(uri, observer, syncToNetwork, UserHandle.myUserId());
     }
 
     /**
