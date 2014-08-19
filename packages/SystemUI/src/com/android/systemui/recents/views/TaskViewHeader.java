@@ -211,13 +211,14 @@ class TaskViewHeader extends FrameLayout {
     void startEnterRecentsAnimation(int delay, Runnable postAnimRunnable) {
         // Animate the task bar of the first task view
         setVisibility(View.VISIBLE);
-        setTranslationY(-getMeasuredHeight());
+        setAlpha(0f);
         animate()
-                .translationY(0)
+                .alpha(1f)
                 .setStartDelay(delay)
-                .setInterpolator(mConfig.fastOutSlowInInterpolator)
+                .setInterpolator(mConfig.linearOutSlowInInterpolator)
                 .setDuration(mConfig.taskBarEnterAnimDuration)
                 .withEndAction(postAnimRunnable)
+                .withLayer()
                 .start();
     }
 
@@ -225,9 +226,9 @@ class TaskViewHeader extends FrameLayout {
     void startLaunchTaskAnimation(Runnable preAnimRunnable, final Runnable postAnimRunnable) {
         // Animate the task bar out of the first task view
         animate()
-                .translationY(-getMeasuredHeight())
+                .alpha(0f)
                 .setStartDelay(0)
-                .setInterpolator(mConfig.fastOutLinearInInterpolator)
+                .setInterpolator(mConfig.linearOutSlowInInterpolator)
                 .setDuration(mConfig.taskBarExitAnimDuration)
                 .withStartAction(preAnimRunnable)
                 .withEndAction(new Runnable() {
@@ -236,6 +237,7 @@ class TaskViewHeader extends FrameLayout {
                         post(postAnimRunnable);
                     }
                 })
+                .withLayer()
                 .start();
     }
 
