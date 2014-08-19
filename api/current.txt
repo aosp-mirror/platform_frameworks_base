@@ -2047,6 +2047,8 @@ package android {
     field public static final int TextAppearance_Material_Widget_TextView = 16974381; // 0x103022d
     field public static final int TextAppearance_Material_Widget_TextView_PopupMenu = 16974382; // 0x103022e
     field public static final int TextAppearance_Material_Widget_TextView_SpinnerItem = 16974383; // 0x103022f
+    field public static final int TextAppearance_Material_Widget_Toolbar_Subtitle = 16974569; // 0x10302e9
+    field public static final int TextAppearance_Material_Widget_Toolbar_Title = 16974568; // 0x10302e8
     field public static final int TextAppearance_Material_WindowTitle = 16974361; // 0x1030219
     field public static final int TextAppearance_Medium = 16973892; // 0x1030044
     field public static final int TextAppearance_Medium_Inverse = 16973893; // 0x1030045
