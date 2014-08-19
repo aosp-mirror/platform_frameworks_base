@@ -247,14 +247,14 @@ public final class MediaController {
     }
 
     /**
-     * Get the current audio info for this session.
+     * Get the current playback info for this session.
      *
-     * @return The current audio info or null.
+     * @return The current playback info or null.
      */
-    public @Nullable AudioInfo getAudioInfo() {
+    public @Nullable PlaybackInfo getPlaybackInfo() {
         try {
             ParcelableVolumeInfo result = mSessionBinder.getVolumeAttributes();
-            return new AudioInfo(result.volumeType, result.audioAttrs, result.controlType,
+            return new PlaybackInfo(result.volumeType, result.audioAttrs, result.controlType,
                     result.maxVolume, result.currentVolume);
 
         } catch (RemoteException e) {
@@ -269,7 +269,7 @@ public final class MediaController {
      *
      * @return A {@link PendingIntent} to launch UI or null.
      */
-    public @Nullable PendingIntent getLaunchActivity() {
+    public @Nullable PendingIntent getSessionActivity() {
         try {
             return mSessionBinder.getLaunchPendingIntent();
         } catch (RemoteException e) {
@@ -293,9 +293,10 @@ public final class MediaController {
      * {@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}. The flags in
      * {@link AudioManager} may be used to affect the handling.
      *
-     * @see #getAudioInfo()
+     * @see #getPlaybackInfo()
      * @param value The value to set it to, between 0 and the reported max.
-     * @param flags Any flags to pass with the command.
+     * @param flags Flags from {@link AudioManager} to include with the volume
+     *            request.
      */
     public void setVolumeTo(int value, int flags) {
         try {
@@ -314,7 +315,7 @@ public final class MediaController {
      * {@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}. The flags in
      * {@link AudioManager} may be used to affect the handling.
      *
-     * @see #getAudioInfo()
+     * @see #getPlaybackInfo()
      * @param direction The direction to adjust the volume in.
      * @param flags Any flags to pass with the command.
      */
@@ -565,7 +566,7 @@ public final class MediaController {
          *
          * @param info The current audio info for this session.
          */
-        public void onAudioInfoChanged(AudioInfo info) {
+        public void onAudioInfoChanged(PlaybackInfo info) {
         }
     }
 
@@ -773,9 +774,19 @@ public final class MediaController {
     }
 
     /**
-     * Holds information about the way audio is handled for this session.
+     * Holds information about the current playback and how audio is handled for
+     * this session.
      */
-    public static final class AudioInfo {
+    public static final class PlaybackInfo {
+        /**
+         * The session uses remote playback.
+         */
+        public static final int PLAYBACK_TYPE_REMOTE = 2;
+        /**
+         * The session uses local playback.
+         */
+        public static final int PLAYBACK_TYPE_LOCAL = 1;
+
         private final int mVolumeType;
         private final int mVolumeControl;
         private final int mMaxVolume;
@@ -785,7 +796,7 @@ public final class MediaController {
         /**
          * @hide
          */
-        public AudioInfo(int type, AudioAttributes attrs, int control, int max, int current) {
+        public PlaybackInfo(int type, AudioAttributes attrs, int control, int max, int current) {
             mVolumeType = type;
             mAudioAttrs = attrs;
             mVolumeControl = control;
@@ -794,22 +805,22 @@ public final class MediaController {
         }
 
         /**
-         * Get the type of volume handling, either local or remote. One of:
+         * Get the type of playback which affects volume handling. One of:
          * <ul>
-         * <li>{@link MediaSession#PLAYBACK_TYPE_LOCAL}</li>
-         * <li>{@link MediaSession#PLAYBACK_TYPE_REMOTE}</li>
+         * <li>{@link #PLAYBACK_TYPE_LOCAL}</li>
+         * <li>{@link #PLAYBACK_TYPE_REMOTE}</li>
          * </ul>
          *
-         * @return The type of volume handling this session is using.
+         * @return The type of playback this session is using.
          */
-        public int getVolumeType() {
+        public int getPlaybackType() {
             return mVolumeType;
         }
 
         /**
          * Get the audio attributes for this session. The attributes will affect
          * volume handling for the session. When the volume type is
-         * {@link MediaSession#PLAYBACK_TYPE_REMOTE} these may be ignored by the
+         * {@link PlaybackInfo#PLAYBACK_TYPE_REMOTE} these may be ignored by the
          * remote volume handler.
          *
          * @return The attributes for this session.
@@ -920,7 +931,7 @@ public final class MediaController {
         public void onVolumeInfoChanged(ParcelableVolumeInfo pvi) {
             MediaController controller = mController.get();
             if (controller != null) {
-                AudioInfo info = new AudioInfo(pvi.volumeType, pvi.audioAttrs, pvi.controlType,
+                PlaybackInfo info = new PlaybackInfo(pvi.volumeType, pvi.audioAttrs, pvi.controlType,
                         pvi.maxVolume, pvi.currentVolume);
                 controller.postMessage(MSG_UPDATE_VOLUME, info, null);
             }
@@ -958,7 +969,7 @@ public final class MediaController {
                     mCallback.onExtrasChanged((Bundle) msg.obj);
                     break;
                 case MSG_UPDATE_VOLUME:
-                    mCallback.onAudioInfoChanged((AudioInfo) msg.obj);
+                    mCallback.onAudioInfoChanged((PlaybackInfo) msg.obj);
                     break;
                 case MSG_DESTROYED:
                     mCallback.onSessionDestroyed();

@@ -16381,16 +16381,16 @@ package android.media.session {
     method public void addCallback(android.media.session.MediaController.Callback, android.os.Handler);
     method public void adjustVolume(int, int);
     method public boolean dispatchMediaButtonEvent(android.view.KeyEvent);
-    method public android.media.session.MediaController.AudioInfo getAudioInfo();
     method public android.os.Bundle getExtras();
     method public long getFlags();
-    method public android.app.PendingIntent getLaunchActivity();
     method public android.media.MediaMetadata getMetadata();
     method public java.lang.String getPackageName();
+    method public android.media.session.MediaController.PlaybackInfo getPlaybackInfo();
     method public android.media.session.PlaybackState getPlaybackState();
     method public java.util.List<android.media.session.MediaSession.Item> getQueue();
     method public java.lang.CharSequence getQueueTitle();
     method public int getRatingType();
+    method public android.app.PendingIntent getSessionActivity();
     method public android.media.session.MediaSession.Token getSessionToken();
     method public android.media.session.MediaController.TransportControls getTransportControls();
     method public void removeCallback(android.media.session.MediaController.Callback);
@@ -16398,17 +16398,9 @@ package android.media.session {
     method public void setVolumeTo(int, int);
   }
 
-  public static final class MediaController.AudioInfo {
-    method public android.media.AudioAttributes getAudioAttributes();
-    method public int getCurrentVolume();
-    method public int getMaxVolume();
-    method public int getVolumeControl();
-    method public int getVolumeType();
-  }
-
   public static abstract class MediaController.Callback {
     ctor public MediaController.Callback();
-    method public void onAudioInfoChanged(android.media.session.MediaController.AudioInfo);
+    method public void onAudioInfoChanged(android.media.session.MediaController.PlaybackInfo);
     method public void onExtrasChanged(android.os.Bundle);
     method public void onMetadataChanged(android.media.MediaMetadata);
     method public void onPlaybackStateChanged(android.media.session.PlaybackState);
@@ -16416,6 +16408,16 @@ package android.media.session {
     method public void onQueueTitleChanged(java.lang.CharSequence);
     method public void onSessionDestroyed();
     method public void onSessionEvent(java.lang.String, android.os.Bundle);
+  }
+
+  public static final class MediaController.PlaybackInfo {
+    method public android.media.AudioAttributes getAudioAttributes();
+    method public int getCurrentVolume();
+    method public int getMaxVolume();
+    method public int getPlaybackType();
+    method public int getVolumeControl();
+    field public static final int PLAYBACK_TYPE_LOCAL = 1; // 0x1
+    field public static final int PLAYBACK_TYPE_REMOTE = 2; // 0x2
   }
 
   public final class MediaController.TransportControls {
@@ -16447,7 +16449,6 @@ package android.media.session {
     method public void setCallback(android.media.session.MediaSession.Callback, android.os.Handler);
     method public void setExtras(android.os.Bundle);
     method public void setFlags(int);
-    method public void setLaunchActivity(android.app.PendingIntent);
     method public void setMediaButtonReceiver(android.app.PendingIntent);
     method public void setMetadata(android.media.MediaMetadata);
     method public void setPlaybackState(android.media.session.PlaybackState);
@@ -16455,10 +16456,9 @@ package android.media.session {
     method public void setPlaybackToRemote(android.media.VolumeProvider);
     method public void setQueue(java.util.List<android.media.session.MediaSession.Item>);
     method public void setQueueTitle(java.lang.CharSequence);
+    method public void setSessionActivity(android.app.PendingIntent);
     field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
     field public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 2; // 0x2
-    field public static final int PLAYBACK_TYPE_LOCAL = 1; // 0x1
-    field public static final int PLAYBACK_TYPE_REMOTE = 2; // 0x2
   }
 
   public static abstract class MediaSession.Callback {
@@ -16505,6 +16505,7 @@ package android.media.session {
 
   public final class MediaSessionManager {
     method public void addOnActiveSessionsChangedListener(android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, android.content.ComponentName);
+    method public void addOnActiveSessionsChangedListener(android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, android.content.ComponentName, android.os.Handler);
     method public java.util.List<android.media.session.MediaController> getActiveSessions(android.content.ComponentName);
     method public void removeOnActiveSessionsChangedListener(android.media.session.MediaSessionManager.OnActiveSessionsChangedListener);
   }
@@ -16516,7 +16517,7 @@ package android.media.session {
   public final class PlaybackState implements android.os.Parcelable {
     method public int describeContents();
     method public long getActions();
-    method public long getBufferPosition();
+    method public long getBufferedPosition();
     method public java.util.List<android.media.session.PlaybackState.CustomAction> getCustomActions();
     method public java.lang.CharSequence getErrorMessage();
     method public long getLastPositionUpdateTime();
@@ -16560,7 +16561,7 @@ package android.media.session {
     method public android.media.session.PlaybackState build();
     method public android.media.session.PlaybackState.Builder setActions(long);
     method public android.media.session.PlaybackState.Builder setActiveItem(long);
-    method public android.media.session.PlaybackState.Builder setBufferPosition(long);
+    method public android.media.session.PlaybackState.Builder setBufferedPosition(long);
     method public android.media.session.PlaybackState.Builder setErrorMessage(java.lang.CharSequence);
     method public android.media.session.PlaybackState.Builder setState(int, long, float, long);
     method public android.media.session.PlaybackState.Builder setState(int, long, float);
