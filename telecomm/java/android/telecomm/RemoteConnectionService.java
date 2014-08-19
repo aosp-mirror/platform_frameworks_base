@@ -48,7 +48,7 @@ final class RemoteConnectionService {
 
     private final IConnectionServiceAdapter mServantDelegate = new IConnectionServiceAdapter() {
         @Override
-        public void handleCreateConnectionSuccessful(
+        public void handleCreateConnectionComplete(
                 String id,
                 ConnectionRequest request,
                 ParcelableConnection parcel) {
@@ -56,6 +56,7 @@ final class RemoteConnectionService {
                     findConnectionForAction(id, "handleCreateConnectionSuccessful");
             if (connection != NULL_CONNECTION && mPendingConnections.contains(connection)) {
                 mPendingConnections.remove(connection);
+                // Unconditionally initialize the connection ...
                 connection.setState(parcel.getState());
                 connection.setCallCapabilities(parcel.getCapabilities());
                 connection.setHandle(
@@ -64,26 +65,12 @@ final class RemoteConnectionService {
                         parcel.getCallerDisplayName(),
                         parcel.getCallerDisplayNamePresentation());
                 // TODO: Do we need to support video providers for remote connections?
+                if (connection.getState() == Connection.STATE_DISCONNECTED) {
+                    // ... then, if it was created in a disconnected state, that indicates
+                    // failure on the providing end, so immediately mark it destroyed
+                    connection.setDestroyed();
+                }
             }
-        }
-
-        @Override
-        public void handleCreateConnectionFailed(
-                String id,
-                ConnectionRequest request,
-                int errorCode,
-                String errorMessage) {
-            // TODO: How do we propagate the failure codes?
-            findConnectionForAction(id, "handleCreateConnectionFailed")
-                    .setDestroyed();
-        }
-
-        @Override
-        public void handleCreateConnectionCancelled(
-                String id,
-                ConnectionRequest request) {
-            findConnectionForAction(id, "handleCreateConnectionCancelled")
-                    .setDestroyed();
         }
 
         @Override

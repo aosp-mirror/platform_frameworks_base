@@ -36,6 +36,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents a connection to a remote endpoint that carries voice traffic.
+ * <p>
+ * Implementations create a custom subclass of {@code Connection} and return it to the framework
+ * as the return value of
+ * {@link ConnectionService#onCreateIncomingConnection(PhoneAccountHandle, ConnectionRequest)}
+ * or
+ * {@link ConnectionService#onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
+ * Implementations are then responsible for updating the state of the {@code Connection}, and
+ * must call {@link #destroy()} to signal to the framework that the {@code Connection} is no
+ * longer used and associated resources may be recovered.
  */
 public abstract class Connection {
 
@@ -52,10 +61,6 @@ public abstract class Connection {
     public static final int STATE_HOLDING = 5;
 
     public static final int STATE_DISCONNECTED = 6;
-
-    public static final int STATE_FAILED = 7;
-
-    public static final int STATE_CANCELED = 8;
 
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
@@ -644,10 +649,6 @@ public abstract class Connection {
                 return "STATE_HOLDING";
             case STATE_DISCONNECTED:
                 return "DISCONNECTED";
-            case STATE_FAILED:
-                return "STATE_FAILED";
-            case STATE_CANCELED:
-                return "STATE_CANCELED";
             default:
                 Log.wtf(Connection.class, "Unknown state %d", state);
                 return "UNKNOWN";
@@ -691,33 +692,6 @@ public abstract class Connection {
         for (Listener l : mListeners) {
             l.onCallerDisplayNameChanged(this, callerDisplayName, presentation);
         }
-    }
-
-    /**
-     * Cancel the {@link Connection}. Once this is called, the {@link Connection} will not be used,
-     * and no subsequent {@link Connection}s will be attempted.
-     */
-    public final void setCanceled() {
-        Log.d(this, "setCanceled");
-        setState(STATE_CANCELED);
-    }
-
-    /**
-     * Move the {@link Connection} to the {@link #STATE_FAILED} state, with the given code
-     * ({@see DisconnectCause}) and message. This message is not shown to the user, but is useful
-     * for logging and debugging purposes.
-     * <p>
-     * After calling this, the {@link Connection} will not be used.
-     *
-     * @param code The {@link DisconnectCause} indicating why the connection
-     *             failed.
-     * @param message A message explaining why the {@link Connection} failed.
-     */
-    public final void setFailed(int code, String message) {
-        Log.d(this, "setFailed (%d: %s)", code, message);
-        mFailureCode = code;
-        mFailureMessage = message;
-        setState(STATE_FAILED);
     }
 
     /**
@@ -1094,9 +1068,8 @@ public abstract class Connection {
     }
 
     private void setState(int state) {
-        if (mState == STATE_FAILED || mState == STATE_CANCELED) {
-            Log.d(this, "Connection already %s; cannot transition out of this state.",
-                    stateToString(mState));
+        if (mState == STATE_DISCONNECTED && mState != state) {
+            Log.d(this, "Connection already DISCONNECTED; cannot transition out of this state.");
             return;
         }
         if (mState != state) {
@@ -1109,33 +1082,41 @@ public abstract class Connection {
         }
     }
 
+    static class FailureSignalingConnection extends Connection {
+        public FailureSignalingConnection(int code, String message) {
+            setDisconnected(code, message);
+        }
+    }
+
     /**
-     * Return a {@link Connection} which represents a failed connection attempt. The returned
-     * {@link Connection} will have {@link #getFailureCode()}, {@link #getFailureMessage()}, and
-     * {@link #getState()} set appropriately, but the {@link Connection} itself should not be used
-     * for anything.
+     * Return a {@code Connection} which represents a failed connection attempt. The returned
+     * {@code Connection} will have a {@link #getFailureCode()} and {@link #getFailureMessage()}
+     * as specified, a {@link #getState()} of {@link #STATE_DISCONNECTED}.
+     * <p>
+     * The returned {@code Connection} can be assumed to {@link #destroy()} itself when appropriate,
+     * so users of this method need not maintain a reference to its return value to destroy it.
      *
      * @param code The failure code ({@see DisconnectCause}).
      * @param message A reason for why the connection failed (not intended to be shown to the user).
-     * @return A {@link Connection} which indicates failure.
+     * @return A {@code Connection} which indicates failure.
      */
     public static Connection createFailedConnection(final int code, final String message) {
-        return new Connection() {{
-            setFailed(code, message);
-        }};
+        return new FailureSignalingConnection(code, message);
     }
 
-    private static final Connection CANCELED_CONNECTION = new Connection() {{
-        setCanceled();
-    }};
+    private static final Connection CANCELED_CONNECTION =
+            new FailureSignalingConnection(DisconnectCause.OUTGOING_CANCELED, null);
 
     /**
-     * Return a {@link Connection} which represents a canceled a connection attempt. The returned
-     * {@link Connection} will have state {@link #STATE_CANCELED}, and cannot be moved out of that
-     * state. This connection should not be used for anything, and no other {@link Connection}s
-     * should be attempted.
+     * Return a {@code Connection} which represents a canceled connection attempt. The returned
+     * {@code Connection} will have state {@link #STATE_DISCONNECTED}, and cannot be moved out of
+     * that state. This connection should not be used for anything, and no other
+     * {@code Connection}s should be attempted.
+     * <p>
+     * The returned {@code Connection} can be assumed to {@link #destroy()} itself when appropriate,
+     * so users of this method need not maintain a reference to its return value to destroy it.
      *
-     * @return A {@link Connection} which indicates that the underlying call should be canceled.
+     * @return A {@code Connection} which indicates that the underlying call should be canceled.
      */
     public static Connection createCanceledConnection() {
         return CANCELED_CONNECTION;
