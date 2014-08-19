@@ -29,7 +29,6 @@ import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
 import android.app.Notification;
-import android.app.Notification.Builder;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
@@ -50,7 +49,6 @@ import android.media.AudioManager;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -582,11 +580,6 @@ public class NotificationManagerService extends SystemService {
             } catch (RemoteException e) {
             }
             Binder.restoreCallingIdentity(ident);
-        }
-
-        @Override
-        public boolean allowDisable(int what, IBinder token, String pkg) {
-            return mZenModeHelper.allowDisable(what, token, pkg);
         }
 
         @Override
