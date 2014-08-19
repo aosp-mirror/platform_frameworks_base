@@ -386,11 +386,13 @@ public class TransitionSet extends Transition {
      */
     @Override
     protected void createAnimators(ViewGroup sceneRoot, TransitionValuesMaps startValues,
-            TransitionValuesMaps endValues) {
+            TransitionValuesMaps endValues, ArrayList<TransitionValues> startValuesList,
+            ArrayList<TransitionValues> endValuesList) {
         startValues = removeExcludes(startValues);
         endValues = removeExcludes(endValues);
         for (Transition childTransition : mTransitions) {
-            childTransition.createAnimators(sceneRoot, startValues, endValues);
+            childTransition.createAnimators(sceneRoot, startValues, endValues, startValuesList,
+                    endValuesList);
         }
     }
 
