@@ -30,6 +30,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.KeyEvent;
 
@@ -50,6 +51,9 @@ import java.util.List;
 public final class MediaSessionManager {
     private static final String TAG = "SessionManager";
 
+    private final ArrayMap<OnActiveSessionsChangedListener, SessionsChangedWrapper> mListeners
+            = new ArrayMap<OnActiveSessionsChangedListener, SessionsChangedWrapper>();
+    private final Object mLock = new Object();
     private final ISessionManager mService;
 
     private Context mContext;
@@ -141,10 +145,11 @@ public final class MediaSessionManager {
      * @param notificationListener The enabled notification listener component.
      *            May be null.
      */
-    public void addActiveSessionsListener(@NonNull SessionListener sessionListener,
+    public void addOnActiveSessionsChangedListener(
+            @NonNull OnActiveSessionsChangedListener sessionListener,
             @Nullable ComponentName notificationListener) {
-        addActiveSessionsListener(sessionListener, notificationListener, UserHandle.myUserId(),
-                null);
+        addOnActiveSessionsChangedListener(sessionListener, notificationListener,
+                UserHandle.myUserId(), null);
     }
 
     /**
@@ -163,7 +168,8 @@ public final class MediaSessionManager {
      * @param handler The handler to post updates on.
      * @hide
      */
-    public void addActiveSessionsListener(@NonNull SessionListener sessionListener,
+    public void addOnActiveSessionsChangedListener(
+            @NonNull OnActiveSessionsChangedListener sessionListener,
             @Nullable ComponentName notificationListener, int userId, @Nullable Handler handler) {
         if (sessionListener == null) {
             throw new IllegalArgumentException("listener may not be null");
@@ -171,11 +177,18 @@ public final class MediaSessionManager {
         if (handler == null) {
             handler = new Handler();
         }
-        sessionListener.setHandler(handler);
-        try {
-            mService.addSessionsListener(sessionListener.mStub, notificationListener, userId);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error in addActiveSessionsListener.", e);
+        synchronized (mLock) {
+            if (mListeners.get(sessionListener) != null) {
+                Log.w(TAG, "Attempted to add session listener twice, ignoring.");
+                return;
+            }
+            SessionsChangedWrapper wrapper = new SessionsChangedWrapper(sessionListener, handler);
+            try {
+                mService.addSessionsListener(wrapper.mStub, notificationListener, userId);
+                mListeners.put(sessionListener, wrapper);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error in addOnActiveSessionsChangedListener.", e);
+            }
         }
     }
 
@@ -184,14 +197,20 @@ public final class MediaSessionManager {
      *
      * @param listener The listener to remove.
      */
-    public void removeActiveSessionsListener(@NonNull SessionListener listener) {
+    public void removeOnActiveSessionsChangedListener(
+            @NonNull OnActiveSessionsChangedListener listener) {
         if (listener == null) {
             throw new IllegalArgumentException("listener may not be null");
         }
-        try {
-            mService.removeSessionsListener(listener.mStub);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error in removeActiveSessionsListener.", e);
+        synchronized (mLock) {
+            SessionsChangedWrapper wrapper = mListeners.remove(listener);
+            if (wrapper != null) {
+                try {
+                    mService.removeSessionsListener(wrapper.mStub);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error in removeOnActiveSessionsChangedListener.", e);
+                }
+            }
         }
     }
 
@@ -257,28 +276,18 @@ public final class MediaSessionManager {
 
     /**
      * Listens for changes to the list of active sessions. This can be added
-     * using {@link #addActiveSessionsListener}.
+     * using {@link #addOnActiveSessionsChangedListener}.
      */
-    public static abstract class SessionListener {
-        private final Context mContext;
-        private Handler mHandler;
+    public interface OnActiveSessionsChangedListener {
+        public void onActiveSessionsChanged(@Nullable List<MediaController> controllers);
+    }
 
-        public SessionListener(Context context) {
-            mContext = context;
-        }
-        /**
-         * Called when the list of active sessions has changed. This can be due
-         * to a session being added or removed or the order of sessions
-         * changing. The controllers will be provided in priority order with the
-         * most important controller at index 0.
-         *
-         * @param controllers The updated list of controllers for the user that
-         *            changed.
-         */
-        public abstract void onActiveSessionsChanged(
-                @Nullable List<MediaController> controllers);
+    private final class SessionsChangedWrapper {
+        private final OnActiveSessionsChangedListener mListener;
+        private final Handler mHandler;
 
-        private final void setHandler(Handler handler) {
+        public SessionsChangedWrapper(OnActiveSessionsChangedListener listener, Handler handler) {
+            mListener = listener;
             mHandler = handler;
         }
 
@@ -295,7 +304,7 @@ public final class MediaSessionManager {
                             for (int i = 0; i < size; i++) {
                                 controllers.add(new MediaController(mContext, tokens.get(i)));
                             }
-                            SessionListener.this.onActiveSessionsChanged(controllers);
+                            mListener.onActiveSessionsChanged(controllers);
                         }
                     });
                 }
