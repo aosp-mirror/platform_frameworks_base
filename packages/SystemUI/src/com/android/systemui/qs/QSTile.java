@@ -286,6 +286,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         public Drawable icon;
         public String label;
         public String contentDescription;
+        public String dualLabelContentDescription;
 
         public boolean copyTo(State other) {
             if (other == null) throw new IllegalArgumentException();
@@ -294,12 +295,15 @@ public abstract class QSTile<TState extends State> implements Listenable {
                     || other.iconId != iconId
                     || !Objects.equals(other.icon, icon)
                     || !Objects.equals(other.label, label)
-                    || !Objects.equals(other.contentDescription, contentDescription);
+                    || !Objects.equals(other.contentDescription, contentDescription)
+                    || !Objects.equals(other.dualLabelContentDescription,
+                    dualLabelContentDescription);
             other.visible = visible;
             other.iconId = iconId;
             other.icon = icon;
             other.label = label;
             other.contentDescription = contentDescription;
+            other.dualLabelContentDescription = dualLabelContentDescription;
             return changed;
         }
 
@@ -315,6 +319,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
             sb.append(",icon=").append(icon);
             sb.append(",label=").append(label);
             sb.append(",contentDescription=").append(contentDescription);
+            sb.append(",dualLabelContentDescription=").append(dualLabelContentDescription);
             return sb.append(']');
         }
     }

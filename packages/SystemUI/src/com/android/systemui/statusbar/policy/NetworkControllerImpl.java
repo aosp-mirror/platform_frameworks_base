@@ -602,6 +602,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
             mQSPhoneSignalIconId = R.drawable.ic_qs_signal_no_signal;
             mDataSignalIconId = R.drawable.stat_sys_signal_null;
+            mContentDescriptionPhoneSignal = mContext.getString(
+                    AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0]);
         } else {
             if (mSignalStrength == null) {
                 if (CHATTY) Log.d(TAG, "updateTelephonySignalStrength: mSignalStrength == null");
@@ -665,8 +667,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         mDataIconList = TelephonyIcons.DATA_G[mInetCondition];
                         mDataTypeIconId = 0;
                         mQSDataTypeIconId = 0;
-                        mContentDescriptionDataType = mContext.getString(
-                                R.string.accessibility_data_connection_gprs);
+                        mContentDescriptionDataType = "";
                         break;
                     } else {
                         // fall through
