@@ -1007,10 +1007,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     /**
      * Return external input devices.
      */
-    List<HdmiDeviceInfo> getSafeExternalInputs() {
-        synchronized (mLock) {
-            return mSafeExternalInputs;
-        }
+    List<HdmiDeviceInfo> getSafeExternalInputsLocked() {
+        return mSafeExternalInputs;
     }
 
     @ServiceThreadOnly

@@ -206,6 +206,22 @@ final class HdmiUtils {
         return list;
     }
 
+    static <T> List<T> mergeToUnmodifiableList(List<T> a, List<T> b) {
+        if (a.isEmpty() && b.isEmpty()) {
+            return Collections.emptyList();
+        }
+        if (a.isEmpty()) {
+            return Collections.unmodifiableList(b);
+        }
+        if (b.isEmpty()) {
+            return Collections.unmodifiableList(a);
+        }
+        List<T> newList = new ArrayList<>();
+        newList.addAll(a);
+        newList.addAll(b);
+        return Collections.unmodifiableList(newList);
+    }
+
     /**
      * See if the new path is affecting the active path.
      *
