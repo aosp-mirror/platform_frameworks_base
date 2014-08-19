@@ -451,12 +451,15 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material" parent="Widget" />
 
     <!-- Bordered ink button -->
-    <style name="Widget.Material.Button" parent="Widget.Button">
+    <style name="Widget.Material.Button">
         <item name="background">@drawable/btn_default_material</item>
         <item name="textAppearance">?attr/textAppearanceButton</item>
         <item name="minHeight">48dip</item>
         <item name="minWidth">88dip</item>
         <item name="stateListAnimator">@anim/button_state_list_anim_material</item>
+        <item name="focusable">true</item>
+        <item name="clickable">true</item>
+        <item name="gravity">center_vertical|center_horizontal</item>
     </style>
 
     <!-- Small bordered ink button -->
@@ -499,9 +502,6 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.ButtonBar.AlertDialog">
         <item name="background">@null</item>
-        <item name="paddingStart">16dp</item>
-        <item name="paddingEnd">16dp</item>
-        <item name="paddingBottom">16dp</item>
         <item name="minHeight">@dimen/alert_dialog_button_bar_height</item>
     </style>
 
