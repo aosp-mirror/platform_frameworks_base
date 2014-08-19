@@ -2089,13 +2089,21 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (newCap.satisfiedByNetworkCapabilities(network.networkCapabilities)) {
                 if (VDBG) log("apparently satisfied.  currentScore=" + network.currentScore);
                 if ((bestNetwork == null) || bestNetwork.currentScore < network.currentScore) {
-                    bestNetwork = network;
+                    if (!nri.isRequest) {
+                        // Not setting bestNetwork here as a listening NetworkRequest may be
+                        // satisfied by multiple Networks.  Instead the request is added to
+                        // each satisfying Network and notified about each.
+                        network.addRequest(nri.request);
+                        notifyNetworkCallback(network, nri);
+                    } else {
+                        bestNetwork = network;
+                    }
                 }
             }
         }
         if (bestNetwork != null) {
             if (VDBG) log("using " + bestNetwork.name());
-            if (nri.isRequest && bestNetwork.networkInfo.isConnected()) {
+            if (bestNetwork.networkInfo.isConnected()) {
                 // Cancel any lingering so the linger timeout doesn't teardown this network
                 // even though we have a request for it.
                 bestNetwork.networkLingered.clear();
@@ -2105,7 +2113,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mNetworkForRequestId.put(nri.request.requestId, bestNetwork);
             notifyNetworkCallback(bestNetwork, nri);
             score = bestNetwork.currentScore;
-            if (nri.isRequest && nri.request.legacyType != TYPE_NONE) {
+            if (nri.request.legacyType != TYPE_NONE) {
                 mLegacyTypeTracker.add(nri.request.legacyType, bestNetwork);
             }
         }
@@ -4386,6 +4394,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (VDBG) log("  checking if request is satisfied: " + nri.request);
             if (nri.request.networkCapabilities.satisfiedByNetworkCapabilities(
                     newNetwork.networkCapabilities)) {
+                if (!nri.isRequest) {
+                    newNetwork.addRequest(nri.request);
+                    continue;
+                }
                 // next check if it's better than any current network we're using for
                 // this request
                 if (VDBG) {
