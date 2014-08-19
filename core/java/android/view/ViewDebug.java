@@ -187,6 +187,15 @@ public class ViewDebug {
          * @return true if the supported values should be formatted as a hex string.
          */
         boolean formatToHexString() default false;
+
+        /**
+         * Indicates whether or not the key to value mappings are held in adjacent indices.
+         *
+         * Note: Applies only to fields and methods that return String[].
+         *
+         * @return true if the key to value mappings are held in adjacent indices.
+         */
+        boolean hasAdjacentMapping() default false;
     }
 
     /**
@@ -1056,7 +1065,6 @@ public class ViewDebug {
             Class<?> klass, String prefix) throws IOException {
 
         final Method[] methods = getExportedPropertyMethods(klass);
-
         int count = methods.length;
         for (int i = 0; i < count; i++) {
             final Method method = methods[i];
@@ -1106,6 +1114,19 @@ public class ViewDebug {
                     final String suffix = "()";
 
                     exportUnrolledArray(context, out, property, array, valuePrefix, suffix);
+
+                    continue;
+                } else if (returnType == String[].class) {
+                    final String[] array = (String[]) methodValue;
+                    if (property.hasAdjacentMapping() && array != null) {
+                        for (int j = 0; j < array.length; j += 2) {
+                            if (array[j] != null) {
+                                writeEntry(out, categoryPrefix + prefix, array[j], "()",
+                                        array[j + 1] == null ? "null" : array[j + 1]);
+                            }
+
+                        }
+                    }
 
                     continue;
                 } else if (!returnType.isPrimitive()) {
@@ -1185,6 +1206,18 @@ public class ViewDebug {
                     final String suffix = "";
 
                     exportUnrolledArray(context, out, property, array, valuePrefix, suffix);
+
+                    continue;
+                } else if (type == String[].class) {
+                    final String[] array = (String[]) field.get(view);
+                    if (property.hasAdjacentMapping() && array != null) {
+                        for (int j = 0; j < array.length; j += 2) {
+                            if (array[j] != null) {
+                                writeEntry(out, categoryPrefix + prefix, array[j], "",
+                                        array[j + 1] == null ? "null" : array[j + 1]);
+                            }
+                        }
+                    }
 
                     continue;
                 } else if (!type.isPrimitive()) {
