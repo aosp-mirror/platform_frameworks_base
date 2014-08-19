@@ -29437,6 +29437,7 @@ package android.telephony {
     method public int hasCarrierPrivileges();
     method public boolean hasIccCard();
     method public boolean iccCloseLogicalChannel(int);
+    method public byte[] iccExchangeSimIO(int, int, int, int, int, java.lang.String);
     method public android.telephony.IccOpenLogicalChannelResponse iccOpenLogicalChannel(java.lang.String);
     method public java.lang.String iccTransmitApduBasicChannel(int, int, int, int, int, java.lang.String);
     method public java.lang.String iccTransmitApduLogicalChannel(int, int, int, int, int, int, java.lang.String);
