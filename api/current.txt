@@ -8599,24 +8599,35 @@ package android.content.pm {
   }
 
   public class LauncherApps {
+    method public void addCallback(android.content.pm.LauncherApps.Callback);
+    method public void addCallback(android.content.pm.LauncherApps.Callback, android.os.Handler);
     method public void addOnAppsChangedCallback(android.content.pm.LauncherApps.OnAppsChangedCallback);
     method public void addOnAppsChangedCallback(android.content.pm.LauncherApps.OnAppsChangedCallback, android.os.Handler);
     method public java.util.List<android.content.pm.LauncherActivityInfo> getActivityList(java.lang.String, android.os.UserHandle);
+    method public boolean isActivityEnabled(android.content.ComponentName, android.os.UserHandle);
     method public boolean isActivityEnabledForProfile(android.content.ComponentName, android.os.UserHandle);
+    method public boolean isPackageEnabled(java.lang.String, android.os.UserHandle);
     method public boolean isPackageEnabledForProfile(java.lang.String, android.os.UserHandle);
+    method public void removeCallback(android.content.pm.LauncherApps.Callback);
     method public void removeOnAppsChangedCallback(android.content.pm.LauncherApps.OnAppsChangedCallback);
     method public android.content.pm.LauncherActivityInfo resolveActivity(android.content.Intent, android.os.UserHandle);
     method public void showAppDetailsForProfile(android.content.ComponentName, android.os.UserHandle, android.graphics.Rect, android.os.Bundle);
     method public void startActivityForProfile(android.content.ComponentName, android.os.UserHandle, android.graphics.Rect, android.os.Bundle);
+    method public void startAppDetailsActivity(android.content.ComponentName, android.os.UserHandle, android.graphics.Rect, android.os.Bundle);
+    method public void startMainActivity(android.content.ComponentName, android.os.UserHandle, android.graphics.Rect, android.os.Bundle);
   }
 
-  public static abstract class LauncherApps.OnAppsChangedCallback {
-    ctor public LauncherApps.OnAppsChangedCallback();
+  public static abstract class LauncherApps.Callback {
+    ctor public LauncherApps.Callback();
     method public abstract void onPackageAdded(java.lang.String, android.os.UserHandle);
     method public abstract void onPackageChanged(java.lang.String, android.os.UserHandle);
     method public abstract void onPackageRemoved(java.lang.String, android.os.UserHandle);
     method public abstract void onPackagesAvailable(java.lang.String[], android.os.UserHandle, boolean);
     method public abstract void onPackagesUnavailable(java.lang.String[], android.os.UserHandle, boolean);
+  }
+
+  public static abstract class LauncherApps.OnAppsChangedCallback extends android.content.pm.LauncherApps.Callback {
+    ctor public LauncherApps.OnAppsChangedCallback();
   }
 
   public class PackageInfo implements android.os.Parcelable {
