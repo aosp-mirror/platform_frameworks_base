@@ -208,6 +208,8 @@ protected:
         // ensure that local bounds cover mapped bounds
         if (!state.mMatrix.isSimple()) return false;
 
+        if (state.mRoundRectClipState) return false;
+
         // check state/paint for transparency
         if (mPaint) {
             if (mPaint->getShader() && !mPaint->getShader()->isOpaque()) {
