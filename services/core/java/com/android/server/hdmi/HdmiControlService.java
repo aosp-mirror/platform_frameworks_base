@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_ADD_DEVICE;
+import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE;
 import static com.android.server.hdmi.Constants.DISABLED;
 import static com.android.server.hdmi.Constants.ENABLED;
 import static com.android.server.hdmi.Constants.OPTION_CEC_AUTO_WAKEUP;
@@ -202,6 +204,9 @@ public final class HdmiControlService extends SystemService {
     @GuardedBy("mLock")
     private boolean mMhlInputChangeEnabled;
 
+    @GuardedBy("mLock")
+    private List<HdmiDeviceInfo> mMhlDevices;
+
     // List of listeners registered by callers that want to get notified of
     // system audio mode changes.
     private final ArrayList<IHdmiSystemAudioModeChangeListener>
@@ -293,6 +298,7 @@ public final class HdmiControlService extends SystemService {
             Slog.i(TAG, "Device does not support MHL-control.");
         }
         initPortInfo();
+        mMhlDevices = Collections.emptyList();
         mMessageValidator = new HdmiCecMessageValidator(this);
         publishBinderService(Context.HDMI_CONTROL_SERVICE, new BinderService());
 
@@ -683,16 +689,16 @@ public final class HdmiControlService extends SystemService {
     /**
      * Called when a new hotplug event is issued.
      *
-     * @param portNo hdmi port number where hot plug event issued.
+     * @param portId hdmi port number where hot plug event issued.
      * @param connected whether to be plugged in or not
      */
     @ServiceThreadOnly
-    void onHotplug(int portNo, boolean connected) {
+    void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
         for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
-            device.onHotplug(portNo, connected);
+            device.onHotplug(portId, connected);
         }
-        announceHotplugEvent(portNo, connected);
+        announceHotplugEvent(portId, connected);
     }
 
     /**
@@ -793,10 +799,15 @@ public final class HdmiControlService extends SystemService {
             HdmiMhlLocalDevice device = mMhlController.removeLocalDevice(portId);
             if (device != null) {
                 device.onDeviceRemoved();
+                // There is no explicit event for device removal unlike capability register event
+                // used for device addition . Hence we remove the device on hotplug event.
+                invokeDeviceEventListeners(device.getInfo(), DEVICE_EVENT_REMOVE_DEVICE);
+                updateSafeMhlInput();
             } else {
                 Slog.w(TAG, "No device to remove:[portId=" + portId);
             }
         }
+        announceHotplugEvent(portId, connected);
     }
 
     @ServiceThreadOnly
@@ -823,16 +834,43 @@ public final class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    void handleCapabilityRegisterChanged(int portId, int adopterId, int deviceId) {
+    void handleMhlCapabilityRegisterChanged(int portId, int adopterId, int deviceId) {
         assertRunOnServiceThread();
         HdmiMhlLocalDevice device = mMhlController.getLocalDevice(portId);
-        // Hot plug event should be called before capability register change event.
+
+        // Hotplug event should already have been called before capability register change event.
         if (device != null) {
             device.setCapabilityRegister(adopterId, deviceId);
+            invokeDeviceEventListeners(device.getInfo(), DEVICE_EVENT_ADD_DEVICE);
+            updateSafeMhlInput();
         } else {
             Slog.w(TAG, "No mhl device exists for capability register change event[portId:"
                     + portId + ", adopterId:" + adopterId + ", deviceId:" + deviceId + "]");
         }
+    }
+
+    @ServiceThreadOnly
+    private void updateSafeMhlInput() {
+        assertRunOnServiceThread();
+        List<HdmiDeviceInfo> inputs = Collections.emptyList();
+        SparseArray<HdmiMhlLocalDevice> devices = mMhlController.getAllLocalDevices();
+        for (int i = 0; i < devices.size(); ++i) {
+            HdmiMhlLocalDevice device = devices.valueAt(i);
+            HdmiDeviceInfo info = device.getInfo();
+            if (info != null) {
+                if (inputs.isEmpty()) {
+                    inputs = new ArrayList<>();
+                }
+                inputs.add(device.getInfo());
+            }
+        }
+        synchronized (mLock) {
+            mMhlDevices = inputs;
+        }
+    }
+
+    private List<HdmiDeviceInfo> getMhlDevicesLocked() {
+        return mMhlDevices;
     }
 
     // Record class that monitors the event of the caller of being killed. Used to clean up
@@ -1138,10 +1176,12 @@ public final class HdmiControlService extends SystemService {
             // No need to hold the lock for obtaining TV device as the local device instance
             // is preserved while the HDMI control is enabled.
             HdmiCecLocalDeviceTv tv = tv();
-            if (tv == null) {
-                return Collections.emptyList();
+            synchronized (mLock) {
+                List<HdmiDeviceInfo> cecDevices = (tv == null)
+                        ? Collections.<HdmiDeviceInfo>emptyList()
+                        : tv.getSafeExternalInputsLocked();
+                return HdmiUtils.mergeToUnmodifiableList(cecDevices, getMhlDevicesLocked());
             }
-            return tv.getSafeExternalInputs();
         }
 
         @Override
