@@ -34,6 +34,7 @@ public class LockTaskNotify {
     private final Context mContext;
     private final H mHandler;
     private AccessibilityManager mAccessibilityManager;
+    private Toast mLastToast;
 
     public LockTaskNotify(Context context) {
         mContext = context;
@@ -52,7 +53,11 @@ public class LockTaskNotify {
         if (!isLocked && mAccessibilityManager.isEnabled()) {
             text = mContext.getString(R.string.lock_to_app_toast_accessible);
         }
-        Toast.makeText(mContext, text, Toast.LENGTH_LONG).show();
+        if (mLastToast != null) {
+            mLastToast.cancel();
+        }
+        mLastToast = Toast.makeText(mContext, text, Toast.LENGTH_LONG);
+        mLastToast.show();
     }
 
     public void show(boolean starting) {

@@ -4859,15 +4859,12 @@
     <!-- Exting lock-to-app indication. -->
     <string name="lock_to_app_exit">Screen unpinned</string>
 
-    <!-- Lock-to-app checkbox for lock on exit -->
-    <string name="lock_to_app_use_screen_lock">Ask for %1$s before unpinning</string>
-
     <!-- Lock-to-app unlock pin string -->
-    <string name="lock_to_app_unlock_pin">PIN</string>
+    <string name="lock_to_app_unlock_pin">Ask for PIN before unpinning</string>
     <!-- Lock-to-app unlock pattern string -->
-    <string name="lock_to_app_unlock_pattern">unlock pattern</string>
+    <string name="lock_to_app_unlock_pattern">Ask for unlock pattern before unpinning</string>
     <!-- Lock-to-app unlock password string -->
-    <string name="lock_to_app_unlock_password">password</string>
+    <string name="lock_to_app_unlock_password">Ask for password before unpinning</string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description -->
     <string name="battery_saver_description">To help improve battery life, battery saver reduces your device’s performance and limits vibration and most background data. Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging</string>
