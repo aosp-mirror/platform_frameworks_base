@@ -21,12 +21,14 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
@@ -129,6 +131,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         mHeaderView = (TaskViewHeader) findViewById(R.id.task_view_bar);
         mThumbnailView = (TaskViewThumbnail) findViewById(R.id.task_view_thumbnail);
         mActionButtonView = findViewById(R.id.lock_to_app_fab);
+        mActionButtonView.setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                // Set the outline to match the FAB background
+                outline.setOval(0, 0, mActionButtonView.getWidth(),
+                        mActionButtonView.getHeight());
+            }
+        });
         if (mFooterView != null) {
             mFooterView.setCallbacks(this);
         }
@@ -469,7 +479,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             boolean occludesLaunchTarget) {
         if (isLaunchingTask) {
             // Disable the thumbnail clip and animate the bar out for the window animation out
-            mHeaderView.startLaunchTaskAnimation(mThumbnailView.disableTaskBarClipAsRunnable(), r);
+            mHeaderView.startLaunchTaskAnimation(mThumbnailView.disableTaskBarClipAsRunnable(), r,
+                    mIsFocused);
             // Animate the thumbnail alpha back into full opacity for the window animation out
             mThumbnailView.startLaunchTaskAnimation();
 
@@ -624,7 +635,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     public void setDim(int dim) {
         mDim = dim;
         // Defer setting hardware layers if we have not yet measured, or there is no dim to draw
-        if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0 && dim > 0) {
+        if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0) {
             if (mDimAnimator != null) {
                 mDimAnimator.removeAllListeners();
                 mDimAnimator.cancel();
@@ -828,6 +839,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 } else if (v == mHeaderView.mDismissButton) {
                     dismissTask();
                 } else {
+                    if (v == mActionButtonView) {
+                        // Reset the translation of the action button before we animate it out
+                        mActionButtonView.setTranslationZ(0f);
+                    }
                     mCb.onTaskViewClicked(tv, tv.getTask(),
                             (v == mFooterView || v == mActionButtonView));
                 }
