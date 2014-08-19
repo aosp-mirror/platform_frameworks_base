@@ -90,6 +90,8 @@ public class VpnConfig implements Parcelable {
     public List<RouteInfo> routes = new ArrayList<RouteInfo>();
     public List<String> dnsServers;
     public List<String> searchDomains;
+    public List<String> allowedApplications;
+    public List<String> disallowedApplications;
     public PendingIntent configureIntent;
     public long startTime = -1;
     public boolean legacy;
@@ -151,6 +153,8 @@ public class VpnConfig implements Parcelable {
         out.writeTypedList(routes);
         out.writeStringList(dnsServers);
         out.writeStringList(searchDomains);
+        out.writeStringList(allowedApplications);
+        out.writeStringList(disallowedApplications);
         out.writeParcelable(configureIntent, flags);
         out.writeLong(startTime);
         out.writeInt(legacy ? 1 : 0);
@@ -173,6 +177,8 @@ public class VpnConfig implements Parcelable {
             in.readTypedList(config.routes, RouteInfo.CREATOR);
             config.dnsServers = in.createStringArrayList();
             config.searchDomains = in.createStringArrayList();
+            config.allowedApplications = in.createStringArrayList();
+            config.disallowedApplications = in.createStringArrayList();
             config.configureIntent = in.readParcelable(null);
             config.startTime = in.readLong();
             config.legacy = in.readInt() != 0;

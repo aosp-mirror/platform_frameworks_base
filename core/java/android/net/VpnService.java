@@ -24,6 +24,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.net.NetworkUtils;
 import android.os.Binder;
@@ -32,6 +33,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 
 import com.android.internal.net.VpnConfig;
 
@@ -518,6 +520,16 @@ public class VpnService extends Service {
             return this;
         }
 
+        private void verifyApp(String packageName) throws PackageManager.NameNotFoundException {
+            IPackageManager pm = IPackageManager.Stub.asInterface(
+                    ServiceManager.getService("package"));
+            try {
+                pm.getApplicationInfo(packageName, 0, UserHandle.getCallingUserId());
+            } catch (RemoteException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
         /**
          * Adds an application that's allowed to access the VPN connection.
          *
@@ -540,7 +552,14 @@ public class VpnService extends Service {
          */
         public Builder addAllowedApplication(String packageName)
                 throws PackageManager.NameNotFoundException {
-            // TODO
+            if (mConfig.disallowedApplications != null) {
+                throw new UnsupportedOperationException("addDisallowedApplication already called");
+            }
+            verifyApp(packageName);
+            if (mConfig.allowedApplications == null) {
+                mConfig.allowedApplications = new ArrayList<String>();
+            }
+            mConfig.allowedApplications.add(packageName);
             return this;
         }
 
@@ -565,7 +584,14 @@ public class VpnService extends Service {
          */
         public Builder addDisallowedApplication(String packageName)
                 throws PackageManager.NameNotFoundException {
-            // TODO
+            if (mConfig.allowedApplications != null) {
+                throw new UnsupportedOperationException("addAllowedApplication already called");
+            }
+            verifyApp(packageName);
+            if (mConfig.disallowedApplications == null) {
+                mConfig.disallowedApplications = new ArrayList<String>();
+            }
+            mConfig.disallowedApplications.add(packageName);
             return this;
         }
 
