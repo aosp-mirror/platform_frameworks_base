@@ -2659,12 +2659,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         // A non-top activity is reporting a visibility change.
-        if (top.fullscreen || top.state != ActivityState.RESUMED || top.app == null ||
-                top.app.thread == null) {
+        if ((visible && (top.fullscreen || top.state != ActivityState.RESUMED)) ||
+                top.app == null || top.app.thread == null) {
             // Can't carry out this request.
             if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG, "requestVisibleBehind: returning top.fullscreen="
-                    + top.fullscreen+ " top.state=" + top.state + " top.app=" + top.app +
+                    + top.fullscreen + " top.state=" + top.state + " top.app=" + top.app +
                     " top.app.thread=" + top.app.thread);
+            return false;
+        } else if (!visible && stack.getVisibleBehindActivity() != r) {
+            // Only the activity set as currently visible behind should actively reset its
+            // visible behind state.
+            if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG, "requestVisibleBehind: returning visible="
+                    + visible + " stack.getVisibleBehindActivity()=" +
+                    stack.getVisibleBehindActivity() + " r=" + r);
             return false;
         }
 

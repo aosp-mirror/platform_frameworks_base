@@ -575,6 +575,10 @@ final class ActivityRecord {
 
     void makeFinishing() {
         if (!finishing) {
+            if (this == task.stack.getVisibleBehindActivity()) {
+                // A finishing activity should not remain as visible in the background
+                mStackSupervisor.requestVisibleBehindLocked(this, false);
+            }
             finishing = true;
             if (stopped) {
                 clearOptionsLocked();
