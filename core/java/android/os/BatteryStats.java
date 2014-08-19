@@ -3065,7 +3065,7 @@ public abstract class BatteryStats implements Parcelable {
                             "partial", which, linePrefix);
                     linePrefix = printWakeLock(sb, wl.getWakeTime(WAKE_TYPE_WINDOW), rawRealtime,
                             "window", which, linePrefix);
-                    if (!linePrefix.equals(": ")) {
+                    if (true || !linePrefix.equals(": ")) {
                         sb.append(" realtime");
                         // Only print out wake locks that were held
                         pw.println(sb.toString());
