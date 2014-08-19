@@ -66,6 +66,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.inputmethodservice.InputMethodService;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -392,6 +393,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private InputMethodInfo[] mIms;
     private int[] mSubtypeIds;
     private Locale mLastSystemLocale;
+    private boolean mShowImeWithHardKeyboard;
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
     private final IPackageManager mIPackageManager;
 
@@ -407,17 +409,25 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     Settings.Secure.ENABLED_INPUT_METHODS), false, this);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE), false, this);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD), false, this);
         }
 
-        @Override public void onChange(boolean selfChange) {
+        @Override public void onChange(boolean selfChange, Uri uri) {
+            final Uri showImeUri =
+                    Settings.Secure.getUriFor(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD);
             synchronized (mMethodMap) {
-                boolean enabledChanged = false;
-                String newEnabled = mSettings.getEnabledInputMethodsStr();
-                if (!mLastEnabled.equals(newEnabled)) {
-                    mLastEnabled = newEnabled;
-                    enabledChanged = true;
+                if (showImeUri.equals(uri)) {
+                    updateKeyboardFromSettingsLocked();
+                } else {
+                    boolean enabledChanged = false;
+                    String newEnabled = mSettings.getEnabledInputMethodsStr();
+                    if (!mLastEnabled.equals(newEnabled)) {
+                        mLastEnabled = newEnabled;
+                        enabledChanged = true;
+                    }
+                    updateInputMethodsFromSettingsLocked(enabledChanged);
                 }
-                updateFromSettingsLocked(enabledChanged);
             }
         }
     }
@@ -598,16 +608,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private class HardKeyboardListener
             implements WindowManagerService.OnHardKeyboardStatusChangeListener {
         @Override
-        public void onHardKeyboardStatusChange(boolean available, boolean enabled) {
-            mHandler.sendMessage(mHandler.obtainMessage(
-                    MSG_HARD_KEYBOARD_SWITCH_CHANGED, available ? 1 : 0, enabled ? 1 : 0));
+        public void onHardKeyboardStatusChange(boolean available) {
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_HARD_KEYBOARD_SWITCH_CHANGED,
+                        available ? 1 : 0));
         }
 
-        public void handleHardKeyboardStatusChange(boolean available,
-                boolean showImeWithHardKeyboard) {
+        public void handleHardKeyboardStatusChange(boolean available) {
             if (DEBUG) {
-                Slog.w(TAG, "HardKeyboardStatusChanged: available = " + available
-                        + ", showImeWithHardKeyboard= " + showImeWithHardKeyboard);
+                Slog.w(TAG, "HardKeyboardStatusChanged: available=" + available);
             }
             synchronized(mMethodMap) {
                 if (mSwitchingDialog != null && mSwitchingDialogTitleView != null
@@ -1657,6 +1665,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     void updateFromSettingsLocked(boolean enabledMayChange) {
+        updateInputMethodsFromSettingsLocked(enabledMayChange);
+        updateKeyboardFromSettingsLocked();
+    }
+
+    void updateInputMethodsFromSettingsLocked(boolean enabledMayChange) {
         if (enabledMayChange) {
             List<InputMethodInfo> enabled = mSettings.getEnabledInputMethodListLocked();
             for (int i=0; i<enabled.size(); i++) {
@@ -1710,6 +1723,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // TODO: Make sure that mSwitchingController and mSettings are sharing the
         // the same enabled IMEs list.
         mSwitchingController.resetCircularListLocked(mContext);
+
+    }
+
+    public void updateKeyboardFromSettingsLocked() {
+        mShowImeWithHardKeyboard = mSettings.isShowImeWithHardKeyboardEnabled();
+        if (mSwitchingDialog != null
+                && mSwitchingDialogTitleView != null
+                && mSwitchingDialog.isShowing()) {
+            final Switch hardKeySwitch = (Switch)mSwitchingDialogTitleView.findViewById(
+                    com.android.internal.R.id.hard_keyboard_switch);
+            hardKeySwitch.setChecked(mShowImeWithHardKeyboard);
+        }
     }
 
     /* package */ void setInputMethodLocked(String id, int subtypeId) {
@@ -2594,8 +2619,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // --------------------------------------------------------------
             case MSG_HARD_KEYBOARD_SWITCH_CHANGED:
-                mHardKeyboardListener.handleHardKeyboardStatusChange(
-                        msg.arg1 == 1, msg.arg2 == 1);
+                mHardKeyboardListener.handleHardKeyboardStatusChange(msg.arg1 == 1);
                 return true;
         }
         return false;
@@ -2684,7 +2708,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (!map.containsKey(defaultImiId)) {
                 Slog.w(TAG, "Default IME is uninstalled. Choose new default IME.");
                 if (chooseNewDefaultIMELocked()) {
-                    updateFromSettingsLocked(true);
+                    updateInputMethodsFromSettingsLocked(true);
                 }
             } else {
                 // Double check that the default IME is certainly enabled.
@@ -2811,11 +2835,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             ? View.VISIBLE : View.GONE);
             final Switch hardKeySwitch = (Switch)mSwitchingDialogTitleView.findViewById(
                     com.android.internal.R.id.hard_keyboard_switch);
-            hardKeySwitch.setChecked(mWindowManagerService.isShowImeWithHardKeyboardEnabled());
+            hardKeySwitch.setChecked(mShowImeWithHardKeyboard);
             hardKeySwitch.setOnCheckedChangeListener(new OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    mWindowManagerService.setShowImeWithHardKeyboard(isChecked);
+                    mSettings.setShowImeWithHardKeyboard(isChecked);
                     // Ensure that the input method dialog is dismissed when changing
                     // the hardware keyboard state.
                     hideInputMethodMenu();
