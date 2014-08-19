@@ -151,6 +151,31 @@ public class TransitionSet extends Transition {
     }
 
     /**
+     * Returns the number of child transitions in the TransitionSet.
+     *
+     * @return The number of child transitions in the TransitionSet.
+     * @see #addTransition(Transition)
+     * @see #getTransitionAt(int)
+     */
+    public int getTransitionCount() {
+        return mTransitions.size();
+    }
+
+    /**
+     * Returns the child Transition at the specified position in the TransitionSet.
+     *
+     * @param index The position of the Transition to retrieve.
+     * @see #addTransition(Transition)
+     * @see #getTransitionCount()
+     */
+    public Transition getTransitionAt(int index) {
+        if (index < 0 || index >= mTransitions.size()) {
+            return null;
+        }
+        return mTransitions.get(index);
+    }
+
+    /**
      * Setting a non-negative duration on a TransitionSet causes all of the child
      * transitions (current and future) to inherit this duration.
      *
