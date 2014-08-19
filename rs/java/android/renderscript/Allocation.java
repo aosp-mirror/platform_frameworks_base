@@ -1868,7 +1868,7 @@ public class Allocation extends BaseObj {
         }
     }
 
-    static void sendBufferNotification(int id) {
+    static void sendBufferNotification(long id) {
         synchronized(mAllocationMap) {
             Allocation a = mAllocationMap.get(new Long(id));
 
