@@ -29,6 +29,8 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
     private final SecureSetting mSetting;
     private final UsageTracker mUsageTracker;
 
+    private boolean mListening;
+
     public ColorInversionTile(Host host) {
         super(host);
 
@@ -36,18 +38,25 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
                 Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED) {
             @Override
             protected void handleValueChanged(int value) {
-                handleRefreshState(value);
                 mUsageTracker.trackUsage();
+                if (mListening) {
+                    handleRefreshState(value);
+                }
             }
         };
         mUsageTracker = new UsageTracker(host.getContext(), ColorInversionTile.class);
+        if (mSetting.getValue() != 0 && !mUsageTracker.isRecentlyUsed()) {
+            mUsageTracker.trackUsage();
+        }
         mUsageTracker.setListening(true);
+        mSetting.setListening(true);
     }
 
     @Override
     protected void handleDestroy() {
         super.handleDestroy();
         mUsageTracker.setListening(false);
+        mSetting.setListening(false);
     }
 
     @Override
@@ -57,7 +66,7 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public void setListening(boolean listening) {
-        mSetting.setListening(listening);
+        mListening = listening;
     }
 
     @Override
