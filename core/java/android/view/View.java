@@ -13831,6 +13831,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     } else {
                         draw(canvas);
                     }
+                    drawAccessibilityFocus(canvas);
                 }
             } finally {
                 renderNode.end(canvas);
@@ -14125,6 +14126,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             } else {
                 draw(canvas);
             }
+            drawAccessibilityFocus(canvas);
 
             canvas.restoreToCount(restoreCount);
             canvas.setBitmap(null);
@@ -14199,6 +14201,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             draw(canvas);
         }
+        drawAccessibilityFocus(canvas);
 
         mPrivateFlags = flags;
 
@@ -14792,9 +14795,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
                         mPrivateFlags &= ~PFLAG_DIRTY_MASK;
                         dispatchDraw(canvas);
+                        if (mOverlay != null && !mOverlay.isEmpty()) {
+                            mOverlay.getOverlayView().draw(canvas);
+                        }
                     } else {
                         draw(canvas);
                     }
+                    drawAccessibilityFocus(canvas);
                 } else {
                     mPrivateFlags &= ~PFLAG_DIRTY_MASK;
                     ((HardwareCanvas) canvas).drawRenderNode(renderNode, null, flags);
@@ -15043,6 +15050,45 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mOverlay != null && !mOverlay.isEmpty()) {
             mOverlay.getOverlayView().dispatchDraw(canvas);
         }
+    }
+
+    /**
+     * Draws the accessibility focus rect onto the specified canvas.
+     *
+     * @param canvas Canvas on which to draw the focus rect
+     */
+    private void drawAccessibilityFocus(Canvas canvas) {
+        if (mAttachInfo == null) {
+            return;
+        }
+
+        final Rect bounds = mAttachInfo.mTmpInvalRect;
+        final ViewRootImpl viewRoot = getViewRootImpl();
+        if (viewRoot == null || viewRoot.getAccessibilityFocusedHost() != this) {
+            return;
+        }
+
+        final AccessibilityManager manager = AccessibilityManager.getInstance(mContext);
+        if (!manager.isEnabled() || !manager.isTouchExplorationEnabled()) {
+            return;
+        }
+
+        final Drawable drawable = viewRoot.getAccessibilityFocusedDrawable();
+        if (drawable == null) {
+            return;
+        }
+
+        final AccessibilityNodeInfo virtualView = viewRoot.getAccessibilityFocusedVirtualView();
+        if (virtualView != null) {
+            virtualView.getBoundsInParent(bounds);
+        } else {
+            bounds.set(0, 0, mRight - mLeft, mBottom - mTop);
+        }
+
+        canvas.translate(mScrollX, mScrollY);
+        drawable.setBounds(bounds);
+        drawable.draw(canvas);
+        canvas.translate(-mScrollX, -mScrollY);
     }
 
     /**
