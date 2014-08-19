@@ -46,7 +46,7 @@
         android:label="@string/app_label"
         android:allowBackup= "false"
         android:supportsRtl="true"
-        android:icon="@*android:drawable/ic_print">
+        android:icon="@drawable/ic_print">
 
         <service
             android:name=".model.PrintSpoolerService"
