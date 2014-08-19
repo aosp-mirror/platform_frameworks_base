@@ -376,7 +376,7 @@ status_t DisplayListRenderer::drawText(const char* text, int bytesCount, int cou
         float x, float y, const float* positions, const SkPaint* paint,
         float totalAdvance, const Rect& bounds, DrawOpMode drawOpMode) {
 
-    if (!text || count <= 0) return DrawGlInfo::kStatusDone;
+    if (!text || count <= 0 || paintWillNotDrawText(*paint)) return DrawGlInfo::kStatusDone;
 
     text = refText(text, bytesCount);
     positions = refBuffer<float>(positions, count * 2);
