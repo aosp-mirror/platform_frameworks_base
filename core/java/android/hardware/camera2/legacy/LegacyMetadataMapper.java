@@ -1207,6 +1207,9 @@ public class LegacyMetadataMapper {
             m.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, bestRange);
         }
 
+        // control.sceneMode -- DISABLED is always available
+        m.set(CaptureRequest.CONTROL_SCENE_MODE, CONTROL_SCENE_MODE_DISABLED);
+
         /*
          * statistics.*
          */
