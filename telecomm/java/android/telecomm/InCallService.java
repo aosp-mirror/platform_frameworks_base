@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.annotation.SdkConstant;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
@@ -39,6 +40,13 @@ import java.lang.String;
  * {@hide}
  */
 public abstract class InCallService extends Service {
+
+    /**
+     * The {@link Intent} that must be declared as handled by the service.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
+    public static final String SERVICE_INTERFACE = "android.telecomm.InCallService";
+
     private static final int MSG_SET_IN_CALL_ADAPTER = 1;
     private static final int MSG_ADD_CALL = 2;
     private static final int MSG_UPDATE_CALL = 3;
