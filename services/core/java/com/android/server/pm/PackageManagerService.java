@@ -48,11 +48,6 @@ import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
-import static android.system.OsConstants.S_IRGRP;
-import static android.system.OsConstants.S_IROTH;
-import static android.system.OsConstants.S_IRWXU;
-import static android.system.OsConstants.S_IXGRP;
-import static android.system.OsConstants.S_IXOTH;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_USER_OWNER;
 import static com.android.internal.util.ArrayUtils.appendInt;
@@ -70,7 +65,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
 import com.android.server.LocalServices;
@@ -254,10 +248,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     // Suffix used during package installation when copying/moving
     // package apks to install directory.
     private static final String INSTALL_PACKAGE_SUFFIX = "-";
-
-    // Special value for {@code PackageParser.Package#cpuAbiOverride} to indicate
-    // that the cpuAbiOverride must be clear.
-    private static final String CLEAR_ABI_OVERRIDE = "-";
 
     static final int SCAN_MONITOR = 1<<0;
     static final int SCAN_NO_DEX = 1<<1;
@@ -5022,7 +5012,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static String deriveAbiOverride(String abiOverride, PackageSetting settings) {
         String cpuAbiOverride = null;
 
-        if (CLEAR_ABI_OVERRIDE.equals(abiOverride)) {
+        if (NativeLibraryHelper.CLEAR_ABI_OVERRIDE.equals(abiOverride)) {
             cpuAbiOverride = null;
         } else if (abiOverride != null) {
             cpuAbiOverride = abiOverride;
@@ -5526,7 +5516,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // Warn if we've set an abiOverride for multi-lib packages..
                     // By definition, we need to copy both 32 and 64 bit libraries for
                     // such packages.
-                    if (pkg.cpuAbiOverride != null && !CLEAR_ABI_OVERRIDE.equals(pkg.cpuAbiOverride)) {
+                    if (pkg.cpuAbiOverride != null
+                            && !NativeLibraryHelper.CLEAR_ABI_OVERRIDE.equals(pkg.cpuAbiOverride)) {
                         Slog.w(TAG, "Ignoring abiOverride for multi arch application.");
                     }
 
@@ -5536,7 +5527,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (isAsec) {
                             abi32 = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_32_BIT_ABIS);
                         } else {
-                            abi32 = copyNativeLibrariesForInternalApp(handle,
+                            abi32 = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle,
                                     nativeLibraryRoot, Build.SUPPORTED_32_BIT_ABIS, useIsaSpecificSubdirs);
                         }
                     }
@@ -5548,7 +5539,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (isAsec) {
                             abi64 = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_64_BIT_ABIS);
                         } else {
-                            abi64 = copyNativeLibrariesForInternalApp(handle,
+                            abi64 = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle,
                                     nativeLibraryRoot, Build.SUPPORTED_64_BIT_ABIS, useIsaSpecificSubdirs);
                         }
                     }
@@ -5587,8 +5578,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (isAsec) {
                         copyRet = NativeLibraryHelper.findSupportedAbi(handle, abiList);
                     } else {
-                        copyRet = copyNativeLibrariesForInternalApp(handle, nativeLibraryRoot, abiList,
-                                useIsaSpecificSubdirs);
+                        copyRet = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle,
+                                nativeLibraryRoot, abiList, useIsaSpecificSubdirs);
                     }
 
                     if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
@@ -6469,58 +6460,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkg.applicationInfo.primaryCpuAbi = null;
             pkg.applicationInfo.secondaryCpuAbi = null;
         }
-    }
-
-    private static void createNativeLibrarySubdir(File path) throws IOException {
-        if (!path.isDirectory()) {
-            path.delete();
-
-            if (!path.mkdir()) {
-                throw new IOException("Cannot create " + path.getPath());
-            }
-
-            try {
-                Os.chmod(path.getPath(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-            } catch (ErrnoException e) {
-                throw new IOException("Cannot chmod native library directory "
-                        + path.getPath(), e);
-            }
-        } else if (!SELinux.restorecon(path)) {
-            throw new IOException("Cannot set SELinux context for " + path.getPath());
-        }
-    }
-
-    private static int copyNativeLibrariesForInternalApp(NativeLibraryHelper.Handle handle,
-            final File nativeLibraryRoot, String[] abiList, boolean useIsaSubdir) throws IOException {
-        createNativeLibrarySubdir(nativeLibraryRoot);
-
-        /*
-         * If this is an internal application or our nativeLibraryPath points to
-         * the app-lib directory, unpack the libraries if necessary.
-         */
-        int abi = NativeLibraryHelper.findSupportedAbi(handle, abiList);
-        if (abi >= 0) {
-            /*
-             * If we have a matching instruction set, construct a subdir under the native
-             * library root that corresponds to this instruction set.
-             */
-            final String instructionSet = VMRuntime.getInstructionSet(abiList[abi]);
-            final File subDir;
-            if (useIsaSubdir) {
-                final File isaSubdir = new File(nativeLibraryRoot, instructionSet);
-                createNativeLibrarySubdir(isaSubdir);
-                subDir = isaSubdir;
-            } else {
-                subDir = nativeLibraryRoot;
-            }
-
-            int copyRet = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle, subDir, abiList[abi]);
-            if (copyRet != PackageManager.INSTALL_SUCCEEDED) {
-                return copyRet;
-            }
-        }
-
-        return abi;
     }
 
     private void killApplication(String pkgName, int appId, String reason) {
@@ -8667,6 +8606,20 @@ public class PackageManagerService extends IPackageManager.Stub {
          */
         public void handleStartCopy() throws RemoteException {
             int ret = PackageManager.INSTALL_SUCCEEDED;
+
+            // If we're already staged, we've firmly committed to an install location
+            if (originStaged) {
+                if (originFile != null) {
+                    flags |= PackageManager.INSTALL_INTERNAL;
+                    flags &= ~PackageManager.INSTALL_EXTERNAL;
+                } else if (originCid != null) {
+                    flags |= PackageManager.INSTALL_EXTERNAL;
+                    flags &= ~PackageManager.INSTALL_INTERNAL;
+                } else {
+                    throw new IllegalStateException("Invalid stage location");
+                }
+            }
+
             final boolean onSd = (flags & PackageManager.INSTALL_EXTERNAL) != 0;
             final boolean onInt = (flags & PackageManager.INSTALL_INTERNAL) != 0;
             PackageInfoLite pkgLite = null;
@@ -8690,7 +8643,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                  * If we have too little free space, try to free cache
                  * before giving up.
                  */
-                if (pkgLite.recommendedInstallLocation
+                if (!originStaged && pkgLite.recommendedInstallLocation
                         == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
                     // TODO: focus freeing disk space on the target device
                     final StorageManager storage = StorageManager.from(mContext);
@@ -9287,49 +9240,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             NativeLibraryHelper.Handle handle = null;
             try {
                 handle = NativeLibraryHelper.Handle.create(codeFile);
-                if (multiArch) {
-                    // Warn if we've set an abiOverride for multi-lib packages..
-                    // By definition, we need to copy both 32 and 64 bit libraries for
-                    // such packages.
-                    if (abiOverride != null &&  !CLEAR_ABI_OVERRIDE.equals(abiOverride)) {
-                        Slog.w(TAG, "Ignoring abiOverride for multi arch application.");
-                    }
-
-                    int copyRet = PackageManager.NO_NATIVE_LIBRARIES;
-                    if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
-                        copyRet = copyNativeLibrariesForInternalApp(handle, libraryRoot,
-                                Build.SUPPORTED_32_BIT_ABIS, true /* use isa specific subdirs */);
-                        maybeThrowExceptionForMultiArchCopy("Failure copying 32 bit native libraries", copyRet);
-                    }
-
-                    if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
-                        copyRet = copyNativeLibrariesForInternalApp(handle, libraryRoot,
-                                Build.SUPPORTED_64_BIT_ABIS, true /* use isa specific subdirs */);
-                        maybeThrowExceptionForMultiArchCopy("Failure copying 64 bit native libraries", copyRet);
-                    }
-                } else {
-                    final String cpuAbiOverride = deriveAbiOverride(this.abiOverride, null /* package setting */);
-                    String[] abiList = (cpuAbiOverride != null) ?
-                            new String[] { cpuAbiOverride } : Build.SUPPORTED_ABIS;
-
-                    if (Build.SUPPORTED_64_BIT_ABIS.length > 0 && cpuAbiOverride == null &&
-                            NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
-                        abiList = Build.SUPPORTED_32_BIT_ABIS;
-                    }
-
-                    int copyRet = copyNativeLibrariesForInternalApp(handle, libraryRoot, abiList,
-                            true /* use isa specific subdirs */);
-                    if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
-                        Slog.w(TAG, "Failure copying native libraries [errorCode=" + copyRet + "]");
-                        return copyRet;
-                    }
-                }
+                ret = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle, libraryRoot,
+                        abiOverride, multiArch);
             } catch (IOException e) {
                 Slog.e(TAG, "Copying native libraries failed", e);
                 ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
-            } catch (PackageManagerException pme) {
-                Slog.e(TAG, "Copying native libraries failed", pme);
-                ret = pme.error;
             } finally {
                 IoUtils.closeQuietly(handle);
             }
@@ -9504,8 +9419,6 @@ public class PackageManagerService extends IPackageManager.Stub {
      * renaming logic.
      */
     class AsecInstallArgs extends InstallArgs {
-        // TODO: teach about handling cluster directories
-
         static final String RES_FILE_NAME = "pkg.apk";
         static final String PUBLIC_RES_FILE_NAME = "res.zip";
 
@@ -9528,12 +9441,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             super(null, false, null, (isExternal ? INSTALL_EXTERNAL : 0)
                     | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
                     instructionSets, null, isMultiArch);
+            // Hackily pretend we're still looking at a full code path
+            if (!fullCodePath.endsWith(RES_FILE_NAME)) {
+                fullCodePath = new File(fullCodePath, RES_FILE_NAME).getAbsolutePath();
+            }
+
             // Extract cid from fullCodePath
             int eidx = fullCodePath.lastIndexOf("/");
             String subStr1 = fullCodePath.substring(0, eidx);
             int sidx = subStr1.lastIndexOf("/");
             cid = subStr1.substring(sidx+1, eidx);
-            setCachePath(subStr1);
+            setMountPath(subStr1);
         }
 
         AsecInstallArgs(String cid, String[] instructionSets, boolean isForwardLocked,
@@ -9542,7 +9460,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
                     instructionSets, null, isMultiArch);
             this.cid = cid;
-            setCachePath(PackageHelper.getSdDir(cid));
+            setMountPath(PackageHelper.getSdDir(cid));
         }
 
         /** New install from existing */
@@ -9564,7 +9482,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             final File target;
             if (isExternal()) {
-                target = Environment.getExternalStorageDirectory();
+                target = new UserEnvironment(UserHandle.USER_OWNER).getExternalStorageDirectory();
             } else {
                 target = Environment.getDataDirectory();
             }
@@ -9578,6 +9496,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
+            // TODO: if already staged, we only need to extract native code
             if (temp) {
                 createCopyFile();
             } else {
@@ -9588,12 +9507,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 PackageHelper.destroySdDir(cid);
             }
 
-            final String newCachePath = imcs.copyPackageToContainer(
+            final String newMountPath = imcs.copyPackageToContainer(
                     originFile.getAbsolutePath(), cid, getEncryptKey(), isExternal(),
                     isFwdLocked(), deriveAbiOverride(abiOverride, null /* settings */));
 
-            if (newCachePath != null) {
-                setCachePath(newCachePath);
+            if (newMountPath != null) {
+                setMountPath(newMountPath);
                 return PackageManager.INSTALL_SUCCEEDED;
             } else {
                 return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
@@ -9622,10 +9541,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else {
                 boolean mounted = PackageHelper.isContainerMounted(cid);
                 if (!mounted) {
-                    String newCachePath = PackageHelper.mountSdDir(cid, getEncryptKey(),
+                    String newMountPath = PackageHelper.mountSdDir(cid, getEncryptKey(),
                             Process.SYSTEM_UID);
-                    if (newCachePath != null) {
-                        setCachePath(newCachePath);
+                    if (newMountPath != null) {
+                        setMountPath(newMountPath);
                     } else {
                         return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
                     }
@@ -9636,7 +9555,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         boolean doRename(int status, PackageParser.Package pkg, String oldCodePath) {
             String newCacheId = getNextCodePath(oldCodePath, pkg.packageName, "/" + RES_FILE_NAME);
-            String newCachePath = null;
+            String newMountPath = null;
             if (PackageHelper.isContainerMounted(cid)) {
                 // Unmount the container
                 if (!PackageHelper.unMountSdDir(cid)) {
@@ -9661,46 +9580,59 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             if (!PackageHelper.isContainerMounted(newCacheId)) {
                 Slog.w(TAG, "Mounting container " + newCacheId);
-                newCachePath = PackageHelper.mountSdDir(newCacheId,
+                newMountPath = PackageHelper.mountSdDir(newCacheId,
                         getEncryptKey(), Process.SYSTEM_UID);
             } else {
-                newCachePath = PackageHelper.getSdDir(newCacheId);
+                newMountPath = PackageHelper.getSdDir(newCacheId);
             }
-            if (newCachePath == null) {
+            if (newMountPath == null) {
                 Slog.w(TAG, "Failed to get cache path for  " + newCacheId);
                 return false;
             }
             Log.i(TAG, "Succesfully renamed " + cid +
                     " to " + newCacheId +
-                    " at new path: " + newCachePath);
+                    " at new path: " + newMountPath);
             cid = newCacheId;
-            setCachePath(newCachePath);
 
-            // TODO: extend to support split APKs
-            pkg.codePath = getCodePath();
-            pkg.baseCodePath = getCodePath();
-            pkg.splitCodePaths = null;
+            final File beforeCodeFile = new File(packagePath);
+            setMountPath(newMountPath);
+            final File afterCodeFile = new File(packagePath);
 
-            pkg.applicationInfo.setCodePath(getCodePath());
-            pkg.applicationInfo.setBaseCodePath(getCodePath());
-            pkg.applicationInfo.setSplitCodePaths(null);
-            pkg.applicationInfo.setResourcePath(getResourcePath());
-            pkg.applicationInfo.setBaseResourcePath(getResourcePath());
-            pkg.applicationInfo.setSplitResourcePaths(null);
+            // Reflect the rename in scanned details
+            pkg.codePath = afterCodeFile.getAbsolutePath();
+            pkg.baseCodePath = FileUtils.rewriteAfterRename(beforeCodeFile, afterCodeFile,
+                    pkg.baseCodePath);
+            pkg.splitCodePaths = FileUtils.rewriteAfterRename(beforeCodeFile, afterCodeFile,
+                    pkg.splitCodePaths);
+
+            // Reflect the rename in app info
+            pkg.applicationInfo.setCodePath(pkg.codePath);
+            pkg.applicationInfo.setBaseCodePath(pkg.baseCodePath);
+            pkg.applicationInfo.setSplitCodePaths(pkg.splitCodePaths);
+            pkg.applicationInfo.setResourcePath(pkg.codePath);
+            pkg.applicationInfo.setBaseResourcePath(pkg.baseCodePath);
+            pkg.applicationInfo.setSplitResourcePaths(pkg.splitCodePaths);
 
             return true;
         }
 
-        private void setCachePath(String newCachePath) {
-            File cachePath = new File(newCachePath);
-            legacyNativeLibraryDir = new File(cachePath, LIB_DIR_NAME).getPath();
-            packagePath = new File(cachePath, RES_FILE_NAME).getPath();
+        private void setMountPath(String mountPath) {
+            final File mountFile = new File(mountPath);
 
-            if (isFwdLocked()) {
-                resourcePath = new File(cachePath, PUBLIC_RES_FILE_NAME).getPath();
+            final File monolithicFile = new File(mountFile, RES_FILE_NAME);
+            if (monolithicFile.exists()) {
+                packagePath = monolithicFile.getAbsolutePath();
+                if (isFwdLocked()) {
+                    resourcePath = new File(mountFile, PUBLIC_RES_FILE_NAME).getAbsolutePath();
+                } else {
+                    resourcePath = packagePath;
+                }
             } else {
+                packagePath = mountFile.getAbsolutePath();
                 resourcePath = packagePath;
             }
+
+            legacyNativeLibraryDir = new File(mountFile, LIB_DIR_NAME).getAbsolutePath();
         }
 
         int doPostInstall(int status, int uid) {
@@ -9739,23 +9671,43 @@ public class PackageManagerService extends IPackageManager.Stub {
             PackageHelper.destroySdDir(cid);
         }
 
-        void cleanUpResourcesLI() {
-            String sourceFile = getCodePath();
-            // Remove dex file
-            if (instructionSets == null) {
-                throw new IllegalStateException("instructionSet == null");
-            }
-            String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
-            for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-                int retCode = mInstaller.rmdex(sourceFile, dexCodeInstructionSet);
-                if (retCode < 0) {
-                    Slog.w(TAG, "Couldn't remove dex file for package: "
-                            + " at location "
-                            + sourceFile.toString() + ", retcode=" + retCode);
-                    // we don't consider this to be a failure of the core package deletion
+        private List<String> getAllCodePaths() {
+            final File codeFile = new File(getCodePath());
+            if (codeFile != null && codeFile.exists()) {
+                try {
+                    final PackageLite pkg = PackageParser.parsePackageLite(codeFile, 0);
+                    return pkg.getAllCodePaths();
+                } catch (PackageParserException e) {
+                    // Ignored; we tried our best
                 }
             }
+            return Collections.EMPTY_LIST;
+        }
+
+        void cleanUpResourcesLI() {
+            // Enumerate all code paths before deleting
+            cleanUpResourcesLI(getAllCodePaths());
+        }
+
+        private void cleanUpResourcesLI(List<String> allCodePaths) {
             cleanUp();
+
+            if (!allCodePaths.isEmpty()) {
+                if (instructionSets == null) {
+                    throw new IllegalStateException("instructionSet == null");
+                }
+                String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
+                for (String codePath : allCodePaths) {
+                    for (String dexCodeInstructionSet : dexCodeInstructionSets) {
+                        int retCode = mInstaller.rmdex(codePath, dexCodeInstructionSet);
+                        if (retCode < 0) {
+                            Slog.w(TAG, "Couldn't remove dex file for package: "
+                                    + " at location " + codePath + ", retcode=" + retCode);
+                            // we don't consider this to be a failure of the core package deletion
+                        }
+                    }
+                }
+            }
         }
 
         boolean matchContainer(String app) {
@@ -9770,16 +9722,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         boolean doPostDeleteLI(boolean delete) {
-            boolean ret = false;
+            if (DEBUG_SD_INSTALL) Slog.i(TAG, "doPostDeleteLI() del=" + delete);
+            final List<String> allCodePaths = getAllCodePaths();
             boolean mounted = PackageHelper.isContainerMounted(cid);
             if (mounted) {
                 // Unmount first
-                ret = PackageHelper.unMountSdDir(cid);
+                if (PackageHelper.unMountSdDir(cid)) {
+                    mounted = false;
+                }
             }
-            if (ret && delete) {
-                cleanUpResourcesLI();
+            if (!mounted && delete) {
+                cleanUpResourcesLI(allCodePaths);
             }
-            return ret;
+            return !mounted;
         }
 
         @Override
@@ -10966,6 +10921,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             outInfo.args = createInstallArgsForExisting(packageFlagsToInstallFlags(ps),
                     ps.codePathString, ps.resourcePathString, ps.legacyNativeLibraryPathString,
                     getAppDexInstructionSets(ps), isMultiArch(ps));
+            if (DEBUG_SD_INSTALL) Slog.i(TAG, "args=" + outInfo.args);
         }
         return true;
     }
@@ -12772,7 +12728,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             getAppDexInstructionSets(ps), isForwardLocked(ps), isMultiArch(ps));
                     // The package status is changed only if the code path
                     // matches between settings and the container id.
-                    if (ps.codePathString != null && ps.codePathString.equals(args.getCodePath())) {
+                    if (ps.codePathString != null
+                            && ps.codePathString.startsWith(args.getCodePath())) {
                         if (DEBUG_SD_INSTALL) {
                             Log.i(TAG, "Container : " + cid + " corresponds to pkg : " + pkgName
                                     + " at code path: " + ps.codePathString);
@@ -12851,7 +12808,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     continue;
                 }
                 // Check code path here.
-                if (codePath == null || !codePath.equals(args.getCodePath())) {
+                if (codePath == null || !codePath.startsWith(args.getCodePath())) {
                     Slog.e(TAG, "Container " + args.cid + " cachepath " + args.getCodePath()
                             + " does not match one in settings " + codePath);
                     continue;

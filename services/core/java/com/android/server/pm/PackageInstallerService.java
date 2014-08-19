@@ -56,6 +56,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Environment.UserEnvironment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -485,7 +486,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             // Brand new install, use best resolved location. This also verifies
             // that target has enough free space for the install.
             final int resolved = PackageHelper.resolveInstallLocation(mContext,
-                    params.installLocation, params.sizeBytes, params.installFlags);
+                    params.appPackageName, params.installLocation, params.sizeBytes,
+                    params.installFlags);
             if (resolved == PackageHelper.RECOMMEND_INSTALL_INTERNAL) {
                 stageInternal = true;
             } else if (resolved == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
@@ -568,7 +570,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private void checkExternalStorage(long sizeBytes) throws IOException {
         if (sizeBytes <= 0) return;
 
-        final File target = Environment.getExternalStorageDirectory();
+        final File target = new UserEnvironment(UserHandle.USER_OWNER)
+                .getExternalStorageDirectory();
         final long targetBytes = sizeBytes + mStorage.getStorageLowBytes(target);
 
         if (target.getUsableSpace() < targetBytes) {
@@ -696,7 +699,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "uninstall");
 
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
-                statusReceiver);
+                statusReceiver, packageName);
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DELETE_PACKAGES)
                 == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
@@ -773,15 +776,19 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     static class PackageDeleteObserverAdapter extends PackageDeleteObserver {
         private final Context mContext;
         private final IntentSender mTarget;
+        private final String mPackageName;
 
-        public PackageDeleteObserverAdapter(Context context, IntentSender target) {
+        public PackageDeleteObserverAdapter(Context context, IntentSender target,
+                String packageName) {
             mContext = context;
             mTarget = target;
+            mPackageName = packageName;
         }
 
         @Override
         public void onUserActionRequired(Intent intent) {
             final Intent fillIn = new Intent();
+            fillIn.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, mPackageName);
             fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
                     PackageInstaller.STATUS_PENDING_USER_ACTION);
             fillIn.putExtra(Intent.EXTRA_INTENT, intent);
@@ -794,6 +801,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         @Override
         public void onPackageDeleted(String basePackageName, int returnCode, String msg) {
             final Intent fillIn = new Intent();
+            fillIn.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, mPackageName);
             fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
                     PackageManager.deleteStatusToPublicStatus(returnCode));
             fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
@@ -809,15 +817,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     static class PackageInstallObserverAdapter extends PackageInstallObserver {
         private final Context mContext;
         private final IntentSender mTarget;
+        private final int mSessionId;
 
-        public PackageInstallObserverAdapter(Context context, IntentSender target) {
+        public PackageInstallObserverAdapter(Context context, IntentSender target, int sessionId) {
             mContext = context;
             mTarget = target;
+            mSessionId = sessionId;
         }
 
         @Override
         public void onUserActionRequired(Intent intent) {
             final Intent fillIn = new Intent();
+            fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, mSessionId);
             fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
                     PackageInstaller.STATUS_PENDING_USER_ACTION);
             fillIn.putExtra(Intent.EXTRA_INTENT, intent);
@@ -831,6 +842,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         public void onPackageInstalled(String basePackageName, int returnCode, String msg,
                 Bundle extras) {
             final Intent fillIn = new Intent();
+            fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, mSessionId);
             fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
                     PackageManager.installStatusToPublicStatus(returnCode));
             fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
@@ -840,8 +852,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 final String existing = extras.getString(
                         PackageManager.EXTRA_FAILURE_EXISTING_PACKAGE);
                 if (!TextUtils.isEmpty(existing)) {
-                    fillIn.putExtra(PackageInstaller.EXTRA_PACKAGE_NAMES, new String[] {
-                            existing });
+                    fillIn.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, existing);
                 }
             }
             try {
@@ -985,6 +996,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 mHistoricalSessions.put(session.sessionId, session);
             }
             writeSessionsAsync();
+        }
+
+        public void onSessionSealed(PackageInstallerSession session) {
+            // It's very important that we block until we've recorded the
+            // session as being sealed, since we never want to allow mutation
+            // after sealing.
+            writeSessionsLocked();
         }
     }
 }
