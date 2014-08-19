@@ -155,7 +155,7 @@ final class HdmiCecKeycode {
     }
 
     /**
-     * A mapping between andorid and cec keycode.
+     * A mapping between Android and CEC keycode.
      *
      * <p>Normal implementation of this looks like
      * <pre>
@@ -174,43 +174,28 @@ final class HdmiCecKeycode {
     private static class KeycodeEntry {
         private final int mAndroidKeycode;
         private final int mCecKeycode;
-        private final int mParam;
         private final boolean mIsRepeatable;
 
-        private KeycodeEntry(int androidKeycode, int cecKeycode, int param, boolean isRepeatable) {
+        private KeycodeEntry(int androidKeycode, int cecKeycode, boolean isRepeatable) {
             mAndroidKeycode = androidKeycode;
             mCecKeycode = cecKeycode;
-            mParam = param;
             mIsRepeatable = isRepeatable;
         }
 
         private KeycodeEntry(int androidKeycode, int cecKeycode) {
-            this(androidKeycode, cecKeycode, NO_PARAM, true);
+            this(androidKeycode, cecKeycode, true);
         }
 
-        private KeycodeEntry(int androidKeycode, int cecKeycode, boolean isRepeatable) {
-            this(androidKeycode, cecKeycode, NO_PARAM, isRepeatable);
-        }
-
-        private byte[] toCecKeycodeIfMatched(int androidKeycode) {
+        private int toCecKeycodeIfMatched(int androidKeycode) {
             if (mAndroidKeycode == androidKeycode) {
-                if (mParam == NO_PARAM) {
-                    return new byte[] {
-                        (byte) (mCecKeycode & 0xFF)
-                    };
-                } else {
-                    return new byte[] {
-                        (byte) (mCecKeycode & 0xFF),
-                        (byte) (mParam & 0xFF)
-                    };
-                }
+                return mCecKeycode;
             } else {
-                return null;
+                return UNSUPPORTED_KEYCODE;
             }
         }
 
-        private int toAndroidKeycodeIfMatched(int cecKeycode, int param) {
-            if (cecKeycode == mCecKeycode && mParam == param) {
+        private int toAndroidKeycodeIfMatched(int cecKeycode) {
+            if (cecKeycode == mCecKeycode) {
                 return mAndroidKeycode;
             } else {
                 return UNSUPPORTED_KEYCODE;
@@ -365,29 +350,28 @@ final class HdmiCecKeycode {
      * Translate Android keycode to Hdmi Cec keycode.
      *
      * @param keycode Android keycode. For details, refer {@link KeyEvent}
-     * @return array of byte which contains cec keycode and param if it has;
-     *         return null if failed to find matched cec keycode
+     * @return single byte CEC keycode if matched.
      */
-    static byte[] androidKeyToCecKey(int keycode) {
+    static int androidKeyToCecKey(int keycode) {
         for (int i = 0; i < KEYCODE_ENTRIES.length; ++i) {
-            byte[] cecKeycode = KEYCODE_ENTRIES[i].toCecKeycodeIfMatched(keycode);
-            if (cecKeycode != null) {
+            int cecKeycode = KEYCODE_ENTRIES[i].toCecKeycodeIfMatched(keycode);
+            if (cecKeycode != UNSUPPORTED_KEYCODE) {
                 return cecKeycode;
             }
         }
-        return null;
+        return UNSUPPORTED_KEYCODE;
     }
 
     /**
      * Translate Hdmi CEC keycode to Android keycode.
      *
-     * @param keycode Cec keycode. If has no param, put {@link #NO_PARAM}
+     * @param keycode CEC keycode
      * @return cec keycode corresponding to the given android keycode.
      *         If finds no matched keycode, return {@link #UNSUPPORTED_KEYCODE}
      */
-    static int cecKeyToAndroidKey(int keycode, int param) {
+    static int cecKeyToAndroidKey(int keycode) {
         for (int i = 0; i < KEYCODE_ENTRIES.length; ++i) {
-            int androidKey = KEYCODE_ENTRIES[i].toAndroidKeycodeIfMatched(keycode, param);
+            int androidKey = KEYCODE_ENTRIES[i].toAndroidKeycodeIfMatched(keycode);
             if (androidKey != UNSUPPORTED_KEYCODE) {
                 return androidKey;
             }
