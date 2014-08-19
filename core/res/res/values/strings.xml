@@ -3964,9 +3964,9 @@
     <string name="permission_request_notification_with_subtitle">Permission requested\nfor account <xliff:g id="account" example="foo@gmail.com">%s</xliff:g>.</string>
 
     <!-- Message to show when an intent automatically switches users into the personal profile. -->
-    <string name="forward_intent_to_owner">You\'re using this app in your personal space</string>
+    <string name="forward_intent_to_owner">You\'re using this app in your personal profile</string>
     <!-- Message to show when an intent automatically switches users into a work profile. -->
-    <string name="forward_intent_to_work">You\'re using this app in your work space</string>
+    <string name="forward_intent_to_work">You\'re using this app in your work profile</string>
 
     <!-- Label to show for a service that is running because it is an input method. -->
     <string name="input_method_binding_label">Input method</string>
