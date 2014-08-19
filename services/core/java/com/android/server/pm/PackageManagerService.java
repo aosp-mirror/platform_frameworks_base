@@ -11575,18 +11575,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
 
-                if (DEBUG_PREFERRED) {
-                    Slog.i(TAG, existing.size() + " existing preferred matches for:");
-                    filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
-                }
-                for (int i = 0; i < existing.size(); i++) {
-                    PreferredActivity pa = existing.get(i);
+                if (existing != null) {
                     if (DEBUG_PREFERRED) {
-                        Slog.i(TAG, "Removing existing preferred activity "
-                                + pa.mPref.mComponent + ":");
-                        pa.dump(new LogPrinter(Log.INFO, TAG), "  ");
+                        Slog.i(TAG, existing.size() + " existing preferred matches for:");
+                        filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
                     }
-                    pir.removeFilter(pa);
+                    for (int i = 0; i < existing.size(); i++) {
+                        PreferredActivity pa = existing.get(i);
+                        if (DEBUG_PREFERRED) {
+                            Slog.i(TAG, "Removing existing preferred activity "
+                                    + pa.mPref.mComponent + ":");
+                            pa.dump(new LogPrinter(Log.INFO, TAG), "  ");
+                        }
+                        pir.removeFilter(pa);
+                    }
                 }
             }
             addPreferredActivityInternal(filter, match, set, activity, true, userId,
