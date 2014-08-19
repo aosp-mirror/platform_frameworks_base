@@ -668,8 +668,6 @@
     <!-- Shows when people have clicked at the right edge of the screen to explain how to open the phone. In right-to-left languages, this is the opposite direction. [CHAR LIMIT=60] -->
     <string name="camera_hint">Swipe left for camera</string>
 
-    <string name="bugreport_tile_extended" translatable="false">%s\n%s (%s)</string>
-
     <!-- Zen mode condition: no exit criteria. [CHAR LIMIT=NONE] -->
     <string name="zen_mode_forever">Indefinitely</string>
 
