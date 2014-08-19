@@ -22,13 +22,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * UEventObserver is an abstract class that receives UEvent's from the kernel.<p>
+ * UEventObserver is an abstract class that receives UEvents from the kernel.<p>
  *
  * Subclass UEventObserver, implementing onUEvent(UEvent event), then call
  * startObserving() with a match string. The UEvent thread will then call your
  * onUEvent() method when a UEvent occurs that contains your match string.<p>
  *
- * Call stopObserving() to stop receiving UEvent's.<p>
+ * Call stopObserving() to stop receiving UEvents.<p>
  *
  * There is only one UEvent thread per process, even if that process has
  * multiple UEventObserver subclass instances. The UEvent thread starts when
@@ -78,7 +78,7 @@ public abstract class UEventObserver {
     }
 
     /**
-     * Begin observation of UEvent's.<p>
+     * Begin observation of UEvents.<p>
      * This method will cause the UEvent thread to start if this is the first
      * invocation of startObserving in this process.<p>
      * Once called, the UEvent thread will call onUEvent() when an incoming
@@ -103,7 +103,7 @@ public abstract class UEventObserver {
     }
 
     /**
-     * End observation of UEvent's.<p>
+     * End observation of UEvents.<p>
      * This process's UEvent thread will never call onUEvent() on this
      * UEventObserver after this call. Repeated calls have no effect.
      */
