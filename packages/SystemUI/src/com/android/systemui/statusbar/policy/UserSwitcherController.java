@@ -508,9 +508,9 @@ public class UserSwitcherController {
             setTitle(R.string.guest_exit_guest_dialog_title);
             setMessage(context.getString(R.string.guest_exit_guest_dialog_message));
             setButton(DialogInterface.BUTTON_NEGATIVE,
-                    context.getString(android.R.string.no), this);
+                    context.getString(android.R.string.cancel), this);
             setButton(DialogInterface.BUTTON_POSITIVE,
-                    context.getString(android.R.string.yes), this);
+                    context.getString(R.string.guest_exit_guest_dialog_remove), this);
             setCanceledOnTouchOutside(false);
             mGuestId = guestId;
         }
