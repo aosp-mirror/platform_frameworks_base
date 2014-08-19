@@ -700,6 +700,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final String DEBUG_LAYOUT_PROPERTY = "debug.layout";
 
     /**
+     * When set to true, this view will save its attribute data.
+     *
+     * @hide
+     */
+    public static boolean mDebugViewAttributes = false;
+
+    /**
      * Used to mark a View that has no ID.
      */
     public static final int NO_ID = -1;
@@ -3254,6 +3261,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
+    @ViewDebug.ExportedProperty(deepExport = true)
     protected Context mContext;
 
     private final Resources mResources;
@@ -3524,6 +3532,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     GhostView mGhostView;
 
     /**
+     * Holds pairs of adjacent attribute data: attribute name followed by its value.
+     * @hide
+     */
+    @ViewDebug.ExportedProperty(category = "attributes", hasAdjacentMapping = true)
+    public String[] mAttributes;
+
+    /**
+     * Maps a Resource id to its name.
+     */
+    private static SparseArray<String> mAttributeMap;
+
+    /**
      * Simple constructor to use when creating a view from code.
      *
      * @param context The Context the view is running in, through which it can
@@ -3640,6 +3660,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.View, defStyleAttr, defStyleRes);
+
+        if (mDebugViewAttributes) {
+            saveAttributeData(attrs, a);
+        }
 
         Drawable background = null;
 
@@ -4134,6 +4158,51 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     View() {
         mResources = null;
         mRenderNode = RenderNode.create(getClass().getName());
+    }
+
+    private static SparseArray<String> getAttributeMap() {
+        if (mAttributeMap == null) {
+            mAttributeMap = new SparseArray<String>();
+        }
+        return mAttributeMap;
+    }
+
+    private void saveAttributeData(AttributeSet attrs, TypedArray a) {
+        int length = ((attrs == null ? 0 : attrs.getAttributeCount()) + a.getIndexCount()) * 2;
+        mAttributes = new String[length];
+
+        int i = 0;
+        if (attrs != null) {
+            for (i = 0; i < attrs.getAttributeCount(); i += 2) {
+                mAttributes[i] = attrs.getAttributeName(i);
+                mAttributes[i + 1] = attrs.getAttributeValue(i);
+            }
+
+        }
+
+        SparseArray<String> attributeMap = getAttributeMap();
+        for (int j = 0; j < a.length(); ++j) {
+            if (a.hasValue(j)) {
+                try {
+                    int resourceId = a.getResourceId(j, 0);
+                    if (resourceId == 0) {
+                        continue;
+                    }
+
+                    String resourceName = attributeMap.get(resourceId);
+                    if (resourceName == null) {
+                        resourceName = a.getResources().getResourceName(resourceId);
+                        attributeMap.put(resourceId, resourceName);
+                    }
+
+                    mAttributes[i] = resourceName;
+                    mAttributes[i + 1] = a.getText(j).toString();
+                    i += 2;
+                } catch (Resources.NotFoundException e) {
+                    // if we can't get the resource name, we just ignore it
+                }
+            }
+        }
     }
 
     public String toString() {
