@@ -1641,6 +1641,11 @@
         be disabled) but individual Features can be disabled using ImsConfig.setFeatureValue() -->
     <bool name="imsServiceAllowTurnOff">true</bool>
 
+    <!-- Flag specifying whether VoLTE & VT should be allowed on device: independent of the
+         carrier provisioning. If false: hard disabled. If true: then depends on carrier
+         provisioning, availability etc -->
+    <bool name="config_mobile_allow_volte_vt">true</bool>
+
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
     <string-array translatable="false" name="config_cdma_home_system" />
