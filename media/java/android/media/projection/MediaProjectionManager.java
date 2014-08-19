@@ -17,12 +17,20 @@
 package android.media.projection;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.media.projection.IMediaProjection;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.util.ArrayMap;
+import android.util.Log;
+
+import java.util.Map;
 
 /**
  * Manages the retrieval of certain types of {@link MediaProjection} tokens.
@@ -35,6 +43,7 @@ import android.os.IBinder;
  * </p>
  */
 public final class MediaProjectionManager {
+    private static final String TAG = "MediaProjectionManager";
     /** @hide */
     public static final String EXTRA_APP_TOKEN = "android.media.projection.extra.EXTRA_APP_TOKEN";
     /** @hide */
@@ -49,10 +58,15 @@ public final class MediaProjectionManager {
     public static final int TYPE_PRESENTATION = 2;
 
     private Context mContext;
+    private Map<Callback, CallbackDelegate> mCallbacks;
+    private IMediaProjectionManager mService;
 
     /** @hide */
     public MediaProjectionManager(Context context) {
         mContext = context;
+        IBinder b = ServiceManager.getService(Context.MEDIA_PROJECTION_SERVICE);
+        mService = IMediaProjectionManager.Stub.asInterface(b);
+        mCallbacks = new ArrayMap<>();
     }
 
     /**
@@ -87,5 +101,106 @@ public final class MediaProjectionManager {
             return null;
         }
         return new MediaProjection(mContext, IMediaProjection.Stub.asInterface(projection));
+    }
+
+    /**
+     * Get the {@link MediaProjectionInfo} for the active {@link MediaProjection}.
+     * @hide
+     */
+    public MediaProjectionInfo getActiveProjectionInfo() {
+        try {
+            return mService.getActiveProjectionInfo();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to get the active projection info", e);
+        }
+        return null;
+    }
+
+    /**
+     * Stop the current projection if there is one.
+     * @hide
+     */
+    public void stopActiveProjection() {
+        try {
+            mService.stopActiveProjection();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to stop the currently active media projection", e);
+        }
+    }
+
+    /**
+     * Add a callback to monitor all of the {@link MediaProjection}s activity.
+     * Not for use by regular applications, must have the MANAGE_MEDIA_PROJECTION permission.
+     * @hide
+     */
+    public void addCallback(@NonNull Callback callback, @Nullable Handler handler) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
+        }
+        CallbackDelegate delegate = new CallbackDelegate(callback, handler);
+        mCallbacks.put(callback, delegate);
+        try {
+            mService.addCallback(delegate);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to add callbacks to MediaProjection service", e);
+        }
+    }
+
+    /**
+     * Remove a MediaProjection monitoring callback.
+     * @hide
+     */
+    public void removeCallback(@NonNull Callback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
+        }
+        CallbackDelegate delegate = mCallbacks.remove(callback);
+        try {
+            if (delegate != null) {
+                mService.removeCallback(delegate);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to add callbacks to MediaProjection service", e);
+        }
+    }
+
+    /** @hide */
+    public static abstract class Callback {
+        public abstract void onStart(MediaProjectionInfo info);
+        public abstract void onStop(MediaProjectionInfo info);
+    }
+
+    /** @hide */
+    private final static class CallbackDelegate extends IMediaProjectionWatcherCallback.Stub {
+        private Callback mCallback;
+        private Handler mHandler;
+
+        public CallbackDelegate(Callback callback, Handler handler) {
+            mCallback = callback;
+            if (handler == null) {
+                handler = new Handler();
+            }
+            mHandler = handler;
+        }
+
+        @Override
+        public void onStart(final MediaProjectionInfo info) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onStart(info);
+                }
+            });
+        }
+
+        @Override
+        public void onStop(final MediaProjectionInfo info) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onStop(info);
+                }
+            });
+        }
     }
 }

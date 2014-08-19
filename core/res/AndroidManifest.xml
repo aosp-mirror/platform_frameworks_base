@@ -2819,11 +2819,11 @@
         android:description="@string/permdesc_accessDrmCertificates"
         android:protectionLevel="signature|system" />
 
-    <!-- Api Allows an application to create media projection sessions.
+    <!-- Api Allows an application to manage media projection sessions.
          @hide This is not a third-party API (intended for system apps). -->
-    <permission android:name="android.permission.CREATE_MEDIA_PROJECTION"
-        android:label="@string/permlab_createMediaProjection"
-        android:description="@string/permdesc_createMediaProjection"
+    <permission android:name="android.permission.MANAGE_MEDIA_PROJECTION"
+        android:label="@string/permlab_manageMediaProjection"
+        android:description="@string/permdesc_manageMediaProjection"
         android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an application to read install sessions
