@@ -17,12 +17,12 @@ package com.android.server.notification;
 
 import android.app.Notification;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import org.xmlpull.v1.XmlPullParser;
@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
 
 public class RankingHelper implements RankingConfig {
@@ -51,7 +52,7 @@ public class RankingHelper implements RankingConfig {
 
     private final NotificationSignalExtractor[] mSignalExtractors;
     private final NotificationComparator mPreliminaryComparator = new NotificationComparator();
-    private final NotificationComparator mFinalComparator = new GroupedNotificationComparator();
+    private final GlobalSortKeyComparator mFinalComparator = new GlobalSortKeyComparator();
 
     // Package name to uid, to priority. Would be better as Table<String, Int, Int>
     private final ArrayMap<String, SparseIntArray> mPackagePriorities;
@@ -168,34 +169,75 @@ public class RankingHelper implements RankingConfig {
 
     public void sort(ArrayList<NotificationRecord> notificationList) {
         final int N = notificationList.size();
-        // clear group proxies
+        // clear global sort keys
         for (int i = N - 1; i >= 0; i--) {
-            notificationList.get(i).setRankingProxy(null);
+            notificationList.get(i).setGlobalSortKey(null);
         }
 
-        // rank each record individually
-        Collections.sort(notificationList, mPreliminaryComparator);
-
-        // record inidivdual ranking result and nominate proxies for each group
-        for (int i = N - 1; i >= 0; i--) {
-            final NotificationRecord record = notificationList.get(i);
-            record.setAuthoritativeRank(i);
-            final String groupKey = record.getGroupKey();
-            boolean isGroupSummary = record.getNotification().getGroup() != null
-                    && (record.getNotification().flags & Notification.FLAG_GROUP_SUMMARY) != 0;
-            if (isGroupSummary || mProxyByGroupTmp.get(groupKey) == null) {
-                mProxyByGroupTmp.put(groupKey, record);
+        try {
+            // rank each record individually
+            Collections.sort(notificationList, mPreliminaryComparator);
+        } catch (RuntimeException ex) {
+            // Don't crash the system server if something bad happened.
+            Log.e(TAG, "Extreme badness during notification sort", ex);
+            Log.e(TAG, "Current notification list: ");
+            for (int i = 0; i < N; i++) {
+                NotificationRecord nr = notificationList.get(i);
+                Log.e(TAG, String.format(
+                        "  [%d] %s (group %s, rank %d, sortkey %s)",
+                        i, nr, nr.getGroupKey(), nr.getAuthoritativeRank(),
+                        nr.getNotification().getSortKey()));
             }
+            // STOPSHIP: remove once b/16626175 is found
+            throw ex;
         }
-        // assign nominated proxies to each notification
-        for (int i = 0; i < N; i++) {
-            final NotificationRecord record = notificationList.get(i);
-            record.setRankingProxy(mProxyByGroupTmp.get(record.getGroupKey()));
+
+        synchronized (mProxyByGroupTmp) {
+            // record individual ranking result and nominate proxies for each group
+            for (int i = N - 1; i >= 0; i--) {
+                final NotificationRecord record = notificationList.get(i);
+                record.setAuthoritativeRank(i);
+                final String groupKey = record.getGroupKey();
+                boolean isGroupSummary = record.getNotification().isGroupSummary();
+                if (isGroupSummary || !mProxyByGroupTmp.containsKey(groupKey)) {
+                    mProxyByGroupTmp.put(groupKey, record);
+                }
+            }
+            // assign global sort key:
+            //   is_recently_intrusive:group_rank:is_group_summary:group_sort_key:rank
+            for (int i = 0; i < N; i++) {
+                final NotificationRecord record = notificationList.get(i);
+                NotificationRecord groupProxy = mProxyByGroupTmp.get(record.getGroupKey());
+                String groupSortKey = record.getNotification().getSortKey();
+
+                // We need to make sure the developer provided group sort key (gsk) is handled
+                // correctly:
+                //   gsk="" < gsk=non-null-string < gsk=null
+                //
+                // We enforce this by using different prefixes for these three cases.
+                String groupSortKeyPortion;
+                if (groupSortKey == null) {
+                    groupSortKeyPortion = "nsk";
+                } else if (groupSortKey.equals("")) {
+                    groupSortKeyPortion = "esk";
+                } else {
+                    groupSortKeyPortion = "gsk=" + groupSortKey;
+                }
+
+                boolean isGroupSummary = record.getNotification().isGroupSummary();
+                record.setGlobalSortKey(
+                        String.format("intrsv=%c:grnk=0x%04x:gsmry=%c:%s:rnk=0x%04x",
+                        record.isRecentlyIntrusive() ? '0' : '1',
+                        groupProxy.getAuthoritativeRank(),
+                        isGroupSummary ? '0' : '1',
+                        groupSortKeyPortion,
+                        record.getAuthoritativeRank()));
+            }
+            mProxyByGroupTmp.clear();
         }
+
         // Do a second ranking pass, using group proxies
         Collections.sort(notificationList, mFinalComparator);
-
-        mProxyByGroupTmp.clear();
     }
 
     public int indexOf(ArrayList<NotificationRecord> notificationList, NotificationRecord target) {
