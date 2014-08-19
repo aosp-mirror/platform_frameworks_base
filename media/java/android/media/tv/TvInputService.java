@@ -94,6 +94,8 @@ public abstract class TvInputService extends Service {
     private final RemoteCallbackList<ITvInputServiceCallback> mCallbacks =
             new RemoteCallbackList<ITvInputServiceCallback>();
 
+    private TvInputManager mTvInputManager;
+
     @Override
     public final IBinder onBind(Intent intent) {
         return new ITvInputService.Stub() {
@@ -223,6 +225,17 @@ public abstract class TvInputService extends Service {
     @SystemApi
     public String onHdmiDeviceRemoved(HdmiDeviceInfo deviceInfo) {
         return null;
+    }
+
+    private boolean isPassthroughInput(String inputId) {
+        if (mTvInputManager == null) {
+            mTvInputManager = (TvInputManager) getSystemService(Context.TV_INPUT_SERVICE);
+        }
+        TvInputInfo info = mTvInputManager.getTvInputInfo(inputId);
+        if (info != null && info.isPassthroughInput()) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -1229,9 +1242,14 @@ public abstract class TvInputService extends Service {
                         HardwareSession proxySession =
                                 ((HardwareSession) sessionImpl);
                         String harewareInputId = proxySession.getHardwareInputId();
-                        if (TextUtils.isEmpty(harewareInputId)) {
+                        if (TextUtils.isEmpty(harewareInputId) ||
+                                !isPassthroughInput(harewareInputId)) {
+                            if (TextUtils.isEmpty(harewareInputId)) {
+                                Log.w(TAG, "Hardware input id is not setup yet.");
+                            } else {
+                                Log.w(TAG, "Invalid hardware input id : " + harewareInputId);
+                            }
                             sessionImpl.onRelease();
-                            Log.w(TAG, "Hardware input id is not setup yet.");
                             try {
                                 cb.onSessionCreated(null, null);
                             } catch (RemoteException e) {
@@ -1239,7 +1257,6 @@ public abstract class TvInputService extends Service {
                             }
                             return;
                         }
-                        // TODO: check if the given ID is really hardware TV input.
                         proxySession.mProxySession = stub;
                         proxySession.mProxySessionCallback = cb;
                         proxySession.mServiceHandler = mServiceHandler;
