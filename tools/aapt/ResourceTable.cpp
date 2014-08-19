@@ -484,15 +484,6 @@ static status_t compileAttribute(const sp<AaptFile>& in,
                 attr.hasErrors = true;
             }
 
-            // Make sure an id is defined for this enum/flag identifier...
-            if (!attr.hasErrors && !outTable->hasBagOrEntry(itemIdent, &id16, &myPackage)) {
-                err = outTable->startBag(SourcePos(in->getPrintableSource(), block.getLineNumber()),
-                                         myPackage, id16, itemIdent, String16(), NULL);
-                if (err != NO_ERROR) {
-                    attr.hasErrors = true;
-                }
-            }
-
             if (!attr.hasErrors) {
                 if (enumOrFlagsComment.size() == 0) {
                     enumOrFlagsComment.append(mayOrMust(attr.type,
@@ -2508,11 +2499,13 @@ status_t ResourceTable::assignResourceIds()
         sp<Type> attr = p->getType(String16("attr"), unknown);
 
         // Assign indices...
-        for (ti=0; ti<N; ti++) {
+        const size_t typeCount = p->getOrderedTypes().size();
+        for (size_t ti = 0; ti < typeCount; ti++) {
             sp<Type> t = p->getOrderedTypes().itemAt(ti);
             if (t == NULL) {
                 continue;
             }
+
             err = t->applyPublicEntryOrder();
             if (err != NO_ERROR && firstError == NO_ERROR) {
                 firstError = err;
@@ -2534,7 +2527,7 @@ status_t ResourceTable::assignResourceIds()
         }
 
         // Assign resource IDs to keys in bags...
-        for (ti=0; ti<N; ti++) {
+        for (size_t ti = 0; ti < typeCount; ti++) {
             sp<Type> t = p->getOrderedTypes().itemAt(ti);
             if (t == NULL) {
                 continue;
@@ -3296,11 +3289,16 @@ status_t ResourceTable::Entry::setItem(const SourcePos& sourcePos,
     Item item(sourcePos, false, value, style);
 
     if (mType == TYPE_BAG) {
-        const Item& item(mBag.valueAt(0));
-        sourcePos.error("Resource entry %s is already defined as a bag.\n"
-                        "%s:%d: Originally defined here.\n",
-                        String8(mName).string(),
-                        item.sourcePos.file.string(), item.sourcePos.line);
+        if (mBag.size() == 0) {
+            sourcePos.error("Resource entry %s is already defined as a bag.",
+                    String8(mName).string());
+        } else {
+            const Item& item(mBag.valueAt(0));
+            sourcePos.error("Resource entry %s is already defined as a bag.\n"
+                            "%s:%d: Originally defined here.\n",
+                            String8(mName).string(),
+                            item.sourcePos.file.string(), item.sourcePos.line);
+        }
         return UNKNOWN_ERROR;
     }
     if ( (mType != TYPE_UNKNOWN) && (overwrite == false) ) {
@@ -3374,6 +3372,9 @@ status_t ResourceTable::Entry::generateAttributes(ResourceTable* table,
         if (it.isId) {
             if (!table->hasBagOrEntry(key, &id16, &package)) {
                 String16 value("false");
+                NOISY(fprintf(stderr, "Generating %s:id/%s\n",
+                        String8(package).string(),
+                        String8(key).string()));
                 status_t err = table->addEntry(SourcePos(String8("<generated>"), 0), package,
                                                id16, key, value);
                 if (err != NO_ERROR) {
