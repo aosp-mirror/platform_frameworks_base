@@ -53,7 +53,7 @@ public class TaskStackViewLayoutAlgorithm {
 
     // Log function
     static final float XScale = 1.75f;  // The large the XScale, the longer the flat area of the curve
-    static final float LogBase = 300;
+    static final float LogBase = 3000;
     static final int PrecisionSteps = 250;
     static float[] xp;
     static float[] px;
@@ -84,7 +84,7 @@ public class TaskStackViewLayoutAlgorithm {
                 left + size, mStackRect.top + size);
 
         // Update the affiliation offsets
-        float visibleTaskPct = 0.55f;
+        float visibleTaskPct = 0.5f;
         mWithinAffiliationOffset = mConfig.taskBarHeight;
         mBetweenAffiliationOffset = (int) (visibleTaskPct * mTaskRect.height());
     }

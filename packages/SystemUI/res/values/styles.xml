@@ -21,11 +21,23 @@
     </style>
 
     <!-- Alternate Recents theme -->
-    <style name="RecentsTheme" parent="@android:style/Theme.DeviceDefault.Wallpaper.NoTitleBar">
+    <style name="RecentsTheme" parent="@android:style/Theme">
+        <!-- NoTitle -->
+        <item name="android:windowNoTitle">true</item>
+        <!-- Wallpaper -->
+        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowShowWallpaper">true</item>
+        <!-- Misc -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowAnimationStyle">@style/Animation.RecentsActivity</item>
+        <item name="*android:lightingStyle">@style/RecentsLighting</item>
+    </style>
+
+    <style name="RecentsLighting" parent="@*android:style/Lighting">
+        <item name="*android:ambientShadowAlpha">0.30</item>
     </style>
 
     <!-- Animations for a non-full-screen window or activity. -->
