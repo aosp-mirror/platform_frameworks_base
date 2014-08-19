@@ -1501,7 +1501,7 @@ public class RelativeLayout extends ViewGroup {
                     mRules[ALIGN_PARENT_START] = 0;
                 }
 
-                if (mRules[ALIGN_PARENT_RIGHT] == 0) {
+                if (mRules[ALIGN_PARENT_END] != 0) {
                     if (mRules[ALIGN_PARENT_RIGHT] == 0) {
                         // "right" rule is not defined but "end" rule is: use the "end" rule as the
                         // "right" rule
