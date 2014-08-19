@@ -34,19 +34,10 @@ import com.android.internal.telecomm.RemoteServiceCallback;
  * {@hide}
  */
 oneway interface IConnectionServiceAdapter {
-    void handleCreateConnectionSuccessful(
+    void handleCreateConnectionComplete(
             String callId,
             in ConnectionRequest request,
             in ParcelableConnection connection);
-
-    void handleCreateConnectionFailed(
-            String callId,
-            in ConnectionRequest request,
-            int errorCode, String errorMessage);
-
-    void handleCreateConnectionCancelled(
-            String callId,
-            in ConnectionRequest request);
 
     void setActive(String callId);
 

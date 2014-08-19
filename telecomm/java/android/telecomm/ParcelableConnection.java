@@ -41,6 +41,8 @@ public final class ParcelableConnection implements Parcelable {
     private boolean mRequestingRingback;
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
+    private int mFailureCode;
+    private String mFailureMessage;
 
     /** @hide */
     public ParcelableConnection(
@@ -55,7 +57,9 @@ public final class ParcelableConnection implements Parcelable {
             int videoState,
             boolean requestingRingback,
             boolean audioModeIsVoip,
-            StatusHints statusHints) {
+            StatusHints statusHints,
+            int failureCode,
+            String failureMessage) {
         mPhoneAccount = phoneAccount;
         mState = state;
         mCapabilities = capabilities;
@@ -68,6 +72,8 @@ public final class ParcelableConnection implements Parcelable {
         mRequestingRingback = requestingRingback;
         mAudioModeIsVoip = audioModeIsVoip;
         mStatusHints = statusHints;
+        mFailureCode = failureCode;
+        mFailureMessage = failureMessage;
     }
 
     public PhoneAccountHandle getPhoneAccount() {
@@ -119,6 +125,14 @@ public final class ParcelableConnection implements Parcelable {
         return mStatusHints;
     }
 
+    public final int getFailureCode() {
+        return mFailureCode;
+    }
+
+    public final String getFailureMessage() {
+        return mFailureMessage;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder()
@@ -150,6 +164,8 @@ public final class ParcelableConnection implements Parcelable {
             boolean requestingRingback = source.readByte() == 1;
             boolean audioModeIsVoip = source.readByte() == 1;
             StatusHints statusHints = source.readParcelable(classLoader);
+            int disconnectCauseCode = source.readInt();
+            String disconnectCauseMessage = source.readString();
 
             return new ParcelableConnection(
                     phoneAccount,
@@ -163,7 +179,9 @@ public final class ParcelableConnection implements Parcelable {
                     videoState,
                     requestingRingback,
                     audioModeIsVoip,
-                    statusHints);
+                    statusHints,
+                    disconnectCauseCode,
+                    disconnectCauseMessage);
         }
 
         @Override
@@ -194,5 +212,7 @@ public final class ParcelableConnection implements Parcelable {
         destination.writeByte((byte) (mRequestingRingback ? 1 : 0));
         destination.writeByte((byte) (mAudioModeIsVoip ? 1 : 0));
         destination.writeParcelable(mStatusHints, 0);
+        destination.writeInt(mFailureCode);
+        destination.writeString(mFailureMessage);
     }
 }
