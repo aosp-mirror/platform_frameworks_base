@@ -586,7 +586,7 @@
     <!-- QuickSettings: Cellular detail panel, remaining data title [CHAR LIMIT=NONE] -->
     <string name="quick_settings_cellular_detail_remaining_data">Remaining data</string>
     <!-- QuickSettings: Cellular detail panel, over limit title [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_cellular_detail_over_limit">Over limit</string>
+    <string name="quick_settings_cellular_detail_over_limit">Limit reached &#8211; data usage paused</string>
     <!-- QuickSettings: Cellular detail panel, data used format string [CHAR LIMIT=NONE] -->
     <string name="quick_settings_cellular_detail_data_used"><xliff:g id="data_used" example="2.0 GB">%s</xliff:g> used</string>
     <!-- QuickSettings: Cellular detail panel, data limit format string [CHAR LIMIT=NONE] -->
