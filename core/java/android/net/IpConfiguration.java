@@ -16,7 +16,7 @@
 
 package android.net;
 
-import android.net.LinkProperties;
+import android.net.StaticIpConfiguration;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -31,7 +31,7 @@ public class IpConfiguration implements Parcelable {
 
     public enum IpAssignment {
         /* Use statically configured IP settings. Configuration can be accessed
-         * with linkProperties */
+         * with staticIpConfiguration */
         STATIC,
         /* Use dynamically configured IP settigns */
         DHCP,
@@ -42,12 +42,14 @@ public class IpConfiguration implements Parcelable {
 
     public IpAssignment ipAssignment;
 
+    public StaticIpConfiguration staticIpConfiguration;
+
     public enum ProxySettings {
         /* No proxy is to be used. Any existing proxy settings
          * should be cleared. */
         NONE,
         /* Use statically configured proxy. Configuration can be accessed
-         * with linkProperties */
+         * with httpProxy. */
         STATIC,
         /* no proxy details are assigned, this is used to indicate
          * that any existing proxy settings should be retained */
@@ -59,30 +61,69 @@ public class IpConfiguration implements Parcelable {
 
     public ProxySettings proxySettings;
 
-    public LinkProperties linkProperties;
+    public ProxyInfo httpProxy;
 
-    public IpConfiguration(IpConfiguration source) {
-        if (source != null) {
-            ipAssignment = source.ipAssignment;
-            proxySettings = source.proxySettings;
-            linkProperties = new LinkProperties(source.linkProperties);
-        } else {
-            ipAssignment = IpAssignment.UNASSIGNED;
-            proxySettings = ProxySettings.UNASSIGNED;
-            linkProperties = new LinkProperties();
-        }
+    private void init(IpAssignment ipAssignment,
+                      ProxySettings proxySettings,
+                      StaticIpConfiguration staticIpConfiguration,
+                      ProxyInfo httpProxy) {
+        this.ipAssignment = ipAssignment;
+        this.proxySettings = proxySettings;
+        this.staticIpConfiguration = (staticIpConfiguration == null) ?
+                null : new StaticIpConfiguration(staticIpConfiguration);
+        this.httpProxy = (httpProxy == null) ?
+                null : new ProxyInfo(httpProxy);
     }
 
     public IpConfiguration() {
-         this(null);
+        init(IpAssignment.UNASSIGNED, ProxySettings.UNASSIGNED, null, null);
     }
 
     public IpConfiguration(IpAssignment ipAssignment,
                            ProxySettings proxySettings,
-                           LinkProperties linkProperties) {
+                           StaticIpConfiguration staticIpConfiguration,
+                           ProxyInfo httpProxy) {
+        init(ipAssignment, proxySettings, staticIpConfiguration, httpProxy);
+    }
+
+    public IpConfiguration(IpConfiguration source) {
+        this();
+        if (source != null) {
+            init(source.ipAssignment, source.proxySettings,
+                 source.staticIpConfiguration, source.httpProxy);
+        }
+    }
+
+    public IpAssignment getIpAssignment() {
+        return ipAssignment;
+    }
+
+    public void setIpAssignment(IpAssignment ipAssignment) {
         this.ipAssignment = ipAssignment;
+    }
+
+    public StaticIpConfiguration getStaticIpConfiguration() {
+        return staticIpConfiguration;
+    }
+
+    public void setStaticIpConfiguration(StaticIpConfiguration staticIpConfiguration) {
+        this.staticIpConfiguration = staticIpConfiguration;
+    }
+
+    public ProxySettings getProxySettings() {
+        return proxySettings;
+    }
+
+    public void setProxySettings(ProxySettings proxySettings) {
         this.proxySettings = proxySettings;
-        this.linkProperties = new LinkProperties(linkProperties);
+    }
+
+    public ProxyInfo getHttpProxy() {
+        return httpProxy;
+    }
+
+    public void setHttpProxy(ProxyInfo httpProxy) {
+        this.httpProxy = httpProxy;
     }
 
     @Override
@@ -90,10 +131,16 @@ public class IpConfiguration implements Parcelable {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("IP assignment: " + ipAssignment.toString());
         sbuf.append("\n");
+        if (staticIpConfiguration != null) {
+            sbuf.append("Static configuration: " + staticIpConfiguration.toString());
+            sbuf.append("\n");
+        }
         sbuf.append("Proxy settings: " + proxySettings.toString());
         sbuf.append("\n");
-        sbuf.append(linkProperties.toString());
-        sbuf.append("\n");
+        if (httpProxy != null) {
+            sbuf.append("HTTP proxy: " + httpProxy.toString());
+            sbuf.append("\n");
+        }
 
         return sbuf.toString();
     }
@@ -111,14 +158,16 @@ public class IpConfiguration implements Parcelable {
         IpConfiguration other = (IpConfiguration) o;
         return this.ipAssignment == other.ipAssignment &&
                 this.proxySettings == other.proxySettings &&
-                Objects.equals(this.linkProperties, other.linkProperties);
+                Objects.equals(this.staticIpConfiguration, other.staticIpConfiguration) &&
+                Objects.equals(this.httpProxy, other.httpProxy);
     }
 
     @Override
     public int hashCode() {
-        return 13 + (linkProperties != null ? linkProperties.hashCode() : 0) +
+        return 13 + (staticIpConfiguration != null ? staticIpConfiguration.hashCode() : 0) +
                17 * ipAssignment.ordinal() +
-               47 * proxySettings.ordinal();
+               47 * proxySettings.ordinal() +
+               83 * httpProxy.hashCode();
     }
 
     /** Implement the Parcelable interface */
@@ -130,7 +179,8 @@ public class IpConfiguration implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(ipAssignment.name());
         dest.writeString(proxySettings.name());
-        dest.writeParcelable(linkProperties, flags);
+        dest.writeParcelable(staticIpConfiguration, flags);
+        dest.writeParcelable(httpProxy, flags);
     }
 
     /** Implement the Parcelable interface */
@@ -140,7 +190,8 @@ public class IpConfiguration implements Parcelable {
                 IpConfiguration config = new IpConfiguration();
                 config.ipAssignment = IpAssignment.valueOf(in.readString());
                 config.proxySettings = ProxySettings.valueOf(in.readString());
-                config.linkProperties = in.readParcelable(null);
+                config.staticIpConfiguration = in.readParcelable(null);
+                config.httpProxy = in.readParcelable(null);
                 return config;
             }
 
