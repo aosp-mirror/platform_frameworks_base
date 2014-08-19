@@ -349,7 +349,11 @@
   <java-symbol type="dimen" name="notification_text_size" />
   <java-symbol type="dimen" name="notification_title_text_size" />
   <java-symbol type="dimen" name="notification_subtext_size" />
-  <java-symbol type="dimen" name="notification_large_font_vert_pad" />
+  <java-symbol type="dimen" name="notification_top_pad" />
+  <java-symbol type="dimen" name="notification_top_pad_narrow" />
+  <java-symbol type="dimen" name="notification_top_pad_large_text" />
+  <java-symbol type="dimen" name="notification_top_pad_large_text_narrow" />
+  <java-symbol type="dimen" name="notification_large_icon_circle_padding" />
   <java-symbol type="dimen" name="immersive_mode_cling_width" />
   <java-symbol type="dimen" name="circular_display_mask_offset" />
 
@@ -1705,12 +1709,12 @@
   <java-symbol type="layout" name="notification_template_material_inbox" />
   <java-symbol type="layout" name="notification_template_material_media" />
   <java-symbol type="layout" name="notification_template_material_big_media" />
+  <java-symbol type="layout" name="notification_template_material_big_text" />
   <java-symbol type="layout" name="notification_template_icon_group" />
   <java-symbol type="layout" name="notification_material_media_action" />
   <java-symbol type="color" name="notification_action_legacy_color_filter" />
   <java-symbol type="color" name="notification_icon_bg_color" />
   <java-symbol type="drawable" name="notification_icon_legacy_bg" />
-  <java-symbol type="drawable" name="notification_icon_legacy_bg_inset" />
   <java-symbol type="drawable" name="notification_material_media_progress" />
   <java-symbol type="color" name="notification_media_action_bg" />
   <java-symbol type="color" name="notification_media_progress" />

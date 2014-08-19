@@ -42,19 +42,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:singleLine="false"
+            android:layout_marginBottom="10dp"
             android:visibility="gone"
-            />
-        <include
-            layout="@layout/notification_template_part_line3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
             />
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginTop="10dp"
             android:id="@+id/action_divider"
             android:visibility="gone"
             android:background="@drawable/notification_template_divider" />
@@ -64,5 +57,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="1dip"
+            android:id="@+id/overflow_divider"
+            android:visibility="visible"
+            android:background="@drawable/notification_template_divider" />
+        <include
+            layout="@layout/notification_template_part_line3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="10dp" />
     </LinearLayout>
 </FrameLayout>

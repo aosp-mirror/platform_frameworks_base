@@ -215,17 +215,26 @@
     <dimen name="action_bar_stacked_tab_max_width">180dp</dimen>
 
     <!-- Size of notification text (see TextAppearance.StatusBar.EventContent) -->
-    <dimen name="notification_text_size">13sp</dimen>
+    <dimen name="notification_text_size">14sp</dimen>
     <!-- Size of notification text titles (see TextAppearance.StatusBar.EventContent.Title) -->
     <dimen name="notification_title_text_size">16sp</dimen>
     <!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info, Time) -->
     <dimen name="notification_subtext_size">12sp</dimen>
 
-    <!-- 8dp at the top/bottom of the notification view -->
-    <dimen name="notification_vert_pad">10dp</dimen>
+    <!-- Top padding for notifications in the standard layout. -->
+    <dimen name="notification_top_pad">10dp</dimen>
 
-    <!-- Replacement for @dimen/notification_vert_pad when the text is large -->
-    <dimen name="notification_large_font_vert_pad">3dp</dimen>
+    <!-- Top padding for notifications when narrow (i.e. it has 3 lines) -->
+    <dimen name="notification_top_pad_narrow">4dp</dimen>
+
+    <!-- Top padding for notification when text is large -->
+    <dimen name="notification_top_pad_large_text">5dp</dimen>
+
+    <!-- Top padding for notification when text is large and narrow (i.e. it has 3 lines -->
+    <dimen name="notification_top_pad_large_text_narrow">-4dp</dimen>
+
+    <!-- Padding for notification icon when drawn with circle around it -->
+    <dimen name="notification_large_icon_circle_padding">11dp</dimen>
 
     <!-- Keyguard dimensions -->
     <!-- TEMP -->
