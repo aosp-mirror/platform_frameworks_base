@@ -405,8 +405,9 @@ abstract class HdmiCecLocalDevice {
 
         final long downTime = SystemClock.uptimeMillis();
         final byte[] params = message.getParams();
-        final int keycode = HdmiCecKeycode.cecKeyToAndroidKey(params[0],
-                params.length > 1 ? params[1] : HdmiCecKeycode.NO_PARAM);
+        // Note that we don't support parameterized keycode now.
+        // TODO: translate parameterized keycode as well.
+        final int keycode = HdmiCecKeycode.cecKeyToAndroidKey(params[0]);
         int keyRepeatCount = 0;
         if (mLastKeycode != HdmiCecKeycode.UNSUPPORTED_KEYCODE) {
             if (keycode == mLastKeycode) {
