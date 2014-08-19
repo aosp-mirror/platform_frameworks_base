@@ -64,7 +64,7 @@ public class LauncherApps {
     /**
      * Callbacks for package changes to this and related managed profiles.
      */
-    public static abstract class OnAppsChangedCallback {
+    public static abstract class Callback {
         /**
          * Indicates that a package was removed from the specified profile.
          *
@@ -207,17 +207,17 @@ public class LauncherApps {
     }
 
     /**
-     * Starts an activity in the specified profile.
+     * Starts a Main activity in the specified profile.
      *
      * @param component The ComponentName of the activity to launch
      * @param user The UserHandle of the profile
      * @param sourceBounds The Rect containing the source bounds of the clicked icon
      * @param opts Options to pass to startActivity
      */
-    public void startActivityForProfile(ComponentName component, UserHandle user, Rect sourceBounds,
+    public void startMainActivity(ComponentName component, UserHandle user, Rect sourceBounds,
             Bundle opts) {
         if (DEBUG) {
-            Log.i(TAG, "StartActivityForProfile " + component + " " + user.getIdentifier());
+            Log.i(TAG, "StartMainActivity " + component + " " + user.getIdentifier());
         }
         try {
             mService.startActivityAsUser(component, sourceBounds, opts, user);
@@ -235,7 +235,7 @@ public class LauncherApps {
      * @param sourceBounds The Rect containing the source bounds of the clicked icon
      * @param opts Options to pass to startActivity
      */
-    public void showAppDetailsForProfile(ComponentName component, UserHandle user,
+    public void startAppDetailsActivity(ComponentName component, UserHandle user,
             Rect sourceBounds, Bundle opts) {
         try {
             mService.showAppDetailsAsUser(component, sourceBounds, opts, user);
@@ -252,7 +252,7 @@ public class LauncherApps {
      *
      * @return true if the package exists and is enabled.
      */
-    public boolean isPackageEnabledForProfile(String packageName, UserHandle user) {
+    public boolean isPackageEnabled(String packageName, UserHandle user) {
         try {
             return mService.isPackageEnabled(packageName, user);
         } catch (RemoteException re) {
@@ -268,7 +268,7 @@ public class LauncherApps {
      *
      * @return true if the activity exists and is enabled.
      */
-    public boolean isActivityEnabledForProfile(ComponentName component, UserHandle user) {
+    public boolean isActivityEnabled(ComponentName component, UserHandle user) {
         try {
             return mService.isActivityEnabled(component, user);
         } catch (RemoteException re) {
@@ -282,8 +282,8 @@ public class LauncherApps {
      *
      * @param callback The callback to add.
      */
-    public void addOnAppsChangedCallback(OnAppsChangedCallback callback) {
-        addOnAppsChangedCallback(callback, null);
+    public void addCallback(Callback callback) {
+        addCallback(callback, null);
     }
 
     /**
@@ -292,7 +292,7 @@ public class LauncherApps {
      * @param callback The callback to add.
      * @param handler that should be used to post callbacks on, may be null.
      */
-    public void addOnAppsChangedCallback(OnAppsChangedCallback callback, Handler handler) {
+    public void addCallback(Callback callback, Handler handler) {
         synchronized (this) {
             if (callback != null && !mCallbacks.contains(callback)) {
                 boolean addedFirstCallback = mCallbacks.size() == 0;
@@ -311,9 +311,9 @@ public class LauncherApps {
      * Removes a callback that was previously added.
      *
      * @param callback The callback to remove.
-     * @see #addOnAppsChangedListener(OnAppsChangedCallback)
+     * @see #addCallback(Callback)
      */
-    public void removeOnAppsChangedCallback(OnAppsChangedCallback callback) {
+    public void removeCallback(Callback callback) {
         synchronized (this) {
             removeCallbackLocked(callback);
             if (mCallbacks.size() == 0) {
@@ -325,7 +325,7 @@ public class LauncherApps {
         }
     }
 
-    private void removeCallbackLocked(OnAppsChangedCallback callback) {
+    private void removeCallbackLocked(Callback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("Callback cannot be null");
         }
@@ -338,7 +338,7 @@ public class LauncherApps {
         }
     }
 
-    private void addCallbackLocked(OnAppsChangedCallback callback, Handler handler) {
+    private void addCallbackLocked(Callback callback, Handler handler) {
         // Remove if already present.
         removeCallbackLocked(callback);
         if (handler == null) {
@@ -421,7 +421,7 @@ public class LauncherApps {
         private static final int MSG_AVAILABLE = 4;
         private static final int MSG_UNAVAILABLE = 5;
 
-        private OnAppsChangedCallback mCallback;
+        private LauncherApps.Callback mCallback;
 
         private static class CallbackInfo {
             String[] packageNames;
@@ -430,7 +430,7 @@ public class LauncherApps {
             UserHandle user;
         }
 
-        public CallbackMessageHandler(Looper looper, OnAppsChangedCallback callback) {
+        public CallbackMessageHandler(Looper looper, LauncherApps.Callback callback) {
             super(looper, null, true);
             mCallback = callback;
         }
@@ -498,5 +498,46 @@ public class LauncherApps {
             info.user = user;
             obtainMessage(MSG_UNAVAILABLE, info).sendToTarget();
         }
+    }
+
+    /** Remove after unbundled apps have migrated STOP SHIP */
+    public static abstract class OnAppsChangedCallback extends Callback {
+    }
+
+    /** Remove after unbundled apps have migrated STOP SHIP */
+    public void addOnAppsChangedCallback(OnAppsChangedCallback callback) {
+        addCallback(callback, null);
+    }
+
+    /** Remove after unbundled apps have migrated STOP SHIP */
+    public void addOnAppsChangedCallback(OnAppsChangedCallback callback, Handler handler) {
+        addCallback(callback, handler);
+    }
+
+    /** Remove after unbundled apps have migrated STOP SHIP */
+    public void removeOnAppsChangedCallback(OnAppsChangedCallback callback) {
+        removeCallback(callback);
+    }
+
+    /** Remove after unbundled apps have migrated STOP SHIP */
+    public void startActivityForProfile(ComponentName component, UserHandle user, Rect sourceBounds,
+            Bundle opts) {
+        startMainActivity(component, user, sourceBounds, opts);
+    }
+
+    /** Remove after unbundled apps have migrated STOP SHIP */
+    public void showAppDetailsForProfile(ComponentName component, UserHandle user,
+            Rect sourceBounds, Bundle opts) {
+        startAppDetailsActivity(component, user, sourceBounds, opts);
+    }
+
+    /** Remove after unbundled apps have migrated STOP SHIP */
+    public boolean isPackageEnabledForProfile(String packageName, UserHandle user) {
+        return isPackageEnabled(packageName, user);
+    }
+
+    /** Remove after unbundled apps have migrated STOP SHIP */
+    public boolean isActivityEnabledForProfile(ComponentName component, UserHandle user) {
+        return isActivityEnabled(component, user);
     }
 }
