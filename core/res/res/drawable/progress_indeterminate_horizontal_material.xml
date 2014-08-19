@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
  Copyright (C) 2014 The Android Open Source Project
 
@@ -13,13 +14,20 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
 <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:drawable="@drawable/vector_drawable_progress_indeterminate_horizontal" >
+
     <target
-        android:name="rect2_grp"
-        android:animation="@anim/progress_indeterminate_horizontal_rect2" />
+        android:name="path1"
+        android:animation="@anim/progress_indeterminate_horizontal_rect1_translate" />
     <target
-        android:name="rect1_grp"
-        android:animation="@anim/progress_indeterminate_horizontal_rect1" />
+        android:name="path1"
+        android:animation="@anim/progress_indeterminate_horizontal_rect1_scale" />
+
+    <target
+        android:name="path2"
+        android:animation="@anim/progress_indeterminate_horizontal_rect2_translate" />
+    <target
+        android:name="path2"
+        android:animation="@anim/progress_indeterminate_horizontal_rect2_scale" />
 </animated-vector>
