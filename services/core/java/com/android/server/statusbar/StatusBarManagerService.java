@@ -22,7 +22,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -39,9 +38,7 @@ import com.android.server.wm.WindowManagerService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -187,10 +184,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     @Override
     public void disable(int what, IBinder token, String pkg) {
-        if (!mNotificationDelegate.allowDisable(what, token, pkg)) {
-            if (SPEW) Slog.d(TAG, "Blocking disable request from " + pkg);
-            return;
-        }
         disableInternal(mCurrentUserId, what, token, pkg);
     }
 

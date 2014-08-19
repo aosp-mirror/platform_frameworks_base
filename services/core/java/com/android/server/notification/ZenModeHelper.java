@@ -35,7 +35,6 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
@@ -263,18 +262,6 @@ public class ZenModeHelper {
             }
         }
         dispatchOnZenModeChanged();
-    }
-
-    public boolean allowDisable(int what, IBinder token, String pkg) {
-        // TODO(cwren): delete this API before the next release. Bug:15344099
-        boolean allowDisable = true;
-        String reason = null;
-        if (isDefaultPhoneApp(pkg)) {
-            allowDisable = mZenMode == Global.ZEN_MODE_OFF || mConfig.allowCalls;
-            reason = mZenMode == Global.ZEN_MODE_OFF ? "zenOff" : "allowCalls";
-        }
-        ZenLog.traceAllowDisable(pkg, allowDisable, reason);
-        return allowDisable;
     }
 
     public void dump(PrintWriter pw, String prefix) {
