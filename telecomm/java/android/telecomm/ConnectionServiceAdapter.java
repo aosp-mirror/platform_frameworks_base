@@ -76,37 +76,13 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         }
     }
 
-    void handleCreateConnectionSuccessful(
+    void handleCreateConnectionComplete(
             String id,
             ConnectionRequest request,
             ParcelableConnection connection) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.handleCreateConnectionSuccessful(id, request, connection);
-            } catch (RemoteException e) {
-            }
-        }
-    }
-
-    void handleCreateConnectionFailed(
-            String id,
-            ConnectionRequest request,
-            int errorCode,
-            String errorMsg) {
-        for (IConnectionServiceAdapter adapter : mAdapters) {
-            try {
-                adapter.handleCreateConnectionFailed(id, request, errorCode, errorMsg);
-            } catch (RemoteException e) {
-            }
-        }
-    }
-
-    void handleCreateConnectionCancelled(
-            String id,
-            ConnectionRequest request) {
-        for (IConnectionServiceAdapter adapter : mAdapters) {
-            try {
-                adapter.handleCreateConnectionCancelled(id, request);
+                adapter.handleCreateConnectionComplete(id, request, connection);
             } catch (RemoteException e) {
             }
         }

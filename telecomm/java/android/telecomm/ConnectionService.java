@@ -500,81 +500,26 @@ public abstract class ConnectionService extends Service {
             boolean isIncoming) {
         Log.d(this, "call %s", request);
 
-        final Connection createdConnection;
-        if (isIncoming) {
-            createdConnection = onCreateIncomingConnection(callManagerAccount, request);
-        } else {
-            createdConnection = onCreateOutgoingConnection(callManagerAccount, request);
-        }
+        Connection createdConnection = isIncoming
+                ? onCreateIncomingConnection(callManagerAccount, request)
+                : onCreateOutgoingConnection(callManagerAccount, request);
 
-        if (createdConnection != null) {
-            Log.d(this, "adapter handleCreateConnectionSuccessful %s", callId);
-            if (createdConnection.getState() == Connection.STATE_INITIALIZING) {
-                // Wait for the connection to become initialized.
-                createdConnection.addConnectionListener(new Connection.Listener() {
-                    @Override
-                    public void onStateChanged(Connection c, int state) {
-                        switch (state) {
-                            case Connection.STATE_FAILED:
-                                Log.d(this, "Connection (%s) failed (%d: %s)", request,
-                                        c.getFailureCode(), c.getFailureMessage());
-                                Log.d(this, "adapter handleCreateConnectionFailed %s",
-                                        callId);
-                                mAdapter.handleCreateConnectionFailed(
-                                        callId,
-                                        request,
-                                        c.getFailureCode(),
-                                        c.getFailureMessage());
-                                break;
-                            case Connection.STATE_CANCELED:
-                                Log.d(this, "adapter handleCreateConnectionCanceled %s",
-                                        callId);
-                                mAdapter.handleCreateConnectionCancelled(callId, request);
-                                break;
-                            case Connection.STATE_INITIALIZING:
-                                Log.d(this, "State changed to STATE_INITIALIZING; ignoring");
-                                return; // Don't want to stop listening on this state transition.
-                        }
-                        c.removeConnectionListener(this);
-                    }
-
-                    @Override
-                    public void onDestroyed(Connection c) {
-                        // Listen to onDestroy in case the connection is destroyed before
-                        // transitioning to another state.
-                        c.removeConnectionListener(this);
-                    }
-                });
-                Log.d(this, "Connection created in state INITIALIZING");
-                connectionCreated(callId, request, createdConnection);
-            } else if (createdConnection.getState() == Connection.STATE_CANCELED) {
-                // Tell telecomm not to attempt any more services.
-                mAdapter.handleCreateConnectionCancelled(callId, request);
-            } else if (createdConnection.getState() == Connection.STATE_FAILED) {
-                mAdapter.handleCreateConnectionFailed(
-                        callId,
-                        request,
-                        createdConnection.getFailureCode(),
-                        createdConnection.getFailureMessage());
-            } else {
-                connectionCreated(callId, request, createdConnection);
-            }
-        } else {
+        if (createdConnection == null) {
+            Log.d(this, "adapter handleCreateConnectionComplete CANCELED %s", callId);
             // Tell telecomm to try a different service.
-            Log.d(this, "adapter handleCreateConnectionFailed %s", callId);
-            mAdapter.handleCreateConnectionFailed(
-                    callId,
-                    request,
-                    DisconnectCause.ERROR_UNSPECIFIED,
-                    null);
+            createdConnection = Connection.createCanceledConnection();
         }
+        connectionCreated(callId, request, createdConnection);
     }
 
     private void connectionCreated(
             String callId,
             ConnectionRequest request,
             Connection connection) {
-        addConnection(callId, connection);
+        if (!(connection instanceof Connection.FailureSignalingConnection)) {
+            addConnection(callId, connection);
+        }
+
         Uri handle = connection.getHandle();
         String number = handle == null ? "null" : handle.getSchemeSpecificPart();
         Log.v(this, "connectionCreated, parcelableconnection: %s, %d, %s",
@@ -583,7 +528,7 @@ public abstract class ConnectionService extends Service {
                 PhoneCapabilities.toString(connection.getCallCapabilities()));
 
         Log.d(this, "adapter handleCreateConnectionSuccessful %s", callId);
-        mAdapter.handleCreateConnectionSuccessful(
+        mAdapter.handleCreateConnectionComplete(
                 callId,
                 request,
                 new ParcelableConnection(
@@ -599,7 +544,9 @@ public abstract class ConnectionService extends Service {
                         connection.getVideoState(),
                         connection.isRequestingRingback(),
                         connection.getAudioModeIsVoip(),
-                        connection.getStatusHints()));
+                        connection.getStatusHints(),
+                        connection.getFailureCode(),
+                        connection.getFailureMessage()));
     }
 
     private void abort(String callId) {
@@ -699,7 +646,8 @@ public abstract class ConnectionService extends Service {
                     final List<ComponentName> componentNames,
                     final List<IBinder> services) {
                 mHandler.post(new Runnable() {
-                    @Override public void run() {
+                    @Override
+                    public void run() {
                         for (int i = 0; i < componentNames.size() && i < services.size(); i++) {
                             mRemoteConnectionManager.addConnectionService(
                                     componentNames.get(i),
@@ -714,7 +662,8 @@ public abstract class ConnectionService extends Service {
             @Override
             public void onError() {
                 mHandler.post(new Runnable() {
-                    @Override public void run() {
+                    @Override
+                    public void run() {
                         mAreAccountsInitialized = true;
                     }
                 });

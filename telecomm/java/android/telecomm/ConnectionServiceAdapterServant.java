@@ -38,29 +38,27 @@ import java.util.List;
  * @hide
  */
 final class ConnectionServiceAdapterServant {
-    private static final int MSG_HANDLE_CREATE_CONNECTION_SUCCESSFUL = 1;
-    private static final int MSG_HANDLE_CREATE_CONNECTION_FAILED = 2;
-    private static final int MSG_HANDLE_CREATE_CONNECTION_CANCELLED = 3;
-    private static final int MSG_SET_ACTIVE = 4;
-    private static final int MSG_SET_RINGING = 5;
-    private static final int MSG_SET_DIALING = 6;
-    private static final int MSG_SET_DISCONNECTED = 7;
-    private static final int MSG_SET_ON_HOLD = 8;
-    private static final int MSG_SET_REQUESTING_RINGBACK = 9;
-    private static final int MSG_SET_CALL_CAPABILITIES = 10;
-    private static final int MSG_SET_IS_CONFERENCED = 11;
-    private static final int MSG_ADD_CONFERENCE_CALL = 12;
-    private static final int MSG_REMOVE_CALL = 13;
-    private static final int MSG_ON_POST_DIAL_WAIT = 14;
-    private static final int MSG_QUERY_REMOTE_CALL_SERVICES = 15;
-    private static final int MSG_SET_VIDEO_STATE = 16;
-    private static final int MSG_SET_VIDEO_CALL_PROVIDER = 17;
-    private static final int MSG_SET_AUDIO_MODE_IS_VOIP = 18;
-    private static final int MSG_SET_STATUS_HINTS = 19;
-    private static final int MSG_SET_HANDLE = 20;
-    private static final int MSG_SET_CALLER_DISPLAY_NAME = 21;
-    private static final int MSG_START_ACTIVITY_FROM_IN_CALL = 22;
-    private static final int MSG_SET_CONFERENCEABLE_CONNECTIONS = 23;
+    private static final int MSG_HANDLE_CREATE_CONNECTION_COMPLETE = 1;
+    private static final int MSG_SET_ACTIVE = 2;
+    private static final int MSG_SET_RINGING = 3;
+    private static final int MSG_SET_DIALING = 4;
+    private static final int MSG_SET_DISCONNECTED = 5;
+    private static final int MSG_SET_ON_HOLD = 6;
+    private static final int MSG_SET_REQUESTING_RINGBACK = 7;
+    private static final int MSG_SET_CALL_CAPABILITIES = 8;
+    private static final int MSG_SET_IS_CONFERENCED = 9;
+    private static final int MSG_ADD_CONFERENCE_CALL = 10;
+    private static final int MSG_REMOVE_CALL = 11;
+    private static final int MSG_ON_POST_DIAL_WAIT = 12;
+    private static final int MSG_QUERY_REMOTE_CALL_SERVICES = 13;
+    private static final int MSG_SET_VIDEO_STATE = 14;
+    private static final int MSG_SET_VIDEO_CALL_PROVIDER = 15;
+    private static final int MSG_SET_AUDIO_MODE_IS_VOIP = 16;
+    private static final int MSG_SET_STATUS_HINTS = 17;
+    private static final int MSG_SET_HANDLE = 18;
+    private static final int MSG_SET_CALLER_DISPLAY_NAME = 19;
+    private static final int MSG_START_ACTIVITY_FROM_IN_CALL = 20;
+    private static final int MSG_SET_CONFERENCEABLE_CONNECTIONS = 21;
 
     private final IConnectionServiceAdapter mDelegate;
 
@@ -76,37 +74,13 @@ final class ConnectionServiceAdapterServant {
         // Internal method defined to centralize handling of RemoteException
         private void internalHandleMessage(Message msg) throws RemoteException {
             switch (msg.what) {
-                case MSG_HANDLE_CREATE_CONNECTION_SUCCESSFUL: {
+                case MSG_HANDLE_CREATE_CONNECTION_COMPLETE: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
-                        mDelegate.handleCreateConnectionSuccessful(
+                        mDelegate.handleCreateConnectionComplete(
                                 (String) args.arg1,
                                 (ConnectionRequest) args.arg2,
                                 (ParcelableConnection) args.arg3);
-                    } finally {
-                        args.recycle();
-                    }
-                    break;
-                }
-                case MSG_HANDLE_CREATE_CONNECTION_FAILED: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    try {
-                        mDelegate.handleCreateConnectionFailed(
-                                (String) args.arg1,
-                                (ConnectionRequest) args.arg2,
-                                args.argi1,
-                                (String) args.arg3);
-                    } finally {
-                        args.recycle();
-                    }
-                    break;
-                }
-                case MSG_HANDLE_CREATE_CONNECTION_CANCELLED: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    try {
-                        mDelegate.handleCreateConnectionCancelled(
-                                (String) args.arg1,
-                                (ConnectionRequest) args.arg2);
                     } finally {
                         args.recycle();
                     }
@@ -244,7 +218,7 @@ final class ConnectionServiceAdapterServant {
 
     private final IConnectionServiceAdapter mStub = new IConnectionServiceAdapter.Stub() {
         @Override
-        public void handleCreateConnectionSuccessful(
+        public void handleCreateConnectionComplete(
                 String id,
                 ConnectionRequest request,
                 ParcelableConnection connection) {
@@ -252,31 +226,7 @@ final class ConnectionServiceAdapterServant {
             args.arg1 = id;
             args.arg2 = request;
             args.arg3 = connection;
-            mHandler.obtainMessage(MSG_HANDLE_CREATE_CONNECTION_SUCCESSFUL, args).sendToTarget();
-        }
-
-        @Override
-        public void handleCreateConnectionFailed(
-                String id,
-                ConnectionRequest request,
-                int errorCode,
-                String errorMessage) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = id;
-            args.arg2 = request;
-            args.argi1 = errorCode;
-            args.arg3 = errorMessage;
-            mHandler.obtainMessage(MSG_HANDLE_CREATE_CONNECTION_FAILED, args).sendToTarget();
-        }
-
-        @Override
-        public void handleCreateConnectionCancelled(
-                String id,
-                ConnectionRequest request) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = id;
-            args.arg2 = request;
-            mHandler.obtainMessage(MSG_HANDLE_CREATE_CONNECTION_CANCELLED, args).sendToTarget();
+            mHandler.obtainMessage(MSG_HANDLE_CREATE_CONNECTION_COMPLETE, args).sendToTarget();
         }
 
         @Override
