@@ -17108,8 +17108,6 @@ package android.media.tv {
     method public void setStreamVolume(float);
     method public void setTvInputListener(android.media.tv.TvView.TvInputListener);
     method public void tune(java.lang.String, android.net.Uri);
-    field public static final int ERROR_INPUT_DISCONNECTED = 1; // 0x1
-    field public static final int ERROR_INPUT_NOT_CONNECTED = 0; // 0x0
   }
 
   public static abstract interface TvView.OnUnhandledInputEventListener {
@@ -17119,9 +17117,10 @@ package android.media.tv {
   public static abstract class TvView.TvInputListener {
     ctor public TvView.TvInputListener();
     method public void onChannelRetuned(java.lang.String, android.net.Uri);
+    method public void onConnectionFailed(java.lang.String);
     method public void onContentAllowed(java.lang.String);
     method public void onContentBlocked(java.lang.String, android.media.tv.TvContentRating);
-    method public void onError(java.lang.String, int);
+    method public void onDisconnected(java.lang.String);
     method public void onTrackSelected(java.lang.String, int, java.lang.String);
     method public void onTracksChanged(java.lang.String, java.util.List<android.media.tv.TvTrackInfo>);
     method public void onVideoAvailable(java.lang.String);
