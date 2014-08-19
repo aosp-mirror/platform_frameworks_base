@@ -74,7 +74,7 @@ import java.util.List;
     private MetadataEditor mMetadataEditor;
 
     private MediaSessionManager mSessionManager;
-    private MediaSessionManager.SessionListener mSessionListener;
+    private MediaSessionManager.OnActiveSessionsChangedListener mSessionListener;
     private MediaController.Callback mSessionCb = new MediaControllerCallback();
 
     /**
@@ -140,7 +140,7 @@ import java.util.List;
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mSessionManager = (MediaSessionManager) context
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
-        mSessionListener = new TopTransportSessionListener(context);
+        mSessionListener = new TopTransportSessionListener();
 
         if (ActivityManager.isLowRamDeviceStatic()) {
             mMaxBitmapDimension = MAX_BITMAP_DIMENSION;
@@ -710,11 +710,8 @@ import java.util.List;
      * Listens for changes to the active session stack and replaces the
      * currently tracked session if it has changed.
      */
-    private class TopTransportSessionListener extends MediaSessionManager.SessionListener {
-
-        public TopTransportSessionListener(Context context) {
-            super(context);
-        }
+    private class TopTransportSessionListener implements
+            MediaSessionManager.OnActiveSessionsChangedListener {
 
         @Override
         public void onActiveSessionsChanged(List<MediaController> controllers) {
@@ -792,7 +789,7 @@ import java.util.List;
     void startListeningToSessions() {
         final ComponentName listenerComponent = new ComponentName(mContext,
                 mOnClientUpdateListener.getClass());
-        mSessionManager.addActiveSessionsListener(mSessionListener, listenerComponent,
+        mSessionManager.addOnActiveSessionsChangedListener(mSessionListener, listenerComponent,
                 UserHandle.myUserId(), null);
         mSessionListener.onActiveSessionsChanged(mSessionManager
                 .getActiveSessions(listenerComponent));
@@ -806,7 +803,7 @@ import java.util.List;
      * @hide
      */
     void stopListeningToSessions() {
-        mSessionManager.removeActiveSessionsListener(mSessionListener);
+        mSessionManager.removeOnActiveSessionsChangedListener(mSessionListener);
         if (DEBUG) {
             Log.d(TAG, "Unregistered session listener for user "
                     + UserHandle.myUserId());

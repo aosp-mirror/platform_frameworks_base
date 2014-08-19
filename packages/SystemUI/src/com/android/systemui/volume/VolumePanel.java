@@ -37,7 +37,7 @@ import android.media.RingtoneManager;
 import android.media.ToneGenerator;
 import android.media.VolumeProvider;
 import android.media.session.MediaController;
-import android.media.session.MediaController.VolumeInfo;
+import android.media.session.MediaController.AudioInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -537,8 +537,8 @@ public class VolumePanel extends Handler {
             if (mStreamControls != null) {
                 StreamControl sc = mStreamControls.get(streamType);
                 if (sc != null && sc.controller != null) {
-                    VolumeInfo vi = sc.controller.getVolumeInfo();
-                    return vi.getMaxVolume();
+                    AudioInfo ai = sc.controller.getAudioInfo();
+                    return ai.getMaxVolume();
                 }
             }
             return -1;
@@ -554,8 +554,8 @@ public class VolumePanel extends Handler {
             if (mStreamControls != null) {
                 StreamControl sc = mStreamControls.get(streamType);
                 if (sc != null && sc.controller != null) {
-                    VolumeInfo vi = sc.controller.getVolumeInfo();
-                    return vi.getCurrentVolume();
+                    AudioInfo ai = sc.controller.getAudioInfo();
+                    return ai.getCurrentVolume();
                 }
             }
             return -1;
@@ -990,7 +990,7 @@ public class VolumePanel extends Handler {
                     // We still don't have one, ignore the command.
                     Log.w(mTag, "sent remote volume change without a controller!");
                 } else {
-                    VolumeInfo vi = controller.getVolumeInfo();
+                    AudioInfo vi = controller.getAudioInfo();
                     index = vi.getCurrentVolume();
                     max = vi.getMaxVolume();
                     if ((vi.getVolumeControl() & VolumeProvider.VOLUME_CONTROL_FIXED) != 0) {
@@ -1362,7 +1362,7 @@ public class VolumePanel extends Handler {
     };
 
     private final MediaController.Callback mMediaControllerCb = new MediaController.Callback() {
-        public void onVolumeInfoChanged(VolumeInfo info) {
+        public void onAudioInfoChanged(AudioInfo info) {
             onRemoteVolumeUpdateIfShown();
         }
     };
