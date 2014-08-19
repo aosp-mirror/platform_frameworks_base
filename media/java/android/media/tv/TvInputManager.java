@@ -1339,6 +1339,9 @@ public final class TvInputManager {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
+            if (unblockedRating == null) {
+                throw new IllegalArgumentException("unblockedRating cannot be null");
+            }
             try {
                 mService.requestUnblockContent(mToken, unblockedRating.flattenToString(), mUserId);
             } catch (RemoteException e) {
