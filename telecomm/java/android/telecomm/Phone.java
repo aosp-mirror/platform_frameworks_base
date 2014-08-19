@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.util.ArrayMap;
 
@@ -31,6 +32,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * {@hide}
  */
+@SystemApi
 public final class Phone {
 
     public abstract static class Listener {
