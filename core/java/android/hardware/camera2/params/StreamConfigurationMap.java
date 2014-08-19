@@ -339,6 +339,11 @@ public final class StreamConfigurationMap {
      * @see #isOutputSupportedFor(Class)
      */
     public <T> Size[] getOutputSizes(Class<T> klass) {
+        // Image reader is "supported", but never for implementation-defined formats; return empty
+        if (android.media.ImageReader.class.isAssignableFrom(klass)) {
+            return new Size[0];
+        }
+
         if (isOutputSupportedFor(klass) == false) {
             return null;
         }
