@@ -1800,11 +1800,8 @@ public final class TvInputManagerService extends SystemService {
                 UserState userState = getUserStateLocked(mUserId);
                 for (SessionState sessionState : userState.sessionStateMap.values()) {
                     if (mSessionToken == sessionState.mHardwareSessionToken) {
-                        try {
-                            sessionState.mSession.release();
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "error in release", e);
-                        }
+                        releaseSessionLocked(sessionState.mSessionToken, Process.SYSTEM_UID,
+                                mUserId);
                         try {
                             sessionState.mClient.onSessionReleased(sessionState.mSeq);
                         } catch (RemoteException e) {
