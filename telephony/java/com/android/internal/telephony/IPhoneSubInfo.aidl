@@ -33,6 +33,10 @@ interface IPhoneSubInfo {
      */
     String getDeviceIdUsingSubId(long subId);
 
+    /**
+     * Retrieves the IMEI.
+     */
+    String getImeiUsingSubId(long subId);
 
     /**
      * Retrieves the software version number for the device, e.g., IMEI/SV
