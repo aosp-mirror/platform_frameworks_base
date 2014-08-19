@@ -56,6 +56,7 @@ import java.util.List;
  * Keep up to date with ICameraDeviceUser.aidl.
  * </p>
  */
+@SuppressWarnings("deprecation")
 public class CameraDeviceUserShim implements ICameraDeviceUser {
     private static final String TAG = "CameraDeviceUserShim";
 
@@ -259,6 +260,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
                 super(l);
             }
 
+            @Override
             public void handleMessage(Message msg) {
                 try {
                     switch (msg.what) {
@@ -319,6 +321,9 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
 
         // Check errors old HAL initialization
         CameraBinderDecorator.throwOnError(initErrors);
+
+        // Disable shutter sounds (this will work unconditionally) for api2 clients
+        legacyCamera.disableShutterSound();
 
         CameraInfo info = new CameraInfo();
         Camera.getCameraInfo(cameraId, info);
