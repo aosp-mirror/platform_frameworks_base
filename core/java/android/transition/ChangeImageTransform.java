@@ -182,6 +182,7 @@ public class ChangeImageTransform extends Transition {
             if (endMatrix == null) {
                 endMatrix = Matrix.IDENTITY_MATRIX;
             }
+            ANIMATED_TRANSFORM_PROPERTY.set(imageView, startMatrix);
             animator = createMatrixAnimator(imageView, startMatrix, endMatrix);
         }
         return animator;
