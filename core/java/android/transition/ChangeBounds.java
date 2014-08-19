@@ -16,13 +16,11 @@
 
 package android.transition;
 
-import android.animation.TypeConverter;
 import android.content.Context;
 import android.graphics.PointF;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.RectEvaluator;
@@ -119,9 +117,11 @@ public class ChangeBounds extends Transition {
         values.values.put(PROPNAME_BOUNDS, new Rect(view.getLeft(), view.getTop(),
                 view.getRight(), view.getBottom()));
         values.values.put(PROPNAME_PARENT, values.view.getParent());
-        values.view.getLocationInWindow(tempLocation);
-        values.values.put(PROPNAME_WINDOW_X, tempLocation[0]);
-        values.values.put(PROPNAME_WINDOW_Y, tempLocation[1]);
+        if (mReparent) {
+            values.view.getLocationInWindow(tempLocation);
+            values.values.put(PROPNAME_WINDOW_X, tempLocation[0]);
+            values.values.put(PROPNAME_WINDOW_Y, tempLocation[1]);
+        }
     }
 
     @Override
@@ -132,6 +132,19 @@ public class ChangeBounds extends Transition {
     @Override
     public void captureEndValues(TransitionValues transitionValues) {
         captureValues(transitionValues);
+    }
+
+    private boolean parentMatches(View startParent, View endParent) {
+        boolean parentMatches = true;
+        if (mReparent) {
+            TransitionValues endValues = getMatchedTransitionValues(startParent, true);
+            if (endValues == null) {
+                parentMatches = startParent == endParent;
+            } else {
+                parentMatches = endParent == endValues.view;
+            }
+        }
+        return parentMatches;
     }
 
     @Override
@@ -148,13 +161,7 @@ public class ChangeBounds extends Transition {
             return null;
         }
         final View view = endValues.view;
-        boolean parentsEqual = (startParent == endParent) ||
-                (startParent.getId() == endParent.getId());
-        // TODO: Might want reparenting to be separate/subclass transition, or at least
-        // triggered by a property on ChangeBounds. Otherwise, we're forcing the requirement that
-        // all parents in layouts have IDs to avoid layout-inflation resulting in a side-effect
-        // of reparenting the views.
-        if (!mReparent || parentsEqual) {
+        if (parentMatches(startParent, endParent)) {
             Rect startBounds = (Rect) startValues.values.get(PROPNAME_BOUNDS);
             Rect endBounds = (Rect) endValues.values.get(PROPNAME_BOUNDS);
             int startLeft = startBounds.left;
