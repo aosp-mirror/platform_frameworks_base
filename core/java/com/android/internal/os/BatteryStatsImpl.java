@@ -105,7 +105,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
     // in to one common name.
-    private static final int MAX_WAKELOCKS_PER_UID = 50;
+    private static final int MAX_WAKELOCKS_PER_UID = 100;
 
     private static int sNumSpeedSteps;
 
