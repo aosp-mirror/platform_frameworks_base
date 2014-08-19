@@ -205,10 +205,10 @@
     <dimen name="recents_task_view_rounded_corners_radius">2dp</dimen>
 
     <!-- The min translation in the Z index for the last task. -->
-    <dimen name="recents_task_view_z_min">5dp</dimen>
+    <dimen name="recents_task_view_z_min">25dp</dimen>
 
     <!-- The max translation in the Z index for the last task. -->
-    <dimen name="recents_task_view_z_max">65dp</dimen>
+    <dimen name="recents_task_view_z_max">100dp</dimen>
 
     <!-- The amount to translate when animating the removal of a task. -->
     <dimen name="recents_task_view_remove_anim_translation_x">100dp</dimen>
