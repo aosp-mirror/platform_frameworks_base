@@ -21,7 +21,6 @@ import android.net.IEthernetManager;
 import android.net.IpConfiguration;
 import android.net.IpConfiguration.IpAssignment;
 import android.net.IpConfiguration.ProxySettings;
-import android.net.LinkProperties;
 import android.os.RemoteException;
 
 /**
@@ -52,16 +51,12 @@ public class EthernetManager {
      */
     public IpConfiguration getConfiguration() {
         if (mService == null) {
-            return new IpConfiguration(IpAssignment.UNASSIGNED,
-                                       ProxySettings.UNASSIGNED,
-                                       new LinkProperties());
+            return new IpConfiguration();
         }
         try {
             return mService.getConfiguration();
         } catch (RemoteException e) {
-            return new IpConfiguration(IpAssignment.UNASSIGNED,
-                                       ProxySettings.UNASSIGNED,
-                                       new LinkProperties());
+            return new IpConfiguration();
         }
     }
 

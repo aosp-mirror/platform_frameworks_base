@@ -69,9 +69,8 @@ namespace android {
  */
 static struct fieldIds {
     jmethodID clear;
-    jmethodID setInterfaceName;
-    jmethodID addLinkAddress;
-    jmethodID addGateway;
+    jmethodID setIpAddress;
+    jmethodID setGateway;
     jmethodID addDns;
     jmethodID setDomains;
     jmethodID setServerAddress;
@@ -130,21 +129,16 @@ static jboolean android_net_utils_runDhcpCommon(JNIEnv* env, jobject clazz, jstr
     if (result == 0) {
         env->CallVoidMethod(dhcpResults, dhcpResultsFieldIds.clear);
 
-        // set mIfaceName
-        // dhcpResults->setInterfaceName(ifname)
-        env->CallVoidMethod(dhcpResults, dhcpResultsFieldIds.setInterfaceName, ifname);
-
         // set the linkAddress
         // dhcpResults->addLinkAddress(inetAddress, prefixLength)
-        result = env->CallBooleanMethod(dhcpResults, dhcpResultsFieldIds.addLinkAddress,
+        result = env->CallBooleanMethod(dhcpResults, dhcpResultsFieldIds.setIpAddress,
                 env->NewStringUTF(ipaddr), prefixLength);
     }
 
     if (result == 0) {
         // set the gateway
-        // dhcpResults->addGateway(gateway)
         result = env->CallBooleanMethod(dhcpResults,
-                dhcpResultsFieldIds.addGateway, env->NewStringUTF(gateway));
+                dhcpResultsFieldIds.setGateway, env->NewStringUTF(gateway));
     }
 
     if (result == 0) {
@@ -279,12 +273,10 @@ int register_android_net_NetworkUtils(JNIEnv* env)
     LOG_FATAL_IF(dhcpResultsClass == NULL, "Unable to find class android/net/DhcpResults");
     dhcpResultsFieldIds.clear =
             env->GetMethodID(dhcpResultsClass, "clear", "()V");
-    dhcpResultsFieldIds.setInterfaceName =
-            env->GetMethodID(dhcpResultsClass, "setInterfaceName", "(Ljava/lang/String;)V");
-    dhcpResultsFieldIds.addLinkAddress =
-            env->GetMethodID(dhcpResultsClass, "addLinkAddress", "(Ljava/lang/String;I)Z");
-    dhcpResultsFieldIds.addGateway =
-            env->GetMethodID(dhcpResultsClass, "addGateway", "(Ljava/lang/String;)Z");
+    dhcpResultsFieldIds.setIpAddress =
+            env->GetMethodID(dhcpResultsClass, "setIpAddress", "(Ljava/lang/String;I)Z");
+    dhcpResultsFieldIds.setGateway =
+            env->GetMethodID(dhcpResultsClass, "setGateway", "(Ljava/lang/String;)Z");
     dhcpResultsFieldIds.addDns =
             env->GetMethodID(dhcpResultsClass, "addDns", "(Ljava/lang/String;)Z");
     dhcpResultsFieldIds.setDomains =
