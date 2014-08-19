@@ -999,6 +999,8 @@ class DrawStrokableOp : public DrawBoundedOp {
 public:
     DrawStrokableOp(float left, float top, float right, float bottom, const SkPaint* paint)
             : DrawBoundedOp(left, top, right, bottom, paint) {};
+    DrawStrokableOp(const Rect& localBounds, const SkPaint* paint)
+            : DrawBoundedOp(localBounds, paint) {};
 
     virtual bool getLocalBounds(Rect& localBounds) {
         localBounds.set(mLocalBounds);
@@ -1337,11 +1339,11 @@ private:
     const float* mPositions;
 };
 
-class DrawTextOp : public DrawBoundedOp {
+class DrawTextOp : public DrawStrokableOp {
 public:
     DrawTextOp(const char* text, int bytesCount, int count, float x, float y,
             const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds)
-            : DrawBoundedOp(bounds, paint), mText(text), mBytesCount(bytesCount), mCount(count),
+            : DrawStrokableOp(bounds, paint), mText(text), mBytesCount(bytesCount), mCount(count),
             mX(x), mY(y), mPositions(positions), mTotalAdvance(totalAdvance) {
         mPrecacheTransform = SkMatrix::InvalidMatrix();
     }
