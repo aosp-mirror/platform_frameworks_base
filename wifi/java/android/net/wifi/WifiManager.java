@@ -1696,6 +1696,7 @@ public class WifiManager {
      *
      * @hide
      */
+    @SystemApi
     public void connect(WifiConfiguration config, ActionListener listener) {
         if (config == null) throw new IllegalArgumentException("config cannot be null");
         validateChannel();
@@ -1718,6 +1719,7 @@ public class WifiManager {
      * initialized again
      * @hide
      */
+    @SystemApi
     public void connect(int networkId, ActionListener listener) {
         if (networkId < 0) throw new IllegalArgumentException("Network id cannot be negative");
         validateChannel();
@@ -1742,6 +1744,7 @@ public class WifiManager {
      * initialized again
      * @hide
      */
+    @SystemApi
     public void save(WifiConfiguration config, ActionListener listener) {
         if (config == null) throw new IllegalArgumentException("config cannot be null");
         validateChannel();
@@ -1761,6 +1764,7 @@ public class WifiManager {
      * initialized again
      * @hide
      */
+    @SystemApi
     public void forget(int netId, ActionListener listener) {
         if (netId < 0) throw new IllegalArgumentException("Network id cannot be negative");
         validateChannel();
@@ -1776,6 +1780,7 @@ public class WifiManager {
      * initialized again
      * @hide
      */
+    @SystemApi
     public void disable(int netId, ActionListener listener) {
         if (netId < 0) throw new IllegalArgumentException("Network id cannot be negative");
         validateChannel();
