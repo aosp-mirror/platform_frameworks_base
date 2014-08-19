@@ -59,19 +59,6 @@ public class TvView extends ViewGroup {
     // STOPSHIP: Turn debugging off.
     private static final boolean DEBUG = true;
 
-    /**
-     * Passed with {@link TvInputListener#onError(String, int)}. Indicates that the connection to
-     * the requested TV input was not established thus the view is unable to handle the further
-     * operations.
-     */
-    public static final int ERROR_INPUT_NOT_CONNECTED = 0;
-
-    /**
-     * Passed with {@link TvInputListener#onError(String, int)}. Indicates that the underlying TV
-     * input has been disconnected.
-     */
-    public static final int ERROR_INPUT_DISCONNECTED = 1;
-
     private static final int VIDEO_SIZE_VALUE_UNKNOWN = 0;
 
     private static final int ZORDER_MEDIA = 0;
@@ -686,13 +673,20 @@ public class TvView extends ViewGroup {
     public abstract static class TvInputListener {
 
         /**
-         * This is invoked when an error occurred while handling requested operation.
+         * This is invoked when an error occurred while establishing a connection to the underlying
+         * TV input.
          *
          * @param inputId The ID of the TV input bound to this view.
-         * @param errorCode The error code. For the details of error code, please see
-         *         {@link TvView}.
          */
-        public void onError(String inputId, int errorCode) {
+        public void onConnectionFailed(String inputId) {
+        }
+
+        /**
+         * This is invoked when the existing connection to the underlying TV input is lost.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         */
+        public void onDisconnected(String inputId) {
         }
 
         /**
@@ -857,7 +851,7 @@ public class TvView extends ViewGroup {
                 }
             } else {
                 if (mListener != null) {
-                    mListener.onError(mInputId, ERROR_INPUT_NOT_CONNECTED);
+                    mListener.onConnectionFailed(mInputId);
                 }
             }
         }
@@ -870,7 +864,7 @@ public class TvView extends ViewGroup {
             mSessionCallback = null;
             mSession = null;
             if (mListener != null) {
-                mListener.onError(mInputId, ERROR_INPUT_DISCONNECTED);
+                mListener.onDisconnected(mInputId);
             }
         }
 
