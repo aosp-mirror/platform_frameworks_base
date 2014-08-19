@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.view.ViewDebug;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -1638,12 +1639,41 @@ public class Resources {
         /*package*/ String getKey() {
             return mKey;
         }
+
+        private String getResourceNameFromHexString(String hexString) {
+            return getResourceName(Integer.parseInt(hexString, 16));
+        }
+
+        /**
+         * Parses {@link #mKey} and returns a String array that holds pairs of adjacent Theme data:
+         * resource name followed by whether or not it was forced, as specified by
+         * {@link #applyStyle(int, boolean)}.
+         *
+         * @hide
+         */
+        @ViewDebug.ExportedProperty(category = "theme", hasAdjacentMapping = true)
+        public String[] getTheme() {
+            String[] themeData = mKey.split(" ");
+            String[] themes = new String[themeData.length * 2];
+            String theme;
+            boolean forced;
+
+            for (int i = 0, j = themeData.length - 1; i < themes.length; i += 2, --j) {
+                theme = themeData[j];
+                forced = theme.endsWith("!");
+                themes[i] = forced ?
+                        getResourceNameFromHexString(theme.substring(0, theme.length() - 1)) :
+                        getResourceNameFromHexString(theme);
+                themes[i + 1] = forced ? "forced" : "not forced";
+            }
+            return themes;
+        }
     }
 
     /**
      * Generate a new Theme object for this set of Resources.  It initially
      * starts out empty.
-     * 
+     *
      * @return Theme The newly created Theme container.
      */
     public final Theme newTheme() {
@@ -1653,7 +1683,7 @@ public class Resources {
     /**
      * Retrieve a set of basic attribute values from an AttributeSet, not
      * performing styling of them using a theme and/or style resources.
-     * 
+     *
      * @param set The current attribute values to retrieve.
      * @param attrs The specific attributes to be retrieved.
      * @return Returns a TypedArray holding an array of the attribute values.

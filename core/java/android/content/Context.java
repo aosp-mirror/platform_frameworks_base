@@ -45,6 +45,7 @@ import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.view.DisplayAdjustments;
 import android.view.Display;
+import android.view.ViewDebug;
 import android.view.WindowManager;
 
 import java.io.File;
@@ -420,6 +421,7 @@ public abstract class Context {
     /**
      * Return the Theme object associated with this Context.
      */
+    @ViewDebug.ExportedProperty(deepExport = true)
     public abstract Resources.Theme getTheme();
 
     /**

@@ -41,12 +41,17 @@ final class CoreSettingsObserver extends ContentObserver {
             String, Class<?>>();
     private static final Map<String, Class<?>> sSystemSettingToTypeMap = new HashMap<
             String, Class<?>>();
+    private static final Map<String, Class<?>> sGlobalSettingToTypeMap = new HashMap<
+            String, Class<?>>();
     static {
         sSecureSettingToTypeMap.put(Settings.Secure.LONG_PRESS_TIMEOUT, int.class);
         // add other secure settings here...
 
         sSystemSettingToTypeMap.put(Settings.System.TIME_12_24, String.class);
         // add other system settings here...
+
+        sGlobalSettingToTypeMap.put(Settings.Global.DEBUG_VIEW_ATTRIBUTES, int.class);
+        // add other global settings here...
     }
 
     private final Bundle mCoreSettings = new Bundle();
@@ -74,6 +79,7 @@ final class CoreSettingsObserver extends ContentObserver {
     private void sendCoreSettings() {
         populateSettings(mCoreSettings, sSecureSettingToTypeMap);
         populateSettings(mCoreSettings, sSystemSettingToTypeMap);
+        populateSettings(mCoreSettings, sGlobalSettingToTypeMap);
         mActivityManagerService.onCoreSettingsChange(mCoreSettings);
     }
 
@@ -89,6 +95,12 @@ final class CoreSettingsObserver extends ContentObserver {
             mActivityManagerService.mContext.getContentResolver().registerContentObserver(
                     uri, false, this);
         }
+
+        for (String setting : sGlobalSettingToTypeMap.keySet()) {
+            Uri uri = Settings.Global.getUriFor(setting);
+            mActivityManagerService.mContext.getContentResolver().registerContentObserver(
+                    uri, false, this);
+        }
     }
 
     private void populateSettings(Bundle snapshot, Map<String, Class<?>> map) {
@@ -101,32 +113,40 @@ final class CoreSettingsObserver extends ContentObserver {
                     final String value;
                     if (map == sSecureSettingToTypeMap) {
                         value = Settings.Secure.getString(context.getContentResolver(), setting);
-                    } else {
+                    } else if (map == sSystemSettingToTypeMap) {
                         value = Settings.System.getString(context.getContentResolver(), setting);
+                    } else {
+                        value = Settings.Global.getString(context.getContentResolver(), setting);
                     }
                     snapshot.putString(setting, value);
                 } else if (type == int.class) {
                     final int value;
                     if (map == sSecureSettingToTypeMap) {
                         value = Settings.Secure.getInt(context.getContentResolver(), setting);
-                    } else {
+                    } else if (map == sSystemSettingToTypeMap) {
                         value = Settings.System.getInt(context.getContentResolver(), setting);
+                    } else {
+                        value = Settings.Global.getInt(context.getContentResolver(), setting);
                     }
                     snapshot.putInt(setting, value);
                 } else if (type == float.class) {
                     final float value;
                     if (map == sSecureSettingToTypeMap) {
                         value = Settings.Secure.getFloat(context.getContentResolver(), setting);
-                    } else {
+                    } else if (map == sSystemSettingToTypeMap) {
                         value = Settings.System.getFloat(context.getContentResolver(), setting);
+                    } else {
+                        value = Settings.Global.getFloat(context.getContentResolver(), setting);
                     }
                     snapshot.putFloat(setting, value);
                 } else if (type == long.class) {
                     final long value;
                     if (map == sSecureSettingToTypeMap) {
                         value = Settings.Secure.getLong(context.getContentResolver(), setting);
-                    } else {
+                    } else if (map == sSystemSettingToTypeMap) {
                         value = Settings.System.getLong(context.getContentResolver(), setting);
+                    } else {
+                        value = Settings.Global.getLong(context.getContentResolver(), setting);
                     }
                     snapshot.putLong(setting, value);
                 }

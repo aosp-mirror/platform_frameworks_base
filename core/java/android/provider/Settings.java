@@ -5190,6 +5190,12 @@ public final class Settings {
         public static final String ADB_ENABLED = "adb_enabled";
 
         /**
+         * Whether Views are allowed to save their attribute data.
+         * @hide
+         */
+        public static final String DEBUG_VIEW_ATTRIBUTES = "debug_view_attributes";
+
+        /**
          * Whether assisted GPS should be enabled or not.
          * @hide
          */
