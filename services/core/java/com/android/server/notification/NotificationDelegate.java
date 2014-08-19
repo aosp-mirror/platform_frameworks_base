@@ -16,8 +16,6 @@
 
 package com.android.server.notification;
 
-import android.os.IBinder;
-
 public interface NotificationDelegate {
     void onSetDisabled(int status);
     void onClearAll(int callingUid, int callingPid, int userId);
@@ -29,7 +27,6 @@ public interface NotificationDelegate {
             int uid, int initialPid, String message, int userId);
     void onPanelRevealed();
     void onPanelHidden();
-    boolean allowDisable(int what, IBinder token, String pkg);
     void onNotificationVisibilityChanged(
             String[] newlyVisibleKeys, String[] noLongerVisibleKeys);
     void onNotificationExpansionChanged(String key, boolean userAction, boolean expanded);
