@@ -2459,7 +2459,7 @@ public class TelephonyManager {
      * @param filePath
      * @return The APDU response.
      */
-    byte[] iccExchangeSimIO(int fileID, int command, int p1, int p2, int p3,
+    public byte[] iccExchangeSimIO(int fileID, int command, int p1, int p2, int p3,
             String filePath) {
         try {
             return getITelephony().iccExchangeSimIO(fileID, command, p1, p2,
