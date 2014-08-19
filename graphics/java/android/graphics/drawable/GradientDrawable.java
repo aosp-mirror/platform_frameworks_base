@@ -820,7 +820,7 @@ public class GradientDrawable extends Drawable {
 
     @Override
     public int getOpacity() {
-        return (mAlpha == 255 && mGradientState.mOpaque) ?
+        return (mAlpha == 255 && mGradientState.mOpaqueOverBounds) ?
                 PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT;
     }
 
@@ -1413,7 +1413,8 @@ public class GradientDrawable extends Drawable {
     public void getOutline(Outline outline) {
         final GradientState st = mGradientState;
         final Rect bounds = getBounds();
-        outline.setAlpha(mAlpha / 255.0f);
+        // only report non-zero alpha if shape being drawn is opaque
+        outline.setAlpha(st.mOpaqueOverShape ? (mAlpha / 255.0f) : 0.0f);
 
         switch (st.mShape) {
             case RECTANGLE:
@@ -1492,7 +1493,8 @@ public class GradientDrawable extends Drawable {
         private int mGradientRadiusType = RADIUS_TYPE_PIXELS;
         private boolean mUseLevel;
         private boolean mUseLevelForShape;
-        private boolean mOpaque;
+        private boolean mOpaqueOverBounds;
+        private boolean mOpaqueOverShape;
 
         int[] mThemeAttrs;
         int[] mAttrSize;
@@ -1544,7 +1546,7 @@ public class GradientDrawable extends Drawable {
             mGradientRadiusType = state.mGradientRadiusType;
             mUseLevel = state.mUseLevel;
             mUseLevelForShape = state.mUseLevelForShape;
-            mOpaque = state.mOpaque;
+            mOpaqueOverBounds = state.mOpaqueOverBounds;
             mThemeAttrs = state.mThemeAttrs;
             mAttrSize = state.mAttrSize;
             mAttrGradient = state.mAttrGradient;
@@ -1606,40 +1608,36 @@ public class GradientDrawable extends Drawable {
         }
 
         private void computeOpacity() {
-            if (mShape != RECTANGLE) {
-                mOpaque = false;
-                return;
-            }
+            mOpaqueOverBounds = false;
+            mOpaqueOverShape = false;
 
-            if (mRadius > 0 || mRadiusArray != null) {
-                mOpaque = false;
-                return;
-            }
-
+            // First test opacity of all colors
             if (mStrokeWidth > 0) {
                 if (mStrokeColorStateList != null) {
                     if (!mStrokeColorStateList.isOpaque()) {
-                        mOpaque = false;
                         return;
                     }
                 }
             }
 
             if (mColorStateList != null && !mColorStateList.isOpaque()) {
-                mOpaque = false;
                 return;
             }
 
             if (mColors != null) {
                 for (int i = 0; i < mColors.length; i++) {
                     if (!isOpaque(mColors[i])) {
-                        mOpaque = false;
                         return;
                     }
                 }
             }
 
-            mOpaque = true;
+            // Colors are opaque, so opaqueOverShape=true,
+            mOpaqueOverShape = true;
+            // and opaqueOverBounds=true if shape fills bounds
+            mOpaqueOverBounds = mShape == RECTANGLE
+                    && mRadius <= 0
+                    && mRadiusArray == null;
         }
 
         private static boolean isOpaque(int color) {
