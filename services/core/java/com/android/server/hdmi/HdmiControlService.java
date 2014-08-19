@@ -356,7 +356,7 @@ public final class HdmiControlService extends SystemService {
                     break;
                 case Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED:
                     tv().setAutoWakeup(enabled);
-                    setOption(OPTION_CEC_AUTO_WAKEUP, toInt(enabled));
+                    setCecOption(OPTION_CEC_AUTO_WAKEUP, toInt(enabled));
                     break;
                 case Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED:
                     tv().setAutoDeviceOff(enabled);
@@ -1683,11 +1683,17 @@ public final class HdmiControlService extends SystemService {
     }
 
     private void disableDevices(PendingActionClearedCallback callback) {
-        for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
-            device.disableDevice(mStandbyMessageReceived, callback);
+        if (mCecController != null) {
+            for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
+                device.disableDevice(mStandbyMessageReceived, callback);
+            }
+            if (isTvDevice()) {
+                unregisterSettingsObserver();
+            }
         }
-        if (isTvDevice()) {
-            unregisterSettingsObserver();
+
+        if (mMhlController != null) {
+            mMhlController.clearAllLocalDevices();
         }
     }
 
@@ -1759,7 +1765,7 @@ public final class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    void setOption(int key, int value) {
+    void setCecOption(int key, int value) {
         assertRunOnServiceThread();
         mCecController.setOption(key, value);
     }
