@@ -29,7 +29,7 @@ import android.view.Surface;
 oneway interface ITvInputSession {
     void release();
 
-    void setMainSession(boolean isMainSession);
+    void setMain(boolean isMain);
     void setSurface(in Surface surface);
     void dispatchSurfaceChanged(int format, int width, int height);
     // TODO: Remove this once it becomes irrelevant for applications to handle audio focus. The plan
