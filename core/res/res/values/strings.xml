@@ -4245,15 +4245,15 @@
     <string name="data_usage_warning_body">Touch to view usage and settings.</string>
 
     <!-- Notification title when 2G-3G data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_3g_limit_title">2G-3G data is off</string>
+    <string name="data_usage_3g_limit_title">2G-3G data limit reached</string>
     <!-- Notification title when 4G data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_4g_limit_title">4G data is off</string>
+    <string name="data_usage_4g_limit_title">4G data limit reached</string>
     <!-- Notification title when mobile data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_mobile_limit_title">Cellular data is off</string>
+    <string name="data_usage_mobile_limit_title">Cellular data limit reached</string>
     <!-- Notification title when Wi-Fi data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_wifi_limit_title">Wi-Fi data is off</string>
+    <string name="data_usage_wifi_limit_title">Wi-Fi data limit reached</string>
     <!-- Notification body when data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_limit_body">Limit reached</string>
+    <string name="data_usage_limit_body">Data paused for rest of cycle</string>
 
     <!-- Notification title when 2G-3G data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_3g_limit_snoozed_title">2G-3G data limit exceeded</string>
