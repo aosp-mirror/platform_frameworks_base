@@ -53,7 +53,7 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
 
     private View mDraggableContent;
     private View mPrintButton;
-    private ViewGroup mMoreOptionsContainer;
+    private View mMoreOptionsButton;
     private ViewGroup mOptionsContainer;
 
     private View mEmbeddedContentContainer;
@@ -140,7 +140,7 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
         mDynamicContent = findViewById(R.id.dynamic_content);
         mDraggableContent = findViewById(R.id.draggable_content);
         mPrintButton = findViewById(R.id.print_button);
-        mMoreOptionsContainer = (ViewGroup) findViewById(R.id.more_options_container);
+        mMoreOptionsButton = findViewById(R.id.more_options_button);
         mOptionsContainer = (ViewGroup) findViewById(R.id.options_container);
         mEmbeddedContentContainer = findViewById(R.id.embedded_content_container);
         mEmbeddedContentScrim = findViewById(R.id.embedded_content_scrim);
@@ -301,14 +301,14 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
                 || (mDragProgress == 1.0f && progress < 1.0f)) {
             mSummaryContent.setLayerType(View.LAYER_TYPE_HARDWARE, null);
             mDraggableContent.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-            mMoreOptionsContainer.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            mMoreOptionsButton.setLayerType(View.LAYER_TYPE_HARDWARE, null);
             ensureImeClosedAndInputFocusCleared();
         }
         if ((mDragProgress > 0 && progress == 0)
                 || (mDragProgress < 1.0f && progress == 1.0f)) {
             mSummaryContent.setLayerType(View.LAYER_TYPE_NONE, null);
             mDraggableContent.setLayerType(View.LAYER_TYPE_NONE, null);
-            mMoreOptionsContainer.setLayerType(View.LAYER_TYPE_NONE, null);
+            mMoreOptionsButton.setLayerType(View.LAYER_TYPE_NONE, null);
         }
 
         mDragProgress = progress;
@@ -317,7 +317,7 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
 
         final float inverseAlpha = 1.0f - progress;
         mOptionsContainer.setAlpha(inverseAlpha);
-        mMoreOptionsContainer.setAlpha(inverseAlpha);
+        mMoreOptionsButton.setAlpha(inverseAlpha);
 
         mEmbeddedContentScrim.setBackgroundColor(computeScrimColor());
 
@@ -336,8 +336,8 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
             if (mOptionsStateChangeListener != null) {
                 mOptionsStateChangeListener.onOptionsClosed();
             }
-            if (mMoreOptionsContainer.getVisibility() != View.GONE) {
-                mMoreOptionsContainer.setVisibility(View.INVISIBLE);
+            if (mMoreOptionsButton.getVisibility() != View.GONE) {
+                mMoreOptionsButton.setVisibility(View.INVISIBLE);
             }
             mDraggableContent.setVisibility(View.INVISIBLE);
             // If we change the scrim visibility the dimming is lagging
@@ -346,8 +346,8 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
             mEmbeddedContentScrim.setClickable(false);
             mExpandCollapseIcon.setBackgroundResource(R.drawable.ic_expand_more);
         } else {
-            if (mMoreOptionsContainer.getVisibility() != View.GONE) {
-                mMoreOptionsContainer.setVisibility(View.VISIBLE);
+            if (mMoreOptionsButton.getVisibility() != View.GONE) {
+                mMoreOptionsButton.setVisibility(View.VISIBLE);
             }
             mDraggableContent.setVisibility(View.VISIBLE);
         }

@@ -180,8 +180,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private TextView mSummaryCopies;
     private TextView mSummaryPaperSize;
 
-    private View mAdvancedPrintOptionsContainer;
-
     private Button mMoreOptionsButton;
 
     private ImageView mPrintButton;
@@ -1024,7 +1022,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         mPageRangeEditText.addTextChangedListener(new RangeTextWatcher());
 
         // Advanced options button.
-        mAdvancedPrintOptionsContainer = findViewById(R.id.more_options_container);
         mMoreOptionsButton = (Button) findViewById(R.id.more_options_button);
         mMoreOptionsButton.setOnClickListener(clickListener);
 
@@ -1294,10 +1291,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         ComponentName serviceName = mCurrentPrinter.getId().getServiceName();
         if (!TextUtils.isEmpty(PrintOptionUtils.getAdvancedOptionsActivityName(
                 this, serviceName))) {
-            mAdvancedPrintOptionsContainer.setVisibility(View.VISIBLE);
+            mMoreOptionsButton.setVisibility(View.VISIBLE);
             mMoreOptionsButton.setEnabled(true);
         } else {
-            mAdvancedPrintOptionsContainer.setVisibility(View.GONE);
+            mMoreOptionsButton.setVisibility(View.GONE);
             mMoreOptionsButton.setEnabled(false);
         }
 
@@ -1704,7 +1701,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (position == 0 && getPdfPrinter() != null) {
                     PrinterHolder printerHolder = (PrinterHolder) getItem(position);
                     title = printerHolder.printer.getName();
-                    icon = getResources().getDrawable(R.drawable.ic_savetopdf);
+                    icon = getResources().getDrawable(R.drawable.ic_menu_savetopdf);
                 } else if (position == 1) {
                     title = getString(R.string.all_printers);
                 }
@@ -1712,7 +1709,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (position == 1 && getPdfPrinter() != null) {
                     PrinterHolder printerHolder = (PrinterHolder) getItem(position);
                     title = printerHolder.printer.getName();
-                    icon = getResources().getDrawable(R.drawable.ic_savetopdf);
+                    icon = getResources().getDrawable(R.drawable.ic_menu_savetopdf);
                 } else if (position == getCount() - 1) {
                     title = getString(R.string.all_printers);
                 } else {
