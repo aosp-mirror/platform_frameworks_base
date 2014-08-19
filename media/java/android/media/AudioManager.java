@@ -2332,18 +2332,21 @@ public class AudioManager {
     }
 
     /**
-     * Registers a {@link RemoteController} instance for it to receive media metadata updates
-     * and playback state information from applications using {@link RemoteControlClient}, and
-     * control their playback.
-     * <p>Registration requires the {@link OnClientUpdateListener} listener to be one of the
-     * enabled notification listeners (see
+     * Registers a {@link RemoteController} instance for it to receive media
+     * metadata updates and playback state information from applications using
+     * {@link RemoteControlClient}, and control their playback.
+     * <p>
+     * Registration requires the {@link OnClientUpdateListener} listener to be
+     * one of the enabled notification listeners (see
      * {@link android.service.notification.NotificationListenerService}).
+     *
      * @param rctlr the object to register.
-     * @return true if the {@link RemoteController} was successfully registered, false if an
-     *     error occurred, due to an internal system error, or insufficient permissions.
+     * @return true if the {@link RemoteController} was successfully registered,
+     *         false if an error occurred, due to an internal system error, or
+     *         insufficient permissions.
      * @deprecated Use
-     * {@link MediaSessionManager#addActiveSessionsListener(android.media.session.MediaSessionManager.SessionListener, ComponentName)}
-     * and {@link MediaController} instead.
+     *             {@link MediaSessionManager#addOnActiveSessionsChangedListener(android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, ComponentName)}
+     *             and {@link MediaController} instead.
      */
     @Deprecated
     public boolean registerRemoteController(RemoteController rctlr) {
@@ -2355,12 +2358,14 @@ public class AudioManager {
     }
 
     /**
-     * Unregisters a {@link RemoteController}, causing it to no longer receive media metadata and
-     * playback state information, and no longer be capable of controlling playback.
+     * Unregisters a {@link RemoteController}, causing it to no longer receive
+     * media metadata and playback state information, and no longer be capable
+     * of controlling playback.
+     *
      * @param rctlr the object to unregister.
      * @deprecated Use
-     * {@link MediaSessionManager#removeActiveSessionsListener(android.media.session.MediaSessionManager.SessionListener)}
-     * instead.
+     *             {@link MediaSessionManager#removeOnActiveSessionsChangedListener(android.media.session.MediaSessionManager.OnActiveSessionsChangedListener)}
+     *             instead.
      */
     @Deprecated
     public void unregisterRemoteController(RemoteController rctlr) {

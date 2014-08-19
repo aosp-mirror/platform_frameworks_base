@@ -435,18 +435,19 @@ public final class MediaSession {
     }
 
     /**
-     * Update the list of tracks in the play queue. It is an ordered list and should contain the
-     * current track, and previous or upcoming tracks if they exist.
-     * Specify null if there is no current play queue.
+     * Update the list of items in the play queue. It is an ordered list and
+     * should contain the current item, and previous or upcoming items if they
+     * exist. Specify null if there is no current play queue.
      * <p>
-     * The queue should be of reasonable size. If the play queue is unbounded within your
-     * app, it is better to send a reasonable amount in a sliding window instead.
+     * The queue should be of reasonable size. If the play queue is unbounded
+     * within your app, it is better to send a reasonable amount in a sliding
+     * window instead.
      *
-     * @param queue A list of tracks in the play queue.
+     * @param queue A list of items in the play queue.
      */
-    public void setQueue(@Nullable List<Track> queue) {
+    public void setQueue(@Nullable List<Item> queue) {
         try {
-            mBinder.setQueue(new ParceledListSlice<Track>(queue));
+            mBinder.setQueue(new ParceledListSlice<Item>(queue));
         } catch (RemoteException e) {
             Log.wtf("Dead object in setQueue.", e);
         }
@@ -512,8 +513,8 @@ public final class MediaSession {
         postToCallback(CallbackMessageHandler.MSG_PLAY_SEARCH, query, extras);
     }
 
-    private void dispatchSkipToTrack(long id) {
-        postToCallback(CallbackMessageHandler.MSG_SKIP_TO_TRACK, id);
+    private void dispatchSkipToItem(long id) {
+        postToCallback(CallbackMessageHandler.MSG_SKIP_TO_ITEM, id);
     }
 
     private void dispatchPause() {
@@ -782,9 +783,10 @@ public final class MediaSession {
         }
 
         /**
-         * Override to handle requests to play a track with a given id from the play queue.
+         * Override to handle requests to play an item with a given id from the
+         * play queue.
          */
-        public void onSkipToTrack(long id) {
+        public void onSkipToItem(long id) {
         }
 
         /**
@@ -916,7 +918,7 @@ public final class MediaSession {
         public void onSkipToTrack(long id) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchSkipToTrack(id);
+                session.dispatchSkipToItem(id);
             }
         }
 
@@ -1015,12 +1017,12 @@ public final class MediaSession {
     }
 
     /**
-     * A single track that is part of the play queue. It contains information necessary to display
-     * a single track in the queue.
+     * A single item that is part of the play queue. It contains information
+     * necessary to display a single item in the queue.
      */
-    public static final class Track implements Parcelable {
+    public static final class Item implements Parcelable {
         /**
-         * This id is reserved. No tracks can be explicitly asigned this id.
+         * This id is reserved. No items can be explicitly asigned this id.
          */
         public static final int UNKNOWN_ID = -1;
 
@@ -1030,22 +1032,23 @@ public final class MediaSession {
         private final Bundle mExtras;
 
         /**
-         * Create a new {@link MediaSession.Track}.
+         * Create a new {@link MediaSession.Item}.
          *
-         * @param metadata The metadata for this track.
-         * @param id An identifier for this track. It must be unique within the play queue.
-         * @param uri The uri for this track.
-         * @param extras A bundle of extras that can be used to add extra information about the
-         *               track.
+         * @param metadata The metadata for this item.
+         * @param id An identifier for this item. It must be unique within the
+         *            play queue.
+         * @param uri The uri for this item.
+         * @param extras A bundle of extras that can be used to add extra
+         *            information about this item.
          */
-        private Track(MediaMetadata metadata, long id, Uri uri, Bundle extras) {
+        private Item(MediaMetadata metadata, long id, Uri uri, Bundle extras) {
             mMetadata = metadata;
             mId = id;
             mUri = uri;
             mExtras = extras;
         }
 
-        private Track(Parcel in) {
+        private Item(Parcel in) {
             mMetadata = MediaMetadata.CREATOR.createFromParcel(in);
             mId = in.readLong();
             mUri = Uri.CREATOR.createFromParcel(in);
@@ -1053,35 +1056,35 @@ public final class MediaSession {
         }
 
         /**
-         * Get the metadata for this track.
+         * Get the metadata for this item.
          */
         public MediaMetadata getMetadata() {
             return mMetadata;
         }
 
         /**
-         * Get the id for this track.
+         * Get the id for this item.
          */
         public long getId() {
             return mId;
         }
 
         /**
-         * Get the Uri for this track.
+         * Get the Uri for this item.
          */
         public Uri getUri() {
             return mUri;
         }
 
         /**
-         * Get the extras for this track.
+         * Get the extras for this item.
          */
         public Bundle getExtras() {
             return mExtras;
         }
 
         /**
-         * Builder for {@link MediaSession.Track} objects.
+         * Builder for {@link MediaSession.Item} objects.
          */
         public static final class Builder {
             private final MediaMetadata mMetadata;
@@ -1096,15 +1099,15 @@ public final class MediaSession {
             public Builder(MediaMetadata metadata, long id, Uri uri) {
                 if (metadata == null) {
                     throw new IllegalArgumentException(
-                            "You must specify a non-null MediaMetadata to build a Track.");
+                            "You must specify a non-null MediaMetadata to build an Item.");
                 }
                 if (uri == null) {
                     throw new IllegalArgumentException(
-                            "You must specify a non-null Uri to build a Track.");
+                            "You must specify a non-null Uri to build an Item.");
                 }
                 if (id == UNKNOWN_ID) {
                     throw new IllegalArgumentException(
-                            "You must specify an id other than UNKNOWN_ID to build a Track.");
+                            "You must specify an id other than UNKNOWN_ID to build an Item.");
                 }
                 mMetadata = metadata;
                 mId = id;
@@ -1112,18 +1115,18 @@ public final class MediaSession {
             }
 
             /**
-             * Set optional extras for the track.
+             * Set optional extras for the item.
              */
-            public MediaSession.Track.Builder setExtras(Bundle extras) {
+            public MediaSession.Item.Builder setExtras(Bundle extras) {
                 mExtras = extras;
                 return this;
             }
 
             /**
-             * Create the {@link Track}.
+             * Create the {@link Item}.
              */
-            public MediaSession.Track build() {
-                return new MediaSession.Track(mMetadata, mId, mUri, mExtras);
+            public MediaSession.Item build() {
+                return new MediaSession.Item(mMetadata, mId, mUri, mExtras);
             }
         }
 
@@ -1140,23 +1143,23 @@ public final class MediaSession {
             return 0;
         }
 
-        public static final Creator<MediaSession.Track> CREATOR
-                = new Creator<MediaSession.Track>() {
+        public static final Creator<MediaSession.Item> CREATOR
+                = new Creator<MediaSession.Item>() {
 
             @Override
-            public MediaSession.Track createFromParcel(Parcel p) {
-                return new MediaSession.Track(p);
+            public MediaSession.Item createFromParcel(Parcel p) {
+                return new MediaSession.Item(p);
             }
 
             @Override
-            public MediaSession.Track[] newArray(int size) {
-                return new MediaSession.Track[size];
+            public MediaSession.Item[] newArray(int size) {
+                return new MediaSession.Item[size];
             }
         };
 
         @Override
         public String toString() {
-            return "MediaSession.Track {" +
+            return "MediaSession.Item {" +
                     "Metadata=" + mMetadata +
                     ", Id=" + mId +
                     ", Uri=" + mUri +
@@ -1182,7 +1185,7 @@ public final class MediaSession {
         private static final int MSG_PLAY = 1;
         private static final int MSG_PLAY_URI = 2;
         private static final int MSG_PLAY_SEARCH = 3;
-        private static final int MSG_SKIP_TO_TRACK = 4;
+        private static final int MSG_SKIP_TO_ITEM = 4;
         private static final int MSG_PAUSE = 5;
         private static final int MSG_STOP = 6;
         private static final int MSG_NEXT = 7;
@@ -1232,8 +1235,8 @@ public final class MediaSession {
                 case MSG_PLAY_SEARCH:
                     mCallback.onPlayFromSearch((String) msg.obj, msg.getData());
                     break;
-                case MSG_SKIP_TO_TRACK:
-                    mCallback.onSkipToTrack((Long) msg.obj);
+                case MSG_SKIP_TO_ITEM:
+                    mCallback.onSkipToItem((Long) msg.obj);
                 case MSG_PAUSE:
                     mCallback.onPause();
                     break;
