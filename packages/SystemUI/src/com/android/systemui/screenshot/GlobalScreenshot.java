@@ -164,7 +164,8 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             .setContentTitle(r.getString(R.string.screenshot_saving_title))
             .setContentText(r.getString(R.string.screenshot_saving_text))
             .setSmallIcon(R.drawable.stat_notify_image)
-            .setWhen(now);
+            .setWhen(now)
+            .setColor(r.getColor(com.android.internal.R.color.system_notification_accent_color));
 
         mNotificationStyle = new Notification.BigPictureStyle()
             .bigPicture(preview);
@@ -177,7 +178,9 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
                 .setContentText(r.getString(R.string.screenshot_saving_text))
                 .setSmallIcon(R.drawable.stat_notify_image)
                 .setCategory(Notification.CATEGORY_PROGRESS)
-                .setWhen(now);
+                .setWhen(now)
+                .setColor(r.getColor(
+                        com.android.internal.R.color.system_notification_accent_color));
 
         mNotificationBuilder.setPublicVersion(mPublicNotificationBuilder.build());
 
@@ -304,7 +307,9 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
                 .setContentText(r.getString(R.string.screenshot_saved_text))
                 .setContentIntent(PendingIntent.getActivity(params.context, 0, launchIntent, 0))
                 .setWhen(now)
-                .setAutoCancel(true);
+                .setAutoCancel(true)
+                .setColor(r.getColor(
+                        com.android.internal.R.color.system_notification_accent_color));;
 
             // Update the text in the public version as well
             mPublicNotificationBuilder
@@ -312,7 +317,9 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
                 .setContentText(r.getString(R.string.screenshot_saved_text))
                 .setContentIntent(PendingIntent.getActivity(params.context, 0, launchIntent, 0))
                 .setWhen(now)
-                .setAutoCancel(true);
+                .setAutoCancel(true)
+                .setColor(r.getColor(
+                        com.android.internal.R.color.system_notification_accent_color));
 
             mNotificationBuilder.setPublicVersion(mPublicNotificationBuilder.build());
 
@@ -717,7 +724,9 @@ class GlobalScreenshot {
             .setWhen(System.currentTimeMillis())
             .setVisibility(Notification.VISIBILITY_PUBLIC) // ok to show outside lockscreen
             .setCategory(Notification.CATEGORY_ERROR)
-            .setAutoCancel(true);
+            .setAutoCancel(true)
+            .setColor(context.getResources().getColor(
+                        com.android.internal.R.color.system_notification_accent_color));
         Notification n =
             new Notification.BigTextStyle(b)
                 .bigText(r.getString(R.string.screenshot_failed_text))

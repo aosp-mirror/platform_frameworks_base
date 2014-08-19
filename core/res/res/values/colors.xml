@@ -128,7 +128,7 @@
     <drawable name="notification_template_icon_bg">#3333B5E5</drawable>
     <drawable name="notification_template_icon_low_bg">#0cffffff</drawable>
 
-    <color name="notification_icon_bg_color">#ffa3a3a3</color>
+    <color name="notification_icon_bg_color">#ff9e9e9e</color>
     <color name="notification_action_legacy_color_filter">#ff555555</color>
 
     <color name="notification_media_action_bg">#00000000</color>
@@ -141,6 +141,9 @@
     <color name="keyguard_avatar_frame_pressed_color">#ff35b5e5</color>
 
     <color name="accessibility_focus_highlight">#bf39b500</color>
+
+    <color name="system_notification_accent_color">#ff607D8B</color>
+    <color name="battery_saver_mode_color">#fff4511e</color><!-- deep orange 600 -->
 
 </resources>
 
