@@ -691,6 +691,10 @@ public final class TvInputManagerService extends SystemService {
     private void releaseSessionLocked(IBinder sessionToken, int callingUid, int userId) {
         SessionState sessionState = getSessionStateLocked(sessionToken, callingUid, userId);
         if (sessionState.mSession != null) {
+            UserState userState = getUserStateLocked(userId);
+            if (sessionToken == userState.mainSessionToken) {
+                setMainLocked(sessionToken, false, callingUid, userId);
+            }
             try {
                 sessionState.mSession.release();
             } catch (RemoteException e) {
@@ -704,6 +708,9 @@ public final class TvInputManagerService extends SystemService {
     private void removeSessionStateLocked(IBinder sessionToken, int userId) {
         UserState userState = getUserStateLocked(userId);
         if (sessionToken == userState.mainSessionToken) {
+            if (DEBUG) {
+                Slog.d(TAG, "mainSessionToken=null");
+            }
             userState.mainSessionToken = null;
         }
 
@@ -738,6 +745,25 @@ public final class TvInputManagerService extends SystemService {
         args.arg1 = sessionToken;
         args.arg2 = System.currentTimeMillis();
         mWatchLogHandler.obtainMessage(WatchLogHandler.MSG_LOG_WATCH_END, args).sendToTarget();
+    }
+
+    private void setMainLocked(IBinder sessionToken, boolean isMain, int callingUid, int userId) {
+        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid, userId);
+        if (sessionState.mHardwareSessionToken != null) {
+            sessionState = getSessionStateLocked(sessionState.mHardwareSessionToken,
+                    Process.SYSTEM_UID, userId);
+        }
+        ServiceState serviceState = getServiceStateLocked(sessionState.mInfo.getComponent(),
+                userId);
+        if (!serviceState.mIsHardware) {
+            return;
+        }
+        ITvInputSession session = getSessionLocked(sessionState);
+        try {
+            session.setMain(isMain);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "error in setMain", e);
+        }
     }
 
     private void notifyInputAddedLocked(UserState userState, String inputId) {
@@ -1050,6 +1076,9 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public void releaseSession(IBinder sessionToken, int userId) {
+            if (DEBUG) {
+                Slog.d(TAG, "releaseSession(): " + sessionToken);
+            }
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
                     userId, "releaseSession");
@@ -1065,6 +1094,9 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public void setMainSession(IBinder sessionToken, int userId) {
+            if (DEBUG) {
+                Slog.d(TAG, "setMainSession(): " + sessionToken);
+            }
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
                     userId, "setMainSession");
@@ -1075,50 +1107,19 @@ public final class TvInputManagerService extends SystemService {
                     if (userState.mainSessionToken == sessionToken) {
                         return;
                     }
-
-                    SessionState newMainSessionState = getSessionStateLocked(
-                            sessionToken, callingUid, resolvedUserId);
-                    if (newMainSessionState.mHardwareSessionToken != null) {
-                        newMainSessionState = getSessionStateLocked(
-                                newMainSessionState.mHardwareSessionToken,
-                                Process.SYSTEM_UID, resolvedUserId);
+                    if (DEBUG) {
+                        Slog.d(TAG, "mainSessionToken=" + sessionToken);
                     }
-                    ServiceState newMainServiceState = getServiceStateLocked(
-                            newMainSessionState.mInfo.getComponent(), resolvedUserId);
-                    ITvInputSession newMainSession = getSessionLocked(newMainSessionState);
-
-                    ServiceState oldMainServiceState = null;
-                    ITvInputSession oldMainSession = null;
-                    if (userState.mainSessionToken != null) {
-                        SessionState oldMainSessionState = getSessionStateLocked(
-                                userState.mainSessionToken, Process.SYSTEM_UID, resolvedUserId);
-                        if (oldMainSessionState.mHardwareSessionToken != null) {
-                            oldMainSessionState = getSessionStateLocked(
-                                    oldMainSessionState.mHardwareSessionToken,
-                                    Process.SYSTEM_UID, resolvedUserId);
-                        }
-                        oldMainServiceState = getServiceStateLocked(
-                                oldMainSessionState.mInfo.getComponent(), resolvedUserId);
-                        oldMainSession = getSessionLocked(oldMainSessionState);
-                    }
-
+                    IBinder oldMainSessionToken = userState.mainSessionToken;
                     userState.mainSessionToken = sessionToken;
 
                     // Inform the new main session first.
-                    // See {@link TvInputService#onSetMainSession}.
-                    if (newMainServiceState.mIsHardware) {
-                        try {
-                            newMainSession.setMainSession(true);
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "error in setMainSession", e);
-                        }
+                    // See {@link TvInputService.Session#onSetMain}.
+                    if (sessionToken != null) {
+                        setMainLocked(sessionToken, true, callingUid, userId);
                     }
-                    if (oldMainSession != null && oldMainServiceState.mIsHardware) {
-                        try {
-                            oldMainSession.setMainSession(false);
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "error in setMainSession", e);
-                        }
+                    if (oldMainSessionToken != null) {
+                        setMainLocked(oldMainSessionToken, false, Process.SYSTEM_UID, userId);
                     }
                 }
             } finally {

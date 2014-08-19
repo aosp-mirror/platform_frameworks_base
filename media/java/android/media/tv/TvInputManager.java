@@ -1023,10 +1023,12 @@ public final class TvInputManager {
         }
 
         /**
-         * Sets this as main session. See {@link TvView#setMainTvView} for about meaning of "main".
-         * @hide
+         * Sets this as the main session. The main session is a session whose corresponding TV
+         * input determines the HDMI-CEC active source device.
+         *
+         * @see TvView#setMain
          */
-        public void setMainSession() {
+        void setMain() {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
