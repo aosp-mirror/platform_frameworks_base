@@ -2530,6 +2530,9 @@
   <public type="style" name="Widget.Material.Spinner.Form" />
   <public type="style" name="Widget.Material.Light.Spinner.Form" />
 
+  <public type="style" name="TextAppearance.Material.Widget.Toolbar.Title" />
+  <public type="style" name="TextAppearance.Material.Widget.Toolbar.Subtitle" />
+
   <public-padding type="string" name="l_resource_pad" end="0x01040030" />
 
   <public type="string" name="config_webSettingsDefaultTextEncoding" />

@@ -313,15 +313,38 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Material.Widget.ActionMode"/>
-    <style name="TextAppearance.Material.Widget.ActionMode.Title" parent="TextAppearance.Material.Title" />
-    <style name="TextAppearance.Material.Widget.ActionMode.Title.Inverse" parent="TextAppearance.Material.Title.Inverse" />
-    <style name="TextAppearance.Material.Widget.ActionMode.Subtitle" parent="TextAppearance.Material.Subhead" />
-    <style name="TextAppearance.Material.Widget.ActionMode.Subtitle.Inverse" parent="TextAppearance.Material.Subhead.Inverse" />
-
-    <style name="TextAppearance.Material.Widget.ActionBar.Title" parent="TextAppearance.Material.Title" />
-    <style name="TextAppearance.Material.Widget.ActionBar.Title.Inverse" parent="TextAppearance.Material.Title.Inverse" />
-    <style name="TextAppearance.Material.Widget.ActionBar.Subtitle" parent="TextAppearance.Material.Subhead" />
-    <style name="TextAppearance.Material.Widget.ActionBar.Subtitle.Inverse" parent="TextAppearance.Material.Subhead.Inverse" />
+    <style name="TextAppearance.Material.Widget.ActionMode.Title"
+           parent="TextAppearance.Material.Title">
+        <item name="textSize">@dimen/text_size_title_material_toolbar</item>
+    </style>
+    <style name="TextAppearance.Material.Widget.ActionMode.Title.Inverse"
+           parent="TextAppearance.Material.Title.Inverse">
+        <item name="textSize">@dimen/text_size_title_material_toolbar</item>
+    </style>
+    <style name="TextAppearance.Material.Widget.ActionMode.Subtitle"
+           parent="TextAppearance.Material.Subhead">
+        <item name="textSize">@dimen/text_size_subtitle_material_toolbar</item>
+    </style>
+    <style name="TextAppearance.Material.Widget.ActionMode.Subtitle.Inverse"
+           parent="TextAppearance.Material.Subhead.Inverse">
+        <item name="textSize">@dimen/text_size_subtitle_material_toolbar</item>
+    </style>
+    <style name="TextAppearance.Material.Widget.ActionBar.Title"
+           parent="TextAppearance.Material.Title">
+        <item name="textSize">@dimen/text_size_title_material_toolbar</item>
+    </style>
+    <style name="TextAppearance.Material.Widget.ActionBar.Title.Inverse"
+           parent="TextAppearance.Material.Title.Inverse">
+        <item name="textSize">@dimen/text_size_title_material_toolbar</item>
+    </style>
+    <style name="TextAppearance.Material.Widget.ActionBar.Subtitle"
+           parent="TextAppearance.Material.Subhead">
+        <item name="textSize">@dimen/text_size_subtitle_material_toolbar</item>
+    </style>
+    <style name="TextAppearance.Material.Widget.ActionBar.Subtitle.Inverse"
+           parent="TextAppearance.Material.Subhead.Inverse">
+        <item name="textSize">@dimen/text_size_subtitle_material_toolbar</item>
+    </style>
 
     <style name="TextAppearance.Material.Widget.ActionBar.Menu" parent="TextAppearance.Material.Menu">
         <item name="textColor">?attr/actionMenuTextColor</item>
@@ -332,6 +355,11 @@ please see styles_device_defaults.xml.
         <item name="textColor">?attr/actionMenuTextColor</item>
         <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
     </style>
+
+    <style name="TextAppearance.Material.Widget.Toolbar.Title"
+           parent="TextAppearance.Material.Widget.ActionBar.Title" />
+    <style name="TextAppearance.Material.Widget.Toolbar.Subtitle"
+           parent="TextAppearance.Material.Widget.ActionBar.Subtitle" />
 
     <style name="TextAppearance.Material.WindowTitle" parent="TextAppearance.Material.Title" />
     <style name="TextAppearance.Material.DialogWindowTitle" parent="TextAppearance.Material.Title" />
@@ -759,6 +787,8 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.Toolbar" parent="Widget.Toolbar">
         <item name="navigationButtonStyle">@style/Widget.Material.Toolbar.Button.Navigation</item>
+        <item name="titleTextAppearance">@style/TextAppearance.Material.Widget.Toolbar.Title</item>
+        <item name="subtitleTextAppearance">@style/TextAppearance.Material.Widget.Toolbar.Subtitle</item>
     </style>
 
     <style name="Widget.Material.Toolbar.Button.Navigation" parent="Widget.Toolbar.Button.Navigation">
