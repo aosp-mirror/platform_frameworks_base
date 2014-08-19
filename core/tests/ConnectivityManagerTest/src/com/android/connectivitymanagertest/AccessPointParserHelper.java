@@ -26,8 +26,8 @@ import org.xml.sax.helpers.DefaultHandler;
 import android.net.IpConfiguration.IpAssignment;
 import android.net.IpConfiguration.ProxySettings;
 import android.net.LinkAddress;
-import android.net.LinkProperties;
 import android.net.RouteInfo;
+import android.net.StaticIpConfiguration;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.AuthAlgorithm;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
@@ -116,7 +116,7 @@ public class AccessPointParserHelper {
         boolean usercert = false;
         WifiConfiguration config = null;
         int securityType = NONE;
-        LinkProperties mLinkProperties = null;
+        StaticIpConfiguration mStaticIpConfiguration = null;
         InetAddress mInetAddr = null;
 
         @Override
@@ -153,7 +153,7 @@ public class AccessPointParserHelper {
                 usercert = true;
             }
             if (tagName.equalsIgnoreCase("ip")) {
-                mLinkProperties = new LinkProperties();
+                mStaticIpConfiguration = new StaticIpConfiguration();
                 ip = true;
             }
             if (tagName.equalsIgnoreCase("gateway")) {
@@ -173,15 +173,15 @@ public class AccessPointParserHelper {
         @Override
         public void endElement(String uri, String localName, String tagName) throws SAXException {
             if (tagName.equalsIgnoreCase("accesspoint")) {
-                if (mLinkProperties != null) {
+                if (mStaticIpConfiguration != null) {
                     config.setIpAssignment(IpAssignment.STATIC);
-                    config.setLinkProperties(mLinkProperties);
+                    config.setStaticIpConfiguration(mStaticIpConfiguration);
                 } else {
                     config.setIpAssignment(IpAssignment.DHCP);
                 }
                 config.setProxySettings(ProxySettings.NONE);
                 networks.add(config);
-                mLinkProperties = null;
+                mStaticIpConfiguration = null;
             }
         }
 
@@ -312,7 +312,7 @@ public class AccessPointParserHelper {
                     if (!InetAddress.isNumeric(gwAddr)) {
                         throw new SAXException();
                     }
-                    mLinkProperties.addRoute(new RouteInfo(InetAddress.getByName(gwAddr)));
+                    mStaticIpConfiguration.gateway = InetAddress.getByName(gwAddr);
                 } catch (UnknownHostException e) {
                     throw new SAXException();
                 }
@@ -324,7 +324,7 @@ public class AccessPointParserHelper {
                     if ((nwPrefixLength < 0) || (nwPrefixLength > 32)) {
                         throw new SAXException();
                     }
-                    mLinkProperties.addLinkAddress(new LinkAddress(mInetAddr, nwPrefixLength));
+                    mStaticIpConfiguration.ipAddress = new LinkAddress(mInetAddr, nwPrefixLength);
                 } catch (NumberFormatException e) {
                     throw new SAXException();
                 }
@@ -336,7 +336,7 @@ public class AccessPointParserHelper {
                     if (!InetAddress.isNumeric(dnsAddr)) {
                         throw new SAXException();
                     }
-                    mLinkProperties.addDnsServer(InetAddress.getByName(dnsAddr));
+                    mStaticIpConfiguration.dnsServers.add(InetAddress.getByName(dnsAddr));
                 } catch (UnknownHostException e) {
                     throw new SAXException();
                 }
@@ -348,7 +348,7 @@ public class AccessPointParserHelper {
                     if (!InetAddress.isNumeric(dnsAddr)) {
                         throw new SAXException();
                     }
-                    mLinkProperties.addDnsServer(InetAddress.getByName(dnsAddr));
+                    mStaticIpConfiguration.dnsServers.add(InetAddress.getByName(dnsAddr));
                 } catch (UnknownHostException e) {
                     throw new SAXException();
                 }
