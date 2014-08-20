@@ -5801,6 +5801,29 @@ public class WindowManagerService extends IWindowManager.Stub
         SystemProperties.set(StrictMode.VISUAL_PROPERTY, value);
     }
 
+    private static void convertCropForSurfaceFlinger(Rect crop, int rot, int dw, int dh) {
+        if (rot == Surface.ROTATION_90) {
+            final int tmp = crop.top;
+            crop.top = dw - crop.right;
+            crop.right = crop.bottom;
+            crop.bottom = dw - crop.left;
+            crop.left = tmp;
+        } else if (rot == Surface.ROTATION_180) {
+            int tmp = crop.top;
+            crop.top = dh - crop.bottom;
+            crop.bottom = dh - tmp;
+            tmp = crop.right;
+            crop.right = dw - crop.left;
+            crop.left = dw - tmp;
+        } else if (rot == Surface.ROTATION_270) {
+            final int tmp = crop.top;
+            crop.top = crop.left;
+            crop.left = dh - crop.bottom;
+            crop.bottom = crop.right;
+            crop.right = dh - tmp;
+        }
+    }
+
     /**
      * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
      * In portrait mode, it grabs the upper region of the screen based on the vertical dimension
@@ -5962,20 +5985,30 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // Constrain frame to the screen size.
                 frame.intersect(0, 0, dw, dh);
-                // Constrain thumbnail to smaller of screen width or height. Assumes aspect
-                // of thumbnail is the same as the screen (in landscape) or square.
-                scale = Math.max(width / (float) frame.width(), height / (float) frame.height());
-                dw = (int)(dw * scale);
-                dh = (int)(dh * scale);
+
+                // Tell surface flinger what part of the image to crop. Take the top
+                // right part of the application, and crop the larger dimension to fit.
+                Rect crop = new Rect(frame);
+                if (width / (float) frame.width() < height / (float) frame.height()) {
+                    int cropWidth = (int)((float)width / (float)height * frame.height());
+                    crop.right = crop.left + cropWidth;
+                } else {
+                    int cropHeight = (int)((float)height / (float)width * frame.width());
+                    crop.bottom = crop.top + cropHeight;
+                }
 
                 // The screenshot API does not apply the current screen rotation.
                 rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
                 if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
-                    final int tmp = dw;
-                    dw = dh;
-                    dh = tmp;
+                    final int tmp = width;
+                    width = height;
+                    height = tmp;
                     rot = (rot == Surface.ROTATION_90) ? Surface.ROTATION_270 : Surface.ROTATION_90;
                 }
+
+                // Surfaceflinger is not aware of orientation, so convert our logical
+                // crop to surfaceflinger's portrait orientation.
+                convertCropForSurfaceFlinger(crop, rot, dw, dh);
 
                 if (DEBUG_SCREENSHOT) {
                     Slog.i(TAG, "Screenshot: " + dw + "x" + dh + " from " + minLayer + " to "
@@ -5995,7 +6028,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_SCREENSHOT && inRotation) Slog.v(TAG,
                         "Taking screenshot while rotating");
 
-                rawss = SurfaceControl.screenshot(new Rect(), dw, dh, minLayer, maxLayer,
+                rawss = SurfaceControl.screenshot(crop, width, height, minLayer, maxLayer,
                         inRotation);
                 if (rawss == null) {
                     Slog.w(TAG, "Screenshot failure taking screenshot for (" + dw + "x" + dh
@@ -6012,11 +6045,8 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_SCREENSHOT) {
             bm.eraseColor(0xFF000000);
         }
-        frame.scale(scale);
         Matrix matrix = new Matrix();
-        ScreenRotationAnimation.createRotationMatrix(rot, dw, dh, matrix);
-        // TODO: Test for RTL vs. LTR and use frame.right-width instead of -frame.left
-        matrix.postTranslate(-FloatMath.ceil(frame.left), -FloatMath.ceil(frame.top));
+        ScreenRotationAnimation.createRotationMatrix(rot, width, height, matrix);
         Canvas canvas = new Canvas(bm);
         canvas.drawBitmap(rawss, matrix, null);
         canvas.setBitmap(null);
@@ -6042,6 +6072,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         rawss.recycle();
+
         return bm;
     }
 
