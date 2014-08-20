@@ -330,12 +330,6 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/projection/IMediaProjectionCallback.aidl \
 	media/java/android/media/projection/IMediaProjectionManager.aidl \
 	media/java/android/media/projection/IMediaProjectionWatcherCallback.aidl \
-	media/java/android/media/routing/IMediaRouteService.aidl \
-	media/java/android/media/routing/IMediaRouteClientCallback.aidl \
-	media/java/android/media/routing/IMediaRouter.aidl \
-	media/java/android/media/routing/IMediaRouterDelegate.aidl \
-	media/java/android/media/routing/IMediaRouterRoutingCallback.aidl \
-	media/java/android/media/routing/IMediaRouterStateCallback.aidl \
 	media/java/android/media/session/IActiveSessionsListener.aidl \
 	media/java/android/media/session/ISessionController.aidl \
 	media/java/android/media/session/ISessionControllerCallback.aidl \
@@ -497,7 +491,6 @@ aidl_files := \
 	frameworks/base/location/java/com/android/internal/location/ProviderRequest.aidl \
 	frameworks/base/media/java/android/media/MediaMetadata.aidl \
 	frameworks/base/media/java/android/media/Rating.aidl \
-	frameworks/base/media/java/android/media/routing/MediaRouteSelector.aidl \
 	frameworks/base/media/java/android/media/session/MediaSession.aidl \
 	frameworks/base/media/java/android/media/session/PlaybackState.aidl \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \

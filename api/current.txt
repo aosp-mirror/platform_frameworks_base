@@ -23,7 +23,6 @@ package android {
     field public static final java.lang.String BIND_DEVICE_ADMIN = "android.permission.BIND_DEVICE_ADMIN";
     field public static final java.lang.String BIND_DREAM_SERVICE = "android.permission.BIND_DREAM_SERVICE";
     field public static final java.lang.String BIND_INPUT_METHOD = "android.permission.BIND_INPUT_METHOD";
-    field public static final java.lang.String BIND_MEDIA_ROUTE_SERVICE = "android.permission.BIND_MEDIA_ROUTE_SERVICE";
     field public static final java.lang.String BIND_NFC_SERVICE = "android.permission.BIND_NFC_SERVICE";
     field public static final java.lang.String BIND_NOTIFICATION_LISTENER_SERVICE = "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE";
     field public static final java.lang.String BIND_PRINT_SERVICE = "android.permission.BIND_PRINT_SERVICE";
@@ -16380,242 +16379,6 @@ package android.media.projection {
 
 }
 
-package android.media.routing {
-
-  public final class MediaRouteSelector implements android.os.Parcelable {
-    method public boolean containsProtocol(java.lang.Class<?>);
-    method public boolean containsProtocol(java.lang.String);
-    method public int describeContents();
-    method public android.os.Bundle getExtras();
-    method public int getOptionalFeatures();
-    method public java.util.List<java.lang.String> getOptionalProtocols();
-    method public int getRequiredFeatures();
-    method public java.util.List<java.lang.String> getRequiredProtocols();
-    method public java.lang.String getServicePackageName();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public static final class MediaRouteSelector.Builder {
-    ctor public MediaRouteSelector.Builder();
-    method public android.media.routing.MediaRouteSelector.Builder addOptionalProtocol(java.lang.Class<?>);
-    method public android.media.routing.MediaRouteSelector.Builder addOptionalProtocol(java.lang.String);
-    method public android.media.routing.MediaRouteSelector.Builder addRequiredProtocol(java.lang.Class<?>);
-    method public android.media.routing.MediaRouteSelector.Builder addRequiredProtocol(java.lang.String);
-    method public android.media.routing.MediaRouteSelector build();
-    method public android.media.routing.MediaRouteSelector.Builder setExtras(android.os.Bundle);
-    method public android.media.routing.MediaRouteSelector.Builder setOptionalFeatures(int);
-    method public android.media.routing.MediaRouteSelector.Builder setRequiredFeatures(int);
-    method public android.media.routing.MediaRouteSelector.Builder setServicePackageName(java.lang.String);
-  }
-
-  public abstract class MediaRouteService extends android.app.Service {
-    ctor public MediaRouteService();
-    method public android.media.routing.MediaRouter.ServiceMetadata getServiceMetadata();
-    method public android.os.IBinder onBind(android.content.Intent);
-    method public abstract android.media.routing.MediaRouteService.ClientSession onCreateClientSession(android.media.routing.MediaRouteService.ClientInfo);
-    field public static final java.lang.String SERVICE_INTERFACE = "android.media.routing.MediaRouteService";
-  }
-
-  public static final class MediaRouteService.ClientInfo {
-    method public java.lang.String getPackageName();
-    method public int getUid();
-  }
-
-  public static abstract class MediaRouteService.ClientSession {
-    ctor public MediaRouteService.ClientSession();
-    method public abstract boolean onConnect(android.media.routing.MediaRouter.ConnectionRequest, android.media.routing.MediaRouteService.ConnectionCallback);
-    method public abstract void onDisconnect();
-    method public void onPauseStream();
-    method public void onRelease();
-    method public void onResumeStream();
-    method public abstract boolean onStartDiscovery(android.media.routing.MediaRouter.DiscoveryRequest, android.media.routing.MediaRouteService.DiscoveryCallback);
-    method public abstract void onStopDiscovery();
-  }
-
-  public final class MediaRouteService.ConnectionCallback {
-    method public void onConnected(android.media.routing.MediaRouter.ConnectionInfo);
-    method public void onConnectionFailed(int, java.lang.CharSequence, android.os.Bundle);
-    method public void onDisconnected();
-  }
-
-  public final class MediaRouteService.DiscoveryCallback {
-    method public void onDestinationFound(android.media.routing.MediaRouter.DestinationInfo, java.util.List<android.media.routing.MediaRouter.RouteInfo>);
-    method public void onDestinationLost(android.media.routing.MediaRouter.DestinationInfo);
-    method public void onDiscoveryFailed(int, java.lang.CharSequence, android.os.Bundle);
-  }
-
-  public final class MediaRouter {
-    ctor public MediaRouter(android.content.Context);
-    method public void addSelector(android.media.routing.MediaRouteSelector);
-    method public void clearSelectors();
-    method public android.media.routing.MediaRouter.Delegate createDelegate();
-    method public android.media.routing.MediaRouter.ConnectionInfo getConnection();
-    method public int getConnectionState();
-    method public java.util.List<android.media.routing.MediaRouter.DestinationInfo> getDiscoveredDestinations();
-    method public java.util.List<android.media.routing.MediaRouter.RouteInfo> getDiscoveredRoutes(android.media.routing.MediaRouter.DestinationInfo);
-    method public int getDiscoveryState();
-    method public android.media.AudioAttributes getPreferredAudioAttributes();
-    method public android.view.Display getPreferredPresentationDisplay();
-    method public android.media.VolumeProvider getPreferredVolumeProvider();
-    method public android.media.routing.MediaRouter.DestinationInfo getSelectedDestination();
-    method public android.media.routing.MediaRouter.RouteInfo getSelectedRoute();
-    method public java.util.List<android.media.routing.MediaRouteSelector> getSelectors();
-    method public boolean isReleased();
-    method public void pauseStream();
-    method public void release();
-    method public void removeSelector(android.media.routing.MediaRouteSelector);
-    method public void resumeStream();
-    method public void setRoutingCallback(android.media.routing.MediaRouter.RoutingCallback, android.os.Handler);
-    field public static final int CONNECTION_ERROR_ABORTED = 1; // 0x1
-    field public static final int CONNECTION_ERROR_BARGED = 7; // 0x7
-    field public static final int CONNECTION_ERROR_BROKEN = 6; // 0x6
-    field public static final int CONNECTION_ERROR_BUSY = 4; // 0x4
-    field public static final int CONNECTION_ERROR_TIMEOUT = 5; // 0x5
-    field public static final int CONNECTION_ERROR_UNAUTHORIZED = 2; // 0x2
-    field public static final int CONNECTION_ERROR_UNKNOWN = 0; // 0x0
-    field public static final int CONNECTION_ERROR_UNREACHABLE = 3; // 0x3
-    field public static final int CONNECTION_FLAG_BARGE = 1; // 0x1
-    field public static final int CONNECTION_STATE_CONNECTED = 2; // 0x2
-    field public static final int CONNECTION_STATE_CONNECTING = 1; // 0x1
-    field public static final int CONNECTION_STATE_DISCONNECTED = 0; // 0x0
-    field public static final int DISCONNECTION_REASON_APPLICATION_REQUEST = 0; // 0x0
-    field public static final int DISCONNECTION_REASON_ERROR = 2; // 0x2
-    field public static final int DISCONNECTION_REASON_USER_REQUEST = 1; // 0x1
-    field public static final int DISCOVERY_ERROR_ABORTED = 1; // 0x1
-    field public static final int DISCOVERY_ERROR_NO_CONNECTIVITY = 2; // 0x2
-    field public static final int DISCOVERY_ERROR_UNKNOWN = 0; // 0x0
-    field public static final int DISCOVERY_FLAG_BACKGROUND = 1; // 0x1
-    field public static final int DISCOVERY_STATE_STARTED = 1; // 0x1
-    field public static final int DISCOVERY_STATE_STOPPED = 0; // 0x0
-    field public static final int ROUTE_FEATURE_LIVE_AUDIO = 1; // 0x1
-    field public static final int ROUTE_FEATURE_LIVE_VIDEO = 2; // 0x2
-  }
-
-  public static final class MediaRouter.ConnectionInfo {
-    method public android.media.AudioAttributes getAudioAttributes();
-    method public android.os.Bundle getExtras();
-    method public int getFeatures();
-    method public android.view.Display getPresentationDisplay();
-    method public android.os.IBinder getProtocolBinder(java.lang.String);
-    method public android.os.IBinder getProtocolBinder(int);
-    method public T getProtocolObject(java.lang.Class<T>);
-    method public java.util.List<java.lang.String> getProtocols();
-    method public android.media.routing.MediaRouter.RouteInfo getRoute();
-    method public android.media.VolumeProvider getVolumeProvider();
-  }
-
-  public static final class MediaRouter.ConnectionInfo.Builder {
-    ctor public MediaRouter.ConnectionInfo.Builder(android.media.routing.MediaRouter.RouteInfo);
-    method public android.media.routing.MediaRouter.ConnectionInfo build();
-    method public android.media.routing.MediaRouter.ConnectionInfo.Builder setAudioAttributes(android.media.AudioAttributes);
-    method public android.media.routing.MediaRouter.ConnectionInfo.Builder setExtras(android.os.Bundle);
-    method public android.media.routing.MediaRouter.ConnectionInfo.Builder setPresentationDisplay(android.view.Display);
-    method public android.media.routing.MediaRouter.ConnectionInfo.Builder setProtocolBinder(java.lang.String, android.os.IBinder);
-    method public android.media.routing.MediaRouter.ConnectionInfo.Builder setProtocolStub(java.lang.Class<?>, android.os.IInterface);
-    method public android.media.routing.MediaRouter.ConnectionInfo.Builder setVolumeProvider(android.media.VolumeProvider);
-  }
-
-  public static final class MediaRouter.ConnectionRequest {
-    method public android.os.Bundle getExtras();
-    method public int getFlags();
-    method public android.media.routing.MediaRouter.RouteInfo getRoute();
-    method public void setExtras(android.os.Bundle);
-    method public void setFlags(int);
-    method public void setRoute(android.media.routing.MediaRouter.RouteInfo);
-  }
-
-  public static final class MediaRouter.Delegate {
-    ctor public MediaRouter.Delegate();
-    method public void addStateCallback(android.media.routing.MediaRouter.StateCallback, android.os.Handler);
-    method public void connect(android.media.routing.MediaRouter.DestinationInfo, int);
-    method public void disconnect(int);
-    method public int getConnectionState();
-    method public java.util.List<android.media.routing.MediaRouter.DestinationInfo> getDiscoveredDestinations();
-    method public int getDiscoveryState();
-    method public android.media.routing.MediaRouter.DestinationInfo getSelectedDestination();
-    method public boolean isReleased();
-    method public void removeStateCallback(android.media.routing.MediaRouter.StateCallback);
-    method public void startDiscovery(int);
-    method public void stopDiscovery();
-  }
-
-  public static final class MediaRouter.DestinationInfo {
-    method public java.lang.CharSequence getDescription();
-    method public android.os.Bundle getExtras();
-    method public int getIconResourceId();
-    method public java.lang.String getId();
-    method public java.lang.CharSequence getName();
-    method public android.media.routing.MediaRouter.ServiceMetadata getServiceMetadata();
-    method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
-  }
-
-  public static final class MediaRouter.DestinationInfo.Builder {
-    ctor public MediaRouter.DestinationInfo.Builder(java.lang.String, android.media.routing.MediaRouter.ServiceMetadata, java.lang.CharSequence);
-    method public android.media.routing.MediaRouter.DestinationInfo build();
-    method public android.media.routing.MediaRouter.DestinationInfo.Builder setDescription(java.lang.CharSequence);
-    method public android.media.routing.MediaRouter.DestinationInfo.Builder setExtras(android.os.Bundle);
-    method public android.media.routing.MediaRouter.DestinationInfo.Builder setIconResourceId(int);
-  }
-
-  public static final class MediaRouter.DiscoveryRequest {
-    method public int getFlags();
-    method public java.util.List<android.media.routing.MediaRouteSelector> getSelectors();
-    method public void setFlags(int);
-    method public void setSelectors(java.util.List<android.media.routing.MediaRouteSelector>);
-  }
-
-  public static final class MediaRouter.RouteInfo {
-    method public android.media.routing.MediaRouter.DestinationInfo getDestination();
-    method public android.os.Bundle getExtras();
-    method public int getFeatures();
-    method public java.lang.String getId();
-    method public java.util.List<java.lang.String> getProtocols();
-    method public android.media.routing.MediaRouteSelector getSelector();
-  }
-
-  public static final class MediaRouter.RouteInfo.Builder {
-    ctor public MediaRouter.RouteInfo.Builder(java.lang.String, android.media.routing.MediaRouter.DestinationInfo, android.media.routing.MediaRouteSelector);
-    method public android.media.routing.MediaRouter.RouteInfo.Builder addProtocol(java.lang.Class<T>);
-    method public android.media.routing.MediaRouter.RouteInfo.Builder addProtocol(java.lang.String);
-    method public android.media.routing.MediaRouter.RouteInfo build();
-    method public android.media.routing.MediaRouter.RouteInfo.Builder setExtras(android.os.Bundle);
-    method public android.media.routing.MediaRouter.RouteInfo.Builder setFeatures(int);
-  }
-
-  public static abstract class MediaRouter.RoutingCallback extends android.media.routing.MediaRouter.StateCallback {
-    ctor public MediaRouter.RoutingCallback();
-    method public boolean onPrepareConnectionRequest(android.media.routing.MediaRouter.ConnectionRequest, android.media.routing.MediaRouter.DestinationInfo, java.util.List<android.media.routing.MediaRouter.RouteInfo>);
-    method public boolean onPrepareDiscoveryRequest(android.media.routing.MediaRouter.DiscoveryRequest, java.util.List<android.media.routing.MediaRouteSelector>);
-  }
-
-  public static final class MediaRouter.ServiceMetadata {
-    method public android.content.ComponentName getComponentName();
-    method public android.graphics.drawable.Drawable getIcon(android.content.pm.PackageManager);
-    method public java.lang.CharSequence getLabel(android.content.pm.PackageManager);
-    method public java.lang.String getPackageName();
-    method public android.content.pm.ServiceInfo getService();
-  }
-
-  public static abstract class MediaRouter.StateCallback {
-    ctor public MediaRouter.StateCallback();
-    method public void onConnected();
-    method public void onConnecting();
-    method public void onConnectionFailed(int, java.lang.CharSequence, android.os.Bundle);
-    method public void onConnectionStateChanged(int);
-    method public void onDestinationFound(android.media.routing.MediaRouter.DestinationInfo);
-    method public void onDestinationLost(android.media.routing.MediaRouter.DestinationInfo);
-    method public void onDisconnected();
-    method public void onDiscoveryFailed(int, java.lang.CharSequence, android.os.Bundle);
-    method public void onDiscoveryStarted();
-    method public void onDiscoveryStateChanged(int);
-    method public void onDiscoveryStopped();
-    method public void onReleased();
-    method public void onSelectedDestinationChanged(android.media.routing.MediaRouter.DestinationInfo);
-  }
-
-}
-
 package android.media.session {
 
   public final class MediaController {
@@ -16623,7 +16386,6 @@ package android.media.session {
     method public void addCallback(android.media.session.MediaController.Callback);
     method public void addCallback(android.media.session.MediaController.Callback, android.os.Handler);
     method public void adjustVolume(int, int);
-    method public android.media.routing.MediaRouter.Delegate createMediaRouterDelegate();
     method public boolean dispatchMediaButtonEvent(android.view.KeyEvent);
     method public android.media.session.MediaController.AudioInfo getAudioInfo();
     method public android.os.Bundle getExtras();
@@ -16693,7 +16455,6 @@ package android.media.session {
     method public void setFlags(int);
     method public void setLaunchActivity(android.app.PendingIntent);
     method public void setMediaButtonReceiver(android.app.PendingIntent);
-    method public void setMediaRouter(android.media.routing.MediaRouter);
     method public void setMetadata(android.media.MediaMetadata);
     method public void setPlaybackState(android.media.session.PlaybackState);
     method public void setPlaybackToLocal(android.media.AudioAttributes);
