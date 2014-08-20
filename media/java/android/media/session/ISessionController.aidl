@@ -20,8 +20,6 @@ import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.media.MediaMetadata;
 import android.media.Rating;
-import android.media.routing.IMediaRouterDelegate;
-import android.media.routing.IMediaRouterStateCallback;
 import android.media.session.ISessionControllerCallback;
 import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
@@ -50,8 +48,6 @@ interface ISessionController {
     ParcelableVolumeInfo getVolumeAttributes();
     void adjustVolume(int direction, int flags, String packageName);
     void setVolumeTo(int value, int flags, String packageName);
-
-    IMediaRouterDelegate createMediaRouterDelegate(IMediaRouterStateCallback callback);
 
     // These commands are for the TransportControls
     void play();

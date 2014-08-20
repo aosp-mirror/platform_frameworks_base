@@ -1160,12 +1160,6 @@
         interface of a widget service. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindRouteProvider">bind to a route provider service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindRouteProvider">Allows the holder to bind to any registered
-        route providers. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindDeviceAdmin">interact with a device admin</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindDeviceAdmin">Allows the holder to send intents to
@@ -2155,11 +2149,6 @@
     <string name="permlab_bindConditionProviderService">bind to a condition provider service</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindConditionProviderService">Allows the holder to bind to the top-level interface of a condition provider service. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindMediaRouteService">bind to a media route service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindMediaRouteService">Allows the holder to bind to the top-level interface of a media route service. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindDreamService">bind to a dream service</string>
