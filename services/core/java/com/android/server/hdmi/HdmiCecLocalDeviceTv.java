@@ -418,15 +418,23 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleGetMenuLanguage(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        HdmiCecMessage command = HdmiCecMessageBuilder.buildSetMenuLanguageCommand(
-                mAddress, Locale.getDefault().getISO3Language());
         // TODO: figure out how to handle failed to get language code.
-        if (command != null) {
-            mService.sendCecCommand(command);
-        } else {
+        if (!broadcastMenuLanguage(Locale.getDefault().getISO3Language())) {
             Slog.w(TAG, "Failed to respond to <Get Menu Language>: " + message.toString());
         }
         return true;
+    }
+
+    @ServiceThreadOnly
+    boolean broadcastMenuLanguage(String language) {
+        assertRunOnServiceThread();
+        HdmiCecMessage command = HdmiCecMessageBuilder.buildSetMenuLanguageCommand(
+                mAddress, language);
+        if (command != null) {
+            mService.sendCecCommand(command);
+            return true;
+        }
+        return false;
     }
 
     @Override
