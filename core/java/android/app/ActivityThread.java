@@ -124,6 +124,7 @@ import libcore.io.EventLogger;
 import libcore.io.IoUtils;
 
 import dalvik.system.CloseGuard;
+import dalvik.system.VMDebug;
 import dalvik.system.VMRuntime;
 
 final class RemoteServiceException extends AndroidRuntimeException {
@@ -282,9 +283,7 @@ public final class ActivityThread {
         Configuration createdConfig;
         ActivityClientRecord nextIdle;
 
-        String profileFile;
-        ParcelFileDescriptor profileFd;
-        boolean autoStopProfiler;
+        ProfilerInfo profilerInfo;
 
         ActivityInfo activityInfo;
         CompatibilityInfo compatInfo;
@@ -436,9 +435,7 @@ public final class ActivityThread {
         CompatibilityInfo compatInfo;
 
         /** Initial values for {@link Profiler}. */
-        String initProfileFile;
-        ParcelFileDescriptor initProfileFd;
-        boolean initAutoStopProfiler;
+        ProfilerInfo initProfilerInfo;
 
         public String toString() {
             return "AppBindData{appInfo=" + appInfo + "}";
@@ -448,10 +445,12 @@ public final class ActivityThread {
     static final class Profiler {
         String profileFile;
         ParcelFileDescriptor profileFd;
+        int samplingInterval;
         boolean autoStopProfiler;
         boolean profiling;
         boolean handlingProfiling;
-        public void setProfiler(String file, ParcelFileDescriptor fd) {
+        public void setProfiler(ProfilerInfo profilerInfo) {
+            ParcelFileDescriptor fd = profilerInfo.profileFd;
             if (profiling) {
                 if (fd != null) {
                     try {
@@ -469,16 +468,18 @@ public final class ActivityThread {
                     // Ignore
                 }
             }
-            profileFile = file;
+            profileFile = profilerInfo.profileFile;
             profileFd = fd;
+            samplingInterval = profilerInfo.samplingInterval;
+            autoStopProfiler = profilerInfo.autoStopProfiler;
         }
         public void startProfiling() {
             if (profileFd == null || profiling) {
                 return;
             }
             try {
-                Debug.startMethodTracing(profileFile, profileFd.getFileDescriptor(),
-                        8 * 1024 * 1024, 0);
+                VMDebug.startMethodTracing(profileFile, profileFd.getFileDescriptor(),
+                        8 * 1024 * 1024, 0, samplingInterval != 0, samplingInterval);
                 profiling = true;
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Profiling failed on path " + profileFile);
@@ -525,11 +526,6 @@ public final class ActivityThread {
         ContextImpl context;
         String what;
         String who;
-    }
-
-    static final class ProfilerControlData {
-        String path;
-        ParcelFileDescriptor fd;
     }
 
     static final class DumpHeapData {
@@ -612,7 +608,7 @@ public final class ActivityThread {
                 IVoiceInteractor voiceInteractor, int procState, Bundle state,
                 PersistableBundle persistentState, List<ResultInfo> pendingResults,
                 List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
-                String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler) {
+                ProfilerInfo profilerInfo) {
 
             updateProcessState(procState, false);
 
@@ -633,9 +629,7 @@ public final class ActivityThread {
             r.startsNotResumed = notResumed;
             r.isForward = isForward;
 
-            r.profileFile = profileName;
-            r.profileFd = profileFd;
-            r.autoStopProfiler = autoStopProfiler;
+            r.profilerInfo = profilerInfo;
 
             updatePendingConfiguration(curConfig);
 
@@ -742,11 +736,10 @@ public final class ActivityThread {
             sendMessage(H.STOP_SERVICE, token);
         }
 
-        public final void bindApplication(String processName,
-                ApplicationInfo appInfo, List<ProviderInfo> providers,
-                ComponentName instrumentationName, String profileFile,
-                ParcelFileDescriptor profileFd, boolean autoStopProfiler,
-                Bundle instrumentationArgs, IInstrumentationWatcher instrumentationWatcher,
+        public final void bindApplication(String processName, ApplicationInfo appInfo,
+                List<ProviderInfo> providers, ComponentName instrumentationName,
+                ProfilerInfo profilerInfo, Bundle instrumentationArgs,
+                IInstrumentationWatcher instrumentationWatcher,
                 IUiAutomationConnection instrumentationUiConnection, int debugMode,
                 boolean enableOpenGlTrace, boolean isRestrictedBackupMode, boolean persistent,
                 Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
@@ -810,9 +803,7 @@ public final class ActivityThread {
             data.persistent = persistent;
             data.config = config;
             data.compatInfo = compatInfo;
-            data.initProfileFile = profileFile;
-            data.initProfileFd = profileFd;
-            data.initAutoStopProfiler = false;
+            data.initProfilerInfo = profilerInfo;
             sendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -878,12 +869,8 @@ public final class ActivityThread {
             sendMessage(H.ACTIVITY_CONFIGURATION_CHANGED, token);
         }
 
-        public void profilerControl(boolean start, String path, ParcelFileDescriptor fd,
-                int profileType) {
-            ProfilerControlData pcd = new ProfilerControlData();
-            pcd.path = path;
-            pcd.fd = fd;
-            sendMessage(H.PROFILER_CONTROL, pcd, start ? 1 : 0, profileType);
+        public void profilerControl(boolean start, ProfilerInfo profilerInfo, int profileType) {
+            sendMessage(H.PROFILER_CONTROL, profilerInfo, start ? 1 : 0, profileType);
         }
 
         public void dumpHeap(boolean managed, String path, ParcelFileDescriptor fd) {
@@ -1417,7 +1404,7 @@ public final class ActivityThread {
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case PROFILER_CONTROL:
-                    handleProfilerControl(msg.arg1 != 0, (ProfilerControlData)msg.obj, msg.arg2);
+                    handleProfilerControl(msg.arg1 != 0, (ProfilerInfo)msg.obj, msg.arg2);
                     break;
                 case CREATE_BACKUP_AGENT:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backupCreateAgent");
@@ -2354,10 +2341,9 @@ public final class ActivityThread {
         unscheduleGcIdler();
         mSomeActivitiesChanged = true;
 
-        if (r.profileFd != null) {
-            mProfiler.setProfiler(r.profileFile, r.profileFd);
+        if (r.profilerInfo != null) {
+            mProfiler.setProfiler(r.profilerInfo);
             mProfiler.startProfiling();
-            mProfiler.autoStopProfiler = r.autoStopProfiler;
         }
 
         // Make sure we are running with the most recent config.
@@ -4118,22 +4104,21 @@ public final class ActivityThread {
         mSomeActivitiesChanged = true;
     }
 
-    final void handleProfilerControl(boolean start, ProfilerControlData pcd, int profileType) {
+    final void handleProfilerControl(boolean start, ProfilerInfo profilerInfo, int profileType) {
         if (start) {
             try {
                 switch (profileType) {
-                    default:                        
-                        mProfiler.setProfiler(pcd.path, pcd.fd);
-                        mProfiler.autoStopProfiler = false;
+                    default:
+                        mProfiler.setProfiler(profilerInfo);
                         mProfiler.startProfiling();
                         break;
                 }
             } catch (RuntimeException e) {
-                Slog.w(TAG, "Profiling failed on path " + pcd.path
+                Slog.w(TAG, "Profiling failed on path " + profilerInfo.profileFile
                         + " -- can the process access this path?");
             } finally {
                 try {
-                    pcd.fd.close();
+                    profilerInfo.profileFd.close();
                 } catch (IOException e) {
                     Slog.w(TAG, "Failure closing profile fd", e);
                 }
@@ -4265,9 +4250,12 @@ public final class ActivityThread {
         mCompatConfiguration = new Configuration(data.config);
 
         mProfiler = new Profiler();
-        mProfiler.profileFile = data.initProfileFile;
-        mProfiler.profileFd = data.initProfileFd;
-        mProfiler.autoStopProfiler = data.initAutoStopProfiler;
+        if (data.initProfilerInfo != null) {
+            mProfiler.profileFile = data.initProfilerInfo.profileFile;
+            mProfiler.profileFd = data.initProfilerInfo.profileFd;
+            mProfiler.samplingInterval = data.initProfilerInfo.samplingInterval;
+            mProfiler.autoStopProfiler = data.initProfilerInfo.autoStopProfiler;
+        }
 
         // send up app name; do this *before* waiting for debugger
         Process.setArgV0(data.processName);
@@ -4282,7 +4270,7 @@ public final class ActivityThread {
                 HardwareRenderer.disable(false);
             }
         }
-        
+
         if (mProfiler.profileFd != null) {
             mProfiler.startProfiling();
         }

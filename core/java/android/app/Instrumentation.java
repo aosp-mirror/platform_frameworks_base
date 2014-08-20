@@ -1481,7 +1481,7 @@ public class Instrumentation {
                 .startActivity(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         token, target != null ? target.mEmbeddedID : null,
-                        requestCode, 0, null, null, options);
+                        requestCode, 0, null, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
         }
@@ -1598,7 +1598,7 @@ public class Instrumentation {
                 .startActivity(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         token, target != null ? target.mWho : null,
-                        requestCode, 0, null, null, options);
+                        requestCode, 0, null, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
         }
@@ -1658,7 +1658,7 @@ public class Instrumentation {
                 .startActivityAsUser(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         token, target != null ? target.mEmbeddedID : null,
-                        requestCode, 0, null, null, options, user.getIdentifier());
+                        requestCode, 0, null, options, user.getIdentifier());
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
         }
@@ -1695,7 +1695,7 @@ public class Instrumentation {
                 .startActivityAsCaller(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         token, target != null ? target.mEmbeddedID : null,
-                        requestCode, 0, null, null, options);
+                        requestCode, 0, null, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
         }
