@@ -59,6 +59,9 @@ redirects:
 - from: /guide/google/gcm/server-javadoc/...
   to: /reference/com/google/android/gcm/server/package-summary.html
 
+- from: /google/play-services/auth.html
+  to: /google/auth/http-auth.html
+
 - from: /guide/google/play/services.html
   to: /google/play-services/index.html
 
