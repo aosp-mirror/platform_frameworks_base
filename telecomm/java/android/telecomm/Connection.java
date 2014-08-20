@@ -65,8 +65,6 @@ public abstract class Connection {
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
 
-    private static Connection sNullConnection;
-
     /** @hide */
     public abstract static class Listener {
         public void onStateChanged(Connection c, int state) {}
@@ -476,9 +474,8 @@ public abstract class Connection {
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
     private int mVideoState;
-    private int mFailureCode;
-    private String mFailureMessage;
-    private boolean mIsCanceled;
+    private int mDisconnectCause;
+    private String mDisconnectMessage;
     private Conference mConference;
     private ConnectionService mConnectionService;
 
@@ -604,17 +601,17 @@ public abstract class Connection {
     }
 
     /**
-     * @return The failure code ({@see DisconnectCause}) associated with this failed connection.
+     * @return The {@link DisconnectCause} for this connection.
      */
-    public final int getFailureCode() {
-        return mFailureCode;
+    public final int getDisconnectCause() {
+        return mDisconnectCause;
     }
 
     /**
-     * @return The reason for the connection failure. This will not be displayed to the user.
+     * @return The disconnect message for this connection.
      */
-    public final String getFailureMessage() {
-        return mFailureMessage;
+    public final String getDisconnectMessage() {
+        return mDisconnectMessage;
     }
 
     /**
@@ -778,6 +775,8 @@ public abstract class Connection {
      * @param message Optional call-service-provided message about the disconnect.
      */
     public final void setDisconnected(int cause, String message) {
+        mDisconnectCause = cause;
+        mDisconnectMessage = message;
         setState(STATE_DISCONNECTED);
         Log.d(this, "Disconnected with cause %d message %s", cause, message);
         for (Listener l : mListeners) {
@@ -1060,13 +1059,6 @@ public abstract class Connection {
         return builder.toString();
     }
 
-    static synchronized Connection getNullConnection() {
-        if (sNullConnection == null) {
-            sNullConnection = new Connection() {};
-        }
-        return sNullConnection;
-    }
-
     private void setState(int state) {
         if (mState == STATE_DISCONNECTED && mState != state) {
             Log.d(this, "Connection already DISCONNECTED; cannot transition out of this state.");
@@ -1082,30 +1074,28 @@ public abstract class Connection {
         }
     }
 
-    static class FailureSignalingConnection extends Connection {
-        public FailureSignalingConnection(int code, String message) {
-            setDisconnected(code, message);
+    private static class FailureSignalingConnection extends Connection {
+        public FailureSignalingConnection(int cause, String message) {
+            setDisconnected(cause, message);
         }
     }
 
     /**
      * Return a {@code Connection} which represents a failed connection attempt. The returned
-     * {@code Connection} will have a {@link #getFailureCode()} and {@link #getFailureMessage()}
-     * as specified, a {@link #getState()} of {@link #STATE_DISCONNECTED}.
+     * {@code Connection} will have a {@link #getDisconnectCause()} and
+     * {@link #getDisconnectMessage()} as specified, and a {@link #getState()} of
+     * {@link #STATE_DISCONNECTED}.
      * <p>
      * The returned {@code Connection} can be assumed to {@link #destroy()} itself when appropriate,
      * so users of this method need not maintain a reference to its return value to destroy it.
      *
-     * @param code The failure code ({@see DisconnectCause}).
+     * @param cause The disconnect cause, ({@see DisconnectCause}).
      * @param message A reason for why the connection failed (not intended to be shown to the user).
      * @return A {@code Connection} which indicates failure.
      */
-    public static Connection createFailedConnection(final int code, final String message) {
-        return new FailureSignalingConnection(code, message);
+    public static Connection createFailedConnection(int cause, String message) {
+        return new FailureSignalingConnection(cause, message);
     }
-
-    private static final Connection CANCELED_CONNECTION =
-            new FailureSignalingConnection(DisconnectCause.OUTGOING_CANCELED, null);
 
     /**
      * Return a {@code Connection} which represents a canceled connection attempt. The returned
@@ -1119,7 +1109,7 @@ public abstract class Connection {
      * @return A {@code Connection} which indicates that the underlying call should be canceled.
      */
     public static Connection createCanceledConnection() {
-        return CANCELED_CONNECTION;
+        return new FailureSignalingConnection(DisconnectCause.OUTGOING_CANCELED, null);
     }
 
     private final void  fireOnConferenceableConnectionsChanged() {
