@@ -62,8 +62,12 @@ public final class ResourcesKey {
             return false;
         }
         ResourcesKey peer = (ResourcesKey) obj;
-        if (!mResDir.equals(peer.mResDir)) {
-            return false;
+        if (mResDir != peer.mResDir) {
+            if (mResDir == null || peer.mResDir == null) {
+                return false;
+            } else if (!mResDir.equals(peer.mResDir)) {
+                return false;
+            }
         }
         if (mDisplayId != peer.mDisplayId) {
             return false;
