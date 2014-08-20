@@ -18,6 +18,7 @@ package android.widget;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -38,6 +39,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import com.android.internal.R;
 import com.android.internal.widget.ExploreByTouchHelper;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Formatter;
 import java.util.List;
@@ -71,6 +73,9 @@ class SimpleMonthView extends View {
 
     // used for scaling to the device density
     private static float mScale = 0;
+
+    /** Single-letter (when available) formatter for the day of week label. */
+    private SimpleDateFormat mDayFormatter = new SimpleDateFormat("EEEEE", Locale.getDefault());
 
     // affects the padding on the sides of this view
     private int mPadding = 0;
@@ -179,6 +184,13 @@ class SimpleMonthView extends View {
 
         // Sets up any standard paints that will be used
         initView();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        mDayFormatter = new SimpleDateFormat("EEEEE", newConfig.locale);
     }
 
     void setTextColor(ColorStateList colors) {
@@ -426,16 +438,16 @@ class SimpleMonthView extends View {
     }
 
     private void drawWeekDayLabels(Canvas canvas) {
-        int y = mMonthHeaderSize - (mMonthDayLabelTextSize / 2);
-        int dayWidthHalf = (mWidth - mPadding * 2) / (mNumDays * 2);
+        final int y = mMonthHeaderSize - (mMonthDayLabelTextSize / 2);
+        final int dayWidthHalf = (mWidth - mPadding * 2) / (mNumDays * 2);
 
         for (int i = 0; i < mNumDays; i++) {
-            int calendarDay = (i + mWeekStart) % mNumDays;
-            int x = (2 * i + 1) * dayWidthHalf + mPadding;
+            final int calendarDay = (i + mWeekStart) % mNumDays;
             mDayLabelCalendar.set(Calendar.DAY_OF_WEEK, calendarDay);
-            canvas.drawText("" + mDayLabelCalendar.getDisplayName(Calendar.DAY_OF_WEEK,
-                    Calendar.SHORT, Locale.getDefault()).toUpperCase(Locale.getDefault()).charAt(0),
-                    x, y, mMonthDayLabelPaint);
+
+            final String dayLabel = mDayFormatter.format(mDayLabelCalendar.getTime());
+            final int x = (2 * i + 1) * dayWidthHalf + mPadding;
+            canvas.drawText(dayLabel, x, y, mMonthDayLabelPaint);
         }
     }
 
