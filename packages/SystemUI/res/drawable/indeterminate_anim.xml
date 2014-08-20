@@ -18,15 +18,15 @@
 
     <target
         android:name="path1"
-        android:animation="@*android:anim/progress_indeterminate_horizontal_rect1_translate" />
+        android:animation="@anim/progress_indeterminate_horizontal_rect1_translate" />
     <target
         android:name="path1"
-        android:animation="@*android:anim/progress_indeterminate_horizontal_rect1_scale" />
+        android:animation="@anim/progress_indeterminate_horizontal_rect1_scale" />
 
     <target
         android:name="path2"
-        android:animation="@*android:anim/progress_indeterminate_horizontal_rect2_translate" />
+        android:animation="@anim/progress_indeterminate_horizontal_rect2_translate" />
     <target
         android:name="path2"
-        android:animation="@*android:anim/progress_indeterminate_horizontal_rect2_scale" />
+        android:animation="@anim/progress_indeterminate_horizontal_rect2_scale" />
 </animated-vector>
