@@ -958,7 +958,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 Object obj = null;
                 switch (status) {
                     case HdmiControlManager.DEVICE_EVENT_ADD_DEVICE: {
-                        if (!mHdmiDeviceList.contains(deviceInfo)) {
+                        if (findHdmiDeviceInfo(deviceInfo.getId()) == null) {
                             mHdmiDeviceList.add(deviceInfo);
                         } else {
                             Slog.w(TAG, "The list already contains " + deviceInfo + "; ignoring.");
@@ -969,7 +969,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                         break;
                     }
                     case HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE: {
-                        if (!mHdmiDeviceList.remove(deviceInfo)) {
+                        HdmiDeviceInfo originalDeviceInfo = findHdmiDeviceInfo(deviceInfo.getId());
+                        if (!mHdmiDeviceList.remove(originalDeviceInfo)) {
                             Slog.w(TAG, "The list doesn't contain " + deviceInfo + "; ignoring.");
                             return;
                         }
@@ -978,13 +979,14 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                         break;
                     }
                     case HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE: {
-                        if (!mHdmiDeviceList.remove(deviceInfo)) {
+                        HdmiDeviceInfo originalDeviceInfo = findHdmiDeviceInfo(deviceInfo.getId());
+                        if (!mHdmiDeviceList.remove(originalDeviceInfo)) {
                             Slog.w(TAG, "The list doesn't contain " + deviceInfo + "; ignoring.");
                             return;
                         }
                         mHdmiDeviceList.add(deviceInfo);
                         messageType = ListenerHandler.HDMI_DEVICE_UPDATED;
-                        String inputId = mHdmiInputIdMap.get(deviceInfo.getLogicalAddress());
+                        String inputId = mHdmiInputIdMap.get(deviceInfo.getId());
                         SomeArgs args = SomeArgs.obtain();
                         args.arg1 = inputId;
                         args.arg2 = deviceInfo;
@@ -1000,6 +1002,15 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     mPendingHdmiDeviceEvents.add(msg);
                 }
             }
+        }
+
+        private HdmiDeviceInfo findHdmiDeviceInfo(int id) {
+            for (HdmiDeviceInfo info : mHdmiDeviceList) {
+                if (info.getId() == id) {
+                    return info;
+                }
+            }
+            return null;
         }
     }
 
