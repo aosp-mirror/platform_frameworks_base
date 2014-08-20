@@ -28802,8 +28802,8 @@ package android.telecomm {
     method public final int getCallerDisplayNamePresentation();
     method public final android.telecomm.Conference getConference();
     method public final java.util.List<android.telecomm.Connection> getConferenceableConnections();
-    method public final int getFailureCode();
-    method public final java.lang.String getFailureMessage();
+    method public final int getDisconnectCause();
+    method public final java.lang.String getDisconnectMessage();
     method public final android.net.Uri getHandle();
     method public final int getHandlePresentation();
     method public final int getState();
