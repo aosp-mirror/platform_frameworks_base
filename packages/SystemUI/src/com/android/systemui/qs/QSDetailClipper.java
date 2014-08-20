@@ -46,7 +46,11 @@ public class QSDetailClipper {
         r = (int) Math.max(r, Math.ceil(Math.sqrt(w * w + y * y)));
         r = (int) Math.max(r, Math.ceil(Math.sqrt(w * w + h * h)));
         r = (int) Math.max(r, Math.ceil(Math.sqrt(x * x + h * h)));
-        mAnimator = ViewAnimationUtils.createCircularReveal(mDetail, x, y, 0, r);
+        if (in) {
+            mAnimator = ViewAnimationUtils.createCircularReveal(mDetail, x, y, 0, r);
+        } else {
+            mAnimator = ViewAnimationUtils.createCircularReveal(mDetail, x, y, r, 0);
+        }
         mAnimator.setDuration((long)(mAnimator.getDuration() * 1.5));
         if (listener != null) {
             mAnimator.addListener(listener);
@@ -55,12 +59,11 @@ public class QSDetailClipper {
         if (in) {
             mBackground.startTransition((int)(mAnimator.getDuration() * 0.6));
             mAnimator.addListener(mVisibleOnStart);
-            mAnimator.start();
         } else {
             mDetail.postDelayed(mReverseBackground, (long)(mAnimator.getDuration() * 0.65));
             mAnimator.addListener(mGoneOnEnd);
-            mAnimator.reverse();
         }
+        mAnimator.start();
     }
 
     private final Runnable mReverseBackground = new Runnable() {
