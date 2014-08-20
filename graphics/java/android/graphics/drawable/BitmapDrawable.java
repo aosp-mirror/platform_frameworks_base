@@ -81,14 +81,14 @@ public class BitmapDrawable extends Drawable {
     private static final int TILE_MODE_REPEAT = 1;
     private static final int TILE_MODE_MIRROR = 2;
 
-    private final Rect mDstRect = new Rect();   // Gravity.apply() sets this
+    private final Rect mDstRect = new Rect();   // #updateDstRectAndInsetsIfDirty() sets this
 
     private BitmapState mBitmapState;
     private PorterDuffColorFilter mTintFilter;
 
     private int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
 
-    private boolean mApplyGravity;
+    private boolean mDstRectAndInsetsDirty = true;
     private boolean mMutated;
 
      // These are scaled to match the target density.
@@ -96,7 +96,7 @@ public class BitmapDrawable extends Drawable {
     private int mBitmapHeight;
 
     /** Optical insets due to gravity. */
-    private Insets mOpticalInsets = null;
+    private Insets mOpticalInsets = Insets.NONE;
 
     // Mirroring matrix for using with Shaders
     private Matrix mMirrorMatrix;
@@ -285,7 +285,7 @@ public class BitmapDrawable extends Drawable {
     public void setGravity(int gravity) {
         if (mBitmapState.mGravity != gravity) {
             mBitmapState.mGravity = gravity;
-            mApplyGravity = true;
+            mDstRectAndInsetsDirty = true;
             invalidateSelf();
         }
     }
@@ -428,6 +428,7 @@ public class BitmapDrawable extends Drawable {
             state.mTileModeX = xmode;
             state.mTileModeY = ymode;
             state.mRebuildShader = true;
+            mDstRectAndInsetsDirty = true;
             invalidateSelf();
         }
     }
@@ -464,7 +465,7 @@ public class BitmapDrawable extends Drawable {
 
     @Override
     protected void onBoundsChange(Rect bounds) {
-        mApplyGravity = true;
+        mDstRectAndInsetsDirty = true;
 
         final Shader shader = mBitmapState.mPaint.getShader();
         if (shader != null) {
@@ -503,7 +504,6 @@ public class BitmapDrawable extends Drawable {
             }
 
             state.mRebuildShader = false;
-            copyBounds(mDstRect);
         }
 
         final int restoreAlpha;
@@ -523,14 +523,10 @@ public class BitmapDrawable extends Drawable {
             clearColorFilter = false;
         }
 
+        updateDstRectAndInsetsIfDirty();
         final Shader shader = paint.getShader();
         final boolean needMirroring = needMirroring();
         if (shader == null) {
-            if (mApplyGravity) {
-                applyGravity();
-                mApplyGravity = false;
-            }
-
             if (needMirroring) {
                 canvas.save();
                 // Mirror the bitmap
@@ -544,11 +540,6 @@ public class BitmapDrawable extends Drawable {
                 canvas.restore();
             }
         } else {
-            if (mApplyGravity) {
-                copyBounds(mDstRect);
-                mApplyGravity = false;
-            }
-
             if (needMirroring) {
                 // Mirror the bitmap
                 updateMirrorMatrix(mDstRect.right - mDstRect.left);
@@ -574,39 +565,46 @@ public class BitmapDrawable extends Drawable {
         }
     }
 
+    private void updateDstRectAndInsetsIfDirty() {
+        if (mDstRectAndInsetsDirty) {
+            if (mBitmapState.mTileModeX == null && mBitmapState.mTileModeY == null) {
+                final Rect bounds = getBounds();
+                final int layoutDirection = getLayoutDirection();
+                Gravity.apply(mBitmapState.mGravity, mBitmapWidth, mBitmapHeight,
+                        bounds, mDstRect, layoutDirection);
+
+                final int left = mDstRect.left - bounds.left;
+                final int top = mDstRect.top - bounds.top;
+                final int right = bounds.right - mDstRect.right;
+                final int bottom = bounds.bottom - mDstRect.bottom;
+                mOpticalInsets = Insets.of(left, top, right, bottom);
+            } else {
+                copyBounds(mDstRect);
+                mOpticalInsets = Insets.NONE;
+            }
+        }
+        mDstRectAndInsetsDirty = false;
+    }
+
     /**
      * @hide
      */
     @Override
     public Insets getOpticalInsets() {
-        if (mApplyGravity && mBitmapState.mPaint.getShader() == null) {
-            applyGravity();
-            mApplyGravity = false;
-        }
-        return mOpticalInsets == null ? Insets.NONE : mOpticalInsets;
-    }
-
-    private void applyGravity() {
-        final Rect bounds = getBounds();
-        final int layoutDirection = getLayoutDirection();
-        Gravity.apply(mBitmapState.mGravity, mBitmapWidth, mBitmapHeight,
-                bounds, mDstRect, layoutDirection);
-
-        final int left = mDstRect.left - bounds.left;
-        final int top = mDstRect.top - bounds.top;
-        final int right = bounds.right - mDstRect.right;
-        final int bottom = bounds.bottom - mDstRect.bottom;
-        mOpticalInsets = Insets.of(left, top, right, bottom);
+        updateDstRectAndInsetsIfDirty();
+        return mOpticalInsets;
     }
 
     @Override
     public void getOutline(@NonNull Outline outline) {
-        super.getOutline(outline);
-        if (mBitmapState.mBitmap == null || mBitmapState.mBitmap.hasAlpha()) {
-            // Only opaque Bitmaps can report a non-0 alpha,
-            // since only they are guaranteed to fill their bounds
-            outline.setAlpha(0.0f);
-        }
+        updateDstRectAndInsetsIfDirty();
+        outline.setRect(mDstRect);
+
+        // Only opaque Bitmaps can report a non-0 alpha,
+        // since only they are guaranteed to fill their bounds
+        boolean opaqueOverShape = mBitmapState.mBitmap != null
+                && !mBitmapState.mBitmap.hasAlpha();
+        outline.setAlpha(opaqueOverShape ? getAlpha() / 255.0f : 0.0f);
     }
 
     @Override
