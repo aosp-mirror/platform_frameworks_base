@@ -1588,6 +1588,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     final CharSequence summary = InputMethodUtils.getImeAndSubtypeDisplayName(
                             mContext, imi, mCurrentSubtype);
 
+                    mImeSwitcherNotification.color = mContext.getResources().getColor(
+                            com.android.internal.R.color.system_notification_accent_color);
                     mImeSwitcherNotification.setLatestEventInfo(
                             mContext, title, summary, mImeSwitchPendingIntent);
                     if ((mNotificationManager != null)

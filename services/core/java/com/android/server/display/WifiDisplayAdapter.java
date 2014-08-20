@@ -502,6 +502,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                         .addAction(android.R.drawable.ic_menu_close_clear_cancel,
                                 r.getString(R.string.wifi_display_notification_disconnect),
                                 mDisconnectPendingIntent)
+                        .setColor(r.getColor(
+                                com.android.internal.R.color.system_notification_accent_color))
                         .build();
             } else {
                 notification = new Notification.Builder(context)
@@ -516,6 +518,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                         .addAction(android.R.drawable.ic_menu_close_clear_cancel,
                                 r.getString(R.string.wifi_display_notification_disconnect),
                                 mDisconnectPendingIntent)
+                        .setColor(r.getColor(
+                                com.android.internal.R.color.system_notification_accent_color))
                         .build();
             }
             mNotificationManager.notifyAsUser(null,

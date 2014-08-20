@@ -23,7 +23,6 @@
     <color name="system_bar_background_opaque">#ff000000</color>
     <color name="system_bar_background_semi_transparent">#66000000</color> <!-- 40% black -->
     <color name="system_bar_background_transparent">#00000000</color>
-    <color name="system_bar_background_warning">#fff4511e</color><!-- deep orange 600 -->
     <color name="notification_panel_solid_background">#ff000000</color>
     <drawable name="status_bar_recents_app_thumbnail_background">#88000000</drawable>
     <color name="status_bar_recents_app_label_color">#ffffffff</color>

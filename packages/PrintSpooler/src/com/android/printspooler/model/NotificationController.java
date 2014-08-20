@@ -124,7 +124,9 @@ final class NotificationController {
                 .setContentText(printJob.getPrinterName())
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
-                .setShowWhen(true);
+                .setShowWhen(true)
+                .setColor(mContext.getResources().getColor(
+                        com.android.internal.R.color.system_notification_accent_color));
         mNotificationManager.notify(0, builder.build());
     }
 
@@ -140,7 +142,9 @@ final class NotificationController {
                 .setContentText(printJob.getPrinterName())
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
-                .setShowWhen(true);
+                .setShowWhen(true)
+                .setColor(mContext.getResources().getColor(
+                        com.android.internal.R.color.system_notification_accent_color));
         mNotificationManager.notify(0, builder.build());
     }
 
@@ -154,7 +158,9 @@ final class NotificationController {
                 .setContentText(printJob.getPrinterName())
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
-                .setShowWhen(true);
+                .setShowWhen(true)
+                .setColor(mContext.getResources().getColor(
+                        com.android.internal.R.color.system_notification_accent_color));
            mNotificationManager.notify(0, builder.build());
     }
 
@@ -166,7 +172,9 @@ final class NotificationController {
                 .setContentText(printJob.getPrinterName())
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
-                .setShowWhen(true);
+                .setShowWhen(true)
+                .setColor(mContext.getResources().getColor(
+                        com.android.internal.R.color.system_notification_accent_color));
         mNotificationManager.notify(0, builder.build());
     }
 
@@ -198,6 +206,8 @@ final class NotificationController {
 
         builder.setNumber(printJobCount);
         builder.setStyle(inboxStyle);
+        builder.setColor(mContext.getResources().getColor(
+                com.android.internal.R.color.system_notification_accent_color));
 
         mNotificationManager.notify(0, builder.build());
     }

@@ -1700,6 +1700,8 @@ public class AccountManagerService
             subtitle = titleAndSubtitle.substring(index + 1);
         }
         UserHandle user = new UserHandle(userId);
+        n.color = mContext.getResources().getColor(
+                com.android.internal.R.color.system_notification_accent_color);
         n.setLatestEventInfo(mContext, title, subtitle,
                 PendingIntent.getActivityAsUser(mContext, 0, intent,
                         PendingIntent.FLAG_CANCEL_CURRENT, null, user));
@@ -2968,6 +2970,8 @@ public class AccountManagerService
                 UserHandle user = new UserHandle(userId);
                 final String notificationTitleFormat =
                         mContext.getText(R.string.notification_title).toString();
+                n.color = mContext.getResources().getColor(
+                        com.android.internal.R.color.system_notification_accent_color);
                 n.setLatestEventInfo(mContext,
                         String.format(notificationTitleFormat, account.name),
                         message, PendingIntent.getActivityAsUser(

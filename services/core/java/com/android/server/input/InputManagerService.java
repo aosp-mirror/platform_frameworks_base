@@ -774,6 +774,8 @@ public class InputManagerService extends IInputManager.Stub
                     .setContentIntent(mKeyboardLayoutIntent)
                     .setSmallIcon(R.drawable.ic_settings_language)
                     .setPriority(Notification.PRIORITY_LOW)
+                    .setColor(mContext.getResources().getColor(
+                            com.android.internal.R.color.system_notification_accent_color))
                     .build();
             mNotificationManager.notifyAsUser(null,
                     R.string.select_keyboard_layout_notification_title,

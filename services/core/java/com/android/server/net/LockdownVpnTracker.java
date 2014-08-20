@@ -304,16 +304,18 @@ public class LockdownVpnTracker {
     }
 
     private void showNotification(int titleRes, int iconRes) {
-        final Notification.Builder builder = new Notification.Builder(mContext);
-        builder.setWhen(0);
-        builder.setSmallIcon(iconRes);
-        builder.setContentTitle(mContext.getString(titleRes));
-        builder.setContentText(mContext.getString(R.string.vpn_lockdown_config));
-        builder.setContentIntent(mConfigIntent);
-        builder.setPriority(Notification.PRIORITY_LOW);
-        builder.setOngoing(true);
-        builder.addAction(
-                R.drawable.ic_menu_refresh, mContext.getString(R.string.reset), mResetIntent);
+        final Notification.Builder builder = new Notification.Builder(mContext)
+                .setWhen(0)
+                .setSmallIcon(iconRes)
+                .setContentTitle(mContext.getString(titleRes))
+                .setContentText(mContext.getString(R.string.vpn_lockdown_config))
+                .setContentIntent(mConfigIntent)
+                .setPriority(Notification.PRIORITY_LOW)
+                .setOngoing(true)
+                .addAction(R.drawable.ic_menu_refresh, mContext.getString(R.string.reset),
+                        mResetIntent)
+                .setColor(mContext.getResources().getColor(
+                        com.android.internal.R.color.system_notification_accent_color));
 
         NotificationManager.from(mContext).notify(TAG, 0, builder.build());
     }

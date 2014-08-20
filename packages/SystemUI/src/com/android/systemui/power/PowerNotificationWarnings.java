@@ -162,7 +162,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setPriority(Notification.PRIORITY_MAX)
                 .setCategory(Notification.CATEGORY_SYSTEM)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setFullScreenIntent(pendingBroadcast(ACTION_SHOW_FALLBACK_CHARGER), true);
+                .setFullScreenIntent(pendingBroadcast(ACTION_SHOW_FALLBACK_CHARGER), true)
+                .setColor(mContext.getResources().getColor(
+                        com.android.internal.R.color.system_notification_accent_color));
         final Notification n = nb.build();
         if (n.headsUpContentView != null) {
             n.headsUpContentView.setViewVisibility(com.android.internal.R.id.right_icon, View.GONE);
@@ -185,7 +187,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setPriority(Notification.PRIORITY_MAX)
                 .setCategory(Notification.CATEGORY_SYSTEM)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setFullScreenIntent(pendingBroadcast(ACTION_SHOW_FALLBACK_WARNING), true);
+                .setFullScreenIntent(pendingBroadcast(ACTION_SHOW_FALLBACK_WARNING), true)
+                .setColor(mContext.getResources().getColor(
+                        com.android.internal.R.color.battery_saver_mode_color));
         if (hasBatterySettings()) {
             nb.setContentIntent(pendingBroadcast(ACTION_SHOW_BATTERY_SETTINGS));
         }
@@ -214,7 +218,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setOngoing(true)
                 .setShowWhen(false)
                 .setCategory(Notification.CATEGORY_SYSTEM)
-                .setVisibility(Notification.VISIBILITY_PUBLIC);
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setColor(mContext.getResources().getColor(
+                        com.android.internal.R.color.battery_saver_mode_color));
         addStopSaverAction(nb);
         if (hasSaverSettings()) {
             nb.setContentIntent(pendingActivity(mOpenSaverSettings));

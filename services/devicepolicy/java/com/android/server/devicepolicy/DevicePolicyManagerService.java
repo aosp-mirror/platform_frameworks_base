@@ -1536,6 +1536,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             .setContentIntent(notifyIntent)
             .setPriority(Notification.PRIORITY_HIGH)
             .setShowWhen(false)
+            .setColor(mContext.getResources().getColor(
+                    com.android.internal.R.color.system_notification_accent_color))
             .build();
 
         // If this is a boot intent, this will fire for each user. But if this is a storage changed
