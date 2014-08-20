@@ -22,6 +22,7 @@ import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.os.AsyncTask;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.widget.AbsListView;
@@ -278,12 +279,15 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             });
         }
 
-        final TextView titleView = (TextView) findViewById(R.id.title);
-        if (titleView != null) {
-            if (title == null) {
-                title = getTitleForAction(intent.getAction(), defaultTitleRes);
+        if (title == null) {
+            title = getTitleForAction(intent.getAction(), defaultTitleRes);
+        }
+        if (!TextUtils.isEmpty(title)) {
+            final TextView titleView = (TextView) findViewById(R.id.title);
+            if (titleView != null) {
+                titleView.setText(title);
             }
-            titleView.setText(title);
+            setTitle(title);
         }
 
         final ImageView iconView = (ImageView) findViewById(R.id.icon);
