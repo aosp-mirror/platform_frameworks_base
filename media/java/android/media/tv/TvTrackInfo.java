@@ -46,10 +46,12 @@ public final class TvTrackInfo implements Parcelable {
     private final int mAudioSampleRate;
     private final int mVideoWidth;
     private final int mVideoHeight;
+    private final float mVideoFrameRate;
     private final Bundle mExtra;
 
     private TvTrackInfo(int type, String id, String language, int audioChannelCount,
-            int audioSampleRate, int videoWidth, int videoHeight, Bundle extra) {
+            int audioSampleRate, int videoWidth, int videoHeight, float videoFrameRate,
+            Bundle extra) {
         mType = type;
         mId = id;
         mLanguage = language;
@@ -57,6 +59,7 @@ public final class TvTrackInfo implements Parcelable {
         mAudioSampleRate = audioSampleRate;
         mVideoWidth = videoWidth;
         mVideoHeight = videoHeight;
+        mVideoFrameRate = videoFrameRate;
         mExtra = extra;
     }
 
@@ -68,6 +71,7 @@ public final class TvTrackInfo implements Parcelable {
         mAudioSampleRate = in.readInt();
         mVideoWidth = in.readInt();
         mVideoHeight = in.readInt();
+        mVideoFrameRate = in.readFloat();
         mExtra = in.readBundle();
     }
 
@@ -137,6 +141,17 @@ public final class TvTrackInfo implements Parcelable {
     }
 
     /**
+     * Returns the frame rate of the video, in the unit of fps (frames per second). Valid only for
+     * {@link #TYPE_VIDEO} tracks.
+     */
+    public final float getVideoFrameRate() {
+        if (mType != TYPE_VIDEO) {
+            throw new IllegalStateException("Not a video track");
+        }
+        return mVideoFrameRate;
+    }
+
+    /**
      * Returns the extra information about the current track.
      */
     public final Bundle getExtra() {
@@ -163,6 +178,7 @@ public final class TvTrackInfo implements Parcelable {
         dest.writeInt(mAudioSampleRate);
         dest.writeInt(mVideoWidth);
         dest.writeInt(mVideoHeight);
+        dest.writeFloat(mVideoFrameRate);
         dest.writeBundle(mExtra);
     }
 
@@ -190,6 +206,7 @@ public final class TvTrackInfo implements Parcelable {
         private int mAudioSampleRate;
         private int mVideoWidth;
         private int mVideoHeight;
+        private float mVideoFrameRate;
         private Bundle mExtra;
 
         /**
@@ -279,6 +296,20 @@ public final class TvTrackInfo implements Parcelable {
         }
 
         /**
+         * Sets the frame rate of the video, in the unit fps (frames per rate). Valid only for
+         * {@link #TYPE_VIDEO} tracks.
+         *
+         * @param videoFrameRate The frame rate of the video.
+         */
+        public final Builder setVideoFrameRate(float videoFrameRate) {
+            if (mType != TYPE_VIDEO) {
+                throw new IllegalStateException("Not a video track");
+            }
+            mVideoFrameRate = videoFrameRate;
+            return this;
+        }
+
+        /**
          * Sets the extra information about the current track.
          *
          * @param extra The extra information.
@@ -295,7 +326,7 @@ public final class TvTrackInfo implements Parcelable {
          */
         public TvTrackInfo build() {
             return new TvTrackInfo(mType, mId, mLanguage, mAudioChannelCount, mAudioSampleRate,
-                    mVideoWidth, mVideoHeight, mExtra);
+                    mVideoWidth, mVideoHeight, mVideoFrameRate, mExtra);
         }
     }
 }
