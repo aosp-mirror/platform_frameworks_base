@@ -81,6 +81,7 @@ public:
     static void enqueueDestroyLayer(Layer* layer);
     ANDROID_API DeferredLayerUpdater* createDisplayListLayer(int width, int height);
     ANDROID_API DeferredLayerUpdater* createTextureLayer();
+    ANDROID_API void buildLayer(RenderNode* node);
     ANDROID_API bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
     ANDROID_API void pushLayerUpdate(DeferredLayerUpdater* layer);
     ANDROID_API void cancelLayerUpdate(DeferredLayerUpdater* layer);
