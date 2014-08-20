@@ -28,7 +28,6 @@ import android.media.AudioAttributes;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
-import android.media.routing.MediaRouter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -221,23 +220,6 @@ public final class MediaSession {
             mBinder.setLaunchPendingIntent(pi);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setLaunchPendingIntent.", e);
-        }
-    }
-
-    /**
-     * Associates a {@link MediaRouter} with this session to control the destination
-     * of media content.
-     * <p>
-     * A media router may only be associated with at most one session at a time.
-     * </p>
-     *
-     * @param router The media router, or null to remove the current association.
-     */
-    public void setMediaRouter(@Nullable MediaRouter router) {
-        try {
-            mBinder.setMediaRouter(router != null ? router.getBinder() : null);
-        } catch (RemoteException e) {
-            Log.wtf(TAG, "Failure in setMediaButtonReceiver.", e);
         }
     }
 

@@ -25,15 +25,6 @@
             android:name="com.android.onemedia.OnePlayerService"
             android:exported="true"
             android:process="com.android.onemedia.service" />
-        <service
-            android:name=".provider.OneMediaRouteProvider"
-            android:permission="android.permission.BIND_MEDIA_ROUTE_SERVICE"
-            android:exported="true"
-            android:process="com.android.onemedia.provider">
-            <intent-filter>
-                <action android:name="android.media.routing.MediaRouteService" />
-            </intent-filter>
-          </service>
     </application>
 
 </manifest>
