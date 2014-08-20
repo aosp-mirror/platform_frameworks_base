@@ -21,7 +21,7 @@ import android.os.Parcelable;
 
 /**
  * Convenience class for passing information about the audio configuration of a
- * session. The public implementation is {@link MediaController.AudioInfo}.
+ * session. The public implementation is {@link MediaController.PlaybackInfo}.
  *
  * @hide
  */

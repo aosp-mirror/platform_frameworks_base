@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.PlaybackState;
 import android.media.session.MediaSession;
 import android.os.UserHandle;
@@ -209,7 +210,7 @@ public class MediaSessionStack {
         int size = records.size();
         for (int i = 0; i < size; i++) {
             MediaSessionRecord record = records.get(i);
-            if (record.getPlaybackType() == MediaSession.PLAYBACK_TYPE_REMOTE) {
+            if (record.getPlaybackType() == PlaybackInfo.PLAYBACK_TYPE_REMOTE) {
                 return record;
             }
         }
