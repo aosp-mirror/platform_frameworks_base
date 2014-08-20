@@ -65,6 +65,7 @@ public:
     // IFrameCallback, Chroreographer-driven frame callback entry point
     virtual void doFrame();
 
+    void buildLayer(RenderNode* node);
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
 
     void destroyHardwareResources();
