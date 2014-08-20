@@ -2406,6 +2406,27 @@ public class DevicePolicyManager {
     }
 
     /**
+     * @hide
+     * @param user The user for whom to fetch the profile owner name, if any.
+     * @return the human readable name of the organisation associated with this profile owner or
+     *         null if one is not set.
+     * @throws IllegalArgumentException if the userId is invalid.
+     */
+    @SystemApi
+    public String getProfileOwnerNameAsUser(UserHandle user) throws IllegalArgumentException {
+        if (mService != null) {
+            try {
+                return mService.getProfileOwnerName(user.getIdentifier());
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to get profile owner");
+                throw new IllegalArgumentException(
+                        "Requested profile owner for invalid userId", re);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Called by a profile owner or device owner to add a default intent handler activity for
      * intents that match a certain intent filter. This activity will remain the default intent
      * handler even if the set of potential event handlers for the intent filter changes and if
