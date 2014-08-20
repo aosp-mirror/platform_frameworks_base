@@ -596,7 +596,7 @@ public class PackageParser {
     public final static int PARSE_ON_SDCARD = 1<<5;
     public final static int PARSE_IS_SYSTEM_DIR = 1<<6;
     public final static int PARSE_IS_PRIVILEGED = 1<<7;
-    public final static int PARSE_GET_SIGNATURES = 1<<8;
+    public final static int PARSE_COLLECT_CERTIFICATES = 1<<8;
     public final static int PARSE_TRUSTED_OVERLAY = 1<<9;
 
     private static final Comparator<String> sSplitNameComparator = new SplitNameComparator();
@@ -1087,34 +1087,6 @@ public class PackageParser {
         }
     }
 
-    /**
-     * Only collect certificates on the manifest; does not validate signatures
-     * across remainder of package.
-     */
-    private static Signature[] collectManifestCertificates(File apkFile)
-            throws PackageParserException {
-        final String apkPath = apkFile.getAbsolutePath();
-        try {
-            final StrictJarFile jarFile = new StrictJarFile(apkPath);
-            try {
-                final ZipEntry jarEntry = jarFile.findEntry(ANDROID_MANIFEST_FILENAME);
-                if (jarEntry == null) {
-                    throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
-                            "Package " + apkPath + " has no manifest");
-                }
-
-                final Certificate[][] certs = loadCertificates(jarFile, jarEntry);
-                return convertToSignatures(certs);
-
-            } finally {
-                jarFile.close();
-            }
-        } catch (GeneralSecurityException | IOException | RuntimeException e) {
-            throw new PackageParserException(INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING,
-                    "Failed to collect certificates from " + apkPath, e);
-        }
-    }
-
     private static Signature[] convertToSignatures(Certificate[][] certs)
             throws CertificateEncodingException {
         final Signature[] res = new Signature[certs.length];
@@ -1129,7 +1101,8 @@ public class PackageParser {
      * file, including package name, split name, and install location.
      *
      * @param apkFile path to a single APK
-     * @param flags optional parse flags, such as {@link #PARSE_GET_SIGNATURES}
+     * @param flags optional parse flags, such as
+     *            {@link #PARSE_COLLECT_CERTIFICATES}
      */
     public static ApkLite parseApkLite(File apkFile, int flags)
             throws PackageParserException {
@@ -1154,11 +1127,12 @@ public class PackageParser {
             final Resources res = new Resources(assets, metrics, null);
             parser = assets.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
 
-            // Only collect certificates on the manifest; does not validate
-            // signatures across remainder of package.
             final Signature[] signatures;
-            if ((flags & PARSE_GET_SIGNATURES) != 0) {
-                signatures = collectManifestCertificates(apkFile);
+            if ((flags & PARSE_COLLECT_CERTIFICATES) != 0) {
+                // TODO: factor signature related items out of Package object
+                final Package tempPkg = new Package(null);
+                collectCertificates(tempPkg, apkFile, 0);
+                signatures = tempPkg.mSignatures;
             } else {
                 signatures = null;
             }

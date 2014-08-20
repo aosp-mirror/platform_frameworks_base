@@ -195,6 +195,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         this.internalStageDir = internalStageDir;
         this.externalStageCid = externalStageCid;
 
+        if ((internalStageDir == null) == (externalStageCid == null)) {
+            throw new IllegalArgumentException(
+                    "Exactly one of internal or external stage must be set");
+        }
+
         mSealed = sealed;
 
         // Always derived at runtime
@@ -395,7 +400,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         Preconditions.checkNotNull(statusReceiver);
 
         final PackageInstallObserverAdapter adapter = new PackageInstallObserverAdapter(mContext,
-                statusReceiver);
+                statusReceiver, sessionId);
         mHandler.obtainMessage(MSG_COMMIT, adapter.getBinder()).sendToTarget();
     }
 
@@ -414,8 +419,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             mSealed = true;
 
-            // TODO: persist disabled mutations before going forward, since
-            // beyond this point we may have hardlinks to the valid install
+            // Persist the fact that we've sealed ourselves to prevent mutations
+            // of any hard links we create below.
+            mCallback.onSessionSealed(this);
         }
 
         final File stageDir;
@@ -476,9 +482,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         };
 
-        // TODO: send ASEC cid if that's where we staged things
-        mPm.installStage(mPackageName, this.internalStageDir, null, localObserver, params,
-                installerPackageName, installerUid, new UserHandle(userId));
+        mPm.installStage(mPackageName, this.internalStageDir, this.externalStageCid, localObserver,
+                params, installerPackageName, installerUid, new UserHandle(userId));
     }
 
     /**
@@ -486,6 +491,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * consistent package name, version code, and signing certificates.
      * <p>
      * Renames package files in stage to match split names defined inside.
+     * <p>
+     * Note that upgrade compatibility is still performed by
+     * {@link PackageManagerService}.
      */
     private void validateInstallLocked(File stageDir) throws PackageManagerException {
         mPackageName = null;
@@ -498,13 +506,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
         }
 
-        final ArraySet<String> seenSplits = new ArraySet<>();
-
         // Verify that all staged packages are internally consistent
+        final ArraySet<String> seenSplits = new ArraySet<>();
         for (File file : files) {
+
+            // Installers can't stage directories, so it's fine to ignore
+            // entries like "lost+found".
+            if (file.isDirectory()) continue;
+
             final ApkLite info;
             try {
-                info = PackageParser.parseApkLite(file, PackageParser.PARSE_GET_SIGNATURES);
+                info = PackageParser.parseApkLite(file, PackageParser.PARSE_COLLECT_CERTIFICATES);
             } catch (PackageParserException e) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Failed to parse " + file + ": " + e);
@@ -550,10 +562,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        // TODO: shift package signature verification to installer; we're
-        // currently relying on PMS to do this.
-        // TODO: teach about compatible upgrade keysets.
-
         if (params.mode == SessionParams.MODE_FULL_INSTALL) {
             // Full installs must include a base package
             if (!seenSplits.contains(null)) {
@@ -577,7 +585,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             final ApkLite info;
             try {
                 info = PackageParser.parseApkLite(new File(app.getBaseCodePath()),
-                        PackageParser.PARSE_GET_SIGNATURES);
+                        PackageParser.PARSE_COLLECT_CERTIFICATES);
             } catch (PackageParserException e) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Failed to parse existing base " + app.getBaseCodePath() + ": " + e);
