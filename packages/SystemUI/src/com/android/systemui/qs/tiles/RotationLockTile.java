@@ -74,6 +74,38 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
             state.label = mContext.getString(R.string.quick_settings_rotation_unlocked_label);
             state.icon = res.getDrawable(R.drawable.ic_qs_rotation_unlocked);
         }
+        state.contentDescription = getAccessibilityString(
+                R.string.accessibility_rotation_lock_on_portrait,
+                R.string.accessibility_rotation_lock_on_landscape,
+                R.string.accessibility_rotation_lock_off);
+    }
+
+    /**
+     * Get the correct accessibility string based on the state
+     *
+     * @param idWhenPortrait The id which should be used when locked in portrait.
+     * @param idWhenLandscape The id which should be used when locked in landscape.
+     * @param idWhenOff The id which should be used when the rotation lock is off.
+     * @return
+     */
+    private String getAccessibilityString(int idWhenPortrait, int idWhenLandscape, int idWhenOff) {
+        int stringID;
+        if (mState.value) {
+            final boolean portrait = mContext.getResources().getConfiguration().orientation
+                    != Configuration.ORIENTATION_LANDSCAPE;
+            stringID = portrait ? idWhenPortrait: idWhenLandscape;
+        } else {
+            stringID = idWhenOff;
+        }
+        return mContext.getString(stringID);
+    }
+
+    @Override
+    protected String composeChangeAnnouncement() {
+        return getAccessibilityString(
+                R.string.accessibility_rotation_lock_on_portrait_changed,
+                R.string.accessibility_rotation_lock_on_landscape_changed,
+                R.string.accessibility_rotation_lock_off_changed);
     }
 
     private final RotationLockControllerCallback mCallback = new RotationLockControllerCallback() {
