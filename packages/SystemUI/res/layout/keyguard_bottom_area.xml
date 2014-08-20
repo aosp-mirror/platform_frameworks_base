@@ -31,7 +31,7 @@
         android:layout_gravity="bottom|center_horizontal"
         android:textStyle="italic"
         android:textColor="#ffffff"
-        android:textAppearance="?android:attr/textAppearanceSmall"/>
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <FrameLayout
         android:id="@+id/preview_container"
@@ -66,6 +66,7 @@
         android:layout_gravity="bottom|center_horizontal"
         android:src="@drawable/ic_lock_24dp"
         android:scaleType="center"
-        android:tint="#ffffffff" />
+        android:tint="#ffffffff"
+        android:contentDescription="@string/accessibility_unlock_button" />
 
 </com.android.systemui.statusbar.phone.KeyguardBottomAreaView>

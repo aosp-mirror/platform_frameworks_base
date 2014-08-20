@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.phone.PhoneManager;
@@ -36,7 +37,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -44,17 +45,23 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.KeyguardIndicationController;
-import com.android.systemui.statusbar.policy.FlashlightController;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
+import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.policy.AccessibilityController;
+import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.PreviewInflater;
+
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
+import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
 /**
  * Implementation for the bottom area of the Keyguard, including camera/phone affordance and status
  * text.
  */
 public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickListener,
-        UnlockMethodCache.OnUnlockMethodChangedListener {
+        UnlockMethodCache.OnUnlockMethodChangedListener,
+        AccessibilityController.AccessibilityStateChangedCallback, View.OnLongClickListener {
 
     final static String TAG = "PhoneStatusBar/KeyguardBottomAreaView";
 
@@ -80,6 +87,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private FlashlightController mFlashlightController;
     private PreviewInflater mPreviewInflater;
     private KeyguardIndicationController mIndicationController;
+    private AccessibilityController mAccessibilityController;
+    private PhoneStatusBar mPhoneStatusBar;
 
     private final TrustDrawable mTrustDrawable;
 
@@ -101,6 +110,40 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mTrustDrawable = new TrustDrawable(mContext);
     }
 
+    private AccessibilityDelegate mAccessibilityDelegate = new AccessibilityDelegate() {
+        @Override
+        public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfo(host, info);
+            String label = null;
+            if (host == mLockIcon) {
+                label = getResources().getString(R.string.unlock_label);
+            } else if (host == mCameraImageView) {
+                label = getResources().getString(R.string.camera_label);
+            } else if (host == mPhoneImageView) {
+                label = getResources().getString(R.string.phone_label);
+            }
+            info.addAction(new AccessibilityAction(ACTION_CLICK, label));
+        }
+
+        @Override
+        public boolean performAccessibilityAction(View host, int action, Bundle args) {
+            if (action == ACTION_CLICK) {
+                if (host == mLockIcon) {
+                    mPhoneStatusBar.animateCollapsePanels(
+                            CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+                    return true;
+                } else if (host == mCameraImageView) {
+                    launchCamera();
+                    return true;
+                } else if (host == mPhoneImageView) {
+                    launchPhone();
+                    return true;
+                }
+            }
+            return super.performAccessibilityAction(host, action, args);
+        }
+    };
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -111,7 +154,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLockIcon = (KeyguardAffordanceView) findViewById(R.id.lock_icon);
         mIndicationText = (TextView) findViewById(R.id.keyguard_indication_text);
         watchForCameraPolicyChanges();
-        watchForAccessibilityChanges();
         updateCameraVisibility();
         updatePhoneVisibility();
         mUnlockMethodCache = UnlockMethodCache.getInstance(getContext());
@@ -123,6 +165,16 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         inflatePreviews();
         mLockIcon.setOnClickListener(this);
         mLockIcon.setBackground(mTrustDrawable);
+        mLockIcon.setOnLongClickListener(this);
+        mCameraImageView.setOnClickListener(this);
+        mPhoneImageView.setOnClickListener(this);
+        initAccessibility();
+    }
+
+    private void initAccessibility() {
+        mLockIcon.setAccessibilityDelegate(mAccessibilityDelegate);
+        mPhoneImageView.setAccessibilityDelegate(mAccessibilityDelegate);
+        mCameraImageView.setAccessibilityDelegate(mAccessibilityDelegate);
     }
 
     @Override
@@ -148,6 +200,15 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     public void setFlashlightController(FlashlightController flashlightController) {
         mFlashlightController = flashlightController;
+    }
+
+    public void setAccessibilityController(AccessibilityController accessibilityController) {
+        mAccessibilityController = accessibilityController;
+        accessibilityController.addStateChangedCallback(this);
+    }
+
+    public void setPhoneStatusBar(PhoneStatusBar phoneStatusBar) {
+        mPhoneStatusBar = phoneStatusBar;
     }
 
     private Intent getCameraIntent() {
@@ -203,28 +264,24 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
     }
 
-    private void watchForAccessibilityChanges() {
-        final AccessibilityManager am =
-                (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
-
-        // Set the initial state
-        enableAccessibility(am.isTouchExplorationEnabled());
-
-        // Watch for changes
-        am.addTouchExplorationStateChangeListener(
-                new AccessibilityManager.TouchExplorationStateChangeListener() {
-            @Override
-            public void onTouchExplorationStateChanged(boolean enabled) {
-                enableAccessibility(enabled);
-            }
-        });
+    @Override
+    public void onStateChanged(boolean accessibilityEnabled, boolean touchExplorationEnabled) {
+        mCameraImageView.setClickable(touchExplorationEnabled);
+        mPhoneImageView.setClickable(touchExplorationEnabled);
+        mCameraImageView.setFocusable(accessibilityEnabled);
+        mPhoneImageView.setFocusable(accessibilityEnabled);
+        updateLockIconClickability();
     }
 
-    private void enableAccessibility(boolean touchExplorationEnabled) {
-        mCameraImageView.setOnClickListener(touchExplorationEnabled ? this : null);
-        mCameraImageView.setClickable(touchExplorationEnabled);
-        mPhoneImageView.setOnClickListener(touchExplorationEnabled ? this : null);
-        mPhoneImageView.setClickable(touchExplorationEnabled);
+    private void updateLockIconClickability() {
+        if (mAccessibilityController == null) {
+            return;
+        }
+        mLockIcon.setClickable(mUnlockMethodCache.isTrustManaged()
+                || mAccessibilityController.isTouchExplorationEnabled());
+        mLockIcon.setLongClickable(mAccessibilityController.isTouchExplorationEnabled()
+                && mUnlockMethodCache.isTrustManaged());
+        mLockIcon.setFocusable(mAccessibilityController.isAccessibilityEnabled());
     }
 
     @Override
@@ -234,10 +291,25 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         } else if (v == mPhoneImageView) {
             launchPhone();
         } if (v == mLockIcon) {
-            mIndicationController.showTransientIndication(
-                    R.string.keyguard_indication_trust_disabled);
-            mLockPatternUtils.requireCredentialEntry(mLockPatternUtils.getCurrentUser());
+            if (!mAccessibilityController.isAccessibilityEnabled()) {
+                handleTrustCircleClick();
+            } else {
+                mPhoneStatusBar.animateCollapsePanels(
+                        CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+            }
         }
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        handleTrustCircleClick();
+        return true;
+    }
+
+    private void handleTrustCircleClick() {
+        mIndicationController.showTransientIndication(
+                R.string.keyguard_indication_trust_disabled);
+        mLockPatternUtils.requireCredentialEntry(mLockPatternUtils.getCurrentUser());
     }
 
     public void launchCamera() {
@@ -304,7 +376,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLockIcon.setImageResource(iconRes);
         boolean trustManaged = mUnlockMethodCache.isTrustManaged();
         mTrustDrawable.setTrustManaged(trustManaged);
-        mLockIcon.setClickable(trustManaged);
+
+        // TODO: Update content description depending on state
+        updateLockIconClickability();
     }
 
 
