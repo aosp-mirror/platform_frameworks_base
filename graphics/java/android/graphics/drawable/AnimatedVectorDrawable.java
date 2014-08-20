@@ -17,11 +17,15 @@ package android.graphics.drawable;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.ValueAnimator;
+import android.annotation.NonNull;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Outline;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -129,7 +133,6 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
 
     private final AnimatedVectorDrawableState mAnimatedVectorState;
 
-
     public AnimatedVectorDrawable() {
         mAnimatedVectorState = new AnimatedVectorDrawableState(
                 new AnimatedVectorDrawableState(null));
@@ -163,6 +166,16 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     }
 
     @Override
+    protected boolean onStateChange(int[] state) {
+        return mAnimatedVectorState.mVectorDrawable.setState(state);
+    }
+
+    @Override
+    protected boolean onLevelChange(int level) {
+        return mAnimatedVectorState.mVectorDrawable.setLevel(level);
+    }
+
+    @Override
     public int getAlpha() {
         return mAnimatedVectorState.mVectorDrawable.getAlpha();
     }
@@ -178,6 +191,43 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     }
 
     @Override
+    public void setTintList(ColorStateList tint) {
+        mAnimatedVectorState.mVectorDrawable.setTintList(tint);
+    }
+
+    @Override
+    public void setHotspot(float x, float y) {
+        mAnimatedVectorState.mVectorDrawable.setHotspot(x, y);
+    }
+
+    @Override
+    public void setHotspotBounds(int left, int top, int right, int bottom) {
+        mAnimatedVectorState.mVectorDrawable.setHotspotBounds(left, top, right, bottom);
+    }
+
+    @Override
+    public void setTintMode(PorterDuff.Mode tintMode) {
+        mAnimatedVectorState.mVectorDrawable.setTintMode(tintMode);
+    }
+
+    @Override
+    public boolean setVisible(boolean visible, boolean restart) {
+        mAnimatedVectorState.mVectorDrawable.setVisible(visible, restart);
+        return super.setVisible(visible, restart);
+    }
+
+    /** {@hide} */
+    @Override
+    public void setLayoutDirection(int layoutDirection) {
+        mAnimatedVectorState.mVectorDrawable.setLayoutDirection(layoutDirection);
+    }
+
+    @Override
+    public boolean isStateful() {
+        return mAnimatedVectorState.mVectorDrawable.isStateful();
+    }
+
+    @Override
     public int getOpacity() {
         return mAnimatedVectorState.mVectorDrawable.getOpacity();
     }
@@ -190,6 +240,11 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     @Override
     public int getIntrinsicHeight() {
         return mAnimatedVectorState.mVectorDrawable.getIntrinsicHeight();
+    }
+
+    @Override
+    public void getOutline(@NonNull Outline outline) {
+        mAnimatedVectorState.mVectorDrawable.getOutline(outline);
     }
 
     @Override
