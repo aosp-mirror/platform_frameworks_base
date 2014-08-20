@@ -209,7 +209,9 @@ public class GpsNetInitiatedHandler {
 
         // if not to popup dialog immediately, pending intent will open the dialog
         Intent intent = !mPopupImmediately ? getDlgIntent(notif) : new Intent();
-        PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, intent, 0);                
+        PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+        mNiNotification.color = mContext.getResources().getColor(
+                com.android.internal.R.color.system_notification_accent_color);
         mNiNotification.setLatestEventInfo(mContext, title, message, pi);
 
         notificationManager.notifyAsUser(null, notif.notificationId, mNiNotification,

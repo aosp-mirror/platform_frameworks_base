@@ -1607,6 +1607,7 @@ public class Notification implements Parcelable
         builder.setPriority(this.priority);
         builder.setTicker(this.tickerText);
         builder.setNumber(this.number);
+        builder.setColor(this.color);
         builder.mFlags = this.flags;
         builder.setSound(this.sound, this.audioStreamType);
         builder.setDefaults(this.defaults);

@@ -599,6 +599,8 @@ final class UiModeManagerService extends SystemService {
                 n.defaults = Notification.DEFAULT_LIGHTS;
                 n.flags = Notification.FLAG_ONGOING_EVENT;
                 n.when = 0;
+                n.color = context.getResources().getColor(
+                        com.android.internal.R.color.system_notification_accent_color);
                 n.setLatestEventInfo(
                         context,
                         context.getString(R.string.car_mode_disable_notification_title),

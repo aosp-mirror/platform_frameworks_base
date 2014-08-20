@@ -1984,5 +1984,7 @@
   <java-symbol type="layout" name="select_dialog_singlechoice_material" />
   <java-symbol type="layout" name="select_dialog_multichoice_material" />
   <java-symbol type="array" name="no_ems_support_sim_operators" />
+  <java-symbol type="color" name="battery_saver_mode_color" />
+  <java-symbol type="color" name="system_notification_accent_color" />
   <java-symbol type="dimen" name="text_handle_min_size" />
 </resources>
