@@ -66,6 +66,12 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public void reset() {
+        if (mContractedChild != null) {
+            mContractedChild.animate().cancel();
+        }
+        if (mExpandedChild != null) {
+            mExpandedChild.animate().cancel();
+        }
         removeAllViews();
         mContractedChild = null;
         mExpandedChild = null;
@@ -76,6 +82,7 @@ public class NotificationContentView extends FrameLayout {
 
     public void setContractedChild(View child) {
         if (mContractedChild != null) {
+            mContractedChild.animate().cancel();
             removeView(mContractedChild);
         }
         sanitizeContractedLayoutParams(child);
@@ -86,6 +93,7 @@ public class NotificationContentView extends FrameLayout {
 
     public void setExpandedChild(View child) {
         if (mExpandedChild != null) {
+            mExpandedChild.animate().cancel();
             removeView(mExpandedChild);
         }
         addView(child);
