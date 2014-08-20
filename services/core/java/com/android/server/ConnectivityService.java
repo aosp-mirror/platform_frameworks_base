@@ -3490,10 +3490,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mIsProvisioningNetwork.set(false);
             // Check for  apps that can handle provisioning first
             Intent provisioningIntent = new Intent(TelephonyIntents.ACTION_CARRIER_SETUP);
-            provisioningIntent.addCategory(TelephonyIntents.CATEGORY_MCCMNC_PREFIX
-                    + mTelephonyManager.getSimOperator());
-            if (mContext.getPackageManager().resolveActivity(provisioningIntent, 0 /* flags */)
-                    != null) {
+            List<String> carrierPackages =
+                    mTelephonyManager.getCarrierPackageNamesForBroadcastIntent(provisioningIntent);
+            if (carrierPackages != null && !carrierPackages.isEmpty()) {
+                if (carrierPackages.size() != 1) {
+                    if (DBG) log("Multiple matching carrier apps found, launching the first.");
+                }
+                provisioningIntent.setPackage(carrierPackages.get(0));
                 provisioningIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
                         Intent.FLAG_ACTIVITY_NEW_TASK);
                 mContext.startActivity(provisioningIntent);
