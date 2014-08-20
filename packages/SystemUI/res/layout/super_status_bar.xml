@@ -38,7 +38,9 @@
                 android:layout_height="match_parent"
                 android:elevation="2dp"
                 android:background="@drawable/brightness_mirror_background">
-            <include layout="@layout/quick_settings_brightness_dialog" />
+            <include layout="@layout/quick_settings_brightness_dialog"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
         </FrameLayout>
     </FrameLayout>
 
