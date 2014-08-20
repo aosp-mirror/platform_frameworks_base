@@ -244,6 +244,29 @@ void CanvasContext::invokeFunctor(RenderThread& thread, Functor* functor) {
     thread.renderState().invokeFunctor(functor, mode, NULL);
 }
 
+void CanvasContext::buildLayer(RenderNode* node) {
+    ATRACE_CALL();
+    if (!mEglManager.hasEglContext() || !mCanvas) {
+        return;
+    }
+    requireGlContext();
+    // buildLayer() will leave the tree in an unknown state, so we must stop drawing
+    stopDrawing();
+
+    TreeInfo info(TreeInfo::MODE_FULL, mRenderThread.renderState());
+    info.frameTimeMs = mRenderThread.timeLord().frameTimeMs();
+    info.damageAccumulator = &mDamageAccumulator;
+    info.renderer = mCanvas;
+    node->prepareTree(info);
+    SkRect ignore;
+    mDamageAccumulator.finish(&ignore);
+    // Tickle the GENERIC property on node to mark it as dirty for damaging
+    // purposes when the frame is actually drawn
+    node->setPropertyFieldsDirty(RenderNode::GENERIC);
+
+    mCanvas->flushLayerUpdates();
+}
+
 bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
     requireGlContext();
     layer->apply();

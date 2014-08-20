@@ -13640,11 +13640,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         switch (mLayerType) {
             case LAYER_TYPE_HARDWARE:
-                // The only part of a hardware layer we can build in response to
-                // this call is to ensure the display list is up to date.
-                // The actual rendering of the display list into the layer must
-                // be done at playback time
                 updateDisplayListIfDirty();
+                if (attachInfo.mHardwareRenderer != null && mRenderNode.isValid()) {
+                    attachInfo.mHardwareRenderer.buildLayer(mRenderNode);
+                }
                 break;
             case LAYER_TYPE_SOFTWARE:
                 buildDrawingCache(true);
