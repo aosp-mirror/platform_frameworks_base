@@ -45,8 +45,7 @@
         android:allowClearUserData="true"
         android:label="@string/app_label"
         android:allowBackup= "false"
-        android:supportsRtl="true"
-        android:icon="@drawable/ic_print">
+        android:supportsRtl="true">
 
         <service
             android:name=".model.PrintSpoolerService"
