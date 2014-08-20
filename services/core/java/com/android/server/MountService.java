@@ -33,7 +33,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.hardware.usb.UsbManager;
-import android.app.admin.DevicePolicyManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
@@ -1761,6 +1760,21 @@ class MountService extends IMountService.Stub
         return rc;
     }
 
+    @Override
+    public int resizeSecureContainer(String id, int sizeMb, String key) {
+        validatePermission(android.Manifest.permission.ASEC_CREATE);
+        waitForReady();
+        warnOnNotMounted();
+
+        int rc = StorageResultCode.OperationSucceeded;
+        try {
+            mConnector.execute("asec", "resize", id, sizeMb, new SensitiveArg(key));
+        } catch (NativeDaemonConnectorException e) {
+            rc = StorageResultCode.OperationFailedInternalError;
+        }
+        return rc;
+    }
+
     public int finalizeSecureContainer(String id) {
         validatePermission(android.Manifest.permission.ASEC_CREATE);
         warnOnNotMounted();
@@ -1835,7 +1849,7 @@ class MountService extends IMountService.Stub
         return rc;
     }
 
-    public int mountSecureContainer(String id, String key, int ownerUid) {
+    public int mountSecureContainer(String id, String key, int ownerUid, boolean readOnly) {
         validatePermission(android.Manifest.permission.ASEC_MOUNT_UNMOUNT);
         waitForReady();
         warnOnNotMounted();
@@ -1848,7 +1862,8 @@ class MountService extends IMountService.Stub
 
         int rc = StorageResultCode.OperationSucceeded;
         try {
-            mConnector.execute("asec", "mount", id, new SensitiveArg(key), ownerUid);
+            mConnector.execute("asec", "mount", id, new SensitiveArg(key), ownerUid,
+                    readOnly ? "ro" : "rw");
         } catch (NativeDaemonConnectorException e) {
             int code = e.getCode();
             if (code != VoldResponseCode.OpFailedStorageBusy) {
