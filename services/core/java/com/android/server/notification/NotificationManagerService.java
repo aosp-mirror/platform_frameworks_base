@@ -17,6 +17,8 @@
 package com.android.server.notification;
 
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
+import static android.service.notification.NotificationListenerService.TRIM_FULL;
+import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -1290,24 +1292,23 @@ public class NotificationManagerService extends SystemService {
          */
         @Override
         public ParceledListSlice<StatusBarNotification> getActiveNotificationsFromListener(
-                INotificationListener token, String[] keys) {
+                INotificationListener token, String[] keys, int trim) {
             synchronized (mNotificationList) {
                 final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                final ArrayList<StatusBarNotification> list
-                        = new ArrayList<StatusBarNotification>();
                 final boolean getKeys = keys != null;
                 final int N = getKeys ? keys.length : mNotificationList.size();
-                list.ensureCapacity(N);
+                final ArrayList<StatusBarNotification> list
+                        = new ArrayList<StatusBarNotification>(N);
                 for (int i=0; i<N; i++) {
                     final NotificationRecord r = getKeys
                             ? mNotificationsByKey.get(keys[i])
                             : mNotificationList.get(i);
-                    if (r != null) {
-                        StatusBarNotification sbn = r.sbn;
-                        if (isVisibleToListener(sbn, info)) {
-                            list.add(sbn);
-                        }
-                    }
+                    if (r == null) continue;
+                    StatusBarNotification sbn = r.sbn;
+                    if (!isVisibleToListener(sbn, info)) continue;
+                    StatusBarNotification sbnToSend =
+                            (trim == TRIM_FULL) ? sbn : sbn.cloneLight();
+                    list.add(sbnToSend);
                 }
                 return new ParceledListSlice<StatusBarNotification>(list);
             }
@@ -1360,6 +1361,16 @@ public class NotificationManagerService extends SystemService {
                 throws RemoteException {
             synchronized (mNotificationLight) {
                 return mInterruptionFilter;
+            }
+        }
+
+        @Override
+        public void setOnNotificationPostedTrimFromListener(INotificationListener token, int trim)
+                throws RemoteException {
+            synchronized (mNotificationList) {
+                final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                if (info == null) return;
+                mListeners.setOnNotificationPostedTrimLocked(info, trim);
             }
         }
 
@@ -2611,6 +2622,8 @@ public class NotificationManagerService extends SystemService {
 
     public class NotificationListeners extends ManagedServices {
 
+        private final ArraySet<ManagedServiceInfo> mLightTrimListeners = new ArraySet<>();
+
         public NotificationListeners() {
             super(getContext(), mHandler, mNotificationList, mUserProfiles);
         }
@@ -2651,6 +2664,20 @@ public class NotificationManagerService extends SystemService {
             if (mListenersDisablingEffects.remove(removed)) {
                 updateListenerHintsLocked();
             }
+            mLightTrimListeners.remove(removed);
+        }
+
+        public void setOnNotificationPostedTrimLocked(ManagedServiceInfo info, int trim) {
+            if (trim == TRIM_LIGHT) {
+                mLightTrimListeners.add(info);
+            } else {
+                mLightTrimListeners.remove(info);
+            }
+        }
+
+        public int getOnNotificationPostedTrim(ManagedServiceInfo info) {
+            return mLightTrimListeners.contains(info) ? TRIM_LIGHT : TRIM_FULL;
+
         }
 
         /**
@@ -2661,8 +2688,10 @@ public class NotificationManagerService extends SystemService {
          * but isn't anymore.
          */
         public void notifyPostedLocked(StatusBarNotification sbn, StatusBarNotification oldSbn) {
-            // make a copy in case changes are made to the underlying Notification object
-            final StatusBarNotification sbnClone = sbn.clone();
+            // Lazily initialized snapshots of the notification.
+            StatusBarNotification sbnClone = null;
+            StatusBarNotification sbnCloneLight = null;
+
             for (final ManagedServiceInfo info : mServices) {
                 boolean sbnVisible = isVisibleToListener(sbn, info);
                 boolean oldSbnVisible = oldSbn != null ? isVisibleToListener(oldSbn, info) : false;
@@ -2684,10 +2713,20 @@ public class NotificationManagerService extends SystemService {
                     continue;
                 }
 
+                final int trim = mListeners.getOnNotificationPostedTrim(info);
+
+                if (trim == TRIM_LIGHT && sbnCloneLight == null) {
+                    sbnCloneLight = sbn.cloneLight();
+                } else if (trim == TRIM_FULL && sbnClone == null) {
+                    sbnClone = sbn.clone();
+                }
+                final StatusBarNotification sbnToPost =
+                        (trim == TRIM_FULL) ? sbnClone : sbnCloneLight;
+
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        notifyPosted(info, sbnClone, update);
+                        notifyPosted(info, sbnToPost, update);
                     }
                 });
             }
