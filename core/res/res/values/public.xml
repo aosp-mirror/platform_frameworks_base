@@ -2272,6 +2272,7 @@
   <public type="attr" name="inset" />
   <public type="attr" name="letterSpacing" />
   <public type="attr" name="fontFeatureSettings" />
+  <public type="attr" name="outlineProvider" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
