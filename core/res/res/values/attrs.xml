@@ -2513,6 +2513,19 @@
                  result to valid color values. Saturate(S + D) -->
             <enum name="add" value="16" />
         </attr>
+
+        <!-- ViewOutlineProvider used to determine the View's Outline. -->
+        <attr name="outlineProvider">
+            <!-- Default, background drawable-driven outline. -->
+            <enum name="background" value="0" />
+            <!-- No outline provider. -->
+            <enum name="none" value="1" />
+            <!-- Generates an opaque outline for the bounds of the view. -->
+            <enum name="bounds" value="2" />
+            <!-- Generates an opaque outline for the padded bounds of the view. -->
+            <enum name="paddedBounds" value="3" />
+        </attr>
+
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->

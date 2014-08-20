@@ -4047,6 +4047,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mBackgroundTintMode = Drawable.parseTintMode(a.getInt(
                             R.styleable.View_backgroundTintMode, -1), mBackgroundTintMode);
                     break;
+                case R.styleable.View_outlineProvider:
+                    setOutlineProviderFromAttribute(a.getInt(R.styleable.View_outlineProvider,
+                            PROVIDER_BACKGROUND));
+                    break;
             }
         }
 
@@ -10824,14 +10828,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Deprecated, pending removal
-     *
-     * @hide
-     */
-    @Deprecated
-    public void setOutline(@Nullable Outline outline) {}
-
-    /**
      * Returns whether the Outline should be used to clip the contents of the View.
      * <p>
      * Note that this flag will only be respected if the View's Outline returns true from
@@ -10857,6 +10853,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         damageInParent();
         if (getClipToOutline() != clipToOutline) {
             mRenderNode.setClipToOutline(clipToOutline);
+        }
+    }
+
+    // correspond to the enum values of View_outlineProvider
+    private static final int PROVIDER_BACKGROUND = 0;
+    private static final int PROVIDER_NONE = 1;
+    private static final int PROVIDER_BOUNDS = 2;
+    private static final int PROVIDER_PADDED_BOUNDS = 3;
+    private void setOutlineProviderFromAttribute(int providerInt) {
+        switch (providerInt) {
+            case PROVIDER_BACKGROUND:
+                setOutlineProvider(ViewOutlineProvider.BACKGROUND);
+                break;
+            case PROVIDER_NONE:
+                setOutlineProvider(null);
+                break;
+            case PROVIDER_BOUNDS:
+                setOutlineProvider(ViewOutlineProvider.BOUNDS);
+                break;
+            case PROVIDER_PADDED_BOUNDS:
+                setOutlineProvider(ViewOutlineProvider.PADDED_BOUNDS);
+                break;
         }
     }
 
