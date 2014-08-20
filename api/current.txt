@@ -17072,6 +17072,7 @@ package android.media.tv {
     method public final java.lang.String getId();
     method public final java.lang.String getLanguage();
     method public final int getType();
+    method public final float getVideoFrameRate();
     method public final int getVideoHeight();
     method public final int getVideoWidth();
     method public void writeToParcel(android.os.Parcel, int);
@@ -17088,6 +17089,7 @@ package android.media.tv {
     method public final android.media.tv.TvTrackInfo.Builder setAudioSampleRate(int);
     method public final android.media.tv.TvTrackInfo.Builder setExtra(android.os.Bundle);
     method public final android.media.tv.TvTrackInfo.Builder setLanguage(java.lang.String);
+    method public final android.media.tv.TvTrackInfo.Builder setVideoFrameRate(float);
     method public final android.media.tv.TvTrackInfo.Builder setVideoHeight(int);
     method public final android.media.tv.TvTrackInfo.Builder setVideoWidth(int);
   }
