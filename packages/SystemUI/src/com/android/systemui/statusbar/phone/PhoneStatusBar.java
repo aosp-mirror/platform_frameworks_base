@@ -361,9 +361,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
             if (userSetup != mUserSetup) {
                 mUserSetup = userSetup;
-                if (mNotificationPanel != null) {
-                    mNotificationPanel.setQsExpansionEnabled(isDeviceProvisioned() && userSetup);
-                }
                 if (!mUserSetup && mStatusBarView != null)
                     animateCollapseQuickSettings();
             }
@@ -1458,7 +1455,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateClearAll();
         updateEmptyShadeView();
 
-        mNotificationPanel.setQsExpansionEnabled(isDeviceProvisioned() && mUserSetup);
+        mNotificationPanel.setQsExpansionEnabled(isDeviceProvisioned());
         mShadeUpdates.check();
     }
 
