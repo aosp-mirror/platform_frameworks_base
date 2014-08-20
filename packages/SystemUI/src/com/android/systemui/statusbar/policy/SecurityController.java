@@ -23,8 +23,7 @@ public interface SecurityController {
     String getVpnApp();
     boolean isLegacyVpn();
     String getLegacyVpnName();
-    void openVpnApp();
-    void disconnectFromLegacyVpn();
+    void disconnectFromVpn();
 
     void addCallback(VpnCallback callback);
     void removeCallback(VpnCallback callback);

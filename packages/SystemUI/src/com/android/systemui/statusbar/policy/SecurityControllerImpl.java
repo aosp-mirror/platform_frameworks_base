@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.policy;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
@@ -109,18 +108,17 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     @Override
-    public void openVpnApp() {
-        Intent i = mContext.getPackageManager().getLaunchIntentForPackage(mVpnConfig.user);
-        if (i != null) {
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivity(i);
-        }
-    }
-
-    @Override
-    public void disconnectFromLegacyVpn() {
+    public void disconnectFromVpn() {
         try {
-            mConnectivityService.prepareVpn(VpnConfig.LEGACY_VPN, VpnConfig.LEGACY_VPN);
+            if (isLegacyVpn()) {
+                mConnectivityService.prepareVpn(VpnConfig.LEGACY_VPN, VpnConfig.LEGACY_VPN);
+            } else {
+                // Prevent this app from initiating VPN connections in the future without user
+                // intervention.
+                mConnectivityService.setVpnPackageAuthorization(false);
+
+                mConnectivityService.prepareVpn(mVpnConfig.user, VpnConfig.LEGACY_VPN);
+            }
         } catch (Exception e) {
             Log.e(TAG, "Unable to disconnect from VPN", e);
         }
@@ -154,9 +152,7 @@ public class SecurityControllerImpl implements SecurityController {
             mIsVpnEnabled = mVpnConfig != null;
 
             if (mVpnConfig != null && !mVpnConfig.legacy) {
-                ApplicationInfo info =
-                        mContext.getPackageManager().getApplicationInfo(mVpnConfig.user, 0);
-                mVpnName = mContext.getPackageManager().getApplicationLabel(info).toString();
+                mVpnName = VpnConfig.getVpnLabel(mContext, mVpnConfig.user).toString();
             }
         } catch (RemoteException | NameNotFoundException e) {
             Log.w(TAG, "Unable to get current VPN", e);
