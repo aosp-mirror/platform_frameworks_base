@@ -51,6 +51,10 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     private QSTileHost mHost;
     private Handler mHandler;
 
+    private boolean mIsVisible;
+    private boolean mIsIconVisible;
+    private int mFooterTextId;
+
     public QSFooter(QSPanel qsPanel, Context context) {
         mRootView = LayoutInflater.from(context)
                 .inflate(R.layout.quick_settings_footer, qsPanel, false);
@@ -99,16 +103,17 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
 
     private void handleRefreshState() {
         if (mSecurityController.hasDeviceOwner()) {
-            mFooterText.setText(R.string.device_owned_footer);
-            mRootView.setVisibility(View.VISIBLE);
-            mFooterIcon.setVisibility(View.INVISIBLE);
+            mFooterTextId = R.string.device_owned_footer;
+            mIsVisible = true;
+            mIsIconVisible = false;
         } else if (mSecurityController.isVpnEnabled()) {
-            mFooterText.setText(R.string.vpn_footer);
-            mRootView.setVisibility(View.VISIBLE);
-            mFooterIcon.setVisibility(View.VISIBLE);
+            mFooterTextId = R.string.vpn_footer;
+            mIsVisible = true;
+            mIsIconVisible = true;
         } else {
-            mRootView.setVisibility(View.GONE);
+            mIsVisible = false;
         }
+        mRootView.post(mUpdateDisplayState);
     }
 
     @Override
@@ -180,6 +185,17 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         }
         return R.string.monitoring_title;
     }
+
+    private final Runnable mUpdateDisplayState = new Runnable() {
+        @Override
+        public void run() {
+            if (mFooterTextId != 0) {
+                mFooterText.setText(mFooterTextId);
+            }
+            mRootView.setVisibility(mIsVisible ? View.VISIBLE : View.GONE);
+            mFooterIcon.setVisibility(mIsIconVisible ? View.VISIBLE : View.INVISIBLE);
+        }
+    };
 
     private class Callback implements VpnCallback {
         @Override
