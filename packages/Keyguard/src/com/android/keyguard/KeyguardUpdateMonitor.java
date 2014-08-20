@@ -218,7 +218,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     handleFingerprintProcessed(msg.arg1);
                     break;
                 case MSG_FACE_UNLOCK_STATE_CHANGED:
-                    handleFaceUnlockStateChanged(msg.arg1 != 0);
+                    handleFaceUnlockStateChanged(msg.arg1 != 0, msg.arg2);
                     break;
             }
         }
@@ -227,6 +227,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private SparseBooleanArray mUserHasTrust = new SparseBooleanArray();
     private SparseBooleanArray mUserTrustIsManaged = new SparseBooleanArray();
     private SparseBooleanArray mUserFingerprintRecognized = new SparseBooleanArray();
+    private SparseBooleanArray mUserFaceUnlockRunning = new SparseBooleanArray();
 
     @Override
     public void onTrustChanged(boolean enabled, int userId, boolean initiatedByUser) {
@@ -297,13 +298,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    private void handleFaceUnlockStateChanged(boolean running) {
+    private void handleFaceUnlockStateChanged(boolean running, int userId) {
+        mUserFaceUnlockRunning.put(userId, running);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
-                cb.onFaceUnlockStateChanged(running);
+                cb.onFaceUnlockStateChanged(running, userId);
             }
         }
+    }
+
+    public boolean isFaceUnlockRunning(int userId) {
+        return mUserFaceUnlockRunning.get(userId);
     }
 
     private boolean isTrustDisabled(int userId) {
@@ -398,9 +404,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
                 dispatchBootCompleted();
             } else if (ACTION_FACE_UNLOCK_STARTED.equals(action)) {
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_FACE_UNLOCK_STATE_CHANGED, 1, 0));
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_FACE_UNLOCK_STATE_CHANGED, 1,
+                        getSendingUserId()));
             } else if (ACTION_FACE_UNLOCK_STOPPED.equals(action)) {
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_FACE_UNLOCK_STATE_CHANGED, 0, 0));
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_FACE_UNLOCK_STATE_CHANGED, 0,
+                        getSendingUserId()));
             }
         }
     };
