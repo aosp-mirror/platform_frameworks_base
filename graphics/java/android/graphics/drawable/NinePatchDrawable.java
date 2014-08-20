@@ -446,18 +446,7 @@ public class NinePatchDrawable extends Drawable {
                         ": <nine-patch> requires a valid 9-patch source image");
             }
 
-            // Hey, now might be a good time to actually load optical bounds!
             bitmap.getOpticalInsets(opticalInsets);
-
-            // Sanity check for valid padding when we have optical insets.
-            if (padding.left < opticalInsets.left) {
-                padding.left = opticalInsets.left;
-                padding.right = opticalInsets.right;
-            }
-            if (padding.top < opticalInsets.top) {
-                padding.top = opticalInsets.top;
-                padding.bottom = opticalInsets.bottom;
-            }
 
             state.mNinePatch = new NinePatch(bitmap, bitmap.getNinePatchChunk());
             state.mPadding = padding;
@@ -626,21 +615,6 @@ public class NinePatchDrawable extends Drawable {
             mOpticalInsets = Insets.of(opticalInsets);
             mDither = dither;
             mAutoMirrored = autoMirror;
-
-            // Sanity check for valid padding when we have optical insets.
-            if (opticalInsets != null && !opticalInsets.isEmpty()) {
-                if (mPadding == null) {
-                    mPadding = new Rect();
-                }
-                if (mPadding.left < opticalInsets.left) {
-                    mPadding.left = opticalInsets.left;
-                    mPadding.right = opticalInsets.right;
-                }
-                if (mPadding.top < opticalInsets.top) {
-                    mPadding.top = opticalInsets.top;
-                    mPadding.bottom = opticalInsets.bottom;
-                }
-            }
         }
 
         // Copy constructor
