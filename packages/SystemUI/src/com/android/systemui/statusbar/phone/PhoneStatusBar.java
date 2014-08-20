@@ -2131,6 +2131,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // Expand the window to encompass the full screen in anticipation of the drag.
         // This is only possible to do atomically because the status bar is at the top of the screen!
         mStatusBarWindowManager.setStatusBarExpanded(true);
+        mStatusBarView.setFocusable(false);
 
         visibilityChanged(true);
         mWaitingForKeyguardExit = false;
@@ -2305,6 +2306,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         // Shrink the window to the size of the status bar only
         mStatusBarWindowManager.setStatusBarExpanded(false);
+        mStatusBarView.setFocusable(true);
 
         // Close any "App info" popups that might have snuck on-screen
         dismissPopups();
