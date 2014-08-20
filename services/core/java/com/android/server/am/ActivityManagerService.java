@@ -1472,6 +1472,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     notification.defaults = 0; // please be quiet
                     notification.sound = null;
                     notification.vibrate = null;
+                    notification.color = mContext.getResources().getColor(
+                            com.android.internal.R.color.system_notification_accent_color);
                     notification.setLatestEventInfo(context, text,
                             mContext.getText(R.string.heavy_weight_notification_detail),
                             PendingIntent.getActivityAsUser(mContext, 0, root.intent,

@@ -735,6 +735,8 @@ public class Vpn {
                         .setContentIntent(mStatusIntent)
                         .setDefaults(0)
                         .setOngoing(true)
+                        .setColor(mContext.getResources().getColor(
+                                com.android.internal.R.color.system_notification_accent_color))
                         .build();
                 nm.notifyAsUser(null, R.drawable.vpn_connected, notification, new UserHandle(user));
             }

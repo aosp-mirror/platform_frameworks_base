@@ -783,7 +783,9 @@ public final class PrintManagerService extends SystemService {
                     .setContentIntent(pendingIntent)
                     .setWhen(System.currentTimeMillis())
                     .setAutoCancel(true)
-                    .setShowWhen(true);
+                    .setShowWhen(true)
+                    .setColor(mContext.getResources().getColor(
+                            com.android.internal.R.color.system_notification_accent_color));
 
             NotificationManager notificationManager = (NotificationManager) mContext
                     .getSystemService(Context.NOTIFICATION_SERVICE);
