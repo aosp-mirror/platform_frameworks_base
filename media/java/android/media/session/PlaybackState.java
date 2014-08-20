@@ -217,7 +217,7 @@ public final class PlaybackState implements Parcelable {
 
     private final int mState;
     private final long mPosition;
-    private final long mBufferPosition;
+    private final long mBufferedPosition;
     private final float mSpeed;
     private final long mActions;
     private List<PlaybackState.CustomAction> mCustomActions;
@@ -226,14 +226,14 @@ public final class PlaybackState implements Parcelable {
     private final long mActiveItemId;
 
     private PlaybackState(int state, long position, long updateTime, float speed,
-            long bufferPosition, long transportControls,
+            long bufferedPosition, long transportControls,
             List<PlaybackState.CustomAction> customActions, long activeItemId,
             CharSequence error) {
         mState = state;
         mPosition = position;
         mSpeed = speed;
         mUpdateTime = updateTime;
-        mBufferPosition = bufferPosition;
+        mBufferedPosition = bufferedPosition;
         mActions = transportControls;
         mCustomActions = new ArrayList<>(customActions);
         mActiveItemId = activeItemId;
@@ -245,7 +245,7 @@ public final class PlaybackState implements Parcelable {
         mPosition = in.readLong();
         mSpeed = in.readFloat();
         mUpdateTime = in.readLong();
-        mBufferPosition = in.readLong();
+        mBufferedPosition = in.readLong();
         mActions = in.readLong();
         mCustomActions = in.createTypedArrayList(CustomAction.CREATOR);
         mActiveItemId = in.readLong();
@@ -258,7 +258,7 @@ public final class PlaybackState implements Parcelable {
         StringBuilder bob = new StringBuilder("PlaybackState {");
         bob.append("state=").append(mState);
         bob.append(", position=").append(mPosition);
-        bob.append(", buffered position=").append(mBufferPosition);
+        bob.append(", buffered position=").append(mBufferedPosition);
         bob.append(", speed=").append(mSpeed);
         bob.append(", updated=").append(mUpdateTime);
         bob.append(", actions=").append(mActions);
@@ -280,7 +280,7 @@ public final class PlaybackState implements Parcelable {
         dest.writeLong(mPosition);
         dest.writeFloat(mSpeed);
         dest.writeLong(mUpdateTime);
-        dest.writeLong(mBufferPosition);
+        dest.writeLong(mBufferedPosition);
         dest.writeLong(mActions);
         dest.writeTypedList(mCustomActions);
         dest.writeLong(mActiveItemId);
@@ -310,12 +310,12 @@ public final class PlaybackState implements Parcelable {
     }
 
     /**
-     * Get the current buffer position in ms. This is the farthest playback
+     * Get the current buffered position in ms. This is the farthest playback
      * point that can be reached from the current position using only buffered
      * content.
      */
-    public long getBufferPosition() {
-        return mBufferPosition;
+    public long getBufferedPosition() {
+        return mBufferedPosition;
     }
 
     /**
@@ -711,7 +711,7 @@ public final class PlaybackState implements Parcelable {
 
         private int mState;
         private long mPosition;
-        private long mBufferPosition;
+        private long mBufferedPosition;
         private float mSpeed;
         private long mActions;
         private CharSequence mErrorMessage;
@@ -736,7 +736,7 @@ public final class PlaybackState implements Parcelable {
             }
             mState = from.mState;
             mPosition = from.mPosition;
-            mBufferPosition = from.mBufferPosition;
+            mBufferedPosition = from.mBufferedPosition;
             mSpeed = from.mSpeed;
             mActions = from.mActions;
             if (from.mCustomActions != null) {
@@ -889,15 +889,16 @@ public final class PlaybackState implements Parcelable {
         }
 
         /**
-         * Set the current buffer position in ms. This is the farthest playback
-         * point that can be reached from the current position using only
-         * buffered content.
+         * Set the current buffered position in ms. This is the farthest
+         * playback point that can be reached from the current position using
+         * only buffered content.
          *
-         * @param bufferPosition The position in ms that playback is buffered to.
+         * @param bufferedPosition The position in ms that playback is buffered
+         *            to.
          * @return this
          */
-        public Builder setBufferPosition(long bufferPosition) {
-            mBufferPosition = bufferPosition;
+        public Builder setBufferedPosition(long bufferedPosition) {
+            mBufferedPosition = bufferedPosition;
             return this;
         }
 
@@ -931,7 +932,7 @@ public final class PlaybackState implements Parcelable {
          * @return A new state instance.
          */
         public PlaybackState build() {
-            return new PlaybackState(mState, mPosition, mUpdateTime, mSpeed, mBufferPosition,
+            return new PlaybackState(mState, mPosition, mUpdateTime, mSpeed, mBufferedPosition,
                     mActions, mCustomActions, mActiveItemId, mErrorMessage);
         }
     }
