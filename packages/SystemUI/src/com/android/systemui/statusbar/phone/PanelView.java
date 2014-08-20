@@ -58,7 +58,7 @@ public abstract class PanelView extends FrameLayout {
     private boolean mHasLayoutedSinceDown;
     private float mUpdateFlingVelocity;
     private boolean mUpdateFlingOnLayout;
-    private boolean mTouching;
+    private boolean mPeekTouching;
     private boolean mJustPeeked;
     private boolean mClosing;
     protected boolean mTracking;
@@ -233,7 +233,7 @@ public abstract class PanelView extends FrameLayout {
                 mPanelClosedOnDown = mExpandedHeight == 0.0f;
                 mHasLayoutedSinceDown = false;
                 mUpdateFlingOnLayout = false;
-                mTouching = true;
+                mPeekTouching = mPanelClosedOnDown;
                 if (mVelocityTracker == null) {
                     initVelocityTracker();
                 }
@@ -337,7 +337,7 @@ public abstract class PanelView extends FrameLayout {
                     mVelocityTracker.recycle();
                     mVelocityTracker = null;
                 }
-                mTouching = false;
+                mPeekTouching = false;
                 break;
         }
         return !waitForTouchSlop || mTracking;
@@ -399,7 +399,6 @@ public abstract class PanelView extends FrameLayout {
                 mPanelClosedOnDown = mExpandedHeight == 0.0f;
                 mHasLayoutedSinceDown = false;
                 mUpdateFlingOnLayout = false;
-                mTouching = true;
                 initVelocityTracker();
                 trackMovement(event);
                 break;
@@ -434,7 +433,6 @@ public abstract class PanelView extends FrameLayout {
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                mTouching = false;
                 break;
         }
         return false;
@@ -571,7 +569,7 @@ public abstract class PanelView extends FrameLayout {
                 && currentMaxPanelHeight != mExpandedHeight
                 && !mPeekPending
                 && mPeekAnimator == null
-                && !mTouching) {
+                && !mPeekTouching) {
             setExpandedHeight(currentMaxPanelHeight);
         }
     }

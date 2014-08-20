@@ -734,6 +734,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void flingTopOverscroll(float velocity, boolean open) {
+        mLastOverscroll = 0f;
         setQsExpansion(mQsExpansionHeight);
         flingSettings(velocity, open, new Runnable() {
             @Override
