@@ -49,7 +49,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     private static final String TAG_NOTIFICATION = "low_battery";
     private static final int ID_NOTIFICATION = 100;
-    private static final int AUTO_DISMISS_MS = 10000;
 
     private static final int SHOWING_NOTHING = 0;
     private static final int SHOWING_WARNING = 1;
@@ -62,8 +61,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         "SHOWING_INVALID_CHARGER",
     };
 
-    private static final String ACTION_SHOW_FALLBACK_WARNING = "PNW.warningFallback";
-    private static final String ACTION_SHOW_FALLBACK_CHARGER = "PNW.chargerFallback";
     private static final String ACTION_SHOW_BATTERY_SETTINGS = "PNW.batterySettings";
     private static final String ACTION_START_SAVER = "PNW.startSaver";
     private static final String ACTION_STOP_SAVER = "PNW.stopSaver";
@@ -76,7 +73,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private final Context mContext;
     private final NotificationManager mNoMan;
     private final Handler mHandler = new Handler();
-    private final PowerDialogWarnings mFallbackDialogs;
     private final Receiver mReceiver = new Receiver();
     private final Intent mOpenBatterySettings = settings(Intent.ACTION_POWER_USAGE_SUMMARY);
     private final Intent mOpenSaverSettings = settings(Settings.ACTION_BATTERY_SAVER_SETTINGS);
@@ -97,7 +93,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     public PowerNotificationWarnings(Context context, PhoneStatusBar phoneStatusBar) {
         mContext = context;
         mNoMan = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        mFallbackDialogs = new PowerDialogWarnings(context, phoneStatusBar);
         mReceiver.init();
     }
 
@@ -121,7 +116,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         }
         mBucket = bucket;
         mScreenOffTime = screenOffTime;
-        mFallbackDialogs.update(batteryLevel, bucket, screenOffTime);
     }
 
     @Override
@@ -134,8 +128,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     private void updateNotification() {
-        if (DEBUG) Slog.d(TAG, "updateNotification mWarning=" + mWarning
-                + " mSaver=" + mSaver + " mInvalidCharger=" + mInvalidCharger);
+        if (DEBUG) Slog.d(TAG, "updateNotification mWarning=" + mWarning + " mPlaySound="
+                + mPlaySound + " mSaver=" + mSaver + " mInvalidCharger=" + mInvalidCharger);
         if (mInvalidCharger) {
             showInvalidChargerNotification();
             mShowing = SHOWING_INVALID_CHARGER;
@@ -162,7 +156,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setPriority(Notification.PRIORITY_MAX)
                 .setCategory(Notification.CATEGORY_SYSTEM)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setFullScreenIntent(pendingBroadcast(ACTION_SHOW_FALLBACK_CHARGER), true)
                 .setColor(mContext.getResources().getColor(
                         com.android.internal.R.color.system_notification_accent_color));
         final Notification n = nb.build();
@@ -182,12 +175,10 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setShowWhen(false)
                 .setContentTitle(mContext.getString(R.string.battery_low_title))
                 .setContentText(mContext.getString(textRes, mBatteryLevel))
-                .setOngoing(true)
                 .setOnlyAlertOnce(true)
                 .setPriority(Notification.PRIORITY_MAX)
                 .setCategory(Notification.CATEGORY_SYSTEM)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setFullScreenIntent(pendingBroadcast(ACTION_SHOW_FALLBACK_WARNING), true)
                 .setColor(mContext.getResources().getColor(
                         com.android.internal.R.color.battery_saver_mode_color));
         if (hasBatterySettings()) {
@@ -266,14 +257,12 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     @Override
     public void updateLowBatteryWarning() {
         updateNotification();
-        mFallbackDialogs.updateLowBatteryWarning();
     }
 
     @Override
     public void dismissLowBatteryWarning() {
         if (DEBUG) Slog.d(TAG, "dismissing low battery warning: level=" + mBatteryLevel);
         dismissLowBatteryNotification();
-        mFallbackDialogs.dismissLowBatteryWarning();
     }
 
     private void dismissLowBatteryNotification() {
@@ -298,8 +287,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mPlaySound = playSound;
         mWarning = true;
         updateNotification();
-        mHandler.removeCallbacks(mDismissLowBatteryNotification);
-        mHandler.postDelayed(mDismissLowBatteryNotification, AUTO_DISMISS_MS);
     }
 
     private void attachLowBatterySound(Notification.Builder b) {
@@ -336,7 +323,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     @Override
     public void dismissInvalidChargerWarning() {
         dismissInvalidChargerNotification();
-        mFallbackDialogs.dismissInvalidChargerWarning();
     }
 
     private void dismissInvalidChargerNotification() {
@@ -378,8 +364,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
         public void init() {
             IntentFilter filter = new IntentFilter();
-            filter.addAction(ACTION_SHOW_FALLBACK_WARNING);
-            filter.addAction(ACTION_SHOW_FALLBACK_CHARGER);
             filter.addAction(ACTION_SHOW_BATTERY_SETTINGS);
             filter.addAction(ACTION_START_SAVER);
             filter.addAction(ACTION_STOP_SAVER);
@@ -390,13 +374,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             Slog.i(TAG, "Received " + action);
-            if (action.equals(ACTION_SHOW_FALLBACK_WARNING)) {
-                dismissLowBatteryNotification();
-                mFallbackDialogs.showLowBatteryWarning(false /*playSound*/);
-            } else if (action.equals(ACTION_SHOW_FALLBACK_CHARGER)) {
-                dismissInvalidChargerNotification();
-                mFallbackDialogs.showInvalidChargerWarning();
-            } else if (action.equals(ACTION_SHOW_BATTERY_SETTINGS)) {
+            if (action.equals(ACTION_SHOW_BATTERY_SETTINGS)) {
                 dismissLowBatteryNotification();
                 mContext.startActivityAsUser(mOpenBatterySettings, UserHandle.CURRENT);
             } else if (action.equals(ACTION_START_SAVER)) {
@@ -419,13 +397,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                     setSaverSetting(true);
                 }
             });
-        }
-    };
-
-    private final Runnable mDismissLowBatteryNotification = new Runnable() {
-        @Override
-        public void run() {
-            dismissLowBatteryNotification();
         }
     };
 }
