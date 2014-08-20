@@ -33,7 +33,10 @@ import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class BatteryMeterView extends View implements DemoMode {
+import com.android.systemui.statusbar.policy.BatteryController;
+
+public class BatteryMeterView extends View implements DemoMode,
+        BatteryController.BatteryStateChangeCallback {
     public static final String TAG = BatteryMeterView.class.getSimpleName();
     public static final String ACTION_LEVEL_TEST = "com.android.systemui.BATTERY_LEVEL_TEST";
 
@@ -67,6 +70,9 @@ public class BatteryMeterView extends View implements DemoMode {
     private final Path mShapePath = new Path();
     private final Path mClipPath = new Path();
     private final Path mTextPath = new Path();
+
+    private BatteryController mBatteryController;
+    private boolean mPowerSaveEnabled;
 
     private class BatteryTracker extends BroadcastReceiver {
         public static final int UNKNOWN_LEVEL = -1;
@@ -155,6 +161,7 @@ public class BatteryMeterView extends View implements DemoMode {
             // preload the battery level
             mTracker.onReceive(getContext(), sticky);
         }
+        mBatteryController.addStateChangedCallback(this);
     }
 
     @Override
@@ -162,6 +169,7 @@ public class BatteryMeterView extends View implements DemoMode {
         super.onDetachedFromWindow();
 
         getContext().unregisterReceiver(mTracker);
+        mBatteryController.removeStateChangedCallback(this);
     }
 
     public BatteryMeterView(Context context) {
@@ -227,6 +235,22 @@ public class BatteryMeterView extends View implements DemoMode {
         mBoltPoints = loadBoltPoints(res);
     }
 
+    public void setBatteryController(BatteryController batteryController) {
+        mBatteryController = batteryController;
+        mPowerSaveEnabled = mBatteryController.isPowerSave();
+    }
+
+    @Override
+    public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+        // TODO: Use this callback instead of own broadcast receiver.
+    }
+
+    @Override
+    public void onPowerSaveChanged() {
+        mPowerSaveEnabled = mBatteryController.isPowerSave();
+        invalidate();
+    }
+
     private static float[] loadBoltPoints(Resources res) {
         final int[] pts = res.getIntArray(R.array.batterymeter_bolt_points);
         int maxX = 0, maxY = 0;
@@ -251,6 +275,11 @@ public class BatteryMeterView extends View implements DemoMode {
     }
 
     private int getColorForLevel(int percent) {
+
+        // If we are in power save mode, always use the normal color.
+        if (mPowerSaveEnabled) {
+            return mColors[mColors.length-1];
+        }
         int thresh, color = 0;
         for (int i=0; i<mColors.length; i+=2) {
             thresh = mColors[i];
