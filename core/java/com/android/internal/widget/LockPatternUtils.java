@@ -479,6 +479,7 @@ public class LockPatternUtils {
         saveLockPattern(null);
         setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
         setLong(PASSWORD_TYPE_ALTERNATE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
+        onAfterChangingPassword();
     }
 
     /**
@@ -565,6 +566,7 @@ public class LockPatternUtils {
                 dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0,
                         0, 0, 0, 0, 0, userId);
             }
+            onAfterChangingPassword();
         } catch (RemoteException re) {
             Log.e(TAG, "Couldn't save lock pattern " + re);
         }
@@ -844,6 +846,7 @@ public class LockPatternUtils {
                         DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0, 0, 0, 0, 0, 0,
                         userHandle);
             }
+            onAfterChangingPassword();
         } catch (RemoteException re) {
             // Cant do much
             Log.e(TAG, "Unable to save lock password " + re);
@@ -1541,5 +1544,9 @@ public class LockPatternUtils {
      */
     public void requireCredentialEntry(int userId) {
         getTrustManager().reportRequireCredentialEntry(userId);
+    }
+
+    private void onAfterChangingPassword() {
+        getTrustManager().reportEnabledTrustAgentsChanged(getCurrentOrCallingUserId());
     }
 }
