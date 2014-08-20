@@ -374,7 +374,6 @@
     <dimen name="datepicker_year_label_height">64dp</dimen>
     <dimen name="datepicker_year_label_text_size">22dp</dimen>
     <dimen name="datepicker_component_width">270dp</dimen>
-    <dimen name="datepicker_selected_calendar_layout_height">155dp</dimen>
     <dimen name="datepicker_selected_date_day_size">75dp</dimen>
     <dimen name="datepicker_selected_date_month_size">30dp</dimen>
     <dimen name="datepicker_selected_date_year_size">30dp</dimen>
