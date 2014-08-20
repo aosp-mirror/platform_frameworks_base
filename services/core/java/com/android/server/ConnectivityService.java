@@ -1733,6 +1733,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
+    private boolean isLiveNetworkAgent(NetworkAgentInfo nai, String msg) {
+        final NetworkAgentInfo officialNai;
+        synchronized (mNetworkForNetId) {
+            officialNai = mNetworkForNetId.get(nai.network.netId);
+        }
+        if (officialNai != null && officialNai.equals(nai)) return true;
+        if (officialNai != null || VDBG) {
+            loge(msg + " - validateNetworkAgent found mismatched netId: " + officialNai +
+                " - " + nai);
+        }
+        return false;
+    }
+
     // must be stateless - things change under us.
     private class NetworkStateTrackerHandler extends Handler {
         public NetworkStateTrackerHandler(Looper looper) {
@@ -1862,23 +1875,30 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
                 case NetworkMonitor.EVENT_NETWORK_VALIDATED: {
                     NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
-                    handleConnectionValidated(nai);
+                    if (isLiveNetworkAgent(nai, "EVENT_NETWORK_VALIDATED")) {
+                        handleConnectionValidated(nai);
+                    }
                     break;
                 }
                 case NetworkMonitor.EVENT_NETWORK_LINGER_COMPLETE: {
                     NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
-                    handleLingerComplete(nai);
+                    if (isLiveNetworkAgent(nai, "EVENT_NETWORK_LINGER_COMPLETE")) {
+                        handleLingerComplete(nai);
+                    }
                     break;
                 }
                 case NetworkMonitor.EVENT_PROVISIONING_NOTIFICATION: {
+                    NetworkAgentInfo nai = null;
+                    synchronized (mNetworkForNetId) {
+                        nai = mNetworkForNetId.get(msg.arg2);
+                    }
+                    if (nai == null) {
+                        loge("EVENT_PROVISIONING_NOTIFICATION from unknown NetworkMonitor");
+                        break;
+                    }
                     if (msg.arg1 == 0) {
                         setProvNotificationVisibleIntent(false, msg.arg2, 0, null, null);
                     } else {
-                        NetworkAgentInfo nai = mNetworkForNetId.get(msg.arg2);
-                        if (nai == null) {
-                            loge("EVENT_PROVISIONING_NOTIFICATION from unknown NetworkMonitor");
-                            break;
-                        }
                         setProvNotificationVisibleIntent(true, msg.arg2, nai.networkInfo.getType(),
                                 nai.networkInfo.getExtraInfo(), (PendingIntent)msg.obj);
                     }
