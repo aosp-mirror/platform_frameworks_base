@@ -26,7 +26,6 @@ import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
-import android.media.routing.MediaRouter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -116,17 +115,6 @@ public final class MediaController {
      */
     public @NonNull TransportControls getTransportControls() {
         return mTransportControls;
-    }
-
-    /**
-     * Creates a media router delegate through which the destination of the media
-     * router may be observed and controlled.
-     *
-     * @return The media router delegate, or null if the media session does
-     * not support media routing.
-     */
-    public @Nullable MediaRouter.Delegate createMediaRouterDelegate() {
-        return new MediaRouter.Delegate();
     }
 
     /**
