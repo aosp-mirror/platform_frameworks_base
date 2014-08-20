@@ -60,6 +60,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
     private Callback mCallback;
     protected final TState mState = newTileState();
     private final TState mTmpState = newTileState();
+    private boolean mAnnounceNextStateChange;
 
     abstract protected TState newTileState();
     abstract protected void handleClick();
@@ -161,9 +162,25 @@ public abstract class QSTile<TState extends State> implements Listenable {
     }
 
     private void handleStateChanged() {
+        boolean delayAnnouncement = shouldAnnouncementBeDelayed();
         if (mCallback != null) {
             mCallback.onStateChanged(mState);
+            if (mAnnounceNextStateChange && !delayAnnouncement) {
+                String announcement = composeChangeAnnouncement();
+                if (announcement != null) {
+                    mCallback.onAnnouncementRequested(announcement);
+                }
+            }
         }
+        mAnnounceNextStateChange = mAnnounceNextStateChange && delayAnnouncement;
+    }
+
+    protected boolean shouldAnnouncementBeDelayed() {
+        return false;
+    }
+
+    protected String composeChangeAnnouncement() {
+        return null;
     }
 
     private void handleShowDetail(boolean show) {
@@ -217,6 +234,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
                     handleSetCallback((QSTile.Callback)msg.obj);
                 } else if (msg.what == CLICK) {
                     name = "handleClick";
+                    mAnnounceNextStateChange = true;
                     handleClick();
                 } else if (msg.what == SECONDARY_CLICK) {
                     name = "handleSecondaryClick";
@@ -255,6 +273,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         void onShowDetail(boolean show);
         void onToggleStateChanged(boolean state);
         void onScanStateChanged(boolean state);
+        void onAnnouncementRequested(CharSequence announcement);
     }
 
     public interface Host {

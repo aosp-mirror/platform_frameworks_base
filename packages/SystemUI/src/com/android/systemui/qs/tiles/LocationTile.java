@@ -71,14 +71,21 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
             state.iconId = R.drawable.ic_qs_location_on;
             state.label = mContext.getString(R.string.quick_settings_location_label);
             state.contentDescription = mContext.getString(
-                    R.string.accessibility_quick_settings_location,
-                    mContext.getString(R.string.accessibility_desc_on));
+                    R.string.accessibility_quick_settings_location_on);
         } else {
             state.iconId = R.drawable.ic_qs_location_off;
             state.label = mContext.getString(R.string.quick_settings_location_label);
             state.contentDescription = mContext.getString(
-                    R.string.accessibility_quick_settings_location,
-                    mContext.getString(R.string.accessibility_desc_off));
+                    R.string.accessibility_quick_settings_location_off);
+        }
+    }
+
+    @Override
+    protected String composeChangeAnnouncement() {
+        if (mState.value) {
+            return mContext.getString(R.string.accessibility_quick_settings_location_changed_on);
+        } else {
+            return mContext.getString(R.string.accessibility_quick_settings_location_changed_off);
         }
     }
 
