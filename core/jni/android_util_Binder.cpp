@@ -272,9 +272,9 @@ protected:
         //printf("\n");
         jboolean res = env->CallBooleanMethod(mObject, gBinderOffsets.mExecTransact,
             code, reinterpret_cast<jlong>(&data), reinterpret_cast<jlong>(reply), flags);
-        jthrowable excep = env->ExceptionOccurred();
 
-        if (excep) {
+        if (env->ExceptionCheck()) {
+            jthrowable excep = env->ExceptionOccurred();
             report_exception(env, excep,
                 "*** Uncaught remote exception!  "
                 "(Exceptions are not yet supported across processes.)");
@@ -296,12 +296,12 @@ protected:
             set_dalvik_blockguard_policy(env, strict_policy_before);
         }
 
-        jthrowable excep2 = env->ExceptionOccurred();
-        if (excep2) {
-            report_exception(env, excep2,
+        if (env->ExceptionCheck()) {
+            jthrowable excep = env->ExceptionOccurred();
+            report_exception(env, excep,
                 "*** Uncaught exception in onBinderStrictModePolicyChange");
             /* clean up JNI local ref -- we don't return to Java code */
-            env->DeleteLocalRef(excep2);
+            env->DeleteLocalRef(excep);
         }
 
         // Need to always call through the native implementation of
@@ -403,8 +403,8 @@ public:
 
             env->CallStaticVoidMethod(gBinderProxyOffsets.mClass,
                     gBinderProxyOffsets.mSendDeathNotice, mObject);
-            jthrowable excep = env->ExceptionOccurred();
-            if (excep) {
+            if (env->ExceptionCheck()) {
+                jthrowable excep = env->ExceptionOccurred();
                 report_exception(env, excep,
                         "*** Uncaught exception returned from death notification!");
             }
