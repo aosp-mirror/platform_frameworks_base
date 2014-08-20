@@ -178,7 +178,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             invokeCallback(callback, HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
             return;
         }
-        // TODO: Handle MHL device
         int targetAddress = targetDevice.getLogicalAddress();
         ActiveSource active = getActiveSource();
         if (active.isValid() && targetAddress == active.logicalAddress) {

@@ -416,7 +416,8 @@ public class HdmiDeviceInfo implements Parcelable {
         switch (mHdmiDeviceType) {
             case HDMI_DEVICE_TYPE_CEC:
                 s.append("CEC: ");
-                s.append("logical_address: ").append(mLogicalAddress).append(" ");
+                s.append("logical_address: ").append(String.format("0x%02X", mLogicalAddress));
+                s.append(" ");
                 s.append("device_type: ").append(mDeviceType).append(" ");
                 s.append("vendor_id: ").append(mVendorId).append(" ");
                 s.append("display_name: ").append(mDisplayName).append(" ");
@@ -424,8 +425,8 @@ public class HdmiDeviceInfo implements Parcelable {
                 break;
             case HDMI_DEVICE_TYPE_MHL:
                 s.append("MHL: ");
-                s.append("device_id: ").append(mDeviceId).append(" ");
-                s.append("adopter_id: ").append(mAdopterId).append(" ");
+                s.append("device_id: ").append(String.format("0x%04X", mDeviceId)).append(" ");
+                s.append("adopter_id: ").append(String.format("0x%04X", mAdopterId)).append(" ");
                 break;
 
             case HDMI_DEVICE_TYPE_HARDWARE:
@@ -434,7 +435,8 @@ public class HdmiDeviceInfo implements Parcelable {
             default:
                 return "";
         }
-        s.append("physical_address: ").append(String.format("0x04X", mPhysicalAddress)).append(" ");
+        s.append("physical_address: ").append(String.format("0x%04X", mPhysicalAddress));
+        s.append(" ");
         s.append("port_id: ").append(mPortId);
         return s.toString();
     }
