@@ -178,8 +178,13 @@ public class ResourcesManager {
         //}
 
         AssetManager assets = new AssetManager();
-        if (assets.addAssetPath(resDir) == 0) {
-            return null;
+        // resDir can be null if the 'android' package is creating a new Resources object.
+        // This is fine, since each AssetManager automatically loads the 'android' package
+        // already.
+        if (resDir != null) {
+            if (assets.addAssetPath(resDir) == 0) {
+                return null;
+            }
         }
 
         if (splitResDirs != null) {
