@@ -110,6 +110,15 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         mDetailAdapter.updateItems(devices);
     }
 
+    @Override
+    protected String composeChangeAnnouncement() {
+        if (!mState.value) {
+            // We only announce when it's turned off to avoid vocal overflow.
+            return mContext.getString(R.string.accessibility_casting_turned_off);
+        }
+        return null;
+    }
+
     private String getDeviceName(CastDevice device) {
         return device.name != null ? device.name
                 : mContext.getString(R.string.quick_settings_cast_device_default_name);

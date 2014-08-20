@@ -70,13 +70,20 @@ public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
         if (airplaneMode) {
             state.iconId =  R.drawable.ic_qs_airplane_on;
             state.contentDescription =  mContext.getString(
-                    R.string.accessibility_quick_settings_airplane,
-                    mContext.getString(R.string.accessibility_desc_on));
+                    R.string.accessibility_quick_settings_airplane_on);
         } else {
             state.iconId = R.drawable.ic_qs_airplane_off;
             state.contentDescription =  mContext.getString(
-                    R.string.accessibility_quick_settings_airplane,
-                    mContext.getString(R.string.accessibility_desc_off));
+                    R.string.accessibility_quick_settings_airplane_off);
+        }
+    }
+
+    @Override
+    protected String composeChangeAnnouncement() {
+        if (mState.value) {
+            return mContext.getString(R.string.accessibility_quick_settings_airplane_changed_on);
+        } else {
+            return mContext.getString(R.string.accessibility_quick_settings_airplane_changed_off);
         }
     }
 

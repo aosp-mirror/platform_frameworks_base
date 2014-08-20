@@ -40,6 +40,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
     private final NetworkController mController;
     private final WifiDetailAdapter mDetailAdapter;
+    private final QSTile.SignalState mStateBeforeClick = newTileState();
 
     public WifiTile(Host host) {
         super(host);
@@ -80,6 +81,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected void handleClick() {
+        mState.copyTo(mStateBeforeClick);
         mController.setWifiEnabled(!mState.enabled);
     }
 
@@ -138,6 +140,20 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             wifiName = r.getString(R.string.accessibility_wifi_name, state.label);
         }
         state.dualLabelContentDescription = wifiName;
+    }
+
+    @Override
+    protected boolean shouldAnnouncementBeDelayed() {
+        return mStateBeforeClick.enabled == mState.enabled;
+    }
+
+    @Override
+    protected String composeChangeAnnouncement() {
+        if (mState.enabled) {
+            return mContext.getString(R.string.accessibility_quick_settings_wifi_changed_on);
+        } else {
+            return mContext.getString(R.string.accessibility_quick_settings_wifi_changed_off);
+        }
     }
 
     private static String removeDoubleQuotes(String string) {
