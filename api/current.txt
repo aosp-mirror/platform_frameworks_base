@@ -3593,8 +3593,11 @@ package android.app {
   }
 
   public class ActivityManager {
+    method public int addAppTask(android.app.Activity, android.content.Intent, android.app.ActivityManager.TaskDescription, android.graphics.Bitmap);
     method public boolean clearApplicationUserData();
     method public void dumpPackageState(java.io.FileDescriptor, java.lang.String);
+    method public int getAppTaskThumbnailHeight();
+    method public int getAppTaskThumbnailWidth();
     method public java.util.List<android.app.ActivityManager.AppTask> getAppTasks();
     method public android.content.pm.ConfigurationInfo getDeviceConfigurationInfo();
     method public int getLargeMemoryClass();
@@ -3628,6 +3631,7 @@ package android.app {
   public static class ActivityManager.AppTask {
     method public void finishAndRemoveTask();
     method public android.app.ActivityManager.RecentTaskInfo getTaskInfo();
+    method public void setExcludeFromRecents(boolean);
   }
 
   public static class ActivityManager.MemoryInfo implements android.os.Parcelable {
