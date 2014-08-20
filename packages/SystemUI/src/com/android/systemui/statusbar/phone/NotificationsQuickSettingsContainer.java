@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewStub;
+import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
@@ -54,10 +55,9 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     }
 
     @Override
-    protected boolean fitSystemWindows(Rect insets) {
-        setPadding(0, 0, 0, insets.bottom);
-        insets.bottom = 0;
-        return true;
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        setPadding(0, 0, 0, insets.getSystemWindowInsetBottom());
+        return insets;
     }
 
     @Override
