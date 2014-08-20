@@ -2622,6 +2622,161 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a profile or device owner to set the permitted accessibility services. When
+     * set by a device owner or profile owner the restriction applies to all profiles of the
+     * user the device owner or profile owner is an admin for.
+     * 
+     * By default the user can use any accessiblity service. When zero or more packages have
+     * been added, accessiblity services that are not in the list and not part of the system
+     * can not be enabled by the user. 
+     *
+     * <p> Calling with a null value for the list disables the restriction so that all services
+     * can be used, calling with an empty list only allows the builtin system's services.
+     *
+     * <p> System accesibility services are always available to the user the list can't modify
+     * this.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageNames List of accessibility service package names.
+     *
+     * @return true if setting the restriction succeeded. It fail if there is
+     * one or more non-system accessibility services enabled, that are not in the list.
+     */
+    public boolean setPermittedAccessibilityServices(ComponentName admin,
+            List<String> packageNames) {
+        if (mService != null) {
+            try {
+                return mService.setPermittedAccessibilityServices(admin, packageNames);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the list of permitted accessibility services set by this device or profile owner.
+     *
+     * <p>An empty list means no accessibility services except system services are allowed.
+     * Null means all accessibility services are allowed.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return List of accessiblity service package names.
+     */
+    public List<String> getPermittedAccessibilityServices(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getPermittedAccessibilityServices(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the list of accessibility services permitted by the device or profiles
+     * owners of this user.
+     *
+     * <p>Null means all accessibility services are allowed, if a non-null list is returned
+     * it will contain the intersection of the permitted lists for any device or profile
+     * owners that apply to this user. It will also include any system accessibility services.
+     *
+     * @param userId which user to check for.
+     * @return List of accessiblity service package names.
+     * @hide
+     */
+     @SystemApi
+     public List<String> getPermittedAccessibilityServices(int userId) {
+        if (mService != null) {
+            try {
+                return mService.getPermittedAccessibilityServicesForUser(userId);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return null;
+     }
+
+    /**
+     * Called by a profile or device owner to set the permitted input methods services. When
+     * set by a device owner or profile owner the restriction applies to all profiles of the
+     * user the device owner or profile owner is an admin for.
+     *
+     * By default the user can use any input method. When zero or more packages have
+     * been added, input method that are not in the list and not part of the system
+     * can not be enabled by the user.
+     *
+     * This method will fail if it is called for a admin that is not for the foreground user
+     * or a profile of the foreground user.
+     *
+     * <p> Calling with a null value for the list disables the restriction so that all input methods
+     * can be used, calling with an empty list disables all but the system's own input methods.
+     *
+     * <p> System input methods are always available to the user this method can't modify this.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageNames List of input method package names.
+     * @return true if setting the restriction succeeded. It will fail if there is
+     *     one or more input method enabled, that are not in the list or user if the foreground
+     *     user.
+     */
+    public boolean setPermittedInputMethods(ComponentName admin, List<String> packageNames) {
+        if (mService != null) {
+            try {
+                return mService.setPermittedInputMethods(admin, packageNames);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * Returns the list of permitted input methods set by this device or profile owner.
+     *
+     * <p>An empty list means no input methods except system input methods are allowed.
+     * Null means all input methods are allowed.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return List of input method package names.
+     */
+    public List<String> getPermittedInputMethods(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getPermittedInputMethods(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the list of input methods permitted by the device or profiles
+     * owners of the current user.
+     *
+     * <p>Null means all input methods are allowed, if a non-null list is returned
+     * it will contain the intersection of the permitted lists for any device or profile
+     * owners that apply to this user. It will also include any system input methods.
+     *
+     * @return List of input method package names.
+     * @hide
+     */
+    @SystemApi
+    public List<String> getPermittedInputMethodsForCurrentUser() {
+        if (mService != null) {
+            try {
+                return mService.getPermittedInputMethodsForCurrentUser();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Called by a device owner to create a user with the specified name. The UserHandle returned
      * by this method should not be persisted as user handles are recycled as users are removed and
      * created. If you need to persist an identifier for this user, use
