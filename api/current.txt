@@ -8886,6 +8886,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_SENSOR_COMPASS = "android.hardware.sensor.compass";
     field public static final java.lang.String FEATURE_SENSOR_GYROSCOPE = "android.hardware.sensor.gyroscope";
     field public static final java.lang.String FEATURE_SENSOR_HEART_RATE = "android.hardware.sensor.heartrate";
+    field public static final java.lang.String FEATURE_SENSOR_HEART_RATE_ECG = "android.hardware.sensor.heartrate.ecg";
     field public static final java.lang.String FEATURE_SENSOR_LIGHT = "android.hardware.sensor.light";
     field public static final java.lang.String FEATURE_SENSOR_PROXIMITY = "android.hardware.sensor.proximity";
     field public static final java.lang.String FEATURE_SENSOR_RELATIVE_HUMIDITY = "android.hardware.sensor.relative_humidity";
