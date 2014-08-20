@@ -16,6 +16,8 @@
 
 package android.telecomm;
 
+import android.annotation.SystemApi;
+
 /**
  * Defines call-state constants of the different states in which a call can exist. Although states
  * have the notion of normal transitions, due to the volatile nature of telephony systems, code
@@ -24,6 +26,7 @@ package android.telecomm;
  *
  * {@hide}
  */
+@SystemApi
 public final class CallState {
 
     private CallState() {}

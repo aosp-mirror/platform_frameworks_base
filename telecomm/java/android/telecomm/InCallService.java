@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -39,6 +40,7 @@ import java.lang.String;
  *
  * {@hide}
  */
+@SystemApi
 public abstract class InCallService extends Service {
 
     /**

@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -34,6 +35,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * {@hide}
  */
+@SystemApi
 public final class Call {
     /**
      * The state of a {@code Call} when newly created.
