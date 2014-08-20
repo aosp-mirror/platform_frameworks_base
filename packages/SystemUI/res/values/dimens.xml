@@ -430,4 +430,16 @@
 
     <!-- The text size for battery level -->
     <dimen name="battery_level_text_size">12sp</dimen>
+
+    <!-- TrustDrawable: Minimum inner radius of the breathing animation -->
+    <dimen name="trust_circle_inner_radius_visible_min">22dp</dimen>
+    <!-- TrustDrawable: Maximum inner radius of the breathing animation -->
+    <dimen name="trust_circle_inner_radius_visible_max">24dp</dimen>
+    <!-- TrustDrawable: Inner radius at the end of the exit animation -->
+    <dimen name="trust_circle_inner_radius_exit">38dp</dimen>
+    <!-- TrustDrawable: Inner radius at the beginning of the enter animation -->
+    <dimen name="trust_circle_inner_radius_enter">18dp</dimen>
+    <!-- TrustDrawable: Thickness of the circle -->
+    <dimen name="trust_circle_thickness">2dp</dimen>
+
 </resources>

@@ -82,21 +82,24 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private KeyguardIndicationController mIndicationController;
     private boolean mFaceUnlockRunning;
 
+    private final TrustDrawable mTrustDrawable;
+
     public KeyguardBottomAreaView(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public KeyguardBottomAreaView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public KeyguardBottomAreaView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public KeyguardBottomAreaView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        mTrustDrawable = new TrustDrawable(mContext);
     }
 
     @Override
@@ -120,6 +123,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mPreviewInflater = new PreviewInflater(mContext, new LockPatternUtils(mContext));
         inflatePreviews();
         mLockIcon.setOnClickListener(this);
+        mLockIcon.setBackground(mTrustDrawable);
     }
 
     @Override
@@ -267,14 +271,31 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
+        if (isShown()) {
+            mTrustDrawable.start();
+        } else {
+            mTrustDrawable.stop();
+        }
         if (changedView == this && visibility == VISIBLE) {
             updateLockIcon();
             updateCameraVisibility();
         }
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mTrustDrawable.stop();
+    }
+
     private void updateLockIcon() {
-        if (getVisibility() != VISIBLE) {
+        boolean visible = isShown() && KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
+        if (visible) {
+            mTrustDrawable.start();
+        } else {
+            mTrustDrawable.stop();
+        }
+        if (!visible) {
             return;
         }
         // TODO: Real icon for facelock.
@@ -283,10 +304,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 : R.drawable.ic_lock_24dp;
         mLockIcon.setImageResource(iconRes);
         boolean trustManaged = mUnlockMethodCache.isTrustManaged();
-        mLockIcon.setBackgroundResource(trustManaged && !mFaceUnlockRunning
-                ? R.drawable.trust_circle : 0);
+        mTrustDrawable.setTrustManaged(trustManaged);
         mLockIcon.setClickable(trustManaged);
     }
+
+
 
     public KeyguardAffordanceView getPhoneView() {
         return mPhoneImageView;
@@ -357,6 +379,16 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         @Override
         public void onFaceUnlockStateChanged(boolean running) {
             mFaceUnlockRunning = running;
+            updateLockIcon();
+        }
+
+        @Override
+        public void onScreenTurnedOn() {
+            updateLockIcon();
+        }
+
+        @Override
+        public void onScreenTurnedOff(int why) {
             updateLockIcon();
         }
     };
