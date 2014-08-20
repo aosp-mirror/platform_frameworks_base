@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package android.content;
+package android.service.restrictions;
 
 import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.RestrictionsManager;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 
 /**
- * @hide
  * Abstract implementation of a Restrictions Provider BroadcastReceiver. To implement a
  * Restrictions Provider, extend from this class and implement the abstract methods.
  * Export this receiver in the manifest. A profile owner device admin can then register this
@@ -34,12 +37,10 @@ import android.os.PersistableBundle;
  * {@link RestrictionsManager#notifyPermissionResponse(String, PersistableBundle)}.
  *
  * @see RestrictionsManager
- * TODO: STOPSHIP: Remove before L ships, after clients have switched over
- * to android.service.restrictions.RestrictionsReceiver. Bug: 17006805
  */
-public abstract class AbstractRestrictionsProvider extends BroadcastReceiver {
+public abstract class RestrictionsReceiver extends BroadcastReceiver {
 
-    private static final String TAG = "AbstractRestrictionsProvider";
+    private static final String TAG = "RestrictionsReceiver";
 
     /**
      * An asynchronous permission request made by an application for an operation that requires
@@ -61,7 +62,7 @@ public abstract class AbstractRestrictionsProvider extends BroadcastReceiver {
      * @see RestrictionsManager#REQUEST_TYPE_LOCAL_APPROVAL
      * @see RestrictionsManager#REQUEST_KEY_ID
      */
-    public abstract void requestPermission(Context context,
+    public abstract void onRequestPermission(Context context,
             String packageName, String requestType, String requestId, PersistableBundle request);
 
     /**
@@ -79,7 +80,7 @@ public abstract class AbstractRestrictionsProvider extends BroadcastReceiver {
             String requestId = intent.getStringExtra(RestrictionsManager.EXTRA_REQUEST_ID);
             PersistableBundle request = (PersistableBundle)
                     intent.getParcelableExtra(RestrictionsManager.EXTRA_REQUEST_BUNDLE);
-            requestPermission(context, packageName, requestType, requestId, request);
+            onRequestPermission(context, packageName, requestType, requestId, request);
         }
     }
 }

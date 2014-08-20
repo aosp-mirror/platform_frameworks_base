@@ -26,6 +26,7 @@ import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.service.restrictions.RestrictionsReceiver;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
@@ -107,7 +108,7 @@ import java.util.List;
  * </pre>
  *
  * @see RestrictionEntry
- * @see AbstractRestrictionsProvider
+ * @see RestrictionsReceiver
  * @see DevicePolicyManager#setRestrictionsProvider(ComponentName, ComponentName)
  * @see DevicePolicyManager#setApplicationRestrictions(ComponentName, String, Bundle)
  */
