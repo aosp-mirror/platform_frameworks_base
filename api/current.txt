@@ -6759,12 +6759,6 @@ package android.bluetooth.le {
 
 package android.content {
 
-  public abstract class AbstractRestrictionsProvider extends android.content.BroadcastReceiver {
-    ctor public AbstractRestrictionsProvider();
-    method public void onReceive(android.content.Context, android.content.Intent);
-    method public abstract void requestPermission(android.content.Context, java.lang.String, java.lang.String, java.lang.String, android.os.PersistableBundle);
-  }
-
   public abstract class AbstractThreadedSyncAdapter {
     ctor public AbstractThreadedSyncAdapter(android.content.Context, boolean);
     ctor public AbstractThreadedSyncAdapter(android.content.Context, boolean, boolean);
@@ -27451,6 +27445,16 @@ package android.service.notification {
     method public boolean isOngoing();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+}
+
+package android.service.restrictions {
+
+  public abstract class RestrictionsReceiver extends android.content.BroadcastReceiver {
+    ctor public RestrictionsReceiver();
+    method public void onReceive(android.content.Context, android.content.Intent);
+    method public abstract void onRequestPermission(android.content.Context, java.lang.String, java.lang.String, java.lang.String, android.os.PersistableBundle);
   }
 
 }

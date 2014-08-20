@@ -21,7 +21,6 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.admin.IDevicePolicyManager;
-import android.content.AbstractRestrictionsProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -41,6 +40,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.security.Credentials;
+import android.service.restrictions.RestrictionsReceiver;
 import android.util.Log;
 
 import com.android.org.conscrypt.TrustedCertificateStore;
@@ -3086,7 +3086,7 @@ public class DevicePolicyManager {
      * Only a profile owner can designate the restrictions provider.
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param provider The component name of the service that implements
-     * {@link AbstractRestrictionsProvider}. If this param is null,
+     * {@link RestrictionsReceiver}. If this param is null,
      * it removes the restrictions provider previously assigned.
      */
     public void setRestrictionsProvider(ComponentName admin, ComponentName provider) {
