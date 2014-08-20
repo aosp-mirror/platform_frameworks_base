@@ -3158,6 +3158,7 @@ public class Editor {
         // Offset from touch position to mPosition
         private float mTouchToWindowOffsetX, mTouchToWindowOffsetY;
         protected int mHotspotX;
+        protected int mHorizontalGravity;
         // Offsets the hotspot point up, so that cursor is not hidden by the finger when moving up
         private float mTouchOffsetY;
         // Where the touch position should be on the handle to ensure a maximum cursor visibility
@@ -3172,6 +3173,8 @@ public class Editor {
         private boolean mPositionHasChanged = true;
         // Used to delay the appearance of the action popup window
         private Runnable mActionPopupShower;
+        // Minimum touch target size for handles
+        private int mMinSize;
 
         public HandleView(Drawable drawableLtr, Drawable drawableRtl) {
             super(mTextView.getContext());
@@ -3184,10 +3187,12 @@ public class Editor {
 
             mDrawableLtr = drawableLtr;
             mDrawableRtl = drawableRtl;
+            mMinSize = mTextView.getContext().getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.text_handle_min_size);
 
             updateDrawable();
 
-            final int handleHeight = mDrawable.getIntrinsicHeight();
+            final int handleHeight = getPreferredHeight();
             mTouchOffsetY = -0.3f * handleHeight;
             mIdealVerticalOffset = 0.7f * handleHeight;
         }
@@ -3197,9 +3202,11 @@ public class Editor {
             final boolean isRtlCharAtOffset = mTextView.getLayout().isRtlCharAt(offset);
             mDrawable = isRtlCharAtOffset ? mDrawableRtl : mDrawableLtr;
             mHotspotX = getHotspotX(mDrawable, isRtlCharAtOffset);
+            mHorizontalGravity = getHorizontalGravity(isRtlCharAtOffset);
         }
 
         protected abstract int getHotspotX(Drawable drawable, boolean isRtlRun);
+        protected abstract int getHorizontalGravity(boolean isRtlRun);
 
         // Touch-up filter: number of previous positions remembered
         private static final int HISTORY_SIZE = 5;
@@ -3244,7 +3251,15 @@ public class Editor {
 
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            setMeasuredDimension(mDrawable.getIntrinsicWidth(), mDrawable.getIntrinsicHeight());
+            setMeasuredDimension(getPreferredWidth(), getPreferredHeight());
+        }
+
+        private int getPreferredWidth() {
+            return Math.max(mDrawable.getIntrinsicWidth(), mMinSize);
+        }
+
+        private int getPreferredHeight() {
+            return Math.max(mDrawable.getIntrinsicHeight(), mMinSize);
         }
 
         public void show() {
@@ -3336,7 +3351,8 @@ public class Editor {
                 }
                 final int line = layout.getLineForOffset(offset);
 
-                mPositionX = (int) (layout.getPrimaryHorizontal(offset) - 0.5f - mHotspotX);
+                mPositionX = (int) (layout.getPrimaryHorizontal(offset) - 0.5f - mHotspotX -
+                        getHorizontalOffset() + getCursorOffset());
                 mPositionY = layout.getLineBottom(line);
 
                 // Take TextView's padding and scroll into account.
@@ -3385,8 +3401,34 @@ public class Editor {
 
         @Override
         protected void onDraw(Canvas c) {
-            mDrawable.setBounds(0, 0, mRight - mLeft, mBottom - mTop);
+            final int drawWidth = mDrawable.getIntrinsicWidth();
+            final int left = getHorizontalOffset();
+
+            mDrawable.setBounds(left, 0, left + drawWidth, mDrawable.getIntrinsicHeight());
             mDrawable.draw(c);
+        }
+
+        private int getHorizontalOffset() {
+            final int width = getPreferredWidth();
+            final int drawWidth = mDrawable.getIntrinsicWidth();
+            final int left;
+            switch (mHorizontalGravity) {
+                case Gravity.LEFT:
+                    left = 0;
+                    break;
+                default:
+                case Gravity.CENTER:
+                    left = (width - drawWidth) / 2;
+                    break;
+                case Gravity.RIGHT:
+                    left = width - drawWidth;
+                    break;
+            }
+            return left;
+        }
+
+        protected int getCursorOffset() {
+            return 0;
         }
 
         @Override
@@ -3508,6 +3550,22 @@ public class Editor {
         }
 
         @Override
+        protected int getHorizontalGravity(boolean isRtlRun) {
+            return Gravity.CENTER_HORIZONTAL;
+        }
+
+        @Override
+        protected int getCursorOffset() {
+            int offset = super.getCursorOffset();
+            final Drawable cursor = mCursorCount > 0 ? mCursorDrawable[0] : null;
+            if (cursor != null) {
+                cursor.getPadding(mTempRect);
+                offset += (cursor.getIntrinsicWidth() - mTempRect.left - mTempRect.right) / 2;
+            }
+            return offset;
+        }
+
+        @Override
         public boolean onTouchEvent(MotionEvent ev) {
             final boolean result = super.onTouchEvent(ev);
 
@@ -3594,6 +3652,11 @@ public class Editor {
         }
 
         @Override
+        protected int getHorizontalGravity(boolean isRtlRun) {
+            return isRtlRun ? Gravity.RIGHT : Gravity.LEFT;
+        }
+
+        @Override
         public int getCurrentCursorOffset() {
             return mTextView.getSelectionStart();
         }
@@ -3634,6 +3697,11 @@ public class Editor {
             } else {
                 return drawable.getIntrinsicWidth() / 4;
             }
+        }
+
+        @Override
+        protected int getHorizontalGravity(boolean isRtlRun) {
+            return isRtlRun ? Gravity.LEFT : Gravity.RIGHT;
         }
 
         @Override
