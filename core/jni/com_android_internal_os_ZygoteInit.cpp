@@ -96,7 +96,7 @@ static void com_android_internal_os_ZygoteInit_reopenStdio(JNIEnv* env,
 
     fd = jniGetFDFromFileDescriptor(env, in);
 
-    if  (env->ExceptionOccurred() != NULL) {
+    if  (env->ExceptionCheck()) {
         return;
     }
 
@@ -106,7 +106,7 @@ static void com_android_internal_os_ZygoteInit_reopenStdio(JNIEnv* env,
 
     fd = jniGetFDFromFileDescriptor(env, out);
 
-    if  (env->ExceptionOccurred() != NULL) {
+    if  (env->ExceptionCheck()) {
         return;
     }
 
@@ -116,7 +116,7 @@ static void com_android_internal_os_ZygoteInit_reopenStdio(JNIEnv* env,
 
     fd = jniGetFDFromFileDescriptor(env, errfd);
 
-    if  (env->ExceptionOccurred() != NULL) {
+    if  (env->ExceptionCheck()) {
         return;
     }
 
@@ -134,7 +134,7 @@ static void com_android_internal_os_ZygoteInit_setCloseOnExec (JNIEnv *env,
 
     fd = jniGetFDFromFileDescriptor(env, descriptor);
 
-    if  (env->ExceptionOccurred() != NULL) {
+    if  (env->ExceptionCheck()) {
         return;
     }
 
@@ -170,7 +170,7 @@ static jint com_android_internal_os_ZygoteInit_selectReadable (
     jsize length = env->GetArrayLength(fds);
     fd_set fdset;
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return -1;
     }
 
@@ -179,14 +179,14 @@ static jint com_android_internal_os_ZygoteInit_selectReadable (
     int nfds = 0;
     for (jsize i = 0; i < length; i++) {
         jobject fdObj = env->GetObjectArrayElement(fds, i);
-        if  (env->ExceptionOccurred() != NULL) {
+        if  (env->ExceptionCheck()) {
             return -1;
         }
         if (fdObj == NULL) {
             continue;
         }
         int fd = jniGetFDFromFileDescriptor(env, fdObj);
-        if  (env->ExceptionOccurred() != NULL) {
+        if  (env->ExceptionCheck()) {
             return -1;
         }
 
@@ -209,14 +209,14 @@ static jint com_android_internal_os_ZygoteInit_selectReadable (
 
     for (jsize i = 0; i < length; i++) {
         jobject fdObj = env->GetObjectArrayElement(fds, i);
-        if  (env->ExceptionOccurred() != NULL) {
+        if  (env->ExceptionCheck()) {
             return -1;
         }
         if (fdObj == NULL) {
             continue;
         }
         int fd = jniGetFDFromFileDescriptor(env, fdObj);
-        if  (env->ExceptionOccurred() != NULL) {
+        if  (env->ExceptionCheck()) {
             return -1;
         }
         if (FD_ISSET(fd, &fdset)) {
