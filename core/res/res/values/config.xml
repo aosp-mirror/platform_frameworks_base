@@ -469,10 +469,10 @@
     <integer name="config_longPressOnPowerBehavior">1</integer>
 
     <!-- Package name for default keyguard appwidget [DO NOT TRANSLATE] -->
-    <string name="widget_default_package_name"></string>
+    <string name="widget_default_package_name" translatable="false"></string>
 
     <!-- Class name for default keyguard appwidget [DO NOT TRANSLATE] -->
-    <string name="widget_default_class_name"></string>
+    <string name="widget_default_class_name" translatable="false"></string>
 
     <!-- Indicate whether the SD card is accessible without removing the battery. -->
     <bool name="config_batterySdCardAccessibility">false</bool>
@@ -888,7 +888,7 @@
          PERSIST may improve performance by reducing how often journal blocks are
          reallocated (compared to truncation) resulting in better data block locality
          and less churn of the storage media. -->
-    <string name="db_default_journal_mode">PERSIST</string>
+    <string name="db_default_journal_mode" translatable="false">PERSIST</string>
 
     <!-- Maximum size of the persistent journal file in bytes.
          If the journal file grows to be larger than this amount then SQLite will
@@ -900,7 +900,7 @@
          NORMAL also preserves durability in non-WAL modes and uses checksums to ensure
          integrity although there is a small chance that an error might go unnoticed.
          Choices are: FULL, NORMAL, OFF. -->
-    <string name="db_default_sync_mode">FULL</string>
+    <string name="db_default_sync_mode" translatable="false">FULL</string>
 
     <!-- The database synchronization mode when using Write-Ahead Logging.
          FULL is safest and preserves durability at the cost of extra fsyncs.
@@ -908,7 +908,7 @@
          and after checkpoint operations.  If checkpoints are infrequent and power loss
          occurs, then committed transactions could be lost and applications might break.
          Choices are: FULL, NORMAL, OFF. -->
-    <string name="db_wal_sync_mode">FULL</string>
+    <string name="db_wal_sync_mode" translatable="false">FULL</string>
 
     <!-- The Write-Ahead Log auto-checkpoint interval in database pages (typically 1 to 4KB).
          The log is checkpointed automatically whenever it exceeds this many pages.
@@ -1085,7 +1085,8 @@
     <!-- If supported and enabled, are dreams activated when asleep and charging? (by default) -->
     <bool name="config_dreamsActivatedOnSleepByDefault">false</bool>
     <!-- ComponentName of the default dream (Settings.Secure.SCREENSAVER_COMPONENT) -->
-    <string name="config_dreamsDefaultComponent">com.google.android.deskclock/com.android.deskclock.Screensaver</string>
+    <string name="config_dreamsDefaultComponent" translatable="false"
+            >com.google.android.deskclock/com.android.deskclock.Screensaver</string>
 
     <!-- Base "touch slop" value used by ViewConfiguration as a
          movement threshold where scrolling should begin. -->
@@ -1222,20 +1223,20 @@
 
     <!-- Class name of the framework account picker activity.
          Can be customized for other product types -->
-    <string name="config_chooseAccountActivity"
+    <string name="config_chooseAccountActivity" translatable="false"
             >android/android.accounts.ChooseAccountActivity</string>
     <!-- Class name of the account type and account picker activity.
          Can be customized for other product types -->
-    <string name="config_chooseTypeAndAccountActivity"
+    <string name="config_chooseTypeAndAccountActivity" translatable="false"
             >android/android.accounts.ChooseTypeAndAccountActivity</string>
 
     <!-- Component name of a custom ResolverActivity (Intent resolver) to be used instead of
          the default framework version. If left empty, then the framework version will be used.
          Example: com.google.android.myapp/.resolver.MyResolverActivity  -->
-    <string name="config_customResolverActivity"></string>
+    <string name="config_customResolverActivity" translatable="false"></string>
 
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
-    <string name="config_appsAuthorizedForSharedAccounts">;com.android.settings;</string>
+    <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
 
     <!-- Flag indicating that the media framework should not allow changes or mute on any
          stream or master volumes. -->
