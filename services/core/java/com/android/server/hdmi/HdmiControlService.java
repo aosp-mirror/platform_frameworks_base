@@ -78,6 +78,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Provides a service for sending and processing HDMI control messages,
@@ -123,7 +124,7 @@ public final class HdmiControlService extends SystemService {
         void onPollingFinished(List<Integer> ackedAddress);
     }
 
-    private class PowerStateReceiver extends BroadcastReceiver {
+    private class HdmiControlBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
@@ -135,6 +136,12 @@ public final class HdmiControlService extends SystemService {
                 case Intent.ACTION_SCREEN_ON:
                     if (isPowerStandbyOrTransient()) {
                         onWakeUp();
+                    }
+                    break;
+                case Intent.ACTION_CONFIGURATION_CHANGED:
+                    String language = Locale.getDefault().getISO3Language();
+                    if (!mLanguage.equals(language)) {
+                        onLanguageChanged(language);
                     }
                     break;
             }
@@ -238,10 +245,14 @@ public final class HdmiControlService extends SystemService {
 
     private HdmiCecMessageValidator mMessageValidator;
 
-    private final PowerStateReceiver mPowerStateReceiver = new PowerStateReceiver();
+    private final HdmiControlBroadcastReceiver
+            mHdmiControlBroadcastReceiver = new HdmiControlBroadcastReceiver();
 
     @ServiceThreadOnly
     private int mPowerStatus = HdmiControlManager.POWER_STATUS_STANDBY;
+
+    @ServiceThreadOnly
+    private String mLanguage = Locale.getDefault().getISO3Language();
 
     @ServiceThreadOnly
     private boolean mStandbyMessageReceived = false;
@@ -307,7 +318,8 @@ public final class HdmiControlService extends SystemService {
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             filter.addAction(Intent.ACTION_SCREEN_ON);
-            getContext().registerReceiver(mPowerStateReceiver, filter);
+            filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+            getContext().registerReceiver(mHdmiControlBroadcastReceiver, filter);
         }
     }
 
@@ -1695,6 +1707,16 @@ public final class HdmiControlService extends SystemService {
                 }
             }
         });
+    }
+
+    @ServiceThreadOnly
+    private void onLanguageChanged(String language) {
+        assertRunOnServiceThread();
+        mLanguage = language;
+
+        if (isTvDevice()) {
+            tv().broadcastMenuLanguage(language);
+        }
     }
 
     private void disableDevices(PendingActionClearedCallback callback) {
