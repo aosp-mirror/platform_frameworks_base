@@ -20676,6 +20676,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (mPosted) {
                 return;
             }
+
             final long timeSinceLastMillis = SystemClock.uptimeMillis() - mLastEventTimeMillis;
             final long minEventIntevalMillis =
                     ViewConfiguration.getSendRecurringAccessibilityEventsInterval();
@@ -20684,7 +20685,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 run();
             } else {
                 postDelayed(this, minEventIntevalMillis - timeSinceLastMillis);
-                mPosted = true;
                 mPostedWithDelay = true;
             }
         }
