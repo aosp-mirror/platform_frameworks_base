@@ -20,10 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static android.os.Build.VERSION_CODES.GINGERBREAD;
-import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR2;
-import static android.os.Build.VERSION_CODES.KITKAT;
+import static android.os.Build.VERSION_CODES.*;
 
 /**
  * Various helper methods to simulate older versions of platform.
@@ -39,13 +36,16 @@ public class Config {
     private static final List<String> sDefaultResourceDir =
             Collections.singletonList(DEFAULT_RESOURCE_DIR);
 
+    private static final int WHITE = 0xFFFFFFFF;
+    private static final int BLACK = 0xFF000000;
+
     public static boolean showOnScreenNavBar(int platformVersion) {
         return platformVersion == 0 || platformVersion >= ICE_CREAM_SANDWICH;
     }
 
     public static int getStatusBarColor(int platformVersion) {
         // return white for froyo and earlier; black otherwise.
-        return platformVersion == 0 || platformVersion >= GINGERBREAD ? 0xFF000000 : 0xFFFFFFFF;
+        return platformVersion == 0 || platformVersion >= GINGERBREAD ? BLACK : WHITE;
     }
 
     public static List<String> getResourceDirs(int platformVersion) {
@@ -69,5 +69,50 @@ public class Config {
         list.add(DEFAULT_RESOURCE_DIR);
 
         return Collections.unmodifiableList(list);
+    }
+
+    public static String getTime(int platformVersion) {
+        if (platformVersion == 0) {
+            // TODO: revisit when the version is selected.
+            return "4:57";
+        }
+        if (platformVersion < GINGERBREAD) {
+            return "2:20";
+        }
+        if (platformVersion < ICE_CREAM_SANDWICH) {
+            return "2:30";
+        }
+        if (platformVersion < JELLY_BEAN) {
+            return "4:00";
+        }
+        if (platformVersion < KITKAT) {
+            return "4:30";
+        }
+        if (platformVersion <= KITKAT_WATCH) {
+            return "4:40";
+        }
+        // Should never happen.
+        return "4:04";
+    }
+
+    public static int getTimeColor(int platformVersion) {
+        if (platformVersion == 0 || platformVersion >= KITKAT ||
+                platformVersion > FROYO && platformVersion < HONEYCOMB) {
+            // Gingerbread and KitKat onwards.
+            return WHITE;
+        }
+        // Black for froyo.
+        if (platformVersion < GINGERBREAD) {
+            return BLACK;
+        } else if (platformVersion < KITKAT) {
+            // Honeycomb to JB-mr2: Holo blue light.
+            return 0xff33b5e5;
+        }
+        // Should never happen.
+        return WHITE;
+    }
+
+    public static String getWifiIconType(int platformVersion) {
+        return platformVersion == 0 ? "xml" : "png";
     }
 }

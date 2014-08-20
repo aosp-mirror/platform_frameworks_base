@@ -1,17 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
-	<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_weight="1"/>
-	<ImageView
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:layout_marginTop="1dp"/>
-	<ImageView
-			android:layout_height="wrap_content"
-			android:layout_width="wrap_content"
-			android:layout_marginLeft="3dp"
-			android:layout_marginRight="5dp"
-			android:layout_marginTop="2dp"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+    <!-- The exact size of the wifi icon is specified in order to scale it properly.
+    Without scaling, it appeared huge. This is currently, 70% of the actual size. -->
+    <ImageView
+            android:layout_height="22.4dp"
+            android:layout_width="20.65dp"
+            android:layout_marginTop="1dp"/>
+    <ImageView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="4dp"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginRight="5dp"
+            android:gravity="center_vertical"
+            android:textSize="16dp"
+            android:fontFamily="sans-serif-medium"/>
 </merge>
