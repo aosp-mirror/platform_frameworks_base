@@ -197,5 +197,5 @@ public class KeyguardUpdateMonitorCallback {
     /**
      * Called when the state of face unlock changed.
      */
-    public void onFaceUnlockStateChanged(boolean running) { }
+    public void onFaceUnlockStateChanged(boolean running, int userId) { }
 }
