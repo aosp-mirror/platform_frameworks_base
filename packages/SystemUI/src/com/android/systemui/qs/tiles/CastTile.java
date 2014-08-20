@@ -37,8 +37,8 @@ import java.util.Set;
 
 /** Quick settings tile: Cast **/
 public class CastTile extends QSTile<QSTile.BooleanState> {
-    private static final Intent WIFI_DISPLAY_SETTINGS =
-            new Intent(Settings.ACTION_WIFI_DISPLAY_SETTINGS);
+    private static final Intent CAST_SETTINGS =
+            new Intent(Settings.ACTION_CAST_SETTINGS);
 
     private final CastController mController;
     private final CastDetailAdapter mDetailAdapter;
@@ -144,7 +144,7 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
 
         @Override
         public Intent getSettingsIntent() {
-            return WIFI_DISPLAY_SETTINGS;
+            return CAST_SETTINGS;
         }
 
         @Override
