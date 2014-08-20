@@ -31,15 +31,5 @@ interface IWifiPasspointManager
     Messenger getMessenger();
 
     int getPasspointState();
-
-    List<WifiPasspointPolicy> requestCredentialMatch(in List<ScanResult> requested);
-
-    List<WifiPasspointCredential> getCredentials();
-
-    boolean addCredential(in WifiPasspointCredential cred);
-
-    boolean updateCredential(in WifiPasspointCredential cred);
-
-    boolean removeCredential(in WifiPasspointCredential cred);
 }
 
