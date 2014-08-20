@@ -495,6 +495,10 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
+    List<HdmiPortInfo> getPortInfo() {
+        return mPortInfo;
+    }
+
     /**
      * Returns HDMI port information for the given port id.
      *
@@ -1110,7 +1114,7 @@ public final class HdmiControlService extends SystemService {
         @Override
         public List<HdmiPortInfo> getPortInfo() {
             enforceAccessPermission();
-            return mPortInfo;
+            return HdmiControlService.this.getPortInfo();
         }
 
         @Override
