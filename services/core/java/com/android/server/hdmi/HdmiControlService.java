@@ -1001,6 +1001,17 @@ public final class HdmiControlService extends SystemService {
                         invokeCallback(callback, HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE);
                         return;
                     }
+                    if (mMhlController != null) {
+                        HdmiMhlLocalDevice device = mMhlController.getLocalDeviceById(deviceId);
+                        if (device != null) {
+                            // Upon selecting MHL device, we send RAP[Content On] to wake up
+                            // the connected mobile device, start routing control to switch ports.
+                            // callback is handled by MHL action.
+                            device.turnOn(callback);
+                            tv.doManualPortSwitching(device.getInfo().getPortId(), null);
+                            return;
+                        }
+                    }
                     tv.deviceSelect(deviceId, callback);
                 }
             });
