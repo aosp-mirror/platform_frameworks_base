@@ -930,6 +930,7 @@ package android {
     field public static final int orderingFromXml = 16843239; // 0x10101e7
     field public static final int orientation = 16842948; // 0x10100c4
     field public static final int outAnimation = 16843128; // 0x1010178
+    field public static final int outlineProvider = 16843961; // 0x10104b9
     field public static final int overScrollFooter = 16843459; // 0x10102c3
     field public static final int overScrollHeader = 16843458; // 0x10102c2
     field public static final int overScrollMode = 16843457; // 0x10102c1
@@ -34994,6 +34995,8 @@ package android.view {
     ctor public ViewOutlineProvider();
     method public abstract void getOutline(android.view.View, android.graphics.Outline);
     field public static final android.view.ViewOutlineProvider BACKGROUND;
+    field public static final android.view.ViewOutlineProvider BOUNDS;
+    field public static final android.view.ViewOutlineProvider PADDED_BOUNDS;
   }
 
   public class ViewOverlay {

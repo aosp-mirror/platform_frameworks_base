@@ -44,6 +44,35 @@ public abstract class ViewOutlineProvider {
     };
 
     /**
+     * Maintains the outline of the View to match its rectangular bounds,
+     * at <code>1.0f</code> alpha.
+     *
+     * This can be used to enable Views that are opaque but lacking a background cast a shadow.
+     */
+    public static final ViewOutlineProvider BOUNDS = new ViewOutlineProvider() {
+        @Override
+        public void getOutline(View view, Outline outline) {
+            outline.setRect(0, 0, view.getWidth(), view.getHeight());
+        }
+    };
+
+    /**
+     * Maintains the outline of the View to match its rectangular padded bounds,
+     * at <code>1.0f</code> alpha.
+     *
+     * This can be used to enable Views that are opaque but lacking a background cast a shadow.
+     */
+    public static final ViewOutlineProvider PADDED_BOUNDS = new ViewOutlineProvider() {
+        @Override
+        public void getOutline(View view, Outline outline) {
+            outline.setRect(view.getPaddingLeft(),
+                    view.getPaddingTop(),
+                    view.getWidth() - view.getPaddingRight(),
+                    view.getHeight() - view.getPaddingBottom());
+        }
+    };
+
+    /**
      * Called to get the provider to populate the Outline.
      *
      * This method will be called by a View when its owned Drawables are invalidated, when the
