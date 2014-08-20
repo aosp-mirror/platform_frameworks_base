@@ -1263,6 +1263,7 @@ public class Vpn {
                 }
             } catch (Exception e) {
                 Log.i(TAG, "Aborting", e);
+                updateState(DetailedState.FAILED, e.getMessage());
                 exit();
             } finally {
                 // Kill the daemons if they fail to stop.
