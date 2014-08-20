@@ -394,4 +394,7 @@
      <dimen name="lock_pattern_dot_line_width">3dp</dimen>
      <dimen name="lock_pattern_dot_size">12dp</dimen>
      <dimen name="lock_pattern_dot_size_activated">28dp</dimen>
+
+     <dimen name="text_handle_min_size">40dp</dimen>
+
 </resources>
