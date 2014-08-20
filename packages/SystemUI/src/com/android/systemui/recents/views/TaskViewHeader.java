@@ -143,7 +143,7 @@ class TaskViewHeader extends FrameLayout {
         mBackgroundColor = new ColorDrawable(0);
         // Copy the ripple drawable since we are going to be manipulating it
         mBackground = (RippleDrawable)
-                getResources().getDrawable(R.drawable.recents_task_view_header_bg);
+                getContext().getDrawable(R.drawable.recents_task_view_header_bg);
         mBackground = (RippleDrawable) mBackground.mutate().getConstantState().newDrawable();
         mBackground.setColor(ColorStateList.valueOf(0));
         mBackground.setDrawableByLayerId(mBackground.getId(0), mBackgroundColor);

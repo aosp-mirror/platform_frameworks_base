@@ -386,15 +386,23 @@ final class TaskRecord {
         setNextAffiliate(null);
     }
 
-    void setLastThumbnail(Bitmap thumbnail) {
-        mLastThumbnail = thumbnail;
-        if (thumbnail == null) {
-            if (mLastThumbnailFile != null) {
-                mLastThumbnailFile.delete();
+    /**
+     * Sets the last thumbnail.
+     * @return whether the thumbnail was set
+     */
+    boolean setLastThumbnail(Bitmap thumbnail) {
+        if (mLastThumbnail != thumbnail) {
+            mLastThumbnail = thumbnail;
+            if (thumbnail == null) {
+                if (mLastThumbnailFile != null) {
+                    mLastThumbnailFile.delete();
+                }
+            } else {
+                mService.mTaskPersister.saveImage(thumbnail, mFilename);
             }
-        } else {
-            mService.mTaskPersister.saveImage(thumbnail, mFilename);
+            return true;
         }
+        return false;
     }
 
     void getLastThumbnail(TaskThumbnail thumbs) {
@@ -403,7 +411,8 @@ final class TaskRecord {
         if (mLastThumbnail == null) {
             thumbs.mainThumbnail = mService.mTaskPersister.getThumbnail(mFilename);
         }
-        if (mLastThumbnailFile.exists()) {
+        // Only load the thumbnail file if we don't have a thumbnail
+        if (thumbs.mainThumbnail == null && mLastThumbnailFile.exists()) {
             try {
                 thumbs.thumbnailFileDescriptor = ParcelFileDescriptor.open(mLastThumbnailFile,
                         ParcelFileDescriptor.MODE_READ_ONLY);
