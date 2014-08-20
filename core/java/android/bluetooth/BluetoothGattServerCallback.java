@@ -141,7 +141,7 @@ public abstract class BluetoothGattServerCallback {
      * notifications.
      *
      * @param device The remote device the notification has been sent to
-     * @param status 0 if the operation was successful
+     * @param status {@link BluetoothGatt#GATT_SUCCESS} if the operation was successful
      */
     public void onNotificationSent(BluetoothDevice device, int status) {
     }
