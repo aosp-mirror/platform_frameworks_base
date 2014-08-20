@@ -3461,7 +3461,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (sourceRecord.app == null) {
                 throw new SecurityException("Called without a process attached to activity");
             }
-            if (sourceRecord.app.uid != Process.SYSTEM_UID) {
+            if (UserHandle.getAppId(sourceRecord.app.uid) != Process.SYSTEM_UID) {
                 // This is still okay, as long as this activity is running under the
                 // uid of the original calling activity.
                 if (sourceRecord.app.uid != sourceRecord.launchedFromUid) {
