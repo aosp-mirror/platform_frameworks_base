@@ -30,7 +30,6 @@ import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.ObbInfo;
 import android.content.res.ObbScanner;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
 import android.os.FileUtils;
@@ -67,7 +66,6 @@ import java.io.OutputStream;
  */
 public class DefaultContainerService extends IntentService {
     private static final String TAG = "DefContainer";
-    private static final boolean localLOGV = false;
 
     private static final String LIB_DIR_NAME = "lib";
 
@@ -112,7 +110,7 @@ public class DefaultContainerService extends IntentService {
                 return copyPackageToContainerInner(pkg, handle, containerId, key, isExternal,
                         isForwardLocked, abiOverride);
             } catch (PackageParserException | IOException e) {
-                Slog.w(TAG, "Failed to parse package at " + packagePath);
+                Slog.w(TAG, "Failed to copy package at " + packagePath, e);
                 return null;
             } finally {
                 IoUtils.closeQuietly(handle);
@@ -188,7 +186,7 @@ public class DefaultContainerService extends IntentService {
             ret.installLocation = pkg.installLocation;
             ret.verifiers = pkg.verifiers;
             ret.recommendedInstallLocation = PackageHelper.resolveInstallLocation(context,
-                    pkg.installLocation, sizeBytes, flags);
+                    pkg.packageName, pkg.installLocation, sizeBytes, flags);
             ret.multiArch = pkg.multiArch;
 
             return ret;
@@ -313,161 +311,73 @@ public class DefaultContainerService extends IntentService {
 
     private String copyPackageToContainerInner(PackageLite pkg, NativeLibraryHelper.Handle handle,
             String newCid, String key, boolean isExternal, boolean isForwardLocked,
-            String abiOverride) {
-        // TODO: extend to support copying all split APKs
-        if (!ArrayUtils.isEmpty(pkg.splitNames)) {
-            throw new UnsupportedOperationException("Copying split APKs not yet supported");
-        }
+            String abiOverride) throws IOException {
 
-        final String resFileName = "pkg.apk";
-        final String publicResFileName = "res.zip";
-
-        if (pkg.multiArch) {
-            // TODO: Support multiArch installs on ASEC.
-            throw new IllegalArgumentException("multiArch not supported on ASEC installs.");
-        }
-
-        // The .apk file
-        final String codePath = pkg.baseCodePath;
-        final File codeFile = new File(codePath);
-        final String[] abis;
-        try {
-            abis = calculateAbiList(handle, abiOverride, pkg.multiArch);
-        } catch (IOException ioe) {
-            Slog.w(TAG, "Problem determining app ABIS: " + ioe);
-            return null;
-        }
-
-        // Calculate size of container needed to hold base APK. Round up to
-        // nearest MB, and tack on an extra MB for filesystem overhead.
-        final int sizeMb;
-        try {
-            final long sizeBytes = calculateInstalledSizeInner(pkg, handle, isForwardLocked, abis);
-            sizeMb = ((int) ((sizeBytes + MB_IN_BYTES) / MB_IN_BYTES)) + 1;
-        } catch (IOException e) {
-            Slog.w(TAG, "Problem when trying to copy " + codeFile.getPath());
-            return null;
-        }
+        // Calculate container size, rounding up to nearest MB and adding an
+        // extra MB for filesystem overhead
+        final long sizeBytes = calculateInstalledSizeInner(pkg, handle, isForwardLocked,
+                abiOverride);
+        final int sizeMb = ((int) ((sizeBytes + MB_IN_BYTES) / MB_IN_BYTES)) + 1;
 
         // Create new container
-        final String newCachePath = PackageHelper.createSdDir(sizeMb, newCid, key, Process.myUid(),
+        final String newMountPath = PackageHelper.createSdDir(sizeMb, newCid, key, Process.myUid(),
                 isExternal);
-        if (newCachePath == null) {
-            Slog.e(TAG, "Failed to create container " + newCid);
-            return null;
+        if (newMountPath == null) {
+            throw new IOException("Failed to create container " + newCid);
         }
-
-        if (localLOGV) {
-            Slog.i(TAG, "Created container for " + newCid + " at path : " + newCachePath);
-        }
-
-        final File resFile = new File(newCachePath, resFileName);
-        if (FileUtils.copyFile(new File(codePath), resFile)) {
-            if (localLOGV) {
-                Slog.i(TAG, "Copied " + codePath + " to " + resFile);
-            }
-        } else {
-            Slog.e(TAG, "Failed to copy " + codePath + " to " + resFile);
-            // Clean up container
-            PackageHelper.destroySdDir(newCid);
-            return null;
-        }
+        final File targetDir = new File(newMountPath);
 
         try {
-            Os.chmod(resFile.getAbsolutePath(), 0640);
+            // Copy all APKs
+            copyFile(pkg.baseCodePath, targetDir, "base.apk", isForwardLocked);
+            if (!ArrayUtils.isEmpty(pkg.splitNames)) {
+                for (int i = 0; i < pkg.splitNames.length; i++) {
+                    copyFile(pkg.splitCodePaths[i], targetDir,
+                            "split_" + pkg.splitNames[i] + ".apk", isForwardLocked);
+                }
+            }
+
+            // Extract native code
+            final File libraryRoot = new File(targetDir, LIB_DIR_NAME);
+            final int res = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle, libraryRoot,
+                    abiOverride, pkg.multiArch);
+            if (res != PackageManager.INSTALL_SUCCEEDED) {
+                throw new IOException("Failed to extract native code, res=" + res);
+            }
+
+            if (!PackageHelper.finalizeSdDir(newCid)) {
+                throw new IOException("Failed to finalize " + newCid);
+            }
+
+            if (PackageHelper.isContainerMounted(newCid)) {
+                PackageHelper.unMountSdDir(newCid);
+            }
+
         } catch (ErrnoException e) {
-            Slog.e(TAG, "Could not chown APK: " + e.getMessage());
             PackageHelper.destroySdDir(newCid);
-            return null;
-        }
-
-        if (isForwardLocked) {
-            File publicZipFile = new File(newCachePath, publicResFileName);
-            try {
-                PackageHelper.extractPublicFiles(resFile.getAbsolutePath(), publicZipFile);
-                if (localLOGV) {
-                    Slog.i(TAG, "Copied resources to " + publicZipFile);
-                }
-            } catch (IOException e) {
-                Slog.e(TAG, "Could not chown public APK " + publicZipFile.getAbsolutePath() + ": "
-                        + e.getMessage());
-                PackageHelper.destroySdDir(newCid);
-                return null;
-            }
-
-            try {
-                Os.chmod(publicZipFile.getAbsolutePath(), 0644);
-            } catch (ErrnoException e) {
-                Slog.e(TAG, "Could not chown public resource file: " + e.getMessage());
-                PackageHelper.destroySdDir(newCid);
-                return null;
-            }
-        }
-
-        final File sharedLibraryDir = new File(newCachePath, LIB_DIR_NAME);
-        if (sharedLibraryDir.mkdir()) {
-            int ret = PackageManager.INSTALL_SUCCEEDED;
-            if (abis != null) {
-                // TODO(multiArch): Support multi-arch installs on asecs. Note that we are NOT
-                // using an ISA specific subdir here for now.
-                final String abi = abis[0];
-                ret = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle,
-                        sharedLibraryDir, abi);
-
-                if (ret != PackageManager.INSTALL_SUCCEEDED) {
-                    Slog.e(TAG, "Could not copy native libraries to " + sharedLibraryDir.getPath());
-                    PackageHelper.destroySdDir(newCid);
-                    return null;
-                }
-            }
-        } else {
-            Slog.e(TAG, "Could not create native lib directory: " + sharedLibraryDir.getPath());
+            throw e.rethrowAsIOException();
+        } catch (IOException e) {
             PackageHelper.destroySdDir(newCid);
-            return null;
+            throw e;
         }
 
-        if (!PackageHelper.finalizeSdDir(newCid)) {
-            Slog.e(TAG, "Failed to finalize " + newCid + " at path " + newCachePath);
-            // Clean up container
-            PackageHelper.destroySdDir(newCid);
-            return null;
-        }
-
-        if (localLOGV) {
-            Slog.i(TAG, "Finalized container " + newCid);
-        }
-
-        if (PackageHelper.isContainerMounted(newCid)) {
-            if (localLOGV) {
-                Slog.i(TAG, "Unmounting " + newCid + " at path " + newCachePath);
-            }
-
-            // Force a gc to avoid being killed.
-            Runtime.getRuntime().gc();
-            PackageHelper.unMountSdDir(newCid);
-        } else {
-            if (localLOGV) {
-                Slog.i(TAG, "Container " + newCid + " not mounted");
-            }
-        }
-
-        return newCachePath;
+        return newMountPath;
     }
 
     private int copyPackageInner(PackageLite pkg, IParcelFileDescriptorFactory target)
             throws IOException, RemoteException {
-        copyFile(pkg.baseCodePath, "base.apk", target);
+        copyFile(pkg.baseCodePath, target, "base.apk");
         if (!ArrayUtils.isEmpty(pkg.splitNames)) {
             for (int i = 0; i < pkg.splitNames.length; i++) {
-                copyFile(pkg.splitCodePaths[i], "split_" + pkg.splitNames[i] + ".apk", target);
+                copyFile(pkg.splitCodePaths[i], target, "split_" + pkg.splitNames[i] + ".apk");
             }
         }
 
         return PackageManager.INSTALL_SUCCEEDED;
     }
 
-    private void copyFile(String sourcePath, String targetName,
-            IParcelFileDescriptorFactory target) throws IOException, RemoteException {
+    private void copyFile(String sourcePath, IParcelFileDescriptorFactory target, String targetName)
+            throws IOException, RemoteException {
         Slog.d(TAG, "Copying " + sourcePath + " to " + targetName);
         InputStream in = null;
         OutputStream out = null;
@@ -482,76 +392,58 @@ public class DefaultContainerService extends IntentService {
         }
     }
 
+    private void copyFile(String sourcePath, File targetDir, String targetName,
+            boolean isForwardLocked) throws IOException, ErrnoException {
+        final File sourceFile = new File(sourcePath);
+        final File targetFile = new File(targetDir, targetName);
+
+        Slog.d(TAG, "Copying " + sourceFile + " to " + targetFile);
+        if (!FileUtils.copyFile(sourceFile, targetFile)) {
+            throw new IOException("Failed to copy " + sourceFile + " to " + targetFile);
+        }
+
+        if (isForwardLocked) {
+            final String publicTargetName = PackageHelper.replaceEnd(targetName,
+                    ".apk", ".zip");
+            final File publicTargetFile = new File(targetDir, publicTargetName);
+
+            PackageHelper.extractPublicFiles(sourceFile, publicTargetFile);
+
+            Os.chmod(targetFile.getAbsolutePath(), 0640);
+            Os.chmod(publicTargetFile.getAbsolutePath(), 0644);
+        } else {
+            Os.chmod(targetFile.getAbsolutePath(), 0644);
+        }
+    }
+
     private long calculateInstalledSizeInner(PackageLite pkg, boolean isForwardLocked,
             String abiOverride) throws IOException {
         NativeLibraryHelper.Handle handle = null;
         try {
             handle = NativeLibraryHelper.Handle.create(pkg);
-            return calculateInstalledSizeInner(pkg, handle, isForwardLocked,
-                    calculateAbiList(handle, abiOverride, pkg.multiArch));
+            return calculateInstalledSizeInner(pkg, handle, isForwardLocked, abiOverride);
         } finally {
             IoUtils.closeQuietly(handle);
         }
     }
 
     private long calculateInstalledSizeInner(PackageLite pkg, NativeLibraryHelper.Handle handle,
-            boolean isForwardLocked, String[] abis) throws IOException {
+            boolean isForwardLocked, String abiOverride) throws IOException {
         long sizeBytes = 0;
 
         // Include raw APKs, and possibly unpacked resources
         for (String codePath : pkg.getAllCodePaths()) {
-            sizeBytes += new File(codePath).length();
+            final File codeFile = new File(codePath);
+            sizeBytes += codeFile.length();
 
             if (isForwardLocked) {
-                sizeBytes += PackageHelper.extractPublicFiles(codePath, null);
+                sizeBytes += PackageHelper.extractPublicFiles(codeFile, null);
             }
         }
 
         // Include all relevant native code
-        if (!ArrayUtils.isEmpty(abis)) {
-            sizeBytes += NativeLibraryHelper.sumNativeBinariesLI(handle, abis);
-        }
+        sizeBytes += NativeLibraryHelper.sumNativeBinaries(handle, abiOverride, pkg.multiArch);
 
         return sizeBytes;
-    }
-
-    private String[] calculateAbiList(NativeLibraryHelper.Handle handle, String abiOverride,
-                                      boolean isMultiArch) throws IOException {
-        if (isMultiArch) {
-            final int abi32 = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_32_BIT_ABIS);
-            final int abi64 = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_64_BIT_ABIS);
-
-            if (abi32 >= 0 && abi64 >= 0) {
-                return new String[] { Build.SUPPORTED_64_BIT_ABIS[abi64], Build.SUPPORTED_32_BIT_ABIS[abi32] };
-            } else if (abi64 >= 0) {
-                return new String[] { Build.SUPPORTED_64_BIT_ABIS[abi64] };
-            } else if (abi32 >= 0) {
-                return new String[] { Build.SUPPORTED_32_BIT_ABIS[abi32] };
-            }
-
-            if (abi64 != PackageManager.NO_NATIVE_LIBRARIES || abi32 != PackageManager.NO_NATIVE_LIBRARIES) {
-                throw new IOException("Error determining ABI list: errorCode=[" + abi32 + "," + abi64 + "]");
-            }
-
-        } else {
-            String[] abiList = Build.SUPPORTED_ABIS;
-            if (abiOverride != null) {
-                abiList = new String[] { abiOverride };
-            } else if (Build.SUPPORTED_64_BIT_ABIS.length > 0 &&
-                    NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
-                abiList = Build.SUPPORTED_32_BIT_ABIS;
-            }
-
-            final int abi = NativeLibraryHelper.findSupportedAbi(handle,abiList);
-            if (abi >= 0) {
-               return new String[]{Build.SUPPORTED_ABIS[abi]};
-            }
-
-            if (abi != PackageManager.NO_NATIVE_LIBRARIES) {
-                throw new IOException("Error determining ABI list: errorCode=" + abi);
-            }
-        }
-
-        return null;
     }
 }

@@ -105,10 +105,14 @@ public class PackageInstaller {
     public static final String EXTRA_STATUS_MESSAGE = "android.content.pm.extra.STATUS_MESSAGE";
 
     /**
-     * List of package names that are relevant to a status.
+     * Package name relevant to a status.
      *
-     * @see Intent#getStringArrayExtra(String)
+     * @see Intent#getStringExtra(String)
      */
+    public static final String EXTRA_PACKAGE_NAME = "android.content.pm.extra.PACKAGE_NAME";
+
+    /** {@hide} */
+    @Deprecated
     public static final String EXTRA_PACKAGE_NAMES = "android.content.pm.extra.PACKAGE_NAMES";
 
     /** {@hide} */
@@ -178,8 +182,8 @@ public class PackageInstaller {
      * permission, incompatible certificates, etc. The user may be able to
      * uninstall another app to fix the issue.
      * <p>
-     * The result may also contain {@link #EXTRA_PACKAGE_NAMES} with the
-     * specific packages identified as the cause of the conflict.
+     * The result may also contain {@link #EXTRA_PACKAGE_NAME} with the
+     * specific package identified as the cause of the conflict.
      *
      * @see #EXTRA_STATUS_MESSAGE
      */
