@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.hardware.input.InputManager;
+import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -33,9 +34,13 @@ import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
+
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
 public class KeyButtonView extends ImageView {
     private static final String TAG = "StatusBar.KeyButtonView";
@@ -93,6 +98,35 @@ public class KeyButtonView extends ImageView {
 
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        if (mCode != 0) {
+            info.addAction(new AccessibilityNodeInfo.AccessibilityAction(ACTION_CLICK, null));
+            if (mSupportsLongpress) {
+                info.addAction(
+                        new AccessibilityNodeInfo.AccessibilityAction(ACTION_LONG_CLICK, null));
+            }
+        }
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        if (action == ACTION_CLICK && mCode != 0) {
+            sendEvent(KeyEvent.ACTION_DOWN, 0, SystemClock.uptimeMillis());
+            sendEvent(KeyEvent.ACTION_UP, 0);
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+            playSoundEffect(SoundEffectConstants.CLICK);
+            return true;
+        } else if (action == ACTION_LONG_CLICK && mCode != 0 && mSupportsLongpress) {
+            sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
+            sendEvent(KeyEvent.ACTION_UP, 0);
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
+            return true;
+        }
+        return super.performAccessibilityAction(action, arguments);
     }
 
     public void setQuiescentAlpha(float alpha, boolean animate) {
