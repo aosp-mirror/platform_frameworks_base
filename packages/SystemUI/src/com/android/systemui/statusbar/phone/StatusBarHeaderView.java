@@ -700,6 +700,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             final boolean showingDetail = detail != null;
             transition(mClock, !showingDetail);
             transition(mDateGroup, !showingDetail);
+            transition(mAlarmStatus, !showingDetail);
             transition(mQsDetailHeader, showingDetail);
             if (showingDetail) {
                 mQsDetailHeaderTitle.setText(detail.getTitle());
