@@ -41,8 +41,8 @@ public final class ParcelableConnection implements Parcelable {
     private boolean mRequestingRingback;
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
-    private int mFailureCode;
-    private String mFailureMessage;
+    private int mDisconnectCause;
+    private String mDisconnectMessage;
 
     /** @hide */
     public ParcelableConnection(
@@ -58,8 +58,8 @@ public final class ParcelableConnection implements Parcelable {
             boolean requestingRingback,
             boolean audioModeIsVoip,
             StatusHints statusHints,
-            int failureCode,
-            String failureMessage) {
+            int disconnectCause,
+            String disconnectMessage) {
         mPhoneAccount = phoneAccount;
         mState = state;
         mCapabilities = capabilities;
@@ -72,8 +72,8 @@ public final class ParcelableConnection implements Parcelable {
         mRequestingRingback = requestingRingback;
         mAudioModeIsVoip = audioModeIsVoip;
         mStatusHints = statusHints;
-        mFailureCode = failureCode;
-        mFailureMessage = failureMessage;
+        mDisconnectCause = disconnectCause;
+        mDisconnectMessage = disconnectMessage;
     }
 
     public PhoneAccountHandle getPhoneAccount() {
@@ -125,12 +125,12 @@ public final class ParcelableConnection implements Parcelable {
         return mStatusHints;
     }
 
-    public final int getFailureCode() {
-        return mFailureCode;
+    public final int getDisconnectCause() {
+        return mDisconnectCause;
     }
 
-    public final String getFailureMessage() {
-        return mFailureMessage;
+    public final String getDisconnectMessage() {
+        return mDisconnectMessage;
     }
 
     @Override
@@ -212,7 +212,7 @@ public final class ParcelableConnection implements Parcelable {
         destination.writeByte((byte) (mRequestingRingback ? 1 : 0));
         destination.writeByte((byte) (mAudioModeIsVoip ? 1 : 0));
         destination.writeParcelable(mStatusHints, 0);
-        destination.writeInt(mFailureCode);
-        destination.writeString(mFailureMessage);
+        destination.writeInt(mDisconnectCause);
+        destination.writeString(mDisconnectMessage);
     }
 }
