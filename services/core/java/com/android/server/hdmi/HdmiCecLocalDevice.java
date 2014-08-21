@@ -691,6 +691,7 @@ abstract class HdmiCecLocalDevice {
             mActiveSource.logicalAddress = logicalAddress;
             mActiveSource.physicalAddress = physicalAddress;
         }
+        mService.setLastInputForMhl(Constants.INVALID_PORT_ID);
     }
 
     int getActivePath() {

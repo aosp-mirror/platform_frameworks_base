@@ -243,6 +243,9 @@ public final class HdmiControlService extends SystemService {
     // Map from port ID to HdmiPortInfo.
     private UnmodifiableSparseArray<HdmiPortInfo> mPortInfoMap;
 
+    // Map from port ID to HdmiDeviceInfo.
+    private UnmodifiableSparseArray<HdmiDeviceInfo> mPortDeviceMap;
+
     private HdmiCecMessageValidator mMessageValidator;
 
     private final HdmiControlBroadcastReceiver
@@ -262,6 +265,12 @@ public final class HdmiControlService extends SystemService {
 
     @ServiceThreadOnly
     private int mActivePortId = Constants.INVALID_PORT_ID;
+
+    // Last input port before switching to the MHL port by way of incoming request RAP[ContentOn].
+    // Should switch back to this port when the device sends RAP[ContentOff].
+    // Gets invalidated if we go to other port/input.
+    @ServiceThreadOnly
+    private int mLastInputMhl = Constants.INVALID_PORT_ID;
 
     public HdmiControlService(Context context) {
         super(context);
@@ -474,12 +483,15 @@ public final class HdmiControlService extends SystemService {
 
         SparseArray<HdmiPortInfo> portInfoMap = new SparseArray<>();
         SparseIntArray portIdMap = new SparseIntArray();
+        SparseArray<HdmiDeviceInfo> portDeviceMap = new SparseArray<>();
         for (HdmiPortInfo info : cecPortInfo) {
             portIdMap.put(info.getAddress(), info.getId());
             portInfoMap.put(info.getId(), info);
+            portDeviceMap.put(info.getId(), new HdmiDeviceInfo(info.getAddress(), info.getId()));
         }
         mPortIdMap = new UnmodifiableSparseIntArray(portIdMap);
         mPortInfoMap = new UnmodifiableSparseArray<>(portInfoMap);
+        mPortDeviceMap = new UnmodifiableSparseArray<>(portDeviceMap);
 
         if (mMhlController == null) {
             mPortInfo = Collections.unmodifiableList(Arrays.asList(cecPortInfo));
@@ -1020,6 +1032,10 @@ public final class HdmiControlService extends SystemService {
                     if (mMhlController != null) {
                         HdmiMhlLocalDevice device = mMhlController.getLocalDeviceById(deviceId);
                         if (device != null) {
+                            if (device.getPortId() == tv.getActivePortId()) {
+                                invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
+                                return;
+                            }
                             // Upon selecting MHL device, we send RAP[Content On] to wake up
                             // the connected mobile device, start routing control to switch ports.
                             // callback is handled by MHL action.
@@ -1838,9 +1854,60 @@ public final class HdmiControlService extends SystemService {
     void setActivePortId(int portId) {
         assertRunOnServiceThread();
         mActivePortId = portId;
+
+        // Resets last input for MHL, which stays valid only after the MHL device was selected,
+        // and no further switching is done.
+        setLastInputForMhl(Constants.INVALID_PORT_ID);
     }
 
-    void setMhlInputChangeEnabled(boolean enabled) {
+    @ServiceThreadOnly
+    void setLastInputForMhl(int portId) {
+        assertRunOnServiceThread();
+        mLastInputMhl = portId;
+    }
+
+    @ServiceThreadOnly
+    int getLastInputForMhl() {
+        assertRunOnServiceThread();
+        return mLastInputMhl;
+    }
+
+    /**
+     * Performs input change, routing control for MHL device.
+     *
+     * @param portId MHL port, or the last port to go back to if {@code contentOn} is false
+     * @param contentOn {@code true} if RAP data is content on; otherwise false
+     */
+    @ServiceThreadOnly
+    void changeInputForMhl(int portId, boolean contentOn) {
+        assertRunOnServiceThread();
+        final int lastInput = contentOn ? tv().getActivePortId() : Constants.INVALID_PORT_ID;
+        tv().doManualPortSwitching(portId, new IHdmiControlCallback.Stub() {
+            @Override
+            public void onComplete(int result) throws RemoteException {
+                // Keep the last input to switch back later when RAP[ContentOff] is received.
+                // This effectively sets the port to invalid one if the switching is for
+                // RAP[ContentOff].
+                setLastInputForMhl(lastInput);
+            }
+        });
+
+        // MHL device is always directly connected to the port. Update the active port ID to avoid
+        // unnecessary post-routing control task.
+        tv().setActivePortId(portId);
+
+        // The port is either the MHL-enabled port where the mobile device is connected, or
+        // the last port to go back to when RAP[ContentOff] is received. Note that the last port
+        // may not be the MHL-enabled one. In this case the device info to be passed to
+        // input change listener should be the one describing the corresponding HDMI port.
+        HdmiMhlLocalDevice device = mMhlController.getLocalDevice(portId);
+        HdmiDeviceInfo info = (device != null && device.getInfo() != null)
+                ? device.getInfo()
+                : mPortDeviceMap.get(portId);
+        invokeInputChangeListener(info);
+    }
+
+   void setMhlInputChangeEnabled(boolean enabled) {
         if (mMhlController != null) {
             mMhlController.setOption(OPTION_MHL_INPUT_SWITCHING, toInt(enabled));
         }
