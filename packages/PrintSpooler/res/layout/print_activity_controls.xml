@@ -24,241 +24,215 @@
     android:elevation="@dimen/preview_controls_elevation"
     android:background="?android:attr/colorPrimary">
 
-        <LinearLayout
-         android:id="@+id/draggable_content"
-         android:layout_width="fill_parent"
-         android:layout_height="wrap_content"
-         android:orientation="vertical">
+    <LinearLayout
+        android:id="@+id/draggable_content"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-         <com.android.printspooler.widget.PrintOptionsLayout
-             android:id="@+id/options_container"
-             android:layout_width="fill_parent"
-             android:layout_height="wrap_content"
-             printspooler:columnCount="@integer/print_option_column_count">
+        <com.android.printspooler.widget.PrintOptionsLayout
+            android:id="@+id/options_container"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            printspooler:columnCount="@integer/print_option_column_count">
 
-             <LinearLayout
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:layout_marginStart="16dip"
-                 android:layout_marginEnd="16dip"
-                 android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dip"
+                android:layout_marginEnd="16dip"
+                android:orientation="vertical">
 
-                 <!-- Copies -->
+                <!-- Copies -->
 
-                 <TextView
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="8dip"
-                     android:layout_marginStart="12dip"
-                     android:textAppearance="?android:attr/textAppearanceSmall"
-                     android:labelFor="@+id/copies_edittext"
-                     android:text="@string/label_copies">
-                 </TextView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dip"
+                    android:layout_marginStart="12dip"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:labelFor="@+id/copies_edittext"
+                    android:text="@string/label_copies">
+                </TextView>
 
-                 <view
-                     class="com.android.printspooler.widget.FirstFocusableEditText"
-                     android:id="@+id/copies_edittext"
-                     android:layout_width="fill_parent"
-                     android:layout_height="wrap_content"
-                     style="?android:attr/editTextStyle"
-                     android:singleLine="true"
-                     android:ellipsize="end"
-                     android:inputType="numberDecimal">
-                 </view>
+                <view
+                    class="com.android.printspooler.widget.FirstFocusableEditText"
+                    android:id="@+id/copies_edittext"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    style="?android:attr/editTextStyle"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:inputType="numberDecimal">
+                </view>
 
-             </LinearLayout>
+            </LinearLayout>
 
-             <LinearLayout
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:layout_marginStart="16dip"
-                 android:layout_marginEnd="16dip"
-                 android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dip"
+                android:layout_marginEnd="16dip"
+                android:orientation="vertical">
 
-                 <!-- Paper size -->
+                <!-- Paper size -->
 
-                 <TextView
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="8dip"
-                     android:layout_marginStart="12dip"
-                     android:textAppearance="?android:attr/textAppearanceSmall"
-                     android:labelFor="@+id/paper_size_spinner"
-                     android:text="@string/label_paper_size">
-                 </TextView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dip"
+                    android:layout_marginStart="12dip"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:labelFor="@+id/paper_size_spinner"
+                    android:text="@string/label_paper_size">
+                </TextView>
 
-                 <Spinner
-                     android:id="@+id/paper_size_spinner"
-                     android:layout_width="fill_parent"
-                     android:layout_height="wrap_content">
-                 </Spinner>
+                <Spinner
+                    android:id="@+id/paper_size_spinner"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content">
+                </Spinner>
 
-             </LinearLayout>
+            </LinearLayout>
 
-             <LinearLayout
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:layout_marginStart="16dip"
-                 android:layout_marginEnd="16dip"
-                 android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dip"
+                android:layout_marginEnd="16dip"
+                android:orientation="vertical">
 
-                 <!-- Color -->
+                <!-- Color -->
 
-                 <TextView
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="8dip"
-                     android:layout_marginStart="12dip"
-                     android:textAppearance="?android:attr/textAppearanceSmall"
-                     android:labelFor="@+id/color_spinner"
-                     android:text="@string/label_color">
-                 </TextView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dip"
+                    android:layout_marginStart="12dip"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:labelFor="@+id/color_spinner"
+                    android:text="@string/label_color">
+                </TextView>
 
-                 <Spinner
-                     android:id="@+id/color_spinner"
-                     android:layout_width="fill_parent"
-                     android:layout_height="wrap_content">
-                 </Spinner>
+                <Spinner
+                    android:id="@+id/color_spinner"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content">
+                </Spinner>
 
-             </LinearLayout>
+            </LinearLayout>
 
-             <LinearLayout
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:layout_marginStart="16dip"
-                 android:layout_marginEnd="16dip"
-                 android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dip"
+                android:layout_marginEnd="16dip"
+                android:orientation="vertical">
 
-                 <!-- Orientation -->
+                <!-- Orientation -->
 
-                 <TextView
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="8dip"
-                     android:layout_marginStart="12dip"
-                     android:textAppearance="?android:attr/textAppearanceSmall"
-                     android:labelFor="@+id/orientation_spinner"
-                     android:text="@string/label_orientation">
-                 </TextView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dip"
+                    android:layout_marginStart="12dip"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:labelFor="@+id/orientation_spinner"
+                    android:text="@string/label_orientation">
+                </TextView>
 
-                 <Spinner
-                     android:id="@+id/orientation_spinner"
-                     android:layout_width="fill_parent"
-                     android:layout_height="wrap_content">
-                 </Spinner>
+                <Spinner
+                    android:id="@+id/orientation_spinner"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content">
+                </Spinner>
 
-             </LinearLayout>
+            </LinearLayout>
 
-             <LinearLayout
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:layout_marginStart="16dip"
-                 android:layout_marginEnd="16dip"
-                 android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dip"
+                android:layout_marginEnd="16dip"
+                android:orientation="vertical">
 
-                 <!-- Range options -->
+                <!-- Range options -->
 
-                 <TextView
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="8dip"
-                     android:layout_marginStart="12dip"
-                     android:textAppearance="?android:attr/textAppearanceSmall"
-                     android:labelFor="@+id/range_options_spinner"
-                     android:text="@string/label_pages">
-                 </TextView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dip"
+                    android:layout_marginStart="12dip"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:labelFor="@+id/range_options_spinner"
+                    android:text="@string/label_pages">
+                </TextView>
 
-                 <Spinner
-                     android:id="@+id/range_options_spinner"
-                     android:layout_width="fill_parent"
-                     android:layout_height="wrap_content">
-                 </Spinner>
+                <Spinner
+                    android:id="@+id/range_options_spinner"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content">
+                </Spinner>
 
-             </LinearLayout>
+            </LinearLayout>
 
-             <LinearLayout
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:layout_marginStart="16dip"
-                 android:layout_marginEnd="16dip"
-                 android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dip"
+                android:layout_marginEnd="16dip"
+                android:orientation="vertical">
 
-                 <!-- Pages -->
+                <!-- Pages -->
 
-                 <TextView
-                     android:id="@+id/page_range_title"
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="8dip"
-                     android:layout_marginStart="12dip"
-                     android:textAppearance="?android:attr/textAppearanceSmall"
-                     android:text="@string/pages_range_example"
-                     android:labelFor="@+id/page_range_edittext"
-                     android:textAllCaps="false"
-                     android:visibility="visible">
-                 </TextView>
+                <TextView
+                    android:id="@+id/page_range_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dip"
+                    android:layout_marginStart="12dip"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="@string/pages_range_example"
+                    android:labelFor="@+id/page_range_edittext"
+                    android:textAllCaps="false"
+                    android:visibility="visible">
+                </TextView>
 
-                 <view
-                     class="com.android.printspooler.widget.FirstFocusableEditText"
-                     android:id="@+id/page_range_edittext"
-                     android:layout_width="fill_parent"
-                     android:layout_height="wrap_content"
-                     android:layout_gravity="bottom|fill_horizontal"
-                     android:singleLine="true"
-                     android:ellipsize="end"
-                     android:visibility="visible"
-                     android:inputType="textNoSuggestions">
-                 </view>
+                <view
+                    class="com.android.printspooler.widget.FirstFocusableEditText"
+                    android:id="@+id/page_range_edittext"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|fill_horizontal"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:visibility="visible"
+                    android:inputType="textNoSuggestions">
+                </view>
 
-             </LinearLayout>
+            </LinearLayout>
 
-         </com.android.printspooler.widget.PrintOptionsLayout>
+        </com.android.printspooler.widget.PrintOptionsLayout>
 
-         <!-- More options -->
+        <!-- More options -->
 
-         <LinearLayout
-             android:id="@+id/more_options_container"
-             android:layout_width="fill_parent"
-             android:layout_height="wrap_content"
-             android:paddingStart="28dip"
-             android:paddingEnd="28dip"
-             android:orientation="vertical"
-             android:visibility="visible">
+        <Button
+            android:id="@+id/more_options_button"
+            style="?android:attr/borderlessButtonStyle"
+            android:textColor="?android:attr/textColorPrimary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dip"
+            android:layout_marginEnd="16dip"
+            android:text="@string/more_options_button"
+            android:gravity="start|center_vertical">
+        </Button>
 
-             <ImageView
-                 android:layout_width="fill_parent"
-                 android:layout_height="1dip"
-                 android:layout_gravity="fill_horizontal"
-                 android:background="?android:attr/colorControlNormal"
-                 android:contentDescription="@null">
-             </ImageView>
+    </LinearLayout>
 
-             <Button
-                 android:id="@+id/more_options_button"
-                 style="?android:attr/borderlessButtonStyle"
-                 android:layout_width="fill_parent"
-                 android:layout_height="wrap_content"
-                 android:layout_gravity="fill_horizontal"
-                 android:text="@string/more_options_button"
-                 android:gravity="start|center_vertical"
-                 android:textAllCaps="false">
-             </Button>
+    <!-- Expand/collapse handle -->
 
-             <ImageView
-                 android:layout_width="fill_parent"
-                 android:layout_height="1dip"
-                 android:layout_gravity="fill_horizontal"
-                 android:background="?android:attr/colorControlNormal"
-                 android:contentDescription="@null">
-             </ImageView>
-
-         </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- Expand/collapse handle -->
-
-        <FrameLayout
+    <FrameLayout
          android:id="@+id/expand_collapse_handle"
          android:layout_width="fill_parent"
          android:layout_height="wrap_content">
