@@ -4737,17 +4737,16 @@ public final class Settings {
 
         /**
          * List of TV inputs that are currently hidden. This is a string
-         * containing the IDs of all hidden TV inputs. Each ID is separated by ':'.
-         *
+         * containing the IDs of all hidden TV inputs. Each ID is encoded by
+         * {@link android.net.Uri#encode(String)} and separated by ':'.
          * @hide
          */
         public static final String TV_INPUT_HIDDEN_INPUTS = "tv_input_hidden_inputs";
 
         /**
          * List of custom TV input labels. This is a string containing <TV input id, custom name>
-         * pairs. Each pair is separated by ':' and TV input id and custom name are separated by
-         * ','.
-         *
+         * pairs. TV input id and custom name are encoded by {@link android.net.Uri#encode(String)}
+         * and separated by ','. Each pair is separated by ':'.
          * @hide
          */
         public static final String TV_INPUT_CUSTOM_LABELS = "tv_input_custom_labels";
