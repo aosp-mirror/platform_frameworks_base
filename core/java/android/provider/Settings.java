@@ -2674,6 +2674,9 @@ public final class Settings {
          */
         public static final String[] CLONE_TO_MANAGED_PROFILE = {
             DATE_FORMAT,
+            HAPTIC_FEEDBACK_ENABLED,
+            SOUND_EFFECTS_ENABLED,
+            TEXT_SHOW_PASSWORD,
             TIME_12_24
         };
 
