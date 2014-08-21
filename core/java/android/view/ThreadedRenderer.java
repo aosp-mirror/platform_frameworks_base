@@ -332,6 +332,11 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
+    void buildLayer(RenderNode node) {
+        nBuildLayer(mNativeProxy, node.getNativeDisplayList());
+    }
+
+    @Override
     boolean copyLayerInto(final HardwareLayer layer, final Bitmap bitmap) {
         return nCopyLayerInto(mNativeProxy,
                 layer.getDeferredLayerUpdater(), bitmap.mNativeBitmap);
@@ -468,6 +473,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private static native long nCreateDisplayListLayer(long nativeProxy, int width, int height);
     private static native long nCreateTextureLayer(long nativeProxy);
+    private static native void nBuildLayer(long nativeProxy, long node);
     private static native boolean nCopyLayerInto(long nativeProxy, long layer, long bitmap);
     private static native void nPushLayerUpdate(long nativeProxy, long layer);
     private static native void nCancelLayerUpdate(long nativeProxy, long layer);

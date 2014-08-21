@@ -264,6 +264,13 @@ static jlong android_view_ThreadedRenderer_createTextureLayer(JNIEnv* env, jobje
     return reinterpret_cast<jlong>(layer);
 }
 
+static void android_view_ThreadedRenderer_buildLayer(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jlong nodePtr) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    RenderNode* node = reinterpret_cast<RenderNode*>(nodePtr);
+    proxy->buildLayer(node);
+}
+
 static jboolean android_view_ThreadedRenderer_copyLayerInto(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlong layerPtr, jlong bitmapPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -367,6 +374,7 @@ static JNINativeMethod gMethods[] = {
     { "nInvokeFunctor", "(JZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
     { "nCreateDisplayListLayer", "(JII)J", (void*) android_view_ThreadedRenderer_createDisplayListLayer },
     { "nCreateTextureLayer", "(J)J", (void*) android_view_ThreadedRenderer_createTextureLayer },
+    { "nBuildLayer", "(JJ)V", (void*) android_view_ThreadedRenderer_buildLayer },
     { "nCopyLayerInto", "(JJJ)Z", (void*) android_view_ThreadedRenderer_copyLayerInto },
     { "nPushLayerUpdate", "(JJ)V", (void*) android_view_ThreadedRenderer_pushLayerUpdate },
     { "nCancelLayerUpdate", "(JJ)V", (void*) android_view_ThreadedRenderer_cancelLayerUpdate },

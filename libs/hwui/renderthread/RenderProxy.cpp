@@ -284,6 +284,18 @@ DeferredLayerUpdater* RenderProxy::createTextureLayer() {
     return layer;
 }
 
+CREATE_BRIDGE2(buildLayer, CanvasContext* context, RenderNode* node) {
+    args->context->buildLayer(args->node);
+    return NULL;
+}
+
+void RenderProxy::buildLayer(RenderNode* node) {
+    SETUP_TASK(buildLayer);
+    args->context = mContext;
+    args->node = node;
+    postAndWait(task);
+}
+
 CREATE_BRIDGE3(copyLayerInto, CanvasContext* context, DeferredLayerUpdater* layer,
         SkBitmap* bitmap) {
     bool success = args->context->copyLayerInto(args->layer, args->bitmap);
