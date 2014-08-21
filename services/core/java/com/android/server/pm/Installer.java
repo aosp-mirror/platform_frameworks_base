@@ -61,17 +61,7 @@ public final class Installer extends SystemService {
             return -1;
         }
 
-        StringBuilder builder = new StringBuilder("patchoat");
-        builder.append(' ');
-        builder.append(apkPath);
-        builder.append(' ');
-        builder.append(uid);
-        builder.append(isPublic ? " 1" : " 0");
-        builder.append(' ');
-        builder.append(pkgName);
-        builder.append(' ');
-        builder.append(instructionSet);
-        return mInstaller.execute(builder.toString());
+        return mInstaller.patchoat(apkPath, uid, isPublic, pkgName, instructionSet);
     }
 
     public int patchoat(String apkPath, int uid, boolean isPublic, String instructionSet) {
@@ -93,23 +83,13 @@ public final class Installer extends SystemService {
     }
 
     public int dexopt(String apkPath, int uid, boolean isPublic, String pkgName,
-            String instructionSet) {
+            String instructionSet, boolean vmSafeMode) {
         if (!isValidInstructionSet(instructionSet)) {
             Slog.e(TAG, "Invalid instruction set: " + instructionSet);
             return -1;
         }
 
-        StringBuilder builder = new StringBuilder("dexopt");
-        builder.append(' ');
-        builder.append(apkPath);
-        builder.append(' ');
-        builder.append(uid);
-        builder.append(isPublic ? " 1" : " 0");
-        builder.append(' ');
-        builder.append(pkgName);
-        builder.append(' ');
-        builder.append(instructionSet);
-        return mInstaller.execute(builder.toString());
+        return mInstaller.dexopt(apkPath, uid, isPublic, pkgName, instructionSet, vmSafeMode);
     }
 
     public int idmap(String targetApkPath, String overlayApkPath, int uid) {
