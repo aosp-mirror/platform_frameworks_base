@@ -1470,6 +1470,12 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             case 320:
                 parts.add("xhdpi");
                 break;
+            case 480:
+                parts.add("xxhdpi");
+                break;
+            case 640:
+                parts.add("xxxhdpi");
+                break;
             default:
                 parts.add(config.densityDpi + "dpi");
                 break;
@@ -1542,7 +1548,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 break;
         }
 
-        parts.add("v" + Build.VERSION.SDK_INT);
+        parts.add("v" + Build.VERSION.RESOURCES_SDK_INT);
         return TextUtils.join("-", parts);
     }
 }
