@@ -126,3 +126,38 @@ TEST(WeakResourceFilterTest, MatchesConfigWithRegion) {
     EXPECT_TRUE(filter.match(config));
 }
 
+TEST(StrongResourceFilterTest, MatchesDensities) {
+    ConfigDescription config;
+    config.density = 160;
+    config.version = 4;
+    std::set<ConfigDescription> configs;
+    configs.insert(config);
+
+    StrongResourceFilter filter(configs);
+
+    ConfigDescription expectedConfig;
+    expectedConfig.density = 160;
+    expectedConfig.version = 4;
+    ASSERT_TRUE(filter.match(expectedConfig));
+}
+
+TEST(StrongResourceFilterTest, MatchOnlyMdpiAndExcludeAllOthers) {
+    std::set<ConfigDescription> configsToMatch;
+    ConfigDescription config;
+    config.density = 160;
+    config.version = 4;
+    configsToMatch.insert(config);
+
+    std::set<ConfigDescription> configsToNotMatch;
+    config.density = 480;
+    configsToNotMatch.insert(config);
+
+    AndResourceFilter filter;
+    filter.addFilter(new InverseResourceFilter(new StrongResourceFilter(configsToNotMatch)));
+    filter.addFilter(new StrongResourceFilter(configsToMatch));
+
+    ConfigDescription expectedConfig;
+    expectedConfig.density = 160;
+    expectedConfig.version = 4;
+    ASSERT_TRUE(filter.match(expectedConfig));
+}
