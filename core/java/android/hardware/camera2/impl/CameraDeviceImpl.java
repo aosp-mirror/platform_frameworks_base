@@ -312,10 +312,33 @@ public class CameraDeviceImpl extends CameraDevice {
     }
 
     public void configureOutputs(List<Surface> outputs) throws CameraAccessException {
+        // Leave this here for backwards compatibility with older code using this directly
+        configureOutputsChecked(outputs);
+    }
+
+    /**
+     * Attempt to configure the outputs; the device goes to idle and then configures the
+     * new outputs if possible.
+     *
+     * <p>The configuration may gracefully fail, if there are too many outputs, if the formats
+     * are not supported, or if the sizes for that format is not supported. In this case this
+     * function will return {@code false} and the unconfigured callback will be fired.</p>
+     *
+     * <p>If the configuration succeeds (with 1 or more outputs), then the idle callback is fired.
+     * Unconfiguring the device always fires the idle callback.</p>
+     *
+     * @param outputs a list of one or more surfaces, or {@code null} to unconfigure
+     * @return whether or not the configuration was successful
+     *
+     * @throws CameraAccessException if there were any unexpected problems during configuration
+     */
+    public boolean configureOutputsChecked(List<Surface> outputs) throws CameraAccessException {
         // Treat a null input the same an empty list
         if (outputs == null) {
             outputs = new ArrayList<Surface>();
         }
+        boolean success = false;
+
         synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
 
@@ -355,7 +378,17 @@ public class CameraDeviceImpl extends CameraDevice {
                     mConfiguredOutputs.put(streamId, s);
                 }
 
-                mRemoteDevice.endConfigure();
+                try {
+                    mRemoteDevice.endConfigure();
+                }
+                catch (IllegalArgumentException e) {
+                    // OK. camera service can reject stream config if it's not supported by HAL
+                    // This is only the result of a programmer misusing the camera2 api.
+                    Log.e(TAG, "Stream configuration failed", e);
+                    return false;
+                }
+
+                success = true;
             } catch (CameraRuntimeException e) {
                 if (e.getReason() == CAMERA_IN_USE) {
                     throw new IllegalStateException("The camera is currently busy." +
@@ -365,15 +398,18 @@ public class CameraDeviceImpl extends CameraDevice {
                 throw e.asChecked();
             } catch (RemoteException e) {
                 // impossible
-                return;
-            }
-
-            if (outputs.size() > 0) {
-                mDeviceHandler.post(mCallOnIdle);
-            } else {
-                mDeviceHandler.post(mCallOnUnconfigured);
+                return false;
+            } finally {
+                if (success && outputs.size() > 0) {
+                    mDeviceHandler.post(mCallOnIdle);
+                } else {
+                    // Always return to the 'unconfigured' state if we didn't hit a fatal error
+                    mDeviceHandler.post(mCallOnUnconfigured);
+                }
             }
         }
+
+        return success;
     }
 
     @Override
@@ -397,7 +433,7 @@ public class CameraDeviceImpl extends CameraDevice {
             boolean configureSuccess = true;
             CameraAccessException pendingException = null;
             try {
-                configureOutputs(outputs); // and then block until IDLE
+                configureSuccess = configureOutputsChecked(outputs); // and then block until IDLE
             } catch (CameraAccessException e) {
                 configureSuccess = false;
                 pendingException = e;
