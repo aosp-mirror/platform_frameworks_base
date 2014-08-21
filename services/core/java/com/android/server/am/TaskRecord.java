@@ -167,6 +167,34 @@ final class TaskRecord {
         setIntent(_intent, info);
     }
 
+    TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
+            ActivityManager.TaskDescription _taskDescription) {
+        mService = service;
+        mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
+                TaskPersister.IMAGE_EXTENSION;
+        mLastThumbnailFile = new File(TaskPersister.sImagesDir, mFilename);
+        taskId = _taskId;
+        mAffiliatedTaskId = _taskId;
+        voiceSession = null;
+        voiceInteractor = null;
+        mActivities = new ArrayList<ActivityRecord>();
+        setIntent(_intent, info);
+
+        taskType = ActivityRecord.APPLICATION_ACTIVITY_TYPE;
+        isPersistable = true;
+        mCallingUid = info.applicationInfo.uid;
+        mCallingPackage = info.packageName;
+        // Clamp to [1, 100].
+        maxRecents = Math.min(Math.max(info.maxRecents, 1), 100);
+
+        taskType = APPLICATION_ACTIVITY_TYPE;
+        mTaskToReturnTo = HOME_ACTIVITY_TYPE;
+        userId = UserHandle.getUserId(info.applicationInfo.uid);
+        lastTaskDescription = _taskDescription;
+        mCallingUid = info.applicationInfo.uid;
+        mCallingPackage = info.packageName;
+    }
+
     TaskRecord(ActivityManagerService service, int _taskId, Intent _intent, Intent _affinityIntent,
             String _affinity, ComponentName _realActivity, ComponentName _origActivity,
             boolean _rootWasReset, boolean _autoRemoveRecents, boolean _askedCompatMode,
@@ -765,7 +793,7 @@ final class TaskRecord {
     }
 
     void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
-        Slog.i(TAG, "Saving task=" + this);
+        if (ActivityManagerService.DEBUG_RECENTS) Slog.i(TAG, "Saving task=" + this);
 
         out.attribute(null, ATTR_TASKID, String.valueOf(taskId));
         if (realActivity != null) {
@@ -948,18 +976,15 @@ final class TaskRecord {
             activities.get(activityNdx).task = task;
         }
 
-        Slog.i(TAG, "Restored task=" + task);
+        if (ActivityManagerService.DEBUG_RECENTS) Slog.d(TAG, "Restored task=" + task);
         return task;
     }
 
     void dump(PrintWriter pw, String prefix) {
-        if (rootWasReset || userId != 0 || numFullscreen != 0) {
-            pw.print(prefix); pw.print(" rootWasReset="); pw.print(rootWasReset);
-                    pw.print(" userId="); pw.print(userId);
-                    pw.print(" taskType="); pw.print(taskType);
-                    pw.print(" numFullscreen="); pw.print(numFullscreen);
-                    pw.print(" mTaskToReturnTo="); pw.println(mTaskToReturnTo);
-        }
+        pw.print(prefix); pw.print("userId="); pw.print(userId);
+                pw.print(" creatorUid="); pw.print(creatorUid);
+                pw.print(" mCallingUid="); pw.print(mCallingUid);
+                pw.print(" mCallingPackage="); pw.println(mCallingPackage);
         if (affinity != null) {
             pw.print(prefix); pw.print("affinity="); pw.println(affinity);
         }
@@ -990,6 +1015,17 @@ final class TaskRecord {
         if (realActivity != null) {
             pw.print(prefix); pw.print("realActivity=");
             pw.println(realActivity.flattenToShortString());
+        }
+        if (autoRemoveRecents || taskType != 0 || mTaskToReturnTo != 0 || numFullscreen != 0) {
+            pw.print(prefix); pw.print("autoRemoveRecents="); pw.print(autoRemoveRecents);
+                    pw.print(" numFullscreen="); pw.print(numFullscreen);
+                    pw.print(" taskType="); pw.print(taskType);
+                    pw.print(" mTaskToReturnTo="); pw.println(mTaskToReturnTo);
+        }
+        if (rootWasReset || mNeverRelinquishIdentity || mReuseTask) {
+            pw.print(prefix); pw.print("rootWasReset="); pw.print(rootWasReset);
+                    pw.print(" mNeverRelinquishIdentity="); pw.print(mNeverRelinquishIdentity);
+                    pw.print(" mReuseTask="); pw.println(mReuseTask);
         }
         pw.print(prefix); pw.print("Activities="); pw.println(mActivities);
         if (!askedCompatMode) {

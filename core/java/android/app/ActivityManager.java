@@ -16,6 +16,11 @@
 
 package android.app;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Point;
 import android.os.BatteryStats;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -47,16 +52,13 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.Slog;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Interact with the overall activities running in the system.
@@ -296,6 +298,8 @@ public class ActivityManager {
 
     /** @hide Process is being cached for later use and is empty. */
     public static final int PROCESS_STATE_CACHED_EMPTY = 13;
+
+    Point mAppTaskThumbnailSize;
 
     /*package*/ ActivityManager(Context context, Handler handler) {
         mContext = context;
@@ -991,6 +995,103 @@ public class ActivityManager {
             tasks.add(new AppTask(appTasks.get(i)));
         }
         return tasks;
+    }
+
+    /**
+     * Return the current design width for {@link AppTask} thumbnails, for use
+     * with {@link #addAppTask}.
+     */
+    public int getAppTaskThumbnailWidth() {
+        synchronized (this) {
+            ensureAppTaskThumbnailSizeLocked();
+            return mAppTaskThumbnailSize.x;
+        }
+    }
+
+    /**
+     * Return the current design height for {@link AppTask} thumbnails, for use
+     * with {@link #addAppTask}.
+     */
+    public int getAppTaskThumbnailHeight() {
+        synchronized (this) {
+            ensureAppTaskThumbnailSizeLocked();
+            return mAppTaskThumbnailSize.y;
+        }
+    }
+
+    private void ensureAppTaskThumbnailSizeLocked() {
+        if (mAppTaskThumbnailSize == null) {
+            try {
+                mAppTaskThumbnailSize = ActivityManagerNative.getDefault().getAppTaskThumbnailSize();
+            } catch (RemoteException e) {
+                throw new IllegalStateException("System dead?", e);
+            }
+        }
+    }
+
+    /**
+     * Add a new {@link AppTask} for the calling application.  This will create a new
+     * recents entry that is added to the <b>end</b> of all existing recents.
+     *
+     * @param activity The activity that is adding the entry.   This is used to help determine
+     * the context that the new recents entry will be in.
+     * @param intent The Intent that describes the recents entry.  This is the same Intent that
+     * you would have used to launch the activity for it.  In generally you will want to set
+     * both {@link Intent#FLAG_ACTIVITY_NEW_DOCUMENT} and
+     * {@link Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS}; the latter is required since this recents
+     * entry will exist without an activity, so it doesn't make sense to not retain it when
+     * its activity disappears.  The given Intent here also must have an explicit ComponentName
+     * set on it.
+     * @param description Optional additional description information.
+     * @param thumbnail Thumbnail to use for the recents entry.  Should be the size given by
+     * {@link #getAppTaskThumbnailWidth()} and {@link #getAppTaskThumbnailHeight()}.  If the
+     * bitmap is not that exact size, it will be recreated in your process, probably in a way
+     * you don't like, before the recents entry is added.
+     *
+     * @return Returns the task id of the newly added app task, or -1 if the add failed.  The
+     * most likely cause of failure is that there is no more room for more tasks for your app.
+     */
+    public int addAppTask(@NonNull Activity activity, @NonNull Intent intent,
+            @Nullable TaskDescription description, @NonNull Bitmap thumbnail) {
+        Point size;
+        synchronized (this) {
+            ensureAppTaskThumbnailSizeLocked();
+            size = mAppTaskThumbnailSize;
+        }
+        final int tw = thumbnail.getWidth();
+        final int th = thumbnail.getHeight();
+        if (tw != size.x || th != size.y) {
+            Bitmap bm = Bitmap.createBitmap(size.x, size.y, thumbnail.getConfig());
+
+            // Use ScaleType.CENTER_CROP, except we leave the top edge at the top.
+            float scale;
+            float dx = 0, dy = 0;
+            if (tw * size.x > size.y * th) {
+                scale = (float) size.x / (float) th;
+                dx = (size.y - tw * scale) * 0.5f;
+            } else {
+                scale = (float) size.y / (float) tw;
+                dy = (size.x - th * scale) * 0.5f;
+            }
+            Matrix matrix = new Matrix();
+            matrix.setScale(scale, scale);
+            matrix.postTranslate((int) (dx + 0.5f), 0);
+
+            Canvas canvas = new Canvas(bm);
+            canvas.drawBitmap(thumbnail, matrix, null);
+            canvas.setBitmap(null);
+
+            thumbnail = bm;
+        }
+        if (description == null) {
+            description = new TaskDescription();
+        }
+        try {
+            return ActivityManagerNative.getDefault().addAppTask(activity.getActivityToken(),
+                    intent, description, thumbnail);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("System dead?", e);
+        }
     }
 
     /**
@@ -2512,6 +2613,21 @@ public class ActivityManager {
             } catch (RemoteException e) {
                 Slog.e(TAG, "Invalid AppTask", e);
                 return null;
+            }
+        }
+
+        /**
+         * Modify the {@link Intent#FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS} flag in the root
+         * Intent of this AppTask.
+         *
+         * @param exclude If true, {@link Intent#FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS} will
+         * be set; otherwise, it will be cleared.
+         */
+        public void setExcludeFromRecents(boolean exclude) {
+            try {
+                mAppTaskImpl.setExcludeFromRecents(exclude);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Invalid AppTask", e);
             }
         }
     }

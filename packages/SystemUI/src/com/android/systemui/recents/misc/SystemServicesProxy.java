@@ -71,6 +71,8 @@ import java.util.Random;
 public class SystemServicesProxy {
     final static String TAG = "SystemServicesProxy";
 
+    final static BitmapFactory.Options sBitmapOptions;
+
     ActivityManager mAm;
     IActivityManager mIam;
     AppWidgetManager mAwm;
@@ -88,6 +90,11 @@ public class SystemServicesProxy {
     int mDummyThumbnailHeight;
     Paint mBgProtectionPaint;
     Canvas mBgProtectionCanvas;
+
+    static {
+        sBitmapOptions = new BitmapFactory.Options();
+        sBitmapOptions.inMutable = true;
+    }
 
     /** Private constructor */
     public SystemServicesProxy(Context context) {
@@ -258,7 +265,8 @@ public class SystemServicesProxy {
         Bitmap thumbnail = taskThumbnail.mainThumbnail;
         ParcelFileDescriptor descriptor = taskThumbnail.thumbnailFileDescriptor;
         if (thumbnail == null && descriptor != null) {
-            thumbnail = BitmapFactory.decodeFileDescriptor(descriptor.getFileDescriptor());
+            thumbnail = BitmapFactory.decodeFileDescriptor(descriptor.getFileDescriptor(),
+                    null, sBitmapOptions);
         }
         if (descriptor != null) {
             try {
