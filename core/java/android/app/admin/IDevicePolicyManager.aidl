@@ -180,8 +180,8 @@ interface IDevicePolicyManager {
 
     void notifyLockTaskModeChanged(boolean isEnabled, String pkg, int userId);
 
-    void setBlockUninstall(in ComponentName admin, in String packageName, boolean blockUninstall);
-    boolean getBlockUninstall(in ComponentName admin, in String packageName);
+    void setUninstallBlocked(in ComponentName admin, in String packageName, boolean uninstallBlocked);
+    boolean getUninstallBlocked(in ComponentName admin, in String packageName);
 
     void setCrossProfileCallerIdDisabled(in ComponentName who, boolean disabled);
     boolean getCrossProfileCallerIdDisabled(in ComponentName who);

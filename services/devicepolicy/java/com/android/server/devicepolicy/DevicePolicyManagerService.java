@@ -4903,7 +4903,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setBlockUninstall(ComponentName who, String packageName, boolean blockUninstall) {
+    public void setUninstallBlocked(ComponentName who, String packageName,
+            boolean uninstallBlocked) {
         final int userId = UserHandle.getCallingUserId();
 
         synchronized (this) {
@@ -4915,7 +4916,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long id = Binder.clearCallingIdentity();
             try {
                 IPackageManager pm = AppGlobals.getPackageManager();
-                pm.setBlockUninstallForUser(packageName, blockUninstall, userId);
+                pm.setBlockUninstallForUser(packageName, uninstallBlocked, userId);
             } catch (RemoteException re) {
                 // Shouldn't happen.
                 Slog.e(LOG_TAG, "Failed to setBlockUninstallForUser", re);
@@ -4926,7 +4927,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean getBlockUninstall(ComponentName who, String packageName) {
+    public boolean getUninstallBlocked(ComponentName who, String packageName) {
         final int userId = UserHandle.getCallingUserId();
 
         synchronized (this) {
