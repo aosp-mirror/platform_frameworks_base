@@ -3505,7 +3505,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         try {
             int ret = mStackSupervisor.startActivityMayWait(null, targetUid, targetPackage, intent,
                     resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
-                    null, null, null, null, options, UserHandle.getUserId(targetUid), null);
+                    null, null, null, null, options, UserHandle.getUserId(sourceRecord.app.uid),
+                    null);
             return ret;
         } catch (SecurityException e) {
             // XXX need to figure out how to propagate to original app.
