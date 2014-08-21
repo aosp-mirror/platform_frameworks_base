@@ -21,6 +21,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telecomm.VideoProfile;
 
+import com.android.internal.telephony.PhoneConstants;
+
 /**
  * Parcelable object to handle IMS call profile.
  * It is created from GSMA IR.92/IR.94, 3GPP TS 24.229/TS 26.114/TS26.111.
@@ -334,6 +336,38 @@ public class ImsCallProfile implements Parcelable {
             return ImsCallProfile.CALL_TYPE_VT;
         }
         return ImsCallProfile.CALL_TYPE_VOICE;
+    }
+
+    /**
+     * Translate presentation value to OIR value
+     * @param presentation
+     * @return OIR valuse
+     */
+    public static int presentationToOIR(int presentation) {
+        switch (presentation) {
+            case PhoneConstants.PRESENTATION_RESTRICTED:
+                return ImsCallProfile.OIR_PRESENTATION_RESTRICTED;
+            case PhoneConstants.PRESENTATION_ALLOWED:
+                return ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED;
+            default:
+                return ImsCallProfile.OIR_DEFAULT;
+        }
+    }
+
+    /**
+     * Translate OIR value to presentation value
+     * @param oir value
+     * @return presentation value
+     */
+    public static int OIRToPresentation(int oir) {
+        switch(oir) {
+            case ImsCallProfile.OIR_PRESENTATION_RESTRICTED:
+                return PhoneConstants.PRESENTATION_RESTRICTED;
+            case ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED:
+                return PhoneConstants.PRESENTATION_ALLOWED;
+            default:
+                return PhoneConstants.PRESENTATION_UNKNOWN;
+        }
     }
 
     /**
