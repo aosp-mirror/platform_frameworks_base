@@ -2074,10 +2074,11 @@ bool ResourceTable::hasResources() const {
     return mNumLocal > 0;
 }
 
-sp<AaptFile> ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& filter)
+sp<AaptFile> ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& filter,
+        const bool isBase)
 {
     sp<AaptFile> data = new AaptFile(String8(), AaptGroupEntry(), String8());
-    status_t err = flatten(bundle, filter, data);
+    status_t err = flatten(bundle, filter, data, isBase);
     return err == NO_ERROR ? data : NULL;
 }
 
@@ -2699,7 +2700,9 @@ ResourceTable::validateLocalizations(void)
     return err;
 }
 
-status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& filter, const sp<AaptFile>& dest)
+status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& filter,
+        const sp<AaptFile>& dest,
+        const bool isBase)
 {
     const ConfigDescription nullConfig;
 
@@ -2766,6 +2769,13 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
                 configTypeName = "1complex";
             } else {
                 configTypeName = "2value";
+            }
+
+            // mipmaps don't get filtered, so they will
+            // allways end up in the base. Make sure they
+            // don't end up in a split.
+            if (typeName == mipmap16 && !isBase) {
+                continue;
             }
 
             const bool filterable = (typeName != mipmap16);
@@ -2871,10 +2881,12 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
             return amt;
         }
 
-        status_t err = flattenLibraryTable(data, libraryPackages);
-        if (err != NO_ERROR) {
-            fprintf(stderr, "ERROR: failed to write library table\n");
-            return err;
+        if (isBase) {
+            status_t err = flattenLibraryTable(data, libraryPackages);
+            if (err != NO_ERROR) {
+                fprintf(stderr, "ERROR: failed to write library table\n");
+                return err;
+            }
         }
 
         // Build the type chunks inside of this package.
@@ -2890,6 +2902,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
                 continue;
             }
             const bool filterable = (typeName != mipmap16);
+            const bool skipEntireType = (typeName == mipmap16 && !isBase);
 
             const size_t N = t != NULL ? t->getOrderedConfigs().size() : 0;
 
@@ -2927,6 +2940,11 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
                     if (cl->getPublic()) {
                         typeSpecFlags[ei] |= htodl(ResTable_typeSpec::SPEC_PUBLIC);
                     }
+
+                    if (skipEntireType) {
+                        continue;
+                    }
+
                     const size_t CN = cl->getEntries().size();
                     for (size_t ci=0; ci<CN; ci++) {
                         if (filterable && !filter->match(cl->getEntries().keyAt(ci))) {
@@ -2943,6 +2961,10 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
                 }
             }
             
+            if (skipEntireType) {
+                continue;
+            }
+
             // We need to write one type chunk for each configuration for
             // which we have entries in this type.
             const size_t NC = t->getUniqueConfigs().size();
