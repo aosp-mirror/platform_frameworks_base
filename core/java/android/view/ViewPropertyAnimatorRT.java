@@ -81,7 +81,7 @@ class ViewPropertyAnimatorRT {
             int property = RenderNodeAnimator.mapViewPropertyToRenderProperty(holder.mNameConstant);
 
             final float finalValue = holder.mFromValue + holder.mDeltaValue;
-            RenderNodeAnimator animator = new RenderNodeAnimatorCompat(property, finalValue);
+            RenderNodeAnimator animator = new RenderNodeAnimator(property, finalValue);
             animator.setStartDelay(startDelay);
             animator.setDuration(duration);
             animator.setInterpolator(interpolator);
