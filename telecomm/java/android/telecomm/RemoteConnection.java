@@ -158,6 +158,7 @@ public final class RemoteConnection {
          *
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param videoState The new video state of the {@code RemoteConnection}.
+         * @hide
          */
         public void onVideoStateChanged(RemoteConnection connection, int videoState) {}
 
@@ -357,6 +358,7 @@ public final class RemoteConnection {
     /**
      * @return The video state of the {@code RemoteConnection}. See
      * {@link VideoProfile.VideoState}.
+     * @hide
      */
     public int getVideoState() {
         return mVideoState;

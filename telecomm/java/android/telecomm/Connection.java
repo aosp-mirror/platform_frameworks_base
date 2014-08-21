@@ -87,6 +87,7 @@ public abstract class Connection {
         public void onConferenceChanged(Connection c, Conference conference) {}
     }
 
+    /** @hide */
     public static abstract class VideoProvider {
 
         /**
@@ -528,6 +529,7 @@ public abstract class Connection {
      * {@link VideoProfile.VideoState#RX_ENABLED}.
      *
      * @return The video state of the call.
+     * @hide
      */
     public final int getVideoState() {
         return mVideoState;
@@ -699,6 +701,7 @@ public abstract class Connection {
      * {@link VideoProfile.VideoState#RX_ENABLED}.
      *
      * @param videoState The new video state.
+     * @hide
      */
     public final void setVideoState(int videoState) {
         Log.d(this, "setVideoState %d", videoState);
@@ -755,6 +758,7 @@ public abstract class Connection {
     /**
      * Sets the video call provider.
      * @param videoProvider The video provider.
+     * @hide
      */
     public final void setVideoProvider(VideoProvider videoProvider) {
         mVideoProvider = videoProvider;
@@ -763,6 +767,7 @@ public abstract class Connection {
         }
     }
 
+    /** @hide */
     public final VideoProvider getVideoProvider() {
         return mVideoProvider;
     }
