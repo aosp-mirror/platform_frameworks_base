@@ -38,6 +38,7 @@ public class UnlockMethodCache {
     private final ArrayList<OnUnlockMethodChangedListener> mListeners = new ArrayList<>();
     private boolean mMethodInsecure;
     private boolean mTrustManaged;
+    private boolean mFaceUnlockRunning;
 
     private UnlockMethodCache(Context ctx) {
         mLockPatternUtils = new LockPatternUtils(ctx);
@@ -73,10 +74,14 @@ public class UnlockMethodCache {
         boolean methodInsecure = !mLockPatternUtils.isSecure() ||
                 mKeyguardUpdateMonitor.getUserHasTrust(user);
         boolean trustManaged = mKeyguardUpdateMonitor.getUserTrustIsManaged(user);
-        boolean changed = methodInsecure != mMethodInsecure || trustManaged != mTrustManaged;
+        boolean faceUnlockRunning = mKeyguardUpdateMonitor.isFaceUnlockRunning(user)
+                && trustManaged;
+        boolean changed = methodInsecure != mMethodInsecure || trustManaged != mTrustManaged
+                || faceUnlockRunning != mFaceUnlockRunning;
         if (changed || updateAlways) {
             mMethodInsecure = methodInsecure;
             mTrustManaged = trustManaged;
+            mFaceUnlockRunning = faceUnlockRunning;
             notifyListeners(mMethodInsecure);
         }
     }
@@ -112,10 +117,19 @@ public class UnlockMethodCache {
         public void onFingerprintRecognized(int userId) {
             updateMethodSecure(false /* updateAlways */);
         }
+
+        @Override
+        public void onFaceUnlockStateChanged(boolean running, int userId) {
+            updateMethodSecure(false /* updateAlways */);
+        }
     };
 
     public boolean isTrustManaged() {
         return mTrustManaged;
+    }
+
+    public boolean isFaceUnlockRunning() {
+        return mFaceUnlockRunning;
     }
 
     public static interface OnUnlockMethodChangedListener {
