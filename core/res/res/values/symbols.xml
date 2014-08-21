@@ -1266,7 +1266,6 @@
   <java-symbol type="xml" name="audio_assets" />
   <java-symbol type="xml" name="global_keys" />
   <java-symbol type="xml" name="default_zen_mode_config" />
-  <java-symbol type="xml" name="tv_content_rating_systems" />
 
   <java-symbol type="raw" name="color_fade_vert" />
   <java-symbol type="raw" name="color_fade_frag" />

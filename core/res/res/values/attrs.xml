@@ -7292,7 +7292,7 @@
         <attr name="colorPrimary" />
     </declare-styleable>
 
-    <!-- Use <code>tv-input</code> as the root tag of the XML resource that describes an
+    <!-- Use <code>tv-input</code> as the root tag of the XML resource that describes a
          {@link android.media.tv.TvInputService}, which is referenced from its
          {@link android.media.tv.TvInputService#SERVICE_META_DATA} meta-data entry.
          Described here are the attributes that can be included in that tag. -->
@@ -7305,6 +7305,36 @@
         <attr name="settingsActivity" />
         <!-- Reference to an XML document that describes TV content rating. -->
         <attr name="tvContentRatingDescription" format="reference" />
+    </declare-styleable>
+
+    <!-- Attributes that can be used with <code>rating-system-definition</code> tags inside of the
+         XML resource that describes TV content rating of a
+         {@link android.media.tv.TvInputService}, which is referenced from
+         {@link android.R.attr#tvContentRatingDescription}. -->
+    <declare-styleable name="RatingSystemDefinition">
+        <!-- The unique name of the content rating system. -->
+        <attr name="name" />
+        <!-- The title of the content rating system which is shown to the user. -->
+        <attr name="title" />
+        <!-- The short description of the content rating system. -->
+        <attr name="description" />
+        <!-- The country associated with the content rating system. -->
+        <attr name="country" format="string" />
+    </declare-styleable>
+
+    <!-- Attributes that can be used with <code>rating-definition</code> tags inside of the XML
+         resource that describes TV content rating of a {@link android.media.tv.TvInputService},
+         which is referenced from {@link android.R.attr#tvContentRatingDescription}. -->
+    <declare-styleable name="RatingDefinition">
+        <!-- The unique name of the content rating. -->
+        <attr name="name" />
+        <!-- The title of the content rating which is shown to the user. -->
+        <attr name="title" />
+        <!-- The short description of the content rating. -->
+        <attr name="description" />
+        <!-- The age associated with the content rating. The content of this rating is suitable for
+             people of this age or above. -->
+        <attr name="ageHint" format="integer" />
     </declare-styleable>
 
     <declare-styleable name="ResolverDrawerLayout">
