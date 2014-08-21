@@ -6334,7 +6334,6 @@ package android.bluetooth {
     method public deprecated void abortReliableWrite(android.bluetooth.BluetoothDevice);
     method public boolean beginReliableWrite();
     method public void close();
-    method public boolean configureMTU(int);
     method public boolean connect();
     method public void disconnect();
     method public boolean discoverServices();
@@ -6348,14 +6347,15 @@ package android.bluetooth {
     method public boolean readCharacteristic(android.bluetooth.BluetoothGattCharacteristic);
     method public boolean readDescriptor(android.bluetooth.BluetoothGattDescriptor);
     method public boolean readRemoteRssi();
-    method public boolean requestConnectionParameterUpdate(int);
+    method public boolean requestConnectionPriority(int);
+    method public boolean requestMtu(int);
     method public boolean setCharacteristicNotification(android.bluetooth.BluetoothGattCharacteristic, boolean);
     method public boolean writeCharacteristic(android.bluetooth.BluetoothGattCharacteristic);
     method public boolean writeDescriptor(android.bluetooth.BluetoothGattDescriptor);
-    field public static final int GATT_CONNECTION_BALANCED = 0; // 0x0
+    field public static final int CONNECTION_PRIORITY_BALANCED = 0; // 0x0
+    field public static final int CONNECTION_PRIORITY_HIGH = 1; // 0x1
+    field public static final int CONNECTION_PRIORITY_LOW_POWER = 2; // 0x2
     field public static final int GATT_CONNECTION_CONGESTED = 143; // 0x8f
-    field public static final int GATT_CONNECTION_HIGH_PRIORITY = 1; // 0x1
-    field public static final int GATT_CONNECTION_LOW_POWER = 2; // 0x2
     field public static final int GATT_FAILURE = 257; // 0x101
     field public static final int GATT_INSUFFICIENT_AUTHENTICATION = 5; // 0x5
     field public static final int GATT_INSUFFICIENT_ENCRYPTION = 15; // 0xf
@@ -6372,11 +6372,11 @@ package android.bluetooth {
     method public void onCharacteristicChanged(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic);
     method public void onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int);
     method public void onCharacteristicWrite(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int);
-    method public void onConfigureMTU(android.bluetooth.BluetoothGatt, int, int);
     method public void onConnectionCongested(android.bluetooth.BluetoothGatt, boolean);
     method public void onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int);
     method public void onDescriptorRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattDescriptor, int);
     method public void onDescriptorWrite(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattDescriptor, int);
+    method public void onMtuChanged(android.bluetooth.BluetoothGatt, int, int);
     method public void onReadRemoteRssi(android.bluetooth.BluetoothGatt, int, int);
     method public void onReliableWriteCompleted(android.bluetooth.BluetoothGatt, int);
     method public void onServicesDiscovered(android.bluetooth.BluetoothGatt, int);
