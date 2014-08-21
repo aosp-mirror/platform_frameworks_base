@@ -106,7 +106,24 @@ public class ScanResult implements Parcelable {
      * Status: indicating join status
      * @hide
      */
-    public int status;
+    public int autoJoinStatus;
+
+    /**
+     * @hide
+     * Last time we blacklisted the ScanResult
+     */
+    public long blackListTimestamp;
+
+    /** @hide **/
+    public void setAutoJoinStatus(int status) {
+        if (status < 0) status = 0;
+        if (status == 0) {
+            blackListTimestamp = 0;
+        }  else if (status > autoJoinStatus) {
+            blackListTimestamp = System.currentTimeMillis();
+        }
+        autoJoinStatus = status;
+    }
 
     /**
      * Status: indicating the scan result is not a result
@@ -245,7 +262,7 @@ public class ScanResult implements Parcelable {
             distanceSdCm = source.distanceSdCm;
             seen = source.seen;
             passpoint = source.passpoint;
-            status = source.status;
+            autoJoinStatus = source.autoJoinStatus;
             untrusted = source.untrusted;
             numConnection = source.numConnection;
             numUsage = source.numUsage;
@@ -283,8 +300,8 @@ public class ScanResult implements Parcelable {
                 append("(cm)");
 
         sb.append(", passpoint: ").append(passpoint != null ? "yes" : "no");
-        if (status != 0) {
-            sb.append(", status: ").append(status);
+        if (autoJoinStatus != 0) {
+            sb.append(", status: ").append(autoJoinStatus);
         }
         return sb.toString();
     }
@@ -310,7 +327,7 @@ public class ScanResult implements Parcelable {
         dest.writeInt(distanceCm);
         dest.writeInt(distanceSdCm);
         dest.writeLong(seen);
-        dest.writeInt(status);
+        dest.writeInt(autoJoinStatus);
         dest.writeInt(untrusted ? 1 : 0);
         dest.writeInt(numConnection);
         dest.writeInt(numUsage);
@@ -351,7 +368,7 @@ public class ScanResult implements Parcelable {
                     in.readInt()
                 );
                 sr.seen = in.readLong();
-                sr.status = in.readInt();
+                sr.autoJoinStatus = in.readInt();
                 sr.untrusted = in.readInt() != 0;
                 sr.numConnection = in.readInt();
                 sr.numUsage = in.readInt();
