@@ -867,6 +867,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                         // the timeout is suspended while a restore is in progress.  Clean
                         // up now.
                         Slog.w(TAG, "Restore session timed out; aborting");
+                        mActiveRestoreSession.markTimedOut();
                         post(mActiveRestoreSession.new EndRestoreRunnable(
                                 BackupManagerService.this, mActiveRestoreSession));
                     }
@@ -8738,10 +8739,15 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         private IBackupTransport mRestoreTransport = null;
         RestoreSet[] mRestoreSets = null;
         boolean mEnded = false;
+        boolean mTimedOut = false;
 
         ActiveRestoreSession(String packageName, String transport) {
             mPackageName = packageName;
             mRestoreTransport = getTransport(transport);
+        }
+
+        public void markTimedOut() {
+            mTimedOut = true;
         }
 
         // --- Binder interface ---
@@ -8754,6 +8760,11 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
             if (mEnded) {
                 throw new IllegalStateException("Restore session already ended");
+            }
+
+            if (mTimedOut) {
+                Slog.i(TAG, "Session already timed out");
+                return -1;
             }
 
             long oldId = Binder.clearCallingIdentity();
@@ -8785,6 +8796,11 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
             if (mEnded) {
                 throw new IllegalStateException("Restore session already ended");
+            }
+
+            if (mTimedOut) {
+                Slog.i(TAG, "Session already timed out");
+                return -1;
             }
 
             if (mRestoreTransport == null || mRestoreSets == null) {
@@ -8861,6 +8877,11 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 throw new IllegalStateException("Restore session already ended");
             }
 
+            if (mTimedOut) {
+                Slog.i(TAG, "Session already timed out");
+                return -1;
+            }
+
             if (mRestoreTransport == null || mRestoreSets == null) {
                 Slog.e(TAG, "Ignoring restoreAll() with no restore set");
                 return -1;
@@ -8907,6 +8928,11 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
             if (mEnded) {
                 throw new IllegalStateException("Restore session already ended");
+            }
+
+            if (mTimedOut) {
+                Slog.i(TAG, "Session already timed out");
+                return -1;
             }
 
             if (mPackageName != null) {
@@ -9005,6 +9031,11 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
         public synchronized void endRestoreSession() {
             if (DEBUG) Slog.d(TAG, "endRestoreSession");
+
+            if (mTimedOut) {
+                Slog.i(TAG, "Session already timed out");
+                return;
+            }
 
             if (mEnded) {
                 throw new IllegalStateException("Restore session already ended");
