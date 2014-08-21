@@ -19,6 +19,7 @@ package android.view;
 import android.animation.Animator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
+import android.animation.Animator.AnimatorListener;
 import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
 import android.graphics.Paint;
@@ -202,7 +203,7 @@ public class RenderNodeAnimator extends Animator {
             mViewTarget.mTransformationInfo.mAlpha = mFinalValue;
         }
 
-        final ArrayList<AnimatorListener> listeners = getListeners();
+        final ArrayList<AnimatorListener> listeners = cloneListeners();
         final int numListeners = listeners == null ? 0 : listeners.size();
         for (int i = 0; i < numListeners; i++) {
             listeners.get(i).onAnimationStart(this);
@@ -220,7 +221,7 @@ public class RenderNodeAnimator extends Animator {
             getHelper().removeDelayedAnimation(this);
             nEnd(mNativePtr.get());
 
-            final ArrayList<AnimatorListener> listeners = getListeners();
+            final ArrayList<AnimatorListener> listeners = cloneListeners();
             final int numListeners = listeners == null ? 0 : listeners.size();
             for (int i = 0; i < numListeners; i++) {
                 listeners.get(i).onAnimationCancel(this);
@@ -329,11 +330,20 @@ public class RenderNodeAnimator extends Animator {
     protected void onFinished() {
         mFinished = true;
 
-        final ArrayList<AnimatorListener> listeners = getListeners();
+        final ArrayList<AnimatorListener> listeners = cloneListeners();
         final int numListeners = listeners == null ? 0 : listeners.size();
         for (int i = 0; i < numListeners; i++) {
             listeners.get(i).onAnimationEnd(this);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private ArrayList<AnimatorListener> cloneListeners() {
+        ArrayList<AnimatorListener> listeners = getListeners();
+        if (listeners != null) {
+            listeners = (ArrayList<AnimatorListener>) listeners.clone();
+        }
+        return listeners;
     }
 
     long getNativeAnimator() {
