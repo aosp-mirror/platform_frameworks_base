@@ -22,7 +22,13 @@ import android.content.Context;
 
 /**
  * Class for scheduling various types of jobs with the scheduling framework on the device.
- *
+ * See {@link android.app.job.JobInfo} for more description of the types of jobs that can be run
+ * and how to construct them.
+ * The framework will be intelligent about when you receive your callbacks, and attempt to batch
+ * and defer them as much as possible. Typically if you don't specify a deadline on your job, it
+ * can be run at any moment depending on the current state of the JobScheduler's internal queue,
+ * however it might be deferred as long as until the next time the device is connected to a power
+ * source.
  * <p>You do not
  * instantiate this class directly; instead, retrieve it through
  * {@link android.content.Context#getSystemService
