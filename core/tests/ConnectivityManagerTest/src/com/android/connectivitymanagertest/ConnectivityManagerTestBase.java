@@ -520,7 +520,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
      * @param length required length of the string
      * @return
      */
-    protected boolean isHex(String input, int length) {
+    protected static boolean isHex(String input, int length) {
         Pattern p = Pattern.compile(String.format("[0-9A-Fa-f]{%d}", length));
         return p.matcher(input).matches();
     }
