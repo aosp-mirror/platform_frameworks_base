@@ -18,6 +18,7 @@ package com.android.server.devicepolicy;
 
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
@@ -39,14 +40,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.hardware.usb.UsbManager;
 import android.net.ProxyInfo;
@@ -77,6 +79,10 @@ import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
+import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.IAccessibilityManager;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.view.IWindowManager;
 
 import com.android.internal.R;
@@ -282,6 +288,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_DISABLE_SCREEN_CAPTURE = "disable-screen-capture";
         private static final String TAG_DISABLE_ACCOUNT_MANAGEMENT = "disable-account-management";
         private static final String TAG_ACCOUNT_TYPE = "account-type";
+        private static final String TAG_PERMITTED_ACCESSIBILITY_SERVICES
+                = "permitted-accessiblity-services";
         private static final String TAG_ENCRYPTION_REQUESTED = "encryption-requested";
         private static final String TAG_MANAGE_TRUST_AGENT_FEATURES = "manage-trust-agent-features";
         private static final String TAG_TRUST_AGENT_FEATURE = "feature";
@@ -291,6 +299,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_GLOBAL_PROXY_EXCLUSION_LIST = "global-proxy-exclusion-list";
         private static final String TAG_GLOBAL_PROXY_SPEC = "global-proxy-spec";
         private static final String TAG_SPECIFIES_GLOBAL_PROXY = "specifies-global-proxy";
+        private static final String TAG_PERMITTED_IMES = "permitted-imes";
         private static final String TAG_MAX_FAILED_PASSWORD_WIPE = "max-failed-password-wipe";
         private static final String TAG_MAX_TIME_TO_UNLOCK = "max-time-to-unlock";
         private static final String TAG_MIN_PASSWORD_NONLETTER = "min-password-nonletter";
@@ -307,6 +316,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_CROSS_PROFILE_WIDGET_PROVIDERS =
                 "cross-profile-widget-providers";
         private static final String TAG_PROVIDER = "provider";
+        private static final String TAG_PACKAGE_LIST_ITEM  = "item";
 
         final DeviceAdminInfo info;
 
@@ -357,6 +367,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean disableScreenCapture = false; // Can only be set by a device/profile owner.
 
         Set<String> accountTypesWithManagementDisabled = new HashSet<String>();
+
+        // The list of permitted accessibility services package namesas set by a profile
+        // or device owner. Null means all accessibility services are allowed, empty means
+        // none except system services are allowed.
+        List<String> permittedAccessiblityServices;
+
+        // The list of permitted input methods package names as set by a profile or device owner.
+        // Null means all input methods are allowed, empty means none except system imes are
+        // allowed.
+        List<String> permittedInputMethods;
 
         // TODO: review implementation decisions with frameworks team
         boolean specifiesGlobalProxy = false;
@@ -521,6 +541,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 out.endTag(null, TAG_CROSS_PROFILE_WIDGET_PROVIDERS);
             }
+            writePackageListToXml(out, TAG_PERMITTED_ACCESSIBILITY_SERVICES,
+                    permittedAccessiblityServices);
+            writePackageListToXml(out, TAG_PERMITTED_IMES, permittedInputMethods);
+        }
+
+        void writePackageListToXml(XmlSerializer out, String outerTag,
+                List<String> packageList)
+                throws IllegalArgumentException, IllegalStateException, IOException {
+            if (packageList == null) {
+                return;
+            }
+
+            out.startTag(null, outerTag);
+            for (String packageName : packageList) {
+                out.startTag(null, TAG_PACKAGE_LIST_ITEM);
+                out.attribute(null, ATTR_VALUE, packageName);
+                out.endTag(null, TAG_PACKAGE_LIST_ITEM);
+            }
+            out.endTag(null, outerTag);
         }
 
         void readFromXml(XmlPullParser parser)
@@ -604,11 +643,40 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     trustAgentFeatures = getAllTrustAgentFeatures(parser, tag);
                 } else if (TAG_CROSS_PROFILE_WIDGET_PROVIDERS.equals(tag)) {
                     crossProfileWidgetProviders = getCrossProfileWidgetProviders(parser, tag);
+                } else if (TAG_PERMITTED_ACCESSIBILITY_SERVICES.equals(tag)) {
+                    permittedAccessiblityServices = readPackageList(parser, tag);
+                } else if (TAG_PERMITTED_IMES.equals(tag)) {
+                    permittedInputMethods = readPackageList(parser, tag);
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                 }
                 XmlUtils.skipCurrentTag(parser);
             }
+        }
+
+        private List<String> readPackageList(XmlPullParser parser,
+                String tag) throws XmlPullParserException, IOException {
+            List<String> result = new ArrayList<String>();
+            int outerDepth = parser.getDepth();
+            int outerType;
+            while ((outerType=parser.next()) != XmlPullParser.END_DOCUMENT
+                    && (outerType != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+                if (outerType == XmlPullParser.END_TAG || outerType == XmlPullParser.TEXT) {
+                    continue;
+                }
+                String outerTag = parser.getName();
+                if (TAG_PACKAGE_LIST_ITEM.equals(outerTag)) {
+                    String packageName = parser.getAttributeValue(null, ATTR_VALUE);
+                    if (packageName != null) {
+                        result.add(packageName);
+                    } else {
+                        Slog.w(LOG_TAG, "Package name missing under " + outerTag);
+                    }
+                } else {
+                    Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + outerTag);
+                }
+            }
+            return result;
         }
 
         private Set<String> readDisableAccountInfo(XmlPullParser parser, String tag)
@@ -754,6 +822,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     pw.println(disabledKeyguardFeatures);
             pw.print(prefix); pw.print("crossProfileWidgetProviders=");
                     pw.println(crossProfileWidgetProviders);
+            if (!(permittedAccessiblityServices == null)) {
+                pw.print(prefix); pw.print("permittedAccessibilityServices=");
+                        pw.println(permittedAccessiblityServices.toString());
+            }
+            if (!(permittedInputMethods == null)) {
+                pw.print(prefix); pw.print("permittedInputMethods=");
+                        pw.println(permittedInputMethods.toString());
+            }
         }
     }
 
@@ -3968,6 +4044,343 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } finally {
                 restoreCallingIdentity(id);
             }
+        }
+    }
+
+    /**
+     * @return true if all packages in enabledPackages are either in the list
+     * permittedList or are a system app.
+     */
+    private boolean checkPackagesInPermittedListOrSystem(List<String> enabledPackages,
+            List<String> permittedList) {
+        int userIdToCheck = UserHandle.getCallingUserId();
+        long id = Binder.clearCallingIdentity();
+        try {
+            // If we have an enabled packages list for a managed profile the packages
+            // we should check are installed for the parent user.
+            UserInfo user = mUserManager.getUserInfo(userIdToCheck);
+            if (user.isManagedProfile()) {
+                userIdToCheck = user.profileGroupId;
+            }
+
+            IPackageManager pm = AppGlobals.getPackageManager();
+            for (String enabledPackage : enabledPackages) {
+                boolean systemService = false;
+                try {
+                    ApplicationInfo applicationInfo = pm.getApplicationInfo(enabledPackage,
+                            PackageManager.GET_UNINSTALLED_PACKAGES, userIdToCheck);
+                    systemService = (applicationInfo.flags
+                            & ApplicationInfo.FLAG_SYSTEM) != 0;
+                } catch (RemoteException e) {
+                    Log.i(LOG_TAG, "Can't talk to package managed", e);
+                }
+                if (!systemService && !permittedList.contains(enabledPackage)) {
+                    return false;
+                }
+            }
+        } finally {
+            restoreCallingIdentity(id);
+        }
+        return true;
+    }
+
+    private AccessibilityManager getAccessibilityManagerForUser(int userId) {
+        // Not using AccessibilityManager.getInstance because that guesses
+        // at the user you require based on callingUid and caches for a given
+        // process.
+        IBinder iBinder = ServiceManager.getService(Context.ACCESSIBILITY_SERVICE);
+        IAccessibilityManager service = iBinder == null
+                ? null : IAccessibilityManager.Stub.asInterface(iBinder);
+        return new AccessibilityManager(mContext, service, userId);
+    }
+
+    @Override
+    public boolean setPermittedAccessibilityServices(ComponentName who, List packageList) {
+        if (!mHasFeature) {
+            return false;
+        }
+        if (who == null) {
+            throw new NullPointerException("ComponentName is null");
+        }
+
+        if (packageList != null) {
+            int userId = UserHandle.getCallingUserId();
+            List<AccessibilityServiceInfo> enabledServices = null;
+            long id = Binder.clearCallingIdentity();
+            try {
+                UserInfo user = mUserManager.getUserInfo(userId);
+                if (user.isManagedProfile()) {
+                    userId = user.profileGroupId;
+                }
+                AccessibilityManager accessibilityManager = getAccessibilityManagerForUser(userId);
+                enabledServices = accessibilityManager.getEnabledAccessibilityServiceList(
+                        AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+            } finally {
+                restoreCallingIdentity(id);
+            }
+
+            if (enabledServices != null) {
+                List<String> enabledPackages = new ArrayList<String>();
+                for (AccessibilityServiceInfo service : enabledServices) {
+                    enabledPackages.add(service.getResolveInfo().serviceInfo.packageName);
+                }
+                if (!checkPackagesInPermittedListOrSystem(enabledPackages, packageList)) {
+                    Slog.e(LOG_TAG, "Cannot set permitted accessibility services, "
+                            + "because it contains already enabled accesibility services.");
+                    return false;
+                }
+            }
+        }
+
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            admin.permittedAccessiblityServices = packageList;
+            saveSettingsLocked(UserHandle.getCallingUserId());
+        }
+        return true;
+    }
+
+    @Override
+    public List getPermittedAccessibilityServices(ComponentName who) {
+        if (!mHasFeature) {
+            return null;
+        }
+
+        if (who == null) {
+            throw new NullPointerException("ComponentName is null");
+        }
+
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            return admin.permittedAccessiblityServices;
+        }
+    }
+
+    @Override
+    public List getPermittedAccessibilityServicesForUser(int userId) {
+        if (!mHasFeature) {
+            return null;
+        }
+        synchronized (this) {
+            List<String> result = null;
+            // If we have multiple profiles we return the intersection of the
+            // permitted lists. This can happen in cases where we have a device
+            // and profile owner.
+            List<UserInfo> profiles = mUserManager.getProfiles(userId);
+            final int PROFILES_SIZE = profiles.size();
+            for (int i = 0; i < PROFILES_SIZE; ++i) {
+                // Just loop though all admins, only device or profiles
+                // owners can have permitted lists set.
+                DevicePolicyData policy = getUserData(profiles.get(i).id);
+                final int N = policy.mAdminList.size();
+                for (int j = 0; j < N; j++) {
+                    ActiveAdmin admin = policy.mAdminList.get(j);
+                    List<String> fromAdmin = admin.permittedAccessiblityServices;
+                    if (fromAdmin != null) {
+                        if (result == null) {
+                            result = new ArrayList<String>(fromAdmin);
+                        } else {
+                            result.retainAll(fromAdmin);
+                        }
+                    }
+                }
+            }
+
+            // If we have a permitted list add all system accessibility services.
+            if (result != null) {
+                long id = Binder.clearCallingIdentity();
+                try {
+                    UserInfo user = mUserManager.getUserInfo(userId);
+                    if (user.isManagedProfile()) {
+                        userId = user.profileGroupId;
+                    }
+                    AccessibilityManager accessibilityManager =
+                            getAccessibilityManagerForUser(userId);
+                    List<AccessibilityServiceInfo> installedServices =
+                            accessibilityManager.getInstalledAccessibilityServiceList();
+
+                    IPackageManager pm = AppGlobals.getPackageManager();
+                    if (installedServices != null) {
+                        for (AccessibilityServiceInfo service : installedServices) {
+                            String packageName = service.getResolveInfo().serviceInfo.packageName;
+                            try {
+                                ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName,
+                                        PackageManager.GET_UNINSTALLED_PACKAGES, userId);
+                                if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                                    result.add(packageName);
+                                }
+                            } catch (RemoteException e) {
+                                Log.i(LOG_TAG, "Accessibility service in missing package", e);
+                            }
+                        }
+                    }
+                } finally {
+                    restoreCallingIdentity(id);
+                }
+            }
+
+            return result;
+        }
+    }
+
+    private boolean checkCallerIsCurrentUserOrProfile() {
+        int callingUserId = UserHandle.getCallingUserId();
+        long token = Binder.clearCallingIdentity();
+        try {
+            UserInfo currentUser;
+            UserInfo callingUser = mUserManager.getUserInfo(callingUserId);
+            try {
+                currentUser = ActivityManagerNative.getDefault().getCurrentUser();
+            } catch (RemoteException e) {
+                Slog.e(LOG_TAG, "Failed to talk to activity managed.", e);
+                return false;
+            }
+
+            if (callingUser.isManagedProfile() && callingUser.profileGroupId != currentUser.id) {
+                Slog.e(LOG_TAG, "Cannot set permitted input methods for managed profile "
+                        + "of a user that isn't the foreground user.");
+                return false;
+            }
+            if (!callingUser.isManagedProfile() && callingUserId != currentUser.id ) {
+                Slog.e(LOG_TAG, "Cannot set permitted input methods "
+                        + "of a user that isn't the foreground user.");
+                return false;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean setPermittedInputMethods(ComponentName who, List packageList) {
+        if (!mHasFeature) {
+            return false;
+        }
+        if (who == null) {
+            throw new NullPointerException("ComponentName is null");
+        }
+
+        // TODO When InputMethodManager supports per user calls remove
+        //      this restriction.
+        if (!checkCallerIsCurrentUserOrProfile()) {
+            return false;
+        }
+
+        if (packageList != null) {
+            // InputMethodManager fetches input methods for current user.
+            // So this can only be set when calling user is the current user
+            // or parent is current user in case of managed profiles.
+            InputMethodManager inputMethodManager = (InputMethodManager) mContext
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+            List<InputMethodInfo> enabledImes = inputMethodManager.getEnabledInputMethodList();
+
+            if (enabledImes != null) {
+                List<String> enabledPackages = new ArrayList<String>();
+                for (InputMethodInfo ime : enabledImes) {
+                    enabledPackages.add(ime.getPackageName());
+                }
+                if (!checkPackagesInPermittedListOrSystem(enabledPackages, packageList)) {
+                    Slog.e(LOG_TAG, "Cannot set permitted input methods, "
+                            + "because it contains already enabled input method.");
+                    return false;
+                }
+            }
+        }
+
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            admin.permittedInputMethods = packageList;
+            saveSettingsLocked(UserHandle.getCallingUserId());
+        }
+        return true;
+    }
+
+    @Override
+    public List getPermittedInputMethods(ComponentName who) {
+        if (!mHasFeature) {
+            return null;
+        }
+
+        if (who == null) {
+            throw new NullPointerException("ComponentName is null");
+        }
+
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            return admin.permittedInputMethods;
+        }
+    }
+
+    @Override
+    public List getPermittedInputMethodsForCurrentUser() {
+        UserInfo currentUser;
+        try {
+            currentUser = ActivityManagerNative.getDefault().getCurrentUser();
+        } catch (RemoteException e) {
+            Slog.e(LOG_TAG, "Failed to make remote calls to get current user", e);
+            // Activity managed is dead, just allow all IMEs
+            return null;
+        }
+
+        int userId = currentUser.id;
+        synchronized (this) {
+            List<String> result = null;
+            // If we have multiple profiles we return the intersection of the
+            // permitted lists. This can happen in cases where we have a device
+            // and profile owner.
+            List<UserInfo> profiles = mUserManager.getProfiles(userId);
+            final int PROFILES_SIZE = profiles.size();
+            for (int i = 0; i < PROFILES_SIZE; ++i) {
+                // Just loop though all admins, only device or profiles
+                // owners can have permitted lists set.
+                DevicePolicyData policy = getUserData(profiles.get(i).id);
+                final int N = policy.mAdminList.size();
+                for (int j = 0; j < N; j++) {
+                    ActiveAdmin admin = policy.mAdminList.get(j);
+                    List<String> fromAdmin = admin.permittedInputMethods;
+                    if (fromAdmin != null) {
+                        if (result == null) {
+                            result = new ArrayList<String>(fromAdmin);
+                        } else {
+                            result.retainAll(fromAdmin);
+                        }
+                    }
+                }
+            }
+
+            // If we have a permitted list add all system input methods.
+            if (result != null) {
+                InputMethodManager inputMethodManager = (InputMethodManager) mContext
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+                List<InputMethodInfo> imes = inputMethodManager.getInputMethodList();
+                long id = Binder.clearCallingIdentity();
+                try {
+                    IPackageManager pm = AppGlobals.getPackageManager();
+                    if (imes != null) {
+                        for (InputMethodInfo ime : imes) {
+                            String packageName = ime.getPackageName();
+                            try {
+                                ApplicationInfo applicationInfo = pm.getApplicationInfo(
+                                        packageName, PackageManager.GET_UNINSTALLED_PACKAGES,
+                                        userId);
+                                if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                                    result.add(packageName);
+                                }
+                            } catch (RemoteException e) {
+                                Log.i(LOG_TAG, "Input method for missing package", e);
+                            }
+                        }
+                    }
+                } finally {
+                    restoreCallingIdentity(id);
+                }
+            }
+            return result;
         }
     }
 

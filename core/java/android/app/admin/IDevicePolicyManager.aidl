@@ -24,6 +24,7 @@ import android.net.ProxyInfo;
 import android.os.Bundle;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
+import java.util.List;
 
 /**
  * Internal IPC interface to the device policy service.
@@ -136,6 +137,14 @@ interface IDevicePolicyManager {
     void setUserRestriction(in ComponentName who, in String key, boolean enable);
     void addCrossProfileIntentFilter(in ComponentName admin, in IntentFilter filter, int flags);
     void clearCrossProfileIntentFilters(in ComponentName admin);
+
+    boolean setPermittedAccessibilityServices(in ComponentName admin,in List packageList);
+    List getPermittedAccessibilityServices(in ComponentName admin);
+    List getPermittedAccessibilityServicesForUser(int userId);
+
+    boolean setPermittedInputMethods(in ComponentName admin,in List packageList);
+    List getPermittedInputMethods(in ComponentName admin);
+    List getPermittedInputMethodsForCurrentUser();
 
     boolean setApplicationHidden(in ComponentName admin, in String packageName, boolean hidden);
     int setApplicationsHidden(in ComponentName admin, in Intent intent, boolean hidden);
