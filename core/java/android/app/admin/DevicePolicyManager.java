@@ -55,7 +55,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Public interface for managing policies enforced on a device.  Most clients
@@ -1875,12 +1874,16 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device/profile owner to set whether the screen capture is disabled.
+     * Called by a device/profile owner to set whether the screen capture is disabled. Disabling
+     * screen capture also prevents the content from being shown on display devices that do not have
+     * a secure video output. See {@link android.view.Display#FLAG_SECURE} for more details about
+     * secure surfaces and secure displays.
      *
      * <p>The calling device admin must be a device or profile owner. If it is not, a
      * security exception will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param disabled Whether or not screen capture should be disabled.
      */
     public void setScreenCaptureDisabled(ComponentName admin, boolean disabled) {
         if (mService != null) {
