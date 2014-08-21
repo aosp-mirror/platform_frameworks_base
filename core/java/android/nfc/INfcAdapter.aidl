@@ -57,7 +57,6 @@ interface INfcAdapter
     void setReaderMode (IBinder b, IAppCallback callback, int flags, in Bundle extras);
     void setP2pModes(int initatorModes, int targetModes);
 
-    void registerLockscreenDispatch(INfcLockscreenDispatch lockscreenDispatch, in int[] techList);
     void addNfcUnlockHandler(INfcUnlockHandler unlockHandler, in int[] techList);
     void removeNfcUnlockHandler(INfcUnlockHandler unlockHandler);
 }
