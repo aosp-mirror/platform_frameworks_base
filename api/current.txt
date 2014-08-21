@@ -12682,7 +12682,7 @@ package android.hardware.camera2 {
     method public T get(android.hardware.camera2.CameraCharacteristics.Key<T>);
     method public java.util.List<android.hardware.camera2.CaptureRequest.Key<?>> getAvailableCaptureRequestKeys();
     method public java.util.List<android.hardware.camera2.CaptureResult.Key<?>> getAvailableCaptureResultKeys();
-    field public static final android.hardware.camera2.CameraCharacteristics.Key COLOR_CORRECTION_AVAILABLE_ABERRATION_CORRECTION_MODES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES;
     field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AE_AVAILABLE_ANTIBANDING_MODES;
     field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AE_AVAILABLE_MODES;
     field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES;
@@ -12796,9 +12796,9 @@ package android.hardware.camera2 {
 
   public abstract class CameraMetadata {
     method public java.util.List<TKey> getKeys();
-    field public static final int COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_FAST = 1; // 0x1
-    field public static final int COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_HIGH_QUALITY = 2; // 0x2
-    field public static final int COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_OFF = 0; // 0x0
+    field public static final int COLOR_CORRECTION_ABERRATION_MODE_FAST = 1; // 0x1
+    field public static final int COLOR_CORRECTION_ABERRATION_MODE_HIGH_QUALITY = 2; // 0x2
+    field public static final int COLOR_CORRECTION_ABERRATION_MODE_OFF = 0; // 0x0
     field public static final int COLOR_CORRECTION_MODE_FAST = 1; // 0x1
     field public static final int COLOR_CORRECTION_MODE_HIGH_QUALITY = 2; // 0x2
     field public static final int COLOR_CORRECTION_MODE_TRANSFORM_MATRIX = 0; // 0x0
@@ -12989,7 +12989,7 @@ package android.hardware.camera2 {
     method public java.lang.Object getTag();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.hardware.camera2.CaptureRequest.Key BLACK_LEVEL_LOCK;
-    field public static final android.hardware.camera2.CaptureRequest.Key COLOR_CORRECTION_ABERRATION_CORRECTION_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key COLOR_CORRECTION_ABERRATION_MODE;
     field public static final android.hardware.camera2.CaptureRequest.Key COLOR_CORRECTION_GAINS;
     field public static final android.hardware.camera2.CaptureRequest.Key COLOR_CORRECTION_MODE;
     field public static final android.hardware.camera2.CaptureRequest.Key COLOR_CORRECTION_TRANSFORM;
@@ -13061,7 +13061,7 @@ package android.hardware.camera2 {
     method public android.hardware.camera2.CaptureRequest getRequest();
     method public int getSequenceId();
     field public static final android.hardware.camera2.CaptureResult.Key BLACK_LEVEL_LOCK;
-    field public static final android.hardware.camera2.CaptureResult.Key COLOR_CORRECTION_ABERRATION_CORRECTION_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key COLOR_CORRECTION_ABERRATION_MODE;
     field public static final android.hardware.camera2.CaptureResult.Key COLOR_CORRECTION_GAINS;
     field public static final android.hardware.camera2.CaptureResult.Key COLOR_CORRECTION_MODE;
     field public static final android.hardware.camera2.CaptureResult.Key COLOR_CORRECTION_TRANSFORM;
