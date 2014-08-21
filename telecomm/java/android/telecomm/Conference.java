@@ -163,6 +163,7 @@ public abstract class Conference {
      * @return True if the connection was successfully removed.
      */
     public void removeConnection(Connection connection) {
+        Log.d(this, "removing %s from %s", connection, mChildConnections);
         if (connection != null && mChildConnections.remove(connection)) {
             connection.resetConference();
             for (Listener l : mListeners) {
@@ -177,7 +178,7 @@ public abstract class Conference {
     public void destroy() {
         Log.d(this, "destroying conference : %s", this);
         // Tear down the children.
-        for (Connection connection : new ArrayList<>(mChildConnections)) {
+        for (Connection connection : mChildConnections) {
             Log.d(this, "removing connection %s", connection);
             removeConnection(connection);
         }

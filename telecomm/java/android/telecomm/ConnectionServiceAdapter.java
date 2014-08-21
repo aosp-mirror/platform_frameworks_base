@@ -197,6 +197,7 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     void setIsConferenced(String callId, String conferenceCallId) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
+                Log.d(this, "sending connection %s with conference %s", callId, conferenceCallId);
                 adapter.setIsConferenced(callId, conferenceCallId);
             } catch (RemoteException ignored) {
             }
