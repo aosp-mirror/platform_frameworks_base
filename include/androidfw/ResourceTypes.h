@@ -1459,6 +1459,9 @@ public:
     // Loads an unmapped reference table from the package.
     status_t load(const ResTable_lib_header* const header);
 
+    // Adds mappings from the other DynamicRefTable
+    status_t addMappings(const DynamicRefTable& other);
+
     // Creates a mapping from build-time package ID to run-time package ID for
     // the given package.
     status_t addMapping(const String16& packageName, uint8_t packageId);
