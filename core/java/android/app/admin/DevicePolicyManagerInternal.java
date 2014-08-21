@@ -26,6 +26,22 @@ import java.util.List;
 public abstract class DevicePolicyManagerInternal {
 
     /**
+     * Listener for changes in the white-listed packages to show cross-profile
+     * widgets.
+     */
+    public interface OnCrossProfileWidgetProvidersChangeListener {
+
+        /**
+         * Called when the white-listed packages to show cross-profile widgets
+         * have changed for a given user.
+         *
+         * @param profileId The profile for which the white-listed packages changed.
+         * @param packages The white-listed packages.
+         */
+        public void onCrossProfileWidgetProvidersChanged(int profileId, List<String> packages);
+    }
+
+    /**
      * Gets the packages whose widget providers are white-listed to be
      * available in the parent user.
      *
@@ -35,4 +51,13 @@ public abstract class DevicePolicyManagerInternal {
      *    profile.
      */
     public abstract List<String> getCrossProfileWidgetProviders(int profileId);
+
+    /**
+     * Adds a listener for changes in the white-listed packages to show
+     * cross-profile app widgets.
+     *
+     * @param listener The listener to add.
+     */
+    public abstract void addOnCrossProfileWidgetProvidersChangeListener(
+            OnCrossProfileWidgetProvidersChangeListener listener);
 }
