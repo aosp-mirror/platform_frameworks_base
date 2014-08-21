@@ -143,14 +143,14 @@ public abstract class BluetoothGattCallback {
      * Callback indicating the MTU for a given device connection has changed.
      *
      * This callback is triggered in response to the
-     * {@link BluetoothGatt#configureMTU} function, or in response to a connection
+     * {@link BluetoothGatt#requestMtu} function, or in response to a connection
      * event.
      *
-     * @param gatt GATT client invoked {@link BluetoothGatt#configureMTU}
+     * @param gatt GATT client invoked {@link BluetoothGatt#requestMtu}
      * @param mtu The new MTU size
      * @param status {@link BluetoothGatt#GATT_SUCCESS} if the MTU has been changed successfully
      */
-    public void onConfigureMTU(BluetoothGatt gatt, int mtu, int status) {
+    public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
     }
 
     /**
