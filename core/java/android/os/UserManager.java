@@ -57,8 +57,7 @@ public class UserManager {
 
     /**
      * Key for user restrictions. Specifies if a user is disallowed from changing Wi-Fi
-     * access points.
-     * The default value is <code>false</code>.
+     * access points. The default value is <code>false</code>.
      * <p/>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
@@ -119,7 +118,7 @@ public class UserManager {
 
     /**
      * Key for user restrictions. Specifies if a user is disallowed from transferring files over
-     * USB. The default value is <code>false</code>.
+     * USB. This can only be set by device owners. The default value is <code>false</code>.
      * <p/>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
@@ -139,8 +138,7 @@ public class UserManager {
 
     /**
      * Key for user restrictions. Specifies if a user is disallowed from removing itself and other
-     * users.
-     * The default value is <code>false</code>.
+     * users. The default value is <code>false</code>.
      * <p/>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
@@ -170,7 +168,8 @@ public class UserManager {
 
     /**
      * Key for user restrictions. Specifies if a user is disallowed from configuring Tethering
-     * & portable hotspots. The default value is <code>false</code>.
+     * & portable hotspots. This can only be set by device owners. The default value is
+     * <code>false</code>.
      * <p/>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
@@ -180,8 +179,8 @@ public class UserManager {
 
     /**
      * Key for user restrictions. Specifies if a user is disallowed from factory resetting
-     * from Settings.
-     * The default value is <code>false</code>.
+     * from Settings. This can only be set by device owners. The default value is
+     * <code>false</code>.
      * <p>
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
@@ -190,7 +189,7 @@ public class UserManager {
 
     /**
      * Key for user restrictions. Specifies if a user is disallowed from adding new users and
-     * profiles. The default value is <code>false</code>.
+     * profiles. This can only be set by device owners. The default value is <code>false</code>.
      * <p>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
@@ -210,7 +209,7 @@ public class UserManager {
 
     /**
      * Key for user restrictions. Specifies if a user is disallowed from configuring cell
-     * broadcasts. The default value is <code>false</code>.
+     * broadcasts. This can only be set by device owners. The default value is <code>false</code>.
      * <p>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
@@ -220,7 +219,7 @@ public class UserManager {
 
     /**
      * Key for user restrictions. Specifies if a user is disallowed from configuring mobile
-     * networks. The default value is <code>false</code>.
+     * networks. This can only be set by device owners. The default value is <code>false</code>.
      * <p>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
@@ -249,7 +248,8 @@ public class UserManager {
 
     /**
      * Key for user restrictions. Specifies if a user is disallowed from mounting
-     * physical external media. The default value is <code>false</code>.
+     * physical external media. This can only be set by device owners. The default value is
+     * <code>false</code>.
      * <p/>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
@@ -259,7 +259,7 @@ public class UserManager {
 
     /**
      * Key for user restrictions. Specifies if a user is disallowed from adjusting microphone
-     * volume.
+     * volume. If set, the microphone will be muted. This can only be set by device owners.
      * The default value is <code>false</code>.
      * <p/>
      * Type: Boolean
@@ -270,7 +270,7 @@ public class UserManager {
 
     /**
      * Key for user restrictions. Specifies if a user is disallowed from adjusting the master
-     * volume.
+     * volume. If set, the master volume will be muted. This can only be set by device owners.
      * The default value is <code>false</code>.
      * <p/>
      * Type: Boolean
@@ -292,8 +292,7 @@ public class UserManager {
 
     /**
      * Key for user restrictions. Specifies that the user is not allowed to send or receive
-     * SMS messages.
-     * The default value is <code>false</code>.
+     * SMS messages. This can only be set by device owners. The default value is <code>false</code>.
      * <p/>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)
@@ -311,7 +310,7 @@ public class UserManager {
      * <li>{@link LayoutParams#TYPE_SYSTEM_ERROR}</li>
      * <li>{@link LayoutParams#TYPE_SYSTEM_OVERLAY}</li>
      *
-     * <p>The default value is <code>false</code>.
+     * <p>This can only be set by device owners. The default value is <code>false</code>.
      * <p/>
      * Type: Boolean
      * @see #setUserRestrictions(Bundle)

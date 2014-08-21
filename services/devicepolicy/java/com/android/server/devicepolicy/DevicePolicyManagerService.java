@@ -151,6 +151,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String ATTR_PRIVATE_KEY_ACCESS_LISTENER = "private-key-access-listener";
 
+    private static final Set<String> DEVICE_OWNER_USER_RESTRICTIONS;
+    static {
+        DEVICE_OWNER_USER_RESTRICTIONS = new HashSet();
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_USB_FILE_TRANSFER);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_CONFIG_TETHERING);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_FACTORY_RESET);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_ADD_USER);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_CONFIG_CELL_BROADCASTS);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_UNMUTE_MICROPHONE);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_ADJUST_VOLUME);
+        DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_SMS);
+    }
+
     final Context mContext;
     final UserManager mUserManager;
     final PowerManager.WakeLock mWakeLock;
@@ -4179,7 +4194,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
             }
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            ActiveAdmin activeAdmin =
+                    getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            boolean isDeviceOwner = isDeviceOwner(activeAdmin.info.getPackageName());
+            if (!isDeviceOwner && DEVICE_OWNER_USER_RESTRICTIONS.contains(key)) {
+                throw new SecurityException("Profile owners cannot set user restriction " + key);
+            }
 
             long id = Binder.clearCallingIdentity();
             try {
