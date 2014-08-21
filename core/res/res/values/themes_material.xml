@@ -333,8 +333,7 @@ please see themes_device_defaults.xml.
         <item name="dividerVertical">?attr/listDivider</item>
         <item name="dividerHorizontal">?attr/listDivider</item>
         <item name="buttonBarStyle">@style/Widget.Material.ButtonBar</item>
-        <item name="buttonBarButtonStyle">@style/Widget.Material.Button.Borderless</item>
-        <item name="buttonBarPositiveButtonStyle">@style/Widget.Material.Button.Borderless.Colored</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Material.Button.Borderless.Colored</item>
         <item name="segmentedButtonStyle">@style/Widget.Material.SegmentedButton</item>
 
         <!-- SearchView attributes -->
@@ -679,8 +678,7 @@ please see themes_device_defaults.xml.
         <item name="dividerVertical">?attr/listDivider</item>
         <item name="dividerHorizontal">?attr/listDivider</item>
         <item name="buttonBarStyle">@style/Widget.Material.Light.ButtonBar</item>
-        <item name="buttonBarButtonStyle">@style/Widget.Material.Light.Button.Borderless</item>
-        <item name="buttonBarPositiveButtonStyle">@style/Widget.Material.Light.Button.Borderless.Colored</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Material.Light.Button.Borderless.Colored</item>
         <item name="segmentedButtonStyle">@style/Widget.Material.Light.SegmentedButton</item>
 
         <!-- SearchView attributes -->
