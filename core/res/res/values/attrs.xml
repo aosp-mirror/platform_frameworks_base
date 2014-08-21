@@ -5608,6 +5608,19 @@
         </attr>
     </declare-styleable>
 
+    <!-- Use <code>changeTransform</code> as the root tag of the XML resource that
+         describes a {@link android.transition.ChangeTransform} transition. -->
+    <declare-styleable name="ChangeTransform">
+        <!-- A parent change should use an overlay or affect the transform of the
+             transitionining View. Default is true. Corresponds to
+             {@link android.transition.ChangeTransform#setReparentWithOverlay(boolean)}. -->
+        <attr name="reparentWithOverlay" format="boolean"/>
+
+        <!-- Tells ChangeTransform to track parent changes. Default is true. Corresponds to
+             {@link android.transition.ChangeTransform#setReparent(boolean)}. -->
+        <attr name="reparent" format="boolean"/>
+    </declare-styleable>
+
     <!-- Use <code>transitionManager</code> as the root tag of the XML resource that
          describes a {@link android.transition.TransitionManager
          TransitionManager}. -->
