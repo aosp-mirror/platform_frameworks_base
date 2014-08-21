@@ -188,7 +188,7 @@ public class Typeface {
                 return createFromFamiliesWithDefault(families);
             }
         }
-        return null;
+        throw new RuntimeException("Font asset not found " + path);
     }
 
     /**
@@ -215,7 +215,7 @@ public class Typeface {
                 return createFromFamiliesWithDefault(families);
             }
         }
-        return null;
+        throw new RuntimeException("Font not found " + path);
     }
 
     /**
