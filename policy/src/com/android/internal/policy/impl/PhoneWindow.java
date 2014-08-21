@@ -267,6 +267,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private Boolean mAllowExitTransitionOverlap;
     private Boolean mAllowEnterTransitionOverlap;
     private long mBackgroundFadeDurationMillis = -1;
+    private Boolean mSharedElementsUseOverlay;
 
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
@@ -3546,6 +3547,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             R.styleable.Window_windowTransitionBackgroundFadeDuration,
                             DEFAULT_BACKGROUND_FADE_DURATION_MS);
                 }
+                if (mSharedElementsUseOverlay == null) {
+                    mSharedElementsUseOverlay = getWindowStyle().getBoolean(
+                            R.styleable.Window_windowSharedElementsUseOverlay, true);
+                }
             }
         }
     }
@@ -4022,6 +4027,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             throw new IllegalArgumentException("negative durations are not allowed");
         }
         mBackgroundFadeDurationMillis = fadeDurationMillis;
+    }
+
+    @Override
+    public void setSharedElementsUseOverlay(boolean sharedElementsUseOverlay) {
+        mSharedElementsUseOverlay = sharedElementsUseOverlay;
+    }
+
+    @Override
+    public boolean getSharedElementsUseOverlay() {
+        return (mSharedElementsUseOverlay == null) ? true : mSharedElementsUseOverlay;
     }
 
     private static final class DrawableFeatureState {
