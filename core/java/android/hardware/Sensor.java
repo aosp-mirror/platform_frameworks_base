@@ -348,7 +348,7 @@ public final class Sensor {
      * A sensor of this type returns the number of steps taken by the user since the last reboot
      * while activated. The value is returned as a float (with the fractional part set to zero) and
      * is reset to zero only on a system reboot. The timestamp of the event is set to the time when
-     * the first step for that event was taken. This sensor is implemented in hardware and is
+     * the last step for that event was taken. This sensor is implemented in hardware and is
      * expected to be low power.
      * <p>
      * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
