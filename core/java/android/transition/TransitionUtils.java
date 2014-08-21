@@ -18,6 +18,8 @@ package android.transition;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
+import android.animation.TypeEvaluator;
+import android.graphics.Matrix;
 
 /**
  * Static utility methods for Transitions.
@@ -35,6 +37,27 @@ public class TransitionUtils {
             AnimatorSet animatorSet = new AnimatorSet();
             animatorSet.playTogether(animator1, animator2);
             return animatorSet;
+        }
+    }
+
+    public static class MatrixEvaluator implements TypeEvaluator<Matrix> {
+
+        float[] mTempStartValues = new float[9];
+
+        float[] mTempEndValues = new float[9];
+
+        Matrix mTempMatrix = new Matrix();
+
+        @Override
+        public Matrix evaluate(float fraction, Matrix startValue, Matrix endValue) {
+            startValue.getValues(mTempStartValues);
+            endValue.getValues(mTempEndValues);
+            for (int i = 0; i < 9; i++) {
+                float diff = mTempEndValues[i] - mTempStartValues[i];
+                mTempEndValues[i] = mTempStartValues[i] + (fraction * diff);
+            }
+            mTempMatrix.setValues(mTempEndValues);
+            return mTempMatrix;
         }
     }
 }
