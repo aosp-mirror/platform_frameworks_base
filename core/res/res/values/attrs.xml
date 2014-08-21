@@ -1005,6 +1005,9 @@
         <!-- The color applied to framework buttons in their normal state. -->
         <attr name="colorButtonNormal" format="color" />
 
+        <!-- The color applied to framework switch thumbs in their normal state. -->
+        <attr name="colorSwitchThumbNormal" format="color" />
+
         <!-- ================== -->
         <!-- Hardware rendering -->
         <!-- ================== -->

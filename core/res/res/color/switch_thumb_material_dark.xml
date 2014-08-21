@@ -15,19 +15,6 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false">
-        <nine-patch android:src="@drawable/switch_track_mtrl_alpha"
-            android:tint="?attr/colorForeground"
-            android:alpha="0.1" />
-    </item>
-    <item android:state_checked="true">
-        <nine-patch android:src="@drawable/switch_track_mtrl_alpha"
-            android:tint="?attr/colorControlActivated"
-            android:alpha="0.3" />
-    </item>
-    <item>
-        <nine-patch android:src="@drawable/switch_track_mtrl_alpha"
-            android:tint="?attr/colorForeground"
-            android:alpha="0.3" />
-    </item>
+    <item android:state_enabled="false" android:color="@color/switch_thumb_disabled_material_dark"/>
+    <item android:color="@color/switch_thumb_normal_material_dark"/>
 </selector>
