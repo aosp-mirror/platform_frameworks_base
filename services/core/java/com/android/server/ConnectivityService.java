@@ -756,10 +756,20 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return mNextNetworkRequestId++;
     }
 
-    private synchronized int nextNetId() {
-        int netId = mNextNetId;
-        if (++mNextNetId > MAX_NET_ID) mNextNetId = MIN_NET_ID;
-        return netId;
+    private void assignNextNetId(NetworkAgentInfo nai) {
+        synchronized (mNetworkForNetId) {
+            for (int i = MIN_NET_ID; i <= MAX_NET_ID; i++) {
+                int netId = mNextNetId;
+                if (++mNextNetId > MAX_NET_ID) mNextNetId = MIN_NET_ID;
+                // Make sure NetID unused.  http://b/16815182
+                if (mNetworkForNetId.get(netId) == null) {
+                    nai.network = new Network(netId);
+                    mNetworkForNetId.put(netId, nai);
+                    return;
+                }
+            }
+        }
+        throw new IllegalStateException("No free netIds");
     }
 
     private int getConnectivityChangeDelay() {
@@ -4149,7 +4159,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             int currentScore, NetworkMisc networkMisc) {
         enforceConnectivityInternalPermission();
 
-        NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(), nextNetId(),
+        NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(),
             new NetworkInfo(networkInfo), new LinkProperties(linkProperties),
             new NetworkCapabilities(networkCapabilities), currentScore, mContext, mTrackerHandler,
             networkMisc);
@@ -4163,9 +4173,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void handleRegisterNetworkAgent(NetworkAgentInfo na) {
         if (VDBG) log("Got NetworkAgent Messenger");
         mNetworkAgentInfos.put(na.messenger, na);
-        synchronized (mNetworkForNetId) {
-            mNetworkForNetId.put(na.network.netId, na);
-        }
+        assignNextNetId(na);
         na.asyncChannel.connect(mContext, mTrackerHandler, na.messenger);
         NetworkInfo networkInfo = na.networkInfo;
         na.networkInfo = null;

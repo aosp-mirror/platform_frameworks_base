@@ -40,7 +40,7 @@ import java.util.ArrayList;
  */
 public class NetworkAgentInfo {
     public NetworkInfo networkInfo;
-    public final Network network;
+    public Network network;
     public LinkProperties linkProperties;
     public NetworkCapabilities networkCapabilities;
     public int currentScore;
@@ -55,12 +55,12 @@ public class NetworkAgentInfo {
     public final Messenger messenger;
     public final AsyncChannel asyncChannel;
 
-    public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, int netId, NetworkInfo info,
+    public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, NetworkInfo info,
             LinkProperties lp, NetworkCapabilities nc, int score, Context context, Handler handler,
             NetworkMisc misc) {
         this.messenger = messenger;
         asyncChannel = ac;
-        network = new Network(netId);
+        network = null;
         networkInfo = info;
         linkProperties = lp;
         networkCapabilities = nc;
@@ -87,6 +87,7 @@ public class NetworkAgentInfo {
 
     public String name() {
         return "NetworkAgentInfo [" + networkInfo.getTypeName() + " (" +
-                networkInfo.getSubtypeName() + ") - " + network.toString() + "]";
+                networkInfo.getSubtypeName() + ") - " +
+                (network == null ? "null" : network.toString()) + "]";
     }
 }
