@@ -75,6 +75,7 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.os.Environment.UserEnvironment;
 import android.os.storage.IMountService;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -1442,43 +1443,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         return array;
     }
 
-    // Backup password management
     boolean passwordMatchesSaved(String algorithm, String candidatePw, int rounds) {
-        // First, on an encrypted device we require matching the device pw
-        final boolean isEncrypted;
-        try {
-            isEncrypted = (mMountService.getEncryptionState() !=
-                    IMountService.ENCRYPTION_STATE_NONE);
-            if (isEncrypted) {
-                if (DEBUG) {
-                    Slog.i(TAG, "Device encrypted; verifying against device data pw");
-                }
-                // 0 means the password validated
-                // -2 means device not encrypted
-                // Any other result is either password failure or an error condition,
-                // so we refuse the match
-                final int result = mMountService.verifyEncryptionPassword(candidatePw);
-                if (result == 0) {
-                    if (MORE_DEBUG) Slog.d(TAG, "Pw verifies");
-                    return true;
-                } else if (result != -2) {
-                    if (MORE_DEBUG) Slog.d(TAG, "Pw mismatch");
-                    return false;
-                } else {
-                    // ...else the device is supposedly not encrypted.  HOWEVER, the
-                    // query about the encryption state said that the device *is*
-                    // encrypted, so ... we may have a problem.  Log it and refuse
-                    // the backup.
-                    Slog.e(TAG, "verified encryption state mismatch against query; no match allowed");
-                    return false;
-                }
-            }
-        } catch (Exception e) {
-            // Something went wrong talking to the mount service.  This is very bad;
-            // assume that we fail password validation.
-            return false;
-        }
-
         if (mPasswordHash == null) {
             // no current password case -- require that 'currentPw' be null or empty
             if (candidatePw == null || "".equals(candidatePw)) {
@@ -1583,14 +1548,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "hasBackupPassword");
 
-        try {
-            return (mMountService.getEncryptionState() != IMountService.ENCRYPTION_STATE_NONE)
-                || (mPasswordHash != null && mPasswordHash.length() > 0);
-        } catch (Exception e) {
-            // If we can't talk to the mount service we have a serious problem; fail
-            // "secure" i.e. assuming that we require a password
-            return true;
-        }
+        return mPasswordHash != null && mPasswordHash.length() > 0;
     }
 
     private boolean backupPasswordMatches(String currentPw) {
@@ -3321,6 +3279,20 @@ public class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    boolean deviceIsEncrypted() {
+        try {
+            return mMountService.getEncryptionState()
+                     != IMountService.ENCRYPTION_STATE_NONE
+                && mMountService.getPasswordType()
+                     != StorageManager.CRYPT_TYPE_DEFAULT;
+        } catch (Exception e) {
+            // If we can't talk to the mount service we have a serious problem; fail
+            // "secure" i.e. assuming that the device is encrypted.
+            Slog.e(TAG, "Unable to communicate with mount service: " + e.getMessage());
+            return true;
+        }
+    }
+
     // Full backup task variant used for adb backup
     class PerformAdbBackupTask extends FullBackupTask {
         FullBackupEngine mBackupEngine;
@@ -3338,7 +3310,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         ArrayList<String> mPackages;
         String mCurrentPassword;
         String mEncryptPassword;
-        
+
         PerformAdbBackupTask(ParcelFileDescriptor fd, IFullBackupRestoreObserver observer, 
                 boolean includeApks, boolean includeObbs, boolean includeShared,
                 boolean doWidgets, String curPassword, String encryptPassword, boolean doAllApps,
@@ -3535,6 +3507,13 @@ public class BackupManagerService extends IBackupManager.Stub {
             PackageInfo pkg = null;
             try {
                 boolean encrypting = (mEncryptPassword != null && mEncryptPassword.length() > 0);
+
+                // Only allow encrypted backups of encrypted devices
+                if (deviceIsEncrypted() && !encrypting) {
+                    Slog.e(TAG, "Unencrypted backup of encrypted device; aborting");
+                    return;
+                }
+
                 OutputStream finalOutput = ofstream;
 
                 // Verify that the given password matches the currently-active
@@ -8315,17 +8294,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                         params.observer = observer;
                         params.curPassword = curPassword;
 
-                        boolean isEncrypted;
-                        try {
-                            isEncrypted = (mMountService.getEncryptionState() !=
-                                    IMountService.ENCRYPTION_STATE_NONE);
-                            if (isEncrypted) Slog.w(TAG, "Device is encrypted; forcing enc password");
-                        } catch (RemoteException e) {
-                            // couldn't contact the mount service; fail "safe" and assume encryption
-                            Slog.e(TAG, "Unable to contact mount service!");
-                            isEncrypted = true;
-                        }
-                        params.encryptPassword = (isEncrypted) ? curPassword : encPpassword;
+                        params.encryptPassword = encPpassword;
 
                         if (DEBUG) Slog.d(TAG, "Sending conf message with verb " + verb);
                         mWakelock.acquire();
