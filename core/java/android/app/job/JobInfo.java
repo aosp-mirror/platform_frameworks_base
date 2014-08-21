@@ -26,6 +26,9 @@ import android.os.PersistableBundle;
  * Container of data passed to the {@link android.app.job.JobScheduler} fully encapsulating the
  * parameters required to schedule work against the calling application. These are constructed
  * using the {@link JobInfo.Builder}.
+ * You must specify at least one sort of constraint on the JobInfo object that you are creating.
+ * The goal here is to provide the scheduler with high-level semantics about the work you want to
+ * accomplish. Doing otherwise with throw an exception in your app.
  */
 public class JobInfo implements Parcelable {
     public interface NetworkType {
@@ -434,7 +437,7 @@ public class JobInfo implements Parcelable {
          * @return The job object to hand to the JobScheduler. This object is immutable.
          */
         public JobInfo build() {
-            // Allow tasks with no constraints. What am I, a database?
+            // Allow jobs with no constraints - What am I, a database?
             if (!mHasEarlyConstraint && !mHasLateConstraint && !mRequiresCharging &&
                     !mRequiresDeviceIdle && mNetworkCapabilities == NetworkType.NONE) {
                 throw new IllegalArgumentException("You're trying to build a job with no " +
