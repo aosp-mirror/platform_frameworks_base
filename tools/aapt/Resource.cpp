@@ -770,7 +770,14 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
     if (!addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "versionCode",
             bundle->getVersionCode(), errorOnFailedInsert, replaceVersion)) {
         return UNKNOWN_ERROR;
+    } else {
+        const XMLNode::attribute_entry* attr = root->getAttribute(
+                String16(RESOURCES_ANDROID_NAMESPACE), String16("versionCode"));
+        if (attr != NULL) {
+            bundle->setVersionCode(strdup(String8(attr->string).string()));
+        }
     }
+
     if (!addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "versionName",
             bundle->getVersionName(), errorOnFailedInsert, replaceVersion)) {
         return UNKNOWN_ERROR;
