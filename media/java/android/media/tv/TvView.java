@@ -38,6 +38,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 /**
@@ -69,8 +70,10 @@ public class TvView extends ViewGroup {
     private static final int CAPTION_ENABLED = 1;
     private static final int CAPTION_DISABLED = 2;
 
+    private static final WeakReference<TvView> NULL_TV_VIEW = new WeakReference(null);
+
     private static final Object sMainTvViewLock = new Object();
-    private static TvView sMainTvView;
+    private static WeakReference<TvView> sMainTvView = NULL_TV_VIEW;
 
     private final Handler mHandler = new Handler();
     private Session mSession;
@@ -186,16 +189,16 @@ public class TvView extends ViewGroup {
      * (including the tuner, composite, S-Video, etc.), the internal device (= TV itself) becomes
      * the active source.
      * </p><p>
-     * First tuned {@link TvView} becomes main automatically, and keeps to be main until {@link
-     * #setMain} is called for other {@link TvView}. Note that main {@link TvView} won't be reset
-     * even when current main {@link TvView} is removed from view hierarchy.
+     * First tuned {@link TvView} becomes main automatically, and keeps to be main until either
+     * {@link #reset} is called for the main {@link TvView} or {@link #setMain} is called for other
+     * {@link TvView}.
      * </p>
      * @hide
      */
     @SystemApi
     public void setMain() {
         synchronized (sMainTvViewLock) {
-            sMainTvView = this;
+            sMainTvView = new WeakReference(this);
             if (hasWindowFocus() && mSession != null) {
                 mSession.setMain();
             }
@@ -288,8 +291,8 @@ public class TvView extends ViewGroup {
             throw new IllegalArgumentException("inputId cannot be null or an empty string");
         }
         synchronized (sMainTvViewLock) {
-            if (sMainTvView == null) {
-                sMainTvView = this;
+            if (sMainTvView.get() == null) {
+                sMainTvView = new WeakReference(this);
             }
         }
         if (mSessionCallback != null && mSessionCallback.mInputId.equals(inputId)) {
@@ -320,6 +323,11 @@ public class TvView extends ViewGroup {
      */
     public void reset() {
         if (DEBUG) Log.d(TAG, "reset()");
+        synchronized (sMainTvViewLock) {
+            if (this == sMainTvView.get()) {
+                sMainTvView = NULL_TV_VIEW;
+            }
+        }
         if (mSession != null) {
             release();
             resetSurfaceView();
@@ -530,7 +538,7 @@ public class TvView extends ViewGroup {
         // Other app may have shown its own main TvView.
         // Set main again to regain main session.
         synchronized (sMainTvViewLock) {
-            if (hasFocus && this == sMainTvView && mSession != null) {
+            if (hasFocus && this == sMainTvView.get() && mSession != null) {
                 mSession.setMain();
             }
         }
@@ -828,7 +836,7 @@ public class TvView extends ViewGroup {
             mSession = session;
             if (session != null) {
                 synchronized (sMainTvViewLock) {
-                    if (hasWindowFocus() && TvView.this == sMainTvView) {
+                    if (hasWindowFocus() && TvView.this == sMainTvView.get()) {
                         mSession.setMain();
                     }
                 }
