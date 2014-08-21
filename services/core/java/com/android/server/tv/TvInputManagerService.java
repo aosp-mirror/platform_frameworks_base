@@ -283,7 +283,6 @@ public final class TvInputManagerService extends SystemService {
         userState.inputMap = inputMap;
 
         userState.ratingSystemXmlUriSet.clear();
-        userState.ratingSystemXmlUriSet.add(TvContentRating.SYSTEM_CONTENT_RATING_SYSTEM_XML);
         for (TvInputState state : userState.inputMap.values()) {
             Uri ratingSystemXmlUri = state.mInfo.getRatingSystemXmlUri();
             if (ratingSystemXmlUri != null) {
