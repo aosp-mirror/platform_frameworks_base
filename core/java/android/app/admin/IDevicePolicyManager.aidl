@@ -138,7 +138,6 @@ interface IDevicePolicyManager {
     void clearCrossProfileIntentFilters(in ComponentName admin);
 
     boolean setApplicationHidden(in ComponentName admin, in String packageName, boolean hidden);
-    int setApplicationsHidden(in ComponentName admin, in Intent intent, boolean hidden);
     boolean isApplicationHidden(in ComponentName admin, in String packageName);
 
     UserHandle createUser(in ComponentName who, in String name);

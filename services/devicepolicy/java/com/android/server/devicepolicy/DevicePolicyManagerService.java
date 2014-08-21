@@ -4181,46 +4181,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public int setApplicationsHidden(ComponentName who, Intent intent, boolean hidden) {
-        int callingUserId = UserHandle.getCallingUserId();
-        synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-
-            long id = Binder.clearCallingIdentity();
-            try {
-                IPackageManager pm = AppGlobals.getPackageManager();
-                List<ResolveInfo> activitiesToEnable = pm.queryIntentActivities(intent,
-                        intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                        PackageManager.GET_DISABLED_COMPONENTS
-                                | PackageManager.GET_UNINSTALLED_PACKAGES,
-                        callingUserId);
-
-                if (DBG) Slog.d(LOG_TAG, "Enabling activities: " + activitiesToEnable);
-                int numberOfAppsUnhidden = 0;
-                if (activitiesToEnable != null) {
-                    for (ResolveInfo info : activitiesToEnable) {
-                        if (info.activityInfo != null) {
-                            numberOfAppsUnhidden++;
-                            pm.setApplicationHiddenSettingAsUser(info.activityInfo.packageName,
-                                    hidden, callingUserId);
-                        }
-                    }
-                }
-                return numberOfAppsUnhidden;
-            } catch (RemoteException re) {
-                // shouldn't happen
-                Slog.e(LOG_TAG, "Failed to setApplicationsHiddenSettingsWithIntent", re);
-            } finally {
-                restoreCallingIdentity(id);
-            }
-            return 0;
-        }
-    }
-
-    @Override
     public boolean isApplicationHidden(ComponentName who, String packageName) {
         int callingUserId = UserHandle.getCallingUserId();
         synchronized (this) {
