@@ -272,23 +272,22 @@ public class NetworkMonitor extends StateMachine {
                 case CMD_NETWORK_LINGER:
                     if (DBG) log("Lingering");
                     transitionTo(mLingeringState);
-                    break;
+                    return HANDLED;
                 case CMD_NETWORK_CONNECTED:
                     if (DBG) log("Connected");
                     transitionTo(mEvaluatingState);
-                    break;
+                    return HANDLED;
                 case CMD_NETWORK_DISCONNECTED:
                     if (DBG) log("Disconnected - quitting");
                     quit();
-                    break;
+                    return HANDLED;
                 case CMD_FORCE_REEVALUATION:
                     if (DBG) log("Forcing reevaluation");
                     transitionTo(mEvaluatingState);
-                    break;
+                    return HANDLED;
                 default:
-                    break;
+                    return HANDLED;
             }
-            return HANDLED;
         }
     }
 
@@ -314,11 +313,10 @@ public class NetworkMonitor extends StateMachine {
             switch (message.what) {
                 case CMD_NETWORK_CONNECTED:
                     transitionTo(mValidatedState);
-                    break;
+                    return HANDLED;
                 default:
                     return NOT_HANDLED;
             }
-            return HANDLED;
         }
     }
 
@@ -347,23 +345,25 @@ public class NetworkMonitor extends StateMachine {
             switch (message.what) {
                 case CMD_REEVALUATE:
                     if (message.arg1 != mReevaluateToken)
-                        break;
+                        return HANDLED;
                     if (mNetworkAgentInfo.isVPN()) {
                         transitionTo(mValidatedState);
+                        return HANDLED;
                     }
                     // If network provides no internet connectivity adjust evaluation.
                     if (!mNetworkAgentInfo.networkCapabilities.hasCapability(
                             NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
                         // TODO: Try to verify something works.  Do all gateways respond to pings?
                         transitionTo(mValidatedState);
+                        return HANDLED;
                     }
                     // Kick off a thread to perform internet connectivity evaluation.
                     Thread thread = new EvaluateInternetConnectivity(mReevaluateToken);
                     thread.run();
-                    break;
+                    return HANDLED;
                 case EVENT_REEVALUATION_COMPLETE:
                     if (message.arg1 != mReevaluateToken)
-                        break;
+                        return HANDLED;
                     int httpResponseCode = message.arg2;
                     if (httpResponseCode == 204) {
                         transitionTo(mValidatedState);
@@ -375,11 +375,10 @@ public class NetworkMonitor extends StateMachine {
                         Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
                         sendMessageDelayed(msg, mReevaluateDelayMs);
                     }
-                    break;
+                    return HANDLED;
                 default:
                     return NOT_HANDLED;
             }
-            return HANDLED;
         }
     }
 
@@ -432,17 +431,16 @@ public class NetworkMonitor extends StateMachine {
             switch (message.what) {
                 case EVENT_APP_BYPASSED_CAPTIVE_PORTAL:
                     transitionTo(mValidatedState);
-                    break;
+                    return HANDLED;
                 case EVENT_APP_INDICATES_SIGN_IN_IMPOSSIBLE:
                     transitionTo(mOfflineState);
-                    break;
+                    return HANDLED;
                 case EVENT_NO_APP_RESPONSE:
                     transitionTo(mUserPromptedState);
-                    break;
+                    return HANDLED;
                 default:
                     return NOT_HANDLED;
             }
-            return HANDLED;
         }
         public void exit() {
             mReceiver.cancel();
@@ -488,13 +486,12 @@ public class NetworkMonitor extends StateMachine {
             switch (message.what) {
                 case CMD_USER_WANTS_SIGN_IN:
                     if (message.arg1 != mUserPromptedToken)
-                        break;
+                        return HANDLED;
                     transitionTo(mInteractiveAppsPromptedState);
-                    break;
+                    return HANDLED;
                 default:
                     return NOT_HANDLED;
             }
-            return HANDLED;
         }
 
         @Override
@@ -520,17 +517,16 @@ public class NetworkMonitor extends StateMachine {
             switch (message.what) {
                 case EVENT_APP_BYPASSED_CAPTIVE_PORTAL:
                     transitionTo(mValidatedState);
-                    break;
+                    return HANDLED;
                 case EVENT_APP_INDICATES_SIGN_IN_IMPOSSIBLE:
                     transitionTo(mOfflineState);
-                    break;
+                    return HANDLED;
                 case EVENT_NO_APP_RESPONSE:
                     transitionTo(mCaptivePortalState);
-                    break;
+                    return HANDLED;
                 default:
                     return NOT_HANDLED;
             }
-            return HANDLED;
         }
         public void exit() {
             mReceiver.cancel();
@@ -581,18 +577,17 @@ public class NetworkMonitor extends StateMachine {
             switch (message.what) {
                 case CMD_CAPTIVE_PORTAL_LOGGED_IN:
                     if (message.arg1 != mCaptivePortalLoggedInToken)
-                        break;
+                        return HANDLED;
                     if (message.arg2 == 0) {
                         // TODO: Should teardown network.
                         transitionTo(mOfflineState);
                     } else {
                         transitionTo(mValidatedState);
                     }
-                    break;
+                    return HANDLED;
                 default:
                     return NOT_HANDLED;
             }
-            return HANDLED;
         }
 
         @Override
@@ -616,17 +611,16 @@ public class NetworkMonitor extends StateMachine {
                 case CMD_NETWORK_CONNECTED:
                     // Go straight to active as we've already evaluated.
                     transitionTo(mValidatedState);
-                    break;
+                    return HANDLED;
                 case CMD_LINGER_EXPIRED:
                     if (message.arg1 != mLingerToken)
-                        break;
+                        return HANDLED;
                     mConnectivityServiceHandler.sendMessage(
                             obtainMessage(EVENT_NETWORK_LINGER_COMPLETE, mNetworkAgentInfo));
-                    break;
+                    return HANDLED;
                 default:
                     return NOT_HANDLED;
             }
-            return HANDLED;
         }
     }
 
