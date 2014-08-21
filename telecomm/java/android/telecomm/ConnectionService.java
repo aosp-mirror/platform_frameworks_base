@@ -73,6 +73,8 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_ON_PHONE_ACCOUNT_CLICKED = 15;
     private static final int MSG_REMOVE_CONNECTION_SERVICE_ADAPTER = 16;
 
+    private static Connection sNullConnection;
+
     private final Map<String, Connection> mConnectionById = new HashMap<>();
     private final Map<Connection, String> mIdByConnection = new HashMap<>();
     private final Map<String, Conference> mConferenceById = new HashMap<>();
@@ -498,36 +500,29 @@ public abstract class ConnectionService extends Service {
             final String callId,
             final ConnectionRequest request,
             boolean isIncoming) {
-        Log.d(this, "call %s", request);
+        Log.d(this, "createConnection, callManagerAccount: %s, callId: %s, request: %s, " +
+                "isIncoming: %b", callManagerAccount, callId, request, isIncoming);
 
-        Connection createdConnection = isIncoming
+        Connection connection = isIncoming
                 ? onCreateIncomingConnection(callManagerAccount, request)
                 : onCreateOutgoingConnection(callManagerAccount, request);
-
-        if (createdConnection == null) {
-            Log.d(this, "adapter handleCreateConnectionComplete CANCELED %s", callId);
-            // Tell telecomm to try a different service.
-            createdConnection = Connection.createCanceledConnection();
+        Log.d(this, "createConnection, connection: %s", connection);
+        if (connection == null) {
+            connection = Connection.createFailedConnection(DisconnectCause.OUTGOING_FAILURE, null);
         }
-        connectionCreated(callId, request, createdConnection);
-    }
 
-    private void connectionCreated(
-            String callId,
-            ConnectionRequest request,
-            Connection connection) {
-        if (!(connection instanceof Connection.FailureSignalingConnection)) {
+        if (connection.getState() != Connection.STATE_DISCONNECTED) {
             addConnection(callId, connection);
         }
 
         Uri handle = connection.getHandle();
         String number = handle == null ? "null" : handle.getSchemeSpecificPart();
-        Log.v(this, "connectionCreated, parcelableconnection: %s, %d, %s",
+        Log.v(this, "createConnection, number: %s, state: %s, capabilities: %s",
                 Connection.toLogSafePhoneNumber(number),
-                connection.getState(),
+                Connection.stateToString(connection.getState()),
                 PhoneCapabilities.toString(connection.getCallCapabilities()));
 
-        Log.d(this, "adapter handleCreateConnectionSuccessful %s", callId);
+        Log.d(this, "createConnection, calling handleCreateConnectionSuccessful %s", callId);
         mAdapter.handleCreateConnectionComplete(
                 callId,
                 request,
@@ -545,8 +540,8 @@ public abstract class ConnectionService extends Service {
                         connection.isRequestingRingback(),
                         connection.getAudioModeIsVoip(),
                         connection.getStatusHints(),
-                        connection.getFailureCode(),
-                        connection.getFailureMessage()));
+                        connection.getDisconnectCause(),
+                        connection.getDisconnectMessage()));
     }
 
     private void abort(String callId) {
@@ -598,13 +593,13 @@ public abstract class ConnectionService extends Service {
         Log.d(this, "conference %s, %s", callId1, callId2);
 
         Connection connection1 = findConnectionForAction(callId1, "conference");
-        if (connection1 == Connection.getNullConnection()) {
+        if (connection1 == getNullConnection()) {
             Log.w(this, "Connection1 missing in conference request %s.", callId1);
             return;
         }
 
         Connection connection2 = findConnectionForAction(callId2, "conference");
-        if (connection2 == Connection.getNullConnection()) {
+        if (connection2 == getNullConnection()) {
             Log.w(this, "Connection2 missing in conference request %s.", callId2);
             return;
         }
@@ -616,7 +611,7 @@ public abstract class ConnectionService extends Service {
         Log.d(this, "splitFromConference(%s)", callId);
 
         Connection connection = findConnectionForAction(callId, "splitFromConference");
-        if (connection == Connection.getNullConnection()) {
+        if (connection == getNullConnection()) {
             Log.w(this, "Connection missing in conference request %s.", callId);
             return;
         }
@@ -881,6 +876,13 @@ public abstract class ConnectionService extends Service {
             return mConnectionById.get(callId);
         }
         Log.w(this, "%s - Cannot find Connection %s", action, callId);
-        return Connection.getNullConnection();
+        return getNullConnection();
+    }
+
+    static synchronized Connection getNullConnection() {
+        if (sNullConnection == null) {
+            sNullConnection = new Connection() {};
+        }
+        return sNullConnection;
     }
 }
