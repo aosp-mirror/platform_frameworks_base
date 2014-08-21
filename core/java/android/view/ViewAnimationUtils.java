@@ -30,6 +30,9 @@ public final class ViewAnimationUtils {
      *
      * Any shadow cast by the View will respect the circular clip from this animator.
      *
+     * Note that the animation returned here is a one-shot animation. It cannot
+     * be re-used, and once started it cannot be paused or resumed.
+     *
      * @param view The View will be clipped to the animating circle.
      * @param centerX The x coordinate of the center of the animating circle.
      * @param centerY The y coordinate of the center of the animating circle.

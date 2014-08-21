@@ -93,6 +93,14 @@ public class RenderNodeAnimator extends Animator {
 
     private long mUnscaledDuration = 300;
     private long mUnscaledStartDelay = 0;
+    // If this is true, we will run any start delays on the UI thread. This is
+    // the safe default, and is necessary to ensure start listeners fire at
+    // the correct time. Animators created by RippleDrawable (the
+    // CanvasProperty<> ones) do not have this expectation, and as such will
+    // set this to false so that the renderthread handles the startdelay instead
+    private final boolean mUiThreadHandlesDelay;
+    private long mStartDelay = 0;
+    private long mStartTime;
 
     public static int mapViewPropertyToRenderProperty(int viewProperty) {
         return sViewPropertyAnimatorMap.get(viewProperty);
@@ -101,6 +109,7 @@ public class RenderNodeAnimator extends Animator {
     public RenderNodeAnimator(int property, float finalValue) {
         mRenderProperty = property;
         mFinalValue = finalValue;
+        mUiThreadHandlesDelay = true;
         init(nCreateAnimator(new WeakReference<RenderNodeAnimator>(this),
                 property, finalValue));
     }
@@ -109,6 +118,7 @@ public class RenderNodeAnimator extends Animator {
         init(nCreateCanvasPropertyFloatAnimator(
                 new WeakReference<RenderNodeAnimator>(this),
                 property.getNativeContainer(), finalValue));
+        mUiThreadHandlesDelay = false;
     }
 
     /**
@@ -123,11 +133,13 @@ public class RenderNodeAnimator extends Animator {
         init(nCreateCanvasPropertyPaintAnimator(
                 new WeakReference<RenderNodeAnimator>(this),
                 property.getNativeContainer(), paintField, finalValue));
+        mUiThreadHandlesDelay = false;
     }
 
     public RenderNodeAnimator(int x, int y, float startRadius, float endRadius) {
         init(nCreateRevealAnimator(new WeakReference<RenderNodeAnimator>(this),
                 x, y, startRadius, endRadius));
+        mUiThreadHandlesDelay = true;
     }
 
     private void init(long ptr) {
@@ -169,6 +181,16 @@ public class RenderNodeAnimator extends Animator {
 
         mStarted = true;
         applyInterpolator();
+
+        if (mStartDelay <= 0 || !mUiThreadHandlesDelay) {
+            nSetStartDelay(mNativePtr.get(), mStartDelay);
+            doStart();
+        } else {
+            getHelper().addDelayedAnimation(this);
+        }
+    }
+
+    private void doStart() {
         nStart(mNativePtr.get());
 
         // Alpha is a special snowflake that has the canonical value stored
@@ -195,6 +217,7 @@ public class RenderNodeAnimator extends Animator {
     @Override
     public void cancel() {
         if (!mFinished) {
+            getHelper().removeDelayedAnimation(this);
             nEnd(mNativePtr.get());
 
             final ArrayList<AnimatorListener> listeners = getListeners();
@@ -258,7 +281,7 @@ public class RenderNodeAnimator extends Animator {
             throw new IllegalArgumentException("startDelay must be positive; " + startDelay);
         }
         mUnscaledStartDelay = startDelay;
-        nSetStartDelay(mNativePtr.get(), (long) (startDelay * ValueAnimator.getDurationScale()));
+        mStartDelay = (long) (ValueAnimator.getDurationScale() * startDelay);
     }
 
     @Override
@@ -303,7 +326,7 @@ public class RenderNodeAnimator extends Animator {
         return mInterpolator;
     }
 
-    private void onFinished() {
+    protected void onFinished() {
         mFinished = true;
 
         final ArrayList<AnimatorListener> listeners = getListeners();
@@ -317,12 +340,93 @@ public class RenderNodeAnimator extends Animator {
         return mNativePtr.get();
     }
 
+    /**
+     * @return true if the animator was started, false if still delayed
+     */
+    private boolean processDelayed(long frameTimeMs) {
+        if (mStartTime == 0) {
+            mStartTime = frameTimeMs;
+        } else if ((frameTimeMs - mStartTime) >= mStartDelay) {
+            doStart();
+            return true;
+        }
+        return false;
+    }
+
+    private static DelayedAnimationHelper getHelper() {
+        DelayedAnimationHelper helper = sAnimationHelper.get();
+        if (helper == null) {
+            helper = new DelayedAnimationHelper();
+            sAnimationHelper.set(helper);
+        }
+        return helper;
+    }
+
+    private static ThreadLocal<DelayedAnimationHelper> sAnimationHelper =
+            new ThreadLocal<DelayedAnimationHelper>();
+
+    private static class DelayedAnimationHelper implements Runnable {
+
+        private ArrayList<RenderNodeAnimator> mDelayedAnims = new ArrayList<RenderNodeAnimator>();
+        private final Choreographer mChoreographer;
+        private boolean mCallbackScheduled;
+
+        public DelayedAnimationHelper() {
+            mChoreographer = Choreographer.getInstance();
+        }
+
+        public void addDelayedAnimation(RenderNodeAnimator animator) {
+            mDelayedAnims.add(animator);
+            scheduleCallback();
+        }
+
+        public void removeDelayedAnimation(RenderNodeAnimator animator) {
+            mDelayedAnims.remove(animator);
+        }
+
+        private void scheduleCallback() {
+            if (!mCallbackScheduled) {
+                mCallbackScheduled = true;
+                mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, this, null);
+            }
+        }
+
+        @Override
+        public void run() {
+            long frameTimeMs = mChoreographer.getFrameTime();
+            mCallbackScheduled = false;
+
+            int end = 0;
+            for (int i = 0; i < mDelayedAnims.size(); i++) {
+                RenderNodeAnimator animator = mDelayedAnims.get(i);
+                if (!animator.processDelayed(frameTimeMs)) {
+                    if (end != i) {
+                        mDelayedAnims.set(end, animator);
+                    }
+                    end++;
+                }
+            }
+            while (mDelayedAnims.size() > end) {
+                mDelayedAnims.remove(mDelayedAnims.size() - 1);
+            }
+
+            if (mDelayedAnims.size() > 0) {
+                scheduleCallback();
+            }
+        }
+    }
+
     // Called by native
     private static void callOnFinished(WeakReference<RenderNodeAnimator> weakThis) {
         RenderNodeAnimator animator = weakThis.get();
         if (animator != null) {
             animator.onFinished();
         }
+    }
+
+    @Override
+    public Animator clone() {
+        throw new IllegalStateException("Cannot clone this animator");
     }
 
     private static native long nCreateAnimator(WeakReference<RenderNodeAnimator> weakThis,
