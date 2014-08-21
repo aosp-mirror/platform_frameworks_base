@@ -1093,6 +1093,25 @@ public class LockPatternUtils {
      */
     public void setVisiblePatternEnabled(boolean enabled) {
         setBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, enabled);
+
+        // Update for crypto if owner
+        int userId = getCurrentOrCallingUserId();
+        if (userId != UserHandle.USER_OWNER) {
+            return;
+        }
+
+        IBinder service = ServiceManager.getService("mount");
+        if (service == null) {
+            Log.e(TAG, "Could not find the mount service to update the user info");
+            return;
+        }
+
+        IMountService mountService = IMountService.Stub.asInterface(service);
+        try {
+            mountService.setField("PatternVisible", enabled ? "1" : "0");
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error changing pattern visible state", e);
+        }
     }
 
     /**
