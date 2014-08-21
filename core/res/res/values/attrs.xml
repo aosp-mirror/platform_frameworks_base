@@ -3786,13 +3786,17 @@
         <attr name="textColorLink" />
         <!-- Present the text in ALL CAPS. This may use a small-caps form when available. -->
         <attr name="textAllCaps" format="boolean" />
-        <!-- Place a shadow of the specified color behind the text. -->
+        <!-- Place a blurred shadow of text underneath the text, drawn with the
+             specified color. The text shadow produced does not interact with
+             properties on View that are responsible for real time shadows,
+             {@link android.R.styleable#View_elevation elevation} and
+             {@link android.R.styleable#View_translationZ translationZ}. -->
         <attr name="shadowColor" format="color" />
-        <!-- Horizontal offset of the shadow. -->
+        <!-- Horizontal offset of the text shadow. -->
         <attr name="shadowDx" format="float" />
-        <!-- Vertical offset of the shadow. -->
+        <!-- Vertical offset of the text shadow. -->
         <attr name="shadowDy" format="float" />
-        <!-- Radius of the shadow. -->
+        <!-- Blur radius of the text shadow. -->
         <attr name="shadowRadius" format="float" />
         <!-- Elegant text height, especially for less compacted complex script text. -->
         <attr name="elegantTextHeight" format="boolean" />
@@ -3933,13 +3937,17 @@
         <!-- Set an input filter to constrain the text length to the
              specified number. -->
         <attr name="maxLength" format="integer" min="0" />
-        <!-- Place a shadow of the specified color behind the text. -->
+        <!-- Place a blurred shadow of text underneath the text, drawn with the
+             specified color. The text shadow produced does not interact with
+             properties on View that are responsible for real time shadows,
+             {@link android.R.styleable#View_elevation elevation} and
+             {@link android.R.styleable#View_translationZ translationZ}. -->
         <attr name="shadowColor" />
-        <!-- Horizontal offset of the shadow. -->
+        <!-- Horizontal offset of the text shadow. -->
         <attr name="shadowDx" />
-        <!-- Vertical offset of the shadow. -->
+        <!-- Vertical offset of the text shadow. -->
         <attr name="shadowDy" />
-        <!-- Radius of the shadow. -->
+        <!-- Blur radius of the text shadow. -->
         <attr name="shadowRadius" />
         <attr name="autoLink" />
         <!-- If set to false, keeps the movement method from being set
