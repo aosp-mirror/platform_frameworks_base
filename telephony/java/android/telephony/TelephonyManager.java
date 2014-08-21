@@ -617,6 +617,37 @@ public class TelephonyManager {
     }
 
     /**
+     * Returns the IMEI. Return null if IMEI is not available.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     */
+    /** {@hide} */
+    public String getImei() {
+        return getImei(getDefaultSim());
+    }
+
+    /**
+     * Returns the IMEI. Return null if IMEI is not available.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @param slotId of which deviceID is returned
+     */
+    /** {@hide} */
+    public String getImei(int slotId) {
+        long[] subId = SubscriptionManager.getSubId(slotId);
+        try {
+            return getSubscriberInfo().getImeiUsingSubId(subId[0]);
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            return null;
+        }
+    }
+
+    /**
      * Returns the current location of the device.
      *<p>
      * If there is only one radio in the device and that radio has an LTE connection,
