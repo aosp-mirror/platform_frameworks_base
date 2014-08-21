@@ -14,18 +14,20 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:autoMirrored="true">
-    <item android:state_checked="true">
-        <nine-patch android:src="@drawable/spinner_textfield_activated_mtrl_alpha"
-            android:tint="?attr/colorControlActivated" />
-    </item>
-    <item android:state_pressed="true">
-        <nine-patch android:src="@drawable/spinner_textfield_activated_mtrl_alpha"
-            android:tint="?attr/colorControlActivated" />
-    </item>
-    <item>
-        <nine-patch android:src="@drawable/spinner_textfield_default_mtrl_alpha"
-            android:tint="?attr/colorControlNormal" />
-    </item>
-</selector>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+       android:inset="@dimen/control_inset_material">
+    <selector android:autoMirrored="true">
+        <item android:state_checked="true">
+            <nine-patch android:src="@drawable/spinner_textfield_activated_mtrl_alpha"
+                android:tint="?attr/colorControlActivated" />
+        </item>
+        <item android:state_pressed="true">
+            <nine-patch android:src="@drawable/spinner_textfield_activated_mtrl_alpha"
+                android:tint="?attr/colorControlActivated" />
+        </item>
+        <item>
+            <nine-patch android:src="@drawable/spinner_textfield_default_mtrl_alpha"
+                android:tint="?attr/colorControlNormal" />
+        </item>
+    </selector>
+</inset>
