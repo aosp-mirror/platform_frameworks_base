@@ -74,11 +74,15 @@ public class LockToAppRequestDialog implements OnClickListener {
         return 0;
     }
 
-    public void showLockTaskPrompt(TaskRecord task) {
+    public void clearPrompt() {
         if (mDialog != null) {
             mDialog.dismiss();
             mDialog = null;
         }
+    }
+
+    public void showLockTaskPrompt(TaskRecord task) {
+        clearPrompt();
         mRequestedTask = task;
         final int unlockStringId = getLockString(task.userId);
 
@@ -97,6 +101,8 @@ public class LockToAppRequestDialog implements OnClickListener {
         mDialog = builder.create();
 
         mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        mDialog.getWindow().getAttributes().privateFlags |=
+                WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         mDialog.show();
 
         if (unlockStringId != 0) {
