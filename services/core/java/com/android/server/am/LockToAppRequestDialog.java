@@ -102,8 +102,7 @@ public class LockToAppRequestDialog implements OnClickListener {
         if (unlockStringId != 0) {
             String unlockString = mContext.getString(unlockStringId);
             mCheckbox = (CheckBox) mDialog.findViewById(R.id.lock_to_app_checkbox);
-            mCheckbox.setText(mContext.getString(R.string.lock_to_app_use_screen_lock,
-                    unlockString));
+            mCheckbox.setText(unlockString);
 
             // Remember state.
             try {
