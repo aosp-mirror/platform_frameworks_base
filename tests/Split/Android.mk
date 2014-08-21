@@ -20,8 +20,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 LOCAL_PACKAGE_NAME := Split
 
-LOCAL_AAPT_FLAGS := --split fr,de
-LOCAL_AAPT_FLAGS += -v
+LOCAL_PACKAGE_SPLITS := mdpi-v4 hdpi-v4 xhdpi-v4 xxhdpi-v4
 
 LOCAL_MODULE_TAGS := tests
 
