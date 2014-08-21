@@ -370,6 +370,7 @@ public abstract class Animator implements Cloneable {
      * @hide
      */
     public void reverse() {
+        throw new IllegalStateException("Reverse is not supported");
     }
 
     /**
