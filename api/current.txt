@@ -31578,7 +31578,7 @@ package android.text.style {
     field public static final java.lang.String CASE_GENITIVE = "android.genitive";
     field public static final java.lang.String CASE_INSTRUMENTAL = "android.instrumental";
     field public static final java.lang.String CASE_LOCATIVE = "android.locative";
-    field public static final java.lang.String CASE_NOMINATIVE = "android.nomative";
+    field public static final java.lang.String CASE_NOMINATIVE = "android.nominative";
     field public static final java.lang.String CASE_VOCATIVE = "android.vocative";
     field public static final java.lang.String GENDER_FEMALE = "android.female";
     field public static final java.lang.String GENDER_MALE = "android.male";
