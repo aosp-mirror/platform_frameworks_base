@@ -914,10 +914,11 @@ public abstract class Connection {
      */
     public final boolean setConference(Conference conference) {
         // We check to see if it is already part of another conference.
-        if (mConference == null && mConnectionService != null &&
-                mConnectionService.containsConference(conference)) {
+        if (mConference == null) {
             mConference = conference;
-            fireConferenceChanged();
+            if (mConnectionService != null && mConnectionService.containsConference(conference)) {
+                fireConferenceChanged();
+            }
             return true;
         }
         return false;
@@ -929,6 +930,7 @@ public abstract class Connection {
      */
     public final void resetConference() {
         if (mConference != null) {
+            Log.d(this, "Conference reset");
             mConference = null;
             fireConferenceChanged();
         }
