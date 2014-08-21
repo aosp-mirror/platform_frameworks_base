@@ -15,10 +15,7 @@
 -->
 
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetLeft="@dimen/control_inset_material"
-    android:insetTop="@dimen/control_inset_material"
-    android:insetBottom="@dimen/control_inset_material"
-    android:insetRight="@dimen/control_inset_material">
+        android:inset="@dimen/control_inset_material">
     <ripple android:color="?attr/colorControlActivated">
         <item>
             <selector>
