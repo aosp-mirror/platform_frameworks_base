@@ -2850,11 +2850,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceConnectivityInternalPermission();
 
         if (TextUtils.isEmpty(iface)) return ConnectivityManager.TYPE_NONE;
-        for (NetworkStateTracker tracker : mNetTrackers) {
-            if (tracker != null) {
-                LinkProperties lp = tracker.getLinkProperties();
-                if (lp != null && iface.equals(lp.getInterfaceName())) {
-                    return tracker.getNetworkInfo().getType();
+
+        synchronized(mNetworkForNetId) {
+            for (int i = 0; i < mNetworkForNetId.size(); i++) {
+                NetworkAgentInfo nai = mNetworkForNetId.valueAt(i);
+                LinkProperties lp = nai.linkProperties;
+                if (lp != null && iface.equals(lp.getInterfaceName()) && nai.networkInfo != null) {
+                    return nai.networkInfo.getType();
                 }
             }
         }
