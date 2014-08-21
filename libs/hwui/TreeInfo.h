@@ -65,6 +65,7 @@ public:
         , frameTimeMs(0)
         , animationHook(NULL)
         , prepareTextures(mode == MODE_FULL)
+        , runAnimations(true)
         , damageAccumulator(NULL)
         , renderState(renderState)
         , renderer(NULL)
@@ -76,6 +77,7 @@ public:
         , frameTimeMs(clone.frameTimeMs)
         , animationHook(clone.animationHook)
         , prepareTextures(mode == MODE_FULL)
+        , runAnimations(clone.runAnimations)
         , damageAccumulator(clone.damageAccumulator)
         , renderState(clone.renderState)
         , renderer(clone.renderer)
@@ -88,6 +90,12 @@ public:
     // TODO: Remove this? Currently this is used to signal to stop preparing
     // textures if we run out of cache space.
     bool prepareTextures;
+    // TODO: buildLayer uses this to suppress running any animations, but this
+    // should probably be refactored somehow. The reason this is done is
+    // because buildLayer is not setup for injecting the animationHook, as well
+    // as this being otherwise wasted work as all the animators will be
+    // re-evaluated when the frame is actually drawn
+    bool runAnimations;
 
     // Must not be null during actual usage
     DamageAccumulator* damageAccumulator;

@@ -216,7 +216,10 @@ void RenderNode::prepareTreeImpl(TreeInfo& info) {
     if (info.mode == TreeInfo::MODE_FULL) {
         pushStagingPropertiesChanges(info);
     }
-    uint32_t animatorDirtyMask = mAnimatorManager.animate(info);
+    uint32_t animatorDirtyMask = 0;
+    if (CC_LIKELY(info.runAnimations)) {
+        animatorDirtyMask = mAnimatorManager.animate(info);
+    }
     prepareLayer(info, animatorDirtyMask);
     if (info.mode == TreeInfo::MODE_FULL) {
         pushStagingDisplayListChanges(info);
@@ -231,7 +234,9 @@ void RenderNode::pushStagingPropertiesChanges(TreeInfo& info) {
     // Push the animators first so that setupStartValueIfNecessary() is called
     // before properties() is trampled by stagingProperties(), as they are
     // required by some animators.
-    mAnimatorManager.pushStaging(info);
+    if (CC_LIKELY(info.runAnimations)) {
+        mAnimatorManager.pushStaging(info);
+    }
     if (mDirtyPropertyFields) {
         mDirtyPropertyFields = 0;
         damageSelf(info);
