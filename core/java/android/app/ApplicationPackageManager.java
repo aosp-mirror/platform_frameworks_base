@@ -749,10 +749,10 @@ final class ApplicationPackageManager extends PackageManager {
             putCachedIcon(name, dr);
             return dr;
         } catch (NameNotFoundException e) {
-            Log.w("PackageManager", "Failure retrieving resources for"
+            Log.w("PackageManager", "Failure retrieving resources for "
                   + appInfo.packageName);
         } catch (Resources.NotFoundException e) {
-            Log.w("PackageManager", "Failure retrieving resources for"
+            Log.w("PackageManager", "Failure retrieving resources for "
                   + appInfo.packageName + ": " + e.getMessage());
         } catch (RuntimeException e) {
             // If an exception was thrown, fall through to return
@@ -1100,7 +1100,7 @@ final class ApplicationPackageManager extends PackageManager {
             putCachedString(name, text);
             return text;
         } catch (NameNotFoundException e) {
-            Log.w("PackageManager", "Failure retrieving resources for"
+            Log.w("PackageManager", "Failure retrieving resources for "
                   + appInfo.packageName);
         } catch (RuntimeException e) {
             // If an exception was thrown, fall through to return

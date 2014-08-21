@@ -28,6 +28,7 @@ import android.content.ComponentName;
 import android.content.ContentProviderClient;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -219,7 +220,7 @@ public class ActivityTestMain extends Activity {
             @Override public boolean onMenuItemClick(MenuItem item) {
                 Intent intent = new Intent(ActivityTestMain.this, UserTarget.class);
                 sendOrderedBroadcastAsUser(intent, new UserHandle(mSecondUser), null,
-                        new BroadcastResultReceiver(), 
+                        new BroadcastResultReceiver(),
                         null, Activity.RESULT_OK, null, null);
                 return true;
             }
@@ -291,6 +292,30 @@ public class ActivityTestMain extends Activity {
                 return true;
             }
         });
+        menu.add("Add App Recent").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                addAppRecents(1);
+                return true;
+            }
+        });
+        menu.add("Add App 10x Recent").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                addAppRecents(10);
+                return true;
+            }
+        });
+        menu.add("Exclude!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                setExclude(true);
+                return true;
+            }
+        });
+        menu.add("Include!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                setExclude(false);
+                return true;
+            }
+        });
         return true;
     }
 
@@ -317,7 +342,36 @@ public class ActivityTestMain extends Activity {
         mConnections.clear();
     }
 
-    private View scrollWrap(View view) {
+    void addAppRecents(int count) {
+        ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        intent.setComponent(new ComponentName(this, ActivityTestMain.class));
+        for (int i=0; i<count; i++) {
+            ActivityManager.TaskDescription desc = new ActivityManager.TaskDescription();
+            desc.setLabel("Added #" + i);
+            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.icon);
+            if ((i&1) == 0) {
+                desc.setIcon(bitmap);
+            }
+            int taskId = am.addAppTask(this, intent, desc, bitmap);
+            Log.i(TAG, "Added new task id #" + taskId);
+        }
+    }
+
+    void setExclude(boolean exclude) {
+        ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.AppTask> tasks = am.getAppTasks();
+        int taskId = getTaskId();
+        for (int i=0; i<tasks.size(); i++) {
+            ActivityManager.AppTask task = tasks.get(i);
+            if (task.getTaskInfo().id == taskId) {
+                task.setExcludeFromRecents(exclude);
+            }
+        }
+    }
+     private View scrollWrap(View view) {
         ScrollView scroller = new ScrollView(this);
         scroller.addView(view, new ScrollView.LayoutParams(ScrollView.LayoutParams.MATCH_PARENT,
                 ScrollView.LayoutParams.MATCH_PARENT));
