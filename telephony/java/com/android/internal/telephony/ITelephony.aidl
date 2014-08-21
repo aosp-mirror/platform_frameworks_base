@@ -677,6 +677,18 @@ interface ITelephony {
     void setImsRegistrationState(boolean registered);
 
     /**
+     * Return MDN string for CDMA phone.
+     * @param subId user preferred subId.
+     */
+    String getCdmaMdn(long subId);
+
+    /**
+     * Return MIN string for CDMA phone.
+     * @param subId user preferred subId.
+     */
+    String getCdmaMin(long subId);
+
+    /**
      * Has the calling application been granted special privileges by the carrier.
      *
      * If any of the packages in the calling UID has carrier privileges, the
