@@ -29,11 +29,6 @@
 namespace android {
 namespace uirenderer {
 
-template<typename T>
-static inline T max(T a, T b) {
-    return a > b ? a : b;
-}
-
 void ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
         const Vector3* casterPolygon, int casterVertexCount,
         const Vector3& centroid3d, const Rect& casterBounds,
@@ -66,7 +61,7 @@ void ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
 }
 
 void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
-        const Vector3* casterPolygon, int casterVertexCount,
+        const Vector3* casterPolygon, int casterVertexCount, const Vector3& casterCentroid,
         const mat4& receiverTransform, const Vector3& lightCenter, int lightRadius,
         const Rect& casterBounds, const Rect& localClip, VertexBuffer& shadowVertexBuffer) {
     ATRACE_CALL();
@@ -109,9 +104,9 @@ void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
         return;
     }
 
-    SpotShadow::createSpotShadow(isCasterOpaque,
-            casterPolygon, casterVertexCount, adjustedLightCenter, lightRadius,
-            lightVertexCount, shadowVertexBuffer);
+    SpotShadow::createSpotShadow(isCasterOpaque, adjustedLightCenter, lightRadius,
+            casterPolygon, casterVertexCount, casterCentroid, shadowVertexBuffer);
+
 #if DEBUG_SHADOW
      if(shadowVertexBuffer.getVertexCount() <= 0) {
         ALOGD("Spot shadow generation failed %d", shadowVertexBuffer.getVertexCount());
@@ -180,6 +175,18 @@ Vector2 ShadowTessellator::centroid2d(const Vector2* poly, int polyLength) {
     return centroid;
 }
 
+// Make sure p1 -> p2 is going CW around the poly.
+Vector2 ShadowTessellator::calculateNormal(const Vector2& p1, const Vector2& p2) {
+    Vector2 result = p2 - p1;
+    if (result.x != 0 || result.y != 0) {
+        result.normalize();
+        // Calculate the normal , which is CCW 90 rotate to the delta.
+        float tempy = result.y;
+        result.y = result.x;
+        result.x = -tempy;
+    }
+    return result;
+}
 /**
  * Test whether the polygon is order in clockwise.
  *
