@@ -38,7 +38,6 @@ import java.util.List;
 public class WifiClientTest extends AndroidTestCase {
 
     private WifiManager mWifiManager;
-    private final String TAG = "WifiClientTest";
 
     //10s delay for turning on wifi
     private static final int DELAY = 10000;
