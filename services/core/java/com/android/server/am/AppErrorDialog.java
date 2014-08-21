@@ -94,6 +94,9 @@ final class AppErrorDialog extends BaseErrorDialog {
             }
             mResult.set(msg.what);
 
+            // Make sure we don't have time timeout still hanging around.
+            removeMessages(FORCE_QUIT);
+
             // If this is a timeout we won't be automatically closed, so go
             // ahead and explicitly dismiss ourselves just in case.
             dismiss();
