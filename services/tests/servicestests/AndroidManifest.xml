@@ -39,6 +39,7 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
+        <uses-library android:name="services" />
 
         <service android:name="com.android.server.AccessibilityManagerServiceTest$MyFirstMockAccessibilityService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
