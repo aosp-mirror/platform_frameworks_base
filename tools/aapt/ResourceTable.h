@@ -165,7 +165,8 @@ public:
     size_t numLocalResources() const;
     bool hasResources() const;
 
-    sp<AaptFile> flatten(Bundle* bundle, const sp<const ResourceFilter>& filter);
+    sp<AaptFile> flatten(Bundle* bundle, const sp<const ResourceFilter>& filter,
+            const bool isBase);
 
     static inline uint32_t makeResId(uint32_t packageId,
                                      uint32_t typeId,
@@ -206,7 +207,8 @@ public:
     void addLocalization(const String16& name, const String8& locale, const SourcePos& src);
     status_t validateLocalizations(void);
 
-    status_t flatten(Bundle* bundle, const sp<const ResourceFilter>& filter, const sp<AaptFile>& dest);
+    status_t flatten(Bundle* bundle, const sp<const ResourceFilter>& filter,
+            const sp<AaptFile>& dest, const bool isBase);
     status_t flattenLibraryTable(const sp<AaptFile>& dest, const Vector<sp<Package> >& libs);
 
     void writePublicDefinitions(const String16& package, FILE* fp);
