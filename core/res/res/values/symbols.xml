@@ -622,7 +622,6 @@
   <java-symbol type="id" name="lock_to_app_checkbox" />
   <java-symbol type="string" name="lock_to_app_start" />
   <java-symbol type="string" name="lock_to_app_exit" />
-  <java-symbol type="string" name="lock_to_app_use_screen_lock" />
   <java-symbol type="string" name="lock_to_app_unlock_pin" />
   <java-symbol type="string" name="lock_to_app_unlock_pattern" />
   <java-symbol type="string" name="lock_to_app_unlock_password" />
