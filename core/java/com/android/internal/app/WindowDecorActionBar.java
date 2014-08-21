@@ -925,6 +925,15 @@ public class WindowDecorActionBar extends ActionBar implements
     public void onContentScrollStopped() {
     }
 
+    @Override
+    public boolean collapseActionView() {
+        if (mDecorToolbar != null && mDecorToolbar.hasExpandedActionView()) {
+            mDecorToolbar.collapseActionView();
+            return true;
+        }
+        return false;
+    }
+
     /**
      * @hide 
      */

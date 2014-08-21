@@ -184,8 +184,6 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
                 Build.VERSION_CODES.KITKAT;
 
         mFlingEstimator = new OverScroller(context);
-
-        setFocusableInTouchMode(true);
     }
 
     @Override
@@ -658,27 +656,6 @@ public class ActionBarOverlayLayout extends ViewGroup implements DecorContentPar
         mFlingEstimator.fling(0, 0, 0, (int) velocityY, 0, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
         final int finalY = mFlingEstimator.getFinalY();
         return finalY > mActionBarTop.getHeight();
-    }
-
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        if (super.dispatchKeyEvent(event)) {
-            return true;
-        }
-
-        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-            final int action = event.getAction();
-
-            // Collapse any expanded action views.
-            if (mDecorToolbar != null && mDecorToolbar.hasExpandedActionView()) {
-                if (action == KeyEvent.ACTION_UP) {
-                    mDecorToolbar.collapseActionView();
-                }
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @Override
