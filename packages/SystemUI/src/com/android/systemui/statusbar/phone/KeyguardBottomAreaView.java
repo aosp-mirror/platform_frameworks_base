@@ -80,7 +80,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private FlashlightController mFlashlightController;
     private PreviewInflater mPreviewInflater;
     private KeyguardIndicationController mIndicationController;
-    private boolean mFaceUnlockRunning;
 
     private final TrustDrawable mTrustDrawable;
 
@@ -299,7 +298,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             return;
         }
         // TODO: Real icon for facelock.
-        int iconRes = mFaceUnlockRunning ? R.drawable.ic_account_circle
+        int iconRes = mUnlockMethodCache.isFaceUnlockRunning() ? R.drawable.ic_account_circle
                 : mUnlockMethodCache.isMethodInsecure() ? R.drawable.ic_lock_open_24dp
                 : R.drawable.ic_lock_24dp;
         mLockIcon.setImageResource(iconRes);
@@ -374,12 +373,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         @Override
         public void onUserSwitchComplete(int userId) {
             updateCameraVisibility();
-        }
-
-        @Override
-        public void onFaceUnlockStateChanged(boolean running) {
-            mFaceUnlockRunning = running;
-            updateLockIcon();
         }
 
         @Override
