@@ -70,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 107;
+    private static final int DATABASE_VERSION = 108;
 
     private Context mContext;
     private int mUserHandle;
@@ -1712,6 +1712,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
             }
             upgradeVersion = 107;
+        }
+
+        if (upgradeVersion < 108) {
+            // Reset the auto-brightness setting to default since the behavior
+            // of the feature is now quite different and is being presented to
+            // the user in a new way as "adaptive brightness".
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT OR REPLACE INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, Settings.System.SCREEN_BRIGHTNESS_MODE,
+                        R.bool.def_screen_brightness_automatic_mode);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 108;
         }
 
         // *** Remember to update DATABASE_VERSION above!
