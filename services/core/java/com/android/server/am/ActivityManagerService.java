@@ -40,6 +40,9 @@ import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.BatteryStats;
 import android.os.PersistableBundle;
@@ -261,6 +264,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean DEBUG_PSS = localLOGV || false;
     static final boolean DEBUG_LOCKSCREEN = localLOGV || false;
+    static final boolean DEBUG_RECENTS = localLOGV || false;
     static final boolean VALIDATE_TOKENS = false;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
 
@@ -409,6 +413,21 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     ArrayList<TaskRecord> mRecentTasks;
     ArraySet<TaskRecord> mTmpRecents = new ArraySet<TaskRecord>();
+
+    /**
+     * For addAppTask: cached of the last activity component that was added.
+     */
+    ComponentName mLastAddedTaskComponent;
+
+    /**
+     * For addAppTask: cached of the last activity uid that was added.
+     */
+    int mLastAddedTaskUid;
+
+    /**
+     * For addAppTask: cached of the last ActivityInfo that was added.
+     */
+    ActivityInfo mLastAddedTaskActivity;
 
     public class PendingAssistExtras extends Binder implements Runnable {
         public final ActivityRecord activity;
@@ -1180,6 +1199,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     /** Flag whether the device has a recents UI */
     final boolean mHasRecents;
+
+    final int mThumbnailWidth;
+    final int mThumbnailHeight;
 
     final ServiceThread mHandlerThread;
     final MainHandler mHandler;
@@ -2229,8 +2251,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         mConfigurationSeq = mConfiguration.seq = 1;
         mProcessCpuTracker.init();
 
-        mHasRecents = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_hasRecents);
+        final Resources res = mContext.getResources();
+        mHasRecents = res.getBoolean(com.android.internal.R.bool.config_hasRecents);
+        mThumbnailWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_width);
+        mThumbnailHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_height);
 
         mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
@@ -3781,7 +3805,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     final void addRecentTaskLocked(TaskRecord task) {
-        int N = mRecentTasks.size();
+        final int N = mRecentTasks.size();
         // Quick case: check if the top-most recent task is the same.
         if (N > 0 && mRecentTasks.get(0) == task) {
             return;
@@ -3790,10 +3814,25 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (task.voiceSession != null) {
             return;
         }
-        // Remove any existing entries that are the same kind of task.
+
+        trimRecentsForTask(task, true);
+
+        if (N >= MAX_RECENT_TASKS) {
+            final TaskRecord tr = mRecentTasks.remove(N - 1);
+            tr.disposeThumbnail();
+            tr.closeRecentsChain();
+        }
+        mRecentTasks.add(0, task);
+    }
+
+    /**
+     * If needed, remove oldest existing entries in recents that are for the same kind
+     * of task as the given one.
+     */
+    int trimRecentsForTask(TaskRecord task, boolean doTrim) {
+        int N = mRecentTasks.size();
         final Intent intent = task.intent;
         final boolean document = intent != null && intent.isDocument();
-        final ComponentName comp = intent.getComponent();
 
         int maxRecents = task.maxRecents - 1;
         for (int i=0; i<N; i++) {
@@ -3825,6 +3864,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
+            if (!doTrim) {
+                // If the caller is not actually asking for a trim, just tell them we reached
+                // a point where the trim would happen.
+                return i;
+            }
+
             // Either task and tr are the same or, their affinities match or their intents match
             // and neither of them is a document, or they are documents using the same activity
             // and their maxRecents has been reached.
@@ -3842,12 +3887,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             notifyTaskPersisterLocked(tr, false);
         }
-        if (N >= MAX_RECENT_TASKS) {
-            final TaskRecord tr = mRecentTasks.remove(N - 1);
-            tr.disposeThumbnail();
-            tr.closeRecentsChain();
-        }
-        mRecentTasks.add(0, task);
+
+        return -1;
     }
 
     @Override
@@ -7639,7 +7680,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=0; i<N && maxNum > 0; i++) {
                 TaskRecord tr = mRecentTasks.get(i);
                 // Only add calling user or related users recent tasks
-                if (!includedUsers.contains(Integer.valueOf(tr.userId))) continue;
+                if (!includedUsers.contains(Integer.valueOf(tr.userId))) {
+                    if (DEBUG_RECENTS) Slog.d(TAG, "Skipping, not user: " + tr);
+                    continue;
+                }
 
                 // Return the entry if desired by the caller.  We always return
                 // the first entry, because callers always expect this to be the
@@ -7656,11 +7700,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // If the caller doesn't have the GET_TASKS permission, then only
                         // allow them to see a small subset of tasks -- their own and home.
                         if (!tr.isHomeTask() && tr.creatorUid != callingUid) {
+                            if (DEBUG_RECENTS) Slog.d(TAG, "Skipping, not allowed: " + tr);
                             continue;
                         }
                     }
                     if (tr.autoRemoveRecents && tr.getTopActivity() == null) {
                         // Don't include auto remove tasks that are finished or finishing.
+                        if (DEBUG_RECENTS) Slog.d(TAG, "Skipping, auto-remove without activity: "
+                                + tr);
                         continue;
                     }
 
@@ -7675,11 +7722,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                             if (rti.origActivity != null) {
                                 if (pm.getActivityInfo(rti.origActivity, 0, userId)
                                         == null) {
+                                    if (DEBUG_RECENTS) Slog.d(TAG, "Skipping, unavail orig act: "
+                                            + tr);
                                     continue;
                                 }
                             } else if (rti.baseIntent != null) {
                                 if (pm.queryIntentActivities(rti.baseIntent,
                                         null, 0, userId) == null) {
+                                    if (DEBUG_RECENTS) Slog.d(TAG, "Skipping, unavail intent: "
+                                            + tr);
                                     continue;
                                 }
                             }
@@ -7718,6 +7769,97 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         return null;
+    }
+
+    @Override
+    public int addAppTask(IBinder activityToken, Intent intent,
+            ActivityManager.TaskDescription description, Bitmap thumbnail) throws RemoteException {
+        final int callingUid = Binder.getCallingUid();
+        final long callingIdent = Binder.clearCallingIdentity();
+
+        try {
+            synchronized (this) {
+                ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
+                if (r == null) {
+                    throw new IllegalArgumentException("Activity does not exist; token="
+                            + activityToken);
+                }
+                ComponentName comp = intent.getComponent();
+                if (comp == null) {
+                    throw new IllegalArgumentException("Intent " + intent
+                            + " must specify explicit component");
+                }
+                if (thumbnail.getWidth() != mThumbnailWidth
+                        || thumbnail.getHeight() != mThumbnailHeight) {
+                    throw new IllegalArgumentException("Bad thumbnail size: got "
+                            + thumbnail.getWidth() + "x" + thumbnail.getHeight() + ", require "
+                            + mThumbnailWidth + "x" + mThumbnailHeight);
+                }
+                if (intent.getSelector() != null) {
+                    intent.setSelector(null);
+                }
+                if (intent.getSourceBounds() != null) {
+                    intent.setSourceBounds(null);
+                }
+                if ((intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0) {
+                    if ((intent.getFlags()&Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS) == 0) {
+                        // The caller has added this as an auto-remove task...  that makes no
+                        // sense, so turn off auto-remove.
+                        intent.addFlags(Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
+                    }
+                } else if ((intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
+                    // Must be a new task.
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                }
+                if (!comp.equals(mLastAddedTaskComponent) || callingUid != mLastAddedTaskUid) {
+                    mLastAddedTaskActivity = null;
+                }
+                ActivityInfo ainfo = mLastAddedTaskActivity;
+                if (ainfo == null) {
+                    ainfo = mLastAddedTaskActivity = AppGlobals.getPackageManager().getActivityInfo(
+                            comp, 0, UserHandle.getUserId(callingUid));
+                    if (ainfo.applicationInfo.uid != callingUid) {
+                        throw new SecurityException(
+                                "Can't add task for another application: target uid="
+                                + ainfo.applicationInfo.uid + ", calling uid=" + callingUid);
+                    }
+                }
+
+                TaskRecord task = new TaskRecord(this, mStackSupervisor.getNextTaskId(), ainfo,
+                        intent, description);
+
+                int trimIdx = trimRecentsForTask(task, false);
+                if (trimIdx >= 0) {
+                    // If this would have caused a trim, then we'll abort because that
+                    // means it would be added at the end of the list but then just removed.
+                    return -1;
+                }
+
+                final int N = mRecentTasks.size();
+                if (N >= (MAX_RECENT_TASKS-1)) {
+                    final TaskRecord tr = mRecentTasks.remove(N - 1);
+                    tr.disposeThumbnail();
+                    tr.closeRecentsChain();
+                }
+
+                mRecentTasks.add(task);
+                r.task.stack.addTask(task, false, false);
+
+                task.setLastThumbnail(thumbnail);
+                task.freeLastThumbnail();
+
+                return task.taskId;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingIdent);
+        }
+    }
+
+    @Override
+    public Point getAppTaskThumbnailSize() {
+        synchronized (this) {
+            return new Point(mThumbnailWidth,  mThumbnailHeight);
+        }
     }
 
     @Override
@@ -18056,14 +18198,16 @@ public final class ActivityManagerService extends ActivityManagerNative
             mCallingUid = callingUid;
         }
 
+        private void checkCaller() {
+            if (mCallingUid != Binder.getCallingUid()) {
+                throw new SecurityException("Caller " + mCallingUid
+                        + " does not match caller of getAppTasks(): " + Binder.getCallingUid());
+            }
+        }
+
         @Override
         public void finishAndRemoveTask() {
-            // Ensure that we are called from the same process that created this AppTask
-            if (mCallingUid != Binder.getCallingUid()) {
-                Slog.w(TAG, "finishAndRemoveTask: caller " + mCallingUid
-                        + " does not match caller of getAppTasks(): " + Binder.getCallingUid());
-                return;
-            }
+            checkCaller();
 
             synchronized (ActivityManagerService.this) {
                 long origId = Binder.clearCallingIdentity();
@@ -18085,12 +18229,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         @Override
         public ActivityManager.RecentTaskInfo getTaskInfo() {
-            // Ensure that we are called from the same process that created this AppTask
-            if (mCallingUid != Binder.getCallingUid()) {
-                Slog.w(TAG, "finishAndRemoveTask: caller " + mCallingUid
-                        + " does not match caller of getAppTasks(): " + Binder.getCallingUid());
-                return null;
-            }
+            checkCaller();
 
             synchronized (ActivityManagerService.this) {
                 long origId = Binder.clearCallingIdentity();
@@ -18103,6 +18242,29 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Binder.restoreCallingIdentity(origId);
                 }
                 return null;
+            }
+        }
+
+        @Override
+        public void setExcludeFromRecents(boolean exclude) {
+            checkCaller();
+
+            synchronized (ActivityManagerService.this) {
+                long origId = Binder.clearCallingIdentity();
+                try {
+                    TaskRecord tr = recentTaskForIdLocked(mTaskId);
+                    if (tr != null) {
+                        Intent intent = tr.getBaseIntent();
+                        if (exclude) {
+                            intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                        } else {
+                            intent.setFlags(intent.getFlags()
+                                    & ~Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                        }
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(origId);
+                }
             }
         }
     }

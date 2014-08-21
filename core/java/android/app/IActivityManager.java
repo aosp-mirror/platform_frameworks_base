@@ -36,6 +36,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
@@ -119,6 +120,9 @@ public interface IActivityManager extends IInterface {
     public String getCallingPackage(IBinder token) throws RemoteException;
     public ComponentName getCallingActivity(IBinder token) throws RemoteException;
     public List<IAppTask> getAppTasks() throws RemoteException;
+    public int addAppTask(IBinder activityToken, Intent intent,
+            ActivityManager.TaskDescription description, Bitmap thumbnail) throws RemoteException;
+    public Point getAppTaskThumbnailSize() throws RemoteException;
     public List<RunningTaskInfo> getTasks(int maxNum, int flags) throws RemoteException;
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum,
             int flags, int userId) throws RemoteException;
@@ -765,4 +769,6 @@ public interface IActivityManager extends IInterface {
     int NOTIFY_ENTER_ANIMATION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+230;
     int KEYGUARD_WAITING_FOR_ACTIVITY_DRAWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+231;
     int START_ACTIVITY_AS_CALLER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+232;
+    int ADD_APP_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+233;
+    int GET_APP_TASK_THUMBNAIL_SIZE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+234;
 }
