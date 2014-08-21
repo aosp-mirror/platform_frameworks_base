@@ -1028,6 +1028,8 @@ package android {
     field public static final int readPermission = 16842759; // 0x1010007
     field public static final int recognitionService = 16843932; // 0x101049c
     field public static final int relinquishTaskIdentity = 16843894; // 0x1010476
+    field public static final int reparent = 16843965; // 0x10104bd
+    field public static final int reparentWithOverlay = 16843966; // 0x10104be
     field public static final int repeatCount = 16843199; // 0x10101bf
     field public static final int repeatMode = 16843200; // 0x10101c0
     field public static final int reqFiveWayNav = 16843314; // 0x1010232
@@ -31803,7 +31805,7 @@ package android.transition {
     ctor public ChangeBounds(android.content.Context, android.util.AttributeSet);
     method public void captureEndValues(android.transition.TransitionValues);
     method public void captureStartValues(android.transition.TransitionValues);
-    method public void setReparent(boolean);
+    method public deprecated void setReparent(boolean);
     method public void setResizeClip(boolean);
   }
 
@@ -31826,6 +31828,10 @@ package android.transition {
     ctor public ChangeTransform(android.content.Context, android.util.AttributeSet);
     method public void captureEndValues(android.transition.TransitionValues);
     method public void captureStartValues(android.transition.TransitionValues);
+    method public boolean getReparent();
+    method public boolean getReparentWithOverlay();
+    method public void setReparent(boolean);
+    method public void setReparentWithOverlay(boolean);
   }
 
   public class CircularPropagation extends android.transition.VisibilityPropagation {
