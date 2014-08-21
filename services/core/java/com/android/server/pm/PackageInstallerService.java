@@ -485,17 +485,22 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         if (params.mode == SessionParams.MODE_FULL_INSTALL) {
             // Brand new install, use best resolved location. This also verifies
             // that target has enough free space for the install.
-            final int resolved = PackageHelper.resolveInstallLocation(mContext,
-                    params.appPackageName, params.installLocation, params.sizeBytes,
-                    params.installFlags);
-            if (resolved == PackageHelper.RECOMMEND_INSTALL_INTERNAL) {
-                stageInternal = true;
-            } else if (resolved == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
-                stageInternal = false;
-            } else {
-                throw new IOException("No storage with enough free space; res=" + resolved);
-            }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                final int resolved = PackageHelper.resolveInstallLocation(mContext,
+                        params.appPackageName, params.installLocation, params.sizeBytes,
+                        params.installFlags);
 
+                if (resolved == PackageHelper.RECOMMEND_INSTALL_INTERNAL) {
+                    stageInternal = true;
+                } else if (resolved == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
+                    stageInternal = false;
+                } else {
+                    throw new IOException("No storage with enough free space; res=" + resolved);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         } else if (params.mode == SessionParams.MODE_INHERIT_EXISTING) {
             // We always stage inheriting sessions on internal storage first,
             // since we don't want to grow containers until we're sure that
