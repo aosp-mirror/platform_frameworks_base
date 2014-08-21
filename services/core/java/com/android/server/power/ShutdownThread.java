@@ -430,10 +430,10 @@ public final class ShutdownThread extends Thread {
                 }
 
                 try {
-                    radioOff = phone == null || !phone.isRadioOn();
+                    radioOff = phone == null || !phone.needMobileRadioShutdown();
                     if (!radioOff) {
-                        Log.w(TAG, "Turning off radio...");
-                        phone.setRadio(false);
+                        Log.w(TAG, "Turning off cellular radios...");
+                        phone.shutdownMobileRadios();
                     }
                 } catch (RemoteException ex) {
                     Log.e(TAG, "RemoteException during radio shutdown", ex);
@@ -456,7 +456,7 @@ public final class ShutdownThread extends Thread {
                     }
                     if (!radioOff) {
                         try {
-                            radioOff = !phone.isRadioOn();
+                            radioOff = !phone.needMobileRadioShutdown();
                         } catch (RemoteException ex) {
                             Log.e(TAG, "RemoteException during radio shutdown", ex);
                             radioOff = true;
@@ -472,7 +472,7 @@ public final class ShutdownThread extends Thread {
                             Log.e(TAG, "RemoteException during NFC shutdown", ex);
                             nfcOff = true;
                         }
-                        if (radioOff) {
+                        if (nfcOff) {
                             Log.i(TAG, "NFC turned off.");
                         }
                     }
