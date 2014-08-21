@@ -18716,7 +18716,6 @@ package android.nfc {
     method public boolean invokeBeam(android.app.Activity);
     method public boolean isEnabled();
     method public boolean isNdefPushEnabled();
-    method public boolean registerLockscreenDispatch(android.nfc.NfcAdapter.NfcLockscreenDispatch, java.lang.String[]);
     method public void setBeamPushUris(android.net.Uri[], android.app.Activity);
     method public void setBeamPushUrisCallback(android.nfc.NfcAdapter.CreateBeamUrisCallback, android.app.Activity);
     method public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, android.app.Activity...);
@@ -18750,10 +18749,6 @@ package android.nfc {
 
   public static abstract interface NfcAdapter.CreateNdefMessageCallback {
     method public abstract android.nfc.NdefMessage createNdefMessage(android.nfc.NfcEvent);
-  }
-
-  public static abstract interface NfcAdapter.NfcLockscreenDispatch {
-    method public abstract boolean onTagDetected(android.nfc.Tag);
   }
 
   public static abstract interface NfcAdapter.OnNdefPushCompleteCallback {
