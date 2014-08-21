@@ -1678,7 +1678,7 @@ android.net.Uri}s pointing to the images/videos to attach.</dd>
 <p><b>Example intent:</b></p>
 <pre>
 public void composeMmsMessage(String message, Uri attachment) {
-    Intent intent = new Intent(Intent.ACTION_SEND);
+    Intent intent = new Intent(Intent.ACTION_SENDTO);
     intent.setType(HTTP.PLAIN_TEXT_TYPE);
     intent.putExtra("sms_body", message);
     intent.putExtra(Intent.EXTRA_STREAM, attachment);
