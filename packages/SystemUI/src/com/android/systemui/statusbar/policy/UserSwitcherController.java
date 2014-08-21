@@ -158,8 +158,9 @@ public class UserSwitcherController {
                             picture = BitmapHelper.createCircularClip(
                                     picture, avatarSize, avatarSize);
                         }
-                        records.add(new UserRecord(info, picture, false /* isGuest */, isCurrent,
-                                false /* isAddUser */, false /* isRestricted */));
+                        int index = isCurrent ? 0 : records.size();
+                        records.add(index, new UserRecord(info, picture, false /* isGuest */,
+                                isCurrent, false /* isAddUser */, false /* isRestricted */));
                     }
                 }
 
@@ -182,7 +183,8 @@ public class UserSwitcherController {
                                     false /* isAddUser */, createIsRestricted));
                         }
                     } else {
-                        records.add(guestRecord);
+                        int index = guestRecord.isCurrent ? 0 : records.size();
+                        records.add(index, guestRecord);
                     }
                 }
 
