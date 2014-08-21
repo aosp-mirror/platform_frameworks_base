@@ -16,25 +16,25 @@
 
 package android.app;
 
-import android.Manifest;
+import android.annotation.SystemApi;
+import android.app.usage.UsageStatsManager;
+import android.content.Context;
 import android.media.AudioAttributes.AttributeUsage;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.UserManager;
-import android.util.ArrayMap;
-
-import com.android.internal.app.IAppOpsService;
-import com.android.internal.app.IAppOpsCallback;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserManager;
+import android.util.ArrayMap;
+
+import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.app.IAppOpsService;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * API for interacting with "application operation" tracking.
@@ -203,8 +203,10 @@ public class AppOpsManager {
     public static final int OP_TOAST_WINDOW = 45;
     /** @hide Capture the device's display contents and/or audio */
     public static final int OP_PROJECT_MEDIA = 46;
+    /** @hide Activate a VPN connection without user intervention. */
+    public static final int OP_ACTIVATE_VPN = 47;
     /** @hide */
-    public static final int _NUM_OP = 47;
+    public static final int _NUM_OP = 48;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION =
@@ -218,6 +220,9 @@ public class AppOpsManager {
     /** Continually monitoring location data with a relatively high power request. */
     public static final String OPSTR_MONITOR_HIGH_POWER_LOCATION
             = "android:monitor_location_high_power";
+    /** Activate a VPN connection without user intervention. @hide */
+    @SystemApi
+    public static final String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
 
     /**
      * This maps each operation to the operation that serves as the
@@ -275,6 +280,7 @@ public class AppOpsManager {
             OP_MUTE_MICROPHONE,
             OP_TOAST_WINDOW,
             OP_PROJECT_MEDIA,
+            OP_ACTIVATE_VPN,
     };
 
     /**
@@ -329,6 +335,7 @@ public class AppOpsManager {
             null,
             null,
             null,
+            OPSTR_ACTIVATE_VPN,
     };
 
     /**
@@ -383,6 +390,7 @@ public class AppOpsManager {
             "MUTE_MICROPHONE",
             "TOAST_WINDOW",
             "PROJECT_MEDIA",
+            "ACTIVATE_VPN",
     };
 
     /**
@@ -437,6 +445,7 @@ public class AppOpsManager {
             null, // no permission for muting/unmuting microphone
             null, // no permission for displaying toasts
             null, // no permission for projecting media
+            null, // no permission for activating vpn
     };
 
     /**
@@ -492,6 +501,7 @@ public class AppOpsManager {
             UserManager.DISALLOW_UNMUTE_MICROPHONE, // MUTE_MICROPHONE
             UserManager.DISALLOW_CREATE_WINDOWS, // TOAST_WINDOW
             null, //PROJECT_MEDIA
+            UserManager.DISALLOW_CONFIG_VPN, // ACTIVATE_VPN
     };
 
     /**
@@ -546,6 +556,7 @@ public class AppOpsManager {
             false, //MUTE_MICROPHONE
             true, //TOAST_WINDOW
             false, //PROJECT_MEDIA
+            false, //ACTIVATE_VPN
     };
 
     /**
@@ -599,6 +610,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_IGNORED, // OP_PROJECT_MEDIA
+            AppOpsManager.MODE_IGNORED, // OP_ACTIVATE_VPN
     };
 
     /**
@@ -625,6 +637,7 @@ public class AppOpsManager {
             false,
             false,
             true,      // OP_WRITE_SMS
+            false,
             false,
             false,
             false,

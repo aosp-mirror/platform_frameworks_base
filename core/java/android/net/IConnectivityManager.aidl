@@ -108,6 +108,8 @@ interface IConnectivityManager
 
     boolean prepareVpn(String oldPackage, String newPackage);
 
+    void setVpnPackageAuthorization(boolean authorized);
+
     ParcelFileDescriptor establishVpn(in VpnConfig config);
 
     VpnConfig getVpnConfig();
