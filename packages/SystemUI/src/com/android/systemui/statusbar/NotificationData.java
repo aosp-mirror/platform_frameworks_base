@@ -252,18 +252,21 @@ public class NotificationData {
         int N = mSortedAndFiltered.size();
         pw.print(indent);
         pw.println("active notifications: " + N);
-        for (int i = 0; i < N; i++) {
-            NotificationData.Entry e = mSortedAndFiltered.get(i);
-            dumpEntry(pw, indent, i, e);
+        int active;
+        for (active = 0; active < N; active++) {
+            NotificationData.Entry e = mSortedAndFiltered.get(active);
+            dumpEntry(pw, indent, active, e);
         }
 
         int M = mEntries.size();
         pw.print(indent);
-        pw.println("inactive notifications: " + M);
+        pw.println("inactive notifications: " + (M - active));
+        int inactiveCount = 0;
         for (int i = 0; i < M; i++) {
             Entry entry = mEntries.valueAt(i);
             if (!mSortedAndFiltered.contains(entry)) {
-                dumpEntry(pw, indent, i, entry);
+                dumpEntry(pw, indent, inactiveCount, entry);
+                inactiveCount++;
             }
         }
     }
@@ -273,8 +276,8 @@ public class NotificationData {
         pw.println("  [" + i + "] key=" + e.key + " icon=" + e.icon);
         StatusBarNotification n = e.notification;
         pw.print(indent);
-        pw.println("      pkg=" + n.getPackageName() + " id=" + n.getId() + " score=" + n
-                .getScore());
+        pw.println("      pkg=" + n.getPackageName() + " id=" + n.getId() + " score=" +
+                n.getScore());
         pw.print(indent);
         pw.println("      notification=" + n.getNotification());
         pw.print(indent);
