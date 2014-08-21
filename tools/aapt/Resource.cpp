@@ -1399,7 +1399,8 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
             sp<ApkSplit>& split = splits.editItemAt(i);
             sp<AaptFile> flattenedTable = new AaptFile(String8("resources.arsc"),
                     AaptGroupEntry(), String8());
-            err = table.flatten(bundle, split->getResourceFilter(), flattenedTable);
+            err = table.flatten(bundle, split->getResourceFilter(),
+                    flattenedTable, split->isBase());
             if (err != NO_ERROR) {
                 fprintf(stderr, "Failed to generate resource table for split '%s'\n",
                         split->getPrintableName().string());
