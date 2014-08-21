@@ -199,6 +199,29 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     @Override
+    public void jumpToCurrentState() {
+        super.jumpToCurrentState();
+
+        if (mRipple != null) {
+            mRipple.jump();
+        }
+
+        if (mBackground != null) {
+            mBackground.jump();
+        }
+
+        mClearingHotspots = true;
+        final int count = mAnimatingRipplesCount;
+        final Ripple[] ripples = mAnimatingRipples;
+        for (int i = 0; i < count; i++) {
+            ripples[i].jump();
+            ripples[i] = null;
+        }
+        mAnimatingRipplesCount = 0;
+        mClearingHotspots = false;
+    }
+
+    @Override
     public void setAlpha(int alpha) {
         super.setAlpha(alpha);
 
@@ -534,18 +557,6 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     private void clearHotspots() {
-        mClearingHotspots = true;
-
-        final int count = mAnimatingRipplesCount;
-        final Ripple[] ripples = mAnimatingRipples;
-        for (int i = 0; i < count; i++) {
-            // Calling cancel may remove the ripple from the animating ripple
-            // array, so cache the reference before nulling it out.
-            final Ripple ripple = ripples[i];
-            ripples[i] = null;
-            ripple.cancel();
-        }
-
         if (mRipple != null) {
             mRipple.cancel();
             mRipple = null;
@@ -556,8 +567,16 @@ public class RippleDrawable extends LayerDrawable {
             mBackground = null;
         }
 
-        mClearingHotspots = false;
+        mClearingHotspots = true;
+        final int count = mAnimatingRipplesCount;
+        final Ripple[] ripples = mAnimatingRipples;
+        for (int i = 0; i < count; i++) {
+            ripples[i].cancel();
+            ripples[i] = null;
+        }
         mAnimatingRipplesCount = 0;
+        mClearingHotspots = false;
+
         invalidateSelf();
     }
 

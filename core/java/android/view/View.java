@@ -13090,6 +13090,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         removeSendViewScrolledAccessibilityEventCallback();
         stopNestedScroll();
 
+        // Anything that started animating right before detach should already
+        // be in its final state when re-attached.
+        jumpDrawablesToCurrentState();
+
         destroyDrawingCache();
 
         cleanupDraw();

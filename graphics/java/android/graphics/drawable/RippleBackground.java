@@ -203,7 +203,7 @@ class RippleBackground {
         final boolean canUseHardware = c.isHardwareAccelerated();
         if (mCanUseHardware != canUseHardware && mCanUseHardware) {
             // We've switched from hardware to non-hardware mode. Panic.
-            cancelHardwareAnimations();
+            cancelHardwareAnimations(true);
         }
         mCanUseHardware = canUseHardware;
 
@@ -223,7 +223,7 @@ class RippleBackground {
         final ArrayList<RenderNodeAnimator> pendingAnimations = mPendingAnimations;
         final int N = pendingAnimations.size();
         if (N > 0) {
-            cancelHardwareAnimations();
+            cancelHardwareAnimations(false);
 
             for (int i = 0; i < N; i++) {
                 pendingAnimations.get(i).setTarget(c);
@@ -403,6 +403,41 @@ class RippleBackground {
         invalidateSelf();
     }
 
+    public void jump() {
+        endSoftwareAnimations();
+        endHardwareAnimations();
+    }
+
+    private void endSoftwareAnimations() {
+        if (mAnimOuterOpacity != null) {
+            mAnimOuterOpacity.end();
+        }
+
+        if (mAnimX != null) {
+            mAnimX.end();
+        }
+
+        if (mAnimY != null) {
+            mAnimY.end();
+        }
+    }
+
+    private void endHardwareAnimations() {
+        final ArrayList<RenderNodeAnimator> runningAnimations = mRunningAnimations;
+        final int N = runningAnimations.size();
+        for (int i = 0; i < N; i++) {
+            runningAnimations.get(i).end();
+        }
+        runningAnimations.clear();
+
+        // Abort any pending animations. Since we always have a completion
+        // listener on a pending animation, we also need to remove ourselves.
+        if (!mPendingAnimations.isEmpty()) {
+            mPendingAnimations.clear();
+            removeSelf();
+        }
+    }
+
     private Paint getTempPaint() {
         if (mTempPaint == null) {
             mTempPaint = new Paint();
@@ -477,7 +512,7 @@ class RippleBackground {
      */
     public void cancel() {
         cancelSoftwareAnimations();
-        cancelHardwareAnimations();
+        cancelHardwareAnimations(true);
     }
 
     private void cancelSoftwareAnimations() {
@@ -497,7 +532,7 @@ class RippleBackground {
     /**
      * Cancels any running hardware animations.
      */
-    private void cancelHardwareAnimations() {
+    private void cancelHardwareAnimations(boolean cancelPending) {
         final ArrayList<RenderNodeAnimator> runningAnimations = mRunningAnimations;
         final int N = runningAnimations.size();
         for (int i = 0; i < N; i++) {
@@ -505,6 +540,11 @@ class RippleBackground {
         }
 
         runningAnimations.clear();
+
+        if (cancelPending && !mPendingAnimations.isEmpty()) {
+            mPendingAnimations.clear();
+            removeSelf();
+        }
     }
 
     private void removeSelf() {
