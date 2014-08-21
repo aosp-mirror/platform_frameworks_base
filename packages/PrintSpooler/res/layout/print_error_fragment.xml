@@ -33,6 +33,9 @@
         android:id="@+id/message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dip"
+        android:layout_marginEnd="16dip"
+        android:gravity="center_horizontal"
         android:text="@string/print_error_default_message"
         android:textAppearance="?android:attr/textAppearanceLargeInverse">
     </TextView>
