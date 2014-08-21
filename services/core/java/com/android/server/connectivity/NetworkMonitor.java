@@ -16,6 +16,7 @@
 
 package com.android.server.connectivity;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -213,6 +214,7 @@ public class NetworkMonitor extends StateMachine {
     private final NetworkAgentInfo mNetworkAgentInfo;
     private final TelephonyManager mTelephonyManager;
     private final WifiManager mWifiManager;
+    private final AlarmManager mAlarmManager;
 
     private String mServer;
     private boolean mIsCaptivePortalCheckEnabled = false;
@@ -238,6 +240,7 @@ public class NetworkMonitor extends StateMachine {
         mNetworkAgentInfo = networkAgentInfo;
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         addState(mDefaultState);
         addState(mOfflineState, mDefaultState);
@@ -598,10 +601,38 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private class LingeringState extends State {
+        private static final String ACTION_LINGER_EXPIRED = "android.net.netmon.lingerExpired";
+        private static final String EXTRA_NETID = "lingerExpiredNetId";
+        private static final String EXTRA_TOKEN = "lingerExpiredToken";
+
+        private class LingerExpiredBroadcastReceiver extends BroadcastReceiver {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(ACTION_LINGER_EXPIRED) &&
+                        Integer.parseInt(intent.getStringExtra(EXTRA_NETID)) ==
+                        mNetworkAgentInfo.network.netId) {
+                    sendMessage(CMD_LINGER_EXPIRED,
+                            Integer.parseInt(intent.getStringExtra(EXTRA_TOKEN)));
+                }
+            }
+        }
+
+        private BroadcastReceiver mBroadcastReceiver;
+        private PendingIntent mIntent;
+
         @Override
         public void enter() {
-            Message message = obtainMessage(CMD_LINGER_EXPIRED, ++mLingerToken, 0);
-            sendMessageDelayed(message, mLingerDelayMs);
+            mBroadcastReceiver = new LingerExpiredBroadcastReceiver();
+            mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(ACTION_LINGER_EXPIRED));
+
+            Intent intent = new Intent(ACTION_LINGER_EXPIRED, null);
+            intent.putExtra(EXTRA_NETID, String.valueOf(mNetworkAgentInfo.network.netId));
+            intent.putExtra(EXTRA_TOKEN, String.valueOf(++mLingerToken));
+            mIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+            long wakeupTime = SystemClock.elapsedRealtime() + mLingerDelayMs;
+            mAlarmManager.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP, wakeupTime,
+                    // Give a specific window so we aren't subject to unknown inexactitude.
+                    mLingerDelayMs / 6, mIntent);
         }
 
         @Override
@@ -621,6 +652,12 @@ public class NetworkMonitor extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
+        }
+
+        @Override
+        public void exit() {
+            mAlarmManager.cancel(mIntent);
+            mContext.unregisterReceiver(mBroadcastReceiver);
         }
     }
 
