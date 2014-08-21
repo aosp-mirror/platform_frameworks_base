@@ -33,7 +33,8 @@ public interface StateChangedListener {
     /**
      * Called by the controller to notify the JobManager that regardless of the state of the task,
      * it must be run immediately.
-     * @param jobStatus The state of the task which is to be run immediately.
+     * @param jobStatus The state of the task which is to be run immediately. <strong>null
+     *                  indicates to the scheduler that any ready jobs should be flushed.</strong>
      */
     public void onRunJobNow(JobStatus jobStatus);
 }
