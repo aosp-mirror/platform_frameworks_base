@@ -91,7 +91,7 @@ public void onDataChanged(DataEventBuffer dataEvents) {
   for (DataEvent event : dataEvents) {
     if (event.getType() == DataEvent.TYPE_CHANGED &&
         event.getDataItem().getUri().getPath().equals("/image")) {
-      DataMapItem dataMapItem = DataMapItem.fromDataItem(dataItem); 
+      DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
       Asset profileAsset = dataMapItem.getDataMap().getAsset("profileImage");
       Bitmap bitmap = loadBitmapFromAsset(profileAsset);
       // Do something with the bitmap
