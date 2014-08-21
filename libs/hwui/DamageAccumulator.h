@@ -50,7 +50,7 @@ public:
     void dirty(float left, float top, float right, float bottom);
 
     // Returns the current dirty area, *NOT* transformed by pushed transforms
-    void peekAtDirty(SkRect* dest);
+    void peekAtDirty(SkRect* dest) const;
 
     void computeCurrentTransform(Matrix4* outMatrix) const;
 
