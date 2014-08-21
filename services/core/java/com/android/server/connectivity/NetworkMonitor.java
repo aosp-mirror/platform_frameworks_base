@@ -639,8 +639,7 @@ public class NetworkMonitor extends StateMachine {
                 log("Checking " + url.toString() + " on " +
                         mNetworkAgentInfo.networkInfo.getExtraInfo());
             }
-            url = mNetworkAgentInfo.network.getBoundURL(url);
-            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection = (HttpURLConnection) mNetworkAgentInfo.network.openConnection(url);
             urlConnection.setInstanceFollowRedirects(false);
             urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
