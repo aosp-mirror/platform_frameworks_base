@@ -1841,6 +1841,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
                         Integer.toString(msg.arg1), msg.arg1);
                 mSystemServiceManager.switchUser(msg.arg1);
+                mLockToAppRequest.clearPrompt();
                 break;
             }
             case ENTER_ANIMATION_COMPLETE_MSG: {
