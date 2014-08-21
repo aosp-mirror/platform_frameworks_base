@@ -214,7 +214,7 @@ void DamageAccumulator::dirty(float left, float top, float right, float bottom) 
     mHead->pendingDirty.join(left, top, right, bottom);
 }
 
-void DamageAccumulator::peekAtDirty(SkRect* dest) {
+void DamageAccumulator::peekAtDirty(SkRect* dest) const {
     *dest = mHead->pendingDirty;
 }
 
