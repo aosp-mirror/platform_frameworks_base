@@ -94,9 +94,17 @@ import java.util.Map;
  * and {@link #dequeueOutputBuffer} then transfer ownership from the codec
  * to the client.<p>
  * The client is not required to resubmit/release buffers immediately
- * to the codec, the sample code above simply does this for simplicity's sake.<p>
+ * to the codec, the sample code above simply does this for simplicity's sake.
+ * Nonetheless, it is possible that a codec may hold off on generating
+ * output buffers until all outstanding buffers have been
+ * released/resubmitted.
+ * <p>
  * Once the client has an input buffer available it can fill it with data
- * and submit it it to the codec via a call to {@link #queueInputBuffer}.<p>
+ * and submit it it to the codec via a call to {@link #queueInputBuffer}.
+ * Do not submit multiple input buffers with the same timestamp (unless
+ * it is codec-specific data marked as such using the flag
+ * {@link #BUFFER_FLAG_CODEC_CONFIG}).
+ * <p>
  * The codec in turn will return an output buffer to the client in response
  * to {@link #dequeueOutputBuffer}. After the output buffer has been processed
  * a call to {@link #releaseOutputBuffer} will return it to the codec.
@@ -128,17 +136,63 @@ import java.util.Map;
  * {@link #queueInputBuffer}. The codec will continue to return output buffers
  * until it eventually signals the end of the output stream by specifying
  * the same flag ({@link #BUFFER_FLAG_END_OF_STREAM}) on the BufferInfo returned in
- * {@link #dequeueOutputBuffer}.
+ * {@link #dequeueOutputBuffer}.  Do not submit additional input buffers after
+ * signaling the end of the input stream, unless the codec has been flushed,
+ * or stopped and restarted.
  * <p>
+ * <h3>Seeking &amp; Adaptive Playback Support</h3>
+ *
+ * You can check if a decoder supports adaptive playback via {@link
+ * MediaCodecInfo.CodecCapabilities#isFeatureSupported}.  Adaptive playback
+ * is only supported if you configure the codec to decode onto a {@link
+ * android.view.Surface}.
+ *
+ * <h4>For decoders that do not support adaptive playback (including
+ * when not decoding onto a Surface)</h4>
+ *
  * In order to start decoding data that's not adjacent to previously submitted
- * data (i.e. after a seek) it is necessary to {@link #flush} the decoder.
+ * data (i.e. after a seek) <em>one must</em> {@link #flush} the decoder.
  * Any input or output buffers the client may own at the point of the flush are
  * immediately revoked, i.e. after a call to {@link #flush} the client does not
  * own any buffers anymore.
+ * <p>
+ * It is important that the input data after a flush starts at a suitable
+ * stream boundary.  The first frame must be able to be decoded completely on
+ * its own (for most codecs this means an I-frame), and that no frames should
+ * refer to frames before that first new frame.
  * Note that the format of the data submitted after a flush must not change,
  * flush does not support format discontinuities,
- * for this a full {@link #stop}, {@link #configure}, {@link #start}
+ * for this a full {@link #stop}, {@link #configure configure()}, {@link #start}
  * cycle is necessary.
+ *
+ * <h4>For decoders that support adaptive playback</h4>
+ *
+ * In order to start decoding data that's not adjacent to previously submitted
+ * data (i.e. after a seek) it is <em>not necessary</em> to {@link #flush} the
+ * decoder.
+ * <p>
+ * It is still important that the input data after the discontinuity starts
+ * at a suitable stream boundary (e.g. I-frame), and that no new frames refer
+ * to frames before the first frame of the new input data segment.
+ * <p>
+ * For some video formats it is also possible to change the picture size
+ * mid-stream.  To do this for H.264, the new Sequence Parameter Set (SPS) and
+ * Picture Parameter Set (PPS) values must be packaged together with an
+ * Instantaneous Decoder Refresh (IDR) frame in a single buffer, which then
+ * can be enqueued as a regular input buffer.
+ * The client will receive an {@link #INFO_OUTPUT_FORMAT_CHANGED} return
+ * value from {@link #dequeueOutputBuffer dequeueOutputBuffer()} or
+ * {@link Callback#onOutputBufferAvailable onOutputBufferAvailable()}
+ * just after the picture-size change takes place and before any
+ * frames with the new size have been returned.
+ * <p>
+ * Be careful when calling {@link #flush} shortly after you have changed
+ * the picture size.  If you have not received confirmation of the picture
+ * size change, you will need to repeat the request for the new picture size.
+ * E.g. for H.264 you will need to prepend the PPS/SPS to the new IDR
+ * frame to ensure that the codec receives the picture size change request.
+ *
+ * <h3>States and error handling</h3>
  *
  * <p> During its life, a codec conceptually exists in one of the following states:
  * Initialized, Configured, Executing, Error, Uninitialized, (omitting transitory states
