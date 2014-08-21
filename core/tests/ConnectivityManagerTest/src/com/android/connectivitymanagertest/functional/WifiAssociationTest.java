@@ -136,7 +136,7 @@ public class WifiAssociationTest extends ConnectivityManagerTestBase {
                 config.allowedProtocols.set(Protocol.WPA);
                 config.allowedPairwiseCiphers.set(PairwiseCipher.TKIP);
                 config.allowedGroupCiphers.set(GroupCipher.TKIP);
-                if (mPassword.matches("[0-9A-Fa-f]{64}")) {
+                if (isHex(mPassword, 64)) {
                     config.preSharedKey = mPassword;
                 } else {
                     config.preSharedKey = '"' + mPassword + '"';
@@ -150,7 +150,7 @@ public class WifiAssociationTest extends ConnectivityManagerTestBase {
                 config.allowedPairwiseCiphers.set(PairwiseCipher.CCMP);
                 config.allowedGroupCiphers.set(GroupCipher.CCMP);
                 config.allowedProtocols.set(Protocol.RSN);
-                if (mPassword.matches("[0-9A-Fa-f]{64}")) {
+                if (isHex(mPassword, 64)) {
                     config.preSharedKey = mPassword;
                 } else {
                     config.preSharedKey = '"' + mPassword + '"';
