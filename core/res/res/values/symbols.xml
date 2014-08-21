@@ -1990,4 +1990,6 @@
   <java-symbol type="color" name="battery_saver_mode_color" />
   <java-symbol type="color" name="system_notification_accent_color" />
   <java-symbol type="dimen" name="text_handle_min_size" />
+  <java-symbol type="id" name="transitionTransform" />
+  <java-symbol type="id" name="parentMatrix" />
 </resources>

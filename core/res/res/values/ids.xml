@@ -85,4 +85,6 @@
   <item type="id" name="scene_layoutid_cache" />
   <item type="id" name="mask" />
   <item type="id" name="transitionPosition" />
+  <item type="id" name="transitionTransform" />
+  <item type="id" name="parentMatrix" />
 </resources>

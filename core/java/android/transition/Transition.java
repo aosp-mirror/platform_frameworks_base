@@ -112,8 +112,8 @@ import com.android.internal.R;
  *
  * Further information on XML resource descriptions for transitions can be found for
  * {@link android.R.styleable#Transition}, {@link android.R.styleable#TransitionSet},
- * {@link android.R.styleable#TransitionTarget}, {@link android.R.styleable#Fade}, and
- * {@link android.R.styleable#Slide}.
+ * {@link android.R.styleable#TransitionTarget}, {@link android.R.styleable#Fade},
+ * {@link android.R.styleable#Slide}, and {@link android.R.styleable#ChangeTransform}.
  *
  */
 public abstract class Transition implements Cloneable {
@@ -1755,22 +1755,38 @@ public abstract class Transition implements Cloneable {
         // if oldValues null, then transition didn't care to stash values,
         // and won't get canceled
         if (oldValues != null && newValues != null) {
-            for (String key : oldValues.values.keySet()) {
-                Object oldValue = oldValues.values.get(key);
-                Object newValue = newValues.values.get(key);
-                if (oldValue != null && newValue != null &&
-                        !oldValue.equals(newValue)) {
-                    valuesChanged = true;
-                    if (DBG) {
-                        Log.d(LOG_TAG, "Transition.playTransition: " +
-                                "oldValue != newValue for " + key +
-                                ": old, new = " + oldValue + ", " + newValue);
+            String[] properties = getTransitionProperties();
+            if (properties != null) {
+                int count = properties.length;
+                for (int i = 0; i < count; i++) {
+                    if (isValueChanged(oldValues, newValues, properties[i])) {
+                        valuesChanged = true;
+                        break;
                     }
-                    break;
+                }
+            } else {
+                for (String key : oldValues.values.keySet()) {
+                    if (isValueChanged(oldValues, newValues, key)) {
+                        valuesChanged = true;
+                        break;
+                    }
                 }
             }
         }
         return valuesChanged;
+    }
+
+    private static boolean isValueChanged(TransitionValues oldValues, TransitionValues newValues,
+            String key) {
+        Object oldValue = oldValues.values.get(key);
+        Object newValue = newValues.values.get(key);
+        boolean changed = (oldValue != null && newValue != null && !oldValue.equals(newValue));
+        if (DBG && changed) {
+            Log.d(LOG_TAG, "Transition.playTransition: " +
+                    "oldValue != newValue for " + key +
+                    ": old, new = " + oldValue + ", " + newValue);
+        }
+        return changed;
     }
 
     /**

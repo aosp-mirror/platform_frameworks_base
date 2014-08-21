@@ -107,6 +107,8 @@ public class ChangeBounds extends Transition {
      *
      * @param reparent true if the transition should track the parent
      * container of target views and animate parent changes.
+     * @deprecated Use {@link android.transition.ChangeTransform} to handle
+     * transitions between different parents.
      */
     public void setReparent(boolean reparent) {
         mReparent = reparent;
