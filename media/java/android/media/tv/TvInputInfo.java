@@ -46,7 +46,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -616,11 +615,15 @@ public final class TvInputInfo implements Parcelable {
         public static Set<String> getHiddenTvInputIds(Context context, int userId) {
             String hiddenIdsString = Settings.Secure.getStringForUser(
                     context.getContentResolver(), Settings.Secure.TV_INPUT_HIDDEN_INPUTS, userId);
+            Set<String> set = new HashSet<String>();
             if (TextUtils.isEmpty(hiddenIdsString)) {
-                return new HashSet<String>();
+                return set;
             }
             String[] ids = hiddenIdsString.split(TV_INPUT_SEPARATOR);
-            return new HashSet<>(Arrays.asList(ids));
+            for (String id : ids) {
+                set.add(Uri.decode(id));
+            }
+            return set;
         }
 
         /**
@@ -641,7 +644,7 @@ public final class TvInputInfo implements Parcelable {
             String[] pairs = labelsString.split(TV_INPUT_SEPARATOR);
             for (String pairString : pairs) {
                 String[] pair = pairString.split(CUSTOM_NAME_SEPARATOR);
-                map.put(pair[0], pair[1]);
+                map.put(Uri.decode(pair[0]), Uri.decode(pair[1]));
             }
             return map;
         }
@@ -667,7 +670,7 @@ public final class TvInputInfo implements Parcelable {
                 } else {
                     builder.append(TV_INPUT_SEPARATOR);
                 }
-                builder.append(inputId);
+                builder.append(Uri.encode(inputId));
             }
             Settings.Secure.putStringForUser(context.getContentResolver(),
                     Settings.Secure.TV_INPUT_HIDDEN_INPUTS, builder.toString(), userId);
@@ -695,9 +698,9 @@ public final class TvInputInfo implements Parcelable {
                 } else {
                     builder.append(TV_INPUT_SEPARATOR);
                 }
-                builder.append(entry.getKey());
+                builder.append(Uri.encode(entry.getKey()));
                 builder.append(CUSTOM_NAME_SEPARATOR);
-                builder.append(entry.getValue());
+                builder.append(Uri.encode(entry.getValue()));
             }
             Settings.Secure.putStringForUser(context.getContentResolver(),
                     Settings.Secure.TV_INPUT_CUSTOM_LABELS, builder.toString(), userId);
@@ -706,14 +709,6 @@ public final class TvInputInfo implements Parcelable {
         private static void ensureValidField(String value) {
             if (TextUtils.isEmpty(value)) {
                 throw new IllegalArgumentException(value + " should not empty ");
-            }
-            if (value.contains(TV_INPUT_SEPARATOR)) {
-                throw new IllegalArgumentException(value + " should not include "
-                        + TV_INPUT_SEPARATOR);
-            }
-            if (value.contains(CUSTOM_NAME_SEPARATOR)) {
-                throw new IllegalArgumentException(value + " should not include "
-                        + CUSTOM_NAME_SEPARATOR);
             }
         }
     }
