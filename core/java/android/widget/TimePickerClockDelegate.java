@@ -37,6 +37,8 @@ import com.android.internal.R;
 import java.util.Calendar;
 import java.util.Locale;
 
+import libcore.icu.LocaleData;
+
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO;
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
 
@@ -153,11 +155,8 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
         mMinuteSpinnerInput = (EditText) mMinuteSpinner.findViewById(R.id.numberpicker_input);
         mMinuteSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 
-            /* Get the localized am/pm strings and use them in the spinner */
-        final Resources res = context.getResources();
-        final String amText = res.getString(R.string.time_picker_am_label);
-        final String pmText = res.getString(R.string.time_picker_pm_label);
-        mAmPmStrings = new String[] {amText, pmText};
+        // Get the localized am/pm strings and use them in the spinner.
+        mAmPmStrings = getAmPmStrings(context);
 
         // am/pm
         View amPmView = mDelegator.findViewById(R.id.amPm);
@@ -613,5 +612,12 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
             }
         };
     }
-}
 
+    public static String[] getAmPmStrings(Context context) {
+        String[] result = new String[2];
+        LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
+        result[0] = d.amPm[0].length() > 2 ? d.narrowAm : d.amPm[0];
+        result[1] = d.amPm[1].length() > 2 ? d.narrowPm : d.amPm[1];
+        return result;
+    }
+}

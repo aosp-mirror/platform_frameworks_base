@@ -4142,10 +4142,6 @@
     <string name="time_picker_increment_set_pm_button">Set PM</string>
     <!-- Description of the button to decrease the TimePicker's set AM value. [CHAR LIMIT=NONE] -->
     <string name="time_picker_decrement_set_am_button">Set AM</string>
-    <!-- Label for the TimePicker's PM button. [CHAR LIMIT=2] -->
-    <string name="time_picker_pm_label">PM</string>
-    <!-- Label for the TimePicker's AM button. [CHAR LIMIT=2] -->
-    <string name="time_picker_am_label">AM</string>
 
     <!-- DatePicker - accessibility support -->
     <!-- Description of the button to increase the DatePicker's month value. [CHAR LIMIT=NONE] -->
