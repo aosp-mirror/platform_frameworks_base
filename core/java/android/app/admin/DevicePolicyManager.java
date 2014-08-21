@@ -130,7 +130,7 @@ public class DevicePolicyManager {
      * message containing an Nfc record with MIME type {@link #MIME_TYPE_PROVISIONING_NFC}.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME
-        = "android.app.extra.deviceAdminPackageName";
+        = "android.app.extra.DEVICE_ADMIN_PACKAGE_NAME";
 
     /**
      * A String extra holding the default name of the profile that is created during managed profile
@@ -139,7 +139,7 @@ public class DevicePolicyManager {
      * <p>Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}
      */
     public static final String EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME
-        = "android.app.extra.defaultManagedProfileName";
+        = "android.app.extra.DEFAULT_MANAGED_PROFILE_NAME";
 
     /**
      * A String extra that, holds the email address of the account which a managed profile is
@@ -153,7 +153,7 @@ public class DevicePolicyManager {
      * It is usually used to avoid that the user has to enter their email address twice.
      */
     public static final String EXTRA_PROVISIONING_EMAIL_ADDRESS
-        = "android.app.extra.ManagedProfileEmailAddress";
+        = "android.app.extra.MANAGED_PROFILE_EMAIL_ADDRESS";
 
     /**
      * A String extra holding the time zone {@link android.app.AlarmManager} that the device
@@ -163,17 +163,17 @@ public class DevicePolicyManager {
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_TIME_ZONE
-        = "android.app.extra.timeZone";
+        = "android.app.extra.TIME_ZONE";
 
     /**
-     * A Long extra holding the local time {@link android.app.AlarmManager} that the device
-     * will be set to.
+     * A Long extra holding the wall clock time (in milliseconds) to be set on the device's
+     * {@link android.app.AlarmManager}.
      *
      * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_LOCAL_TIME
-        = "android.app.extra.localTime";
+        = "android.app.extra.LOCAL_TIME";
 
     /**
      * A String extra holding the {@link java.util.Locale} that the device will be set to.
@@ -183,7 +183,7 @@ public class DevicePolicyManager {
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_LOCALE
-        = "android.app.extra.locale";
+        = "android.app.extra.LOCALE";
 
     /**
      * A String extra holding the ssid of the wifi network that should be used during nfc device
@@ -193,7 +193,7 @@ public class DevicePolicyManager {
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_SSID
-        = "android.app.extra.wifiSsid";
+        = "android.app.extra.WIFI_SSID";
 
     /**
      * A boolean extra indicating whether the wifi network in {@link #EXTRA_PROVISIONING_WIFI_SSID}
@@ -203,7 +203,7 @@ public class DevicePolicyManager {
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_HIDDEN
-        = "android.app.extra.wifiHidden";
+        = "android.app.extra.WIFI_HIDDEN";
 
     /**
      * A String extra indicating the security type of the wifi network in
@@ -213,7 +213,7 @@ public class DevicePolicyManager {
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_SECURITY_TYPE
-        = "android.app.extra.wifiSecurityType";
+        = "android.app.extra.WIFI_SECURITY_TYPE";
 
     /**
      * A String extra holding the password of the wifi network in
@@ -223,7 +223,7 @@ public class DevicePolicyManager {
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_PASSWORD
-        = "android.app.extra.wifiPassword";
+        = "android.app.extra.WIFI_PASSWORD";
 
     /**
      * A String extra holding the proxy host for the wifi network in
@@ -233,7 +233,7 @@ public class DevicePolicyManager {
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_PROXY_HOST
-        = "android.app.extra.wifiProxyHost";
+        = "android.app.extra.WIFI_PROXY_HOST";
 
     /**
      * An int extra holding the proxy port for the wifi network in
@@ -243,7 +243,7 @@ public class DevicePolicyManager {
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_PROXY_PORT
-        = "android.app.extra.wifiProxyPort";
+        = "android.app.extra.WIFI_PROXY_PORT";
 
     /**
      * A String extra holding the proxy bypass for the wifi network in
@@ -253,7 +253,7 @@ public class DevicePolicyManager {
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_PROXY_BYPASS
-        = "android.app.extra.wifiProxyBypassHosts";
+        = "android.app.extra.WIFI_PROXY_BYPASS_HOSTS";
 
     /**
      * A String extra holding the proxy auto-config (PAC) URL for the wifi network in
@@ -263,7 +263,7 @@ public class DevicePolicyManager {
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_PAC_URL
-        = "android.app.extra.wifiPacUrl";
+        = "android.app.extra.WIFI_PAC_URL";
 
     /**
      * A String extra holding a url that specifies the download location of the device admin
@@ -273,7 +273,7 @@ public class DevicePolicyManager {
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION
-        = "android.app.extra.deviceAdminPackageDownloadLocation";
+        = "android.app.extra.DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION";
 
     /**
      * A String extra holding a http cookie header which should be used in the http request to the
@@ -283,7 +283,7 @@ public class DevicePolicyManager {
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER
-        = "android.app.extra.deviceAdminPackageDownloadCookieHeader";
+        = "android.app.extra.DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER";
 
     /**
      * A String extra holding the SHA-1 checksum of the file at download location specified in
@@ -295,7 +295,7 @@ public class DevicePolicyManager {
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM
-        = "android.app.extra.deviceAdminPackageChecksum";
+        = "android.app.extra.DEVICE_ADMIN_PACKAGE_CHECKSUM";
 
     /**
      * This MIME type is used for starting the Device Owner provisioning.
