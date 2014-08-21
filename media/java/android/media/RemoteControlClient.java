@@ -389,9 +389,7 @@ import java.lang.IllegalArgumentException;
     public void registerWithSession(MediaSessionLegacyHelper helper) {
         helper.addRccListener(mRcMediaIntent, mTransportListener);
         mSession = helper.getSession(mRcMediaIntent);
-        if (mTransportControlFlags != 0) {
-            setTransportControlFlags(mTransportControlFlags);
-        }
+        setTransportControlFlags(mTransportControlFlags);
     }
 
     /**
