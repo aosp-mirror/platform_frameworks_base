@@ -14,8 +14,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-       android:drawable="@drawable/notification_icon_legacy_bg" android:insetBottom="8dp"
-       android:insetLeft="8dp" android:insetRight="8dp" android:insetTop="8dp"
-       android:visible="true"/>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:startColor="#44000000"
+        android:centerColor="#1C000000"
+        android:endColor="#00000000"
+        android:centerY="0.3"
+        android:centerX="0.5"
+        android:angle="270"/>
+</shape>
