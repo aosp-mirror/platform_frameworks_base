@@ -116,11 +116,11 @@ please see themes_device_defaults.xml.
 
         <!-- Button styles -->
         <item name="buttonStyle">@style/Widget.Button</item>
-
         <item name="buttonStyleSmall">@style/Widget.Button.Small</item>
         <item name="buttonStyleInset">@style/Widget.Button.Inset</item>
-
         <item name="buttonStyleToggle">@style/Widget.Button.Toggle</item>
+
+        <item name="switchStyle">@style/Widget.CompoundButton.Switch</item>
 
         <item name="selectableItemBackground">@drawable/item_background</item>
         <item name="selectableItemBackgroundBorderless">?attr/selectableItemBackground</item>
