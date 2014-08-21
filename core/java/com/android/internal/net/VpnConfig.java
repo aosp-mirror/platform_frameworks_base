@@ -20,17 +20,19 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.net.LinkAddress;
+import android.net.RouteInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.UserHandle;
-import android.net.RouteInfo;
-import android.net.LinkAddress;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple container used to carry information in VpnBuilder, VpnDialogs,
@@ -55,12 +57,19 @@ public class VpnConfig implements Parcelable {
         return intent;
     }
 
-    public static PendingIntent getIntentForStatusPanel(Context context) {
-        Intent intent = new Intent();
-        intent.setClassName(DIALOGS_PACKAGE, DIALOGS_PACKAGE + ".ManageDialog");
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY |
-                Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        return PendingIntent.getActivityAsUser(context, 0, intent, 0, null, UserHandle.CURRENT);
+    public static CharSequence getVpnLabel(Context context, String packageName)
+            throws NameNotFoundException {
+        PackageManager pm = context.getPackageManager();
+        Intent intent = new Intent(SERVICE_INTERFACE);
+        intent.setPackage(packageName);
+        List<ResolveInfo> services = pm.queryIntentServices(intent, 0 /* flags */);
+        if (services != null && services.size() == 1) {
+            // This app contains exactly one VPN service. Call loadLabel, which will attempt to
+            // load the service's label, and fall back to the app label if none is present.
+            return services.get(0).loadLabel(pm);
+        } else {
+            return pm.getApplicationInfo(packageName, 0).loadLabel(pm);
+        }
     }
 
     public String user;

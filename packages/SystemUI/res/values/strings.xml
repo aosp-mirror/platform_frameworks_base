@@ -834,8 +834,8 @@
     <!-- Monitoring dialog title for normal devices  [CHAR LIMIT=35]-->
     <string name="monitoring_title">Network monitoring</string>
 
-    <!-- Monitoring dialog open app button [CHAR LIMIT=30] -->
-    <string name="open_app">Open app</string>
+    <!-- Monitoring dialog disable vpn button [CHAR LIMIT=30] -->
+    <string name="disable_vpn">Disable VPN</string>
 
     <!-- Monitoring dialog disconnect vpn button [CHAR LIMIT=30] -->
     <string name="disconnect_vpn">Disconnect VPN</string>
