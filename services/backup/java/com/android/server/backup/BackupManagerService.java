@@ -34,7 +34,6 @@ import android.app.backup.IBackupManager;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreObserver;
 import android.app.backup.IRestoreSession;
-import android.app.job.JobParameters;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -79,6 +78,7 @@ import android.os.storage.IMountService;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Log;
@@ -308,12 +308,13 @@ public class BackupManagerService extends IBackupManager.Stub {
     volatile boolean mClearingData;
 
     // Transport bookkeeping
-    final HashMap<String,String> mTransportNames
-            = new HashMap<String,String>();             // component name -> registration name
-    final HashMap<String,IBackupTransport> mTransports
-            = new HashMap<String,IBackupTransport>();   // registration name -> binder
-    final ArrayList<TransportConnection> mTransportConnections
-            = new ArrayList<TransportConnection>();
+    final Intent mTransportServiceIntent = new Intent(SERVICE_ACTION_TRANSPORT_HOST);
+    final ArrayMap<String,String> mTransportNames
+            = new ArrayMap<String,String>();             // component name -> registration name
+    final ArrayMap<String,IBackupTransport> mTransports
+            = new ArrayMap<String,IBackupTransport>();   // registration name -> binder
+    final ArrayMap<String,TransportConnection> mTransportConnections
+            = new ArrayMap<String,TransportConnection>();
     String mCurrentTransport;
     ActiveRestoreSession mActiveRestoreSession;
 
@@ -1064,9 +1065,8 @@ public class BackupManagerService extends IBackupManager.Stub {
         if (DEBUG) Slog.v(TAG, "Starting with transport " + mCurrentTransport);
 
         // Find transport hosts and bind to their services
-        Intent transportServiceIntent = new Intent(SERVICE_ACTION_TRANSPORT_HOST);
         List<ResolveInfo> hosts = mPackageManager.queryIntentServicesAsUser(
-                transportServiceIntent, 0, UserHandle.USER_OWNER);
+                mTransportServiceIntent, 0, UserHandle.USER_OWNER);
         if (DEBUG) {
             Slog.v(TAG, "Found transports: " + ((hosts == null) ? "null" : hosts.size()));
         }
@@ -1082,17 +1082,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                     ServiceInfo info = hosts.get(i).serviceInfo;
                     PackageInfo packInfo = mPackageManager.getPackageInfo(info.packageName, 0);
                     if ((packInfo.applicationInfo.flags & ApplicationInfo.FLAG_PRIVILEGED) != 0) {
-                        ComponentName svcName = new ComponentName(info.packageName, info.name);
-                        if (DEBUG) {
-                            Slog.i(TAG, "Binding to transport host " + svcName);
-                        }
-                        Intent intent = new Intent(transportServiceIntent);
-                        intent.setComponent(svcName);
-                        TransportConnection connection = new TransportConnection();
-                        mTransportConnections.add(connection);
-                        context.bindServiceAsUser(intent,
-                                connection, Context.BIND_AUTO_CREATE,
-                                UserHandle.OWNER);
+                        bindTransport(info);
                     } else {
                         Slog.w(TAG, "Transport package not privileged: " + info.packageName);
                     }
@@ -1752,6 +1742,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             String action = intent.getAction();
             boolean replacing = false;
             boolean added = false;
+            boolean rebind = false;
             Bundle extras = intent.getExtras();
             String pkgList[] = null;
             if (Intent.ACTION_PACKAGE_ADDED.equals(action) ||
@@ -1764,7 +1755,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 if (pkgName != null) {
                     pkgList = new String[] { pkgName };
                 }
-                added = Intent.ACTION_PACKAGE_ADDED.equals(action);
+                rebind = added = Intent.ACTION_PACKAGE_ADDED.equals(action);
                 replacing = extras.getBoolean(Intent.EXTRA_REPLACING, false);
             } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
                 added = true;
@@ -1797,6 +1788,20 @@ public class BackupManagerService extends IBackupManager.Stub {
                             enqueueFullBackup(packageName, now);
                             scheduleNextFullBackupJob();
                         }
+
+                        // if this was the PACKAGE_ADDED conclusion of an upgrade of the package
+                        // hosting one of our transports, we need to explicitly rebind now.
+                        if (rebind) {
+                            synchronized (mTransportConnections) {
+                                final TransportConnection conn = mTransportConnections.get(packageName);
+                                if (conn != null) {
+                                    if (DEBUG) {
+                                        Slog.i(TAG, "Transport package changed; rebinding");
+                                    }
+                                    bindTransport(conn.mTransport);
+                                }
+                            }
+                        }
                     } catch (NameNotFoundException e) {
                         // doesn't really exist; ignore it
                         if (DEBUG) {
@@ -1804,6 +1809,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                         }
                     }
                 }
+
             } else {
                 if (replacing) {
                     // The package is being updated.  We'll receive a PACKAGE_ADDED shortly.
@@ -1818,6 +1824,12 @@ public class BackupManagerService extends IBackupManager.Stub {
 
     // ----- Track connection to transports service -----
     class TransportConnection implements ServiceConnection {
+        ServiceInfo mTransport;
+
+        public TransportConnection(ServiceInfo transport) {
+            mTransport = transport;
+        }
+
         @Override
         public void onServiceConnected(ComponentName component, IBinder service) {
             if (DEBUG) Slog.v(TAG, "Connected to transport " + component);
@@ -1840,6 +1852,32 @@ public class BackupManagerService extends IBackupManager.Stub {
             registerTransport(null, name, null);
         }
     };
+
+    void bindTransport(ServiceInfo transport) {
+        ComponentName svcName = new ComponentName(transport.packageName, transport.name);
+        if (DEBUG) {
+            Slog.i(TAG, "Binding to transport host " + svcName);
+        }
+        Intent intent = new Intent(mTransportServiceIntent);
+        intent.setComponent(svcName);
+
+        TransportConnection connection;
+        synchronized (mTransportConnections) {
+            connection = mTransportConnections.get(transport.packageName);
+            if (null == connection) {
+                connection = new TransportConnection(transport);
+                mTransportConnections.put(transport.packageName, connection);
+            } else {
+                // This is a rebind due to package upgrade.  The service won't be
+                // automatically relaunched for us until we explicitly rebind, but
+                // we need to unbind the now-orphaned original connection.
+                mContext.unbindService(connection);
+            }
+        }
+        mContext.bindServiceAsUser(intent,
+                connection, Context.BIND_AUTO_CREATE,
+                UserHandle.OWNER);
+    }
 
     // Add the backup agents in the given packages to our set of known backup participants.
     // If 'packageNames' is null, adds all backup agents in the whole system.
