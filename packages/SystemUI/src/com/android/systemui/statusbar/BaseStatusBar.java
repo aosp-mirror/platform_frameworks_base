@@ -1183,7 +1183,10 @@ public abstract class BaseStatusBar extends SystemUI implements
             icon.setImageDrawable(iconDrawable);
             if (mNotificationColorUtil.isGrayscale(iconDrawable)) {
                 icon.setBackgroundResource(
-                        com.android.internal.R.drawable.notification_icon_legacy_bg_inset);
+                        com.android.internal.R.drawable.notification_icon_legacy_bg);
+                int padding = mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.notification_large_icon_circle_padding);
+                icon.setPadding(padding, padding, padding, padding);
             }
 
             if (profileIcon != null) {
@@ -1213,6 +1216,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                 text.setTextAppearance(mContext,
                         R.style.TextAppearance_StatusBar_Material_EventContent_Parenthetical);
             }
+
+            int topPadding = Notification.Builder.calculateTopPadding(mContext,
+                    false /* hasThreeLines */,
+                    mContext.getResources().getConfiguration().fontScale);
+            title.setPadding(0, topPadding, 0, 0);
 
             entry.autoRedacted = true;
         }

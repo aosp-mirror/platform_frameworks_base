@@ -413,12 +413,12 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.StatusBar.Material" />
 
     <style name="TextAppearance.StatusBar.Material.EventContent">
-        <item name="textColor">#90000000</item>
+        <item name="textColor">@color/secondary_text_material_light</item>
         <item name="textSize">@dimen/notification_text_size</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Material.EventContent.Title">
-        <item name="textColor">#DD000000</item>
+        <item name="textColor">@color/primary_text_default_material_light</item>
         <item name="textSize">@dimen/notification_title_text_size</item>
     </style>
 
