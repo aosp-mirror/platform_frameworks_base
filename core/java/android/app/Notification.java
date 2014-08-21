@@ -40,6 +40,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -1755,6 +1756,7 @@ public class Notification implements Parcelable
      */
     public static class Builder {
         private static final int MAX_ACTION_BUTTONS = 3;
+        private static final float LARGE_TEXT_SCALE = 1.3f;
 
         /**
          * @hide
@@ -2577,28 +2579,14 @@ public class Notification implements Parcelable
             return bitmap;
         }
 
-        private RemoteViews applyStandardTemplate(int resId, boolean fitIn1U) {
-            final boolean largeFontScale
-                    = mContext.getResources().getConfiguration().fontScale >= 1.25f;
-
+        private RemoteViews applyStandardTemplate(int resId) {
             Bitmap profileIcon = getProfileBadge();
             RemoteViews contentView = new BuilderRemoteViews(mContext.getPackageName(),
                     mOriginatingUserId, resId);
 
-            if (largeFontScale) {
-                // Make a little extra room for the bigger text.
-                final int margin = (int) mContext.getResources()
-                        .getDimensionPixelSize(R.dimen.notification_large_font_vert_pad);
-                contentView.setViewPadding(R.id.line1, 0, margin, 0, 0);
-                contentView.setViewPadding(R.id.line3, 0, 0, 0, margin);
-            }
-
             boolean showLine3 = false;
             boolean showLine2 = false;
 
-            if (mPriority < PRIORITY_LOW) {
-                // TODO: Low priority presentation
-            }
             if (profileIcon != null) {
                 contentView.setImageViewBitmap(R.id.profile_icon, profileIcon);
                 contentView.setViewVisibility(R.id.profile_icon, View.VISIBLE);
@@ -2666,15 +2654,12 @@ public class Notification implements Parcelable
                 }
             }
             if (showLine2) {
-                if (fitIn1U) {
-                    // need to shrink all the type to make sure everything fits
-                    final Resources res = mContext.getResources();
-                    final float subTextSize = res.getDimensionPixelSize(
-                            R.dimen.notification_subtext_size);
-                    contentView.setTextViewTextSize(R.id.text, TypedValue.COMPLEX_UNIT_PX, subTextSize);
-                }
-                // vertical centering
-                contentView.setViewPadding(R.id.line1, 0, 0, 0, 0);
+
+                // need to shrink all the type to make sure everything fits
+                final Resources res = mContext.getResources();
+                final float subTextSize = res.getDimensionPixelSize(
+                        R.dimen.notification_subtext_size);
+                contentView.setTextViewTextSize(R.id.text, TypedValue.COMPLEX_UNIT_PX, subTextSize);
             }
 
             if (mWhen != 0 && mShowWhen) {
@@ -2691,13 +2676,51 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.time, View.GONE);
             }
 
+            // Adjust padding depending on line count and font size.
+            contentView.setViewPadding(R.id.line1, 0, calculateTopPadding(mContext,
+                    hasThreeLines(), mContext.getResources().getConfiguration().fontScale),
+                    0, 0);
+
             contentView.setViewVisibility(R.id.line3, showLine3 ? View.VISIBLE : View.GONE);
             contentView.setViewVisibility(R.id.overflow_divider, showLine3 ? View.VISIBLE : View.GONE);
             return contentView;
         }
 
+        /**
+         * Logic to find out whether the notification is going to have three lines in the contracted
+         * layout. This is used to adjust the top padding.
+         *
+         * @return true if the notification is going to have three lines; false if the notification
+         *         is going to have one or two lines
+         */
+        private boolean hasThreeLines() {
+            boolean hasLine3 = mContentText != null || mContentInfo != null || mNumber > 0;
+            boolean hasLine2 = (mSubText != null && mContentText != null) ||
+                    (mSubText == null && (mProgressMax != 0 || mProgressIndeterminate));
+            return hasLine2 && hasLine3;
+        }
+
+        /**
+         * @hide
+         */
+        public static int calculateTopPadding(Context ctx, boolean hasThreeLines,
+                float fontScale) {
+            int padding = ctx.getResources().getDimensionPixelSize(hasThreeLines
+                    ? R.dimen.notification_top_pad_narrow
+                    : R.dimen.notification_top_pad);
+            int largePadding = ctx.getResources().getDimensionPixelSize(hasThreeLines
+                    ? R.dimen.notification_top_pad_large_text_narrow
+                    : R.dimen.notification_top_pad_large_text);
+            float largeFactor = (MathUtils.constrain(fontScale, 1.0f, LARGE_TEXT_SCALE) - 1f)
+                    / (LARGE_TEXT_SCALE - 1f);
+
+            // Linearly interpolate the padding between large and normal with the font scale ranging
+            // from 1f to LARGE_TEXT_SCALE
+            return Math.round((1 - largeFactor) * padding + largeFactor * largePadding);
+        }
+
         private RemoteViews applyStandardTemplateWithActions(int layoutId) {
-            RemoteViews big = applyStandardTemplate(layoutId, false);
+            RemoteViews big = applyStandardTemplate(layoutId);
 
             int N = mActions.size();
             if (N > 0) {
@@ -2717,7 +2740,7 @@ public class Notification implements Parcelable
             if (mContentView != null) {
                 return mContentView;
             } else {
-                return applyStandardTemplate(getBaseLayoutResource(), true); // no more special large_icon flavor
+                return applyStandardTemplate(getBaseLayoutResource());
             }
         }
 
@@ -2810,7 +2833,7 @@ public class Notification implements Parcelable
          */
         private void applyLargeIconBackground(RemoteViews contentView) {
             contentView.setInt(R.id.icon, "setBackgroundResource",
-                    R.drawable.notification_icon_legacy_bg_inset);
+                    R.drawable.notification_icon_legacy_bg);
 
             contentView.setDrawableParameters(
                     R.id.icon,
@@ -2819,6 +2842,10 @@ public class Notification implements Parcelable
                     resolveColor(),
                     PorterDuff.Mode.SRC_ATOP,
                     -1);
+
+            int padding = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.notification_large_icon_circle_padding);
+            contentView.setViewPadding(R.id.icon, padding, padding, padding, padding);
         }
 
         private void removeLargeIconBackground(RemoteViews contentView) {
@@ -3234,7 +3261,7 @@ public class Notification implements Parcelable
         }
 
         private int getBigTextLayoutResource() {
-            return getBigBaseLayoutResource();
+            return R.layout.notification_template_material_big_text;
         }
 
         private int getInboxLayoutResource() {
@@ -3325,6 +3352,19 @@ public class Notification implements Parcelable
             }
 
             return contentView;
+        }
+
+        /**
+         * Changes the padding of the first line such that the big and small content view have the
+         * same top padding.
+         *
+         * @hide
+         */
+        protected void applyTopPadding(RemoteViews contentView) {
+            int topPadding = Builder.calculateTopPadding(mBuilder.mContext,
+                    mBuilder.hasThreeLines(),
+                    mBuilder.mContext.getResources().getConfiguration().fontScale);
+            contentView.setViewPadding(R.id.line1, 0, topPadding, 0, 0);
         }
 
         /**
@@ -3465,6 +3505,8 @@ public class Notification implements Parcelable
 
             contentView.setImageViewBitmap(R.id.big_picture, mPicture);
 
+            applyTopPadding(contentView);
+
             return contentView;
         }
 
@@ -3575,8 +3617,6 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews makeBigContentView() {
-            // Remove the content text so line3 only shows if you have a summary
-            final boolean hadThreeLines = (mBuilder.mContentText != null && mBuilder.mSubText != null);
 
             // Nasty
             CharSequence oldBuilderContentText = mBuilder.mContentText;
@@ -3586,14 +3626,11 @@ public class Notification implements Parcelable
 
             mBuilder.mContentText = oldBuilderContentText;
 
-            if (hadThreeLines) {
-                // vertical centering
-                contentView.setViewPadding(R.id.line1, 0, 0, 0, 0);
-            }
-
             contentView.setTextViewText(R.id.big_text, mBuilder.processLegacyText(mBigText));
             contentView.setViewVisibility(R.id.big_text, View.VISIBLE);
             contentView.setViewVisibility(R.id.text2, View.GONE);
+
+            applyTopPadding(contentView);
 
             return contentView;
         }
@@ -3706,13 +3743,20 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(rowId, View.GONE);
             }
 
-
+            final boolean largeText =
+                    mBuilder.mContext.getResources().getConfiguration().fontScale > 1f;
+            final float subTextSize = mBuilder.mContext.getResources().getDimensionPixelSize(
+                    R.dimen.notification_subtext_size);
             int i=0;
             while (i < mTexts.size() && i < rowIds.length) {
                 CharSequence str = mTexts.get(i);
                 if (str != null && !str.equals("")) {
                     contentView.setViewVisibility(rowIds[i], View.VISIBLE);
                     contentView.setTextViewText(rowIds[i], mBuilder.processLegacyText(str));
+                    if (largeText) {
+                        contentView.setTextViewTextSize(rowIds[i], TypedValue.COMPLEX_UNIT_PX,
+                                subTextSize);
+                    }
                 }
                 i++;
             }
@@ -3722,6 +3766,8 @@ public class Notification implements Parcelable
 
             contentView.setViewVisibility(R.id.inbox_more,
                     mTexts.size() > rowIds.length ? View.VISIBLE : View.GONE);
+
+            applyTopPadding(contentView);
 
             return contentView;
         }
@@ -3876,7 +3922,7 @@ public class Notification implements Parcelable
 
         private RemoteViews makeMediaContentView() {
             RemoteViews view = mBuilder.applyStandardTemplate(
-                    R.layout.notification_template_material_media, true /* 1U */);
+                    R.layout.notification_template_material_media);
 
             final int numActions = mBuilder.mActions.size();
             final int N = mActionsToShowInCompact == null
@@ -3901,7 +3947,7 @@ public class Notification implements Parcelable
 
         private RemoteViews makeMediaBigContentView() {
             RemoteViews big = mBuilder.applyStandardTemplate(
-                    R.layout.notification_template_material_big_media, false);
+                    R.layout.notification_template_material_big_media);
 
             final int N = Math.min(mBuilder.mActions.size(), MAX_MEDIA_BUTTONS);
             if (N > 0) {
