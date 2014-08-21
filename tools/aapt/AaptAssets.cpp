@@ -561,15 +561,17 @@ status_t AaptGroup::addFile(const sp<AaptFile>& file, const bool overwriteDuplic
         return NO_ERROR;
     }
 
-#if 0
-    printf("Error adding file %s: group %s already exists in leaf=%s path=%s\n",
-            file->getSourceFile().string(),
-            file->getGroupEntry().toDirName(String8()).string(),
-            mLeaf.string(), mPath.string());
-#endif
+    // Check if the version is automatically applied. This is a common source of
+    // error.
+    ConfigDescription withoutVersion = file->getGroupEntry().toParams();
+    withoutVersion.version = 0;
+    AaptConfig::applyVersionForCompatibility(&withoutVersion);
 
-    SourcePos(file->getSourceFile(), -1).error("Duplicate file.\n%s: Original is here.",
-                                               getPrintableSource().string());
+    const sp<AaptFile>& originalFile = mFiles.valueAt(index);
+    SourcePos(file->getSourceFile(), -1)
+            .error("Duplicate file.\n%s: Original is here. %s",
+                   originalFile->getPrintableSource().string(),
+                   (withoutVersion.version != 0) ? "The version qualifier may be implied." : "");
     return UNKNOWN_ERROR;
 }
 
