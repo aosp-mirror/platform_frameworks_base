@@ -76,6 +76,7 @@ public class DozeService extends DreamService {
     private PendingIntent mNotificationPulseIntent;
     private int mMultipulseCount;
     private int mNotificationPulseInterval;
+    private boolean mPowerSaveActive;
 
     public DozeService() {
         if (DEBUG) Log.d(mTag, "new DozeService()");
@@ -94,6 +95,7 @@ public class DozeService extends DreamService {
         pw.print("  mNotificationLightOn: "); pw.println(mNotificationLightOn);
         pw.print("  mMultipulseCount: "); pw.println(mMultipulseCount);
         pw.print("  mNotificationPulseInterval: "); pw.println(mNotificationPulseInterval);
+        pw.print("  mPowerSaveActive: "); pw.println(mPowerSaveActive);
     }
 
     @Override
@@ -141,7 +143,13 @@ public class DozeService extends DreamService {
     @Override
     public void onDreamingStarted() {
         super.onDreamingStarted();
-        if (DEBUG) Log.d(mTag, "onDreamingStarted canDoze=" + canDoze());
+        mPowerSaveActive = mHost != null && mHost.isPowerSaveActive();
+        if (DEBUG) Log.d(mTag, "onDreamingStarted canDoze=" + canDoze() + " mPowerSaveActive="
+                + mPowerSaveActive);
+        if (mPowerSaveActive) {
+            finishToSavePower();
+            return;
+        }
         mDreaming = true;
         listenForPulseSignals(true);
         requestDoze();
@@ -230,6 +238,11 @@ public class DozeService extends DreamService {
         if (mHost != null) {
             mHost.dozingStopped(this);
         }
+    }
+
+    private void finishToSavePower() {
+        Log.w(mTag, "Exiting ambient mode due to low power battery saver");
+        finish();
     }
 
     private void listenForPulseSignals(boolean listen) {
@@ -329,6 +342,14 @@ public class DozeService extends DreamService {
             mNotificationLightOn = on;
             rescheduleNotificationPulse();
         }
+
+        @Override
+        public void onPowerSaveChanged(boolean active) {
+            mPowerSaveActive = active;
+            if (mPowerSaveActive && mDreaming) {
+                finishToSavePower();
+            }
+        }
     };
 
     public interface Host {
@@ -337,11 +358,13 @@ public class DozeService extends DreamService {
         void requestDoze(DozeService dozeService);
         void requestPulse(int pulses, boolean delayed, DozeService dozeService);
         void dozingStopped(DozeService dozeService);
+        boolean isPowerSaveActive();
 
         public interface Callback {
             void onNewNotifications();
             void onBuzzBeepBlinked();
             void onNotificationLight(boolean on);
+            void onPowerSaveChanged(boolean active);
         }
     }
 
