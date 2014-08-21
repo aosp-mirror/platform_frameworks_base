@@ -26,25 +26,25 @@ import java.util.Locale;
  */
 public final class AudioState implements Parcelable {
     /** Direct the audio stream through the device's earpiece. */
-    public static int ROUTE_EARPIECE      = 0x00000001;
+    public static final int ROUTE_EARPIECE      = 0x00000001;
 
     /** Direct the audio stream through Bluetooth. */
-    public static int ROUTE_BLUETOOTH     = 0x00000002;
+    public static final int ROUTE_BLUETOOTH     = 0x00000002;
 
     /** Direct the audio stream through a wired headset. */
-    public static int ROUTE_WIRED_HEADSET = 0x00000004;
+    public static final int ROUTE_WIRED_HEADSET = 0x00000004;
 
     /** Direct the audio stream through the device's spakerphone. */
-    public static int ROUTE_SPEAKER       = 0x00000008;
+    public static final int ROUTE_SPEAKER       = 0x00000008;
 
     /**
      * Direct the audio stream through the device's earpiece or wired headset if one is
      * connected.
      */
-    public static int ROUTE_WIRED_OR_EARPIECE = ROUTE_EARPIECE | ROUTE_WIRED_HEADSET;
+    public static final int ROUTE_WIRED_OR_EARPIECE = ROUTE_EARPIECE | ROUTE_WIRED_HEADSET;
 
     /** Bit mask of all possible audio routes. */
-    public static int ROUTE_ALL = ROUTE_EARPIECE | ROUTE_BLUETOOTH | ROUTE_WIRED_HEADSET |
+    public static final int ROUTE_ALL = ROUTE_EARPIECE | ROUTE_BLUETOOTH | ROUTE_WIRED_HEADSET |
             ROUTE_SPEAKER;
 
     /** True if the call is muted, false otherwise. */

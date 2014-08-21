@@ -28554,12 +28554,12 @@ package android.telecomm {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
-    field public static int ROUTE_ALL;
-    field public static int ROUTE_BLUETOOTH;
-    field public static int ROUTE_EARPIECE;
-    field public static int ROUTE_SPEAKER;
-    field public static int ROUTE_WIRED_HEADSET;
-    field public static int ROUTE_WIRED_OR_EARPIECE;
+    field public static final int ROUTE_ALL = 15; // 0xf
+    field public static final int ROUTE_BLUETOOTH = 2; // 0x2
+    field public static final int ROUTE_EARPIECE = 1; // 0x1
+    field public static final int ROUTE_SPEAKER = 8; // 0x8
+    field public static final int ROUTE_WIRED_HEADSET = 4; // 0x4
+    field public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
     field public final boolean isMuted;
     field public final int route;
     field public final int supportedRouteMask;
