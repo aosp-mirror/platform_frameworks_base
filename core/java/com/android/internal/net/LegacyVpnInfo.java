@@ -40,7 +40,6 @@ public class LegacyVpnInfo implements Parcelable {
 
     public String key;
     public int state = -1;
-    public PendingIntent intent;
 
     @Override
     public int describeContents() {
@@ -51,7 +50,6 @@ public class LegacyVpnInfo implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(key);
         out.writeInt(state);
-        out.writeParcelable(intent, flags);
     }
 
     public static final Parcelable.Creator<LegacyVpnInfo> CREATOR =
@@ -61,7 +59,6 @@ public class LegacyVpnInfo implements Parcelable {
             LegacyVpnInfo info = new LegacyVpnInfo();
             info.key = in.readString();
             info.state = in.readInt();
-            info.intent = in.readParcelable(null);
             return info;
         }
 

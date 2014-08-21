@@ -17,40 +17,15 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <!-- Dialog title to identify the request from a VPN application. [CHAR LIMIT=60] -->
-    <string name="prompt"><xliff:g id="app">%s</xliff:g>
-        attempts to create a VPN connection.
-    </string>
+    <string name="prompt">Connection request</string>
 
     <!-- Dialog message to warn about the risk of using a VPN application. [CHAR LIMIT=NONE] -->
-    <string name="warning">By proceeding, you are giving the application
-        permission to intercept all network traffic.
-        <b>Do NOT accept unless you trust the application.</b> Otherwise,
-        you run the risk of having your data compromised by a malicious
-        software.
-    </string>
-
-    <!-- Checkbox label to accept the request from a VPN application. [CHAR LIMIT=60] -->
-    <string name="accept">I trust this application.</string>
-
-    <!-- Dialog title for built-in VPN. [CHAR LIMIT=40]  -->
-    <string name="legacy_title">VPN is connected</string>
-    <!-- Button label to configure the current VPN session. [CHAR LIMIT=20] -->
-    <string name="configure">Configure</string>
-    <!-- Button label to disconnect the current VPN session. [CHAR LIMIT=20] -->
-    <string name="disconnect">Disconnect</string>
-
-    <!-- Label for the name of the current VPN session. [CHAR LIMIT=20] -->
-    <string name="session">Session:</string>
-    <!-- Label for the duration of the current VPN session. [CHAR LIMIT=20] -->
-    <string name="duration">Duration:</string>
-    <!-- Label for the network usage of data transmitted over VPN. [CHAR LIMIT=20] -->
-    <string name="data_transmitted">Sent:</string>
-    <!-- Label for the network usage of data received over VPN. [CHAR LIMIT=20] -->
-    <string name="data_received">Received:</string>
-
-    <!-- Formatted string for the network usage over VPN. [CHAR LIMIT=40] -->
-    <string name="data_value_format">
-        <xliff:g id="number">%1$s</xliff:g> bytes /
-        <xliff:g id="number">%2$s</xliff:g> packets
+    <string name="warning"><xliff:g id="app">%s</xliff:g> wants to set up a VPN connection
+        that allows it to monitor network traffic. Only accept if you trust the source.
+        <![CDATA[
+        <br />
+        <br />
+        <img src="vpn_icon" />
+        ]]> appears at the top of your screen when VPN is active.
     </string>
 </resources>

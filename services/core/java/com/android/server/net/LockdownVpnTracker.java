@@ -205,7 +205,6 @@ public class LockdownVpnTracker {
     private void initLocked() {
         Slog.d(TAG, "initLocked()");
 
-        mVpn.setEnableNotifications(false);
         mVpn.setEnableTeardown(false);
 
         final IntentFilter resetFilter = new IntentFilter(ACTION_LOCKDOWN_RESET);
@@ -249,7 +248,6 @@ public class LockdownVpnTracker {
         hideNotification();
 
         mContext.unregisterReceiver(mResetReceiver);
-        mVpn.setEnableNotifications(true);
         mVpn.setEnableTeardown(true);
     }
 
