@@ -68,6 +68,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
     /** This session is closed; all further calls will throw ISE */
     private boolean mClosed = false;
+    /** This session failed to be configured successfully */
+    private final boolean mConfigureSuccess;
     /** Do not unconfigure if this is set; another session will overwrite configuration */
     private boolean mSkipUnconfigure = false;
 
@@ -119,10 +121,12 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         if (configureSuccess) {
             mStateListener.onConfigured(this);
             if (VERBOSE) Log.v(TAG, "ctor - Created session successfully");
+            mConfigureSuccess = true;
         } else {
             mStateListener.onConfigureFailed(this);
             mClosed = true; // do not fire any other callbacks, do not allow any other work
             Log.e(TAG, "Failed to create capture session; configuration failed");
+            mConfigureSuccess = false;
         }
     }
 
@@ -285,9 +289,9 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         // - This session is active, so close() below starts the shutdown drain
         // - This session is mid-shutdown drain, and hasn't yet reached the idle drain listener.
         // - This session is already closed and has executed the idle drain listener, and
-        //   configureOutputs(null) has already been called.
+        //   configureOutputsChecked(null) has already been called.
         //
-        // Do not call configureOutputs(null) going forward, since it would race with the
+        // Do not call configureOutputsChecked(null) going forward, since it would race with the
         // configuration for the new session. If it was already called, then we don't care, since it
         // won't get called again.
         mSkipUnconfigure = true;
@@ -506,7 +510,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
             public void onUnconfigured(CameraDevice camera) {
                 synchronized (session) {
                     // Ignore #onUnconfigured before #close is called
-                    if (mClosed) {
+                    if (mClosed && mConfigureSuccess) {
                         mUnconfigureDrainer.taskFinished();
                     }
                 }
@@ -619,7 +623,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
                 try {
                     mUnconfigureDrainer.taskStarted();
-                    mDeviceImpl.configureOutputs(null); // begin transition to unconfigured state
+                    mDeviceImpl.configureOutputsChecked(null); // begin transition to unconfigured
                 } catch (CameraAccessException e) {
                     // OK: do not throw checked exceptions.
                     Log.e(TAG, "Exception while configuring outputs: ", e);
