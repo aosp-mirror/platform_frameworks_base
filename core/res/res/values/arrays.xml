@@ -506,12 +506,24 @@
 
     <!-- Used in LocalePicker -->
     <string-array translatable="false" name="special_locale_codes">
+        <!-- http://b/17150708 - ensure that the list of languages says "Arabic"
+             rather than "Arabic (Egypt)". If you're an OEM supporting multiple
+             Arabic locales, you should remove this entry so that ar_EG is shown
+             as "Arabic (Egypt)" in Settings. -->
+        <item>ar_EG</item>
+
         <item>zh_CN</item>
         <item>zh_TW</item>
     </string-array>
 
     <!-- Used in LocalePicker -->
     <string-array translatable="false" name="special_locale_names">
+        <!-- http://b/17150708 - ensure that the list of languages says "Arabic"
+             rather than "Arabic (Egypt)". If you're an OEM supporting multiple
+             Arabic locales, you should remove this entry so that ar_EG is shown
+             as "Arabic (Egypt)" in Settings. -->
+        <item>العربية</item>
+
         <item>中文 (简体)</item>
         <item>中文 (繁體)</item>
     </string-array>
