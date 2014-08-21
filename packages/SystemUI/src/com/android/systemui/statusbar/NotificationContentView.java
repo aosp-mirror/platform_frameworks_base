@@ -17,15 +17,20 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.graphics.ColorFilter;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.android.systemui.R;
 
@@ -37,6 +42,8 @@ import com.android.systemui.R;
 public class NotificationContentView extends FrameLayout {
 
     private static final long ANIMATION_DURATION_LENGTH = 170;
+    private static final Paint INVERT_PAINT = createInvertPaint();
+    private static final ColorFilter NO_COLOR_FILTER = new ColorFilter();
 
     private final Rect mClipBounds = new Rect();
 
@@ -50,6 +57,7 @@ public class NotificationContentView extends FrameLayout {
     private final Interpolator mLinearInterpolator = new LinearInterpolator();
 
     private boolean mContractedVisible = true;
+    private boolean mDark;
 
     private final Paint mFadePaint = new Paint();
 
@@ -191,5 +199,50 @@ public class NotificationContentView extends FrameLayout {
 
     public boolean isContentExpandable() {
         return mExpandedChild != null;
+    }
+
+    public void setDark(boolean dark, boolean fade) {
+        if (mDark == dark) return;
+        mDark = dark;
+        setImageViewDark(dark, fade, com.android.internal.R.id.right_icon);
+        setImageViewDark(dark, fade, com.android.internal.R.id.icon);
+    }
+
+    private void setImageViewDark(boolean dark, boolean fade, int imageViewId) {
+        // TODO: implement fade
+        final ImageView v = (ImageView) mContractedChild.findViewById(imageViewId);
+        final Drawable d = v.getBackground();
+        if (dark) {
+            v.setLayerType(LAYER_TYPE_HARDWARE, INVERT_PAINT);
+            if (d != null) {
+                v.setTag(R.id.doze_saved_filter_tag, d.getColorFilter() != null ? d.getColorFilter()
+                        : NO_COLOR_FILTER);
+                d.setColorFilter(getResources().getColor(R.color.doze_small_icon_background_color),
+                        PorterDuff.Mode.SRC_ATOP);
+                v.setImageAlpha(getResources().getInteger(R.integer.doze_small_icon_alpha));
+            }
+        } else {
+            v.setLayerType(LAYER_TYPE_NONE, null);
+            if (d != null)  {
+                final ColorFilter filter = (ColorFilter) v.getTag(R.id.doze_saved_filter_tag);
+                if (filter != null) {
+                    d.setColorFilter(filter == NO_COLOR_FILTER ? null : filter);
+                    v.setTag(R.id.doze_saved_filter_tag, null);
+                }
+                v.setImageAlpha(0xff);
+            }
+        }
+    }
+
+    private static Paint createInvertPaint() {
+        final Paint p = new Paint();
+        final float[] invert = {
+            -1f,  0f,  0f, 1f, 1f,
+             0f, -1f,  0f, 1f, 1f,
+             0f,  0f, -1f, 1f, 1f,
+             0f,  0f,  0f, 1f, 0f
+        };
+        p.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(invert)));
+        return p;
     }
 }

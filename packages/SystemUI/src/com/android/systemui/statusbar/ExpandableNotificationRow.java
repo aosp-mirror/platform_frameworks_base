@@ -120,6 +120,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return false;
     }
 
+    @Override
+    public void setDark(boolean dark, boolean fade) {
+        super.setDark(dark, fade);
+        final NotificationContentView showing = getShowingLayout();
+        if (showing != null) {
+            showing.setDark(dark, fade);
+        }
+    }
+
     public void setHeightRange(int rowMinHeight, int rowMaxHeight) {
         mRowMinHeight = rowMinHeight;
         mRowMaxHeight = rowMaxHeight;
