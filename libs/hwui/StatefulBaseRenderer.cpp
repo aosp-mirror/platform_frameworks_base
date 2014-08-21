@@ -196,12 +196,14 @@ void StatefulBaseRenderer::setClippingOutline(LinearAllocator& allocator, const 
     float radius;
     if (!outline->getAsRoundRect(&bounds, &radius)) return; // only RR supported
 
-    if (!MathUtils::isPositive(radius)) {
+    bool outlineIsRounded = MathUtils::isPositive(radius);
+    if (!outlineIsRounded || currentTransform()->isSimple()) {
         // TODO: consider storing this rect separately, so that this can't be replaced with clip ops
         clipRect(bounds.left, bounds.top, bounds.right, bounds.bottom, SkRegion::kIntersect_Op);
-        return;
     }
-    setClippingRoundRect(allocator, bounds, radius);
+    if (outlineIsRounded) {
+        setClippingRoundRect(allocator, bounds, radius);
+    }
 }
 
 void StatefulBaseRenderer::setClippingRoundRect(LinearAllocator& allocator,
