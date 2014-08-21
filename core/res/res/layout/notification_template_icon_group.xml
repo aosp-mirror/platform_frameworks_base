@@ -23,20 +23,23 @@
     android:id="@+id/icon_group"
     >
     <ImageView android:id="@+id/icon"
-        android:layout_width="@dimen/notification_large_icon_width"
-        android:layout_height="@dimen/notification_large_icon_height"
-        android:padding="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
         android:scaleType="centerInside"
         />
     <ImageView android:id="@+id/right_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:padding="4dp"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:padding="3dp"
         android:layout_gravity="end|bottom"
         android:scaleType="centerInside"
         android:visibility="gone"
-        android:layout_marginEnd="3dp"
-        android:layout_marginBottom="3dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         />
 </FrameLayout>
 

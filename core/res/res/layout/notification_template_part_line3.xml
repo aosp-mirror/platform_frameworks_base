@@ -19,10 +19,9 @@
     android:id="@+id/line3"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginEnd="8dp"
     android:orientation="horizontal"
-    android:layout_weight="0"
     android:gravity="center_vertical"
-    android:paddingBottom="@dimen/notification_vert_pad"
     >
     <TextView android:id="@+id/text"
         android:textAppearance="@style/TextAppearance.StatusBar.Material.EventContent"

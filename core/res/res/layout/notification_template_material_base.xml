@@ -31,25 +31,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="top"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="@dimen/notification_large_icon_width"
         android:minHeight="@dimen/notification_large_icon_height"
         android:orientation="vertical"
         >
-        <include layout="@layout/notification_template_part_line1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            />
-        <include layout="@layout/notification_template_part_line2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            />
-        <include layout="@layout/notification_template_part_line3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            />
+        <include layout="@layout/notification_template_part_line1" />
+        <include layout="@layout/notification_template_part_line2" />
+        <include layout="@layout/notification_template_part_line3" />
     </LinearLayout>
 </FrameLayout>
