@@ -96,19 +96,19 @@ public final class BluetoothGatt implements BluetoothProfile {
      * Bluetooth SIG. This is the default value if no connection parameter update
      * is requested.
      */
-    public static final int GATT_CONNECTION_BALANCED = 0;
+    public static final int CONNECTION_PRIORITY_BALANCED = 0;
 
     /**
      * Connection paramter update - Request a high priority, low latency connection.
      * An application should only request high priority connection paramters to transfer
      * large amounts of data over LE quickly. Once the transfer is complete, the application
-     * should request {@link BluetoothGatt#GATT_CONNECTION_BALANCED} connectoin parameters
+     * should request {@link BluetoothGatt#CONNECTION_PRIORITY_BALANCED} connectoin parameters
      * to reduce energy use.
      */
-    public static final int GATT_CONNECTION_HIGH_PRIORITY = 1;
+    public static final int CONNECTION_PRIORITY_HIGH = 1;
 
     /** Connection paramter update - Request low power, reduced data rate connection parameters. */
-    public static final int GATT_CONNECTION_LOW_POWER = 2;
+    public static final int CONNECTION_PRIORITY_LOW_POWER = 2;
 
     /**
      * No authentication required.
@@ -601,7 +601,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                     return;
                 }
                 try {
-                    mCallback.onConfigureMTU(BluetoothGatt.this, mtu, status);
+                    mCallback.onMtuChanged(BluetoothGatt.this, mtu, status);
                 } catch (Exception ex) {
                     Log.w(TAG, "Unhandled exception in callback", ex);
                 }
@@ -1239,20 +1239,20 @@ public final class BluetoothGatt implements BluetoothProfile {
     }
 
     /**
-     * Configure the MTU used for a given connection.
+     * Request an MTU size used for a given connection.
      *
      * <p>When performing a write request operation (write without response),
      * the data sent is truncated to the MTU size. This function may be used
-     * to request a larget MTU size to be able to send more data at once.
+     * to request a larger MTU size to be able to send more data at once.
      *
-     * <p>A {@link BluetoothGattCallback#onConfigureMTU} callback will indicate
+     * <p>A {@link BluetoothGattCallback#onMtuChanged} callback will indicate
      * whether this operation was successful.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @return true, if the new MTU value has been requested successfully
      */
-    public boolean configureMTU(int mtu) {
+    public boolean requestMtu(int mtu) {
         if (DBG) Log.d(TAG, "configureMTU() - device: " + mDevice.getAddress()
                             + " mtu: " + mtu);
         if (mService == null || mClientIf == 0) return false;
@@ -1274,19 +1274,19 @@ public final class BluetoothGatt implements BluetoothProfile {
      * remote device.
      *
      * @param connectionPriority Request a specific connection priority. Must be one of
-     *          {@link BluetoothGatt#GATT_CONNECTION_BALANCED},
-     *          {@link BluetoothGatt#GATT_CONNECTION_HIGH_PRIORITY}
-     *          or {@link BluetoothGatt#GATT_CONNECTION_LOW_POWER}.
+     *          {@link BluetoothGatt#CONNECTION_PRIORITY_BALANCED},
+     *          {@link BluetoothGatt#CONNECTION_PRIORITY_HIGH}
+     *          or {@link BluetoothGatt#CONNECTION_PRIORITY_LOW_POWER}.
      * @throws IllegalArgumentException If the parameters are outside of their
      *                                  specified range.
      */
-    public boolean requestConnectionParameterUpdate(int connectionPriority) {
-        if (connectionPriority < GATT_CONNECTION_BALANCED ||
-            connectionPriority > GATT_CONNECTION_LOW_POWER) {
+    public boolean requestConnectionPriority(int connectionPriority) {
+        if (connectionPriority < CONNECTION_PRIORITY_BALANCED ||
+            connectionPriority > CONNECTION_PRIORITY_LOW_POWER) {
             throw new IllegalArgumentException("connectionPriority not within valid range");
         }
 
-        if (DBG) Log.d(TAG, "requestConnectionParameterUpdate() - params: " + connectionPriority);
+        if (DBG) Log.d(TAG, "requestConnectionPriority() - params: " + connectionPriority);
         if (mService == null || mClientIf == 0) return false;
 
         try {
