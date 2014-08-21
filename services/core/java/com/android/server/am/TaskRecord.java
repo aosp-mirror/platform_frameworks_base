@@ -792,6 +792,11 @@ final class TaskRecord {
         return true;
     }
 
+    private static String createLastTaskDescriptionIconFilename(int taskId, long lastActiveTime) {
+        return String.valueOf(taskId) + LAST_ACTIVITY_ICON_SUFFIX + lastActiveTime +
+                TaskPersister.IMAGE_EXTENSION;
+    }
+
     void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
         if (ActivityManagerService.DEBUG_RECENTS) Slog.i(TAG, "Saving task=" + this);
 
@@ -818,8 +823,8 @@ final class TaskRecord {
             out.attribute(null, ATTR_LASTDESCRIPTION, lastDescription.toString());
         }
         if (lastTaskDescription != null) {
-            saveTaskDescription(lastTaskDescription, String.valueOf(taskId) +
-                    LAST_ACTIVITY_ICON_SUFFIX + lastActiveTime, out);
+            saveTaskDescription(lastTaskDescription, createLastTaskDescriptionIconFilename(taskId,
+                    lastActiveTime), out);
         }
         out.attribute(null, ATTR_TASK_AFFILIATION_COLOR, String.valueOf(mAffiliatedTaskColor));
         out.attribute(null, ATTR_TASK_AFFILIATION, String.valueOf(mAffiliatedTaskId));
@@ -961,8 +966,8 @@ final class TaskRecord {
         }
 
         if (lastActiveTime >= 0) {
-            taskDescription.setIcon(TaskPersister.restoreImage(String.valueOf(taskId) +
-                    LAST_ACTIVITY_ICON_SUFFIX + lastActiveTime + TaskPersister.IMAGE_EXTENSION));
+            taskDescription.setIcon(TaskPersister.restoreImage(
+                    createLastTaskDescriptionIconFilename(taskId, lastActiveTime)));
         }
 
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,

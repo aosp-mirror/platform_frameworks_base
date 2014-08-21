@@ -1054,8 +1054,8 @@ final class ActivityRecord {
         return null;
     }
 
-    private static String createImageFilename(ActivityRecord r, int taskId) {
-        return String.valueOf(taskId) + ACTIVITY_ICON_SUFFIX + r.createTime +
+    private static String createImageFilename(long createTime, int taskId) {
+        return String.valueOf(taskId) + ACTIVITY_ICON_SUFFIX + createTime +
                 TaskPersister.IMAGE_EXTENSION;
     }
 
@@ -1072,7 +1072,7 @@ final class ActivityRecord {
         out.attribute(null, ATTR_USERID, String.valueOf(userId));
 
         if (taskDescription != null) {
-            task.saveTaskDescription(taskDescription, createImageFilename(this, task.taskId),
+            task.saveTaskDescription(taskDescription, createImageFilename(createTime, task.taskId),
                     out);
         }
 
@@ -1165,7 +1165,8 @@ final class ActivityRecord {
         r.persistentState = persistentState;
 
         if (createTime >= 0) {
-            taskDescription.setIcon(TaskPersister.restoreImage(createImageFilename(r, taskId)));
+            taskDescription.setIcon(TaskPersister.restoreImage(createImageFilename(createTime,
+                    taskId)));
         }
         r.taskDescription = taskDescription;
         r.createTime = createTime;
