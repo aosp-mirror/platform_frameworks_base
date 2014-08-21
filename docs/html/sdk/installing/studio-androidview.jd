@@ -1,0 +1,55 @@
+page.title=Using the Android Project View
+
+@jd:body
+
+
+<p>The Android project view in Android Studio shows a flattened version of your project's structure
+that provides quick access to the key source files of Android projects and helps you work with
+the new <a href="{@docRoot}sdk/installing/studio-build.html">Gradle-based build system</a>. The
+Android project view:</p>
+
+<ul>
+<li>Groups the build files for all modules at the top level of the project hierarchy.</li>
+<li>Shows the most important source directories at the top level of the module hierarchy.</li>
+<li>Groups all the manifest files for each module.</li>
+<li>Shows resource files from all Gradle source sets.</li>
+<li>Groups resource files for different locales, orientations, and screen types in a single group
+per resource type.</li>
+</ul>
+
+<div style="float:right;margin-left:30px;width:240px">
+<img src="{@docRoot}images/tools/projectview01.png" alt="" width="220" height="264"/>
+<p class="img-caption"><strong>Figure 1:</strong> Show the Android project view.</p>
+</div>
+
+
+<h2 id="enable-view">Enable the Android Project View</h2>
+
+<p>The Android project view is not yet enabled by default. To show the Android project view,
+click <strong>Project</strong> and select <strong>Android</strong>, as shown in Figure 1.</p>
+
+
+<h2 id="project-view">Use the Android Project View</h2>
+
+<p>The Android project view shows all the build files at the top level of the project hierarchy
+under <strong>Gradle Scripts</strong>. Each project module appears as a folder at the top
+level of the project hierarchy and contains these three elements at the top level:</p>
+
+<ul>
+<li><code>java/</code> - Source files for the module.</li>
+<li><code>manifests/</code> - Manifest files for the module.</li>
+<li><code>res/</code> - Resource files for the module.</li>
+</ul>
+
+<p>Figure 2 shows how the Android project view groups all the instances of the
+<code>ic_launcher.png</code> resource for different screen densities under the same element.</p>
+
+<p class="note"><strong>Note:</strong> The Android project view shows a hierarchy that helps you
+work with Android projects by providing a flattened structure that highlights the most commonly
+used files while developing Android applications. However, the project structure on disk differs
+from this representation.</p>
+
+<img src="{@docRoot}images/tools/projectview03.png" alt=""
+     style="margin-top:10px" width="650" height="508"/>
+<p class="img-caption"><strong>Figure 2:</strong> The traditional project view (left) and the
+Android project view (right).</p>
