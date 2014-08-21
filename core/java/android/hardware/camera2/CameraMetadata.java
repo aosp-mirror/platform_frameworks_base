@@ -386,8 +386,8 @@ public abstract class CameraMetadata<TKey> {
      * </ul>
      * </li>
      * <li>Manual aberration correction control (if aberration correction is supported)<ul>
-     * <li>{@link CaptureRequest#COLOR_CORRECTION_ABERRATION_CORRECTION_MODE android.colorCorrection.aberrationCorrectionMode}</li>
-     * <li>{@link CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_ABERRATION_CORRECTION_MODES android.colorCorrection.availableAberrationCorrectionModes}</li>
+     * <li>{@link CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE android.colorCorrection.aberrationMode}</li>
+     * <li>{@link CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES android.colorCorrection.availableAberrationModes}</li>
      * </ul>
      * </li>
      * </ul>
@@ -396,8 +396,8 @@ public abstract class CameraMetadata<TKey> {
      * <p>A given camera device may also support additional post-processing
      * controls, but this capability only covers the above list of controls.</p>
      *
-     * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_CORRECTION_MODE
-     * @see CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_ABERRATION_CORRECTION_MODES
+     * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE
+     * @see CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#SHADING_MODE
@@ -739,28 +739,28 @@ public abstract class CameraMetadata<TKey> {
     public static final int COLOR_CORRECTION_MODE_HIGH_QUALITY = 2;
 
     //
-    // Enumeration values for CaptureRequest#COLOR_CORRECTION_ABERRATION_CORRECTION_MODE
+    // Enumeration values for CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE
     //
 
     /**
      * <p>No aberration correction is applied.</p>
-     * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_CORRECTION_MODE
+     * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE
      */
-    public static final int COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_OFF = 0;
+    public static final int COLOR_CORRECTION_ABERRATION_MODE_OFF = 0;
 
     /**
      * <p>Aberration correction will not slow down capture rate
      * relative to sensor raw output.</p>
-     * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_CORRECTION_MODE
+     * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE
      */
-    public static final int COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_FAST = 1;
+    public static final int COLOR_CORRECTION_ABERRATION_MODE_FAST = 1;
 
     /**
      * <p>Aberration correction operates at improved quality but reduced
      * capture rate (relative to sensor raw output).</p>
-     * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_CORRECTION_MODE
+     * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE
      */
-    public static final int COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_HIGH_QUALITY = 2;
+    public static final int COLOR_CORRECTION_ABERRATION_MODE_HIGH_QUALITY = 2;
 
     //
     // Enumeration values for CaptureRequest#CONTROL_AE_ANTIBANDING_MODE
@@ -1213,7 +1213,8 @@ public abstract class CameraMetadata<TKey> {
      * image while recording video) use case.</p>
      * <p>The camera device should take the highest-quality image
      * possible (given the other settings) without disrupting the
-     * frame rate of video recording.  </p>
+     * frame rate of video recording.<br />
+     * </p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT = 4;
