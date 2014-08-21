@@ -257,6 +257,7 @@ void CanvasContext::buildLayer(RenderNode* node) {
     info.frameTimeMs = mRenderThread.timeLord().frameTimeMs();
     info.damageAccumulator = &mDamageAccumulator;
     info.renderer = mCanvas;
+    info.runAnimations = false;
     node->prepareTree(info);
     SkRect ignore;
     mDamageAccumulator.finish(&ignore);
