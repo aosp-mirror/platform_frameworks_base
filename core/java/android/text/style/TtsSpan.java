@@ -26,9 +26,13 @@ import android.text.TextUtils;
 
 /**
  * A span that supplies additional meta-data for the associated text intended
- * for text-to-speech engines.  If the text is being processed by a
+ * for text-to-speech engines. If the text is being processed by a
  * text-to-speech engine, the engine may use the data in this span in addition
  * to or instead of its associated text.
+ *
+ * Each instance of a TtsSpan has a type, for example {@link #TYPE_DATE}
+ * or {@link #TYPE_MEASURE}. And a list of arguments, provided as
+ * key-value pairs in a bundle.
  *
  * The inner classes are there for convenience and provide builders for each
  * TtsSpan type.
@@ -39,7 +43,7 @@ public class TtsSpan implements ParcelableSpan {
 
     /**
      * This span type can be used to add morphosyntactic features to the text it
-     * spans over, or synthesize a something else than the spanned text.  Use
+     * spans over, or synthesize a something else than the spanned text. Use
      * the argument {@link #ARG_TEXT} to set a different text.
      * Accepts the arguments {@link #ARG_GENDER},
      * {@link #ARG_ANIMACY}, {@link #ARG_MULTIPLICITY} and
@@ -48,7 +52,7 @@ public class TtsSpan implements ParcelableSpan {
     public static final String TYPE_TEXT = "android.type.text";
 
     /**
-     * The text associated with this span is a cardinal.  Must include the
+     * The text associated with this span is a cardinal. Must include the
      * number to be synthesized with {@link #ARG_NUMBER}.
      * Also accepts the arguments {@link #ARG_GENDER},
      * {@link #ARG_ANIMACY}, {@link #ARG_MULTIPLICITY} and
@@ -108,12 +112,12 @@ public class TtsSpan implements ParcelableSpan {
     public static final String TYPE_TIME = "android.type.time";
 
     /**
-     * The text associated with this span is a date. All arguments are optional,
-     * but at least one has to be provided: {@link #ARG_WEEKDAY},
-     * {@link #ARG_DAY}, {@link #ARG_MONTH} and {@link #ARG_YEAR}.
-     * Also accepts the arguments {@link #ARG_GENDER},
-     * {@link #ARG_ANIMACY}, {@link #ARG_MULTIPLICITY} and
-     * {@link #ARG_CASE}.
+     * The text associated with this span is a date. At least one of the
+     * arguments {@link #ARG_MONTH} and {@link #ARG_YEAR} has to be provided.
+     * The argument {@link #ARG_DAY} is optional if {@link #ARG_MONTH} is set.
+     * The argument {@link #ARG_WEEKDAY} is optional if {@link #ARG_DAY} is set.
+     * Also accepts the arguments {@link #ARG_GENDER}, {@link #ARG_ANIMACY},
+     * {@link #ARG_MULTIPLICITY} and {@link #ARG_CASE}.
      */
     public static final String TYPE_DATE = "android.type.date";
 
@@ -121,12 +125,10 @@ public class TtsSpan implements ParcelableSpan {
      * The text associated with this span is a telephone number. The argument
      * {@link #ARG_NUMBER_PARTS} is required. {@link #ARG_COUNTRY_CODE} and
      * {@link #ARG_EXTENSION} are optional.
-     * Also accepts the arguments {@link #ARG_GENDER},
-     * {@link #ARG_ANIMACY}, {@link #ARG_MULTIPLICITY} and
-     * {@link #ARG_CASE}.
+     * Also accepts the arguments {@link #ARG_GENDER}, {@link #ARG_ANIMACY},
+     * {@link #ARG_MULTIPLICITY} and {@link #ARG_CASE}.
      */
     public static final String TYPE_TELEPHONE = "android.type.telephone";
-
 
     /**
      * The text associated with this span is a URI (can be used for URLs and
@@ -138,9 +140,8 @@ public class TtsSpan implements ParcelableSpan {
      * {@link #ARG_PROTOCOL}, {@link #ARG_USERNAME}, {@link #ARG_PASSWORD},
      * {@link #ARG_DOMAIN}, {@link #ARG_PORT}, {@link #ARG_PATH},
      * {@link #ARG_QUERY_STRING} and {@link #ARG_FRAGMENT_ID}.
-     * Also accepts the arguments {@link #ARG_GENDER},
-     * {@link #ARG_ANIMACY}, {@link #ARG_MULTIPLICITY} and
-     * {@link #ARG_CASE}.
+     * Also accepts the arguments {@link #ARG_GENDER}, {@link #ARG_ANIMACY},
+     * {@link #ARG_MULTIPLICITY} and {@link #ARG_CASE}.
      */
     public static final String TYPE_ELECTRONIC = "android.type.electronic";
 
@@ -149,18 +150,16 @@ public class TtsSpan implements ParcelableSpan {
      * with the same arguments as {@link #TYPE_DECIMAL}.
      * {@link #ARG_CURRENCY} is used to set the currency. {@link #ARG_QUANTITY}
      * is optional.
-     * Also accepts the arguments {@link #ARG_GENDER},
-     * {@link #ARG_ANIMACY}, {@link #ARG_MULTIPLICITY} and
-     * {@link #ARG_CASE}.
+     * Also accepts the arguments {@link #ARG_GENDER}, {@link #ARG_ANIMACY},
+     * {@link #ARG_MULTIPLICITY} and {@link #ARG_CASE}.
      */
     public static final String TYPE_MONEY = "android.type.money";
 
     /**
      * The text associated with this span is a series of digits that have to be
-     * read sequentially. {@link #ARG_DIGITS} is required.
-     * Also accepts the arguments {@link #ARG_GENDER},
-     * {@link #ARG_ANIMACY}, {@link #ARG_MULTIPLICITY} and
-     * {@link #ARG_CASE}.
+     * read sequentially. The digits can be set with {@link #ARG_DIGITS}.
+     * Also accepts the arguments {@link #ARG_GENDER}, {@link #ARG_ANIMACY},
+     * {@link #ARG_MULTIPLICITY} and {@link #ARG_CASE}.
      */
     public static final String TYPE_DIGITS = "android.type.digits";
 
@@ -169,13 +168,12 @@ public class TtsSpan implements ParcelableSpan {
      * be read verbatim. The engine will attempt to ready out any character like
      * punctuation but excluding whitespace. {@link #ARG_VERBATIM} is required.
      * Also accepts the arguments {@link #ARG_GENDER},
-     * {@link #ARG_ANIMACY}, {@link #ARG_MULTIPLICITY} and
-     * {@link #ARG_CASE}.
+     * {@link #ARG_ANIMACY}, {@link #ARG_MULTIPLICITY} and {@link #ARG_CASE}.
      */
     public static final String TYPE_VERBATIM = "android.type.verbatim";
 
     /**
-     * String argument supplying gender information.  Can be any of
+     * String argument supplying gender information. Can be any of
      * {@link #GENDER_NEUTRAL}, {@link #GENDER_MALE} and
      * {@link #GENDER_FEMALE}.
      */
@@ -186,7 +184,7 @@ public class TtsSpan implements ParcelableSpan {
     public static final String GENDER_FEMALE = "android.female";
 
     /**
-     * String argument supplying animacy information.  Can be
+     * String argument supplying animacy information. Can be
      * {@link #ANIMACY_ANIMATE} or
      * {@link #ANIMACY_INANIMATE}
      */
@@ -196,9 +194,8 @@ public class TtsSpan implements ParcelableSpan {
     public static final String ANIMACY_INANIMATE = "android.inanimate";
 
     /**
-     * String argument supplying multiplicity information.  Can be any of
-     * {@link #MULTIPLICITY_SINGLE},
-     * {@link #MULTIPLICITY_DUAL} and
+     * String argument supplying multiplicity information. Can be any of
+     * {@link #MULTIPLICITY_SINGLE}, {@link #MULTIPLICITY_DUAL} and
      * {@link #MULTIPLICITY_PLURAL}
      */
     public static final String ARG_MULTIPLICITY = "android.arg.multiplicity";
@@ -208,16 +205,14 @@ public class TtsSpan implements ParcelableSpan {
     public static final String MULTIPLICITY_PLURAL = "android.plural";
 
     /**
-     * String argument supplying case information.  Can be any of
-     * {@link #CASE_NOMINATIVE}, {@link #CASE_ACCUSATIVE},
-     * {@link #CASE_DATIVE}, {@link #CASE_ABLATIVE},
-     * {@link #CASE_GENITIVE}, {@link #CASE_VOCATIVE},
-     * {@link #CASE_LOCATIVE} and
-     * {@link #CASE_INSTRUMENTAL}
+     * String argument supplying case information. Can be any of
+     * {@link #CASE_NOMINATIVE}, {@link #CASE_ACCUSATIVE}, {@link #CASE_DATIVE},
+     * {@link #CASE_ABLATIVE}, {@link #CASE_GENITIVE}, {@link #CASE_VOCATIVE},
+     * {@link #CASE_LOCATIVE} and {@link #CASE_INSTRUMENTAL}
      */
     public static final String ARG_CASE = "android.arg.case";
 
-    public static final String CASE_NOMINATIVE = "android.nomative";
+    public static final String CASE_NOMINATIVE = "android.nominative";
     public static final String CASE_ACCUSATIVE = "android.accusative";
     public static final String CASE_DATIVE = "android.dative";
     public static final String CASE_ABLATIVE = "android.ablative";
@@ -227,14 +222,14 @@ public class TtsSpan implements ParcelableSpan {
     public static final String CASE_INSTRUMENTAL = "android.instrumental";
 
     /**
-     * String supplying the text to be synthesized.  The synthesizer is free
+     * String supplying the text to be synthesized. The synthesizer is free
      * to decide how to interpret the text.
      * Can be used with {@link #TYPE_TEXT}.
      */
     public static final String ARG_TEXT = "android.arg.text";
 
     /**
-     * Argument used to specify a whole number.  The value can be a string of
+     * Argument used to specify a whole number. The value can be a string of
      * digits of any size optionally prefixed with a - or +.
      * Can be used with {@link #TYPE_CARDINAL} and {@link #TYPE_ORDINAL}.
      */
@@ -293,7 +288,7 @@ public class TtsSpan implements ParcelableSpan {
      * specified in English singular form. Prefixes may be used. Engines will do
      * their best to pronounce them correctly in the language used. Engines are
      * expected to at least support the most common ones like "meter", "second",
-     * "degree celcius" and "degree fahrenheit" with some common prefixes like
+     * "degree celsius" and "degree fahrenheit" with some common prefixes like
      * "milli" and "kilo".
      * Can be used with {@link #TYPE_MEASURE}.
      */
@@ -589,8 +584,8 @@ public class TtsSpan implements ParcelableSpan {
 
         /**
          * Sets the gender information for this instance.
-         * @param gender Can any of {@link TtsSpan#GENDER_NEUTRAL},
-         *     {@link TtsSpan#GENDER_MALE} and {@link TtsSpan#GENDER_FEMALE}.
+         * @param gender Can any of {@link #GENDER_NEUTRAL},
+         *     {@link #GENDER_MALE} and {@link #GENDER_FEMALE}.
          * @return This instance.
          */
         public C setGender(String gender) {
@@ -599,8 +594,8 @@ public class TtsSpan implements ParcelableSpan {
 
         /**
          * Sets the animacy information for this instance.
-         * @param animacy Can be any of {@link TtsSpan#ANIMACY_ANIMATE} and
-         *     {@link TtsSpan#ANIMACY_INANIMATE}.
+         * @param animacy Can be any of {@link #ANIMACY_ANIMATE} and
+         *     {@link #ANIMACY_INANIMATE}.
          * @return This instance.
          */
         public C setAnimacy(String animacy) {
@@ -610,9 +605,8 @@ public class TtsSpan implements ParcelableSpan {
         /**
          * Sets the multiplicity information for this instance.
          * @param multiplicity Can be any of
-         *     {@link TtsSpan#MULTIPLICITY_SINGLE},
-         *     {@link TtsSpan#MULTIPLICITY_DUAL} and
-         *     {@link TtsSpan#MULTIPLICITY_PLURAL}.
+         *     {@link #MULTIPLICITY_SINGLE}, {@link #MULTIPLICITY_DUAL} and
+         *     {@link #MULTIPLICITY_PLURAL}.
          * @return This instance.
          */
         public C setMultiplicity(String multiplicity) {
@@ -621,11 +615,11 @@ public class TtsSpan implements ParcelableSpan {
 
         /**
          * Sets the grammatical case information for this instance.
-         * @param grammaticalCase Can be any of {@link TtsSpan#CASE_NOMINATIVE},
-         *     {@link TtsSpan#CASE_ACCUSATIVE}, {@link TtsSpan#CASE_DATIVE},
-         *     {@link TtsSpan#CASE_ABLATIVE}, {@link TtsSpan#CASE_GENITIVE},
-         *     {@link TtsSpan#CASE_VOCATIVE}, {@link TtsSpan#CASE_LOCATIVE} and
-         *     {@link TtsSpan#CASE_INSTRUMENTAL}.
+         * @param grammaticalCase Can be any of {@link #CASE_NOMINATIVE},
+         *     {@link #CASE_ACCUSATIVE}, {@link #CASE_DATIVE},
+         *     {@link #CASE_ABLATIVE}, {@link #CASE_GENITIVE},
+         *     {@link #CASE_VOCATIVE}, {@link #CASE_LOCATIVE} and
+         *     {@link #CASE_INSTRUMENTAL}.
          * @return This instance.
          */
         public C setCase(String grammaticalCase) {
@@ -634,20 +628,20 @@ public class TtsSpan implements ParcelableSpan {
     }
 
     /**
-     * A builder for TtsSpans of type {@link TtsSpan #TYPE_TEXT}.
+     * A builder for TtsSpans of type {@link #TYPE_TEXT}.
      */
     public static class TextBuilder extends SemioticClassBuilder<TextBuilder> {
 
         /**
-         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_TEXT}.
+         * Creates a builder for a TtsSpan of type {@link #TYPE_TEXT}.
          */
         public TextBuilder() {
             super(TtsSpan.TYPE_TEXT);
         }
 
         /**
-         * Creates a TtsSpan of type {@link TtsSpan#TYPE_TEXT} and sets the
-         * {@link TtsSpan#ARG_TEXT} argument.
+         * Creates a TtsSpan of type {@link #TYPE_TEXT} and sets the
+         * {@link #ARG_TEXT} argument.
          * @param text The text to be synthesized.
          * @see #setText(String)
          */
@@ -657,8 +651,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_TEXT} argument, the text to be
-         * synthesized.
+         * Sets the {@link #ARG_TEXT} argument, the text to be synthesized.
          * @param text The string that will be synthesized.
          * @return This instance.
          */
@@ -668,22 +661,21 @@ public class TtsSpan implements ParcelableSpan {
     }
 
     /**
-     * A builder for TtsSpans of type {@link TtsSpan #TYPE_CARDINAL}.
+     * A builder for TtsSpans of type {@link #TYPE_CARDINAL}.
      */
     public static class CardinalBuilder
             extends SemioticClassBuilder<CardinalBuilder> {
 
         /**
-         * Creates a builder for a TtsSpan of type
-         * {@link TtsSpan#TYPE_CARDINAL}.
+         * Creates a builder for a TtsSpan of type {@link #TYPE_CARDINAL}.
          */
         public CardinalBuilder() {
             super(TtsSpan.TYPE_CARDINAL);
         }
 
         /**
-         * Creates a TtsSpan of type {@link TtsSpan#TYPE_CARDINAL} and sets the
-         * {@link TtsSpan#ARG_NUMBER} argument.
+         * Creates a TtsSpan of type {@link #TYPE_CARDINAL} and sets the
+         * {@link #ARG_NUMBER} argument.
          * @param number The number to synthesize.
          * @see #setNumber(long)
          */
@@ -693,8 +685,8 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Creates a TtsSpan of type {@link TtsSpan#TYPE_CARDINAL} and sets the
-         * {@link TtsSpan#ARG_NUMBER} argument.
+         * Creates a TtsSpan of type {@link #TYPE_CARDINAL} and sets the
+         * {@link #ARG_NUMBER} argument.
          * @param number The number to synthesize.
          * @see #setNumber(String)
          */
@@ -705,7 +697,7 @@ public class TtsSpan implements ParcelableSpan {
 
         /**
          * Convenience method that converts the number to a String and set it to
-         * the value for {@link TtsSpan#ARG_NUMBER}.
+         * the value for {@link #ARG_NUMBER}.
          * @param number The number that will be synthesized.
          * @return This instance.
          */
@@ -714,7 +706,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_NUMBER} argument.
+         * Sets the {@link #ARG_NUMBER} argument.
          * @param number A non-empty string of digits with an optional
          *     leading + or -.
          * @return This instance.
@@ -725,21 +717,21 @@ public class TtsSpan implements ParcelableSpan {
     }
 
     /**
-     * A builder for TtsSpans of type {@link TtsSpan#TYPE_ORDINAL}.
+     * A builder for TtsSpans of type {@link #TYPE_ORDINAL}.
      */
     public static class OrdinalBuilder
             extends SemioticClassBuilder<OrdinalBuilder> {
 
         /**
-         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_ORDINAL}.
+         * Creates a builder for a TtsSpan of type {@link #TYPE_ORDINAL}.
          */
         public OrdinalBuilder() {
             super(TtsSpan.TYPE_ORDINAL);
         }
 
         /**
-         * Creates a TtsSpan of type {@link TtsSpan#TYPE_ORDINAL} and sets the
-         * {@link TtsSpan#ARG_NUMBER} argument.
+         * Creates a TtsSpan of type {@link #TYPE_ORDINAL} and sets the
+         * {@link #ARG_NUMBER} argument.
          * @param number The ordinal number to synthesize.
          * @see #setNumber(long)
          */
@@ -749,8 +741,8 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Creates a TtsSpan of type {@link TtsSpan#TYPE_ORDINAL} and sets the
-         * {@link TtsSpan#ARG_NUMBER} argument.
+         * Creates a TtsSpan of type {@link #TYPE_ORDINAL} and sets the
+         * {@link #ARG_NUMBER} argument.
          * @param number The number to synthesize.
          * @see #setNumber(String)
          */
@@ -761,7 +753,7 @@ public class TtsSpan implements ParcelableSpan {
 
         /**
          * Convenience method that converts the number to a String and sets it
-         * to the value for {@link TtsSpan#ARG_NUMBER}.
+         * to the value for {@link #ARG_NUMBER}.
          * @param number The ordinal number that will be synthesized.
          * @return This instance.
          */
@@ -770,7 +762,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_NUMBER} argument.
+         * Sets the {@link #ARG_NUMBER} argument.
          * @param number A non-empty string of digits with an optional
          *     leading + or -.
          * @return This instance.
@@ -781,22 +773,21 @@ public class TtsSpan implements ParcelableSpan {
     }
 
     /**
-     * A builder for TtsSpans of type {@link TtsSpan#TYPE_DECIMAL}.
+     * A builder for TtsSpans of type {@link #TYPE_DECIMAL}.
      */
     public static class DecimalBuilder
             extends SemioticClassBuilder<DecimalBuilder> {
 
         /**
-         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_DECIMAL}.
+         * Creates a builder for a TtsSpan of type {@link #TYPE_DECIMAL}.
          */
         public DecimalBuilder() {
             super(TtsSpan.TYPE_DECIMAL);
         }
 
         /**
-         * Creates a TtsSpan of type {@link TtsSpan#TYPE_DECIMAL} and sets the
-         * {@link TtsSpan#ARG_INTEGER_PART} and
-         * {@link TtsSpan#ARG_FRACTIONAL_PART} arguments.
+         * Creates a TtsSpan of type {@link #TYPE_DECIMAL} and sets the
+         * {@link #ARG_INTEGER_PART} and {@link #ARG_FRACTIONAL_PART} arguments.
          * @see {@link #setArgumentsFromDouble(double, int, int)
          */
         public DecimalBuilder(double number,
@@ -809,9 +800,8 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Creates a TtsSpan of type {@link TtsSpan#TYPE_DECIMAL} and sets the
-         * {@link TtsSpan#ARG_INTEGER_PART} and
-         * {@link TtsSpan#ARG_FRACTIONAL_PART} arguments.
+         * Creates a TtsSpan of type {@link #TYPE_DECIMAL} and sets the
+         * {@link #ARG_INTEGER_PART} and {@link #ARG_FRACTIONAL_PART} arguments.
          */
         public DecimalBuilder(String integerPart, String fractionalPart) {
             this();
@@ -821,8 +811,8 @@ public class TtsSpan implements ParcelableSpan {
 
         /**
          * Convenience method takes a double and a maximum number of fractional
-         * digits, it sets the {@link TtsSpan#ARG_INTEGER_PART} and
-         * {@link TtsSpan#ARG_FRACTIONAL_PART} arguments.
+         * digits, it sets the {@link #ARG_INTEGER_PART} and
+         * {@link #ARG_FRACTIONAL_PART} arguments.
          * @param number The number to be synthesized.
          * @param minimumFractionDigits The minimum number of fraction digits
          *     that are pronounced.
@@ -856,7 +846,7 @@ public class TtsSpan implements ParcelableSpan {
 
         /**
          * Convenience method that converts the number to a String and sets it
-         * to the value for {@link TtsSpan#ARG_INTEGER_PART}.
+         * to the value for {@link #ARG_INTEGER_PART}.
          * @param integerPart The integer part of the decimal.
          * @return This instance.
          */
@@ -865,7 +855,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_INTEGER_PART} argument.
+         * Sets the {@link #ARG_INTEGER_PART} argument.
          * @param integerPart A non-empty string of digits with an optional
          *     leading + or -.
          * @return This instance.
@@ -875,7 +865,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_FRACTIONAL_PART} argument.
+         * Sets the {@link #ARG_FRACTIONAL_PART} argument.
          * @param fractionalPart A non-empty string of digits.
          * @return This instance.
          */
@@ -886,23 +876,22 @@ public class TtsSpan implements ParcelableSpan {
     }
 
     /**
-     * A builder for TtsSpans of type {@link TtsSpan#TYPE_FRACTION}.
+     * A builder for TtsSpans of type {@link #TYPE_FRACTION}.
      */
     public static class FractionBuilder
             extends SemioticClassBuilder<FractionBuilder> {
 
         /**
-         * Creates a builder for a TtsSpan of type
-         * {@link TtsSpan#TYPE_FRACTION}.
+         * Creates a builder for a TtsSpan of type {@link #TYPE_FRACTION}.
          */
         public FractionBuilder() {
             super(TtsSpan.TYPE_FRACTION);
         }
 
         /**
-         * Creates a TtsSpan of type {@link TtsSpan#TYPE_FRACTION} and sets the
-         * {@link TtsSpan#ARG_INTEGER_PART}, {@link TtsSpan#ARG_NUMERATOR}, and
-         * {@link TtsSpan#ARG_DENOMINATOR} arguments.
+         * Creates a TtsSpan of type {@link #TYPE_FRACTION} and sets the
+         * {@link #ARG_INTEGER_PART}, {@link #ARG_NUMERATOR}, and
+         * {@link #ARG_DENOMINATOR} arguments.
          */
         public FractionBuilder(long integerPart,
                                long numerator,
@@ -913,10 +902,9 @@ public class TtsSpan implements ParcelableSpan {
             setDenominator(denominator);
         }
 
-
         /**
          * Convenience method that converts the integer to a String and sets the
-         * argument {@link TtsSpan#ARG_NUMBER}.
+         * argument {@link #ARG_NUMBER}.
          * @param integerPart The integer part.
          * @return This instance.
          */
@@ -925,7 +913,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_INTEGER_PART} argument.
+         * Sets the {@link #ARG_INTEGER_PART} argument.
          * @param integerPart A non-empty string of digits with an optional
          *     leading + or -.
          * @return This instance.
@@ -936,7 +924,7 @@ public class TtsSpan implements ParcelableSpan {
 
         /**
          * Convenience method that converts the numerator to a String and sets
-         * the argument {@link TtsSpan#ARG_NUMERATOR}.
+         * the argument {@link #ARG_NUMERATOR}.
          * @param numerator The numerator.
          * @return This instance.
          */
@@ -945,7 +933,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_NUMERATOR} argument.
+         * Sets the {@link #ARG_NUMERATOR} argument.
          * @param numerator A non-empty string of digits with an optional
          *     leading + or -.
          * @return This instance.
@@ -956,7 +944,7 @@ public class TtsSpan implements ParcelableSpan {
 
         /**
          * Convenience method that converts the denominator to a String and sets
-         * the argument {@link TtsSpan#ARG_DENOMINATOR}.
+         * the argument {@link #ARG_DENOMINATOR}.
          * @param denominator The denominator.
          * @return This instance.
          */
@@ -965,7 +953,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_DENOMINATOR} argument.
+         * Sets the {@link #ARG_DENOMINATOR} argument.
          * @param denominator A non-empty string of digits with an optional
          *     leading + or -.
          * @return This instance.
@@ -976,13 +964,13 @@ public class TtsSpan implements ParcelableSpan {
     }
 
     /**
-     * A builder for TtsSpans of type {@link TtsSpan #TYPE_MEASURE}.
+     * A builder for TtsSpans of type {@link #TYPE_MEASURE}.
      */
     public static class MeasureBuilder
             extends SemioticClassBuilder<MeasureBuilder> {
 
         /**
-         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_MEASURE}.
+         * Creates a builder for a TtsSpan of type {@link #TYPE_MEASURE}.
          */
         public MeasureBuilder() {
             super(TtsSpan.TYPE_MEASURE);
@@ -990,7 +978,7 @@ public class TtsSpan implements ParcelableSpan {
 
         /**
          * Convenience method that converts the number to a String and set it to
-         * the value for {@link TtsSpan#ARG_NUMBER}.
+         * the value for {@link #ARG_NUMBER}.
          * @param number The amount of the measure.
          * @return This instance.
          */
@@ -999,7 +987,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_NUMBER} argument.
+         * Sets the {@link #ARG_NUMBER} argument.
          * @param number A non-empty string of digits with an optional
          *     leading + or -.
          * @return This instance.
@@ -1010,7 +998,7 @@ public class TtsSpan implements ParcelableSpan {
 
         /**
          * Convenience method that converts the integer part to a String and set
-         * it to the value for {@link TtsSpan#ARG_INTEGER_PART}.
+         * it to the value for {@link #ARG_INTEGER_PART}.
          * @param integerPart The integer part of a decimal or fraction.
          * @return This instance.
          */
@@ -1019,7 +1007,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_INTEGER_PART} argument.
+         * Sets the {@link #ARG_INTEGER_PART} argument.
          * @param integerPart The integer part of a decimal or fraction; a
          * non-empty string of digits with an optional
          *     leading + or -.
@@ -1030,10 +1018,9 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_FRACTIONAL_PART} argument.
+         * Sets the {@link #ARG_FRACTIONAL_PART} argument.
          * @param fractionalPart The fractional part of a decimal; a non-empty
-         * string of digits with an optional
-         *     leading + or -.
+         *     string of digits with an optional leading + or -.
          * @return This instance.
          */
         public MeasureBuilder setFractionalPart(String fractionalPart) {
@@ -1043,7 +1030,7 @@ public class TtsSpan implements ParcelableSpan {
 
         /**
          * Convenience method that converts the numerator to a String and set it
-         * to the value for {@link TtsSpan#ARG_NUMERATOR}.
+         * to the value for {@link #ARG_NUMERATOR}.
          * @param numerator The numerator of a fraction.
          * @return This instance.
          */
@@ -1052,7 +1039,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_NUMERATOR} argument.
+         * Sets the {@link #ARG_NUMERATOR} argument.
          * @param numerator The numerator of a fraction; a non-empty string of
          *     digits with an optional leading + or -.
          * @return This instance.
@@ -1063,7 +1050,7 @@ public class TtsSpan implements ParcelableSpan {
 
         /**
          * Convenience method that converts the denominator to a String and set
-         * it to the value for {@link TtsSpan#ARG_DENOMINATOR}.
+         * it to the value for {@link #ARG_DENOMINATOR}.
          * @param denominator The denominator of a fraction.
          * @return This instance.
          */
@@ -1072,7 +1059,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_DENOMINATOR} argument.
+         * Sets the {@link #ARG_DENOMINATOR} argument.
          * @param denominator The denominator of a fraction; a non-empty string
          *     of digits with an optional leading + or -.
          * @return This instance.
@@ -1082,7 +1069,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_UNIT} argument.
+         * Sets the {@link #ARG_UNIT} argument.
          * @param unit The unit of the measure.
          * @return This instance.
          * @see {@link TtsSpan.ARG_UNIT}
@@ -1093,22 +1080,21 @@ public class TtsSpan implements ParcelableSpan {
     }
 
     /**
-     * A builder for TtsSpans of type {@link TtsSpan #TYPE_TIME}.
+     * A builder for TtsSpans of type {@link #TYPE_TIME}.
      */
     public static class TimeBuilder
             extends SemioticClassBuilder<TimeBuilder> {
 
         /**
-         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_TIME}.
+         * Creates a builder for a TtsSpan of type {@link #TYPE_TIME}.
          */
         public TimeBuilder() {
             super(TtsSpan.TYPE_TIME);
         }
 
         /**
-         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_TIME} and
-         * sets the {@link TtsSpan#ARG_HOURS} and {@link TtsSpan#ARG_MINUTES}
-         * arguments.
+         * Creates a builder for a TtsSpan of type {@link #TYPE_TIME} and
+         * sets the {@link #ARG_HOURS} and {@link #ARG_MINUTES} arguments.
          */
         public TimeBuilder(int hours, int minutes) {
             this();
@@ -1117,22 +1103,21 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_HOURS} argument.
-         * @param hours The value to be set for hours. See
-         * {@link TtsSpan#ARG_HOURS}.
+         * Sets the {@link #ARG_HOURS} argument.
+         * @param hours The value to be set for hours. See {@link #ARG_HOURS}.
          * @return This instance.
-         * @see {@link TtsSpan#ARG_HOURS}
+         * @see {@link #ARG_HOURS}
          */
         public TimeBuilder setHours(int hours) {
             return setIntArgument(TtsSpan.ARG_HOURS, hours);
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_MINUTES} argument.
+         * Sets the {@link #ARG_MINUTES} argument.
          * @param minutes The value to be set for minutes. See
-         * {@link TtsSpan#ARG_MINUTES}.
+         *     {@link #ARG_MINUTES}.
          * @return This instance.
-         * @see {@link TtsSpan#ARG_MINUTES}
+         * @see {@link #ARG_MINUTES}
          */
         public TimeBuilder setMinutes(int minutes) {
             return setIntArgument(TtsSpan.ARG_MINUTES, minutes);
@@ -1140,24 +1125,23 @@ public class TtsSpan implements ParcelableSpan {
     }
 
     /**
-     * A builder for TtsSpans of type {@link TtsSpan #TYPE_DATE}.
+     * A builder for TtsSpans of type {@link #TYPE_DATE}.
      */
     public static class DateBuilder
             extends SemioticClassBuilder<DateBuilder> {
 
         /**
-         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_DATE}.
+         * Creates a builder for a TtsSpan of type {@link #TYPE_DATE}.
          */
         public DateBuilder() {
             super(TtsSpan.TYPE_DATE);
         }
 
         /**
-         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_TIME} and
-         * possibly sets the {@link TtsSpan#ARG_WEEKDAY},
-         * {@link TtsSpan#ARG_DAY}, {@link TtsSpan#ARG_MONTH} and
-         * {@link TtsSpan#ARG_YEAR} arguments. Pass null to any argument to
-         * leave it unset.
+         * Creates a builder for a TtsSpan of type {@link #TYPE_TIME} and
+         * possibly sets the {@link #ARG_WEEKDAY}, {@link #ARG_DAY},
+         * {@link #ARG_MONTH} and {@link #ARG_YEAR} arguments. Pass null to any
+         * argument to leave it unset.
          */
         public DateBuilder(Integer weekday,
                            Integer day,
@@ -1179,44 +1163,41 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_WEEKDAY} argument.
+         * Sets the {@link #ARG_WEEKDAY} argument.
          * @param weekday The value to be set for weekday. See
-         * {@link TtsSpan#ARG_WEEKDAY}.
+         *     {@link #ARG_WEEKDAY}.
          * @return This instance.
-         * @see {@link TtsSpan#ARG_WEEKDAY}
+         * @see {@link #ARG_WEEKDAY}
          */
         public DateBuilder setWeekday(int weekday) {
             return setIntArgument(TtsSpan.ARG_WEEKDAY, weekday);
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_DAY} argument.
-         * @param day The value to be set for day. See
-         * {@link TtsSpan#ARG_DAY}.
+         * Sets the {@link #ARG_DAY} argument.
+         * @param day The value to be set for day. See {@link #ARG_DAY}.
          * @return This instance.
-         * @see {@link TtsSpan#ARG_DAY}
+         * @see {@link #ARG_DAY}
          */
         public DateBuilder setDay(int day) {
             return setIntArgument(TtsSpan.ARG_DAY, day);
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_MONTH} argument.
-         * @param month The value to be set for month. See
-         * {@link TtsSpan#ARG_MONTH}.
+         * Sets the {@link #ARG_MONTH} argument.
+         * @param month The value to be set for month. See {@link #ARG_MONTH}.
          * @return This instance.
-         * @see {@link TtsSpan#ARG_MONTH}
+         * @see {@link #ARG_MONTH}
          */
         public DateBuilder setMonth(int month) {
             return setIntArgument(TtsSpan.ARG_MONTH, month);
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_YEAR} argument.
-         * @param year The value to be set for year. See
-         * {@link TtsSpan#ARG_YEAR}.
+         * Sets the {@link #ARG_YEAR} argument.
+         * @param year The value to be set for year. See {@link #ARG_YEAR}.
          * @return This instance.
-         * @see {@link TtsSpan#ARG_YEAR}
+         * @see {@link #ARG_YEAR}
          */
         public DateBuilder setYear(int year) {
             return setIntArgument(TtsSpan.ARG_YEAR, year);
@@ -1224,13 +1205,13 @@ public class TtsSpan implements ParcelableSpan {
     }
 
     /**
-     * A builder for TtsSpans of type {@link TtsSpan #TYPE_MONEY}.
+     * A builder for TtsSpans of type {@link #TYPE_MONEY}.
      */
     public static class MoneyBuilder
             extends SemioticClassBuilder<MoneyBuilder> {
 
         /**
-         * Creates a TtsSpan of type {@link TtsSpan#TYPE_MONEY}.
+         * Creates a TtsSpan of type {@link #TYPE_MONEY}.
          */
         public MoneyBuilder() {
             super(TtsSpan.TYPE_MONEY);
@@ -1238,7 +1219,7 @@ public class TtsSpan implements ParcelableSpan {
 
         /**
          * Convenience method that converts the number to a String and set it to
-         * the value for {@link TtsSpan#ARG_INTEGER_PART}.
+         * the value for {@link #ARG_INTEGER_PART}.
          * @param integerPart The integer part of the amount.
          * @return This instance.
          */
@@ -1247,7 +1228,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_INTEGER_PART} argument.
+         * Sets the {@link #ARG_INTEGER_PART} argument.
          * @param integerPart A non-empty string of digits with an optional
          *     leading + or -.
          * @return This instance.
@@ -1257,7 +1238,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_FRACTIONAL_PART} argument.
+         * Sets the {@link #ARG_FRACTIONAL_PART} argument.
          * @param fractionalPart Can be a string of digits of any size.
          * @return This instance.
          */
@@ -1266,7 +1247,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_CURRENCY} argument.
+         * Sets the {@link #ARG_CURRENCY} argument.
          * @param currency Should be a ISO4217 currency code, e.g. "USD".
          * @return This instance.
          */
@@ -1275,7 +1256,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_QUANTITY} argument.
+         * Sets the {@link #ARG_QUANTITY} argument.
          * @param quantity
          * @return This instance.
          */
@@ -1285,21 +1266,21 @@ public class TtsSpan implements ParcelableSpan {
     }
 
     /**
-     * A builder for TtsSpans of type {@link TtsSpan #TYPE_TELEPHONE}.
+     * A builder for TtsSpans of type {@link #TYPE_TELEPHONE}.
      */
     public static class TelephoneBuilder
             extends SemioticClassBuilder<TelephoneBuilder> {
 
         /**
-         * Creates a TtsSpan of type {@link TtsSpan#TYPE_TELEPHONE}.
+         * Creates a TtsSpan of type {@link #TYPE_TELEPHONE}.
          */
         public TelephoneBuilder() {
             super(TtsSpan.TYPE_TELEPHONE);
         }
 
         /**
-         * Creates a TtsSpan of type {@link TtsSpan#TYPE_TELEPHONE} and sets the
-         * {@link TtsSpan#ARG_NUMBER_PARTS} argument.
+         * Creates a TtsSpan of type {@link #TYPE_TELEPHONE} and sets the
+         * {@link #ARG_NUMBER_PARTS} argument.
          */
         public TelephoneBuilder(String numberParts) {
             this();
@@ -1307,7 +1288,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_COUNTRY_CODE} argument.
+         * Sets the {@link #ARG_COUNTRY_CODE} argument.
          * @param countryCode The country code can be a series of digits
          * optionally prefixed with a "+".
          * @return This instance.
@@ -1317,7 +1298,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_NUMBER_PARTS} argument.
+         * Sets the {@link #ARG_NUMBER_PARTS} argument.
          * @param numberParts The main telephone number. Can be a series of
          *     digits and letters separated by spaces, "/", "-" or ".".
          * @return This instance.
@@ -1327,7 +1308,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_EXTENSION} argument.
+         * Sets the {@link #ARG_EXTENSION} argument.
          * @param extension The extension can be a series of digits.
          * @return This instance.
          */
@@ -1337,20 +1318,20 @@ public class TtsSpan implements ParcelableSpan {
     }
 
     /**
-     * A builder for TtsSpans of type {@link TtsSpan #TYPE_ELECTRONIC}.
+     * A builder for TtsSpans of type {@link #TYPE_ELECTRONIC}.
      */
     public static class ElectronicBuilder
             extends SemioticClassBuilder<ElectronicBuilder> {
 
         /**
-         * Creates a TtsSpan of type {@link TtsSpan#TYPE_ELECTRONIC}.
+         * Creates a TtsSpan of type {@link #TYPE_ELECTRONIC}.
          */
         public ElectronicBuilder() {
             super(TtsSpan.TYPE_ELECTRONIC);
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_USERNAME} and {@link TtsSpan#ARG_DOMAIN}
+         * Sets the {@link #ARG_USERNAME} and {@link #ARG_DOMAIN}
          *     arguments, representing an email address.
          * @param username The part before the @ in the email address.
          * @param domain The part after the @ in the email address.
@@ -1362,7 +1343,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_PROTOCOL} argument.
+         * Sets the {@link #ARG_PROTOCOL} argument.
          * @param protocol The protocol of the URI. Examples are "http" and
          *     "ftp".
          * @return This instance.
@@ -1372,7 +1353,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_USERNAME} argument.
+         * Sets the {@link #ARG_USERNAME} argument.
          * @return This instance.
          */
         public ElectronicBuilder setUsername(String username) {
@@ -1380,7 +1361,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_PASSWORD} argument.
+         * Sets the {@link #ARG_PASSWORD} argument.
          * @return This instance.
          */
         public ElectronicBuilder setPassword(String password) {
@@ -1388,7 +1369,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_DOMAIN} argument.
+         * Sets the {@link #ARG_DOMAIN} argument.
          * @param domain The domain, for example "source.android.com".
          * @return This instance.
          */
@@ -1397,7 +1378,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_PORT} argument.
+         * Sets the {@link #ARG_PORT} argument.
          * @return This instance.
          */
         public ElectronicBuilder setPort(int port) {
@@ -1405,7 +1386,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_PATH} argument.
+         * Sets the {@link #ARG_PATH} argument.
          * @param path For example "source/index.html".
          * @return This instance.
          */
@@ -1414,7 +1395,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_QUERY_STRING} argument.
+         * Sets the {@link #ARG_QUERY_STRING} argument.
          * @param queryString For example "arg=value&argtwo=value".
          * @return This instance.
          */
@@ -1423,7 +1404,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_FRAGMENT_ID} argument.
+         * Sets the {@link #ARG_FRAGMENT_ID} argument.
          * @return This instance.
          */
         public ElectronicBuilder setFragmentId(String fragmentId) {
@@ -1432,22 +1413,21 @@ public class TtsSpan implements ParcelableSpan {
     }
 
     /**
-     * A builder for TtsSpans of type {@link TtsSpan #TYPE_DIGITS}.
+     * A builder for TtsSpans of type {@link #TYPE_DIGITS}.
      */
     public static class DigitsBuilder
             extends SemioticClassBuilder<DigitsBuilder> {
 
         /**
-         * Creates a builder for a TtsSpan of type
-         * {@link TtsSpan#TYPE_VERBATIM}.
+         * Creates a builder for a TtsSpan of type {@link #TYPE_DIGITS}.
          */
         public DigitsBuilder() {
             super(TtsSpan.TYPE_DIGITS);
         }
 
         /**
-         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_DIGITS}
-         * and sets the {@link TtsSpan#ARG_DIGITS} argument.
+         * Creates a builder for a TtsSpan of type {@link #TYPE_DIGITS}
+         * and sets the {@link #ARG_DIGITS} argument.
          */
         public DigitsBuilder(String digits) {
             this();
@@ -1455,7 +1435,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_DIGITS} argument.
+         * Sets the {@link #ARG_DIGITS} argument.
          * @param digits A string of digits.
          * @return This instance.
          */
@@ -1465,22 +1445,21 @@ public class TtsSpan implements ParcelableSpan {
     }
 
     /**
-     * A builder for TtsSpans of type {@link TtsSpan #TYPE_VERBATIM}.
+     * A builder for TtsSpans of type {@link #TYPE_VERBATIM}.
      */
     public static class VerbatimBuilder
             extends SemioticClassBuilder<VerbatimBuilder> {
 
         /**
-         * Creates a builder for a TtsSpan of type
-         * {@link TtsSpan#TYPE_VERBATIM}.
+         * Creates a builder for a TtsSpan of type {@link #TYPE_VERBATIM}.
          */
         public VerbatimBuilder() {
             super(TtsSpan.TYPE_VERBATIM);
         }
 
         /**
-         * Creates a builder for a TtsSpan of type {@link TtsSpan#TYPE_VERBATIM}
-         * and sets the {@link TtsSpan#ARG_VERBATIM} argument.
+         * Creates a builder for a TtsSpan of type {@link #TYPE_VERBATIM}
+         * and sets the {@link #ARG_VERBATIM} argument.
          */
         public VerbatimBuilder(String verbatim) {
             this();
@@ -1488,7 +1467,7 @@ public class TtsSpan implements ParcelableSpan {
         }
 
         /**
-         * Sets the {@link TtsSpan#ARG_VERBATIM} argument.
+         * Sets the {@link #ARG_VERBATIM} argument.
          * @param verbatim A string of characters that will be read verbatim,
          *     except whitespace.
          * @return This instance.
