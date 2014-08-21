@@ -769,6 +769,7 @@ public class NetworkMonitor extends StateMachine {
             latencyBroadcast.putExtra(EXTRA_IS_CAPTIVE_PORTAL, isCaptivePortal);
             latencyBroadcast.putExtra(EXTRA_RESPONSE_TIMESTAMP_MS, responseTimestampMs);
         }
-        mContext.sendBroadcast(latencyBroadcast, PERMISSION_ACCESS_NETWORK_CONDITIONS);
+        mContext.sendBroadcastAsUser(latencyBroadcast, UserHandle.CURRENT,
+                PERMISSION_ACCESS_NETWORK_CONDITIONS);
     }
 }
