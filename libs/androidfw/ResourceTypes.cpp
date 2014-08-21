@@ -3346,6 +3346,7 @@ status_t ResTable::add(ResTable* src)
             TypeList& typeList = pg->types.editItemAt(j);
             typeList.appendVector(srcPg->types[j]);
         }
+        pg->dynamicRefTable.addMappings(srcPg->dynamicRefTable);
         pg->largestTypeId = max(pg->largestTypeId, srcPg->largestTypeId);
         mPackageGroups.add(pg);
     }
@@ -5604,7 +5605,6 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
             return (mError=NO_MEMORY);
         }
 
-        //printf("Adding new package id %d at index %d\n", id, idx);
         err = mPackageGroups.add(group);
         if (err < NO_ERROR) {
             return (mError=err);
@@ -5840,6 +5840,37 @@ status_t DynamicRefTable::load(const ResTable_lib_header* const header)
         }
         mEntries.replaceValueFor(String16(tmpName), (uint8_t) packageId);
         entry = entry + 1;
+    }
+    return NO_ERROR;
+}
+
+status_t DynamicRefTable::addMappings(const DynamicRefTable& other) {
+    if (mAssignedPackageId != other.mAssignedPackageId) {
+        return UNKNOWN_ERROR;
+    }
+
+    const size_t entryCount = other.mEntries.size();
+    for (size_t i = 0; i < entryCount; i++) {
+        ssize_t index = mEntries.indexOfKey(other.mEntries.keyAt(i));
+        if (index < 0) {
+            mEntries.add(other.mEntries.keyAt(i), other.mEntries[i]);
+        } else {
+            if (other.mEntries[i] != mEntries[index]) {
+                return UNKNOWN_ERROR;
+            }
+        }
+    }
+
+    // Merge the lookup table. No entry can conflict
+    // (value of 0 means not set).
+    for (size_t i = 0; i < 256; i++) {
+        if (mLookupTable[i] != other.mLookupTable[i]) {
+            if (mLookupTable[i] == 0) {
+                mLookupTable[i] = other.mLookupTable[i];
+            } else if (other.mLookupTable[i] != 0) {
+                return UNKNOWN_ERROR;
+            }
+        }
     }
     return NO_ERROR;
 }
@@ -6216,21 +6247,36 @@ void ResTable::print(bool inclValues) const
     printf("Package Groups (%d)\n", (int)pgCount);
     for (size_t pgIndex=0; pgIndex<pgCount; pgIndex++) {
         const PackageGroup* pg = mPackageGroups[pgIndex];
-        printf("Package Group %d id=%d packageCount=%d name=%s\n",
+        printf("Package Group %d id=0x%02x packageCount=%d name=%s\n",
                 (int)pgIndex, pg->id, (int)pg->packages.size(),
                 String8(pg->name).string());
 
+        const KeyedVector<String16, uint8_t>& refEntries = pg->dynamicRefTable.entries();
+        const size_t refEntryCount = refEntries.size();
+        if (refEntryCount > 0) {
+            printf("  DynamicRefTable entryCount=%d:\n", (int) refEntryCount);
+            for (size_t refIndex = 0; refIndex < refEntryCount; refIndex++) {
+                printf("    0x%02x -> %s\n",
+                        refEntries.valueAt(refIndex),
+                        String8(refEntries.keyAt(refIndex)).string());
+            }
+            printf("\n");
+        }
+
+        int packageId = pg->id;
         size_t pkgCount = pg->packages.size();
         for (size_t pkgIndex=0; pkgIndex<pkgCount; pkgIndex++) {
             const Package* pkg = pg->packages[pkgIndex];
-            printf("  Package %d id=%d name=%s\n", (int)pkgIndex,
+            // Use a package's real ID, since the ID may have been assigned
+            // if this package is a shared library.
+            packageId = pkg->package->id;
+            printf("  Package %d id=0x%02x name=%s\n", (int)pkgIndex,
                     pkg->package->id, String8(String16(pkg->package->name)).string());
         }
 
         for (size_t typeIndex=0; typeIndex < pg->types.size(); typeIndex++) {
             const TypeList& typeList = pg->types[typeIndex];
             if (typeList.isEmpty()) {
-                //printf("    type %d NULL\n", (int)typeIndex);
                 continue;
             }
             const Type* typeConfigs = typeList[0];
@@ -6239,13 +6285,15 @@ void ResTable::print(bool inclValues) const
                    (int)typeIndex, (int)NTC, (int)typeConfigs->entryCount);
             if (typeConfigs->typeSpecFlags != NULL) {
                 for (size_t entryIndex=0; entryIndex<typeConfigs->entryCount; entryIndex++) {
-                    uint32_t resID = (0xff000000 & ((pg->id)<<24))
+                    uint32_t resID = (0xff000000 & ((packageId)<<24))
                                 | (0x00ff0000 & ((typeIndex+1)<<16))
                                 | (0x0000ffff & (entryIndex));
                     // Since we are creating resID without actually
                     // iterating over them, we have no idea which is a
                     // dynamic reference. We must check.
-                    pg->dynamicRefTable.lookupResourceId(&resID);
+                    if (packageId == 0) {
+                        pg->dynamicRefTable.lookupResourceId(&resID);
+                    }
 
                     resource_name resName;
                     if (this->getResourceName(resID, true, &resName)) {
@@ -6303,10 +6351,12 @@ void ResTable::print(bool inclValues) const
                         continue;
                     }
 
-                    uint32_t resID = (0xff000000 & ((pg->id)<<24))
+                    uint32_t resID = (0xff000000 & ((packageId)<<24))
                                 | (0x00ff0000 & ((typeIndex+1)<<16))
                                 | (0x0000ffff & (entryIndex));
-                    pg->dynamicRefTable.lookupResourceId(&resID);
+                    if (packageId == 0) {
+                        pg->dynamicRefTable.lookupResourceId(&resID);
+                    }
                     resource_name resName;
                     if (this->getResourceName(resID, true, &resName)) {
                         String8 type8;
@@ -6387,9 +6437,11 @@ void ResTable::print(bool inclValues) const
                             const ResTable_map* mapPtr = (ResTable_map*)(baseMapPtr+mapOffset);
                             const uint32_t parent = dtohl(bagPtr->parent.ident);
                             uint32_t resolvedParent = parent;
-                            status_t err = pg->dynamicRefTable.lookupResourceId(&resolvedParent);
-                            if (err != NO_ERROR) {
-                                resolvedParent = 0;
+                            if (Res_GETPACKAGE(resolvedParent) + 1 == 0) {
+                                status_t err = pg->dynamicRefTable.lookupResourceId(&resolvedParent);
+                                if (err != NO_ERROR) {
+                                    resolvedParent = 0;
+                                }
                             }
                             printf("          Parent=0x%08x(Resolved=0x%08x), Count=%d\n",
                                     parent, resolvedParent, N);
