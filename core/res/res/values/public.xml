@@ -2275,6 +2275,7 @@
   <public type="attr" name="outlineProvider" />
   <public type="attr" name="ageHint" />
   <public type="attr" name="country" />
+  <public type="attr" name="windowSharedElementsUseOverlay" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
