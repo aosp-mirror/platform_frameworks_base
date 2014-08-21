@@ -170,6 +170,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     final UserManager mUserManager;
     final PowerManager.WakeLock mWakeLock;
 
+    final LocalService mLocalService;
+
     IPowerManager mIPowerManager;
     IWindowManager mIWindowManager;
     NotificationManager mNotificationManager;
@@ -797,6 +799,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 PackageManager.FEATURE_DEVICE_ADMIN);
         mWakeLock = ((PowerManager)context.getSystemService(Context.POWER_SERVICE))
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DPM");
+        mLocalService = new LocalService();
         if (!mHasFeature) {
             // Skip the rest of the initialization
             return;
@@ -817,7 +820,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         filter.addDataScheme("package");
         context.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
 
-        LocalServices.addService(DevicePolicyManagerInternal.class, new LocalService());
+        LocalServices.addService(DevicePolicyManagerInternal.class, mLocalService);
     }
 
     /**
@@ -1919,44 +1922,71 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean addCrossProfileWidgetProvider(ComponentName admin, String packageName) {
-        ActiveAdmin activeAdmin = getActiveAdminForCallerLocked(admin,
-                DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-        if (activeAdmin.crossProfileWidgetProviders == null) {
-            activeAdmin.crossProfileWidgetProviders = new ArrayList<>();
+        final int userId = UserHandle.getCallingUserId();
+        List<String> changedProviders = null;
+
+        synchronized (this) {
+            ActiveAdmin activeAdmin = getActiveAdminForCallerLocked(admin,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (activeAdmin.crossProfileWidgetProviders == null) {
+                activeAdmin.crossProfileWidgetProviders = new ArrayList<>();
+            }
+            List<String> providers = activeAdmin.crossProfileWidgetProviders;
+            if (!providers.contains(packageName)) {
+                providers.add(packageName);
+                changedProviders = new ArrayList<>(providers);
+                saveSettingsLocked(userId);
+            }
         }
-        if (activeAdmin.crossProfileWidgetProviders.add(packageName)) {
-            saveSettingsLocked(UserHandle.getCallingUserId());
+
+        if (changedProviders != null) {
+            mLocalService.notifyCrossProfileProvidersChanged(userId, changedProviders);
             return true;
         }
+
         return false;
     }
 
     @Override
     public boolean removeCrossProfileWidgetProvider(ComponentName admin, String packageName) {
-        ActiveAdmin activeAdmin = getActiveAdminForCallerLocked(admin,
-                DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-        if (activeAdmin.crossProfileWidgetProviders == null) {
-            return false;
+        final int userId = UserHandle.getCallingUserId();
+        List<String> changedProviders = null;
+
+        synchronized (this) {
+            ActiveAdmin activeAdmin = getActiveAdminForCallerLocked(admin,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (activeAdmin.crossProfileWidgetProviders == null) {
+                return false;
+            }
+            List<String> providers = activeAdmin.crossProfileWidgetProviders;
+            if (providers.remove(packageName)) {
+                changedProviders = new ArrayList<>(providers);
+                saveSettingsLocked(userId);
+            }
         }
-        if (activeAdmin.crossProfileWidgetProviders.remove(packageName)) {
-            saveSettingsLocked(UserHandle.getCallingUserId());
+
+        if (changedProviders != null) {
+            mLocalService.notifyCrossProfileProvidersChanged(userId, changedProviders);
             return true;
         }
+
         return false;
     }
 
     @Override
     public List<String> getCrossProfileWidgetProviders(ComponentName admin) {
-        ActiveAdmin activeAdmin = getActiveAdminForCallerLocked(admin,
-                DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-        if (activeAdmin.crossProfileWidgetProviders == null
-                || activeAdmin.crossProfileWidgetProviders.isEmpty()) {
-            return null;
-        }
-        if (Binder.getCallingUid() == Process.myUid()) {
-            return new ArrayList<>(activeAdmin.crossProfileWidgetProviders);
-        } else {
-            return activeAdmin.crossProfileWidgetProviders;
+        synchronized (this) {
+            ActiveAdmin activeAdmin = getActiveAdminForCallerLocked(admin,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (activeAdmin.crossProfileWidgetProviders == null
+                    || activeAdmin.crossProfileWidgetProviders.isEmpty()) {
+                return null;
+            }
+            if (Binder.getCallingUid() == Process.myUid()) {
+                return new ArrayList<>(activeAdmin.crossProfileWidgetProviders);
+            } else {
+                return activeAdmin.crossProfileWidgetProviders;
+            }
         }
     }
 
@@ -4808,26 +4838,51 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private final class LocalService extends DevicePolicyManagerInternal {
+        private List<OnCrossProfileWidgetProvidersChangeListener> mWidgetProviderListeners;
+
         @Override
         public List<String> getCrossProfileWidgetProviders(int profileId) {
-            ComponentName ownerComponent = mDeviceOwner.getProfileOwnerComponent(profileId);
-            if (ownerComponent == null) {
-                return Collections.emptyList();
+            synchronized (DevicePolicyManagerService.this) {
+                ComponentName ownerComponent = mDeviceOwner.getProfileOwnerComponent(profileId);
+                if (ownerComponent == null) {
+                    return Collections.emptyList();
+                }
+
+                DevicePolicyData policy = getUserData(profileId);
+                ActiveAdmin admin = policy.mAdminMap.get(ownerComponent);
+
+                if (admin == null || admin.crossProfileWidgetProviders == null
+                        || admin.crossProfileWidgetProviders.isEmpty()) {
+                    return Collections.emptyList();
+                }
+
+                return admin.crossProfileWidgetProviders;
             }
+        }
 
-            DevicePolicyData policy = getUserData(profileId);
-            ActiveAdmin admin = policy.mAdminMap.get(ownerComponent);
-
-            if (admin == null) {
-                return Collections.emptyList();
+        @Override
+        public void addOnCrossProfileWidgetProvidersChangeListener(
+                OnCrossProfileWidgetProvidersChangeListener listener) {
+            synchronized (DevicePolicyManagerService.this) {
+                if (mWidgetProviderListeners == null) {
+                    mWidgetProviderListeners = new ArrayList<>();
+                }
+                if (!mWidgetProviderListeners.contains(listener)) {
+                    mWidgetProviderListeners.add(listener);
+                }
             }
+        }
 
-            if (admin.crossProfileWidgetProviders == null
-                    || admin.crossProfileWidgetProviders.isEmpty()) {
-                return Collections.emptyList();
+        private void notifyCrossProfileProvidersChanged(int userId, List<String> packages) {
+            final List<OnCrossProfileWidgetProvidersChangeListener> listeners;
+            synchronized (DevicePolicyManagerService.this) {
+                listeners = new ArrayList<>(mWidgetProviderListeners);
             }
-
-            return admin.crossProfileWidgetProviders;
+            final int listenerCount = listeners.size();
+            for (int i = 0; i < listenerCount; i++) {
+                OnCrossProfileWidgetProvidersChangeListener listener = listeners.get(i);
+                listener.onCrossProfileWidgetProvidersChanged(userId, packages);
+            }
         }
     }
 }

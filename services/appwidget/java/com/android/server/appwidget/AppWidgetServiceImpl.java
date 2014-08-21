@@ -20,6 +20,7 @@ import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.DevicePolicyManagerInternal.OnCrossProfileWidgetProvidersChangeListener;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
@@ -102,7 +103,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBackupProvider {
+class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBackupProvider,
+        OnCrossProfileWidgetProvidersChangeListener {
     private static final String TAG = "AppWidgetServiceImpl";
 
     private static boolean DEBUG = false;
@@ -199,6 +201,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mSecurityPolicy = new SecurityPolicy();
         computeMaximumWidgetBitmapMemory();
         registerBroadcastReceiver();
+        registerOnCrossProfileProvidersChangedListener();
     }
 
     private void computeMaximumWidgetBitmapMemory() {
@@ -241,6 +244,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         userFilter.addAction(Intent.ACTION_USER_STOPPED);
         mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
                 userFilter, null, null);
+    }
+
+    private void registerOnCrossProfileProvidersChangedListener() {
+        DevicePolicyManagerInternal devicePolicyManager = LocalServices.getService(
+                DevicePolicyManagerInternal.class);
+        // The device policy is an optional component.
+        if (devicePolicyManager != null) {
+            devicePolicyManager.addOnCrossProfileWidgetProvidersChangeListener(this);
+        }
     }
 
     public void setSafeMode(boolean safeMode) {
@@ -368,7 +380,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 saveGroupStateAsync(userId);
 
                 // If the set of providers has been modified, notify each active AppWidgetHost
-                scheduleNotifyHostsForProvidersChangedLocked();
+                scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
             }
         }
     }
@@ -1657,10 +1669,26 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    private void scheduleNotifyHostsForProvidersChangedLocked() {
+    private void scheduleNotifyGroupHostsForProvidersChangedLocked(int userId) {
+        final int[] profileIds = mSecurityPolicy.getEnabledGroupProfileIds(userId);
+
         final int N = mHosts.size();
         for (int i = N - 1; i >= 0; i--) {
             Host host = mHosts.get(i);
+
+            boolean hostInGroup = false;
+            final int M = profileIds.length;
+            for (int j = 0; j < M; j++) {
+                final int profileId = profileIds[j];
+                if (host.getUserId() == profileId) {
+                    hostInGroup = true;
+                    break;
+                }
+            }
+
+            if (!hostInGroup) {
+                continue;
+            }
 
             if (host == null || host.zombie || host.callbacks == null) {
                 continue;
@@ -2617,6 +2645,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     private void onUserStopped(int userId) {
         synchronized (mLock) {
+            boolean providersChanged = false;
+            boolean crossProfileWidgetsChanged = false;
+
             // Remove widgets that have both host and provider in the user.
             final int widgetCount = mWidgets.size();
             for (int i = widgetCount - 1; i >= 0; i--) {
@@ -2645,6 +2676,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             for (int i = hostCount - 1; i >= 0; i--) {
                 Host host = mHosts.get(i);
                 if (host.getUserId() == userId) {
+                    crossProfileWidgetsChanged |= !host.widgets.isEmpty();
                     deleteHostLocked(host);
                 }
             }
@@ -2654,6 +2686,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             for (int i = providerCount - 1; i >= 0; i--) {
                 Provider provider = mProviders.get(i);
                 if (provider.getUserId() == userId) {
+                    crossProfileWidgetsChanged |= !provider.widgets.isEmpty();
+                    providersChanged = true;
                     deleteProviderLocked(provider);
                 }
             }
@@ -2677,6 +2711,17 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             final int nextIdIndex = mNextAppWidgetIds.indexOfKey(userId);
             if (nextIdIndex >= 0) {
                 mNextAppWidgetIds.removeAt(nextIdIndex);
+            }
+
+            // Announce removed provider changes to all hosts in the group.
+            if (providersChanged) {
+                scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+            }
+
+            // Save state if removing a profile changed the group state.
+            // Nothing will be saved if the group parent was removed.
+            if (crossProfileWidgetsChanged) {
+                saveGroupStateAsync(userId);
             }
         }
     }
@@ -2840,6 +2885,31 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             mContext.unbindService(connection);
         } finally {
             Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public void onCrossProfileWidgetProvidersChanged(int userId, List<String> packages) {
+        final int parentId = mSecurityPolicy.getProfileParent(userId);
+        // We care only if the white-listed package is in a profile of
+        // the group parent as only the parent can add widgets from the
+        // profile and not the other way around.
+        if (parentId != userId) {
+            synchronized (mLock) {
+                boolean providersChanged = false;
+
+                final int packageCount = packages.size();
+                for (int i = 0; i < packageCount; i++) {
+                    String packageName = packages.get(i);
+                    providersChanged |= updateProvidersForPackageLocked(packageName,
+                            userId, null);
+                }
+
+                if (providersChanged) {
+                    saveGroupStateAsync(userId);
+                    scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+                }
+            }
         }
     }
 
