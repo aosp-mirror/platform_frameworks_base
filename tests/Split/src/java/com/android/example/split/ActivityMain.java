@@ -24,8 +24,6 @@ public class ActivityMain extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        TextView text = new TextView(this);
-        text.setText(R.string.test);
-        setContentView(text);
+        setContentView(R.layout.main);
     }
 }
