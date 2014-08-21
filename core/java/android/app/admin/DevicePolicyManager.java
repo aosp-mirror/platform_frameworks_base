@@ -2160,6 +2160,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide */
+    @SystemApi
     public String getDeviceOwner() {
         if (mService != null) {
             try {
@@ -2368,6 +2369,7 @@ public class DevicePolicyManager {
      * owner has been set for that user.
      * @throws IllegalArgumentException if the userId is invalid.
      */
+    @SystemApi
     public ComponentName getProfileOwner() throws IllegalArgumentException {
         return getProfileOwnerAsUser(Process.myUserHandle().getIdentifier());
     }
