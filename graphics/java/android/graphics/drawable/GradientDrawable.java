@@ -811,6 +811,11 @@ public class GradientDrawable extends Drawable {
     }
 
     @Override
+    public ColorFilter getColorFilter() {
+        return mColorFilter;
+    }
+
+    @Override
     public void setColorFilter(ColorFilter cf) {
         if (cf != mColorFilter) {
             mColorFilter = cf;
