@@ -27,8 +27,7 @@
     android:layout_height="wrap_content"
     androidprv:layout_maxWidth="@dimen/keyguard_security_width"
     androidprv:layout_maxHeight="@dimen/keyguard_security_height"
-    android:gravity="center_horizontal|top"
-    android:contentDescription="@string/keyguard_accessibility_status">
+    android:gravity="center_horizontal|top">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
