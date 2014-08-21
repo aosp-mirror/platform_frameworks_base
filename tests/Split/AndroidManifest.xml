@@ -16,9 +16,9 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.example.split">
-    <application android:label="@string/app_title">
-        <activity android:name="ActivityMain"
+    <application android:label="@string/app_title"
             android:icon="@mipmap/ic_app">
+        <activity android:name="ActivityMain">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
