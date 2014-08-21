@@ -41,78 +41,79 @@ import java.util.Objects;
  * The following XML example shows how the TV Parental Guidelines in United States can be defined:
  * <p><pre class="prettyprint">
  * {@literal
- * <?xml version="1.0" encoding="UTF-8"?>
- * <rating-system-definitions version="1.0">
- *     <rating-system-definition id="US_TV"
- *         displayName="US-TV"
- *         description="The TV Parental Guidelines"
- *         country="US">
- *         <sub-rating-definition id="US_TV_D"
- *             displayName="D"
- *             description="Suggestive dialogue (Usually means talks about sex)" />
- *         <sub-rating-definition id="US_TV_L"
- *             displayName="L"
- *             description="Coarse language" />
- *         <sub-rating-definition id="US_TV_S"
- *             displayName="S"
- *             description="Sexual content" />
- *         <sub-rating-definition id="US_TV_V"
- *             displayName="V"
- *             description="Violence" />
- *         <sub-rating-definition id="US_TV_FV"
- *             displayName="FV"
- *             description="Fantasy violence (Children\'s programming only)" />
+ * <rating-system-definitions xmlns:android="http://schemas.android.com/apk/res/android"
+ *     android:versionCode="1">
+ *     <!-- TV content rating system for US TV -->
+ *     <rating-system-definition android:name="US_TV"
+ *         android:title="US-TV"
+ *         android:description="@string/description_ustv"
+ *         android:country="US">
+ *         <sub-rating-definition android:name="US_TV_D"
+ *             android:title="D"
+ *             android:description="@string/description_ustv_d" />
+ *         <sub-rating-definition android:name="US_TV_L"
+ *             android:title="L"
+ *             android:description="@string/description_ustv_l" />
+ *         <sub-rating-definition android:name="US_TV_S"
+ *             android:title="S"
+ *             android:description="@string/description_ustv_s" />
+ *         <sub-rating-definition android:name="US_TV_V"
+ *             android:title="V"
+ *             android:description="@string/description_ustv_v" />
+ *         <sub-rating-definition android:name="US_TV_FV"
+ *             android:title="FV"
+ *             android:description="@string/description_ustv_fv" />
  *
- *         <rating-definition id="US_TV_Y"
- *             displayName="TV-Y"
- *             description="This program is designed to be appropriate for all children"
- *             ageHint="0" />
- *         <rating-definition id="US_TV_Y7"
- *             displayName="TV-Y7"
- *             description="This program is designed for children age 7 and above"
- *             ageHint="7">
- *             <sub-rating id="US_TV_FV" />
+ *         <rating-definition android:name="US_TV_Y"
+ *             android:title="TV-Y"
+ *             android:description="@string/description_ustv_y"
+ *             android:ageHint="0" />
+ *         <rating-definition android:name="US_TV_Y7"
+ *             android:title="TV-Y7"
+ *             android:description="@string/description_ustv_y7"
+ *             android:ageHint="7">
+ *             <sub-rating android:name="US_TV_FV" />
  *         </rating-definition>
- *         <rating-definition id="US_TV_G"
- *             displayName="TV-G"
- *             description="Most parents would find this program suitable for all ages"
- *             ageHint="0" />
- *         <rating-definition id="US_TV_PG"
- *             displayName="TV-PG"
- *             description="This program contains material that parents may find unsuitable for younger children"
- *             ageHint="14">
- *             <sub-rating id="US_TV_D" />
- *             <sub-rating id="US_TV_L" />
- *             <sub-rating id="US_TV_S" />
- *             <sub-rating id="US_TV_V" />
+ *         <rating-definition android:name="US_TV_G"
+ *             android:title="TV-G"
+ *             android:description="@string/description_ustv_g"
+ *             android:ageHint="0" />
+ *         <rating-definition android:name="US_TV_PG"
+ *             android:title="TV-PG"
+ *             android:description="@string/description_ustv_pg"
+ *             android:ageHint="14">
+ *             <sub-rating android:name="US_TV_D" />
+ *             <sub-rating android:name="US_TV_L" />
+ *             <sub-rating android:name="US_TV_S" />
+ *             <sub-rating android:name="US_TV_V" />
  *         </rating-definition>
- *         <rating-definition id="US_TV_14"
- *             displayName="TV-14"
- *             description="This program contains some material that many parents would find unsuitable for children under 14 years of age"
- *             ageHint="14">
- *             <sub-rating id="US_TV_D" />
- *             <sub-rating id="US_TV_L" />
- *             <sub-rating id="US_TV_S" />
- *             <sub-rating id="US_TV_V" />
+ *         <rating-definition android:name="US_TV_14"
+ *             android:title="TV-14"
+ *             android:description="@string/description_ustv_14"
+ *             android:ageHint="14">
+ *             <sub-rating android:name="US_TV_D" />
+ *             <sub-rating android:name="US_TV_L" />
+ *             <sub-rating android:name="US_TV_S" />
+ *             <sub-rating android:name="US_TV_V" />
  *         </rating-definition>
- *         <rating-definition id="US_TV_MA"
- *             displayName="TV-MA"
- *             description="This program is specifically designed to be viewed by adults and therefore may be unsuitable for children under 17"
- *             ageHint="17">
- *             <sub-rating id="US_TV_L" />
- *             <sub-rating id="US_TV_S" />
- *             <sub-rating id="US_TV_V" />
+ *         <rating-definition android:name="US_TV_MA"
+ *             android:title="TV-MA"
+ *             android:description="@string/description_ustv_ma"
+ *             android:ageHint="17">
+ *             <sub-rating android:name="US_TV_L" />
+ *             <sub-rating android:name="US_TV_S" />
+ *             <sub-rating android:name="US_TV_V" />
  *         </rating-definition>
- *         <order>
- *             <rating id="US_TV_Y" />
- *             <rating id="US_TV_Y7" />
- *         </order>
- *         <order>
- *             <rating id="US_TV_G" />
- *             <rating id="US_TV_PG" />
- *             <rating id="US_TV_14" />
- *             <rating id="US_TV_MA" />
- *         </order>
+ *         <rating-order>
+ *             <rating android:name="US_TV_Y" />
+ *             <rating android:name="US_TV_Y7" />
+ *         </rating-order>
+ *         <rating-order>
+ *             <rating android:name="US_TV_G" />
+ *             <rating android:name="US_TV_PG" />
+ *             <rating android:name="US_TV_14" />
+ *             <rating android:name="US_TV_MA" />
+ *         </rating-order>
  *     </rating-system-definition>
  * </rating-system-definitions>}</pre></p>
  *
@@ -1506,10 +1507,6 @@ import java.util.Objects;
  * </table>
  */
 public final class TvContentRating {
-    /** @hide */
-    public static final Uri SYSTEM_CONTENT_RATING_SYSTEM_XML = Uri.parse(
-            "android.resource://system/" + com.android.internal.R.xml.tv_content_rating_systems);
-
     // TODO: Consider to use other DELIMITER. In some countries such as India may use this delimiter
     // in the main ratings.
     private static final String DELIMITER = "/";
