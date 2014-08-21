@@ -31,7 +31,7 @@ page.tags=view,viewgroup
     <li>{@link android.view.ViewGroup}</li>
     <li>{@link android.view.ViewGroup.LayoutParams}</li>
   </ol>
-  
+
   <h2>See also</h2>
   <ol>
     <li><a href="{@docRoot}training/basics/firstapp/building-ui.html">Building a Simple User
@@ -43,9 +43,9 @@ href="{@docRoot}guide/components/activities.html">activity</a> or <a
 href="{@docRoot}guide/topics/appwidgets/index.html">app widget</a>.
 You can declare a layout in two ways:</p>
 <ul>
-<li><strong>Declare UI elements in XML</strong>. Android provides a straightforward XML 
+<li><strong>Declare UI elements in XML</strong>. Android provides a straightforward XML
 vocabulary that corresponds to the View classes and subclasses, such as those for widgets and layouts.</li>
-<li><strong>Instantiate layout elements at runtime</strong>. Your 
+<li><strong>Instantiate layout elements at runtime</strong>. Your
 application can create View and ViewGroup objects (and manipulate their properties) programmatically. </li>
 </ul>
 
@@ -55,12 +55,12 @@ application can create View and ViewGroup objects (and manipulate their properti
 <div class="sidebox">
   <ul>
   <li>The <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT
-  Plugin for Eclipse</a> offers a layout preview of your XML &mdash; 
+  Plugin for Eclipse</a> offers a layout preview of your XML &mdash;
   with the XML file opened, select the <strong>Layout</strong> tab.</li>
-  <li>You should also try the 
-  <a href="{@docRoot}tools/debugging/debugging-ui.html#hierarchyViewer">Hierarchy Viewer</a> tool, 
-  for debugging layouts &mdash; it reveals layout property values, 
-  draws wireframes with padding/margin indicators, and full rendered views while 
+  <li>You should also try the
+  <a href="{@docRoot}tools/debugging/debugging-ui.html#hierarchyViewer">Hierarchy Viewer</a> tool,
+  for debugging layouts &mdash; it reveals layout property values,
+  draws wireframes with padding/margin indicators, and full rendered views while
   you debug on the emulator or device.</li>
   <li>The <a href="{@docRoot}tools/debugging/debugging-ui.html#layoutopt">layoutopt</a> tool lets
   you quickly analyze your layouts and hierarchies for inefficiencies or other problems.</li>
@@ -68,7 +68,7 @@ application can create View and ViewGroup objects (and manipulate their properti
 </div>
 
 <p>The advantage to declaring your UI in XML is that it enables you to better separate the presentation of your application from the code that controls its behavior. Your UI descriptions are external to your application code, which means that you can modify or adapt it without having to modify your source code and recompile. For example, you can create XML layouts for different screen orientations, different device screen sizes, and different languages. Additionally, declaring the layout in XML makes it easier to visualize the structure of your UI, so it's easier to debug problems. As such, this document focuses on teaching you how to declare your layout in XML. If you're
-interested in instantiating View objects at runtime, refer to the {@link android.view.ViewGroup} and 
+interested in instantiating View objects at runtime, refer to the {@link android.view.ViewGroup} and
 {@link android.view.View} class references.</p>
 
 <p>In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods. In fact, the correspondence is often so direct that you can guess what XML attribute corresponds to a class method, or guess what class corresponds to a given XML element. However, note that not all vocabulary is identical. In some cases, there are slight naming differences. For
@@ -102,7 +102,7 @@ to hold a {@link android.widget.TextView} and a {@link android.widget.Button}:</
 &lt;/LinearLayout>
 </pre>
 
-<p>After you've declared your layout in XML, save the file with the <code>.xml</code> extension, 
+<p>After you've declared your layout in XML, save the file with the <code>.xml</code> extension,
 in your Android project's <code>res/layout/</code> directory, so it will properly compile. </p>
 
 <p>More information about the syntax for a layout XML file is available in the <a
@@ -111,11 +111,11 @@ href="{@docRoot}guide/topics/resources/layout-resource.html">Layout Resources</a
 <h2 id="load">Load the XML Resource</h2>
 
 <p>When you compile your application, each XML layout file is compiled into a
-{@link android.view.View} resource. You should load the layout resource from your application code, in your 
+{@link android.view.View} resource. You should load the layout resource from your application code, in your
 {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate()} callback implementation.
-Do so by calling <code>{@link android.app.Activity#setContentView(int) setContentView()}</code>, 
-passing it the reference to your layout resource in the form of: 
-<code>R.layout.<em>layout_file_name</em></code>. 
+Do so by calling <code>{@link android.app.Activity#setContentView(int) setContentView()}</code>,
+passing it the reference to your layout resource in the form of:
+<code>R.layout.<em>layout_file_name</em></code>.
 For example, if your XML layout is saved as <code>main_layout.xml</code>, you would load it
 for your Activity like so:</p>
 <pre>
@@ -126,7 +126,7 @@ public void onCreate(Bundle savedInstanceState) {
 </pre>
 
 <p>The <code>onCreate()</code> callback method in your Activity is called by the Android framework when
-your Activity is launched (see the discussion about lifecycles, in the 
+your Activity is launched (see the discussion about lifecycles, in the
 <a href="{@docRoot}guide/components/activities.html#Lifecycle">Activities</a>
 document).</p>
 
@@ -136,18 +136,18 @@ document).</p>
 <p>Every View and ViewGroup object supports their own variety of XML attributes.
 Some attributes are specific to a View object (for example, TextView supports the <code>textSize</code>
 attribute), but these attributes are also inherited by any View objects that may extend this class.
-Some are common to all View objects, because they are inherited from the root View class (like 
-the <code>id</code> attribute). And, other attributes are considered "layout parameters," which are 
+Some are common to all View objects, because they are inherited from the root View class (like
+the <code>id</code> attribute). And, other attributes are considered "layout parameters," which are
 attributes that describe certain layout orientations of the View object, as defined by that object's
 parent ViewGroup object.</p>
 
 <h3 id="id">ID</h3>
 
 <p>Any View object may have an integer ID associated with it, to uniquely identify the View within the tree.
-When the application is compiled, this ID is referenced as an integer, but the ID is typically 
+When the application is compiled, this ID is referenced as an integer, but the ID is typically
 assigned in the layout XML file as a string, in the <code>id</code> attribute.
 This is an XML attribute common to all View objects
-(defined by the {@link android.view.View} class) and you will use it very often. 
+(defined by the {@link android.view.View} class) and you will use it very often.
 The syntax for an ID, inside an XML tag is:</p>
 <pre>android:id="&#64;+id/my_button"</pre>
 
@@ -170,7 +170,7 @@ resources class, rather than the local resources class.</p>
         android:text="&#64;string/my_button_text"/>
 </pre>
   </li>
-  <li>Then create an instance of the view object and capture it from the layout 
+  <li>Then create an instance of the view object and capture it from the layout
 (typically in the <code>{@link android.app.Activity#onCreate(Bundle) onCreate()}</code> method):
 <pre>
 Button myButton = (Button) findViewById(R.id.my_button);
@@ -178,16 +178,16 @@ Button myButton = (Button) findViewById(R.id.my_button);
   </li>
 </ol>
 <p>Defining IDs for view objects is important when creating a {@link android.widget.RelativeLayout}.
-In a relative layout, sibling views can define their layout relative to another sibling view, 
+In a relative layout, sibling views can define their layout relative to another sibling view,
 which is referenced by the unique ID.</p>
 <p>An ID need not be unique throughout the entire tree, but it should be
-unique within the part of the tree you are searching (which may often be the entire tree, so it's best 
+unique within the part of the tree you are searching (which may often be the entire tree, so it's best
 to be completely unique when possible).</p>
 
 
 <h3 id="layout-params">Layout Parameters</h3>
 
-<p>XML layout attributes named <code>layout_<em>something</em></code> define 
+<p>XML layout attributes named <code>layout_<em>something</em></code> define
 layout parameters for the View that are appropriate for the ViewGroup in which it resides.</p>
 
 <p>Every ViewGroup class implements a nested class that extends {@link
@@ -201,7 +201,7 @@ view group defines layout parameters for each child view (including the child vi
 parameters associated with each view.</p>
 
 <p>Note that every LayoutParams subclass has its own syntax for setting
-values. Each child element must define LayoutParams that are appropriate for its parent, 
+values. Each child element must define LayoutParams that are appropriate for its parent,
 though it may also define different LayoutParams for its own children. </p>
 
 <p>All view groups include a width and height (<code>layout_width</code> and
@@ -236,7 +236,7 @@ Available Resources</a> document.</p>
    two dimensions, expressed as a width and a height. The unit for location
    and dimensions is the pixel.
    </p>
-  
+
    <p>
    It is possible to retrieve the location of a view by invoking the methods
    {@link android.view.View#getLeft()} and {@link android.view.View#getTop()}. The former returns the left, or X,
@@ -246,7 +246,7 @@ Available Resources</a> document.</p>
    when <code>getLeft()</code> returns 20, that means the view is located 20 pixels to the
    right of the left edge of its direct parent.
    </p>
-  
+
    <p>
    In addition, several convenience methods are offered to avoid unnecessary
    computations, namely {@link android.view.View#getRight()} and {@link android.view.View#getBottom()}.
@@ -254,14 +254,14 @@ Available Resources</a> document.</p>
    rectangle representing the view. For instance, calling {@link android.view.View#getRight()}
    is similar to the following computation: <code>getLeft() + getWidth()</code>.
    </p>
-   
+
 
 <h2 id="SizePaddingMargins">Size, Padding and Margins</h2>
    <p>
    The size of a view is expressed with a width and a height. A view actually
    possess two pairs of width and height values.
    </p>
-  
+
    <p>
    The first pair is known as <em>measured width</em> and
    <em>measured height</em>. These dimensions define how big a view wants to be
@@ -269,16 +269,16 @@ Available Resources</a> document.</p>
    measured dimensions can be obtained by calling {@link android.view.View#getMeasuredWidth()}
    and {@link android.view.View#getMeasuredHeight()}.
    </p>
-  
+
    <p>
    The second pair is simply known as <em>width</em> and <em>height</em>, or
    sometimes <em>drawing width</em> and <em>drawing height</em>. These
    dimensions define the actual size of the view on screen, at drawing time and
    after layout. These values may, but do not have to, be different from the
    measured width and height. The width and height can be obtained by calling
-   {@link android.view.View#getWidth()} and {@link android.view.View#getHeight()}. 
+   {@link android.view.View#getWidth()} and {@link android.view.View#getHeight()}.
    </p>
-  
+
    <p>
    To measure its dimensions, a view takes into account its padding. The padding
    is expressed in pixels for the left, top, right and bottom parts of the view.
@@ -287,9 +287,9 @@ Available Resources</a> document.</p>
    2 pixels to the right of the left edge. Padding can be set using the
    {@link android.view.View#setPadding(int, int, int, int)} method and queried by calling
    {@link android.view.View#getPaddingLeft()}, {@link android.view.View#getPaddingTop()},
-   {@link android.view.View#getPaddingRight()} and {@link android.view.View#getPaddingBottom()}.  
+   {@link android.view.View#getPaddingRight()} and {@link android.view.View#getPaddingBottom()}.
    </p>
-  
+
    <p>
    Even though a view can define a padding, it does not provide any support for
    margins. However, view groups provide such a support. Refer to
@@ -297,13 +297,13 @@ Available Resources</a> document.</p>
    {@link android.view.ViewGroup.MarginLayoutParams} for further information.
    </p>
 
-   <p>For more information about dimensions, see 
+   <p>For more information about dimensions, see
    <a href="{@docRoot}guide/topics/resources/more-resources.html#Dimension">Dimension Values</a>.
    </p>
-   
 
-   
-   
+
+
+
 
 
 <style type="text/css">
@@ -332,7 +332,7 @@ layout to acheive your UI design, you should strive to keep your layout hierarch
 possible. Your layout draws faster if it has fewer nested layouts (a wide view hierarchy is
 better than a deep view hierarchy).</p>
 
-<!-- 
+<!--
 <h2 id="framelayout">FrameLayout</h2>
 <p>{@link android.widget.FrameLayout FrameLayout} is the simplest type of layout
 object. It's basically a blank space on your screen that you can
@@ -417,7 +417,7 @@ android.widget.TextView}.
 android.widget.ListView}, initialize a new {@link android.widget.ArrayAdapter} using a
 constructor to specify the layout for each string and the string array:</p>
 <pre>
-ArrayAdapter adapter = new ArrayAdapter&lt;String>(this, 
+ArrayAdapter&lt;String> adapter = new ArrayAdapter&lt;String>(this,
         android.R.layout.simple_list_item_1, myStringArray);
 </pre>
 <p>The arguments for this constructor are:</p>
@@ -453,14 +453,14 @@ numbers. You then create a string array specifying which columns from the {@link
 android.database.Cursor} you want in the layout for each result and an integer array specifying the
 corresponding views that each column should be placed:</p>
 <pre>
-String[] fromColumns = {ContactsContract.Data.DISPLAY_NAME, 
+String[] fromColumns = {ContactsContract.Data.DISPLAY_NAME,
                         ContactsContract.CommonDataKinds.Phone.NUMBER};
 int[] toViews = {R.id.display_name, R.id.phone_number};
 </pre>
 <p>When you instantiate the {@link android.widget.SimpleCursorAdapter}, pass the layout to use for
 each result, the {@link android.database.Cursor} containing the results, and these two arrays:</p>
 <pre>
-SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, 
+SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
         R.layout.person_name_and_number, cursor, fromColumns, toViews, 0);
 ListView listView = getListView();
 listView.setAdapter(adapter);
@@ -490,7 +490,7 @@ private OnItemClickListener mMessageClickedHandler = new OnItemClickListener() {
     }
 };
 
-listView.setOnItemClickListener(mMessageClickedHandler); 
+listView.setOnItemClickListener(mMessageClickedHandler);
 </pre>
 
 
