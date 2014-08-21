@@ -1539,7 +1539,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 widget.views = views;
             }
 
-            scheduleNotifyUpdateAppWidgetLocked(widget);
+            scheduleNotifyUpdateAppWidgetLocked(widget, views);
         }
     }
 
@@ -1611,7 +1611,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    private void scheduleNotifyUpdateAppWidgetLocked(Widget widget) {
+    private void scheduleNotifyUpdateAppWidgetLocked(Widget widget, RemoteViews updateViews) {
         if (widget == null || widget.provider == null || widget.provider.zombie
                 || widget.host.callbacks == null || widget.host.zombie) {
             return;
@@ -1620,7 +1620,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = widget.host;
         args.arg2 = widget.host.callbacks;
-        args.arg3 = widget.views;
+        args.arg3 = updateViews;
         args.argi1 = widget.appWidgetId;
 
         mCallbackHandler.obtainMessage(
