@@ -18,8 +18,8 @@ package android.net.wifi;
 
 import android.net.wifi.passpoint.WifiPasspointInfo;
 import android.net.wifi.passpoint.WifiPasspointManager;
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Describes information about a detected access point. In addition
@@ -48,7 +48,10 @@ public class ScanResult implements Parcelable {
      */
     public String capabilities;
     /**
-     * The detected signal level in dBm.
+     * The detected signal level in dBm, also known as the RSSI.
+     *
+     * <p>Use {@link android.net.wifi.WifiManager#calculateSignalLevel} to convert this number into
+     * an absolute signal level which can be displayed to a user.
      */
     public int level;
     /**
