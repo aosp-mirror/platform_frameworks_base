@@ -17,13 +17,17 @@
 package com.android.internal.content;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Environment;
+import android.os.Environment.UserEnvironment;
 import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageResultCode;
@@ -215,7 +219,7 @@ public class PackageHelper {
     /**
      * Extract public files for the single given APK.
      */
-    public static int extractPublicFiles(String apkPath, File publicZipFile)
+    public static long extractPublicFiles(File apkFile, File publicZipFile)
             throws IOException {
         final FileOutputStream fstr;
         final ZipOutputStream publicZipOutStream;
@@ -226,12 +230,13 @@ public class PackageHelper {
         } else {
             fstr = new FileOutputStream(publicZipFile);
             publicZipOutStream = new ZipOutputStream(fstr);
+            Log.d(TAG, "Extracting " + apkFile + " to " + publicZipFile);
         }
 
-        int size = 0;
+        long size = 0L;
 
         try {
-            final ZipFile privateZip = new ZipFile(apkPath);
+            final ZipFile privateZip = new ZipFile(apkFile.getAbsolutePath());
             try {
                 // Copy manifest, resources.arsc and res directory to public zip
                 for (final ZipEntry zipEntry : Collections.list(privateZip.entries())) {
@@ -308,8 +313,15 @@ public class PackageHelper {
      * Given a requested {@link PackageInfo#installLocation} and calculated
      * install size, pick the actual location to install the app.
      */
-    public static int resolveInstallLocation(Context context, int installLocation, long sizeBytes,
-            int installFlags) {
+    public static int resolveInstallLocation(Context context, String packageName,
+            int installLocation, long sizeBytes, int installFlags) {
+        ApplicationInfo existingInfo = null;
+        try {
+            existingInfo = context.getPackageManager().getApplicationInfo(packageName,
+                    PackageManager.GET_UNINSTALLED_PACKAGES);
+        } catch (NameNotFoundException ignored) {
+        }
+
         final int prefer;
         final boolean checkBoth;
         if ((installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
@@ -325,7 +337,16 @@ public class PackageHelper {
             prefer = RECOMMEND_INSTALL_EXTERNAL;
             checkBoth = true;
         } else if (installLocation == PackageInfo.INSTALL_LOCATION_AUTO) {
-            prefer = RECOMMEND_INSTALL_INTERNAL;
+            // When app is already installed, prefer same medium
+            if (existingInfo != null) {
+                if ((existingInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
+                    prefer = RECOMMEND_INSTALL_EXTERNAL;
+                } else {
+                    prefer = RECOMMEND_INSTALL_INTERNAL;
+                }
+            } else {
+                prefer = RECOMMEND_INSTALL_INTERNAL;
+            }
             checkBoth = true;
         } else {
             prefer = RECOMMEND_INSTALL_INTERNAL;
@@ -337,14 +358,15 @@ public class PackageHelper {
 
         boolean fitsOnInternal = false;
         if (checkBoth || prefer == RECOMMEND_INSTALL_INTERNAL) {
-            fitsOnInternal = (sizeBytes
-                    <= storage.getStorageBytesUntilLow(Environment.getDataDirectory()));
+            final File target = Environment.getDataDirectory();
+            fitsOnInternal = (sizeBytes <= storage.getStorageBytesUntilLow(target));
         }
 
         boolean fitsOnExternal = false;
         if (!emulated && (checkBoth || prefer == RECOMMEND_INSTALL_EXTERNAL)) {
-            fitsOnExternal = (sizeBytes
-                    <= storage.getStorageBytesUntilLow(Environment.getExternalStorageDirectory()));
+            final File target = new UserEnvironment(UserHandle.USER_OWNER)
+                    .getExternalStorageDirectory();
+            fitsOnExternal = (sizeBytes <= storage.getStorageBytesUntilLow(target));
         }
 
         if (prefer == RECOMMEND_INSTALL_INTERNAL) {
@@ -376,5 +398,13 @@ public class PackageHelper {
         } else {
             return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
         }
+    }
+
+    public static String replaceEnd(String str, String before, String after) {
+        if (!str.endsWith(before)) {
+            throw new IllegalArgumentException(
+                    "Expected " + str + " to end with " + before);
+        }
+        return str.substring(0, str.length() - before.length()) + after;
     }
 }
