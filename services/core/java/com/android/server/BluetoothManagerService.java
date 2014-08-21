@@ -121,6 +121,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private int mState;
     private final BluetoothHandler mHandler;
     private int mErrorRecoveryRetryCounter;
+    private final int mSystemUiUid;
 
     private void registerForAirplaneMode(IntentFilter filter) {
         final ContentResolver resolver = mContext.getContentResolver();
@@ -218,6 +219,15 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         if (isBluetoothPersistedStateOn()) {
             mEnableExternal = true;
         }
+
+        int sysUiUid = -1;
+        try {
+            sysUiUid = mContext.getPackageManager().getPackageUid("com.android.systemui",
+                    UserHandle.USER_OWNER);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.wtf(TAG, "Unable to resolve SystemUI's UID.", e);
+        }
+        mSystemUiUid = sysUiUid;
     }
 
     /**
@@ -1118,7 +1128,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         try {
             foregroundUser = ActivityManager.getCurrentUser();
             valid = (callingUser == foregroundUser) ||
-                    callingAppId == Process.NFC_UID;
+                    callingAppId == Process.NFC_UID ||
+                    callingAppId == mSystemUiUid;
             if (DBG) {
                 Log.d(TAG, "checkIfCallerIsForegroundUser: valid=" + valid
                     + " callingUser=" + callingUser
