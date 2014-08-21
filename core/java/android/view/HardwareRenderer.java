@@ -349,6 +349,8 @@ public abstract class HardwareRenderer {
      */
     abstract HardwareLayer createTextureLayer();
 
+    abstract void buildLayer(RenderNode node);
+
     abstract boolean copyLayerInto(HardwareLayer layer, Bitmap bitmap);
 
     /**
