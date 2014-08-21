@@ -22,4 +22,5 @@ import android.app.ActivityManager;
 interface IAppTask {
     void finishAndRemoveTask();
     ActivityManager.RecentTaskInfo getTaskInfo();
+    void setExcludeFromRecents(boolean exclude);
 }

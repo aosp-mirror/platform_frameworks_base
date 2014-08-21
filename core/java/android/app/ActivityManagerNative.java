@@ -30,6 +30,8 @@ import android.content.pm.IPackageDataObserver;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
@@ -561,6 +563,27 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
                 IAppTask task = list.get(i);
                 reply.writeStrongBinder(task.asBinder());
             }
+            return true;
+        }
+
+        case ADD_APP_TASK_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder activityToken = data.readStrongBinder();
+            Intent intent = Intent.CREATOR.createFromParcel(data);
+            ActivityManager.TaskDescription descr
+                    = ActivityManager.TaskDescription.CREATOR.createFromParcel(data);
+            Bitmap thumbnail = Bitmap.CREATOR.createFromParcel(data);
+            int res = addAppTask(activityToken, intent, descr, thumbnail);
+            reply.writeNoException();
+            reply.writeInt(res);
+            return true;
+        }
+
+        case GET_APP_TASK_THUMBNAIL_SIZE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            Point size = getAppTaskThumbnailSize();
+            reply.writeNoException();
+            size.writeToParcel(reply, 0);
             return true;
         }
 
@@ -2876,6 +2899,33 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return list;
+    }
+    public int addAppTask(IBinder activityToken, Intent intent,
+            ActivityManager.TaskDescription description, Bitmap thumbnail) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(activityToken);
+        intent.writeToParcel(data, 0);
+        description.writeToParcel(data, 0);
+        thumbnail.writeToParcel(data, 0);
+        mRemote.transact(ADD_APP_TASK_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int res = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
+    public Point getAppTaskThumbnailSize() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(GET_APP_TASK_THUMBNAIL_SIZE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        Point size = Point.CREATOR.createFromParcel(reply);
+        data.recycle();
+        reply.recycle();
+        return size;
     }
     public List getTasks(int maxNum, int flags) throws RemoteException {
         Parcel data = Parcel.obtain();
