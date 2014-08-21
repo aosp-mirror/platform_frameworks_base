@@ -57,7 +57,7 @@ socket_connect_local(JNIEnv *env, jobject object,
 
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return;
     }
 
@@ -95,7 +95,7 @@ socket_bind_local (JNIEnv *env, jobject object, jobject fileDescriptor,
 
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return;
     }
 
@@ -118,7 +118,7 @@ socket_listen (JNIEnv *env, jobject object, jobject fileDescriptor, jint backlog
 
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return;
     }
 
@@ -154,7 +154,7 @@ socket_accept (JNIEnv *env, jobject object, jobject fileDescriptor, jobject s)
 
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return NULL;
     }
 
@@ -184,7 +184,7 @@ socket_shutdown (JNIEnv *env, jobject object, jobject fileDescriptor,
 
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return;
     }
 
@@ -246,7 +246,7 @@ socket_getOption(JNIEnv *env, jobject object, jobject fileDescriptor, jint optID
 
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return 0;
     }
 
@@ -293,7 +293,7 @@ static void socket_setOption(
 
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return;
     }
 
@@ -353,7 +353,7 @@ static jint socket_pending (JNIEnv *env, jobject object,
 
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return (jint)-1;
     }
 
@@ -378,7 +378,7 @@ static jint socket_available (JNIEnv *env, jobject object,
 
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return (jint)-1;
     }
 
@@ -459,20 +459,20 @@ static int socket_process_cmsg(JNIEnv *env, jobject thisJ, struct msghdr * pMsg)
                 jobject fdObject
                         = jniCreateFileDescriptor(env, pDescriptors[i]);
 
-                if (env->ExceptionOccurred() != NULL) {
+                if (env->ExceptionCheck()) {
                     return -1;
                 }
 
                 env->SetObjectArrayElement(fdArray, i, fdObject);
 
-                if (env->ExceptionOccurred() != NULL) {
+                if (env->ExceptionCheck()) {
                     return -1;
                 }
             }
 
             env->SetObjectField(thisJ, field_inboundFileDescriptors, fdArray);
 
-            if (env->ExceptionOccurred() != NULL) {
+            if (env->ExceptionCheck()) {
                 return -1;
             }
         }
@@ -558,7 +558,7 @@ static int socket_write_all(JNIEnv *env, jobject object, int fd,
             = (jobjectArray)env->GetObjectField(
                 object, field_outboundFileDescriptors);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return -1;
     }
 
@@ -570,18 +570,18 @@ static int socket_write_all(JNIEnv *env, jobject object, int fd,
     // Add any pending outbound file descriptors to the message
     if (outboundFds != NULL) {
 
-        if (env->ExceptionOccurred() != NULL) {
+        if (env->ExceptionCheck()) {
             return -1;
         }
 
         for (int i = 0; i < countFds; i++) {
             jobject fdObject = env->GetObjectArrayElement(outboundFds, i);
-            if (env->ExceptionOccurred() != NULL) {
+            if (env->ExceptionCheck()) {
                 return -1;
             }
 
             fds[i] = jniGetFDFromFileDescriptor(env, fdObject);
-            if (env->ExceptionOccurred() != NULL) {
+            if (env->ExceptionCheck()) {
                 return -1;
             }
         }
@@ -638,7 +638,7 @@ static jint socket_read (JNIEnv *env, jobject object, jobject fileDescriptor)
 
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return (jint)0;
     }
 
@@ -683,7 +683,7 @@ static jint socket_readba (JNIEnv *env, jobject object,
 
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return (jint)-1;
     }
 
@@ -717,7 +717,7 @@ static void socket_write (JNIEnv *env, jobject object,
 
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return;
     }
 
@@ -745,7 +745,7 @@ static void socket_writeba (JNIEnv *env, jobject object,
 
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return;
     }
 
@@ -777,7 +777,7 @@ static jobject socket_get_peer_credentials(JNIEnv *env,
 
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return NULL;
     }
 
@@ -816,7 +816,7 @@ static jobject socket_getSockName(JNIEnv *env,
 
     fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         return NULL;
     }
 
