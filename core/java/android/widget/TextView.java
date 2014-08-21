@@ -2867,8 +2867,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Gives the text a shadow of the specified radius and color, the specified
-     * distance from its normal position.
+     * Gives the text a shadow of the specified blur radius and color, the specified
+     * distance from its drawn position.
+     * <p>
+     * The text shadow produced does not interact with the properties on view
+     * that are responsible for real time shadows,
+     * {@link View#getElevation() elevation} and
+     * {@link View#getTranslationZ() translationZ}.
+     *
+     * @see Paint#setShadowLayer(float, float, float, int)
      *
      * @attr ref android.R.styleable#TextView_shadowColor
      * @attr ref android.R.styleable#TextView_shadowDx
