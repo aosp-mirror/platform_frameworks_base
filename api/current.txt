@@ -5462,7 +5462,6 @@ package android.app.admin {
     method public void setAccountManagementDisabled(android.content.ComponentName, java.lang.String, boolean);
     method public boolean setApplicationHidden(android.content.ComponentName, java.lang.String, boolean);
     method public void setApplicationRestrictions(android.content.ComponentName, java.lang.String, android.os.Bundle);
-    method public int setApplicationsHidden(android.content.ComponentName, android.content.Intent, boolean);
     method public void setBlockUninstall(android.content.ComponentName, java.lang.String, boolean);
     method public void setCameraDisabled(android.content.ComponentName, boolean);
     method public void setCrossProfileCallerIdDisabled(android.content.ComponentName, boolean);

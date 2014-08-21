@@ -3027,28 +3027,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by profile or device owner to hide or unhide currently installed packages. This
-     * should only be called by a profile or device owner running within a managed profile.
-     *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param intent An intent matching the app(s) to be updated. All apps that resolve for this
-     *               intent will be updated in the current profile.
-     * @param hidden {@code true} if the packages should be hidden, {@code false} if they should
-     *                 be unhidden.
-     * @return int The number of activities that matched the intent and were updated.
-     */
-    public int setApplicationsHidden(ComponentName admin, Intent intent, boolean hidden) {
-        if (mService != null) {
-            try {
-                return mService.setApplicationsHidden(admin, intent, hidden);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed talking with device policy service", e);
-            }
-        }
-        return 0;
-    }
-
-    /**
      * Called by device or profile owner to determine if a package is hidden.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
