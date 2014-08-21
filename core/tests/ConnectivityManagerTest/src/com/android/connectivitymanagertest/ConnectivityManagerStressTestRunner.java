@@ -35,14 +35,14 @@ import junit.framework.TestSuite;
  */
 
 public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunner {
-    public int mSoftapIterations = 100;
-    public int mScanIterations = 100;
-    public int mReconnectIterations = 100;
+    private int mSoftApIterations = 100;
+    private int mScanIterations = 100;
+    private int mReconnectIterations = 100;
     // sleep time before restart wifi, default is set to 2 minutes
-    public int mSleepTime = 2 * 60 * 1000;
-    public String mReconnectSsid = "securenetdhcp";
-    public String mReconnectPassword = "androidwifi";
-    public boolean mWifiOnlyFlag = false;
+    private long mSleepTime = 2 * 60 * 1000;
+    private String mReconnectSsid = null;
+    private String mReconnectPassword = null;
+    private boolean mWifiOnlyFlag = false;
 
     @Override
     public TestSuite getAllTests() {
@@ -60,15 +60,15 @@ public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunn
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        String valueStr = (String) icicle.get("softap_iterations");
+        String valueStr = icicle.getString("softap_iterations");
         if (valueStr != null) {
             int iteration = Integer.parseInt(valueStr);
             if (iteration > 0) {
-                mSoftapIterations = iteration;
+                mSoftApIterations = iteration;
             }
         }
 
-        String scanIterationStr = (String) icicle.get("scan_iterations");
+        String scanIterationStr = icicle.getString("scan_iterations");
         if (scanIterationStr != null) {
             int scanIteration = Integer.parseInt(scanIterationStr);
             if (scanIteration > 0) {
@@ -76,17 +76,17 @@ public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunn
             }
         }
 
-        String ssidStr= (String) icicle.get("reconnect_ssid");
+        String ssidStr= icicle.getString("reconnect_ssid");
         if (ssidStr != null) {
             mReconnectSsid = ssidStr;
         }
 
-        String passwordStr = (String) icicle.get("reconnect_password");
+        String passwordStr = icicle.getString("reconnect_password");
         if (passwordStr != null) {
             mReconnectPassword = passwordStr;
         }
 
-        String reconnectStr = (String) icicle.get("reconnect_iterations");
+        String reconnectStr = icicle.getString("reconnect_iterations");
         if (reconnectStr != null) {
             int iteration = Integer.parseInt(reconnectStr);
             if (iteration > 0) {
@@ -94,7 +94,7 @@ public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunn
             }
         }
 
-        String sleepTimeStr = (String) icicle.get("sleep_time");
+        String sleepTimeStr = icicle.getString("sleep_time");
         if (sleepTimeStr != null) {
             int sleepTime = Integer.parseInt(sleepTimeStr);
             if (sleepTime > 0) {
@@ -102,9 +102,37 @@ public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunn
             }
         }
 
-        String wifiOnlyFlag = (String) icicle.get("wifi-only");
+        String wifiOnlyFlag = icicle.getString("wifi-only");
         if (wifiOnlyFlag != null) {
             mWifiOnlyFlag = true;
         }
+    }
+
+    public int getSoftApInterations() {
+        return mSoftApIterations;
+    }
+
+    public int getScanIterations() {
+        return mScanIterations;
+    }
+
+    public int getReconnectIterations() {
+        return mReconnectIterations;
+    }
+
+    public boolean isWifiOnly() {
+        return mWifiOnlyFlag;
+    }
+
+    public long getSleepTime() {
+        return mSleepTime;
+    }
+
+    public String getReconnectSsid() {
+        return mReconnectSsid;
+    }
+
+    public String getReconnectPassword() {
+        return mReconnectPassword;
     }
 }
