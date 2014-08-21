@@ -268,16 +268,21 @@ public class ActionBarContainer extends FrameLayout {
 
         if (mActionBarView == null) return;
 
-        final LayoutParams lp = (LayoutParams) mActionBarView.getLayoutParams();
-        final int actionBarViewHeight = isCollapsed(mActionBarView) ? 0 :
-                mActionBarView.getMeasuredHeight() + lp.topMargin + lp.bottomMargin;
+        int nonTabMaxHeight = 0;
+        final int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            final View child = getChildAt(i);
+            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            nonTabMaxHeight = isCollapsed(child) ? 0 :
+                    child.getMeasuredHeight() + lp.topMargin + lp.bottomMargin;
+        }
 
         if (mTabContainer != null && mTabContainer.getVisibility() != GONE) {
             final int mode = MeasureSpec.getMode(heightMeasureSpec);
             if (mode == MeasureSpec.AT_MOST) {
                 final int maxHeight = MeasureSpec.getSize(heightMeasureSpec);
                 setMeasuredDimension(getMeasuredWidth(),
-                        Math.min(actionBarViewHeight + mTabContainer.getMeasuredHeight(),
+                        Math.min(nonTabMaxHeight + mTabContainer.getMeasuredHeight(),
                                 maxHeight));
             }
         }
