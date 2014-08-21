@@ -2712,6 +2712,16 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
 
     // The libraries this table references.
     Vector<sp<Package> > libraryPackages;
+    const ResTable& table = mAssets->getIncludedResources();
+    const size_t basePackageCount = table.getBasePackageCount();
+    for (size_t i = 0; i < basePackageCount; i++) {
+        size_t packageId = table.getBasePackageId(i);
+        String16 packageName(table.getBasePackageName(i));
+        if (packageId > 0x01 && packageId != 0x7f &&
+                packageName != String16("android")) {
+            libraryPackages.add(sp<Package>(new Package(packageName, packageId)));
+        }
+    }
 
     // Iterate through all data, collecting all values (strings,
     // references, etc).
@@ -2720,22 +2730,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
     for (pi=0; pi<N; pi++) {
         sp<Package> p = mOrderedPackages.itemAt(pi);
         if (p->getTypes().size() == 0) {
-            // Empty, this is an imported package being used as
-            // a shared library. We do not flatten this package.
-            if (p->getAssignedId() != 0x01 && p->getName() != String16("android")) {
-                // This is not the base Android package, and it is a library
-                // so we must add a reference to the library when flattening.
-                libraryPackages.add(p);
-            }
             continue;
-        } else if (p->getAssignedId() == 0x00) {
-            if (mPackageType != SharedLibrary) {
-                fprintf(stderr, "ERROR: Package %s can not have ID=0x00 unless building a shared library.",
-                        String8(p->getName()).string());
-                return UNKNOWN_ERROR;
-            }
-            // If this is a shared library, we also include ourselves as an entry.
-            libraryPackages.add(p);
         }
 
         StringPool typeStrings(useUTF8);
@@ -3147,7 +3142,8 @@ status_t ResourceTable::flattenLibraryTable(const sp<AaptFile>& dest, const Vect
 
         const size_t libStart = dest->getSize();
         const size_t count = libs.size();
-        ResTable_lib_header* libHeader = (ResTable_lib_header*) dest->editDataInRange(libStart, sizeof(ResTable_lib_header));
+        ResTable_lib_header* libHeader = (ResTable_lib_header*) dest->editDataInRange(
+                libStart, sizeof(ResTable_lib_header));
 
         memset(libHeader, 0, sizeof(*libHeader));
         libHeader->header.type = htods(RES_TABLE_LIBRARY_TYPE);
@@ -3163,7 +3159,8 @@ status_t ResourceTable::flattenLibraryTable(const sp<AaptFile>& dest, const Vect
                         String8(libPackage->getName()).string(),
                         (uint8_t)libPackage->getAssignedId()));
 
-            ResTable_lib_entry* entry = (ResTable_lib_entry*) dest->editDataInRange(entryStart, sizeof(ResTable_lib_entry));
+            ResTable_lib_entry* entry = (ResTable_lib_entry*) dest->editDataInRange(
+                    entryStart, sizeof(ResTable_lib_entry));
             memset(entry, 0, sizeof(*entry));
             entry->packageId = htodl(libPackage->getAssignedId());
             strcpy16_htod(entry->packageName, libPackage->getName().string());
