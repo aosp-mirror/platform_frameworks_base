@@ -1371,6 +1371,13 @@
          may have a specific value set in an overlay config.xml file. -->
     <integer name="config_mobile_mtu">1500</integer>
 
+    <!-- Configure mobile tcp buffer sizes in the form:
+         rat-name:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
+         If no value is found for the rat-name in use, the system default will be applied.
+    -->
+    <string-array name="config_mobile_tcp_buffers">
+    </string-array>
+
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
          Here are a few of them:
