@@ -18,6 +18,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <androidfw/Asset.h>
 #include <androidfw/ResourceTypes.h>
+#include <cutils/compiler.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <sys/mman.h>
@@ -87,27 +88,39 @@ static bool optionsJustBounds(JNIEnv* env, jobject options) {
     return options != NULL && env->GetBooleanField(options, gOptions_justBoundsFieldID);
 }
 
-static void scaleNinePatchChunk(android::Res_png_9patch* chunk, float scale) {
+static void scaleDivRange(int32_t* divs, int count, float scale, int maxValue) {
+    for (int i = 0; i < count; i++) {
+        divs[i] = int32_t(divs[i] * scale + 0.5f);
+        if (i > 0 && divs[i] == divs[i - 1]) {
+            divs[i]++; // avoid collisions
+        }
+    }
+
+    if (CC_UNLIKELY(divs[count - 1] > maxValue)) {
+        // if the collision avoidance above put some divs outside the bounds of the bitmap,
+        // slide outer stretchable divs inward to stay within bounds
+        int highestAvailable = maxValue;
+        for (int i = count - 1; i >= 0; i--) {
+            divs[i] = highestAvailable;
+            if (i > 0 && divs[i] <= divs[i-1]){
+                // keep shifting
+                highestAvailable = divs[i] - 1;
+            } else {
+                break;
+            }
+        }
+    }
+}
+
+static void scaleNinePatchChunk(android::Res_png_9patch* chunk, float scale,
+        int scaledWidth, int scaledHeight) {
     chunk->paddingLeft = int(chunk->paddingLeft * scale + 0.5f);
     chunk->paddingTop = int(chunk->paddingTop * scale + 0.5f);
     chunk->paddingRight = int(chunk->paddingRight * scale + 0.5f);
     chunk->paddingBottom = int(chunk->paddingBottom * scale + 0.5f);
 
-    int32_t* xDivs = chunk->getXDivs();
-    for (int i = 0; i < chunk->numXDivs; i++) {
-        xDivs[i] = int32_t(xDivs[i] * scale + 0.5f);
-        if (i > 0 && xDivs[i] == xDivs[i - 1]) {
-            xDivs[i]++;
-        }
-    }
-
-    int32_t* yDivs = chunk->getYDivs();
-    for (int i = 0; i < chunk->numYDivs; i++) {
-        yDivs[i] = int32_t(yDivs[i] * scale + 0.5f);
-        if (i > 0 && yDivs[i] == yDivs[i - 1]) {
-            yDivs[i]++;
-        }
-    }
+    scaleDivRange(chunk->getXDivs(), chunk->numXDivs, scale, scaledWidth);
+    scaleDivRange(chunk->getYDivs(), chunk->numYDivs, scale, scaledHeight);
 }
 
 static SkColorType colorTypeForScaledOutput(SkColorType colorType) {
@@ -330,7 +343,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     jbyteArray ninePatchChunk = NULL;
     if (peeker.mPatch != NULL) {
         if (willScale) {
-            scaleNinePatchChunk(peeker.mPatch, scale);
+            scaleNinePatchChunk(peeker.mPatch, scale, scaledWidth, scaledHeight);
         }
 
         size_t ninePatchArraySize = peeker.mPatch->serializedSize();
