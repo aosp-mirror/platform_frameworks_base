@@ -190,14 +190,6 @@ public class MediaRouter {
 
             final int mainType = mCurAudioRoutesInfo.mMainType;
 
-            boolean a2dpEnabled;
-            try {
-                a2dpEnabled = mAudioService.isBluetoothA2dpOn();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error querying Bluetooth A2DP state", e);
-                a2dpEnabled = false;
-            }
-
             if (!TextUtils.equals(newRoutes.mBluetoothName, mCurAudioRoutesInfo.mBluetoothName)) {
                 mCurAudioRoutesInfo.mBluetoothName = newRoutes.mBluetoothName;
                 if (mCurAudioRoutesInfo.mBluetoothName != null) {
@@ -220,6 +212,7 @@ public class MediaRouter {
             }
 
             if (mBluetoothA2dpRoute != null) {
+                final boolean a2dpEnabled = isBluetoothA2dpOn();
                 if (mainType != AudioRoutesInfo.MAIN_SPEAKER &&
                         mSelectedRoute == mBluetoothA2dpRoute && !a2dpEnabled) {
                     selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mDefaultAudioVideo, false);
@@ -227,6 +220,15 @@ public class MediaRouter {
                         a2dpEnabled) {
                     selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO, mBluetoothA2dpRoute, false);
                 }
+            }
+        }
+
+        boolean isBluetoothA2dpOn() {
+            try {
+                return mAudioService.isBluetoothA2dpOn();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error querying Bluetooth A2DP state", e);
+                return false;
             }
         }
 
@@ -950,7 +952,7 @@ public class MediaRouter {
     static void selectDefaultRouteStatic() {
         // TODO: Be smarter about the route types here; this selects for all valid.
         if (sStatic.mSelectedRoute != sStatic.mBluetoothA2dpRoute
-                && sStatic.mBluetoothA2dpRoute != null) {
+                && sStatic.mBluetoothA2dpRoute != null && sStatic.isBluetoothA2dpOn()) {
             selectRouteStatic(ROUTE_TYPE_ANY, sStatic.mBluetoothA2dpRoute, false);
         } else {
             selectRouteStatic(ROUTE_TYPE_ANY, sStatic.mDefaultAudioVideo, false);
