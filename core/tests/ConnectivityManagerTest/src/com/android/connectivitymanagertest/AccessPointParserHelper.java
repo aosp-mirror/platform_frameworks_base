@@ -66,7 +66,6 @@ import java.util.List;
  *      networkprefixlength.
  */
 public class AccessPointParserHelper {
-    private static final String TAG = "AccessPointParserHelper";
     static final int NONE = 0;
     static final int WEP = 1;
     static final int PSK = 2;
