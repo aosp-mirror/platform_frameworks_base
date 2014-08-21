@@ -3189,7 +3189,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     void endLockTaskModeIfTaskEnding(TaskRecord task) {
         if (mLockTaskModeTask != null && mLockTaskModeTask == task) {
+            final Message lockTaskMsg = Message.obtain();
+            lockTaskMsg.arg1 = mLockTaskModeTask.userId;
+            lockTaskMsg.what = LOCK_TASK_END_MSG;
             mLockTaskModeTask = null;
+            mHandler.sendMessage(lockTaskMsg);
         }
     }
 
