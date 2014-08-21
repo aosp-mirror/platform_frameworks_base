@@ -179,13 +179,6 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         transformUpdateNeeded = true;
     }
 
-    if (transformUpdateNeeded) {
-        // update the transform in window of the layer to reset its origin wrt light source position
-        Matrix4 windowTransform;
-        info.damageAccumulator->computeCurrentTransform(&windowTransform);
-        mLayer->setWindowTransform(windowTransform);
-    }
-
     SkRect dirty;
     info.damageAccumulator->peekAtDirty(&dirty);
 
@@ -198,6 +191,12 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         return;
     }
 
+    if (transformUpdateNeeded) {
+        // update the transform in window of the layer to reset its origin wrt light source position
+        Matrix4 windowTransform;
+        info.damageAccumulator->computeCurrentTransform(&windowTransform);
+        mLayer->setWindowTransform(windowTransform);
+    }
 
     if (dirty.intersect(0, 0, getWidth(), getHeight())) {
         dirty.roundOut();
