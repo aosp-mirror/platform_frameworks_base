@@ -1445,6 +1445,7 @@ package android {
     field public static final int windowSharedElementExitTransition = 16843834; // 0x101043a
     field public static final int windowSharedElementReenterTransition = 16843954; // 0x10104b2
     field public static final int windowSharedElementReturnTransition = 16843953; // 0x10104b1
+    field public static final int windowSharedElementsUseOverlay = 16843964; // 0x10104bc
     field public static final int windowShowAnimation = 16842934; // 0x10100b6
     field public static final int windowShowWallpaper = 16843410; // 0x1010292
     field public static final int windowSoftInputMode = 16843307; // 0x101022b
@@ -35137,6 +35138,7 @@ package android.view {
     method public android.transition.Transition getSharedElementExitTransition();
     method public android.transition.Transition getSharedElementReenterTransition();
     method public android.transition.Transition getSharedElementReturnTransition();
+    method public boolean getSharedElementsUseOverlay();
     method public abstract int getStatusBarColor();
     method public long getTransitionBackgroundFadeDuration();
     method public android.transition.TransitionManager getTransitionManager();
@@ -35198,6 +35200,7 @@ package android.view {
     method public void setSharedElementExitTransition(android.transition.Transition);
     method public void setSharedElementReenterTransition(android.transition.Transition);
     method public void setSharedElementReturnTransition(android.transition.Transition);
+    method public void setSharedElementsUseOverlay(boolean);
     method public void setSoftInputMode(int);
     method public abstract void setStatusBarColor(int);
     method public abstract void setTitle(java.lang.CharSequence);

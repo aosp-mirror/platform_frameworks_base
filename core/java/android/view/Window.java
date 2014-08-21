@@ -1662,6 +1662,27 @@ public abstract class Window {
     public void setTransitionBackgroundFadeDuration(long fadeDurationMillis) { }
 
     /**
+     * Returns <code>true</code> when shared elements should use an Overlay during
+     * shared element transitions or <code>false</code> when they should animate as
+     * part of the normal View hierarchy. The default value is true.
+     *
+     * @return <code>true</code> when shared elements should use an Overlay during
+     * shared element transitions or <code>false</code> when they should animate as
+     * part of the normal View hierarchy.
+     */
+    public boolean getSharedElementsUseOverlay() { return true; }
+
+    /**
+     * Sets whether or not shared elements should use an Overlay during shared element transitions.
+     * The default value is true.
+     *
+     * @param sharedElementsUseOverlay <code>true</code> indicates that shared elements should
+     *                                 be transitioned with an Overlay or <code>false</code>
+     *                                 to transition within the normal View hierarchy.
+     */
+    public void setSharedElementsUseOverlay(boolean sharedElementsUseOverlay) { }
+
+    /**
      * @return the color of the status bar.
      */
     public abstract int getStatusBarColor();
