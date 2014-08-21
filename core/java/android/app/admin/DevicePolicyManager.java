@@ -124,7 +124,7 @@ public class DevicePolicyManager {
      * application that started provisioning. The package will be set as profile owner in that case.
      *
      * <p>This package is set as device owner when device owner provisioning is started by an Nfc
-     * message containing an Nfc record with MIME type {@link #PROVISIONING_NFC_MIME_TYPE}.
+     * message containing an Nfc record with MIME type {@link #MIME_TYPE_PROVISIONING_NFC}.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME
         = "android.app.extra.deviceAdminPackageName";
@@ -156,7 +156,7 @@ public class DevicePolicyManager {
      * A String extra holding the time zone {@link android.app.AlarmManager} that the device
      * will be set to.
      *
-     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_TIME_ZONE
@@ -166,7 +166,7 @@ public class DevicePolicyManager {
      * A Long extra holding the local time {@link android.app.AlarmManager} that the device
      * will be set to.
      *
-     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_LOCAL_TIME
@@ -176,7 +176,7 @@ public class DevicePolicyManager {
      * A String extra holding the {@link java.util.Locale} that the device will be set to.
      * Format: xx_yy, where xx is the language code, and yy the country code.
      *
-     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_LOCALE
@@ -186,7 +186,7 @@ public class DevicePolicyManager {
      * A String extra holding the ssid of the wifi network that should be used during nfc device
      * owner provisioning for downloading the mobile device management application.
      *
-     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_SSID
@@ -196,7 +196,7 @@ public class DevicePolicyManager {
      * A boolean extra indicating whether the wifi network in {@link #EXTRA_PROVISIONING_WIFI_SSID}
      * is hidden or not.
      *
-     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_HIDDEN
@@ -206,7 +206,7 @@ public class DevicePolicyManager {
      * A String extra indicating the security type of the wifi network in
      * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
      *
-     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_SECURITY_TYPE
@@ -216,7 +216,7 @@ public class DevicePolicyManager {
      * A String extra holding the password of the wifi network in
      * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
      *
-     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_PASSWORD
@@ -226,7 +226,7 @@ public class DevicePolicyManager {
      * A String extra holding the proxy host for the wifi network in
      * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
      *
-     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_PROXY_HOST
@@ -236,7 +236,7 @@ public class DevicePolicyManager {
      * An int extra holding the proxy port for the wifi network in
      * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
      *
-     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_PROXY_PORT
@@ -246,7 +246,7 @@ public class DevicePolicyManager {
      * A String extra holding the proxy bypass for the wifi network in
      * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
      *
-     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_PROXY_BYPASS
@@ -256,7 +256,7 @@ public class DevicePolicyManager {
      * A String extra holding the proxy auto-config (PAC) URL for the wifi network in
      * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
      *
-     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_PAC_URL
@@ -266,7 +266,7 @@ public class DevicePolicyManager {
      * A String extra holding a url that specifies the download location of the device admin
      * package. When not provided it is assumed that the device admin package is already installed.
      *
-     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION
@@ -276,7 +276,7 @@ public class DevicePolicyManager {
      * A String extra holding a http cookie header which should be used in the http request to the
      * url specified in {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}.
      *
-     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER
@@ -288,7 +288,7 @@ public class DevicePolicyManager {
      * the file at the download location an error will be shown to the user and the user will be
      * asked to factory reset the device.
      *
-     * <p>Use in an Nfc record with {@link #PROVISIONING_NFC_MIME_TYPE} that starts device owner
+     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an Nfc bump.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM
@@ -336,7 +336,7 @@ public class DevicePolicyManager {
      * <p>Input: Nothing.</p>
      * <p>Output: Nothing</p>
      */
-    public static final String PROVISIONING_NFC_MIME_TYPE
+    public static final String MIME_TYPE_PROVISIONING_NFC
         = "application/com.android.managedprovisioning";
 
     /**
