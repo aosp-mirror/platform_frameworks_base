@@ -37,6 +37,7 @@ import android.media.session.IActiveSessionsListener;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
 import android.media.session.ISessionManager;
+import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Binder;
@@ -814,7 +815,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             } else {
                 session.adjustVolume(direction, flags, getContext().getPackageName(),
                         UserHandle.myUserId());
-                if (session.getPlaybackType() == MediaSession.PLAYBACK_TYPE_REMOTE
+                if (session.getPlaybackType() == PlaybackInfo.PLAYBACK_TYPE_REMOTE
                         && mRvc != null) {
                     try {
                         mRvc.remoteVolumeChanged(session.getControllerBinder(), flags);

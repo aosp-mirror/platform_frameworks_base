@@ -37,7 +37,7 @@ import android.media.RingtoneManager;
 import android.media.ToneGenerator;
 import android.media.VolumeProvider;
 import android.media.session.MediaController;
-import android.media.session.MediaController.AudioInfo;
+import android.media.session.MediaController.PlaybackInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -537,7 +537,7 @@ public class VolumePanel extends Handler {
             if (mStreamControls != null) {
                 StreamControl sc = mStreamControls.get(streamType);
                 if (sc != null && sc.controller != null) {
-                    AudioInfo ai = sc.controller.getAudioInfo();
+                    PlaybackInfo ai = sc.controller.getPlaybackInfo();
                     return ai.getMaxVolume();
                 }
             }
@@ -554,7 +554,7 @@ public class VolumePanel extends Handler {
             if (mStreamControls != null) {
                 StreamControl sc = mStreamControls.get(streamType);
                 if (sc != null && sc.controller != null) {
-                    AudioInfo ai = sc.controller.getAudioInfo();
+                    PlaybackInfo ai = sc.controller.getPlaybackInfo();
                     return ai.getCurrentVolume();
                 }
             }
@@ -990,7 +990,7 @@ public class VolumePanel extends Handler {
                     // We still don't have one, ignore the command.
                     Log.w(mTag, "sent remote volume change without a controller!");
                 } else {
-                    AudioInfo vi = controller.getAudioInfo();
+                    PlaybackInfo vi = controller.getPlaybackInfo();
                     index = vi.getCurrentVolume();
                     max = vi.getMaxVolume();
                     if ((vi.getVolumeControl() & VolumeProvider.VOLUME_CONTROL_FIXED) != 0) {
@@ -1362,7 +1362,7 @@ public class VolumePanel extends Handler {
     };
 
     private final MediaController.Callback mMediaControllerCb = new MediaController.Callback() {
-        public void onAudioInfoChanged(AudioInfo info) {
+        public void onAudioInfoChanged(PlaybackInfo info) {
             onRemoteVolumeUpdateIfShown();
         }
     };

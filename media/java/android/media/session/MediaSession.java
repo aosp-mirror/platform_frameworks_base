@@ -102,16 +102,6 @@ public final class MediaSession {
             FLAG_EXCLUSIVE_GLOBAL_PRIORITY })
     public @interface SessionFlags { }
 
-    /**
-     * The session uses local playback.
-     */
-    public static final int PLAYBACK_TYPE_LOCAL = 1;
-
-    /**
-     * The session uses remote playback.
-     */
-    public static final int PLAYBACK_TYPE_REMOTE = 2;
-
     private final Object mLock = new Object();
 
     private final MediaSession.Token mSessionToken;
@@ -216,7 +206,7 @@ public final class MediaSession {
      *
      * @param pi The intent to launch to show UI for this Session.
      */
-    public void setLaunchActivity(@Nullable PendingIntent pi) {
+    public void setSessionActivity(@Nullable PendingIntent pi) {
         try {
             mBinder.setLaunchPendingIntent(pi);
         } catch (RemoteException e) {

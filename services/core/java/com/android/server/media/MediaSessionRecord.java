@@ -34,6 +34,7 @@ import android.media.session.ISessionCallback;
 import android.media.session.ISessionController;
 import android.media.session.ISessionControllerCallback;
 import android.media.session.MediaController;
+import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
 import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
@@ -115,7 +116,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private AudioAttributes mAudioAttrs;
     private AudioManager mAudioManager;
     private AudioManagerInternal mAudioManagerInternal;
-    private int mVolumeType = MediaSession.PLAYBACK_TYPE_LOCAL;
+    private int mVolumeType = PlaybackInfo.PLAYBACK_TYPE_LOCAL;
     private int mVolumeControlType = VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
     private int mMaxVolume = 0;
     private int mCurrentVolume = 0;
@@ -241,7 +242,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         } else if (direction < -1) {
             direction = -1;
         }
-        if (mVolumeType == MediaSession.PLAYBACK_TYPE_LOCAL) {
+        if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
             int stream = AudioAttributes.toLegacyStreamType(mAudioAttrs);
             mAudioManagerInternal.adjustStreamVolumeForUid(stream, direction, flags, packageName,
                     uid);
@@ -269,7 +270,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     public void setVolumeTo(int value, int flags, String packageName, int uid) {
-        if (mVolumeType == MediaSession.PLAYBACK_TYPE_LOCAL) {
+        if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
             int stream = AudioAttributes.toLegacyStreamType(mAudioAttrs);
             mAudioManagerInternal.setStreamVolumeForUid(stream, value, flags, packageName, uid);
         } else {
@@ -758,8 +759,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void setPlaybackToLocal(AudioAttributes attributes) {
             boolean typeChanged;
             synchronized (mLock) {
-                typeChanged = mVolumeType == MediaSession.PLAYBACK_TYPE_REMOTE;
-                mVolumeType = MediaSession.PLAYBACK_TYPE_LOCAL;
+                typeChanged = mVolumeType == PlaybackInfo.PLAYBACK_TYPE_REMOTE;
+                mVolumeType = PlaybackInfo.PLAYBACK_TYPE_LOCAL;
                 if (attributes != null) {
                     mAudioAttrs = attributes;
                 } else {
@@ -775,8 +776,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void setPlaybackToRemote(int control, int max) {
             boolean typeChanged;
             synchronized (mLock) {
-                typeChanged = mVolumeType == MediaSession.PLAYBACK_TYPE_LOCAL;
-                mVolumeType = MediaSession.PLAYBACK_TYPE_REMOTE;
+                typeChanged = mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL;
+                mVolumeType = PlaybackInfo.PLAYBACK_TYPE_REMOTE;
                 mVolumeControlType = control;
                 mMaxVolume = max;
             }
@@ -1008,7 +1009,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 int type;
                 int max;
                 int current;
-                if (mVolumeType == MediaSession.PLAYBACK_TYPE_REMOTE) {
+                if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_REMOTE) {
                     type = mVolumeControlType;
                     max = mMaxVolume;
                     current = mOptimisticVolume != -1 ? mOptimisticVolume
