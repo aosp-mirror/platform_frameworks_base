@@ -267,6 +267,9 @@ public class DeviceOwner {
             if (mDeviceOwner != null) {
                 out.startTag(null, TAG_DEVICE_OWNER);
                 out.attribute(null, ATTR_PACKAGE, mDeviceOwner.packageName);
+                if (mDeviceOwner.name != null) {
+                    out.attribute(null, ATTR_NAME, mDeviceOwner.name);
+                }
                 out.endTag(null, TAG_DEVICE_OWNER);
             }
 
