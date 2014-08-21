@@ -47,6 +47,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     private InputStream mInputStream = null;
 
     private boolean mAllowCrossDomainRedirect = true;
+    private boolean mAllowCrossProtocolRedirect = true;
 
     // from com.squareup.okhttp.internal.http
     private final static int HTTP_TEMP_REDIRECT = 307;
@@ -91,6 +92,8 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     private boolean filterOutInternalHeaders(String key, String val) {
         if ("android-allow-cross-domain-redirect".equalsIgnoreCase(key)) {
             mAllowCrossDomainRedirect = parseBoolean(val);
+            // cross-protocol redirects are also controlled by this flag
+            mAllowCrossProtocolRedirect = mAllowCrossDomainRedirect;
         } else {
             return false;
         }
@@ -190,8 +193,12 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
                         !url.getProtocol().equals("http")) {
                     throw new NoRouteToHostException("Unsupported protocol redirect");
                 }
+                boolean sameProtocol = mURL.getProtocol().equals(url.getProtocol());
+                if (!mAllowCrossProtocolRedirect && !sameProtocol) {
+                    throw new NoRouteToHostException("Cross-protocol redirects are disallowed");
+                }
                 boolean sameHost = mURL.getHost().equals(url.getHost());
-                if (!sameHost) {
+                if (!mAllowCrossDomainRedirect && !sameHost) {
                     throw new NoRouteToHostException("Cross-domain redirects are disallowed");
                 }
 
