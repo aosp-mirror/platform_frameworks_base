@@ -180,7 +180,8 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         // takes ownership of ScreenshotClient
         SkMallocPixelRef* pixels = SkMallocPixelRef::NewWithProc(screenshotInfo,
                 (size_t) rowBytes, NULL, (void*) screenshot->getPixels(), &DeleteScreenshot,
-                (void*) (screenshot.detach()));
+                (void*) (screenshot.get()));
+        screenshot.detach();
         pixels->setImmutable();
         bitmap->setPixelRef(pixels)->unref();
         bitmap->lockPixels();
