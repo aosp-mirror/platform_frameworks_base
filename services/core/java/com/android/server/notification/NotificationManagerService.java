@@ -29,6 +29,7 @@ import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
@@ -56,6 +57,7 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -109,6 +111,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /** {@hide} */
 public class NotificationManagerService extends SystemService {
@@ -173,6 +176,7 @@ public class NotificationManagerService extends SystemService {
     NotificationRecord mVibrateNotification;
 
     private final ArraySet<ManagedServiceInfo> mListenersDisablingEffects = new ArraySet<>();
+    private ComponentName mEffectsSuppressor;
     private int mListenerHints;  // right now, all hints are global
 
     // for enabling and disabling notification pulse behavior
@@ -941,6 +945,15 @@ public class NotificationManagerService extends SystemService {
         scheduleListenerHintsChanged(hints);
     }
 
+    private void updateEffectsSuppressorLocked() {
+        final ComponentName suppressor = !mListenersDisablingEffects.isEmpty()
+                ? mListenersDisablingEffects.valueAt(0).component : null;
+        if (Objects.equals(suppressor, mEffectsSuppressor)) return;
+        mEffectsSuppressor = suppressor;
+        getContext().sendBroadcast(new Intent(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED)
+                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY));
+    }
+
     private final IBinder mService = new INotificationManager.Stub() {
         // Toasts
         // ============================================================================
@@ -1299,6 +1312,7 @@ public class NotificationManagerService extends SystemService {
                     }
                     mZenModeHelper.requestFromListener(hints);
                     updateListenerHintsLocked();
+                    updateEffectsSuppressorLocked();
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -1383,6 +1397,12 @@ public class NotificationManagerService extends SystemService {
             }
 
             dumpImpl(pw, DumpFilter.parseFromArguments(args));
+        }
+
+        @Override
+        public ComponentName getEffectsSuppressor() {
+            enforceSystemOrSystemUI("INotificationManager.getEffectsSuppressor");
+            return mEffectsSuppressor;
         }
     };
 

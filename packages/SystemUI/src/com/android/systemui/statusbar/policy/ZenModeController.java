@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.content.ComponentName;
 import android.service.notification.Condition;
 
 public interface ZenModeController {
@@ -29,6 +30,7 @@ public interface ZenModeController {
     long getNextAlarm();
     void setUserId(int userId);
     boolean isZenAvailable();
+    ComponentName getEffectsSuppressor();
 
     public static class Callback {
         public void onZenChanged(int zen) {}
@@ -36,5 +38,6 @@ public interface ZenModeController {
         public void onConditionsChanged(Condition[] conditions) {}
         public void onNextAlarmChanged() {}
         public void onZenAvailableChanged(boolean available) {}
+        public void onEffectsSupressorChanged() {}
     }
 }
