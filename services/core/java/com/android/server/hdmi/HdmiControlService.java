@@ -160,6 +160,8 @@ public final class HdmiControlService extends SystemService {
     // Type of logical devices hosted in the system. Stored in the unmodifiable list.
     private final List<Integer> mLocalDevices;
 
+    private final HdmiLogger mSpamSafeLogger = new HdmiLogger(TAG);
+
     // List of records for hotplug event listener to handle the the caller killed in action.
     @GuardedBy("mLock")
     private final ArrayList<HotplugEventListenerRecord> mHotplugEventListenerRecords =
@@ -634,7 +636,7 @@ public final class HdmiControlService extends SystemService {
         if (mMessageValidator.isValid(command)) {
             mCecController.sendCommand(command, callback);
         } else {
-            Slog.e(TAG, "Invalid message type:" + command);
+            mSpamSafeLogger.error("Invalid message type:" + command);
             if (callback != null) {
                 callback.onSendCompleted(Constants.SEND_RESULT_FAILURE);
             }
@@ -695,7 +697,7 @@ public final class HdmiControlService extends SystemService {
         }
 
         if (message.getDestination() != Constants.ADDR_BROADCAST) {
-            Slog.w(TAG, "Unhandled cec command:" + message);
+            mSpamSafeLogger.warning("Unhandled cec command:" + message);
         }
         return false;
     }
