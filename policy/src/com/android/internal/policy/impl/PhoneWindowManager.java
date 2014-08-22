@@ -2968,7 +2968,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             boolean immersiveSticky = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0;
             boolean navAllowedHidden = immersive || immersiveSticky;
             navTranslucent &= !immersiveSticky;  // transient trumps translucent
-            navTranslucent &= areTranslucentBarsAllowed();
+            boolean isKeyguardShowing = isStatusBarKeyguard() && !mHideLockScreen;
+            if (!isKeyguardShowing) {
+                navTranslucent &= areTranslucentBarsAllowed();
+            }
 
             // When the navigation bar isn't visible, we put up a fake
             // input window to catch all touch events.  This way we can
@@ -3092,7 +3095,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 boolean statusBarTransient = (sysui & View.STATUS_BAR_TRANSIENT) != 0;
                 boolean statusBarTranslucent = (sysui
                         & (View.STATUS_BAR_TRANSLUCENT | View.SYSTEM_UI_TRANSPARENT)) != 0;
-                statusBarTranslucent &= areTranslucentBarsAllowed();
+                if (!isKeyguardShowing) {
+                    statusBarTranslucent &= areTranslucentBarsAllowed();
+                }
 
                 // If the status bar is hidden, we don't want to cause
                 // windows behind it to scroll.
@@ -5591,7 +5596,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             vis = (vis & ~flags) | (oldVis & flags);
         }
 
-        if (!areTranslucentBarsAllowed()) {
+        if (!areTranslucentBarsAllowed() && transWin != mStatusBar) {
             vis &= ~(View.NAVIGATION_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSLUCENT
                     | View.SYSTEM_UI_TRANSPARENT);
         }
