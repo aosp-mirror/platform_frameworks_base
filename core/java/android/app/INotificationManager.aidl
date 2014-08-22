@@ -62,6 +62,8 @@ interface INotificationManager
     void requestHintsFromListener(in INotificationListener token, int hints);
     int getHintsFromListener(in INotificationListener token);
 
+    ComponentName getEffectsSuppressor();
+
     ZenModeConfig getZenModeConfig();
     boolean setZenModeConfig(in ZenModeConfig config);
     oneway void notifyConditions(String pkg, in IConditionProvider provider, in Condition[] conditions);

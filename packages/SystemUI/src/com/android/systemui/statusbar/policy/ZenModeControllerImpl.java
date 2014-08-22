@@ -18,7 +18,9 @@ package com.android.systemui.statusbar.policy;
 
 import android.app.AlarmManager;
 import android.app.INotificationManager;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -161,9 +163,20 @@ public class ZenModeControllerImpl implements ZenModeController {
         mSetupObserver.register();
     }
 
+    @Override
+    public ComponentName getEffectsSuppressor() {
+        return NotificationManager.from(mContext).getEffectsSuppressor();
+    }
+
     private void fireNextAlarmChanged() {
         for (Callback cb : mCallbacks) {
             cb.onNextAlarmChanged();
+        }
+    }
+
+    private void fireEffectsSuppressorChanged() {
+        for (Callback cb : mCallbacks) {
+            cb.onEffectsSupressorChanged();
         }
     }
 
@@ -218,6 +231,9 @@ public class ZenModeControllerImpl implements ZenModeController {
         public void onReceive(Context context, Intent intent) {
             if (AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED.equals(intent.getAction())) {
                 fireNextAlarmChanged();
+            }
+            if (NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED.equals(intent.getAction())) {
+                fireEffectsSuppressorChanged();
             }
         }
     };
