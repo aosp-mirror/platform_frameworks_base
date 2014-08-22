@@ -300,7 +300,7 @@ public abstract class TvInputService extends Service {
             if (eventType == null) {
                 throw new IllegalArgumentException("eventType should not be null.");
             }
-            mHandler.post(new Runnable() {
+            runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -319,7 +319,7 @@ public abstract class TvInputService extends Service {
          * @param channelUri The URI of a channel.
          */
         public void notifyChannelRetuned(final Uri channelUri) {
-            mHandler.post(new Runnable() {
+            runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -351,7 +351,7 @@ public abstract class TvInputService extends Service {
             trackIdSet.clear();
 
             // TODO: Validate the track list.
-            mHandler.post(new Runnable() {
+            runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -375,7 +375,7 @@ public abstract class TvInputService extends Service {
          * @see #onSelectTrack
          */
         public void notifyTrackSelected(final int type, final String trackId) {
-            mHandler.post(new Runnable() {
+            runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -393,7 +393,7 @@ public abstract class TvInputService extends Service {
          * been started.
          */
         public void notifyVideoAvailable() {
-            mHandler.post(new Runnable() {
+            runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -423,7 +423,7 @@ public abstract class TvInputService extends Service {
                     || reason > TvInputManager.VIDEO_UNAVAILABLE_REASON_END) {
                 throw new IllegalArgumentException("Unknown reason: " + reason);
             }
-            mHandler.post(new Runnable() {
+            runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -462,7 +462,7 @@ public abstract class TvInputService extends Service {
          * @see TvInputManager
          */
         public void notifyContentAllowed() {
-            mHandler.post(new Runnable() {
+            runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -502,7 +502,7 @@ public abstract class TvInputService extends Service {
          * @see TvInputManager
          */
         public void notifyContentBlocked(final TvContentRating rating) {
-            mHandler.post(new Runnable() {
+            runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -531,7 +531,7 @@ public abstract class TvInputService extends Service {
             if (left > right || top > bottm) {
                 throw new IllegalArgumentException("Invalid parameter");
             }
-            mHandler.post(new Runnable() {
+            runOnMainThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -1048,6 +1048,14 @@ public abstract class TvInputService extends Service {
 
         private void setSessionCallback(ITvInputSessionCallback callback) {
             mSessionCallback = callback;
+        }
+
+        private final void runOnMainThread(Runnable action) {
+            if (mHandler.getLooper().isCurrentThread()) {
+                action.run();
+            } else {
+                mHandler.post(action);
+            }
         }
     }
 
