@@ -127,10 +127,11 @@ public class ConnectivityManagerMobileTest extends
         assertTrue("failed to connect to " + mTestAccessPoint,
                 connectToWifi(mTestAccessPoint));
         // assert that WifiManager reports correct state
-        assertTrue(waitForWifiState(WifiManager.WIFI_STATE_ENABLED, LONG_TIMEOUT));
+        assertTrue("wifi not enabled", waitForWifiState(
+                WifiManager.WIFI_STATE_ENABLED, LONG_TIMEOUT));
         // assert that ConnectivityManager reports correct state for Wifi
-        assertTrue(waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                WIFI_CONNECTION_TIMEOUT));
+        assertTrue("wifi not connected", waitForNetworkState(
+                ConnectivityManager.TYPE_WIFI, State.CONNECTED, WIFI_CONNECTION_TIMEOUT));
         // below check disbabled since we have bug in what ConnectivityManager returns
 //        if (!mWifiOnlyFlag) {
 //            // assert that ConnectivityManager reports correct state for mobile
@@ -267,8 +268,8 @@ public class ConnectivityManagerMobileTest extends
         // connect to Wifi
         assertTrue("failed to connect to " + mTestAccessPoint,
                 connectToWifi(mTestAccessPoint));
-        assertTrue(waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                WIFI_CONNECTION_TIMEOUT));
+        assertTrue("wifi not connected", waitForNetworkState(
+                ConnectivityManager.TYPE_WIFI, State.CONNECTED, WIFI_CONNECTION_TIMEOUT));
         // verify that connection actually works
         assertTrue("no network connectivity after wifi enable", checkNetworkConnectivity());
 
@@ -289,8 +290,8 @@ public class ConnectivityManagerMobileTest extends
         // connect to Wifi
         assertTrue("failed to connect to " + mTestAccessPoint,
                 connectToWifi(mTestAccessPoint));
-        assertTrue(waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                WIFI_CONNECTION_TIMEOUT));
+        assertTrue("wifi not connected", waitForNetworkState(
+                ConnectivityManager.TYPE_WIFI, State.CONNECTED, WIFI_CONNECTION_TIMEOUT));
 
         // enable airplane mode without clearing Wifi
         mCm.setAirplaneMode(true);
@@ -322,8 +323,8 @@ public class ConnectivityManagerMobileTest extends
         // connect to Wifi
         assertTrue("failed to connect to " + mTestAccessPoint,
                 connectToWifi(mTestAccessPoint));
-        assertTrue(waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
-                WIFI_CONNECTION_TIMEOUT));
+        assertTrue("wifi not connected", waitForNetworkState(
+                ConnectivityManager.TYPE_WIFI, State.CONNECTED, WIFI_CONNECTION_TIMEOUT));
         assertNotNull("not associated with any AP", mWifiManager.getConnectionInfo().getBSSID());
 
         // disconnect from the current AP
