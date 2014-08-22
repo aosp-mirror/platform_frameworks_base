@@ -611,12 +611,35 @@ public abstract class BaseStatusBar extends SystemUI implements
                entry.expandedBig.findViewById(com.android.internal.R.id.media_action_area) != null;
     }
 
-    private void startAppNotificationSettingsActivity(String packageName, int appUid) {
-        Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+    private void startAppNotificationSettingsActivity(String packageName, final int appUid) {
+        final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName);
         intent.putExtra(Settings.EXTRA_APP_UID, appUid);
-        TaskStackBuilder.create(mContext).addNextIntentWithParentStack(intent)
-                .startActivities(null, new UserHandle(UserHandle.getUserId(appUid)));
+
+        final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
+        dismissKeyguardThenExecute(new OnDismissAction() {
+            @Override
+            public boolean onDismiss() {
+                AsyncTask.execute(new Runnable() {
+                    public void run() {
+                        try {
+                            if (keyguardShowing) {
+                                ActivityManagerNative.getDefault()
+                                        .keyguardWaitingForActivityDrawn();
+                            }
+                            TaskStackBuilder.create(mContext)
+                                    .addNextIntentWithParentStack(intent)
+                                    .startActivities(null,
+                                            new UserHandle(UserHandle.getUserId(appUid)));
+                            overrideActivityPendingAppTransition(keyguardShowing);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                });
+                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+                return true;
+            }
+        });
     }
 
     protected SwipeHelper.LongPressListener getNotificationLongClicker() {
@@ -1070,14 +1093,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             final int appUidF = appUid;
             settingsButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    dismissKeyguardThenExecute(new OnDismissAction() {
-                        public boolean onDismiss() {
-                            startAppNotificationSettingsActivity(pkg, appUidF);
-                            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
-                            visibilityChanged(false);
-                            return true;
-                        }
-                    });
+                    startAppNotificationSettingsActivity(pkg, appUidF);
                 }
             });
         } else {
