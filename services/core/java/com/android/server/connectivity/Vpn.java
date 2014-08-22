@@ -22,6 +22,7 @@ import static android.system.OsConstants.AF_INET6;
 
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -105,6 +106,7 @@ public class Vpn {
     private boolean mAllowIPv6;
     private Connection mConnection;
     private LegacyVpnRunner mLegacyVpnRunner;
+    private PendingIntent mStatusIntent;
     private volatile boolean mEnableTeardown = true;
     private final IConnectivityManager mConnService;
     private final INetworkManagementService mNetd;
@@ -237,6 +239,7 @@ public class Vpn {
 
         // Reset the interface.
         if (mInterface != null) {
+            mStatusIntent = null;
             agentDisconnect();
             jniReset(mInterface);
             mInterface = null;
@@ -567,17 +570,20 @@ public class Vpn {
 
         // add the user
         mVpnUsers.add(UidRange.createForUser(user));
+
+        prepareStatusIntent();
     }
 
     private void removeVpnUserLocked(int user) {
-            if (!isRunningLocked()) {
-                throw new IllegalStateException("VPN is not active");
-            }
-            UidRange uidRange = UidRange.createForUser(user);
-            if (mNetworkAgent != null) {
-                mNetworkAgent.removeUidRanges(new UidRange[] { uidRange });
-            }
-            mVpnUsers.remove(uidRange);
+        if (!isRunningLocked()) {
+            throw new IllegalStateException("VPN is not active");
+        }
+        UidRange uidRange = UidRange.createForUser(user);
+        if (mNetworkAgent != null) {
+            mNetworkAgent.removeUidRanges(new UidRange[] { uidRange });
+        }
+        mVpnUsers.remove(uidRange);
+        mStatusIntent = null;
     }
 
     private void onUserAdded(int userId) {
@@ -645,6 +651,7 @@ public class Vpn {
         public void interfaceRemoved(String interfaze) {
             synchronized (Vpn.this) {
                 if (interfaze.equals(mInterface) && jniCheck(interfaze) == 0) {
+                    mStatusIntent = null;
                     mVpnUsers = null;
                     mInterface = null;
                     if (mConnection != null) {
@@ -699,6 +706,15 @@ public class Vpn {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mService = null;
+        }
+    }
+
+    private void prepareStatusIntent() {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mStatusIntent = VpnConfig.getIntentForStatusPanel(mContext);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -911,6 +927,9 @@ public class Vpn {
         final LegacyVpnInfo info = new LegacyVpnInfo();
         info.key = mConfig.user;
         info.state = LegacyVpnInfo.stateFromNetworkInfo(mNetworkInfo);
+        if (mNetworkInfo.isConnected()) {
+            info.intent = mStatusIntent;
+        }
         return info;
     }
 
