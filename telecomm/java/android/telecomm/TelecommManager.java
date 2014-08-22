@@ -76,6 +76,7 @@ public class TelecommManager {
      * {@link VideoProfile.VideoState#BIDIRECTIONAL},
      * {@link VideoProfile.VideoState#RX_ENABLED},
      * {@link VideoProfile.VideoState#TX_ENABLED}.
+     * @hide
      */
     public static final String EXTRA_START_CALL_WITH_VIDEO_STATE =
             "android.intent.extra.START_CALL_WITH_VIDEO_STATE";
