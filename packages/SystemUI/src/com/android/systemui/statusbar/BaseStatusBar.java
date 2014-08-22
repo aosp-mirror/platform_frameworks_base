@@ -1169,8 +1169,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             final ImageView icon = (ImageView) publicViewLocal.findViewById(
                     com.android.internal.R.id.icon);
-            final ImageView profileIcon = (ImageView) publicViewLocal.findViewById(
-                    com.android.internal.R.id.profile_icon);
+            final ImageView profileBadge = (ImageView) publicViewLocal.findViewById(
+                    com.android.internal.R.id.profile_badge_line3);
 
             final StatusBarIcon ic = new StatusBarIcon(entry.notification.getPackageName(),
                     entry.notification.getUser(),
@@ -1189,14 +1189,14 @@ public abstract class BaseStatusBar extends SystemUI implements
                 icon.setPadding(padding, padding, padding, padding);
             }
 
-            if (profileIcon != null) {
+            if (profileBadge != null) {
                 Drawable profileDrawable
                         = mUserManager.getBadgeForUser(entry.notification.getUser(), 0);
                 if (profileDrawable != null) {
-                    profileIcon.setImageDrawable(profileDrawable);
-                    profileIcon.setVisibility(View.VISIBLE);
+                    profileBadge.setImageDrawable(profileDrawable);
+                    profileBadge.setVisibility(View.VISIBLE);
                 } else {
-                    profileIcon.setVisibility(View.GONE);
+                    profileBadge.setVisibility(View.GONE);
                 }
             }
 
