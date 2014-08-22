@@ -36,7 +36,7 @@
         android:layout_width="@dimen/multi_user_switch_width_collapsed"
         android:layout_height="@dimen/status_bar_header_height"
         android:layout_alignParentEnd="true"
-        android:background="@drawable/ripple_drawable">
+        android:background="@drawable/ripple_drawable" >
         <ImageView android:id="@+id/multi_user_avatar"
             android:layout_width="24dp"
             android:layout_height="24dp"
@@ -51,7 +51,7 @@
         android:layout_height="@dimen/status_bar_header_height"
         android:background="@drawable/ripple_drawable"
         android:src="@drawable/ic_settings"
-        android:contentDescription="@string/accessibility_desc_settings"/>
+        android:contentDescription="@string/accessibility_desc_settings" />
 
     <LinearLayout android:id="@+id/system_icons_super_container"
         android:layout_width="wrap_content"
@@ -60,11 +60,11 @@
         android:layout_alignWithParentIfMissing="true"
         android:layout_marginStart="16dp"
         android:background="@drawable/ripple_drawable"
-        android:paddingEnd="2dp">
+        android:paddingEnd="2dp" >
         <FrameLayout android:id="@+id/system_icons_container"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/status_bar_height"
-            android:layout_gravity="center_vertical"/>
+            android:layout_gravity="center_vertical" />
         <TextView android:id="@+id/battery_level"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
