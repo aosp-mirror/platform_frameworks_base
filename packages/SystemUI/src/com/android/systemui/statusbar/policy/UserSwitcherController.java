@@ -246,7 +246,6 @@ public class UserSwitcherController {
 
     private void switchToUserId(int id) {
         try {
-            WindowManagerGlobal.getWindowManagerService().lockNow(null);
             ActivityManagerNative.getDefault().switchUser(id);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't switch user.", e);

@@ -1179,6 +1179,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int SYSTEM_USER_CURRENT_MSG = 43;
     static final int ENTER_ANIMATION_COMPLETE_MSG = 44;
     static final int ENABLE_SCREEN_AFTER_BOOT_MSG = 45;
+    static final int START_USER_SWITCH_MSG = 46;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1769,6 +1770,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 };
                 thread.start();
+                break;
+            }
+            case START_USER_SWITCH_MSG: {
+                showUserSwitchDialog(msg.arg1, (String) msg.obj);
                 break;
             }
             case REPORT_USER_SWITCH_MSG: {
@@ -17439,6 +17444,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     /**
+     * Start user, if its not already running, and bring it to foreground.
+     */
+    boolean startUserInForeground(final int userId, Dialog dlg) {
+        boolean result = startUser(userId, /* foreground */ true);
+        dlg.dismiss();
+        return result;
+    }
+
+    /**
      * Refreshes the list of users related to the current user when either a
      * user switch happens or when a new related user is started in the
      * background.
@@ -17476,7 +17490,29 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public boolean switchUser(final int userId) {
-        return startUser(userId, /* foregound */ true);
+        String userName;
+        synchronized (this) {
+            UserInfo userInfo = getUserManagerLocked().getUserInfo(userId);
+            if (userInfo == null) {
+                Slog.w(TAG, "No user info for user #" + userId);
+                return false;
+            }
+            if (userInfo.isManagedProfile()) {
+                Slog.w(TAG, "Cannot switch to User #" + userId + ": not a full user");
+                return false;
+            }
+            userName = userInfo.name;
+        }
+        mHandler.removeMessages(START_USER_SWITCH_MSG);
+        mHandler.sendMessage(mHandler.obtainMessage(START_USER_SWITCH_MSG, userId, 0, userName));
+        return true;
+    }
+
+    private void showUserSwitchDialog(int userId, String userName) {
+        // The dialog will show and then initiate the user switch by calling startUserInForeground
+        Dialog d = new UserSwitchingDialog(this, mContext, userId, userName,
+                true /* above system */);
+        d.show();
     }
 
     private boolean startUser(final int userId, boolean foreground) {
