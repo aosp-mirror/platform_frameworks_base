@@ -12981,7 +12981,7 @@ package android.hardware.camera2 {
   }
 
   public class CaptureFailure {
-    method public int getFrameNumber();
+    method public long getFrameNumber();
     method public int getReason();
     method public android.hardware.camera2.CaptureRequest getRequest();
     method public int getSequenceId();
