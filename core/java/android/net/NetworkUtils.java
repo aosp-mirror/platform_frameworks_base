@@ -128,8 +128,9 @@ public class NetworkUtils {
     /**
      * Explicitly binds {@code socketfd} to the network designated by {@code netId}.  This
      * overrides any binding via {@link #bindProcessToNetwork}.
+     * @return 0 on success or negative errno on failure.
      */
-    public native static boolean bindSocketToNetwork(int socketfd, int netId);
+    public native static int bindSocketToNetwork(int socketfd, int netId);
 
     /**
      * Protect {@code socketfd} from VPN connections.  After protecting, data sent through

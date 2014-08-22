@@ -17458,12 +17458,12 @@ package android.net {
   }
 
   public class Network implements android.os.Parcelable {
+    method public void bindSocket(java.net.Socket) throws java.io.IOException;
     method public int describeContents();
     method public java.net.InetAddress[] getAllByName(java.lang.String) throws java.net.UnknownHostException;
-    method public java.net.URL getBoundURL(java.net.URL) throws java.net.MalformedURLException;
     method public java.net.InetAddress getByName(java.lang.String) throws java.net.UnknownHostException;
     method public javax.net.SocketFactory getSocketFactory();
-    method public static void setNetworkBoundURLFactory(android.net.NetworkBoundURLFactory);
+    method public java.net.URLConnection openConnection(java.net.URL) throws java.io.IOException;
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
