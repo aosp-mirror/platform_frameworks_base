@@ -29,14 +29,30 @@
         android:background="@drawable/btn_borderless_rect"
         android:contentDescription="@null" />
 
-    <SeekBar
-        android:id="@+id/seekbar"
+    <FrameLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:paddingBottom="0dp"
-        android:paddingEnd="16dp"
-        android:paddingStart="8dp"
-        android:paddingTop="0dip" />
+        android:layout_weight="1" >
 
+        <TextView
+            android:id="@+id/suppressor"
+            android:visibility="gone"
+            android:textAppearance="@style/TextAppearance.QS.VolumeSuppressor"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <SeekBar
+            android:id="@+id/seekbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="0dp"
+            android:paddingEnd="16dp"
+            android:paddingStart="8dp"
+            android:paddingTop="0dp" />
+
+    </FrameLayout>
 </LinearLayout>
