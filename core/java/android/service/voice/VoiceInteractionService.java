@@ -35,6 +35,7 @@ import com.android.internal.app.IVoiceInteractionManagerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Locale;
 
 
 /**
@@ -163,7 +164,7 @@ public class VoiceInteractionService extends Service {
      * Called during service initialization to tell you when the system is ready
      * to receive interaction from it. You should generally do initialization here
      * rather than in {@link #onCreate()}. Methods such as {@link #startSession(Bundle)} and
-     * {@link #createAlwaysOnHotwordDetector(String, String, android.service.voice.AlwaysOnHotwordDetector.Callback)}
+     * {@link #createAlwaysOnHotwordDetector(String, Locale, android.service.voice.AlwaysOnHotwordDetector.Callback)}
      * will not be operational until this point.
      */
     public void onReady() {
@@ -200,6 +201,17 @@ public class VoiceInteractionService extends Service {
     }
 
     /**
+     * FIXME: Remove once the prebuilts are updated.
+     *
+     * @hide
+     */
+    @Deprecated
+    public final AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(
+            String keyphrase, String locale, AlwaysOnHotwordDetector.Callback callback) {
+        return createAlwaysOnHotwordDetector(keyphrase, new Locale(locale), callback);
+    }
+
+    /**
      * Creates an {@link AlwaysOnHotwordDetector} for the given keyphrase and locale.
      * This instance must be retained and used by the client.
      * Calling this a second time invalidates the previously created hotword detector
@@ -207,12 +219,11 @@ public class VoiceInteractionService extends Service {
      *
      * @param keyphrase The keyphrase that's being used, for example "Hello Android".
      * @param locale The locale for which the enrollment needs to be performed.
-     *        This is a Java locale, for example "en_US".
      * @param callback The callback to notify of detection events.
      * @return An always-on hotword detector for the given keyphrase and locale.
      */
     public final AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(
-            String keyphrase, String locale, AlwaysOnHotwordDetector.Callback callback) {
+            String keyphrase, Locale locale, AlwaysOnHotwordDetector.Callback callback) {
         if (mSystemService == null) {
             throw new IllegalStateException("Not available until onReady() is called");
         }
