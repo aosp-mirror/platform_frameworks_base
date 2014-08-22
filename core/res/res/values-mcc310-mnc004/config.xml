@@ -33,4 +33,5 @@
         <item>83</item>
     </string-array>
 
+    <bool name="config_auto_attach_data_on_creation">false</bool>
 </resources>
