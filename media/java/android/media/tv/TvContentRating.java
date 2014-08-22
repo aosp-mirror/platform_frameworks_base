@@ -17,7 +17,6 @@
 package android.media.tv;
 
 import android.annotation.SystemApi;
-import android.net.Uri;
 import android.text.TextUtils;
 
 import java.util.Arrays;
@@ -26,19 +25,22 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A class representing a TV content rating.
- * When a TV input service provides the content rating information of a program into TV provider,
- * TvContentRating class will be used for generating the value of {@link
- * TvContract.Programs#COLUMN_CONTENT_RATING}. To create an object of {@link TvContentRating}, use
- * the {@link #createRating} method with valid arguments. The arguments could be a system defined
- * strings, or a TV input service defined strings.
- * TV input service defined strings are in an xml file defined in <code>&lt;{@link
- * android.R.styleable#TvInputService tv-input}&gt;</code> with the {@link
- * android.R.attr#tvContentRatingDescription tvContentRatingDescription} attribute by the TV input
- * service.
- *
+ * A class representing a TV content rating. When a TV input service inserts the content rating
+ * information on a program into the database, this class can be used to generate the formatted
+ * string for
+ * {@link TvContract.Programs#COLUMN_CONTENT_RATING TvContract.Programs.COLUMN_CONTENT_RATING}.
+ * To create a {@code TvContentRating} object, use the
+ * {@link #createRating TvContentRating.createRating} method with valid rating system string
+ * constants.
+ * <p>
+ * It is possible for a TV input to define its own content rating system by supplying a content
+ * rating system definition XML resource (see example below) and having the
+ * {@link android.R.attr#tvContentRatingDescription tvContentRatingDescription} attribute in
+ * {@link TvInputService#SERVICE_META_DATA} of the TV input point to it.
+ * </p>
  * <h3> Example: Rating system definition for the TV Parental Guidelines</h3>
- * The following XML example shows how the TV Parental Guidelines in United States can be defined:
+ * The following XML example shows how the TV Parental Guidelines in the United States can be
+ * defined:
  * <p><pre class="prettyprint">
  * {@literal
  * <rating-system-definitions xmlns:android="http://schemas.android.com/apk/res/android"
@@ -118,24 +120,36 @@ import java.util.Objects;
  * </rating-system-definitions>}</pre></p>
  *
  * <h3>System defined rating strings</h3>
- *
- * <u>System defined string for {@code domain}</u>
- * <table border="0" cellspacing="0" cellpadding="0">
+ * The following strings are defined by the system to provide a standard way to create
+ * {@code TvContentRating} objects.
+ * <p>For example, to create an object that represents TV-PG rating with suggestive dialogue and
+ * coarse language from the TV Parental Guidelines in the United States, one can use the following
+ * code snippet:
+ * </p>
+ * <pre>
+ * String rating = TvContentRating.createRating(
+ *         "com.android.tv",
+ *         "US_TV",
+ *         "US_TV_PG",
+ *         "US_TV_D", "US_TV_L");
+ * </pre>
+ * <h4>System defined string for domains</h4>
+ * <table>
  *     <tr>
- *         <td width=10%>String value</td>
- *         <td>Comments</td>
+ *         <th>Constant Value</th>
+ *         <th>Comment</th>
  *     </tr>
  *     <tr>
- *         <td>android.media.tv</td>
+ *         <td>com.android.tv</td>
  *         <td>Used for creating system defined content ratings</td>
  *     </tr>
  * </table>
  *
- * <u>System defined string for {@code ratingSystem}</u>
- * <table border="1" cellspacing="0" cellpadding="0">
+ * <h4>System defined strings for rating systems</h4>
+ * <table>
  *     <tr>
- *         <td width="10%">String value</td>
- *         <td>Comments</td>
+ *         <th>Constant Value</th>
+ *         <th>Comment</th>
  *     </tr>
  *     <tr>
  *         <td>AM_TV_RS</td>
@@ -316,7 +330,7 @@ import java.util.Objects;
  *     </tr>
  *     <tr>
  *         <td>US_TV</td>
- *         <td>TV content rating system for United States</td>
+ *         <td>TV content rating system for the United States</td>
  *     </tr>
  *     <tr>
  *         <td>VE_TV</td>
@@ -328,12 +342,12 @@ import java.util.Objects;
  *     </tr>
  * </table>
  *
- * <u>System defined string for {@code rating}</u>
- * <table border="1" cellspacing="0" cellpadding="0">
+ * <h4>System defined strings for ratings</h4>
+ * <table>
  *     <tr>
- *         <td width="10%">RatingSystem code</td>
- *         <td width="10%">Rating string value</td>
- *         <td>Comments</td>
+ *         <th>Rating System</th>
+ *         <th>Constant Value</th>
+ *         <th>Comment</th>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="6">AM_TV_RS</td>
@@ -1401,12 +1415,12 @@ import java.util.Objects;
  *     </tr>
  * </table>
  *
- * <u>System defined string for {@code subRating}</u>
- * <table border="1" cellspacing="0" cellpadding="0">
+ * <h4>System defined strings for sub-ratings</h4>
+ * <table>
  *     <tr>
- *         <td width="10%">RatingSystem code</td>
- *         <td width="10%">Rating string value</td>
- *         <td>Comments</td>
+ *         <th>Rating System</th>
+ *         <th>Constant Value</th>
+ *         <th>Comment</th>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="6">NL_TV</td>
@@ -1518,13 +1532,15 @@ public final class TvContentRating {
     private final int mHashCode;
 
     /**
-     * Creates a TvContentRating object.
+     * Creates a {@code TvContentRating} object with predefined content rating strings.
      *
-     * @param domain The domain name.
-     * @param ratingSystem The rating system id.
-     * @param rating The content rating string.
-     * @param subRatings The string array of sub-ratings.
-     * @return A TvContentRating object, or null if creation failed.
+     * @param domain The domain string. For example, "com.android.tv".
+     * @param ratingSystem The rating system string. For example, "US_TV".
+     * @param rating The content rating string. For example, "US_TV_PG".
+     * @param subRatings The sub-rating strings. For example, "US_TV_D" and "US_TV_L".
+     * @return A {@code TvContentRating} object.
+     * @throws IllegalArgumentException If {@code domain}, {@code ratingSystem} or {@code rating} is
+     *             {@code null}.
      */
     public static TvContentRating createRating(String domain, String ratingSystem,
             String rating, String... subRatings) {
@@ -1541,12 +1557,12 @@ public final class TvContentRating {
     }
 
     /**
-     * Recovers a TvContentRating from a String that was previously created with
+     * Recovers a {@code TvContentRating} object from the string that was previously created from
      * {@link #flattenToString}.
      *
-     * @param ratingString The String that was returned by flattenToString().
-     * @return a new TvContentRating containing the domain, rating system, rating and
-     *         sub-ratings information was encoded in {@code ratingString}.
+     * @param ratingString The string returned by {@link #flattenToString}.
+     * @return the {@code TvContentRating} object containing the domain, rating system, rating and
+     *         sub-ratings information encoded in {@code ratingString}.
      * @see #flattenToString
      */
     public static TvContentRating unflattenFromString(String ratingString) {
@@ -1568,10 +1584,10 @@ public final class TvContentRating {
     /**
      * Constructs a TvContentRating object from a given rating and sub-rating constants.
      *
-     * @param domain The domain name.
-     * @param ratingSystem The rating system id.
-     * @param rating The content rating string.
-     * @param subRatings The String array of sub-rating constants defined in this class.
+     * @param domain The string for domain of the content rating system such as "com.android.tv".
+     * @param ratingSystem The rating system string such as "US_TV".
+     * @param rating The content rating string such as "US_TV_PG".
+     * @param subRatings The sub-rating strings such as "US_TV_D" and "US_TV_L".
      */
     private TvContentRating(
             String domain, String ratingSystem, String rating, String[] subRatings) {
@@ -1588,28 +1604,29 @@ public final class TvContentRating {
     }
 
     /**
-     * Returns the domain.
+     * Returns the domain of this {@code TvContentRating} object.
      */
     public String getDomain() {
         return mDomain;
     }
 
     /**
-     * Returns the rating system id.
+     * Returns the rating system of this {@code TvContentRating} object.
      */
     public String getRatingSystem() {
         return mRatingSystem;
     }
 
     /**
-     * Returns the main rating.
+     * Returns the main rating of this {@code TvContentRating} object.
      */
     public String getMainRating() {
         return mRating;
     }
 
     /**
-     * Returns the unmodifiable {@code List} of sub-rating strings.
+     * Returns the unmodifiable sub-rating string {@link List} of this {@code TvContentRating}
+     * object.
      */
     public List<String> getSubRatings() {
         if (mSubRatings == null) {
@@ -1619,12 +1636,12 @@ public final class TvContentRating {
     }
 
     /**
-     * Returns a String that unambiguously describes both the rating and sub-rating information
-     * contained in the TvContentRating. You can later recover the TvContentRating from this string
-     * through {@link #unflattenFromString}.
+     * Returns a string that unambiguously describes the rating information contained in a
+     * {@code TvContentRating} object. One can later recover the object from this string through
+     * {@link #unflattenFromString}.
      *
-     * @return a new String holding rating/sub-rating information, which can later be stored in the
-     *         database and settings.
+     * @return a string containing the rating information, which can later be stored in the
+     *         database.
      * @see #unflattenFromString
      */
     public String flattenToString() {
@@ -1644,11 +1661,11 @@ public final class TvContentRating {
     }
 
     /**
-     * Returns true if this rating has the same main rating as the specified rating and when this
-     * rating's sub-ratings contain the other's.
+     * Returns {@code true} if this rating has the same main rating as the specified rating and when
+     * this rating's sub-ratings contain the other's.
      * <p>
-     * For example, a TvContentRating object that represents TV-PG with S(Sexual content) and
-     * V(Violence) contains TV-PG, TV-PG/S, TV-PG/V and itself.
+     * For example, a {@code TvContentRating} object that represents TV-PG with S(Sexual content)
+     * and V(Violence) contains TV-PG, TV-PG/S, TV-PG/V and itself.
      * </p>
      *
      * @param rating The {@link TvContentRating} to check.
