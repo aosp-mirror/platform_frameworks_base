@@ -15566,10 +15566,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean targetTaskAffinityMatchesActivity(IBinder token, String destAffinity) {
-        ActivityRecord srec = ActivityRecord.forToken(token);
-        return srec != null && srec.task.affinity != null &&
-                srec.task.affinity.equals(destAffinity);
+    public boolean shouldUpRecreateTask(IBinder token, String destAffinity) {
+        synchronized (this) {
+            ActivityRecord srec = ActivityRecord.forToken(token);
+            if (srec.task != null && srec.task.stack != null) {
+                return srec.task.stack.shouldUpRecreateTaskLocked(srec, destAffinity);
+            }
+        }
+        return false;
     }
 
     public boolean navigateUpTo(IBinder token, Intent destIntent, int resultCode,
