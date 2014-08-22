@@ -28556,8 +28556,6 @@ package android.telecomm {
     method public final int getHandlePresentation();
     method public final int getState();
     method public final android.telecomm.StatusHints getStatusHints();
-    method public final android.telecomm.Connection.VideoProvider getVideoProvider();
-    method public final int getVideoState();
     method public final boolean isRequestingRingback();
     method public void onAbort();
     method public void onAnswer(int);
@@ -28589,8 +28587,6 @@ package android.telecomm {
     method public final void setRequestingRingback(boolean);
     method public final void setRinging();
     method public final void setStatusHints(android.telecomm.StatusHints);
-    method public final void setVideoProvider(android.telecomm.Connection.VideoProvider);
-    method public final void setVideoState(int);
     method public final void startActivityFromInCall(android.app.PendingIntent);
     method public static java.lang.String stateToString(int);
     field public static final int STATE_ACTIVE = 4; // 0x4
@@ -28602,35 +28598,6 @@ package android.telecomm {
     field public static final int STATE_RINGING = 2; // 0x2
   }
 
-  public static abstract class Connection.VideoProvider {
-    ctor public Connection.VideoProvider();
-    method public void changeCallDataUsage(int);
-    method public void changeCameraCapabilities(android.telecomm.CameraCapabilities);
-    method public void changePeerDimensions(int, int);
-    method public void handleCallSessionEvent(int);
-    method public abstract void onRequestCallDataUsage();
-    method public abstract void onRequestCameraCapabilities();
-    method public abstract void onSendSessionModifyRequest(android.telecomm.VideoProfile);
-    method public abstract void onSendSessionModifyResponse(android.telecomm.VideoProfile);
-    method public abstract void onSetCamera(java.lang.String);
-    method public abstract void onSetDeviceOrientation(int);
-    method public abstract void onSetDisplaySurface(android.view.Surface);
-    method public abstract void onSetPauseImage(java.lang.String);
-    method public abstract void onSetPreviewSurface(android.view.Surface);
-    method public abstract void onSetZoom(float);
-    method public void receiveSessionModifyRequest(android.telecomm.VideoProfile);
-    method public void receiveSessionModifyResponse(int, android.telecomm.VideoProfile, android.telecomm.VideoProfile);
-    field public static final int SESSION_EVENT_CAMERA_FAILURE = 5; // 0x5
-    field public static final int SESSION_EVENT_CAMERA_READY = 6; // 0x6
-    field public static final int SESSION_EVENT_RX_PAUSE = 1; // 0x1
-    field public static final int SESSION_EVENT_RX_RESUME = 2; // 0x2
-    field public static final int SESSION_EVENT_TX_START = 3; // 0x3
-    field public static final int SESSION_EVENT_TX_STOP = 4; // 0x4
-    field public static final int SESSION_MODIFY_REQUEST_FAIL = 2; // 0x2
-    field public static final int SESSION_MODIFY_REQUEST_INVALID = 3; // 0x3
-    field public static final int SESSION_MODIFY_REQUEST_SUCCESS = 1; // 0x1
-  }
-
   public final class ConnectionRequest implements android.os.Parcelable {
     ctor public ConnectionRequest(android.telecomm.PhoneAccountHandle, android.net.Uri, int, android.os.Bundle, int);
     method public int describeContents();
@@ -28638,7 +28605,6 @@ package android.telecomm {
     method public android.os.Bundle getExtras();
     method public android.net.Uri getHandle();
     method public int getHandlePresentation();
-    method public int getVideoState();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -28750,7 +28716,6 @@ package android.telecomm {
     method public android.telecomm.RemoteConnection getParent();
     method public int getState();
     method public android.telecomm.StatusHints getStatusHints();
-    method public int getVideoState();
     method public void hold();
     method public boolean isRequestingRingback();
     method public void playDtmfTone(char);
@@ -28778,7 +28743,6 @@ package android.telecomm {
     method public void onStartActivityFromInCall(android.telecomm.RemoteConnection, android.app.PendingIntent);
     method public void onStateChanged(android.telecomm.RemoteConnection, int);
     method public void onStatusHintsChanged(android.telecomm.RemoteConnection, android.telecomm.StatusHints);
-    method public void onVideoStateChanged(android.telecomm.RemoteConnection, int);
   }
 
   public abstract interface Response {
@@ -28817,35 +28781,6 @@ package android.telecomm {
     field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecomm.extra.CONNECTION_SERVICE";
     field public static final java.lang.String EXTRA_PHONE_ACCOUNT_HANDLE = "android.intent.extra.PHONE_ACCOUNT_HANDLE";
     field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
-    field public static final java.lang.String EXTRA_START_CALL_WITH_VIDEO_STATE = "android.intent.extra.START_CALL_WITH_VIDEO_STATE";
-  }
-
-  public class VideoProfile implements android.os.Parcelable {
-    ctor public VideoProfile(int);
-    ctor public VideoProfile(int, int);
-    method public int describeContents();
-    method public int getQuality();
-    method public int getVideoState();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int QUALITY_DEFAULT = 4; // 0x4
-    field public static final int QUALITY_HIGH = 1; // 0x1
-    field public static final int QUALITY_LOW = 3; // 0x3
-    field public static final int QUALITY_MEDIUM = 2; // 0x2
-  }
-
-  public static class VideoProfile.VideoState {
-    ctor public VideoProfile.VideoState();
-    method public static boolean isAudioOnly(int);
-    method public static boolean isBidirectional(int);
-    method public static boolean isPaused(int);
-    method public static boolean isReceptionEnabled(int);
-    method public static boolean isTransmissionEnabled(int);
-    field public static final int AUDIO_ONLY = 0; // 0x0
-    field public static final int BIDIRECTIONAL = 3; // 0x3
-    field public static final int PAUSED = 4; // 0x4
-    field public static final int RX_ENABLED = 2; // 0x2
-    field public static final int TX_ENABLED = 1; // 0x1
   }
 
 }

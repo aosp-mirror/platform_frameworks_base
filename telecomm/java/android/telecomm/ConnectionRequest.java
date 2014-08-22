@@ -93,6 +93,7 @@ public final class ConnectionRequest implements Parcelable {
      * {@link VideoProfile.VideoState#RX_ENABLED}.
      *
      * @return The video state for the connection.
+     * @hide
      */
     public int getVideoState() {
         return mVideoState;
