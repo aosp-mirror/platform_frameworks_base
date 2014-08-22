@@ -412,8 +412,9 @@ final class AccessibilityController {
 
             private final WindowManager mWindowManager;
 
-            private final int mBorderWidth;
+            private final float mBorderWidth;
             private final int mHalfBorderWidth;
+            private final int mDrawBorderInset;
 
             private final ViewportWindow mWindow;
 
@@ -421,10 +422,11 @@ final class AccessibilityController {
 
             public MagnifiedViewport() {
                 mWindowManager = (WindowManager) mContext.getSystemService(Service.WINDOW_SERVICE);
-                mBorderWidth = (int) TypedValue.applyDimension(
+                mBorderWidth = TypedValue.applyDimension(
                         TypedValue.COMPLEX_UNIT_DIP, DEFAUTLT_BORDER_WIDTH_DIP,
                                 mContext.getResources().getDisplayMetrics());
-                mHalfBorderWidth = (int) (mBorderWidth + 0.5) / 2;
+                mHalfBorderWidth = (int) Math.ceil(mBorderWidth / 2);
+                mDrawBorderInset = (int) mBorderWidth / 2;
                 mWindow = new ViewportWindow(mContext);
                 recomputeBoundsLocked();
             }
@@ -437,7 +439,8 @@ final class AccessibilityController {
                 }
                 // If this message is pending we are in a rotation animation and do not want
                 // to show the border. We will do so when the pending message is handled.
-                if (!mHandler.hasMessages(MyHandler.MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED)) {
+                if (!mHandler.hasMessages(
+                        MyHandler.MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED)) {
                     setMagnifiedRegionBorderShownLocked(isMagnifyingLocked(), true);
                 }
             }
@@ -513,8 +516,8 @@ final class AccessibilityController {
 
                 visibleWindows.clear();
 
-                magnifiedBounds.op(mHalfBorderWidth, mHalfBorderWidth,
-                        screenWidth - mHalfBorderWidth, screenHeight - mHalfBorderWidth,
+                magnifiedBounds.op(mDrawBorderInset, mDrawBorderInset,
+                        screenWidth - mDrawBorderInset, screenHeight - mDrawBorderInset,
                         Region.Op.INTERSECT);
 
                 if (!mOldMagnifiedBounds.equals(magnifiedBounds)) {
@@ -527,8 +530,8 @@ final class AccessibilityController {
                     Rect dirtyRect = mTempRect1;
                     if (mFullRedrawNeeded) {
                         mFullRedrawNeeded = false;
-                        dirtyRect.set(mHalfBorderWidth, mHalfBorderWidth,
-                                screenWidth - mHalfBorderWidth, screenHeight - mHalfBorderWidth);
+                        dirtyRect.set(mDrawBorderInset, mDrawBorderInset,
+                                screenWidth - mDrawBorderInset, screenHeight - mDrawBorderInset);
                         mWindow.invalidate(dirtyRect);
                     } else {
                         Region dirtyRegion = mTempRegion3;
