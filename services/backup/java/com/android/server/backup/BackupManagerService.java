@@ -1064,31 +1064,19 @@ public class BackupManagerService extends IBackupManager.Stub {
         }
         if (DEBUG) Slog.v(TAG, "Starting with transport " + mCurrentTransport);
 
-        // Find transport hosts and bind to their services
+        // Find all transport hosts and bind to their services
         List<ResolveInfo> hosts = mPackageManager.queryIntentServicesAsUser(
                 mTransportServiceIntent, 0, UserHandle.USER_OWNER);
         if (DEBUG) {
             Slog.v(TAG, "Found transports: " + ((hosts == null) ? "null" : hosts.size()));
         }
         if (hosts != null) {
-            if (MORE_DEBUG) {
-                for (int i = 0; i < hosts.size(); i++) {
-                    ServiceInfo info = hosts.get(i).serviceInfo;
-                    Slog.v(TAG, "   " + info.packageName + "/" + info.name);
-                }
-            }
             for (int i = 0; i < hosts.size(); i++) {
-                try {
-                    ServiceInfo info = hosts.get(i).serviceInfo;
-                    PackageInfo packInfo = mPackageManager.getPackageInfo(info.packageName, 0);
-                    if ((packInfo.applicationInfo.flags & ApplicationInfo.FLAG_PRIVILEGED) != 0) {
-                        bindTransport(info);
-                    } else {
-                        Slog.w(TAG, "Transport package not privileged: " + info.packageName);
-                    }
-                } catch (Exception e) {
-                    Slog.e(TAG, "Problem resolving transport service: " + e.getMessage());
+                final ServiceInfo transport = hosts.get(i).serviceInfo;
+                if (MORE_DEBUG) {
+                    Slog.v(TAG, "   " + transport.packageName + "/" + transport.name);
                 }
+                tryBindTransport(transport);
             }
         }
 
@@ -1789,8 +1777,8 @@ public class BackupManagerService extends IBackupManager.Stub {
                             scheduleNextFullBackupJob();
                         }
 
-                        // if this was the PACKAGE_ADDED conclusion of an upgrade of the package
-                        // hosting one of our transports, we need to explicitly rebind now.
+                        // Transport maintenance: rebind to known existing transports that have
+                        // just been updated; and bind to any newly-installed transport services.
                         if (rebind) {
                             synchronized (mTransportConnections) {
                                 final TransportConnection conn = mTransportConnections.get(packageName);
@@ -1799,9 +1787,12 @@ public class BackupManagerService extends IBackupManager.Stub {
                                         Slog.i(TAG, "Transport package changed; rebinding");
                                     }
                                     bindTransport(conn.mTransport);
+                                } else {
+                                    checkForTransportAndBind(app);
                                 }
                             }
                         }
+
                     } catch (NameNotFoundException e) {
                         // doesn't really exist; ignore it
                         if (DEBUG) {
@@ -1853,7 +1844,36 @@ public class BackupManagerService extends IBackupManager.Stub {
         }
     };
 
-    void bindTransport(ServiceInfo transport) {
+    // Check whether the given package hosts a transport, and bind if so
+    void checkForTransportAndBind(PackageInfo pkgInfo) {
+        Intent intent = new Intent(mTransportServiceIntent)
+                .setPackage(pkgInfo.packageName);
+        List<ResolveInfo> hosts = mPackageManager.queryIntentServicesAsUser(
+                intent, 0, UserHandle.USER_OWNER);
+        final int N = hosts.size();
+        for (int i = 0; i < N; i++) {
+            final ServiceInfo info = hosts.get(i).serviceInfo;
+            tryBindTransport(info);
+        }
+    }
+
+    // Verify that the service exists and is hosted by a privileged app, then proceed to bind
+    boolean tryBindTransport(ServiceInfo info) {
+        try {
+            PackageInfo packInfo = mPackageManager.getPackageInfo(info.packageName, 0);
+            if ((packInfo.applicationInfo.flags & ApplicationInfo.FLAG_PRIVILEGED) != 0) {
+                return bindTransport(info);
+            } else {
+                Slog.w(TAG, "Transport package " + info.packageName + " not privileged");
+            }
+        } catch (NameNotFoundException e) {
+            Slog.w(TAG, "Problem resolving transport package " + info.packageName);
+        }
+        return false;
+    }
+
+    // Actually bind; presumes that we have already validated the transport service
+    boolean bindTransport(ServiceInfo transport) {
         ComponentName svcName = new ComponentName(transport.packageName, transport.name);
         if (DEBUG) {
             Slog.i(TAG, "Binding to transport host " + svcName);
@@ -1874,7 +1894,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 mContext.unbindService(connection);
             }
         }
-        mContext.bindServiceAsUser(intent,
+        return mContext.bindServiceAsUser(intent,
                 connection, Context.BIND_AUTO_CREATE,
                 UserHandle.OWNER);
     }
@@ -8470,7 +8490,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     // name is not one of the available transports, no action is taken and the method
     // returns null.
     public String selectBackupTransport(String transport) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "selectBackupTransport");
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+                "selectBackupTransport");
 
         synchronized (mTransports) {
             String prevTransport = null;
@@ -9130,19 +9151,22 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             pw.println("  next scheduled: " + mNextBackupPass);
 
             pw.println("Available transports:");
-            for (String t : listAllTransports()) {
-                pw.println((t.equals(mCurrentTransport) ? "  * " : "    ") + t);
-                try {
-                    IBackupTransport transport = getTransport(t);
-                    File dir = new File(mBaseStateDir, transport.transportDirName());
-                    pw.println("       destination: " + transport.currentDestinationString());
-                    pw.println("       intent: " + transport.configurationIntent());
-                    for (File f : dir.listFiles()) {
-                        pw.println("       " + f.getName() + " - " + f.length() + " state bytes");
+            final String[] transports = listAllTransports();
+            if (transports != null) {
+                for (String t : listAllTransports()) {
+                    pw.println((t.equals(mCurrentTransport) ? "  * " : "    ") + t);
+                    try {
+                        IBackupTransport transport = getTransport(t);
+                        File dir = new File(mBaseStateDir, transport.transportDirName());
+                        pw.println("       destination: " + transport.currentDestinationString());
+                        pw.println("       intent: " + transport.configurationIntent());
+                        for (File f : dir.listFiles()) {
+                            pw.println("       " + f.getName() + " - " + f.length() + " state bytes");
+                        }
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Error in transport", e);
+                        pw.println("        Error: " + e);
                     }
-                } catch (Exception e) {
-                    Slog.e(TAG, "Error in transport", e);
-                    pw.println("        Error: " + e);
                 }
             }
 
