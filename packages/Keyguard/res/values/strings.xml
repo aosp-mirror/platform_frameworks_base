@@ -115,8 +115,6 @@
     <string name="keyguard_accessibility_widget"><xliff:g id="widget_index">%1$s</xliff:g> widget.</string>
     <!-- Accessibility description of the lock screen user selector widget. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_user_selector">User selector</string>
-    <!-- Accessibility description of the lock screen status widget. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_status">Status</string>
     <!-- Accessibility description of the camera widget. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_camera">Camera</string>
     <!-- Accessibility description of the lock media control widget. [CHAR_LIMIT=none] -->
@@ -175,6 +173,9 @@
 
     <!-- Accessibility description announced when user drags widget away from delete drop target [CHAR LIMIT=NONE] -->
     <string name="keyguard_accessibility_delete_widget_end"><xliff:g id="widget_index">%1$s</xliff:g> will not be deleted.</string>
+
+    <!-- Accessibility description for the text view that indicates when the next alarm is set (not shown on screen). [CHAR_LIMIT=none] -->
+    <string name="keyguard_accessibility_next_alarm">Next alarm set for <xliff:g id="alarm" example="Fri 8:30 AM">%1$s</xliff:g></string>
 
     <!-- Password keyboard strings. Used by LockScreen and Settings --><skip />
     <!-- Label for "switch to symbols" key.  Must be short to fit on key! -->
