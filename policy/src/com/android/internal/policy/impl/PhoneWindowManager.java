@@ -4266,7 +4266,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             result &= ~ACTION_PASS_TO_USER;
                             break;
                         }
-                        if (telecommManager.isInAPhoneCall()
+                        if (telecommManager.isInCall()
                                 && (result & ACTION_PASS_TO_USER) == 0) {
                             // If we are in call but we decided not to pass the key to
                             // the application, just pass it to the session service.
@@ -4341,7 +4341,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             telecommManager.silenceRinger();
                         } else if ((mIncallPowerBehavior
                                 & Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_HANGUP) != 0
-                                && telecommManager.isInAPhoneCall() && interactive) {
+                                && telecommManager.isInCall() && interactive) {
                             // Otherwise, if "Power button ends call" is enabled,
                             // the Power button will hang up any current active call.
                             hungUp = telecommManager.endCall();
@@ -4384,7 +4384,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (down) {
                     TelecommManager telecommManager = getTelecommService();
                     if (telecommManager != null) {
-                        if (telecommManager.isInAPhoneCall()) {
+                        if (telecommManager.isInCall()) {
                             // Suppress PLAY/PAUSE toggle when phone is ringing or in-call
                             // to avoid music playback.
                             break;

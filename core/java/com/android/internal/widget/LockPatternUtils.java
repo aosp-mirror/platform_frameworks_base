@@ -34,8 +34,8 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
-import android.phone.PhoneManager;
 import android.provider.Settings;
+import android.telecomm.TelecommManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.IWindowManager;
@@ -1438,7 +1438,7 @@ public class LockPatternUtils {
         }
 
         int textId;
-        if (getPhoneManager().isInAPhoneCall()) {
+        if (getTelecommManager().isInCall()) {
             // show "return to call" text and show phone icon
             textId = R.string.lockscreen_return_to_call;
             int phoneCallIcon = showIcon ? R.drawable.stat_sys_phone_call : 0;
@@ -1456,11 +1456,11 @@ public class LockPatternUtils {
      * on various lockscreens.
      */
     public void resumeCall() {
-        getPhoneManager().showCallScreen(false);
+        getTelecommManager().showInCallScreen(false);
     }
 
-    private PhoneManager getPhoneManager() {
-        return (PhoneManager) mContext.getSystemService(Context.PHONE_SERVICE);
+    private TelecommManager getTelecommManager() {
+        return (TelecommManager) mContext.getSystemService(Context.TELECOMM_SERVICE);
     }
 
     private void finishBiometricWeak() {

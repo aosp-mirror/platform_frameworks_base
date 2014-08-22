@@ -122,7 +122,6 @@ import android.os.SystemVibrator;
 import android.os.UserManager;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
-import android.phone.PhoneManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
 import android.service.fingerprint.IFingerprintService;
@@ -568,11 +567,6 @@ class ContextImpl extends Context {
         registerService(TELECOMM_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
                     return new TelecommManager(ctx.getOuterContext());
-                }});
-
-        registerService(PHONE_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new PhoneManager(ctx.getOuterContext());
                 }});
 
         registerService(UI_MODE_SERVICE, new ServiceFetcher() {

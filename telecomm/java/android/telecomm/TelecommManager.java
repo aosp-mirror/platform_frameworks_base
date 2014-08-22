@@ -17,7 +17,6 @@ package android.telecomm;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
-
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -394,14 +393,15 @@ public class TelecommManager {
     /**
      * Returns whether there is an ongoing phone call (can be in dialing, ringing, active or holding
      * states).
-     *
-     * @hide
+     * <p>
+     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
+     * </p>
      */
     @SystemApi
-    public boolean isInAPhoneCall() {
+    public boolean isInCall() {
         try {
             if (isServiceConnected()) {
-                return getTelecommService().isInAPhoneCall();
+                return getTelecommService().isInCall();
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException attempting to get default phone app.", e);
@@ -538,6 +538,67 @@ public class TelecommManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException adding a new incoming call: " + phoneAccount, e);
+        }
+    }
+
+    /**
+     * Processes the specified dial string as an MMI code.
+     * MMI codes are any sequence of characters entered into the dialpad that contain a "*" or "#".
+     * Some of these sequences launch special behavior through handled by Telephony.
+     * <p>
+     * Requires that the method-caller be set as the system dialer app.
+     * </p>
+     *
+     * @param dialString The digits to dial.
+     * @return True if the digits were processed as an MMI code, false otherwise.
+     */
+    public boolean handleMmi(String dialString) {
+        ITelecommService service = getTelecommService();
+        if (service != null) {
+            try {
+                return service.handlePinMmi(dialString);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling ITelecommService#handlePinMmi", e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Removes the missed-call notification if one is present.
+     * <p>
+     * Requires that the method-caller be set as the system dialer app.
+     * </p>
+     */
+    public void cancelMissedCallsNotification() {
+        ITelecommService service = getTelecommService();
+        if (service != null) {
+            try {
+                service.cancelMissedCallsNotification();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling ITelecommService#cancelMissedCallsNotification", e);
+            }
+        }
+    }
+
+    /**
+     * Brings the in-call screen to the foreground if there is an ongoing call. If there is
+     * currently no ongoing call, then this method does nothing.
+     * <p>
+     * Requires that the method-caller be set as the system dialer app or have the
+     * {@link android.Manifest.permission#READ_PHONE_STATE} permission.
+     * </p>
+     *
+     * @param showDialpad Brings up the in-call dialpad as part of showing the in-call screen.
+     */
+    public void showInCallScreen(boolean showDialpad) {
+        ITelecommService service = getTelecommService();
+        if (service != null) {
+            try {
+                service.showInCallScreen(showDialpad);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling ITelecommService#showCallScreen", e);
+            }
         }
     }
 
