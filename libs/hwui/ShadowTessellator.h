@@ -72,7 +72,7 @@ public:
             const Rect& localClip, float maxZ, VertexBuffer& shadowVertexBuffer);
 
     static void tessellateSpotShadow(bool isCasterOpaque,
-            const Vector3* casterPolygon, int casterVertexCount,
+            const Vector3* casterPolygon, int casterVertexCount, const Vector3& casterCentroid,
             const mat4& receiverTransform, const Vector3& lightCenter, int lightRadius,
             const Rect& casterBounds, const Rect& localClip, VertexBuffer& shadowVertexBuffer);
 
@@ -82,6 +82,7 @@ public:
 
     static bool isClockwise(const Vector2* polygon, int len);
 
+    static Vector2 calculateNormal(const Vector2& p1, const Vector2& p2);
     /**
      * Determine whether the path is clockwise, using the control points.
      *

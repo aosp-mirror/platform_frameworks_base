@@ -17,6 +17,9 @@
 #define LOG_TAG "OpenGLRenderer"
 
 #define SHADOW_SHRINK_SCALE 0.1f
+#define CASTER_Z_CAP_RATIO 0.95f
+#define FAKE_UMBRA_SIZE_RATIO 0.01f
+#define OCLLUDED_UMBRA_SHRINK_FACTOR 0.95f
 
 #include <math.h>
 #include <stdlib.h>
@@ -25,11 +28,27 @@
 #include "ShadowTessellator.h"
 #include "SpotShadow.h"
 #include "Vertex.h"
+#include "utils/MathUtils.h"
 
+// TODO: After we settle down the new algorithm, we can remove the old one and
+// its utility functions.
+// Right now, we still need to keep it for comparison purpose and future expansion.
 namespace android {
 namespace uirenderer {
 
 static const double EPSILON = 1e-7;
+
+/**
+ * For each polygon's vertex, the light center will project it to the receiver
+ * as one of the outline vertex.
+ * For each outline vertex, we need to store the position and normal.
+ * Normal here is defined against the edge by the current vertex and the next vertex.
+ */
+struct OutlineData {
+    Vector2 position;
+    Vector2 normal;
+    float radius;
+};
 
 /**
  * Calculate the angle between and x and a y coordinate.
@@ -500,12 +519,13 @@ void SpotShadow::computeLightPolygon(int points, const Vector3& lightCenter,
 *                            empty strip if error.
 *
 */
-void SpotShadow::createSpotShadow(bool isCasterOpaque, const Vector3* poly,
+
+void SpotShadow::createSpotShadow_old(bool isCasterOpaque, const Vector3* poly,
         int polyLength, const Vector3& lightCenter, float lightSize,
         int lightVertexCount, VertexBuffer& retStrips) {
     Vector3 light[lightVertexCount * 3];
     computeLightPolygon(lightVertexCount, lightCenter, lightSize, light);
-    computeSpotShadow(isCasterOpaque, light, lightVertexCount, lightCenter, poly,
+    computeSpotShadow_old(isCasterOpaque, light, lightVertexCount, lightCenter, poly,
             polyLength, retStrips);
 }
 
@@ -519,9 +539,9 @@ void SpotShadow::createSpotShadow(bool isCasterOpaque, const Vector3* poly,
  * @param shadowTriangleStrip return an (x,y,alpha) triangle strip representing the shadow. Return
  *                            empty strip if error.
  */
-void SpotShadow::computeSpotShadow(bool isCasterOpaque, const Vector3* lightPoly,
-        int lightPolyLength, const Vector3& lightCenter, const Vector3* poly,
-        int polyLength, VertexBuffer& shadowTriangleStrip) {
+void SpotShadow::computeSpotShadow_old(bool isCasterOpaque, const Vector3* lightPoly,
+        int lightPolyLength, const Vector3& lightCenter, const Vector3* poly, int polyLength,
+        VertexBuffer& shadowTriangleStrip) {
     // Point clouds for all the shadowed vertices
     Vector2 shadowRegion[lightPolyLength * polyLength];
     // Shadow polygon from one point light.
@@ -616,8 +636,196 @@ void SpotShadow::computeSpotShadow(bool isCasterOpaque, const Vector3* lightPoly
         umbraLength = polyLength;
     }
 
-    generateTriangleStrip(isCasterOpaque, penumbra, penumbraLength, umbra,
+    generateTriangleStrip(isCasterOpaque, 1.0, penumbra, penumbraLength, umbra,
             umbraLength, poly, polyLength, shadowTriangleStrip);
+}
+
+float SpotShadow::projectCasterToOutline(Vector2& outline,
+        const Vector3& lightCenter, const Vector3& polyVertex) {
+    float lightToPolyZ = lightCenter.z - polyVertex.z;
+    float ratioZ = CASTER_Z_CAP_RATIO;
+    if (lightToPolyZ != 0) {
+        // If any caster's vertex is almost above the light, we just keep it as 95%
+        // of the height of the light.
+        ratioZ = MathUtils::min(polyVertex.z / lightToPolyZ, CASTER_Z_CAP_RATIO);
+    }
+
+    outline.x = polyVertex.x - ratioZ * (lightCenter.x - polyVertex.x);
+    outline.y = polyVertex.y - ratioZ * (lightCenter.y - polyVertex.y);
+    return ratioZ;
+}
+
+/**
+ * Generate the shadow spot light of shape lightPoly and a object poly
+ *
+ * @param isCasterOpaque whether the caster is opaque
+ * @param lightCenter the center of the light
+ * @param lightSize the radius of the light
+ * @param poly x,y,z vertexes of a convex polygon that occludes the light source
+ * @param polyLength number of vertexes of the occluding polygon
+ * @param shadowTriangleStrip return an (x,y,alpha) triangle strip representing the shadow. Return
+ *                            empty strip if error.
+ */
+void SpotShadow::createSpotShadow(bool isCasterOpaque, const Vector3& lightCenter,
+        float lightSize, const Vector3* poly, int polyLength, const Vector3& polyCentroid,
+        VertexBuffer& shadowTriangleStrip) {
+    OutlineData outlineData[polyLength];
+    Vector2 outlineCentroid;
+    // Calculate the projected outline for each polygon's vertices from the light center.
+    //
+    //                       O     Light
+    //                      /
+    //                    /
+    //                   .     Polygon vertex
+    //                 /
+    //               /
+    //              O     Outline vertices
+    //
+    // Ratio = (Poly - Outline) / (Light - Poly)
+    // Outline.x = Poly.x - Ratio * (Light.x - Poly.x)
+    // Outline's radius / Light's radius = Ratio
+
+    // Compute the last outline vertex to make sure we can get the normal and outline
+    // in one single loop.
+    projectCasterToOutline(outlineData[polyLength - 1].position, lightCenter,
+            poly[polyLength - 1]);
+
+    // Take the outline's polygon, calculate the normal for each outline edge.
+    int currentNormalIndex = polyLength - 1;
+    int nextNormalIndex = 0;
+
+    for (int i = 0; i < polyLength; i++) {
+        float ratioZ = projectCasterToOutline(outlineData[i].position,
+                lightCenter, poly[i]);
+        outlineData[i].radius = ratioZ * lightSize;
+
+        outlineData[currentNormalIndex].normal = ShadowTessellator::calculateNormal(
+                outlineData[currentNormalIndex].position,
+                outlineData[nextNormalIndex].position);
+        currentNormalIndex = (currentNormalIndex + 1) % polyLength;
+        nextNormalIndex++;
+    }
+
+    projectCasterToOutline(outlineCentroid, lightCenter, polyCentroid);
+
+    int penumbraIndex = 0;
+    int penumbraLength = polyLength * 3;
+    Vector2 penumbra[penumbraLength];
+
+    Vector2 umbra[polyLength];
+    float distOutline = 0;
+    float ratioVI = 0;
+
+    bool hasValidUmbra = true;
+    // We need the maxRatioVI to decrease the spot shadow strength accordingly.
+    float maxRaitoVI = 1.0;
+
+    for (int i = 0; i < polyLength; i++) {
+        // Generate all the penumbra's vertices only using the (outline vertex + normal * radius)
+        // There is no guarantee that the penumbra is still convex, but for
+        // each outline vertex, it will connect to all its corresponding penumbra vertices as
+        // triangle fans. And for neighber penumbra vertex, it will be a trapezoid.
+        //
+        // Penumbra Vertices marked as Pi
+        // Outline Vertices marked as Vi
+        //                                            (P3)
+        //          (P2)                               |     ' (P4)
+        //   (P1)'   |                                 |   '
+        //         ' |                                 | '
+        // (P0)  ------------------------------------------------(P5)
+        //           | (V0)                            |(V1)
+        //           |                                 |
+        //           |                                 |
+        //           |                                 |
+        //           |                                 |
+        //           |                                 |
+        //           |                                 |
+        //           |                                 |
+        //           |                                 |
+        //       (V3)-----------------------------------(V2)
+        int preNormalIndex = (i + polyLength - 1) % polyLength;
+        penumbra[penumbraIndex++] = outlineData[i].position +
+            outlineData[preNormalIndex].normal * outlineData[i].radius;
+
+        int currentNormalIndex = i;
+        // (TODO) Depending on how roundness we want for each corner, we can subdivide
+        // further here and/or introduce some heuristic to decide how much the
+        // subdivision should be.
+        Vector2 avgNormal =
+            (outlineData[preNormalIndex].normal + outlineData[currentNormalIndex].normal) / 2;
+
+        penumbra[penumbraIndex++] = outlineData[i].position +
+            avgNormal * outlineData[i].radius;
+
+        penumbra[penumbraIndex++] = outlineData[i].position +
+            outlineData[currentNormalIndex].normal * outlineData[i].radius;
+
+        // Compute the umbra by the intersection from the outline's centroid!
+        //
+        //       (V) ------------------------------------
+        //           |          '                       |
+        //           |         '                        |
+        //           |       ' (I)                      |
+        //           |    '                             |
+        //           | '             (C)                |
+        //           |                                  |
+        //           |                                  |
+        //           |                                  |
+        //           |                                  |
+        //           ------------------------------------
+        //
+        // Connect a line b/t the outline vertex (V) and the centroid (C), it will
+        // intersect with the outline vertex's circle at point (I).
+        // Now, ratioVI = VI / VC, ratioIC = IC / VC
+        // Then the intersetion point can be computed as Ixy = Vxy * ratioIC + Cxy * ratioVI;
+        //
+        // When one of the outline circle cover the the outline centroid, (like I is
+        // on the other side of C), there is no real umbra any more, so we just fake
+        // a small area around the centroid as the umbra, and tune down the spot
+        // shadow's umbra strength to simulate the effect the whole shadow will
+        // become lighter in this case.
+        // The ratio can be simulated by using the inverse of maximum of ratioVI for
+        // all (V).
+        distOutline = (outlineData[i].position - outlineCentroid).length();
+        if (distOutline == 0) {
+            // If the outline has 0 area, then there is no spot shadow anyway.
+            ALOGW("Outline has 0 area, no spot shadow!");
+            return;
+        }
+        ratioVI = outlineData[i].radius / distOutline;
+        if (ratioVI >= 1.0) {
+            maxRaitoVI = ratioVI;
+            hasValidUmbra = false;
+        }
+        // When we know we don't have valid umbra, don't bother to compute the
+        // values below. But we can't skip the loop yet since we want to know the
+        // maximum ratio.
+        if (hasValidUmbra) {
+            float ratioIC = (distOutline - outlineData[i].radius) / distOutline;
+            umbra[i] = outlineData[i].position * ratioIC + outlineCentroid * ratioVI;
+        }
+    }
+
+    float shadowStrengthScale = 1.0;
+    if (!hasValidUmbra) {
+        ALOGW("The object is too close to the light or too small, no real umbra!");
+        for (int i = 0; i < polyLength; i++) {
+            umbra[i] = outlineData[i].position * FAKE_UMBRA_SIZE_RATIO +
+                outlineCentroid * (1 - FAKE_UMBRA_SIZE_RATIO);
+        }
+        shadowStrengthScale = 1.0 / maxRaitoVI;
+    }
+
+#if DEBUG_SHADOW
+    dumpPolygon(poly, polyLength, "input poly");
+    dumpPolygon(outline, polyLength, "outline");
+    dumpPolygon(penumbra, penumbraLength, "penumbra");
+    dumpPolygon(umbra, polyLength, "umbra");
+    ALOGD("hasValidUmbra is %d and shadowStrengthScale is %f", hasValidUmbra, shadowStrengthScale);
+#endif
+
+    generateTriangleStrip(isCasterOpaque, shadowStrengthScale, penumbra,
+            penumbraLength, umbra, polyLength, poly, polyLength, shadowTriangleStrip);
 }
 
 /**
@@ -697,7 +905,6 @@ int SpotShadow::calculateOccludedUmbra(const Vector2* umbra, int umbraLength,
             occludedUmbra, polyLength);
 }
 
-#define OCLLUDED_UMBRA_SHRINK_FACTOR 0.95f
 /**
  * Generate a triangle strip given two convex polygons
  *
@@ -708,8 +915,8 @@ int SpotShadow::calculateOccludedUmbra(const Vector2* umbra, int umbraLength,
  * @param shadowTriangleStrip return an (x,y,alpha) triangle strip representing the shadow. Return
  *                            empty strip if error.
 **/
-void SpotShadow::generateTriangleStrip(bool isCasterOpaque, const Vector2* penumbra,
-        int penumbraLength, const Vector2* umbra, int umbraLength,
+void SpotShadow::generateTriangleStrip(bool isCasterOpaque, float shadowStrengthScale,
+        const Vector2* penumbra, int penumbraLength, const Vector2* umbra, int umbraLength,
         const Vector3* poly, int polyLength, VertexBuffer& shadowTriangleStrip) {
     const int rays = SHADOW_RAY_COUNT;
     const int size = 2 * rays;
@@ -750,13 +957,12 @@ void SpotShadow::generateTriangleStrip(bool isCasterOpaque, const Vector2* penum
             }
         }
     }
-
     AlphaVertex* shadowVertices =
             shadowTriangleStrip.alloc<AlphaVertex>(SHADOW_VERTEX_COUNT);
 
     // NOTE: Shadow alpha values are transformed when stored in alphavertices,
     // so that they can be consumed directly by gFS_Main_ApplyVertexAlphaShadowInterp
-    float transformedMaxAlpha = M_PI;
+    float transformedMaxAlpha = M_PI * shadowStrengthScale;
 
     // Calculate the vertices (x, y, alpha) in the shadow area.
     AlphaVertex centroidXYA;
@@ -789,7 +995,6 @@ void SpotShadow::generateTriangleStrip(bool isCasterOpaque, const Vector2* penum
             shadowVertices[2 * rays + rayIndex] = centroidXYA;
         }
     }
-
     shadowTriangleStrip.setMode(VertexBuffer::kTwoPolyRingShadow);
     shadowTriangleStrip.computeBounds<AlphaVertex>();
 }
@@ -844,7 +1049,16 @@ void SpotShadow::updateBound(const Vector2 inVector, Vector2& lowerBound,
 /**
  * For debug purpose, when things go wrong, dump the whole polygon data.
  */
-static void dumpPolygon(const Vector2* poly, int polyLength, const char* polyName) {
+void SpotShadow::dumpPolygon(const Vector2* poly, int polyLength, const char* polyName) {
+    for (int i = 0; i < polyLength; i++) {
+        ALOGD("polygon %s i %d x %f y %f", polyName, i, poly[i].x, poly[i].y);
+    }
+}
+
+/**
+ * For debug purpose, when things go wrong, dump the whole polygon data.
+ */
+void SpotShadow::dumpPolygon(const Vector3* poly, int polyLength, const char* polyName) {
     for (int i = 0; i < polyLength; i++) {
         ALOGD("polygon %s i %d x %f y %f", polyName, i, poly[i].x, poly[i].y);
     }
@@ -885,8 +1099,8 @@ void SpotShadow::testIntersection(const Vector2* poly1, int poly1Length,
         const Vector2* poly2, int poly2Length,
         const Vector2* intersection, int intersectionLength) {
     // Find the min and max of x and y.
-    Vector2 lowerBound(FLT_MAX, FLT_MAX);
-    Vector2 upperBound(-FLT_MAX, -FLT_MAX);
+    Vector2 lowerBound = {FLT_MAX, FLT_MAX};
+    Vector2 upperBound = {-FLT_MAX, -FLT_MAX};
     for (int i = 0; i < poly1Length; i++) {
         updateBound(poly1[i], lowerBound, upperBound);
     }
