@@ -357,10 +357,10 @@ please see themes_device_defaults.xml.
         <item name="timePickerDialogTheme">?attr/dialogTheme</item>
 
         <!-- DatePicker style -->
-        <item name="datePickerStyle">?attr/dialogTheme</item>
+        <item name="datePickerStyle">@style/Widget.Material.DatePicker</item>
 
         <!-- DatePicker dialog theme -->
-        <item name="datePickerDialogTheme">@style/Theme.Material.Dialog.Alert</item>
+        <item name="datePickerDialogTheme">?attr/dialogTheme</item>
 
         <!-- TODO: This belongs in a FastScroll style -->
         <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_material</item>
@@ -1196,7 +1196,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Light.Dialog.Alert" parent="Theme.Material.Light.Dialog.BaseAlert"/>
 
     <!-- Theme for a presentation window on a secondary display. -->
-    <style name="Theme.Material.Light.Dialog.Presentation" parent="@style/Theme.Material.Light.NoActionBar.Fullscreen" />
+    <style name="Theme.Material.Light.Dialog.Presentation" parent="Theme.Material.Light.NoActionBar.Fullscreen" />
 
     <!-- Default material (dark) for windows that want to have the user's selected
          wallpaper appear behind them.  -->
@@ -1213,7 +1213,47 @@ please see themes_device_defaults.xml.
     </style>
 
     <!-- Default theme for Settings and activities launched from Settings. -->
-    <style name="Theme.Material.Settings" parent="@style/Theme.Material.Light.DarkActionBar">
+    <style name="Theme.Material.Settings" parent="Theme.Material.Light.DarkActionBar">
+        <item name="colorPrimary">@color/material_blue_grey_900</item>
+        <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
+        <item name="colorAccent">@color/material_deep_teal_A500</item>
+
+        <item name="dialogTheme">@style/Theme.Material.Settings.Dialog</item>
+        <item name="alertDialogTheme">@style/Theme.Material.Settings.Dialog.Alert</item>
+        <item name="presentationTheme">@style/Theme.Material.Settings.Dialog.Presentation</item>
+        <item name="searchDialogTheme">@style/Theme.Material.Settings.SearchBar</item>
+        <item name="panelMenuListTheme">@style/Theme.Material.Settings.CompactMenu</item>
+    </style>
+
+    <style name="Theme.Material.Settings.BaseDialog" parent="Theme.Material.Light.BaseDialog">
+        <item name="colorPrimary">@color/material_blue_grey_900</item>
+        <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
+        <item name="colorAccent">@color/material_deep_teal_A500</item>
+    </style>
+
+    <style name="Theme.Material.Settings.Dialog" parent="Theme.Material.Settings.BaseDialog" />
+
+    <style name="Theme.Material.Settings.Dialog.BaseAlert" parent="Theme.Material.Light.Dialog.BaseAlert">
+        <item name="colorPrimary">@color/material_blue_grey_900</item>
+        <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
+        <item name="colorAccent">@color/material_deep_teal_A500</item>
+    </style>
+
+    <style name="Theme.Material.Settings.Dialog.Alert" parent="Theme.Material.Settings.Dialog.BaseAlert" />
+
+    <style name="Theme.Material.Settings.Dialog.Presentation" parent="Theme.Material.Light.Dialog.Presentation">
+        <item name="colorPrimary">@color/material_blue_grey_900</item>
+        <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
+        <item name="colorAccent">@color/material_deep_teal_A500</item>
+    </style>
+
+    <style name="Theme.Material.Settings.SearchBar" parent="Theme.Material.Light.SearchBar">
+        <item name="colorPrimary">@color/material_blue_grey_900</item>
+        <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
+        <item name="colorAccent">@color/material_deep_teal_A500</item>
+    </style>
+
+    <style name="Theme.Material.Settings.CompactMenu" parent="Theme.Material.Light.CompactMenu">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
         <item name="colorAccent">@color/material_deep_teal_A500</item>
