@@ -1298,25 +1298,6 @@ public class Editor {
                         reported = reportExtractedText();
                     }
                 }
-
-                if (imm.isWatchingCursor(mTextView) && highlight != null) {
-                    highlight.computeBounds(ims.mTmpRectF, true);
-                    ims.mTmpOffset[0] = ims.mTmpOffset[1] = 0;
-
-                    canvas.getMatrix().mapPoints(ims.mTmpOffset);
-                    ims.mTmpRectF.offset(ims.mTmpOffset[0], ims.mTmpOffset[1]);
-
-                    ims.mTmpRectF.offset(0, cursorOffsetVertical);
-
-                    ims.mCursorRectInWindow.set((int)(ims.mTmpRectF.left + 0.5),
-                            (int)(ims.mTmpRectF.top + 0.5),
-                            (int)(ims.mTmpRectF.right + 0.5),
-                            (int)(ims.mTmpRectF.bottom + 0.5));
-
-                    imm.updateCursor(mTextView,
-                            ims.mCursorRectInWindow.left, ims.mCursorRectInWindow.top,
-                            ims.mCursorRectInWindow.right, ims.mCursorRectInWindow.bottom);
-                }
             }
         }
 
@@ -4136,7 +4117,6 @@ public class Editor {
 
     static class InputMethodState {
         Rect mCursorRectInWindow = new Rect();
-        RectF mTmpRectF = new RectF();
         float[] mTmpOffset = new float[2];
         ExtractedTextRequest mExtractedTextRequest;
         final ExtractedText mExtractedText = new ExtractedText();

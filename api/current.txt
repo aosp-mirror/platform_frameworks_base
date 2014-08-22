@@ -13574,7 +13574,7 @@ package android.inputmethodservice {
     method public void onStartInput(android.view.inputmethod.EditorInfo, boolean);
     method public void onStartInputView(android.view.inputmethod.EditorInfo, boolean);
     method public void onUnbindInput();
-    method public void onUpdateCursor(android.graphics.Rect);
+    method public deprecated void onUpdateCursor(android.graphics.Rect);
     method public void onUpdateCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfo);
     method public void onUpdateExtractedText(int, android.view.inputmethod.ExtractedText);
     method public void onUpdateExtractingViews(android.view.inputmethod.EditorInfo);
@@ -36187,7 +36187,7 @@ package android.view.inputmethod {
     method public boolean performPrivateCommand(java.lang.String, android.os.Bundle);
     method public static final void removeComposingSpans(android.text.Spannable);
     method public boolean reportFullscreenMode(boolean);
-    method public int requestCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfoRequest);
+    method public boolean requestUpdateCursorAnchorInfo(int);
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
     method public static void setComposingSpans(android.text.Spannable);
@@ -36251,25 +36251,6 @@ package android.view.inputmethod {
     method public android.view.inputmethod.CursorAnchorInfo.Builder setInsertionMarkerLocation(float, float, float, float, boolean);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setMatrix(android.graphics.Matrix);
     method public android.view.inputmethod.CursorAnchorInfo.Builder setSelectionRange(int, int);
-  }
-
-  public final class CursorAnchorInfoRequest implements android.os.Parcelable {
-    ctor public CursorAnchorInfoRequest(int, int);
-    ctor public CursorAnchorInfoRequest(android.os.Parcel);
-    method public int describeContents();
-    method public int getRequestFlags();
-    method public int getRequestType();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE = 2; // 0x2
-    field public static final int FLAG_CURSOR_ANCHOR_INFO_MONITOR = 1; // 0x1
-    field public static final int FLAG_CURSOR_RECT_IN_SCREEN_COORDINATES = 2; // 0x2
-    field public static final int FLAG_CURSOR_RECT_MONITOR = 1; // 0x1
-    field public static final int FLAG_CURSOR_RECT_WITH_VIEW_MATRIX = 4; // 0x4
-    field public static final int RESULT_NOT_HANDLED = 0; // 0x0
-    field public static final int RESULT_SCHEDULED = 1; // 0x1
-    field public static final int TYPE_CURSOR_ANCHOR_INFO = 1; // 0x1
-    field public static final int TYPE_CURSOR_RECT = 2; // 0x2
   }
 
   public class EditorInfo implements android.text.InputType android.os.Parcelable {
@@ -36369,13 +36350,15 @@ package android.view.inputmethod {
     method public abstract boolean performEditorAction(int);
     method public abstract boolean performPrivateCommand(java.lang.String, android.os.Bundle);
     method public abstract boolean reportFullscreenMode(boolean);
-    method public abstract int requestCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfoRequest);
+    method public abstract boolean requestUpdateCursorAnchorInfo(int);
     method public abstract boolean sendKeyEvent(android.view.KeyEvent);
     method public abstract boolean setComposingRegion(int, int);
     method public abstract boolean setComposingText(java.lang.CharSequence, int);
     method public abstract boolean setSelection(int, int);
     field public static final int GET_EXTRACTED_TEXT_MONITOR = 1; // 0x1
     field public static final int GET_TEXT_WITH_STYLES = 1; // 0x1
+    field public static final int REQUEST_UPDATE_CURSOR_ANCHOR_INFO_IMMEDIATE = 1; // 0x1
+    field public static final int REQUEST_UPDATE_CURSOR_ANCHOR_INFO_MONITOR = 2; // 0x2
   }
 
   public class InputConnectionWrapper implements android.view.inputmethod.InputConnection {
@@ -36397,7 +36380,7 @@ package android.view.inputmethod {
     method public boolean performEditorAction(int);
     method public boolean performPrivateCommand(java.lang.String, android.os.Bundle);
     method public boolean reportFullscreenMode(boolean);
-    method public int requestCursorAnchorInfo(android.view.inputmethod.CursorAnchorInfoRequest);
+    method public boolean requestUpdateCursorAnchorInfo(int);
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
     method public boolean setComposingText(java.lang.CharSequence, int);
@@ -36463,7 +36446,7 @@ package android.view.inputmethod {
     method public boolean isActive(android.view.View);
     method public boolean isActive();
     method public boolean isFullscreenMode();
-    method public boolean isWatchingCursor(android.view.View);
+    method public deprecated boolean isWatchingCursor(android.view.View);
     method public void restartInput(android.view.View);
     method public void sendAppPrivateCommand(android.view.View, java.lang.String, android.os.Bundle);
     method public void setAdditionalInputMethodSubtypes(java.lang.String, android.view.inputmethod.InputMethodSubtype[]);
@@ -36481,7 +36464,7 @@ package android.view.inputmethod {
     method public boolean switchToNextInputMethod(android.os.IBinder, boolean);
     method public void toggleSoftInput(int, int);
     method public void toggleSoftInputFromWindow(android.os.IBinder, int, int);
-    method public void updateCursor(android.view.View, int, int, int, int);
+    method public deprecated void updateCursor(android.view.View, int, int, int, int);
     method public void updateCursorAnchorInfo(android.view.View, android.view.inputmethod.CursorAnchorInfo);
     method public void updateExtractedText(android.view.View, int, android.view.inputmethod.ExtractedText);
     method public void updateSelection(android.view.View, int, int, int, int);

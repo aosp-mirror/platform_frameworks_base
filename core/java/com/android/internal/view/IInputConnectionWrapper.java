@@ -25,7 +25,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
-import android.view.inputmethod.CursorAnchorInfoRequest;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 
@@ -55,7 +54,7 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_REPORT_FULLSCREEN_MODE = 100;
     private static final int DO_PERFORM_PRIVATE_COMMAND = 120;
     private static final int DO_CLEAR_META_KEY_STATES = 130;
-    private static final int DO_REQUEST_CURSOR_ANCHOR_INFO = 140;
+    private static final int DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO = 140;
 
     private WeakReference<InputConnection> mInputConnection;
 
@@ -177,9 +176,10 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
         dispatchMessage(obtainMessageOO(DO_PERFORM_PRIVATE_COMMAND, action, data));
     }
 
-    public void requestCursorAnchorInfo(CursorAnchorInfoRequest request, int seq,
+    public void requestUpdateCursorAnchorInfo(int cursorUpdateMode, int seq,
             IInputContextCallback callback) {
-        dispatchMessage(obtainMessageOSC(DO_REQUEST_CURSOR_ANCHOR_INFO, request, seq, callback));
+        dispatchMessage(obtainMessageISC(DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO, cursorUpdateMode,
+                seq, callback));
     }
 
     void dispatchMessage(Message msg) {
@@ -427,18 +427,17 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
                         (Bundle)args.arg2);
                 return;
             }
-            case DO_REQUEST_CURSOR_ANCHOR_INFO: {
+            case DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO: {
                 SomeArgs args = (SomeArgs)msg.obj;
                 try {
                     InputConnection ic = mInputConnection.get();
                     if (ic == null || !isActive()) {
                         Log.w(TAG, "requestCursorAnchorInfo on inactive InputConnection");
-                        args.callback.setRequestCursorAnchorInfoResult(0, args.seq);
+                        args.callback.setRequestUpdateCursorAnchorInfoResult(false, args.seq);
                         return;
                     }
-                    args.callback.setRequestCursorAnchorInfoResult(
-                            ic.requestCursorAnchorInfo((CursorAnchorInfoRequest)args.arg1),
-                            args.seq);
+                    args.callback.setRequestUpdateCursorAnchorInfoResult(
+                            ic.requestUpdateCursorAnchorInfo(msg.arg1), args.seq);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Got RemoteException calling requestCursorAnchorInfo", e);
                 }
