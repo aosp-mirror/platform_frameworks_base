@@ -84,6 +84,7 @@ public abstract class ConnectionService extends Service {
     private final ConnectionServiceAdapter mAdapter = new ConnectionServiceAdapter();
 
     private boolean mAreAccountsInitialized = false;
+    private Conference sNullConference;
 
     private final IBinder mBinder = new IConnectionService.Stub() {
         @Override
@@ -561,17 +562,29 @@ public abstract class ConnectionService extends Service {
 
     private void disconnect(String callId) {
         Log.d(this, "disconnect %s", callId);
-        findConnectionForAction(callId, "disconnect").onDisconnect();
+        if (mConnectionById.containsKey(callId)) {
+            findConnectionForAction(callId, "disconnect").onDisconnect();
+        } else {
+            findConferenceForAction(callId, "disconnect").onDisconnect();
+        }
     }
 
     private void hold(String callId) {
         Log.d(this, "hold %s", callId);
-        findConnectionForAction(callId, "hold").onHold();
+        if (mConnectionById.containsKey(callId)) {
+            findConnectionForAction(callId, "hold").onHold();
+        } else {
+            findConferenceForAction(callId, "hold").onHold();
+        }
     }
 
     private void unhold(String callId) {
         Log.d(this, "unhold %s", callId);
-        findConnectionForAction(callId, "unhold").onUnhold();
+        if (mConnectionById.containsKey(callId)) {
+            findConnectionForAction(callId, "unhold").onUnhold();
+        } else {
+            findConferenceForAction(callId, "unhold").onUnhold();
+        }
     }
 
     private void onAudioStateChanged(String callId, AudioState audioState) {
@@ -616,7 +629,10 @@ public abstract class ConnectionService extends Service {
             return;
         }
 
-        // TODO: Find existing conference call and invoke split(connection).
+        Conference conference = connection.getConference();
+        if (conference != null) {
+            conference.onSeparate(connection);
+        }
     }
 
     private void onPostDialContinue(String callId, boolean proceed) {
@@ -884,5 +900,20 @@ public abstract class ConnectionService extends Service {
             sNullConnection = new Connection() {};
         }
         return sNullConnection;
+    }
+
+    private Conference findConferenceForAction(String conferenceId, String action) {
+        if (mConferenceById.containsKey(conferenceId)) {
+            return mConferenceById.get(conferenceId);
+        }
+        Log.w(this, "%s - Cannot find conference %s", action, conferenceId);
+        return getNullConference();
+    }
+
+    private Conference getNullConference() {
+        if (sNullConference == null) {
+            sNullConference = new Conference(null) {};
+        }
+        return sNullConference;
     }
 }
