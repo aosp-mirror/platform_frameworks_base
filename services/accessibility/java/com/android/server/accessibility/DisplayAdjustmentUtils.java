@@ -60,15 +60,17 @@ class DisplayAdjustmentUtils {
     public static boolean hasAdjustments(Context context, int userId) {
         final ContentResolver cr = context.getContentResolver();
 
-        boolean hasColorTransform = Settings.Secure.getIntForUser(
-                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, userId) == 1;
-
-        if (!hasColorTransform) {
-            hasColorTransform |= Settings.Secure.getIntForUser(
-                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, 0, userId) == 1;
+        if (Settings.Secure.getIntForUser(cr,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, userId) != 0) {
+            return true;
         }
 
-        return hasColorTransform;
+        if (Settings.Secure.getIntForUser(cr,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, 0, userId) != 0) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -76,52 +78,39 @@ class DisplayAdjustmentUtils {
      */
     public static void applyAdjustments(Context context, int userId) {
         final ContentResolver cr = context.getContentResolver();
-        float[] colorMatrix = new float[16];
-        float[] outputMatrix = new float[16];
-        boolean hasColorTransform = false;
+        float[] colorMatrix = null;
 
-        Matrix.setIdentityM(colorMatrix, 0);
-
-        final boolean inversionEnabled = Settings.Secure.getIntForUser(
-                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, userId) == 1;
-        if (inversionEnabled) {
-            final float[] inversionMatrix = INVERSION_MATRIX_VALUE_ONLY;
-            Matrix.multiplyMM(outputMatrix, 0, colorMatrix, 0, inversionMatrix, 0);
-
-            colorMatrix = outputMatrix;
-            outputMatrix = colorMatrix;
-
-            hasColorTransform = true;
+        if (Settings.Secure.getIntForUser(cr,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, userId) != 0) {
+            colorMatrix = multiply(colorMatrix, INVERSION_MATRIX_VALUE_ONLY);
         }
 
-        final boolean daltonizerEnabled = Settings.Secure.getIntForUser(
-                cr, Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, 0, userId) != 0;
-        if (daltonizerEnabled) {
+        if (Settings.Secure.getIntForUser(cr,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, 0, userId) != 0) {
             final int daltonizerMode = Settings.Secure.getIntForUser(cr,
                     Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER, DEFAULT_DISPLAY_DALTONIZER,
                     userId);
             // Monochromacy isn't supported by the native Daltonizer.
             if (daltonizerMode == AccessibilityManager.DALTONIZER_SIMULATE_MONOCHROMACY) {
-                Matrix.multiplyMM(outputMatrix, 0, colorMatrix, 0, GRAYSCALE_MATRIX, 0);
-
-                final float[] temp = colorMatrix;
-                colorMatrix = outputMatrix;
-                outputMatrix = temp;
-
-                hasColorTransform = true;
-                nativeSetDaltonizerMode(AccessibilityManager.DALTONIZER_DISABLED);
+                colorMatrix = multiply(colorMatrix, GRAYSCALE_MATRIX);
+                setDaltonizerMode(AccessibilityManager.DALTONIZER_DISABLED);
             } else {
-                nativeSetDaltonizerMode(daltonizerMode);
+                setDaltonizerMode(daltonizerMode);
             }
         } else {
-            nativeSetDaltonizerMode(AccessibilityManager.DALTONIZER_DISABLED);
+            setDaltonizerMode(AccessibilityManager.DALTONIZER_DISABLED);
         }
 
-        if (hasColorTransform) {
-            nativeSetColorTransform(colorMatrix);
-        } else {
-            nativeSetColorTransform(null);
+        setColorTransform(colorMatrix);
+    }
+
+    private static float[] multiply(float[] matrix, float[] other) {
+        if (matrix == null) {
+            return other;
         }
+        float[] result = new float[16];
+        Matrix.multiplyMM(result, 0, matrix, 0, other, 0);
+        return result;
     }
 
     /**
@@ -130,7 +119,7 @@ class DisplayAdjustmentUtils {
      *
      * @param mode new Daltonization mode
      */
-    private static void nativeSetDaltonizerMode(int mode) {
+    private static void setDaltonizerMode(int mode) {
         try {
             final IBinder flinger = ServiceManager.getService("SurfaceFlinger");
             if (flinger != null) {
@@ -152,7 +141,7 @@ class DisplayAdjustmentUtils {
      * @param m the float array that holds the transformation matrix, or null to
      *            disable transformation
      */
-    private static void nativeSetColorTransform(float[] m) {
+    private static void setColorTransform(float[] m) {
         try {
             final IBinder flinger = ServiceManager.getService("SurfaceFlinger");
             if (flinger != null) {
