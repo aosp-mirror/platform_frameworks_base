@@ -127,8 +127,10 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         mSelectHours = res.getString(R.string.select_hours);
         mMinutePickerDescription = res.getString(R.string.minute_picker_description);
         mSelectMinutes = res.getString(R.string.select_minutes);
-        mAmText = res.getString(R.string.time_picker_am_label);
-        mPmText = res.getString(R.string.time_picker_pm_label);
+
+        String[] amPmStrings = TimePickerClockDelegate.getAmPmStrings(context);
+        mAmText = amPmStrings[0];
+        mPmText = amPmStrings[1];
 
         final int layoutResourceId = a.getResourceId(R.styleable.TimePicker_internalLayout,
                 R.layout.time_picker_holo);
