@@ -712,12 +712,14 @@
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"允許應用程式存取外部儲存空間 (所有用戶)。"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"存取快取檔案系統"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"允許應用程式讀取及寫入快取檔案系統。"</string>
-    <!-- no translation found for permlab_use_sip (2052499390128979920) -->
-    <skip />
-    <!-- no translation found for permdesc_use_sip (2297804849860225257) -->
-    <skip />
+    <string name="permlab_use_sip" msgid="2052499390128979920">"撥打/接聽 SIP 電話"</string>
+    <string name="permdesc_use_sip" msgid="2297804849860225257">"允許應用程式撥打及接聽 SIP 電話。"</string>
     <string name="permlab_bind_call_service" msgid="6724009726671246551">"與通話畫面互動"</string>
     <string name="permdesc_bind_call_service" msgid="8732547662442572435">"允許應用程式控制通話畫面的顯示時間和方式。"</string>
+    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
+    <skip />
+    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
+    <skip />
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"讀取網絡用量記錄"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"允許應用程式讀取特定網絡和應用程式的網絡使用量記錄。"</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"管理網絡政策"</string>
@@ -1208,7 +1210,7 @@
     <string name="chooseUsbActivity" msgid="6894748416073583509">"選取要以 USB 裝置存取的應用程式"</string>
     <string name="noApplications" msgid="2991814273936504689">"沒有應用程式可執行這項操作。"</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"很抱歉，<xliff:g id="APPLICATION">%1$s</xliff:g> 已停止。"</string>
+    <string name="aerr_application" msgid="932628488013092776">"抱歉，<xliff:g id="APPLICATION">%1$s</xliff:g>已停止操作。"</string>
     <string name="aerr_process" msgid="4507058997035697579">"很抱歉，處理程序 <xliff:g id="PROCESS">%1$s</xliff:g> 已停止。"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> 沒有回應。\n\n您要結束嗎？"</string>
@@ -1350,7 +1352,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"輕觸即可停用 USB 偵錯。"</string>
     <string name="select_input_method" msgid="8547250819326693584">"變更鍵盤"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"選擇鍵盤"</string>
-    <string name="use_physical_keyboard" msgid="6203112478095117625">"實體鍵盤"</string>
+    <!-- no translation found for show_ime (9157568568695230830) -->
+    <skip />
     <string name="hardware" msgid="7517821086888990278">"硬件"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"選取鍵盤配置"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"輕觸即可選取鍵盤配置。"</string>
@@ -1762,530 +1765,31 @@
     <string name="item_is_selected" msgid="949687401682476608">"已選取<xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> 已刪除"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="2126866321272822564">"您已進入應用程式鎖定模式。如要退出，請輕觸並按住 [最近使用的應用程式] 按鈕"</string>
-    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"您目前正在使用應用程式鎖定模式。"</string>
-    <string name="lock_to_app_title" msgid="5895142291937470019">"要使用「應用程式鎖定」嗎？"</string>
-    <string name="lock_to_app_description" msgid="2800403592608529611">"應用程式鎖定模式會將螢幕鎖定在單一應用程式的畫面。\n\n如要退出，請輕觸並按住 [最近使用的應用程式] 按鈕。"</string>
+    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
+    <skip />
+    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
+    <skip />
+    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
+    <skip />
+    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
+    <skip />
+    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
+    <skip />
+    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
+    <skip />
     <string name="lock_to_app_negative" msgid="2259143719362732728">"不用了，謝謝"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"啟動"</string>
-    <string name="lock_to_app_start" msgid="3074665051586318340">"已進入應用程式鎖定模式"</string>
-    <string name="lock_to_app_exit" msgid="8967089657201849300">"已退出應用程式鎖定模式"</string>
-    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"退出時須提供%1$s"</string>
+    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
+    <skip />
+    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
+    <skip />
+    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"解鎖圖案"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"密碼"</string>
-    <!-- no translation found for description_amtvrs (8725404332673690032) -->
-    <skip />
-    <!-- no translation found for description_amtvrs_y (4535932507762824125) -->
-    <skip />
-    <!-- no translation found for description_amtvrs_y7 (4843157405053727570) -->
-    <skip />
-    <!-- no translation found for description_amtvrs_ga (8280008424151423133) -->
-    <skip />
-    <!-- no translation found for description_amtvrs_tw (2578136749233401367) -->
-    <skip />
-    <!-- no translation found for description_amtvrs_t (345761291919031095) -->
-    <skip />
-    <!-- no translation found for description_amtvrs_a (6457819648253336739) -->
-    <skip />
-    <!-- no translation found for description_amtvas (2864199922297854008) -->
-    <skip />
-    <!-- no translation found for description_amtvas_ec (7983817930744979095) -->
-    <skip />
-    <!-- no translation found for description_amtvas_e (3756149542498884183) -->
-    <skip />
-    <!-- no translation found for description_amtvas_e9 (5456413573244777003) -->
-    <skip />
-    <!-- no translation found for description_amtvas_t (7944661452049158964) -->
-    <skip />
-    <!-- no translation found for description_amtvas_m (7223239588624385377) -->
-    <skip />
-    <!-- no translation found for description_amtvas_ao (9151873011261050673) -->
-    <skip />
-    <!-- no translation found for description_artv_all (364978047754520239) -->
-    <skip />
-    <!-- no translation found for description_artv_13 (2899455922796919350) -->
-    <skip />
-    <!-- no translation found for description_artv_16 (7307425436483512910) -->
-    <skip />
-    <!-- no translation found for description_artv_18 (9209927176612264497) -->
-    <skip />
-    <!-- no translation found for description_autv_ctc (580007133665370344) -->
-    <skip />
-    <!-- no translation found for description_autv_g (8766137647646009788) -->
-    <skip />
-    <!-- no translation found for description_autv_pg (1120374039233559514) -->
-    <skip />
-    <!-- no translation found for description_autv_m (5699878848170834347) -->
-    <skip />
-    <!-- no translation found for description_autv_ma15 (1649811423937841031) -->
-    <skip />
-    <!-- no translation found for description_autv_r18 (4731492357626559718) -->
-    <skip />
-    <!-- no translation found for description_autv_x18 (7471360113223867348) -->
-    <skip />
-    <!-- no translation found for description_bgtv_a (4080107560220623980) -->
-    <skip />
-    <!-- no translation found for description_bgtv_b (3562986880206334536) -->
-    <skip />
-    <!-- no translation found for description_bgtv_c (2118865606515175311) -->
-    <skip />
-    <!-- no translation found for description_bgtv_d (2154327256494352024) -->
-    <skip />
-    <!-- no translation found for description_bgtv_x (8152747703122141371) -->
-    <skip />
-    <!-- no translation found for description_brtv_l (1556506348989197233) -->
-    <skip />
-    <!-- no translation found for description_brtv_10 (6482474511057295426) -->
-    <skip />
-    <!-- no translation found for description_brtv_12 (3866073463174552388) -->
-    <skip />
-    <!-- no translation found for description_brtv_14 (8000276408382866766) -->
-    <skip />
-    <!-- no translation found for description_brtv_16 (1763867402144709767) -->
-    <skip />
-    <!-- no translation found for description_brtv_18 (9024148588030726309) -->
-    <skip />
-    <!-- no translation found for description_catv_exempt (3972646497134886470) -->
-    <skip />
-    <!-- no translation found for description_catv_c (4440403088748913964) -->
-    <skip />
-    <!-- no translation found for description_catv_c8 (7157242552288918297) -->
-    <skip />
-    <!-- no translation found for description_catv_g (2109878777115073829) -->
-    <skip />
-    <!-- no translation found for description_catv_pg (7456573695346477726) -->
-    <skip />
-    <!-- no translation found for description_catv_14 (8094604146081463304) -->
-    <skip />
-    <!-- no translation found for description_catv_18 (8687145835253664143) -->
-    <skip />
-    <!-- no translation found for description_chtv_all (5703231298914686594) -->
-    <skip />
-    <!-- no translation found for description_chtv_red (2679063110716813555) -->
-    <skip />
-    <!-- no translation found for description_cltv_i (2317348591464039386) -->
-    <skip />
-    <!-- no translation found for description_cltv_i7 (1245948898081838683) -->
-    <skip />
-    <!-- no translation found for description_cltv_i10 (8140128283736708519) -->
-    <skip />
-    <!-- no translation found for description_cltv_i12 (2739127525854644613) -->
-    <skip />
-    <!-- no translation found for description_cltv_f (3308749622248009751) -->
-    <skip />
-    <!-- no translation found for description_cltv_r (157103876726801377) -->
-    <skip />
-    <!-- no translation found for description_cltv_a (9203004232685495868) -->
-    <skip />
-    <!-- no translation found for description_detv_all (1483249406177422724) -->
-    <skip />
-    <!-- no translation found for description_detv_12 (746518079154668613) -->
-    <skip />
-    <!-- no translation found for description_detv_16 (5690413821191509580) -->
-    <skip />
-    <!-- no translation found for description_detv_18 (44599484534787974) -->
-    <skip />
-    <!-- no translation found for description_dktv_g (610947014192685528) -->
-    <skip />
-    <!-- no translation found for description_dktv_y (4095688983501700645) -->
-    <skip />
-    <!-- no translation found for description_dktv_r (8739285813310386515) -->
-    <skip />
-    <!-- no translation found for description_dktv_b (1304947265634583906) -->
-    <skip />
-    <!-- no translation found for description_estv_tp (1822759030871350269) -->
-    <skip />
-    <!-- no translation found for description_estv_i (3766033620124690961) -->
-    <skip />
-    <!-- no translation found for description_estv_7 (8721492435509764830) -->
-    <skip />
-    <!-- no translation found for description_estv_7i (2711729455452401897) -->
-    <skip />
-    <!-- no translation found for description_estv_12 (8896931636297130592) -->
-    <skip />
-    <!-- no translation found for description_estv_16 (2274142720185871523) -->
-    <skip />
-    <!-- no translation found for description_estv_18 (7368459302885513167) -->
-    <skip />
-    <!-- no translation found for description_fitv_s (3268310758566961295) -->
-    <skip />
-    <!-- no translation found for description_fitv_k7 (693997427905447973) -->
-    <skip />
-    <!-- no translation found for description_fitv_k12 (1373617371750927627) -->
-    <skip />
-    <!-- no translation found for description_fitv_k16 (1531284982003733718) -->
-    <skip />
-    <!-- no translation found for description_fitv_k18 (5440994306974743812) -->
-    <skip />
-    <!-- no translation found for description_frtv_all (4729285903163682811) -->
-    <skip />
-    <!-- no translation found for description_frtv_10 (6760888448355386128) -->
-    <skip />
-    <!-- no translation found for description_frtv_12 (6018370898859283738) -->
-    <skip />
-    <!-- no translation found for description_frtv_16 (1319508720505160960) -->
-    <skip />
-    <!-- no translation found for description_frtv_18 (7855486306004041345) -->
-    <skip />
-    <!-- no translation found for description_grtv_all (3165430975737819024) -->
-    <skip />
-    <!-- no translation found for description_grtv_10 (1318157499799932505) -->
-    <skip />
-    <!-- no translation found for description_grtv_12 (7932432868625690829) -->
-    <skip />
-    <!-- no translation found for description_grtv_15 (2697965728032342040) -->
-    <skip />
-    <!-- no translation found for description_grtv_18 (5844024066808386696) -->
-    <skip />
-    <!-- no translation found for description_hktv_g (2081098882211904799) -->
-    <skip />
-    <!-- no translation found for description_hktv_pg (4236656058591150501) -->
-    <skip />
-    <!-- no translation found for description_hktv_m (1910266085395443787) -->
-    <skip />
-    <!-- no translation found for description_hutv_u (7724340821106780225) -->
-    <skip />
-    <!-- no translation found for description_hutv_cf (5713307405730628949) -->
-    <skip />
-    <!-- no translation found for description_hutv_6 (7875008778965005549) -->
-    <skip />
-    <!-- no translation found for description_hutv_12 (9156725113080219882) -->
-    <skip />
-    <!-- no translation found for description_hutv_16 (7544556481624667701) -->
-    <skip />
-    <!-- no translation found for description_hutv_18 (1626521112701123265) -->
-    <skip />
-    <!-- no translation found for description_idtv_p (6272206399910862405) -->
-    <skip />
-    <!-- no translation found for description_idtv_a (8800388643843782465) -->
-    <skip />
-    <!-- no translation found for description_idtv_a_bo (911576922969663462) -->
-    <skip />
-    <!-- no translation found for description_idtv_su (4369633040930258866) -->
-    <skip />
-    <!-- no translation found for description_idtv_bo (1431146686564849087) -->
-    <skip />
-    <!-- no translation found for description_idtv_r (5827962472458912713) -->
-    <skip />
-    <!-- no translation found for description_idtv_r_bo (7858447328910604156) -->
-    <skip />
-    <!-- no translation found for description_idtv_d (7541888404887779669) -->
-    <skip />
-    <!-- no translation found for description_ietv_ga (4642321747715248533) -->
-    <skip />
-    <!-- no translation found for description_ietv_ch (3330402268385961544) -->
-    <skip />
-    <!-- no translation found for description_ietv_ya (4069454081494515303) -->
-    <skip />
-    <!-- no translation found for description_ietv_ps (7824457229783420380) -->
-    <skip />
-    <!-- no translation found for description_ietv_ma (2007155969306777422) -->
-    <skip />
-    <!-- no translation found for description_iltv_g (4043213262243305262) -->
-    <skip />
-    <!-- no translation found for description_iltv_12 (7780022228603138844) -->
-    <skip />
-    <!-- no translation found for description_iltv_15 (1539578320983136379) -->
-    <skip />
-    <!-- no translation found for description_iltv_18 (7970124287967053441) -->
-    <skip />
-    <!-- no translation found for description_iltv_e (7270515027851109174) -->
-    <skip />
-    <!-- no translation found for description_intv_u (4409067314659441506) -->
-    <skip />
-    <!-- no translation found for description_intv_u/a (5184979938382735615) -->
-    <skip />
-    <!-- no translation found for description_intv_a (4069232615702497582) -->
-    <skip />
-    <!-- no translation found for description_intv_s (8992315906331100367) -->
-    <skip />
-    <!-- no translation found for description_istv_l (2060831828024455393) -->
-    <skip />
-    <!-- no translation found for description_istv_7 (1844519280360863121) -->
-    <skip />
-    <!-- no translation found for description_istv_10 (4203217618341110046) -->
-    <skip />
-    <!-- no translation found for description_istv_12 (4834042725603037283) -->
-    <skip />
-    <!-- no translation found for description_istv_14 (4406801385726606683) -->
-    <skip />
-    <!-- no translation found for description_istv_16 (365432629005229347) -->
-    <skip />
-    <!-- no translation found for description_istv_18 (8376140537243510405) -->
-    <skip />
-    <!-- no translation found for description_krtv_all (1483913188733515440) -->
-    <skip />
-    <!-- no translation found for description_krtv_7 (8682276932541234333) -->
-    <skip />
-    <!-- no translation found for description_krtv_12 (6963065489873976068) -->
-    <skip />
-    <!-- no translation found for description_krtv_15 (6916394374284107977) -->
-    <skip />
-    <!-- no translation found for description_krtv_19 (7954273383199778597) -->
-    <skip />
-    <!-- no translation found for description_mvtv_y (3943277859471637549) -->
-    <skip />
-    <!-- no translation found for description_mvtv_g (4657828520346609827) -->
-    <skip />
-    <!-- no translation found for description_mvtv_pg (3864658391850426197) -->
-    <skip />
-    <!-- no translation found for description_mvtv_pg-12 (2216350829013720553) -->
-    <skip />
-    <!-- no translation found for description_mvtv_12 (5276461870956711977) -->
-    <skip />
-    <!-- no translation found for description_mvtv_15 (7106953260329293776) -->
-    <skip />
-    <!-- no translation found for description_mvtv_18 (7006573852262189406) -->
-    <skip />
-    <!-- no translation found for description_mvtv_21 (7476284001838921253) -->
-    <skip />
-    <!-- no translation found for description_mvtv_x (6499801610415924301) -->
-    <skip />
-    <!-- no translation found for description_mxtv_a (7174608035829320762) -->
-    <skip />
-    <!-- no translation found for description_mxtv_b (3670477404589260152) -->
-    <skip />
-    <!-- no translation found for description_mxtv_b-15 (8819354848127579747) -->
-    <skip />
-    <!-- no translation found for description_mxtv_c (3553641627415667328) -->
-    <skip />
-    <!-- no translation found for description_mxtv_d (3878980934298154757) -->
-    <skip />
-    <!-- no translation found for description_mxtv_rc (4968210486942321347) -->
-    <skip />
-    <!-- no translation found for description_mytv_u (7992019130820426014) -->
-    <skip />
-    <!-- no translation found for description_mytv_p13 (2006920076949391912) -->
-    <skip />
-    <!-- no translation found for description_mytv_18 (1958247530905842382) -->
-    <skip />
-    <!-- no translation found for description_nltv_v (1483555324354422551) -->
-    <skip />
-    <!-- no translation found for description_nltv_f (255578123439921739) -->
-    <skip />
-    <!-- no translation found for description_nltv_s (6193927829534523304) -->
-    <skip />
-    <!-- no translation found for description_nltv_d (3374553904035308871) -->
-    <skip />
-    <!-- no translation found for description_nltv_da (1749379319390419150) -->
-    <skip />
-    <!-- no translation found for description_nltv_l (4940772416975329234) -->
-    <skip />
-    <!-- no translation found for description_nltv_al (5041932203459682871) -->
-    <skip />
-    <!-- no translation found for description_nltv_6 (3546423755489923885) -->
-    <skip />
-    <!-- no translation found for description_nltv_9 (7376993909159390832) -->
-    <skip />
-    <!-- no translation found for description_nltv_12 (5978017871069609209) -->
-    <skip />
-    <!-- no translation found for description_nltv_16 (1179906153900651722) -->
-    <skip />
-    <!-- no translation found for description_nzftv (146041741052337733) -->
-    <skip />
-    <!-- no translation found for description_nzftv_g (7541885472155817369) -->
-    <skip />
-    <!-- no translation found for description_nzftv_pgr (6784787939626550110) -->
-    <skip />
-    <!-- no translation found for description_nzftv_ao (658380192140260039) -->
-    <skip />
-    <!-- no translation found for description_nzptv (241701402496277362) -->
-    <skip />
-    <!-- no translation found for description_nzptv_c (6475200916428978507) -->
-    <skip />
-    <!-- no translation found for description_nzptv_v (5240133670204303166) -->
-    <skip />
-    <!-- no translation found for description_nzptv_l (7918327057227193483) -->
-    <skip />
-    <!-- no translation found for description_nzptv_s (273281440427641308) -->
-    <skip />
-    <!-- no translation found for description_nzptv_g (973626491011050055) -->
-    <skip />
-    <!-- no translation found for description_nzptv_pg (4758011078051581792) -->
-    <skip />
-    <!-- no translation found for description_nzptv_m (1567051823394181103) -->
-    <skip />
-    <!-- no translation found for description_nzptv_16 (5669667948991057907) -->
-    <skip />
-    <!-- no translation found for description_nzptv_18 (1657260722016869371) -->
-    <skip />
-    <!-- no translation found for description_petv (5559685180480404628) -->
-    <skip />
-    <!-- no translation found for description_petv_a (5173645608432271582) -->
-    <skip />
-    <!-- no translation found for description_petv_14 (5966087674663742056) -->
-    <skip />
-    <!-- no translation found for description_petv_18 (7019630766403420130) -->
-    <skip />
-    <!-- no translation found for description_peatv (3634656795668410617) -->
-    <skip />
-    <!-- no translation found for description_peatv_gp (3618385648727054626) -->
-    <skip />
-    <!-- no translation found for description_peatv_pg (7593142528684761505) -->
-    <skip />
-    <!-- no translation found for description_peatv_14 (5859459560298362393) -->
-    <skip />
-    <!-- no translation found for description_peatv_18 (2553706587014952987) -->
-    <skip />
-    <!-- no translation found for description_phtv_g (2881516809627264027) -->
-    <skip />
-    <!-- no translation found for description_phtv_pg (7482341361410927180) -->
-    <skip />
-    <!-- no translation found for description_phtv_spg (3887913591843612878) -->
-    <skip />
-    <!-- no translation found for description_pltv_g (3565351590443748263) -->
-    <skip />
-    <!-- no translation found for description_pltv_7 (366413712101571629) -->
-    <skip />
-    <!-- no translation found for description_pltv_12 (4035426913452019902) -->
-    <skip />
-    <!-- no translation found for description_pltv_16 (7597517415447468821) -->
-    <skip />
-    <!-- no translation found for description_pltv_18 (2897280907055051640) -->
-    <skip />
-    <!-- no translation found for description_pttv_t (4742028020170896717) -->
-    <skip />
-    <!-- no translation found for description_pttv_10 (8272045717843749489) -->
-    <skip />
-    <!-- no translation found for description_pttv_12 (6944802687353314948) -->
-    <skip />
-    <!-- no translation found for description_pttv_16 (8071670633939250916) -->
-    <skip />
-    <!-- no translation found for description_rotv_y (969324821485320166) -->
-    <skip />
-    <!-- no translation found for description_rotv_g (8500146486438254738) -->
-    <skip />
-    <!-- no translation found for description_rotv_ap (216575414175684221) -->
-    <skip />
-    <!-- no translation found for description_rotv_12 (323979906483875270) -->
-    <skip />
-    <!-- no translation found for description_rotv_15 (6469399617455125913) -->
-    <skip />
-    <!-- no translation found for description_rotv_18 (3592554928967418416) -->
-    <skip />
-    <!-- no translation found for description_rutv_0 (1189359151352757515) -->
-    <skip />
-    <!-- no translation found for description_rutv_6 (2353995318569336577) -->
-    <skip />
-    <!-- no translation found for description_rutv_12 (5771361352056507174) -->
-    <skip />
-    <!-- no translation found for description_rutv_16 (972213177494629509) -->
-    <skip />
-    <!-- no translation found for description_rutv_18 (638034451405144583) -->
-    <skip />
-    <!-- no translation found for description_rstv_g (3170795792938872243) -->
-    <skip />
-    <!-- no translation found for description_rstv_12 (8439136546593367639) -->
-    <skip />
-    <!-- no translation found for description_rstv_14 (4100191434896490937) -->
-    <skip />
-    <!-- no translation found for description_rstv_15 (6603766886727865412) -->
-    <skip />
-    <!-- no translation found for description_rstv_16 (8270956181386948273) -->
-    <skip />
-    <!-- no translation found for description_rstv_17 (297444503123795521) -->
-    <skip />
-    <!-- no translation found for description_rstv_18 (7698675837977377422) -->
-    <skip />
-    <!-- no translation found for description_sgftv_pg (3870004698989791235) -->
-    <skip />
-    <!-- no translation found for description_sgftv_pg13 (4704866814396800249) -->
-    <skip />
-    <!-- no translation found for description_sgptv_nc16 (545097661241350415) -->
-    <skip />
-    <!-- no translation found for description_sgptv_m18 (7070031962847685837) -->
-    <skip />
-    <!-- no translation found for description_sitv_vs (6029303058492749615) -->
-    <skip />
-    <!-- no translation found for description_sitv_12 (1562265508790961396) -->
-    <skip />
-    <!-- no translation found for description_sitv_15 (814397053035102343) -->
-    <skip />
-    <!-- no translation found for description_sitv_ad (1165818216176162192) -->
-    <skip />
-    <!-- no translation found for description_thtv_primary (6512252166876553779) -->
-    <skip />
-    <!-- no translation found for description_thtv_children (1594272832954693188) -->
-    <skip />
-    <!-- no translation found for description_thtv_general (5808557138959815577) -->
-    <skip />
-    <!-- no translation found for description_thtv_pg13 (889956538395653454) -->
-    <skip />
-    <!-- no translation found for description_thtv_pg18 (4562428332758892578) -->
-    <skip />
-    <!-- no translation found for description_thtv_adults (8538542343641784979) -->
-    <skip />
-    <!-- no translation found for description_trtv_g (814709416798352432) -->
-    <skip />
-    <!-- no translation found for description_trtv_7 (4013069254406734945) -->
-    <skip />
-    <!-- no translation found for description_trtv_13 (1547262200213469515) -->
-    <skip />
-    <!-- no translation found for description_trtv_18 (7226520040857228271) -->
-    <skip />
-    <!-- no translation found for description_twtv_g (8446951247865479252) -->
-    <skip />
-    <!-- no translation found for description_twtv_p (853443650448817932) -->
-    <skip />
-    <!-- no translation found for description_twtv_pg (7158733234441280037) -->
-    <skip />
-    <!-- no translation found for description_twtv_r (7722190018180631998) -->
-    <skip />
-    <!-- no translation found for description_uatv_green circle (4230191850030083669) -->
-    <skip />
-    <!-- no translation found for description_uatv_yellow triangle (8849499067175997748) -->
-    <skip />
-    <!-- no translation found for description_uatv_red square (4082028234845100357) -->
-    <skip />
-    <string name="description_ustvpg" msgid="3666171166900312727">"美國電視分級制度"</string>
-    <string name="description_ustvpg_d" msgid="6552868431924879897">"挑逗性對話 (通常為性暗示)"</string>
-    <string name="description_ustvpg_l" msgid="2427588153488291892">"言語粗俗"</string>
-    <string name="description_ustvpg_s" msgid="2556047043212535339">"色情內容"</string>
-    <string name="description_ustvpg_v" msgid="6647466085048806213">"暴力內容"</string>
-    <string name="description_ustvpg_fv" msgid="4015953953338931020">"虛構暴力 (只針對兒童節目)"</string>
-    <!-- no translation found for description_ustvpg_y (6547820726370164424) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_y7 (2874291795165074132) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_g (7919375742191053371) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_pg (8225983744703834021) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_14 (7397655878454282341) -->
-    <skip />
-    <!-- no translation found for description_ustvpg_ma (3697701573351883304) -->
-    <skip />
-    <!-- no translation found for description_vetv_tu (8003039623029896661) -->
-    <skip />
-    <!-- no translation found for description_vetv_su (5264501691167249797) -->
-    <skip />
-    <!-- no translation found for description_vetv_a (544323071374454118) -->
-    <skip />
-    <!-- no translation found for description_zatv_d (6571984174827591259) -->
-    <skip />
-    <!-- no translation found for description_zatv_v (4679866575541703635) -->
-    <skip />
-    <!-- no translation found for description_zatv_n (7765574098989944543) -->
-    <skip />
-    <!-- no translation found for description_zatv_p (1893150762583767795) -->
-    <skip />
-    <!-- no translation found for description_zatv_s (8564722716580038312) -->
-    <skip />
-    <!-- no translation found for description_zatv_l (3031691623802167108) -->
-    <skip />
-    <!-- no translation found for description_zatv_f (5412201271650571415) -->
-    <skip />
-    <!-- no translation found for description_zatv_pg (6944138875310807057) -->
-    <skip />
-    <!-- no translation found for description_zatv_13 (2245766192902590932) -->
-    <skip />
-    <!-- no translation found for description_zatv_16 (7129501987396433120) -->
-    <skip />
-    <!-- no translation found for description_zatv_18 (3374729017790665930) -->
-    <skip />
-    <!-- no translation found for description_zatv_r18 (6316770789529705936) -->
-    <skip />
     <!-- no translation found for battery_saver_description (725676363406667978) -->
+    <skip />
+    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
     <skip />
 </resources>
