@@ -25,7 +25,7 @@ LOCAL_C_INCLUDES += \
 	frameworks/rs \
 	$(rs_generated_include_dir)
 
-LOCAL_CFLAGS += -Wno-unused-parameter
+LOCAL_CFLAGS += -Wno-unused-parameter -std=c++11
 
 LOCAL_ADDITIONAL_DEPENDENCIES := $(addprefix $(rs_generated_include_dir)/,rsgApiFuncDecl.h)
 LOCAL_MODULE:= librs_jni
