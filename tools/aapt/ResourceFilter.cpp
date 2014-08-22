@@ -56,24 +56,34 @@ WeakResourceFilter::match(const ResTable_config& config) const
         return true;
     }
 
+    uint32_t matchedAxis = 0x0;
     const size_t N = mConfigs.size();
     for (size_t i = 0; i < N; i++) {
         const std::pair<ConfigDescription, uint32_t>& entry = mConfigs[i];
         uint32_t diff = entry.first.diff(config);
         if ((diff & entry.second) == 0) {
-            return true;
+            // Mark the axis that was matched.
+            matchedAxis |= entry.second;
         } else if ((diff & entry.second) == ResTable_config::CONFIG_LOCALE) {
             // If the locales differ, but the languages are the same and
             // the locale we are matching only has a language specified,
             // we match.
-            if (config.language[0] && memcmp(config.language, entry.first.language, sizeof(config.language)) == 0) {
+            if (config.language[0] &&
+                    memcmp(config.language, entry.first.language, sizeof(config.language)) == 0) {
                 if (config.country[0] == 0) {
-                    return true;
+                    matchedAxis |= ResTable_config::CONFIG_LOCALE;
                 }
+            }
+        } else if ((diff & entry.second) == ResTable_config::CONFIG_SMALLEST_SCREEN_SIZE) {
+            // Special case if the smallest screen width doesn't match. We check that the
+            // config being matched has a smaller screen width than the filter specified.
+            if (config.smallestScreenWidthDp != 0 &&
+                    config.smallestScreenWidthDp < entry.first.smallestScreenWidthDp) {
+                matchedAxis |= ResTable_config::CONFIG_SMALLEST_SCREEN_SIZE;
             }
         }
     }
-    return false;
+    return matchedAxis == (mConfigMask & mask);
 }
 
 status_t
