@@ -460,7 +460,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /**
-     * This is called with the full window width and height to allow stack view children to 
+     * This is ONLY used from AlternateRecentsComponent to update the dummy stack view for purposes
+     * of getting the task rect to animate to.
+     */
+    public void updateMinMaxScrollForStack(TaskStack stack, boolean launchedWithAltTab,
+            boolean launchedFromHome) {
+        mStack = stack;
+        updateMinMaxScroll(false, launchedWithAltTab, launchedFromHome);
+    }
+
+    /**
+     * This is called with the full window width and height to allow stack view children to
      * perform the full screen transition down.
      */
     @Override

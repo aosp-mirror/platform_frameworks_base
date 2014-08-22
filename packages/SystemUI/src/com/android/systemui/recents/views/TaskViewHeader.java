@@ -49,7 +49,7 @@ import com.android.systemui.recents.model.Task;
 
 
 /* The task bar view */
-class TaskViewHeader extends FrameLayout {
+public class TaskViewHeader extends FrameLayout {
 
     RecentsConfiguration mConfig;
 
@@ -156,8 +156,11 @@ class TaskViewHeader extends FrameLayout {
             // Draw the highlight at the top edge (but put the bottom edge just out of view)
             float offset = (float) Math.ceil(mConfig.taskViewHighlightPx / 2f);
             float radius = mConfig.taskViewRoundedCornerRadiusPx;
+            int count = canvas.save(Canvas.CLIP_SAVE_FLAG);
+            canvas.clipRect(0, 0, getMeasuredWidth(), getMeasuredHeight());
             canvas.drawRoundRect(-offset, 0f, (float) getMeasuredWidth() + offset,
                     getMeasuredHeight() + radius, radius, radius, sHighlightPaint);
+            canvas.restoreToCount(count);
         }
     }
 
@@ -178,7 +181,7 @@ class TaskViewHeader extends FrameLayout {
     }
 
     /** Binds the bar view to the task */
-    void rebindToTask(Task t) {
+    public void rebindToTask(Task t) {
         // If an activity icon is defined, then we use that as the primary icon to show in the bar,
         // otherwise, we fall back to the application icon
         if (t.activityIcon != null) {
@@ -210,51 +213,6 @@ class TaskViewHeader extends FrameLayout {
     /** Unbinds the bar view from the task */
     void unbindFromTask() {
         mApplicationIcon.setImageDrawable(null);
-    }
-
-    /** Prepares this task view for the enter-recents animations.  This is called earlier in the
-     * first layout because the actual animation into recents may take a long time. */
-    void prepareEnterRecentsAnimation() {
-        setVisibility(View.INVISIBLE);
-    }
-
-    /** Animates this task bar as it enters recents */
-    void startEnterRecentsAnimation(int delay, Runnable postAnimRunnable) {
-        // Animate the task bar of the first task view
-        setVisibility(View.VISIBLE);
-        setAlpha(0f);
-        animate()
-                .alpha(1f)
-                .setStartDelay(delay)
-                .setInterpolator(mConfig.linearOutSlowInInterpolator)
-                .setDuration(mConfig.taskBarEnterAnimDuration)
-                .withEndAction(postAnimRunnable)
-                .withLayer()
-                .start();
-    }
-
-    /** Animates this task bar as it exits recents */
-    void startLaunchTaskAnimation(Runnable preAnimRunnable, final Runnable postAnimRunnable,
-            boolean isFocused) {
-        if (isFocused) {
-            onTaskViewFocusChanged(false);
-        }
-
-        // Animate the task bar out of the first task view
-        animate()
-                .alpha(0f)
-                .setStartDelay(0)
-                .setInterpolator(mConfig.linearOutSlowInInterpolator)
-                .setDuration(mConfig.taskBarExitAnimDuration)
-                .withStartAction(preAnimRunnable)
-                .withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        post(postAnimRunnable);
-                    }
-                })
-                .withLayer()
-                .start();
     }
 
     /** Animates this task bar dismiss button when launching a task. */

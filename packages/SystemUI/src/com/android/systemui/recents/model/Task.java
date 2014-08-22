@@ -88,7 +88,6 @@ public class Task {
     public boolean isActive;
     public boolean lockToThisTask;
     public boolean lockToTaskEnabled;
-    public int userId;
 
     TaskCallbacks mCb;
 
@@ -96,13 +95,12 @@ public class Task {
         // Only used by RecentsService for task rect calculations.
     }
 
-    public Task(int id, boolean isActive, Intent intent, int taskAffiliation, int taskAffiliationColor,
-                String activityTitle, Drawable activityIcon, int colorPrimary, int userId,
-                long firstActiveTime, long lastActiveTime, boolean lockToThisTask,
-                boolean lockToTaskEnabled) {
-        boolean isInAffiliationGroup = (taskAffiliation != id);
+    public Task(TaskKey key, boolean isActive, int taskAffiliation, int taskAffiliationColor,
+                String activityTitle, Drawable activityIcon, int colorPrimary,
+                boolean lockToThisTask, boolean lockToTaskEnabled) {
+        boolean isInAffiliationGroup = (taskAffiliation != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (taskAffiliationColor != 0);
-        this.key = new TaskKey(id, intent, userId, firstActiveTime, lastActiveTime);
+        this.key = key;
         this.taskAffiliation = taskAffiliation;
         this.taskAffiliationColor = taskAffiliationColor;
         this.activityLabel = activityTitle;
@@ -113,7 +111,20 @@ public class Task {
         this.isActive = isActive;
         this.lockToThisTask = lockToTaskEnabled && lockToThisTask;
         this.lockToTaskEnabled = lockToTaskEnabled;
-        this.userId = userId;
+    }
+
+    /** Copies the other task. */
+    public void copyFrom(Task o) {
+        this.key = o.key;
+        this.taskAffiliation = o.taskAffiliation;
+        this.taskAffiliationColor = o.taskAffiliationColor;
+        this.activityLabel = o.activityLabel;
+        this.activityIcon = o.activityIcon;
+        this.colorPrimary = o.colorPrimary;
+        this.useLightOnPrimaryColor = o.useLightOnPrimaryColor;
+        this.isActive = o.isActive;
+        this.lockToThisTask = o.lockToThisTask;
+        this.lockToTaskEnabled = o.lockToTaskEnabled;
     }
 
     /** Set the callbacks */

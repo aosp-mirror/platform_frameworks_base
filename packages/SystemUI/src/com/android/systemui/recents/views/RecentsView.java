@@ -408,14 +408,26 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         int thumbnailHeight = transform.rect.height();
         if (task.thumbnail != null && thumbnailWidth > 0 && thumbnailHeight > 0 &&
                 task.thumbnail.getWidth() > 0 && task.thumbnail.getHeight() > 0) {
-            // Resize the thumbnail to the size of the view that we are animating from
-            Bitmap b = Bitmap.createBitmap(thumbnailWidth, thumbnailHeight,
-                    Bitmap.Config.ARGB_8888);
-            Canvas c = new Canvas(b);
-            c.drawBitmap(task.thumbnail,
-                    new Rect(0, 0, task.thumbnail.getWidth(), task.thumbnail.getHeight()),
-                    new Rect(0, 0, thumbnailWidth, thumbnailHeight), null);
-            c.setBitmap(null);
+            Bitmap b;
+            if (tv != null) {
+                // Disable any focused state before we draw the header
+                if (tv.isFocusedTask()) {
+                    tv.unsetFocusedTask();
+                }
+
+                b = Bitmap.createBitmap(thumbnailWidth, thumbnailHeight, Bitmap.Config.ARGB_8888);
+                if (Constants.DebugFlags.App.EnableTransitionThumbnailDebugMode) {
+                    b.eraseColor(0xFFff0000);
+                } else {
+                    Canvas c = new Canvas(b);
+                    c.scale(tv.getScaleX(), tv.getScaleY());
+                    tv.mHeaderView.draw(c);
+                    c.setBitmap(null);
+                }
+            } else {
+                // Notify the system to skip the thumbnail layer by using an ALPHA_8 bitmap
+                b = Bitmap.createBitmap(thumbnailWidth, thumbnailHeight, Bitmap.Config.ALPHA_8);
+            }
             ActivityOptions.OnAnimationStartedListener animStartedListener = null;
             if (lockToTask) {
                 animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
@@ -434,7 +446,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     }
                 };
             }
-            opts = ActivityOptions.makeThumbnailScaleUpAnimation(sourceView,
+            opts = ActivityOptions.makeThumbnailAspectScaleUpAnimation(sourceView,
                     b, offsetX, offsetY, animStartedListener);
         }
 
@@ -472,7 +484,15 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         if (tv == null) {
             post(launchRunnable);
         } else {
-            stackView.startLaunchTaskAnimation(tv, launchRunnable);
+            if (!task.group.isFrontMostTask(task)) {
+                // For affiliated tasks that are behind other tasks, we must animate the front cards
+                // out of view before starting the task transition
+                stackView.startLaunchTaskAnimation(tv, launchRunnable);
+            } else {
+                // Otherwise, we can start the task transition immediately
+                stackView.startLaunchTaskAnimation(tv, null);
+                postDelayed(launchRunnable, 17);
+            }
         }
     }
 
@@ -485,7 +505,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         intent.setComponent(intent.resolveActivity(getContext().getPackageManager()));
         TaskStackBuilder.create(getContext())
                 .addNextIntentWithParentStack(intent).startActivities(null,
-                new UserHandle(t.userId));
+                new UserHandle(t.key.userId));
     }
 
     @Override

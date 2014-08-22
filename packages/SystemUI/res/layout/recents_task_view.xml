@@ -23,45 +23,7 @@
         android:id="@+id/task_view_thumbnail"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-    <com.android.systemui.recents.views.TaskViewHeader
-        android:id="@+id/task_view_bar"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/recents_task_bar_height"
-        android:layout_gravity="top|center_horizontal">
-        <com.android.systemui.recents.views.FixedSizeImageView
-            android:id="@+id/application_icon"
-            android:layout_width="@dimen/recents_task_view_application_icon_size"
-            android:layout_height="@dimen/recents_task_view_application_icon_size"
-            android:layout_marginStart="8dp"
-            android:layout_gravity="center_vertical|start"
-            android:padding="8dp"
-            android:background="@drawable/recents_button_bg" />
-        <TextView
-            android:id="@+id/activity_description"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|start"
-            android:layout_marginStart="64dp"
-            android:layout_marginEnd="64dp"
-            android:textSize="16sp"
-            android:textColor="#ffffffff"
-            android:text="@string/recents_empty_message"
-            android:fontFamily="sans-serif-medium"
-            android:singleLine="true"
-            android:maxLines="2"
-            android:ellipsize="marquee"
-            android:fadingEdge="horizontal" />
-        <com.android.systemui.recents.views.FixedSizeImageView
-            android:id="@+id/dismiss_task"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="4dp"
-            android:layout_gravity="center_vertical|end"
-            android:padding="12dp"
-            android:background="@drawable/recents_button_bg"
-            android:visibility="invisible"
-            android:src="@drawable/recents_dismiss_light" />
-    </com.android.systemui.recents.views.TaskViewHeader>
+    <include layout="@layout/recents_task_view_header" />
     <FrameLayout
         android:id="@+id/lock_to_app_fab"
         android:layout_width="48dp"
