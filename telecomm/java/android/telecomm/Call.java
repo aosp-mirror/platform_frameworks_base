@@ -329,6 +329,7 @@ public final class Call {
          *
          * @param call The {@code Call} invoking this method.
          * @param videoCall The {@code Call.VideoCall} associated with the {@code Call}.
+         * @hide
          */
         public void onVideoCallChanged(Call call, InCallService.VideoCall videoCall) {}
 
@@ -582,6 +583,7 @@ public final class Call {
      * Obtains an object that can be used to display video from this {@code Call}.
      *
      * @return An {@code Call.VideoCall}.
+     * @hide
      */
     public InCallService.VideoCall getVideoCall() {
         return mVideoCall;

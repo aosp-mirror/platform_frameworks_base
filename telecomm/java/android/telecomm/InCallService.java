@@ -198,6 +198,7 @@ public abstract class InCallService extends Service {
 
     /**
      * Class to invoke functionality related to video calls.
+     * @hide
      */
     public static abstract class VideoCall {
 
@@ -294,6 +295,7 @@ public abstract class InCallService extends Service {
 
         /**
          * Listener class which invokes callbacks after video call actions occur.
+         * @hide
          */
         public static abstract class Listener {
             /**
