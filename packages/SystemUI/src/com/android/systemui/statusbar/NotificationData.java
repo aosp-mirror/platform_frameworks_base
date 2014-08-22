@@ -98,6 +98,16 @@ public class NotificationData {
 
         @Override
         public int compare(Entry a, Entry b) {
+            String mediaNotification = mEnvironment.getCurrentMediaNotificationKey();
+
+            // Upsort current media notification.
+            boolean aMedia = a.key.equals(mediaNotification);
+            boolean bMedia = b.key.equals(mediaNotification);
+            if (aMedia != bMedia) {
+                return aMedia ? -1 : 1;
+            }
+
+            // RankingMap as received from NoMan.
             if (mRankingMap != null) {
                 mRankingMap.getRanking(a.key, mRankingA);
                 mRankingMap.getRanking(b.key, mRankingB);
@@ -288,5 +298,6 @@ public class NotificationData {
         public boolean shouldHideSensitiveContents(int userId);
         public boolean isDeviceProvisioned();
         public boolean isNotificationForCurrentProfiles(StatusBarNotification sbn);
+        public String getCurrentMediaNotificationKey();
     }
 }

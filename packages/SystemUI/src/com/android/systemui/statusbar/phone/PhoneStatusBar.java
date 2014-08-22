@@ -2050,6 +2050,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return mNotificationPanel.isQsExpanded();
     }
 
+    @Override  // NotificationData.Environment
+    public String getCurrentMediaNotificationKey() {
+        return mMediaNotificationKey;
+    }
+
     /**
      * All changes to the status bar and notifications funnel through here and are batched.
      */
