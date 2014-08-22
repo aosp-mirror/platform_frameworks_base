@@ -117,6 +117,8 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     final ArrayList<JobStatus> mPendingJobs = new ArrayList<JobStatus>();
 
+    final ArrayList<Integer> mStartedUsers = new ArrayList();
+
     final JobHandler mHandler;
     final JobSchedulerStub mJobSchedulerStub;
 
@@ -150,6 +152,18 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
         }
     };
+
+    @Override
+    public void onStartUser(int userHandle) {
+        mStartedUsers.add(userHandle);
+        // Let's kick any outstanding jobs for this user.
+        mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
+    }
+
+    @Override
+    public void onStopUser(int userHandle) {
+        mStartedUsers.remove(Integer.valueOf(userHandle));
+    }
 
     /**
      * Entry point from client to schedule the provided job.
@@ -610,9 +624,20 @@ public class JobSchedulerService extends com.android.server.SystemService
          *      - It's ready.
          *      - It's not pending.
          *      - It's not already running on a JSC.
+         *      - The user that requested the job is running.
          */
         private boolean isReadyToBeExecutedLocked(JobStatus job) {
-              return job.isReady() && !mPendingJobs.contains(job) && !isCurrentlyActiveLocked(job);
+            final boolean jobReady = job.isReady();
+            final boolean jobPending = mPendingJobs.contains(job);
+            final boolean jobActive = isCurrentlyActiveLocked(job);
+            final boolean userRunning = mStartedUsers.contains(job.getUserId());
+
+            if (DEBUG) {
+                Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
+                        + " ready=" + jobReady + " pending=" + jobPending
+                        + " active=" + jobActive + " userRunning=" + userRunning);
+            }
+            return userRunning && jobReady && !jobPending && !jobActive;
         }
 
         /**
@@ -795,6 +820,11 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     void dumpInternal(PrintWriter pw) {
         synchronized (mJobs) {
+            pw.print("Started users: ");
+            for (int i=0; i<mStartedUsers.size(); i++) {
+                pw.print("u" + mStartedUsers.get(i) + " ");
+            }
+            pw.println();
             pw.println("Registered jobs:");
             if (mJobs.size() > 0) {
                 ArraySet<JobStatus> jobs = mJobs.getJobs();
