@@ -41,7 +41,8 @@
                 android:layout_marginEnd="8dp"
                 android:minWidth="132dp"
                 android:text="@string/quick_settings_more_settings"
-                android:textAppearance="@style/TextAppearance.QS.DetailButton" />
+                android:textAppearance="@style/TextAppearance.QS.DetailButton"
+                android:focusable="true" />
 
         <TextView
                 android:id="@android:id/button1"
@@ -50,7 +51,8 @@
                 android:layout_height="wrap_content"
                 android:minWidth="88dp"
                 android:text="@string/quick_settings_done"
-                android:textAppearance="@style/TextAppearance.QS.DetailButton" />
+                android:textAppearance="@style/TextAppearance.QS.DetailButton"
+                android:focusable="true"/>
 
     </LinearLayout>
 </LinearLayout>

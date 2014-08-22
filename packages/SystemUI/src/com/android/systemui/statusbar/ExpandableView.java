@@ -17,12 +17,14 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
 
@@ -259,6 +261,24 @@ public abstract class ExpandableView extends FrameLayout {
         if (mOnHeightChangedListener != null) {
             mOnHeightChangedListener.onReset(this);
         }
+    }
+
+    /**
+     * This method returns the drawing rect for the view which is different from the regular
+     * drawing rect, since we layout all children in the {@link NotificationStackScrollLayout} at
+     * position 0 and usually the translation is neglected. Since we are manually clipping this
+     * view,we also need to subtract the clipTopAmount from the top. This is needed in order to
+     * ensure that accessibility and focusing work correctly.
+     *
+     * @param outRect The (scrolled) drawing bounds of the view.
+     */
+    @Override
+    public void getDrawingRect(Rect outRect) {
+        super.getDrawingRect(outRect);
+        outRect.left += getTranslationX();
+        outRect.right += getTranslationX();
+        outRect.bottom = (int) (outRect.top + getTranslationY() + getActualHeight());
+        outRect.top += getTranslationY() + getClipTopAmount();
     }
 
     /**

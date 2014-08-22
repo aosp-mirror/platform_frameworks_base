@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         >
-    <ImageButton
+    <com.android.systemui.statusbar.DismissViewImageButton
             android:id="@+id/dismiss_text"
             android:layout_width="48dp"
             android:layout_height="48dp"

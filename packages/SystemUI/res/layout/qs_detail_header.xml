@@ -19,6 +19,7 @@
     android:layout_height="wrap_content"
     android:layout_alignParentBottom="true"
     android:padding="@dimen/qs_panel_padding"
+    android:visibility="invisible"
     android:background="@drawable/btn_borderless_rect" >
 
     <TextView

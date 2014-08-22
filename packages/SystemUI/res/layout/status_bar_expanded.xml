@@ -50,10 +50,6 @@
         android:visibility="gone"
         />
 
-    <include
-        layout="@layout/keyguard_bottom_area"
-        android:visibility="gone" />
-
     <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -101,7 +97,7 @@
             android:layout_width="@dimen/notification_panel_width"
             android:layout_height="match_parent"
             android:layout_gravity="@integer/notification_panel_layout_gravity"
-            android:layout_marginBottom="@dimen/close_handle_underlap"/>
+            android:layout_marginBottom="@dimen/close_handle_underlap" />
 
         <ViewStub
             android:id="@+id/keyguard_user_switcher"
@@ -116,6 +112,10 @@
             android:visibility="invisible" />
 
     </com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer>
+
+    <include
+            layout="@layout/keyguard_bottom_area"
+            android:visibility="gone" />
 
     <include layout="@layout/status_bar_expanded_header" />
 
