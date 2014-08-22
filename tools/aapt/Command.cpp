@@ -438,6 +438,7 @@ enum {
     LARGE_SCREEN_ATTR = 0x01010286,
     XLARGE_SCREEN_ATTR = 0x010102bf,
     REQUIRED_ATTR = 0x0101028e,
+    INSTALL_LOCATION_ATTR = 0x010102b7,
     SCREEN_SIZE_ATTR = 0x010102ca,
     SCREEN_DENSITY_ATTR = 0x010102cb,
     REQUIRES_SMALLEST_WIDTH_DP_ATTR = 0x01010364,
@@ -1177,6 +1178,33 @@ int doDump(Bundle* bundle)
                                     splitName.string()).string());
                     }
                     printf("\n");
+
+                    int32_t installLocation = getResolvedIntegerAttribute(&res, tree,
+                            INSTALL_LOCATION_ATTR, &error, -1);
+                    if (error != "") {
+                        fprintf(stderr, "ERROR getting 'android:installLocation' attribute: %s\n",
+                                error.string());
+                        goto bail;
+                    }
+
+                    if (installLocation >= 0) {
+                        printf("install-location:'");
+                        switch (installLocation) {
+                            case 0:
+                                printf("auto");
+                                break;
+                            case 1:
+                                printf("internalOnly");
+                                break;
+                            case 2:
+                                printf("preferExternal");
+                                break;
+                            default:
+                                fprintf(stderr, "Invalid installLocation %d\n", installLocation);
+                                goto bail;
+                        }
+                        printf("'\n");
+                    }
                 } else if (depth == 2) {
                     withinApplication = false;
                     if (tag == "application") {
