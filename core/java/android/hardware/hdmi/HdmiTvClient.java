@@ -35,6 +35,11 @@ import libcore.util.EmptyArray;
 public final class HdmiTvClient extends HdmiClient {
     private static final String TAG = "HdmiTvClient";
 
+    /**
+     * Size of MHL scratchpad register.
+     */
+    public static final int SCRATCHPAD_DATA_SIZE = 16;
+
     HdmiTvClient(IHdmiControlService service) {
         super(service);
     }
@@ -78,6 +83,15 @@ public final class HdmiTvClient extends HdmiClient {
         } catch (RemoteException e) {
             Log.e(TAG, "failed to select device: ", e);
         }
+    }
+
+    private static IHdmiControlCallback getCallbackWrapper(final SelectCallback callback) {
+        return new IHdmiControlCallback.Stub() {
+            @Override
+            public void onComplete(int result) {
+                callback.onComplete(result);
+            }
+        };
     }
 
     /**
@@ -126,6 +140,15 @@ public final class HdmiTvClient extends HdmiClient {
         }
     }
 
+    private static IHdmiInputChangeListener getListenerWrapper(final InputChangeListener listener) {
+        return new IHdmiInputChangeListener.Stub() {
+            @Override
+            public void onChanged(HdmiDeviceInfo info) {
+                listener.onChanged(info);
+            }
+        };
+    }
+
     /**
      * Set system audio volume
      *
@@ -168,6 +191,38 @@ public final class HdmiTvClient extends HdmiClient {
         } catch (RemoteException e) {
             Log.e(TAG, "failed to set record listener.", e);
         }
+    }
+
+    private static IHdmiRecordListener getListenerWrapper(final HdmiRecordListener callback) {
+        return new IHdmiRecordListener.Stub() {
+            @Override
+            public byte[] getOneTouchRecordSource(int recorderAddress) {
+                HdmiRecordSources.RecordSource source =
+                        callback.getOneTouchRecordSource(recorderAddress);
+                if (source == null) {
+                    return EmptyArray.BYTE;
+                }
+                byte[] data = new byte[source.getDataSize(true)];
+                source.toByteArray(true, data, 0);
+                return data;
+            }
+
+            @Override
+            public void onOneTouchRecordResult(int result) {
+                callback.onOneTouchRecordResult(result);
+            }
+
+            @Override
+            public void onTimerRecordingResult(int result) {
+                callback.onTimerRecordingResult(
+                        HdmiRecordListener.TimerStatusData.parseFrom(result));
+            }
+
+            @Override
+            public void onClearTimerRecordingResult(int result) {
+                callback.onClearTimerRecordingResult(result);
+            }
+        };
     }
 
     /**
@@ -276,53 +331,63 @@ public final class HdmiTvClient extends HdmiClient {
         }
     }
 
-    private static IHdmiControlCallback getCallbackWrapper(final SelectCallback callback) {
-        return new IHdmiControlCallback.Stub() {
+    /**
+     * Interface used to get incoming MHL scratchpad command.
+     */
+    public interface HdmiMhlScratchpadCommandListener {
+        void onReceived(int portId, int offset, int length, byte[] data);
+    }
+
+    /**
+     * Set {@link HdmiMhlScratchpadCommandListener} to get incoming MHL sSratchpad command.
+     *
+     * @param listener to receive incoming MHL Scratchpad command
+     */
+    public void setHdmiMhlScratchpadCommandListener(HdmiMhlScratchpadCommandListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null.");
+        }
+        try {
+            mService.addHdmiMhlScratchpadCommandListener(getListenerWrapper(listener));
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to set hdmi mhl scratchpad command listener: ", e);
+        }
+    }
+
+    private IHdmiMhlScratchpadCommandListener getListenerWrapper(
+            final HdmiMhlScratchpadCommandListener listener) {
+        return new IHdmiMhlScratchpadCommandListener.Stub() {
             @Override
-            public void onComplete(int result) {
-                callback.onComplete(result);
+            public void onReceived(int portId, int offset, int length, byte[] data) {
+                listener.onReceived(portId, offset, length, data);
             }
         };
     }
 
-    private static IHdmiInputChangeListener getListenerWrapper(final InputChangeListener listener) {
-        return new IHdmiInputChangeListener.Stub() {
-            @Override
-            public void onChanged(HdmiDeviceInfo info) {
-                listener.onChanged(info);
-            }
-        };
-    }
+    /**
+     * Send MHL Scratchpad command to the device connected to a port of the given portId.
+     *
+     * @param portId id of port to send MHL Scratchpad command
+     * @param offset offset in the in given data
+     * @param length length of data. offset + length should be bound to length of data.
+     * @param data container for Scratchpad data. It should be 16 bytes.
+     * @throws IllegalArgumentException if the given parameters are invalid
+     */
+    public void sendScratchpadCommand(int portId, int offset, int length, byte[] data) {
+        if (data == null || data.length != SCRATCHPAD_DATA_SIZE) {
+            throw new IllegalArgumentException("Invalid scratchpad data.");
+        }
+        if (offset < 0 || offset >= SCRATCHPAD_DATA_SIZE) {
+            throw new IllegalArgumentException("Invalid offset:" + offset);
+        }
+        if (length < 0 || offset + length > SCRATCHPAD_DATA_SIZE) {
+            throw new IllegalArgumentException("Invalid length:" + length);
+        }
 
-    private static IHdmiRecordListener getListenerWrapper(final HdmiRecordListener callback) {
-        return new IHdmiRecordListener.Stub() {
-            @Override
-            public byte[] getOneTouchRecordSource(int recorderAddress) {
-                HdmiRecordSources.RecordSource source =
-                        callback.getOneTouchRecordSource(recorderAddress);
-                if (source == null) {
-                    return EmptyArray.BYTE;
-                }
-                byte[] data = new byte[source.getDataSize(true)];
-                source.toByteArray(true, data, 0);
-                return data;
-            }
-
-            @Override
-            public void onOneTouchRecordResult(int result) {
-                callback.onOneTouchRecordResult(result);
-            }
-
-            @Override
-            public void onTimerRecordingResult(int result) {
-                callback.onTimerRecordingResult(
-                        HdmiRecordListener.TimerStatusData.parseFrom(result));
-            }
-
-            @Override
-            public void onClearTimerRecordingResult(int result) {
-                callback.onClearTimerRecordingResult(result);
-            }
-        };
+        try {
+            mService.sendScratchpadCommand(portId, offset, length, data);
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to send scratchpad command: ", e);
+        }
     }
 }

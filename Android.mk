@@ -156,6 +156,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/hdmi/IHdmiDeviceEventListener.aidl \
 	core/java/android/hardware/hdmi/IHdmiHotplugEventListener.aidl \
 	core/java/android/hardware/hdmi/IHdmiInputChangeListener.aidl \
+	core/java/android/hardware/hdmi/IHdmiMhlScratchpadCommandListener.aidl \
 	core/java/android/hardware/hdmi/IHdmiRecordListener.aidl \
 	core/java/android/hardware/hdmi/IHdmiSystemAudioModeChangeListener.aidl \
 	core/java/android/hardware/hdmi/IHdmiVendorCommandListener.aidl \
