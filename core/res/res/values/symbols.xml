@@ -990,6 +990,8 @@
   <java-symbol type="string" name="ssl_ca_cert_warning" />
   <java-symbol type="string" name="lockscreen_transport_play_description" />
   <java-symbol type="string" name="lockscreen_transport_pause_description" />
+  <java-symbol type="string" name="config_ethernet_tcp_buffers" />
+  <java-symbol type="string" name="config_wifi_tcp_buffers" />
 
   <java-symbol type="plurals" name="abbrev_in_num_days" />
   <java-symbol type="plurals" name="abbrev_in_num_hours" />
