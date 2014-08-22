@@ -267,7 +267,7 @@ static void tessellateShadows(
             casterBounds, *localClip, maxZ, ambientBuffer);
 
     ShadowTessellator::tessellateSpotShadow(
-            isCasterOpaque, casterPolygon, casterVertexCount,
+            isCasterOpaque, casterPolygon, casterVertexCount, centroid3d,
             *drawTransform, lightCenter, lightRadius, casterBounds, *localClip,
             spotBuffer);
 }

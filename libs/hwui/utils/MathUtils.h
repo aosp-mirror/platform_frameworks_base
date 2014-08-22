@@ -66,11 +66,13 @@ public:
         return isZero(valueA - valueB);
     }
 
-    inline static int max(int a, int b) {
+    template<typename T>
+    static inline T max(T a, T b) {
         return a > b ? a : b;
     }
 
-    inline static int min(int a, int b) {
+    template<typename T>
+    static inline T min(T a, T b) {
         return a < b ? a : b;
     }
 
