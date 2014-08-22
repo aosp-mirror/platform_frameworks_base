@@ -8,11 +8,13 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
+    services.core \
+    services.devicepolicy \
     easymocklib \
     guava \
     mockito-target
 
-LOCAL_JAVA_LIBRARIES := android.test.runner services
+LOCAL_JAVA_LIBRARIES := android.test.runner
 
 LOCAL_PACKAGE_NAME := FrameworksServicesTests
 
