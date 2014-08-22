@@ -2869,7 +2869,7 @@
                 android:label="@string/managed_profile_label">
         </activity-alias>
         <activity android:name="com.android.internal.app.HeavyWeightSwitcherActivity"
-                android:theme="@style/Theme.Holo.Dialog"
+                android:theme="@style/Theme.Material.Dialog"
                 android:label="@string/heavy_weight_switcher_title"
                 android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true"

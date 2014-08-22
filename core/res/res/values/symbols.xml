@@ -836,6 +836,7 @@
   <java-symbol type="string" name="time_picker_increment_set_pm_button" />
   <java-symbol type="string" name="upload_file" />
   <java-symbol type="string" name="user_switched" />
+  <java-symbol type="string" name="user_switching_message" />
   <java-symbol type="string" name="volume_alarm" />
   <java-symbol type="string" name="volume_icon_description_bluetooth" />
   <java-symbol type="string" name="volume_icon_description_incall" />
