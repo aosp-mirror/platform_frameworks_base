@@ -23,7 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"지우기"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"목록에서 삭제"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"앱 정보"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"최근에 사용한 앱 없음"</string>
+    <!-- no translation found for status_bar_no_recent_apps (7374907845131203189) -->
+    <skip />
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"최근에 사용한 앱 숨기기"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"최근에 사용한 앱 1개"</item>
@@ -82,7 +83,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"뒤로"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"홈"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"메뉴"</string>
-    <string name="accessibility_recent" msgid="8571350598987952883">"최근에 사용한 앱"</string>
+    <!-- no translation found for accessibility_recent (1606470783629913980) -->
+    <skip />
     <string name="accessibility_search_light" msgid="1103867596330271848">"검색"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"카메라"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"전화"</string>
@@ -157,7 +159,9 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"알림이 제거되었습니다."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"알림 세부정보"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"빠른 설정"</string>
-    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"최근 앱"</string>
+    <string name="accessibility_desc_settings" msgid="3417884241751434521">"설정"</string>
+    <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
+    <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"사용자 <xliff:g id="USER">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"모바일 <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
@@ -169,6 +173,8 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"패널 닫기"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"시간 늘리기"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"시간 줄이기"</string>
+    <!-- no translation found for accessibility_brightness (8003681285547803095) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G 데이터 사용 중지됨"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G 데이터 사용 중지됨"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"이동통신 데이터 사용 중지됨"</string>
@@ -181,8 +187,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS에서 위치 설정"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"위치 요청 있음"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"모든 알림 지우기"</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5386295743469882227) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"설정"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"화면이 자동으로 회전됩니다."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"화면이 가로 방향으로 잠겨 있습니다."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"화면이 세로 방향으로 잠겨 있습니다."</string>
@@ -241,7 +246,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> 사용됨"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"한도: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> 경고"</string>
-    <string name="recents_empty_message" msgid="7883614615463619450">"최근에 사용한 앱 없음"</string>
+    <!-- no translation found for recents_empty_message (8682129509540827999) -->
+    <skip />
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"애플리케이션 정보"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"앱에 잠금"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"검색"</string>
@@ -261,7 +267,8 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"<xliff:g id="ALARM_TIME">%s</xliff:g>에 알람을 들을 수 없습니다."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"아래에 덜 급한 알림 표시"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"다시 탭하여 열기"</string>
+    <!-- no translation found for notification_tap_again (8524949573675922138) -->
+    <skip />
     <string name="keyguard_unlock" msgid="8043466894212841998">"위로 스와이프하여 잠금 해제"</string>
     <string name="phone_hint" msgid="3101468054914424646">"전화 기능을 사용하려면 오른쪽으로 스와이프하세요."</string>
     <string name="camera_hint" msgid="5241441720959174226">"카메라를 사용하려면 왼쪽으로 스와이프하세요."</string>
@@ -270,19 +277,25 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"최우선만 수신"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"모두 수신"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"충전 중(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> 후 충전 완료)"</string>
-    <!-- no translation found for user_add_user (5110251524486079492) -->
+    <!-- no translation found for accessibility_multi_user_switch_switcher (7305948938141024937) -->
     <skip />
-    <!-- no translation found for user_new_user_name (426540612051178753) -->
+    <!-- no translation found for accessibility_multi_user_switch_quick_contact (3020367729287990475) -->
     <skip />
+    <string name="user_add_user" msgid="5110251524486079492">"사용자 추가"</string>
+    <string name="user_new_user_name" msgid="426540612051178753">"새 사용자"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"손님"</string>
-    <string name="guest_new_guest" msgid="4259024453643879653">"새 손님 추가"</string>
-    <string name="guest_exit_guest" msgid="1619100760451149682">"손님 모드 종료"</string>
+    <!-- no translation found for guest_new_guest (600537543078847803) -->
+    <skip />
+    <string name="guest_exit_guest" msgid="7187359342030096885">"손님 삭제"</string>
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"손님 세션을 종료하시겠습니까?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"손님 세션을 종료하면 로컬 데이터가 삭제됩니다."</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"손님 세션 다시 시작"</string>
-    <string name="guest_wipe_session_message" msgid="5369763062345463297">"새로운 세션을 시작하시겠습니까?"</string>
-    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"예"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"아니요"</string>
+    <!-- no translation found for guest_wipe_session_message (8476238178270112811) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (5065558566939858884) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (1401113462524894716) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"1분 동안"</item>
     <item quantity="other" msgid="6924190729213550991">"%d분 동안"</item>
@@ -307,12 +320,11 @@
     <string name="monitoring_title" msgid="169206259253048106">"네트워크 모니터링"</string>
     <string name="open_app" msgid="4011771120339160755">"앱 열기"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN 연결 해제"</string>
-    <!-- no translation found for monitoring_description_device_owned (7512371572956715493) -->
+    <string name="monitoring_description_device_owned" msgid="7512371572956715493">"이 기기는 \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n에서 관리합니다. 관리자가 이메일, 앱 및 보안 웹사이트 등의 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 내용은 관리자에게 문의하세요."</string>
+    <string name="monitoring_description_vpn" msgid="7288268682714305659">"\'<xliff:g id="APPLICATION">%1$s</xliff:g>\'에 VPN 연결을 설정할 수 있는 권한을 부여했습니다.\n\n이 앱에서 내 기기와 이메일과 앱, 보안 웹사이트 등의 네트워크 활동을 모니터링할 수 있습니다."</string>
+    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"VPN(\'<xliff:g id="APPLICATION">%1$s</xliff:g>\')에 연결되었습니다.\n\nVPN 서비스 제공업체에서 내 기기와 이메일, 앱, 보안 웹사이트 등의 네트워크 활동을 모니터링할 수 있습니다."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"이 기기는 \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다.\n\n관리자가 이메일, 앱, 보안 웹사이트 등의 네트워크 활동을 모니터링할 수 있습니다. 자세한 정보는 관리자에게 문의하세요.\n\n또한 \'<xliff:g id="APPLICATION">%2$s</xliff:g>\'에 VPN 연결을 설정할 수 있는 권한을 부여했습니다. 이 앱에서도 네트워크 활동을 모니터링할 수 있습니다."</string>
+    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"이 기기는 \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다.\n\n관리자가 이메일, 앱, 보안 웹사이트 등의 네트워크 활동을 모니터링할 수 있습니다. 자세한 정보는 관리자에게 문의하세요.\n\n또한 VPN에도 연결되었습니다(\'<xliff:g id="APPLICATION">%2$s</xliff:g>\'). VPN 서비스 제공업체에서도 네트워크 활동을 모니터링할 수 있습니다."</string>
+    <!-- no translation found for keyguard_indication_trust_disabled (7412534203633528135) -->
     <skip />
-    <!-- no translation found for monitoring_description_vpn (7288268682714305659) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn (4740349017929725435) -->
-    <skip />
-    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"이 기기는 \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n에서 관리합니다. 관리자가 이메일, 앱 및 보안 웹사이트 등의 네트워크 활동을 모니터링할 수 있습니다. 자세한 정보는 관리자에게 문의하세요.\n\n또한 \'<xliff:g id="APPLICATION">%2$s</xliff:g>\'에 VPN 연결을 설정할 수 있는 권한을 부여했습니다. 이 앱에서도 네트워크 활동을 모니터링할 수 있습니다."</string>
-    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"이 기기는 \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n에서 관리합니다. 관리자가 이메일, 앱 및 보안 웹사이트 등의 네트워크 활동을 모니터링할 수 있습니다. 자세한 정보는 관리자에게 문의하세요.\n\n또한 VPN에도 연결되었습니다(\'<xliff:g id="APPLICATION">%2$s</xliff:g>\'). VPN 서비스 제공업체에서도 네트워크 활동을 모니터링할 수 있습니다."</string>
 </resources>

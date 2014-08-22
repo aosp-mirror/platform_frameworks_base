@@ -23,7 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"清除"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"从列表中删除"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"应用信息"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"最近没有运行任何应用"</string>
+    <!-- no translation found for status_bar_no_recent_apps (7374907845131203189) -->
+    <skip />
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"关闭最近运行的应用"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 个最近运行的应用"</item>
@@ -39,9 +40,9 @@
     <string name="invalid_charger_title" msgid="3515740382572798460">"不支持USB充电。"</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"仅限使用设备随附的充电器。"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"设置"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"要打开节电助手吗？"</string>
-    <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"打开"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"打开节电助手"</string>
+    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"要开启节电助手吗？"</string>
+    <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"开启"</string>
+    <string name="battery_saver_start_action" msgid="5576697451677486320">"开启节电助手"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"设置"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WLAN"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"飞行模式"</string>
@@ -80,7 +81,8 @@
     <string name="accessibility_back" msgid="567011538994429120">"返回"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"主屏幕"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"菜单"</string>
-    <string name="accessibility_recent" msgid="8571350598987952883">"最近运行的应用"</string>
+    <!-- no translation found for accessibility_recent (1606470783629913980) -->
+    <skip />
     <string name="accessibility_search_light" msgid="1103867596330271848">"搜索"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"相机"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"电话"</string>
@@ -157,7 +159,9 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"已关闭通知。"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"通知栏。"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"快捷设置。"</string>
-    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"最近使用的应用。"</string>
+    <string name="accessibility_desc_settings" msgid="3417884241751434521">"设置"</string>
+    <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
+    <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"用户：<xliff:g id="USER">%s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>，<xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"移动数据连接：<xliff:g id="SIGNAL">%1$s</xliff:g>，<xliff:g id="TYPE">%2$s</xliff:g>，<xliff:g id="NETWORK">%3$s</xliff:g>。"</string>
@@ -169,6 +173,8 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"关闭面板"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"更长时间"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"更短时间"</string>
+    <!-- no translation found for accessibility_brightness (8003681285547803095) -->
+    <skip />
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G数据网络已关闭"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G数据网络已关闭"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"移动数据网络已关闭"</string>
@@ -181,8 +187,7 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"已通过GPS确定位置"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"应用发出了有效位置信息请求"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"清除所有通知。"</string>
-    <!-- no translation found for status_bar_notification_inspect_item_title (5386295743469882227) -->
-    <skip />
+    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"设置"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"屏幕会自动旋转。"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"屏幕锁定为横向模式。"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"屏幕锁定为纵向模式。"</string>
@@ -241,7 +246,8 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"已使用<xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"上限为<xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g>警告"</string>
-    <string name="recents_empty_message" msgid="7883614615463619450">"最近没有用过任何应用"</string>
+    <!-- no translation found for recents_empty_message (8682129509540827999) -->
+    <skip />
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"应用信息"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"开启单应用模式"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"搜索"</string>
@@ -261,7 +267,8 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"您在<xliff:g id="ALARM_TIME">%s</xliff:g>将不会听到闹钟响铃"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"不太紧急的通知会显示在下方"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"再次点按即可打开"</string>
+    <!-- no translation found for notification_tap_again (8524949573675922138) -->
+    <skip />
     <string name="keyguard_unlock" msgid="8043466894212841998">"向上滑动即可解锁"</string>
     <string name="phone_hint" msgid="3101468054914424646">"向右滑动可打开拨号界面"</string>
     <string name="camera_hint" msgid="5241441720959174226">"向左滑动可打开相机"</string>
@@ -270,19 +277,25 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"优先"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"全部"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"正在充电（还需<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>充满）"</string>
-    <!-- no translation found for user_add_user (5110251524486079492) -->
+    <!-- no translation found for accessibility_multi_user_switch_switcher (7305948938141024937) -->
     <skip />
-    <!-- no translation found for user_new_user_name (426540612051178753) -->
+    <!-- no translation found for accessibility_multi_user_switch_quick_contact (3020367729287990475) -->
     <skip />
+    <string name="user_add_user" msgid="5110251524486079492">"添加用户"</string>
+    <string name="user_new_user_name" msgid="426540612051178753">"新用户"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"访客"</string>
-    <string name="guest_new_guest" msgid="4259024453643879653">"添加新访客"</string>
-    <string name="guest_exit_guest" msgid="1619100760451149682">"退出访客模式"</string>
+    <!-- no translation found for guest_new_guest (600537543078847803) -->
+    <skip />
+    <string name="guest_exit_guest" msgid="7187359342030096885">"移除访客"</string>
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"要退出访客模式吗？"</string>
     <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"退出访客模式将移除本地数据。"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"访客，欢迎回来！"</string>
-    <string name="guest_wipe_session_message" msgid="5369763062345463297">"要发起新的会话吗？"</string>
-    <string name="guest_wipe_session_wipe" msgid="9154291314115781448">"是"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="850084868661344050">"不"</string>
+    <!-- no translation found for guest_wipe_session_message (8476238178270112811) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_wipe (5065558566939858884) -->
+    <skip />
+    <!-- no translation found for guest_wipe_session_dontwipe (1401113462524894716) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"1分钟"</item>
     <item quantity="other" msgid="6924190729213550991">"%d分钟"</item>
@@ -292,7 +305,7 @@
     <item quantity="other" msgid="5408537517529822157">"%d小时"</item>
   </plurals>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"节电助手已开启"</string>
-    <string name="battery_saver_notification_text" msgid="820318788126672692">"降低性能并减少后台数据"</string>
+    <string name="battery_saver_notification_text" msgid="820318788126672692">"降低性能并限制后台流量"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"关闭节电助手"</string>
     <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"内容已隐藏"</string>
@@ -307,12 +320,11 @@
     <string name="monitoring_title" msgid="169206259253048106">"网络监控"</string>
     <string name="open_app" msgid="4011771120339160755">"打开应用"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"断开VPN连接"</string>
-    <!-- no translation found for monitoring_description_device_owned (7512371572956715493) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (7288268682714305659) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn (4740349017929725435) -->
-    <skip />
-    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"此设备由以下单位管理：\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n您的管理员可以监控您的网络活动，包括收发电子邮件、使用应用和浏览安全网站。若要了解详情，请与您的管理员联系。\n\n此外，您已授权“<xliff:g id="APPLICATION">%2$s</xliff:g>”可以设置VPN连接。此应用也可以监控网络活动。"</string>
+    <string name="monitoring_description_device_owned" msgid="7512371572956715493">"此设备由以下单位管理：\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n您的管理员可以监控您的设备和网络活动，包括收发电子邮件、使用应用和浏览安全网站。\n\n若要了解详情，请与您的管理员联系。"</string>
+    <string name="monitoring_description_vpn" msgid="7288268682714305659">"您已授权“<xliff:g id="APPLICATION">%1$s</xliff:g>”设置VPN连接。\n\n此应用可以监控您的设备和网络活动，包括收发电子邮件、使用应用和浏览安全网站。"</string>
+    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"您已连接到VPN（“<xliff:g id="APPLICATION">%1$s</xliff:g>”）。\n\n您的VPN服务提供商可以监控您的设备和网络活动，包括收发电子邮件、使用应用和浏览安全网站。"</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"此设备由以下单位管理：\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n您的管理员可以监控您的网络活动，包括收发电子邮件、使用应用和浏览安全网站。若要了解详情，请与您的管理员联系。\n\n此外，您已授权“<xliff:g id="APPLICATION">%2$s</xliff:g>”设置VPN连接。此应用也可以监控网络活动。"</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"此设备由以下单位管理：\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n您的管理员可以监控您的网络活动，包括收发电子邮件、使用应用和浏览安全网站。若要了解详情，请与您的管理员联系。\n\n此外，您已连接到VPN（“<xliff:g id="APPLICATION">%2$s</xliff:g>”）。您的VPN服务提供商也可以监控您的网络活动。"</string>
+    <!-- no translation found for keyguard_indication_trust_disabled (7412534203633528135) -->
+    <skip />
 </resources>
