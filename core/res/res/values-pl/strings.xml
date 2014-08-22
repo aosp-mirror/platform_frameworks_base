@@ -1003,7 +1003,7 @@
   </plurals>
   <plurals name="num_minutes_ago">
     <item quantity="one" msgid="3306787433088810191">"1 minutę temu"</item>
-    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> min. temu"</item>
+    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> min temu"</item>
   </plurals>
   <plurals name="num_hours_ago">
     <item quantity="one" msgid="9150797944610821849">"godzinę temu"</item>

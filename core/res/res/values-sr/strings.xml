@@ -1358,7 +1358,7 @@
     <string name="submit" msgid="1602335572089911941">"Пошаљи"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Режим рада у аутомобилу је омогућен"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Додирните да бисте изашли из режима рада у аутомобилу."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Активно повезивање са Интернетом преко мобилног уређаја или врућа тачка"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Активно повезивање са интернетом преко мобилног уређаја или врућа тачка"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Додирните да бисте подесили."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Назад"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Next"</string>
@@ -1506,7 +1506,7 @@
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Подешавања"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Прекини везу"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Скенирање..."</string>
-    <string name="media_route_status_connecting" msgid="6422571716007825440">"Повезивање..."</string>
+    <string name="media_route_status_connecting" msgid="6422571716007825440">"Повезује се..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Доступна"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"Нису доступне"</string>
     <string name="media_route_status_in_use" msgid="4533786031090198063">"У употреби"</string>

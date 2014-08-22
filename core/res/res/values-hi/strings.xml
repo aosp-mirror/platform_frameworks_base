@@ -1202,10 +1202,10 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"वाई-फ़ाई  से कनेक्‍ट नहीं हो सका"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" के पास एक कमज़ोर इंटरनेट कनेक्‍शन है."</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"वाई-फ़ाई  प्रत्यक्ष"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"वाई-फ़ाई डायरेक्ट"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"वाई-फ़ाई  डायरेक्ट प्रारंभ करें. इससे वाई-फ़ाई  क्‍लाइंट/हॉटस्पॉट कार्यवाही बंद हो जाएगी."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"वाई-फ़ाई  डायरेक्ट प्रारंभ नहीं किया जा सका."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"वाई-फ़ाई  प्रत्यक्ष चालू है"</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"वाई-फ़ाई डायरेक्ट चालू है"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"सेटिंग के लिए स्‍पर्श करें"</string>
     <string name="accept" msgid="1645267259272829559">"स्वीकार करें"</string>
     <string name="decline" msgid="2112225451706137894">"अस्वीकार करें"</string>

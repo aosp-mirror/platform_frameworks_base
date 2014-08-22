@@ -1157,7 +1157,7 @@
     <string name="smv_application" msgid="3307209192155442829">"“<xliff:g id="APPLICATION">%1$s</xliff:g>”应用（<xliff:g id="PROCESS">%2$s</xliff:g> 进程）违反了自我强制执行的严格模式 (StrictMode) 政策。"</string>
     <string name="smv_process" msgid="5120397012047462446">"进程 <xliff:g id="PROCESS">%1$s</xliff:g> 违反了自我强制执行的严格模式 (StrictMode) 政策。"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android正在升级..."</string>
-    <string name="android_upgrading_apk" msgid="7904042682111526169">"正在优化第 <xliff:g id="NUMBER_0">%1$d</xliff:g> 个应用（共 <xliff:g id="NUMBER_1">%2$d</xliff:g> 个）。"</string>
+    <string name="android_upgrading_apk" msgid="7904042682111526169">"正在优化第<xliff:g id="NUMBER_0">%1$d</xliff:g>个应用（共<xliff:g id="NUMBER_1">%2$d</xliff:g>个）。"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"正在启动应用。"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"即将完成启动。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g>正在运行"</string>
