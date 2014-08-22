@@ -5021,6 +5021,9 @@ public class Activity extends ContextThemeWrapper
                 }
             }
         }
+        if (mActionBar != null) {
+            mActionBar.setTitle(title);
+        }
     }
 
     protected void onChildTitleChanged(Activity childActivity, CharSequence title) {
