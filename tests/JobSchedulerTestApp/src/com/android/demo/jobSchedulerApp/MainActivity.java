@@ -65,6 +65,8 @@ public class MainActivity extends Activity {
         mAnyConnectivityRadioButton = (RadioButton) findViewById(R.id.checkbox_any);
         mRequiresChargingCheckBox = (CheckBox) findViewById(R.id.checkbox_charging);
         mRequiresIdleCheckbox = (CheckBox) findViewById(R.id.checkbox_idle);
+        mIsPersistedCheckbox = (CheckBox) findViewById(R.id.checkbox_persisted);
+
         mServiceComponent = new ComponentName(this, TestJobService.class);
         // Start service and provide it a way to communicate with us.
         Intent startServiceIntent = new Intent(this, TestJobService.class);
@@ -85,6 +87,7 @@ public class MainActivity extends Activity {
     RadioButton mAnyConnectivityRadioButton;
     CheckBox mRequiresChargingCheckBox;
     CheckBox mRequiresIdleCheckbox;
+    CheckBox mIsPersistedCheckbox;
 
     ComponentName mServiceComponent;
     /** Service object to interact scheduled jobs. */
@@ -146,7 +149,7 @@ public class MainActivity extends Activity {
         }
         builder.setRequiresDeviceIdle(mRequiresIdleCheckbox.isChecked());
         builder.setRequiresCharging(mRequiresChargingCheckBox.isChecked());
-
+        builder.setIsPersisted(mIsPersistedCheckbox.isChecked());
         mTestService.scheduleJob(builder.build());
 
     }

@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.text.format.DateUtils;
 
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,6 +42,7 @@ public class JobStatus {
     public static final long NO_EARLIEST_RUNTIME = 0L;
 
     final JobInfo job;
+    /** Uid of the package requesting this job. */
     final int uId;
     final String name;
     final String tag;
@@ -214,12 +216,39 @@ public class JobStatus {
         return String.valueOf(hashCode()).substring(0, 3) + ".."
                 + ":[" + job.getService()
                 + ",jId=" + job.getId()
-                + ",R=(" + earliestRunTimeElapsedMillis + "," + latestRunTimeElapsedMillis + ")"
+                + ",u" + getUserId()
+                + ",R=(" + formatRunTime(earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME)
+                + "," + formatRunTime(latestRunTimeElapsedMillis, NO_LATEST_RUNTIME) + ")"
                 + ",N=" + job.getNetworkCapabilities() + ",C=" + job.isRequireCharging()
                 + ",I=" + job.isRequireDeviceIdle() + ",F=" + numFailures
+                + ",P=" + job.isPersisted()
                 + (isReady() ? "(READY)" : "")
                 + "]";
     }
+
+    private String formatRunTime(long runtime, long  defaultValue) {
+        if (runtime == defaultValue) {
+            return "none";
+        } else {
+            long elapsedNow = SystemClock.elapsedRealtime();
+            long nextRuntime = runtime - elapsedNow;
+            if (nextRuntime > 0) {
+                return DateUtils.formatElapsedTime(nextRuntime / 1000);
+            } else {
+                return "-" + DateUtils.formatElapsedTime(nextRuntime / -1000);
+            }
+        }
+    }
+
+    /**
+     * Convenience function to identify a job uniquely without pulling all the data that
+     * {@link #toString()} returns.
+     */
+    public String toShortString() {
+        return job.getService().flattenToShortString() + " jId=" + job.getId() +
+                ", u" + getUserId();
+    }
+
     // Dumpsys infrastructure
     public void dump(PrintWriter pw, String prefix) {
         pw.println(this.toString());
