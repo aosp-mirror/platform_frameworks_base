@@ -112,6 +112,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     private final HdmiCecStandbyModeHandler mStandbyHandler;
 
+    // If true, do not do routing control/send active source for internal source.
+    // Set to true when the device was woken up by <Text/Image View On>.
+    private boolean mSkipRoutingControl;
+
     // Set of physical addresses of CEC switches on the CEC bus. Managed independently from
     // other CEC devices since they might not have logical address.
     private final ArraySet<Integer> mCecSwitches = new ArraySet<Integer>();
@@ -134,6 +138,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, mService.getVendorId()));
         mCecSwitches.add(mService.getPhysicalAddress());  // TV is a CEC switch too.
+        mSkipRoutingControl = (reason == HdmiControlService.INITIATED_BY_WAKE_UP_MESSAGE);
         launchRoutingControl(reason != HdmiControlService.INITIATED_BY_ENABLE_CEC &&
                 reason != HdmiControlService.INITIATED_BY_BOOT_UP);
         launchDeviceDiscovery();
@@ -207,7 +212,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         // Seq #18
         if (mService.isControlEnabled() && mActiveSource.logicalAddress != mAddress) {
             updateActiveSource(mAddress, mService.getPhysicalAddress());
-            // TODO: Check if this comes from <Text/Image View On> - if true, do nothing.
+            if (mSkipRoutingControl) {
+                mSkipRoutingControl = false;
+                return;
+            }
             HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(
                     mAddress, mService.getPhysicalAddress());
             mService.sendCecCommand(activeSource);
@@ -304,11 +312,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
-        // TODO: Return immediately if the operation is triggered by <Text/Image View On>
-        // and this is the first notification about the active input after power-on
-        // (switch to HDMI didn't happen so far but is expected to happen soon).
         int oldPath = getActivePortId() != Constants.INVALID_PORT_ID
                 ? mService.portIdToPath(getActivePortId()) : getDeviceInfo().getPhysicalAddress();
+        setActivePath(oldPath);
+        if (mSkipRoutingControl) {
+            mSkipRoutingControl = false;
+            return;
+        }
         int newPath = mService.portIdToPath(portId);
         HdmiCecMessage routingChange =
                 HdmiCecMessageBuilder.buildRoutingChange(mAddress, oldPath, newPath);
@@ -566,8 +576,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (mService.isPowerStandbyOrTransient() && mAutoWakeup) {
             mService.wakeUp();
         }
-        // TODO: Connect to Hardware input manager to invoke TV App with the appropriate channel
-        //       that represents the source device.
         return true;
     }
 
