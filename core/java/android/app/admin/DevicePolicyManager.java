@@ -1373,6 +1373,8 @@ public class DevicePolicyManager {
      * and its profiles or a particular one.
      * @param admin The name of the admin component to check, or null to aggregate
      * all admins.
+     * @return time in milliseconds for the given admin or the minimum value (strictest) of
+     * all admins if admin is null.
      */
     public long getMaximumTimeToLock(ComponentName admin) {
         return getMaximumTimeToLock(admin, UserHandle.myUserId());

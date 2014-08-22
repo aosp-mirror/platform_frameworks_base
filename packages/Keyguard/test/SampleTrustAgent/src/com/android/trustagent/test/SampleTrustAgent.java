@@ -76,6 +76,12 @@ public class SampleTrustAgent extends TrustAgentService
     }
 
     @Override
+    public void onTrustTimeout() {
+        super.onTrustTimeout();
+        Toast.makeText(this, "onTrustTimeout(): timeout expired", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     public void onUnlockAttempt(boolean successful) {
         if (getReportUnlockAttempts(this)) {
             Toast.makeText(this, "onUnlockAttempt(successful=" + successful + ")",
