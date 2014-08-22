@@ -46,7 +46,12 @@ import java.util.Map;
  * {@hide}
  */
 public class NotificationUsageStats {
+    // WARNING: Aggregated stats can grow unboundedly with pkg+id+tag.
+    // Don't enable on production builds.
+    private static final boolean ENABLE_AGGREGATED_IN_MEMORY_STATS = true;
     private static final boolean ENABLE_SQLITE_LOG = true;
+
+    private static final AggregatedStats[] EMPTY_AGGREGATED_STATS = new AggregatedStats[0];
 
     // Guarded by synchronized(this).
     private final Map<String, AggregatedStats> mStats = new HashMap<String, AggregatedStats>();
@@ -147,6 +152,10 @@ public class NotificationUsageStats {
 
     // Locked by this.
     private AggregatedStats[] getAggregatedStatsLocked(NotificationRecord record) {
+        if (!ENABLE_AGGREGATED_IN_MEMORY_STATS) {
+            return EMPTY_AGGREGATED_STATS;
+        }
+
         StatusBarNotification n = record.sbn;
 
         String user = String.valueOf(n.getUserId());
@@ -171,9 +180,12 @@ public class NotificationUsageStats {
     }
 
     public synchronized void dump(PrintWriter pw, String indent, DumpFilter filter) {
-        for (AggregatedStats as : mStats.values()) {
-            if (filter != null && !filter.matches(as.key)) continue;
-            as.dump(pw, indent);
+        if (ENABLE_AGGREGATED_IN_MEMORY_STATS) {
+            for (AggregatedStats as : mStats.values()) {
+                if (filter != null && !filter.matches(as.key))
+                    continue;
+                as.dump(pw, indent);
+            }
         }
         if (ENABLE_SQLITE_LOG) {
             mSQLiteLog.dump(pw, indent, filter);
