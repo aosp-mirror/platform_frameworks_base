@@ -265,13 +265,15 @@ public class ActionMenuItemView extends TextView
         final int width = getWidth();
         final int height = getHeight();
         final int midy = screenPos[1] + height / 2;
-        final int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
-
+        int referenceX = screenPos[0] + width / 2;
+        if (v.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR) {
+            final int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+            referenceX = screenWidth - referenceX; // mirror
+        }
         Toast cheatSheet = Toast.makeText(context, mItemData.getTitle(), Toast.LENGTH_SHORT);
         if (midy < displayFrame.height()) {
             // Show along the top; follow action buttons
-            cheatSheet.setGravity(Gravity.TOP | Gravity.END,
-                    screenWidth - screenPos[0] - width / 2, height);
+            cheatSheet.setGravity(Gravity.TOP | Gravity.END, referenceX, height);
         } else {
             // Show along the bottom center
             cheatSheet.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, height);
