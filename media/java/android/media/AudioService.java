@@ -200,6 +200,7 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_UNLOAD_SOUND_EFFECTS = 20;
     private static final int MSG_SYSTEM_READY = 21;
     private static final int MSG_PERSIST_MUSIC_ACTIVE_MS = 22;
+    private static final int MSG_PERSIST_MICROPHONE_MUTE = 23;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -873,6 +874,10 @@ public class AudioService extends IAudioService.Stub {
         AudioSystem.setMasterMute(masterMute);
         broadcastMasterMuteStatus(masterMute);
 
+        boolean microphoneMute =
+                System.getIntForUser(cr, System.MICROPHONE_MUTE, 0, UserHandle.USER_CURRENT) == 1;
+        AudioSystem.muteMicrophone(microphoneMute);
+
         // Each stream will read its own persisted settings
 
         // Broadcast the sticky intent
@@ -1447,17 +1452,15 @@ public class AudioService extends IAudioService.Stub {
         if (mUseFixedVolume) {
             return;
         }
-
         if (mAppOps.noteOp(AppOpsManager.OP_AUDIO_MASTER_VOLUME, Binder.getCallingUid(),
                 callingPackage) != AppOpsManager.MODE_ALLOWED) {
             return;
         }
-
         if (state != AudioSystem.getMasterMute()) {
             AudioSystem.setMasterMute(state);
             // Post a persist master volume msg
             sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME_MUTE, SENDMSG_REPLACE, state ? 1
-                    : 0, 0, null, PERSIST_DELAY);
+                    : 0, UserHandle.getCallingUserId(), null, PERSIST_DELAY);
             sendMasterMuteUpdate(state, flags);
         }
     }
@@ -1563,6 +1566,9 @@ public class AudioService extends IAudioService.Stub {
         }
 
         AudioSystem.muteMicrophone(on);
+        // Post a persist microphone msg.
+        sendMsg(mAudioHandler, MSG_PERSIST_MICROPHONE_MUTE, SENDMSG_REPLACE, on ? 1
+                : 0, UserHandle.getCallingUserId(), null, PERSIST_DELAY);
     }
 
     /** @see AudioManager#getRingerMode() */
@@ -3819,7 +3825,6 @@ public class AudioService extends IAudioService.Stub {
 
         @Override
         public void handleMessage(Message msg) {
-
             switch (msg.what) {
 
                 case MSG_SET_DEVICE_VOLUME:
@@ -3851,7 +3856,7 @@ public class AudioService extends IAudioService.Stub {
                     Settings.System.putIntForUser(mContentResolver,
                                                  Settings.System.VOLUME_MASTER_MUTE,
                                                  msg.arg1,
-                                                 UserHandle.USER_CURRENT);
+                                                 msg.arg2);
                     break;
 
                 case MSG_PERSIST_RINGER_MODE:
@@ -4045,6 +4050,12 @@ public class AudioService extends IAudioService.Stub {
                     Settings.Secure.putIntForUser(mContentResolver,
                             Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS, musicActiveMs,
                             UserHandle.USER_CURRENT);
+                    break;
+                case MSG_PERSIST_MICROPHONE_MUTE:
+                    Settings.System.putIntForUser(mContentResolver,
+                                                 Settings.System.MICROPHONE_MUTE,
+                                                 msg.arg1,
+                                                 msg.arg2);
                     break;
             }
         }

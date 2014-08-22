@@ -4595,7 +4595,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void setUserRestriction(ComponentName who, String key, boolean enabled) {
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
-
         synchronized (this) {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
@@ -4606,13 +4605,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (!isDeviceOwner && DEVICE_OWNER_USER_RESTRICTIONS.contains(key)) {
                 throw new SecurityException("Profile owners cannot set user restriction " + key);
             }
+            boolean alreadyRestricted = mUserManager.hasUserRestriction(key, userHandle);
 
+            IAudioService iAudioService = null;
+            if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)
+                    || UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
+                iAudioService = IAudioService.Stub.asInterface(
+                        ServiceManager.getService(Context.AUDIO_SERVICE));
+            }
+
+            if (enabled && !alreadyRestricted) {
+                try {
+                    if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
+                        iAudioService.setMicrophoneMute(true, who.getPackageName());
+                    } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
+                        iAudioService.setMasterMute(true, 0, who.getPackageName(), null);
+                    }
+                } catch (RemoteException re) {
+                    Slog.e(LOG_TAG, "Failed to talk to AudioService.", re);
+                }
+            }
             long id = Binder.clearCallingIdentity();
             try {
-                AudioManager audioManager =
-                        (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-                boolean alreadyRestricted = mUserManager.hasUserRestriction(key);
-
                 if (enabled && !alreadyRestricted) {
                     if (UserManager.DISALLOW_CONFIG_WIFI.equals(key)) {
                         Settings.Secure.putIntForUser(mContext.getContentResolver(),
@@ -4643,25 +4657,22 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                                 Settings.Secure.INSTALL_NON_MARKET_APPS, 0,
                                 userHandle.getIdentifier());
-                    } else if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
-                        audioManager.setMicrophoneMute(true);
-                    } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
-                        audioManager.setMasterMute(true);
                     }
                 }
-
                 mUserManager.setUserRestriction(key, enabled, userHandle);
-
-                if (!enabled && alreadyRestricted) {
-                    if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
-                        audioManager.setMicrophoneMute(false);
-                    } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
-                        audioManager.setMasterMute(false);
-                    }
-                }
-
             } finally {
                 restoreCallingIdentity(id);
+            }
+            if (!enabled && alreadyRestricted) {
+                try {
+                    if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
+                        iAudioService.setMicrophoneMute(false, who.getPackageName());
+                    } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
+                        iAudioService.setMasterMute(false, 0, who.getPackageName(), null);
+                    }
+                } catch (RemoteException re) {
+                    Slog.e(LOG_TAG, "Failed to talk to AudioService.", re);
+                }
             }
         }
     }

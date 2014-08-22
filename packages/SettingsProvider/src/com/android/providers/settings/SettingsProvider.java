@@ -318,10 +318,10 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private void checkUserRestrictions(String setting) {
+    private void checkUserRestrictions(String setting, int userId) {
         String userRestriction = sRestrictedKeys.get(setting);
         if (!TextUtils.isEmpty(userRestriction)
-            && mUserManager.hasUserRestriction(userRestriction)) {
+            && mUserManager.hasUserRestriction(userRestriction, new UserHandle(userId))) {
             throw new SecurityException(
                     "Permission denial: user is restricted from changing this setting.");
         }
@@ -936,7 +936,7 @@ public class SettingsProvider extends ContentProvider {
         try {
             int numValues = values.length;
             for (int i = 0; i < numValues; i++) {
-                checkUserRestrictions(values[i].getAsString(Settings.Secure.NAME));
+                checkUserRestrictions(values[i].getAsString(Settings.Secure.NAME), callingUser);
                 if (db.insert(args.table, null, values[i]) < 0) return 0;
                 SettingsCache.populate(cache, values[i]);
                 if (LOCAL_LOGV) Log.v(TAG, args.table + " <- " + values[i]);
@@ -1067,7 +1067,7 @@ public class SettingsProvider extends ContentProvider {
         // Check write permissions only after determining which table the insert will touch
         checkWritePermissions(args);
 
-        checkUserRestrictions(name);
+        checkUserRestrictions(name, desiredUserHandle);
 
         // The global table is stored under the owner, always
         if (TABLE_GLOBAL.equals(args.table)) {
@@ -1143,7 +1143,7 @@ public class SettingsProvider extends ContentProvider {
             callingUser = UserHandle.USER_OWNER;
         }
         checkWritePermissions(args);
-        checkUserRestrictions(initialValues.getAsString(Settings.Secure.NAME));
+        checkUserRestrictions(initialValues.getAsString(Settings.Secure.NAME), callingUser);
 
         final AtomicInteger mutationCount = sKnownMutationsInFlight.get(callingUser);
         mutationCount.incrementAndGet();

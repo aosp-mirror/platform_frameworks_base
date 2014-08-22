@@ -2113,6 +2113,13 @@ public final class Settings {
         public static final String VOLUME_MASTER_MUTE = "volume_master_mute";
 
         /**
+         * Microphone mute (int 1 = mute, 0 = not muted).
+         *
+         * @hide
+         */
+        public static final String MICROPHONE_MUTE = "microphone_mute";
+
+        /**
          * Whether the notifications should use the ring volume (value of 1) or
          * a separate notification volume (value of 0). In most cases, users
          * will have this enabled so the notification and ringer volumes will be
