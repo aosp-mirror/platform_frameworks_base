@@ -157,8 +157,7 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"បាន​បដិសេធ​ការ​ជូនដំណឹង"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"ពណ៌​ការ​ជូន​ដំណឹង"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ការ​កំណត់​រហ័ស។"</string>
-    <!-- no translation found for accessibility_desc_settings (3417884241751434521) -->
-    <skip />
+    <string name="accessibility_desc_settings" msgid="3417884241751434521">"ការកំណត់"</string>
     <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
     <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"អ្នក​ប្រើ <xliff:g id="USER">%s</xliff:g> ។"</string>
@@ -285,8 +284,7 @@
     <string name="guest_nickname" msgid="8059989128963789678">"ភ្ញៀវ"</string>
     <!-- no translation found for guest_new_guest (600537543078847803) -->
     <skip />
-    <!-- no translation found for guest_exit_guest (7187359342030096885) -->
-    <skip />
+    <string name="guest_exit_guest" msgid="7187359342030096885">"លុប​សម័យ​ភ្ញៀវ"</string>
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"ចេញ​ពី​សម័យ​ភ្ញៀវ?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"ការ​ចេញ​ពី​សម័យ​ភ្ញៀវ​នឹង​លុប​ទិន្នន័យ​មូលដ្ឋាន។"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"សូម​ស្វាគមន៍​ការ​ត្រឡប់​មកវិញ, ភ្ញៀវ!"</string>

@@ -23,8 +23,7 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"ရှင်းလင်းရန်"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"စာရင်းမှ ဖယ်မည်"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"အပ်ပလီကေးရှင်း အချက်အလက်များ"</string>
-    <!-- no translation found for status_bar_no_recent_apps (7374907845131203189) -->
-    <skip />
+    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"သင်၏ မကြာမီက မျက်နှာပြင်များ ဒီမှာ ပေါ်လာကြမည်"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"လတ်တလောအပ်ပလီကေးရှင်းများအား ဖယ်ထုတ်မည်"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for status_bar_accessibility_recent_apps:other (1040784359794890744) -->
@@ -79,8 +78,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"နောက်သို့"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"ပင်မစာမျက်နှာ"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"မီနူး"</string>
-    <!-- no translation found for accessibility_recent (1606470783629913980) -->
-    <skip />
+    <string name="accessibility_recent" msgid="1606470783629913980">"မကြာမီက မျက်နှာပြင်များ"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"ရှာဖွေရန်"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ကင်မရာ"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ဖုန်း"</string>
@@ -156,8 +154,7 @@
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"အ​ကြောင်းကြားစာအကွက်"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"အမြန်လုပ် အပြင်အဆင်"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"ဆက်တင်များ"</string>
-    <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
-    <skip />
+    <string name="accessibility_desc_recent_apps" msgid="8376953390514779637">"မကြာမီက မျက်နှာပြင်များ"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"သုံးစွဲသူ <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"မိုဘိုင်းလ် <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
@@ -169,8 +166,7 @@
     <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"ပိတ်ရန် အကွက်"</string>
     <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"အချိန် တိုးရန်"</string>
     <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"အချိန် လျှော့ရန်"</string>
-    <!-- no translation found for accessibility_brightness (8003681285547803095) -->
-    <skip />
+    <string name="accessibility_brightness" msgid="8003681285547803095">"တောက်ပမှုကို ပြရန်"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G ဒေတာ ပိတ်ထား"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G ဒေတာ ပိတ်ထား"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"ဆယ်လူလာ ဒေတာကို ပိတ်ထား"</string>
@@ -242,8 +238,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> သုံးထား"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ကန့်သတ်ချက်"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> သတိပေးချက်"</string>
-    <!-- no translation found for recents_empty_message (8682129509540827999) -->
-    <skip />
+    <string name="recents_empty_message" msgid="8682129509540827999">"သင်၏ မကြာမီက မျက်နှာပြင်များ ဒီမှာ ပေါ်လာကြမည်"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"အပလီကေးရှင်း အင်ဖို"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"appသို့ သော့ခတ်ထားရန်"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ရှာဖွေရန်"</string>
@@ -263,8 +258,7 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"သင်သည် သင်၏ <xliff:g id="ALARM_TIME">%s</xliff:g> နှိုးစက်ကို ကြားရမည် မဟုတ်"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"အရေးပါမှု နည်းသည့် အကြောင်းကြားချက်များ အောက်မှာ"</string>
-    <!-- no translation found for notification_tap_again (8524949573675922138) -->
-    <skip />
+    <string name="notification_tap_again" msgid="8524949573675922138">"ဖွင့်ရန် ထပ်ပြီး ထိပါ"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"သော့ဖွင့်ရန် အပေါ်သို့ ပွတ်ဆွဲပါ"</string>
     <string name="phone_hint" msgid="3101468054914424646">"ဖုန်း အတွက် ညာသို့ ပွတ်ဆွဲပါ"</string>
     <string name="camera_hint" msgid="5241441720959174226">"ကင်မရာ အတွက် ဘယ်သို့ ပွတ်ဆွဲပါ"</string>
@@ -273,25 +267,19 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"ဦးစားပေးမှု"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"အားလုံး"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> အပြည့် အထိ) အားသွင်းနေ"</string>
-    <!-- no translation found for accessibility_multi_user_switch_switcher (7305948938141024937) -->
-    <skip />
-    <!-- no translation found for accessibility_multi_user_switch_quick_contact (3020367729287990475) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"အသုံးပြုသူကို ပြောင်းလဲရန်"</string>
+    <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"ပရိုဖိုင်ကို ပြရန်"</string>
     <string name="user_add_user" msgid="5110251524486079492">"သုံးသူ ထပ်ထည့်ရန်"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"အသုံးပြုသူ အသစ်"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"ဧည့်သည်"</string>
-    <!-- no translation found for guest_new_guest (600537543078847803) -->
-    <skip />
+    <string name="guest_new_guest" msgid="600537543078847803">"ဧည့်သည့်ကို ထည့်ပေးရန်"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"ဧည့်သည်ကို ဖယ်ထုတ်ရန်"</string>
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"ဧည့်သည် ချိတ်ဆက်မှုထဲက ထွက်မလား?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"ဧည့်သည် ချိတ်ဆက်မှု ထဲမှ ထွက်လိုက်ခြင်းက စက်တွင်း ဒေတာကို ဖယ်ရှားပစ်မည်။"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"ပြန်လာတာ ကြိုဆိုပါသည်၊ ဧည့်သည်!"</string>
-    <!-- no translation found for guest_wipe_session_message (8476238178270112811) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_wipe (5065558566939858884) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_dontwipe (1401113462524894716) -->
-    <skip />
+    <string name="guest_wipe_session_message" msgid="8476238178270112811">"သင်သည် သင်၏ ချိတ်ဆက်မှုကို ဆက်ပြုလုပ် လိုပါသလား?"</string>
+    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"အစမှ ပြန်စပါ"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"ဟုတ်ကဲ့၊ ဆက်လုပ်ပါ"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"တစ်မိနစ် အတွင်း"</item>
     <item quantity="other" msgid="6924190729213550991">"%d မိနစ် အတွင်း"</item>
@@ -319,6 +307,5 @@
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\") ကို သင်ချိတ်ဆက်မိ၏။\n\nသင့် VPN ဝန်ဆောင်မှုပေးသူသည် သင့်စက်ပစ္စည်းနှင့် အီးမေးများ၊ app များ နှင့် လုံခြုံသည့်ဝက်ဘ်ဆိုက် အပါအဝင် ကွန်ယက် လှုပ်ှရားမှုများကို စောင့်ကြည့်နိုင်သည်။"</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"ဒီကိရိယာကို စီမံကွပ်ကဲသူမှာ:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nသင်၏ စီမံအုပ်ချုပ်သူက သင်၏ ကွန်ရက် လှုပ်ရှားမှုကို၊ အီးမေးလ်များ၊ appများ နှင့် လုံခြုံသည့် ဝက်ဘ်ဆိုက်များ အပါအဝင်ကို၊ စောင့်ကြပ် နိုင်ပါသည်။ အချက်အလက်များ ပိုပြီး ရယူရန်၊ သင်၏ စီမံအုပ်ချုပ်သူကို ဆက်သွယ်ပါ။\n\n ထို့အပြင် သင်သည် \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" အား VPN ချိတ်ဆက်မှု စဖွင့်လုပ်ကိုင်ရန် ခွင့်ပြုခဲ့သည်။ ဒီ  appကပါ သင်၏ ကွန်ရက် လှုပ်ရှားမှုကို စောင့်ကြပ် နိုင်ပါသည်။"</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"ဒီကိရိယာကို စီမံကွပ်ကဲသူမှာ:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nသင်၏  စီမံအုပ်ချုပ်သူက သင်၏ ကွန်ရက် လှုပ်ရှားမှုကို၊ အီးမေးလ်များ၊ appများ နှင့် လုံခြုံသည့် ဝက်ဘ်ဆိုက်များ အပါအဝင်ကို၊ စောင့်ကြပ် နိုင်ပါသည်။ အချက်အလက်များ ပိုပြီး ရယူရန်၊ သင်၏ စီမံအုပ်ချုပ်သူကို ဆက်သွယ်ပါ။\n\nထို့အပြင်၊ သင်သည် VPN  (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") သို့ ချိတ်ဆက်ထားသည်။ သင်၏ VPN ဝန်ဆောင်မှုကို စီမံပေးသူကပါ ကွန်ရက် လှုပ်ရှားမှုများကို စောင့်ကြပ်နိုင်သေးသည်။"</string>
-    <!-- no translation found for keyguard_indication_trust_disabled (7412534203633528135) -->
-    <skip />
+    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"သင်က လက်ဖြင့် သော့မဖွင့်မချင်း ကိရိယာမှာ သော့ပိတ်လျက် ရှိနေမည်"</string>
 </resources>

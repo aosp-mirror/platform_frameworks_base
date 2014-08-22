@@ -157,8 +157,7 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Pemberitahuan diketepikan."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Bidai pemberitahuan."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Tetapan pantas."</string>
-    <!-- no translation found for accessibility_desc_settings (3417884241751434521) -->
-    <skip />
+    <string name="accessibility_desc_settings" msgid="3417884241751434521">"Tetapan"</string>
     <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
     <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Pengguna <xliff:g id="USER">%s</xliff:g>."</string>
@@ -285,8 +284,7 @@
     <string name="guest_nickname" msgid="8059989128963789678">"Tetamu"</string>
     <!-- no translation found for guest_new_guest (600537543078847803) -->
     <skip />
-    <!-- no translation found for guest_exit_guest (7187359342030096885) -->
-    <skip />
+    <string name="guest_exit_guest" msgid="7187359342030096885">"Alih keluar tetamu"</string>
     <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"Keluar dari sesi tetamu?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"Data tempatan akan dialih keluar apabila anda keluar dari sesi tetamu."</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Selamat kembali, tetamu!"</string>
