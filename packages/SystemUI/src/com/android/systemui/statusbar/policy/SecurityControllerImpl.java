@@ -17,11 +17,11 @@ package com.android.systemui.statusbar.policy;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.IConnectivityManager;
+import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.os.RemoteException;
@@ -45,6 +45,8 @@ public class SecurityControllerImpl implements SecurityController {
             .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
             .removeCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
             .build();
+    private static final int NO_NETWORK = -1;
+
     private final Context mContext;
     private final ConnectivityManager mConnectivityManager;
     private final IConnectivityManager mConnectivityService = IConnectivityManager.Stub.asInterface(
@@ -52,9 +54,9 @@ public class SecurityControllerImpl implements SecurityController {
     private final DevicePolicyManager mDevicePolicyManager;
     private final ArrayList<VpnCallback> mCallbacks = new ArrayList<VpnCallback>();
 
-    private boolean mIsVpnEnabled;
     private VpnConfig mVpnConfig;
     private String mVpnName;
+    private int mCurrentVpnNetworkId = NO_NETWORK;
 
     public SecurityControllerImpl(Context context) {
         mContext = context;
@@ -69,7 +71,7 @@ public class SecurityControllerImpl implements SecurityController {
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("SecurityController state:");
-        pw.print("  mIsVpnEnabled="); pw.println(mIsVpnEnabled);
+        pw.print("  mCurrentVpnNetworkId="); pw.println(mCurrentVpnNetworkId);
         pw.print("  mVpnConfig="); pw.println(mVpnConfig);
         pw.print("  mVpnName="); pw.println(mVpnName);
     }
@@ -86,10 +88,7 @@ public class SecurityControllerImpl implements SecurityController {
 
     @Override
     public boolean isVpnEnabled() {
-        // TODO: Remove once using NetworkCallback for updates.
-        updateState();
-
-        return mIsVpnEnabled;
+        return mCurrentVpnNetworkId != NO_NETWORK;
     }
 
     @Override
@@ -138,6 +137,14 @@ public class SecurityControllerImpl implements SecurityController {
         mCallbacks.add(callback);
     }
 
+    private void setCurrentNetid(int netId) {
+        if (netId != mCurrentVpnNetworkId) {
+            mCurrentVpnNetworkId = netId;
+            updateState();
+            fireCallbacks();
+        }
+    }
+
     private void fireCallbacks() {
         for (VpnCallback callback : mCallbacks) {
             callback.onVpnStateChanged();
@@ -148,9 +155,6 @@ public class SecurityControllerImpl implements SecurityController {
         try {
             mVpnConfig = mConnectivityService.getVpnConfig();
 
-            // TODO: Remove once using NetworkCallback for updates.
-            mIsVpnEnabled = mVpnConfig != null;
-
             if (mVpnConfig != null && !mVpnConfig.legacy) {
                 mVpnName = VpnConfig.getVpnLabel(mContext, mVpnConfig.user).toString();
             }
@@ -160,13 +164,25 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     private final NetworkCallback mNetworkCallback = new NetworkCallback() {
-        public void onCapabilitiesChanged(android.net.Network network,
-                android.net.NetworkCapabilities networkCapabilities) {
-            if (DEBUG) Log.d(TAG, "onCapabilitiesChanged " + networkCapabilities);
-            mIsVpnEnabled = networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN);
-            updateState();
-            fireCallbacks();
-        }
+        @Override
+        public void onAvailable(Network network) {
+            NetworkCapabilities networkCapabilities =
+                    mConnectivityManager.getNetworkCapabilities(network);
+            if (DEBUG) Log.d(TAG, "onAvailable " + network.netId + " : " + networkCapabilities);
+            if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
+                setCurrentNetid(network.netId);
+            }
+        };
+
+        // TODO Find another way to receive VPN lost.  This may be delayed depending on
+        // how long the VPN connection is held on to.
+        @Override
+        public void onLost(Network network) {
+            if (DEBUG) Log.d(TAG, "onLost " + network.netId);
+            if (mCurrentVpnNetworkId == network.netId) {
+                setCurrentNetid(NO_NETWORK);
+            }
+        };
     };
 
 }
