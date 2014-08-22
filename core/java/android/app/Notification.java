@@ -2579,20 +2579,35 @@ public class Notification implements Parcelable
             return bitmap;
         }
 
+        private boolean addProfileBadge(RemoteViews contentView, int resId) {
+            Bitmap profileBadge = getProfileBadge();
+
+            contentView.setViewVisibility(R.id.profile_badge_large_template, View.GONE);
+            contentView.setViewVisibility(R.id.profile_badge_line2, View.GONE);
+            contentView.setViewVisibility(R.id.profile_badge_line3, View.GONE);
+
+            if (profileBadge != null) {
+                contentView.setImageViewBitmap(resId, profileBadge);
+                contentView.setViewVisibility(resId, View.VISIBLE);
+
+                // Make sure Line 3 is visible. As badge will be here if there
+                // is no text to display.
+                if (resId == R.id.profile_badge_line3) {
+                    contentView.setViewVisibility(R.id.line3, View.VISIBLE);
+                }
+                return true;
+            }
+            return false;
+        }
+
         private RemoteViews applyStandardTemplate(int resId) {
-            Bitmap profileIcon = getProfileBadge();
             RemoteViews contentView = new BuilderRemoteViews(mContext.getPackageName(),
                     mOriginatingUserId, resId);
 
             boolean showLine3 = false;
             boolean showLine2 = false;
+            boolean contentTextInLine2 = false;
 
-            if (profileIcon != null) {
-                contentView.setImageViewBitmap(R.id.profile_icon, profileIcon);
-                contentView.setViewVisibility(R.id.profile_icon, View.VISIBLE);
-            } else {
-                contentView.setViewVisibility(R.id.profile_icon, View.GONE);
-            }
             if (mLargeIcon != null) {
                 contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
                 processLargeIcon(mLargeIcon, contentView);
@@ -2639,6 +2654,7 @@ public class Notification implements Parcelable
                     contentView.setTextViewText(R.id.text2, processLegacyText(mContentText));
                     contentView.setViewVisibility(R.id.text2, View.VISIBLE);
                     showLine2 = true;
+                    contentTextInLine2 = true;
                 } else {
                     contentView.setViewVisibility(R.id.text2, View.GONE);
                 }
@@ -2681,6 +2697,15 @@ public class Notification implements Parcelable
                     hasThreeLines(), mContext.getResources().getConfiguration().fontScale),
                     0, 0);
 
+            // We want to add badge to first line of text.
+            boolean addedBadge = addProfileBadge(contentView,
+                    contentTextInLine2 ? R.id.profile_badge_line2 : R.id.profile_badge_line3);
+            // If we added the badge to line 3 then we should show line 3.
+            if (addedBadge && !contentTextInLine2) {
+                showLine3 = true;
+            }
+
+            // Note getStandardView may hide line 3 again.
             contentView.setViewVisibility(R.id.line3, showLine3 ? View.VISIBLE : View.GONE);
             contentView.setViewVisibility(R.id.overflow_divider, showLine3 ? View.VISIBLE : View.GONE);
             return contentView;
@@ -3347,6 +3372,8 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.overflow_divider, View.VISIBLE);
                 contentView.setViewVisibility(R.id.line3, View.VISIBLE);
             } else {
+                // Clear text in case we use the line to show the profile badge.
+                contentView.setTextViewText(R.id.text, "");
                 contentView.setViewVisibility(R.id.overflow_divider, View.GONE);
                 contentView.setViewVisibility(R.id.line3, View.GONE);
             }
@@ -3507,6 +3534,9 @@ public class Notification implements Parcelable
 
             applyTopPadding(contentView);
 
+            boolean twoTextLines = mBuilder.mSubText != null && mBuilder.mContentText != null;
+            mBuilder.addProfileBadge(contentView,
+                    twoTextLines ? R.id.profile_badge_line2 : R.id.profile_badge_line3);
             return contentView;
         }
 
@@ -3631,6 +3661,8 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.text2, View.GONE);
 
             applyTopPadding(contentView);
+
+            mBuilder.addProfileBadge(contentView, R.id.profile_badge_large_template);
 
             return contentView;
         }
@@ -3768,6 +3800,8 @@ public class Notification implements Parcelable
                     mTexts.size() > rowIds.length ? View.VISIBLE : View.GONE);
 
             applyTopPadding(contentView);
+
+            mBuilder.addProfileBadge(contentView, R.id.profile_badge_large_template);
 
             return contentView;
         }
