@@ -1675,4 +1675,6 @@
          Examples: <item>311480;prefix</item> <item>310260;suffix</item>
     -->
     <string-array translatable="false" name="no_ems_support_sim_operators" />
+
+    <bool name="config_auto_attach_data_on_creation">true</bool>
 </resources>

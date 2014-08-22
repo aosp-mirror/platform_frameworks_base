@@ -1992,4 +1992,5 @@
   <java-symbol type="dimen" name="text_handle_min_size" />
   <java-symbol type="id" name="transitionTransform" />
   <java-symbol type="id" name="parentMatrix" />
+  <java-symbol type="bool" name="config_auto_attach_data_on_creation" />
 </resources>

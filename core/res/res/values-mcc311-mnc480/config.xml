@@ -43,4 +43,5 @@
          provisioning, availability etc -->
     <bool name="config_mobile_allow_volte_vt">false</bool>
 
+    <bool name="config_auto_attach_data_on_creation">false</bool>
 </resources>
