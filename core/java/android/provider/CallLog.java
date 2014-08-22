@@ -24,13 +24,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
+import android.location.Country;
+import android.location.CountryDetector;
 import android.net.Uri;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract.CommonDataKinds.Callable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.DataUsageFeedback;
 import android.telecomm.PhoneAccountHandle;
+import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 
 import com.android.internal.telephony.CallerInfo;
@@ -345,6 +349,13 @@ public class CallLog {
         public static final String PHONE_ACCOUNT_ID = "subscription_id";
 
         /**
+         * If a successful call is made that is longer than this duration, update the phone number
+         * in the ContactsProvider with the normalized version of the number, based on the user's
+         * current country code.
+         */
+        private static final int MIN_DURATION_FOR_NORMALIZED_NUMBER_UPDATE_MS = 1000 * 10;
+
+        /**
          * Adds a call to the call log.
          *
          * @param ci the CallerInfo object to get the target contact from.  Can be null
@@ -484,12 +495,13 @@ public class CallLog {
                 if (cursor != null) {
                     try {
                         if (cursor.getCount() > 0 && cursor.moveToFirst()) {
-                            final Uri feedbackUri = DataUsageFeedback.FEEDBACK_URI.buildUpon()
-                                    .appendPath(cursor.getString(0))
-                                    .appendQueryParameter(DataUsageFeedback.USAGE_TYPE,
-                                                DataUsageFeedback.USAGE_TYPE_CALL)
-                                    .build();
-                            resolver.update(feedbackUri, new ContentValues(), null, null);
+                            final String dataId = cursor.getString(0);
+                            updateDataUsageStatForData(resolver, dataId);
+                            if (duration >= MIN_DURATION_FOR_NORMALIZED_NUMBER_UPDATE_MS
+                                    && callType == Calls.OUTGOING_TYPE
+                                    && TextUtils.isEmpty(ci.normalizedNumber)) {
+                                updateNormalizedNumber(context, resolver, dataId, number);
+                            }
                         }
                     } finally {
                         cursor.close();
@@ -561,6 +573,54 @@ public class CallLog {
                     "(SELECT _id FROM calls ORDER BY " + DEFAULT_SORT_ORDER
                     + " LIMIT -1 OFFSET 500)", null);
             return result;
+        }
+
+        private static void updateDataUsageStatForData(ContentResolver resolver, String dataId) {
+            final Uri feedbackUri = DataUsageFeedback.FEEDBACK_URI.buildUpon()
+                    .appendPath(dataId)
+                    .appendQueryParameter(DataUsageFeedback.USAGE_TYPE,
+                                DataUsageFeedback.USAGE_TYPE_CALL)
+                    .build();
+            resolver.update(feedbackUri, new ContentValues(), null, null);
+        }
+
+        /**
+         * Update the normalized phone number for the given dataId in the ContactsProvider, based
+         * on the user's current country.
+         */
+        private static void updateNormalizedNumber(Context context, ContentResolver resolver,
+                String dataId, String number) {
+            if (TextUtils.isEmpty(number) || TextUtils.isEmpty(dataId)) {
+                return;
+            }
+
+            final String countryIso = getCurrentCountryIso(context);
+            if (TextUtils.isEmpty(countryIso)) {
+                return;
+            }
+
+            final String normalizedNumber = PhoneNumberUtils.formatNumberToE164(number,
+                    getCurrentCountryIso(context));
+            if (TextUtils.isEmpty(normalizedNumber)) {
+                return;
+            }
+
+            final ContentValues values = new ContentValues();
+            values.put(Phone.NORMALIZED_NUMBER, normalizedNumber);
+            resolver.update(Data.CONTENT_URI, values, Data._ID + "=?", new String[] {dataId});
+        }
+
+        private static String getCurrentCountryIso(Context context) {
+            String countryIso = null;
+            final CountryDetector detector = (CountryDetector) context.getSystemService(
+                    Context.COUNTRY_DETECTOR);
+            if (detector != null) {
+                final Country country = detector.detectCountry();
+                if (country != null) {
+                    countryIso = country.getCountryIso();
+                }
+            }
+            return countryIso;
         }
     }
 }
