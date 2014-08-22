@@ -35,9 +35,9 @@
     <item type="dimen" name="dialog_fixed_height_minor">90%</item>
 
     <!-- The width that is used when creating thumbnails of applications. -->
-    <dimen name="thumbnail_width">640dp</dimen>
+    <dimen name="thumbnail_width">420dp</dimen>
     <!-- The height that is used when creating thumbnails of applications. -->
-    <dimen name="thumbnail_height">640dp</dimen>
+    <dimen name="thumbnail_height">420dp</dimen>
 
     <!-- Preference activity, vertical padding for the header list -->
     <dimen name="preference_screen_header_vertical_padding">32dp</dimen>
