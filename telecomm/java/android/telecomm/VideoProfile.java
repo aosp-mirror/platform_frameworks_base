@@ -21,6 +21,8 @@ import android.os.Parcelable;
 
 /**
  * Represents attributes of video calls.
+ *
+ * {@hide}
  */
 public class VideoProfile implements Parcelable {
     /**
