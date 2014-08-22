@@ -1354,7 +1354,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"ប៉ះ ដើម្បី​បិទ​ការ​កែ​កំហុស​យូអេសប៊ី។"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ប្ដូរ​ក្ដារចុច"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"ជ្រើស​ក្ដារចុច"</string>
-    <string name="use_physical_keyboard" msgid="6203112478095117625">"ក្ដារ​ចុច​​ពិតប្រាកដ"</string>
+    <!-- no translation found for show_ime (9157568568695230830) -->
+    <skip />
     <string name="hardware" msgid="7517821086888990278">"ផ្នែក​រឹង"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"ជ្រើស​ប្លង់​ក្ដារ​ចុច"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"ប៉ះ ​ដើម្បី​ជ្រើស​ប្លង់​​ក្ដារចុច។"</string>

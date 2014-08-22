@@ -1352,7 +1352,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ഡീബഗ്ഗിംഗ് പ്രവർത്തനരഹിതമാക്കാൻ സ്‌പർശിക്കുക."</string>
     <string name="select_input_method" msgid="8547250819326693584">"കീബോർട്ട് മാറ്റുക"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"കീബോർഡുകൾ തിരഞ്ഞെടുക്കുക"</string>
-    <string name="use_physical_keyboard" msgid="6203112478095117625">"ഭൗതിക കീബോർഡ്"</string>
+    <!-- no translation found for show_ime (9157568568695230830) -->
+    <skip />
     <string name="hardware" msgid="7517821086888990278">"ഹാർഡ്‌വെയർ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"കീബോർഡ് ലേഔട്ട് തിരഞ്ഞെടുക്കുക"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"ഒരു കീബോർഡ് ലേഔട്ട് തിരഞ്ഞെടുക്കാൻ സ്‌പർശിക്കുക."</string>

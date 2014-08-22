@@ -1352,7 +1352,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Допрете за да се оневозможи отстранувањето грешки преку USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Измени тастатура"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Избери тастатури"</string>
-    <string name="use_physical_keyboard" msgid="6203112478095117625">"Физичка тастатура"</string>
+    <!-- no translation found for show_ime (9157568568695230830) -->
+    <skip />
     <string name="hardware" msgid="7517821086888990278">"Хардвер"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Избери изглед на тастатура"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Допри за да избереш изглед на тастатура."</string>

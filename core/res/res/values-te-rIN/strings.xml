@@ -1352,7 +1352,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB డీబగ్గింగ్‌ను నిలిపివేయడానికి తాకండి."</string>
     <string name="select_input_method" msgid="8547250819326693584">"కీబోర్డ్‌ను మార్చు"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"కీబోర్డ్‌లను ఎంచుకోండి"</string>
-    <string name="use_physical_keyboard" msgid="6203112478095117625">"భౌతిక కీబోర్డ్"</string>
+    <!-- no translation found for show_ime (9157568568695230830) -->
+    <skip />
     <string name="hardware" msgid="7517821086888990278">"హార్డ్‌వేర్"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"కీబోర్డ్ లేఅవుట్‌ను ఎంచుకోండి"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"కీబోర్డ్ లేఅవుట్‌ను ఎంచుకోవడానికి తాకండి."</string>

@@ -1352,7 +1352,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Додирните да бисте онемогућили отклањање грешака са USB-а."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Промените тастатуру"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Изаберите тастатуре"</string>
-    <string name="use_physical_keyboard" msgid="6203112478095117625">"Физичка тастатура"</string>
+    <!-- no translation found for show_ime (9157568568695230830) -->
+    <skip />
     <string name="hardware" msgid="7517821086888990278">"Хардвер"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Избор распореда тастатуре"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Додирните да бисте изабрали распоред тастатуре."</string>
@@ -1448,7 +1449,7 @@
     <string name="submit" msgid="1602335572089911941">"Пошаљи"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Режим рада у аутомобилу је омогућен"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Додирните да бисте изашли из режима рада у аутомобилу."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Активно повезивање са Интернетом преко мобилног уређаја или врућа тачка"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Активно повезивање са интернетом преко мобилног уређаја или врућа тачка"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Додирните да бисте подесили."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Назад"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Next"</string>

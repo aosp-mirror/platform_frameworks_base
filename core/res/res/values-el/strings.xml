@@ -716,10 +716,8 @@
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Επιτρέπει στην εφαρμογή να πραγματοποιεί και να λαμβάνει κλήσεις SIP."</string>
     <string name="permlab_bind_call_service" msgid="6724009726671246551">"αλληλεπίδραση με την οθόνη κατά τη διάρκεια κλήσης"</string>
     <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Επιτρέπει στην εφαρμογή να ελέγχει πότε και πώς βλέπει ο χρήστης την οθόνη κατά τη διάρκεια κλήσης."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"αλληλεπίδραση με υπηρεσίες τηλεφωνίας"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Επιτρέπει στην εφαρμογή να αλληλεπιδρά με υπηρεσίες τηλεφωνίας για την πραγματοποίηση/λήψη κλήσεων."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ανάγνωση ιστορικών δεδομένων χρήσης δικτύου"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Επιτρέπει στην εφαρμογή την ανάγνωση ιστορικών στοιχείων χρήσης δικτύου για συγκεκριμένα δίκτυα και εφαρμογές."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"διαχείριση πολιτικής δικτύου"</string>
@@ -1352,7 +1350,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Αγγίξτε για απενεργοποίηση του εντοπισμού σφαλμάτων USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Αλλαγή πληκτρολογίου"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Επιλογή πληκτρολογίων"</string>
-    <string name="use_physical_keyboard" msgid="6203112478095117625">"Φυσικό πληκτρολόγιο"</string>
+    <!-- no translation found for show_ime (9157568568695230830) -->
+    <skip />
     <string name="hardware" msgid="7517821086888990278">"Υλικό"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Επιλογή διάταξης πληκτρολογίου"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Αγγίξτε για να επιλέξετε διάταξη πληκτρολογίου."</string>
@@ -1764,31 +1763,20 @@
     <string name="item_is_selected" msgid="949687401682476608">"Επιλέχτηκε το στοιχείο <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> διαγράφηκε"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Εργασία <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"Για να ξεκαρφιτσώσετε αυτήν την οθόνη, αγγίξτε παρατεταμένα τα κουμπιά \"Επιστροφή\" και \"Πρόσφατα\" ταυτόχρονα."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Για να ξεκαρφιτσώσετε αυτήν την οθόνη, αγγίξτε παρατεταμένα το κουμπί \"Πρόσφατα\"."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Η οθόνη καρφιστώθηκε. Το ξεκαρφίτσωμα δεν επιτρέπεται από τον οργανισμό σας."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Χρήση καρφιτσώματος οθόνης;"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Το καρφίτσωμα της οθόνης κλειδώνει την οθόνη σε μία μόνο προβολή.\n\nΓια έξοδο, αγγίξτε παρατεταμένα τα κουμπιά \"Επιστροφή\" και \"Πρόσφατα\" ταυτόχρονα."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Το καρφίτσωμα της οθόνης κλειδώνει την οθόνη σε μία μόνο προβολή.\n\nΓια έξοδο, αγγίξτε παρατεταμένα το κουμπί \"Πρόσφατα\"."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"ΟΧΙ, ΕΥΧΑΡΙΣΤΩ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ΕΝΑΡΞΗ"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Η οθόνη καρφιτσώθηκε"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Η οθόνη ξεκαρφιτσώθηκε"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="5732663305876339596">"Να γίνεται ερώτηση για %1$s πριν από το ξεκαρφίτσωμα"</string>
     <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"Αριθμός PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"μοτίβο ξεκλειδώματος"</string>
     <string name="lock_to_app_unlock_password" msgid="795224196583495868">"κωδικός πρόσβασης"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="battery_saver_description" msgid="725676363406667978">"Για τη βελτίωση της διάρκειας ζωής της μπαταρίας, η λειτουργία εξοικονόμησης μπαταρίας μειώνει την απόδοση της συσκευής σας και περιορίζει τη δόνηση και την πλειονότητα των δεδομένων παρασκηνίου. Το ηλεκτρονικό ταχυδρομείου, η ανταλλαγή μηνυμάτων και άλλες εφαρμογές που βασίζονται στο συγχρονισμό ενδέχεται να μην ενημερώνονται, παρά μόνο εάν τις ανοίξετε.\n\nΗ λειτουργία εξοικονόμησης μπαταρίας απενεργοποιείται αυτόματα κατά τη φόρτιση της συσκευής σας."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Έως τη λήξη του νεκρού χρόνου σας στις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

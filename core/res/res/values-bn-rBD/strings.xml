@@ -1352,7 +1352,8 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ডিবাগিং অক্ষম করতে স্পর্শ করুন৷"</string>
     <string name="select_input_method" msgid="8547250819326693584">"কীবোর্ড পরিবর্তন করুন"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"কীবোর্ড চয়ন করুন"</string>
-    <string name="use_physical_keyboard" msgid="6203112478095117625">"ফিজিক্যাল কীবোর্ড"</string>
+    <!-- no translation found for show_ime (9157568568695230830) -->
+    <skip />
     <string name="hardware" msgid="7517821086888990278">"হার্ডওয়্যার"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"কীবোর্ডের লেআউট নির্বাচন করুন"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"একটি কীবোর্ডের লেআউট নির্বাচন করতে স্পর্শ করুন৷"</string>
