@@ -155,7 +155,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     @Override
     public void draw(Canvas canvas) {
         mAnimatedVectorState.mVectorDrawable.draw(canvas);
-        if (isRunning()) {
+        if (isStarted()) {
             invalidateSelf();
         }
     }
@@ -361,13 +361,25 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
         return false;
     }
 
+    private boolean isStarted() {
+        final ArrayList<Animator> animators = mAnimatedVectorState.mAnimators;
+        final int size = animators.size();
+        for (int i = 0; i < size; i++) {
+            final Animator animator = animators.get(i);
+            if (animator.isStarted()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void start() {
         final ArrayList<Animator> animators = mAnimatedVectorState.mAnimators;
         final int size = animators.size();
         for (int i = 0; i < size; i++) {
             final Animator animator = animators.get(i);
-            if (!animator.isRunning()) {
+            if (!animator.isStarted()) {
                 animator.start();
             }
         }
