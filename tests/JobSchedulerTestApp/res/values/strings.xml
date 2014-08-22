@@ -27,6 +27,7 @@ limitations under the License.
     <string name="charging_caption">Charging:</string>
     <string name="charging_text">Requires device plugged in.</string>
     <string name="idle_caption">Idle:</string>
+    <string name="persisted_caption">Persisted:</string>
     <string name="constraints">Constraints</string>
     <string name="connectivity">Connectivity:</string>
     <string name="any">Any</string>
@@ -34,4 +35,5 @@ limitations under the License.
     <string name="timing">Timing:</string>
     <string name="delay">Delay:</string>
     <string name="deadline">Deadline:</string>
+    <string name="persisted_mode_text">Persisted:</string>
 </resources>

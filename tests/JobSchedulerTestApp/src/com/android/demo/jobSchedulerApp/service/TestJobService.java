@@ -90,31 +90,6 @@ public class TestJobService extends JobService {
             mActivity.onReceivedStartJob(params);
         }
 
-        // Spin off a new task on a separate thread for a couple seconds.
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                try {
-                    Log.d(TAG, "Sleeping for 3 seconds.");
-                    Thread.sleep(3000L);
-                } catch (InterruptedException e) {}
-                final JobParameters params = jobParamsMap.get(currId);
-                Log.d(TAG, "Pulled :" + currId + " " + params);
-                jobFinished(params, false);
-
-                Log.d(TAG, "Rescheduling new job: " + params.getJobId());
-                scheduleJob(
-                        new JobInfo.Builder(params.getJobId(),
-                                new ComponentName(getBaseContext(), TestJobService.class))
-                                .setMinimumLatency(2000L)
-                                .setOverrideDeadline(3000L)
-                                .setRequiresCharging(true)
-                                .build()
-                );
-
-                return null;
-            }
-        }.execute();
         return true;
     }
 
