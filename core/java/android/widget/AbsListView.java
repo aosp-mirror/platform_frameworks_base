@@ -65,7 +65,6 @@ import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
-import android.view.inputmethod.CursorAnchorInfoRequest;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -5718,8 +5717,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         @Override
-        public int requestCursorAnchorInfo(CursorAnchorInfoRequest request) {
-            return getTarget().requestCursorAnchorInfo(request);
+        public boolean requestUpdateCursorAnchorInfo(int cursorUpdateMode) {
+            return getTarget().requestUpdateCursorAnchorInfo(cursorUpdateMode);
         }
     }
 

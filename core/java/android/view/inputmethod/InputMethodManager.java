@@ -313,9 +313,8 @@ public final class InputMethodManager {
     CompletionInfo[] mCompletions;
     
     // Cursor position on the screen.
-    Rect mNextCursorRect = new Rect();
+    Rect mTmpCursorRect = new Rect();
     Rect mCursorRect = new Rect();
-    RectF mTempRectF = new RectF();
     int mCursorSelStart;
     int mCursorSelEnd;
     int mCursorCandStart;
@@ -372,28 +371,12 @@ public final class InputMethodManager {
     InputChannel mCurChannel;
     ImeInputEventSender mCurSender;
 
-    private static final int CURSOR_RECT_MONITOR_MODE_NONE = 0x0;
-
-    private static final int CURSOR_RECT_MONITOR_FLAG_MASK =
-            CursorAnchorInfoRequest.FLAG_CURSOR_RECT_MONITOR |
-            CursorAnchorInfoRequest.FLAG_CURSOR_RECT_IN_SCREEN_COORDINATES |
-            CursorAnchorInfoRequest.FLAG_CURSOR_RECT_WITH_VIEW_MATRIX;
-
-    private static final int CURSOR_ANCHOR_INFO_MONITOR_MODE_NONE = 0x0;
-
-    private static final int CURSOR_ANCHOR_INFO_MONITOR_FLAG_MASK =
-            CursorAnchorInfoRequest.FLAG_CURSOR_ANCHOR_INFO_MONITOR |
-            CursorAnchorInfoRequest.FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE;
-
-    /**
-     * The monitor mode for {@link #updateCursor(View, int, int, int, int)}.
-     */
-    private int mCursorRectMonitorMode = CURSOR_RECT_MONITOR_MODE_NONE;
+    private static final int REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE = 0x0;
 
     /**
      * The monitor mode for {@link #updateCursorAnchorInfo(View, CursorAnchorInfo)}.
      */
-    private int mCursorAnchorInfoMonitorMode = CURSOR_ANCHOR_INFO_MONITOR_MODE_NONE;
+    private int mRequestUpdateCursorAnchorInfoMonitorMode = REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE;
 
     final Pool<PendingEvent> mPendingEventPool = new SimplePool<PendingEvent>(20);
     final SparseArray<PendingEvent> mPendingEvents = new SparseArray<PendingEvent>(20);
@@ -446,8 +429,8 @@ public final class InputMethodManager {
                             return;
                         }
 
-                        mCursorAnchorInfoMonitorMode = CURSOR_ANCHOR_INFO_MONITOR_MODE_NONE;
-                        mCursorRectMonitorMode = CURSOR_RECT_MONITOR_MODE_NONE;
+                        mRequestUpdateCursorAnchorInfoMonitorMode =
+                                REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE;
 
                         setInputChannelLocked(res.channel);
                         mCurMethod = res.method;
@@ -1540,59 +1523,49 @@ public final class InputMethodManager {
     }
 
     /**
-     * Returns true if the current input method wants to watch the location
+     * Return true if the current input method wants to watch the location
      * of the input editor's cursor in its window.
-     */
-    public boolean isWatchingCursor(View view) {
-        if (!isActive(view)) {
-            return false;
-        }
-        synchronized (mH) {
-            return (mCursorRectMonitorMode & CursorAnchorInfoRequest.FLAG_CURSOR_RECT_MONITOR) != 0;
-        }
-    }
-
-    /**
-     * Updates the result of {@link #isWatchingCursor(View)}.
      *
-     * @hide
+     * @deprecated Use {@link InputConnection#requestUpdateCursorAnchorInfo(int)} instead.
      */
-    public void setCursorRectMonitorMode(int flags) {
-        synchronized (mH) {
-            mCursorRectMonitorMode = (CURSOR_RECT_MONITOR_FLAG_MASK & flags);
-        }
+    @Deprecated
+    public boolean isWatchingCursor(View view) {
+        return false;
     }
 
     /**
-     * Returns true if the current input method wants to be notified when cursor/anchor location
+     * Return true if the current input method wants to be notified when cursor/anchor location
      * is changed.
      *
      * @hide
      */
     public boolean isCursorAnchorInfoEnabled() {
         synchronized (mH) {
-            final boolean isImmediate = (mCursorAnchorInfoMonitorMode &
-                    CursorAnchorInfoRequest.FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE) != 0;
-            final boolean isMonitoring = (mCursorAnchorInfoMonitorMode &
-                    CursorAnchorInfoRequest.FLAG_CURSOR_ANCHOR_INFO_MONITOR) != 0;
+            final boolean isImmediate = (mRequestUpdateCursorAnchorInfoMonitorMode &
+                    InputConnection.REQUEST_UPDATE_CURSOR_ANCHOR_INFO_IMMEDIATE) != 0;
+            final boolean isMonitoring = (mRequestUpdateCursorAnchorInfoMonitorMode &
+                    InputConnection.REQUEST_UPDATE_CURSOR_ANCHOR_INFO_MONITOR) != 0;
             return isImmediate || isMonitoring;
         }
     }
 
     /**
-     * Updates the result of {@link #isWatchingCursor(View)}.
+     * Set the requested mode for {@link #updateCursorAnchorInfo(View, CursorAnchorInfo)}.
      *
      * @hide
      */
-    public void setCursorAnchorInfoMonitorMode(int flags) {
+    public void setUpdateCursorAnchorInfoMode(int flags) {
         synchronized (mH) {
-            mCursorAnchorInfoMonitorMode = (CURSOR_ANCHOR_INFO_MONITOR_FLAG_MASK & flags);
+            mRequestUpdateCursorAnchorInfoMonitorMode = flags;
         }
     }
 
     /**
      * Report the current cursor location in its window.
+     *
+     * @deprecated Use {@link #updateCursorAnchorInfo(View, CursorAnchorInfo)} instead.
      */
+    @Deprecated
     public void updateCursor(View view, int left, int top, int right, int bottom) {
         checkFocus();
         synchronized (mH) {
@@ -1601,33 +1574,15 @@ public final class InputMethodManager {
                     || mCurrentTextBoxAttribute == null || mCurMethod == null) {
                 return;
             }
-            if (DEBUG) Log.d(TAG, "updateCursor");
-            final boolean usesScreenCoordinates = (mCursorRectMonitorMode &
-                    CursorAnchorInfoRequest.FLAG_CURSOR_RECT_IN_SCREEN_COORDINATES) != 0;
-            if (usesScreenCoordinates) {
-                view.getLocationOnScreen(mViewTopLeft);
-                final Matrix viewMatrix = view.getMatrix();
-                final boolean usesViewMatrix = (viewMatrix != null) && ((mCursorRectMonitorMode &
-                        CursorAnchorInfoRequest.FLAG_CURSOR_RECT_WITH_VIEW_MATRIX) != 0);
-                if (usesViewMatrix) {
-                    mTempRectF.set(left, top, right, bottom);
-                    mViewToScreenMatrix.set(viewMatrix);
-                    mViewToScreenMatrix.postTranslate(mViewTopLeft[0], mViewTopLeft[1]);
-                    mViewToScreenMatrix.mapRect(mTempRectF);
-                    mNextCursorRect.set((int)mTempRectF.left, (int)mTempRectF.top,
-                            (int)mTempRectF.right, (int)mTempRectF.bottom);
-                } else {
-                    mNextCursorRect.set(left + mViewTopLeft[0], top + mViewTopLeft[1],
-                            right + mViewTopLeft[0], bottom + mViewTopLeft[1]);
-                }
-            } else {
-                mNextCursorRect.set(left, top, right, bottom);
-            }
-            if (!Objects.equals(mCursorRect, mNextCursorRect)) {
-                if (DEBUG) Log.v(TAG, "CURSOR CHANGE: " + mNextCursorRect);
+
+            mTmpCursorRect.set(left, top, right, bottom);
+            if (!mCursorRect.equals(mTmpCursorRect)) {
+                if (DEBUG) Log.d(TAG, "updateCursor");
+
                 try {
-                    mCurMethod.updateCursor(mNextCursorRect);
-                    mCursorRect.set(mNextCursorRect);
+                    if (DEBUG) Log.v(TAG, "CURSOR CHANGE: " + mCurMethod);
+                    mCurMethod.updateCursor(mTmpCursorRect);
+                    mCursorRect.set(mTmpCursorRect);
                 } catch (RemoteException e) {
                     Log.w(TAG, "IME died: " + mCurId, e);
                 }
@@ -1652,8 +1607,8 @@ public final class InputMethodManager {
             }
             // If immediate bit is set, we will call updateCursorAnchorInfo() even when the data has
             // not been changed from the previous call.
-            final boolean isImmediate = (mCursorAnchorInfoMonitorMode &
-                    CursorAnchorInfoRequest.FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE) != 0;
+            final boolean isImmediate = (mRequestUpdateCursorAnchorInfoMonitorMode &
+                    InputConnection.REQUEST_UPDATE_CURSOR_ANCHOR_INFO_IMMEDIATE) != 0;
             if (!isImmediate && Objects.equals(mCursorAnchorInfo, cursorAnchorInfo)) {
                 // TODO: Consider always emitting this message once we have addressed redundant
                 // calls of this method from android.widget.Editor.
@@ -1668,8 +1623,8 @@ public final class InputMethodManager {
                 mCurMethod.updateCursorAnchorInfo(cursorAnchorInfo);
                 mCursorAnchorInfo = cursorAnchorInfo;
                 // Clear immediate bit (if any).
-                mCursorAnchorInfoMonitorMode &=
-                        ~CursorAnchorInfoRequest.FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE;
+                mRequestUpdateCursorAnchorInfoMonitorMode &=
+                        ~InputConnection.REQUEST_UPDATE_CURSOR_ANCHOR_INFO_IMMEDIATE;
             } catch (RemoteException e) {
                 Log.w(TAG, "IME died: " + mCurId, e);
             }
