@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.util.Log;
 
@@ -274,26 +275,42 @@ public final class PowerManager {
      * User activity event type: Unspecified event type.
      * @hide
      */
+    @SystemApi
     public static final int USER_ACTIVITY_EVENT_OTHER = 0;
 
     /**
      * User activity event type: Button or key pressed or released.
      * @hide
      */
+    @SystemApi
     public static final int USER_ACTIVITY_EVENT_BUTTON = 1;
 
     /**
      * User activity event type: Touch down, move or up.
      * @hide
      */
+    @SystemApi
     public static final int USER_ACTIVITY_EVENT_TOUCH = 2;
 
     /**
-     * User activity flag: Do not restart the user activity timeout or brighten
-     * the display in response to user activity if it is already dimmed.
+     * User activity flag: If already dimmed, extend the dim timeout
+     * but do not brighten.  This flag is useful for keeping the screen on
+     * a little longer without causing a visible change such as when
+     * the power key is pressed.
      * @hide
      */
+    @SystemApi
     public static final int USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS = 1 << 0;
+
+    /**
+     * User activity flag: Note the user activity as usual but do not
+     * reset the user activity timeout.  This flag is useful for applying
+     * user activity power hints when interacting with the device indirectly
+     * on a secondary screen while allowing the primary screen to go to sleep.
+     * @hide
+     */
+    @SystemApi
+    public static final int USER_ACTIVITY_FLAG_INDIRECT = 1 << 1;
 
     /**
      * Go to sleep reason code: Going to sleep due by application request.
@@ -506,9 +523,38 @@ public final class PowerManager {
      * @see #goToSleep
      */
     public void userActivity(long when, boolean noChangeLights) {
+        userActivity(when, USER_ACTIVITY_EVENT_OTHER,
+                noChangeLights ? USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS : 0);
+    }
+
+    /**
+     * Notifies the power manager that user activity happened.
+     * <p>
+     * Resets the auto-off timer and brightens the screen if the device
+     * is not asleep.  This is what happens normally when a key or the touch
+     * screen is pressed or when some other user activity occurs.
+     * This method does not wake up the device if it has been put to sleep.
+     * </p><p>
+     * Requires the {@link android.Manifest.permission#DEVICE_POWER} or
+     * {@link android.Manifest.permission#USER_ACTIVITY} permission.
+     * </p>
+     *
+     * @param when The time of the user activity, in the {@link SystemClock#uptimeMillis()}
+     * time base.  This timestamp is used to correctly order the user activity request with
+     * other power management functions.  It should be set
+     * to the timestamp of the input event that caused the user activity.
+     * @param event The user activity event.
+     * @param flags Optional user activity flags.
+     *
+     * @see #wakeUp
+     * @see #goToSleep
+     *
+     * @hide Requires signature or system permission.
+     */
+    @SystemApi
+    public void userActivity(long when, int event, int flags) {
         try {
-            mService.userActivity(when, USER_ACTIVITY_EVENT_OTHER,
-                    noChangeLights ? USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS : 0);
+            mService.userActivity(when, event, flags);
         } catch (RemoteException e) {
         }
     }
