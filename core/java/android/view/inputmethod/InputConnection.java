@@ -725,13 +725,34 @@ public interface InputConnection {
     public boolean performPrivateCommand(String action, Bundle data);
 
     /**
-     * Called by the IME to ask the editor for calling back
+     * The editor is requested to call
+     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)} at
+     * once, as soon as possible, regardless of cursor/anchor position changes. This flag can be
+     * used together with {@link #REQUEST_UPDATE_CURSOR_ANCHOR_INFO_MONITOR}.
+     */
+    public static final int REQUEST_UPDATE_CURSOR_ANCHOR_INFO_IMMEDIATE = 1 << 0;
+
+    /**
+     * The editor is requested to call
+     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}
+     * whenever cursor/anchor position is changed. To disable monitoring, call
+     * {@link InputConnection#requestUpdateCursorAnchorInfo(int)} again with this flag off.
+     * <p>
+     * This flag can be used together with {@link #REQUEST_UPDATE_CURSOR_ANCHOR_INFO_IMMEDIATE}.
+     * </p>
+     */
+    public static final int REQUEST_UPDATE_CURSOR_ANCHOR_INFO_MONITOR = 1 << 1;
+
+    /**
+     * Called by the input method to ask the editor for calling back
      * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)} to
      * notify cursor/anchor locations.
      *
-     * @param request the details of the request.
-     * @return a result code that depends on {@link CursorAnchorInfoRequest#getRequestType()}. See
-     * {@link CursorAnchorInfoRequest} for details.
+     * @param cursorUpdateMode {@link #REQUEST_UPDATE_CURSOR_ANCHOR_INFO_IMMEDIATE} and/or
+     * {@link #REQUEST_UPDATE_CURSOR_ANCHOR_INFO_MONITOR}
+     * @return {@code true} if the request is scheduled. {@code false} to indicate that when the
+     * application will not call
+     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}.
      */
-    public int requestCursorAnchorInfo(CursorAnchorInfoRequest request);
+    public boolean requestUpdateCursorAnchorInfo(int cursorUpdateMode);
 }

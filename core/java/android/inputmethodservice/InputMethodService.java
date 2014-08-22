@@ -53,7 +53,6 @@ import android.view.WindowManager.BadTokenException;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
-import android.view.inputmethod.CursorAnchorInfoRequest;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -1711,13 +1710,12 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
-     * Called when the application has reported a new location of its text cursor.  This is only
-     * called if explicitly requested by the input method.  The default implementation does nothing.
-     * @param newCursor The new cursor position, in screen coordinates if the input method calls
-     * {@link InputConnection#requestCursorAnchorInfo(CursorAnchorInfoRequest)} with
-     * {@link CursorAnchorInfoRequest#FLAG_CURSOR_RECT_IN_SCREEN_COORDINATES}. Otherwise,
-     * this is in local coordinates.
+     * Called when the application has reported a new location of its text
+     * cursor.  This is only called if explicitly requested by the input method.
+     * The default implementation does nothing.
+     * @deprecated Use {#link onUpdateCursorAnchorInfo(CursorAnchorInfo)} instead.
      */
+    @Deprecated
     public void onUpdateCursor(Rect newCursor) {
         // Intentionally empty
     }

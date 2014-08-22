@@ -126,7 +126,7 @@ public class InputConnectionWrapper implements InputConnection {
         return mTarget.performPrivateCommand(action, data);
     }
 
-    public int requestCursorAnchorInfo(CursorAnchorInfoRequest request) {
-        return mTarget.requestCursorAnchorInfo(request);
+    public boolean requestUpdateCursorAnchorInfo(int cursorUpdateMode) {
+        return mTarget.requestUpdateCursorAnchorInfo(cursorUpdateMode);
     }
  }
