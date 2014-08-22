@@ -959,6 +959,23 @@ public final class MediaCodecInfo {
                         }
                     }
                 }
+                // for now this just means using the smaller max size as 2nd
+                // upper limit.
+                // for now we are keeping the profile specific "width/height
+                // in macroblocks" limits.
+                if (Integer.valueOf(1).equals(map.get("feature-can-swap-width-height"))) {
+                    if (widths != null) {
+                        mSmallerDimensionUpperLimit =
+                            Math.min(widths.getUpper(), heights.getUpper());
+                        widths = heights = widths.extend(heights);
+                    } else {
+                        Log.w(TAG, "feature can-swap-width-height is best used with size-range");
+                        mSmallerDimensionUpperLimit =
+                            Math.min(mWidthRange.getUpper(), mHeightRange.getUpper());
+                        mWidthRange = mHeightRange = mWidthRange.extend(mHeightRange);
+                    }
+                }
+
                 ratios = Utils.parseRationalRange(
                         map.get("block-aspect-ratio-range"), null);
                 blockRatios = Utils.parseRationalRange(
@@ -1124,9 +1141,17 @@ public final class MediaCodecInfo {
             private void updateLimits() {
                 // pixels -> blocks <- counts
                 mHorizontalBlockRange = mHorizontalBlockRange.intersect(
-                        Utils.factorRange(mWidthRange, mBlockWidth)).intersect(mBlockCountRange);
+                        Utils.factorRange(mWidthRange, mBlockWidth));
+                mHorizontalBlockRange = mHorizontalBlockRange.intersect(
+                        Range.create(
+                                mBlockCountRange.getLower() / mVerticalBlockRange.getUpper(),
+                                mBlockCountRange.getUpper() / mVerticalBlockRange.getLower()));
                 mVerticalBlockRange = mVerticalBlockRange.intersect(
-                        Utils.factorRange(mHeightRange, mBlockHeight)).intersect(mBlockCountRange);
+                        Utils.factorRange(mHeightRange, mBlockHeight));
+                mVerticalBlockRange = mVerticalBlockRange.intersect(
+                        Range.create(
+                                mBlockCountRange.getLower() / mHorizontalBlockRange.getUpper(),
+                                mBlockCountRange.getUpper() / mHorizontalBlockRange.getLower()));
                 mBlockCountRange = mBlockCountRange.intersect(
                         Range.create(
                                 mHorizontalBlockRange.getLower()
