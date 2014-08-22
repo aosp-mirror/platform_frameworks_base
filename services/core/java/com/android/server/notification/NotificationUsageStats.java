@@ -48,7 +48,7 @@ import java.util.Map;
 public class NotificationUsageStats {
     // WARNING: Aggregated stats can grow unboundedly with pkg+id+tag.
     // Don't enable on production builds.
-    private static final boolean ENABLE_AGGREGATED_IN_MEMORY_STATS = true;
+    private static final boolean ENABLE_AGGREGATED_IN_MEMORY_STATS = false;
     private static final boolean ENABLE_SQLITE_LOG = true;
 
     private static final AggregatedStats[] EMPTY_AGGREGATED_STATS = new AggregatedStats[0];
