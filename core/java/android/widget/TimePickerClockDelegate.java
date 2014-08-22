@@ -73,16 +73,6 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
     private boolean mHourWithTwoDigit;
     private char mHourFormat;
 
-    /**
-     * A no-op callback used in the constructor to avoid null checks later in
-     * the code.
-     */
-    private static final TimePicker.OnTimeChangedListener NO_OP_CHANGE_LISTENER =
-            new TimePicker.OnTimeChangedListener() {
-                public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                }
-            };
-
     public TimePickerClockDelegate(TimePicker delegator, Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(delegator, context);
@@ -215,8 +205,6 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
         updateHourControl();
         updateMinuteControl();
         updateAmPmControl();
-
-        setOnTimeChangedListener(NO_OP_CHANGE_LISTENER);
 
         // set to current time
         setCurrentHour(mTempCalendar.get(Calendar.HOUR_OF_DAY));
