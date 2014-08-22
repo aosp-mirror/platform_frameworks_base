@@ -105,4 +105,5 @@
     <color name="search_panel_card_color">#ffffff</color>
 
     <color name="keyguard_user_switcher_background_gradient_color">#77000000</color>
+    <color name="doze_small_icon_background_color">#ff434343</color>
 </resources>

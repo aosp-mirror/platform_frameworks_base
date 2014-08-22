@@ -34,5 +34,6 @@
     <item type="id" name="alpha_animator_start_value_tag"/>
     <item type="id" name="top_inset_animator_start_value_tag"/>
     <item type="id" name="height_animator_start_value_tag"/>
+    <item type="id" name="doze_saved_filter_tag"/>
 </resources>
 
