@@ -272,6 +272,9 @@ public class ActionBarContainer extends FrameLayout {
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             final View child = getChildAt(i);
+            if (child == mTabContainer) {
+                continue;
+            }
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             nonTabMaxHeight = isCollapsed(child) ? 0 :
                     child.getMeasuredHeight() + lp.topMargin + lp.bottomMargin;
