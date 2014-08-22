@@ -50,7 +50,7 @@ public abstract class HdmiClient {
         try {
             mService.sendKeyEvent(getDeviceType(), keyCode, isPressed);
         } catch (RemoteException e) {
-            Log.e(TAG, "queryDisplayStatus threw exception ", e);
+            Log.e(TAG, "sendKeyEvent threw exception ", e);
         }
     }
 
