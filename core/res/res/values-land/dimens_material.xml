@@ -19,5 +19,9 @@
     <dimen name="action_bar_default_height_material">48dp</dimen>
     <!-- Default padding of an action bar. -->
     <dimen name="action_bar_default_padding_material">0dp</dimen>
+    <!-- Default text size for action bar title.-->
+    <dimen name="text_size_title_material_toolbar">14dp</dimen>
+    <!-- Default text size for action bar subtitle.-->
+    <dimen name="text_size_subtitle_material_toolbar">12dp</dimen>
 
 </resources>
