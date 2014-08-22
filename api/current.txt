@@ -39689,6 +39689,7 @@ package android.widget {
     method public void setOnPreparedListener(android.media.MediaPlayer.OnPreparedListener);
     method public void setVideoPath(java.lang.String);
     method public void setVideoURI(android.net.Uri);
+    method public void setVideoURI(android.net.Uri, java.util.Map<java.lang.String, java.lang.String>);
     method public void start();
     method public void stopPlayback();
     method public void suspend();
