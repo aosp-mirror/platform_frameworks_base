@@ -27,5 +27,5 @@ oneway interface IInputContextCallback {
     void setCursorCapsMode(int capsMode, int seq);
     void setExtractedText(in ExtractedText extractedText, int seq);
     void setSelectedText(CharSequence selectedText, int seq);
-    void setRequestCursorAnchorInfoResult(int result, int seq);
+    void setRequestUpdateCursorAnchorInfoResult(boolean result, int seq);
 }

@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
-import android.view.inputmethod.CursorAnchorInfoRequest;
 import android.view.inputmethod.ExtractedTextRequest;
 
 import com.android.internal.view.IInputContextCallback;
@@ -74,6 +73,6 @@ import com.android.internal.view.IInputContextCallback;
 
     void getSelectedText(int flags, int seq, IInputContextCallback callback);
 
-    void requestCursorAnchorInfo(in CursorAnchorInfoRequest request, int seq,
+    void requestUpdateCursorAnchorInfo(in int cursorUpdateMode, int seq,
             IInputContextCallback callback);
 }
