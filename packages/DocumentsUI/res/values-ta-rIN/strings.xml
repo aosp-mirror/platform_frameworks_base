@@ -24,24 +24,18 @@
     <string name="menu_list" msgid="7279285939892417279">"பட்டியல்"</string>
     <string name="menu_sort" msgid="7677740407158414452">"இதன்படி வரிசைப்படுத்து"</string>
     <string name="menu_search" msgid="3816712084502856974">"தேடு"</string>
-    <string name="menu_settings" msgid="6008033148948428823">"அமைப்புகள்"</string>
+    <string name="menu_settings" msgid="6008033148948428823">"அமைப்பு"</string>
     <string name="menu_open" msgid="432922957274920903">"திற"</string>
     <string name="menu_save" msgid="2394743337684426338">"சேமி"</string>
     <string name="menu_share" msgid="3075149983979628146">"பகிர்"</string>
     <string name="menu_delete" msgid="8138799623850614177">"நீக்கு"</string>
     <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" ஐத் தேர்ந்தெடு"</string>
-    <!-- no translation found for menu_advanced_show (4693652895715631401) -->
-    <skip />
-    <!-- no translation found for menu_advanced_show (5792182900084144261) -->
-    <skip />
-    <!-- no translation found for menu_advanced_hide (4218809952721972589) -->
-    <skip />
-    <!-- no translation found for menu_advanced_hide (4845869969015718848) -->
-    <skip />
-    <!-- no translation found for menu_file_size_show (3240323619260823076) -->
-    <skip />
-    <!-- no translation found for menu_file_size_hide (8881975928502581042) -->
-    <skip />
+    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"அகச் சேமிப்பகத்தைக் காட்டு"</string>
+    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD கார்டைக் காட்டு"</string>
+    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"அகச் சேமிப்பகத்தை மறை"</string>
+    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD கார்டை மறை"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"கோப்பு அளவைக் காட்டு"</string>
+    <string name="menu_file_size_hide" msgid="8881975928502581042">"கோப்பு அளவை மறை"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> தேர்ந்தெடுக்கப்பட்டன"</string>
     <string name="sort_name" msgid="9183560467917256779">"பெயரின்படி"</string>
     <string name="sort_date" msgid="586080032956151448">"தேதியின்படி திருத்தப்பட்டது"</string>
