@@ -1825,7 +1825,7 @@ public class PhoneNumberUtils
         int slotId = SubscriptionManager.getSlotId(subId);
         // retrieve the list of emergency numbers
         // check read-write ecclist property first
-        String ecclist = (slotId == 0) ? "ril.ecclist" : ("ril.ecclist" + slotId);
+        String ecclist = (slotId <= 0) ? "ril.ecclist" : ("ril.ecclist" + slotId);
 
         numbers = SystemProperties.get(ecclist);
 
