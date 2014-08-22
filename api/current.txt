@@ -22465,15 +22465,12 @@ package android.os {
   }
 
   public final class PowerManager {
-    method public void goToSleep(long);
     method public boolean isInteractive();
     method public boolean isPowerSaveMode();
     method public deprecated boolean isScreenOn();
     method public boolean isWakeLockLevelSupported(int);
     method public android.os.PowerManager.WakeLock newWakeLock(int, java.lang.String);
     method public void reboot(java.lang.String);
-    method public void userActivity(long, boolean);
-    method public void wakeUp(long);
     field public static final int ACQUIRE_CAUSES_WAKEUP = 268435456; // 0x10000000
     field public static final java.lang.String ACTION_POWER_SAVE_MODE_CHANGED = "android.os.action.POWER_SAVE_MODE_CHANGED";
     field public static final deprecated int FULL_WAKE_LOCK = 26; // 0x1a
