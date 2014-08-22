@@ -752,6 +752,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             @Override
             public void onPowerSaveChanged() {
                 mHandler.post(mCheckBarModes);
+                if (mDozeServiceHost != null) {
+                    mDozeServiceHost.firePowerSaveChanged(mBatteryController.isPowerSave());
+                }
             }
             @Override
             public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
@@ -3920,6 +3923,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         private DozeService mCurrentDozeService;
 
+        public void firePowerSaveChanged(boolean active) {
+            for (Callback callback : mCallbacks) {
+                callback.onPowerSaveChanged(active);
+            }
+        }
+
         public void fireBuzzBeepBlinked() {
             for (Callback callback : mCallbacks) {
                 callback.onBuzzBeepBlinked();
@@ -3968,6 +3977,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             if (dozeService == null) return;
             dozeService.stayAwake(PROCESSING_TIME);
             mHandler.obtainMessage(H.DOZING_STOPPED, dozeService).sendToTarget();
+        }
+
+        @Override
+        public boolean isPowerSaveActive() {
+            return mBatteryController != null && mBatteryController.isPowerSave();
         }
 
         private void handleRequestDoze(DozeService dozeService) {
