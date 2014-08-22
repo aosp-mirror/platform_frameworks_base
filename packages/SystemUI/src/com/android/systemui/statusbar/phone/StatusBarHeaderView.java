@@ -114,6 +114,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private final LayoutValues mCurrentValues = new LayoutValues();
 
     private float mCurrentT;
+    private boolean mShowingDetail;
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -282,7 +283,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mDateExpanded.setVisibility(mExpanded && mAlarmShowing ? View.INVISIBLE : View.VISIBLE);
         mAlarmStatus.setVisibility(mExpanded && mAlarmShowing ? View.VISIBLE : View.INVISIBLE);
         mSettingsButton.setVisibility(mExpanded ? View.VISIBLE : View.INVISIBLE);
-        mQsDetailHeader.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
+        mQsDetailHeader.setVisibility(mExpanded && mShowingDetail? View.VISIBLE : View.INVISIBLE);
         if (mSignalCluster != null) {
             updateSignalClusterDetachment();
         }
@@ -375,7 +376,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private void updateClickTargets() {
         mMultiUserSwitch.setClickable(mExpanded);
+        mMultiUserSwitch.setFocusable(mExpanded);
         mSystemIconsSuperContainer.setClickable(mExpanded);
+        mSystemIconsSuperContainer.setFocusable(mExpanded);
         mAlarmStatus.setClickable(mNextAlarm != null && mNextAlarm.getShowIntent() != null);
     }
 
@@ -716,6 +719,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             transition(mDateGroup, !showingDetail);
             transition(mAlarmStatus, !showingDetail);
             transition(mQsDetailHeader, showingDetail);
+            mShowingDetail = showingDetail;
             if (showingDetail) {
                 mQsDetailHeaderTitle.setText(detail.getTitle());
                 final Boolean toggleState = detail.getToggleState();
@@ -741,8 +745,20 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         private void transition(final View v, final boolean in) {
             if (in) {
                 v.bringToFront();
+                v.setVisibility(VISIBLE);
             }
-            v.animate().alpha(in ? 1 : 0).withLayer().start();
+            v.animate()
+                    .alpha(in ? 1 : 0)
+                    .withLayer()
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!in) {
+                                v.setVisibility(INVISIBLE);
+                            }
+                        }
+                    })
+                    .start();
         }
     };
 }

@@ -71,6 +71,7 @@ public class QSPanel extends ViewGroup {
     private QSTileHost mHost;
 
     private QSFooter mFooter;
+    private boolean mGridContentVisible = true;
 
     public QSPanel(Context context) {
         this(context, null);
@@ -189,13 +190,13 @@ public class QSPanel extends ViewGroup {
         mHandler.obtainMessage(H.SHOW_DETAIL, show ? 1 : 0, 0, r).sendToTarget();
     }
 
-    private void setTileVisibility(View v, boolean visible) {
-        mHandler.obtainMessage(H.SET_TILE_VISIBILITY, visible ? 1 : 0, 0, v).sendToTarget();
+    private void setTileVisibility(View v, int visibility) {
+        mHandler.obtainMessage(H.SET_TILE_VISIBILITY, visibility, 0, v).sendToTarget();
     }
 
-    private void handleSetTileVisibility(View v, boolean visible) {
-        if (visible == (v.getVisibility() == VISIBLE)) return;
-        v.setVisibility(visible ? VISIBLE : GONE);
+    private void handleSetTileVisibility(View v, int visibility) {
+        if (visibility == v.getVisibility()) return;
+        v.setVisibility(visibility);
     }
 
     public void setTiles(Collection<QSTile<?>> tiles) {
@@ -219,7 +220,14 @@ public class QSPanel extends ViewGroup {
         final QSTile.Callback callback = new QSTile.Callback() {
             @Override
             public void onStateChanged(QSTile.State state) {
-                setTileVisibility(r.tileView, state.visible);
+                int visibility = state.visible ? VISIBLE : GONE;
+                if (state.visible && !mGridContentVisible) {
+
+                    // We don't want to show it if the content is hidden,
+                    // then we just set it to invisible, to ensure that it gets visible again
+                    visibility = INVISIBLE;
+                }
+                setTileVisibility(r.tileView, visibility);
                 r.tileView.onStateChanged(state);
             }
             @Override
@@ -317,12 +325,26 @@ public class QSPanel extends ViewGroup {
             mDetail.bringToFront();
             mDetailContent.addView(r.detailView);
             setDetailRecord(r);
+            listener = mHideGridContentWhenDone;
         } else {
+            setGridContentVisibility(true);
             listener = mTeardownDetailWhenDone;
             fireScanStateChanged(false);
         }
         fireShowingDetail(show ? detailAdapter : null);
         mClipper.animateCircularClip(x, y, show, listener);
+    }
+
+    private void setGridContentVisibility(boolean visible) {
+        int newVis = visible ? VISIBLE : INVISIBLE;
+        for (int i = 0; i < mRecords.size(); i++) {
+            TileRecord tileRecord = mRecords.get(i);
+            if (tileRecord.tileView.getVisibility() != GONE) {
+                tileRecord.tileView.setVisibility(newVis);
+            }
+        }
+        mBrightnessView.setVisibility(newVis);
+        mGridContentVisible = visible;
     }
 
     @Override
@@ -448,7 +470,7 @@ public class QSPanel extends ViewGroup {
             if (msg.what == SHOW_DETAIL) {
                 handleShowDetail((Record)msg.obj, msg.arg1 != 0);
             } else if (msg.what == SET_TILE_VISIBILITY) {
-                handleSetTileVisibility((View)msg.obj, msg.arg1 != 0);
+                handleSetTileVisibility((View)msg.obj, msg.arg1);
             }
         }
     }
@@ -471,6 +493,13 @@ public class QSPanel extends ViewGroup {
             mDetailContent.removeAllViews();
             setDetailRecord(null);
         };
+    };
+
+    private final AnimatorListenerAdapter mHideGridContentWhenDone = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            setGridContentVisibility(false);
+        }
     };
 
     public interface Callback {
