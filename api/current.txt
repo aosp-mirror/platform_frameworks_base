@@ -33376,6 +33376,7 @@ package android.view {
     field public static final int KEYCODE_U = 49; // 0x31
     field public static final int KEYCODE_UNKNOWN = 0; // 0x0
     field public static final int KEYCODE_V = 50; // 0x32
+    field public static final int KEYCODE_VOICE_ASSIST = 231; // 0xe7
     field public static final int KEYCODE_VOLUME_DOWN = 25; // 0x19
     field public static final int KEYCODE_VOLUME_MUTE = 164; // 0xa4
     field public static final int KEYCODE_VOLUME_UP = 24; // 0x18

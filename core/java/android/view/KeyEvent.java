@@ -657,11 +657,15 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: TV data service key.
      * Displays data services like weather, sports. */
     public static final int KEYCODE_TV_DATA_SERVICE = 230;
+    /** Key code constant: Voice Assist key.
+     * Launches the global voice assist activity. Not delivered to applications. */
+    public static final int KEYCODE_VOICE_ASSIST = 231;
 
-    private static final int LAST_KEYCODE = KEYCODE_TV_DATA_SERVICE;
+    private static final int LAST_KEYCODE = KEYCODE_VOICE_ASSIST;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
+    //  isWakeKey()
     //  frameworks/native/include/android/keycodes.h
     //  frameworks/native/include/input/InputEventLabels.h
     //  frameworks/base/core/res/res/values/attrs.xml

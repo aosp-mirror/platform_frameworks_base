@@ -70,6 +70,7 @@ import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
+import android.speech.RecognizerIntent;
 import android.telecomm.TelecommManager;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -2338,6 +2339,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
             return -1;
+        } else if (keyCode == KeyEvent.KEYCODE_VOICE_ASSIST) {
+            if (!down) {
+                Intent voiceIntent;
+                if (!keyguardOn && mPowerManager.isInteractive()) {
+                    voiceIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
+                } else {
+                    voiceIntent = new Intent(RecognizerIntent.ACTION_VOICE_SEARCH_HANDS_FREE);
+                    voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE, keyguardOn);
+                }
+                mContext.startActivityAsUser(voiceIntent, UserHandle.CURRENT_OR_SELF);
+            }
         } else if (keyCode == KeyEvent.KEYCODE_SYSRQ) {
             if (down && repeatCount == 0) {
                 mHandler.post(mScreenshotRunnable);
