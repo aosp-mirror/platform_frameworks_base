@@ -47,13 +47,13 @@ public class CaptureFailure {
     private final int mReason;
     private final boolean mDropped;
     private final int mSequenceId;
-    private final int mFrameNumber;
+    private final long mFrameNumber;
 
     /**
      * @hide
      */
     public CaptureFailure(CaptureRequest request, int reason, boolean dropped, int sequenceId,
-            int frameNumber) {
+            long frameNumber) {
         mRequest = request;
         mReason = reason;
         mDropped = dropped;
@@ -95,9 +95,9 @@ public class CaptureFailure {
      * for every new result or failure; and the scope is the lifetime of the
      * {@link CameraDevice}.</p>
      *
-     * @return int frame number
+     * @return long frame number
      */
-    public int getFrameNumber() {
+    public long getFrameNumber() {
         return mFrameNumber;
     }
 
