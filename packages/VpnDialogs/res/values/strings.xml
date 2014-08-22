@@ -28,4 +28,26 @@
         <img src="vpn_icon" />
         ]]> appears at the top of your screen when VPN is active.
     </string>
+
+    <!-- Dialog title for built-in VPN. [CHAR LIMIT=40]  -->
+    <string name="legacy_title">VPN is connected</string>
+    <!-- Button label to configure the current VPN session. [CHAR LIMIT=20] -->
+    <string name="configure">Configure</string>
+    <!-- Button label to disconnect the current VPN session. [CHAR LIMIT=20] -->
+    <string name="disconnect">Disconnect</string>
+
+    <!-- Label for the name of the current VPN session. [CHAR LIMIT=20] -->
+    <string name="session">Session:</string>
+    <!-- Label for the duration of the current VPN session. [CHAR LIMIT=20] -->
+    <string name="duration">Duration:</string>
+    <!-- Label for the network usage of data transmitted over VPN. [CHAR LIMIT=20] -->
+    <string name="data_transmitted">Sent:</string>
+    <!-- Label for the network usage of data received over VPN. [CHAR LIMIT=20] -->
+    <string name="data_received">Received:</string>
+
+    <!-- Formatted string for the network usage over VPN. [CHAR LIMIT=40] -->
+    <string name="data_value_format">
+        <xliff:g id="number">%1$s</xliff:g> bytes /
+        <xliff:g id="number">%2$s</xliff:g> packets
+    </string>
 </resources>
