@@ -3072,7 +3072,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         boolean more = false;
         final long drawingTime = getDrawingTime();
 
-
+        if (usingRenderNodeProperties) canvas.insertReorderBarrier();
         // Only use the preordered list if not HW accelerated, since the HW pipeline will do the
         // draw reordering internally
         final ArrayList<View> preorderedList = usingRenderNodeProperties
@@ -3099,6 +3099,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 more |= drawChild(canvas, child, drawingTime);
             }
         }
+        if (usingRenderNodeProperties) canvas.insertInorderBarrier();
 
         if (debugDraw()) {
             onDebugDraw(canvas);

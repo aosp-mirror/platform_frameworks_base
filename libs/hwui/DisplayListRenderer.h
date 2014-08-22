@@ -57,6 +57,8 @@ public:
     DisplayListRenderer();
     virtual ~DisplayListRenderer();
 
+    void insertReorderBarrier(bool enableReorder);
+
     DisplayListData* finishRecording();
 
 // ----------------------------------------------------------------------------
@@ -154,19 +156,27 @@ public:
         mHighContrastText = highContrastText;
     }
 private:
-    void insertRestoreToCount();
-    void insertTranslate();
+    enum DeferredBarrierType {
+        kBarrier_None,
+        kBarrier_InOrder,
+        kBarrier_OutOfOrder,
+    };
+
+    void flushRestoreToCount();
+    void flushTranslate();
+    void flushReorderBarrier();
 
     LinearAllocator& alloc() { return mDisplayListData->allocator; }
 
     // Each method returns final index of op
-    int addStateOp(StateOp* op);
-    int addDrawOp(DrawOp* op);
-    int addOpInternal(DisplayListOp* op) {
-        insertRestoreToCount();
-        insertTranslate();
-        return mDisplayListData->displayListOps.add(op);
-    }
+    size_t addOpAndUpdateChunk(DisplayListOp* op);
+    // flushes any deferred operations, and appends the op
+    size_t flushAndAddOp(DisplayListOp* op);
+
+    size_t addStateOp(StateOp* op);
+    size_t addDrawOp(DrawOp* op);
+    size_t addRenderNodeOp(DrawRenderNodeOp* op);
+
 
     template<class T>
     inline const T* refBuffer(const T* srcBuffer, int32_t count) {
@@ -277,7 +287,8 @@ private:
 
     float mTranslateX;
     float mTranslateY;
-    bool mHasTranslate;
+    bool mHasDeferredTranslate;
+    DeferredBarrierType mDeferredBarrierType;
     bool mHighContrastText;
 
     int mRestoreSaveCount;

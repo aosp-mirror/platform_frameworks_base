@@ -33,10 +33,10 @@ namespace uirenderer {
 
 DisplayListRenderer::DisplayListRenderer()
     : mCaches(Caches::getInstance())
-    , mDisplayListData(0)
+    , mDisplayListData(NULL)
     , mTranslateX(0.0f)
     , mTranslateY(0.0f)
-    , mHasTranslate(false)
+    , mDeferredBarrierType(kBarrier_None)
     , mHighContrastText(false)
     , mRestoreSaveCount(-1) {
 }
@@ -68,6 +68,7 @@ status_t DisplayListRenderer::prepareDirty(float left, float top,
 
     initializeSaveStack(0, 0, getWidth(), getHeight(), Vector3());
 
+    mDeferredBarrierType = kBarrier_InOrder;
     mDirtyClip = opaque;
     mRestoreSaveCount = -1;
 
@@ -75,8 +76,8 @@ status_t DisplayListRenderer::prepareDirty(float left, float top,
 }
 
 void DisplayListRenderer::finish() {
-    insertRestoreToCount();
-    insertTranslate();
+    flushRestoreToCount();
+    flushTranslate();
 }
 
 void DisplayListRenderer::interrupt() {
@@ -104,13 +105,13 @@ void DisplayListRenderer::restore() {
     }
 
     mRestoreSaveCount--;
-    insertTranslate();
+    flushTranslate();
     StatefulBaseRenderer::restore();
 }
 
 void DisplayListRenderer::restoreToCount(int saveCount) {
     mRestoreSaveCount = saveCount;
-    insertTranslate();
+    flushTranslate();
     StatefulBaseRenderer::restoreToCount(saveCount);
 }
 
@@ -123,10 +124,10 @@ int DisplayListRenderer::saveLayer(float left, float top, float right, float bot
 
 void DisplayListRenderer::translate(float dx, float dy, float dz) {
     // ignore dz, not used at defer time
-    mHasTranslate = true;
+    mHasDeferredTranslate = true;
     mTranslateX += dx;
     mTranslateY += dy;
-    insertRestoreToCount();
+    flushRestoreToCount();
     StatefulBaseRenderer::translate(dx, dy, dz);
 }
 
@@ -174,16 +175,12 @@ bool DisplayListRenderer::clipRegion(const SkRegion* region, SkRegion::Op op) {
 }
 
 status_t DisplayListRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t flags) {
+    LOG_ALWAYS_FATAL_IF(!renderNode, "missing rendernode");
+
     // dirty is an out parameter and should not be recorded,
     // it matters only when replaying the display list
     DrawRenderNodeOp* op = new (alloc()) DrawRenderNodeOp(renderNode, flags, *currentTransform());
-    int opIndex = addDrawOp(op);
-    mDisplayListData->addChild(op);
-
-    if (renderNode->stagingProperties().isProjectionReceiver()) {
-        // use staging property, since recording on UI thread
-        mDisplayListData->projectionReceiveIndex = opIndex;
-    }
+    addRenderNodeOp(op);
 
     return DrawGlInfo::kStatusDone;
 }
@@ -428,30 +425,60 @@ void DisplayListRenderer::setupPaintFilter(int clearBits, int setBits) {
     addStateOp(new (alloc()) SetupPaintFilterOp(clearBits, setBits));
 }
 
-void DisplayListRenderer::insertRestoreToCount() {
+void DisplayListRenderer::insertReorderBarrier(bool enableReorder) {
+    flushRestoreToCount();
+    flushTranslate();
+    mDeferredBarrierType = enableReorder ? kBarrier_OutOfOrder : kBarrier_InOrder;
+}
+
+void DisplayListRenderer::flushRestoreToCount() {
     if (mRestoreSaveCount >= 0) {
-        DisplayListOp* op = new (alloc()) RestoreToCountOp(mRestoreSaveCount);
-        mDisplayListData->displayListOps.add(op);
+        addOpAndUpdateChunk(new (alloc()) RestoreToCountOp(mRestoreSaveCount));
         mRestoreSaveCount = -1;
     }
 }
 
-void DisplayListRenderer::insertTranslate() {
-    if (mHasTranslate) {
+void DisplayListRenderer::flushTranslate() {
+    if (mHasDeferredTranslate) {
         if (mTranslateX != 0.0f || mTranslateY != 0.0f) {
-            DisplayListOp* op = new (alloc()) TranslateOp(mTranslateX, mTranslateY);
-            mDisplayListData->displayListOps.add(op);
+            addOpAndUpdateChunk(new (alloc()) TranslateOp(mTranslateX, mTranslateY));
             mTranslateX = mTranslateY = 0.0f;
         }
-        mHasTranslate = false;
+        mHasDeferredTranslate = false;
     }
 }
 
-int DisplayListRenderer::addStateOp(StateOp* op) {
-    return addOpInternal(op);
+size_t DisplayListRenderer::addOpAndUpdateChunk(DisplayListOp* op) {
+    int insertIndex = mDisplayListData->displayListOps.add(op);
+    if (mDeferredBarrierType != kBarrier_None) {
+        // op is first in new chunk
+        mDisplayListData->chunks.push();
+        DisplayListData::Chunk& newChunk = mDisplayListData->chunks.editTop();
+        newChunk.beginOpIndex = insertIndex;
+        newChunk.endOpIndex = insertIndex + 1;
+        newChunk.reorderChildren = (mDeferredBarrierType == kBarrier_OutOfOrder);
+
+        int nextChildIndex = mDisplayListData->children().size();
+        newChunk.beginChildIndex = newChunk.endChildIndex = nextChildIndex;
+        mDeferredBarrierType = kBarrier_None;
+    } else {
+        // standard case - append to existing chunk
+        mDisplayListData->chunks.editTop().endOpIndex = insertIndex + 1;
+    }
+    return insertIndex;
 }
 
-int DisplayListRenderer::addDrawOp(DrawOp* op) {
+size_t DisplayListRenderer::flushAndAddOp(DisplayListOp* op) {
+    flushRestoreToCount();
+    flushTranslate();
+    return addOpAndUpdateChunk(op);
+}
+
+size_t DisplayListRenderer::addStateOp(StateOp* op) {
+    return flushAndAddOp(op);
+}
+
+size_t DisplayListRenderer::addDrawOp(DrawOp* op) {
     Rect localBounds;
     if (op->getLocalBounds(localBounds)) {
         bool rejected = quickRejectConservative(localBounds.left, localBounds.top,
@@ -460,7 +487,22 @@ int DisplayListRenderer::addDrawOp(DrawOp* op) {
     }
 
     mDisplayListData->hasDrawOps = true;
-    return addOpInternal(op);
+    return flushAndAddOp(op);
+}
+
+size_t DisplayListRenderer::addRenderNodeOp(DrawRenderNodeOp* op) {
+    int opIndex = addDrawOp(op);
+    int childIndex = mDisplayListData->addChild(op);
+
+    // update the chunk's child indices
+    DisplayListData::Chunk& chunk = mDisplayListData->chunks.editTop();
+    chunk.endChildIndex = childIndex + 1;
+
+    if (op->renderNode()->stagingProperties().isProjectionReceiver()) {
+        // use staging property, since recording on UI thread
+        mDisplayListData->projectionReceiveIndex = opIndex;
+    }
+    return opIndex;
 }
 
 }; // namespace uirenderer
