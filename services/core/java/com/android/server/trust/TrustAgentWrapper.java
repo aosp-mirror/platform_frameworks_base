@@ -16,16 +16,22 @@
 
 package com.android.server.trust;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -43,6 +49,9 @@ import java.util.List;
  * TrustManager and the actual TrustAgent.
  */
 public class TrustAgentWrapper {
+    private static final String EXTRA_COMPONENT_NAME = "componentName";
+    private static final String TRUST_EXPIRED_ACTION = "android.server.trust.TRUST_EXPIRED_ACTION";
+    private static final String PERMISSION = "android.permission.PROVIDE_TRUST_AGENT";
     private static final boolean DEBUG = false;
     private static final String TAG = "TrustAgentWrapper";
 
@@ -79,6 +88,20 @@ public class TrustAgentWrapper {
     private boolean mTrustDisabledByDpm;
     private boolean mManagingTrust;
     private IBinder mSetTrustAgentFeaturesToken;
+    private AlarmManager mAlarmManager;
+    private final Intent mAlarmIntent;
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ComponentName component = intent.getParcelableExtra(EXTRA_COMPONENT_NAME);
+            if (TRUST_EXPIRED_ACTION.equals(intent.getAction())
+                    && mName.equals(component)) {
+                mHandler.removeMessages(MSG_TRUST_TIMEOUT);
+                mHandler.sendEmptyMessage(MSG_TRUST_TIMEOUT);
+            }
+        }
+    };
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -95,8 +118,10 @@ public class TrustAgentWrapper {
                     boolean initiatedByUser = msg.arg1 != 0;
                     long durationMs = msg.getData().getLong(DATA_DURATION);
                     if (durationMs > 0) {
-                        mHandler.removeMessages(MSG_TRUST_TIMEOUT);
-                        mHandler.sendEmptyMessageDelayed(MSG_TRUST_TIMEOUT, durationMs);
+                        long expiration = SystemClock.elapsedRealtime() + durationMs;
+                        PendingIntent op = PendingIntent.getBroadcast(mContext, 0, mAlarmIntent,
+                                PendingIntent.FLAG_CANCEL_CURRENT);
+                        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, expiration, op);
                     }
                     mTrustManagerService.mArchive.logGrantTrust(mUserId, mName,
                             (mMessage != null ? mMessage.toString() : null),
@@ -106,6 +131,7 @@ public class TrustAgentWrapper {
                 case MSG_TRUST_TIMEOUT:
                     if (DEBUG) Slog.v(TAG, "Trust timed out : " + mName.flattenToShortString());
                     mTrustManagerService.mArchive.logTrustTimeout(mUserId, mName);
+                    onTrustTimeout();
                     // Fall through.
                 case MSG_REVOKE_TRUST:
                     mTrusted = false;
@@ -212,8 +238,19 @@ public class TrustAgentWrapper {
             Intent intent, UserHandle user) {
         mContext = context;
         mTrustManagerService = trustManagerService;
+        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mUserId = user.getIdentifier();
         mName = intent.getComponent();
+
+        mAlarmIntent = new Intent(TRUST_EXPIRED_ACTION).putExtra(EXTRA_COMPONENT_NAME, mName);
+        mAlarmIntent.setData(Uri.parse(mAlarmIntent.toUri(Intent.URI_INTENT_SCHEME)));
+
+        final IntentFilter alarmFilter = new IntentFilter(TRUST_EXPIRED_ACTION);
+        alarmFilter.addDataScheme(mAlarmIntent.getScheme());
+        final String pathUri = mAlarmIntent.toUri(Intent.URI_INTENT_SCHEME);
+        alarmFilter.addDataPath(pathUri, PatternMatcher.PATTERN_LITERAL);
+        mContext.registerReceiver(mBroadcastReceiver, alarmFilter);
+
         // Schedules a restart for when connecting times out. If the connection succeeds,
         // the restart is canceled in mCallback's onConnected.
         scheduleRestart();
@@ -227,6 +264,13 @@ public class TrustAgentWrapper {
         Slog.w(TAG , "Remote Exception", e);
     }
 
+    private void onTrustTimeout() {
+        try {
+            if (mTrustAgentService != null) mTrustAgentService.onTrustTimeout();
+        } catch (RemoteException e) {
+            onError(e);
+        }
+    }
     /**
      * @see android.service.trust.TrustAgentService#onUnlockAttempt(boolean)
      */
