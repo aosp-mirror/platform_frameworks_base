@@ -28,8 +28,6 @@ public class Shader {
      */
     private long native_instance;
 
-    private long native_with_local_matrix;
-
     /**
      * Initialization step that should be called by subclasses in their
      * constructors. Calling again may result in memory leaks.
@@ -80,24 +78,18 @@ public class Shader {
      * Set the shader's local matrix. Passing null will reset the shader's
      * matrix to identity.
      *
-     * Starting with {@link android.os.Build.VERSION_CODES#L}, this does not
-     * modify any Paints which use this Shader. In order to modify the Paint,
-     * you need to call {@link Paint#setShader} again. Further, any {@link ComposeShader}s
-     * created with this Shader will be unaffected.
-     *
      * @param localM The shader's new local matrix, or null to specify identity
      */
     public void setLocalMatrix(Matrix localM) {
         mLocalMatrix = localM;
-        native_with_local_matrix = nativeSetLocalMatrix(native_instance,
-                native_with_local_matrix, localM == null ? 0 : localM.native_instance);
+        nativeSetLocalMatrix(native_instance, localM == null ? 0 : localM.native_instance);
     }
 
     protected void finalize() throws Throwable {
         try {
             super.finalize();
         } finally {
-            nativeDestructor(native_instance, native_with_local_matrix);
+            nativeDestructor(native_instance);
         }
     }
 
@@ -124,13 +116,9 @@ public class Shader {
     }
 
     /* package */ long getNativeInstance() {
-        if (native_with_local_matrix != 0) {
-            return native_with_local_matrix;
-        }
         return native_instance;
     }
 
-    private static native void nativeDestructor(long native_shader, long native_with_local_matrix);
-    private static native long nativeSetLocalMatrix(long native_shader,
-            long native_with_local_matrix, long matrix_instance);
+    private static native void nativeDestructor(long native_shader);
+    private static native void nativeSetLocalMatrix(long native_shader, long matrix_instance);
 }

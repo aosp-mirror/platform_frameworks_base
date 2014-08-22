@@ -54,26 +54,19 @@ static void Shader_destructor(JNIEnv* env, jobject o, jlong shaderHandle, jlong 
 {
     SkShader* shader = reinterpret_cast<SkShader*>(shaderHandle);
     SkSafeUnref(shader);
-    SkShader* shaderWithLM = reinterpret_cast<SkShader*>(shaderWithLMHandle);
-    SkSafeUnref(shaderWithLM);
 }
 
-static jlong Shader_setLocalMatrix(JNIEnv* env, jobject o, jlong shaderHandle,
-        jlong oldLocalMatrixShaderHandle, jlong matrixHandle)
+static void Shader_setLocalMatrix(JNIEnv* env, jobject o, jlong shaderHandle, jlong matrixHandle)
 {
-    // The old shader with local matrix is no longer needed, so unref it.
-    SkSafeUnref(reinterpret_cast<SkShader*>(oldLocalMatrixShaderHandle));
-
     SkShader* shader       = reinterpret_cast<SkShader*>(shaderHandle);
     const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
     if (shader) {
-        if (NULL == matrix) {
-            matrix = &SkMatrix::I();
+        if (matrix) {
+            shader->setLocalMatrix(*matrix);
+        } else {
+            shader->resetLocalMatrix();
         }
-        SkShader* newShader = SkShader::CreateLocalMatrixShader(shader, *matrix);
-        shader = newShader;
     }
-    return reinterpret_cast<jlong>(shader);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -243,8 +236,8 @@ static JNINativeMethod gColorMethods[] = {
 };
 
 static JNINativeMethod gShaderMethods[] = {
-    { "nativeDestructor",        "(JJ)V",    (void*)Shader_destructor        },
-    { "nativeSetLocalMatrix",    "(JJJ)J",   (void*)Shader_setLocalMatrix    }
+    { "nativeDestructor",        "(J)V",    (void*)Shader_destructor        },
+    { "nativeSetLocalMatrix",    "(JJ)V",   (void*)Shader_setLocalMatrix    }
 };
 
 static JNINativeMethod gBitmapShaderMethods[] = {
