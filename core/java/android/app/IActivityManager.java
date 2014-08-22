@@ -393,7 +393,7 @@ public interface IActivityManager extends IInterface {
 
     public void keyguardWaitingForActivityDrawn() throws RemoteException;
 
-    public boolean targetTaskAffinityMatchesActivity(IBinder token, String destAffinity)
+    public boolean shouldUpRecreateTask(IBinder token, String destAffinity)
             throws RemoteException;
 
     public boolean navigateUpTo(IBinder token, Intent target, int resultCode, Intent resultData)
@@ -702,7 +702,7 @@ public interface IActivityManager extends IInterface {
     int GET_MY_MEMORY_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+142;
     int KILL_PROCESSES_BELOW_FOREGROUND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+143;
     int GET_CURRENT_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+144;
-    int TARGET_TASK_AFFINITY_MATCHES_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+145;
+    int SHOULD_UP_RECREATE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+145;
     int NAVIGATE_UP_TO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+146;
     int SET_LOCK_SCREEN_SHOWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+147;
     int FINISH_ACTIVITY_AFFINITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+148;

@@ -2806,6 +2806,42 @@ final class ActivityStack {
         }
     }
 
+    final boolean shouldUpRecreateTaskLocked(ActivityRecord srec, String destAffinity) {
+        // Basic case: for simple app-centric recents, we need to recreate
+        // the task if the affinity has changed.
+        if (srec == null || srec.task.affinity == null ||
+                !srec.task.affinity.equals(destAffinity)) {
+            return true;
+        }
+        // Document-centric case: an app may be split in to multiple documents;
+        // they need to re-create their task if this current activity is the root
+        // of a document, unless simply finishing it will return them to the the
+        // correct app behind.
+        if (srec.frontOfTask && srec.task != null) {
+            // Okay, this activity is at the root of its task.  What to do, what to do...
+            if (srec.task.getTaskToReturnTo() != ActivityRecord.APPLICATION_ACTIVITY_TYPE) {
+                // Finishing won't return to an application, so we need to recreate.
+                return true;
+            }
+            // We now need to get the task below it to determine what to do.
+            int taskIdx = mTaskHistory.indexOf(srec.task);
+            if (taskIdx <= 0) {
+                Slog.w(TAG, "shouldUpRecreateTask: task not in history for " + srec);
+                return false;
+            }
+            if (taskIdx == 0) {
+                // At the bottom of the stack, nothing to go back to.
+                return true;
+            }
+            TaskRecord prevTask = mTaskHistory.get(taskIdx);
+            if (!srec.task.affinity.equals(prevTask.affinity)) {
+                // These are different apps, so need to recreate.
+                return true;
+            }
+        }
+        return false;
+    }
+
     final boolean navigateUpToLocked(IBinder token, Intent destIntent, int resultCode,
             Intent resultData) {
         final ActivityRecord srec = ActivityRecord.forToken(token);
