@@ -141,6 +141,11 @@
         <item name="android:textColor">@color/system_accent_color</item>
     </style>
 
+    <style name="TextAppearance.QS.VolumeSuppressor">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/qs_tile_text</item>
+    </style>
+
     <style name="TextAppearance.QS.DetailButton">
         <item name="android:textSize">14sp</item>
         <item name="android:textAllCaps">true</item>

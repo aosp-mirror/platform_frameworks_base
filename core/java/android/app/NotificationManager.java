@@ -16,7 +16,9 @@
 
 package android.app;
 
+import android.annotation.SdkConstant;
 import android.app.Notification.Builder;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
@@ -71,6 +73,16 @@ public class NotificationManager
 {
     private static String TAG = "NotificationManager";
     private static boolean localLOGV = false;
+
+    /**
+     * Intent that is broadcast when the state of {@link #getEffectsSuppressor()} changes.
+     * This broadcast is only sent to registered receivers.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_EFFECTS_SUPPRESSOR_CHANGED
+            = "android.os.action.ACTION_EFFECTS_SUPPRESSOR_CHANGED";
 
     private static INotificationManager sService;
 
@@ -224,6 +236,18 @@ public class NotificationManager
         try {
             service.cancelAllNotifications(pkg, UserHandle.myUserId());
         } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public ComponentName getEffectsSuppressor() {
+        INotificationManager service = getService();
+        try {
+            return service.getEffectsSuppressor();
+        } catch (RemoteException e) {
+            return null;
         }
     }
 

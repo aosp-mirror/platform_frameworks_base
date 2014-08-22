@@ -19,11 +19,15 @@ package com.android.systemui.volume;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -57,6 +61,7 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -109,6 +114,7 @@ public class VolumePanel extends Handler {
     private static final int MSG_LAYOUT_DIRECTION = 12;
     private static final int MSG_ZEN_MODE_AVAILABLE_CHANGED = 13;
     private static final int MSG_USER_ACTIVITY = 14;
+    private static final int MSG_NOTIFICATION_EFFECTS_SUPPRESSOR_CHANGED = 15;
 
     // Pseudo stream type for master volume
     private static final int STREAM_MASTER = -100;
@@ -234,8 +240,10 @@ public class VolumePanel extends Handler {
         ViewGroup group;
         ImageView icon;
         SeekBar seekbarView;
+        TextView suppressorView;
         int iconRes;
         int iconMuteRes;
+        int iconSuppressedRes;
     }
 
     // Synchronize when accessing this
@@ -613,8 +621,12 @@ public class VolumePanel extends Handler {
                         toggle(sc);
                     }
                 });
+                sc.iconSuppressedRes = com.android.systemui.R.drawable.ic_ringer_mute;
             }
             sc.seekbarView = (SeekBar) sc.group.findViewById(com.android.systemui.R.id.seekbar);
+            sc.suppressorView =
+                    (TextView) sc.group.findViewById(com.android.systemui.R.id.suppressor);
+            sc.suppressorView.setVisibility(View.GONE);
             final int plusOne = (streamType == AudioSystem.STREAM_BLUETOOTH_SCO ||
                     streamType == AudioSystem.STREAM_VOICE_CALL) ? 1 : 0;
             sc.seekbarView.setMax(getStreamMaxVolume(streamType) + plusOne);
@@ -678,6 +690,40 @@ public class VolumePanel extends Handler {
         sc.icon.setImageResource(muted ? sc.iconMuteRes : sc.iconRes);
     }
 
+    private void updateSliderSupressor(StreamControl sc) {
+        final ComponentName suppressor = isNotificationOrRing(sc.streamType)
+                ? mZenController.getEffectsSuppressor() : null;
+        if (suppressor == null) {
+            sc.seekbarView.setVisibility(View.VISIBLE);
+            sc.suppressorView.setVisibility(View.GONE);
+        } else {
+            sc.seekbarView.setVisibility(View.GONE);
+            sc.suppressorView.setVisibility(View.VISIBLE);
+            sc.suppressorView.setText(mContext.getString(com.android.systemui.R.string.muted_by,
+                    getSuppressorCaption(suppressor)));
+            sc.icon.setImageResource(sc.iconSuppressedRes);
+        }
+    }
+
+    private String getSuppressorCaption(ComponentName suppressor) {
+        final PackageManager pm = mContext.getPackageManager();
+        try {
+            final ServiceInfo info = pm.getServiceInfo(suppressor, 0);
+            if (info != null) {
+                final CharSequence seq = info.loadLabel(pm);
+                if (seq != null) {
+                    final String str = seq.toString().trim();
+                    if (str.length() > 0) {
+                        return str;
+                    }
+                }
+            }
+        } catch (Throwable e) {
+            Log.w(TAG, "Error loading suppressor caption", e);
+        }
+        return suppressor.getPackageName();
+    }
+
     /** Update the mute and progress state of a slider */
     private void updateSlider(StreamControl sc) {
         updateSliderProgress(sc, -1);
@@ -686,6 +732,7 @@ public class VolumePanel extends Handler {
         sc.icon.setImageDrawable(null);
         updateSliderIcon(sc, muted);
         updateSliderEnabled(sc, muted, false);
+        updateSliderSupressor(sc);
     }
 
     private void updateSliderEnabled(final StreamControl sc, boolean muted, boolean fixedVolume) {
@@ -1275,7 +1322,9 @@ public class VolumePanel extends Handler {
                 }
                 break;
             }
-            case MSG_RINGER_MODE_CHANGED: {
+
+            case MSG_RINGER_MODE_CHANGED:
+            case MSG_NOTIFICATION_EFFECTS_SUPPRESSOR_CHANGED: {
                 if (isShowing()) {
                     updateStates();
                 }
@@ -1356,8 +1405,14 @@ public class VolumePanel extends Handler {
     };
 
     private final ZenModeController.Callback mZenCallback = new ZenModeController.Callback() {
+        @Override
         public void onZenAvailableChanged(boolean available) {
             obtainMessage(MSG_ZEN_MODE_AVAILABLE_CHANGED, available ? 1 : 0, 0).sendToTarget();
+        }
+        @Override
+        public void onEffectsSupressorChanged() {
+            obtainMessage(MSG_NOTIFICATION_EFFECTS_SUPPRESSOR_CHANGED,
+                    mZenController.getEffectsSuppressor()).sendToTarget();
         }
     };
 
