@@ -126,8 +126,10 @@ public final class HdmiControlService extends SystemService {
     }
 
     private class HdmiControlBroadcastReceiver extends BroadcastReceiver {
+        @ServiceThreadOnly
         @Override
         public void onReceive(Context context, Intent intent) {
+            assertRunOnServiceThread();
             switch (intent.getAction()) {
                 case Intent.ACTION_SCREEN_OFF:
                     if (isPowerOnOrTransient()) {
@@ -355,6 +357,7 @@ public final class HdmiControlService extends SystemService {
             super(handler);
         }
 
+        // onChange is set up to run in service thread.
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             String option = uri.getLastPathSegment();
@@ -1661,21 +1664,29 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
+    @ServiceThreadOnly
     int getPowerStatus() {
+        assertRunOnServiceThread();
         return mPowerStatus;
     }
 
+    @ServiceThreadOnly
     boolean isPowerOnOrTransient() {
+        assertRunOnServiceThread();
         return mPowerStatus == HdmiControlManager.POWER_STATUS_ON
                 || mPowerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
     }
 
+    @ServiceThreadOnly
     boolean isPowerStandbyOrTransient() {
+        assertRunOnServiceThread();
         return mPowerStatus == HdmiControlManager.POWER_STATUS_STANDBY
                 || mPowerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY;
     }
 
+    @ServiceThreadOnly
     boolean isPowerStandby() {
+        assertRunOnServiceThread();
         return mPowerStatus == HdmiControlManager.POWER_STATUS_STANDBY;
     }
 
@@ -1697,11 +1708,6 @@ public final class HdmiControlService extends SystemService {
         pm.goToSleep(SystemClock.uptimeMillis(), PowerManager.GO_TO_SLEEP_REASON_HDMI, 0);
         // PowerManger will send the broadcast Intent.ACTION_SCREEN_OFF and after this gets
         // the intent, the sequence will continue at onStandby().
-    }
-
-    void nap() {
-        PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
-        pm.nap(SystemClock.uptimeMillis());
     }
 
     @ServiceThreadOnly
@@ -1751,6 +1757,12 @@ public final class HdmiControlService extends SystemService {
         if (isTvDevice()) {
             tv().broadcastMenuLanguage(language);
         }
+    }
+
+    @ServiceThreadOnly
+    String getLanguage() {
+        assertRunOnServiceThread();
+        return mLanguage;
     }
 
     private void disableDevices(PendingActionClearedCallback callback) {
