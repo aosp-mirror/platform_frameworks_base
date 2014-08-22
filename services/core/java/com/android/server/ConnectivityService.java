@@ -2160,7 +2160,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void handleReleaseNetworkRequest(NetworkRequest request, int callingUid) {
         NetworkRequestInfo nri = mNetworkRequests.get(request);
         if (nri != null) {
-            if (nri.mUid != callingUid) {
+            if (Process.SYSTEM_UID != callingUid && nri.mUid != callingUid) {
                 if (DBG) log("Attempt to release unowned NetworkRequest " + request);
                 return;
             }
