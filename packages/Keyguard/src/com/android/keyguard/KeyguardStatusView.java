@@ -143,7 +143,10 @@ public class KeyguardStatusView extends GridLayout {
 
     void refreshAlarmStatus(AlarmManager.AlarmClockInfo nextAlarm) {
         if (nextAlarm != null) {
-            mAlarmStatusView.setText(formatNextAlarm(mContext, nextAlarm));
+            String alarm = formatNextAlarm(mContext, nextAlarm);
+            mAlarmStatusView.setText(alarm);
+            mAlarmStatusView.setContentDescription(
+                    getResources().getString(R.string.keyguard_accessibility_next_alarm, alarm));
             mAlarmStatusView.setVisibility(View.VISIBLE);
         } else {
             mAlarmStatusView.setVisibility(View.GONE);
