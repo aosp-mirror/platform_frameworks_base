@@ -95,6 +95,10 @@ public class FileBridge extends Thread {
                     int len = Memory.peekInt(temp, 4, ByteOrder.BIG_ENDIAN);
                     while (len > 0) {
                         int n = IoBridge.read(mServer, temp, 0, Math.min(temp.length, len));
+                        if (n == -1) {
+                            throw new IOException(
+                                    "Unexpected EOF; still expected " + len + " bytes");
+                        }
                         IoBridge.write(mTarget, temp, 0, n);
                         len -= n;
                     }
