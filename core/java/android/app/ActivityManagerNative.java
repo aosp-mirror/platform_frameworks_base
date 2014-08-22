@@ -1997,11 +1997,11 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case TARGET_TASK_AFFINITY_MATCHES_ACTIVITY_TRANSACTION: {
+        case SHOULD_UP_RECREATE_TASK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
             String destAffinity = data.readString();
-            boolean res = targetTaskAffinityMatchesActivity(token, destAffinity);
+            boolean res = shouldUpRecreateTask(token, destAffinity);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
@@ -4858,14 +4858,14 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public boolean targetTaskAffinityMatchesActivity(IBinder token, String destAffinity)
+    public boolean shouldUpRecreateTask(IBinder token, String destAffinity)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
         data.writeString(destAffinity);
-        mRemote.transact(TARGET_TASK_AFFINITY_MATCHES_ACTIVITY_TRANSACTION, data, reply, 0);
+        mRemote.transact(SHOULD_UP_RECREATE_TASK_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean result = reply.readInt() != 0;
         data.recycle();

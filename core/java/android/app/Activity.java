@@ -54,7 +54,6 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.session.MediaController;
-import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -5638,8 +5637,8 @@ public class Activity extends ContextThemeWrapper
             if (info.taskAffinity == null) {
                 return false;
             }
-            return !ActivityManagerNative.getDefault()
-                    .targetTaskAffinityMatchesActivity(mToken, info.taskAffinity);
+            return ActivityManagerNative.getDefault()
+                    .shouldUpRecreateTask(mToken, info.taskAffinity);
         } catch (RemoteException e) {
             return false;
         } catch (NameNotFoundException e) {
