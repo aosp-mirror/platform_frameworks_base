@@ -3969,7 +3969,7 @@
     <string name="permission_request_notification_with_subtitle">Permission requested\nfor account <xliff:g id="account" example="foo@gmail.com">%s</xliff:g>.</string>
 
     <!-- Message to show when an intent automatically switches users into the personal profile. -->
-    <string name="forward_intent_to_owner">You\'re using this app in your personal profile</string>
+    <string name="forward_intent_to_owner">You\'re using this app outside of your work profile</string>
     <!-- Message to show when an intent automatically switches users into a work profile. -->
     <string name="forward_intent_to_work">You\'re using this app in your work profile</string>
 
@@ -4336,7 +4336,7 @@
 
     <!-- Text for the toast that is shown when the user clicks on a launcher that
          doesn't support the work profile. [CHAR LIMIT=100] -->
-    <string name="activity_resolver_work_profiles_support">%1$s doesn\'t support work profile.</string>
+    <string name="activity_resolver_work_profiles_support">%1$s doesn\'t support work profile</string>
 
     <!-- Name of the default audio route for tablets when nothing
          is connected to a headphone or other wired audio output jack. [CHAR LIMIT=50] -->
@@ -4832,7 +4832,7 @@
     <string name="deleted_key"><xliff:g id="key" example="4">%1$s</xliff:g> deleted</string>
 
     <!--
-        Used to wrap a label for content description for a managed profile, e.g. "Work Email" instead
+        Used to wrap a label for content description for a work profile, e.g. "Work Email" instead
         of email when there are two email apps.
         [CHAR LIMIT=20]
      -->
