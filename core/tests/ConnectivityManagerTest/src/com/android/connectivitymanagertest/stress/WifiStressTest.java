@@ -198,6 +198,9 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
     // Stress Wifi reconnection to secure net after sleep
     @LargeTest
     public void testWifiReconnectionAfterSleep() {
+        // set always scan to false
+        Settings.Global.putInt(mRunner.getContext().getContentResolver(),
+                Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0);
         // set wifi sleep policy to never on while in sleep
         Settings.Global.putInt(mRunner.getContext().getContentResolver(),
                 Settings.Global.WIFI_SLEEP_POLICY, Settings.Global.WIFI_SLEEP_POLICY_NEVER);
