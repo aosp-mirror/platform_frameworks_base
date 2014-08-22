@@ -67,6 +67,6 @@
         android:src="@drawable/ic_lock_24dp"
         android:scaleType="center"
         android:tint="#ffffffff"
-        android:contentDescription="@string/accessibility_unlock_button" />
+        android:contentDescription="@string/accessibility_unlock_button_not_secured" />
 
 </com.android.systemui.statusbar.phone.KeyguardBottomAreaView>

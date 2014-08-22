@@ -213,14 +213,23 @@
     <string name="accessibility_camera_button">Camera</string>
     <!-- Content description of the phone button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_phone_button">Phone</string>
-    <!-- Content description of the unlock button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_unlock_button">Unlock</string>
     <!-- Click action label for accessibility for the unlock button. [CHAR LIMIT=NONE] -->
     <string name="unlock_label">unlock</string>
     <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
     <string name="phone_label">open phone</string>
     <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
     <string name="camera_label">open camera</string>
+
+    <!-- Content description of the lock icon when device is secured (lock closed) and trust not managed (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_unlock_button_secured">Device secured.</string>
+    <!-- Content description of the lock icon when device is not secured (lock open) and trust not managed (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_unlock_button_not_secured">Device not secured.</string>
+    <!-- Content description of the lock icon when device is secured (lock closed) and trust managed (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_unlock_button_secured_trust_managed">Device secured, trust agent active.</string>
+    <!-- Content description of the lock icon when device is not secured (lock open) and trust managed (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_unlock_button_not_secured_trust_managed">Device not secured, trust agent active.</string>
+    <!-- Content description of the lock icon when face unlock is running (face icon) and trust managed (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_unlock_button_face_unlock_running">Face detection running, trust agent active.</string>
 
     <!-- Content description of the switch input method button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_ime_switch_button">Switch input method button.</string>
