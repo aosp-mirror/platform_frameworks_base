@@ -49,7 +49,7 @@ using namespace android;
 
 #define PER_ARRAY_TYPE(flag, fnc, readonly, ...) {                                      \
     jint len = 0;                                                                       \
-    void *ptr = NULL;                                                                   \
+    void *ptr = nullptr;                                                                \
     size_t typeBytes = 0;                                                               \
     jint relFlag = 0;                                                                   \
     if (readonly) {                                                                     \
@@ -112,7 +112,7 @@ using namespace android;
 class AutoJavaStringToUTF8 {
 public:
     AutoJavaStringToUTF8(JNIEnv* env, jstring str) : fEnv(env), fJStr(str) {
-        fCStr = env->GetStringUTFChars(str, NULL);
+        fCStr = env->GetStringUTFChars(str, nullptr);
         fLength = env->GetStringUTFLength(str);
     }
     ~AutoJavaStringToUTF8() {
@@ -132,14 +132,14 @@ class AutoJavaStringArrayToUTF8 {
 public:
     AutoJavaStringArrayToUTF8(JNIEnv* env, jobjectArray strings, jsize stringsLength)
     : mEnv(env), mStrings(strings), mStringsLength(stringsLength) {
-        mCStrings = NULL;
-        mSizeArray = NULL;
+        mCStrings = nullptr;
+        mSizeArray = nullptr;
         if (stringsLength > 0) {
             mCStrings = (const char **)calloc(stringsLength, sizeof(char *));
             mSizeArray = (size_t*)calloc(stringsLength, sizeof(size_t));
             for (jsize ct = 0; ct < stringsLength; ct ++) {
                 jstring s = (jstring)mEnv->GetObjectArrayElement(mStrings, ct);
-                mCStrings[ct] = mEnv->GetStringUTFChars(s, NULL);
+                mCStrings[ct] = mEnv->GetStringUTFChars(s, nullptr);
                 mSizeArray[ct] = mEnv->GetStringUTFLength(s);
             }
         }
@@ -201,10 +201,10 @@ static jstring
 nGetName(JNIEnv *_env, jobject _this, jlong con, jlong obj)
 {
     LOG_API("nGetName, con(%p), obj(%p)", (RsContext)con, (void *)obj);
-    const char *name = NULL;
+    const char *name = nullptr;
     rsaGetName((RsContext)con, (void *)obj, &name);
-    if(name == NULL || strlen(name) == 0) {
-        return NULL;
+    if(name == nullptr || strlen(name) == 0) {
+        return nullptr;
     }
     return _env->NewStringUTF(name);
 }
@@ -284,8 +284,8 @@ nContextSetSurface(JNIEnv *_env, jobject _this, jlong con, jint width, jint heig
 {
     LOG_API("nContextSetSurface, con(%p), width(%i), height(%i), surface(%p)", (RsContext)con, width, height, (Surface *)wnd);
 
-    ANativeWindow * window = NULL;
-    if (wnd == NULL) {
+    ANativeWindow * window = nullptr;
+    if (wnd == nullptr) {
 
     } else {
         window = android_view_Surface_getNativeWindow(_env, wnd).get();
@@ -346,7 +346,7 @@ nContextGetUserMessage(JNIEnv *_env, jobject _this, jlong con, jintArray data)
 {
     jint len = _env->GetArrayLength(data);
     LOG_API("nContextGetMessage, con(%p), len(%i)", (RsContext)con, len);
-    jint *ptr = _env->GetIntArrayElements(data, NULL);
+    jint *ptr = _env->GetIntArrayElements(data, nullptr);
     size_t receiveLen;
     uint32_t subID;
     int id = rsContextGetMessage((RsContext)con,
@@ -364,7 +364,7 @@ static jint
 nContextPeekMessage(JNIEnv *_env, jobject _this, jlong con, jintArray auxData)
 {
     LOG_API("nContextPeekMessage, con(%p)", (RsContext)con);
-    jint *auxDataPtr = _env->GetIntArrayElements(auxData, NULL);
+    jint *auxDataPtr = _env->GetIntArrayElements(auxData, nullptr);
     size_t receiveLen;
     uint32_t subID;
     int id = rsContextPeekMessage((RsContext)con, &receiveLen, sizeof(receiveLen),
@@ -390,11 +390,11 @@ static void nContextDeinitToClient(JNIEnv *_env, jobject _this, jlong con)
 static void
 nContextSendMessage(JNIEnv *_env, jobject _this, jlong con, jint id, jintArray data)
 {
-    jint *ptr = NULL;
+    jint *ptr = nullptr;
     jint len = 0;
     if (data) {
         len = _env->GetArrayLength(data);
-        ptr = _env->GetIntArrayElements(data, NULL);
+        ptr = _env->GetIntArrayElements(data, nullptr);
     }
     LOG_API("nContextSendMessage, con(%p), id(%i), len(%i)", (RsContext)con, id, len);
     rsContextSendMessage((RsContext)con, id, (const uint8_t *)ptr, len * sizeof(int));
@@ -419,8 +419,8 @@ nElementCreate2(JNIEnv *_env, jobject _this, jlong con,
     int fieldCount = _env->GetArrayLength(_ids);
     LOG_API("nElementCreate2, con(%p)", (RsContext)con);
 
-    jlong *jIds = _env->GetLongArrayElements(_ids, NULL);
-    jint *jArraySizes = _env->GetIntArrayElements(_arraySizes, NULL);
+    jlong *jIds = _env->GetLongArrayElements(_ids, nullptr);
+    jint *jArraySizes = _env->GetIntArrayElements(_arraySizes, nullptr);
 
     RsElement *ids = (RsElement*)malloc(fieldCount * sizeof(RsElement));
     uint32_t *arraySizes = (uint32_t *)malloc(fieldCount * sizeof(uint32_t));
@@ -549,7 +549,7 @@ nAllocationGetSurface(JNIEnv *_env, jobject _this, jlong con, jlong a)
 
     IGraphicBufferProducer *v = (IGraphicBufferProducer *)rsAllocationGetSurface((RsContext)con, (RsAllocation)a);
     sp<IGraphicBufferProducer> bp = v;
-    v->decStrong(NULL);
+    v->decStrong(nullptr);
 
     jobject o = android_view_Surface_createFromIGraphicBufferProducer(_env, bp);
     return o;
@@ -685,7 +685,7 @@ nAllocationData1D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint off
     RsAllocation *alloc = (RsAllocation *)_alloc;
     LOG_API("nAllocation1DData, con(%p), adapter(%p), offset(%i), count(%i), sizeBytes(%i), dataType(%i)",
             (RsContext)con, (RsAllocation)alloc, offset, count, sizeBytes, dataType);
-    PER_ARRAY_TYPE(NULL, rsAllocation1DData, true, (RsContext)con, alloc, offset, lod, count, ptr, sizeBytes);
+    PER_ARRAY_TYPE(nullptr, rsAllocation1DData, true, (RsContext)con, alloc, offset, lod, count, ptr, sizeBytes);
 }
 
 // Copies from the Java array data into the Allocation pointed to by alloc.
@@ -695,7 +695,7 @@ nAllocationElementData1D(JNIEnv *_env, jobject _this, jlong con, jlong alloc, ji
 {
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocationElementData1D, con(%p), alloc(%p), offset(%i), comp(%i), len(%i), sizeBytes(%i)", (RsContext)con, (RsAllocation)alloc, offset, compIdx, len, sizeBytes);
-    jbyte *ptr = _env->GetByteArrayElements(data, NULL);
+    jbyte *ptr = _env->GetByteArrayElements(data, nullptr);
     rsAllocation1DElementData((RsContext)con, (RsAllocation)alloc, offset, lod, ptr, sizeBytes, compIdx);
     _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
 }
@@ -709,7 +709,7 @@ nAllocationData2D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint xof
     RsAllocationCubemapFace face = (RsAllocationCubemapFace)_face;
     LOG_API("nAllocation2DData, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i) type(%i)",
             (RsContext)con, alloc, xoff, yoff, w, h, sizeBytes, dataType);
-    PER_ARRAY_TYPE(NULL, rsAllocation2DData, true, (RsContext)con, alloc, xoff, yoff, lod, face, w, h, ptr, sizeBytes, 0);
+    PER_ARRAY_TYPE(nullptr, rsAllocation2DData, true, (RsContext)con, alloc, xoff, yoff, lod, face, w, h, ptr, sizeBytes, 0);
 }
 
 // Copies from the Allocation pointed to by srcAlloc into the Allocation
@@ -746,7 +746,7 @@ nAllocationData3D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint xof
     RsAllocation *alloc = (RsAllocation *)_alloc;
     LOG_API("nAllocation3DData, con(%p), alloc(%p), xoff(%i), yoff(%i), zoff(%i), lod(%i), w(%i), h(%i), d(%i), sizeBytes(%i)",
             (RsContext)con, (RsAllocation)alloc, xoff, yoff, zoff, lod, w, h, d, sizeBytes);
-    PER_ARRAY_TYPE(NULL, rsAllocation3DData, true, (RsContext)con, alloc, xoff, yoff, zoff, lod, w, h, d, ptr, sizeBytes, 0);
+    PER_ARRAY_TYPE(nullptr, rsAllocation3DData, true, (RsContext)con, alloc, xoff, yoff, zoff, lod, w, h, d, ptr, sizeBytes, 0);
 }
 
 // Copies from the Allocation pointed to by srcAlloc into the Allocation
@@ -836,13 +836,13 @@ static jlong
 nFileA3DCreateFromAsset(JNIEnv *_env, jobject _this, jlong con, jobject _assetMgr, jstring _path)
 {
     AssetManager* mgr = assetManagerForJavaObject(_env, _assetMgr);
-    if (mgr == NULL) {
+    if (mgr == nullptr) {
         return 0;
     }
 
     AutoJavaStringToUTF8 str(_env, _path);
     Asset* asset = mgr->open(str.c_str(), Asset::ACCESS_BUFFER);
-    if (asset == NULL) {
+    if (asset == nullptr) {
         return 0;
     }
 
@@ -924,13 +924,13 @@ nFontCreateFromAsset(JNIEnv *_env, jobject _this, jlong con, jobject _assetMgr, 
                      jfloat fontSize, jint dpi)
 {
     AssetManager* mgr = assetManagerForJavaObject(_env, _assetMgr);
-    if (mgr == NULL) {
+    if (mgr == nullptr) {
         return 0;
     }
 
     AutoJavaStringToUTF8 str(_env, _path);
     Asset* asset = mgr->open(str.c_str(), Asset::ACCESS_BUFFER);
-    if (asset == NULL) {
+    if (asset == nullptr) {
         return 0;
     }
 
@@ -1027,7 +1027,7 @@ nScriptSetVarV(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot, 
 {
     LOG_API("nScriptSetVarV, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
     jint len = _env->GetArrayLength(data);
-    jbyte *ptr = _env->GetByteArrayElements(data, NULL);
+    jbyte *ptr = _env->GetByteArrayElements(data, nullptr);
     rsScriptSetVarV((RsContext)con, (RsScript)script, slot, ptr, len);
     _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
 }
@@ -1037,7 +1037,7 @@ nScriptGetVarV(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot, 
 {
     LOG_API("nScriptSetVarV, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
     jint len = _env->GetArrayLength(data);
-    jbyte *ptr = _env->GetByteArrayElements(data, NULL);
+    jbyte *ptr = _env->GetByteArrayElements(data, nullptr);
     rsScriptGetVarV((RsContext)con, (RsScript)script, slot, ptr, len);
     _env->ReleaseByteArrayElements(data, ptr, 0);
 }
@@ -1047,9 +1047,9 @@ nScriptSetVarVE(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot,
 {
     LOG_API("nScriptSetVarVE, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
     jint len = _env->GetArrayLength(data);
-    jbyte *ptr = _env->GetByteArrayElements(data, NULL);
+    jbyte *ptr = _env->GetByteArrayElements(data, nullptr);
     jint dimsLen = _env->GetArrayLength(dims) * sizeof(int);
-    jint *dimsPtr = _env->GetIntArrayElements(dims, NULL);
+    jint *dimsPtr = _env->GetIntArrayElements(dims, nullptr);
     rsScriptSetVarVE((RsContext)con, (RsScript)script, slot, ptr, len, (RsElement)elem,
                      (const uint32_t*) dimsPtr, dimsLen);
     _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
@@ -1085,7 +1085,7 @@ nScriptInvokeV(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot, 
 {
     LOG_API("nScriptInvokeV, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
     jint len = _env->GetArrayLength(data);
-    jbyte *ptr = _env->GetByteArrayElements(data, NULL);
+    jbyte *ptr = _env->GetByteArrayElements(data, nullptr);
     rsScriptInvokeV((RsContext)con, (RsScript)script, slot, ptr, len);
     _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
 }
@@ -1099,13 +1099,13 @@ nScriptForEach(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot,
             (void *)script, slot);
 
     jint   in_len = 0;
-    jlong *in_ptr = NULL;
+    jlong *in_ptr = nullptr;
 
-    RsAllocation *in_allocs = NULL;
+    RsAllocation *in_allocs = nullptr;
 
-    if (ains != NULL) {
+    if (ains != nullptr) {
         in_len = _env->GetArrayLength(ains);
-        in_ptr = _env->GetLongArrayElements(ains, NULL);
+        in_ptr = _env->GetLongArrayElements(ains, nullptr);
 
         if (sizeof(RsAllocation) == sizeof(jlong)) {
             in_allocs = (RsAllocation*)in_ptr;
@@ -1122,22 +1122,22 @@ nScriptForEach(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot,
     }
 
     jint   param_len = 0;
-    jbyte *param_ptr = NULL;
+    jbyte *param_ptr = nullptr;
 
-    if (params != NULL) {
+    if (params != nullptr) {
         param_len = _env->GetArrayLength(params);
-        param_ptr = _env->GetByteArrayElements(params, NULL);
+        param_ptr = _env->GetByteArrayElements(params, nullptr);
     }
 
-    RsScriptCall sc, *sca = NULL;
+    RsScriptCall sc, *sca = nullptr;
     uint32_t sc_size = 0;
 
     jint  limit_len = 0;
-    jint *limit_ptr = NULL;
+    jint *limit_ptr = nullptr;
 
-    if (limits != NULL) {
+    if (limits != nullptr) {
         limit_len = _env->GetArrayLength(limits);
-        limit_ptr = _env->GetIntArrayElements(limits, NULL);
+        limit_ptr = _env->GetIntArrayElements(limits, nullptr);
 
         assert(limit_len == 6);
 
@@ -1156,15 +1156,15 @@ nScriptForEach(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot,
                          in_allocs, in_len, (RsAllocation)aout,
                          param_ptr, param_len, sca, sc_size);
 
-    if (ains != NULL) {
+    if (ains != nullptr) {
         _env->ReleaseLongArrayElements(ains, in_ptr, JNI_ABORT);
     }
 
-    if (params != NULL) {
+    if (params != nullptr) {
         _env->ReleaseByteArrayElements(params, param_ptr, JNI_ABORT);
     }
 
-    if (limits != NULL) {
+    if (limits != nullptr) {
         _env->ReleaseIntArrayElements(limits, limit_ptr, JNI_ABORT);
     }
 }
@@ -1181,7 +1181,7 @@ nScriptCCreate(JNIEnv *_env, jobject _this, jlong con,
     AutoJavaStringToUTF8 resNameUTF(_env, resName);
     AutoJavaStringToUTF8 cacheDirUTF(_env, cacheDir);
     jlong ret = 0;
-    jbyte* script_ptr = NULL;
+    jbyte* script_ptr = nullptr;
     jint _exception = 0;
     jint remaining;
     if (!scriptRef) {
@@ -1248,35 +1248,35 @@ nScriptGroupCreate(JNIEnv *_env, jobject _this, jlong con, jlongArray _kernels, 
     LOG_API("nScriptGroupCreate, con(%p)", (RsContext)con);
 
     jint kernelsLen = _env->GetArrayLength(_kernels);
-    jlong *jKernelsPtr = _env->GetLongArrayElements(_kernels, NULL);
+    jlong *jKernelsPtr = _env->GetLongArrayElements(_kernels, nullptr);
     RsScriptKernelID* kernelsPtr = (RsScriptKernelID*) malloc(sizeof(RsScriptKernelID) * kernelsLen);
     for(int i = 0; i < kernelsLen; ++i) {
         kernelsPtr[i] = (RsScriptKernelID)jKernelsPtr[i];
     }
 
     jint srcLen = _env->GetArrayLength(_src);
-    jlong *jSrcPtr = _env->GetLongArrayElements(_src, NULL);
+    jlong *jSrcPtr = _env->GetLongArrayElements(_src, nullptr);
     RsScriptKernelID* srcPtr = (RsScriptKernelID*) malloc(sizeof(RsScriptKernelID) * srcLen);
     for(int i = 0; i < srcLen; ++i) {
         srcPtr[i] = (RsScriptKernelID)jSrcPtr[i];
     }
 
     jint dstkLen = _env->GetArrayLength(_dstk);
-    jlong *jDstkPtr = _env->GetLongArrayElements(_dstk, NULL);
+    jlong *jDstkPtr = _env->GetLongArrayElements(_dstk, nullptr);
     RsScriptKernelID* dstkPtr = (RsScriptKernelID*) malloc(sizeof(RsScriptKernelID) * dstkLen);
     for(int i = 0; i < dstkLen; ++i) {
         dstkPtr[i] = (RsScriptKernelID)jDstkPtr[i];
     }
 
     jint dstfLen = _env->GetArrayLength(_dstf);
-    jlong *jDstfPtr = _env->GetLongArrayElements(_dstf, NULL);
+    jlong *jDstfPtr = _env->GetLongArrayElements(_dstf, nullptr);
     RsScriptKernelID* dstfPtr = (RsScriptKernelID*) malloc(sizeof(RsScriptKernelID) * dstfLen);
     for(int i = 0; i < dstfLen; ++i) {
         dstfPtr[i] = (RsScriptKernelID)jDstfPtr[i];
     }
 
     jint typesLen = _env->GetArrayLength(_types);
-    jlong *jTypesPtr = _env->GetLongArrayElements(_types, NULL);
+    jlong *jTypesPtr = _env->GetLongArrayElements(_types, nullptr);
     RsType* typesPtr = (RsType*) malloc(sizeof(RsType) * typesLen);
     for(int i = 0; i < typesLen; ++i) {
         typesPtr[i] = (RsType)jTypesPtr[i];
@@ -1370,7 +1370,7 @@ nProgramFragmentCreate(JNIEnv *_env, jobject _this, jlong con, jstring shader,
                        jobjectArray texNames, jlongArray params)
 {
     AutoJavaStringToUTF8 shaderUTF(_env, shader);
-    jlong *jParamPtr = _env->GetLongArrayElements(params, NULL);
+    jlong *jParamPtr = _env->GetLongArrayElements(params, nullptr);
     jint paramLen = _env->GetArrayLength(params);
 
     int texCount = _env->GetArrayLength(texNames);
@@ -1401,7 +1401,7 @@ nProgramVertexCreate(JNIEnv *_env, jobject _this, jlong con, jstring shader,
                      jobjectArray texNames, jlongArray params)
 {
     AutoJavaStringToUTF8 shaderUTF(_env, shader);
-    jlong *jParamPtr = _env->GetLongArrayElements(params, NULL);
+    jlong *jParamPtr = _env->GetLongArrayElements(params, nullptr);
     jint paramLen = _env->GetArrayLength(params);
 
     LOG_API("nProgramVertexCreate, con(%p), paramLen(%i)", (RsContext)con, paramLen);
@@ -1507,21 +1507,21 @@ nMeshCreate(JNIEnv *_env, jobject _this, jlong con, jlongArray _vtx, jlongArray 
     LOG_API("nMeshCreate, con(%p)", (RsContext)con);
 
     jint vtxLen = _env->GetArrayLength(_vtx);
-    jlong *jVtxPtr = _env->GetLongArrayElements(_vtx, NULL);
+    jlong *jVtxPtr = _env->GetLongArrayElements(_vtx, nullptr);
     RsAllocation* vtxPtr = (RsAllocation*) malloc(sizeof(RsAllocation) * vtxLen);
     for(int i = 0; i < vtxLen; ++i) {
         vtxPtr[i] = (RsAllocation)(uintptr_t)jVtxPtr[i];
     }
 
     jint idxLen = _env->GetArrayLength(_idx);
-    jlong *jIdxPtr = _env->GetLongArrayElements(_idx, NULL);
+    jlong *jIdxPtr = _env->GetLongArrayElements(_idx, nullptr);
     RsAllocation* idxPtr = (RsAllocation*) malloc(sizeof(RsAllocation) * idxLen);
     for(int i = 0; i < idxLen; ++i) {
         idxPtr[i] = (RsAllocation)(uintptr_t)jIdxPtr[i];
     }
 
     jint primLen = _env->GetArrayLength(_prim);
-    jint *primPtr = _env->GetIntArrayElements(_prim, NULL);
+    jint *primPtr = _env->GetIntArrayElements(_prim, nullptr);
 
     jlong id = (jlong)(uintptr_t)rsMeshCreate((RsContext)con,
                                (RsAllocation *)vtxPtr, vtxLen,
@@ -1744,14 +1744,14 @@ static int registerFuncs(JNIEnv *_env)
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
-    JNIEnv* env = NULL;
+    JNIEnv* env = nullptr;
     jint result = -1;
 
     if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
         ALOGE("ERROR: GetEnv failed\n");
         goto bail;
     }
-    assert(env != NULL);
+    assert(env != nullptr);
 
     if (registerFuncs(env) < 0) {
         ALOGE("ERROR: Renderscript native registration failed\n");
