@@ -77,7 +77,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
 
     @Override
     protected void handleSecondaryClick() {
-        showDetail(true);
+        mHost.startSettingsActivity(BLUETOOTH_SETTINGS);
     }
 
     @Override
