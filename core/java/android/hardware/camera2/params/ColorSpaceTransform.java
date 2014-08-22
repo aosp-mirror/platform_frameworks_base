@@ -225,7 +225,18 @@ public final class ColorSpaceTransform {
         }
         if (obj instanceof ColorSpaceTransform) {
             final ColorSpaceTransform other = (ColorSpaceTransform) obj;
-            return Arrays.equals(mElements, other.mElements);
+            for (int i = 0, j = 0; i < COUNT; ++i, j += RATIONAL_SIZE) {
+                int numerator = mElements[j + OFFSET_NUMERATOR];
+                int denominator = mElements[j + OFFSET_DENOMINATOR];
+                int numeratorOther = other.mElements[j + OFFSET_NUMERATOR];
+                int denominatorOther = other.mElements[j + OFFSET_DENOMINATOR];
+                Rational r = new Rational(numerator, denominator);
+                Rational rOther = new Rational(numeratorOther, denominatorOther);
+                if (!r.equals(rOther)) {
+                    return false;
+                }
+            }
+            return true;
         }
         return false;
     }
@@ -238,5 +249,51 @@ public final class ColorSpaceTransform {
         return HashCodeHelpers.hashCode(mElements);
     }
 
+    /**
+     * Return the color space transform as a string representation.
+     *
+     *  <p> Example:
+     * {@code "ColorSpaceTransform([1/1, 0/1, 0/1], [0/1, 1/1, 0/1], [0/1, 0/1, 1/1])"} is an
+     * identity transform. Elements are printed in row major order. </p>
+     *
+     * @return string representation of color space transform
+     */
+    @Override
+    public String toString() {
+        return String.format("ColorSpaceTransform%s", toShortString());
+    }
+
+    /**
+     * Return the color space transform as a compact string representation.
+     *
+     *  <p> Example:
+     * {@code "([1/1, 0/1, 0/1], [0/1, 1/1, 0/1], [0/1, 0/1, 1/1])"} is an identity transform.
+     * Elements are printed in row major order. </p>
+     *
+     * @return compact string representation of color space transform
+     */
+    private String toShortString() {
+        StringBuilder sb = new StringBuilder("(");
+        for (int row = 0, i = 0; row < ROWS; row++) {
+            sb.append("[");
+            for (int col = 0; col < COLUMNS; col++, i += RATIONAL_SIZE) {
+                int numerator = mElements[i + OFFSET_NUMERATOR];
+                int denominator = mElements[i + OFFSET_DENOMINATOR];
+                sb.append(numerator);
+                sb.append("/");
+                sb.append(denominator);
+                if (col < COLUMNS - 1) {
+                    sb.append(", ");
+                }
+            }
+            sb.append("]");
+            if (row < ROWS - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append(")");
+        return sb.toString();
+    }
+
     private final int[] mElements;
-};
+}

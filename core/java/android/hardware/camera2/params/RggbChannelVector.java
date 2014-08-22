@@ -190,6 +190,32 @@ public final class RggbChannelVector {
                 Float.floatToIntBits(mBlue);
     }
 
+    /**
+     * Return the RggbChannelVector as a string representation.
+     *
+     * <p> {@code "RggbChannelVector{R:%f, G_even:%f, G_odd:%f, B:%f}"}, where each
+     * {@code %f} respectively represents one of the the four color channels. </p>
+     *
+     * @return string representation of {@link RggbChannelVector}
+     */
+    @Override
+    public String toString() {
+        return String.format("RggbChannelVector%s", toShortString());
+    }
+
+    /**
+     * Return the RggbChannelVector as a string in compact form.
+     *
+     * <p> {@code "{R:%f, G_even:%f, G_odd:%f, B:%f}"}, where each {@code %f}
+     * respectively represents one of the the four color channels. </p>
+     *
+     * @return compact string representation of {@link RggbChannelVector}
+     */
+    private String toShortString() {
+        return String.format("{R:%f, G_even:%f, G_odd:%f, B:%f}",
+                mRed, mGreenEven, mGreenOdd, mBlue);
+    }
+
     private final float mRed;
     private final float mGreenEven;
     private final float mGreenOdd;
