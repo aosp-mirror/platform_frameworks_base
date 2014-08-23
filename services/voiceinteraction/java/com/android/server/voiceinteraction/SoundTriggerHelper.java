@@ -16,6 +16,10 @@
 
 package com.android.server.voiceinteraction;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
@@ -27,6 +31,7 @@ import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
 import android.hardware.soundtrigger.SoundTrigger.SoundModelEvent;
 import android.hardware.soundtrigger.SoundTriggerModule;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -64,8 +69,10 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     /** The properties for the DSP module */
     private final SoundTriggerModule mModule;
     private final Object mLock = new Object();
+    private final Context mContext;
     private final TelephonyManager mTelephonyManager;
     private final PhoneStateListener mPhoneStateListener;
+    private final PowerManager mPowerManager;
 
     // TODO: Since many layers currently only deal with one recognition
     // we simplify things by assuming one listener here too.
@@ -77,15 +84,19 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     private RecognitionConfig mRecognitionConfig = null;
     private boolean mRequested = false;
     private boolean mCallActive = false;
+    private boolean mIsPowerSaveMode = false;
     // Indicates if the native sound trigger service is disabled or not.
     // This is an indirect indication of the microphone being open in some other application.
     private boolean mServiceDisabled = false;
     private boolean mStarted = false;
+    private PowerSaveModeListener mPowerSaveModeListener;
 
-    SoundTriggerHelper(TelephonyManager telephonyManager) {
+    SoundTriggerHelper(Context context) {
         ArrayList <ModuleProperties> modules = new ArrayList<>();
         int status = SoundTrigger.listModules(modules);
-        mTelephonyManager = telephonyManager;
+        mContext = context;
+        mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mPhoneStateListener = new MyCallStateListener();
         if (status != SoundTrigger.STATUS_OK || modules.size() == 0) {
             Slog.w(TAG, "listModules status=" + status + ", # of modules=" + modules.size());
@@ -133,6 +144,15 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 mCallActive = mTelephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE;
                 // Register for call state changes when the first call to start recognition occurs.
                 mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+
+                // Register for power saver mode changes when the first call to start recognition
+                // occurs.
+                if (mPowerSaveModeListener == null) {
+                    mPowerSaveModeListener = new PowerSaveModeListener();
+                    mContext.registerReceiver(mPowerSaveModeListener,
+                            new IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED));
+                }
+                mIsPowerSaveMode = mPowerManager.isPowerSaveMode();
             }
 
             if (moduleProperties == null || mModule == null) {
@@ -338,16 +358,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
     }
 
-    class MyCallStateListener extends PhoneStateListener {
-        @Override
-        public void onCallStateChanged(int state, String arg1) {
-            if (DBG) Slog.d(TAG, "onCallStateChanged: " + state);
-            synchronized (mLock) {
-                onCallStateChangedLocked(TelephonyManager.CALL_STATE_IDLE != state);
-            }
-        }
-    }
-
     private void onCallStateChangedLocked(boolean callActive) {
         if (mCallActive == callActive) {
             // We consider multiple call states as being active
@@ -355,6 +365,14 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return;
         }
         mCallActive = callActive;
+        updateRecognitionLocked(true /* notify */);
+    }
+
+    private void onPowerSaveModeChangedLocked(boolean isPowerSaveMode) {
+        if (mIsPowerSaveMode == isPowerSaveMode) {
+            return;
+        }
+        mIsPowerSaveMode = isPowerSaveMode;
         updateRecognitionLocked(true /* notify */);
     }
 
@@ -438,7 +456,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return STATUS_OK;
         }
 
-        boolean start = mRequested && !mCallActive && !mServiceDisabled;
+        boolean start = mRequested && !mCallActive && !mServiceDisabled && !mIsPowerSaveMode;
         if (start == mStarted) {
             // No-op.
             return STATUS_OK;
@@ -509,6 +527,36 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         // Unregister from call state changes.
         mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+
+        // Unregister from power save mode changes.
+        if (mPowerSaveModeListener != null) {
+            mContext.unregisterReceiver(mPowerSaveModeListener);
+            mPowerSaveModeListener = null;
+        }
+    }
+
+    class MyCallStateListener extends PhoneStateListener {
+        @Override
+        public void onCallStateChanged(int state, String arg1) {
+            if (DBG) Slog.d(TAG, "onCallStateChanged: " + state);
+            synchronized (mLock) {
+                onCallStateChangedLocked(TelephonyManager.CALL_STATE_IDLE != state);
+            }
+        }
+    }
+
+    class PowerSaveModeListener extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(intent.getAction())) {
+                return;
+            }
+            boolean active = mPowerManager.isPowerSaveMode();
+            if (DBG) Slog.d(TAG, "onPowerSaveModeChanged: " + active);
+            synchronized (mLock) {
+                onPowerSaveModeChangedLocked(active);
+            }
+        }
     }
 
     void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -525,6 +573,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             pw.print("  requested="); pw.println(mRequested);
             pw.print("  started="); pw.println(mStarted);
             pw.print("  call active="); pw.println(mCallActive);
+            pw.print("  power save mode active="); pw.println(mIsPowerSaveMode);
             pw.print("  service disabled="); pw.println(mServiceDisabled);
         }
     }
