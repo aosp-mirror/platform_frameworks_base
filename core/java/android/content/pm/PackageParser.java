@@ -354,7 +354,11 @@ public class PackageParser {
     }
 
     public static final boolean isApkFile(File file) {
-        return file.getName().endsWith(".apk");
+        return isApkPath(file.getName());
+    }
+
+    private static boolean isApkPath(String path) {
+        return path.endsWith(".apk");
     }
 
     /*
@@ -754,26 +758,41 @@ public class PackageParser {
                     "Not a coreApp: " + packageDir);
         }
 
-        final File baseApk = new File(lite.baseCodePath);
-        final Package pkg = parseBaseApk(baseApk, flags);
-        if (pkg == null) {
-            throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
-                    "Failed to parse base APK: " + baseApk);
-        }
+        final AssetManager assets = new AssetManager();
+        try {
+            // Load the base and all splits into the AssetManager
+            // so that resources can be overriden when parsing the manifests.
+            loadApkIntoAssetManager(assets, lite.baseCodePath, flags);
 
-        if (!ArrayUtils.isEmpty(lite.splitNames)) {
-            final int num = lite.splitNames.length;
-            pkg.splitNames = lite.splitNames;
-            pkg.splitCodePaths = lite.splitCodePaths;
-            pkg.splitFlags = new int[num];
-
-            for (int i = 0; i < num; i++) {
-                parseSplitApk(pkg, i, flags);
+            if (!ArrayUtils.isEmpty(lite.splitCodePaths)) {
+                for (String path : lite.splitCodePaths) {
+                    loadApkIntoAssetManager(assets, path, flags);
+                }
             }
-        }
 
-        pkg.codePath = packageDir.getAbsolutePath();
-        return pkg;
+            final File baseApk = new File(lite.baseCodePath);
+            final Package pkg = parseBaseApk(baseApk, assets, flags);
+            if (pkg == null) {
+                throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
+                        "Failed to parse base APK: " + baseApk);
+            }
+
+            if (!ArrayUtils.isEmpty(lite.splitNames)) {
+                final int num = lite.splitNames.length;
+                pkg.splitNames = lite.splitNames;
+                pkg.splitCodePaths = lite.splitCodePaths;
+                pkg.splitFlags = new int[num];
+
+                for (int i = 0; i < num; i++) {
+                    parseSplitApk(pkg, i, assets, flags);
+                }
+            }
+
+            pkg.codePath = packageDir.getAbsolutePath();
+            return pkg;
+        } finally {
+            IoUtils.closeQuietly(assets);
+        }
     }
 
     /**
@@ -796,35 +815,48 @@ public class PackageParser {
             }
         }
 
-        final Package pkg = parseBaseApk(apkFile, flags);
-        pkg.codePath = apkFile.getAbsolutePath();
-        return pkg;
+        final AssetManager assets = new AssetManager();
+        try {
+            final Package pkg = parseBaseApk(apkFile, assets, flags);
+            pkg.codePath = apkFile.getAbsolutePath();
+            return pkg;
+        } finally {
+            IoUtils.closeQuietly(assets);
+        }
     }
 
-    private Package parseBaseApk(File apkFile, int flags) throws PackageParserException {
+    private static int loadApkIntoAssetManager(AssetManager assets, String apkPath, int flags)
+            throws PackageParserException {
+        if ((flags & PARSE_MUST_BE_APK) != 0 && !isApkPath(apkPath)) {
+            throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
+                    "Invalid package file: " + apkPath);
+        }
+
+        // The AssetManager guarantees uniqueness for asset paths, so if this asset path
+        // already exists in the AssetManager, addAssetPath will only return the cookie
+        // assigned to it.
+        int cookie = assets.addAssetPath(apkPath);
+        if (cookie == 0) {
+            throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
+                    "Failed adding asset path: " + apkPath);
+        }
+        return cookie;
+    }
+
+    private Package parseBaseApk(File apkFile, AssetManager assets, int flags)
+            throws PackageParserException {
         final String apkPath = apkFile.getAbsolutePath();
 
         mParseError = PackageManager.INSTALL_SUCCEEDED;
         mArchiveSourcePath = apkFile.getAbsolutePath();
 
-        if ((flags & PARSE_MUST_BE_APK) != 0 && !isApkFile(apkFile)) {
-            throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
-                    "Invalid package file: " + apkPath);
-        }
-
         if (DEBUG_JAR) Slog.d(TAG, "Scanning base APK: " + apkPath);
 
-        AssetManager assets = null;
+        final int cookie = loadApkIntoAssetManager(assets, apkPath, flags);
+
         Resources res = null;
         XmlResourceParser parser = null;
         try {
-            assets = new AssetManager();
-            int cookie = assets.addAssetPath(apkPath);
-            if (cookie == 0) {
-                throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
-                        "Failed adding asset path: " + apkPath);
-            }
-
             res = new Resources(assets, mMetrics, null);
             assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     Build.VERSION.RESOURCES_SDK_INT);
@@ -849,11 +881,10 @@ public class PackageParser {
                     "Failed to read manifest from " + apkPath, e);
         } finally {
             IoUtils.closeQuietly(parser);
-            IoUtils.closeQuietly(assets);
         }
     }
 
-    private void parseSplitApk(Package pkg, int splitIndex, int flags)
+    private void parseSplitApk(Package pkg, int splitIndex, AssetManager assets, int flags)
             throws PackageParserException {
         final String apkPath = pkg.splitCodePaths[splitIndex];
         final File apkFile = new File(apkPath);
@@ -861,24 +892,13 @@ public class PackageParser {
         mParseError = PackageManager.INSTALL_SUCCEEDED;
         mArchiveSourcePath = apkPath;
 
-        if ((flags & PARSE_MUST_BE_APK) != 0 && !isApkFile(apkFile)) {
-            throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
-                    "Invalid package file: " + apkPath);
-        }
-
         if (DEBUG_JAR) Slog.d(TAG, "Scanning split APK: " + apkPath);
 
-        AssetManager assets = null;
+        final int cookie = loadApkIntoAssetManager(assets, apkPath, flags);
+
         Resources res = null;
         XmlResourceParser parser = null;
         try {
-            assets = new AssetManager();
-            int cookie = assets.addAssetPath(apkPath);
-            if (cookie == 0) {
-                throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
-                        "Failed adding asset path: " + apkPath);
-            }
-
             res = new Resources(assets, mMetrics, null);
             assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     Build.VERSION.RESOURCES_SDK_INT);
@@ -898,7 +918,6 @@ public class PackageParser {
                     "Failed to read manifest from " + apkPath, e);
         } finally {
             IoUtils.closeQuietly(parser);
-            IoUtils.closeQuietly(assets);
         }
     }
 
