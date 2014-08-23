@@ -17,7 +17,6 @@
 package android.app.job;
 
 import android.content.ComponentName;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -31,40 +30,45 @@ import android.os.PersistableBundle;
  * accomplish. Doing otherwise with throw an exception in your app.
  */
 public class JobInfo implements Parcelable {
-    public interface NetworkType {
-        /** Default. */
-        public final int NONE = 0;
-        /** This job requires network connectivity. */
-        public final int ANY = 1;
-        /** This job requires network connectivity that is unmetered. */
-        public final int UNMETERED = 2;
-    }
+    /** Default. */
+    public static final int NETWORK_TYPE_NONE = 0;
+    /** This job requires network connectivity. */
+    public static final int NETWORK_TYPE_ANY = 1;
+    /** This job requires network connectivity that is unmetered. */
+    public static final int NETWORK_TYPE_UNMETERED = 2;
 
     /**
      * Amount of backoff a job has initially by default, in milliseconds.
-     * @hide.
      */
-    public static final long DEFAULT_INITIAL_BACKOFF_MILLIS = 5000L;
+    public static final long DEFAULT_INITIAL_BACKOFF_MILLIS = 30000L;  // 30 seconds.
+
+    /**
+     * Maximum backoff we allow for a job, in milliseconds.
+     */
+    public static final long MAX_BACKOFF_DELAY_MILLIS = 5 * 60 * 60 * 1000;  // 5 hours.
+
+    /**
+     * Linearly back-off a failed job. See
+     * {@link android.app.job.JobInfo.Builder#setBackoffCriteria(long, int)}
+     * retry_time(current_time, num_failures) =
+     *     current_time + initial_backoff_millis * num_failures, num_failures >= 1
+     */
+    public static final int BACKOFF_POLICY_LINEAR = 0;
+
+    /**
+     * Exponentially back-off a failed job. See
+     * {@link android.app.job.JobInfo.Builder#setBackoffCriteria(long, int)}
+     *
+     * retry_time(current_time, num_failures) =
+     *     current_time + initial_backoff_millis * 2 ^ (num_failures - 1), num_failures >= 1
+     */
+    public static final int BACKOFF_POLICY_EXPONENTIAL = 1;
 
     /**
      * Default type of backoff.
      * @hide
      */
-    public static final int DEFAULT_BACKOFF_POLICY = BackoffPolicy.EXPONENTIAL;
-    /**
-     * Maximum backoff we allow for a job, in milliseconds.
-     * @hide
-     */
-    public static final long MAX_BACKOFF_DELAY_MILLIS = 24 * 60 * 60 * 1000;  // 24 hours.
-
-    /**
-     * Linear: retry_time(failure_time, t) = failure_time + initial_retry_delay * t, t >= 1
-     * Expon: retry_time(failure_time, t) = failure_time + initial_retry_delay ^ t, t >= 1
-     */
-    public interface BackoffPolicy {
-        public final int LINEAR = 0;
-        public final int EXPONENTIAL = 1;
-    }
+    public static final int DEFAULT_BACKOFF_POLICY = BACKOFF_POLICY_EXPONENTIAL;
 
     private final int jobId;
     private final PersistableBundle extras;
@@ -73,7 +77,7 @@ public class JobInfo implements Parcelable {
     private final boolean requireDeviceIdle;
     private final boolean hasEarlyConstraint;
     private final boolean hasLateConstraint;
-    private final int networkCapabilities;
+    private final int networkType;
     private final long minLatencyMillis;
     private final long maxExecutionDelayMillis;
     private final boolean isPeriodic;
@@ -118,10 +122,12 @@ public class JobInfo implements Parcelable {
     }
 
     /**
-     * See {@link android.app.job.JobInfo.NetworkType} for a description of this value.
+     * One of {@link android.app.job.JobInfo#NETWORK_TYPE_ANY},
+     * {@link android.app.job.JobInfo#NETWORK_TYPE_NONE}, or
+     * {@link android.app.job.JobInfo#NETWORK_TYPE_UNMETERED}.
      */
-    public int getNetworkCapabilities() {
-        return networkCapabilities;
+    public int getNetworkType() {
+        return networkType;
     }
 
     /**
@@ -172,8 +178,9 @@ public class JobInfo implements Parcelable {
     }
 
     /**
-     * See {@link android.app.job.JobInfo.BackoffPolicy} for an explanation of the values this field
-     * can take. This defaults to exponential.
+     * One of either {@link android.app.job.JobInfo#BACKOFF_POLICY_EXPONENTIAL}, or
+     * {@link android.app.job.JobInfo#BACKOFF_POLICY_LINEAR}, depending on which criteria you set
+     * when creating this job.
      */
     public int getBackoffPolicy() {
         return backoffPolicy;
@@ -203,7 +210,7 @@ public class JobInfo implements Parcelable {
         service = in.readParcelable(null);
         requireCharging = in.readInt() == 1;
         requireDeviceIdle = in.readInt() == 1;
-        networkCapabilities = in.readInt();
+        networkType = in.readInt();
         minLatencyMillis = in.readLong();
         maxExecutionDelayMillis = in.readLong();
         isPeriodic = in.readInt() == 1;
@@ -221,7 +228,7 @@ public class JobInfo implements Parcelable {
         service = b.mJobService;
         requireCharging = b.mRequiresCharging;
         requireDeviceIdle = b.mRequiresDeviceIdle;
-        networkCapabilities = b.mNetworkCapabilities;
+        networkType = b.mNetworkType;
         minLatencyMillis = b.mMinLatencyMillis;
         maxExecutionDelayMillis = b.mMaxExecutionDelayMillis;
         isPeriodic = b.mIsPeriodic;
@@ -245,7 +252,7 @@ public class JobInfo implements Parcelable {
         out.writeParcelable(service, flags);
         out.writeInt(requireCharging ? 1 : 0);
         out.writeInt(requireDeviceIdle ? 1 : 0);
-        out.writeInt(networkCapabilities);
+        out.writeInt(networkType);
         out.writeLong(minLatencyMillis);
         out.writeLong(maxExecutionDelayMillis);
         out.writeInt(isPeriodic ? 1 : 0);
@@ -282,7 +289,7 @@ public class JobInfo implements Parcelable {
         // Requirements.
         private boolean mRequiresCharging;
         private boolean mRequiresDeviceIdle;
-        private int mNetworkCapabilities;
+        private int mNetworkType;
         private boolean mIsPersisted;
         // One-off parameters.
         private long mMinLatencyMillis;
@@ -320,15 +327,15 @@ public class JobInfo implements Parcelable {
         }
 
         /**
-         * Set some description of the kind of network capabilities you would like to have. This
-         * will be a parameter defined in {@link android.app.job.JobInfo.NetworkType}.
-         * Not calling this function means the network is not necessary.
+         * Set some description of the kind of network type your job needs to have.
+         * Not calling this function means the network is not necessary, as the default is
+         * {@link #NETWORK_TYPE_NONE}.
          * Bear in mind that calling this function defines network as a strict requirement for your
-         * job if the network requested is not available your job will never run. See
+         * job. If the network requested is not available your job will never run. See
          * {@link #setOverrideDeadline(long)} to change this behaviour.
          */
-        public Builder setRequiredNetworkCapabilities(int networkCapabilities) {
-            mNetworkCapabilities = networkCapabilities;
+        public Builder setRequiredNetworkType(int networkType) {
+            mNetworkType = networkType;
             return this;
         }
 
@@ -401,8 +408,8 @@ public class JobInfo implements Parcelable {
 
         /**
          * Set up the back-off/retry policy.
-         * This defaults to some respectable values: {5 seconds, Exponential}. We cap back-off at
-         * 1hr.
+         * This defaults to some respectable values: {30 seconds, Exponential}. We cap back-off at
+         * 5hrs.
          * Note that trying to set a backoff criteria for a job with
          * {@link #setRequiresDeviceIdle(boolean)} will throw an exception when you call build().
          * This is because back-off typically does not make sense for these types of jobs. See
@@ -411,7 +418,8 @@ public class JobInfo implements Parcelable {
          * mode.
          * @param initialBackoffMillis Millisecond time interval to wait initially when job has
          *                             failed.
-         * @param backoffPolicy is one of {@link BackoffPolicy}
+         * @param backoffPolicy is one of {@link #BACKOFF_POLICY_LINEAR} or
+         * {@link #BACKOFF_POLICY_EXPONENTIAL}
          */
         public Builder setBackoffCriteria(long initialBackoffMillis, int backoffPolicy) {
             mBackoffPolicySet = true;
@@ -428,7 +436,7 @@ public class JobInfo implements Parcelable {
          * @param isPersisted True to indicate that the job will be written to disk and loaded at
          *                    boot.
          */
-        public Builder setIsPersisted(boolean isPersisted) {
+        public Builder setPersisted(boolean isPersisted) {
             mIsPersisted = isPersisted;
             return this;
         }
@@ -439,7 +447,7 @@ public class JobInfo implements Parcelable {
         public JobInfo build() {
             // Allow jobs with no constraints - What am I, a database?
             if (!mHasEarlyConstraint && !mHasLateConstraint && !mRequiresCharging &&
-                    !mRequiresDeviceIdle && mNetworkCapabilities == NetworkType.NONE) {
+                    !mRequiresDeviceIdle && mNetworkType == NETWORK_TYPE_NONE) {
                 throw new IllegalArgumentException("You're trying to build a job with no " +
                         "constraints, this is not allowed.");
             }

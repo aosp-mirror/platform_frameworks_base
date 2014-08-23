@@ -17,9 +17,6 @@
 package android.app.job;
 
 import android.app.Service;
-import android.app.job.IJobCallback;
-import android.app.job.IJobService;
-import android.app.job.IJobService.Stub;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -218,7 +215,7 @@ public abstract class JobService extends Service {
      *
      * <p>This will happen if the requirements specified at schedule time are no longer met. For
      * example you may have requested WiFi with
-     * {@link android.app.job.JobInfo.Builder#setRequiredNetworkCapabilities(int)}, yet while your
+     * {@link android.app.job.JobInfo.Builder#setRequiredNetworkType(int)}, yet while your
      * job was executing the user toggled WiFi. Another example is if you had specified
      * {@link android.app.job.JobInfo.Builder#setRequiresDeviceIdle(boolean)}, and the phone left its
      * idle maintenance window. You are solely responsible for the behaviour of your application
@@ -248,8 +245,8 @@ public abstract class JobService extends Service {
      *
      * @param params Parameters specifying system-provided info about this job, this was given to
      *               your application in {@link #onStartJob(JobParameters)}.
-     * @param needsReschedule True if this job is complete, false if you want the JobManager to
-     *                        reschedule you.
+     * @param needsReschedule True if this job should be rescheduled according to the back-off
+     *                        criteria specified at schedule-time. False otherwise.
      */
     public final void jobFinished(JobParameters params, boolean needsReschedule) {
         ensureHandler();
