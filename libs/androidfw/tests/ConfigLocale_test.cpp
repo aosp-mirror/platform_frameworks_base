@@ -21,7 +21,7 @@
 #include <gtest/gtest.h>
 namespace android {
 
-TEST(ResourceTypesTest, ResourceConfig_packAndUnpack2LetterLanguage) {
+TEST(ConfigLocaleTest, packAndUnpack2LetterLanguage) {
      ResTable_config config;
      config.packLanguage("en");
 
@@ -44,7 +44,7 @@ TEST(ResourceTypesTest, ResourceConfig_packAndUnpack2LetterLanguage) {
      EXPECT_EQ(0, out[3]);
 }
 
-TEST(ResourceTypesTest, ResourceConfig_packAndUnpack2LetterRegion) {
+TEST(ConfigLocaleTest, packAndUnpack2LetterRegion) {
      ResTable_config config;
      config.packRegion("US");
 
@@ -59,7 +59,7 @@ TEST(ResourceTypesTest, ResourceConfig_packAndUnpack2LetterRegion) {
      EXPECT_EQ(0, out[3]);
 }
 
-TEST(ResourceTypesTest, ResourceConfig_packAndUnpack3LetterLanguage) {
+TEST(ConfigLocaleTest, packAndUnpack3LetterLanguage) {
      ResTable_config config;
      config.packLanguage("eng");
 
@@ -75,7 +75,7 @@ TEST(ResourceTypesTest, ResourceConfig_packAndUnpack3LetterLanguage) {
      EXPECT_EQ(0, out[3]);
 }
 
-TEST(ResourceTypesTest, ResourceConfig_packAndUnpack3LetterLanguageAtOffset16) {
+TEST(ConfigLocaleTest, packAndUnpack3LetterLanguageAtOffset16) {
      ResTable_config config;
      config.packLanguage("tgp");
 
@@ -88,8 +88,8 @@ TEST(ResourceTypesTest, ResourceConfig_packAndUnpack3LetterLanguageAtOffset16) {
      // which is equivalent to:
      // 1  [0]   [1]   [2]
      // 1-01111-00110-10011
-     EXPECT_EQ(0xbc, config.language[0]);
-     EXPECT_EQ(0xd3, config.language[1]);
+     EXPECT_EQ(char(0xbc), config.language[0]);
+     EXPECT_EQ(char(0xd3), config.language[1]);
 
      char out[4] = { 1, 1, 1, 1};
      config.unpackLanguage(out);
@@ -99,7 +99,7 @@ TEST(ResourceTypesTest, ResourceConfig_packAndUnpack3LetterLanguageAtOffset16) {
      EXPECT_EQ(0, out[3]);
 }
 
-TEST(ResourceTypesTest, ResourceConfig_packAndUnpack3LetterRegion) {
+TEST(ConfigLocaleTest, packAndUnpack3LetterRegion) {
      ResTable_config config;
      config.packRegion("419");
 
@@ -131,7 +131,7 @@ TEST(ResourceTypesTest, ResourceConfig_packAndUnpack3LetterRegion) {
      }
 }
 
-TEST(ResourceTypesTest, IsMoreSpecificThan) {
+TEST(ConfigLocaleTest, IsMoreSpecificThan) {
     ResTable_config l;
     ResTable_config r;
 
@@ -170,7 +170,7 @@ TEST(ResourceTypesTest, IsMoreSpecificThan) {
     EXPECT_TRUE(r.isMoreSpecificThan(l));
 }
 
-TEST(ResourceTypesTest, setLocale) {
+TEST(ConfigLocaleTest, setLocale) {
     ResTable_config test;
     test.setBcp47Locale("en-US");
     EXPECT_EQ('e', test.language[0]);
