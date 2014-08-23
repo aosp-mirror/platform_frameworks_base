@@ -195,6 +195,8 @@ public final class PowerManager {
      * <p>
      * This is used by the dream manager to implement doze mode.  It currently
      * has no effect unless the power manager is in the dozing state.
+     * </p><p>
+     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
      * </p>
      *
      * {@hide}
@@ -331,6 +333,12 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_REASON_HDMI = 5;
 
     /**
+     * Go to sleep flag: Skip dozing state and directly go to full sleep.
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_FLAG_NO_DOZE = 1 << 0;
+
+    /**
      * The value to pass as the 'reason' argument to reboot() to
      * reboot into recovery mode (for applying system updates, doing
      * factory resets, etc.).
@@ -343,12 +351,6 @@ public final class PowerManager {
      */
     public static final String REBOOT_RECOVERY = "recovery";
     
-    /**
-     * Go to sleep flag: Skip dozing state and directly go to full sleep.
-     * @hide
-     */
-    public static final int GO_TO_SLEEP_FLAG_NO_DOZE = 1 << 0;
-
     final Context mContext;
     final IPowerManager mService;
     final Handler mHandler;
