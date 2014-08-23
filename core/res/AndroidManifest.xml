@@ -2408,6 +2408,13 @@
         android:description="@string/permdesc_devicePower"
         android:protectionLevel="signature" />
 
+   <!-- Allows access to the PowerManager.userActivity function.
+   <p>Not for use by third-party applications. @hide @SystemApi -->
+    <permission android:name="android.permission.USER_ACTIVITY"
+        android:label="@string/permlab_userActivity"
+        android:description="@string/permdesc_userActivity"
+        android:protectionLevel="signature|system" />
+
    <!-- @hide Allows low-level access to tun tap driver -->
     <permission android:name="android.permission.NET_TUNNELING"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
