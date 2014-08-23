@@ -186,8 +186,6 @@ public final class PowerManager {
      * </p><p>
      * Cannot be used with {@link #ACQUIRE_CAUSES_WAKEUP}.
      * </p>
-     *
-     * {@hide}
      */
     public static final int PROXIMITY_SCREEN_OFF_WAKE_LOCK = 0x00000020;
 
@@ -243,11 +241,9 @@ public final class PowerManager {
     public static final int UNIMPORTANT_FOR_LOGGING = 0x40000000;
 
     /**
-     * Flag for {@link WakeLock#release release(int)} to defer releasing a
-     * {@link #PROXIMITY_SCREEN_OFF_WAKE_LOCK} wake lock until the proximity sensor returns
-     * a negative value.
-     *
-     * {@hide}
+     * Flag for {@link WakeLock#release WakeLock.release(int)}: Defer releasing a
+     * {@link #PROXIMITY_SCREEN_OFF_WAKE_LOCK} wake lock until the proximity sensor
+     * indicates that an object is not in close proximity.
      */
     public static final int WAIT_FOR_PROXIMITY_NEGATIVE = 1;
 
@@ -456,6 +452,7 @@ public final class PowerManager {
      * @see #FULL_WAKE_LOCK
      * @see #SCREEN_DIM_WAKE_LOCK
      * @see #SCREEN_BRIGHT_WAKE_LOCK
+     * @see #PROXIMITY_SCREEN_OFF_WAKE_LOCK
      * @see #ACQUIRE_CAUSES_WAKEUP
      * @see #ON_AFTER_RELEASE
      */
@@ -619,8 +616,6 @@ public final class PowerManager {
      *
      * @param level The wake lock level to check.
      * @return True if the specified wake lock level is supported.
-     *
-     * {@hide}
      */
     public boolean isWakeLockLevelSupported(int level) {
         try {
@@ -893,8 +888,6 @@ public final class PowerManager {
          *
          * @param flags Combination of flag values to modify the release behavior.
          * Currently only {@link #WAIT_FOR_PROXIMITY_NEGATIVE} is supported.
-         *
-         * {@hide}
          */
         public void release(int flags) {
             synchronized (mToken) {

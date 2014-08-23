@@ -22469,6 +22469,7 @@ package android.os {
     method public boolean isInteractive();
     method public boolean isPowerSaveMode();
     method public deprecated boolean isScreenOn();
+    method public boolean isWakeLockLevelSupported(int);
     method public android.os.PowerManager.WakeLock newWakeLock(int, java.lang.String);
     method public void reboot(java.lang.String);
     method public void userActivity(long, boolean);
@@ -22478,8 +22479,10 @@ package android.os {
     field public static final deprecated int FULL_WAKE_LOCK = 26; // 0x1a
     field public static final int ON_AFTER_RELEASE = 536870912; // 0x20000000
     field public static final int PARTIAL_WAKE_LOCK = 1; // 0x1
+    field public static final int PROXIMITY_SCREEN_OFF_WAKE_LOCK = 32; // 0x20
     field public static final deprecated int SCREEN_BRIGHT_WAKE_LOCK = 10; // 0xa
     field public static final deprecated int SCREEN_DIM_WAKE_LOCK = 6; // 0x6
+    field public static final int WAIT_FOR_PROXIMITY_NEGATIVE = 1; // 0x1
   }
 
   public final class PowerManager.WakeLock {
@@ -22487,6 +22490,7 @@ package android.os {
     method public void acquire(long);
     method public boolean isHeld();
     method public void release();
+    method public void release(int);
     method public void setReferenceCounted(boolean);
     method public void setWorkSource(android.os.WorkSource);
   }
