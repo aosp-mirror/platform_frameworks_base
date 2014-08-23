@@ -44,6 +44,7 @@ import android.net.INetworkManagementEventObserver;
 import android.net.InterfaceConfiguration;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
+import android.net.Network;
 import android.net.NetworkStats;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
@@ -1200,10 +1201,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setDnsForwarders(String[] dns) {
+    public void setDnsForwarders(Network network, String[] dns) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final Command cmd = new Command("tether", "dns", "set");
+        int netId = (network != null) ? network.netId : ConnectivityManager.NETID_UNSET;
+        final Command cmd = new Command("tether", "dns", "set", netId);
+
         for (String s : dns) {
             cmd.appendArg(NetworkUtils.numericToInetAddress(s).getHostAddress());
         }
