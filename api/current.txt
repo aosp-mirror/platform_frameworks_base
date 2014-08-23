@@ -27464,7 +27464,7 @@ package android.service.voice {
 
   public class VoiceInteractionService extends android.app.Service {
     ctor public VoiceInteractionService();
-    method public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(java.lang.String, java.lang.String, android.service.voice.AlwaysOnHotwordDetector.Callback);
+    method public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(java.lang.String, java.util.Locale, android.service.voice.AlwaysOnHotwordDetector.Callback);
     method public static boolean isActiveService(android.content.Context, android.content.ComponentName);
     method public android.os.IBinder onBind(android.content.Intent);
     method public void onReady();

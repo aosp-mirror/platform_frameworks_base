@@ -6930,8 +6930,8 @@
         <attr name="searchKeyphraseId" format="integer" />
         <!-- The actual keyphrase/hint text, or empty if not keyphrase dependent. @hide @SystemApi -->
         <attr name="searchKeyphrase" format="string" />
-        <!-- A comma separated list of java locales that are supported for this keyphrase,
-             or empty if not locale dependent. @hide @SystemApi -->
+        <!-- A comma separated list of BCP-47 language tag for locales that are supported
+             for this keyphrase, or empty if not locale dependent. @hide @SystemApi -->
         <attr name="searchKeyphraseSupportedLocales" format="string" />
         <!-- Flags for supported recognition modes. @hide @SystemApi -->
         <attr name="searchKeyphraseRecognitionFlags">
