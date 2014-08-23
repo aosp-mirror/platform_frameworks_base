@@ -1688,7 +1688,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // If the caller is not coming from another activity, but has given us an
         // explicit task into which they would like us to launch the new activity,
         // then let's see about doing that.
-        if (sourceRecord == null && inTask != null && inTask.stack != null) {
+        if (sourceRecord == null && inTask != null && inTask.stack != null && inTask.inRecents) {
             // If this task is empty, then we are adding the first activity -- it
             // determines the root, and must be launching as a NEW_TASK.
             if (inTask.getRootActivity() == null) {
