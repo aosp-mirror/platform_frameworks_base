@@ -39,10 +39,10 @@ import android.util.Slog;
 
 import com.android.internal.app.IVoiceInteractionManagerService;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Locale;
 
 /**
  * A class that lets a VoiceInteractionService implementation interact with
@@ -167,7 +167,7 @@ public class AlwaysOnHotwordDetector {
     private static final int MSG_DETECTION_RESUME = 5;
 
     private final String mText;
-    private final String mLocale;
+    private final Locale mLocale;
     /**
      * The metadata of the Keyphrase, derived from the enrollment application.
      * This may be null if this keyphrase isn't supported by the enrollment application.
@@ -317,7 +317,7 @@ public class AlwaysOnHotwordDetector {
      *
      * @hide
      */
-    public AlwaysOnHotwordDetector(String text, String locale, Callback callback,
+    public AlwaysOnHotwordDetector(String text, Locale locale, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
             IVoiceInteractionService voiceInteractionService,
             IVoiceInteractionManagerService modelManagementService) {
@@ -491,14 +491,19 @@ public class AlwaysOnHotwordDetector {
      */
     void onSoundModelsChanged() {
         synchronized (mLock) {
-            // FIXME: This should stop the recognition if it was using an enrolled sound model
-            // that's no longer available.
             if (mAvailability == STATE_INVALID
                     || mAvailability == STATE_HARDWARE_UNAVAILABLE
                     || mAvailability == STATE_KEYPHRASE_UNSUPPORTED) {
                 Slog.w(TAG, "Received onSoundModelsChanged for an unsupported keyphrase/config");
                 return;
             }
+
+            // Stop the recognition before proceeding.
+            // This is done because we want to stop the recognition on an older model if it changed
+            // or was deleted.
+            // The availability change callback should ensure that the client starts recognition
+            // again if needed.
+            stopRecognitionLocked();
 
             // Execute a refresh availability task - which should then notify of a change.
             new RefreshAvailabiltyTask().execute();

@@ -18,6 +18,8 @@ package android.hardware.soundtrigger;
 
 import android.util.ArraySet;
 
+import java.util.Locale;
+
 /**
  * A Voice Keyphrase metadata read from the enrollment application.
  *
@@ -26,17 +28,14 @@ import android.util.ArraySet;
 public class KeyphraseMetadata {
     public final int id;
     public final String keyphrase;
-    public final ArraySet<String> supportedLocales;
+    public final ArraySet<Locale> supportedLocales;
     public final int recognitionModeFlags;
 
-    public KeyphraseMetadata(int id, String keyphrase, String[] supportedLocales,
+    public KeyphraseMetadata(int id, String keyphrase, ArraySet<Locale> supportedLocales,
             int recognitionModeFlags) {
         this.id = id;
         this.keyphrase = keyphrase;
-        this.supportedLocales = new ArraySet<String>(supportedLocales.length);
-        for (String locale : supportedLocales) {
-            this.supportedLocales.add(locale);
-        }
+        this.supportedLocales = supportedLocales;
         this.recognitionModeFlags = recognitionModeFlags;
     }
 
@@ -56,7 +55,7 @@ public class KeyphraseMetadata {
     /**
      * @return Indicates if we support the given locale.
      */
-    public boolean supportsLocale(String locale) {
+    public boolean supportsLocale(Locale locale) {
         return supportedLocales.isEmpty() || supportedLocales.contains(locale);
     }
 }

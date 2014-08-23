@@ -25,6 +25,7 @@ import android.service.voice.VoiceInteractionService;
 import android.util.Log;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 public class MainInteractionService extends VoiceInteractionService {
     static final String TAG = "MainInteractionService";
@@ -67,7 +68,8 @@ public class MainInteractionService extends VoiceInteractionService {
         Log.i(TAG, "Keyphrase enrollment meta-data: "
                 + Arrays.toString(getKeyphraseEnrollmentInfo().listKeyphraseMetadata()));
 
-        mHotwordDetector = createAlwaysOnHotwordDetector("Hello There", "en-US", mHotwordCallback);
+        mHotwordDetector = createAlwaysOnHotwordDetector(
+                "Hello There", new Locale("en-US"), mHotwordCallback);
     }
 
     @Override
