@@ -159,11 +159,11 @@ public class JobStatus {
     }
 
     public boolean hasConnectivityConstraint() {
-        return job.getNetworkCapabilities() == JobInfo.NetworkType.ANY;
+        return job.getNetworkType() == JobInfo.NETWORK_TYPE_ANY;
     }
 
     public boolean hasUnmeteredConstraint() {
-        return job.getNetworkCapabilities() == JobInfo.NetworkType.UNMETERED;
+        return job.getNetworkType() == JobInfo.NETWORK_TYPE_UNMETERED;
     }
 
     public boolean hasChargingConstraint() {
@@ -219,7 +219,7 @@ public class JobStatus {
                 + ",u" + getUserId()
                 + ",R=(" + formatRunTime(earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME)
                 + "," + formatRunTime(latestRunTimeElapsedMillis, NO_LATEST_RUNTIME) + ")"
-                + ",N=" + job.getNetworkCapabilities() + ",C=" + job.isRequireCharging()
+                + ",N=" + job.getNetworkType() + ",C=" + job.isRequireCharging()
                 + ",I=" + job.isRequireDeviceIdle() + ",F=" + numFailures
                 + ",P=" + job.isPersisted()
                 + (isReady() ? "(READY)" : "")
