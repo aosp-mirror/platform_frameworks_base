@@ -46,7 +46,6 @@ import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
 import android.speech.RecognitionService;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -78,8 +77,7 @@ public class VoiceInteractionManagerService extends SystemService {
         mContext = context;
         mResolver = context.getContentResolver();
         mDbHelper = new DatabaseHelper(context);
-        mSoundTriggerHelper = new SoundTriggerHelper(
-                (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
+        mSoundTriggerHelper = new SoundTriggerHelper(context);
     }
 
     @Override
