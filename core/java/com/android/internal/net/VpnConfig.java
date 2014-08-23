@@ -28,6 +28,7 @@ import android.net.LinkAddress;
 import android.net.RouteInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -55,6 +56,15 @@ public class VpnConfig implements Parcelable {
                         com.android.internal.R.string.config_customVpnConfirmDialogComponent));
         intent.setClassName(componentName.getPackageName(), componentName.getClassName());
         return intent;
+    }
+
+    /** NOTE: This should only be used for legacy VPN. */
+    public static PendingIntent getIntentForStatusPanel(Context context) {
+        Intent intent = new Intent();
+        intent.setClassName(DIALOGS_PACKAGE, DIALOGS_PACKAGE + ".ManageDialog");
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY |
+                Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        return PendingIntent.getActivityAsUser(context, 0, intent, 0, null, UserHandle.CURRENT);
     }
 
     public static CharSequence getVpnLabel(Context context, String packageName)
