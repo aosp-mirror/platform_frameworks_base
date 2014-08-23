@@ -515,7 +515,7 @@ public class JobStore {
             // Read out job identifier attributes.
             try {
                 jobBuilder = buildBuilderFromXml(parser);
-                jobBuilder.setIsPersisted(true);
+                jobBuilder.setPersisted(true);
                 uid = Integer.valueOf(parser.getAttributeValue(null, "uid"));
             } catch (NumberFormatException e) {
                 Slog.e(TAG, "Error parsing job's required fields, skipping");
@@ -622,11 +622,11 @@ public class JobStore {
         private void buildConstraintsFromXml(JobInfo.Builder jobBuilder, XmlPullParser parser) {
             String val = parser.getAttributeValue(null, "unmetered");
             if (val != null) {
-                jobBuilder.setRequiredNetworkCapabilities(JobInfo.NetworkType.UNMETERED);
+                jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED);
             }
             val = parser.getAttributeValue(null, "connectivity");
             if (val != null) {
-                jobBuilder.setRequiredNetworkCapabilities(JobInfo.NetworkType.ANY);
+                jobBuilder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
             }
             val = parser.getAttributeValue(null, "idle");
             if (val != null) {

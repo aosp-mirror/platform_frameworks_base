@@ -20,10 +20,8 @@ import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
-import android.app.job.JobInfo.NetworkType;
 import android.content.ComponentName;
 import android.content.Context;
-import android.util.Slog;
 
 public class FullBackupJob extends JobService {
     private static final String TAG = "FullBackupJob";
@@ -40,7 +38,7 @@ public class FullBackupJob extends JobService {
         JobScheduler js = (JobScheduler) ctx.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, sIdleService)
                 .setRequiresDeviceIdle(true)
-                .setRequiredNetworkCapabilities(NetworkType.UNMETERED)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
                 .setRequiresCharging(true);
         if (minDelay > 0) {
             builder.setMinimumLatency(minDelay);

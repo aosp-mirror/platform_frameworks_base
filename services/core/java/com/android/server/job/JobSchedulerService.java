@@ -407,26 +407,26 @@ public class JobSchedulerService extends com.android.server.SystemService
         final JobInfo job = failureToReschedule.getJob();
 
         final long initialBackoffMillis = job.getInitialBackoffMillis();
-        final int backoffAttempt = failureToReschedule.getNumFailures() + 1;
-        long newEarliestRuntimeElapsed = elapsedNowMillis;
+        final int backoffAttempts = failureToReschedule.getNumFailures() + 1;
+        long delayMillis;
 
         switch (job.getBackoffPolicy()) {
-            case JobInfo.BackoffPolicy.LINEAR:
-                newEarliestRuntimeElapsed += initialBackoffMillis * backoffAttempt;
+            case JobInfo.BACKOFF_POLICY_LINEAR:
+                delayMillis = initialBackoffMillis * backoffAttempts;
                 break;
             default:
                 if (DEBUG) {
                     Slog.v(TAG, "Unrecognised back-off policy, defaulting to exponential.");
                 }
-            case JobInfo.BackoffPolicy.EXPONENTIAL:
-                newEarliestRuntimeElapsed +=
-                        Math.pow(initialBackoffMillis * 0.001, backoffAttempt) * 1000;
+            case JobInfo.BACKOFF_POLICY_EXPONENTIAL:
+                delayMillis =
+                        (long) Math.scalb(initialBackoffMillis, backoffAttempts - 1);
                 break;
         }
-        newEarliestRuntimeElapsed =
-                Math.min(newEarliestRuntimeElapsed, JobInfo.MAX_BACKOFF_DELAY_MILLIS);
-        return new JobStatus(failureToReschedule, newEarliestRuntimeElapsed,
-                JobStatus.NO_LATEST_RUNTIME, backoffAttempt);
+        delayMillis =
+                Math.min(delayMillis, JobInfo.MAX_BACKOFF_DELAY_MILLIS);
+        return new JobStatus(failureToReschedule, elapsedNowMillis + delayMillis,
+                JobStatus.NO_LATEST_RUNTIME, backoffAttempts);
     }
 
     /**
