@@ -5719,8 +5719,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (mEditor != null && mEditor.mKeyListener != null) {
-            resetErrorChangedFlag();
-
             boolean doDown = true;
             if (otherEvent != null) {
                 try {
@@ -7637,6 +7635,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 list.get(i).afterTextChanged(text);
             }
         }
+        hideErrorIfUnchanged();
     }
 
     void updateAfterEdit() {
@@ -7676,7 +7675,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             ims.mChangedDelta += after-before;
         }
-
+        resetErrorChangedFlag();
         sendOnTextChanged(buffer, start, before, after);
         onTextChanged(buffer, start, before, after);
     }
