@@ -77,6 +77,7 @@ public class KeyphraseEnrollmentInfo {
             "com.android.intent.extra.VOICE_KEYPHRASE_HINT_TEXT";
     /**
      * Intent extra: The voice locale to use while managing the keyphrase.
+     * This is a BCP-47 language tag.
      */
     public static final String EXTRA_VOICE_KEYPHRASE_LOCALE =
             "com.android.intent.extra.VOICE_KEYPHRASE_LOCALE";
@@ -267,7 +268,7 @@ public class KeyphraseEnrollmentInfo {
             Intent intent = new Intent(ACTION_MANAGE_VOICE_KEYPHRASES)
                     .setPackage(mEnrollmentPackage)
                     .putExtra(EXTRA_VOICE_KEYPHRASE_HINT_TEXT, keyphrase)
-                    .putExtra(EXTRA_VOICE_KEYPHRASE_LOCALE, locale)
+                    .putExtra(EXTRA_VOICE_KEYPHRASE_LOCALE, locale.toLanguageTag())
                     .putExtra(EXTRA_VOICE_KEYPHRASE_ACTION, action);
             return intent;
         }
