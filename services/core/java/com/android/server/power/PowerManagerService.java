@@ -2774,6 +2774,10 @@ public final class PowerManagerService extends com.android.server.SystemService
             PowerManager.validateWakeLockParameters(flags, tag);
 
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
+            if ((flags & PowerManager.DOZE_WAKE_LOCK) != 0) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.DEVICE_POWER, null);
+            }
             if (ws != null && ws.size() != 0) {
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.UPDATE_DEVICE_STATS, null);
