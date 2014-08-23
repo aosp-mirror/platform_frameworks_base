@@ -554,7 +554,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
 
         case GET_APP_TASKS_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            List<IAppTask> list = getAppTasks();
+            String callingPackage = data.readString();
+            List<IAppTask> list = getAppTasks(callingPackage);
             reply.writeNoException();
             int N = list != null ? list.size() : -1;
             reply.writeInt(N);
@@ -2880,10 +2881,11 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return res;
     }
-    public List<IAppTask> getAppTasks() throws RemoteException {
+    public List<IAppTask> getAppTasks(String callingPackage) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(callingPackage);
         mRemote.transact(GET_APP_TASKS_TRANSACTION, data, reply, 0);
         reply.readException();
         ArrayList<IAppTask> list = null;

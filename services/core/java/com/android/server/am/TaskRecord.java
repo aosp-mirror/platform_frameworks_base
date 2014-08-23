@@ -26,11 +26,16 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskThumbnail;
 import android.app.ActivityOptions;
+import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.Slog;
@@ -57,6 +62,7 @@ final class TaskRecord {
     private static final String ATTR_AUTOREMOVERECENTS = "auto_remove_recents";
     private static final String ATTR_ASKEDCOMPATMODE = "asked_compat_mode";
     private static final String ATTR_USERID = "user_id";
+    private static final String ATTR_EFFECTIVE_UID = "effective_uid";
     private static final String ATTR_TASKTYPE = "task_type";
     private static final String ATTR_FIRSTACTIVETIME = "first_active_time";
     private static final String ATTR_LASTACTIVETIME = "last_active_time";
@@ -83,6 +89,7 @@ final class TaskRecord {
     final IVoiceInteractor voiceInteractor;         // Associated interactor to provide to app
     Intent intent;          // The original intent that started the task.
     Intent affinityIntent;  // Intent of affinity-moved activity that started this task.
+    int effectiveUid;       // The current effective uid of the identity of this task.
     ComponentName origActivity; // The non-alias activity component of the intent.
     ComponentName realActivity; // The actual activity component that started the task.
     long firstActiveTime;   // First time this task was active.
@@ -198,7 +205,7 @@ final class TaskRecord {
     TaskRecord(ActivityManagerService service, int _taskId, Intent _intent, Intent _affinityIntent,
             String _affinity, ComponentName _realActivity, ComponentName _origActivity,
             boolean _rootWasReset, boolean _autoRemoveRecents, boolean _askedCompatMode,
-            int _taskType, int _userId,
+            int _taskType, int _userId, int _effectiveUid,
             String _lastDescription, ArrayList<ActivityRecord> activities, long _firstActiveTime,
             long _lastActiveTime, long lastTimeMoved, boolean neverRelinquishIdentity,
             ActivityManager.TaskDescription _lastTaskDescription, int taskAffiliation,
@@ -222,6 +229,7 @@ final class TaskRecord {
         taskType = _taskType;
         mTaskToReturnTo = HOME_ACTIVITY_TYPE;
         userId = _userId;
+        effectiveUid = _effectiveUid;
         firstActiveTime = _firstActiveTime;
         lastActiveTime = _lastActiveTime;
         lastDescription = _lastDescription;
@@ -265,6 +273,7 @@ final class TaskRecord {
         }
 
         affinity = info.taskAffinity;
+        effectiveUid = info.applicationInfo.uid;
         stringName = null;
 
         if (info.targetActivity == null) {
@@ -311,7 +320,6 @@ final class TaskRecord {
         }
 
         userId = UserHandle.getUserId(info.applicationInfo.uid);
-        creatorUid = info.applicationInfo.uid;
         if ((info.flags & ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS) != 0) {
             // If the activity itself has requested auto-remove, then just always do it.
             autoRemoveRecents = true;
@@ -814,6 +822,7 @@ final class TaskRecord {
         out.attribute(null, ATTR_AUTOREMOVERECENTS, String.valueOf(autoRemoveRecents));
         out.attribute(null, ATTR_ASKEDCOMPATMODE, String.valueOf(askedCompatMode));
         out.attribute(null, ATTR_USERID, String.valueOf(userId));
+        out.attribute(null, ATTR_EFFECTIVE_UID, String.valueOf(effectiveUid));
         out.attribute(null, ATTR_TASKTYPE, String.valueOf(taskType));
         out.attribute(null, ATTR_FIRSTACTIVETIME, String.valueOf(firstActiveTime));
         out.attribute(null, ATTR_LASTACTIVETIME, String.valueOf(lastActiveTime));
@@ -872,6 +881,7 @@ final class TaskRecord {
         boolean askedCompatMode = false;
         int taskType = ActivityRecord.APPLICATION_ACTIVITY_TYPE;
         int userId = 0;
+        int effectiveUid = -1;
         String lastDescription = null;
         long firstActiveTime = -1;
         long lastActiveTime = -1;
@@ -908,6 +918,8 @@ final class TaskRecord {
                 askedCompatMode = Boolean.valueOf(attrValue);
             } else if (ATTR_USERID.equals(attrName)) {
                 userId = Integer.valueOf(attrValue);
+            } else if (ATTR_EFFECTIVE_UID.equals(attrName)) {
+                effectiveUid = Integer.valueOf(attrValue);
             } else if (ATTR_TASKTYPE.equals(attrName)) {
                 taskType = Integer.valueOf(attrValue);
             } else if (ATTR_FIRSTACTIVETIME.equals(attrName)) {
@@ -970,10 +982,30 @@ final class TaskRecord {
                     createLastTaskDescriptionIconFilename(taskId, lastActiveTime)));
         }
 
+        if (effectiveUid <= 0) {
+            Intent checkIntent = intent != null ? intent : affinityIntent;
+            effectiveUid = 0;
+            if (checkIntent != null) {
+                IPackageManager pm = AppGlobals.getPackageManager();
+                try {
+                    ApplicationInfo ai = pm.getApplicationInfo(
+                            checkIntent.getComponent().getPackageName(),
+                            PackageManager.GET_UNINSTALLED_PACKAGES
+                                    | PackageManager.GET_DISABLED_COMPONENTS, userId);
+                    if (ai != null) {
+                        effectiveUid = ai.uid;
+                    }
+                } catch (RemoteException e) {
+                }
+            }
+            Slog.w(TAG, "Updating task #" + taskId + " for " + checkIntent
+                    + ": effectiveUid=" + effectiveUid);
+        }
+
         final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
                 affinityIntent, affinity, realActivity, origActivity, rootHasReset,
-                autoRemoveRecents, askedCompatMode, taskType, userId, lastDescription, activities,
-                firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
+                autoRemoveRecents, askedCompatMode, taskType, userId, effectiveUid, lastDescription,
+                activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
                 taskDescription, taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor,
                 callingUid, callingPackage);
 
@@ -987,8 +1019,8 @@ final class TaskRecord {
 
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("userId="); pw.print(userId);
-                pw.print(" creatorUid="); pw.print(creatorUid);
-                pw.print(" mCallingUid="); pw.print(mCallingUid);
+                pw.print(" effectiveUid="); UserHandle.formatUid(pw, effectiveUid);
+                pw.print(" mCallingUid="); UserHandle.formatUid(pw, mCallingUid);
                 pw.print(" mCallingPackage="); pw.println(mCallingPackage);
         if (affinity != null) {
             pw.print(prefix); pw.print("affinity="); pw.println(affinity);

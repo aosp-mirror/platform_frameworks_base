@@ -3763,7 +3763,7 @@ final class ActivityStack {
             if (activities.isEmpty()) {
                 continue;
             }
-            if (!allowed && !task.isHomeTask() && task.creatorUid != callingUid) {
+            if (!allowed && !task.isHomeTask() && task.effectiveUid != callingUid) {
                 continue;
             }
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {

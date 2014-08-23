@@ -7509,17 +7509,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     // =========================================================
 
     @Override
-    public List<IAppTask> getAppTasks() {
-        final PackageManager pm = mContext.getPackageManager();
+    public List<IAppTask> getAppTasks(String callingPackage) {
         int callingUid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
-
-        // Compose the list of packages for this id to test against
-        HashSet<String> packages = new HashSet<String>();
-        String[] uidPackages = pm.getPackagesForUid(callingUid);
-        for (int i = 0; i < uidPackages.length; i++) {
-            packages.add(uidPackages[i]);
-        }
 
         synchronized(this) {
             ArrayList<IAppTask> list = new ArrayList<IAppTask>();
@@ -7529,13 +7521,21 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final int N = mRecentTasks.size();
                 for (int i = 0; i < N; i++) {
                     TaskRecord tr = mRecentTasks.get(i);
-                    // Skip tasks that do not match the package name
-                    if (packages.contains(tr.getBaseIntent().getComponent().getPackageName())) {
-                        ActivityManager.RecentTaskInfo taskInfo =
-                                createRecentTaskInfoFromTaskRecord(tr);
-                        AppTaskImpl taskImpl = new AppTaskImpl(taskInfo.persistentId, callingUid);
-                        list.add(taskImpl);
+                    // Skip tasks that do not match the caller.  We don't need to verify
+                    // callingPackage, because we are also limiting to callingUid and know
+                    // that will limit to the correct security sandbox.
+                    if (tr.effectiveUid != callingUid) {
+                        continue;
                     }
+                    Intent intent = tr.getBaseIntent();
+                    if (intent == null ||
+                            !callingPackage.equals(intent.getComponent().getPackageName())) {
+                        continue;
+                    }
+                    ActivityManager.RecentTaskInfo taskInfo =
+                            createRecentTaskInfoFromTaskRecord(tr);
+                    AppTaskImpl taskImpl = new AppTaskImpl(taskInfo.persistentId, callingUid);
+                    list.add(taskImpl);
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -7699,7 +7699,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (!allowed) {
                         // If the caller doesn't have the GET_TASKS permission, then only
                         // allow them to see a small subset of tasks -- their own and home.
-                        if (!tr.isHomeTask() && tr.creatorUid != callingUid) {
+                        if (!tr.isHomeTask() && tr.effectiveUid != callingUid) {
                             if (DEBUG_RECENTS) Slog.d(TAG, "Skipping, not allowed: " + tr);
                             continue;
                         }
