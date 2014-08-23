@@ -160,9 +160,9 @@ public final class PowerManagerService extends com.android.server.SystemService
     // Poll interval in milliseconds for watching boot animation finished.
     private static final int BOOT_ANIMATION_POLL_INTERVAL = 200;
 
-    // Used to send the hint to the PowerHAL indicating transitions
-    // from and to the low power mode.
-    private static final int POWER_HINT_LOW_POWER_MODE = 5;
+    // Power hints defined in hardware/libhardware/include/hardware/power.h.
+    private static final int POWER_HINT_INTERACTION = 2;
+    private static final int POWER_HINT_LOW_POWER = 5;
 
     private final Context mContext;
     private final ServiceThread mHandlerThread;
@@ -222,6 +222,9 @@ public final class PowerManagerService extends com.android.server.SystemService
     // Timestamp of the last call to user activity.
     private long mLastUserActivityTime;
     private long mLastUserActivityTimeNoChangeLights;
+
+    // Timestamp of last interactive power hint.
+    private long mLastInteractivePowerHintTime;
 
     // A bitfield that summarizes the effect of the user activity timer.
     // A zero value indicates that the user activity timer has expired.
@@ -707,7 +710,7 @@ public final class PowerManagerService extends com.android.server.SystemService
         final boolean lowPowerModeEnabled = mLowPowerModeSetting;
         if (mLowPowerModeEnabled != lowPowerModeEnabled) {
             mLowPowerModeEnabled = lowPowerModeEnabled;
-            powerHintInternal(POWER_HINT_LOW_POWER_MODE, lowPowerModeEnabled ? 1 : 0);
+            powerHintInternal(POWER_HINT_LOW_POWER, lowPowerModeEnabled ? 1 : 0);
             mLowPowerModeEnabled = lowPowerModeEnabled;
             BackgroundThread.getHandler().post(new Runnable() {
                 @Override
@@ -969,14 +972,24 @@ public final class PowerManagerService extends com.android.server.SystemService
         }
 
         if (eventTime < mLastSleepTime || eventTime < mLastWakeTime
-                || mWakefulness == WAKEFULNESS_ASLEEP || mWakefulness == WAKEFULNESS_DOZING
                 || !mBootCompleted || !mSystemReady) {
             return false;
         }
 
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "userActivity");
         try {
+            if (eventTime > mLastInteractivePowerHintTime) {
+                powerHintInternal(POWER_HINT_INTERACTION, 0);
+                mLastInteractivePowerHintTime = eventTime;
+            }
+
             mNotifier.onUserActivity(event, uid);
+
+            if (mWakefulness == WAKEFULNESS_ASLEEP
+                    || mWakefulness == WAKEFULNESS_DOZING
+                    || (flags & PowerManager.USER_ACTIVITY_FLAG_INDIRECT) != 0) {
+                return false;
+            }
 
             if ((flags & PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS) != 0) {
                 if (eventTime > mLastUserActivityTimeNoChangeLights
@@ -2319,6 +2332,8 @@ public final class PowerManagerService extends com.android.server.SystemService
             pw.println("  mLastUserActivityTime=" + TimeUtils.formatUptime(mLastUserActivityTime));
             pw.println("  mLastUserActivityTimeNoChangeLights="
                     + TimeUtils.formatUptime(mLastUserActivityTimeNoChangeLights));
+            pw.println("  mLastInteractivePowerHintTime="
+                    + TimeUtils.formatUptime(mLastInteractivePowerHintTime));
             pw.println("  mDisplayReady=" + mDisplayReady);
             pw.println("  mHoldingWakeLockSuspendBlocker=" + mHoldingWakeLockSuspendBlocker);
             pw.println("  mHoldingDisplaySuspendBlocker=" + mHoldingDisplaySuspendBlocker);
@@ -2863,7 +2878,10 @@ public final class PowerManagerService extends com.android.server.SystemService
         public void userActivity(long eventTime, int event, int flags) {
             final long now = SystemClock.uptimeMillis();
             if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER)
-                    != PackageManager.PERMISSION_GRANTED) {
+                    != PackageManager.PERMISSION_GRANTED
+                    && mContext.checkCallingOrSelfPermission(
+                            android.Manifest.permission.USER_ACTIVITY)
+                            != PackageManager.PERMISSION_GRANTED) {
                 // Once upon a time applications could call userActivity().
                 // Now we require the DEVICE_POWER permission.  Log a warning and ignore the
                 // request instead of throwing a SecurityException so we don't break old apps.
@@ -2871,8 +2889,8 @@ public final class PowerManagerService extends com.android.server.SystemService
                     if (now >= mLastWarningAboutUserActivityPermission + (5 * 60 * 1000)) {
                         mLastWarningAboutUserActivityPermission = now;
                         Slog.w(TAG, "Ignoring call to PowerManager.userActivity() because the "
-                                + "caller does not have DEVICE_POWER permission.  "
-                                + "Please fix your app!  "
+                                + "caller does not have DEVICE_POWER or USER_ACTIVITY "
+                                + "permission.  Please fix your app!  "
                                 + " pid=" + Binder.getCallingPid()
                                 + " uid=" + Binder.getCallingUid());
                     }
