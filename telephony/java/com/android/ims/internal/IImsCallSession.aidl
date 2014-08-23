@@ -16,6 +16,7 @@
 
 package com.android.ims.internal;
 
+import android.os.Message;
 import com.android.ims.ImsCallProfile;
 import com.android.ims.ImsStreamMediaProfile;
 import com.android.ims.internal.IImsCallSessionListener;
@@ -206,10 +207,10 @@ interface IImsCallSession {
      * event 0 ~ 9 maps to decimal value 0 ~ 9, '*' to 10, '#' to 11, event 'A' ~ 'D' to 12 ~ 15,
      * and event flash to 16. Currently, event flash is not supported.
      *
-     * @param code the DTMF to send. Value 0 to 15 (inclusive) are valid inputs.
-     * @param duration the interval in milli-seconds between the DTMFs
+     * @param c the DTMF to send. '0' ~ '9', 'A' ~ 'D', '*', '#' are valid inputs.
+     * @param result.
      */
-    void sendDtmf(int code, int duration);
+    void sendDtmf(char c, in Message result);
 
     /**
      * Sends an USSD message.
