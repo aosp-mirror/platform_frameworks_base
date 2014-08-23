@@ -521,7 +521,11 @@ public final class PowerManager {
      *
      * @see #wakeUp
      * @see #goToSleep
+     *
+     * @removed Requires signature or system permission.
+     * @deprecated Use {@link #userActivity(long, int, int)}.
      */
+    @Deprecated
     public void userActivity(long when, boolean noChangeLights) {
         userActivity(when, USER_ACTIVITY_EVENT_OTHER,
                 noChangeLights ? USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS : 0);
@@ -575,13 +579,33 @@ public final class PowerManager {
      *
      * @see #userActivity
      * @see #wakeUp
+     *
+     * @removed Requires signature permission.
      */
     public void goToSleep(long time) {
         goToSleep(time, GO_TO_SLEEP_REASON_APPLICATION, 0);
     }
 
     /**
-     * @hide
+     * Forces the device to go to sleep.
+     * <p>
+     * Overrides all the wake locks that are held.
+     * This is what happens when the power key is pressed to turn off the screen.
+     * </p><p>
+     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
+     * </p>
+     *
+     * @param time The time when the request to go to sleep was issued, in the
+     * {@link SystemClock#uptimeMillis()} time base.  This timestamp is used to correctly
+     * order the go to sleep request with other power management functions.  It should be set
+     * to the timestamp of the input event that caused the request to go to sleep.
+     * @param reason The reason the device is going to sleep.
+     * @param flags Optional flags to apply when going to sleep.
+     *
+     * @see #userActivity
+     * @see #wakeUp
+     *
+     * @hide Requires signature permission.
      */
     public void goToSleep(long time, int reason, int flags) {
         try {
@@ -606,6 +630,8 @@ public final class PowerManager {
      *
      * @see #userActivity
      * @see #goToSleep
+     *
+     * @removed Requires signature permission.
      */
     public void wakeUp(long time) {
         try {
@@ -633,7 +659,7 @@ public final class PowerManager {
      * @see #wakeUp
      * @see #goToSleep
      *
-     * @hide
+     * @hide Requires signature permission.
      */
     public void nap(long time) {
         try {
@@ -650,7 +676,7 @@ public final class PowerManager {
      *
      * @param brightness The brightness value from 0 to 255.
      *
-     * {@hide}
+     * @hide Requires signature permission.
      */
     public void setBacklightBrightness(int brightness) {
         try {

@@ -673,6 +673,37 @@
     -->
     <integer name="config_doubleTapOnHomeBehavior">0</integer>
 
+    <!-- Minimum screen brightness setting allowed by the power manager.
+         The user is forbidden from setting the brightness below this level. -->
+    <integer name="config_screenBrightnessSettingMinimum">10</integer>
+
+    <!-- Maximum screen brightness allowed by the power manager.
+         The user is forbidden from setting the brightness above this level. -->
+    <integer name="config_screenBrightnessSettingMaximum">255</integer>
+
+    <!-- Default screen brightness setting.
+         Must be in the range specified by minimum and maximum. -->
+    <integer name="config_screenBrightnessSettingDefault">102</integer>
+
+    <!-- Screen brightness used to dim the screen while dozing in a very low power state.
+         May be less than the minimum allowed brightness setting
+         that can be set by the user. -->
+    <integer name="config_screenBrightnessDoze">1</integer>
+
+    <!-- Screen brightness used to dim the screen when the user activity
+         timeout expires.  May be less than the minimum allowed brightness setting
+         that can be set by the user. -->
+    <integer name="config_screenBrightnessDim">10</integer>
+
+    <!-- Minimum allowable screen brightness to use in a very dark room.
+         This value sets the floor for the darkest possible auto-brightness
+         adjustment.  It is expected to be somewhat less than the first entry in
+         config_autoBrightnessLcdBacklightValues so as to allow the user to have
+         some range of adjustment to dim the screen further than usual in very
+         dark rooms. The contents of the screen must still be clearly visible
+         in darkness (although they may not be visible in a bright room). -->
+    <integer name="config_screenBrightnessDark">1</integer>
+
     <!-- Array of light sensor LUX values to define our levels for auto backlight brightness support.
          The N entries of this array define N + 1 control points as follows:
          (1-based arrays)
@@ -695,28 +726,6 @@
          Must be overridden in platform specific overlays -->
     <integer-array name="config_autoBrightnessLevels">
     </integer-array>
-
-    <!-- Minimum screen brightness setting allowed by the power manager.
-         The user is forbidden from setting the brightness below this level. -->
-    <integer name="config_screenBrightnessSettingMinimum">10</integer>
-
-    <!-- Maximum screen brightness allowed by the power manager.
-         The user is forbidden from setting the brightness above this level. -->
-    <integer name="config_screenBrightnessSettingMaximum">255</integer>
-
-    <!-- Default screen brightness setting.
-         Must be in the range specified by minimum and maximum. -->
-    <integer name="config_screenBrightnessSettingDefault">102</integer>
-
-    <!-- Screen brightness used to dim the screen while dozing in a very low power state.
-         May be less than the minimum allowed brightness setting
-         that can be set by the user. -->
-    <integer name="config_screenBrightnessDoze">1</integer>
-
-    <!-- Screen brightness used to dim the screen when the user activity
-         timeout expires.  May be less than the minimum allowed brightness setting
-         that can be set by the user. -->
-    <integer name="config_screenBrightnessDim">10</integer>
 
     <!-- Array of output values for LCD backlight corresponding to the LUX values
          in the config_autoBrightnessLevels array.  This array should have size one greater
