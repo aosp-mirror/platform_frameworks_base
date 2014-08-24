@@ -332,6 +332,7 @@ public class Watchdog extends Thread {
             final ArrayList<HandlerChecker> blockedCheckers;
             final String subject;
             final boolean allowRestart;
+            int debuggerWasConnected = 0;
             synchronized (this) {
                 long timeout = CHECK_INTERVAL;
                 // Make sure we (re)spin the checkers that have become idle within
@@ -341,16 +342,26 @@ public class Watchdog extends Thread {
                     hc.scheduleCheckLocked();
                 }
 
+                if (debuggerWasConnected > 0) {
+                    debuggerWasConnected--;
+                }
+
                 // NOTE: We use uptimeMillis() here because we do not want to increment the time we
                 // wait while asleep. If the device is asleep then the thing that we are waiting
                 // to timeout on is asleep as well and won't have a chance to run, causing a false
                 // positive on when to kill things.
                 long start = SystemClock.uptimeMillis();
                 while (timeout > 0) {
+                    if (Debug.isDebuggerConnected()) {
+                        debuggerWasConnected = 2;
+                    }
                     try {
                         wait(timeout);
                     } catch (InterruptedException e) {
                         Log.wtf(TAG, e);
+                    }
+                    if (Debug.isDebuggerConnected()) {
+                        debuggerWasConnected = 2;
                     }
                     timeout = CHECK_INTERVAL - (SystemClock.uptimeMillis() - start);
                 }
@@ -450,7 +461,12 @@ public class Watchdog extends Thread {
 
             // Only kill the process if the debugger is not attached.
             if (Debug.isDebuggerConnected()) {
+                debuggerWasConnected = 2;
+            }
+            if (debuggerWasConnected >= 2) {
                 Slog.w(TAG, "Debugger connected: Watchdog is *not* killing the system process");
+            } else if (debuggerWasConnected > 0) {
+                Slog.w(TAG, "Debugger was connected: Watchdog is *not* killing the system process");
             } else if (!allowRestart) {
                 Slog.w(TAG, "Restart not allowed: Watchdog is *not* killing the system process");
             } else {

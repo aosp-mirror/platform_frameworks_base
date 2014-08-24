@@ -446,13 +446,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     // Bring an active task to the foreground
                     ssp.moveTaskToFront(task.key.id, launchOpts);
                 } else {
-                    // Launch the activity anew with the desired animation
-                    Intent i = new Intent(task.key.baseIntent);
-                    i.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
-                            | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
-                    if (!Utilities.isDocument(i)) {
-                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    }
                     try {
                         ssp.startActivityFromRecents(task.key.id, launchOpts);
                         if (launchOpts == null && lockToTask) {
@@ -461,9 +454,6 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     } catch (ActivityNotFoundException anfe) {
                         Console.logError(getContext(), "Could not start Activity");
                     }
-
-                    // And clean up the old task
-                    onTaskViewDismissed(task);
                 }
             }
         };

@@ -102,8 +102,6 @@ import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.TrustedCertificateStore;
 import com.google.android.collect.Lists;
 
-import dalvik.system.VMRuntime;
-
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -201,6 +199,7 @@ public final class ActivityThread {
     String mInstrumentedLibDir = null;
     boolean mSystemThread = false;
     boolean mJitEnabled = false;
+    boolean mSomeActivitiesChanged = false;
 
     // These can be accessed by multiple threads; mPackages is the lock.
     // XXX For now we keep around information about all packages we have
@@ -2353,6 +2352,7 @@ public final class ActivityThread {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
+        mSomeActivitiesChanged = true;
 
         if (r.profileFd != null) {
             mProfiler.setProfiler(r.profileFile, r.profileFd);
@@ -2495,6 +2495,7 @@ public final class ActivityThread {
     public void handleCancelVisibleBehind(IBinder token) {
         ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
+            mSomeActivitiesChanged = true;
             final Activity activity = r.activity;
             if (activity.mVisibleBehind) {
                 activity.mCalled = false;
@@ -2984,6 +2985,7 @@ public final class ActivityThread {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
+        mSomeActivitiesChanged = true;
 
         // TODO Push resumeArgs into the activity for consideration
         ActivityClientRecord r = performResumeActivity(token, clearHide);
@@ -3175,6 +3177,7 @@ public final class ActivityThread {
                 ActivityManagerNative.getDefault().activityPaused(token, r.persistentState);
             } catch (RemoteException ex) {
             }
+            mSomeActivitiesChanged = true;
         }
     }
 
@@ -3413,6 +3416,7 @@ public final class ActivityThread {
         info.state = r.state;
         info.persistentState = r.persistentState;
         mH.post(info);
+        mSomeActivitiesChanged = true;
     }
 
     final void performRestartActivity(IBinder token) {
@@ -3446,6 +3450,7 @@ public final class ActivityThread {
                 TAG, "Handle window " + r + " visibility: " + show);
             updateVisibility(r, show);
         }
+        mSomeActivitiesChanged = true;
     }
 
     private void handleSleeping(IBinder token, boolean sleeping) {
@@ -3743,6 +3748,7 @@ public final class ActivityThread {
                 // If the system process has died, it's game over for everyone.
             }
         }
+        mSomeActivitiesChanged = true;
     }
 
     public final void requestRelaunchActivity(IBinder token,
@@ -3805,6 +3811,7 @@ public final class ActivityThread {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
+        mSomeActivitiesChanged = true;
 
         Configuration changedConfig = null;
         int configChanges = 0;
@@ -4107,6 +4114,8 @@ public final class ActivityThread {
         performConfigurationChanged(r.activity, mCompatConfiguration);
 
         freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(mCompatConfiguration));
+
+        mSomeActivitiesChanged = true;
     }
 
     final void handleProfilerControl(boolean start, ProfilerControlData pcd, int profileType) {
@@ -5045,17 +5054,38 @@ public final class ActivityThread {
             android.ddm.DdmHandleAppName.setAppName("<pre-initialized>",
                                                     UserHandle.myUserId());
             RuntimeInit.setApplicationObject(mAppThread.asBinder());
-            IActivityManager mgr = ActivityManagerNative.getDefault();
+            final IActivityManager mgr = ActivityManagerNative.getDefault();
             try {
                 mgr.attachApplication(mAppThread);
             } catch (RemoteException ex) {
                 // Ignore
             }
+            // Watch for getting close to heap limit.
+            BinderInternal.addGcWatcher(new Runnable() {
+                @Override public void run() {
+                    if (!mSomeActivitiesChanged) {
+                        return;
+                    }
+                    Runtime runtime = Runtime.getRuntime();
+                    long dalvikMax = runtime.maxMemory();
+                    long dalvikUsed = runtime.totalMemory() - runtime.freeMemory();
+                    if (dalvikUsed > ((3*dalvikMax)/4)) {
+                        if (DEBUG_MEMORY_TRIM) Slog.d(TAG, "Dalvik max=" + (dalvikMax/1024)
+                                + " total=" + (runtime.totalMemory()/1024)
+                                + " used=" + (dalvikUsed/1024));
+                        mSomeActivitiesChanged = false;
+                        try {
+                            mgr.releaseSomeActivities(mAppThread);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                }
+            });
         } else {
             // Don't set application object here -- if the system crashes,
             // we can't display an alert, we just want to die die die.
             android.ddm.DdmHandleAppName.setAppName("system_process",
-                                                    UserHandle.myUserId());
+                    UserHandle.myUserId());
             try {
                 mInstrumentation = new Instrumentation();
                 ContextImpl context = ContextImpl.createAppContext(

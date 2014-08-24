@@ -1702,6 +1702,40 @@ public class Instrumentation {
         return null;
     }
 
+    /**
+     * Special version!
+     * @hide
+     */
+    public void execStartActivityFromAppTask(
+            Context who, IBinder contextThread, IAppTask appTask,
+            Intent intent, Bundle options) {
+        IApplicationThread whoThread = (IApplicationThread) contextThread;
+        if (mActivityMonitors != null) {
+            synchronized (mSync) {
+                final int N = mActivityMonitors.size();
+                for (int i=0; i<N; i++) {
+                    final ActivityMonitor am = mActivityMonitors.get(i);
+                    if (am.match(who, null, intent)) {
+                        am.mHits++;
+                        if (am.isBlocking()) {
+                            return;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        try {
+            intent.migrateExtraStreamToClipData();
+            intent.prepareToLeaveProcess();
+            int result = appTask.startActivity(whoThread.asBinder(), who.getBasePackageName(),
+                    intent, intent.resolveTypeIfNeeded(who.getContentResolver()), options);
+            checkStartActivityResult(result, intent);
+        } catch (RemoteException e) {
+        }
+        return;
+    }
+
     /*package*/ final void init(ActivityThread thread,
             Context instrContext, Context appContext, ComponentName component, 
             IInstrumentationWatcher watcher, IUiAutomationConnection uiAutomationConnection) {

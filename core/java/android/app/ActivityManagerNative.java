@@ -365,6 +365,23 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case RELEASE_ACTIVITY_INSTANCE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            boolean res = releaseActivityInstance(token);
+            reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
+            return true;
+        }
+
+        case RELEASE_SOME_ACTIVITIES_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IApplicationThread app = ApplicationThreadNative.asInterface(data.readStrongBinder());
+            releaseSomeActivities(app);
+            reply.writeNoException();
+            return true;
+        }
+
         case WILL_ACTIVITY_BE_VISIBLE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
@@ -2657,6 +2674,28 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(session.asBinder());
         mRemote.transact(FINISH_VOICE_TASK_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    public boolean releaseActivityInstance(IBinder token) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        mRemote.transact(RELEASE_ACTIVITY_INSTANCE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean res = reply.readInt() != 0;
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
+    public void releaseSomeActivities(IApplicationThread app) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(app.asBinder());
+        mRemote.transact(RELEASE_SOME_ACTIVITIES_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

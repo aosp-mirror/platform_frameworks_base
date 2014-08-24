@@ -4704,6 +4704,26 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Ask that the local app instance of this activity be released to free up its memory.
+     * This is asking for the activity to be destroyed, but does <b>not</b> finish the activity --
+     * a new instance of the activity will later be re-created if needed due to the user
+     * navigating back to it.
+     *
+     * @return Returns true if the activity was in a state that it has started the process
+     * of destroying its current instance; returns false if for any reason this could not
+     * be done: it is currently visible to the user, it is already being destroyed, it is
+     * being finished, it hasn't yet saved its state, etc.
+     */
+    public boolean releaseInstance() {
+        try {
+            return ActivityManagerNative.getDefault().releaseActivityInstance(mToken);
+        } catch (RemoteException e) {
+            // Empty
+        }
+        return false;
+    }
+
+    /**
      * Called when an activity you launched exits, giving you the requestCode
      * you started it with, the resultCode it returned, and any additional
      * data from it.  The <var>resultCode</var> will be
