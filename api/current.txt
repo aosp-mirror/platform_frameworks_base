@@ -4374,6 +4374,7 @@ package android.app {
     method public abstract android.app.FragmentTransaction add(android.app.Fragment, java.lang.String);
     method public abstract android.app.FragmentTransaction add(int, android.app.Fragment);
     method public abstract android.app.FragmentTransaction add(int, android.app.Fragment, java.lang.String);
+    method public abstract android.app.FragmentTransaction addSharedElement(android.view.View, java.lang.String);
     method public abstract android.app.FragmentTransaction addToBackStack(java.lang.String);
     method public abstract android.app.FragmentTransaction attach(android.app.Fragment);
     method public abstract int commit();
@@ -4393,8 +4394,6 @@ package android.app {
     method public abstract android.app.FragmentTransaction setCustomAnimations(int, int);
     method public abstract android.app.FragmentTransaction setCustomAnimations(int, int, int, int);
     method public abstract android.app.FragmentTransaction setCustomTransition(int, int);
-    method public abstract android.app.FragmentTransaction setSharedElement(android.view.View, java.lang.String);
-    method public abstract android.app.FragmentTransaction setSharedElements(android.util.Pair<android.view.View, java.lang.String>...);
     method public abstract android.app.FragmentTransaction setTransition(int);
     method public abstract android.app.FragmentTransaction setTransitionStyle(int);
     method public abstract android.app.FragmentTransaction show(android.app.Fragment);
