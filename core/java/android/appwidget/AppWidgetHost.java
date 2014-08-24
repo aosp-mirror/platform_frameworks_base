@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Binder;
 import android.os.Bundle;
@@ -155,7 +154,7 @@ public class AppWidgetHost {
         int[] updatedIds;
         ArrayList<RemoteViews> updatedViews = new ArrayList<RemoteViews>();
         try {
-            updatedIds = sService.startListening(mCallbacks, mContext.getPackageName(), mHostId,
+            updatedIds = sService.startListening(mCallbacks, mContext.getOpPackageName(), mHostId,
                     updatedViews);
         }
         catch (RemoteException e) {
@@ -174,7 +173,7 @@ public class AppWidgetHost {
      */
     public void stopListening() {
         try {
-            sService.stopListening(mContext.getPackageName(), mHostId);
+            sService.stopListening(mContext.getOpPackageName(), mHostId);
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
@@ -192,7 +191,7 @@ public class AppWidgetHost {
      */
     public int allocateAppWidgetId() {
         try {
-            return sService.allocateAppWidgetId(mContext.getPackageName(), mHostId);
+            return sService.allocateAppWidgetId(mContext.getOpPackageName(), mHostId);
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
@@ -222,7 +221,7 @@ public class AppWidgetHost {
             int appWidgetId, int intentFlags, int requestCode, @Nullable Bundle options) {
         try {
             IntentSender intentSender = sService.createAppWidgetConfigIntentSender(
-                    mContext.getPackageName(), appWidgetId, intentFlags);
+                    mContext.getOpPackageName(), appWidgetId, intentFlags);
             if (intentSender != null) {
                 activity.startIntentSenderForResult(intentSender, requestCode, null, 0, 0, 0,
                         options);
@@ -246,7 +245,7 @@ public class AppWidgetHost {
             if (sService == null) {
                 bindService();
             }
-            return sService.getAppWidgetIdsForHost(mContext.getPackageName(), mHostId);
+            return sService.getAppWidgetIdsForHost(mContext.getOpPackageName(), mHostId);
         } catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
         }
@@ -263,7 +262,7 @@ public class AppWidgetHost {
         synchronized (mViews) {
             mViews.remove(appWidgetId);
             try {
-                sService.deleteAppWidgetId(mContext.getPackageName(), appWidgetId);
+                sService.deleteAppWidgetId(mContext.getOpPackageName(), appWidgetId);
             }
             catch (RemoteException e) {
                 throw new RuntimeException("system server dead?", e);
@@ -281,7 +280,7 @@ public class AppWidgetHost {
      */
     public void deleteHost() {
         try {
-            sService.deleteHost(mContext.getPackageName(), mHostId);
+            sService.deleteHost(mContext.getOpPackageName(), mHostId);
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
@@ -319,7 +318,7 @@ public class AppWidgetHost {
         }
         RemoteViews views;
         try {
-            views = sService.getAppWidgetViews(mContext.getPackageName(), appWidgetId);
+            views = sService.getAppWidgetViews(mContext.getOpPackageName(), appWidgetId);
         } catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
         }
