@@ -1004,6 +1004,10 @@ public final class Pm {
                 params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
             } else if (opt.equals("-p")) {
                 params.mode = SessionParams.MODE_INHERIT_EXISTING;
+                params.appPackageName = nextOptionData();
+                if (params.appPackageName == null) {
+                    throw new IllegalArgumentException("Missing inherit package name");
+                }
             } else if (opt.equals("-S")) {
                 params.setSize(Long.parseLong(nextOptionData()));
             } else if (opt.equals("--abi")) {

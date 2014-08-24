@@ -321,7 +321,7 @@ public interface IMountService extends IInterface {
              * Mount a secure container with the specified key and owner UID.
              * Returns an int consistent with MountServiceResultCode
              */
-            public int mountSecureContainer(String id, String key, int ownerUid)
+            public int mountSecureContainer(String id, String key, int ownerUid, boolean readOnly)
                     throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
@@ -331,6 +331,7 @@ public interface IMountService extends IInterface {
                     _data.writeString(id);
                     _data.writeString(key);
                     _data.writeInt(ownerUid);
+                    _data.writeInt(readOnly ? 1 : 0);
                     mRemote.transact(Stub.TRANSACTION_mountSecureContainer, _data, _reply, 0);
                     _reply.readException();
                     _result = _reply.readInt();
@@ -834,6 +835,27 @@ public interface IMountService extends IInterface {
                 }
                 return _result;
             }
+
+            @Override
+            public int resizeSecureContainer(String id, int sizeMb, String key)
+                    throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                int _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(id);
+                    _data.writeInt(sizeMb);
+                    _data.writeString(key);
+                    mRemote.transact(Stub.TRANSACTION_resizeSecureContainer, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readInt();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
         }
 
         private static final String DESCRIPTOR = "IMountService";
@@ -917,6 +939,8 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_setField = IBinder.FIRST_CALL_TRANSACTION + 38;
 
         static final int TRANSACTION_getField = IBinder.FIRST_CALL_TRANSACTION + 39;
+
+        static final int TRANSACTION_resizeSecureContainer = IBinder.FIRST_CALL_TRANSACTION + 40;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -1082,7 +1106,9 @@ public interface IMountService extends IInterface {
                     key = data.readString();
                     int ownerUid;
                     ownerUid = data.readInt();
-                    int resultCode = mountSecureContainer(id, key, ownerUid);
+                    boolean readOnly;
+                    readOnly = data.readInt() != 0;
+                    int resultCode = mountSecureContainer(id, key, ownerUid, readOnly);
                     reply.writeNoException();
                     reply.writeInt(resultCode);
                     return true;
@@ -1308,6 +1334,19 @@ public interface IMountService extends IInterface {
                     reply.writeString(contents);
                     return true;
                 }
+                case TRANSACTION_resizeSecureContainer: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String id;
+                    id = data.readString();
+                    int sizeMb;
+                    sizeMb = data.readInt();
+                    String key;
+                    key = data.readString();
+                    int resultCode = resizeSecureContainer(id, sizeMb, key);
+                    reply.writeNoException();
+                    reply.writeInt(resultCode);
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -1405,7 +1444,8 @@ public interface IMountService extends IInterface {
      * Mount a secure container with the specified key and owner UID. Returns an
      * int consistent with MountServiceResultCode
      */
-    public int mountSecureContainer(String id, String key, int ownerUid) throws RemoteException;
+    public int mountSecureContainer(String id, String key, int ownerUid, boolean readOnly)
+            throws RemoteException;
 
     /**
      * Mount external storage at given mount point. Returns an int consistent
@@ -1571,4 +1611,6 @@ public interface IMountService extends IInterface {
      * @return contents of field
      */
     public String getField(String field) throws RemoteException;
+
+    public int resizeSecureContainer(String id, int sizeMb, String key) throws RemoteException;
 }
