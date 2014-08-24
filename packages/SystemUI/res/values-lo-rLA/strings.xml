@@ -84,6 +84,19 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"ຊອກຫາ"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ກ້ອງ"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ໂທລະສັບ"</string>
+    <string name="unlock_label" msgid="8779712358041029439">"ປົດລັອກ"</string>
+    <string name="phone_label" msgid="2320074140205331708">"​ເປີດ​​ແປ້ນ​ໂທ​ລະ​ສັບ"</string>
+    <string name="camera_label" msgid="7261107956054836961">"ເປີດ​ກ້ອງ"</string>
+    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
+    <skip />
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ປຸ່ມສະລັບຮູບແບບການປ້ອນຂໍ້ມູນ."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ປຸ່ມຊູມທີ່ໃຊ້ຮ່ວມກັນໄດ້."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ຊູມຈໍນ້ອຍໄປເປັນຈໍຂະຫນາດໃຫຍ່."</string>
@@ -110,6 +123,8 @@
     <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"ສັນຍານ Wi-Fi ສອງຂີດ."</string>
     <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wifi ສາມຂີດ."</string>
     <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"ສັນຍານ Wi-Fi ເຕັມ"</string>
+    <string name="accessibility_wifi_name" msgid="7202151365171148501">"ເຊື່ອມ​ຕໍ່​ຫາ <xliff:g id="WIFI">%s</xliff:g> ແລ້ວ."</string>
+    <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"ເຊື່ອມ​ຕໍ່​ຫາ <xliff:g id="BLUETOOTH">%s</xliff:g> ແລ້ວ."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"ບໍ່ມີ WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX ນຶ່ງຂີດ."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX ສອງຂີດ."</string>
@@ -122,10 +137,6 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"ສອງຂີດ."</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"ສາມຂີດ."</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"ສັນຍານເຕັມ."</string>
-    <string name="accessibility_desc_on" msgid="2385254693624345265">"ເປີດ."</string>
-    <string name="accessibility_desc_off" msgid="6475508157786853157">"ປິດ."</string>
-    <string name="accessibility_desc_connected" msgid="8366256693719499665">"ເຊື່ອມ​ຕໍ່ແລ້ວ."</string>
-    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"ກຳ​ລັງ​ເຊື່ອມ​ຕໍ່."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -155,19 +166,42 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"ປິດການແຈ້ງເຕືອນແລ້ວ."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"ໜ້າຈໍແຈ້ງເຕືອນ."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ການຕັ້ງຄ່າດ່ວນ."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"ລັອກ​ໜ້າ​ຈໍ."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"ການ​ຕັ້ງ​ຄ່າ"</string>
     <string name="accessibility_desc_recent_apps" msgid="8376953390514779637">"ໜ້າ​ຈໍ​​ເມື່ອບໍ່​ດົນ​ມາ​ນີ້."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ຜູ່ໃຊ້ <xliff:g id="USER">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"ປິດ Wi-Fi ແລ້ວ."</string>
+    <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"ເປີດ Wi-Fi ແລ້ວ."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"ມືຖື <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"ແບັດເຕີຣີ <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"ໂໝດໃນຍົນ <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"ສະ​ຖານ​ທີ່ <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"ປິດ​ໂໝດ​ຢູ່​ໃນ​ຍົນ."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"ເປີດ​ໂໝດ​ຢູ່​ໃນ​ຍົນ."</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"ປິດ​ໂໝດ​ຢູ່​ໃນ​ຍົນ​ແລ້ວ."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"ເປີດ​ໂໝດ​ຢູ່​ໃນ​ຍົນ​ແລ້ວ."</string>
+    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth ປິດ."</string>
+    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth ເປີດ."</string>
+    <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"ກຳ​ລັງ​ເຊື່ອມ​ຕໍ່ Bluetooth."</string>
+    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"ເຊື່ອມຕໍ່ Bluetooth ແລ້ວ."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"ປິດ Bluetooth ແລ້ວ."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"ເປີດ Bluetooth ແລ້ວ."</string>
+    <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"​ການ​ລາຍ​ງານ​ສະ​ຖານ​ທີ່​ປິດ."</string>
+    <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"​ການ​ລາຍ​ງານ​ສະ​ຖານ​ທີ່​ເປີດ."</string>
+    <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"ປິດ​ການ​ລາຍ​ງານ​ສະ​ຖານ​ທີ່​ແລ້ວ."</string>
+    <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"ເປີດ​ການ​ລາຍ​ງານ​ສະ​ຖານ​ທີ່​ແລ້ວ."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"ຕັ້ງໂມງປຸກ <xliff:g id="TIME">%s</xliff:g> ແລ້ວ."</string>
-    <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"​ປິດ​ແຖບ"</string>
-    <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"​ເພີ່ມ​ເວ​ລາ"</string>
-    <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"ຫຼຸດ​ເວ​ລາ"</string>
+    <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"ປິດ​ແຖບ."</string>
+    <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"​ເພີ່ມ​ເວ​ລາ."</string>
+    <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"ຫຼຸດ​ເວ​ລາ."</string>
+    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"ໄຟ​ສາຍ​ປິດ."</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"ໄຟ​ສາຍ​ເປີດ."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"ປິດ​ໄຟ​ສາຍ​ແລ້ວ."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"​ເປີດ​ໄຟ​ສາຍ​ແລ້ວ."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"​ປິດ​ການ​ສະ​ລັບ​ສີ."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"ເປີດ​ການ​ສຳ​ລັບ​ສີ."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"ປິດ​ຮັອດ​ສະ​ປອດ​ເຄື່ອນ​ທີ່​ແລ້ວ."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"ເປີດ​ຮັອດ​ສະ​ປອດ​ເຄື່ອນ​ທີ່​ແລ້ວ."</string>
+    <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"ຢຸດ​ການ​ສົ່ງ​​ພາບ​ໜ້າ​ຈໍ​ແລ້ວ."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"​ຄວາມ​ແຈ້ງ​​ຂອງ​ຈໍ"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"ຂໍ້​ມູນ 2G-3G ​ແມ່ນ​ປິດ"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"ຂໍ້​ມູນ 4G ແມ່ນ​ປິດ"</string>
@@ -185,6 +219,9 @@
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ໜ້າຈໍຈະໝຸນໂດຍອັດຕະໂນມັດ."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ໜ້າຈໍຖືກລັອກໃນລວງນອນ."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ໜ້າຈໍຖືກລັອກຢູ່ໃນໂໝດແນວຕັ້ງ."</string>
+    <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"​ໜ້າ​ຈໍ​ຈະ​​ໝຸນ​ອັດ​ຕະ​ໂນ​ມັດ."</string>
+    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"ໜ້າ​ຈໍ​ຕອນ​ນີ້​ຖືກ​ລັອກ​ໄວ້​ໃນ​ລວງ​ນອນ."</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"ໜ້າ​ຈໍ​ຕອນ​ນີ້​ຖືກ​ລັອກ​ໄວ້​ໃນ​ລວງ​ຕັ້ງ."</string>
     <string name="dessert_case" msgid="1295161776223959221">"ກ່ອງຂອງຫວານ"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Daydream"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
@@ -236,7 +273,7 @@
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"​ຂໍ້​ມູນ​ອິນ​ເຕີ​ເນັດ​ມື​ຖື"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"​ການ​​ນຳ​ໃຊ້​​ຂໍ້​ມູນ"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"​ຂໍ້​ມູນ​ທີ່​ຍັງ​ເຫຼືອ"</string>
-    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"​ເກີນ​ຂີດ​ຈຳ​ກັດ"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="3242930457130971204">"ໃຊ້​ຂໍ້​ມູນ​ຮອດ​ຈຳ​ນວນ​ທີ່​ຈຳ​ກັດ​ແລ້ວ – ຢຸດ​ການ​ນຳ​ໃຊ້​ຂໍ້​ມູນ​ຊົ່ວ​ຄາວ"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"ໃຊ້​ໄປ​ແລ້ວ <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"ຈຳ​ກັດ <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"ຄຳ​ເຕືອນ <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
@@ -276,8 +313,9 @@
     <string name="guest_nickname" msgid="8059989128963789678">"ແຂກ"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"Add guest"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"​ລຶບ​ແຂກ"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"ສິ້ນ​ສຸດ​ການ​ນຳ​ໃຊ້​ຂອງ​ຜູ່​ຢ້ຽມ​ຢາມບໍ່?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"​ການ​ອອກ​ຈາກ​ເຊດ​ຊັນ​ຜູ່​ຢ້ຽມ​ຢາມ​ຈະ​ເປັນ​ການ​ລຶບ​ຂໍ້​ມູນ​ໃນ​ເຄື່ອງອອ."</string>
+    <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"ລຶບ​ແຂກ​ບໍ?"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"ແອັບຯ​ແລະ​ຂໍ້​ມູນ​ທັງ​ໝົດ​ໃນ​ເຊດ​ຊັນ​ນີ້​ຈະ​ຖືກ​ລຶບ​ອອກ."</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"ລຶບ​"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"ຍິນ​ດີ​ຕ້ອນ​ຮັບ​ກັບ​ມາ, ຜູ່​ຢ້ຽມ​ຢາມ!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"ທ່ານ​ຕ້ອງ​ການ​ສືບ​ຕໍ່​ເຊດ​ຊັນ​ຂອງ​ທ່ານບໍ່?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"ເລີ່ມຕົ້ນໃຫມ່"</string>
@@ -304,7 +342,7 @@
     <string name="vpn_footer" msgid="2388611096129106812">"​ເຄືອ​ຂ່າຍ​ອາດ​ມີ​ການ​ເຝົ້າ​ຕິດ​ຕາມ"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"ການກວດ​ສອບ​ຕິດ​ຕາມ​ອຸ​ປະ​ກອນ"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ການກວດ​ສອບ​ຕິດ​ຕາມ​ເຄືອ​ຂ່າຍ"</string>
-    <string name="open_app" msgid="4011771120339160755">"ເປີດແອັບຯ"</string>
+    <string name="disable_vpn" msgid="4435534311510272506">"ປິດ​ການ​ໃຊ້ VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"ຕັດ​ການ​ເຊື່ອມ​ຕໍ່ VPN"</string>
     <string name="monitoring_description_device_owned" msgid="7512371572956715493">"ອຸ​ປະ​ກອນ​ນີ້​​ຖືກ​ຈັດ​ການ​ໂດຍ:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n​ຜູ່​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານ​ສາ​ມາດ​ເຝົ້າ​ຕິດ​ຕາມ​ອຸ​ປະ​ກອນ​ແລະ​ການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ​ໄດ້ ຮວມ​ເຖິງອີ​ເມວ, ແອັບຯ ແລະ​ເວັບ​ໄຊ​ທີ່​ເຂົ້າ​ລະ​ຫັດ.\n\nສຳ​ລັບ​ຂໍ້​ມູນ​ເພີ່ມ​ເຕີມ, ໃຫ້​ຕິດ​ຕໍ່​ຜູ່​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານ."</string>
     <string name="monitoring_description_vpn" msgid="7288268682714305659">"ທ່ານ​ໃຫ້​ສິດ​ອະ​ນຸ​ຍາດ​ກັບ \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" ເພື່ອ​ຕັ້ງ​ຄ່າ​ການ​ເຊື່ອມ​ຕໍ່ VPN.\n\nແອັບຯ​ນີ້​ຈະ​ສາ​ມາດເຝົ້າ​ຕິດ​ຕາມອຸ​ປະ​ກອນ​ແລະ​ການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ​ໄດ້ ຮວມ​ເຖິງອີ​ເມວ, ແອັບຯ ແລະ​ເວັບ​ໄຊ​ທີ່​ເຂົ້າ​ລະ​ຫັດ."</string>
@@ -312,4 +350,6 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຖືກ​ຈັດ​ການ​ໂດຍ:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n​ຜູ່​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານ​ສາ​ມາດ​ເຝົ້າ​ຕິດ​ຕາມ​ການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ​ໄດ້ ຮວມ​ເຖິງ​ອີ​ເມວ, ແອັບຯ ແລະ​ເວັບ​ໄຊ​ທີ່​ເຂົ້າ​ລະ​​ຫັດ. ສຳ​ລັບ​ຂໍ້​ມູນ​ເພີ່ມ​ເຕີມ, ໃຫ້​ຕິດ​ຕໍ່​ຜູ່​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານ.\n\nອີກ​ຢ່າງ​ນຶ່ງ, ທ່ານມອບ​ສິດ​ອະ​ນຸ​ຍາດໃຫ້ \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" ເພື່ອ​ຕັ້ງ​ຄ່າ​ການ​ເຊື່ອມ​ຕໍ່ VPN. ແອັບຯ​ນີ້​ສາ​ມາດ​ເຝົ້າ​ຕິດ​ຕາມ​ການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ​ໄດ້."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຖືກ​ຈັດ​ການ​ໂດຍ:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n​ຜູ່​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານ​ສາ​ມາດ​ເຝົ້າ​ຕິດ​ຕາມ​ການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ​ໄດ້ ຮວມ​ເຖິງ​ອີ​ເມວ, ແອັບຯ ແລະ​ເວັບ​ໄຊ​ທີ່​ເຂົ້າ​ລະ​​ຫັດ. ສຳ​ລັບ​ຂໍ້​ມູນ​ເພີ່ມ​ເຕີມ, ໃຫ້​ຕິດ​ຕໍ່​ຜູ່​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານ.\n\nນອກ​ຈາກ​ນັ້ນ, ທ່ານ​​ໄດ້​ເຊື່ອມ​ຕໍ່​ຫາ VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). ຜູ່​ໃຫ້​ບໍ​ລິ​ການ VPN ຂອງ​ທ່ານ​ສາ​ມາດ​ເຝົ້າ​ຕິດ​ຕາມ​ການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ​ໄດ້​ເຊັ່ນ​ກັນ."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Device will stay locked until you manually unlock"</string>
+    <!-- no translation found for muted_by (6147073845094180001) -->
+    <skip />
 </resources>
