@@ -413,8 +413,6 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"允許應用程式繫結至遠端屏螢的頂層介面 (不建議一般應用程式使用)。"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"繫結至小工具服務"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"允許應用程式繫結至小工具服務的頂層介面　(不建議一般應用程式使用)。"</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"繫結至路由供應商服務"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"允許應用程式繫結至任何已註冊的路由供應商，但一般應用程式並不需要使用。"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"與裝置管理員互動"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"允許應用程式將調用請求傳送至裝置管理員　(不建議一般應用程式使用)。"</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"繫結至電視訊號輸入裝置"</string>
@@ -613,6 +611,10 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"開啟或關閉手機"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"允許應用程式開啟或關閉平板電腦。"</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"允許應用程式開啟或關閉手機。"</string>
+    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
+    <skip />
+    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
+    <skip />
     <string name="permlab_factoryTest" msgid="3715225492696416187">"以原廠測試模式執行"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"允許在以低階製造商測試身分執行時，可具有平板電腦硬體的完整存取權限。只有在平板電腦以製造商測試模式執行時，才能使用此權限。"</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"以低階製造商測試執行，可具有手機硬件的完整存取權限。只有在手機以製造商測試模式執行時，才能使用此權限。"</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"允許應用程式讀取及寫入快取檔案系統。"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"撥打/接聽 SIP 電話"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"允許應用程式撥打及接聽 SIP 電話。"</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"與通話畫面互動"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"允許應用程式控制通話畫面的顯示時間和方式。"</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"與通話畫面互動"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"允許應用程式控制通話畫面的顯示時間和方式。"</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"與電話語音服務互動"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"允許應用程式與電話語音服務互動以收發電話。"</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"提供通話使用者體驗"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"允許應用程式提供通話使用者體驗。"</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"讀取網絡用量記錄"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"允許應用程式讀取特定網絡和應用程式的網絡使用量記錄。"</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"管理網絡政策"</string>
@@ -732,8 +734,6 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"允許應用程式繫結至通知接聽器服務的頂層介面 (不建議一般應用程式使用)。"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"繫結至條件供應商服務"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"允許應用程式繫結至條件供應商服務的頂層介面，但一般應用程式並不需要使用。"</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"繫結至媒體轉送服務"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"允許應用程式繫結至媒體轉送服務的頂層介面，但一般應用程式並不需要使用。"</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"繫結至 Dream 服務"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"允許應用程式繫結至 Dream 服務的頂層介面 (不建議一般應用程式使用)。"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"調用流動網絡供應商提供的設定應用程式"</string>
@@ -1352,8 +1352,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"輕觸即可停用 USB 偵錯。"</string>
     <string name="select_input_method" msgid="8547250819326693584">"變更鍵盤"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"選擇鍵盤"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"顯示輸入法"</string>
     <string name="hardware" msgid="7517821086888990278">"硬件"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"選取鍵盤配置"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"輕觸即可選取鍵盤配置。"</string>
@@ -1404,8 +1403,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"允許應用程式繫結至信任的代理程式。"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"與更新和復原系統互動"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"允許應用程式與復原系統和系統更新互動。"</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"建立媒體投影工作階段"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"允許應用程式建立媒體投影工作階段。這類工作階段可讓應用程式擷取畫面內容和音訊內容 (一般應用程式並不需用)。"</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"管理媒體投影工作階段"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"允許應用程式管理媒體投影工作階段。這類工作階段可讓應用程式擷取畫面內容和音訊內容 (一般應用程式並不需用)。"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"讀取安裝工作階段"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"允許應用程式讀取安裝工作階段。應用程式將可查看目前安裝套裝的詳細資料。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"輕觸兩下即可控制縮放"</string>
@@ -1426,8 +1425,10 @@
     <string name="deny" msgid="2081879885755434506">"拒絕"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"已要求權限"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> 帳戶的\n權限要求。"</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"您目前在個人空間使用此應用程式"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"您目前在工作空間使用此應用程式"</string>
+    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"輸入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步處理"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"協助工具"</string>
@@ -1502,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"減少時數"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"設定 PM 值"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"設定 AM 值"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"下午"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"上午"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"增加月數"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"減少月數"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"增加日數"</string>
@@ -1536,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"編輯"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"資料用量警告"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"輕觸即可查看使用量和設定。"</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G 數據連線已關閉"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G 數據連線已關閉"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"流動數據連線已關閉"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi 數據連線已關閉"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"已達上限"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"已達到 2G-3G 數據流量上限"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"已達到 4G 數據流量上限"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"已達到流動數據流量上限"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"已達到 Wi-Fi 數據流量上限"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"已暫停使用數據連線，直到工作階段結束為止"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"已達 2G-3G 數據上限"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"已達 4G 數據上限"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"已超過流動數據流量上限"</string>
@@ -1571,7 +1570,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"接聽電話嗎？"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"一律採用"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"只此一次"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s 不支援工作設定檔。"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"平板電腦"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"手機"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"耳機"</string>
@@ -1644,6 +1644,8 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"協助工具已啟用。"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"協助工具已取消。"</string>
     <string name="user_switched" msgid="3768006783166984410">"目前的用戶是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
+    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"擁有者"</string>
     <string name="error_message_title" msgid="4510373083082500195">"錯誤"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"您的管理員不允許這項變更"</string>
@@ -1765,31 +1767,22 @@
     <string name="item_is_selected" msgid="949687401682476608">"已選取<xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> 已刪除"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"如要取消固定這個螢幕，請同時輕觸並按住 [返回] 和 [近期]。"</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"如要取消固定這個螢幕，請輕觸並按住 [近期]。"</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"螢幕已固定，而您的機構不允許取消固定。"</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"使用螢幕固定功能？"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"螢幕固定會鎖定螢幕，只顯示單一應用程式畫面。\n\n如要退出這個模式，請同時輕觸並按住 [返回] 和 [近期]。"</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"螢幕固定會鎖定螢幕，只顯示單一應用程式畫面。\n\n如要退出這個模式，請輕觸並按住 [近期]。"</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"不用了，謝謝"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"啟動"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
+    <string name="lock_to_app_start" msgid="6643342070839862795">"螢幕已固定"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"已取消固定螢幕"</string>
+    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
     <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
+    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
     <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
+    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
     <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"解鎖圖案"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"密碼"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="battery_saver_description" msgid="725676363406667978">"節約電池用量模式有助於延長電池壽命，但會降低裝置效能、限制震動和背景資料傳輸。除非您啟用，否則電郵、短訊及其他需要使用同步功能的應用程式均不會更新。\n\n當裝置充電時，節約電池用量模式會自動關閉。"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"直到停機時間於 <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> 結束"</string>
 </resources>

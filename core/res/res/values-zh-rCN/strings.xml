@@ -413,8 +413,6 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"允许应用绑定至远程显示屏的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"绑定到小部件服务"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"允许应用绑定到小部件服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"绑定到路由程序服务"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"允许应用绑定到任何已注册的路由程序。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"与设备管理器交互"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"允许应用向设备管理器发送Intent。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"绑定至电视输入设备"</string>
@@ -613,6 +611,10 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"开机或关机"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"允许应用打开或关闭平板电脑。"</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"允许应用打开或关闭手机。"</string>
+    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
+    <skip />
+    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
+    <skip />
     <string name="permlab_factoryTest" msgid="3715225492696416187">"在出厂测试模式下运行"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"作为低级制造商测试运行，从而允许对平板电脑硬件进行完全访问。此权限仅当平板电脑在制造商测试模式下运行时才可用。"</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"作为一项低级制造商测试来运行，从而允许对手机硬件进行完全访问。此权限仅当手机在制造商测试模式下运行时才可用。。"</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"允许应用读取和写入缓存文件系统。"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"拨打/接听SIP电话"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"允许该应用拨打和接听SIP电话。"</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"与通话屏幕互动"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"允许应用控制用户看到通话屏幕的时机和方式。"</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"与通话屏幕互动"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"允许应用控制用户看到通话屏幕的时机和方式。"</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"与电话服务交互"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"允许该应用与电话服务交互以便接打电话。"</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"向用户提供通话体验"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"允许应用向用户提供通话体验。"</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"读取网络使用情况历史记录"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"允许应用读取特定网络和应用的网络使用情况历史记录。"</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"管理网络政策"</string>
@@ -732,8 +734,6 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"允许应用绑定到通知侦听器服务的顶级接口（普通应用绝不需要此权限）。"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"绑定到条件提供程序服务"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"允许应用绑定到条件提供程序服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"绑定至媒体路由服务"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"允许应用绑定至媒体路由服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"绑定到互动屏保服务"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"允许应用绑定到互动屏保服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"调用运营商提供的配置应用"</string>
@@ -1230,7 +1230,7 @@
     <string name="smv_application" msgid="3307209192155442829">"“<xliff:g id="APPLICATION">%1$s</xliff:g>”应用（<xliff:g id="PROCESS">%2$s</xliff:g> 进程）违反了自我强制执行的严格模式 (StrictMode) 政策。"</string>
     <string name="smv_process" msgid="5120397012047462446">"进程 <xliff:g id="PROCESS">%1$s</xliff:g> 违反了自我强制执行的严格模式 (StrictMode) 政策。"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android正在升级..."</string>
-    <string name="android_upgrading_apk" msgid="7904042682111526169">"正在优化第 <xliff:g id="NUMBER_0">%1$d</xliff:g> 个应用（共 <xliff:g id="NUMBER_1">%2$d</xliff:g> 个）。"</string>
+    <string name="android_upgrading_apk" msgid="7904042682111526169">"正在优化第<xliff:g id="NUMBER_0">%1$d</xliff:g>个应用（共<xliff:g id="NUMBER_1">%2$d</xliff:g>个）。"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"正在启动应用。"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"即将完成启动。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g>正在运行"</string>
@@ -1352,8 +1352,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"触摸可停用USB调试。"</string>
     <string name="select_input_method" msgid="8547250819326693584">"更改键盘"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"选择键盘"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"显示输入法"</string>
     <string name="hardware" msgid="7517821086888990278">"硬件"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"选择键盘布局"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"触摸可选择键盘布局。"</string>
@@ -1404,8 +1403,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"允许应用绑定至信任的代理服务。"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"与更新和恢复系统互动"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"允许应用与恢复系统和系统更新互动。"</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"创建媒体投影会话"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"允许应用创建媒体投影会话。这些会话可让应用截取显示内容和音频内容。普通应用绝不需要此权限。"</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"管理媒体投影会话"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"允许应用管理媒体投影会话。这些会话可让应用截取显示内容和音频内容。普通应用绝不需要此权限。"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"读取安装会话"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"允许应用读取安装会话。这样，应用将可以查看有关当前软件包安装的详情。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"触摸两次可进行缩放控制"</string>
@@ -1426,8 +1425,10 @@
     <string name="deny" msgid="2081879885755434506">"拒绝"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"权限请求"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"应用对帐户 <xliff:g id="ACCOUNT">%s</xliff:g>\n 提出权限请求。"</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"您目前是在个人空间内使用此应用"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"您目前是在工作空间内使用此应用"</string>
+    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"输入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"辅助功能"</string>
@@ -1502,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"减小小时值"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"设置下午时间"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"设置上午时间"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"下午"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"上午"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"增大月份值"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"减小月份值"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"增大日期值"</string>
@@ -1536,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"修改"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"流量警告"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"触摸可查看使用情况和设置。"</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G数据网络已关闭"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G数据网络已关闭"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"移动数据网络已关闭"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"WLAN数据网络已关闭"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"已达到上限"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"已达到2G-3G流量上限"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"已达到4G流量上限"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"已达到移动数据流量上限"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"已达到WLAN流量上限"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"已暂停本周期剩余时间的流量使用"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"已超出 2G-3G 数据流量限制"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"已超出 4G 数据使用上限"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"已超出移动数据流量上限"</string>
@@ -1571,7 +1570,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"要接听电话吗？"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"始终"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"仅此一次"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s不支持工作资料。"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"平板电脑"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"手机"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"耳机"</string>
@@ -1644,6 +1644,8 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"辅助功能已启用。"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"已取消辅助功能。"</string>
     <string name="user_switched" msgid="3768006783166984410">"当前用户是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
+    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"机主"</string>
     <string name="error_message_title" msgid="4510373083082500195">"错误"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"您的管理员不允许进行此更改"</string>
@@ -1765,31 +1767,22 @@
     <string name="item_is_selected" msgid="949687401682476608">"已选择<xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"已删除<xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"要取消固定屏幕，请同时触摸并按住“返回”和“最近”按钮。"</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"要取消固定屏幕，请触摸并按住“最近”按钮。"</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"屏幕处于固定状态。您所属的单位不允许退出该模式。"</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"要固定屏幕吗？"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"固定屏幕后，设备会一直显示某一个屏幕。\n\n要退出该模式，请同时触摸并按住“返回”和“最近”按钮。"</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"固定屏幕后，设备会一直显示某一个屏幕。\n\n要退出该模式，请触摸并按住“最近”按钮。"</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"不用了"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"启动"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
+    <string name="lock_to_app_start" msgid="6643342070839862795">"已固定屏幕"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"已取消固定屏幕"</string>
+    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
     <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
+    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
     <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
+    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
     <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN码"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"解锁图案"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"密码"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="battery_saver_description" msgid="725676363406667978">"为了延长电池的续航时间，节电助手会降低设备的性能，并限制振动和大部分后台流量。对于电子邮件、聊天工具等依赖于同步功能的应用，可能要打开这类应用时才能收到新信息。\n\n节电助手会在设备充电时自动关闭"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"直到休息时间结束（<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>）"</string>
 </resources>

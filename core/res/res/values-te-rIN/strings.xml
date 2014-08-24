@@ -413,8 +413,6 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"రిమోట్ డిస్‌ప్లే యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాల కోసం ఎప్పటికీ అవసరం ఉండకూడదు."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"విడ్జెట్ సేవకు అనుబంధించడం"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"విడ్జెట్ సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"మార్గ ప్రదాత సేవకు అనుబంధించడం"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"నమోదిత మార్గ ప్రదాతల్లో వేటికైనా అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"పరికర నిర్వాహికితో పరస్పర చర్య చేయడం"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"పరికర నిర్వాహకుడికి లక్ష్యాలను పంపడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"టీవీ ఇన్‌పుట్‌కి అనుబంధించడం"</string>
@@ -613,6 +611,10 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"పవర్ ఫోన్‌ను ఆన్ లేదా ఆఫ్ చేయడం"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"టాబ్లెట్‌ను ఆన్ లేదా ఆఫ్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"ఫోన్‌ను ఆన్ లేదా ఆఫ్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
+    <skip />
+    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
+    <skip />
     <string name="permlab_factoryTest" msgid="3715225492696416187">"ఫ్యాక్టరీ పరీక్ష మోడ్‌లో అమలు చేయడం"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"టాబ్లెట్ హార్డ్‌వేర్‌కు పూర్తి ప్రాప్యతను అనుమతిస్తూ, తక్కువ-స్థాయి తయారీదారు పరీక్షగా అమలు చేయండి. టాబ్లెట్ తయారీదారు పరీక్ష మోడ్‌లో అమలవుతున్నప్పుడు మాత్రమే అందుబాటులో ఉంటుంది."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"ఫోన్ హార్డ్‌వేర్‌కు పూర్తి ప్రాప్యతను అనుమతిస్తూ, తక్కువ-స్థాయి తయారీదారు పరీక్షగా అమలు చేయండి. ఫోన్ తయారీదారు పరీక్ష మోడ్‌లో అమలవుతున్నప్పుడు మాత్రమే అందుబాటులో ఉంటుంది."</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"కాష్ ఫైల్‌సిస్టమ్‌ను చదవడానికి మరియు వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP కాల్‌లను చేయడానికి/స్వీకరించడానికి"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP కాల్‌లను చేయడానికి మరియు స్వీకరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"ఇన్-కాల్ స్క్రీన్‌తో పరస్పర చర్య చేయడం"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"వినియోగదారుకు ఇన్-కాల్ స్క్రీన్ ఎప్పుడు, ఎలా కనిపించాలనే దాన్ని నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ఇన్-కాల్ స్క్రీన్‌తో పరస్పర చర్య చేయడం"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"వినియోగదారునికి ఇన్-కాల్ స్క్రీన్ ఎప్పుడు, ఎలా కనిపించాలనే దాన్ని నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"టెలిఫోన్ సేవలతో పరస్పర చర్య చేయడం"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"కాల్‌లు చేయడం/స్వీకరించడం కోసం టెలిఫోన్ సేవలతో పరస్పర చర్య చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"ఇన్-కాల్ వినియోగదారు అనుభవాన్ని అందించడం"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"ఇన్-కాల్ వినియోగదారుని అనుభవాన్ని అందించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"చారిత్రక నెట్‌వర్క్ వినియోగాన్ని చదవడం"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"నిర్దిష్ట నెట్‌వర్క్‌లు మరియు అనువర్తనాలు కోసం చారిత్రాత్మక నెట్‌వర్క్ వినియోగాన్ని చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"నెట్‌వర్క్ విధానాన్ని నిర్వహించడం"</string>
@@ -732,8 +734,6 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"నోటిఫికేషన్ పరిశీలన సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాల కోసం ఎప్పటికీ అవసరం ఉండకూడదు."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"షరతు ప్రదాత సేవకు అనుబంధించడం"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"షరతు ప్రదాత సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"మీడియా మార్గ సేవకు అనుబంధించడం"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"మీడియా మార్గ సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"డ్రీమ్ సేవ‌కి అనుబంధించడం"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"డ్రీమ్ సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"క్యారియర్ అందించిన కాన్ఫిగరేషన్ అనువర్తనాన్ని అభ్యర్థించడం"</string>
@@ -1352,8 +1352,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB డీబగ్గింగ్‌ను నిలిపివేయడానికి తాకండి."</string>
     <string name="select_input_method" msgid="8547250819326693584">"కీబోర్డ్‌ను మార్చు"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"కీబోర్డ్‌లను ఎంచుకోండి"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"ఇన్‌పుట్ పద్ధతిని చూపు"</string>
     <string name="hardware" msgid="7517821086888990278">"హార్డ్‌వేర్"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"కీబోర్డ్ లేఅవుట్‌ను ఎంచుకోండి"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"కీబోర్డ్ లేఅవుట్‌ను ఎంచుకోవడానికి తాకండి."</string>
@@ -1404,8 +1403,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"విశ్వసనీయ ఏజెంట్ సేవకు అనుబంధించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"నవీకరణ మరియు పునరుద్ధరణ సిస్టమ్‌తో పరస్పర చర్య చేయడం"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"పునరుద్ధరణ సిస్టమ్ మరియు సిస్టమ్ నవీకరణలతో పరస్పర చర్య చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"మీడియా ప్రొజెక్షన్ సెషన్‌లను రూపొందించడం"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"మీడియా ప్రొజెక్షన్ సెషన్‌లను రూపొందించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ సెషన్‌లు ప్రదర్శన మరియు ఆడియో కంటెంట్‌లను క్యాప్చర్ చేయగల సామర్థ్యాన్ని అనువర్తనాలకు అందించగలవు. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"మీడియా ప్రొజెక్షన్ సెషన్‌లను నిర్వహించడం"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"మీడియా ప్రొజెక్షన్ సెషన్‌లను నిర్వహించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ సెషన్‌లు ప్రదర్శన మరియు ఆడియో కంటెంట్‌లను క్యాప్చర్ చేయగల సామర్థ్యాన్ని అనువర్తనాలకు అందించగలవు. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ఇన్‌స్టాల్ సెషన్‌లను చదవడం"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ఇన్‌స్టాల్ సెషన్‌లను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది సక్రియ ప్యాకేజీ ఇన్‌స్టాలేషన్‌ల గురించి వివరాలను చూడటానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"జూమ్ నియంత్రణ కోసం రెండుసార్లు తాకండి"</string>
@@ -1426,8 +1425,9 @@
     <string name="deny" msgid="2081879885755434506">"తిరస్కరించండి"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"అనుమతి అభ్యర్థించబడింది"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"ఖాతా <xliff:g id="ACCOUNT">%s</xliff:g> కోసం\nఅనుమతి అభ్యర్థించబడింది."</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"మీరు మీ వ్యక్తిగత స్థలంలో ఈ అనువర్తనాన్ని ఉపయోగిస్తున్నారు"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"మీరు మీ కార్య స్థలంలో ఈ అనువర్తనాన్ని ఉపయోగిస్తున్నారు"</string>
+    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
+    <skip />
+    <string name="forward_intent_to_work" msgid="621480743856004612">"మీరు మీ కార్యాలయ ప్రొఫైల్‌లో ఈ అనువర్తనాన్ని ఉపయోగిస్తున్నారు"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"సమకాలీకరణ"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ప్రాప్యత"</string>
@@ -1502,8 +1502,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"గంటను తగ్గించు"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"PMని సెట్ చేయి"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"AMను సెట్ చేయండి"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"PM"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"AM"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"నెలని పెంచండి"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"నెలను తగ్గించండి"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"రోజుని పెంచండి"</string>
@@ -1536,11 +1534,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"సవరించు"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"డేటా వినియోగం హెచ్చరిక"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"వినియోగం మరియు సెట్టింగ్‌లను వీక్షించడానికి తాకండి."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G డేటా ఆఫ్‌లో ఉంది"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G డేటా ఆఫ్‌లో ఉంది"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"సెల్యూలార్ డేటా ఆఫ్‌లో ఉంది"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi డేటా ఆఫ్‌లో ఉంది"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"పరిమితిని చేరుకుంది"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G డేటా పరిమితిని చేరుకుంది"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G డేటా పరిమితిని చేరుకుంది"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"సెల్యులార్ డేటా పరిమి. చేరుకుంది"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi డేటా పరిమితిని చేరుకుంది"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"మిగిలిన కార్యా. డేటా పాజ్ చేయబ."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G డేటా పరిమితి మించిపోయింది"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G డేటా పరిమితి మించిపోయింది"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"సెల్యులార్ డేటా పరిమితిని మించిపోయింది"</string>
@@ -1571,7 +1569,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"కాల్‌ను ఆమోదించాలా?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ఎల్లప్పుడూ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"ఒకసారి"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s కార్యాలయ ప్రొఫైల్‌కు మద్దతు ఇవ్వదు."</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"టాబ్లెట్"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"ఫోన్"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"హెడ్‌ఫోన్‌లు"</string>
@@ -1644,6 +1643,8 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"ప్రాప్యత ప్రారంభించబడింది."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ప్రాప్యత రద్దు చేయబడింది."</string>
     <string name="user_switched" msgid="3768006783166984410">"ప్రస్తుత వినియోగదారు <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"యజమాని"</string>
     <string name="error_message_title" msgid="4510373083082500195">"లోపం"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"ఈ మార్పును మీ నిర్వాహకుడు అనుమతించలేదు"</string>
@@ -1765,31 +1766,19 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ఎంచుకోబడింది"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> తొలగించబడింది"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"ఈ స్క్రీన్‌ను అన్‌పిన్ చేయడానికి, వెనుకకు మరియు ఇటీవలివి బటన్‌లను ఒకేసారి నొక్కి, ఉంచండి."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"ఈ స్క్రీన్‌ను అన్‌పిన్ చేయడానికి, ఇటీవలివి బటన్‌ను నొక్కి, ఉంచండి."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"స్క్రీన్ పిన్ చేయబడింది. మీ సంస్థలో అన్‌పిన్ చేయడానికి అనుమతి లేదు."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"స్క్రీన్ పిన్నింగ్‌ను ఉపయోగించాలా?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"స్క్రీన్ పిన్నింగ్ ఒక్క వీక్షణలో డిస్‌ప్లేను లాక్ చేస్తుంది.\n\nనిష్క్రమించడానికి, వెనుకకు మరియు ఇటీవలివి బటన్‌లను ఒకేసారి నొక్కి, ఉంచండి."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"స్క్రీన్ పిన్నింగ్ ఒక్క వీక్షణలో డిస్‌ప్లేను లాక్ చేస్తుంది.\n\nనిష్క్రమించడానికి, ఇటీవలివి బటన్‌ను నొక్కి, ఉంచండి."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"వద్దు, ధన్యవాదాలు"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ప్రారంభించు"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"అన్‌లాక్ నమూనా"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"పాస్‌వర్డ్"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"స్క్రీన్ పిన్ చేయబడింది"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"స్క్రీన్ అన్‌పిన్ చేయబడింది"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"అన్‌పిన్ చేయడానికి ముందు PIN కోసం అడుగు"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"అన్‌పిన్ చేయడానికి ముందు అన్‌లాక్ నమూనా కోసం అడుగు"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"అన్‌పిన్ చేయడానికి ముందు పాస్‌వర్డ్ కోసం అడుగు"</string>
+    <string name="battery_saver_description" msgid="725676363406667978">"బ్యాటరీ సామర్థ్యాన్ని మెరుగుపరచడంలో సహాయపడటానికి, బ్యాటరీ సేవర్ మీ పరికరం పనితీరుని తగ్గిస్తుంది మరియు వైబ్రేషన్‌ను మరియు అత్యధిక నేపథ్య డేటాను పరిమితపరుస్తుంది. అలాగే సమకాలీకరణపై ఆధారపడే ఇమెయిల్, సందేశ సేవ మరియు ఇతర అనువర్తనాలు మీరు వాటిని తెరిస్తే మినహా నవీకరించబడకపోవచ్చు.\n\nమీ పరికరం ఛార్జింగ్‌లో ఉన్నప్పుడు బ్యాటరీ సేవర్ స్వయంచాలకంగా ఆఫ్ చేయబడుతుంది."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"మీ వృథా సమయం <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>కి ముగిసే వరకు"</string>
 </resources>

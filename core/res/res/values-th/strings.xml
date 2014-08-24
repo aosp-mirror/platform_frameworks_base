@@ -413,8 +413,6 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"อนุญาตให้ผู้ใช้ผูกกับอินเทอร์เฟซระดับสูงสุดของจอแสดงผลระยะไกล ซึ่งแอปพลิเคชันทั่วไปไม่จำเป็นต้องใช้"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"เชื่อมโยงกับบริการวิดเจ็ต"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"อนุญาตให้ผู้ใช้เชื่อมโยงกับส่วนติดต่อผู้ใช้ระดับสูงสุดของบริการวิดเจ็ต ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"เชื่อมโยงกับบริการของผู้ให้บริการเส้นทาง"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"ช่วยให้เจ้าของสามารถเชื่อมโยงกับผู้ให้บริการเส้นทางที่ลงทะเบียนรายใดก็ได้ ไม่จำเป็นสำหรับแอปทั่วไป"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"ติดต่อกับผู้ดูแลอุปกรณ์"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"อนุญาตให้ผู้ใช้ส่งการติดต่อไปยังโปรแกรมควบคุมอุปกรณ์ ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"เชื่อมโยงกับอินพุตทีวี"</string>
@@ -613,6 +611,10 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"เปิดหรือปิดโทรศัพท์"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"อนุญาตให้แอปพลิเคชันเปิดหรือปิดแท็บเล็ต"</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"อนุญาตให้แอปพลิเคชันเปิดหรือปิดโทรศัพท์"</string>
+    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
+    <skip />
+    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
+    <skip />
     <string name="permlab_factoryTest" msgid="3715225492696416187">"เรียกใช้ในโหมดการทดสอบจากโรงงาน"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"เรียกใช้การทดสอบจากผู้ผลิตในระดับต่ำ โดยอนุญาตให้เข้าถึงฮาร์ดแวร์แท็บเล็ตอย่างสมบูรณ์ ใช้ได้เฉพาะช่วงที่แท็บเล็ตทำงานในโหมดการทดสอบจากผู้ผลิตเท่านั้น"</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"เรียกใช้การทดสอบจากผู้ผลิตในระดับต่ำ โดยอนุญาตให้เข้าถึงฮาร์ดแวร์โทรศัพท์อย่างสมบูรณ์ ใช้ได้เฉพาะช่วงที่โทรศัพท์ทำงานในโหมดการทดสอบจากผู้ผลิตเท่านั้น"</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"อนุญาตให้แอปพลิเคชันอ่านและเขียนระบบไฟล์แคช"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"โทร/รับสาย SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"อนุญาตให้แอปโทรและรับสาย SIP"</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"โต้ตอบกับหน้าจอขณะกำลังใช้สาย"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"อนุญาตให้แอปควบคุมเวลาและลักษณะที่ผู้ใช้เห็นหน้าจอขณะกำลังใช้สาย"</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"โต้ตอบกับหน้าจอขณะกำลังใช้สาย"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"อนุญาตให้แอปควบคุมเวลาและลักษณะที่ผู้ใช้เห็นหน้าจอขณะกำลังใช้สาย"</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"โต้ตอบกับบริการโทรศัพท์"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"อนุญาตให้แอปโต้ตอบกับบริการโทรศัพท์เพื่อโทรออก/รับสาย"</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"มอบประสบการณ์ของผู้ใช้ขณะกำลังใช้สาย"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"อนุญาตให้แอปมอบประสบการณ์ของผู้ใช้ขณะกำลังใช้สาย"</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"อ่านประวัติการใช้เครือข่าย"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"อนุญาตให้แอปพลิเคชันอ่านประวัติการใช้เครือข่ายสำหรับเครือข่ายและแอปพลิเคชันเฉพาะ"</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"จัดการนโยบายเครือข่าย"</string>
@@ -732,8 +734,6 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"อนุญาตให้เจ้าของเชื่อมโยงกับอินเตอร์เฟซระดับสูงสุดของบริการตัวฟังการแจ้งเตือน ซึ่งไม่มีความจำเป็นสำหรับแอปธรรมดา"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"เชื่อมโยงกับบริการของผู้เสนอเงื่อนไข"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"อนุญาตให้ผู้ใช้อุปกรณ์เชื่อมโยงกับอินเทอร์เฟซระดับบนสุดของบริการของผู้เสนอเงื่อนไข ไม่จำเป็นสำหรับแอปทั่วไป"</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"เชื่อมโยงกับบริการเส้นทางสื่อ"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"อนุญาตให้แอปพลิเคชันเชื่อมโยงกับอินเทอร์เฟซระดับบนสุดของบริการเส้นทางสื่อ ไม่จำเป็นสำหรับแอปทั่วไป"</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"เชื่อมโยงกับบริการที่ต้องการ"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"อนุญาตให้แอปพลิเคชันเชื่อมโยงกับอินเทอร์เฟซระดับบนสุดของบริการที่ต้องการ ไม่จำเป็นสำหรับแอปทั่วไป"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"เรียกใช้แอปการกำหนดค่าของผู้ให้บริการ"</string>
@@ -1352,8 +1352,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"แตะเพื่อปิดใช้งานการแก้ไขข้อบกพร่องของ USB"</string>
     <string name="select_input_method" msgid="8547250819326693584">"เปลี่ยนแป้นพิมพ์"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"เลือกแป้นพิมพ์"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"แสดงวิธีการป้อนข้อมูล"</string>
     <string name="hardware" msgid="7517821086888990278">"ฮาร์ดแวร์"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"เลือกรูปแบบแป้นพิมพ์"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"แตะเพื่อเลือกรูปแบบแป้นพิมพ์"</string>
@@ -1404,8 +1403,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"อนุญาตให้แอปพลิเคชันผูกกับบริการของเอเจนต์ความน่าเชื่อถือได้"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"โต้ตอบกับการอัปเดตและระบบการกู้คืน"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"ช่วยให้แอปพลิเคชันสามารถโต้ตอบกับระบบการกู้คืนและการอัปเดตระบบ"</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"สร้างเซสชันการฉายภาพสื่อ"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"อนุญาตให้แอปพลิเคชันสร้างเซสชันการฉายภาพสื่อ เซสชันดังกล่าวช่วยให้แอปพลิเคชันสามารถจับภาพหน้าจอและเนื้อหาเสียงได้ แอปทั่วไปไม่จำเป็นต้องใช้"</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"จัดการเซสชันการฉายภาพสื่อ"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"อนุญาตให้แอปพลิเคชันจัดการเซสชันการฉายภาพสื่อ เซสชันดังกล่าวช่วยให้แอปพลิเคชันสามารถจับภาพหน้าจอและเนื้อหาเสียงได้ แอปพลิเคชันทั่วไปไม่จำเป็นต้องใช้"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"อ่านเซสชันการติดตั้ง"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"อนุญาตให้แอปพลิเคชันอ่านเซสชันการติดตั้ง ซึ่งจะอนุญาตให้อ่านรายละเอียดเกี่ยวกับการติดตั้งแพ็กเกจที่ใช้งาน"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"แตะสองครั้งเพื่อควบคุมการซูม"</string>
@@ -1426,8 +1425,10 @@
     <string name="deny" msgid="2081879885755434506">"ปฏิเสธ"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"การอนุญาตที่ขอ"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"การอนุญาตที่ขอ\nสำหรับบัญชี <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"คุณกำลังใช้แอปนี้ในพื้นที่ส่วนตัวของคุณ"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"คุณกำลังใช้แอปนี้ในพื้นที่ทำงานของคุณ"</string>
+    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"วิธีป้อนข้อมูล"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"ซิงค์"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"การเข้าถึง"</string>
@@ -1502,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"ลดชั่วโมง"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"ตั้งค่า PM"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"ตั้งค่า AM"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"PM"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"AM"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"เพิ่มเดือน"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"ลดเดือน"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"เพิ่มวัน"</string>
@@ -1536,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"แก้ไข"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"คำเตือนการใช้ข้อมูล"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"แตะเพื่อดูการใช้งานและการตั้งค่า"</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"ข้อมูล 2G-3G ปิดอยู่"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"ข้อมูล 4G ปิดอยู่"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"ข้อมูลมือถือปิดอยู่"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"ข้อมูล Wi-Fi ปิดอยู่"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"ถึงขีดจำกัดแล้ว"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"ถึงขีดจำกัดข้อมูล 2G-3G แล้ว"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"ถึงขีดจำกัดข้อมูล 4G แล้ว"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"ถึงขีดจำกัดข้อมูลมือถือแล้ว"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"ถึงขีดจำกัดข้อมูล Wi-Fi แล้ว"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"หยุดข้อมูลที่เหลือในรอบชั่วคราว"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"เกินขีดจำกัดข้อมูล 2G - 3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"เกินขีดจำกัดของข้อมูล 4G"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"ถึงขีดจำกัดข้อมูลมือถือแล้ว"</string>
@@ -1571,7 +1570,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"รับสายหรือไม่"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ทุกครั้ง"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"เฉพาะครั้งนี้"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s ไม่สนับสนุนโปรไฟล์งาน"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"แท็บเล็ต"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"โทรศัพท์"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"หูฟัง"</string>
@@ -1644,6 +1644,8 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"เปิดใช้งานการเข้าถึงแล้ว"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ยกเลิกการเข้าถึงแล้ว"</string>
     <string name="user_switched" msgid="3768006783166984410">"ผู้ใช้ปัจจุบัน <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"เจ้าของ"</string>
     <string name="error_message_title" msgid="4510373083082500195">"ข้อผิดพลาด"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"ผู้ดูแลระบบไม่อนุญาตการเปลี่ยนแปลงนี้"</string>
@@ -1765,31 +1767,22 @@
     <string name="item_is_selected" msgid="949687401682476608">"เลือก <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"ลบ <xliff:g id="KEY">%1$s</xliff:g> แล้ว"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g>ที่ทำงาน"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"หากต้องการเลิกตรึงหน้าจอ แตะ \"กลับ\" และ \"ล่าสุด\" ค้างไว้พร้อมกัน"</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"หากต้องการเลิกตรึงหน้าจอ ให้แตะ \"ล่าสุด\" ค้างไว้"</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"ตรึงหน้าจอแล้ว องค์กรของคุณไม่อนุญาตให้เลิกตรึง"</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"ใช้การตรึงหน้าจอไหม"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"การตรึงหน้าจอจะล็อกหน้าจอให้อยู่ในมุมมองเดียว\n\nหากต้องการออก ให้แตะ \"กลับ\" และ \"ล่าสุด\" ค้างไว้พร้อมกัน"</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"การตรึงหน้าจอจะล็อกหน้าจอให้อยู่ในมุมมองเดียว\n\nหากต้องการออก แตะ \"ล่าสุด\" ค้างไว้"</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"ไม่เป็นไร ขอบคุณ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"เริ่มต้น"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
+    <string name="lock_to_app_start" msgid="6643342070839862795">"ตรึงหน้าจอแล้ว"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"เลิกตรึงหน้าจอแล้ว"</string>
+    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
     <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
+    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
     <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
+    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
     <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"รูปแบบการปลดล็อก"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"รหัสผ่าน"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="battery_saver_description" msgid="725676363406667978">"เพื่อให้สามารถใช้แบตเตอรี่ได้ยาวนานขึ้น โหมดประหยัดแบตเตอรี่จะลดการทำงานของอุปกรณ์ และจำกัดการสั่นรวมถึงข้อมูลแบ็กกราวด์เกือบทั้งหมด อีเมล การรับส่งข้อความ และแอปอื่นๆ ที่ใช้การซิงค์อาจไม่อัปเดตจนกว่าคุณจะเปิดใช้\n\nโหมดประหยัดแบตเตอรี่จะปิดอัตโนมัติเมื่อชาร์จอุปกรณ์"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"จนกว่าจะสิ้นสุดช่วงเวลาที่เครื่องไม่ทำงานในเวลา <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

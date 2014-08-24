@@ -413,8 +413,6 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"권한을 가진 프로그램이 원격 디스플레이에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"위젯 서비스와 연결"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"권한을 가진 프로그램이 위젯 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"경로 제공업체 서비스 사용"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"권한을 가진 프로그램이 등록된 경로 제공업체를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"기기 관리자와 상호 작용"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"권한을 가진 프로그램이 기기 관리자에게 인텐트를 보낼 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"TV 입력 사용"</string>
@@ -613,6 +611,10 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"휴대전화 전원 켜고 끄기"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"앱이 태블릿을 켜거나 끌 수 있도록 허용합니다."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"앱이 휴대전화를 켜거나 끌 수 있도록 허용합니다."</string>
+    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
+    <skip />
+    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
+    <skip />
     <string name="permlab_factoryTest" msgid="3715225492696416187">"출고 테스트 모드로 실행"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"태블릿 하드웨어에 대한 완전한 액세스를 허용하는 하위 수준의 제조업체 테스트로 실행됩니다. 태블릿이 제조업체 테스트 모드로 실행 중일 때만 사용할 수 있습니다."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"휴대전화 하드웨어에 대한 완전한 액세스를 허용하는 하위 수준의 제조업체 테스트로 실행됩니다. 휴대전화가 제조업체 테스트 모드로 실행 중일 때만 사용할 수 있습니다."</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"앱이 캐시 파일 시스템을 읽고 쓸 수 있도록 허용합니다."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP 통화 발신/수신"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"앱에서 SIP 통화를 발신 및 수신하도록 허용"</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"통화 화면과 상호 작용"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"앱에서 사용자가 통화 화면을 보는 시기와 방법을 제어하도록 허용합니다."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"통화 화면과 상호작용"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"앱에서 사용자가 통화 화면을 보는 시기와 방법을 제어하도록 허용합니다."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"전화 서비스와 상호 작용"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"앱을 전화 서비스와 상호 작용하도록 허용하여 전화를 송수신하세요."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"통화 사용자 경험 제공"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"앱에서 통화 사용자 경험을 제공하도록 허용합니다."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"이전 네트워크 사용량 읽기"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"앱이 특정 네트워크 및 앱에 대한 이전 네트워크 사용량을 읽을 수 있도록 허용합니다."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"네트워크 정책 관리"</string>
@@ -732,8 +734,6 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"권한을 가진 프로그램이 알림 수신기 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"조건 제공자 서비스 사용"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"권한을 가진 프로그램이 조건 제공자 서비스의 최상위 인터페이스를 사용하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"미디어 경로 서비스 사용"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"권한을 가진 프로그램이 미디어 경로 서비스의 최상위 인터페이스를 사용하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"드림 서비스에 연결"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"권한을 가진 프로그램이 드림 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"이동통신사에서 제공한 구성 앱 호출"</string>
@@ -1352,8 +1352,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB 디버깅을 사용하지 않으려면 터치하세요."</string>
     <string name="select_input_method" msgid="8547250819326693584">"키보드 변경"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"키보드 선택"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"입력 방법 표시"</string>
     <string name="hardware" msgid="7517821086888990278">"하드웨어"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"키보드 레이아웃 선택"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"터치하여 키보드 레이아웃을 선택합니다."</string>
@@ -1404,8 +1403,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"애플리케이션이 Trust Agent 서비스에 바인딩할 수 있도록 허용합니다."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"업데이트 및 복구 시스템과 상호작용"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"애플리케이션이 복구 시스템 및 시스템 업데이트와 상호작용할 수 있도록 허용합니다."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"미디어 프로젝션 세션 만들기"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"애플리케이션이 미디어 프로젝션 세션을 만드는 것을 허용합니다. 이 세션은 애플리케이션에 디스플레이 및 오디오 콘텐츠를 캡처하는 기능을 제공할 수 있습니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"미디어 프로젝션 세션 관리"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"애플리케이션이 미디어 프로젝션 세션을 관리하도록 허용합니다. 이 세션은 애플리케이션에 디스플레이 및 오디오 콘텐츠를 캡처하는 기능을 제공할 수 있습니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"설치 세션 읽기"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"애플리케이션의 설치 세션 읽기를 허용하면, 활성 패키지 설치에 대한 세부 정보를 볼 수 있습니다."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"확대/축소하려면 두 번 터치하세요."</string>
@@ -1426,8 +1425,10 @@
     <string name="deny" msgid="2081879885755434506">"거부"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"권한 요청됨"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> 계정에 대해\n권한 요청"</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"현재 개인 공간에서 이 앱을 사용 중입니다."</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"현재 작업 공간에서 이 앱을 사용 중입니다."</string>
+    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"입력 방법"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"동기화"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"접근성"</string>
@@ -1502,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"\'시간\'을 줄입니다."</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"PM 설정"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"AM 설정"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"오후"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"오전"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"\'월\'을 늘립니다."</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"\'월\'을 줄입니다."</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"\'일\'을 늘립니다."</string>
@@ -1536,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"수정"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"데이터 사용 경고"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"사용량 및 설정을 보려면 터치하세요."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G 데이터 사용 중지됨"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G 데이터 사용 중지됨"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"이동통신 데이터 사용 중지됨"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi 데이터 사용 중지됨"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"한도 도달"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G 데이터 한도에 도달함"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G 데이터 한도에 도달함"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"이동통신 데이터 한도에 도달함"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi 데이터 한도에 도달함"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"나머지 주기 동안 데이터 일시중지됨"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G - 3G 데이터 제한 초과됨"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4GB의 데이터 제한 초과됨"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"이동통신 데이터 한도 초과"</string>
@@ -1571,7 +1570,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"통화를 수락하시겠습니까?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"항상"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"한 번만"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s에서 직장 프로필을 지원하지 않습니다."</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"태블릿"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"휴대전화"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"헤드폰"</string>
@@ -1644,6 +1644,8 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"접근성을 사용 설정했습니다."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"접근성이 취소되었습니다."</string>
     <string name="user_switched" msgid="3768006783166984410">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
+    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"소유자"</string>
     <string name="error_message_title" msgid="4510373083082500195">"오류"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"관리자가 이 변경을 허용하지 않습니다."</string>
@@ -1765,31 +1767,22 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g>이(가) 선택됨"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> 삭제됨"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"이 화면을 고정 해제하려면 뒤로와 최근을 동시에 길게 누르세요."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"이 화면을 고정 해제하려면 최근을 길게 누르세요."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"화면이 고정되었습니다. 소속된 조직에서 고정 해제를 허용하지 않습니다."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"화면을 고정하시겠습니까?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"화면 고정을 사용하면 화면을 단일 보기로 잠급니다.\n\n종료하려면 뒤로와 최근을 동시에 길게 누릅니다."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"화면 고정을 사용하면 화면을 단일 보기로 잠급니다.\n\n종료하려면 최근을 길게 누릅니다."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"아니요"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"시작"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
+    <string name="lock_to_app_start" msgid="6643342070839862795">"화면 고정됨"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"화면 고정 해제됨"</string>
+    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
     <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
+    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
     <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
+    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
     <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"잠금해제 패턴"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"비밀번호"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="battery_saver_description" msgid="725676363406667978">"배터리 절약 기능은 배터리 수명을 개선하기 위해 기기의 성능을 줄이고 진동과 대부분의 백그라운드 데이터를 제한합니다. 동기화가 필요한 이메일, 메시지, 기타 앱은 열었을 때 업데이트됩니다.\n\n기기를 충전하는 중에는 배터리 절약 기능이 자동으로 중지됩니다."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>에 정지가 종료될 때까지"</string>
 </resources>

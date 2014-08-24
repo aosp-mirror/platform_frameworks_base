@@ -413,8 +413,6 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en fjärrskärm. Ska inte behövas för vanliga appar."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bind till en widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en widget. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"bind till en ruttleverantörstjänst"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Tillåter att innehavaren binds till en registrerad ruttleverantör. Detta ska inte behövas för vanliga appar."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"arbeta med en enhetsadministratör"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Tillåter att innehavaren skickar avsikter till en enhetsadministratör. Vanliga appar behöver aldrig göra detta."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"binda till en tv-insignal"</string>
@@ -613,6 +611,10 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"sätta på eller stänga av telefonen"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Tillåter att appen slår på eller stänger av surfplattan."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Tillåter att appen slår på eller stänger av mobilen."</string>
+    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
+    <skip />
+    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
+    <skip />
     <string name="permlab_factoryTest" msgid="3715225492696416187">"kör i fabrikstestläge"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Köra som ett testläge för tillverkaren på låg nivå. På så sätt får du fullständig åtkomst till surfplattans maskinvara. Är endast tillgänglig när surfplattan körs i tillverkarens testläge."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Köra som ett testläge för tillverkaren på låg nivå. På så sätt får du fullständig åtkomst till telefonens maskinvara. Är endast tillgänglig när telefonen körs i tillverkarens testläge."</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Tillåter att appen läser och skriver till cachefilsystemet."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"gör/ta emot SIP-anrop"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Tillåter att appen gör och tar emot SIP-anrop."</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"interagera med skärmen för inkommande samtal"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Låter appen kontrollera hur och när användaren ser skärmen för inkommande samtal."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interagera med skärmen för inkommande samtal"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Tillåter att appen kontrollerar hur och när användaren ser skärmen för inkommande samtal."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"samverka med telefonitjänster"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Tillåter appen att använda telefonitjänster för att ringa/ta emot samtal."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"förbättra användarupplevelsen för inkommande samtal."</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Tillåter att appen förbättrar användarupplevelsen för inkommande samtal."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"läsa historisk nätverksanvändning"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Tillåter att appen läser den historiska nätverksanvändningen för specifika nätverk och appar."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"hantera nätverkspolicy"</string>
@@ -732,8 +734,6 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en meddelandelyssnare. Ska inte behövas för vanliga appar."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"bind till en leverantörstjänst"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en leverantörstjänst. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"binda till medieruttjänst"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Tillåter att innehavaren kan binda till den översta nivåns gränssnitt för en medieruttjänst. Detta ska inte behövas för vanliga appar."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"binda till en drömtjänst"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en drömtjänst. Ska inte behövas för vanliga appar."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"anropa konfigurationsappen från operatören"</string>
@@ -1352,8 +1352,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tryck om du vill inaktivera USB-felsökning."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Byt tangentbord"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Välj tangentbord"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"Visa inmatningsmetod"</string>
     <string name="hardware" msgid="7517821086888990278">"Maskinvara"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Välj en tangentbordslayout"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Välj en tangentbordslayout genom att trycka."</string>
@@ -1404,8 +1403,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Tillåter att en app binds vid en tjänst från en betrodd agent."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interagera med uppdaterings- och återställningssystemet"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Tillåter att en app interagerar med systemuppdateringar och återställningssystemet."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Skapa sessioner för medieprojektioner"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Tillåter att appen skapar sessioner för mediaprojektioner. Sessionerna kan ge appar möjlighet att ta bilder av det som visas på skärmen eller spela in ljudinnehåll. Detta ska inte behövas för vanliga appar."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Hantera medieprojektionssessioner"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Tillåter att en app hanterar sessioner för medieprojektion. Dessa sessioner kan ge appar möjlighet att spela in skärm- och ljudinnehåll. Detta ska aldrig behövas för vanliga appar."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Läsa installationssessioner"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Tillåt appen att läsa installationssessioner. Det ger den tillgång till uppgifter om aktiva paketinstallationer."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Tryck två gånger för zoomkontroll"</string>
@@ -1426,8 +1425,9 @@
     <string name="deny" msgid="2081879885755434506">"Neka"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Begärd behörighet"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Begärd behörighet\nför kontot <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"Du använder den här appen i ditt personliga utrymme"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"Du använder den här appen i ditt arbetsutrymme"</string>
+    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
+    <skip />
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Du använder den här appen i din profil"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Indatametod"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synkronisera"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Tillgänglighet"</string>
@@ -1502,8 +1502,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Minska timmar"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Ange em"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Ange fm"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"em"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"fm"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Öka månader"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Minska månader"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Öka dagar"</string>
@@ -1536,11 +1534,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Redigera"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Varning angående dataanvändning"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Visa användning och inställning"</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-/3G-data har inaktiverats"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G-data har inaktiverats"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Mobildata har inaktiverats"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi-data har inaktiverats"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"Gränsen har uppnåtts"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Datagränsen för 2G-3G har uppnåtts"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Datagränsen för 4G har uppnåtts"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Datagränsen för mobilen har uppnåtts"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Datagränsen för Wi-Fi har uppnåtts"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Data är pausade under resten av cykeln"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Gränsen för data via 2G-3G har överskridits"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Gränsen för data via 4G har överskridits"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Mobildatagränsen är överskriden"</string>
@@ -1571,7 +1569,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Vill du ta emot samtal?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Alltid"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Bara en gång"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s har inte stöd för arbetsprofil."</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Surfplatta"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Mobil"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Hörlurar"</string>
@@ -1644,6 +1643,8 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Tillgänglighetsläget har aktiverats."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Byte till tillgänglighetsläge avbrutet."</string>
     <string name="user_switched" msgid="3768006783166984410">"Nuvarande användare: <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"Ägare"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Fel"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Administratören tillåter inte den här ändringen"</string>
@@ -1765,31 +1766,19 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> har markerats"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> har tagits bort"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> för arbetet"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"Om du inte vill att skärmen ska vara fäst håller du ned Föregående och Senaste samtidigt."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Håll ned Senaste om du inte vill att skärmen ska vara fäst."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Skärmen är fäst. Din organisation tillåter inte att du avslutar läget."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Fäst skärmen?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Om skärmen fästs låses bilden.\n\nAvsluta läget genom att hålla ned Föregående och Senaste samtidigt."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Om skärmen fästs låses bilden.\n\nAnsluta läget genom att hålla ned Senaste."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NEJ TACK"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"STARTA"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"Pinkod"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"grafiskt lösenord"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"lösenord"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Skärmen är fäst"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Skärmen är inte längre fäst"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Be om pinkod innan skärmen slutar fästas"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Be om upplåsningsmönster innan skärmen slutar fästas"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Be om lösenord innan skärmen slutar fästas"</string>
+    <string name="battery_saver_description" msgid="725676363406667978">"Batterisparläget ökar batteriets livslängd genom att sänka enhetens prestanda, begränsa vibrationerna och begränsa bakgrundsdata. E-post- och meddelandeappar och andra appar som behöver synkroniseras kanske inte uppdateras om du inte startar dem.\n\nBatterisparläget stängs av automatiskt medan enheten laddas."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Tills avbrottstiden är slut <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

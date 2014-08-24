@@ -413,8 +413,6 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"リモートディスプレイのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ウィジェットサービスにバインド"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"ウィジェットサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"ルートプロバイダサービスへのバインド"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"登録済みのルートプロバイダにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"デバイス管理者との通信"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"デバイス管理者へのintentの送信を所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"テレビの入力へのバインド"</string>
@@ -613,6 +611,10 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"電源のON/OFF"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"タブレットの電源のON/OFFをアプリに許可します。"</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"携帯端末の電源のON/OFFをアプリに許可します。"</string>
+    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
+    <skip />
+    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
+    <skip />
     <string name="permlab_factoryTest" msgid="3715225492696416187">"出荷時試験モードでの実行"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"タブレットハードウェアへのアクセスを完全に許可して、低レベルのメーカーテストを実行します。メーカーのテストモードでタブレットを使用する場合にのみ利用できます。"</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"携帯電話のハードウェアへのアクセスを完全に許可して、低レベルのメーカーテストとして実行します。メーカーのテストモードで携帯電話を使用するときのみ利用できます。"</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"キャッシュファイルシステムの読み書きをアプリに許可します。"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP通話の発着信"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP通話の発着信をアプリに許可します。"</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"通話画面とのインタラクション"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"通話画面をユーザーに表示するタイミングと方法の制御をアプリに許可します。"</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"通話画面とのインタラクション"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"通話画面をユーザーに表示するタイミングと方法の制御をアプリに許可します。"</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"電話サービスとの通信"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"受発信のためアプリが電話サービスと通信することを許可する。"</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"通話中のユーザーエクスペリエンスの提供"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"通話中のユーザーエクスペリエンスの提供をアプリに許可します。"</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ネットワーク使用履歴の読み取り"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"特定のネットワークやアプリに関するネットワーク使用履歴の読み取りをアプリに許可します。"</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"ネットワークポリシーの管理"</string>
@@ -732,8 +734,6 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"通知リスナーサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"コンディションプロバイダサービスへのバインド"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"コンディションプロバイダサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"メディアルートサービスへのバインド"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"メディアルートサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"ドリームサービスにバインド"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"ドリームサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"携帯通信会社が提供する設定アプリの呼び出し"</string>
@@ -1352,8 +1352,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"タップしてUSBデバッグを無効にします。"</string>
     <string name="select_input_method" msgid="8547250819326693584">"キーボードの変更"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"キーボードの選択"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"入力方法を表示する"</string>
     <string name="hardware" msgid="7517821086888990278">"ハードウェア"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"キーボードレイアウトの選択"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"タップしてキーボードレイアウトを選択してください。"</string>
@@ -1404,8 +1403,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"信頼できるエージェントサービスにバインドすることをアプリに許可します。"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"アップデートと回復システムへのアクセス"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"回復システムとシステムアップデートへのアクセスをアプリに許可します。"</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"メディアプロジェクションセッションの作成"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"メディアプロジェクションセッションの作成をアプリに許可します。これらのセッションでは、アプリがディスプレイ/オーディオコンテンツをキャプチャできます。通常のアプリでは不要です。"</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"メディアプロジェクションセッションの管理"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"メディアプロジェクションセッションの管理をアプリに許可します。これらのセッションでは、アプリがディスプレイ/オーディオのコンテンツをキャプチャできます。通常のアプリでは不要です。"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"インストールセッションの読み取り"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"インストールセッションの読み取りをアプリに許可します。これにより、アプリはアクティブパッケージのインストールに関する詳細情報を参照できるようになります。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ダブルタップでズームコントロール"</string>
@@ -1426,8 +1425,10 @@
     <string name="deny" msgid="2081879885755434506">"拒否"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"権限がリクエストされました"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"次のアカウントにアクセスする権限が\nリクエストされました: <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"個人用スペースでこのアプリを使用しています"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"ワークスペースでこのアプリを使用しています"</string>
+    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
+    <skip />
+    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
+    <skip />
     <string name="input_method_binding_label" msgid="1283557179944992649">"入力方法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同期"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ユーザー補助"</string>
@@ -1502,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"1時間戻します"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"午後に設定"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"午前に設定"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"午後"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"午前"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"1か月進めます"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"1か月戻します"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"1日進めます"</string>
@@ -1536,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"編集"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"データ使用の警告"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"タップして使用状況と設定を表示します。"</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G～3Gデータが無効になりました"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4Gデータが無効になりました"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"モバイルデータが無効になりました"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fiデータが無効になりました"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"上限に達しました"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G～3Gデータの上限に達しました"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4Gデータの上限に達しました"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"モバイルデータの上限に達しました"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fiデータの上限に達しました"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"残りのサイクル中データは一時停止"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G～3Gデータの上限を超えました"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4Gデータの上限を超えました"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"モバイルデータの上限を超えました"</string>
@@ -1571,7 +1570,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"通話を受けますか？"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"常時"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"1回のみ"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$sはワークプロフィールをサポートしていません。"</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"タブレット"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"携帯端末"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"ヘッドホン"</string>
@@ -1644,6 +1644,8 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"ユーザー補助が有効になりました。"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ユーザー補助をキャンセルしました。"</string>
     <string name="user_switched" msgid="3768006783166984410">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
+    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"所有者"</string>
     <string name="error_message_title" msgid="4510373083082500195">"エラー"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"この変更は管理者によって許可されていません"</string>
@@ -1765,31 +1767,22 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g>を選択しました"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g>を削除しました"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"仕事の<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"この画面の固定を解除するには[戻る]と[最近]を同時に押し続けます。"</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"この画面の固定を解除するには[最近]を押し続けます。"</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"画面が固定されています。会社/組織により解除は許可されていません。"</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"画面固定を使用しますか？"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"画面固定では、1つの画面が表示されたままになります。\n\n解除するには[戻る]と[最近]を同時に押し続けます。"</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"画面固定では、1つの画面が表示されたままになります。\n\n解除するには[最近]を押し続けます。"</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"いいえ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"開始する"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
+    <string name="lock_to_app_start" msgid="6643342070839862795">"画面を固定しました"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"画面固定を解除しました"</string>
+    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
     <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
+    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
     <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
+    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
     <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"ロック解除パターン"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"パスワード"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="battery_saver_description" msgid="725676363406667978">"バッテリーを長持ちさせるため、バッテリーセーバーは端末のパフォーマンス、バイブレーション、ほとんどのバックグラウンドデータを制限します。同期を使用するメールやメッセージなどのアプリは起動しないと更新されない場合があります。\n\nバッテリーセーバーは、端末の充電中は自動的にOFFになります。"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>にダウンロードが終わるまで"</string>
 </resources>
