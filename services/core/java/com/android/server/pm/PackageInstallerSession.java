@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ABORTED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
+import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
@@ -38,6 +39,7 @@ import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ApkLite;
+import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.Signature;
 import android.os.Bundle;
@@ -47,6 +49,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.system.ErrnoException;
@@ -59,18 +62,21 @@ import android.util.MathUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.pm.PackageInstallerService.PackageInstallObserverAdapter;
 
+import libcore.io.IoUtils;
 import libcore.io.Libcore;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PackageInstallerSession extends IPackageInstallerSession.Stub {
@@ -95,18 +101,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     final SessionParams params;
     final long createdMillis;
 
-    /** Internal location where staged data is written. */
-    final File internalStageDir;
-    /** External container where staged data is written. */
-    final String externalStageCid;
-
-    /**
-     * When a {@link SessionParams#MODE_INHERIT_EXISTING} session is installed
-     * into an ASEC, this is the container where the stage is combined with the
-     * existing install.
-     */
-    // TODO: persist this cid once we start splicing
-    String combinedCid;
+    /** Staging location where client data is written. */
+    final File stageDir;
+    final String stageCid;
 
     /** Note that UID is not persisted; it's always derived at runtime. */
     final int installerUid;
@@ -133,20 +130,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private String mFinalMessage;
 
     @GuardedBy("mLock")
-    private File mResolvedStageDir;
-
-    /**
-     * Path to the resolved base APK for this session, which may point at an APK
-     * inside the session (when the session defines the base), or it may point
-     * at the existing base APK (when adding splits to an existing app).
-     * <p>
-     * This is used when confirming permissions, since we can't fully stage the
-     * session inside an ASEC before confirming with user.
-     */
-    @GuardedBy("mLock")
-    private String mResolvedBaseCodePath;
-
-    @GuardedBy("mLock")
     private ArrayList<FileBridge> mBridges = new ArrayList<>();
 
     @GuardedBy("mLock")
@@ -156,6 +139,25 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private String mPackageName;
     private int mVersionCode;
     private Signature[] mSignatures;
+
+    /**
+     * Path to the validated base APK for this session, which may point at an
+     * APK inside the session (when the session defines the base), or it may
+     * point at the existing base APK (when adding splits to an existing app).
+     * <p>
+     * This is used when confirming permissions, since we can't fully stage the
+     * session inside an ASEC before confirming with user.
+     */
+    @GuardedBy("mLock")
+    private File mResolvedBaseFile;
+
+    @GuardedBy("mLock")
+    private File mResolvedStageDir;
+
+    @GuardedBy("mLock")
+    private final List<File> mResolvedStagedFiles = new ArrayList<>();
+    @GuardedBy("mLock")
+    private final List<File> mResolvedInheritedFiles = new ArrayList<>();
 
     private final Handler.Callback mHandlerCallback = new Handler.Callback() {
         @Override
@@ -168,9 +170,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 try {
                     commitLocked();
                 } catch (PackageManagerException e) {
-                    Slog.e(TAG, "Install failed: " + e);
+                    final String completeMsg = ExceptionUtils.getCompleteMessage(e);
+                    Slog.e(TAG, "Commit of session " + sessionId + " failed: " + completeMsg);
                     destroyInternal();
-                    dispatchSessionFinished(e.error, e.getMessage(), null);
+                    dispatchSessionFinished(e.error, completeMsg, null);
                 }
 
                 return true;
@@ -181,7 +184,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public PackageInstallerSession(PackageInstallerService.InternalCallback callback,
             Context context, PackageManagerService pm, Looper looper, int sessionId, int userId,
             String installerPackageName, SessionParams params, long createdMillis,
-            File internalStageDir, String externalStageCid, boolean sealed) {
+            File stageDir, String stageCid, boolean sealed) {
         mCallback = callback;
         mContext = context;
         mPm = pm;
@@ -192,12 +195,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         this.installerPackageName = installerPackageName;
         this.params = params;
         this.createdMillis = createdMillis;
-        this.internalStageDir = internalStageDir;
-        this.externalStageCid = externalStageCid;
+        this.stageDir = stageDir;
+        this.stageCid = stageCid;
 
-        if ((internalStageDir == null) == (externalStageCid == null)) {
+        if ((stageDir == null) == (stageCid == null)) {
             throw new IllegalArgumentException(
-                    "Exactly one of internal or external stage must be set");
+                    "Exactly one of stageDir or stageCid stage must be set");
         }
 
         mSealed = sealed;
@@ -220,7 +223,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             info.sessionId = sessionId;
             info.installerPackageName = installerPackageName;
-            info.resolvedBaseCodePath = mResolvedBaseCodePath;
+            info.resolvedBaseCodePath = (mResolvedBaseFile != null) ?
+                    mResolvedBaseFile.getAbsolutePath() : null;
             info.progress = mProgress;
             info.sealed = mSealed;
             info.open = mOpenCount.get() > 0;
@@ -253,18 +257,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * might point at an ASEC mount point, which is why we delay path resolution
      * until someone actively works with the session.
      */
-    private File getStageDir() throws IOException {
+    private File resolveStageDir() throws IOException {
         synchronized (mLock) {
             if (mResolvedStageDir == null) {
-                if (internalStageDir != null) {
-                    mResolvedStageDir = internalStageDir;
+                if (stageDir != null) {
+                    mResolvedStageDir = stageDir;
                 } else {
-                    final String path = PackageHelper.getSdDir(externalStageCid);
+                    final String path = PackageHelper.getSdDir(stageCid);
                     if (path != null) {
                         mResolvedStageDir = new File(path);
                     } else {
-                        throw new IOException(
-                                "Failed to resolve container path for " + externalStageCid);
+                        throw new IOException("Failed to resolve path to container " + stageCid);
                     }
                 }
             }
@@ -306,7 +309,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public String[] getNames() {
         assertNotSealed("getNames");
         try {
-            return getStageDir().list();
+            return resolveStageDir().list();
         } catch (IOException e) {
             throw ExceptionUtils.wrap(e);
         }
@@ -339,8 +342,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (!FileUtils.isValidExtFilename(name)) {
                 throw new IllegalArgumentException("Invalid name: " + name);
             }
-            final File target = new File(getStageDir(), name);
+            final File target = new File(resolveStageDir(), name);
 
+            // TODO: this should delegate to DCS so the system process avoids
+            // holding open FDs into containers.
             final FileDescriptor targetFd = Libcore.os.open(target.getAbsolutePath(),
                     O_CREAT | O_WRONLY, 0644);
             Os.chmod(target.getAbsolutePath(), 0644);
@@ -350,7 +355,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (lengthBytes > 0) {
                 final StructStat stat = Libcore.os.fstat(targetFd);
                 final long deltaBytes = lengthBytes - stat.st_size;
-                if (deltaBytes > 0) {
+                // Only need to free up space when writing to internal stage
+                if (stageDir != null && deltaBytes > 0) {
                     mPm.freeStorage(deltaBytes);
                 }
                 Libcore.os.posix_fallocate(targetFd, 0, lengthBytes);
@@ -385,7 +391,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (!FileUtils.isValidExtFilename(name)) {
                 throw new IllegalArgumentException("Invalid name: " + name);
             }
-            final File target = new File(getStageDir(), name);
+            final File target = new File(resolveStageDir(), name);
 
             final FileDescriptor targetFd = Libcore.os.open(target.getAbsolutePath(), O_RDONLY, 0);
             return new ParcelFileDescriptor(targetFd);
@@ -424,22 +430,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mCallback.onSessionSealed(this);
         }
 
-        final File stageDir;
         try {
-            stageDir = getStageDir();
+            resolveStageDir();
         } catch (IOException e) {
             throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
-                    "Failed to resolve stage dir", e);
+                    "Failed to resolve stage location", e);
         }
 
         // Verify that stage looks sane with respect to existing application.
         // This currently only ensures packageName, versionCode, and certificate
         // consistency.
-        validateInstallLocked(stageDir);
+        validateInstallLocked();
 
         Preconditions.checkNotNull(mPackageName);
         Preconditions.checkNotNull(mSignatures);
-        Preconditions.checkNotNull(mResolvedBaseCodePath);
+        Preconditions.checkNotNull(mResolvedBaseFile);
 
         if (!mPermissionsAccepted) {
             // User needs to accept permissions; give installer an intent they
@@ -454,17 +459,41 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
+        if (stageCid != null) {
+            // Figure out the final installed size and resize the container once
+            // and for all. Internally the parser handles straddling between two
+            // locations when inheriting.
+            final long finalSize = calculateInstalledSize();
+            resizeContainer(stageCid, finalSize);
+        }
+
         // Inherit any packages and native libraries from existing install that
         // haven't been overridden.
         if (params.mode == SessionParams.MODE_INHERIT_EXISTING) {
-            // TODO: implement splicing into existing ASEC
-            spliceExistingFilesIntoStage(stageDir);
+            try {
+                if (stageCid != null) {
+                    // TODO: this should delegate to DCS so the system process
+                    // avoids holding open FDs into containers.
+                    copyFiles(mResolvedInheritedFiles, resolveStageDir());
+                } else {
+                    linkFiles(mResolvedInheritedFiles, resolveStageDir());
+                }
+            } catch (IOException e) {
+                throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
+                        "Failed to inherit existing install", e);
+            }
         }
 
         // TODO: surface more granular state from dexopt
         mCallback.onSessionProgressChanged(this, 0.9f);
 
-        // TODO: for ASEC based applications, grow and stream in packages
+        // Unpack native libraries
+        extractNativeLibraries(mResolvedStageDir, params.abiOverride);
+
+        // Container is ready to go, let's seal it up!
+        if (stageCid != null) {
+            finalizeAndFixContainer(stageCid);
+        }
 
         // We've reached point of no return; call into PMS to install the stage.
         // Regardless of success or failure we always destroy session.
@@ -482,7 +511,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         };
 
-        mPm.installStage(mPackageName, this.internalStageDir, this.externalStageCid, localObserver,
+        mPm.installStage(mPackageName, stageDir, stageCid, localObserver,
                 params, installerPackageName, installerUid, new UserHandle(userId));
     }
 
@@ -490,81 +519,88 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * Validate install by confirming that all application packages are have
      * consistent package name, version code, and signing certificates.
      * <p>
+     * Clears and populates {@link #mResolvedBaseFile},
+     * {@link #mResolvedStagedFiles}, and {@link #mResolvedInheritedFiles}.
+     * <p>
      * Renames package files in stage to match split names defined inside.
      * <p>
      * Note that upgrade compatibility is still performed by
      * {@link PackageManagerService}.
      */
-    private void validateInstallLocked(File stageDir) throws PackageManagerException {
+    private void validateInstallLocked() throws PackageManagerException {
         mPackageName = null;
         mVersionCode = -1;
         mSignatures = null;
-        mResolvedBaseCodePath = null;
 
-        final File[] files = stageDir.listFiles();
+        mResolvedBaseFile = null;
+        mResolvedStagedFiles.clear();
+        mResolvedInheritedFiles.clear();
+
+        final File[] files = mResolvedStageDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
         }
 
         // Verify that all staged packages are internally consistent
-        final ArraySet<String> seenSplits = new ArraySet<>();
+        final ArraySet<String> stagedSplits = new ArraySet<>();
         for (File file : files) {
 
             // Installers can't stage directories, so it's fine to ignore
             // entries like "lost+found".
             if (file.isDirectory()) continue;
 
-            final ApkLite info;
+            final ApkLite apk;
             try {
-                info = PackageParser.parseApkLite(file, PackageParser.PARSE_COLLECT_CERTIFICATES);
+                apk = PackageParser.parseApkLite(file, PackageParser.PARSE_COLLECT_CERTIFICATES);
             } catch (PackageParserException e) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Failed to parse " + file + ": " + e);
             }
 
-            if (!seenSplits.add(info.splitName)) {
+            if (!stagedSplits.add(apk.splitName)) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                        "Split " + info.splitName + " was defined multiple times");
+                        "Split " + apk.splitName + " was defined multiple times");
             }
 
             // Use first package to define unknown values
             if (mPackageName == null) {
-                mPackageName = info.packageName;
-                mVersionCode = info.versionCode;
+                mPackageName = apk.packageName;
+                mVersionCode = apk.versionCode;
             }
             if (mSignatures == null) {
-                mSignatures = info.signatures;
+                mSignatures = apk.signatures;
             }
 
-            assertPackageConsistent(String.valueOf(file), info.packageName, info.versionCode,
-                    info.signatures);
+            assertApkConsistent(String.valueOf(file), apk);
 
             // Take this opportunity to enforce uniform naming
             final String targetName;
-            if (info.splitName == null) {
+            if (apk.splitName == null) {
                 targetName = "base.apk";
             } else {
-                targetName = "split_" + info.splitName + ".apk";
+                targetName = "split_" + apk.splitName + ".apk";
             }
             if (!FileUtils.isValidExtFilename(targetName)) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Invalid filename: " + targetName);
             }
 
-            final File targetFile = new File(stageDir, targetName);
+            final File targetFile = new File(mResolvedStageDir, targetName);
             if (!file.equals(targetFile)) {
                 file.renameTo(targetFile);
             }
 
             // Base is coming from session
-            if (info.splitName == null) {
-                mResolvedBaseCodePath = targetFile.getAbsolutePath();
+            if (apk.splitName == null) {
+                mResolvedBaseFile = targetFile;
             }
+
+            mResolvedStagedFiles.add(targetFile);
         }
 
         if (params.mode == SessionParams.MODE_FULL_INSTALL) {
             // Full installs must include a base package
-            if (!seenSplits.contains(null)) {
+            if (!stagedSplits.contains(null)) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Full install must include a base package");
             }
@@ -577,67 +613,204 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         "Missing existing base package for " + mPackageName);
             }
 
-            // Base might be inherited from existing install
-            if (mResolvedBaseCodePath == null) {
-                mResolvedBaseCodePath = app.getBaseCodePath();
-            }
-
-            final ApkLite info;
+            final PackageLite existing;
+            final ApkLite existingBase;
             try {
-                info = PackageParser.parseApkLite(new File(app.getBaseCodePath()),
+                existing = PackageParser.parsePackageLite(new File(app.getCodePath()), 0);
+                existingBase = PackageParser.parseApkLite(new File(app.getBaseCodePath()),
                         PackageParser.PARSE_COLLECT_CERTIFICATES);
             } catch (PackageParserException e) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                        "Failed to parse existing base " + app.getBaseCodePath() + ": " + e);
+                        "Failed to parse existing package " + app.getCodePath() + ": " + e);
             }
 
-            assertPackageConsistent("Existing base", info.packageName, info.versionCode,
-                    info.signatures);
+            assertApkConsistent("Existing base", existingBase);
+
+            // Inherit base if not overridden
+            if (mResolvedBaseFile == null) {
+                mResolvedBaseFile = new File(app.getBaseCodePath());
+                mResolvedInheritedFiles.add(mResolvedBaseFile);
+            }
+
+            // Inherit splits if not overridden
+            if (!ArrayUtils.isEmpty(existing.splitNames)) {
+                for (int i = 0; i < existing.splitNames.length; i++) {
+                    final String splitName = existing.splitNames[i];
+                    final File splitFile = new File(existing.splitCodePaths[i]);
+
+                    if (!stagedSplits.contains(splitName)) {
+                        mResolvedInheritedFiles.add(splitFile);
+                    }
+                }
+            }
         }
     }
 
-    private void assertPackageConsistent(String tag, String packageName, int versionCode,
-            Signature[] signatures) throws PackageManagerException {
-        if (!mPackageName.equals(packageName)) {
+    private void assertApkConsistent(String tag, ApkLite apk) throws PackageManagerException {
+        if (!mPackageName.equals(apk.packageName)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, tag + " package "
-                    + packageName + " inconsistent with " + mPackageName);
+                    + apk.packageName + " inconsistent with " + mPackageName);
         }
-        if (mVersionCode != versionCode) {
+        if (mVersionCode != apk.versionCode) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, tag
-                    + " version code " + versionCode + " inconsistent with "
+                    + " version code " + apk.versionCode + " inconsistent with "
                     + mVersionCode);
         }
-        if (!Signature.areExactMatch(mSignatures, signatures)) {
+        if (!Signature.areExactMatch(mSignatures, apk.signatures)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     tag + " signatures are inconsistent");
         }
     }
 
     /**
-     * Application is already installed; splice existing files that haven't been
-     * overridden into our stage.
+     * Calculate the final install footprint size, combining both staged and
+     * existing APKs together and including unpacked native code from both.
      */
-    private void spliceExistingFilesIntoStage(File stageDir) throws PackageManagerException {
-        final ApplicationInfo app = mPm.getApplicationInfo(mPackageName, 0, userId);
+    private long calculateInstalledSize() throws PackageManagerException {
+        Preconditions.checkNotNull(mResolvedBaseFile);
 
-        int n = 0;
-        final File[] oldFiles = new File(app.getCodePath()).listFiles();
-        if (!ArrayUtils.isEmpty(oldFiles)) {
-            for (File oldFile : oldFiles) {
-                if (!PackageParser.isApkFile(oldFile)) continue;
+        final ApkLite baseApk;
+        try {
+            baseApk = PackageParser.parseApkLite(mResolvedBaseFile, 0);
+        } catch (PackageParserException e) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    "Failed to parse base package " + mResolvedBaseFile + ": " + e);
+        }
 
-                final File newFile = new File(stageDir, oldFile.getName());
-                try {
-                    Os.link(oldFile.getAbsolutePath(), newFile.getAbsolutePath());
-                    n++;
-                } catch (ErrnoException e) {
-                    throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                            "Failed to splice into stage", e);
-                }
+        final List<String> splitPaths = new ArrayList<>();
+        for (File file : mResolvedStagedFiles) {
+            if (mResolvedBaseFile.equals(file)) continue;
+            splitPaths.add(file.getAbsolutePath());
+        }
+        for (File file : mResolvedInheritedFiles) {
+            if (mResolvedBaseFile.equals(file)) continue;
+            splitPaths.add(file.getAbsolutePath());
+        }
+
+        // This is kind of hacky; we're creating a half-parsed package that is
+        // straddled between the inherited and staged APKs.
+        final PackageLite pkg = new PackageLite(null, baseApk, null,
+                splitPaths.toArray(new String[splitPaths.size()]));
+        final boolean isForwardLocked =
+                (params.installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
+
+        try {
+            return PackageHelper.calculateInstalledSize(pkg, isForwardLocked, params.abiOverride);
+        } catch (IOException e) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    "Failed to calculate install size", e);
+        }
+    }
+
+    private static void linkFiles(List<File> fromFiles, File toDir) throws IOException {
+        for (File fromFile : fromFiles) {
+            final File toFile = new File(toDir, fromFile.getName());
+            try {
+                if (LOGD) Slog.d(TAG, "Linking " + fromFile + " to " + toFile);
+                Os.link(fromFile.getAbsolutePath(), toFile.getAbsolutePath());
+            } catch (ErrnoException e) {
+                throw new IOException("Failed to link " + fromFile + " to " + toFile, e);
+            }
+        }
+        Slog.d(TAG, "Linked " + fromFiles.size() + " files into " + toDir);
+    }
+
+    private static void copyFiles(List<File> fromFiles, File toDir) throws IOException {
+        // Remove any partial files from previous attempt
+        for (File file : toDir.listFiles()) {
+            if (file.getName().endsWith(".tmp")) {
+                file.delete();
             }
         }
 
-        if (LOGD) Slog.d(TAG, "Spliced " + n + " existing APKs into stage");
+        for (File fromFile : fromFiles) {
+            final File tmpFile = File.createTempFile("inherit", ".tmp", toDir);
+            if (LOGD) Slog.d(TAG, "Copying " + fromFile + " to " + tmpFile);
+            if (!FileUtils.copyFile(fromFile, tmpFile)) {
+                throw new IOException("Failed to copy " + fromFile + " to " + tmpFile);
+            }
+
+            final File toFile = new File(toDir, fromFile.getName());
+            if (LOGD) Slog.d(TAG, "Renaming " + tmpFile + " to " + toFile);
+            if (!tmpFile.renameTo(toFile)) {
+                throw new IOException("Failed to rename " + tmpFile + " to " + toFile);
+            }
+        }
+        Slog.d(TAG, "Copied " + fromFiles.size() + " files into " + toDir);
+    }
+
+    private static void extractNativeLibraries(File packageDir, String abiOverride)
+            throws PackageManagerException {
+        if (LOGD) Slog.v(TAG, "extractNativeLibraries()");
+
+        // Always start from a clean slate
+        final File libDir = new File(packageDir, NativeLibraryHelper.LIB_DIR_NAME);
+        NativeLibraryHelper.removeNativeBinariesFromDirLI(libDir, true);
+
+        NativeLibraryHelper.Handle handle = null;
+        try {
+            handle = NativeLibraryHelper.Handle.create(packageDir);
+            final int res = NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libDir,
+                    abiOverride);
+            if (res != PackageManager.INSTALL_SUCCEEDED) {
+                throw new PackageManagerException(res,
+                        "Failed to extract native libraries, res=" + res);
+            }
+        } catch (IOException e) {
+            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                    "Failed to extract native libraries", e);
+        } finally {
+            IoUtils.closeQuietly(handle);
+        }
+    }
+
+    private static void resizeContainer(String cid, long targetSize)
+            throws PackageManagerException {
+        String path = PackageHelper.getSdDir(cid);
+        if (path == null) {
+            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
+                    "Failed to find mounted " + cid);
+        }
+
+        final long currentSize = new File(path).getTotalSpace();
+        if (currentSize > targetSize) {
+            Slog.w(TAG, "Current size " + currentSize + " is larger than target size "
+                    + targetSize + "; skipping resize");
+            return;
+        }
+
+        if (!PackageHelper.unMountSdDir(cid)) {
+            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
+                    "Failed to unmount " + cid + " before resize");
+        }
+
+        if (!PackageHelper.resizeSdDir(targetSize, cid,
+                PackageManagerService.getEncryptKey())) {
+            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
+                    "Failed to resize " + cid + " to " + targetSize + " bytes");
+        }
+
+        path = PackageHelper.mountSdDir(cid, PackageManagerService.getEncryptKey(),
+                Process.SYSTEM_UID, false);
+        if (path == null) {
+            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
+                    "Failed to mount " + cid + " after resize");
+        }
+    }
+
+    private void finalizeAndFixContainer(String cid) throws PackageManagerException {
+        if (!PackageHelper.finalizeSdDir(cid)) {
+            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
+                    "Failed to finalize container " + cid);
+        }
+
+        final int uid = mPm.getPackageUid(PackageManagerService.DEFAULT_CONTAINER_PACKAGE,
+                UserHandle.USER_OWNER);
+        final int gid = UserHandle.getSharedAppGid(uid);
+        if (!PackageHelper.fixSdPermissions(cid, gid, null)) {
+            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
+                    "Failed to fix permissions on container " + cid);
+        }
     }
 
     void setPermissionsResult(boolean accepted) {
@@ -694,12 +867,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mSealed = true;
             mDestroyed = true;
         }
-        if (internalStageDir != null) {
-            FileUtils.deleteContents(internalStageDir);
-            internalStageDir.delete();
+        if (stageDir != null) {
+            FileUtils.deleteContents(stageDir);
+            stageDir.delete();
         }
-        if (externalStageCid != null) {
-            PackageHelper.destroySdDir(externalStageCid);
+        if (stageCid != null) {
+            PackageHelper.destroySdDir(stageCid);
         }
     }
 
@@ -717,8 +890,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.printPair("installerPackageName", installerPackageName);
         pw.printPair("installerUid", installerUid);
         pw.printPair("createdMillis", createdMillis);
-        pw.printPair("internalStageDir", internalStageDir);
-        pw.printPair("externalStageCid", externalStageCid);
+        pw.printPair("stageDir", stageDir);
+        pw.printPair("stageCid", stageCid);
         pw.println();
 
         params.dump(pw);

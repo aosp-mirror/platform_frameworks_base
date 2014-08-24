@@ -45,6 +45,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -86,6 +87,8 @@ public class PackageInstaller {
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard
      * against this.
+     * <p>
+     * The session to show details for is defined in {@link #EXTRA_SESSION_ID}.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SESSION_DETAILS = "android.content.pm.action.SESSION_DETAILS";
@@ -95,21 +98,57 @@ public class PackageInstaller {
             ACTION_CONFIRM_PERMISSIONS = "android.content.pm.action.CONFIRM_PERMISSIONS";
 
     /**
-     * An integer session ID.
+     * An integer session ID that an operation is working with.
      *
-     * @see #ACTION_SESSION_DETAILS
+     * @see Intent#getIntExtra(String, int)
      */
     public static final String EXTRA_SESSION_ID = "android.content.pm.extra.SESSION_ID";
 
-    public static final String EXTRA_STATUS = "android.content.pm.extra.STATUS";
-    public static final String EXTRA_STATUS_MESSAGE = "android.content.pm.extra.STATUS_MESSAGE";
-
     /**
-     * Package name relevant to a status.
+     * Package name that an operation is working with.
      *
      * @see Intent#getStringExtra(String)
      */
     public static final String EXTRA_PACKAGE_NAME = "android.content.pm.extra.PACKAGE_NAME";
+
+    /**
+     * Current status of an operation. Will be one of
+     * {@link #STATUS_PENDING_USER_ACTION}, {@link #STATUS_SUCCESS},
+     * {@link #STATUS_FAILURE}, {@link #STATUS_FAILURE_ABORTED},
+     * {@link #STATUS_FAILURE_BLOCKED}, {@link #STATUS_FAILURE_CONFLICT},
+     * {@link #STATUS_FAILURE_INCOMPATIBLE}, {@link #STATUS_FAILURE_INVALID}, or
+     * {@link #STATUS_FAILURE_STORAGE}.
+     * <p>
+     * More information about a status may be available through additional
+     * extras; see the individual status documentation for details.
+     *
+     * @see Intent#getIntExtra(String, int)
+     */
+    public static final String EXTRA_STATUS = "android.content.pm.extra.STATUS";
+
+    /**
+     * Detailed string representation of the status, including raw details that
+     * are useful for debugging.
+     *
+     * @see Intent#getStringExtra(String)
+     */
+    public static final String EXTRA_STATUS_MESSAGE = "android.content.pm.extra.STATUS_MESSAGE";
+
+    /**
+     * Another package name relevant to a status. This is typically the package
+     * responsible for causing an operation failure.
+     *
+     * @see Intent#getStringExtra(String)
+     */
+    public static final String
+            EXTRA_OTHER_PACKAGE_NAME = "android.content.pm.extra.OTHER_PACKAGE_NAME";
+
+    /**
+     * Storage path relevant to a status.
+     *
+     * @see Intent#getStringExtra(String)
+     */
+    public static final String EXTRA_STORAGE_PATH = "android.content.pm.extra.STORAGE_PATH";
 
     /** {@hide} */
     @Deprecated
@@ -153,8 +192,12 @@ public class PackageInstaller {
      * The operation failed because it was blocked. For example, a device policy
      * may be blocking the operation, a package verifier may have blocked the
      * operation, or the app may be required for core system operation.
+     * <p>
+     * The result may also contain {@link #EXTRA_OTHER_PACKAGE_NAME} with the
+     * specific package blocking the install.
      *
      * @see #EXTRA_STATUS_MESSAGE
+     * @see #EXTRA_OTHER_PACKAGE_NAME
      */
     public static final int STATUS_FAILURE_BLOCKED = 2;
 
@@ -182,10 +225,11 @@ public class PackageInstaller {
      * permission, incompatible certificates, etc. The user may be able to
      * uninstall another app to fix the issue.
      * <p>
-     * The result may also contain {@link #EXTRA_PACKAGE_NAME} with the
+     * The result may also contain {@link #EXTRA_OTHER_PACKAGE_NAME} with the
      * specific package identified as the cause of the conflict.
      *
      * @see #EXTRA_STATUS_MESSAGE
+     * @see #EXTRA_OTHER_PACKAGE_NAME
      */
     public static final int STATUS_FAILURE_CONFLICT = 5;
 
@@ -193,8 +237,12 @@ public class PackageInstaller {
      * The operation failed because of storage issues. For example, the device
      * may be running low on space, or external media may be unavailable. The
      * user may be able to help free space or insert different external media.
+     * <p>
+     * The result may also contain {@link #EXTRA_STORAGE_PATH} with the path to
+     * the storage device that caused the failure.
      *
      * @see #EXTRA_STATUS_MESSAGE
+     * @see #EXTRA_STORAGE_PATH
      */
     public static final int STATUS_FAILURE_STORAGE = 6;
 
@@ -281,6 +329,13 @@ public class PackageInstaller {
      * To succeed, the caller must be the current home app.
      */
     public @NonNull List<SessionInfo> getAllSessions() {
+        final ApplicationInfo info = mContext.getApplicationInfo();
+        if ("com.google.android.googlequicksearchbox".equals(info.packageName)
+                && info.versionCode <= 300400070) {
+            Log.d(TAG, "Ignoring callback request from old prebuilt");
+            return Collections.EMPTY_LIST;
+        }
+
         try {
             return mInstaller.getAllSessions(mUserId);
         } catch (RemoteException e) {
