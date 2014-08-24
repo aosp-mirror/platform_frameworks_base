@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Toliau įveskite įrenginio šifruotės slaptažodį. Jis bus naudojamas ir atsarginės kopijos archyvui šifruoti."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Įveskite slaptažodį, kuris bus naudojamas visai atsarginei duomenų kopijai šifruoti. Jei reikšmės neįvesite, bus naudojamas dabartinis atsarginės kopijos slaptažodis:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Jei norite užšifruoti visą atsarginę duomenų kopiją, įveskite slaptažodį:"</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Jei atkūrimo duomenys užšifruoti, įveskite toliau nurodytą slaptažodį:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Pradedama kurti atsarginę kopiją..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Atsarginė kopija sukurta"</string>

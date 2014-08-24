@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Sláðu inn aðgangsorð fyrir dulkóðun tækis hér fyrir neðan. Það verður einnig notað til að dulkóða afritasafnið."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Sláðu inn aðgangsorð til að dulkóða gögn fullrar afritunar. Ef þetta er skilið eftir autt verður núverandi aðgangsorð fyrir afritun notað:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Ef þú vilt dulkóða gögn fullrar afritunar skaltu slá inn aðgangsorð hér að neðan:"</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Ef endurheimt gögn eru dulkóðuð skaltu slá inn aðgangsorðið hér að neðan:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Afritun er að hefjast..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Afritun lokið"</string>

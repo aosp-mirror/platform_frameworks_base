@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Введите пароль для шифрования устройства и архива резервных копий."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Введите пароль для шифрования всех резервных данных. Если поле останется пустым, будет использован текущий пароль:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Чтобы зашифровать все резервные данные, введите пароль:"</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Если восстановленные данные зашифрованы, введите пароль:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Резервное копирование..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Резервное копирование завершено"</string>

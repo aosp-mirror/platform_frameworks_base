@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"الرجاء إدخال كلمة مرور تشفير الجهاز. سيتم استخدام ذلك أيضًا لتشفير أرشيف النسخ الاحتياطي."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"الرجاء إدخال كلمة المرور للاستخدام لتشفير بيانات النسخة الاحتياطية بالكامل. إذا تم ترك هذا فارغًا، فسيتم استخدام كلمة مرور النسخ الاحتياطي الحالية:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"إذا كنت ترغب في تشفير بيانات النسخة الاحتياطية بالكامل، فأدخل كلمة المرور أدناه:"</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"إذا كانت بيانات الاسترداد مشفرة، فالرجاء إدخال كلمة المرور أدناه:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"جارٍ بدء النسخ الاحتياطي..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"انتهت عملية النسخ الاحتياطي"</string>

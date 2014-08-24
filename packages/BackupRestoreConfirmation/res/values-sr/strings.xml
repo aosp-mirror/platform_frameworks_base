@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Унесите лозинку уређаја за шифровање. Ово ће се користити и за шифровање резервне архиве."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Унесите лозинку коју ћете користити за шифровање података потпуне резервне копије. Ако то поље оставите празно, користиће се тренутна лозинка резервне копије:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Ако желите да шифрујете податке потпуне резервне копије, унесите лозинку у наставку."</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Ако су подаци за враћање шифровани, унесите лозинку у наставку:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Покретање прављења резервне копије..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Резервна копија је направљена"</string>

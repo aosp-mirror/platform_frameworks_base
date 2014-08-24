@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"कृपया आपला डिव्‍हाइस कूटबद्धीकरण संकेतशब्‍द खाली प्रविष्‍‍ट करा. हा बॅकअप संग्रह कूटबद्ध करण्‍यासाठी देखील वापरला जाईल."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"कृपया पूर्ण बॅकअप डेटा कूटबद्ध करण्‍यासाठी वापरण्याकरिता संकेतशब्‍द प्रविष्‍ट करा. हे रिक्त सोडल्‍यास, आपला वर्तमान बॅकअप संकेतशब्‍द वापरला जाईल:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"आपण पूर्ण बॅकअप डेटा कूटबद्ध करू इच्‍छित असल्‍यास, खालील संकेतशब्‍द प्रविष्‍ट करा:"</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"पुनर्संचयित डेटा कूटबद्ध केला असल्‍यास, कृपया संकेतशब्‍द खाली प्रविष्‍ट करा:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"बॅकअप सुरू होत आहे..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"बॅकअप समाप्त झाले"</string>

@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Voer jou toestelenkripsie-wagwoord hier onder in. Dit sal ook gebruik word om die rugsteunargief te enkripteer."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Voer asb. \'n wagwoord in om te gebruik vir enkripsie van die volle rugsteundata. As dit leeg gelaat word, sal jou huidige rugsteunwagwoord gebruik word:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"As jy die volle rugsteundata wil enkripteer, voer \'n wagwoord hieronder in:"</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"As die hersteldata geïnkripteer  word, voer asb. die wagwoord hieronder in:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Rugsteun begin tans..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Rugsteun klaar"</string>
