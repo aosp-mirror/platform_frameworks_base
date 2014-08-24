@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> izama ukwenza uxhumano lwe-VPN."</string>
-    <string name="warning" msgid="5470743576660160079">"Ngokuqhubeka, unikeza uhlelo lokusebenza imvume yokuvimbela ukuphithizela kwenethiwekhi. "<b>"UNGAVUMELI ngaphandle uma wethemba uhlelo lokusebenza."</b>" Noma, ungathatha ingozi yokuba idatha yakho ibe sengcupheni yokufinyelelwa isofthiwe e-malicious."</string>
-    <string name="accept" msgid="2889226408765810173">"Ngiyaluthemba lolu hlelo lokusebenza."</string>
+    <string name="prompt" msgid="3183836924226407828">"Isicelo soxhumo"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> ifuna ukusetha uxhumo lwe-VPN eyivumela ukwengamela ithrafikhi yenethiwekhi. Yamukela kuphela uma wethemba umthombo. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; ibonakala phezu kwesikrini sakho uma i-VPN isebenza."</string>
     <string name="legacy_title" msgid="192936250066580964">"I-VPN ixhunyiwe"</string>
     <string name="configure" msgid="4905518375574791375">"Misa"</string>
     <string name="disconnect" msgid="971412338304200056">"Ayixhumekile kwi-inthanethi"</string>

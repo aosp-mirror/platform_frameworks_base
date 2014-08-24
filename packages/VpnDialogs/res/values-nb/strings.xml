@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> forsøker å etablere en VPN-tilkobling."</string>
-    <string name="warning" msgid="5470743576660160079">"Ved å fortsette gir du appen tillatelse til å fange opp all nettverkstrafikk. "<b>"IKKE godta med mindre du stoler på appen."</b>" Ellers risikerer du at dataene dine kompromitteres av en ondsinnet programvare."</string>
-    <string name="accept" msgid="2889226408765810173">"Jeg stoler på denne appen."</string>
+    <string name="prompt" msgid="3183836924226407828">"Tilkoblingsforespørsel"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> ønsker å bruke en VPN-tilkobling som tillater at appen overvåker nettverkstrafikken. Du bør bare godta dette hvis du stoler på kilden. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; vises øverst på skjermen din når VPN er aktivert."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN er tilkoblet"</string>
     <string name="configure" msgid="4905518375574791375">"Konfigurer"</string>
     <string name="disconnect" msgid="971412338304200056">"Koble fra"</string>
