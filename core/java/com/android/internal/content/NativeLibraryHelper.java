@@ -25,6 +25,7 @@ import static android.system.OsConstants.S_IRWXU;
 import static android.system.OsConstants.S_IXGRP;
 import static android.system.OsConstants.S_IXOTH;
 
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.Package;
@@ -51,8 +52,10 @@ import java.util.List;
  */
 public class NativeLibraryHelper {
     private static final String TAG = "NativeHelper";
-
     private static final boolean DEBUG_NATIVE = false;
+
+    public static final String LIB_DIR_NAME = "lib";
+    public static final String LIB64_DIR_NAME = "lib64";
 
     // Special value for {@code PackageParser.Package#cpuAbiOverride} to indicate
     // that the cpuAbiOverride must be clear.
@@ -70,6 +73,7 @@ public class NativeLibraryHelper {
         private volatile boolean mClosed;
 
         final long[] apkHandles;
+        final boolean multiArch;
 
         public static Handle create(File packageFile) throws IOException {
             try {
@@ -81,14 +85,15 @@ public class NativeLibraryHelper {
         }
 
         public static Handle create(Package pkg) throws IOException {
-            return create(pkg.getAllCodePaths());
+            return create(pkg.getAllCodePaths(),
+                    (pkg.applicationInfo.flags & ApplicationInfo.FLAG_MULTIARCH) != 0);
         }
 
         public static Handle create(PackageLite lite) throws IOException {
-            return create(lite.getAllCodePaths());
+            return create(lite.getAllCodePaths(), lite.multiArch);
         }
 
-        private static Handle create(List<String> codePaths) throws IOException {
+        private static Handle create(List<String> codePaths, boolean multiArch) throws IOException {
             final int size = codePaths.size();
             final long[] apkHandles = new long[size];
             for (int i = 0; i < size; i++) {
@@ -103,11 +108,12 @@ public class NativeLibraryHelper {
                 }
             }
 
-            return new Handle(apkHandles);
+            return new Handle(apkHandles, multiArch);
         }
 
-        Handle(long[] apkHandles) {
+        Handle(long[] apkHandles, boolean multiArch) {
             this.apkHandles = apkHandles;
+            this.multiArch = multiArch;
             mGuard.open("close");
         }
 
@@ -159,8 +165,7 @@ public class NativeLibraryHelper {
      * @return {@link PackageManager#INSTALL_SUCCEEDED} if successful or another
      *         error code from that class if not
      */
-    public static int copyNativeBinariesIfNeededLI(Handle handle, File sharedLibraryDir,
-            String abi) {
+    public static int copyNativeBinaries(Handle handle, File sharedLibraryDir, String abi) {
         for (long apkHandle : handle.apkHandles) {
             int res = nativeCopyNativeBinaries(apkHandle, sharedLibraryDir.getPath(), abi);
             if (res != INSTALL_SUCCEEDED) {
@@ -267,7 +272,7 @@ public class NativeLibraryHelper {
         }
     }
 
-    private static long sumNativeBinaries(Handle handle, String[] abiList) {
+    private static long sumNativeBinariesForSupportedAbi(Handle handle, String[] abiList) {
         int abi = findSupportedAbi(handle, abiList);
         if (abi >= 0) {
             return sumNativeBinaries(handle, abiList[abi]);
@@ -276,7 +281,7 @@ public class NativeLibraryHelper {
         }
     }
 
-    public static int copyNativeBinariesIfNeededLI(Handle handle, File libraryRoot,
+    public static int copyNativeBinariesForSupportedAbi(Handle handle, File libraryRoot,
             String[] abiList, boolean useIsaSubdir) throws IOException {
         createNativeLibrarySubdir(libraryRoot);
 
@@ -300,7 +305,7 @@ public class NativeLibraryHelper {
                 subDir = libraryRoot;
             }
 
-            int copyRet = copyNativeBinariesIfNeededLI(handle, subDir, abiList[abi]);
+            int copyRet = copyNativeBinaries(handle, subDir, abiList[abi]);
             if (copyRet != PackageManager.INSTALL_SUCCEEDED) {
                 return copyRet;
             }
@@ -309,10 +314,10 @@ public class NativeLibraryHelper {
         return abi;
     }
 
-    public static int copyNativeBinariesIfNeededLI(Handle handle, File libraryRoot,
-            String abiOverride, boolean multiArch) {
+    public static int copyNativeBinariesWithOverride(Handle handle, File libraryRoot,
+            String abiOverride) {
         try {
-            if (multiArch) {
+            if (handle.multiArch) {
                 // Warn if we've set an abiOverride for multi-lib packages..
                 // By definition, we need to copy both 32 and 64 bit libraries for
                 // such packages.
@@ -322,7 +327,7 @@ public class NativeLibraryHelper {
 
                 int copyRet = PackageManager.NO_NATIVE_LIBRARIES;
                 if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
-                    copyRet = copyNativeBinariesIfNeededLI(handle, libraryRoot,
+                    copyRet = copyNativeBinariesForSupportedAbi(handle, libraryRoot,
                             Build.SUPPORTED_32_BIT_ABIS, true /* use isa specific subdirs */);
                     if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES &&
                             copyRet != PackageManager.INSTALL_FAILED_NO_MATCHING_ABIS) {
@@ -332,7 +337,7 @@ public class NativeLibraryHelper {
                 }
 
                 if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
-                    copyRet = copyNativeBinariesIfNeededLI(handle, libraryRoot,
+                    copyRet = copyNativeBinariesForSupportedAbi(handle, libraryRoot,
                             Build.SUPPORTED_64_BIT_ABIS, true /* use isa specific subdirs */);
                     if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES &&
                             copyRet != PackageManager.INSTALL_FAILED_NO_MATCHING_ABIS) {
@@ -355,7 +360,7 @@ public class NativeLibraryHelper {
                     abiList = Build.SUPPORTED_32_BIT_ABIS;
                 }
 
-                int copyRet = copyNativeBinariesIfNeededLI(handle, libraryRoot, abiList,
+                int copyRet = copyNativeBinariesForSupportedAbi(handle, libraryRoot, abiList,
                         true /* use isa specific subdirs */);
                 if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
                     Slog.w(TAG, "Failure copying native libraries [errorCode=" + copyRet + "]");
@@ -370,10 +375,10 @@ public class NativeLibraryHelper {
         }
     }
 
-    public static long sumNativeBinaries(Handle handle, String abiOverride, boolean multiArch)
+    public static long sumNativeBinariesWithOverride(Handle handle, String abiOverride)
             throws IOException {
         long sum = 0;
-        if (multiArch) {
+        if (handle.multiArch) {
             // Warn if we've set an abiOverride for multi-lib packages..
             // By definition, we need to copy both 32 and 64 bit libraries for
             // such packages.
@@ -382,11 +387,11 @@ public class NativeLibraryHelper {
             }
 
             if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
-                sum += sumNativeBinaries(handle, Build.SUPPORTED_32_BIT_ABIS);
+                sum += sumNativeBinariesForSupportedAbi(handle, Build.SUPPORTED_32_BIT_ABIS);
             }
 
             if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
-                sum += sumNativeBinaries(handle, Build.SUPPORTED_64_BIT_ABIS);
+                sum += sumNativeBinariesForSupportedAbi(handle, Build.SUPPORTED_64_BIT_ABIS);
             }
         } else {
             String cpuAbiOverride = null;
@@ -403,7 +408,7 @@ public class NativeLibraryHelper {
                 abiList = Build.SUPPORTED_32_BIT_ABIS;
             }
 
-            sum += sumNativeBinaries(handle, abiList);
+            sum += sumNativeBinariesForSupportedAbi(handle, abiList);
         }
         return sum;
     }
