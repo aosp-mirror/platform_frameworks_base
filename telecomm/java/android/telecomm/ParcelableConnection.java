@@ -22,6 +22,9 @@ import android.os.Parcelable;
 
 import com.android.internal.telecomm.IVideoProvider;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Information about a connection that is used between Telecomm and the ConnectionService.
  * This is used to send initial Connection information to Telecomm when the connection is
@@ -29,20 +32,21 @@ import com.android.internal.telecomm.IVideoProvider;
  * @hide
  */
 public final class ParcelableConnection implements Parcelable {
-    private PhoneAccountHandle mPhoneAccount;
-    private int mState;
-    private int mCapabilities;
-    private Uri mHandle;
-    private int mHandlePresentation;
-    private String mCallerDisplayName;
-    private int mCallerDisplayNamePresentation;
-    private IVideoProvider mVideoProvider;
-    private int mVideoState;
-    private boolean mRequestingRingback;
-    private boolean mAudioModeIsVoip;
-    private StatusHints mStatusHints;
-    private int mDisconnectCause;
-    private String mDisconnectMessage;
+    private final PhoneAccountHandle mPhoneAccount;
+    private final int mState;
+    private final int mCapabilities;
+    private final Uri mHandle;
+    private final int mHandlePresentation;
+    private final String mCallerDisplayName;
+    private final int mCallerDisplayNamePresentation;
+    private final IVideoProvider mVideoProvider;
+    private final int mVideoState;
+    private final boolean mRequestingRingback;
+    private final boolean mAudioModeIsVoip;
+    private final StatusHints mStatusHints;
+    private final int mDisconnectCause;
+    private final String mDisconnectMessage;
+    private final List<String> mConferenceableConnectionIds;
 
     /** @hide */
     public ParcelableConnection(
@@ -59,7 +63,8 @@ public final class ParcelableConnection implements Parcelable {
             boolean audioModeIsVoip,
             StatusHints statusHints,
             int disconnectCause,
-            String disconnectMessage) {
+            String disconnectMessage,
+            List<String> conferenceableConnectionIds) {
         mPhoneAccount = phoneAccount;
         mState = state;
         mCapabilities = capabilities;
@@ -74,6 +79,7 @@ public final class ParcelableConnection implements Parcelable {
         mStatusHints = statusHints;
         mDisconnectCause = disconnectCause;
         mDisconnectMessage = disconnectMessage;
+        this.mConferenceableConnectionIds = conferenceableConnectionIds;
     }
 
     public PhoneAccountHandle getPhoneAccount() {
@@ -133,6 +139,10 @@ public final class ParcelableConnection implements Parcelable {
         return mDisconnectMessage;
     }
 
+    public final List<String> getConferenceableConnectionIds() {
+        return mConferenceableConnectionIds;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder()
@@ -166,6 +176,8 @@ public final class ParcelableConnection implements Parcelable {
             StatusHints statusHints = source.readParcelable(classLoader);
             int disconnectCauseCode = source.readInt();
             String disconnectCauseMessage = source.readString();
+            List<String> conferenceableConnectionIds = new ArrayList<>();
+            source.readStringList(conferenceableConnectionIds);
 
             return new ParcelableConnection(
                     phoneAccount,
@@ -181,7 +193,8 @@ public final class ParcelableConnection implements Parcelable {
                     audioModeIsVoip,
                     statusHints,
                     disconnectCauseCode,
-                    disconnectCauseMessage);
+                    disconnectCauseMessage,
+                    conferenceableConnectionIds);
         }
 
         @Override
@@ -214,5 +227,6 @@ public final class ParcelableConnection implements Parcelable {
         destination.writeParcelable(mStatusHints, 0);
         destination.writeInt(mDisconnectCause);
         destination.writeString(mDisconnectMessage);
+        destination.writeStringList(mConferenceableConnectionIds);
     }
 }

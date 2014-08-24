@@ -39,7 +39,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -79,7 +78,8 @@ public abstract class ConnectionService extends Service {
     private final Map<Connection, String> mIdByConnection = new HashMap<>();
     private final Map<String, Conference> mConferenceById = new HashMap<>();
     private final Map<Conference, String> mIdByConference = new HashMap<>();
-    private final RemoteConnectionManager mRemoteConnectionManager = new RemoteConnectionManager();
+    private final RemoteConnectionManager mRemoteConnectionManager =
+            new RemoteConnectionManager(this);
     private final List<Runnable> mPreInitializationConnectionRequests = new ArrayList<>();
     private final ConnectionServiceAdapter mAdapter = new ConnectionServiceAdapter();
 
@@ -461,15 +461,9 @@ public abstract class ConnectionService extends Service {
         @Override
         public void onConferenceableConnectionsChanged(
                 Connection connection, List<Connection> conferenceableConnections) {
-            String id = mIdByConnection.get(connection);
-            List<String> conferenceableCallIds = new ArrayList<>(conferenceableConnections.size());
-            for (Connection c : conferenceableConnections) {
-                if (mIdByConnection.containsKey(c)) {
-                    conferenceableCallIds.add(mIdByConnection.get(c));
-                }
-            }
-            Collections.sort(conferenceableCallIds);
-            mAdapter.setConferenceableConnections(id, conferenceableCallIds);
+            mAdapter.setConferenceableConnections(
+                    mIdByConnection.get(connection),
+                    createConnectionIdList(conferenceableConnections));
         }
 
         @Override
@@ -542,7 +536,8 @@ public abstract class ConnectionService extends Service {
                         connection.getAudioModeIsVoip(),
                         connection.getStatusHints(),
                         connection.getDisconnectCause(),
-                        connection.getDisconnectMessage()));
+                        connection.getDisconnectMessage(),
+                        createConnectionIdList(connection.getConferenceableConnections())));
     }
 
     private void abort(String callId) {
@@ -717,6 +712,15 @@ public abstract class ConnectionService extends Service {
     }
 
     /**
+     * Adds two {@code RemoteConnection}s to some {@code RemoteConference}.
+     */
+    public final void conferenceRemoteConnections(
+            RemoteConnection a,
+            RemoteConnection b) {
+        mRemoteConnectionManager.conferenceRemoteConnections(a, b);
+    }
+
+    /**
      * Adds a new conference call. When a conference call is created either as a result of an
      * explicit request via {@link #onConference} or otherwise, the connection service should supply
      * an instance of {@link Conference} by invoking this method. A conference call provided by this
@@ -824,16 +828,27 @@ public abstract class ConnectionService extends Service {
 
     /**
      * Notified that a connection has been removed from this connection service.
+     * <p>
+     * TODO: Deprecate this since we can listen to the Connection onDestroyed() to determine when
+     * it is destroyed. This then percolates down to the RemoteConference stuff, where we can also
+     * have a callback for one being added, but we don't need one for being destroyed.
      *
      * @param connection The connection which was removed.
      */
     public void onConnectionRemoved(Connection connection) {}
+
+    public void onRemoteConferenceAdded(RemoteConference conference) {}
 
     /**
      * @hide
      */
     public boolean containsConference(Conference conference) {
         return mIdByConference.containsKey(conference);
+    }
+
+    /** {@hide} */
+    void addRemoteConference(RemoteConference remoteConference) {
+        onRemoteConferenceAdded(remoteConference);
     }
 
     private void onAccountsInitialized() {
@@ -908,6 +923,17 @@ public abstract class ConnectionService extends Service {
         }
         Log.w(this, "%s - Cannot find conference %s", action, conferenceId);
         return getNullConference();
+    }
+
+    private List<String> createConnectionIdList(List<Connection> connections) {
+        List<String> ids = new ArrayList<>();
+        for (Connection c : connections) {
+            if (mIdByConnection.containsKey(c)) {
+                ids.add(mIdByConnection.get(c));
+            }
+        }
+        Collections.sort(ids);
+        return ids;
     }
 
     private Conference getNullConference() {
