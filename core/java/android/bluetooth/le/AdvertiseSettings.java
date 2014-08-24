@@ -66,13 +66,13 @@ public final class AdvertiseSettings implements Parcelable {
     public static final int ADVERTISE_TX_POWER_HIGH = 3;
 
     /**
-     * The maximimum limited advertisement duration as specified by the Bluetooth SIG
+     * The maximum limited advertisement duration as specified by the Bluetooth SIG
      */
-    private static final int LIMITED_ADVERTISING_MAX_DURATION = 180;
+    private static final int LIMITED_ADVERTISING_MAX_MILLIS = 180 * 1000;
 
     private final int mAdvertiseMode;
     private final int mAdvertiseTxPowerLevel;
-    private final int mAdvertiseTimeoutSeconds;
+    private final int mAdvertiseTimeoutMillis;
     private final boolean mAdvertiseConnectable;
 
     private AdvertiseSettings(int advertiseMode, int advertiseTxPowerLevel,
@@ -80,14 +80,14 @@ public final class AdvertiseSettings implements Parcelable {
         mAdvertiseMode = advertiseMode;
         mAdvertiseTxPowerLevel = advertiseTxPowerLevel;
         mAdvertiseConnectable = advertiseConnectable;
-        mAdvertiseTimeoutSeconds = advertiseTimeout;
+        mAdvertiseTimeoutMillis = advertiseTimeout;
     }
 
     private AdvertiseSettings(Parcel in) {
         mAdvertiseMode = in.readInt();
         mAdvertiseTxPowerLevel = in.readInt();
         mAdvertiseConnectable = in.readInt() != 0 ? true : false;
-        mAdvertiseTimeoutSeconds = in.readInt();
+        mAdvertiseTimeoutMillis = in.readInt();
     }
 
     /**
@@ -107,15 +107,15 @@ public final class AdvertiseSettings implements Parcelable {
     /**
      * Returns whether the advertisement will indicate connectable.
      */
-    public boolean getIsConnectable() {
+    public boolean isConnectable() {
         return mAdvertiseConnectable;
     }
 
     /**
-     * Returns the advertising time limit in seconds.
+     * Returns the advertising time limit in milliseconds.
      */
     public int getTimeout() {
-        return mAdvertiseTimeoutSeconds;
+        return mAdvertiseTimeoutMillis;
     }
 
     @Override
@@ -123,7 +123,7 @@ public final class AdvertiseSettings implements Parcelable {
         return "Settings [mAdvertiseMode=" + mAdvertiseMode
              + ", mAdvertiseTxPowerLevel=" + mAdvertiseTxPowerLevel
              + ", mAdvertiseConnectable=" + mAdvertiseConnectable
-             + ", mAdvertiseTimeoutSeconds=" + mAdvertiseTimeoutSeconds + "]";
+             + ", mAdvertiseTimeoutMillis=" + mAdvertiseTimeoutMillis + "]";
     }
 
     @Override
@@ -136,12 +136,9 @@ public final class AdvertiseSettings implements Parcelable {
         dest.writeInt(mAdvertiseMode);
         dest.writeInt(mAdvertiseTxPowerLevel);
         dest.writeInt(mAdvertiseConnectable ? 1 : 0);
-        dest.writeInt(mAdvertiseTimeoutSeconds);
+        dest.writeInt(mAdvertiseTimeoutMillis);
     }
 
-    /**
-     * @hide
-     */
     public static final Parcelable.Creator<AdvertiseSettings> CREATOR =
             new Creator<AdvertiseSettings>() {
             @Override
@@ -161,7 +158,7 @@ public final class AdvertiseSettings implements Parcelable {
     public static final class Builder {
         private int mMode = ADVERTISE_MODE_LOW_POWER;
         private int mTxPowerLevel = ADVERTISE_TX_POWER_MEDIUM;
-        private int mTimeoutSeconds = 0;
+        private int mTimeoutMillis = 0;
         private boolean mConnectable = true;
 
         /**
@@ -204,26 +201,26 @@ public final class AdvertiseSettings implements Parcelable {
         /**
          * Set whether the advertisement type should be connectable or non-connectable.
          *
-         * @param isConnectable Controls whether the advertisment type will be connectable (true)
+         * @param connectable Controls whether the advertisment type will be connectable (true)
          *                    or non-connectable (false).
          */
-        public Builder setIsConnectable(boolean isConnectable) {
-            mConnectable = isConnectable;
+        public Builder setConnectable(boolean connectable) {
+            mConnectable = connectable;
             return this;
         }
 
         /**
          * Limit advertising to a given amount of time.
-         * @param timeoutSeconds Advertising time limit. May not exceed 180 seconds.
+         * @param timeoutMillis Advertising time limit. May not exceed 180000 milliseconds.
          *                       A value of 0 will disable the time limit.
-         * @throws IllegalArgumentException If the provided timeout is over 180s.
+         * @throws IllegalArgumentException If the provided timeout is over 180000 ms.
          */
-        public Builder setTimeout(int timeoutSeconds) {
-            if (timeoutSeconds < 0 || timeoutSeconds > LIMITED_ADVERTISING_MAX_DURATION) {
-                throw new IllegalArgumentException("timeoutSeconds invalid (must be 0-"
-                                    + LIMITED_ADVERTISING_MAX_DURATION + " seconds)");
+        public Builder setTimeout(int timeoutMillis) {
+            if (timeoutMillis < 0 || timeoutMillis > LIMITED_ADVERTISING_MAX_MILLIS) {
+                throw new IllegalArgumentException("timeoutMillis invalid (must be 0-"
+                                    + LIMITED_ADVERTISING_MAX_MILLIS + " milliseconds)");
             }
-            mTimeoutSeconds = timeoutSeconds;
+            mTimeoutMillis = timeoutMillis;
             return this;
         }
 
@@ -231,7 +228,7 @@ public final class AdvertiseSettings implements Parcelable {
          * Build the {@link AdvertiseSettings} object.
          */
         public AdvertiseSettings build() {
-            return new AdvertiseSettings(mMode, mTxPowerLevel, mConnectable, mTimeoutSeconds);
+            return new AdvertiseSettings(mMode, mTxPowerLevel, mConnectable, mTimeoutMillis);
         }
     }
 }
