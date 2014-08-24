@@ -149,9 +149,6 @@ public final class ScanResult implements Parcelable {
                 + mTimestampNanos + '}';
     }
 
-    /**
-     * @hide
-     */
     public static final Parcelable.Creator<ScanResult> CREATOR = new Creator<ScanResult>() {
             @Override
         public ScanResult createFromParcel(Parcel source) {
