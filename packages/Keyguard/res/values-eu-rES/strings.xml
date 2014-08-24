@@ -53,7 +53,6 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Desblokeatzeko eremua tolestu da."</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> widgeta."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Erabiltzaile-hautatzailea"</string>
-    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Egoera"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Multimedia-kontrolak"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Widgetak berrantolatzen hasi da."</string>
@@ -79,6 +78,8 @@
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Abiaraztea bertan behera utzi da"</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Ezabatzeko, jaregin <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"Ez da <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ezabatuko."</string>
+    <!-- no translation found for keyguard_accessibility_next_alarm (7269583073750518672) -->
+    <skip />
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>

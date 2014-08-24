@@ -20,16 +20,16 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="719438068451601849">"သော့ချက် စောင့်ပေးသူ"</string>
-    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN ကုဒ် ရိုက်ထည့်ပါ"</string>
+    <string name="app_name" msgid="719438068451601849">"သော့ချက် စောင့်ပေးသူ"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PIN ကုဒ် ရိုက်ထည့်ပါ"</string>
     <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"ဆင်းမ်ကဒ် ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ် နှင့် လျို့ဝှက်နံပါတ်သစ် ရိုက်ထည့်ပါ"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"ဆင်းမ်ကဒ် ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ် နံပါတ်"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"ဆင်းမ်ကဒ် လျို့ဝှက်ပင်နံပါတ် အသစ်သွင်းရန်"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"စကားဝှက် ရိုက်ရန် ထိပါ"</font></string>
-    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"သော့ဖွင့်ရန် စကားဝှက်ကို ရိုက်ထည့်ပါ"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"သော့ဖွင့်ရန် PIN ကို ရိုက်ထည့်ပါ"</string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"သော့ဖွင့်ရန် စကားဝှက်ကို ရိုက်ထည့်ပါ"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"သော့ဖွင့်ရန် PIN ကို ရိုက်ထည့်ပါ"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"ပင်နံပါတ်မှားနေပါသည်"</string>
-    <string name="keyguard_label_text" msgid="861796461028298424">"သော့ဖွင့်ရန် Menu ထိုနောက်0ကိုနှိပ်ပါ"</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"သော့ဖွင့်ရန် Menu ထိုနောက်0ကိုနှိပ်ပါ"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"မျက်မှာမှတ် သော့ဖွင့်ခြင်း ခွင့်ပြုသော အကြိမ်ရေထက် ကျော်လွန်သွားပါပြီ"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"အားသွင်းနေပါသည်"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"အားသွင်းနေ"</string>
@@ -53,7 +53,6 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"သောဖွင့်ထားသော နေရာကို ချုံ့လိုက်ခြင်း"</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ဝဒ်ဂျက်"</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"အသုံးပြုသူ ရွေးချယ်ရာ"</string>
-    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"အခြေအနေ"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"ကင်မရာ"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"မီဒီယာ ထိန်းချုပ်မှုများ"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"ဝဒ်ဂျက်များ နေရာစီခြင်း စတင်ပါပြီ"</string>
@@ -79,20 +78,21 @@
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"ဖွင့်တာကို ပယ်ဖျက်ပါ"</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ကို ဖျက်ပစ်ရန် ချ လိုက်ပါ"</string>
     <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ကို ဖျက်ပစ်မည် မဟုတ်ပါ"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"<xliff:g id="ALARM">%1$s</xliff:g> အတွက် နောက် သတိပေးရန် သတ်မှတ်ချက်"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Altခလုတ်"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ပယ်ဖျက်ရန်ခလုတ်"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ဖျက်ရန်ခလုတ်"</string>
-    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"ပြီးဆုံးသည့်ခလုတ်"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"ပြီးဆုံးသည့်ခလုတ်"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"စနစ်ပြောင်းခြင်းခလုတ်"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shiftခလုတ်"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enterခလုတ်"</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"ဖွင့်ရန်"</string>
+    <string name="description_target_unlock" msgid="2228524900439801453">"ဖွင့်ရန်"</string>
     <string name="description_target_camera" msgid="969071997552486814">"ကင်မရာ"</string>
     <string name="description_target_silent" msgid="893551287746522182">"အသံတိတ်ရန်"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"အသံဖွင့်သည်"</string>
+    <string name="description_target_soundon" msgid="30052466675500172">"အသံဖွင့်သည်"</string>
     <string name="description_target_search" msgid="3091587249776033139">"ရှာဖွေရန်"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> အတွက် အပေါ်ကို ပွတ်ဆွဲပါ"</string>
     <string name="description_direction_down" msgid="5087739728639014595">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> အတွက် အောက်ကို ပွတ်ဆွဲပါ"</string>
