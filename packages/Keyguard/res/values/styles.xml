@@ -68,8 +68,11 @@
     </style>
 
     <style name="BouncerSecurityContainer">
-        <item name="android:layout_marginBottom">32dp</item>
         <item name="android:layout_gravity">center_horizontal|bottom</item>
     </style>
 
+    <style name="PasswordTheme" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:colorControlNormal">#80ffffff</item>
+        <item name="android:colorControlActivated">#80ffffff</item>
+    </style>
 </resources>
