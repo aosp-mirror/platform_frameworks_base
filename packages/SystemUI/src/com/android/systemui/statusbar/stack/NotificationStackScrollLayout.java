@@ -1459,6 +1459,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             // drawn when removed
             getOverlay().add(child);
         }
+
+        // Make sure the clipRect we might have set is removed
+        child.setClipBounds(null);
     }
 
     /**
