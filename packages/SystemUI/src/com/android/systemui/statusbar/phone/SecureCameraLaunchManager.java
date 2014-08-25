@@ -57,8 +57,7 @@ import java.util.Map;
  * the UI thread.
  */
 public class SecureCameraLaunchManager {
-    // TODO(bcolonna): Turn off debugging after running with this change for a while. STOPSHIP
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String TAG = "SecureCameraLaunchManager";
 
     // Action sent as a broadcast to tell other apps to stop using the camera.  Other apps that use
