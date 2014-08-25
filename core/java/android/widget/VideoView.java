@@ -253,6 +253,10 @@ public class VideoView extends SurfaceView
      *
      * @param uri     the URI of the video.
      * @param headers the headers for the URI request.
+     *                Note that the cross domain redirection is allowed by default, but that can be
+     *                changed with key/value pairs through the headers parameter with
+     *                "android-allow-cross-domain-redirect" as the key and "0" or "1" as the value
+     *                to disallow or allow cross domain redirection.
      */
     public void setVideoURI(Uri uri, Map<String, String> headers) {
         mUri = uri;
