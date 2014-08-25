@@ -66,6 +66,7 @@ static void Shader_setLocalMatrix(JNIEnv* env, jobject o, jlong shaderHandle, jl
         } else {
             shader->resetLocalMatrix();
         }
+        shader->setGenerationID(shader->getGenerationID() + 1);
     }
 }
 
