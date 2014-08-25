@@ -190,14 +190,17 @@ public abstract class FragmentTransaction {
      * @param name The transitionName for a View in an appearing Fragment to match to the shared
      *             element.
      */
+    public abstract FragmentTransaction addSharedElement(View sharedElement, String name);
+
+    /**
+     * TODO: remove from API
+     * @hide
+     */
     public abstract FragmentTransaction setSharedElement(View sharedElement, String name);
 
     /**
-     * Used with {@link #setCustomTransition(int, int)} to map multiple Views from removed or hidden
-     * Fragments to a Views from a shown or added Fragments. Views in
-     * <var>sharedElements</var> must have unique transitionNames in the View hierarchy.
-     * @param sharedElements Pairs of Views in disappearing Fragments to transitionNames in
-     *                       appearing Fragments.
+     * TODO: remove from API
+     * @hide
      */
     public abstract FragmentTransaction setSharedElements(Pair<View, String>... sharedElements);
 
