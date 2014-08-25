@@ -201,17 +201,6 @@ public class VoiceInteractionService extends Service {
     }
 
     /**
-     * FIXME: Remove once the prebuilts are updated.
-     *
-     * @hide
-     */
-    @Deprecated
-    public final AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(
-            String keyphrase, String locale, AlwaysOnHotwordDetector.Callback callback) {
-        return createAlwaysOnHotwordDetector(keyphrase, Locale.forLanguageTag(locale), callback);
-    }
-
-    /**
      * Creates an {@link AlwaysOnHotwordDetector} for the given keyphrase and locale.
      * This instance must be retained and used by the client.
      * Calling this a second time invalidates the previously created hotword detector
