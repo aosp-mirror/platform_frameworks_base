@@ -54,7 +54,7 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:elevation="8dp"
-            android:background="@*android:color/material_grey_50">
+            android:background="@color/material_grey_50">
 
             <com.android.documentsui.DirectoryContainerView
                 android:id="@+id/container_directory"
@@ -66,7 +66,7 @@
                 android:id="@+id/container_save"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@*android:color/material_grey_50"
+                android:background="@color/material_grey_50"
                 android:elevation="8dp" />
 
         </LinearLayout>

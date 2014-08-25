@@ -64,8 +64,8 @@ please see themes_device_defaults.xml.
         <item name="textColorHintInverse">@color/hint_foreground_material_light</item>
         <item name="textColorHighlight">@color/highlighted_text_material_dark</item>
         <item name="textColorHighlightInverse">@color/highlighted_text_material_light</item>
-        <item name="textColorLink">@color/material_teal_500</item>
-        <item name="textColorLinkInverse">@color/material_teal_500</item>
+        <item name="textColorLink">@color/link_text_material_dark</item>
+        <item name="textColorLinkInverse">@color/link_text_material_light</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_dark</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_material_dark</item>
 
@@ -371,7 +371,7 @@ please see themes_device_defaults.xml.
         <!-- Color palette -->
         <item name="colorPrimaryDark">@color/material_blue_grey_900</item>
         <item name="colorPrimary">@color/material_blue_grey_800</item>
-        <item name="colorAccent">@color/material_deep_teal_A200</item>
+        <item name="colorAccent">@color/material_deep_teal_200</item>
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
         <item name="colorControlActivated">?attr/colorAccent</item>
@@ -406,8 +406,8 @@ please see themes_device_defaults.xml.
         <item name="textColorHintInverse">@color/hint_foreground_material_dark</item>
         <item name="textColorHighlight">@color/highlighted_text_material_light</item>
         <item name="textColorHighlightInverse">@color/highlighted_text_material_dark</item>
-        <item name="textColorLink">@color/material_teal_500</item>
-        <item name="textColorLinkInverse">@color/material_teal_500</item>
+        <item name="textColorLink">@color/link_text_material_light</item>
+        <item name="textColorLinkInverse">@color/link_text_material_dark</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_light</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_material_light</item>
 
@@ -713,7 +713,7 @@ please see themes_device_defaults.xml.
         <!-- Color palette -->
         <item name="colorPrimaryDark">@color/material_blue_grey_100</item>
         <item name="colorPrimary">@color/material_blue_grey_50</item>
-        <item name="colorAccent">@color/material_deep_teal_A500</item>
+        <item name="colorAccent">@color/material_deep_teal_500</item>
 
         <item name="colorControlNormal">?attr/textColorSecondary</item>
         <item name="colorControlActivated">?attr/colorAccent</item>
@@ -758,8 +758,8 @@ please see themes_device_defaults.xml.
         <item name="textColorHintInverse">@color/hint_foreground_material_dark</item>
         <item name="textColorHighlight">@color/highlighted_text_material_light</item>
         <item name="textColorHighlightInverse">@color/highlighted_text_material_dark</item>
-        <item name="textColorLink">@color/material_teal_500</item>
-        <item name="textColorLinkInverse">@color/material_teal_500</item>
+        <item name="textColorLink">@color/link_text_material_light</item>
+        <item name="textColorLinkInverse">@color/link_text_material_dark</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_light</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_material_light</item>
 
@@ -796,8 +796,8 @@ please see themes_device_defaults.xml.
         <item name="textColorHintInverse">@color/hint_foreground_material_light</item>
         <item name="textColorHighlight">@color/highlighted_text_material_dark</item>
         <item name="textColorHighlightInverse">@color/highlighted_text_material_light</item>
-        <item name="textColorLink">@color/material_teal_500</item>
-        <item name="textColorLinkInverse">@color/material_teal_500</item>
+        <item name="textColorLink">@color/link_text_material_dark</item>
+        <item name="textColorLinkInverse">@color/link_text_material_light</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_dark</item>
         <item name="textColorAlertDialogListItem">@color/primary_text_material_dark</item>
 
@@ -1214,7 +1214,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Settings" parent="Theme.Material.Light.DarkActionBar">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
-        <item name="colorAccent">@color/material_deep_teal_A500</item>
+        <item name="colorAccent">@color/material_deep_teal_500</item>
 
         <item name="dialogTheme">@style/Theme.Material.Settings.Dialog</item>
         <item name="alertDialogTheme">@style/Theme.Material.Settings.Dialog.Alert</item>
@@ -1226,7 +1226,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Settings.BaseDialog" parent="Theme.Material.Light.BaseDialog">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
-        <item name="colorAccent">@color/material_deep_teal_A500</item>
+        <item name="colorAccent">@color/material_deep_teal_500</item>
     </style>
 
     <style name="Theme.Material.Settings.Dialog" parent="Theme.Material.Settings.BaseDialog" />
@@ -1234,7 +1234,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Settings.Dialog.BaseAlert" parent="Theme.Material.Light.Dialog.BaseAlert">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
-        <item name="colorAccent">@color/material_deep_teal_A500</item>
+        <item name="colorAccent">@color/material_deep_teal_500</item>
     </style>
 
     <style name="Theme.Material.Settings.Dialog.Alert" parent="Theme.Material.Settings.Dialog.BaseAlert" />
@@ -1242,19 +1242,19 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Settings.Dialog.Presentation" parent="Theme.Material.Light.Dialog.Presentation">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
-        <item name="colorAccent">@color/material_deep_teal_A500</item>
+        <item name="colorAccent">@color/material_deep_teal_500</item>
     </style>
 
     <style name="Theme.Material.Settings.SearchBar" parent="Theme.Material.Light.SearchBar">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
-        <item name="colorAccent">@color/material_deep_teal_A500</item>
+        <item name="colorAccent">@color/material_deep_teal_500</item>
     </style>
 
     <style name="Theme.Material.Settings.CompactMenu" parent="Theme.Material.Light.CompactMenu">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
-        <item name="colorAccent">@color/material_deep_teal_A500</item>
+        <item name="colorAccent">@color/material_deep_teal_500</item>
     </style>
 
 </resources>
