@@ -327,7 +327,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         addAndStartAction(new RoutingControlAction(this, newPath, true, callback));
     }
 
+    @ServiceThreadOnly
     int getPowerStatus() {
+        assertRunOnServiceThread();
         return mService.getPowerStatus();
     }
 
@@ -428,8 +430,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleGetMenuLanguage(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        // TODO: figure out how to handle failed to get language code.
-        if (!broadcastMenuLanguage(Locale.getDefault().getISO3Language())) {
+        if (!broadcastMenuLanguage(mService.getLanguage())) {
             Slog.w(TAG, "Failed to respond to <Get Menu Language>: " + message.toString());
         }
         return true;
