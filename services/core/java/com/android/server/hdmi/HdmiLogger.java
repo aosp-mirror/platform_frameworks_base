@@ -47,7 +47,7 @@ final class HdmiLogger {
         long curTime = SystemClock.uptimeMillis();
         Pair<Long, Integer> timing = mWarningTimingCache.get(logMessage);
         if (shouldLogNow(timing, curTime)) {
-            Slog.w(mTag, buildMessage(logMessage, timing));
+            Slog.w(mTag, buildMessage(logMessage, timing, curTime));
             mWarningTimingCache.put(logMessage, new Pair<>(curTime, 1));
         } else {
             increaseLogCount(mWarningTimingCache, logMessage);
@@ -58,17 +58,17 @@ final class HdmiLogger {
         long curTime = SystemClock.uptimeMillis();
         Pair<Long, Integer> timing = mErrorTimingCache.get(logMessage);
         if (shouldLogNow(timing, curTime)) {
-            Slog.e(mTag, buildMessage(logMessage, timing));
+            Slog.e(mTag, buildMessage(logMessage, timing, curTime));
             mErrorTimingCache.put(logMessage, new Pair<>(curTime, 1));
         } else {
             increaseLogCount(mErrorTimingCache, logMessage);
         }
     }
 
-    private String buildMessage(String message, Pair<Long, Integer> timing) {
+    private String buildMessage(String message, Pair<Long, Integer> timing, long curTime) {
         return new StringBuilder()
-            .append("[").append(timing.second).append("]:").append(message)
-            .toString();
+            .append("[").append(timing == null ? curTime : timing.second).append("]:")
+            .append(message).toString();
     }
 
     private void increaseLogCount(HashMap<String, Pair<Long, Integer>> cache, String message) {
