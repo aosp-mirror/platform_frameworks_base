@@ -415,8 +415,6 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permite proprietarului să se conecteze la interfața de nivel superior a unui ecran la distanță. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"conectare la un serviciu widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unui serviciu widget. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"se conectează la un serviciu de furnizare a traseelor"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Permite titularului să se conecteze la furnizorii de trasee înregistrați. Nu este necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interacţionare cu administratorul unui dispozitiv"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permite proprietarului să trimită intenţii către un administrator al dispozitivului. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"se conectează la o intrare TV"</string>
@@ -615,6 +613,10 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"telefon pornit sau oprit"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Permite aplicaţiei să pornească sau să oprească tableta."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Permite aplicaţiei să activeze sau să dezactiveze telefonul."</string>
+    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
+    <skip />
+    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
+    <skip />
     <string name="permlab_factoryTest" msgid="3715225492696416187">"rulare în mod test de fabrică"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Rulează ca test de nivel redus setat de producător, permiţând accesul complet la sistemul hardware al computerului tablet PC. Permisiune disponibilă doar când acesta rulează în modul de testare setat de producător."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Rulează ca testare de nivel redus al producătorului, permiţând accesul complet la hardware-ul telefonului. Permisiune disponibilă doar când telefonul rulează în modul de testare a producător."</string>
@@ -716,12 +718,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Permite aplicaţiei să scrie şi să citească sistemul de fişiere cache."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"efectuarea/primirea apelurilor SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Permite aplicației să efectueze și să primească apeluri SIP."</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"interacțiune cu ecranul în timpul unui apel"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Permite aplicației să controleze când și cum vede utilizatorul ecranul în timpul unui apel."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interacțiune cu ecranul în timpul unui apel"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Permite aplicației să controleze când și cum vede utilizatorul ecranul în timpul unui apel."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"să interacționeze cu servicii de telefonie"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Permite aplicației să interacționeze cu servicii de telefonie pentru a da / a primi apeluri."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"oferă o experiență de utilizare în timpul unui apel"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Permite aplicației să ofere o experiență de utilizare în timpul unui apel."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"citeşte utilizarea statistică a reţelei"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Permite aplicaţiei să citească utilizarea statistică a reţelei pentru anumite reţele şi aplicaţii."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"gestionează politica de reţea"</string>
@@ -734,8 +736,6 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de citire a notificărilor. În mod normal aplicațiile nu ar trebui să aibă nevoie de această permisiune."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"conectare la un serviciu furnizor de condiții"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu furnizor de condiții. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"se conectează la un serviciu de trasee multimedia"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Permite deținătorului să se conecteze la interfața de nivel superior a unui serviciu de trasee multimedia. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"se conectează la un serviciu de vis"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Permite deținătorului să se conecteze la interfața superioară a unui serviciu de vis. Această opțiune nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"apelarea aplicației de configurare furnizată de operator"</string>
@@ -1354,8 +1354,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Atingeţi pentru a dezactiva depanarea USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Schimbați tastatura"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Alegeți tastaturi"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"Afișați metoda de introducere a textului"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Selectaţi aspectul tastaturii"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Atingeţi pentru a selecta un aspect de tastatură."</string>
@@ -1406,8 +1405,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permite unei aplicații să se asocieze la un serviciu „agent de încredere”."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interacțiune cu sistemul de recuperare și de actualizare"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Permite unei aplicații să interacționeze cu sistemul de recuperare și cu actualizările de sistem."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Creați sesiuni de proiecție media"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Permite unei aplicații să creeze sesiuni de proiecție media. Aceste sesiuni pot permite aplicațiilor să captureze conținuturi vizuale și audio. Nu trebuie utilizată pentru aplicații obișnuite."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Gestionați sesiunile de proiecții media"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Permite unei aplicații să gestioneze sesiunile de proiecții media. Aceste sesiuni pot oferi aplicațiilor capacitatea de a captura conținuturile afișate și conținuturi video. Această opțiune nu ar trebui să fie necesară pentru aplicațiile normale."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Citirea sesiunilor de instalare"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permite unei aplicații accesul la citirea sesiunilor de instalare. Aceasta poate vedea detalii despre instalările de pachete active."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Atingeţi de două ori pentru a mări/micşora"</string>
@@ -1428,8 +1427,9 @@
     <string name="deny" msgid="2081879885755434506">"Refuzaţi"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Permisiune solicitată"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Permisiune solicitată\npentru contul <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"Utilizați această aplicație în spațiul personal"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"Utilizați această aplicație în spațiul de lucru"</string>
+    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
+    <skip />
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Utilizați această aplicație în profilul de serviciu"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Metodă de intrare"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sincronizare"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accesibilitate"</string>
@@ -1504,8 +1504,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Reduceţi valoarea pentru oră"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Setaţi valoarea PM"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Setaţi valoarea AM"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"PM"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"AM"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Creşteţi valoarea pentru lună"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Reduceţi valoarea pentru lună"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Creşteţi valoarea pentru zi"</string>
@@ -1538,11 +1536,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editaţi"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Avertisment de utiliz. a datelor"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Atingeţi pt. a afişa utiliz./set."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"Datele 2G-3G sunt dezactivate"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"Datele 4G sunt dezactivate"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Datele mobile sunt dezactivate"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Datele Wi-Fi sunt dezactivate"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"Limita a fost atinsă"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Ați atins limita de date 2G-3G"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Ați atins limita de date 4G"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Ați atins limita de date mobile"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Ați atins limita de date Wi-Fi"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"S-au întrerupt datele pentru restul ciclului"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"S-a depăşit limita de date 2G-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"S-a depăşit limita de date 4G"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Limită de date mobile depășită"</string>
@@ -1573,7 +1571,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Acceptaţi apelul?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Întotdeauna"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Numai o dată"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s nu acceptă profilul de serviciu."</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tabletă"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Căşti"</string>
@@ -1646,6 +1645,8 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"S-a activat accesibilitatea."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accesibilitatea a fost anulată"</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilizator curent: <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"Proprietar"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Eroare"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Această modificare nu este permisă de administratorul dvs."</string>
@@ -1767,31 +1768,19 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> selectat"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> a fost șters"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de serviciu"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"Pentru a anula fixarea acestui ecran, atingeți și țineți apăsat pe Înapoi și Recente în același timp."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Pentru a anula fixarea acestui ecran, atingeți și țineți apăsat pe Recente."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Ecranul este fixat. Anularea fixării nu este permisă de organizația dvs."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Utilizați fixarea ecranului?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Fixarea ecranului îl blochează pe acesta într-un display unic.\n\nPentru a ieși, atingeți și țineți apăsat pe Înapoi și Recente în același timp."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Fixarea ecranului îl blochează pe acesta într-un display unic.\n\nPentru a ieși, atingeți și țineți apăsat Recente."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NU, MULȚUMESC"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"PORNIȚI"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"model pentru deblocare"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"parolă"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Ecran fixat"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Fixarea ecranului anulată"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Cereți codul PIN înainte de a anula fixarea"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Cereți modelul pentru deblocare înainte de a anula fixarea"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Cereți parola înainte de a anula fixarea"</string>
+    <string name="battery_saver_description" msgid="725676363406667978">"Pentru a îmbunătăți durata de viață a bateriei, economisirea bateriei reduce performanțele dispozitivului dvs. și limiteează vibrația și majoritatea datelor de fundal. Este posibil ca e-mailul, mesageria și alte aplicații care se bazează pe sincronizare să nu se actualizeze decât dacă le deschideți.\n\nEconomisirea bateriei se oprește automat atunci când dispozitivul se încarcă"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Până când inactivitatea dvs. se încheie la <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

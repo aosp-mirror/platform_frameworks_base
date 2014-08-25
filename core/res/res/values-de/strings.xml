@@ -413,8 +413,6 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Ermöglicht dem Halter, sich an die Oberfläche eines Remote-Displays auf oberster Ebene zu binden. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"An einen Widget-Dienst binden"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Ermöglicht dem Halter, sich an die Oberfläche eines Widget-Dienstes auf oberster Ebene zu binden. Sollte nie für normale Apps benötigt werden."</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"An Routenanbieterdienst binden"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Ermöglicht dem Inhaber die Bindung an registrierte Routenanbieter. Sollte für normale Apps nicht erforderlich sein"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"Interaktion mit einem Geräteadministrator"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Ermöglicht dem Halter, Intents an einen Geräteadministrator zu senden. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"An eine TV-Eingabe binden"</string>
@@ -613,6 +611,10 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"Gerät ein- oder ausschalten"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Ermöglicht der App, das Tablet ein- oder auszuschalten"</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Ermöglicht der App, das Telefon ein- oder auszuschalten"</string>
+    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
+    <skip />
+    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
+    <skip />
     <string name="permlab_factoryTest" msgid="3715225492696416187">"In Werkstestmodus ausführen"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Führt einen systemnahen Herstellertest durch, in dessen Rahmen auf die gesamte Tablet-Hardware zugegriffen werden kann. Nur verfügbar, wenn ein Tablet im Herstellertestmodus ausgeführt wird."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Führt einen systemnahen Herstellertest durch, in dessen Rahmen auf die gesamte Telefon-Hardware zugegriffen werden kann. Nur verfügbar, wenn ein Telefon im Herstellertestmodus ausgeführt wird."</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Ermöglicht der App Lese- und Schreibzugriff auf das Cache-Dateisystem"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP-Anrufe tätigen/empfangen"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Ermöglicht der App das Tätigen und Empfangen von SIP-Anrufen"</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"Mit Anrufbildschirm interagieren"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Die App kann steuern, wann und wie der Nutzer den Anrufbildschirm sieht."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"Mit Anrufbildschirm interagieren"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Die App kann steuern, wann und wie der Nutzer den Anrufbildschirm sieht."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"Mit Telefondiensten interagieren"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Ermöglicht der App die Interaktion mit Telefondiensten, um Anrufe zu tätigen und zu empfangen"</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"Anrufoptionen anzeigen"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Die App kann Anrufoptionen für den Nutzer bereitstellen."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"Bisherige Netzwerkauslastung lesen"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Ermöglicht der App, Daten zur bisherigen Netzwerkauslastung für bestimmte Netzwerke und Apps zu lesen"</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"Netzwerkrichtlinien verwalten"</string>
@@ -732,8 +734,6 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ermöglicht dem Inhaber, sich an die Oberfläche der obersten Ebene eines Benachrichtigungs-Listener-Dienstes zu binden. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"An einen Bedingungsproviderdienst binden"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Ermöglicht dem Inhaber, sich an die Oberfläche eines Bedingungsproviderdienstes auf oberster Ebene zu binden. Für normale Apps sollte dies nie erforderlich sein."</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"An Mediarouting-Dienst binden"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Ermöglicht dem Inhaber die Bindung an die Oberfläche eines Mediarouting-Dienstes auf oberster Ebene. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"An Dream-Dienst binden"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Ermöglicht der App, sich an die Oberfläche eines Dream-Dienstes auf oberster Ebene zu binden. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"Vom Mobilfunkanbieter bereitgestellte Konfigurations-App aufrufen"</string>
@@ -1352,8 +1352,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Zum Deaktivieren von USB-Debugging berühren"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Tastatur ändern"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Tastatur auswählen"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"Eingabemethode anzeigen"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Tastaturlayout auswählen"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Zum Auswählen eines Tastaturlayouts berühren"</string>
@@ -1404,8 +1403,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Ermöglicht einer App die Anbindung an einen Trust Agent-Service"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Mit Update- und Wiederherstellungssystem interagieren"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Ermöglicht einer App die Interaktion mit dem Wiederherstellungssystem und den Systemupdates"</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Sitzungen zur Projektion von Medieninhalten erstellen"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Ermöglicht einer App, Sitzungen zur Projektion von Medieninhalten zu erstellen. In diesen Sitzungen können Apps Bildschirm- und Audioinhalte aufnehmen. Für normale Apps sollte dies nie erforderlich sein."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Sitzungen zur Projektion von Medieninhalten verwalten"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Ermöglicht einer App, Sitzungen zur Projektion von Medieninhalten zu verwalten. In diesen Sitzungen können Apps Bildschirm- und Audioinhalte aufnehmen. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Installationssitzungen lesen"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Ermöglicht der App, Installationssitzungen zu lesen. Dadurch kann sie Details aktiver Paketinstallationen abrufen."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Für Zoomeinstellung zweimal berühren"</string>
@@ -1426,8 +1425,9 @@
     <string name="deny" msgid="2081879885755434506">"Ablehnen"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Berechtigung angefordert"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Berechtigung angefordert\nfür Konto <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"Sie verwenden diese App in Ihrem persönlichen Bereich."</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"Sie verwenden diese App in Ihren Arbeitsbereich."</string>
+    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
+    <skip />
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Sie verwenden diese App in Ihrem Arbeitsprofil."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Eingabemethode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchronisieren"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Bedienungshilfen"</string>
@@ -1502,8 +1502,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Stunden verringern"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Zeit festlegen"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Zeit festlegen"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"PM"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"AM"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Monat verlängern"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Monat verringern"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Tag verlängern"</string>
@@ -1536,11 +1534,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Bearbeiten"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Warnung zum Datenverbrauch"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Für Verbrauch/Einstell. berühren"</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G/3G-Daten deaktiviert"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G-Daten deaktiviert"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Mobilfunkdaten deaktiviert"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"WLAN-Daten deaktiviert"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"Limit erreicht"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-/3G-Datenlimit erreicht"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G-Datenlimit erreicht"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Mobilfunkdatenlimit erreicht"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"WLAN-Datenlimit erreicht"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Daten für restl. Zeitraum deakt."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-/3G-Datenlimit überschritten"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G-Datenlimit überschritten"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Mobilfunkdatenlimit überschritten"</string>
@@ -1571,7 +1569,8 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Anruf annehmen?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Immer"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Nur diesmal"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s unterstützt das Arbeitsprofil nicht."</string>
+    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
+    <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Kopfhörer"</string>
@@ -1644,6 +1643,8 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Bedienungshilfen aktiviert"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Bedienungshilfen abgebrochen"</string>
     <string name="user_switched" msgid="3768006783166984410">"Aktueller Nutzer <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"Eigentümer"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Fehler"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Ihr Administrator lässt diese Änderung nicht zu."</string>
@@ -1765,31 +1766,19 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ausgewählt"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> gelöscht"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (geschäftlich)"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"Berühren und halten Sie zum Beenden der Bildschirmfixierung gleichzeitig die Schaltfläche \"Zurück\" und \"Neueste\"."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Berühren und halten Sie zum Beenden der Bildschirmfixierung die Schaltfläche \"Neueste\"."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Der Bildschirm ist fixiert. Sie sind nicht berechtigt, diese Einstellung zu beenden."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Bildschirmfixierung verwenden?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Durch die Bildschirmfixierung wird das Display in einer bestimmten Ansicht gesperrt.\n\nBerühren und halten Sie zum Beenden gleichzeitig die Schaltfläche \"Zurück\" und \"Neueste\"."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Durch die Bildschirmfixierung wird das Display in einer bestimmten Ansicht gesperrt.\n\nBerühren und halten Sie zum Beenden die Schaltfläche \"Neueste\"."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"Nein danke"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"Starten"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"Entsperrungsmuster"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"Passwort"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Bildschirm fixiert"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Bildschirm gelöst"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Vor dem Beenden nach PIN fragen"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Vor dem Beenden nach Entsperrungsmuster fragen"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Vor dem Beenden nach Passwort fragen"</string>
+    <string name="battery_saver_description" msgid="725676363406667978">"Im Energiesparmodus wird Ihr Akku geschont, indem die Geräteleistung reduziert wird und der Vibrationsmodus sowie die meisten Hintergrunddaten begrenzt werden. E-Mails, SMS/MMS und andere Apps mit Synchronisierung werden möglicherweise erst aktualisiert, sobald Sie sie öffnen.\n\nDer Energiesparmodus wird automatisch deaktiviert, wenn Ihr Gerät geladen wird."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Bis zum Ende der Downtime um <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>
