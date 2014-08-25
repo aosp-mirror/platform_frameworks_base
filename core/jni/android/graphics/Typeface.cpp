@@ -41,6 +41,12 @@ static jlong Typeface_createFromTypeface(JNIEnv* env, jobject, jlong familyHandl
     return reinterpret_cast<jlong>(face);
 }
 
+static jlong Typeface_createWeightAlias(JNIEnv* env, jobject, jlong familyHandle, jint weight) {
+    TypefaceImpl* family = reinterpret_cast<TypefaceImpl*>(familyHandle);
+    TypefaceImpl* face = TypefaceImpl_createWeightAlias(family, weight);
+    return reinterpret_cast<jlong>(face);
+}
+
 static void Typeface_unref(JNIEnv* env, jobject obj, jlong faceHandle) {
     TypefaceImpl* face = reinterpret_cast<TypefaceImpl*>(faceHandle);
     TypefaceImpl_unref(face);
@@ -65,6 +71,7 @@ static void Typeface_setDefault(JNIEnv *env, jobject, jlong faceHandle) {
 
 static JNINativeMethod gTypefaceMethods[] = {
     { "nativeCreateFromTypeface", "(JI)J", (void*)Typeface_createFromTypeface },
+    { "nativeCreateWeightAlias",  "(JI)J", (void*)Typeface_createWeightAlias },
     { "nativeUnref",              "(J)V",  (void*)Typeface_unref },
     { "nativeGetStyle",           "(J)I",  (void*)Typeface_getStyle },
     { "nativeCreateFromArray",    "([J)J",
