@@ -46,7 +46,7 @@ import static com.android.internal.R.styleable.WindowAnimation_activityCloseEnte
 import static com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_taskOpenEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_taskOpenExitAnimation;
-import static com.android.internal.R.styleable.WindowAnimation_launchTaskBehindBackgroundAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_launchTaskBehindTargetAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_launchTaskBehindSourceAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_taskCloseEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_taskCloseExitAnimation;
@@ -814,7 +814,7 @@ public class AppTransition implements Dump {
                 case TRANSIT_TASK_OPEN_BEHIND:
                     animAttr = enter
                             ? WindowAnimation_launchTaskBehindSourceAnimation
-                            : WindowAnimation_launchTaskBehindBackgroundAnimation;
+                            : WindowAnimation_launchTaskBehindTargetAnimation;
             }
             a = animAttr != 0 ? loadAnimationAttr(lp, animAttr) : null;
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
