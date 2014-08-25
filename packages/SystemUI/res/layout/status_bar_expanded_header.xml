@@ -102,6 +102,7 @@
             android:singleLine="true"
             android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
             android:layout_below="@id/clock"
+            systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm"
             />
 
         <com.android.systemui.statusbar.policy.DateView android:id="@+id/date_expanded"
