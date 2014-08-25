@@ -68,6 +68,8 @@ public abstract class PanelView extends FrameLayout {
     protected boolean mHintAnimationRunning;
     private boolean mOverExpandedBeforeFling;
     private float mOriginalIndicationY;
+    private boolean mTouchAboveFalsingThreshold;
+    private int mUnlockFalsingThreshold;
 
     private ValueAnimator mHeightAnimator;
     private ObjectAnimator mPeekAnimator;
@@ -183,6 +185,7 @@ public abstract class PanelView extends FrameLayout {
         mTouchSlop = configuration.getScaledTouchSlop();
         mHintDistance = res.getDimension(R.dimen.hint_move_distance);
         mEdgeTapAreaWidth = res.getDimensionPixelSize(R.dimen.edge_tap_area_width);
+        mUnlockFalsingThreshold = res.getDimensionPixelSize(R.dimen.unlock_falsing_threshold);
     }
 
     private void trackMovement(MotionEvent event) {
@@ -234,6 +237,7 @@ public abstract class PanelView extends FrameLayout {
                 mHasLayoutedSinceDown = false;
                 mUpdateFlingOnLayout = false;
                 mPeekTouching = mPanelClosedOnDown;
+                mTouchAboveFalsingThreshold = false;
                 if (mVelocityTracker == null) {
                     initVelocityTracker();
                 }
@@ -297,6 +301,9 @@ public abstract class PanelView extends FrameLayout {
                         mPeekAnimator.cancel();
                     }
                     mJustPeeked = false;
+                }
+                if (-h >= mUnlockFalsingThreshold) {
+                    mTouchAboveFalsingThreshold = true;
                 }
                 if (!mJustPeeked && (!waitForTouchSlop || mTracking) && !isTrackingBlocked()) {
                     setExpandedHeightInternal(newHeight);
@@ -399,6 +406,7 @@ public abstract class PanelView extends FrameLayout {
                 mPanelClosedOnDown = mExpandedHeight == 0.0f;
                 mHasLayoutedSinceDown = false;
                 mUpdateFlingOnLayout = false;
+                mTouchAboveFalsingThreshold = false;
                 initVelocityTracker();
                 trackMovement(event);
                 break;
@@ -471,6 +479,9 @@ public abstract class PanelView extends FrameLayout {
      * @return whether a fling should expands the panel; contracts otherwise
      */
     protected boolean flingExpands(float vel, float vectorVel) {
+        if (!mTouchAboveFalsingThreshold && mStatusBar.isFalsingThresholdNeeded()) {
+            return true;
+        }
         if (Math.abs(vectorVel) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
             return getExpandedFraction() > 0.5f;
         } else {

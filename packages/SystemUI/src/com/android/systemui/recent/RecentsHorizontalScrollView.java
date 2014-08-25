@@ -191,6 +191,11 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         return true;
     }
 
+    @Override
+    public boolean isAntiFalsingNeeded() {
+        return false;
+    }
+
     public void dismissChild(View v) {
         mSwipeHelper.dismissChild(v, 0);
     }

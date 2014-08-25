@@ -81,6 +81,8 @@ public class SwipeHelper implements Gefingerpoken {
     private long mLongPressTimeout;
 
     final private int[] mTmpPos = new int[2];
+    private int mFalsingThreshold;
+    private boolean mTouchAboveFalsingThreshold;
 
     public SwipeHelper(int swipeDirection, Callback callback, Context context) {
         mCallback = callback;
@@ -93,6 +95,8 @@ public class SwipeHelper implements Gefingerpoken {
         mLongPressTimeout = (long) (ViewConfiguration.getLongPressTimeout() * 1.5f); // extra long-press!
         mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
                 android.R.interpolator.fast_out_linear_in);
+        mFalsingThreshold = context.getResources().getDimensionPixelSize(
+                R.dimen.swipe_helper_falsing_threshold);
     }
 
     public void setLongPressListener(LongPressListener listener) {
@@ -222,6 +226,7 @@ public class SwipeHelper implements Gefingerpoken {
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                mTouchAboveFalsingThreshold = false;
                 mDragging = false;
                 mLongPressSent = false;
                 mCurrView = mCallback.getChildAtPosition(ev);
@@ -406,12 +411,16 @@ public class SwipeHelper implements Gefingerpoken {
             case MotionEvent.ACTION_MOVE:
                 if (mCurrView != null) {
                     float delta = getPos(ev) - mInitialTouchPos;
+                    float absDelta = Math.abs(delta);
+                    if (absDelta >= mFalsingThreshold) {
+                        mTouchAboveFalsingThreshold = true;
+                    }
                     // don't let items that can't be dismissed be dragged more than
                     // maxScrollDistance
                     if (CONSTRAIN_SWIPE && !mCallback.canChildBeDismissed(mCurrView)) {
                         float size = getSize(mCurrAnimView);
                         float maxScrollDistance = 0.15f * size;
-                        if (Math.abs(delta) >= size) {
+                        if (absDelta >= size) {
                             delta = delta > 0 ? maxScrollDistance : -maxScrollDistance;
                         } else {
                             delta = maxScrollDistance * (float) Math.sin((delta/size)*(Math.PI/2));
@@ -437,9 +446,11 @@ public class SwipeHelper implements Gefingerpoken {
                     boolean childSwipedFastEnough = (Math.abs(velocity) > escapeVelocity) &&
                             (Math.abs(velocity) > Math.abs(perpendicularVelocity)) &&
                             (velocity > 0) == (getTranslation(mCurrAnimView) > 0);
+                    boolean falsingDetected = mCallback.isAntiFalsingNeeded()
+                            && !mTouchAboveFalsingThreshold;
 
-                    boolean dismissChild = mCallback.canChildBeDismissed(mCurrView) &&
-                            (childSwipedFastEnough || childSwipedFarEnough);
+                    boolean dismissChild = mCallback.canChildBeDismissed(mCurrView)
+                            && !falsingDetected && (childSwipedFastEnough || childSwipedFarEnough);
 
                     if (dismissChild) {
                         // flingadingy
@@ -461,6 +472,8 @@ public class SwipeHelper implements Gefingerpoken {
         View getChildContentView(View v);
 
         boolean canChildBeDismissed(View v);
+
+        boolean isAntiFalsingNeeded();
 
         void onBeginDrag(View v);
 
