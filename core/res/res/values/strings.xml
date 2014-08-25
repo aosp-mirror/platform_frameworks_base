@@ -1821,6 +1821,11 @@
     <string name="permdesc_devicePower" product="default">Allows the app to turn the phone on or off.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_userActivity">reset display timeout</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_userActivity">Allows the app to reset the display timeout.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_factoryTest">run in factory test mode</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_factoryTest" product="tablet">Run as a low-level manufacturer test,
