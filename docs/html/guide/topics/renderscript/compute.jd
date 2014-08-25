@@ -159,8 +159,7 @@ precision (such as SIMD CPU instructions).</p>
 
 <ul>
   <li><strong>{@link android.renderscript}</strong> - The APIs in this class package are
-    available on devices running Android 3.0 (API level 11) and higher. These are the original APIs
-    for RenderScript and are not currently being updated.</li>
+    available on devices running Android 3.0 (API level 11) and higher. </li>
   <li><strong>{@link android.support.v8.renderscript}</strong> - The APIs in this package are
     available through a <a href="{@docRoot}tools/support-library/features.html#v8">Support
     Library</a>, which allows you to use them on devices running Android 2.2 (API level 8) and
@@ -168,8 +167,8 @@ precision (such as SIMD CPU instructions).</p>
 </ul>
 
 <p>We strongly recommend using the Support Library APIs for accessing RenderScript because they
-  include the latest improvements to the RenderScript compute framework and provide a wider range
-  of device compatibility.</p>
+  provide a wider range of device compatibility. Developers targeting specific versions of 
+  Android can use {@link android.renderscript} if necessary.</p>
 
 
 <h3 id="ide-setup">Using the RenderScript Support Library APIs</h3>
