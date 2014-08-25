@@ -15,10 +15,11 @@
 -->
 
 <resources>
+    <color name="material_grey_50">#fffafafa</color>
+    <color name="material_grey_300">#ffeeeeee</color>
 
     <!-- Half-alpha of material_teal_500 -->
     <color name="accent_color_overlay">#8800bcd4</color>
 
-    <color name="grid_item_background">@*android:color/material_grey_300</color>
-
+    <color name="grid_item_background">@color/material_grey_300</color>
 </resources>
