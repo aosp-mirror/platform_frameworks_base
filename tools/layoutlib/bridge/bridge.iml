@@ -34,11 +34,11 @@
     <orderEntry type="module-library" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$ANDROID_BUILD_TOP$/prebuilts/misc/common/sdk-common/sdk-common.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../../prebuilts/misc/common/sdk-common/sdk-common.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$ANDROID_BUILD_TOP$/prebuilts/misc/common/sdk-common/sdk-common-sources.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../../prebuilts/misc/common/sdk-common/sdk-common-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

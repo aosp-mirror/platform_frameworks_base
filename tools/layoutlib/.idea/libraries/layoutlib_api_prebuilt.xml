@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="layoutlib_api-prebuilt">
     <CLASSES>
-      <root url="jar://$ANDROID_BUILD_TOP$/prebuilts/misc/common/layoutlib_api/layoutlib_api-prebuilt.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../../prebuilts/misc/common/layoutlib_api/layoutlib_api-prebuilt.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

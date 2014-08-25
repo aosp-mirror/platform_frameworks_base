@@ -104,9 +104,61 @@ public class Main {
             return platformDir;
         }
         // System Property not set. Try to find the directory in the build directory.
-        String out = System.getenv("ANDROID_HOST_OUT");
-        if (out == null || out.isEmpty() || !new File(out).isDirectory()) {
-            // Can't find the out directory.
+        String androidHostOut = System.getenv("ANDROID_HOST_OUT");
+        if (androidHostOut != null) {
+            platformDir = getPlatformDirFromHostOut(new File(androidHostOut));
+            if (platformDir != null) {
+                return platformDir;
+            }
+        }
+        String workingDirString = System.getProperty("user.dir");
+        File workingDir = new File(workingDirString);
+        // Test if workingDir is android checkout root.
+        platformDir = getPlatformDirFromRoot(workingDir);
+        if (platformDir != null) {
+            return platformDir;
+        }
+        // Test if workingDir is  platform/frameworks/base/tools/layoutlib. That is, root should be
+        // workingDir/../../../../  (4 levels up)
+        File currentDir = workingDir;
+        for (int i = 0; i < 4; i++) {
+            if (currentDir != null) {
+                currentDir = currentDir.getParentFile();
+            }
+        }
+        return currentDir == null ? null : getPlatformDirFromRoot(currentDir);
+    }
+
+    private static String getPlatformDirFromRoot(File root) {
+        if (!root.isDirectory()) {
+            return null;
+        }
+        File out = new File(root, "out");
+        if (!out.isDirectory()) {
+            return null;
+        }
+        File host = new File(out, "host");
+        if (!host.isDirectory()) {
+            return null;
+        }
+        File[] hosts = host.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File path) {
+                return path.isDirectory() && (path.getName().startsWith("linux-") || path.getName()
+                        .startsWith("darwin-"));
+            }
+        });
+        for (File hostOut : hosts) {
+            String platformDir = getPlatformDirFromHostOut(hostOut);
+            if (platformDir != null) {
+                return platformDir;
+            }
+        }
+        return null;
+    }
+
+    private static String getPlatformDirFromHostOut(File out) {
+        if (!out.isDirectory()) {
             return null;
         }
         File sdkDir = new File(out, "sdk" + File.separator + "sdk");
@@ -117,7 +169,7 @@ public class Main {
         File[] possibleSdks = sdkDir.listFiles(new FileFilter() {
             @Override
             public boolean accept(File path) {
-                return path.isDirectory() && path.getAbsolutePath().contains("android-sdk");
+                return path.isDirectory() && path.getName().contains("android-sdk");
             }
         });
         for (File possibleSdk : possibleSdks) {
