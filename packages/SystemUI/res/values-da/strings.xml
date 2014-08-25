@@ -23,8 +23,7 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ryd"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Fjern fra listen"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Oplysninger om appen"</string>
-    <!-- no translation found for status_bar_no_recent_apps (7374907845131203189) -->
-    <skip />
+    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Dine seneste skærme vises her"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Luk de seneste apps"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 seneste app"</item>
@@ -81,11 +80,23 @@
     <string name="accessibility_back" msgid="567011538994429120">"Tilbage"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Startskærm"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
-    <!-- no translation found for accessibility_recent (1606470783629913980) -->
-    <skip />
+    <string name="accessibility_recent" msgid="1606470783629913980">"Seneste skærme"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Søg"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefon"</string>
+    <string name="unlock_label" msgid="8779712358041029439">"lås op"</string>
+    <string name="phone_label" msgid="2320074140205331708">"åbn telefon"</string>
+    <string name="camera_label" msgid="7261107956054836961">"åbn kamera"</string>
+    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
+    <skip />
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Skift indtastningsmetode-knappen."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Knap for kompatibilitetszoom."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom mindre til større skærm."</string>
@@ -112,6 +123,8 @@
     <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wi-Fi to bjælker."</string>
     <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Wi-Fi tre bjælker."</string>
     <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wi-Fi fuldt signal."</string>
+    <string name="accessibility_wifi_name" msgid="7202151365171148501">"Tilsluttet <xliff:g id="WIFI">%s</xliff:g>."</string>
+    <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Tilsluttet <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Ingen WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX en bjælke."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX to bjælker."</string>
@@ -124,10 +137,6 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"To bjælker."</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"Tre bjælker."</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"Fuldt signal."</string>
-    <string name="accessibility_desc_on" msgid="2385254693624345265">"Til."</string>
-    <string name="accessibility_desc_off" msgid="6475508157786853157">"Fra."</string>
-    <string name="accessibility_desc_connected" msgid="8366256693719499665">"Forbundet."</string>
-    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Opretter forbindelse..."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -157,22 +166,43 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Underretningen er annulleret."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Underretningspanel."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Hurtige indstillinger."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Låseskærm."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Indstillinger"</string>
-    <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
-    <skip />
+    <string name="accessibility_desc_recent_apps" msgid="8376953390514779637">"Seneste skærme."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Bruger <xliff:g id="USER">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi er slået fra."</string>
+    <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wi-Fi er slået til."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Mobil <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Batteri <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Flytilstand <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"Placering <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Flytilstand er slået fra."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Flytilstand er slået til."</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Flytilstand er slået fra."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Flytilstand er slået til."</string>
+    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth er slået fra."</string>
+    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth er slået til."</string>
+    <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Opretter forbindelse til Bluetooth."</string>
+    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"Der er oprettet forbindelse til Bluetooth."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"Bluetooth er slået fra."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"Bluetooth er slået til."</string>
+    <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"Placeringsrapportering er slået fra."</string>
+    <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Placeringsrapportering er slået til."</string>
+    <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"Placeringsrapportering er slået fra."</string>
+    <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"Placeringsrapportering er slået til."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarmen er indstillet til <xliff:g id="TIME">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"Luk panelet"</string>
-    <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"Mere tid"</string>
-    <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"Mindre tid"</string>
-    <!-- no translation found for accessibility_brightness (8003681285547803095) -->
-    <skip />
+    <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Luk panelet."</string>
+    <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Mere tid."</string>
+    <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Mindre tid."</string>
+    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Lommelygten er slået fra."</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Lommelygte er slået til."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Lommelygten er slået fra."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Lommelygten er slået til."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Invertering af farver er slået fra."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Invertering af farver er slået til."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobilhotspot er slået fra."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobilhotspot er slået til."</string>
+    <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Casting af din skærm er stoppet."</string>
+    <string name="accessibility_brightness" msgid="8003681285547803095">"Skærmens lysstyrke"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G-data er deaktiveret"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G-data er deaktiveret"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Mobildata er deaktiveret"</string>
@@ -189,6 +219,9 @@
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skærmen roterer automatisk."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Skærmen er nu låst i liggende retning."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Skærmen er nu låst i stående retning."</string>
+    <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"Skærmen roteres nu automatisk."</string>
+    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Skærmen er nu låst i landskabstilstand."</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Skærmen er nu låst i portrættilstand."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Dessertcase"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Dagdrøm"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
@@ -240,12 +273,11 @@
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobildata"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Dataforbrug"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Resterende data"</string>
-    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Over grænsen"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="3242930457130971204">"Grænsen er nået – dataforbruget er midlertidigt afbrudt"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> brugt"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Grænse: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Advarsel ved <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <!-- no translation found for recents_empty_message (8682129509540827999) -->
-    <skip />
+    <string name="recents_empty_message" msgid="8682129509540827999">"Dine seneste skærme vises her"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Oplysninger om applikationen"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"Bliv i app"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"søg"</string>
@@ -265,8 +297,7 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"Du vil ikke kunne høre din alarm kl. <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mindre presserende underretninger nedenfor"</string>
-    <!-- no translation found for notification_tap_again (8524949573675922138) -->
-    <skip />
+    <string name="notification_tap_again" msgid="8524949573675922138">"Tryk igen for at åbne"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Stryg for at låse op"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Stryg til højre for at bruge telefonen"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Stryg til venstre for at åbne kameraet"</string>
@@ -275,25 +306,20 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"Prioritet"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Alle"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Opladning (fuldt opladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
-    <!-- no translation found for accessibility_multi_user_switch_switcher (7305948938141024937) -->
-    <skip />
-    <!-- no translation found for accessibility_multi_user_switch_quick_contact (3020367729287990475) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Skift bruger"</string>
+    <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Vis profil"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Tilføj bruger"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Ny bruger"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Gæst"</string>
-    <!-- no translation found for guest_new_guest (600537543078847803) -->
-    <skip />
+    <string name="guest_new_guest" msgid="600537543078847803">"Tilføj gæst"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Fjern gæst"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"Vil du afslutte gæstesessionen?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"Når gæstesessionen afsluttes, fjernes lokale data."</string>
+    <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Vil du fjerne gæsten?"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Alle apps og data i denne session slettes."</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Fjern"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Velkommen tilbage, gæst!"</string>
-    <!-- no translation found for guest_wipe_session_message (8476238178270112811) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_wipe (5065558566939858884) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_dontwipe (1401113462524894716) -->
-    <skip />
+    <string name="guest_wipe_session_message" msgid="8476238178270112811">"Vil du fortsætte din session?"</string>
+    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Start forfra"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Ja, fortsæt"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"I ét minut"</item>
     <item quantity="other" msgid="6924190729213550991">"I %d minutter"</item>
@@ -316,13 +342,14 @@
     <string name="vpn_footer" msgid="2388611096129106812">"Netværket kan være overvåget"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Overvågning af enhed"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Overvågning af netværk"</string>
-    <string name="open_app" msgid="4011771120339160755">"Åbn app"</string>
+    <string name="disable_vpn" msgid="4435534311510272506">"Deaktiver VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Afbryd VPN-forbindelse"</string>
     <string name="monitoring_description_device_owned" msgid="7512371572956715493">"Denne enhed administreres af:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nDin administrator kan overvåge din enhed og netværksaktivitet, herunder e-mails, apps og sikre websites.\n\nKontakt din administrator, hvis du vil have flere oplysninger."</string>
     <string name="monitoring_description_vpn" msgid="7288268682714305659">"Du har givet \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" tilladelse til at konfigurere en VPN-forbindelse.\n\nDenne app kan overvåge din netværksaktivitet, herunder e-mails, apps og sikre websites."</string>
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Du har forbindelse til et VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\").\n\nDin VPN-udbyder kan overvåge din enhed og netværksaktivitet, herunder e-mails, apps og sikre websites."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Denne enhed administreres af:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nDin administrator kan overvåge din netværksaktivitet, f.eks. e-mails, apps og sikre websites. Kontakt administratoren for at få flere oplysninger.\n\nDu gav også \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" tilladelse til at konfigurere en VPN-forbindelse. Denne app kan også overvåge netværksaktiviteten."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Denne enhed administreres af:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nDin administrator kan overvåge din netværksaktivitet, f.eks. e-mails, apps og sikre websites. Kontakt administratoren for at få flere oplysninger.\n\nDu har også forbindelse til et VPN-netværk (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). Din VPN-udbyder kan også overvåge netværksaktiviteten."</string>
-    <!-- no translation found for keyguard_indication_trust_disabled (7412534203633528135) -->
+    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Enheden vil forblive låst, indtil du manuelt låser den op"</string>
+    <!-- no translation found for muted_by (6147073845094180001) -->
     <skip />
 </resources>
