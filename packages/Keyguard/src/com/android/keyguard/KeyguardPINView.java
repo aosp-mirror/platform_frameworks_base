@@ -85,6 +85,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     @Override
     public void startAppearAnimation() {
         enableClipping(false);
+        setAlpha(1f);
         setTranslationY(mAppearAnimationUtils.getStartTranslation());
         animate()
                 .setDuration(500)
