@@ -5648,19 +5648,21 @@ package android.app.job {
     method public long getIntervalMillis();
     method public long getMaxExecutionDelayMillis();
     method public long getMinLatencyMillis();
-    method public int getNetworkCapabilities();
+    method public int getNetworkType();
     method public android.content.ComponentName getService();
     method public boolean isPeriodic();
     method public boolean isPersisted();
     method public boolean isRequireCharging();
     method public boolean isRequireDeviceIdle();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int BACKOFF_POLICY_EXPONENTIAL = 1; // 0x1
+    field public static final int BACKOFF_POLICY_LINEAR = 0; // 0x0
     field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
-  public static abstract interface JobInfo.BackoffPolicy {
-    field public static final int EXPONENTIAL = 1; // 0x1
-    field public static final int LINEAR = 0; // 0x0
+    field public static final long DEFAULT_INITIAL_BACKOFF_MILLIS = 30000L; // 0x7530L
+    field public static final long MAX_BACKOFF_DELAY_MILLIS = 18000000L; // 0x112a880L
+    field public static final int NETWORK_TYPE_ANY = 1; // 0x1
+    field public static final int NETWORK_TYPE_NONE = 0; // 0x0
+    field public static final int NETWORK_TYPE_UNMETERED = 2; // 0x2
   }
 
   public static final class JobInfo.Builder {
@@ -5668,19 +5670,13 @@ package android.app.job {
     method public android.app.job.JobInfo build();
     method public android.app.job.JobInfo.Builder setBackoffCriteria(long, int);
     method public android.app.job.JobInfo.Builder setExtras(android.os.PersistableBundle);
-    method public android.app.job.JobInfo.Builder setIsPersisted(boolean);
     method public android.app.job.JobInfo.Builder setMinimumLatency(long);
     method public android.app.job.JobInfo.Builder setOverrideDeadline(long);
     method public android.app.job.JobInfo.Builder setPeriodic(long);
-    method public android.app.job.JobInfo.Builder setRequiredNetworkCapabilities(int);
+    method public android.app.job.JobInfo.Builder setPersisted(boolean);
+    method public android.app.job.JobInfo.Builder setRequiredNetworkType(int);
     method public android.app.job.JobInfo.Builder setRequiresCharging(boolean);
     method public android.app.job.JobInfo.Builder setRequiresDeviceIdle(boolean);
-  }
-
-  public static abstract interface JobInfo.NetworkType {
-    field public static final int ANY = 1; // 0x1
-    field public static final int NONE = 0; // 0x0
-    field public static final int UNMETERED = 2; // 0x2
   }
 
   public class JobParameters implements android.os.Parcelable {
