@@ -22,6 +22,7 @@ import android.media.tv.ITvInputClient;
 import android.media.tv.ITvInputHardware;
 import android.media.tv.ITvInputHardwareCallback;
 import android.media.tv.ITvInputManagerCallback;
+import android.media.tv.TvContentRatingSystemInfo;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvStreamConfig;
@@ -38,7 +39,7 @@ interface ITvInputManager {
     List<TvInputInfo> getTvInputList(int userId);
     TvInputInfo getTvInputInfo(in String inputId, int userId);
 
-    List<Uri> getTvContentRatingSystemXmls(int userId);
+    List<TvContentRatingSystemInfo> getTvContentRatingSystemList(int userId);
 
     void registerCallback(in ITvInputManagerCallback callback, int userId);
     void unregisterCallback(in ITvInputManagerCallback callback, int userId);
