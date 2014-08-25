@@ -1051,9 +1051,11 @@ public abstract class TvInputService extends Service {
         }
 
         private final void runOnMainThread(Runnable action) {
-            if (mHandler.getLooper().isCurrentThread()) {
+            if (mHandler.getLooper().isCurrentThread() && mSessionCallback != null) {
                 action.run();
             } else {
+                // Posts the runnable if this is not called from the main thread or the session
+                // is not initialized yet.
                 mHandler.post(action);
             }
         }
