@@ -24,8 +24,7 @@ public:
 };
 
 /**
- * Implements logic for parsing and handling "-c" and "--preferred-configurations"
- * options.
+ * Implements logic for parsing and handling "-c" options.
  */
 class WeakResourceFilter : public ResourceFilter {
 public:
