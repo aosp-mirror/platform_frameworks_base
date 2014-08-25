@@ -208,7 +208,7 @@ public class VoiceInteractionService extends Service {
     @Deprecated
     public final AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(
             String keyphrase, String locale, AlwaysOnHotwordDetector.Callback callback) {
-        return createAlwaysOnHotwordDetector(keyphrase, new Locale(locale), callback);
+        return createAlwaysOnHotwordDetector(keyphrase, Locale.forLanguageTag(locale), callback);
     }
 
     /**
