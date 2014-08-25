@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="icu4j">
     <CLASSES>
-      <root url="jar://$ANDROID_BUILD_TOP$/prebuilts/misc/common/icu4j/icu4j.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../../prebuilts/misc/common/icu4j/icu4j.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="http://icu-project.org/apiref/icu4j50rc/" />

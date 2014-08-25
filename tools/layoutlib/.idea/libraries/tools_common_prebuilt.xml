@@ -4,7 +4,7 @@
       <root url="file://$PROJECT_DIR$" />
     </ANNOTATIONS>
     <CLASSES>
-      <root url="jar://$ANDROID_BUILD_TOP$/prebuilts/misc/common/tools-common/tools-common-prebuilt.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../../prebuilts/misc/common/tools-common/tools-common-prebuilt.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
