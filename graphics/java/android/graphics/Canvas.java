@@ -243,6 +243,12 @@ public class Canvas {
     /** @hide */
     public void setHighContrastText(boolean highContrastText) {}
 
+    /** @hide */
+    public void insertReorderBarrier() {}
+
+    /** @hide */
+    public void insertInorderBarrier() {}
+
     /**
      * @hide
      */

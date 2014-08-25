@@ -1445,6 +1445,7 @@ private:
 
 class DrawRenderNodeOp : public DrawBoundedOp {
     friend class RenderNode; // grant RenderNode access to info of child
+    friend class DisplayListData; // grant DisplayListData access to info of child
 public:
     DrawRenderNodeOp(RenderNode* renderNode, int flags, const mat4& transformFromParent)
             : DrawBoundedOp(0, 0, renderNode->getWidth(), renderNode->getHeight(), 0),
@@ -1452,13 +1453,14 @@ public:
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
             bool useQuickReject) {
-        if (mRenderNode && mRenderNode->isRenderable() && !mSkipInOrderDraw) {
+        if (mRenderNode->isRenderable() && !mSkipInOrderDraw) {
             mRenderNode->defer(deferStruct, level + 1);
         }
     }
+
     virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level,
             bool useQuickReject) {
-        if (mRenderNode && mRenderNode->isRenderable() && !mSkipInOrderDraw) {
+        if (mRenderNode->isRenderable() && !mSkipInOrderDraw) {
             mRenderNode->replay(replayStruct, level + 1);
         }
     }
@@ -1469,7 +1471,7 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw Display List %p, flags %#x", mRenderNode, mFlags);
+        OP_LOG("Draw RenderNode %p %s, flags %#x", mRenderNode, mRenderNode->getName(), mFlags);
         if (mRenderNode && (logFlags & kOpLogFlag_Recurse)) {
             mRenderNode->output(level + 1);
         }
