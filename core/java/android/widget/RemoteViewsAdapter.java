@@ -157,7 +157,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                     RemoteViewsAdapter adapter;
                     final AppWidgetManager mgr = AppWidgetManager.getInstance(context);
                     if ((adapter = mAdapter.get()) != null) {
-                        mgr.bindRemoteViewsService(context.getPackageName(), appWidgetId,
+                        mgr.bindRemoteViewsService(context.getOpPackageName(), appWidgetId,
                                 intent, asBinder());
                     } else {
                         Slog.w(TAG, "bind: adapter was null");
