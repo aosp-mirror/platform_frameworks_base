@@ -4881,7 +4881,7 @@
     <string name="lock_to_app_unlock_password">Ask for password before unpinning</string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description -->
-    <string name="battery_saver_description">To help improve battery life, battery saver reduces your device’s performance and limits vibration and most background data. Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging</string>
+    <string name="battery_saver_description">To help improve battery life, battery saver reduces your device’s performance and limits vibration and most background data. Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging.</string>
 
     <!-- [CHAR_LIMIT=NONE] Zen mode: Condition summary for built-in downtime condition, if active -->
     <string name="downtime_condition_summary">Until your downtime ends at <xliff:g id="formattedTime" example="10.00 PM">%1$s</xliff:g></string>
