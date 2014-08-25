@@ -6,6 +6,16 @@ package android.media {
 
 }
 
+package android.os {
+
+  public final class PowerManager {
+    method public void goToSleep(long);
+    method public deprecated void userActivity(long, boolean);
+    method public void wakeUp(long);
+  }
+
+}
+
 package android.view {
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {

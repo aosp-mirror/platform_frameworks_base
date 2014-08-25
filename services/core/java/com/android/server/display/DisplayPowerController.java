@@ -139,6 +139,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // The dim screen brightness.
     private final int mScreenBrightnessDimConfig;
 
+    // The minimum screen brightness to use in a very dark room.
+    private final int mScreenBrightnessDarkConfig;
+
     // The minimum allowed brightness.
     private final int mScreenBrightnessRangeMinimum;
 
@@ -247,6 +250,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mContext = context;
 
         final Resources resources = context.getResources();
+        final int screenBrightnessSettingMinimum = clampAbsoluteBrightness(resources.getInteger(
+                com.android.internal.R.integer.config_screenBrightnessSettingMinimum));
 
         mScreenBrightnessDozeConfig = clampAbsoluteBrightness(resources.getInteger(
                 com.android.internal.R.integer.config_screenBrightnessDoze));
@@ -254,9 +259,23 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mScreenBrightnessDimConfig = clampAbsoluteBrightness(resources.getInteger(
                 com.android.internal.R.integer.config_screenBrightnessDim));
 
-        int screenBrightnessRangeMinimum = clampAbsoluteBrightness(Math.min(resources.getInteger(
-                com.android.internal.R.integer.config_screenBrightnessSettingMinimum),
-                mScreenBrightnessDimConfig));
+        mScreenBrightnessDarkConfig = clampAbsoluteBrightness(resources.getInteger(
+                com.android.internal.R.integer.config_screenBrightnessDark));
+        if (mScreenBrightnessDarkConfig > mScreenBrightnessDimConfig) {
+            Slog.w(TAG, "Expected config_screenBrightnessDark ("
+                    + mScreenBrightnessDarkConfig + ") to be less than or equal to "
+                    + "config_screenBrightnessDim (" + mScreenBrightnessDimConfig + ").");
+        }
+        if (mScreenBrightnessDarkConfig > mScreenBrightnessDimConfig) {
+            Slog.w(TAG, "Expected config_screenBrightnessDark ("
+                    + mScreenBrightnessDarkConfig + ") to be less than or equal to "
+                    + "config_screenBrightnessSettingMinimum ("
+                    + screenBrightnessSettingMinimum + ").");
+        }
+
+        int screenBrightnessRangeMinimum = Math.min(Math.min(
+                screenBrightnessSettingMinimum, mScreenBrightnessDimConfig),
+                mScreenBrightnessDarkConfig);
 
         mScreenBrightnessRangeMaximum = PowerManager.BRIGHTNESS_ON;
 
@@ -280,8 +299,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         + "Auto-brightness will be disabled.");
                 mUseSoftwareAutoBrightnessConfig = false;
             } else {
-                if (screenBrightness[0] < screenBrightnessRangeMinimum) {
-                    screenBrightnessRangeMinimum = clampAbsoluteBrightness(screenBrightness[0]);
+                int bottom = clampAbsoluteBrightness(screenBrightness[0]);
+                if (mScreenBrightnessDarkConfig > bottom) {
+                    Slog.w(TAG, "config_screenBrightnessDark (" + mScreenBrightnessDarkConfig
+                            + ") should be less than or equal to the first value of "
+                            + "config_autoBrightnessLcdBacklightValues ("
+                            + bottom + ").");
+                }
+                if (bottom < screenBrightnessRangeMinimum) {
+                    screenBrightnessRangeMinimum = bottom;
                 }
                 mAutomaticBrightnessController = new AutomaticBrightnessController(this,
                         handler.getLooper(), sensorManager, screenAutoBrightnessSpline,
@@ -905,6 +931,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("Display Power Controller Configuration:");
         pw.println("  mScreenBrightnessDozeConfig=" + mScreenBrightnessDozeConfig);
         pw.println("  mScreenBrightnessDimConfig=" + mScreenBrightnessDimConfig);
+        pw.println("  mScreenBrightnessDarkConfig=" + mScreenBrightnessDarkConfig);
         pw.println("  mScreenBrightnessRangeMinimum=" + mScreenBrightnessRangeMinimum);
         pw.println("  mScreenBrightnessRangeMaximum=" + mScreenBrightnessRangeMaximum);
         pw.println("  mUseSoftwareAutoBrightnessConfig="
