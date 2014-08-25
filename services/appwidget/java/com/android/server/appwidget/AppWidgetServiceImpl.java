@@ -18,6 +18,7 @@ package com.android.server.appwidget;
 
 import android.app.AlarmManager;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DevicePolicyManagerInternal.OnCrossProfileWidgetProvidersChangeListener;
@@ -177,6 +178,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private final IPackageManager mPackageManager;
     private final AlarmManager mAlarmManager;
     private final UserManager mUserManager;
+    private final AppOpsManager mAppOpsManager;
 
     private final SecurityPolicy mSecurityPolicy;
 
@@ -195,6 +197,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mPackageManager = AppGlobals.getPackageManager();
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mSaveStateHandler = BackgroundThread.getHandler();
         mCallbackHandler = new CallbackHandler(mContext.getMainLooper());
         mBackupRestoreController = new BackupRestoreController();
@@ -889,6 +892,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         if (DEBUG) {
             Slog.i(TAG, "bindRemoteViewsService() " + userId);
         }
+
+        // Make sure the package runs under the caller uid.
+        mSecurityPolicy.enforceCallFromPackage(callingPackage);
 
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(userId);
@@ -3039,26 +3045,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
 
         public void enforceCallFromPackage(String packageName) {
-            if (!isCallFromPackage(packageName)) {
-                throw new SecurityException("Package " + packageName
-                        + " not running under user " + UserHandle.getCallingUserId());
-            }
-        }
-
-        public boolean isCallFromPackage(String packageName) {
-            // System and root call all from anywhere they want.
-            final int callingUid = Binder.getCallingUid();
-            if (callingUid == Process.SYSTEM_UID || callingUid == 0 /* root */) {
-                return true;
-            }
-            // Check if the package is present for the given profile.
-            final int packageUid = getUidForPackage(packageName,
-                    UserHandle.getUserId(callingUid));
-            if (packageUid < 0) {
-                return false;
-            }
-            // Check if the call for a package is coming from that package.
-            return UserHandle.isSameApp(callingUid, packageUid);
+            mAppOpsManager.checkPackage(Binder.getCallingUid(), packageName);
         }
 
         public boolean hasCallerBindPermissionOrBindWhiteListedLocked(String packageName) {
