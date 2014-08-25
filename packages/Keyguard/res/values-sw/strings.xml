@@ -53,7 +53,6 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Eneo la kufungua limekunjwa."</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ya wiji."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Kiteuzi cha mtumiaji"</string>
-    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Hali"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Vidhibiti vya media"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Upangaji upya wa wijeti umeanza."</string>
@@ -79,6 +78,7 @@
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Uzinduzi umeghairiwa"</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Dondosha <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ili ufute."</string>
     <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> haitafutwa."</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Kengele inayofuata imewekwa ilie saa <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -108,7 +108,7 @@
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Chora ruwaza yako"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ingiza PIN ya SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Ingiza PIN"</string>
-    <string name="kg_password_instructions" msgid="5753646556186936819">"Ingiza Nenosiri"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"Weka Nenosiri"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM sasa imelemazwa. Ingiza msimbo wa PUK ili kuendelea. Wasiliana na mtoa huduma kwa maelezo."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Ingiza msimbo wa PIN unaopendelewa"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Thibitisha msimbo wa PIN unaopendelewa"</string>
