@@ -16,7 +16,7 @@
 
 package com.android.defcontainer;
 
-import static android.net.TrafficStats.MB_IN_BYTES;
+import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
 
 import android.app.IntentService;
 import android.content.Context;
@@ -66,8 +66,6 @@ import java.io.OutputStream;
  */
 public class DefaultContainerService extends IntentService {
     private static final String TAG = "DefContainer";
-
-    private static final String LIB_DIR_NAME = "lib";
 
     // TODO: migrate native code unpacking to always be a derivative work
 
@@ -168,7 +166,7 @@ public class DefaultContainerService extends IntentService {
             final long sizeBytes;
             try {
                 pkg = PackageParser.parsePackageLite(packageFile, 0);
-                sizeBytes = calculateInstalledSizeInner(pkg, isForwardLocked, abiOverride);
+                sizeBytes = PackageHelper.calculateInstalledSize(pkg, isForwardLocked, abiOverride);
             } catch (PackageParserException | IOException e) {
                 Slog.w(TAG, "Failed to parse package at " + packagePath + ": " + e);
 
@@ -253,7 +251,7 @@ public class DefaultContainerService extends IntentService {
             final PackageParser.PackageLite pkg;
             try {
                 pkg = PackageParser.parsePackageLite(packageFile, 0);
-                return calculateInstalledSizeInner(pkg, isForwardLocked, abiOverride);
+                return PackageHelper.calculateInstalledSize(pkg, isForwardLocked, abiOverride);
             } catch (PackageParserException | IOException e) {
                 Slog.w(TAG, "Failed to calculate installed size: " + e);
                 return Long.MAX_VALUE;
@@ -315,13 +313,12 @@ public class DefaultContainerService extends IntentService {
 
         // Calculate container size, rounding up to nearest MB and adding an
         // extra MB for filesystem overhead
-        final long sizeBytes = calculateInstalledSizeInner(pkg, handle, isForwardLocked,
-                abiOverride);
-        final int sizeMb = ((int) ((sizeBytes + MB_IN_BYTES) / MB_IN_BYTES)) + 1;
+        final long sizeBytes = PackageHelper.calculateInstalledSize(pkg, handle,
+                isForwardLocked, abiOverride);
 
         // Create new container
-        final String newMountPath = PackageHelper.createSdDir(sizeMb, newCid, key, Process.myUid(),
-                isExternal);
+        final String newMountPath = PackageHelper.createSdDir(sizeBytes, newCid, key,
+                Process.myUid(), isExternal);
         if (newMountPath == null) {
             throw new IOException("Failed to create container " + newCid);
         }
@@ -339,8 +336,8 @@ public class DefaultContainerService extends IntentService {
 
             // Extract native code
             final File libraryRoot = new File(targetDir, LIB_DIR_NAME);
-            final int res = NativeLibraryHelper.copyNativeBinariesIfNeededLI(handle, libraryRoot,
-                    abiOverride, pkg.multiArch);
+            final int res = NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libraryRoot,
+                    abiOverride);
             if (res != PackageManager.INSTALL_SUCCEEDED) {
                 throw new IOException("Failed to extract native code, res=" + res);
             }
@@ -414,36 +411,5 @@ public class DefaultContainerService extends IntentService {
         } else {
             Os.chmod(targetFile.getAbsolutePath(), 0644);
         }
-    }
-
-    private long calculateInstalledSizeInner(PackageLite pkg, boolean isForwardLocked,
-            String abiOverride) throws IOException {
-        NativeLibraryHelper.Handle handle = null;
-        try {
-            handle = NativeLibraryHelper.Handle.create(pkg);
-            return calculateInstalledSizeInner(pkg, handle, isForwardLocked, abiOverride);
-        } finally {
-            IoUtils.closeQuietly(handle);
-        }
-    }
-
-    private long calculateInstalledSizeInner(PackageLite pkg, NativeLibraryHelper.Handle handle,
-            boolean isForwardLocked, String abiOverride) throws IOException {
-        long sizeBytes = 0;
-
-        // Include raw APKs, and possibly unpacked resources
-        for (String codePath : pkg.getAllCodePaths()) {
-            final File codeFile = new File(codePath);
-            sizeBytes += codeFile.length();
-
-            if (isForwardLocked) {
-                sizeBytes += PackageHelper.extractPublicFiles(codeFile, null);
-            }
-        }
-
-        // Include all relevant native code
-        sizeBytes += NativeLibraryHelper.sumNativeBinaries(handle, abiOverride, pkg.multiArch);
-
-        return sizeBytes;
     }
 }

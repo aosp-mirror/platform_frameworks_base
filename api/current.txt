@@ -8680,10 +8680,12 @@ package android.content.pm {
     method public void removeSessionCallback(android.content.pm.PackageInstaller.SessionCallback);
     method public void uninstall(java.lang.String, android.content.IntentSender);
     field public static final java.lang.String ACTION_SESSION_DETAILS = "android.content.pm.action.SESSION_DETAILS";
+    field public static final java.lang.String EXTRA_OTHER_PACKAGE_NAME = "android.content.pm.extra.OTHER_PACKAGE_NAME";
     field public static final java.lang.String EXTRA_PACKAGE_NAME = "android.content.pm.extra.PACKAGE_NAME";
     field public static final java.lang.String EXTRA_SESSION_ID = "android.content.pm.extra.SESSION_ID";
     field public static final java.lang.String EXTRA_STATUS = "android.content.pm.extra.STATUS";
     field public static final java.lang.String EXTRA_STATUS_MESSAGE = "android.content.pm.extra.STATUS_MESSAGE";
+    field public static final java.lang.String EXTRA_STORAGE_PATH = "android.content.pm.extra.STORAGE_PATH";
     field public static final int STATUS_FAILURE = 1; // 0x1
     field public static final int STATUS_FAILURE_ABORTED = 3; // 0x3
     field public static final int STATUS_FAILURE_BLOCKED = 2; // 0x2

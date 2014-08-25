@@ -16,11 +16,14 @@
 
 package com.android.internal.content;
 
+import static android.net.TrafficStats.MB_IN_BYTES;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageParser.PackageLite;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
 import android.os.FileUtils;
@@ -77,9 +80,10 @@ public class PackageHelper {
         }
     }
 
-    public static String createSdDir(int sizeMb, String cid, String sdEncKey, int uid,
+    public static String createSdDir(long sizeBytes, String cid, String sdEncKey, int uid,
             boolean isExternal) {
-        // Create mount point via MountService
+        // Round up to nearest MB, plus another MB for filesystem overhead
+        final int sizeMb = (int) ((sizeBytes + MB_IN_BYTES) / MB_IN_BYTES) + 1;
         try {
             IMountService mountService = getMountService();
 
@@ -102,19 +106,39 @@ public class PackageHelper {
         return null;
     }
 
-   public static String mountSdDir(String cid, String key, int ownerUid) {
-    try {
-        int rc = getMountService().mountSecureContainer(cid, key, ownerUid);
-        if (rc != StorageResultCode.OperationSucceeded) {
-            Log.i(TAG, "Failed to mount container " + cid + " rc : " + rc);
-            return null;
+    public static boolean resizeSdDir(long sizeBytes, String cid, String sdEncKey) {
+        // Round up to nearest MB, plus another MB for filesystem overhead
+        final int sizeMb = (int) ((sizeBytes + MB_IN_BYTES) / MB_IN_BYTES) + 1;
+        try {
+            IMountService mountService = getMountService();
+            int rc = mountService.resizeSecureContainer(cid, sizeMb, sdEncKey);
+            if (rc == StorageResultCode.OperationSucceeded) {
+                return true;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "MountService running?");
         }
-        return getMountService().getSecureContainerPath(cid);
-    } catch (RemoteException e) {
-        Log.e(TAG, "MountService running?");
+        Log.e(TAG, "Failed to create secure container " + cid);
+        return false;
     }
-    return null;
-   }
+
+    public static String mountSdDir(String cid, String key, int ownerUid) {
+        return mountSdDir(cid, key, ownerUid, true);
+    }
+
+    public static String mountSdDir(String cid, String key, int ownerUid, boolean readOnly) {
+        try {
+            int rc = getMountService().mountSecureContainer(cid, key, ownerUid, readOnly);
+            if (rc != StorageResultCode.OperationSucceeded) {
+                Log.i(TAG, "Failed to mount container " + cid + " rc : " + rc);
+                return null;
+            }
+            return getMountService().getSecureContainerPath(cid);
+        } catch (RemoteException e) {
+            Log.e(TAG, "MountService running?");
+        }
+        return null;
+    }
 
    public static boolean unMountSdDir(String cid) {
     try {
@@ -398,6 +422,37 @@ public class PackageHelper {
         } else {
             return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
         }
+    }
+
+    public static long calculateInstalledSize(PackageLite pkg, boolean isForwardLocked,
+            String abiOverride) throws IOException {
+        NativeLibraryHelper.Handle handle = null;
+        try {
+            handle = NativeLibraryHelper.Handle.create(pkg);
+            return calculateInstalledSize(pkg, handle, isForwardLocked, abiOverride);
+        } finally {
+            IoUtils.closeQuietly(handle);
+        }
+    }
+
+    public static long calculateInstalledSize(PackageLite pkg, NativeLibraryHelper.Handle handle,
+            boolean isForwardLocked, String abiOverride) throws IOException {
+        long sizeBytes = 0;
+
+        // Include raw APKs, and possibly unpacked resources
+        for (String codePath : pkg.getAllCodePaths()) {
+            final File codeFile = new File(codePath);
+            sizeBytes += codeFile.length();
+
+            if (isForwardLocked) {
+                sizeBytes += PackageHelper.extractPublicFiles(codeFile, null);
+            }
+        }
+
+        // Include all relevant native code
+        sizeBytes += NativeLibraryHelper.sumNativeBinariesWithOverride(handle, abiOverride);
+
+        return sizeBytes;
     }
 
     public static String replaceEnd(String str, String before, String after) {

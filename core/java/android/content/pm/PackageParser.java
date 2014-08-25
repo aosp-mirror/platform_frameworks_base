@@ -264,7 +264,7 @@ public class PackageParser {
         public final boolean coreApp;
         public final boolean multiArch;
 
-        private PackageLite(String codePath, ApkLite baseApk, String[] splitNames,
+        public PackageLite(String codePath, ApkLite baseApk, String[] splitNames,
                 String[] splitCodePaths) {
             this.packageName = baseApk.packageName;
             this.versionCode = baseApk.versionCode;
