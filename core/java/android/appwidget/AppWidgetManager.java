@@ -441,7 +441,7 @@ public class AppWidgetManager {
      * @hide
      */
     public AppWidgetManager(Context context, IAppWidgetService service) {
-        mPackageName = context.getPackageName();
+        mPackageName = context.getOpPackageName();
         mService = service;
         mDisplayMetrics = context.getResources().getDisplayMetrics();
     }
