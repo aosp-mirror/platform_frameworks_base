@@ -28,6 +28,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.storage.IMountService;
+import android.os.storage.StorageManager;
 import android.util.Log;
 import android.util.Slog;
 import android.view.View;
@@ -182,25 +183,14 @@ public class BackupRestoreConfirmation extends Activity {
         // We vary the password prompt depending on whether one is predefined, and whether
         // the device is encrypted.
         mIsEncrypted = deviceIsEncrypted();
-        if (mIsEncrypted) {
-            Log.d(TAG, "Device is encrypted: requiring encryption pw");
-            TextView pwPrompt = (TextView) findViewById(R.id.password_desc);
-            // this password is mandatory; we hide the other options during backup
-            if (layoutId == R.layout.confirm_backup) {
-                pwPrompt.setText(R.string.device_encryption_backup_text);
-                TextView tv = (TextView) findViewById(R.id.enc_password);
-                tv.setVisibility(View.GONE);
-                tv = (TextView) findViewById(R.id.enc_password_desc);
-                tv.setVisibility(View.GONE);
-            } else {
-                pwPrompt.setText(R.string.device_encryption_restore_text);
-            }
-        } else if (!haveBackupPassword()) {
+        if (!haveBackupPassword()) {
             curPwDesc.setVisibility(View.GONE);
             mCurPassword.setVisibility(View.GONE);
             if (layoutId == R.layout.confirm_backup) {
                 TextView encPwDesc = (TextView) findViewById(R.id.enc_password_desc);
-                encPwDesc.setText(R.string.backup_enc_password_optional);
+                encPwDesc.setText(mIsEncrypted
+                                  ? R.string.backup_enc_password_required
+                                  : R.string.backup_enc_password_optional);
             }
         }
 
@@ -246,8 +236,7 @@ public class BackupRestoreConfirmation extends Activity {
             mDidAcknowledge = true;
 
             try {
-                CharSequence encPassword = (mIsEncrypted)
-                        ? mCurPassword.getText() : mEncPassword.getText();
+                CharSequence encPassword = mEncPassword.getText();
                 mBackupManager.acknowledgeFullBackupOrRestore(mToken,
                         allow,
                         String.valueOf(mCurPassword.getText()),
@@ -261,7 +250,10 @@ public class BackupRestoreConfirmation extends Activity {
 
     boolean deviceIsEncrypted() {
         try {
-            return (mMountService.getEncryptionState() != IMountService.ENCRYPTION_STATE_NONE);
+            return mMountService.getEncryptionState()
+                     != IMountService.ENCRYPTION_STATE_NONE
+                && mMountService.getPasswordType()
+                     != StorageManager.CRYPT_TYPE_DEFAULT;
         } catch (Exception e) {
             // If we can't talk to the mount service we have a serious problem; fail
             // "secure" i.e. assuming that the device is encrypted.
