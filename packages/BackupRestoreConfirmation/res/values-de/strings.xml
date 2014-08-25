@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Geben Sie Ihr Passwort zur Geräteverschlüsselung unten ein. Damit wird auch das Sicherungsarchiv verschlüsselt."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Geben Sie ein Passwort für die Verschlüsselung der vollständigen Sicherungsdaten ein. Wenn Sie dieses Feld leer lassen, wird Ihr aktuelles Sicherungspasswort verwendet:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Wenn Sie die gesamten Sicherungsdaten verschlüsseln möchten, geben Sie unten ein Passwort ein:"</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Geben Sie das Passwort unten ein, wenn die Daten für die Wiederherstellung verschlüsselt sind:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Sicherung wird gestartet..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Sicherung abgeschlossen"</string>

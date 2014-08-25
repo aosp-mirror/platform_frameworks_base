@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Insire o contrasinal de encriptación do dispositivo a continuación. Tamén se usará para encriptar o arquivo de copia de seguranza."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Insire un contrasinal para encriptar os datos da copia de seguranza completa. Se queda en branco este campo, usarase o contrasinal de copia de seguranza actual."</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Se queres encriptar os datos da copia de seguranza completa, insire un contrasinal a continuación:"</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Se os datos de restauración están encriptados, insire o contrasinal a continuación:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Iniciando copia de seguranza..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"A copia de seguranza rematou"</string>

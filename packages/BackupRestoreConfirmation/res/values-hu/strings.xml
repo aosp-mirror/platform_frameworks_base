@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Kérjük, adja meg az eszköz titkosítási jelszavát. Ezt használjuk a biztonsági mentések archívumának titkosításához is."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Kérjük, írjon be egy jelszót a teljes biztonsági mentés adatainak titkosításához. Ha üresen hagyja, jelenlegi biztonsági jelszavát fogjuk használni:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Ha minden mentett adatot szeretne titkosítani, adjon meg egy jelszót alább:"</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Ha a visszaállítási adatok titkosítva vannak, kérjük, adja meg a jelszót alább:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Biztonsági mentés indítása..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"A biztonsági mentés befejeződött"</string>
