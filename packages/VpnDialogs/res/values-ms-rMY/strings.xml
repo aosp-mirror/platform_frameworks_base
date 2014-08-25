@@ -16,9 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> percubaan untuk membuat sambungan VPN."</string>
-    <string name="warning" msgid="5470743576660160079">"Dengan meneruskan, anda memberi keizinan kepada aplikasi untuk memintas semua trafik rangkaian. "<b>"JANGAN terima melainkan anda mempercayai aplikasi itu."</b>" Jika tidak, anda akan mengalami risiko data terjejas oleh perisian berniat jahat."</string>
-    <string name="accept" msgid="2889226408765810173">"Saya percayai aplikasi ini."</string>
+    <!-- no translation found for prompt (3183836924226407828) -->
+    <skip />
+    <!-- no translation found for warning (809658604548412033) -->
+    <skip />
     <string name="legacy_title" msgid="192936250066580964">"VPN telah disambungkan"</string>
     <string name="configure" msgid="4905518375574791375">"Konfigurasikan"</string>
     <string name="disconnect" msgid="971412338304200056">"Putuskan sambungan"</string>

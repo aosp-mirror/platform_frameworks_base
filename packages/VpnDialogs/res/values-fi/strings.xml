@@ -16,9 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> yrittää luoda VPN-yhteyden."</string>
-    <string name="warning" msgid="5470743576660160079">"Jos jatkat, annat sovellukselle luvan seurata kaikkea verkkoliikennettä. "<b>"ÄLÄ hyväksy ellet luota sovellukseen."</b>"Muuten haittaohjelmat voivat vaarantaa tietosi."</string>
-    <string name="accept" msgid="2889226408765810173">"Luotan tähän sovellukseen."</string>
+    <!-- no translation found for prompt (3183836924226407828) -->
+    <skip />
+    <!-- no translation found for warning (809658604548412033) -->
+    <skip />
     <string name="legacy_title" msgid="192936250066580964">"VPN on yhdistetty"</string>
     <string name="configure" msgid="4905518375574791375">"Asetukset"</string>
     <string name="disconnect" msgid="971412338304200056">"Katkaise yhteys"</string>

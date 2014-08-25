@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> tentativas para criar uma ligação VPN."</string>
-    <string name="warning" msgid="5470743576660160079">"Ao continuar estará a dar permissão à aplicação para intercetar todo o tráfego da rede. "<b>"NÃO aceite a menos que confie nesta aplicação."</b>"Caso contrário, corre o risco de ver os seus dados comprometidos por software malicioso."</string>
-    <string name="accept" msgid="2889226408765810173">"Confio nesta aplicação."</string>
+    <string name="prompt" msgid="3183836924226407828">"Pedido de ligação"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> pretende configurar uma ligação VPN que lhe permita monitorizar o tráfego de rede. Aceite apenas se confiar na fonte. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; aparece na parte superior do seu ecrã quando a VPN está ativa."</string>
     <string name="legacy_title" msgid="192936250066580964">"A VPN está ligada"</string>
     <string name="configure" msgid="4905518375574791375">"Configurar"</string>
     <string name="disconnect" msgid="971412338304200056">"Desligar"</string>

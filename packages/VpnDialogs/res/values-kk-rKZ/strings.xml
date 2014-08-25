@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> ВЖЖ байланысын орнату әрекеттері."</string>
-    <string name="warning" msgid="5470743576660160079">"Жалғастыру арқылы барлық желі кептелісін жоюға рұқсат бересіз. "<b>"Егер қолданбаға сенбесеңіз қабылдаМАңыз."</b>" Әйтпесе, деректеріңіз залалды бағдарлама шабуылына ұшырауы мүмкін."</string>
-    <string name="accept" msgid="2889226408765810173">"Мен бұл қолданбаға сенемін."</string>
+    <string name="prompt" msgid="3183836924226407828">"Байланысты сұрау"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> VPN байланысын орнатқысы келеді, бұл оған желілік трафикті бақылауға мүмкіндік береді. Көзге сенсеңіз ғана қабылдаңыз. VPN белсенді болғанда экранның жоғарғы жағында &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; көрсетіледі."</string>
     <string name="legacy_title" msgid="192936250066580964">"ВЖЖ қосылған"</string>
     <string name="configure" msgid="4905518375574791375">"Конфигурациялау"</string>
     <string name="disconnect" msgid="971412338304200056">"Ажырату"</string>

@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> ພະຍາຍາມສ້າງການເຊື່ອມຕໍ່ VPN."</string>
-    <string name="warning" msgid="5470743576660160079">"ຖ້າດຳເນີນຕໍ່, ແມ່ນທ່ານກຳລັງຈະໃຫ້ສິດແກ່ແອັບພລິເຄຊັນ ໃນການດັກຂໍ້ມູນຈະລາຈອນໃນເຄືອຂ່າຍທັງໝົດ. "<b>"ຢ່າຍອມຮັບ ນອກຈາກວ່າທ່ານຈະເຊື່ອໃຈແອັບພລິເຄຊັນດັ່ງກ່າວ."</b>" ຖ້າບໍ່ດັ່ງນັ້ນ, ທ່ານຈະຕົກຢູ່ໃນຄວາມສ່ຽງ ທີ່ຂໍ້ມູນຂອງທ່ານຈະຖືກຄຸກຄາມໂດຍຊອບແວທີ່ເປັນອັນຕະລາຍ."</string>
-    <string name="accept" msgid="2889226408765810173">"ຂ້ອຍເຊື່ອແອັບພລິເຄຊັນນີ້."</string>
+    <string name="prompt" msgid="3183836924226407828">"ການ​ຮ້ອງ​ຂໍ​ການ​ເຊື່ອມ​ຕໍ່"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> ຕ້ອງ​ການ​ຕັ້​ງ​ຄ່າ​ການ​ເຊື່ອມ​ຕໍ່ VPN ທີ່​ອະ​ນຸ​ຍາດ​ໃຫ້​ຕິດ​ຕາມ​ທຣາບ​ຟິກ​ເຄືອ​ຂ່າຍ​ໄດ້. ​ທ່ານ​​ຄວນ​​ຍິນຍອມ​ສະ​ເພາະ​ໃນ​ກໍ​ລະ​ນີ​ທີ່​ທ່ານ​ເຊື່ອ​ຖື​ແຫລ່ງ​ຂໍ້​ມູນ​ເທົ່າ​ນັ້ນ. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; ຈະ​ປາ​ກົດ​ຢູ່​ດ້ານ​ເທິງ​ຂອງ​ໜ້າ​ຈໍ​ເມື່ອ​ມີ​ການ​ເປີດ​ໃຊ້ VPN."</string>
     <string name="legacy_title" msgid="192936250066580964">"ເຊື່ອມຕໍ່ VPN ແລ້ວ"</string>
     <string name="configure" msgid="4905518375574791375">"ປັບຄ່າ"</string>
     <string name="disconnect" msgid="971412338304200056">"ຕັດການເຊື່ອມຕໍ່"</string>

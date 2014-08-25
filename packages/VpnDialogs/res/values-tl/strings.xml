@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> (na) pagtatangka upang lumikha ng koneksyon ng VPN."</string>
-    <string name="warning" msgid="5470743576660160079">"Sa pamamagitan ng pagpapatuloy, binibigyan mo ng pahintulot ang application na harangin ang lahat ng trapiko ng network. "<b>"HUWAG tanggapin maliban kung nagtitiwala ka sa application."</b>" Kung hindi naman, may peligro kang makompromiso ang iyong data ng nakakapanghamak na software."</string>
-    <string name="accept" msgid="2889226408765810173">"Nagtitiwala ako sa application na ito."</string>
+    <string name="prompt" msgid="3183836924226407828">"Kahilingan sa koneksyon"</string>
+    <string name="warning" msgid="809658604548412033">"Gusto ng <xliff:g id="APP">%s</xliff:g> na mag-set up ng koneksyon sa VPN na nagbibigay-daan ditong masubaybayan ang trapiko ng network. Tanggapin lang kung pinagkakatiwalaan mo ang pinagmulan. Lalabas ang &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; sa itaas ng iyong screen kapag aktibo ang VPN."</string>
     <string name="legacy_title" msgid="192936250066580964">"Nakakonekta ang VPN"</string>
     <string name="configure" msgid="4905518375574791375">"I-configure"</string>
     <string name="disconnect" msgid="971412338304200056">"Idiskonekta"</string>

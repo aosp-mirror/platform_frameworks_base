@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> bando sukurti VPN ryšį."</string>
-    <string name="warning" msgid="5470743576660160079">"Tęsdami suteikiate programai leidimą perimti visą tinklo srautą. "<b>"SUTIKITE, TIK JEI pasitikite programa."</b>" Priešingu atveju kyla pavojus, kad jūsų duomenims pakenks kenkėjiška programinė įranga."</string>
-    <string name="accept" msgid="2889226408765810173">"Pasitikiu šia programa."</string>
+    <string name="prompt" msgid="3183836924226407828">"Ryšio užklausa"</string>
+    <string name="warning" msgid="809658604548412033">"„<xliff:g id="APP">%s</xliff:g>“ nori nustatyti VPN ryšį, kad galėtų stebėti tinklo srautą. Sutikite, tik jei pasitikite šaltiniu. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; rodoma ekrano viršuje, kai VPN aktyvus."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN prijungtas"</string>
     <string name="configure" msgid="4905518375574791375">"Konfigūruoti"</string>
     <string name="disconnect" msgid="971412338304200056">"Atsijungti"</string>
