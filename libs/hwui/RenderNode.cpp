@@ -95,6 +95,7 @@ void RenderNode::output(uint32_t level) {
     properties().debugOutputProperties(level);
     int flags = DisplayListOp::kOpLogFlag_Recurse;
     if (mDisplayListData) {
+        // TODO: consider printing the chunk boundaries here
         for (unsigned int i = 0; i < mDisplayListData->displayListOps.size(); i++) {
             mDisplayListData->displayListOps[i]->output(level, flags);
         }
@@ -106,10 +107,10 @@ void RenderNode::output(uint32_t level) {
 int RenderNode::getDebugSize() {
     int size = sizeof(RenderNode);
     if (mStagingDisplayListData) {
-        size += mStagingDisplayListData->allocator.usedSize();
+        size += mStagingDisplayListData->getUsedSize();
     }
     if (mDisplayListData && mDisplayListData != mStagingDisplayListData) {
-        size += mDisplayListData->allocator.usedSize();
+        size += mDisplayListData->getUsedSize();
     }
     return size;
 }
@@ -593,15 +594,16 @@ void RenderNode::replay(ReplayStateStruct& replayStruct, const int level) {
     issueOperations<ReplayOperationHandler>(replayStruct.mRenderer, handler);
 }
 
-void RenderNode::buildZSortedChildList(Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes) {
-    if (mDisplayListData == NULL || mDisplayListData->children().size() == 0) return;
+void RenderNode::buildZSortedChildList(const DisplayListData::Chunk& chunk,
+        Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes) {
+    if (chunk.beginChildIndex == chunk.endChildIndex) return;
 
-    for (unsigned int i = 0; i < mDisplayListData->children().size(); i++) {
+    for (unsigned int i = chunk.beginChildIndex; i < chunk.endChildIndex; i++) {
         DrawRenderNodeOp* childOp = mDisplayListData->children()[i];
         RenderNode* child = childOp->mRenderNode;
         float childZ = child->properties().getZ();
 
-        if (!MathUtils::isZero(childZ)) {
+        if (!MathUtils::isZero(childZ) && chunk.reorderChildren) {
             zTranslatedNodes.add(ZDrawRenderNodeOpPair(childZ, childOp));
             childOp->mSkipInOrderDraw = true;
         } else if (!child->properties().getProjectBackwards()) {
@@ -610,7 +612,7 @@ void RenderNode::buildZSortedChildList(Vector<ZDrawRenderNodeOpPair>& zTranslate
         }
     }
 
-    // Z sort 3d children (stable-ness makes z compare fall back to standard drawing order)
+    // Z sort any 3d children (stable-ness makes z compare fall back to standard drawing order)
     std::stable_sort(zTranslatedNodes.begin(), zTranslatedNodes.end());
 }
 
@@ -871,32 +873,35 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
             handler(new (alloc) DrawLayerOp(mLayer, 0, 0),
                     renderer.getSaveCount() - 1, properties().getClipToBounds());
         } else {
-            Vector<ZDrawRenderNodeOpPair> zTranslatedNodes;
-            buildZSortedChildList(zTranslatedNodes);
-
-            // for 3d root, draw children with negative z values
-            int shadowRestoreTo = issueOperationsOfNegZChildren(zTranslatedNodes, renderer, handler);
-
             DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
-            const int saveCountOffset = renderer.getSaveCount() - 1;
-            const int projectionReceiveIndex = mDisplayListData->projectionReceiveIndex;
-            const int size = static_cast<int>(mDisplayListData->displayListOps.size());
-            for (int i = 0; i < size; i++) {
-                DisplayListOp *op = mDisplayListData->displayListOps[i];
+            for (size_t chunkIndex = 0; chunkIndex < mDisplayListData->getChunks().size(); chunkIndex++) {
+                const DisplayListData::Chunk& chunk = mDisplayListData->getChunks()[chunkIndex];
 
+                Vector<ZDrawRenderNodeOpPair> zTranslatedNodes;
+                buildZSortedChildList(chunk, zTranslatedNodes);
+
+                // for 3d root, draw children with negative z values
+                int shadowRestoreTo = issueOperationsOfNegZChildren(zTranslatedNodes,
+                        renderer, handler);
+                const int saveCountOffset = renderer.getSaveCount() - 1;
+                const int projectionReceiveIndex = mDisplayListData->projectionReceiveIndex;
+
+                for (int opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
+                    DisplayListOp *op = mDisplayListData->displayListOps[opIndex];
 #if DEBUG_DISPLAY_LIST
-                op->output(level + 1);
+                    op->output(level + 1);
 #endif
-                logBuffer.writeCommand(level, op->name());
-                handler(op, saveCountOffset, properties().getClipToBounds());
+                    logBuffer.writeCommand(level, op->name());
+                    handler(op, saveCountOffset, properties().getClipToBounds());
 
-                if (CC_UNLIKELY(i == projectionReceiveIndex && mProjectedNodes.size() > 0)) {
-                    issueOperationsOfProjectedChildren(renderer, handler);
+                    if (CC_UNLIKELY(!mProjectedNodes.isEmpty() && opIndex == projectionReceiveIndex)) {
+                        issueOperationsOfProjectedChildren(renderer, handler);
+                    }
                 }
-            }
 
-            // for 3d root, draw children with positive z values
-            issueOperationsOfPosZChildren(shadowRestoreTo, zTranslatedNodes, renderer, handler);
+                // for 3d root, draw children with positive z values
+                issueOperationsOfPosZChildren(shadowRestoreTo, zTranslatedNodes, renderer, handler);
+            }
         }
     }
 

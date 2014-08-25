@@ -114,7 +114,7 @@ public:
     ANDROID_API int getDebugSize();
 
     bool isRenderable() const {
-        return mDisplayListData && mDisplayListData->hasDrawOps;
+        return mDisplayListData && !mDisplayListData->isEmpty();
     }
 
     bool hasProjectionReceiver() const {
@@ -199,7 +199,8 @@ private:
     template <class T>
     inline void setViewProperties(OpenGLRenderer& renderer, T& handler);
 
-    void buildZSortedChildList(Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes);
+    void buildZSortedChildList(const DisplayListData::Chunk& chunk,
+            Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes);
 
     template<class T>
     inline void issueDrawShadowOperation(const Matrix4& transformFromParent, T& handler);
