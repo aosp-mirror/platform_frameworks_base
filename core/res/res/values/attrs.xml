@@ -1713,6 +1713,7 @@
         <enum name="KEYCODE_12" value="228" />
         <enum name="KEYCODE_LAST_CHANNEL" value="229" />
         <enum name="KEYCODE_TV_DATA_SERVICE" value="230" />
+        <enum name="KEYCODE_VOICE_ASSIST" value="231" />
     </attr>
 
     <!-- ***************************************************************** -->
