@@ -416,6 +416,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     @Override
     public void startAppearAnimation() {
         enableClipping(false);
+        setAlpha(1f);
         setTranslationY(mAppearAnimationUtils.getStartTranslation());
         animate()
                 .setDuration(500)
@@ -444,7 +445,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         mLockPatternView.clearPattern();
         animate()
                 .alpha(0f)
-                .translationY(-100)
+                .translationY(mDisappearYTranslation)
                 .setInterpolator(AnimationUtils.loadInterpolator(
                         mContext, android.R.interpolator.fast_out_linear_in))
                 .setDuration(100)
