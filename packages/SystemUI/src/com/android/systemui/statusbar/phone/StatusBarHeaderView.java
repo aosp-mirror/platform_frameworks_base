@@ -542,7 +542,13 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         target.avatarScale = mMultiUserAvatar.getScaleX();
         target.avatarX = mMultiUserSwitch.getLeft() + mMultiUserAvatar.getLeft();
         target.avatarY = mMultiUserSwitch.getTop() + mMultiUserAvatar.getTop();
-        target.batteryX = mSystemIconsSuperContainer.getLeft() + mSystemIconsContainer.getRight();
+        if (getLayoutDirection() == LAYOUT_DIRECTION_LTR) {
+            target.batteryX = mSystemIconsSuperContainer.getLeft()
+                    + mSystemIconsContainer.getRight();
+        } else {
+            target.batteryX = mSystemIconsSuperContainer.getLeft()
+                    + mSystemIconsContainer.getLeft();
+        }
         target.batteryY = mSystemIconsSuperContainer.getTop() + mSystemIconsContainer.getTop();
         target.batteryLevelAlpha = getAlphaForVisibility(mBatteryLevel);
         target.settingsAlpha = getAlphaForVisibility(mSettingsButton);
@@ -579,11 +585,20 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mMultiUserAvatar.setScaleY(values.avatarScale);
         mMultiUserAvatar.setX(values.avatarX - mMultiUserSwitch.getLeft());
         mMultiUserAvatar.setY(values.avatarY - mMultiUserSwitch.getTop());
-        mSystemIconsSuperContainer.setX(values.batteryX - mSystemIconsContainer.getRight());
+        if (getLayoutDirection() == LAYOUT_DIRECTION_LTR) {
+            mSystemIconsSuperContainer.setX(values.batteryX - mSystemIconsContainer.getRight());
+        } else {
+            mSystemIconsSuperContainer.setX(values.batteryX - mSystemIconsContainer.getLeft());
+        }
         mSystemIconsSuperContainer.setY(values.batteryY - mSystemIconsContainer.getTop());
         if (mSignalCluster != null && mExpanded) {
-            mSignalCluster.setX(mSystemIconsSuperContainer.getX()
-                    - mSignalCluster.getWidth());
+            if (getLayoutDirection() == LAYOUT_DIRECTION_LTR) {
+                mSignalCluster.setX(mSystemIconsSuperContainer.getX()
+                        - mSignalCluster.getWidth());
+            } else {
+                mSignalCluster.setX(mSystemIconsSuperContainer.getX()
+                        + mSystemIconsSuperContainer.getWidth());
+            }
             mSignalCluster.setY(
                     mSystemIconsSuperContainer.getY() + mSystemIconsSuperContainer.getHeight()/2
                             - mSignalCluster.getHeight()/2);
