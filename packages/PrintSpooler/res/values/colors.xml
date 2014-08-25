@@ -24,4 +24,6 @@
 
     <color name="promoted_action_background_color">#FF80CBC4</color>
 
+    <color name="material_grey_500">#ffa3a3a3</color>
+
 </resources>
