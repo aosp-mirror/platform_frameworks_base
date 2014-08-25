@@ -25,7 +25,7 @@ public interface CastController {
     void setCurrentUserId(int currentUserId);
     Set<CastDevice> getCastDevices();
     void startCasting(CastDevice device);
-    void stopCasting();
+    void stopCasting(CastDevice device);
 
     public interface Callback {
         void onCastDevicesChanged();
