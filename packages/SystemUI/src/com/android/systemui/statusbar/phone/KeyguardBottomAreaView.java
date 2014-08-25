@@ -29,7 +29,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.phone.PhoneManager;
 import android.provider.MediaStore;
 import android.telecomm.TelecommManager;
 import android.util.AttributeSet;
@@ -324,13 +323,12 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     public void launchPhone() {
-        TelecommManager tm = TelecommManager.from(mContext);
-        if (tm.isInAPhoneCall()) {
-            final PhoneManager pm = (PhoneManager) mContext.getSystemService(Context.PHONE_SERVICE);
+        final TelecommManager tm = TelecommManager.from(mContext);
+        if (tm.isInCall()) {
             AsyncTask.execute(new Runnable() {
                 @Override
                 public void run() {
-                    pm.showCallScreen(false /* showDialpad */);
+                    tm.showInCallScreen(false /* showDialpad */);
                 }
             });
         } else {

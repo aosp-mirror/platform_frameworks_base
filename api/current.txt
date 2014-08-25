@@ -7353,7 +7353,6 @@ package android.content {
     field public static final java.lang.String NFC_SERVICE = "nfc";
     field public static final java.lang.String NOTIFICATION_SERVICE = "notification";
     field public static final java.lang.String NSD_SERVICE = "servicediscovery";
-    field public static final java.lang.String PHONE_SERVICE = "phone_service";
     field public static final java.lang.String POWER_SERVICE = "power";
     field public static final java.lang.String PRINT_SERVICE = "print";
     field public static final java.lang.String RESTRICTIONS_SERVICE = "restrictions";
@@ -22768,17 +22767,6 @@ package android.os.storage {
 
 }
 
-package android.phone {
-
-  public final class PhoneManager {
-    method public void cancelMissedCallsNotification();
-    method public boolean handlePinMmi(java.lang.String);
-    method public boolean isInAPhoneCall();
-    method public void showCallScreen(boolean);
-  }
-
-}
-
 package android.preference {
 
   public class CheckBoxPreference extends android.preference.TwoStatePreference {
@@ -28758,12 +28746,16 @@ package android.telecomm {
 
   public class TelecommManager {
     method public void addNewIncomingCall(android.telecomm.PhoneAccountHandle, android.os.Bundle);
+    method public void cancelMissedCallsNotification();
     method public void clearAccounts(java.lang.String);
     method public android.telecomm.PhoneAccountHandle getDefaultOutgoingPhoneAccount();
     method public java.util.List<android.telecomm.PhoneAccountHandle> getEnabledPhoneAccounts();
     method public android.telecomm.PhoneAccount getPhoneAccount(android.telecomm.PhoneAccountHandle);
+    method public boolean handleMmi(java.lang.String);
     method public boolean hasMultipleEnabledAccounts();
+    method public boolean isInCall();
     method public void registerPhoneAccount(android.telecomm.PhoneAccount);
+    method public void showInCallScreen(boolean);
     method public void unregisterPhoneAccount(android.telecomm.PhoneAccountHandle);
     field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.intent.action.CONNECTION_SERVICE_CONFIGURE";
     field public static final java.lang.String ACTION_SHOW_CALL_SETTINGS = "android.telecomm.intent.action.SHOW_CALL_SETTINGS";
