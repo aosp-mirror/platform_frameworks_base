@@ -767,7 +767,9 @@ public class LockPatternUtils {
                 if (userHandle == UserHandle.USER_OWNER) {
                     // Update the encryption password.
                     int type = computedQuality == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
-                        ? StorageManager.CRYPT_TYPE_PIN : StorageManager.CRYPT_TYPE_PASSWORD;
+                        || computedQuality == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX
+                        ? StorageManager.CRYPT_TYPE_PIN
+                        : StorageManager.CRYPT_TYPE_PASSWORD;
                     updateEncryptionPassword(type, password);
                 }
 
