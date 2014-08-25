@@ -119,7 +119,7 @@ import java.util.Stack;
  * <dd>Defines path string. This is using exactly same format as "d" attribute
  * in the SVG's path data. This is defined in the viewport space.</dd>
  * <dt><code>android:fillColor</code></dt>
- * <dd>Defines the color to fill the path (black if not present).</dd>
+ * <dd>Defines the color to fill the path (none if not present).</dd>
  * <dt><code>android:strokeColor</code></dt>
  * <dd>Defines the color to draw the path outline (none if not present).</dd>
  * <dt><code>android:strokeWidth</code></dt>
@@ -862,7 +862,7 @@ public class VectorDrawable extends Drawable {
                 }
                 mRenderPath.addPath(path, mFinalPathMatrix);
 
-                if (fullPath.mFillColor != 0) {
+                if (fullPath.mFillColor != Color.TRANSPARENT) {
                     if (mFillPaint == null) {
                         mFillPaint = new Paint();
                         mFillPaint.setColorFilter(mColorFilter);
@@ -873,7 +873,7 @@ public class VectorDrawable extends Drawable {
                     canvas.drawPath(mRenderPath, mFillPaint);
                 }
 
-                if (fullPath.mStrokeColor != 0) {
+                if (fullPath.mStrokeColor != Color.TRANSPARENT) {
                     if (mStrokePaint == null) {
                         mStrokePaint = new Paint();
                         mStrokePaint.setColorFilter(mColorFilter);
@@ -1237,9 +1237,9 @@ public class VectorDrawable extends Drawable {
         // Variables below need to be copied (deep copy if applicable) for mutation.
         private int[] mThemeAttrs;
 
-        int mStrokeColor = 0;
+        int mStrokeColor = Color.TRANSPARENT;
         float mStrokeWidth = 0;
-        int mFillColor = Color.BLACK;
+        int mFillColor = Color.TRANSPARENT;
         int mFillRule;
         float mTrimPathStart = 0;
         float mTrimPathEnd = 1;
