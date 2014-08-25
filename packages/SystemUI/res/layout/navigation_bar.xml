@@ -322,11 +322,4 @@
             />
     </FrameLayout>
 
-    <!-- not used -->
-    <View android:id="@+id/rot270"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:visibility="gone"
-        />
-
 </com.android.systemui.statusbar.phone.NavigationBarView>
