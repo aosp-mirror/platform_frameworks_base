@@ -32,6 +32,7 @@ import android.media.AudioManager;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.BadParcelableException;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1904,7 +1905,8 @@ public class Notification implements Parcelable
             mPriority = PRIORITY_DEFAULT;
             mPeople = new ArrayList<String>();
 
-            mColorUtil = NotificationColorUtil.getInstance();
+            mColorUtil = context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.L ?
+                    NotificationColorUtil.getInstance() : null;
         }
 
         /**
@@ -2610,7 +2612,7 @@ public class Notification implements Parcelable
 
             if (mLargeIcon != null) {
                 contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
-                processLargeIcon(mLargeIcon, contentView);
+                processLargeLegacyIcon(mLargeIcon, contentView);
                 contentView.setImageViewResource(R.id.right_icon, mSmallIcon);
                 contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
                 processSmallRightIcon(mSmallIcon, contentView);
@@ -2813,13 +2815,10 @@ public class Notification implements Parcelable
         }
 
         private void processLegacyAction(Action action, RemoteViews button) {
-            if (isLegacy()) {
-                if (mColorUtil.isGrayscale(mContext, action.icon)) {
-                    button.setTextViewCompoundDrawablesRelativeColorFilter(R.id.action0, 0,
-                            mContext.getResources().getColor(
-                                    R.color.notification_action_legacy_color_filter),
-                            PorterDuff.Mode.MULTIPLY);
-                }
+            if (!isLegacy() || mColorUtil.isGrayscale(mContext, action.icon)) {
+                button.setTextViewCompoundDrawablesRelativeColorFilter(R.id.action0, 0,
+                        mContext.getResources().getColor(R.color.notification_action_color_filter),
+                        PorterDuff.Mode.MULTIPLY);
             }
         }
 
@@ -2845,8 +2844,8 @@ public class Notification implements Parcelable
          * if it's grayscale).
          */
         // TODO: also check bounds, transparency, that sort of thing.
-        private void processLargeIcon(Bitmap largeIcon, RemoteViews contentView) {
-            if (!isLegacy() || mColorUtil.isGrayscale(largeIcon)) {
+        private void processLargeLegacyIcon(Bitmap largeIcon, RemoteViews contentView) {
+            if (isLegacy() && mColorUtil.isGrayscale(largeIcon)) {
                 applyLargeIconBackground(contentView);
             } else {
                 removeLargeIconBackground(contentView);
