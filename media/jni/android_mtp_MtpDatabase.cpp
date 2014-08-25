@@ -848,6 +848,7 @@ void* MyMtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) 
                 result = malloc(exifdata->size);
                 if (result) {
                     memcpy(result, exifdata->data, exifdata->size);
+                    outThumbSize = exifdata->size;
                 }
             }
             exif_data_unref(exifdata);

@@ -352,10 +352,6 @@
     <!-- Wifi driver supports batched scan -->
     <bool translatable="false" name="config_wifi_batched_scan_supported">false</bool>
 
-    <!-- Wifi driver's fallback country code; WS is ISO-Alpha2 code for Samoa which
-         has restrictions on can be scanned; which may satisfy quite a few regulatory issues. -->
-    <string translatable="false" name="config_wifi_unknown_country_code">WS</string>
-
     <!-- Flag indicating whether the we should enable the automatic brightness in Settings.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">false</bool>
@@ -923,7 +919,7 @@
     <!-- Max space (in MB) allocated to DownloadManager to store the downloaded
          files if they are to be stored in DownloadManager's data dir,
          which typically is /data/data/com.android.providers.downloads/files -->
-    <integer name="config_downloadDataDirSize">100</integer>
+    <integer name="config_downloadDataDirSize">200</integer>
 
     <!-- Max number of downloads allowed to proceed concurrently -->
     <integer name="config_MaxConcurrentDownloadsAllowed">5</integer>
