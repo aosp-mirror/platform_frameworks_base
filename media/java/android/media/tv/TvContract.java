@@ -686,6 +686,7 @@ public final class TvContract {
          * </p>
          * @hide
          */
+        @SystemApi
         public static final String COLUMN_BROWSABLE = "browsable";
 
         /**
@@ -717,6 +718,7 @@ public final class TvContract {
          * </p>
          * @hide
          */
+        @SystemApi
         public static final String COLUMN_LOCKED = "locked";
 
         /**
