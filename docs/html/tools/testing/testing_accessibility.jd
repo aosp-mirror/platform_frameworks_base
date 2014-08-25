@@ -179,7 +179,7 @@ focus navigation and audible prompts.</p>
 </p>
 
 <p>For more information about using TalkBack, see
-<a href="http://support.google.com/nexus/bin/answer.py?hl=en&answer=2700928">Use TalkBack</a>.</p>
+<a href="https://support.google.com/accessibility/android/topic/3529932">TalkBack</a>.</p>
 
 <h4 id="testing-ebt">Testing with Explore by Touch</h4>
 
@@ -207,8 +207,7 @@ option is not available.</p>
 </ol>
 
 <p>For more information about using the Explore by Touch features, see
-<a href="http://support.google.com/nexus/bin/answer.py?hl=en&answer=2700722">Use Explore by
-Touch</a>.</p>
+<a href="https://support.google.com/accessibility/android/answer/6006598">Touch Exploration</a>.</p>
 
 <h3 id="test-navigation">Testing focus navigation</h3>
 
@@ -231,7 +230,7 @@ Touch</a>.</p>
 
 <p>Gesture navigation is an accessibility navigation mode that allows users to navigate Android
   devices and applications using specific
-  <a href="http://support.google.com/nexus/bin/answer.py?hl=en&answer=2700718">gestures</a>. This
+  <a href="https://support.google.com/accessibility/android/answer/6006598">gestures</a>. This
   navigation mode is available on Android 4.1 (API Level 16) and higher.</p>
 
 <p class="note"><strong>Note:</strong> Accessibility gestures provide a different navigation path
@@ -248,8 +247,7 @@ content, keyboard and D-pad navigation only allow focus on input fields and butt
 </ul>
 
 <p>For more information about using Explore by Touch accessibility gestures, see
-<a href="http://support.google.com/android/bin/topic.py?hl=en&topic=2492346">Accessibility
-gestures</a>.</p>
+<a href="https://support.google.com/accessibility/android/answer/6006598">Touch Exploration</a>.</p>
 
 <p class="note">
   <strong>Note:</strong> Accessibility services other than TalkBack may map accessibility gestures
