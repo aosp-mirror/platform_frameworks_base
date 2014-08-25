@@ -32,7 +32,7 @@ interface ITelecommService {
      *
      * @param showDialpad if true, make the dialpad visible initially.
      */
-    void showCallScreen(boolean showDialpad);
+    void showInCallScreen(boolean showDialpad);
 
     /**
      * @see TelecommManager#getDefaultOutgoingPhoneAccount
@@ -79,9 +79,9 @@ interface ITelecommService {
     void silenceRinger();
 
     /**
-     * @see TelecommManager#isInAPhoneCall
+     * @see TelecommManager#isInCall
      */
-    boolean isInAPhoneCall();
+    boolean isInCall();
 
     /**
      * @see TelecomManager#isRinging
@@ -99,12 +99,12 @@ interface ITelecommService {
     void acceptRingingCall();
 
     /**
-     * @see PhoneManager#cancelMissedCallsNotification
+     * @see TelecommManager#cancelMissedCallsNotification
      */
     void cancelMissedCallsNotification();
 
     /**
-     * @see PhoneManager#handlePinMmi
+     * @see TelecommManager#handleMmi
      */
     boolean handlePinMmi(String dialString);
 

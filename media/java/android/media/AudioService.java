@@ -2912,13 +2912,13 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private boolean isInCommunication() {
-        boolean isInAPhoneCall = false;
+        boolean IsInCall = false;
 
         TelecommManager telecommManager =
                 (TelecommManager) mContext.getSystemService(Context.TELECOMM_SERVICE);
-        isInAPhoneCall = telecommManager.isInAPhoneCall();
+        IsInCall = telecommManager.isInCall();
 
-        return (isInAPhoneCall || getMode() == AudioManager.MODE_IN_COMMUNICATION);
+        return (IsInCall || getMode() == AudioManager.MODE_IN_COMMUNICATION);
     }
 
     /**
