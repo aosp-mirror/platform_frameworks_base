@@ -28991,10 +28991,10 @@ package android.telephony {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static int INVALID_CHANNEL;
-    field public static int MISSING_RESOURCE;
-    field public static int NO_ERROR;
-    field public static int NO_SUCH_ELEMENT;
-    field public static int UNKNOWN_ERROR;
+    field public static int STATUS_MISSING_RESOURCE;
+    field public static int STATUS_NO_ERROR;
+    field public static int STATUS_NO_SUCH_ELEMENT;
+    field public static int STATUS_UNKNOWN_ERROR;
   }
 
   public class MessagingConfigurationManager {
