@@ -114,7 +114,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
     protected static final int MSG_SHOW_NEXT_AFFILIATED_TASK = 1024;
     protected static final int MSG_SHOW_PREV_AFFILIATED_TASK = 1025;
-    protected static final int MSG_OPEN_SEARCH_PANEL = 1026;
     protected static final int MSG_CLOSE_SEARCH_PANEL = 1027;
     protected static final int MSG_SHOW_HEADS_UP = 1028;
     protected static final int MSG_HIDE_HEADS_UP = 1029;
@@ -728,9 +727,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     @Override
     public void showSearchPanel() {
-        int msg = MSG_OPEN_SEARCH_PANEL;
-        mHandler.removeMessages(msg);
-        mHandler.sendEmptyMessage(msg);
+        if (mSearchPanelView != null && mSearchPanelView.isAssistantAvailable()) {
+            mSearchPanelView.show(true, true);
+        }
     }
 
     @Override
@@ -943,12 +942,6 @@ public abstract class BaseStatusBar extends SystemUI implements
              case MSG_SHOW_PREV_AFFILIATED_TASK:
                   showRecentsPreviousAffiliatedTask();
                   break;
-             case MSG_OPEN_SEARCH_PANEL:
-                 if (DEBUG) Log.d(TAG, "opening search panel");
-                 if (mSearchPanelView != null && mSearchPanelView.isAssistantAvailable()) {
-                     mSearchPanelView.show(true, true);
-                 }
-                 break;
              case MSG_CLOSE_SEARCH_PANEL:
                  if (DEBUG) Log.d(TAG, "closing search panel");
                  if (mSearchPanelView != null && mSearchPanelView.isShowing()) {
