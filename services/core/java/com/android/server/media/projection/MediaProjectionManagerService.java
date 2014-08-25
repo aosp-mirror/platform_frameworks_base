@@ -111,7 +111,6 @@ public final class MediaProjectionManagerService extends SystemService
             @Override
             public void binderDied() {
                 synchronized (mLock) {
-                    unlinkDeathRecipientLocked(callback);
                     removeCallback(callback);
                 }
             }
@@ -125,7 +124,7 @@ public final class MediaProjectionManagerService extends SystemService
     private void removeCallback(IMediaProjectionWatcherCallback callback) {
         synchronized (mLock) {
             unlinkDeathRecipientLocked(callback);
-            removeCallback(callback);
+            mCallbackDelegate.remove(callback);
         }
     }
 
