@@ -87,6 +87,7 @@ public class DozeService extends DreamService {
     protected void dumpOnHandler(FileDescriptor fd, PrintWriter pw, String[] args) {
         super.dumpOnHandler(fd, pw, args);
         pw.print("  mDreaming: "); pw.println(mDreaming);
+        pw.print("  mHost: "); pw.println(mHost);
         pw.print("  mBroadcastReceiverRegistered: "); pw.println(mBroadcastReceiverRegistered);
         pw.print("  mSigMotionSensor: "); pw.println(mSigMotionSensor);
         pw.print("  mPickupSensor:"); pw.println(mPickupSensor);
@@ -107,6 +108,7 @@ public class DozeService extends DreamService {
             final SystemUIApplication app = (SystemUIApplication) getApplication();
             mHost = app.getComponent(Host.class);
         }
+        if (mHost == null) Log.w(TAG, "No doze service host found.");
 
         setWindowless(true);
 
