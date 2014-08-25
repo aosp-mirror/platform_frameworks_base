@@ -4,5 +4,5 @@
     <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
     <string name="action_use_network" msgid="6076184727448466030">"Использовать эту сеть"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Не использовать эту сеть"</string>
-    <string name="action_bar_label" msgid="2573986763322074279">"Подключиться к сети"</string>
+    <string name="action_bar_label" msgid="2573986763322074279">"Регистрация в сети"</string>
 </resources>
