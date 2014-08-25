@@ -69,7 +69,7 @@ public class MainInteractionService extends VoiceInteractionService {
                 + Arrays.toString(getKeyphraseEnrollmentInfo().listKeyphraseMetadata()));
 
         mHotwordDetector = createAlwaysOnHotwordDetector(
-                "Hello There", new Locale("en-US"), mHotwordCallback);
+                "Hello There", Locale.forLanguageTag("en-US"), mHotwordCallback);
     }
 
     @Override
