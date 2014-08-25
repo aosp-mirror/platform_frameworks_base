@@ -20,6 +20,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 
+import java.util.Objects;
+
 /** @hide */
 public final class MediaProjectionInfo implements Parcelable {
     private final String mPackageName;
@@ -41,6 +43,21 @@ public final class MediaProjectionInfo implements Parcelable {
 
     public UserHandle getUserHandle() {
         return mUserHandle;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof MediaProjectionInfo) {
+            final MediaProjectionInfo other = (MediaProjectionInfo) o;
+            return Objects.equals(other.mPackageName, mPackageName)
+                    && Objects.equals(other.mUserHandle, mUserHandle);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mPackageName, mUserHandle);
     }
 
     @Override
