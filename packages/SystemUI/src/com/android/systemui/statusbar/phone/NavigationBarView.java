@@ -23,6 +23,7 @@ import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.app.StatusBarManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -48,12 +49,11 @@ import com.android.systemui.statusbar.policy.KeyButtonView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 public class NavigationBarView extends LinearLayout {
     final static boolean DEBUG = false;
     final static String TAG = "PhoneStatusBar/NavigationBarView";
-
-    final static boolean NAVBAR_ALWAYS_AT_RIGHT = true;
 
     // slippery nav bar when everything is disabled, e.g. during setup
     final static boolean SLIPPERY_WHEN_DISABLED = true;
@@ -87,6 +87,7 @@ public class NavigationBarView extends LinearLayout {
     private final NavTransitionListener mTransitionListener = new NavTransitionListener();
 
     private OnVerticalChangedListener mOnVerticalChangedListener;
+    private boolean mIsLtr;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -387,13 +388,13 @@ public class NavigationBarView extends LinearLayout {
 
         mRotatedViews[Surface.ROTATION_90] = findViewById(R.id.rot90);
 
-        mRotatedViews[Surface.ROTATION_270] = NAVBAR_ALWAYS_AT_RIGHT
-                                                ? findViewById(R.id.rot90)
-                                                : findViewById(R.id.rot270);
+        mRotatedViews[Surface.ROTATION_270] = mRotatedViews[Surface.ROTATION_90];
 
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
+
+        updateLTROrder();
     }
 
     public boolean isVertical() {
@@ -455,6 +456,58 @@ public class NavigationBarView extends LinearLayout {
         postCheckForInvalidLayout("sizeChanged");
         super.onSizeChanged(w, h, oldw, oldh);
     }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        updateLTROrder();
+    }
+
+    /**
+     * In landscape, the LinearLayout is not auto mirrored since it is vertical. Therefore we
+     * have to do it manually
+     */
+    private void updateLTROrder() {
+        boolean isLtr = getResources().getConfiguration()
+                .getLayoutDirection() == LAYOUT_DIRECTION_RTL;
+        if (mIsLtr != isLtr) {
+
+            // We swap all children of the 90 and 270 degree layouts, since they are vertical
+            View rotation90 = mRotatedViews[Surface.ROTATION_90];
+            swapChildrenOrderIfVertical(rotation90.findViewById(R.id.nav_buttons));
+
+            View rotation270 = mRotatedViews[Surface.ROTATION_270];
+            if (rotation90 != rotation270) {
+                swapChildrenOrderIfVertical(rotation270.findViewById(R.id.nav_buttons));
+            }
+            mIsLtr = isLtr;
+        }
+    }
+
+
+    /**
+     * Swaps the children order of a LinearLayout if it's orientation is Vertical
+     *
+     * @param group The LinearLayout to swap the children from.
+     */
+    private void swapChildrenOrderIfVertical(View group) {
+        if (group instanceof LinearLayout) {
+            LinearLayout linearLayout = (LinearLayout) group;
+            if (linearLayout.getOrientation() == VERTICAL) {
+                int childCount = linearLayout.getChildCount();
+                ArrayList<View> childList = new ArrayList<>(childCount);
+                for (int i = 0; i < childCount; i++) {
+                    childList.add(linearLayout.getChildAt(i));
+                }
+                linearLayout.removeAllViews();
+                for (int i = childCount - 1; i >= 0; i--) {
+                    linearLayout.addView(childList.get(i));
+                }
+            }
+        }
+    }
+
+
 
     /*
     @Override
