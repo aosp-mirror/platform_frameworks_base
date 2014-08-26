@@ -54,7 +54,12 @@ final class AccessibilityCache {
             if (DEBUG) {
                 Log.i(LOG_TAG, "Caching window: " + window.getId());
             }
-            mWindowCache.put(window.getId(), window);
+            final int windowId = window.getId();
+            AccessibilityWindowInfo oldWindow = mWindowCache.get(windowId);
+            if (oldWindow != null) {
+                oldWindow.recycle();
+            }
+            mWindowCache.put(windowId, AccessibilityWindowInfo.obtain(window));
         }
     }
 
@@ -183,13 +188,12 @@ final class AccessibilityCache {
                     sortedWindows.put(window.getLayer(), window);
                 }
 
-                List<AccessibilityWindowInfo> windows = new ArrayList<>();
+                List<AccessibilityWindowInfo> windows = new ArrayList<>(windowCount);
                 for (int i = windowCount - 1; i >= 0; i--) {
                     AccessibilityWindowInfo window = sortedWindows.valueAt(i);
                     windows.add(AccessibilityWindowInfo.obtain(window));
+                    sortedWindows.removeAt(i);
                 }
-
-                sortedWindows.clear();
 
                 return windows;
             }
