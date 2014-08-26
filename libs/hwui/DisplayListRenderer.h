@@ -215,11 +215,17 @@ private:
         if (!paint) return NULL;
 
         const SkPaint* paintCopy = mPaintMap.valueFor(paint);
-        if (paintCopy == NULL || paintCopy->getGenerationID() != paint->getGenerationID()) {
-            paintCopy = new SkPaint(*paint);
+        if (paintCopy == NULL
+                || paintCopy->getGenerationID() != paint->getGenerationID()
+                // We can't compare shader pointers because that will always
+                // change as we do partial copying via wrapping. However, if the
+                // shader changes the paint generationID will have changed and
+                // so we don't hit this comparison anyway
+                || !(paint->getShader() && paintCopy->getShader()
+                        && paint->getShader()->getGenerationID() == paintCopy->getShader()->getGenerationID())) {
+            paintCopy = copyPaint(paint);
             // replaceValueFor() performs an add if the entry doesn't exist
             mPaintMap.replaceValueFor(paint, paintCopy);
-            mDisplayListData->paints.add(paintCopy);
         }
 
         return paintCopy;
@@ -228,8 +234,15 @@ private:
     inline SkPaint* copyPaint(const SkPaint* paint) {
         if (!paint) return NULL;
         SkPaint* paintCopy = new SkPaint(*paint);
+        if (paint->getShader()) {
+            SkShader* shaderCopy = SkShader::CreateLocalMatrixShader(
+                    paint->getShader(), paint->getShader()->getLocalMatrix());
+            paintCopy->setShader(shaderCopy);
+            paintCopy->setGenerationID(paint->getGenerationID());
+            shaderCopy->setGenerationID(paint->getShader()->getGenerationID());
+            shaderCopy->unref();
+        }
         mDisplayListData->paints.add(paintCopy);
-
         return paintCopy;
     }
 
