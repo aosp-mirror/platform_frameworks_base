@@ -25,7 +25,7 @@
 
         <item name="android:colorPrimaryDark">@*android:color/material_blue_grey_900</item>
         <item name="android:colorPrimary">@*android:color/material_blue_grey_800</item>
-        <item name="android:colorAccent">@*android:color/material_teal_500</item>
+        <item name="android:colorAccent">@*android:color/material_deep_teal_500</item>
 
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
