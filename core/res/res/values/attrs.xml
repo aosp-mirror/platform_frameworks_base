@@ -1012,13 +1012,25 @@
         <!-- The color applied to framework switch thumbs in their normal state. -->
         <attr name="colorSwitchThumbNormal" format="color" />
 
-        <!-- ================== -->
-        <!-- Hardware rendering -->
-        <!-- ================== -->
+        <!-- =================== -->
+        <!-- Lighting properties -->
+        <!-- =================== -->
         <eat-comment />
 
-        <!-- Reference to the Lighting style. -->
-        <attr name="lightingStyle" format="reference" />
+        <!-- @hide The default Y position of the light used to project view shadows. -->
+        <attr name="lightY" format="dimension" />
+
+        <!-- @hide The default Z position of the light used to project view shadows. -->
+        <attr name="lightZ" format="dimension" />
+
+        <!-- @hide The default radius of the light used to project view shadows. -->
+        <attr name="lightRadius" format="dimension" />
+
+        <!-- Alpha value of the ambient shadow projected by elevated views, between 0 and 1. -->
+        <attr name="ambientShadowAlpha" format="float" />
+
+        <!-- Alpha value of the spot shadow projected by elevated views, between 0 and 1. -->
+        <attr name="spotShadowAlpha" format="float" />
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -7384,11 +7396,11 @@
 
     <!-- @hide -->
     <declare-styleable name="Lighting">
-        <attr name="lightY" format="dimension" />
-        <attr name="lightZ" format="dimension" />
-        <attr name="lightRadius" format="dimension" />
-        <attr name="ambientShadowAlpha" format="float" />
-        <attr name="spotShadowAlpha" format="float" />
+        <attr name="lightY" />
+        <attr name="lightZ" />
+        <attr name="lightRadius" />
+        <attr name="ambientShadowAlpha" />
+        <attr name="spotShadowAlpha" />
     </declare-styleable>
 
     <declare-styleable name="RestrictionEntry">

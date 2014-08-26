@@ -328,6 +328,7 @@ package android {
     field public static final int alwaysRetainTaskState = 16843267; // 0x1010203
     field public static final int amPmBackgroundColor = 16843942; // 0x10104a6
     field public static final int amPmTextColor = 16843941; // 0x10104a5
+    field public static final int ambientShadowAlpha = 16843967; // 0x10104bf
     field public static final int angle = 16843168; // 0x10101a0
     field public static final int animateFirstView = 16843477; // 0x10102d5
     field public static final int animateLayoutChanges = 16843506; // 0x10102f2
@@ -1148,6 +1149,7 @@ package android {
     field public static final int spinnersShown = 16843595; // 0x101034b
     field public static final int splitMotionEvents = 16843503; // 0x10102ef
     field public static final int splitTrack = 16843852; // 0x101044c
+    field public static final int spotShadowAlpha = 16843968; // 0x10104c0
     field public static final int src = 16843033; // 0x1010119
     field public static final int ssp = 16843747; // 0x10103e3
     field public static final int sspPattern = 16843749; // 0x10103e5
