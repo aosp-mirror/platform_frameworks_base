@@ -179,8 +179,30 @@ public final class RemoteConnection {
          * @param connection The {@code RemoteConnection} invoking this method.
          */
         public void onDestroyed(RemoteConnection connection) {}
+
+        /**
+         * Indicates that the {@code RemoteConnection}s with which this {@code RemoteConnection}
+         * may be asked to create a conference has changed.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param conferenceableConnections The {@code RemoteConnection}s with which this
+         *         {@code RemoteConnection} may be asked to create a conference.
+         */
         public void onConferenceableConnectionsChanged(
-                RemoteConnection connection, List<RemoteConnection> conferenceableConnections) {}
+                RemoteConnection connection,
+                List<RemoteConnection> conferenceableConnections) {}
+
+        /**
+         * Indicates that the {@code RemoteConference} that this {@code RemoteConnection} is a part
+         * of has changed.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param conference The {@code RemoteConference} of which this {@code RemoteConnection} is
+         *         a part, which may be {@code null}.
+         */
+        public void onConferenceChanged(
+                RemoteConnection connection,
+                RemoteConference conference) {}
     }
 
     private IConnectionService mConnectionService;
@@ -192,7 +214,9 @@ public final class RemoteConnection {
      */
     private final Set<Listener> mListeners = Collections.newSetFromMap(
             new ConcurrentHashMap<Listener, Boolean>(8, 0.9f, 1));
-    private final Set<RemoteConnection> mConferenceableConnections = new HashSet<>();
+    private final List<RemoteConnection> mConferenceableConnections = new ArrayList<>();
+    private final List<RemoteConnection> mUnmodifiableconferenceableConnections =
+            Collections.unmodifiableList(mConferenceableConnections);
 
     private int mState = Connection.STATE_NEW;
     private int mDisconnectCauseCode = DisconnectCause.NOT_VALID;
@@ -209,6 +233,7 @@ public final class RemoteConnection {
     private int mCallerDisplayNamePresentation;
     private int mFailureCode;
     private String mFailureMessage;
+    private RemoteConference mConference;
 
     /**
      * @hide
@@ -539,6 +564,37 @@ public final class RemoteConnection {
     }
 
     /**
+     * Obtain the {@code RemoteConnection}s with which this {@code RemoteConnection} may be
+     * successfully asked to create a conference with.
+     *
+     * @return The {@code RemoteConnection}s with which this {@code RemoteConnection} may be
+     *         merged into a {@link RemoteConference}.
+     */
+    public List<RemoteConnection> getConferenceableConnections() {
+        return mUnmodifiableconferenceableConnections;
+    }
+
+    /**
+     * Obtain the {@code RemoteConference} that this {@code RemoteConnection} may be a part
+     * of, or {@code null} if there is no such {@code RemoteConference}.
+     *
+     * @return A {@code RemoteConference} or {@code null};
+     */
+    public RemoteConference getConference() {
+        return mConference;
+    }
+
+    /** {@hide} */
+    String getId() {
+        return mConnectionId;
+    }
+
+    /** {@hide} */
+    IConnectionService getConnectionService() {
+        return mConnectionService;
+    }
+
+    /**
      * @hide
      */
     void setState(int state) {
@@ -671,8 +727,17 @@ public final class RemoteConnection {
         mConferenceableConnections.clear();
         mConferenceableConnections.addAll(conferenceableConnections);
         for (Listener l : mListeners) {
-            l.onConferenceableConnectionsChanged(
-                    this, new ArrayList<RemoteConnection>(mConferenceableConnections));
+            l.onConferenceableConnectionsChanged(this, mUnmodifiableconferenceableConnections);
+        }
+    }
+
+    /** @hide */
+    void setConference(RemoteConference conference) {
+        if (mConference != conference) {
+            mConference = conference;
+            for (Listener l : mListeners) {
+                l.onConferenceChanged(this, conference);
+            }
         }
     }
 
