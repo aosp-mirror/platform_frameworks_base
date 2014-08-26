@@ -4634,6 +4634,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             return DEX_OPT_SKIPPED;
         }
 
+        final boolean vmSafeMode = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
+
         final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
         boolean performedDexOpt = false;
         // There are three basic cases here:
@@ -4657,10 +4659,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                             pkg.packageName, dexCodeInstructionSet, defer);
                     if (forceDex || (!defer && isDexOptNeeded == DexFile.DEXOPT_NEEDED)) {
                         Log.i(TAG, "Running dexopt on: " + path + " pkg="
-                                + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet);
+                                + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
+                                + " vmSafeMode=" + vmSafeMode);
                         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
                         final int ret = mInstaller.dexopt(path, sharedGid, !isForwardLocked(pkg),
-                                pkg.packageName, dexCodeInstructionSet);
+                                pkg.packageName, dexCodeInstructionSet, vmSafeMode);
 
                         if (ret < 0) {
                             // Don't bother running dexopt again if we failed, it will probably

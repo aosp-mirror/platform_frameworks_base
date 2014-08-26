@@ -91,26 +91,40 @@ public class InstallerConnection {
     }
 
     public int dexopt(String apkPath, int uid, boolean isPublic, String instructionSet) {
+        return dexopt(apkPath, uid, isPublic, "*", instructionSet, false);
+    }
+
+    public int dexopt(String apkPath, int uid, boolean isPublic, String pkgName,
+            String instructionSet, boolean vmSafeMode) {
         StringBuilder builder = new StringBuilder("dexopt");
         builder.append(' ');
         builder.append(apkPath);
         builder.append(' ');
         builder.append(uid);
         builder.append(isPublic ? " 1" : " 0");
-        builder.append(" *");         // No pkgName arg present
+        builder.append(' ');
+        builder.append(pkgName);
         builder.append(' ');
         builder.append(instructionSet);
+        builder.append(' ');
+        builder.append(vmSafeMode ? " 1" : " 0");
         return execute(builder.toString());
     }
 
     public int patchoat(String apkPath, int uid, boolean isPublic, String instructionSet) {
+        return patchoat(apkPath, uid, isPublic, "*", instructionSet);
+    }
+
+    public int patchoat(String apkPath, int uid, boolean isPublic, String pkgName,
+            String instructionSet) {
         StringBuilder builder = new StringBuilder("patchoat");
         builder.append(' ');
         builder.append(apkPath);
         builder.append(' ');
         builder.append(uid);
         builder.append(isPublic ? " 1" : " 0");
-        builder.append(" *");         // No pkgName arg present
+        builder.append(' ');
+        builder.append(pkgName);
         builder.append(' ');
         builder.append(instructionSet);
         return execute(builder.toString());
