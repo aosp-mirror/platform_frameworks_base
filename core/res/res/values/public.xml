@@ -2278,6 +2278,8 @@
   <public type="attr" name="windowSharedElementsUseOverlay" />
   <public type="attr" name="reparent" />
   <public type="attr" name="reparentWithOverlay" />
+  <public type="attr" name="ambientShadowAlpha" />
+  <public type="attr" name="spotShadowAlpha" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 

@@ -1355,12 +1355,4 @@ please see styles_device_defaults.xml.
         <item name="padding">16dp</item>
     </style>
 
-    <style name="Lighting">
-        <item name="lightY">-200dp</item>
-        <item name="lightZ">800dp</item>
-        <item name="lightRadius">800dp</item>
-        <item name="ambientShadowAlpha">0.06</item>
-        <item name="spotShadowAlpha">0.16</item>
-    </style>
-
 </resources>
