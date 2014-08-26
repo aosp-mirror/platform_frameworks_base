@@ -18,9 +18,7 @@ package android.telecomm;
 
 import android.telephony.DisconnectCause;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -43,7 +41,7 @@ public abstract class Conference {
 
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
     private final List<Connection> mChildConnections = new CopyOnWriteArrayList<>();
-    private final List<Connection> mUnmodifiableChildConnection =
+    private final List<Connection> mUnmodifiableChildConnections =
             Collections.unmodifiableList(mChildConnections);
 
     private PhoneAccountHandle mPhoneAccount;
@@ -61,7 +59,7 @@ public abstract class Conference {
     }
 
     public final List<Connection> getConnections() {
-        return mUnmodifiableChildConnection;
+        return mUnmodifiableChildConnections;
     }
 
     public final int getState() {
@@ -125,7 +123,7 @@ public abstract class Conference {
     }
 
     /**
-     * Sets the cabilities of a conference.
+     * Sets the capabilities of a conference.
      */
     public final void setCapabilities(int capabilities) {
         if (capabilities != mCapabilities) {

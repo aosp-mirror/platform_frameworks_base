@@ -28,11 +28,11 @@ import com.android.internal.telecomm.IConnectionServiceAdapter;
 import com.android.internal.telecomm.IVideoProvider;
 import com.android.internal.telecomm.RemoteServiceCallback;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,8 +43,11 @@ import java.util.UUID;
  */
 final class RemoteConnectionService {
 
-    private static final RemoteConnection
-            NULL_CONNECTION = new RemoteConnection("NULL", null, null);
+    private static final RemoteConnection NULL_CONNECTION =
+            new RemoteConnection("NULL", null, null);
+
+    private static final RemoteConference NULL_CONFERENCE =
+            new RemoteConference("NULL", null);
 
     private final IConnectionServiceAdapter mServantDelegate = new IConnectionServiceAdapter() {
         @Override
@@ -64,6 +67,13 @@ final class RemoteConnectionService {
                 connection.setCallerDisplayName(
                         parcel.getCallerDisplayName(),
                         parcel.getCallerDisplayNamePresentation());
+                List<RemoteConnection> conferenceable = new ArrayList<>();
+                for (String confId : parcel.getConferenceableConnectionIds()) {
+                    if (mConnectionById.containsKey(confId)) {
+                        conferenceable.add(mConnectionById.get(confId));
+                    }
+                }
+                connection.setConferenceableConnections(conferenceable);
                 // TODO: Do we need to support video providers for remote connections?
                 if (connection.getState() == Connection.STATE_DISCONNECTED) {
                     // ... then, if it was created in a disconnected state, that indicates
@@ -75,8 +85,13 @@ final class RemoteConnectionService {
 
         @Override
         public void setActive(String callId) {
-            findConnectionForAction(callId, "setActive")
-                    .setState(Connection.STATE_ACTIVE);
+            if (mConnectionById.containsKey(callId)) {
+                findConnectionForAction(callId, "setActive")
+                        .setState(Connection.STATE_ACTIVE);
+            } else {
+                findConferenceForAction(callId, "setActive")
+                        .setState(Connection.STATE_ACTIVE);
+            }
         }
 
         @Override
@@ -94,14 +109,24 @@ final class RemoteConnectionService {
         @Override
         public void setDisconnected(String callId, int disconnectCause,
                 String disconnectMessage) {
-            findConnectionForAction(callId, "setDisconnected")
-                    .setDisconnected(disconnectCause, disconnectMessage);
+            if (mConnectionById.containsKey(callId)) {
+                findConnectionForAction(callId, "setDisconnected")
+                        .setDisconnected(disconnectCause, disconnectMessage);
+            } else {
+                findConferenceForAction(callId, "setDisconnected")
+                        .setDisconnected(disconnectCause, disconnectMessage);
+            }
         }
 
         @Override
         public void setOnHold(String callId) {
-            findConnectionForAction(callId, "setOnHold")
-                    .setState(Connection.STATE_HOLDING);
+            if (mConnectionById.containsKey(callId)) {
+                findConnectionForAction(callId, "setOnHold")
+                        .setState(Connection.STATE_HOLDING);
+            } else {
+                findConferenceForAction(callId, "setOnHold")
+                        .setState(Connection.STATE_HOLDING);
+            }
         }
 
         @Override
@@ -112,24 +137,80 @@ final class RemoteConnectionService {
 
         @Override
         public void setCallCapabilities(String callId, int callCapabilities) {
-            findConnectionForAction("callId", "setCallCapabilities")
-                    .setCallCapabilities(callCapabilities);
+            if (mConnectionById.containsKey(callId)) {
+                findConnectionForAction(callId, "setCallCapabilities")
+                        .setCallCapabilities(callCapabilities);
+            } else {
+                findConferenceForAction(callId, "setCallCapabilities")
+                        .setCallCapabilities(callCapabilities);
+            }
         }
 
         @Override
         public void setIsConferenced(String callId, String conferenceCallId) {
-            // not supported for remote connections.
+            // Note: callId should not be null; conferenceCallId may be null
+            RemoteConnection connection =
+                    findConnectionForAction(callId, "setIsConferenced");
+            if (connection != NULL_CONNECTION) {
+                if (conferenceCallId == null) {
+                    // 'connection' is being split from its conference
+                    if (connection.getConference() != null) {
+                        connection.getConference().removeConnection(connection);
+                    }
+                } else {
+                    RemoteConference conference =
+                            findConferenceForAction(conferenceCallId, "setIsConferenced");
+                    if (conference != NULL_CONFERENCE) {
+                        conference.addConnection(connection);
+                    }
+                }
+            }
         }
 
         @Override
-        public void addConferenceCall(String callId, ParcelableConference parcelableConference) {
-            // not supported for remote connections.
+        public void addConferenceCall(
+                final String callId,
+                ParcelableConference parcel) {
+            RemoteConference conference = new RemoteConference(callId,
+                    mOutgoingConnectionServiceRpc);
+
+            for (String id : parcel.getConnectionIds()) {
+                RemoteConnection c = mConnectionById.get(id);
+                if (c != null) {
+                    conference.addConnection(c);
+                }
+            }
+
+            if (conference.getConnections().size() == 0) {
+                // A conference was created, but none of its connections are ones that have been
+                // created by, and therefore being tracked by, this remote connection service. It
+                // is of no interest to us.
+                return;
+            }
+
+            conference.setState(parcel.getState());
+            conference.setCallCapabilities(parcel.getCapabilities());
+            mConferenceById.put(callId, conference);
+            conference.addListener(new RemoteConference.Listener() {
+                @Override
+                public void onDestroyed(RemoteConference c) {
+                    mConferenceById.remove(callId);
+                    maybeDisconnectAdapter();
+                }
+            });
+
+            mOurConnectionServiceImpl.addRemoteConference(conference);
         }
 
         @Override
         public void removeCall(String callId) {
-            findConnectionForAction(callId, "removeCall")
-                    .setDestroyed();
+            if (mConnectionById.containsKey(callId)) {
+                findConnectionForAction(callId, "removeCall")
+                        .setDestroyed();
+            } else {
+                findConferenceForAction(callId, "removeCall")
+                        .setDestroyed();
+            }
         }
 
         @Override
@@ -193,13 +274,15 @@ final class RemoteConnectionService {
         @Override
         public final void setConferenceableConnections(
                 String callId, List<String> conferenceableConnectionIds) {
+            List<RemoteConnection> conferenceable = new ArrayList<>();
+            for (String id : conferenceableConnectionIds) {
+                if (mConnectionById.containsKey(id)) {
+                    conferenceable.add(mConnectionById.get(id));
+                }
+            }
 
-            // TODO: When we support more than 1 remote connection, this should
-            // loop through the incoming list of connection IDs and acquire the list
-            // of remote connections which correspond to the IDs. That list should
-            // be set onto the remote connections.
             findConnectionForAction(callId, "setConferenceableConnections")
-                    .setConferenceableConnections(Collections.<RemoteConnection>emptyList());
+                    .setConferenceableConnections(conferenceable);
         }
     };
 
@@ -212,24 +295,33 @@ final class RemoteConnectionService {
             for (RemoteConnection c : mConnectionById.values()) {
                 c.setDestroyed();
             }
+            for (RemoteConference c : mConferenceById.values()) {
+                c.setDestroyed();
+            }
             mConnectionById.clear();
+            mConferenceById.clear();
             mPendingConnections.clear();
-            mConnectionService.asBinder().unlinkToDeath(mDeathRecipient, 0);
+            mOutgoingConnectionServiceRpc.asBinder().unlinkToDeath(mDeathRecipient, 0);
         }
     };
 
-    private final IConnectionService mConnectionService;
+    private final IConnectionService mOutgoingConnectionServiceRpc;
+    private final ConnectionService mOurConnectionServiceImpl;
     private final Map<String, RemoteConnection> mConnectionById = new HashMap<>();
+    private final Map<String, RemoteConference> mConferenceById = new HashMap<>();
     private final Set<RemoteConnection> mPendingConnections = new HashSet<>();
 
-    RemoteConnectionService(IConnectionService connectionService) throws RemoteException {
-        mConnectionService = connectionService;
-        mConnectionService.asBinder().linkToDeath(mDeathRecipient, 0);
+    RemoteConnectionService(
+            IConnectionService outgoingConnectionServiceRpc,
+            ConnectionService ourConnectionServiceImpl) throws RemoteException {
+        mOutgoingConnectionServiceRpc = outgoingConnectionServiceRpc;
+        mOutgoingConnectionServiceRpc.asBinder().linkToDeath(mDeathRecipient, 0);
+        mOurConnectionServiceImpl = ourConnectionServiceImpl;
     }
 
     @Override
     public String toString() {
-        return "[RemoteCS - " + mConnectionService.asBinder().toString() + "]";
+        return "[RemoteCS - " + mOutgoingConnectionServiceRpc.asBinder().toString() + "]";
     }
 
     final RemoteConnection createRemoteConnection(
@@ -245,13 +337,13 @@ final class RemoteConnectionService {
                 request.getVideoState());
         try {
             if (mConnectionById.isEmpty()) {
-                mConnectionService.addConnectionServiceAdapter(mServant.getStub());
+                mOutgoingConnectionServiceRpc.addConnectionServiceAdapter(mServant.getStub());
             }
             RemoteConnection connection =
-                    new RemoteConnection(id, mConnectionService, newRequest);
+                    new RemoteConnection(id, mOutgoingConnectionServiceRpc, newRequest);
             mPendingConnections.add(connection);
             mConnectionById.put(id, connection);
-            mConnectionService.createConnection(
+            mOutgoingConnectionServiceRpc.createConnection(
                     connectionManagerPhoneAccount,
                     id,
                     newRequest,
@@ -260,12 +352,7 @@ final class RemoteConnectionService {
                 @Override
                 public void onDestroyed(RemoteConnection connection) {
                     mConnectionById.remove(id);
-                    if (mConnectionById.isEmpty()) {
-                        try {
-                            mConnectionService.removeConnectionServiceAdapter(mServant.getStub());
-                        } catch (RemoteException e) {
-                        }
-                    }
+                    maybeDisconnectAdapter();
                 }
             });
             return connection;
@@ -282,5 +369,23 @@ final class RemoteConnectionService {
         }
         Log.w(this, "%s - Cannot find Connection %s", action, callId);
         return NULL_CONNECTION;
+    }
+
+    private RemoteConference findConferenceForAction(
+            String callId, String action) {
+        if (mConferenceById.containsKey(callId)) {
+            return mConferenceById.get(callId);
+        }
+        Log.w(this, "%s - Cannot find Conference %s", action, callId);
+        return NULL_CONFERENCE;
+    }
+
+    private void maybeDisconnectAdapter() {
+        if (mConnectionById.isEmpty() && mConferenceById.isEmpty()) {
+            try {
+                mOutgoingConnectionServiceRpc.removeConnectionServiceAdapter(mServant.getStub());
+            } catch (RemoteException e) {
+            }
+        }
     }
 }
