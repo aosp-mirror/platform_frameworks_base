@@ -1952,7 +1952,7 @@
         <!--  When opening an activity in a new task using Intent/FLAG_ACTIVITY_LAUNCH_BEHIND,
               this is the animation that is run on the activity of the new task (which is
               entering the screen and then leaving). -->
-        <attr name="launchTaskBehindBackgroundAnimation" format="reference" />
+        <attr name="launchTaskBehindTargetAnimation" format="reference" />
         <!--  When opening an activity in a new task using Intent.FLAG_ACTIVITY_LAUNCH_BEHIND,
               this is the animation that is run on the activity of the old task (which is
               already on the screen and then stays on). -->
@@ -5531,7 +5531,7 @@
          resource are available in addition to the specific attributes of Fade
          described here. -->
     <declare-styleable name="Fade">
-        <!-- Equivalent to <code>visibilityMode</code>, fadingMode works only
+        <!-- Equivalent to <code>transitionVisibilityMode</code>, fadingMode works only
              with the Fade transition. -->
         <attr name="fadingMode">
             <!-- Fade will only fade appearing items in. -->
@@ -5567,7 +5567,7 @@
     <declare-styleable name="VisibilityTransition">
         <!-- Changes whether the transition supports appearing and/or disappearing Views.
              Corresponds to {@link android.transition.Visibility#setMode(int)}. -->
-        <attr name="visibilityMode">
+        <attr name="transitionVisibilityMode">
             <!-- Only appearing Views will be supported. -->
             <flag name="mode_in" value="1" />
             <!-- Only disappearing Views will be supported. -->

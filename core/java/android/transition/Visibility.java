@@ -84,7 +84,7 @@ public abstract class Visibility extends Transition {
     public Visibility(Context context, AttributeSet attrs) {
         super(context, attrs);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.VisibilityTransition);
-        int mode = a.getInt(R.styleable.VisibilityTransition_visibilityMode, 0);
+        int mode = a.getInt(R.styleable.VisibilityTransition_transitionVisibilityMode, 0);
         a.recycle();
         if (mode != 0) {
             setMode(mode);
@@ -97,7 +97,7 @@ public abstract class Visibility extends Transition {
      *
      * @param mode The behavior supported by this transition, a combination of
      *             {@link #MODE_IN} and {@link #MODE_OUT}.
-     * @attr ref android.R.styleable#VisibilityTransition_visibilityMode
+     * @attr ref android.R.styleable#VisibilityTransition_transitionVisibilityMode
      */
     public void setMode(int mode) {
         if ((mode & ~(MODE_IN | MODE_OUT)) != 0) {
@@ -111,7 +111,7 @@ public abstract class Visibility extends Transition {
      *
      * Returns whether appearing and/or disappearing Views are supported. A combination of
      *         {@link #MODE_IN} and {@link #MODE_OUT}.
-     * @attr ref android.R.styleable#VisibilityTransition_visibilityMode
+     * @attr ref android.R.styleable#VisibilityTransition_transitionVisibilityMode
      */
     public int getMode() {
         return mMode;
