@@ -613,6 +613,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ieslēgt vai izslēgt tālruni"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Ļauj lietotnei ieslēgt vai izslēgt planšetdatoru."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Ļauj lietotnei ieslēgt vai izslēgt tālruni."</string>
+    <string name="permlab_userActivity" msgid="1677844893921729548">"displeja noildzes atiestatīšana"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Ļauj lietotnei atiestatīt displeja noildzi."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"darbināt rūpnīcas pārbaudes režīmā"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Darbina kā zema līmeņa ražotāja testu, atļaujot pilnīgu piekļuvi planšetdatora aparatūrai. Pieejama tikai tad, ja planšetdators darbojas ražotāja testa režīmā."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Darbiniet kā zema līmeņa ražotāja pārbaudi, atļaujot pilnīgu piekļuvi tālruņa aparatūrai. Pieejams tikai tad, ja tālrunis darbojas ražotāja pārbaudes režīmā."</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Ļauj lietotnei lasīt un rakstīt kešatmiņas failu sistēmā."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP zvanu veikšana/saņemšana"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Ļauj lietotnei veikt un saņemt SIP zvanus."</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"mijiedarbība ar zvana laikā rādītu ekrānu"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Ļauj lietotnei kontrolēt, kad un kā lietotājam ir redzams zvana laikā redzamais ekrāns."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"Mijiedarboties ar zvana laikā rādītu ekrānu"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Ļauj lietotnei kontrolēt, kad un kā lietotājam ir redzams zvana laikā redzamais ekrāns."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"mijiedarbība ar tālruņu komunikācijas pakalpojumiem"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Ļauj lietotnei sazināties ar tālruņu komunikācijas pakalpojumiem, lai veiktu vai saņemtu zvanus."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"Nodrošināt lietotāja pieredzi zvana laikā"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Ļauj lietotnei nodrošināt lietotāja pieredzi zvana laikā."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"lasīt informāciju par iepriekšēju tīkla izmantošanu"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Ļauj lietotnei lasīt informāciju par iepriekšēju tīkla izmantošanu saistībā ar noteiktiem tīkliem un lietotnēm."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"pārvaldīt tīkla politiku"</string>
@@ -1352,8 +1354,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Pieskarieties, lai atspējotu USB atkļūdošanu."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Tastatūras maiņa"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Izvēlēties tastatūru"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"Rādīt ievades metodi"</string>
     <string name="hardware" msgid="7517821086888990278">"Aparatūra"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Atlasiet tastatūras izkārtojumu"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Pieskarieties, lai atlasītu tastatūras izkārtojumu."</string>
@@ -1404,8 +1405,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Ļauj lietojumprogrammai izveidot savienojumu ar uzticamības pārbaudes programmu."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Mijiedarbošanās ar atjauninājumu un atkopšanas sistēmu"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Ļauj lietojumprogrammai mijiedarboties ar atkopšanas sistēmu un sistēmas atjauninājumiem."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Izveidot satura projekcijas sesijas"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Ļauj lietojumprogrammai izveidot satura projekcijas sesijas. Šīs sesijas var atļaut lietojumprogrammām uzņemt ekrāna un skaņas saturu. Parastām lietotnēm tas nekad nav nepieciešams."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Pārvaldīt satura projekcijas sesijas"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Ļauj lietojumprogrammai pārvaldīt satura projekcijas sesijas. Šīs sesijas var atļaut lietojumprogrammām uzņemt ekrāna attēlu un tvert skaņas saturu. Parastām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Instalēšanas sesiju lasīšana"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Ļauj lietojumprogrammai lasīt instalēšanas sesijas. Tādējādi lietojumprogrammai ir pieejama informācija par aktīvajām pakotņu instalācijām."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Pieskarieties divreiz, lai kontrolētu tālummaiņu."</string>
@@ -1426,8 +1427,8 @@
     <string name="deny" msgid="2081879885755434506">"Noraidīt"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Atļauja ir pieprasīta."</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Atļauja kontam <xliff:g id="ACCOUNT">%s</xliff:g>\nir pieprasīta."</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"Jūs izmantojat šo lietotni savā personiskajā vidē."</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"Jūs izmantojat šo lietotni savā darba vidē."</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Šo lietotni izmantojat ārpus sava darba profila"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Jūs izmantojat šo lietotni no sava darba profila."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Ievades metode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sinhronizācija"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Pieejamība"</string>
@@ -1502,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Norādīt agrāku stundu"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Iestatīt pēcpusdienas laiku"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Iestatīt priekšpusdienas laiku"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"pēcpusd."</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"priekšpusd."</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Norādīt vēlāku mēnesi"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Norādīt agrāku mēnesi"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Norādīt vēlāku dienu"</string>
@@ -1536,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Rediģēt"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Datu izmantošanas brīdinājums"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Piesk., lai sk. lietoš. un iest."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G–3G dati ir atslēgti"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G dati ir atslēgti"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Mobilie dati ir atslēgti"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi dati ir atslēgti"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"Sasniegts ierobežojums"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Sasniegts 2G-3G datu ierobež."</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Sasniegts 4G datu ierobežojums"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Sasniegts mob. datu ierobežojums"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Sasniegts Wi-Fi datu ierobež."</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Datu lietošana ciklā pārtraukta."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G datu ierobež. pārsniegts"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G datu limits pārsniegts"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Pārsniegts mob. datu ierobežojums"</string>
@@ -1571,7 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Vai atbildēt uz zvanu?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Vienmēr"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Tikai vienreiz"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s neatbalsta darba profilu."</string>
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"Programma %1$s neatbalsta darba profilus"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Planšetdators"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Tālrunis"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Austiņas"</string>
@@ -1644,6 +1643,8 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pieejamības režīms ir iespējots."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Pieejamība ir atcelta."</string>
     <string name="user_switched" msgid="3768006783166984410">"Pašreizējais lietotājs: <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"Īpašnieks"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Kļūda"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Jūsu administrators neļauj veikt šīs izmaiņas."</string>
@@ -1765,31 +1766,19 @@
     <string name="item_is_selected" msgid="949687401682476608">"Atlasīts: <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> tika dzēsts."</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Darbā: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"Lai atspraustu šo ekrānu, vienlaikus pieskarieties pogām “Atpakaļ” un “Pēdējās” un turiet tās nospiestas."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Lai atspraustu šo ekrānu, pieskarieties pogai “Pēdējās” un turiet to nospiestu."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Ekrāns ir piesprausts. Jūsu organizācija nav atļāvusi atspraušanu."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Vai izmantot ekrāna piespraušanu?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Ekrāna piespraušana bloķē ekrānu vienā skatā.\n\nLai izietu, vienlaikus pieskarieties pogām “Atpakaļ” un “Pēdējās” un turiet tās nospiestas."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Ekrāna piespraušana bloķē ekrānu vienā skatā.\n\nLai izietu, pieskarieties un pogai “Pēdējās” un turiet to nospiestu."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NĒ, PALDIES"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"SĀKT"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN kods"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"grafiskā atslēga"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"parole"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrāns ir piesprausts"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekrāns ir atsprausts"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pirms atspraušanas pieprasīt PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pirms atspraušanas pieprasīt grafisko atslēgu"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pirms atspraušanas pieprasīt paroli"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Lai paildzinātu akumulatora darbības laiku, akumulatora enerģijas taupīšanas režīmā tiks pazemināta ierīces veiktspēja, samazināta vibrācija un ierobežota liela daļa fona datu. E-pasta, ziņojumapmaiņas un citas lietotnes, kas regulāri tiek sinhronizētas, tiks atjauninātas tikai tad, ja tās atvērsiet.\n\nIerīces uzlādes laikā akumulatora jaudas taupīšana tiek izslēgta automātiski."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Līdz beigsies dīkstāve (<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>)"</string>
 </resources>

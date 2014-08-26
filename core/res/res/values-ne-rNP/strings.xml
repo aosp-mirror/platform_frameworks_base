@@ -613,6 +613,10 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"फोन खोल्न वा बन्द गर्न उर्जा प्रदान गर्नुहोस"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ट्याब्लेटलाई खोल्न र बन्द गर्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"अनुप्रयोगलाई फोन खोल्न र बन्द गर्न अनुमति दिन्छ।"</string>
+    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
+    <skip />
+    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
+    <skip />
     <string name="permlab_factoryTest" msgid="3715225492696416187">"फ्याक्ट्रि परीक्षण मोडमा चालु गर्नुहोस्"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"ट्याब्लेट हार्डवेयरलाई पुरा पहुँच गर्न दिँदै तल्लो स्तर उत्त्पादक परीक्षणको रूपमा चलाउनुहोस्। ट्याब्लेट उत्त्पादक परीक्षण मोडमा चलिरहेको बेला मात्र उपलब्ध हुन्छ।"</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"तल्लो स्तर उत्त्पादक जस्तै चलाउनुहोस्, पुरा पहुँच दिन फोन हार्डवेयरलाई अनुमति हुन्छ। फोन उत्पादक परीक्षण मोडमा चलिरहेको बेला मात्र उपलब्ध हुन्छ।"</string>
@@ -714,12 +718,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"केस फाइल प्रणालीलाई पढ्न र लेख्‍नको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP कलहरू प्राप्त/बनाउन"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP कलहरू बनाउन र प्राप्त गर्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"आगमन कल स्क्रिनसँग अन्तर्क्रिया गर्नुहोस्"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"कहिले र कसरी प्रयोगकर्ताले आगमन कल स्क्रीन हेर्न सक्दछ भनेर नियन्त्रण गर्न अनुप्रयोगलाई अनुमति दिनुहोस्।"</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"आगमन कल स्क्रिन संग अन्तर्क्रिया गर्नुहोस्"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"कहिले र कसरी प्रयोगकर्ताले आगमन कल स्क्रीन हेर्न सक्दछ भनेर नियन्त्रण गर्न अनुप्रयोगलाई अनुमति दिनुहोस्।"</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"टेलिफोनी सेवा अन्तरक्रिया"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"अनुप्रयोगलाई कल बनाउन/प्राप्त गर्न टेलीफोनी सेवा साथ अन्तरक्रिया गर्न अनुमति दिन्छ।"</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"आउने-कल प्रयोगकर्ता अनुभव प्रदान गर्नुहोस्"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"अनुप्रयोगलाई आउने-कल प्रयोगकर्ता अनुभव प्रदान गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"नेटवर्क उपयोगको इतिहास पढ्नुहोस्"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"निश्चित नेटवर्कहरू र अनुप्रयोगहरूको लागि ऐतिहासिक नेटवर्क उपयोग पढ्नको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"नेटवर्क नीति प्रबन्ध गर्नुहोस्"</string>
@@ -1360,8 +1364,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB डिबग गर्ने असक्षम पार्न छुनुहोस्।"</string>
     <string name="select_input_method" msgid="8547250819326693584">"कुञ्जीपाटी परिवर्तन गर्नुहोस्"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"कीबोर्ड छान्नुहोस्"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"आगत विधि देखाउनुहोस्"</string>
     <string name="hardware" msgid="7517821086888990278">"हार्डवेयर"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"किबोर्ड रूपरेखा चयन गर्नुहोस्"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"किबोर्ड रूपरेखा चयन गर्न टच गर्नुहोस्।"</string>
@@ -1412,8 +1415,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"विश्वस्त प्रतिनिधि सेवालाई बाँध्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"अद्यावधिक र रिकभरी प्रणालीको साथ अन्तर्क्रिया"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"अनुप्रयोगलाई रिकभरी प्रणाली र प्रणाली अद्यावधिकहरूको साथ अन्तर्क्रिया गर्न अनुमति दिन्छ।"</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"मिडिया प्रक्षेपण सत्रहरू सिर्जना गर्नुहोस्"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"मिडिया प्रक्षेपण सत्र सिर्जना गर्न अनुप्रयोगलाई अनुमति दिन्छ। यी सत्रले प्रदर्शन र अडियो सामग्री खिच्ने क्षमताका अनुप्रयोगहरू प्रदान गर्न सक्छन्। सामान्य अनुप्रयोगहरूको कहिल्यै पनि आवश्यक पर्दैन।"</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"मिडिया प्रक्षेपण सत्र व्यवस्थापन गर्नुहोस्"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"मिडिया प्रक्षेपण सत्र व्यवस्थापन गर्न अनुप्रयोगलाई अनुमति दिन्छ। यी सत्रहरूले प्रदर्शन र अडियो सामग्री खिच्ने क्षमताका अनुप्रयोगहरू प्रदान गर्न सक्छन्। सामान्य अनुप्रयोगहरूको कहिल्यै पनि आवश्यक पर्दैन।"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"स्थापना सत्रहरू पढ्नुहोस्"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"स्थापित सत्र पढ्न अनुप्रयोगलाई अनुमति दिनुहोस्। यसले सक्रिय प्याकेज प्रतिष्ठानहरू बारेमा विवरण हेर्ने अनुमति दिन्छ।"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"जुम नियन्त्रणको लागि दुई चोटि टच गर्नुहोस्"</string>
@@ -1434,8 +1437,9 @@
     <string name="deny" msgid="2081879885755434506">"अस्वीकार गर्नुहोस्"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"अनुरोध गरिएको अनुमति"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">\n"खाता <xliff:g id="ACCOUNT">%s</xliff:g>को लागि अनुरोध गरिएको अनुमति।"</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"तपाईँ आफ्नो व्यक्तिगत ठाउँमा यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"तपाईँ आफ्नो कार्य ठाउँमा यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
+    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
+    <skip />
+    <string name="forward_intent_to_work" msgid="621480743856004612">"तपाईँ आफ्नो कार्य प्रोफाइलमा यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"इनपुट विधि"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"सिङ्क गर्नुहोस्"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"उपलब्धता"</string>
@@ -1510,8 +1514,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"घन्टा घटाउनुहोस्"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"PM सेट गर्नुहोस्"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"AM सेट गर्नुहोस्"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"अपरान्ह"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"बिहान"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"महिना बढाउनुहोस्"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"महिना घटाउनुहो्स्"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"दिन बढाउनुहोस्"</string>
@@ -1544,11 +1546,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"सम्पादन गर्नुहोस्"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"डेटा प्रयोग चेतावनी"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"उपयोग र सेटिङहरू हेर्न छुनुहोस्।"</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G डेटा बन्द छ"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G डेटा बन्द छ"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"सेलुलर डेटा बन्द छ"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"वाइफाइ डेटा बन्द छ"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"सीमा पुग्यो"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G डेटा सीमा पुग्यो"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G डेटा सीमा पुग्यो"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"सेलुलर डेटा सीमा पुग्यो"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"वाइफाइ डेटा सीमा पुग्यो"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"तथ्याङ्क बाँकी चक्रको लागि रोकिएको छ"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G डेटा सीमा भन्दा पार भएको छ"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G डेटा SIMा नाघ्यो"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"सेलुलर डेटा सीमा नाघ्यो"</string>
@@ -1579,8 +1581,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"कल स्वीकार गर्नुहुन्छ?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"सधैँ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"एउटा मात्र"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for activity_resolver_work_profiles_support (5462991471861024343) -->
+    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
     <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ट्याब्लेट"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"फोन"</string>
@@ -1654,6 +1655,8 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"पहुँच सक्षम गरिएको।"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"पहुँचयोग्यता रद्द गरियो।"</string>
     <string name="user_switched" msgid="3768006783166984410">"अहिलेको प्रयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>।"</string>
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"मालिक"</string>
     <string name="error_message_title" msgid="4510373083082500195">"त्रुटि"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"यो परिवर्तन गर्न तपाईँको प्रशासक द्वारा अनुमति छैन"</string>
@@ -1775,31 +1778,19 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> चयन गरियो"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> हटाइयो"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"स्क्रिन अनपिन गर्न, उही समयमा भर्खरहरू टच गरेर फेरि होल्ड गर्नुहोस्।"</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"यो स्क्रिन अनपिन गर्न, भर्खरहरू टच गर्नुहोस् र होल्ड गर्नुहोस्।"</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"स्क्रिन अनपिन हुँदैछ। अनपिन गर्ने तपाईँको संगठन द्वारा समर्थित छैन।"</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"स्क्रिन पिन गर्ने प्रयोग गर्नुहुन्छ?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"स्क्रिन पिनिङले एकल दृश्यमा डिस्प्ले लक गर्छ।\n\n बाहिर निस्कन, भर्खरहरू छुनुहोस् होल्ड गर्नुहोस् उही समयमा।"</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"स्क्रिन पिनिङले एकल दृश्यमा डिस्प्ले लक गर्छ।\n\n बाहिर निस्कन, भर्खरहरू छुनुहोस् होल्ड गर्नुहोस्"</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"होइन, धन्यवाद"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"शैली बन्द गर्नुहोस"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"पासवर्ड"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रिन पिन गरियो"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"स्क्रिन अनपिन गरियो"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"पिन निकाल्नुअघि PIN सोध्नुहोस्"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"पिन निकाल्नुअघि खोल्ने रूपरेखा सोध्नुहोस्"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"पिन निकाल्नुअघि पासवर्ड सोध्नुहोस्"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"ब्याट्री जीवन सुधार्न, ब्याट्री बचतले आफ्नो उपकरणको प्रदर्शन र कम्पनको सीमा र सबैभन्दा पृष्ठभूमि डेटा कम गर्छ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जसले तपाईं तिनीहरूलाई नखोले सम्म समिकरण अद्यावधिक नगर्न सक्छ भनि भर पर्छ।\n\nब्याट्री बचतले तपाईँको उपकरण चार्ज हुँदै बेला तपाईँको उपकरण स्वचालित बन्द गर्छ।"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"तपाईँको <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> डाउनटाइम समाप्त हुँदा सम्म"</string>
 </resources>

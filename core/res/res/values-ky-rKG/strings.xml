@@ -805,6 +805,8 @@
     <skip />
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Колдонмого планшетти күйгүзүп же өчүрүү мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Колдонмого телефонду күйгүзүп же өчүрүү мүмкүнчүлүгүн берет."</string>
+    <string name="permlab_userActivity" msgid="1677844893921729548">"дисплейдин күтүү убакытын кайра коюу"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Колдонмонун дисплейин күтүү убакытын кайра коюу мүмкүнчүлүгүн берет."</string>
     <!-- no translation found for permlab_factoryTest (3715225492696416187) -->
     <skip />
     <!-- no translation found for permdesc_factoryTest (3952059318359653091) -->
@@ -924,12 +926,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Колдонмого кэш файл тутумун окуу жана жазуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP чалууларын жасоо/кабыл алуу"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Колдонмонун SIP чалууларын жасап жана кабыл алуусуна жол ачат."</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"чалуу экраны менен байланыштыруу"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Колдонмого чалуу экранын колдонуучу качан жана кандай көрөөрүн башкаруу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"чалуу экраны менен байланыштыруу"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Колдонмого чалуу экраны качан жана кандай көрүнө тургандыгын башкаруу мүмкүнчүлүгүн берет."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"телефония кызматтары"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Колдонмого чалууларды жасоо/кабыл алуу үчүн телефония кызматтары менен байланышууга уруксат берет."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"чалуу ичиндеги колдонуучу тажрыйбасын камсыз кылуу"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Колдонмого чалуу учурундагы колдонуучу тажрыйбасын камсыз кылуу мүмкүнчүлүгүн берет."</string>
     <!-- no translation found for permlab_readNetworkUsageHistory (7862593283611493232) -->
     <skip />
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Колдонмого белгилүү бир тармактарга жана колдонмолорго байланыштуу тармактын колдонулушу жөнүндө таржымалды окуу мүмкүнчүлүгүн берет."</string>
@@ -1747,8 +1749,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB мүчүлүштүктөрдү жоюу мүмкүнчүлүгүн өчүрүү үчүн тийип коюңуз."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Баскычтопту өзгөртүү"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Баскычтопторду тандаңыз"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"Киргизүү ыкмасын көрсөтүү"</string>
     <string name="hardware" msgid="7517821086888990278">"Аппараттык"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Тергичтин жайгашуусун тандоо"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Тергичтин жайгашуусун тандаш үчүн басыңыз."</string>
@@ -1822,8 +1823,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Колдонмого ишенимдүү агент кызматына жалгашууга мүмкүнчүлүк берет."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Калыбына келтирүү системасы жана жаңыртуулар менен иштөө"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Колдонмого калыбына келтирүү системасы жана система жаңыртуулары менен карым-катнашуу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Медиа чагылдыруу сеанстарын түзүү"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Колдонмого медиа чагылдыруу сеанстарын түзүү мүмкүнчүлүгүн берет. Мындай сеанстардын жардамы менен, колдонмолор дисплей жана видео мазмунду сүрөткө тартып турушат. Кадимки колдонмолор үчүн талап кылынбайт."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Медиа чагылтуу сеанстарын башкаруу"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Колдонмого медиа чагылдыруу сеанстарын башкаруу мүмкүнчүлүгүн берет. Мындай сеанстардын жардамы менен, колдонмолор дисплей жана видео мазмунду сүрөткө тартып турушат. Кадимки колдонмолор үчүн талап кылынбайт."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Орнотуу сеанстарын окуу"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Колдонмого орнотуу сеанстарын окуу мүмкүнчүлүгүн берет. Ушуну менен, ал жигердүү топтом орнотууларынын чоо-жайын көрө алат."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Чен өлчөмүн көзөмөлдөө үчүн эки жолу тийип коюңуз"</string>
@@ -1856,8 +1857,8 @@
     <skip />
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Уруксат талап кылуу"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Кийинки эсепке\nуруксат талап кылынууда: <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"Бул колдонмону жеке мейкиндигиңизде пайдаланып жатасыз"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"Бул колдонмону жумуш мейкиндигиңизде пайдаланып жатасыз"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Бул колдонмо жумуш профилиңиздин сыртында колдонулуп жатат"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Бул колдонмону жумуш профилиңизде пайдаланып жатасыз"</string>
     <!-- no translation found for input_method_binding_label (1283557179944992649) -->
     <skip />
     <!-- no translation found for sync_binding_label (3687969138375092423) -->
@@ -1964,8 +1965,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Саатты төмөндөтүү"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"т.к. орнотуу"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"т.ч. орнотуу"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"т.к."</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"т.ч."</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Айды жогорулатуу"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Айды азайтуу"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Күндү жогорулатуу"</string>
@@ -2003,11 +2002,11 @@
     <!-- no translation found for data_usage_warning_title (1955638862122232342) -->
     <skip />
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Колдонууну көрүш үчүн басыңыз."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2Гб-3Гб көлмдөгү дайындр өчүрлдү."</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4Гб көлөмдөгү дайындар өчүрүлдү"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Уюктук дайындар тармагы өчүк"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi дайындар тармагы өчүк"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"Белгиленген чекке жеттиңиз"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G дайындар чегине жетти"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G дайындар чегине жетти"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Уюктук дайындар чегине жетти"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi дайындар чегине жетти"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Калган мерчимде дайындар бир азга токтотулду"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G трафик чектен ашты"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G трафик чектен ашты"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Уюкт дайндр белглнгн чегнн аштңз"</string>
@@ -2052,7 +2051,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Чалуу кабыл алынсынбы?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Дайыма"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Бир жолу гана"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s жумуш профилин колдоого албайт."</string>
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s жумуш профилин колдоого албайт"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Планшет"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Телефон"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Кулакчын"</string>
@@ -2125,6 +2124,8 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Жеткиликтүүлүк иштетилди."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Атайын мүмкүнчүлүктөр иштетилген жок."</string>
     <string name="user_switched" msgid="3768006783166984410">"Учурдагы колдонуучу <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"Ээси"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Ката"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Мындай өзгөртүүгө администраторуңуз тарабынан тыюу салынган."</string>
@@ -2246,31 +2247,19 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> тандалды"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> өчүрүлдү"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Жумуш <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"Бул экранды бошотуу үчүн, бир эле маалда Артка жана Акыркылар баскычтарына тийип, кармап туруңуз."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Бул экранды бошотуу үчүн, Акыркылар баскычына тийип, кармап туруңуз."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Экран кадалды. Уюмуңуздун уруксатысыз бошото албайсыз."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Экран кадалсынбы?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Экран кадалганда дисплей жалгыз көрүнүштө чагылдырылат.\n\nЧыгуу үчүн, бир эле маалда Артка жана Акыркылар деген баскычтарды коё бербей басып туруңуз."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Экран кадалганда дисплей жалгыз көрүнүштө кулпулайт.\n\nЧыгуу үчүн Акыркылар көрүнүшүн коё бербей басып туруңуз."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"ЖОК, РАХМАТ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"БАШТОО"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"бөгөттөн чыгаруу үлгүсү"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"сырсөз"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Экран кадалды"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Экран бошотулду"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Бошотуудан мурун PIN суралсын"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Бошотуудан мурун кулпуну ачкан үлгү суралсын"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Бошотуудан мурун сырсөз суралсын"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Батарея өмүрүн узартууга жардамдашуу үчүн, батарея үнөмдөгүч түзмөгүңүздүн өндүрүмдүүлүгүн азайтып, дирилдөөнү жана көпчүлүк фон дайындарын чектейт. Email, билдирүү жазуу жана башка шайкештирүүгө көз каранды колдонмолор, аларды ачмайыңызча жаңыртылбашы мүмкүн.\n\nТүзмөгүңүз кубатталып жатканда батарея үнөмдөгүч автоматтык түрдө өчөт."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Иштебей турган абал <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> аяктамайынча"</string>
 </resources>

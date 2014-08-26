@@ -613,6 +613,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"accensione o spegnimento del telefono"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Consente all\'applicazione di accendere o spegnere il tablet."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Consente all\'applicazione di accendere o spegnere il telefono."</string>
+    <string name="permlab_userActivity" msgid="1677844893921729548">"reimpostazione del timeout del display"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Consente all\'app di reimpostare il timeout del display."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"esecuzione in modalità test di fabbrica"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"In esecuzione come test del produttore di basso livello, consentendo l\'accesso completo all\'hardware del tablet. Disponibile soltanto quando il tablet è in esecuzione in modalità test del produttore."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"In esecuzione come test del produttore di basso livello, consentendo l\'accesso completo all\'hardware del telefono. Disponibile soltanto quando il telefono è in esecuzione in modalità test del produttore."</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Consente all\'applicazione di leggere e scrivere il filesystem nella cache."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"fare/ricevere chiamate SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Consente all\'app di effettuare e ricevere chiamate SIP."</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"interazione con lo schermo durante una chiamata"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Consente all\'app di stabilire quando e come l\'utente vede lo schermo durante una chiamata."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interazione con lo schermo durante una chiamata"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Consente all\'app di stabilire quando e come l\'utente vede lo schermo durante una chiamata."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"interagire con i servizi di telefonia"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Consente all\'app di interagire con i servizi di telefonia per effettuare/ricevere chiamate."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"offerta di un\'esperienza utente durante le chiamate"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Consente all\'app di offrire un\'esperienza utente durante le chiamate."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"lettura dati storici di utilizzo della rete"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Consente all\'applicazione di leggere dati storici di utilizzo della rete per reti e applicazioni specifiche."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"gestione norme rete"</string>
@@ -1352,8 +1354,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tocca per disattivare il debug USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambia tastiera"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Scegli tastiere"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"Mostra metodo immissione"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Seleziona layout tastiera"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Tocca per selezionare un layout di tastiera."</string>
@@ -1404,8 +1405,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Consente a un\'applicazione di associarsi a un agente di attendibilità."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interazione con il sistema di ripristino e aggiornamento"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Consente a un\'applicazione di interagire con il sistema di ripristino e con gli aggiornamenti di sistema."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Crea sessioni di proiezioni multimediali"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Consente a un\'applicazione di creare sessioni di proiezioni multimediali. Queste sessioni possono permettere alle applicazioni di acquisire contenuti presenti sul display e contenuti audio. Questa autorizzazione non dovrebbe mai essere necessaria per le normali app."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Gestione delle sessioni di proiezione di contenuti multimediali"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Consente a un\'applicazione di gestire sessioni di proiezione di contenuti multimediali. Queste sessioni possono consentire alle applicazioni di acquisire contenuti visivi e audio. Non dovrebbe essere mai necessaria per le normali app."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Lettura di sessioni di installazione"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Consente a un\'applicazione di leggere le sessioni di installazione. L\'app può conoscere i dettagli sulle installazioni di pacchetti attive."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Tocca due volte per il comando dello zoom"</string>
@@ -1426,8 +1427,8 @@
     <string name="deny" msgid="2081879885755434506">"Nega"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Autorizzazione richiesta"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Autorizzazione richiesta\nper l\'account <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"Stai utilizzando l\'app nel tuo spazio personale"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"Stai utilizzando l\'app nel tuo spazio di lavoro"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Stai utilizzando l\'app al di fuori del tuo profilo di lavoro"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Stai utilizzando l\'app nel tuo profilo di lavoro"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Metodo inserimento"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sinc"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibilità"</string>
@@ -1502,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Riduci ore"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Imposta PM"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Imposta AM"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"PM"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"AM"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Aumenta mese"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Riduci mese"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Aumenta giorno"</string>
@@ -1536,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Modifica"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Avviso sull\'utilizzo dei dati"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Mostra utilizzo e impostazioni."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"Dati 2G-3G disattivati"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"Dati 4G disattivati"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Rete dati disattivata"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Dati Wi-Fi disattivati"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"Limite raggiunto"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Limite di dati 2G-3G raggiunto"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Limite di dati 4G raggiunto"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Limite dati cellulari raggiunto"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Limite di dati Wi-Fi raggiunto"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Dati sospesi per resto del ciclo"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Limite dati 2G-3G superato"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Limite dati 4G superato"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Limite rete dati superato"</string>
@@ -1571,7 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Accettare la chiamata?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Sempre"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Solo una volta"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s non supporta il profilo di lavoro."</string>
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s non supporta il profilo di lavoro"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefono"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Cuffie audio"</string>
@@ -1644,6 +1643,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Accessibilità attivata."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accessibilità annullata."</string>
     <string name="user_switched" msgid="3768006783166984410">"Utente corrente <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"Passaggio a <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Proprietario"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Errore"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Questa modifica non è consentita dal tuo amministratore"</string>
@@ -1765,31 +1765,19 @@
     <string name="item_is_selected" msgid="949687401682476608">"Elemento selezionato: <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> eliminato"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> lavoro"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"Per sbloccare questa schermata, tocca e tieni premuto contemporaneamente Indietro e Recenti."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Per sbloccare questa schermata, tocca e tieni premuto Recenti."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"La schermata è bloccata. La tua organizzazione non ne consente lo sblocco."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Utilizzare blocco schermata?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Il blocco schermata fissa la visualizzazione su una stessa immagine.\n\nPer uscire, tocca e tieni premuto contemporaneamente Indietro e Recenti."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Il blocco schermata fissa la visualizzazione su una stessa immagine.\n\nPer uscire, tocca e tieni premuto Recenti."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NO, GRAZIE"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"AVVIA"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"sequenza di sblocco"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"password"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Schermata bloccata"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Schermata sbloccata"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Richiedi il PIN prima di sbloccare"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Richiedi sequenza di sblocco prima di sbloccare"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Richiedi password prima di sbloccare"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Per aumentare la durata della batteria, la funzione Risparmio energetico riduce le prestazioni del dispositivo e limita vibrazione e gran parte dei dati in background. App di email, messaggi e altre app basate sulla sincronizzazione potrebbero non essere aggiornate se non le apri.\n\nIl risparmio energetico si disattiva automaticamente quando il dispositivo è in carica."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Fino al termine del periodo di inattività previsto per le <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

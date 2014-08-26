@@ -613,6 +613,10 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"вклучи или исклучи телефон"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Дозволува апликацијата да го вклучува или исклучува таблетот."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Дозволува апликацијата да го вклучува или исклучува телефонот."</string>
+    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
+    <skip />
+    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
+    <skip />
     <string name="permlab_factoryTest" msgid="3715225492696416187">"извршувај во режим на фабричко тестирање"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Изврши во режим на фабричко тестирање од ниско ниво; дозволи целосен пристап кон хардверот на таблетот. Достапно само кога таблетот работи во режимот на фабричко тестирање."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Изврши во режим на фабричко тестирање од ниско ниво; дозволи целосен пристап кон хардверот на телефонот. Достапно само кога телефонот работи во режимот на фабричко тестирање."</string>
@@ -714,12 +718,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Дозволува апликацијата да чита и да пишува кеш систем на датотеки."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"остварувај/примај повици преку СИП"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Дозволува апликацијата да остварува и прима повици преку СИП."</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"комуницирај со екран на дојдовен повик"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Овозможува апликацијата да контролира кога и како корисникот го гледа екранот на дојдовен повик."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"комуницирај со екран на дојдовен повик"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Овозможува апликацијата да контролира кога и како корисникот го гледа екранот на дојдовен повик."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"комуницира со телефонски услуги"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Дозволува апликацијата да комуницира со телефонски услуги за да прави/прима повици."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"обезбеди искуство за корисникот при дојдовен повик"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Овозможува апликацијата да обезбеди искуство за корисникот при дојдовен повик."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"читај употреба на мрежа во минатото"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Дозволува апликацијата да го чита историското користење на мрежата за одредени мрежи или апликации."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"управувај со политика на мрежа"</string>
@@ -1352,8 +1356,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Допрете за да се оневозможи отстранувањето грешки преку USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Измени тастатура"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Избери тастатури"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"Прикажи влезен метод"</string>
     <string name="hardware" msgid="7517821086888990278">"Хардвер"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Избери изглед на тастатура"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Допри за да избереш изглед на тастатура."</string>
@@ -1404,8 +1407,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Дозволува апликацијата да се поврзе со услуга за агенти за доверба."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Комуницирај со системот за обновување и ажурирање"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Овозможува апликацијата да комуницира со системот за обновување и ажурирање."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Создади сесии за проектирање на медиуми"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Дозволува апликацијата да создава сесии за проектирање на медиуми. Овие сесии им обезбедуваат можност на апликациите да снимаат екранска и аудиосодржина. Не би требало да се користи кај вообичаени апликации."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Управувај со сесиите на прикажување во медиумите"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Овозможува апликацијата да управува со сесиите на прикажување во медиумите. Ваквите сесии може на апликациите да им обезбедат можност да снимаат содржини на екран и аудиосодржини. На стандардните апликации ова не им е потребно."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Читај сесии на инсталирање"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Дозволува апликација да чита сесии на инсталирање. Тоа овозможува апликацијата да гледа детали за активни инсталации на пакет."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Допрете двапати за регулирање на зумирањето"</string>
@@ -1426,8 +1429,9 @@
     <string name="deny" msgid="2081879885755434506">"Одбиј"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Побарана е дозвола"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Побарана е дозвола\nза сметка <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"Користите апликација во личниот простор"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"Користите апликација во работниот простор"</string>
+    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
+    <skip />
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Ја користите апликацијата во работниот профил"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Метод на внес"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Синхронизирај"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Пристапност"</string>
@@ -1502,8 +1506,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Намали час"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Постави попладне"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Подеси претпладне"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"попладне"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"претпладне"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Зголеми месец"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Намали месец"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Зголеми ден"</string>
@@ -1538,11 +1540,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Уреди"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Предупредување за користење податоци"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Допри за да видиш употреба и подесувања."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"Податоците 2G-3G се исклучени"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"Податоците 4G се исклучени"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Мобилните податоци се исклучени"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Подат. преку Wi-Fi се исклучени"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"Го достигнавте лимитот"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Постигна лимит за 2G-3G податоци"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Постигнат лимит за 4G податоци"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Постигна лимит за мобилни подат."</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Постигна лимит за Wi-Fi податоци"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Паузирано до крај на циклус"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Надминат лимит од 2G-3G податоци"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Надминат лимит од 4G податоци"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Лимитот за моб. подат. е надминат"</string>
@@ -1573,8 +1575,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Прифати повик?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Секогаш"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Само еднаш"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for activity_resolver_work_profiles_support (5462991471861024343) -->
+    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
     <skip />
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Таблет"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Телефон"</string>
@@ -1648,6 +1649,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Овозможена е пристапност."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Пристапноста е откажана."</string>
     <string name="user_switched" msgid="3768006783166984410">"Тековен корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"Се префрла на <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Сопственик"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Грешка"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Администраторот не ја дозволува промената"</string>
@@ -1769,31 +1771,19 @@
     <string name="item_is_selected" msgid="949687401682476608">"Избрано <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Избришано <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Работа <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"За да го откачите екранот, допрете и задржете Назад и Неодамнешни истовремено."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"За да го откачите екранот, допрете и задржете Неодамнешни."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Екранот е закачен. Откачување не е дозволено од вашата организација."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Да се употреби закачување на екранот?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Закачувањето на екранот го заклучува екранот во еден приказ.\n\nЗа да излезете, допрете и задржете Назад и Неодамнешни истовремено."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Закачувањето на екранот го заклучува екранот во еден приказ.\n\nЗа да излезете, допрете и задржете Неодамнешни."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"НЕ, БЛАГОДАРАМ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"СТАРТ"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"ПИН"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"шема за отклучување"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"лозинка"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Екранот е закачен"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Екранот е откачен"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Прашај за ПИН пред откачување"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Прашај за шема за отклучување пред откачување"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Прашај за лозинка пред откачување"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"За да помогне во подобрување на трајноста на батеријата, штедачот на батерија го намалува учинокот на уредот и ги ограничува вибрациите и повеќето податоци во заднина. Е-поштата, испраќањето пораки и другите апликации кои се потпираат на синхронизирање може да не се ажурираат освен ако не ги отворите.\n\nШтедачот на батерија автоматски се исклучува кога уредот се полни."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Додека не заврши паузата во <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>
