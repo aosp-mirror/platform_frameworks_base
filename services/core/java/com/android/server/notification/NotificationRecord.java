@@ -63,9 +63,8 @@ public final class NotificationRecord {
     public boolean isUpdate;
     private int mPackagePriority;
 
-    // The record that ranking should use for comparisons outside the group.
-    private NotificationRecord mRankingProxy;
     private int mAuthoritativeRank;
+    private String mGlobalSortKey;
 
     @VisibleForTesting
     public NotificationRecord(StatusBarNotification sbn, int score)
@@ -81,9 +80,8 @@ public final class NotificationRecord {
         mRecentlyIntrusive = previous.mRecentlyIntrusive;
         mPackagePriority = previous.mPackagePriority;
         mIntercept = previous.mIntercept;
-        mRankingProxy = previous.mRankingProxy;
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
-        // Don't copy mGroupKey, recompute it, in case it has changed
+        // Don't copy mGlobalSortKey, recompute it.
     }
 
     public Notification getNotification() { return sbn.getNotification(); }
@@ -158,7 +156,7 @@ public final class NotificationRecord {
         pw.println(prefix + "  mRecentlyIntrusive=" + mRecentlyIntrusive);
         pw.println(prefix + "  mPackagePriority=" + mPackagePriority);
         pw.println(prefix + "  mIntercept=" + mIntercept);
-        pw.println(prefix + "  mRankingProxy=" + getRankingProxy().getKey());
+        pw.println(prefix + "  mGlobalSortKey=" + mGlobalSortKey);
         pw.println(prefix + "  mRankingTimeMs=" + mRankingTimeMs);
     }
 
@@ -265,12 +263,12 @@ public final class NotificationRecord {
         return sbn.getPostTime();
     }
 
-    public NotificationRecord getRankingProxy() {
-        return mRankingProxy;
+    public void setGlobalSortKey(String globalSortKey) {
+        mGlobalSortKey = globalSortKey;
     }
 
-    public void setRankingProxy(NotificationRecord proxy) {
-        mRankingProxy = proxy;
+    public String getGlobalSortKey() {
+        return mGlobalSortKey;
     }
 
     public void setAuthoritativeRank(int authoritativeRank) {
