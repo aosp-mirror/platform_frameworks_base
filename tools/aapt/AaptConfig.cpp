@@ -255,6 +255,8 @@ void applyVersionForCompatibility(ConfigDescription* config) {
                 != ResTable_config::SCREENLONG_ANY
             || config->density != ResTable_config::DENSITY_DEFAULT) {
         minSdk = SDK_DONUT;
+    } else if ((config->density == ResTable_config::DENSITY_ANY)) {
+        minSdk = SDK_L;
     }
 
     if (minSdk > config->sdkVersion) {
@@ -474,6 +476,11 @@ bool parseUiModeNight(const char* name, ResTable_config* out) {
 bool parseDensity(const char* name, ResTable_config* out) {
     if (strcmp(name, kWildcardName) == 0) {
         if (out) out->density = ResTable_config::DENSITY_DEFAULT;
+        return true;
+    }
+
+    if (strcmp(name, "anydpi") == 0) {
+        if (out) out->density = ResTable_config::DENSITY_ANY;
         return true;
     }
 

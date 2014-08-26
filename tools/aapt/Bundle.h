@@ -24,6 +24,7 @@ enum {
     SDK_HONEYCOMB_MR2 = 13,
     SDK_ICE_CREAM_SANDWICH = 14,
     SDK_ICE_CREAM_SANDWICH_MR1 = 15,
+    SDK_L = 21,
 };
 
 /*
