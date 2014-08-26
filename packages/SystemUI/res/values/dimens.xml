@@ -115,9 +115,6 @@
     <!-- Diameter of outer shape drawable shown in navbar search. Should be 1/2 of above value -->
     <dimen name="navbar_search_outerring_radius">170dp</dimen>
 
-    <!-- Threshold for swipe-up gesture to activate search dialog -->
-    <dimen name="navbar_search_up_threshhold">40dip</dimen>
-
     <!-- Height of search panel including navigation bar height -->
     <dimen name="navbar_search_panel_height">230dip</dimen>
 
@@ -420,7 +417,7 @@
     <dimen name="search_card_peek_height">100dp</dimen>
 
     <!-- How far the user needs to drag up to invoke search. -->
-    <dimen name="search_panel_threshold">150dp</dimen>
+    <dimen name="search_panel_threshold">100dp</dimen>
 
     <!-- The width/height of the phone/camera/unlock icon on keyguard. -->
     <dimen name="keyguard_affordance_height">56dp</dimen>
