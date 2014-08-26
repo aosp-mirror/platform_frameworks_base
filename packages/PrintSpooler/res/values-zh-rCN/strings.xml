@@ -25,12 +25,9 @@
     <string name="label_paper_size_summary" msgid="5668204981332138168">"纸张尺寸："</string>
     <string name="label_color" msgid="1108690305218188969">"颜色"</string>
     <string name="label_orientation" msgid="2853142581990496477">"方向"</string>
-    <!-- no translation found for label_pages (7768589729282182230) -->
-    <skip />
-    <!-- no translation found for template_all_pages (3322235982020148762) -->
-    <skip />
-    <!-- no translation found for template_page_range (428638530038286328) -->
-    <skip />
+    <string name="label_pages" msgid="7768589729282182230">"页数"</string>
+    <string name="template_all_pages" msgid="3322235982020148762">"全部<xliff:g id="PAGE_COUNT">%1$s</xliff:g>页"</string>
+    <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g>页"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"例如：1-5、8、11-13"</string>
     <string name="print_preview" msgid="8010217796057763343">"打印预览"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"安装 PDF 查看器以便预览"</string>
