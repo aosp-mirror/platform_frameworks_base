@@ -152,7 +152,10 @@ public class SyncManager {
      */
     private static final int DELAY_RETRY_SYNC_IN_PROGRESS_IN_SECONDS = 10;
 
-    private static final int INITIALIZATION_UNBIND_DELAY_MS = 5000;
+    /**
+     * How long to wait before considering an active sync to have timed-out, and cancelling it.
+     */
+    private static final long ACTIVE_SYNC_TIMEOUT_MILLIS = 30L * 60 * 1000;  // 30 mins.
 
     private static final String SYNC_WAKE_LOCK_PREFIX = "*sync*/";
     private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarm";
@@ -849,6 +852,31 @@ public class SyncManager {
         msg.setData(extras);
         msg.obj = info;
         mSyncHandler.sendMessage(msg);
+    }
+
+    /**
+     * Post a delayed message to the handler that will result in the cancellation of the provided
+     * running sync's context.
+     */
+    private void postSyncExpiryMessage(ActiveSyncContext activeSyncContext) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "posting MESSAGE_SYNC_EXPIRED in " +
+                    (ACTIVE_SYNC_TIMEOUT_MILLIS/1000) + "s");
+        }
+        Message msg = mSyncHandler.obtainMessage();
+        msg.what = SyncHandler.MESSAGE_SYNC_EXPIRED;
+        msg.obj = activeSyncContext;
+        mSyncHandler.sendMessageDelayed(msg, ACTIVE_SYNC_TIMEOUT_MILLIS);
+    }
+
+    /**
+     * Remove any time-outs previously posted for the provided active sync.
+     */
+    private void removeSyncExpiryMessage(ActiveSyncContext activeSyncContext) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "removing all MESSAGE_SYNC_EXPIRED for " + activeSyncContext.toString());
+        }
+        mSyncHandler.removeMessages(SyncHandler.MESSAGE_SYNC_EXPIRED, activeSyncContext);
     }
 
     class SyncHandlerMessagePayload {
@@ -1902,6 +1930,8 @@ public class SyncManager {
         private static final int MESSAGE_SERVICE_CONNECTED = 4;
         private static final int MESSAGE_SERVICE_DISCONNECTED = 5;
         private static final int MESSAGE_CANCEL = 6;
+        /** Posted delayed in order to expire syncs that are long-running. */
+        private static final int MESSAGE_SYNC_EXPIRED = 7;
 
         public final SyncNotificationInfo mSyncNotificationInfo = new SyncNotificationInfo();
         private Long mAlarmScheduleTime = null;
@@ -2000,10 +2030,21 @@ public class SyncManager {
                 // to also take into account the periodic syncs.
                 earliestFuturePollTime = scheduleReadyPeriodicSyncs();
                 switch (msg.what) {
+                    case SyncHandler.MESSAGE_SYNC_EXPIRED:
+                        ActiveSyncContext expiredContext = (ActiveSyncContext) msg.obj;
+                        if (Log.isLoggable(TAG, Log.DEBUG)) {
+                            Log.d(TAG, "handleSyncHandlerMessage: MESSAGE_SYNC_EXPIRED: expiring "
+                                    + expiredContext);
+                        }
+                        cancelActiveSync(expiredContext.mSyncOperation.target,
+                                expiredContext.mSyncOperation.extras);
+                        nextPendingSyncTime = maybeStartNextSyncLocked();
+                        break;
+
                     case SyncHandler.MESSAGE_CANCEL: {
                         SyncStorageEngine.EndPoint payload = (SyncStorageEngine.EndPoint) msg.obj;
                         Bundle extras = msg.peekData();
-                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        if (Log.isLoggable(TAG, Log.DEBUG)) {
                             Log.d(TAG, "handleSyncHandlerMessage: MESSAGE_SERVICE_CANCEL: "
                                     + payload + " bundle: " + extras);
                         }
@@ -2653,6 +2694,13 @@ public class SyncManager {
                     new ActiveSyncContext(op, insertStartSyncEvent(op), targetUid);
             activeSyncContext.mSyncInfo = mSyncStorageEngine.addActiveSync(activeSyncContext);
             mActiveSyncContexts.add(activeSyncContext);
+            if (!activeSyncContext.mSyncOperation.isInitialization() &&
+                    !activeSyncContext.mSyncOperation.isExpedited() &&
+                    !activeSyncContext.mSyncOperation.isManual() &&
+                    !activeSyncContext.mSyncOperation.isIgnoreSettings()) {
+                // Post message to expire this sync if it runs for too long.
+                postSyncExpiryMessage(activeSyncContext);
+            }
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "dispatchSyncOperation: starting " + activeSyncContext);
             }
@@ -2766,7 +2814,6 @@ public class SyncManager {
                     downstreamActivity = 0;
                     upstreamActivity = 0;
                 }
-
                 setDelayUntilTime(syncOperation, syncResult.delayUntil);
             } else {
                 if (isLoggable) {
@@ -2792,7 +2839,6 @@ public class SyncManager {
 
             stopSyncEvent(activeSyncContext.mHistoryRowId, syncOperation, historyMessage,
                     upstreamActivity, downstreamActivity, elapsedTime);
-
             // Check for full-resync and schedule it after closing off the last sync.
             if (info.target_provider) {
                 if (syncResult != null && syncResult.tooManyDeletions) {
@@ -2831,6 +2877,7 @@ public class SyncManager {
             mActiveSyncContexts.remove(activeSyncContext);
             mSyncStorageEngine.removeActiveSync(activeSyncContext.mSyncInfo,
                     activeSyncContext.mSyncOperation.target.userId);
+            removeSyncExpiryMessage(activeSyncContext);
         }
 
         /**

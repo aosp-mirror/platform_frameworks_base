@@ -273,6 +273,14 @@ public class SyncOperation implements Comparable {
         return extras.getBoolean(ContentResolver.SYNC_EXTRAS_DISALLOW_METERED, false);
     }
 
+    public boolean isManual() {
+        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false);
+    }
+
+    public boolean isIgnoreSettings() {
+        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, false);
+    }
+
     /** Changed in V3. */
     public static String toKey(SyncStorageEngine.EndPoint info, Bundle extras) {
         StringBuilder sb = new StringBuilder();
