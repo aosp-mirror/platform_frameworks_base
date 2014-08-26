@@ -25,6 +25,7 @@ import android.net.wifi.ScanSettings;
 import android.net.wifi.WifiChannel;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConnectionStatistics;
+import android.net.wifi.WifiActivityEnergyInfo;
 
 import android.net.DhcpInfo;
 
@@ -40,6 +41,8 @@ import android.os.WorkSource;
 interface IWifiManager
 {
     List<WifiAdapter> getAdaptors();
+
+    WifiActivityEnergyInfo reportActivityInfo(in WifiAdapter adapter);
 
     List<WifiConfiguration> getConfiguredNetworks();
 
