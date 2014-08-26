@@ -106,4 +106,7 @@
 
     <color name="keyguard_user_switcher_background_gradient_color">#77000000</color>
     <color name="doze_small_icon_background_color">#ff434343</color>
+
+    <!-- The color of the navigation bar icons. Need to be in sync with ic_sysbar_* -->
+    <color name="navigation_bar_icon_color">#E5FFFFFF</color>
 </resources>
