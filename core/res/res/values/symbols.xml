@@ -1718,7 +1718,7 @@
   <java-symbol type="layout" name="notification_template_material_big_text" />
   <java-symbol type="layout" name="notification_template_icon_group" />
   <java-symbol type="layout" name="notification_material_media_action" />
-  <java-symbol type="color" name="notification_action_legacy_color_filter" />
+  <java-symbol type="color" name="notification_action_color_filter" />
   <java-symbol type="color" name="notification_icon_bg_color" />
   <java-symbol type="drawable" name="notification_icon_legacy_bg" />
   <java-symbol type="drawable" name="notification_material_media_progress" />
