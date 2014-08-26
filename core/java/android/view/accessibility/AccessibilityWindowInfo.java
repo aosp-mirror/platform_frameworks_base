@@ -55,6 +55,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_ACTIVE = 1 << 0;
     private static final int BOOLEAN_PROPERTY_FOCUSED = 1 << 1;
+    private static final int BOOLEAN_PROPERTY_ACCESSIBLITY_FOCUSED = 1 << 2;
 
     // Housekeeping.
     private static final int MAX_POOL_SIZE = 10;
@@ -255,6 +256,26 @@ public final class AccessibilityWindowInfo implements Parcelable {
      */
     public void setFocused(boolean focused) {
         setBooleanProperty(BOOLEAN_PROPERTY_FOCUSED, focused);
+    }
+
+    /**
+     * Gets if this window has accessibility focus.
+     *
+     * @return Whether has accessibility focus.
+     */
+    public boolean isAccessibilityFocused() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_ACCESSIBLITY_FOCUSED);
+    }
+
+    /**
+     * Sets if this window has accessibility focus.
+     *
+     * @param Whether has accessibility focus.
+     *
+     * @hide
+     */
+    public void setAccessibilityFocused(boolean focused) {
+        setBooleanProperty(BOOLEAN_PROPERTY_ACCESSIBLITY_FOCUSED, focused);
     }
 
     /**
