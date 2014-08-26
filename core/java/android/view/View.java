@@ -15110,7 +15110,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         final AccessibilityNodeInfo virtualView = viewRoot.getAccessibilityFocusedVirtualView();
         if (virtualView != null) {
-            virtualView.getBoundsInParent(bounds);
+            virtualView.getBoundsInScreen(bounds);
+            final int[] offset = mAttachInfo.mTmpLocation;
+            getLocationOnScreen(offset);
+            bounds.offset(-offset[0], -offset[1]);
         } else {
             bounds.set(0, 0, mRight - mLeft, mBottom - mTop);
         }
