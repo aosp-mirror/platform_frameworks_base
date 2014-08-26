@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"कृपया तल तपाईंको उपकरण एन्क्रिप्सन पासवर्ड प्रविष्टि गर्नुहोस्: यो ब्याकप सँग्रह एन्क्रिप्ट गर्न पनि प्रयोग हुने छ।"</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"ब्याकप डेटालाई encrypt गर्न पासवर्ड प्रविष्टि गर्नुहोस्, यदि यो खालि छोडिएको खण्डमा तपाईको पुरानै पासवर्ड प्रयोग हुने छ।"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"यदि तपाईं पूर्ण ब्याकअप डेटा इन्क्रिप्ट गर्न चाहनु हुन्छ भने तल पासवर्ड प्रविष्टि गर्नुहोस्।"</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"यदि पुनःबहाली डेटा इन्क्रिप्ट छ भने कृपया तल पासवर्ड प्रविष्टि गर्नुहोस्:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"जगेडा राख्न सुरु हुँदै..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"ब्याकअप सकियो"</string>

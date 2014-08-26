@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Mangyaring ilagay ang password ng pag-encrypt ng iyong device sa ibaba. Gagamitin rin ito upang i-encrypt ang backup na archive."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Mangyaring maglagay ng password na gamitin sa pag-e-encrypt ng buong data sa pag-backup. Kung iiwanan itong blangko, gagamitin ang iyong kasalukuyang backup na password:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Kung nais mong i-encrypt ang buong data ng backup, maglagay ng password sa ibaba:"</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Kung naka-encrypt ang data sa pagpapanumbalik, pakilagay ang password sa ibaba:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Sinisimulan ang pag-backup..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Tapos na ang pag-backup"</string>

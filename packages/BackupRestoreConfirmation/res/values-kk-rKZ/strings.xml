@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Құрылғыңыздың кодтық кілтсөзін енгізіңіз. Ол сақтық көшірме мұрағатын кодтау үшін де қолданылады."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Деректердің сақтық көшірмесін толығымен шифрлау үшін кілтсөзді енгізіңіз. Егер бұл бос қалдырылса, сіздің қазіргі сақтық көшірме кілтсөзіңіз қолданылады:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Деректердің сақтық көшірмесін толығымен шифрлауды қаласаңыз, кілтсөзді енгізіңіз:"</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Қалпына келтіру деректері кодталса, кілтсөзді енгізіңіз:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Сақтық көшірме басталуда..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Қалпына келтіру аяқталды"</string>
