@@ -239,7 +239,8 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         @Override
         public void onDetailItemDisconnect(Item item) {
             if (item == null || item.tag == null) return;
-            mController.stopCasting();
+            final CastDevice device = (CastDevice) item.tag;
+            mController.stopCasting(device);
         }
     }
 }
