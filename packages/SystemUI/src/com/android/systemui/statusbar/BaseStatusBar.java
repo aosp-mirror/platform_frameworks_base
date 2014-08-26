@@ -21,7 +21,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
-import android.app.ActivityThread;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
@@ -32,16 +31,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
@@ -579,7 +574,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
 
-    protected void applyLegacyRowBackground(StatusBarNotification sbn,
+    protected void applyColorsAndBackgrounds(StatusBarNotification sbn,
             NotificationData.Entry entry) {
         int version = 0;
         try {
@@ -600,6 +595,14 @@ public abstract class BaseStatusBar extends SystemUI implements
             final int color = sbn.getNotification().color;
             if (isMediaNotification(entry)) {
                 entry.row.setTintColor(color);
+            }
+        }
+
+        if (entry.icon != null) {
+            if (version >= Build.VERSION_CODES.L) {
+                entry.icon.setColorFilter(mContext.getResources().getColor(android.R.color.white));
+            } else {
+                entry.icon.setColorFilter(null);
             }
         }
     }
@@ -1250,7 +1253,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         entry.expandedPublic = publicViewLocal;
         entry.setBigContentView(bigContentViewLocal);
 
-        applyLegacyRowBackground(sbn, entry);
+        applyColorsAndBackgrounds(sbn, entry);
 
         // Restore previous flags.
         if (hasUserChangedExpansion) {
