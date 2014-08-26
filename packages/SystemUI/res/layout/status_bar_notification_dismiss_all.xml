@@ -27,5 +27,6 @@
             android:layout_height="48dp"
             android:layout_gravity="end"
             android:src="@drawable/ic_dismiss_all"
-            android:background="@drawable/ripple_drawable" />
+            android:background="@drawable/ripple_drawable"
+            android:contentDescription="@string/accessibility_clear_all" />
 </com.android.systemui.statusbar.DismissView>
