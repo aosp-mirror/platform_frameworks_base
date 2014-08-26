@@ -17,7 +17,6 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiDeviceInfo;
-
 import android.util.Slog;
 
 /**
@@ -57,11 +56,17 @@ abstract class RequestArcAction extends HdmiCecFeatureAction {
         switch (opcode) {
             // Handles only <Feature Abort> here and, both <Initiate ARC> and <Terminate ARC>
             // are handled in HdmiControlService itself because both can be
-            // received wihtout <Request ARC Initiation> or <Request ARC Termination>.
+            // received without <Request ARC Initiation> or <Request ARC Termination>.
             case Constants.MESSAGE_FEATURE_ABORT:
-                disableArcTransmission();
-                finish();
-                return true;
+                int originalOpcode = cmd.getParams()[0] & 0xFF;
+                if (originalOpcode == Constants.MESSAGE_REQUEST_ARC_INITIATION
+                        || originalOpcode == Constants.MESSAGE_REQUEST_ARC_TERMINATION) {
+                    disableArcTransmission();
+                    finish();
+                    return true;
+                } else {
+                    return false;
+                }
             default:
                 Slog.w(TAG, "Unsupported opcode:" + cmd.toString());
         }

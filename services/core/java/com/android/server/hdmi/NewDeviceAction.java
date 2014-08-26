@@ -103,8 +103,8 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
                 requestVendorId();
                 return true;
             } else if (opcode == Constants.MESSAGE_FEATURE_ABORT) {
-                int requestOpcode = params[1] & 0xFF;
-                if (requestOpcode == Constants.MESSAGE_SET_OSD_NAME) {
+                int requestOpcode = params[0] & 0xFF;
+                if (requestOpcode == Constants.MESSAGE_GIVE_OSD_NAME) {
                     requestVendorId();
                     return true;
                 }
@@ -116,8 +116,8 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
                 finish();
                 return true;
             } else if (opcode == Constants.MESSAGE_FEATURE_ABORT) {
-                int requestOpcode = params[1] & 0xFF;
-                if (requestOpcode == Constants.MESSAGE_DEVICE_VENDOR_ID) {
+                int requestOpcode = params[0] & 0xFF;
+                if (requestOpcode == Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID) {
                     addDeviceInfo();
                     finish();
                     return true;
@@ -152,28 +152,17 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
         if (mDisplayName == null) {
             mDisplayName = HdmiUtils.getDefaultDeviceName(mDeviceLogicalAddress);
         }
-        tv().addCecDevice(new HdmiDeviceInfo(
+        HdmiDeviceInfo deviceInfo = new HdmiDeviceInfo(
                 mDeviceLogicalAddress, mDevicePhysicalAddress,
                 tv().getPortId(mDevicePhysicalAddress),
                 HdmiUtils.getTypeFromAddress(mDeviceLogicalAddress),
-                mVendorId, mDisplayName));
+                mVendorId, mDisplayName);
+        tv().addCecDevice(deviceInfo);
 
         if (HdmiUtils.getTypeFromAddress(mDeviceLogicalAddress)
                 == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
-            if (tv().getSystemAudioModeSetting()) {
-                addAndStartAction(new SystemAudioAutoInitiationAction(localDevice(),
-                        mDeviceLogicalAddress));
-            }
-
-            if (shouldTryArcInitiation()) {
-                addAndStartAction(new RequestArcInitiationAction(localDevice(),
-                        mDeviceLogicalAddress));
-            }
+            tv().onNewAvrAdded(deviceInfo);
         }
-    }
-
-    private boolean shouldTryArcInitiation() {
-        return tv().isConnectedToArcPort(mDevicePhysicalAddress) && tv().isArcFeatureEnabled();
     }
 
     @Override

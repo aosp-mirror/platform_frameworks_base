@@ -606,7 +606,7 @@ public final class HdmiControlService extends SystemService {
      * Whether a device of the specified physical address is connected to ARC enabled port.
      */
     boolean isConnectedToArcPort(int physicalAddress) {
-        int portId = mPortIdMap.get(physicalAddress);
+        int portId = pathToPortId(physicalAddress);
         if (portId != Constants.INVALID_PORT_ID) {
             return mPortInfoMap.get(portId).isArcSupported();
         }
@@ -1979,5 +1979,14 @@ public final class HdmiControlService extends SystemService {
         synchronized (mLock) {
             return mMhlInputChangeEnabled;
         }
+    }
+
+    @ServiceThreadOnly
+    void displayOsd(int messageId) {
+        assertRunOnServiceThread();
+        Intent intent = new Intent(HdmiControlManager.ACTION_OSD_MESSAGE);
+        intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_ID, messageId);
+        getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
+                HdmiControlService.PERMISSION);
     }
 }

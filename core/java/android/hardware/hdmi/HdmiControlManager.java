@@ -48,6 +48,12 @@ public final class HdmiControlManager {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_OSD_MESSAGE = "android.hardware.hdmi.action.OSD_MESSAGE";
 
+    // --- Messages for ACTION_OSD_MESSAGE ---
+    /**
+     * Message that ARC enabled device is connected to invalid port (non-ARC port).
+     */
+    public static final int OSD_MESSAGE_ARC_CONNECTED_INVALID_PORT = 1;
+
     /**
      * Used as an extra field in the intent {@link #ACTION_OSD_MESSAGE}. Contains the ID of
      * the message to display on screen.

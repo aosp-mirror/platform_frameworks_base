@@ -54,8 +54,8 @@ public class HdmiCecMessageBuilder {
     static HdmiCecMessage buildFeatureAbortCommand(int src, int dest, int originalOpcode,
             int reason) {
         byte[] params = new byte[] {
-                (byte) originalOpcode,
-                (byte) reason,
+                (byte) (originalOpcode & 0xFF),
+                (byte) (reason & 0xFF),
         };
         return buildCommand(src, dest, Constants.MESSAGE_FEATURE_ABORT, params);
     }
@@ -110,9 +110,9 @@ public class HdmiCecMessageBuilder {
         // Hdmi CEC uses lower-cased ISO 639-2 (3 letters code).
         String normalized = language.toLowerCase();
         byte[] params = new byte[] {
-                (byte) normalized.charAt(0),
-                (byte) normalized.charAt(1),
-                (byte) normalized.charAt(2),
+                (byte) (normalized.charAt(0) & 0xFF),
+                (byte) (normalized.charAt(1) & 0xFF),
+                (byte) (normalized.charAt(2) & 0xFF),
         };
         // <Set Menu Language> is broadcast message.
         return buildCommand(src, Constants.ADDR_BROADCAST,
@@ -155,7 +155,7 @@ public class HdmiCecMessageBuilder {
                 (byte) ((address >> 8) & 0xFF),
                 (byte) (address & 0xFF),
                 // One byte device type
-                (byte) deviceType
+                (byte) (deviceType & 0xFF)
         };
         // <Report Physical Address> is broadcast message.
         return buildCommand(src, Constants.ADDR_BROADCAST,
@@ -194,7 +194,7 @@ public class HdmiCecMessageBuilder {
      */
     static HdmiCecMessage buildCecVersion(int src, int dest, int version) {
         byte[] params = new byte[] {
-                (byte) version
+                (byte) (version & 0xFF)
         };
         return buildCommand(src, dest, Constants.MESSAGE_CEC_VERSION, params);
     }
@@ -332,7 +332,7 @@ public class HdmiCecMessageBuilder {
      */
     static HdmiCecMessage buildReportPowerStatus(int src, int dest, int powerStatus) {
         byte[] param = new byte[] {
-                (byte) (powerStatus)
+                (byte) (powerStatus & 0xFF)
         };
         return buildCommand(src, dest, Constants.MESSAGE_REPORT_POWER_STATUS, param);
     }
@@ -347,7 +347,7 @@ public class HdmiCecMessageBuilder {
      */
     static HdmiCecMessage buildReportMenuStatus(int src, int dest, int menuStatus) {
         byte[] param = new byte[] {
-                (byte) (menuStatus)
+                (byte) (menuStatus & 0xFF)
         };
         return buildCommand(src, dest, Constants.MESSAGE_MENU_STATUS, param);
     }
@@ -391,7 +391,7 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildUserControlPressed(int src, int dest, int uiCommand) {
-        return buildUserControlPressed(src, dest, new byte[] { (byte) uiCommand });
+        return buildUserControlPressed(src, dest, new byte[] { (byte) (uiCommand & 0xFF) });
     }
 
     /**
@@ -594,7 +594,7 @@ public class HdmiCecMessageBuilder {
 
     private static byte[] physicalAddressToParam(int physicalAddress) {
         return new byte[] {
-                (byte) (physicalAddress >> 8),
+                (byte) ((physicalAddress >> 8) & 0xFF),
                 (byte) (physicalAddress & 0xFF)
         };
     }
