@@ -2512,6 +2512,7 @@ public abstract class Context {
      *
      * @see #getSystemService
      * @see android.app.FingerprintManager
+     * @hide
      */
     public static final String FINGERPRINT_SERVICE = "fingerprint";
 
