@@ -5516,8 +5516,8 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM = "android.app.extra.DEVICE_ADMIN_PACKAGE_CHECKSUM";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER = "android.app.extra.DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION = "android.app.extra.DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION";
-    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME = "android.app.extra.DEVICE_ADMIN_PACKAGE_NAME";
-    field public static final java.lang.String EXTRA_PROVISIONING_EMAIL_ADDRESS = "android.app.extra.MANAGED_PROFILE_EMAIL_ADDRESS";
+    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME = "android.app.extra.deviceAdminPackageName";
+    field public static final java.lang.String EXTRA_PROVISIONING_EMAIL_ADDRESS = "android.app.extra.ManagedProfileEmailAddress";
     field public static final java.lang.String EXTRA_PROVISIONING_LOCALE = "android.app.extra.LOCALE";
     field public static final java.lang.String EXTRA_PROVISIONING_LOCAL_TIME = "android.app.extra.LOCAL_TIME";
     field public static final java.lang.String EXTRA_PROVISIONING_TIME_ZONE = "android.app.extra.TIME_ZONE";
