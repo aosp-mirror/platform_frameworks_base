@@ -692,7 +692,7 @@ import java.util.Objects;
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="5">GR_TV</td>
- *         <td>GR_TV_all</td>
+ *         <td>GR_TV_ALL</td>
  *         <td>Suitable for all ages</td>
  *     </tr>
  *     <tr>
@@ -794,7 +794,7 @@ import java.util.Objects;
  *         <td>Suitable for all ages</td>
  *     </tr>
  *     <tr>
- *         <td>IE_TV_Ch</td>
+ *         <td>IE_TV_CH</td>
  *         <td>Suitable for children ages 5 to 10, may contain comedic violence or action fantasy
  *         violence</td>
  *     </tr>
@@ -841,7 +841,7 @@ import java.util.Objects;
  *         <td>Unrestricted public exhibition</td>
  *     </tr>
  *     <tr>
- *         <td>IN_TV_U/A</td>
+ *         <td>IN_TV_U_A</td>
  *         <td>Unrestricted public exhibition, but with a caution regarding parental guidance to
  *         those under 12 years of age</td>
  *     </tr>
@@ -885,7 +885,7 @@ import java.util.Objects;
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="5">KR_TV</td>
- *         <td>KR_TV_All</td>
+ *         <td>KR_TV_ALL</td>
  *         <td>Appropriate for all ages</td>
  *     </tr>
  *     <tr>
@@ -921,7 +921,7 @@ import java.util.Objects;
  *         <td>Parental guidance is required unaccompanied children</td>
  *     </tr>
  *     <tr>
- *         <td>MV_TV_PG-12</td>
+ *         <td>MV_TV_PG_12</td>
  *         <td>Parental guidance is required for children under the age of 12</td>
  *     </tr>
  *     <tr>
@@ -956,7 +956,7 @@ import java.util.Objects;
  *         and mild language</td>
  *     </tr>
  *     <tr>
- *         <td>MX_TV_B-15</td>
+ *         <td>MX_TV_B_15</td>
  *         <td>Designed for ages 15 and up, slightly more intensive than the 'A' and 'B' ratings
  *         </td>
  *     </tr>
