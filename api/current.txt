@@ -17297,15 +17297,10 @@ package android.net {
     method public void unregisterDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     method public void unregisterNetworkCallback(android.net.ConnectivityManager.NetworkCallback);
     field public static final deprecated java.lang.String ACTION_BACKGROUND_DATA_SETTING_CHANGED = "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
-    field public static final java.lang.String ACTION_CAPTIVE_PORTAL_DETECTED = "android.net.conn.CAPTIVE_PORTAL_DETECTED";
-    field public static final java.lang.String ACTION_CAPTIVE_PORTAL_SIGN_IN = "android.net.conn.CAPTIVE_PORTAL_SIGN_IN";
-    field public static final int CAPTIVE_PORTAL_DISCONNECT = 2; // 0x2
-    field public static final int CAPTIVE_PORTAL_SIGNED_IN = 1; // 0x1
     field public static final java.lang.String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
     field public static final deprecated int DEFAULT_NETWORK_PREFERENCE = 1; // 0x1
     field public static final java.lang.String EXTRA_EXTRA_INFO = "extraInfo";
     field public static final java.lang.String EXTRA_IS_FAILOVER = "isFailover";
-    field public static final java.lang.String EXTRA_NETWORK = "network";
     field public static final deprecated java.lang.String EXTRA_NETWORK_INFO = "networkInfo";
     field public static final java.lang.String EXTRA_NETWORK_TYPE = "networkType";
     field public static final java.lang.String EXTRA_NO_CONNECTIVITY = "noConnectivity";
