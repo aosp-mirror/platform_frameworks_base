@@ -220,21 +220,9 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             // Bring an active task to the foreground
             mSystemServicesProxy.moveTaskToFront(toTask.key.id, launchOpts);
         } else {
-            // Launch the activity anew with the desired animation
-            boolean isDocument = Utilities.isDocument(toTask.key.baseIntent);
-            Intent intent = new Intent(toTask.key.baseIntent);
-            intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
-                    | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
-            if (!isDocument) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            }
             try {
                 mSystemServicesProxy.startActivityFromRecents(toTask.key.id, launchOpts);
             } catch (ActivityNotFoundException anfe) {}
-
-            // Remove the old task from activity manager
-            RecentsTaskLoader.getInstance().getSystemServicesProxy().removeTask(toTask.key.id,
-                    isDocument);
         }
     }
 

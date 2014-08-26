@@ -2623,6 +2623,40 @@ public class ActivityManager {
         }
 
         /**
+         * Bring this task to the foreground.  If it contains activities, they will be
+         * brought to the foreground with it and their instances re-created if needed.
+         * If it doesn't contain activities, the root activity of the task will be
+         * re-launched.
+         */
+        public void moveToFront() {
+            try {
+                mAppTaskImpl.moveToFront();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Invalid AppTask", e);
+            }
+        }
+
+        /**
+         * Start an activity in this task.  Brings the task to the foreground.  If this task
+         * is not currently active (that is, its id < 0), then the activity being started
+         * needs to be started as a new task and the Intent's ComponentName must match the
+         * base ComponenentName of the recent task entry.  Otherwise, the activity being
+         * started must <b>not</b> be launched as a new task -- not through explicit intent
+         * flags nor implicitly as the singleTask or singleInstance launch modes.
+         *
+         * <p>See {@link Activity#startActivity(android.content.Intent, android.os.Bundle)
+         * Activity.startActivity} for more information.</p>
+         *
+         * @param intent The Intent describing the new activity to be launched on the task.
+         * @param options Optional launch options.
+         */
+        public void startActivity(Context context, Intent intent, Bundle options) {
+            ActivityThread thread = ActivityThread.currentActivityThread();
+            thread.getInstrumentation().execStartActivityFromAppTask(context,
+                    thread.getApplicationThread(), mAppTaskImpl, intent, options);
+        }
+
+        /**
          * Modify the {@link Intent#FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS} flag in the root
          * Intent of this AppTask.
          *

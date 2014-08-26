@@ -254,7 +254,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                             } else {
                                 owner.startActivityInPackage(uid, key.packageName, finalIntent,
                                         resolvedType, resultTo, resultWho, requestCode, 0,
-                                        options, userId, container);
+                                        options, userId, container, null);
                             }
                         } catch (RuntimeException e) {
                             Slog.w(ActivityManagerService.TAG,

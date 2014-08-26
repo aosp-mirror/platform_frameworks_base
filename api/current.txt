@@ -3518,6 +3518,7 @@ package android.app {
     method public void postponeEnterTransition();
     method public void recreate();
     method public void registerForContextMenu(android.view.View);
+    method public boolean releaseInstance();
     method public final deprecated void removeDialog(int);
     method public void reportFullyDrawn();
     method public boolean requestVisibleBehind(boolean);
@@ -3637,7 +3638,9 @@ package android.app {
   public static class ActivityManager.AppTask {
     method public void finishAndRemoveTask();
     method public android.app.ActivityManager.RecentTaskInfo getTaskInfo();
+    method public void moveToFront();
     method public void setExcludeFromRecents(boolean);
+    method public void startActivity(android.content.Context, android.content.Intent, android.os.Bundle);
   }
 
   public static class ActivityManager.MemoryInfo implements android.os.Parcelable {

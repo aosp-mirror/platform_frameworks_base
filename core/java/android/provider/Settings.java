@@ -6320,8 +6320,7 @@ public final class Settings {
          * processes as soon as they are no longer needed.  If 0, the normal
          * extended lifetime is used.
          */
-        public static final String ALWAYS_FINISH_ACTIVITIES =
-                "always_finish_activities";
+        public static final String ALWAYS_FINISH_ACTIVITIES = "always_finish_activities";
 
         /**
          * Use Dock audio output for media:

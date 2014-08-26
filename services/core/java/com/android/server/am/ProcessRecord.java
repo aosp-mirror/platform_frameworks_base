@@ -17,6 +17,8 @@
 package com.android.server.am;
 
 import android.util.ArraySet;
+import android.util.EventLog;
+import android.util.Slog;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
 
@@ -500,6 +502,21 @@ final class ProcessRecord {
             }
         }
         return adj;
+    }
+
+    void kill(String reason, boolean noisy) {
+        if (!killedByAm) {
+            if (noisy) {
+                Slog.i(ActivityManagerService.TAG, "Killing " + toShortString() + " (adj " + setAdj
+                        + "): " + reason);
+            }
+            EventLog.writeEvent(EventLogTags.AM_KILL, userId, pid, processName, setAdj, reason);
+            Process.killProcessQuiet(pid);
+            Process.killProcessGroup(info.uid, pid);
+            if (!persistent) {
+                killedByAm = true;
+            }
+        }
     }
 
     public String toShortString() {

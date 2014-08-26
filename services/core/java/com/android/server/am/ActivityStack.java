@@ -36,11 +36,13 @@ import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_APP;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_CONTAINERS;
+import static com.android.server.am.ActivityStackSupervisor.DEBUG_RELEASE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_SCREENSHOTS;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_STATES;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
+import android.util.ArraySet;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
@@ -2910,7 +2912,7 @@ final class ActivityStack {
                     int res = mStackSupervisor.startActivityLocked(srec.app.thread, destIntent,
                             null, aInfo, null, null, parent.appToken, null,
                             0, -1, parent.launchedFromUid, parent.launchedFromPackage,
-                            0, null, true, null, null);
+                            0, null, true, null, null, null);
                     foundParentInTask = res == ActivityManager.START_SUCCESS;
                 } catch (RemoteException e) {
                     foundParentInTask = false;
@@ -3058,15 +3060,10 @@ final class ActivityStack {
                 if (!lastIsOpaque) {
                     continue;
                 }
-                // We can destroy this one if we have its icicle saved and
-                // it is not in the process of pausing/stopping/finishing.
-                if (r.app != null && r != mResumedActivity && r != mPausingActivity
-                        && r.haveState && !r.visible && r.stopped
-                        && r.state != ActivityState.DESTROYING
-                        && r.state != ActivityState.DESTROYED) {
+                if (r.isDestroyable()) {
                     if (DEBUG_SWITCH) Slog.v(TAG, "Destroying " + r + " in state " + r.state
                             + " resumed=" + mResumedActivity
-                            + " pausing=" + mPausingActivity);
+                            + " pausing=" + mPausingActivity + " for reason " + reason);
                     if (destroyActivityLocked(r, true, reason)) {
                         activityRemoved = true;
                     }
@@ -3076,6 +3073,60 @@ final class ActivityStack {
         if (activityRemoved) {
             mStackSupervisor.resumeTopActivitiesLocked();
         }
+    }
+
+    final boolean safelyDestroyActivityLocked(ActivityRecord r, String reason) {
+        if (r.isDestroyable()) {
+            if (DEBUG_SWITCH) Slog.v(TAG, "Destroying " + r + " in state " + r.state
+                    + " resumed=" + mResumedActivity
+                    + " pausing=" + mPausingActivity + " for reason " + reason);
+            return destroyActivityLocked(r, true, reason);
+        }
+        return false;
+    }
+
+    final int releaseSomeActivitiesLocked(ProcessRecord app, ArraySet<TaskRecord> tasks,
+            String reason) {
+        // Iterate over tasks starting at the back (oldest) first.
+        if (DEBUG_RELEASE) Slog.d(TAG, "Trying to release some activities in " + app);
+        int maxTasks = tasks.size() / 4;
+        if (maxTasks < 1) {
+            maxTasks = 1;
+        }
+        int numReleased = 0;
+        for (int taskNdx = 0; taskNdx < mTaskHistory.size() && maxTasks > 0; taskNdx++) {
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            if (!tasks.contains(task)) {
+                continue;
+            }
+            if (DEBUG_RELEASE) Slog.d(TAG, "Looking for activities to release in " + task);
+            int curNum = 0;
+            final ArrayList<ActivityRecord> activities = task.mActivities;
+            for (int actNdx = 0; actNdx < activities.size(); actNdx++) {
+                final ActivityRecord activity = activities.get(actNdx);
+                if (activity.app == app && activity.isDestroyable()) {
+                    if (DEBUG_RELEASE) Slog.v(TAG, "Destroying " + activity
+                            + " in state " + activity.state + " resumed=" + mResumedActivity
+                            + " pausing=" + mPausingActivity + " for reason " + reason);
+                    destroyActivityLocked(activity, true, reason);
+                    if (activities.get(actNdx) != activity) {
+                        // Was removed from list, back up so we don't miss the next one.
+                        actNdx--;
+                    }
+                    curNum++;
+                }
+            }
+            if (curNum > 0) {
+                numReleased += curNum;
+                maxTasks--;
+                if (mTaskHistory.get(taskNdx) != task) {
+                    // The entire task got removed, back up so we don't miss the next one.
+                    taskNdx--;
+                }
+            }
+        }
+        if (DEBUG_RELEASE) Slog.d(TAG, "Done releasing: did " + numReleased + " activities");
+        return numReleased;
     }
 
     /**
