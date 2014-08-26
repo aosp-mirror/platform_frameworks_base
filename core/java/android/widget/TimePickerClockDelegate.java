@@ -18,7 +18,6 @@ package android.widget;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -34,6 +33,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import com.android.internal.R;
 
+import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -149,7 +149,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
         mAmPmStrings = getAmPmStrings(context);
 
         // am/pm
-        View amPmView = mDelegator.findViewById(R.id.amPm);
+        final View amPmView = mDelegator.findViewById(R.id.amPm);
         if (amPmView instanceof Button) {
             mAmPmSpinner = null;
             mAmPmSpinnerInput = null;

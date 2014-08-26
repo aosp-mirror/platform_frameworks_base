@@ -32,37 +32,42 @@
         android:layout_marginBottom="8dp" />
 
     <LinearLayout
-        android:id="@+id/date_picker_month_and_day_layout"
+        android:id="@+id/date_picker_month_day_year_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_gravity="center"
-        android:clickable="true"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:gravity="center">
 
-        <TextView
-            android:id="@+id/date_picker_month"
+        <LinearLayout
+            android:id="@+id/date_picker_month_and_day_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:duplicateParentState="true"
-            android:gravity="center_horizontal|bottom" />
+            android:clickable="true"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/date_picker_month"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:duplicateParentState="true"
+                android:gravity="center" />
+
+            <TextView
+                android:id="@+id/date_picker_day"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-10dip"
+                android:layout_marginBottom="-10dip"
+                android:duplicateParentState="true"
+                android:gravity="center" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/date_picker_day"
+            android:id="@+id/date_picker_year"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="-10dip"
-            android:layout_marginTop="-10dip"
-            android:duplicateParentState="true"
             android:gravity="center" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/date_picker_year"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center_horizontal|top" />
 
 </LinearLayout>
