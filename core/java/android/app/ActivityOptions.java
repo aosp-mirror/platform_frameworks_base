@@ -444,10 +444,15 @@ public class ActivityOptions {
      * android.R.styleable#AndroidManifestActivity_launchMode launchMode} values of
      * <code>singleInstance</code> or <code>singleTask</code>.
      */
-    public static ActivityOptions makeLaunchTaskBehindAnimation() {
+    public static ActivityOptions makeTaskLaunchBehind() {
         final ActivityOptions opts = new ActivityOptions();
         opts.mAnimationType = ANIM_LAUNCH_TASK_BEHIND;
         return opts;
+    }
+
+    @Deprecated
+    public static ActivityOptions makeLaunchTaskBehindAnimation() {
+        return makeTaskLaunchBehind();
     }
 
     /** @hide */

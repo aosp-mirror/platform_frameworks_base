@@ -2211,7 +2211,7 @@
   <public type="attr" name="actionModeShareDrawable" />
   <public type="attr" name="actionModeFindDrawable" />
   <public type="attr" name="actionModeWebSearchDrawable" />
-  <public type="attr" name="visibilityMode" />
+  <public type="attr" name="transitionVisibilityMode" />
   <public type="attr" name="minimumHorizontalAngle" />
   <public type="attr" name="minimumVerticalAngle" />
   <public type="attr" name="maximumAngle" />
@@ -2232,7 +2232,7 @@
   <public type="attr" name="multiArch" />
   <public type="attr" name="touchscreenBlocksFocus" />
   <public type="attr" name="windowElevation" />
-  <public type="attr" name="launchTaskBehindBackgroundAnimation" />
+  <public type="attr" name="launchTaskBehindTargetAnimation" />
   <public type="attr" name="launchTaskBehindSourceAnimation" />
   <public type="attr" name="restrictionType" />
   <public type="attr" name="dayOfWeekBackgroundColor" />
