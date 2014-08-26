@@ -305,7 +305,7 @@ public class TvView extends ViewGroup {
                 mSessionCallback.mTuneParams = params;
             }
         } else {
-            reset();
+            resetInternal();
             // When createSession() is called multiple times before the callback is called,
             // only the callback of the last createSession() call will be actually called back.
             // The previous callbacks will be ignored. For the logic, mSessionCallback
@@ -328,6 +328,10 @@ public class TvView extends ViewGroup {
                 sMainTvView = NULL_TV_VIEW;
             }
         }
+        resetInternal();
+    }
+
+    private void resetInternal() {
         if (mSession != null) {
             release();
             resetSurfaceView();
