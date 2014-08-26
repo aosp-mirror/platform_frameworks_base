@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Trace;
 import android.util.DisplayMetrics;
+import dalvik.system.VMRuntime;
 
 import java.io.OutputStream;
 import java.nio.Buffer;
@@ -122,15 +123,18 @@ public final class Bitmap implements Parcelable {
         mIsMutable = isMutable;
         mRequestPremultiplied = requestPremultiplied;
         mBuffer = buffer;
+
         // we delete this in our finalizer
         mNativeBitmap = nativeBitmap;
-        mFinalizer = new BitmapFinalizer(nativeBitmap);
 
         mNinePatchChunk = ninePatchChunk;
         mNinePatchInsets = ninePatchInsets;
         if (density >= 0) {
             mDensity = density;
         }
+
+        int nativeAllocationByteCount = buffer == null ? getByteCount() : 0;
+        mFinalizer = new BitmapFinalizer(nativeBitmap, nativeAllocationByteCount);
     }
 
     /**
@@ -1574,8 +1578,17 @@ public final class Bitmap implements Parcelable {
     private static class BitmapFinalizer {
         private final long mNativeBitmap;
 
-        BitmapFinalizer(long nativeBitmap) {
+        // Native memory allocated for the duration of the Bitmap,
+        // if pixel data allocated into native memory, instead of java byte[]
+        private final int mNativeAllocationByteCount;
+
+        BitmapFinalizer(long nativeBitmap, int nativeAllocationByteCount) {
             mNativeBitmap = nativeBitmap;
+            mNativeAllocationByteCount = nativeAllocationByteCount;
+
+            if (mNativeAllocationByteCount != 0) {
+                VMRuntime.getRuntime().registerNativeAllocation(mNativeAllocationByteCount);
+            }
         }
 
         @Override
@@ -1585,6 +1598,9 @@ public final class Bitmap implements Parcelable {
             } catch (Throwable t) {
                 // Ignore
             } finally {
+                if (mNativeAllocationByteCount != 0) {
+                    VMRuntime.getRuntime().registerNativeFree(mNativeAllocationByteCount);
+                }
                 nativeDestructor(mNativeBitmap);
             }
         }
