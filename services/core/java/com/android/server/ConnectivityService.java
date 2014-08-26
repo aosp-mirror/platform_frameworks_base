@@ -4196,6 +4196,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         final boolean flushDns = updateRoutes(newLp, oldLp, netId);
         updateDnses(newLp, oldLp, netId, flushDns);
         updateClat(newLp, oldLp, networkAgent);
+        if (isDefaultNetwork(networkAgent)) handleApplyDefaultProxy(newLp.getHttpProxy());
     }
 
     private void updateClat(LinkProperties newLp, LinkProperties oldLp, NetworkAgentInfo na) {
