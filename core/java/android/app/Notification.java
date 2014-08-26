@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
@@ -2773,6 +2774,14 @@ public class Notification implements Parcelable
                     contentView.setViewVisibility(R.id.progress, View.VISIBLE);
                     contentView.setProgressBar(
                             R.id.progress, mProgressMax, mProgress, mProgressIndeterminate);
+                    contentView.setProgressBackgroundTintList(
+                            R.id.progress, ColorStateList.valueOf(mContext.getResources().getColor(
+                                    R.color.notification_progress_background_color)));
+                    if (mColor != COLOR_DEFAULT) {
+                        ColorStateList colorStateList = ColorStateList.valueOf(mColor);
+                        contentView.setProgressTintList(R.id.progress, colorStateList);
+                        contentView.setProgressIndeterminateTintList(R.id.progress, colorStateList);
+                    }
                     showLine2 = true;
                 } else {
                     contentView.setViewVisibility(R.id.progress, View.GONE);
