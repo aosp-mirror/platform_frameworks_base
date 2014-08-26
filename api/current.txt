@@ -7343,7 +7343,6 @@ package android.content {
     field public static final java.lang.String DISPLAY_SERVICE = "display";
     field public static final java.lang.String DOWNLOAD_SERVICE = "download";
     field public static final java.lang.String DROPBOX_SERVICE = "dropbox";
-    field public static final java.lang.String FINGERPRINT_SERVICE = "fingerprint";
     field public static final java.lang.String INPUT_METHOD_SERVICE = "input_method";
     field public static final java.lang.String INPUT_SERVICE = "input";
     field public static final java.lang.String JOB_SCHEDULER_SERVICE = "jobscheduler";
@@ -27331,51 +27330,6 @@ package android.service.dreams {
     method public final void wakeUp();
     field public static final java.lang.String DREAM_META_DATA = "android.service.dream";
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.dreams.DreamService";
-  }
-
-}
-
-package android.service.fingerprint {
-
-  public class FingerprintManager {
-    method public void enroll(long);
-    method public void enrollCancel();
-    method public boolean enrolledAndEnabled();
-    method public void remove(int);
-    method public void startListening(android.service.fingerprint.FingerprintManagerReceiver);
-    method public void stopListening();
-    field public static final int FINGERPRINT_ACQUIRED = 1; // 0x1
-    field public static final int FINGERPRINT_ACQUIRED_GOOD = 0; // 0x0
-    field public static final int FINGERPRINT_ACQUIRED_IMAGER_DIRTY = 4; // 0x4
-    field public static final int FINGERPRINT_ACQUIRED_INSUFFICIENT = 2; // 0x2
-    field public static final int FINGERPRINT_ACQUIRED_PARTIAL = 1; // 0x1
-    field public static final int FINGERPRINT_ACQUIRED_TOO_FAST = 16; // 0x10
-    field public static final int FINGERPRINT_ACQUIRED_TOO_SLOW = 8; // 0x8
-    field public static final int FINGERPRINT_ERROR = -1; // 0xffffffff
-    field public static final int FINGERPRINT_ERROR_HW_UNAVAILABLE = 1; // 0x1
-    field public static final int FINGERPRINT_ERROR_NO_RECEIVER = -10; // 0xfffffff6
-    field public static final int FINGERPRINT_ERROR_NO_SPACE = 4; // 0x4
-    field public static final int FINGERPRINT_ERROR_TIMEOUT = 3; // 0x3
-    field public static final int FINGERPRINT_ERROR_UNABLE_TO_PROCESS = 2; // 0x2
-    field public static final int FINGERPRINT_PROCESSED = 2; // 0x2
-    field public static final int FINGERPRINT_TEMPLATE_ENROLLING = 3; // 0x3
-    field public static final int FINGERPRINT_TEMPLATE_REMOVED = 4; // 0x4
-  }
-
-  public class FingerprintManagerReceiver {
-    ctor public FingerprintManagerReceiver();
-    method public void onAcquired(int);
-    method public void onEnrollResult(int, int);
-    method public void onError(int);
-    method public void onProcessed(int);
-    method public void onRemoved(int);
-  }
-
-  public class FingerprintUtils {
-    ctor public FingerprintUtils();
-    method public static void addFingerprintIdForUser(int, android.content.ContentResolver, int);
-    method public static int[] getFingerprintIdsForUser(android.content.ContentResolver, int);
-    method public static boolean removeFingerprintIdForUser(int, android.content.ContentResolver, int);
   }
 
 }

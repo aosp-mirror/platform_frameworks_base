@@ -23,6 +23,10 @@ import android.util.Log;
 
 import java.util.Arrays;
 
+/**
+ * Utility class for dealing with fingerprints and fingerprint settings.
+ * @hide
+ */
 public
 class FingerprintUtils {
     private static final boolean DEBUG = true;
