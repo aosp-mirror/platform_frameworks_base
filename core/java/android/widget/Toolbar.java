@@ -156,6 +156,12 @@ public class Toolbar extends ViewGroup {
 
     private boolean mCollapsible;
 
+    private final Runnable mShowOverflowMenuRunnable = new Runnable() {
+        @Override public void run() {
+            showOverflowMenu();
+        }
+    };
+
     public Toolbar(Context context) {
         this(context, null);
     }
@@ -404,6 +410,7 @@ public class Toolbar extends ViewGroup {
             ensureLogoView();
             if (mLogoView.getParent() == null) {
                 addSystemView(mLogoView);
+                updateChildVisibilityForExpandedActionView(mLogoView);
             }
         } else if (mLogoView != null && mLogoView.getParent() != null) {
             removeView(mLogoView);
@@ -545,6 +552,7 @@ public class Toolbar extends ViewGroup {
             }
             if (mTitleTextView.getParent() == null) {
                 addSystemView(mTitleTextView);
+                updateChildVisibilityForExpandedActionView(mTitleTextView);
             }
         } else if (mTitleTextView != null && mTitleTextView.getParent() != null) {
             removeView(mTitleTextView);
@@ -598,6 +606,7 @@ public class Toolbar extends ViewGroup {
             }
             if (mSubtitleTextView.getParent() == null) {
                 addSystemView(mSubtitleTextView);
+                updateChildVisibilityForExpandedActionView(mSubtitleTextView);
             }
         } else if (mSubtitleTextView != null && mSubtitleTextView.getParent() != null) {
             removeView(mSubtitleTextView);
@@ -728,6 +737,7 @@ public class Toolbar extends ViewGroup {
             ensureNavButtonView();
             if (mNavButtonView.getParent() == null) {
                 addSystemView(mNavButtonView);
+                updateChildVisibilityForExpandedActionView(mNavButtonView);
             }
         } else if (mNavButtonView != null && mNavButtonView.getParent() != null) {
             removeView(mNavButtonView);
@@ -979,6 +989,13 @@ public class Toolbar extends ViewGroup {
     @Override
     protected Parcelable onSaveInstanceState() {
         SavedState state = new SavedState(super.onSaveInstanceState());
+
+        if (mExpandedMenuPresenter != null && mExpandedMenuPresenter.mCurrentExpandedItem != null) {
+            state.expandedMenuItemId = mExpandedMenuPresenter.mCurrentExpandedItem.getItemId();
+        }
+
+        state.isOverflowOpen = isOverflowMenuShowing();
+
         return state;
     }
 
@@ -986,6 +1003,29 @@ public class Toolbar extends ViewGroup {
     protected void onRestoreInstanceState(Parcelable state) {
         final SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
+
+        final Menu menu = mMenuView != null ? mMenuView.peekMenu() : null;
+        if (ss.expandedMenuItemId != 0 && mExpandedMenuPresenter != null && menu != null) {
+            final MenuItem item = menu.findItem(ss.expandedMenuItemId);
+            if (item != null) {
+                item.expandActionView();
+            }
+        }
+
+        if (ss.isOverflowOpen) {
+            postShowOverflowMenu();
+        }
+    }
+
+    private void postShowOverflowMenu() {
+        removeCallbacks(mShowOverflowMenuRunnable);
+        post(mShowOverflowMenuRunnable);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        removeCallbacks(mShowOverflowMenuRunnable);
     }
 
     /**
@@ -1591,6 +1631,13 @@ public class Toolbar extends ViewGroup {
         }
     }
 
+    private void updateChildVisibilityForExpandedActionView(View child) {
+        final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+        if (lp.mViewType != LayoutParams.EXPANDED && child != mMenuView) {
+            child.setVisibility(mExpandedActionView != null ? GONE : VISIBLE);
+        }
+    }
+
     /**
      * Force the toolbar to collapse to zero-height during measurement if
      * it could be considered "empty" (no visible elements with nonzero measured size)
@@ -1673,8 +1720,13 @@ public class Toolbar extends ViewGroup {
     }
 
     static class SavedState extends BaseSavedState {
+        public int expandedMenuItemId;
+        public boolean isOverflowOpen;
+
         public SavedState(Parcel source) {
             super(source);
+            expandedMenuItemId = source.readInt();
+            isOverflowOpen = source.readInt() != 0;
         }
 
         public SavedState(Parcelable superState) {
@@ -1684,6 +1736,8 @@ public class Toolbar extends ViewGroup {
         @Override
         public void writeToParcel(Parcel out, int flags) {
             super.writeToParcel(out, flags);
+            out.writeInt(expandedMenuItemId);
+            out.writeInt(isOverflowOpen ? 1 : 0);
         }
 
         public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
