@@ -3486,13 +3486,28 @@ public class AudioService extends IAudioService.Stub {
         private void dump(PrintWriter pw) {
             pw.print("   Mute count: ");
             pw.println(muteCount());
+            pw.print("   Max: ");
+            pw.println((mIndexMax + 5) / 10);
             pw.print("   Current: ");
             Set set = mIndex.entrySet();
             Iterator i = set.iterator();
             while (i.hasNext()) {
                 Map.Entry entry = (Map.Entry)i.next();
-                pw.print(Integer.toHexString(((Integer)entry.getKey()).intValue())
-                             + ": " + ((((Integer)entry.getValue()).intValue() + 5) / 10)+", ");
+                final int device = (Integer) entry.getKey();
+                pw.print(Integer.toHexString(device));
+                final String deviceName = device == AudioSystem.DEVICE_OUT_DEFAULT ? "default"
+                        : AudioSystem.getOutputDeviceName(device);
+                if (!deviceName.isEmpty()) {
+                    pw.print(" (");
+                    pw.print(deviceName);
+                    pw.print(")");
+                }
+                pw.print(": ");
+                final int index = (((Integer) entry.getValue()) + 5) / 10;
+                pw.print(index);
+                if (i.hasNext()) {
+                    pw.print(", ");
+                }
             }
         }
     }
