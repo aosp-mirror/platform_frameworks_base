@@ -163,6 +163,16 @@ public abstract class InCallService extends Service {
         return new InCallServiceBinder();
     }
 
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Phone oldPhone = mPhone;
+        mPhone = null;
+
+        oldPhone.destroy();
+        onPhoneDestroyed(oldPhone);
+        return false;
+    }
+
     /**
      * Obtain the {@code Phone} associated with this {@code InCallService}.
      *
