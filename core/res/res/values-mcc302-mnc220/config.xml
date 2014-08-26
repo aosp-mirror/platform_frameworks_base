@@ -25,4 +25,6 @@
         <item>302720</item>
         <item>302780</item>
     </string-array>
+
+    <integer name="config_mobile_mtu">1410</integer>
 </resources>
