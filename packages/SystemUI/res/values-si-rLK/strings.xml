@@ -23,8 +23,7 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"හිස් කරන්න"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ලැයිස්තුවෙන් ඉවත් කරන්න"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"යෙදුම් තොරතුරු"</string>
-    <!-- no translation found for status_bar_no_recent_apps (7374907845131203189) -->
-    <skip />
+    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"මෙහි ඔබගේ මෑතක තිර පෙන්නුම් කරයි"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"මෑත යෙදුම් ඉවතලන්න"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"මෑත යෙදුම් 1 ක්"</item>
@@ -81,11 +80,23 @@
     <string name="accessibility_back" msgid="567011538994429120">"ආපසු"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"මුල් පිටුව"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"මෙනුව"</string>
-    <!-- no translation found for accessibility_recent (1606470783629913980) -->
-    <skip />
+    <string name="accessibility_recent" msgid="1606470783629913980">"මෑතක තිර"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"සොයන්න"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"කැමරාව"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"දුරකථනය"</string>
+    <string name="unlock_label" msgid="8779712358041029439">"අඟුල අරින්න"</string>
+    <string name="phone_label" msgid="2320074140205331708">"දුරකථනය විවෘත කරන්න"</string>
+    <string name="camera_label" msgid="7261107956054836961">"කැමරාව විවෘත කරන්න"</string>
+    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
+    <skip />
+    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
+    <skip />
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ආදාන ක්‍රමය මාරු කිරීමේ බොත්තම."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ගැළපෙන විශාලන බොත්තම."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"විශාල තිරය වෙත කුඩාව විශාලනය කරන්න."</string>
@@ -112,6 +123,8 @@
     <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wifi තීරු දෙකයි."</string>
     <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"WiFi තීරු තුනයි."</string>
     <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wifi සංඥාව පිරී ඇත."</string>
+    <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> වෙත සම්බන්ධ කරන ලදි."</string>
+    <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> වෙත සම්බන්ධ කරන ලදි."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX නැත."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX තීරු එකයි."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX තීරු දෙකයි."</string>
@@ -124,10 +137,6 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"තීරු දෙකයි."</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"තීරු තුනයි."</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"සංඥාව පිරී ඇත."</string>
-    <string name="accessibility_desc_on" msgid="2385254693624345265">"සක්‍රීයයි."</string>
-    <string name="accessibility_desc_off" msgid="6475508157786853157">"අක්‍රිය කරන්න."</string>
-    <string name="accessibility_desc_connected" msgid="8366256693719499665">"සම්බන්ධිතයි."</string>
-    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"සම්බන්ධ වෙමින්."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -157,22 +166,43 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"දැනුම්දීම නිෂ්ප්‍රභා කරඇත."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"දැනුම්දීම් ආවරණය."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ක්ෂණික සැකසීම්."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"අගුළු තිරය."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"සැකසීම්"</string>
-    <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
-    <skip />
+    <string name="accessibility_desc_recent_apps" msgid="8376953390514779637">"මෑතක තිර."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"පරිශීලකයා <xliff:g id="USER">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wifi අක්‍රියයි."</string>
+    <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wifi සක්‍රියයි."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"ජංගම <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"බැටරිය <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"අහස්යානා ආකාරය <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"බ්ලූටූත් <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"ස්ථානය <xliff:g id="STATE">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"අහස්යානා අකාරය අක්‍රියයි."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"අහස්යානා ආකාරය සක්‍රීයයි."</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"අහස්යානා අකාරය අක්‍රියයි."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"අහස්යානා ආකාරය සක්‍රීයයි."</string>
+    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"බ්ලූටූත් අක්‍රියයි."</string>
+    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"බ්ලූටූත් සක්‍රියයි."</string>
+    <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"බ්ලූටූත් සම්බන්ධවෙමින්."</string>
+    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"බ්ලූටූත් සම්බන්ධිතයි."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"බ්ලූටූත් අක්‍රියයි."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"බ්ලූටූත් සක්‍රියයි."</string>
+    <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"ස්ථානය වාර්තාකරණය අක්‍රියයි."</string>
+    <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"ස්ථානය වාර්තාකරණය සක්‍රියයි."</string>
+    <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"ස්ථානය වාර්තාකරණය අක්‍රියයි."</string>
+    <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"ස්ථානය වාර්තාකරණය සක්‍රියයි."</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"<xliff:g id="TIME">%s</xliff:g> සඳහා සීනුව සකස් කර ඇත."</string>
-    <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"පැනලය වහන්න"</string>
-    <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"වේලාව වැඩියෙන්"</string>
-    <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"වේලාව අඩුවෙන්"</string>
-    <!-- no translation found for accessibility_brightness (8003681285547803095) -->
-    <skip />
+    <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"පැනලය වහන්න."</string>
+    <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"වේලාව වැඩියෙන්."</string>
+    <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"වේලාව අඩුවෙන්."</string>
+    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"සැණෙළි ආලෝකය අක්‍රිය කරන ලදි."</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"සැණෙළි ආලෝකය සක්‍රිය කරන ලදි."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"සැණෙළි ආලෝකය අක්‍රිය කරන ලදි."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"සැණෙළි ආලෝකය සක්‍රිය කරන ලදි."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"වර්ණ අපවර්තනය අක්‍රිය කරන ලදි."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"වර්ණ අපවර්තනය සක්‍රිය කරන ලදි."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"ජංගම හොට්ස්පොටය අක්‍රිය කරන ලදි."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"ජංගම හොට්ස්පොටය සක්‍රිය කරන ලදි."</string>
+    <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"තිරය විකාශය කිරීම නැවත් වන ලදි."</string>
+    <string name="accessibility_brightness" msgid="8003681285547803095">"දීප්තිය දර්ශනය කරන්න"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G දත්ත අක්‍රියයි"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G දත්ත අක්‍රියයි"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"සෙලියුලර් දත්ත අක්‍රියයි"</string>
@@ -189,6 +219,9 @@
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"තිරය ස්වයංක්‍රීයව කරකැවේ."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"තිරය තිරස් දිශානතියෙහි අගුළු දමා ඇත."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"තිරය සිරස් දිශානතිය තුළ අගුළු වැටී ඇත."</string>
+    <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"තිරය ස්වයංක්‍රීයව කරකැවේ."</string>
+    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"තිරය දැන් තිරස් දිශානතිය අගුළු දමා ඇත."</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"තිරය සිරස් දිශානතිය තුළ අගුළු වැටී ඇත."</string>
     <string name="dessert_case" msgid="1295161776223959221">"අතුරුපස අවස්තාව"</string>
     <string name="start_dreams" msgid="7219575858348719790">"දවල් හීනය"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ඊතර නෙට්"</string>
@@ -240,12 +273,11 @@
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"සෙලියුලර් දත්ත"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"දත්ත භාවිතය"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ඉතිරි ඇති දත්ත"</string>
-    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"සීමාවට වඩා වැඩිය"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="3242930457130971204">"සීමාවට ළඟාවී ඇත – දත්ත භාවිතය විරාමය කරන ලදී"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> භාවිතා කර තිබේ"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> සීමිත"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> අවවාද කිරීම"</string>
-    <!-- no translation found for recents_empty_message (8682129509540827999) -->
-    <skip />
+    <string name="recents_empty_message" msgid="8682129509540827999">"මෙහි ඔබගේ මෑතක තිර පෙන්නුම් කරයි"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"යෙදුම් තොරතුරු"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"යෙදුමට අඟුළු දැමීම"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"සෙවීම"</string>
@@ -265,8 +297,7 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"<xliff:g id="ALARM_TIME">%s</xliff:g> හි තිබෙන ඔබගේ සීනුව ඔබට ඇසෙන්නේ නැත"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"හදිසිය අඩු දැනුම් දීම් පහත"</string>
-    <!-- no translation found for notification_tap_again (8524949573675922138) -->
-    <skip />
+    <string name="notification_tap_again" msgid="8524949573675922138">"විවෘත කිරීමට නැවත ස්පර්ශ කරන්න"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"අගුළු ඇරීමට ස්වයිප් කරන්න."</string>
     <string name="phone_hint" msgid="3101468054914424646">"දුරකථන සඳහා දකුණට ස්වයිප් කරන්න"</string>
     <string name="camera_hint" msgid="5241441720959174226">"කැමරාව සඳහා දකුණට ස්වයිප් කරන්න"</string>
@@ -275,25 +306,20 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"ප්‍රමුඛතාව"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"සියලු"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ආරෝපණය වෙමින් (සම්පුර්ණ වන තෙක් <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
-    <!-- no translation found for accessibility_multi_user_switch_switcher (7305948938141024937) -->
-    <skip />
-    <!-- no translation found for accessibility_multi_user_switch_quick_contact (3020367729287990475) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"පරිශීලක මං මාරුව"</string>
+    <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"පැතිකඩ පෙන්වන්න"</string>
     <string name="user_add_user" msgid="5110251524486079492">"පරිශීලකයෙක් එක් කරන්න"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"නව පරිශීලකයා"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"අමුත්තා"</string>
-    <!-- no translation found for guest_new_guest (600537543078847803) -->
-    <skip />
+    <string name="guest_new_guest" msgid="600537543078847803">"ආගන්තුකයා එකතු කරන්න"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"අමුත්තාන් ඉවත් කරන්න"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"අමුත්තාගේ සැසියෙන් පිටවෙයිද?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"අමුත්තාගේ සැසිය අවසන් කිරීමෙන් පෙදෙසි දත්ත සියල්ලම පිට කරයි."</string>
+    <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"අමුත්තාන් ඉවත් කරන්නද?"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"මෙම සැසියේ සියළුම යෙදුම් සහ දත්ත මකාවී."</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"ඉවත් කරන්න"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"නැවත සාදරයෙන් පිළිගනිමු, අමුත්තා!"</string>
-    <!-- no translation found for guest_wipe_session_message (8476238178270112811) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_wipe (5065558566939858884) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_dontwipe (1401113462524894716) -->
-    <skip />
+    <string name="guest_wipe_session_message" msgid="8476238178270112811">"ඔබගේ සැසිය දිගටම කරගෙන යෑමට ඔබට අවශ්‍යද?"</string>
+    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"යළි මුල සිට අරඹන්න"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"ඔව්, දිගටම කරගෙන යන්න"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"විනාඩි එකක් සඳහා"</item>
     <item quantity="other" msgid="6924190729213550991">"විනාඩි %d සඳහා"</item>
@@ -316,13 +342,14 @@
     <string name="vpn_footer" msgid="2388611096129106812">"ඇතැම් විට ජාලය නිරීක්ෂණය විය හැක"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"උපාංගය නිරීක්ෂණය"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ජාල නිරීක්ෂණය"</string>
-    <string name="open_app" msgid="4011771120339160755">"යෙදුම විවෘත කරන්න"</string>
+    <string name="disable_vpn" msgid="4435534311510272506">"VPN අබල කරන්න."</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN විසන්ධි කරන්න"</string>
     <string name="monitoring_description_device_owned" msgid="7512371572956715493">"මෙම උපාංගය කළමනාකරණය කරනු ලබන්නේ:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nඊ-මේල්, යෙදුම්, සහ ආරක්ෂාකාරී වෙබ් අඩවි ඇතුළු, ඔබගේ ජාල ක්‍රියාකාරකම නිරීක්ෂණය කිරීමට ඔබගේ පරිපාලකට හැක.\n\nවැඩිදුර විස්තර සඳහා, ඔබගේ පරිපාලක අමතන්න."</string>
     <string name="monitoring_description_vpn" msgid="7288268682714305659">"VPN සම්බන්ධතාව සකස් කරගැනීමට \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" අවසර ඔබ දෙන ලදි.\n\nඊ-තැපැල්, යෙදුම්, සහ අරක්ෂිත වෙබ් අඩවි ඇතුළුව ඔබගේ ජාලයේ ක්‍රියාකාරකම් නිරීක්ෂණය කිරීමට මෙම යෙදුමට හැකිය."</string>
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\") වෙත ඔබ සම්බන්ධ වී තිබේ.\n\nඊ-තැපැල්, යෙදුම්, සහ අරක්ෂිත වෙබ් අඩවි ඇතුළුව ඔබගේ VPN සේවාවේ සපයන්නාට ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැක."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"මෙම උපාංගය පාලනය කරන්නේ:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nඊ-තැපැල්, යෙදුම්, සහ අරක්ෂිත වෙබ් අඩවි ඇතුළුව ඔබගේ ජාලයේ ක්‍රියාකාරකම් නිරීක්ෂණය කිරීමට ඔබගේ පාලකයාට හැකියාව තිබේ. වැඩිපුර තොරතුරු සඳහා ඔබගේ පාලකයා සම්බන්ධ කර ගන්න.\n\nතවද, VPN සම්බන්ධතාව සකස් කරගැනීමට \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" අවසර ඔබ දෙන ලදි. මෙම යෙදුම ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කරයි."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"මෙම උපාංගය පාලනය කරන්නේ:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nඊ-තැපැල්, යෙදුම්, සහ අරක්ෂිත වෙබ් අඩවි ඇතුළුව ඔබගේ ජාලයේ ක්‍රියාකාරකම් නිරීක්ෂණය කිරීමට ඔබගේ පාලකයාට හැකියාව තිබේ. වැඩිපුර තොරතුරු සඳහා ඔබගේ පාලකයා සම්බන්ධ කර ගන්න.\n\nතවද, VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") වෙත ඔබ සම්බන්ධ වී තිබේ. තවද ඔබගේ VPN සේවාවේ සපයන්නාට ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැක."</string>
-    <!-- no translation found for keyguard_indication_trust_disabled (7412534203633528135) -->
+    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"ඔබ අතින් අගුළු අරින තුරු උපකරණය අගුළු වැටි තිබේ"</string>
+    <!-- no translation found for muted_by (6147073845094180001) -->
     <skip />
 </resources>

@@ -23,8 +23,7 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"ล้างข้อมูล"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ลบจากรายการ"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ข้อมูลแอปพลิเคชัน"</string>
-    <!-- no translation found for status_bar_no_recent_apps (7374907845131203189) -->
-    <skip />
+    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"หน้าจอล่าสุดของคุณแสดงที่นี่"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ปิดแอปพลิเคชันล่าสุด"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="5854176083865845541">"1 แอปพลิเคชันล่าสุด"</item>
@@ -81,11 +80,18 @@
     <string name="accessibility_back" msgid="567011538994429120">"กลับ"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"หน้าแรก"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"เมนู"</string>
-    <!-- no translation found for accessibility_recent (1606470783629913980) -->
-    <skip />
+    <string name="accessibility_recent" msgid="1606470783629913980">"หน้าจอล่าสุด"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"ค้นหา"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"กล้องถ่ายรูป"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"โทรศัพท์"</string>
+    <string name="unlock_label" msgid="8779712358041029439">"ปลดล็อก"</string>
+    <string name="phone_label" msgid="2320074140205331708">"เปิดโทรศัพท์"</string>
+    <string name="camera_label" msgid="7261107956054836961">"เปิดกล้อง"</string>
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"อุปกรณ์ปลอดภัยแล้ว"</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"อุปกรณ์ไม่มีการรักษาความปลอดภัย"</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"อุปกรณ์ปลอดภัยแล้ว ใช้งานเอเจนต์ความน่าเชื่อถืออยู่"</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"อุปกรณ์ไม่มีการรักษาความปลอดภัย ใช้งานเอเจนต์ความน่าเชื่อถืออยู่"</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"กำลังตรวจจับใบหน้า ใช้งานเอเจนต์ความน่าเชื่อถืออยู่"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ปุ่มสลับวิธีการป้อนข้อมูล"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ปุ่มซูมที่ใช้งานร่วมกันได้"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ซูมหน้าจอให้มีขนาดใหญ่ขึ้น"</string>
@@ -112,6 +118,8 @@
     <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"สัญญาณ WiFi สองขีด"</string>
     <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"สัญญาณ WiFi สามขีด"</string>
     <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"สัญญาณ WiFi เต็ม"</string>
+    <string name="accessibility_wifi_name" msgid="7202151365171148501">"เชื่อมต่อ <xliff:g id="WIFI">%s</xliff:g> แล้ว"</string>
+    <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"เชื่อมต่อกับ <xliff:g id="BLUETOOTH">%s</xliff:g> แล้ว"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"ไม่มีสัญญาณ WiMAX"</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"สัญญาณ WiMAX หนึ่งขีด"</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"สัญญาณ WiMAX สองขีด"</string>
@@ -124,10 +132,6 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"สองขีด"</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"สามขีด"</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"สัญญาณเต็ม"</string>
-    <string name="accessibility_desc_on" msgid="2385254693624345265">"เปิดอยู่"</string>
-    <string name="accessibility_desc_off" msgid="6475508157786853157">"ปิดอยู่"</string>
-    <string name="accessibility_desc_connected" msgid="8366256693719499665">"เชื่อมต่อแล้ว"</string>
-    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"กำลังเชื่อมต่อ"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -157,22 +161,43 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"ปิดการแจ้งเตือนแล้ว"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"หน้าต่างแจ้งเตือน"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"การตั้งค่าด่วน"</string>
+    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"ล็อกหน้าจอ"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"การตั้งค่า"</string>
-    <!-- no translation found for accessibility_desc_recent_apps (8376953390514779637) -->
-    <skip />
+    <string name="accessibility_desc_recent_apps" msgid="8376953390514779637">"หน้าจอล่าสุด"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ผู้ใช้ <xliff:g id="USER">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g> <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"ปิด Wi-Fi แล้ว"</string>
+    <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"เปิด Wi-Fi แล้ว"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"มือถือ <xliff:g id="SIGNAL">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> <xliff:g id="NETWORK">%3$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"แบตเตอรี่ <xliff:g id="STATE">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"โหมดใช้บนเครื่องบิน <xliff:g id="STATE">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"บลูทูธ <xliff:g id="STATE">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_location" msgid="4577282329866813100">"สถานที่ <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"โหมดบนเครื่องบินปิดอยู่"</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"โหมดบนเครื่องบินเปิดอยู่"</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"ปิดโหมดบนเครื่องบินแล้ว"</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"เปิดโหมดบนเครื่องบินแล้ว"</string>
+    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"บลูทูธปิดอยู่"</string>
+    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"บลูทูธเปิดอยู่"</string>
+    <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"กำลังเชื่อมต่อบลูทูธ"</string>
+    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"เชื่อมต่อบลูทูธแล้ว"</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"ปิดบลูทูธแล้ว"</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"เปิดบลูทูธแล้ว"</string>
+    <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"การรายงานตำแหน่งปิดอยู่"</string>
+    <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"การรายงานตำแหน่งเปิดอยู่"</string>
+    <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"ปิดการรายงานตำแหน่งแล้ว"</string>
+    <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"เปิดการรายงานตำแหน่งแล้ว"</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"ตั้งเวลาปลุกไว้ที่ <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_close" msgid="2571790856136835943">"ปิดแผงควบคุม"</string>
-    <string name="accessibility_quick_settings_more_time" msgid="5778794273488176726">"เวลามากขึ้น"</string>
-    <string name="accessibility_quick_settings_less_time" msgid="101026945195230084">"เวลาน้อยลง"</string>
-    <!-- no translation found for accessibility_brightness (8003681285547803095) -->
-    <skip />
+    <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"ปิดแผงควบคุม"</string>
+    <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"เวลามากขึ้น"</string>
+    <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"เวลาน้อยลง"</string>
+    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"ไฟฉายปิดอยู่"</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"ไฟฉายเปิดอยู่"</string>
+    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"ปิดไฟฉายแล้ว"</string>
+    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"เปิดไฟฉายแล้ว"</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"ปิดการกลับสีแล้ว"</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"เปิดการกลับสีแล้ว"</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"ปิดฮอตสปอตเคลื่อนที่แล้ว"</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"เปิดฮอตสปอตเคลื่อนที่แล้ว"</string>
+    <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"หยุดการส่งหน้าจอแล้ว"</string>
+    <string name="accessibility_brightness" msgid="8003681285547803095">"ความสว่างของหน้าจอ"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"ข้อมูล 2G-3G ปิดอยู่"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"ข้อมูล 4G ปิดอยู่"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"ข้อมูลมือถือปิดอยู่"</string>
@@ -189,6 +214,9 @@
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"หน้าจอจะหมุนโดยอัตโนมัติ"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ขณะนี้หน้าจอถูกล็อกให้วางในแนวนอน"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ขณะนี้หน้าจอถูกล็อกให้วางในแนวตั้ง"</string>
+    <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"ขณะนี้หน้าจอจะหมุนโดยอัตโนมัติ"</string>
+    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"ขณะนี้หน้าจอล็อกอยู่ในแนวนอน"</string>
+    <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"ขณะนี้หน้าจอล็อกอยู่ในแนวตั้ง"</string>
     <string name="dessert_case" msgid="1295161776223959221">"ชั้นแสดงของหวาน"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Daydream"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"อีเทอร์เน็ต"</string>
@@ -240,12 +268,11 @@
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"ข้อมูลมือถือ"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"การใช้ข้อมูล"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ข้อมูลที่เหลืออยู่"</string>
-    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"เกินขีดจำกัด"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="3242930457130971204">"ถึงขีดจำกัดแล้ว – หยุดการใช้งานข้อมูลชั่วคราวแล้ว"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"ใช้ไปแล้ว <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"ขีดจำกัด <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"คำเตือน <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <!-- no translation found for recents_empty_message (8682129509540827999) -->
-    <skip />
+    <string name="recents_empty_message" msgid="8682129509540827999">"หน้าจอล่าสุดของคุณแสดงที่นี่"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"ข้อมูลแอปพลิเคชัน"</string>
     <string name="recents_lock_to_app_button_label" msgid="4793991421811647489">"การล็อกแอป"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ค้นหา"</string>
@@ -265,8 +292,7 @@
     <string name="zen_alarm_warning" msgid="6873910860111498041">"คุณจะไม่ได้ยินเสียงปลุกในเวลา <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"การแจ้งเตือนที่เร่งด่วนน้อยด้านล่าง"</string>
-    <!-- no translation found for notification_tap_again (8524949573675922138) -->
-    <skip />
+    <string name="notification_tap_again" msgid="8524949573675922138">"แตะอีกครั้งเพื่อเปิด"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"กวาดขึ้นเพื่อปลดล็อก"</string>
     <string name="phone_hint" msgid="3101468054914424646">"กวาดไปทางขวาเพื่อใช้โทรศัพท์"</string>
     <string name="camera_hint" msgid="5241441720959174226">"กวาดไปทางซ้ายเพื่อใช้กล้องถ่ายรูป"</string>
@@ -275,25 +301,20 @@
     <string name="interruption_level_priority" msgid="6517366750688942030">"สำคัญ"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"ทั้งหมด"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"กำลังชาร์จ (อีก <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> เต็ม)"</string>
-    <!-- no translation found for accessibility_multi_user_switch_switcher (7305948938141024937) -->
-    <skip />
-    <!-- no translation found for accessibility_multi_user_switch_quick_contact (3020367729287990475) -->
-    <skip />
+    <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"สลับผู้ใช้"</string>
+    <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"แสดงโปรไฟล์"</string>
     <string name="user_add_user" msgid="5110251524486079492">"เพิ่มผู้ใช้"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"ผู้ใช้ใหม่"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"ผู้เข้าร่วม"</string>
-    <!-- no translation found for guest_new_guest (600537543078847803) -->
-    <skip />
+    <string name="guest_new_guest" msgid="600537543078847803">"เพิ่มผู้เข้าร่วม"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"นำผู้เข้าร่วมออก"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="7587460301980067285">"ต้องการออกจากเซสชันผู้เยี่ยมชมไหม"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="10255285459589280">"การออกจากเซสชันผู้เยี่ยมชมจะนำข้อมูลในเครื่องออก"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"ต้องการนำผู้เข้าร่วมออกไหม"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"นำออก"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"ยินดีต้อนรับท่านผู้เยี่ยมชมกลับมาอีกครั้ง!"</string>
-    <!-- no translation found for guest_wipe_session_message (8476238178270112811) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_wipe (5065558566939858884) -->
-    <skip />
-    <!-- no translation found for guest_wipe_session_dontwipe (1401113462524894716) -->
-    <skip />
+    <string name="guest_wipe_session_message" msgid="8476238178270112811">"คุณต้องการอยู่ในเซสชันต่อไปไหม"</string>
+    <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"เริ่มต้นใหม่"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"ใช่ ดำเนินการต่อ"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"1 นาที"</item>
     <item quantity="other" msgid="6924190729213550991">"%d นาที"</item>
@@ -316,13 +337,13 @@
     <string name="vpn_footer" msgid="2388611096129106812">"เครือข่ายอาจได้รับการตรวจสอบ"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"การตรวจสอบอุปกรณ์"</string>
     <string name="monitoring_title" msgid="169206259253048106">"การตรวจสอบเครือข่าย"</string>
-    <string name="open_app" msgid="4011771120339160755">"เปิดแอป"</string>
+    <string name="disable_vpn" msgid="4435534311510272506">"ปิดใช้ VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"ยกเลิกการเชื่อมต่อ VPN"</string>
     <string name="monitoring_description_device_owned" msgid="7512371572956715493">"อุปกรณ์นี้จัดการโดย:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nผู้ดูแลระบบสามารถตรวจสอบอุปกรณ์และกิจกรรมเครือข่าย รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย\n\nสำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบ"</string>
     <string name="monitoring_description_vpn" msgid="7288268682714305659">"คุณให้สิทธิ์ \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" ในการตั้งค่าการเชื่อมต่อ VPN\n\nแอปนี้สามารถตรวจสอบอุปกรณ์และกิจกรรมเครือข่าย รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย"</string>
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"คุณเชื่อมต่อกับ VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\") อยู่\n\nผู้ให้บริการ VPN สามารถตรวจสอบอุปกรณ์และกิจกรรมเครือข่าย รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัยได้"</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"อุปกรณ์นี้ได้รับการจัดการโดย:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nผู้ดูแลระบบของคุณสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณได้ รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย สำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบของคุณ\n\nนอกจากนี้ คุณได้ให้สิทธิ์ \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" เพื่อตั้งค่าการเชื่อมต่อ VPN แอปนี้สามารถตรวจสอบกิจกรรมในเครือข่ายได้เช่นกัน"</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"อุปกรณ์นี้ได้รับการจัดการโดย:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nผู้ดูแลระบบของคุณสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณได้ รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย สำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบของคุณ\n\nนอกจากนี้ คุณเชื่อมต่อกับ VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") ผู้ให้บริการ VPN ของคุณสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณได้เช่นกัน"</string>
-    <!-- no translation found for keyguard_indication_trust_disabled (7412534203633528135) -->
-    <skip />
+    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"อุปกรณ์จะล็อกจนกว่าคุณจะปลดล็อกด้วยตนเอง"</string>
+    <string name="muted_by" msgid="6147073845094180001">"ปิดเสียงโดย <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>
