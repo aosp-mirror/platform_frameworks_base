@@ -193,6 +193,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         }
         if (mPlaySound) {
             attachLowBatterySound(nb);
+            mPlaySound = false;
         }
         final Notification n = nb.build();
         if (n.headsUpContentView != null) {
@@ -283,7 +284,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     public void showLowBatteryWarning(boolean playSound) {
         Slog.i(TAG,
                 "show low battery warning: level=" + mBatteryLevel
-                + " [" + mBucket + "]");
+                + " [" + mBucket + "] playSound=" + playSound);
         mPlaySound = playSound;
         mWarning = true;
         updateNotification();
