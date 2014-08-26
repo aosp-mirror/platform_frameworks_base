@@ -177,11 +177,6 @@ public final class HdmiControlService extends SystemService {
     private final ArrayList<VendorCommandListenerRecord> mVendorCommandListenerRecords =
             new ArrayList<>();
 
-    // List of records for MHL Scratchpad command listener to handle the caller killed in action.
-    @GuardedBy("mLock")
-    private final ArrayList<HdmiMhlScratchpadCommandListenerRecord>
-            mScratchpadCommandListenerRecords = new ArrayList<>();
-
     @GuardedBy("mLock")
     private InputChangeListenerRecord mInputChangeListenerRecord;
 
@@ -199,13 +194,6 @@ public final class HdmiControlService extends SystemService {
     @GuardedBy("mLock")
     private boolean mProhibitMode;
 
-    // Set to true while the input change by MHL is allowed.
-    @GuardedBy("mLock")
-    private boolean mMhlInputChangeEnabled;
-
-    @GuardedBy("mLock")
-    private List<HdmiDeviceInfo> mMhlDevices;
-
     // List of records for system audio mode change to handle the the caller killed in action.
     private final ArrayList<SystemAudioModeChangeListenerRecord>
             mSystemAudioModeChangeListenerRecords = new ArrayList<>();
@@ -220,9 +208,6 @@ public final class HdmiControlService extends SystemService {
 
     @Nullable
     private HdmiCecController mCecController;
-
-    @Nullable
-    private HdmiMhlController mMhlController;
 
     // HDMI port information. Stored in the unmodifiable list to keep the static information
     // from being modified.
@@ -254,8 +239,23 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private int mActivePortId = Constants.INVALID_PORT_ID;
 
-    // Last input port before switching to the MHL port by way of incoming request RAP[ContentOn].
-    // Should switch back to this port when the device sends RAP[ContentOff].
+    // Set to true while the input change by MHL is allowed.
+    @GuardedBy("mLock")
+    private boolean mMhlInputChangeEnabled;
+
+    // List of records for MHL Scratchpad command listener to handle the caller killed in action.
+    @GuardedBy("mLock")
+    private final ArrayList<HdmiMhlScratchpadCommandListenerRecord>
+            mScratchpadCommandListenerRecords = new ArrayList<>();
+
+    @GuardedBy("mLock")
+    private List<HdmiDeviceInfo> mMhlDevices;
+
+    @Nullable
+    private HdmiMhlController mMhlController;
+
+    // Last input port before switching to the MHL port. Should switch back to this port
+    // when the mobile device sends the request one touch play with off.
     // Gets invalidated if we go to other port/input.
     @ServiceThreadOnly
     private int mLastInputMhl = Constants.INVALID_PORT_ID;
@@ -302,16 +302,17 @@ public final class HdmiControlService extends SystemService {
         }
 
         mMhlController = HdmiMhlController.create(this);
-        if (mMhlController == null) {
+        if (!mMhlController.isReady()) {
             Slog.i(TAG, "Device does not support MHL-control.");
         }
-        initPortInfo();
         mMhlDevices = Collections.emptyList();
+
+        initPortInfo();
         mMessageValidator = new HdmiCecMessageValidator(this);
         publishBinderService(Context.HDMI_CONTROL_SERVICE, new BinderService());
 
         // Register broadcast receiver for power state change.
-        if (mCecController != null || mMhlController != null) {
+        if (mCecController != null) {
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             filter.addAction(Intent.ACTION_SCREEN_ON);
@@ -375,9 +376,7 @@ public final class HdmiControlService extends SystemService {
                     setMhlInputChangeEnabled(enabled);
                     break;
                 case Global.MHL_POWER_CHARGE_ENABLED:
-                    if (mMhlController != null) {
-                        mMhlController.setOption(OPTION_MHL_POWER_CHARGE, toInt(enabled));
-                    }
+                    mMhlController.setOption(OPTION_MHL_POWER_CHARGE, toInt(enabled));
                     break;
             }
         }
@@ -481,30 +480,30 @@ public final class HdmiControlService extends SystemService {
         mPortInfoMap = new UnmodifiableSparseArray<>(portInfoMap);
         mPortDeviceMap = new UnmodifiableSparseArray<>(portDeviceMap);
 
-        if (mMhlController == null) {
+        HdmiPortInfo[] mhlPortInfo = mMhlController.getPortInfos();
+        ArraySet<Integer> mhlSupportedPorts = new ArraySet<Integer>(mhlPortInfo.length);
+        for (HdmiPortInfo info : mhlPortInfo) {
+            if (info.isMhlSupported()) {
+                mhlSupportedPorts.add(info.getId());
+            }
+        }
+
+        // Build HDMI port info list with CEC port info plus MHL supported flag. We can just use
+        // cec port info if we do not have have port that supports MHL.
+        if (mhlSupportedPorts.isEmpty()) {
             mPortInfo = Collections.unmodifiableList(Arrays.asList(cecPortInfo));
             return;
-        } else {
-            HdmiPortInfo[] mhlPortInfo = mMhlController.getPortInfos();
-            ArraySet<Integer> mhlSupportedPorts = new ArraySet<Integer>(mhlPortInfo.length);
-            for (HdmiPortInfo info : mhlPortInfo) {
-                if (info.isMhlSupported()) {
-                    mhlSupportedPorts.add(info.getId());
-                }
-            }
-
-            // Build HDMI port info list with CEC port info plus MHL supported flag.
-            ArrayList<HdmiPortInfo> result = new ArrayList<>(cecPortInfo.length);
-            for (HdmiPortInfo info : cecPortInfo) {
-                if (mhlSupportedPorts.contains(info.getId())) {
-                    result.add(new HdmiPortInfo(info.getId(), info.getType(), info.getAddress(),
-                            info.isCecSupported(), true, info.isArcSupported()));
-                } else {
-                    result.add(info);
-                }
-            }
-            mPortInfo = Collections.unmodifiableList(result);
         }
+        ArrayList<HdmiPortInfo> result = new ArrayList<>(cecPortInfo.length);
+        for (HdmiPortInfo info : cecPortInfo) {
+            if (mhlSupportedPorts.contains(info.getId())) {
+                result.add(new HdmiPortInfo(info.getId(), info.getType(), info.getAddress(),
+                        info.isCecSupported(), true, info.isArcSupported()));
+            } else {
+                result.add(info);
+            }
+        }
+        mPortInfo = Collections.unmodifiableList(result);
     }
 
     List<HdmiPortInfo> getPortInfo() {
@@ -649,18 +648,6 @@ public final class HdmiControlService extends SystemService {
         sendCecCommand(command, null);
     }
 
-    @ServiceThreadOnly
-    void sendMhlSubcommand(int portId, HdmiMhlSubcommand command) {
-        assertRunOnServiceThread();
-        sendMhlSubcommand(portId, command, null);
-    }
-
-    @ServiceThreadOnly
-    void sendMhlSubcommand(int portId, HdmiMhlSubcommand command, SendMessageCallback callback) {
-        assertRunOnServiceThread();
-        mMhlController.sendSubcommand(portId, command, callback);
-    }
-
     /**
      * Send <Feature Abort> command on the given CEC message if possible.
      * If the aborted message is invalid, then it wont send the message.
@@ -793,6 +780,18 @@ public final class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
+    void sendMhlSubcommand(int portId, HdmiMhlSubcommand command) {
+        assertRunOnServiceThread();
+        sendMhlSubcommand(portId, command, null);
+    }
+
+    @ServiceThreadOnly
+    void sendMhlSubcommand(int portId, HdmiMhlSubcommand command, SendMessageCallback callback) {
+        assertRunOnServiceThread();
+        mMhlController.sendSubcommand(portId, command, callback);
+    }
+
+    @ServiceThreadOnly
     boolean handleMhlSubcommand(int portId, HdmiMhlSubcommand message) {
         assertRunOnServiceThread();
 
@@ -892,6 +891,19 @@ public final class HdmiControlService extends SystemService {
         return mMhlDevices;
     }
 
+    private class HdmiMhlScratchpadCommandListenerRecord implements IBinder.DeathRecipient {
+        private final IHdmiMhlScratchpadCommandListener mListener;
+
+        public HdmiMhlScratchpadCommandListenerRecord(IHdmiMhlScratchpadCommandListener listener) {
+            mListener = listener;
+        }
+
+        @Override
+        public void binderDied() {
+            mScratchpadCommandListenerRecords.remove(this);
+        }
+    }
+
     // Record class that monitors the event of the caller of being killed. Used to clean up
     // the listener list and record list accordingly.
     private final class HotplugEventListenerRecord implements IBinder.DeathRecipient {
@@ -971,19 +983,6 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    private class HdmiMhlScratchpadCommandListenerRecord implements IBinder.DeathRecipient {
-        private final IHdmiMhlScratchpadCommandListener mListener;
-
-        public HdmiMhlScratchpadCommandListenerRecord(IHdmiMhlScratchpadCommandListener listener) {
-            mListener = listener;
-        }
-
-        @Override
-        public void binderDied() {
-            mScratchpadCommandListenerRecords.remove(this);
-        }
-    }
-
     private void enforceAccessPermission() {
         getContext().enforceCallingOrSelfPermission(PERMISSION, TAG);
     }
@@ -1036,20 +1035,18 @@ public final class HdmiControlService extends SystemService {
                         invokeCallback(callback, HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE);
                         return;
                     }
-                    if (mMhlController != null) {
-                        HdmiMhlLocalDevice device = mMhlController.getLocalDeviceById(deviceId);
-                        if (device != null) {
-                            if (device.getPortId() == tv.getActivePortId()) {
-                                invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
-                                return;
-                            }
-                            // Upon selecting MHL device, we send RAP[Content On] to wake up
-                            // the connected mobile device, start routing control to switch ports.
-                            // callback is handled by MHL action.
-                            device.turnOn(callback);
-                            tv.doManualPortSwitching(device.getInfo().getPortId(), null);
+                    HdmiMhlLocalDevice device = mMhlController.getLocalDeviceById(deviceId);
+                    if (device != null) {
+                        if (device.getPortId() == tv.getActivePortId()) {
+                            invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
                             return;
                         }
+                        // Upon selecting MHL device, we send RAP[Content On] to wake up
+                        // the connected mobile device, start routing control to switch ports.
+                        // callback is handled by MHL action.
+                        device.turnOn(callback);
+                        tv.doManualPortSwitching(device.getInfo().getPortId(), null);
+                        return;
                     }
                     tv.deviceSelect(deviceId, callback);
                 }
@@ -1083,12 +1080,10 @@ public final class HdmiControlService extends SystemService {
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (mMhlController != null) {
-                        HdmiMhlLocalDevice device = mMhlController.getLocalDevice(mActivePortId);
-                        if (device != null) {
-                            device.sendKeyEvent(keyCode, isPressed);
-                            return;
-                        }
+                    HdmiMhlLocalDevice device = mMhlController.getLocalDevice(mActivePortId);
+                    if (device != null) {
+                        device.sendKeyEvent(keyCode, isPressed);
+                        return;
                     }
                     if (mCecController != null) {
                         HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(deviceType);
@@ -1377,10 +1372,6 @@ public final class HdmiControlService extends SystemService {
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (mMhlController == null) {
-                        Slog.w(TAG, "No Mhl controller available.");
-                        return;
-                    }
                     if (!isControlEnabled()) {
                         Slog.w(TAG, "Hdmi control is disabled.");
                         return ;
@@ -1763,9 +1754,7 @@ public final class HdmiControlService extends SystemService {
             }
         }
 
-        if (mMhlController != null) {
-            mMhlController.clearAllLocalDevices();
-        }
+        mMhlController.clearAllLocalDevices();
     }
 
     @ServiceThreadOnly
@@ -1875,9 +1864,7 @@ public final class HdmiControlService extends SystemService {
 
         int value = toInt(enabled);
         mCecController.setOption(OPTION_CEC_ENABLE, value);
-        if (mMhlController != null) {
-            mMhlController.setOption(OPTION_MHL_ENABLE, value);
-        }
+        mMhlController.setOption(OPTION_MHL_ENABLE, value);
 
         synchronized (mLock) {
             mHdmiControlEnabled = enabled;
@@ -1943,7 +1930,7 @@ public final class HdmiControlService extends SystemService {
         tv().setActivePortId(portId);
 
         // The port is either the MHL-enabled port where the mobile device is connected, or
-        // the last port to go back to when RAP[ContentOff] is received. Note that the last port
+        // the last port to go back to when turnoff command is received. Note that the last port
         // may not be the MHL-enabled one. In this case the device info to be passed to
         // input change listener should be the one describing the corresponding HDMI port.
         HdmiMhlLocalDevice device = mMhlController.getLocalDevice(portId);
@@ -1954,9 +1941,7 @@ public final class HdmiControlService extends SystemService {
     }
 
    void setMhlInputChangeEnabled(boolean enabled) {
-        if (mMhlController != null) {
-            mMhlController.setOption(OPTION_MHL_INPUT_SWITCHING, toInt(enabled));
-        }
+       mMhlController.setOption(OPTION_MHL_INPUT_SWITCHING, toInt(enabled));
 
         synchronized (mLock) {
             mMhlInputChangeEnabled = enabled;
