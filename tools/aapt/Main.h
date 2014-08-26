@@ -49,7 +49,8 @@ extern android::status_t buildResources(Bundle* bundle,
     const sp<AaptAssets>& assets, sp<ApkBuilder>& builder);
 
 extern android::status_t writeResourceSymbols(Bundle* bundle,
-    const sp<AaptAssets>& assets, const String8& pkgName, bool includePrivate);
+        const sp<AaptAssets>& assets, const String8& pkgName,
+        bool includePrivate, bool emitCallback);
 
 extern android::status_t writeProguardFile(Bundle* bundle, const sp<AaptAssets>& assets);
 
