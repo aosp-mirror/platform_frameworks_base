@@ -15,6 +15,9 @@ package android.service.fingerprint;
  * limitations under the License.
  */
 
+/**
+ * @hide
+ */
 public class FingerprintManagerReceiver {
     /**
      * Fingerprint enrollment progress update. Enrollment is considered complete if
