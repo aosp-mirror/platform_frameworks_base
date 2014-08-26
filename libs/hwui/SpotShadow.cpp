@@ -647,7 +647,7 @@ float SpotShadow::projectCasterToOutline(Vector2& outline,
     if (lightToPolyZ != 0) {
         // If any caster's vertex is almost above the light, we just keep it as 95%
         // of the height of the light.
-        ratioZ = MathUtils::min(polyVertex.z / lightToPolyZ, CASTER_Z_CAP_RATIO);
+        ratioZ = MathUtils::clamp(polyVertex.z / lightToPolyZ, 0.0f, CASTER_Z_CAP_RATIO);
     }
 
     outline.x = polyVertex.x - ratioZ * (lightCenter.x - polyVertex.x);
@@ -669,6 +669,10 @@ float SpotShadow::projectCasterToOutline(Vector2& outline,
 void SpotShadow::createSpotShadow(bool isCasterOpaque, const Vector3& lightCenter,
         float lightSize, const Vector3* poly, int polyLength, const Vector3& polyCentroid,
         VertexBuffer& shadowTriangleStrip) {
+    if (CC_UNLIKELY(lightCenter.z <= 0)) {
+        ALOGW("Relative Light Z is not positive. No spot shadow!");
+        return;
+    }
     OutlineData outlineData[polyLength];
     Vector2 outlineCentroid;
     // Calculate the projected outline for each polygon's vertices from the light center.
@@ -787,7 +791,7 @@ void SpotShadow::createSpotShadow(bool isCasterOpaque, const Vector3& lightCente
         // The ratio can be simulated by using the inverse of maximum of ratioVI for
         // all (V).
         distOutline = (outlineData[i].position - outlineCentroid).length();
-        if (distOutline == 0) {
+        if (CC_UNLIKELY(distOutline == 0)) {
             // If the outline has 0 area, then there is no spot shadow anyway.
             ALOGW("Outline has 0 area, no spot shadow!");
             return;
