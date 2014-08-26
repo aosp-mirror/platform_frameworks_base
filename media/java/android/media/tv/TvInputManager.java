@@ -1170,16 +1170,19 @@ public final class TvInputManager {
          */
         public void selectTrack(int type, String trackId) {
             if (type == TvTrackInfo.TYPE_AUDIO) {
-                if (trackId != null && !mAudioTracks.contains(trackId)) {
+                if (trackId != null && !containsTrack(mAudioTracks, trackId)) {
                     Log.w(TAG, "Invalid audio trackId: " + trackId);
+                    return;
                 }
             } else if (type == TvTrackInfo.TYPE_VIDEO) {
-                if (trackId != null && !mVideoTracks.contains(trackId)) {
+                if (trackId != null && !containsTrack(mVideoTracks, trackId)) {
                     Log.w(TAG, "Invalid video trackId: " + trackId);
+                    return;
                 }
             } else if (type == TvTrackInfo.TYPE_SUBTITLE) {
-                if (trackId != null && !mSubtitleTracks.contains(trackId)) {
+                if (trackId != null && !containsTrack(mSubtitleTracks, trackId)) {
                     Log.w(TAG, "Invalid subtitle trackId: " + trackId);
+                    return;
                 }
             } else {
                 throw new IllegalArgumentException("invalid type: " + type);
@@ -1193,6 +1196,15 @@ public final class TvInputManager {
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        private boolean containsTrack(List<TvTrackInfo> tracks, String trackId) {
+            for (TvTrackInfo track : tracks) {
+                if (track.getId().equals(trackId)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /**
