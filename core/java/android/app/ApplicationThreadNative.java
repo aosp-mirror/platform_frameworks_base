@@ -129,7 +129,7 @@ public abstract class ApplicationThreadNative extends Binder
             scheduleSendResult(b, ri);
             return true;
         }
-        
+
         case SCHEDULE_LAUNCH_ACTIVITY_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
@@ -148,17 +148,13 @@ public abstract class ApplicationThreadNative extends Binder
             List<Intent> pi = data.createTypedArrayList(Intent.CREATOR);
             boolean notResumed = data.readInt() != 0;
             boolean isForward = data.readInt() != 0;
-            String profileName = data.readString();
-            ParcelFileDescriptor profileFd = data.readInt() != 0
-                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
-            boolean autoStopProfiler = data.readInt() != 0;
-            scheduleLaunchActivity(intent, b, ident, info, curConfig, compatInfo,
-                    voiceInteractor, procState, state, persistentState,
-                    ri, pi, notResumed, isForward, profileName, profileFd,
-                    autoStopProfiler);
+            ProfilerInfo profilerInfo = data.readInt() != 0
+                    ? ProfilerInfo.CREATOR.createFromParcel(data) : null;
+            scheduleLaunchActivity(intent, b, ident, info, curConfig, compatInfo, voiceInteractor,
+                    procState, state, persistentState, ri, pi, notResumed, isForward, profilerInfo);
             return true;
         }
-        
+
         case SCHEDULE_RELAUNCH_ACTIVITY_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
@@ -274,10 +270,8 @@ public abstract class ApplicationThreadNative extends Binder
                 data.createTypedArrayList(ProviderInfo.CREATOR);
             ComponentName testName = (data.readInt() != 0)
                 ? new ComponentName(data) : null;
-            String profileName = data.readString();
-            ParcelFileDescriptor profileFd = data.readInt() != 0
-                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
-            boolean autoStopProfiler = data.readInt() != 0;
+            ProfilerInfo profilerInfo = data.readInt() != 0
+                    ? ProfilerInfo.CREATOR.createFromParcel(data) : null;
             Bundle testArgs = data.readBundle();
             IBinder binder = data.readStrongBinder();
             IInstrumentationWatcher testWatcher = IInstrumentationWatcher.Stub.asInterface(binder);
@@ -292,11 +286,9 @@ public abstract class ApplicationThreadNative extends Binder
             CompatibilityInfo compatInfo = CompatibilityInfo.CREATOR.createFromParcel(data);
             HashMap<String, IBinder> services = data.readHashMap(null);
             Bundle coreSettings = data.readBundle();
-            bindApplication(packageName, info,
-                            providers, testName, profileName, profileFd, autoStopProfiler,
-                            testArgs, testWatcher, uiAutomationConnection, testMode,
-                            openGlTrace, restrictedBackupMode, persistent, config, compatInfo,
-                            services, coreSettings);
+            bindApplication(packageName, info, providers, testName, profilerInfo, testArgs,
+                    testWatcher, uiAutomationConnection, testMode, openGlTrace,
+                    restrictedBackupMode, persistent, config, compatInfo, services, coreSettings);
             return true;
         }
 
@@ -403,7 +395,7 @@ public abstract class ApplicationThreadNative extends Binder
             scheduleLowMemory();
             return true;
         }
-        
+
         case SCHEDULE_ACTIVITY_CONFIGURATION_CHANGED_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
@@ -411,19 +403,18 @@ public abstract class ApplicationThreadNative extends Binder
             scheduleActivityConfigurationChanged(b);
             return true;
         }
-        
+
         case PROFILER_CONTROL_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
             boolean start = data.readInt() != 0;
             int profileType = data.readInt();
-            String path = data.readString();
-            ParcelFileDescriptor fd = data.readInt() != 0
-                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
-            profilerControl(start, path, fd, profileType);
+            ProfilerInfo profilerInfo = data.readInt() != 0
+                    ? ProfilerInfo.CREATOR.createFromParcel(data) : null;
+            profilerControl(start, profilerInfo, profileType);
             return true;
         }
-        
+
         case SET_SCHEDULING_GROUP_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
@@ -774,8 +765,7 @@ class ApplicationThreadProxy implements IApplicationThread {
             IVoiceInteractor voiceInteractor, int procState, Bundle state,
             PersistableBundle persistentState, List<ResultInfo> pendingResults,
             List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
-            String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler)
-            throws RemoteException {
+            ProfilerInfo profilerInfo) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         intent.writeToParcel(data, 0);
@@ -792,14 +782,12 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeTypedList(pendingNewIntents);
         data.writeInt(notResumed ? 1 : 0);
         data.writeInt(isForward ? 1 : 0);
-        data.writeString(profileName);
-        if (profileFd != null) {
+        if (profilerInfo != null) {
             data.writeInt(1);
-            profileFd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            profilerInfo.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         } else {
             data.writeInt(0);
         }
-        data.writeInt(autoStopProfiler ? 1 : 0);
         mRemote.transact(SCHEDULE_LAUNCH_ACTIVITY_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
@@ -959,9 +947,8 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     public final void bindApplication(String packageName, ApplicationInfo info,
-            List<ProviderInfo> providers, ComponentName testName, String profileName,
-            ParcelFileDescriptor profileFd, boolean autoStopProfiler, Bundle testArgs,
-            IInstrumentationWatcher testWatcher,
+            List<ProviderInfo> providers, ComponentName testName, ProfilerInfo profilerInfo,
+            Bundle testArgs, IInstrumentationWatcher testWatcher,
             IUiAutomationConnection uiAutomationConnection, int debugMode,
             boolean openGlTrace, boolean restrictedBackupMode, boolean persistent,
             Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
@@ -977,14 +964,12 @@ class ApplicationThreadProxy implements IApplicationThread {
             data.writeInt(1);
             testName.writeToParcel(data, 0);
         }
-        data.writeString(profileName);
-        if (profileFd != null) {
+        if (profilerInfo != null) {
             data.writeInt(1);
-            profileFd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            profilerInfo.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         } else {
             data.writeInt(0);
         }
-        data.writeInt(autoStopProfiler ? 1 : 0);
         data.writeBundle(testArgs);
         data.writeStrongInterface(testWatcher);
         data.writeStrongInterface(uiAutomationConnection);
@@ -1111,7 +1096,7 @@ class ApplicationThreadProxy implements IApplicationThread {
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }
-    
+
     public final void scheduleActivityConfigurationChanged(
             IBinder token) throws RemoteException {
         Parcel data = Parcel.obtain();
@@ -1121,17 +1106,16 @@ class ApplicationThreadProxy implements IApplicationThread {
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }
-    
-    public void profilerControl(boolean start, String path,
-            ParcelFileDescriptor fd, int profileType) throws RemoteException {
+
+    public void profilerControl(boolean start, ProfilerInfo profilerInfo, int profileType)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeInt(start ? 1 : 0);
         data.writeInt(profileType);
-        data.writeString(path);
-        if (fd != null) {
+        if (profilerInfo != null) {
             data.writeInt(1);
-            fd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            profilerInfo.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         } else {
             data.writeInt(0);
         }
@@ -1139,7 +1123,7 @@ class ApplicationThreadProxy implements IApplicationThread {
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }
-    
+
     public void setSchedulingGroup(int group) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
@@ -1148,7 +1132,7 @@ class ApplicationThreadProxy implements IApplicationThread {
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }
-    
+
     public void dispatchPackageBroadcast(int cmd, String[] packages) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
@@ -1157,9 +1141,8 @@ class ApplicationThreadProxy implements IApplicationThread {
         mRemote.transact(DISPATCH_PACKAGE_BROADCAST_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
-        
     }
-    
+
     public void scheduleCrash(String msg) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
@@ -1167,7 +1150,6 @@ class ApplicationThreadProxy implements IApplicationThread {
         mRemote.transact(SCHEDULE_CRASH_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
-        
     }
 
     public void dumpHeap(boolean managed, String path,

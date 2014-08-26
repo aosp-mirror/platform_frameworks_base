@@ -4145,10 +4145,9 @@ public class Activity extends ContextThemeWrapper
                 intent.prepareToLeaveProcess();
                 result = ActivityManagerNative.getDefault()
                     .startActivity(mMainThread.getApplicationThread(), getBasePackageName(),
-                            intent, intent.resolveTypeIfNeeded(getContentResolver()),
-                            mToken, mEmbeddedID, requestCode,
-                            ActivityManager.START_FLAG_ONLY_IF_NEEDED, null, null,
-                            options);
+                            intent, intent.resolveTypeIfNeeded(getContentResolver()), mToken,
+                            mEmbeddedID, requestCode, ActivityManager.START_FLAG_ONLY_IF_NEEDED,
+                            null, options);
             } catch (RemoteException e) {
                 // Empty
             }

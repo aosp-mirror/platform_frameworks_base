@@ -5426,7 +5426,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                         dock.resolveTypeIfNeeded(mContext.getContentResolver()),
                                         null, null, 0,
                                         ActivityManager.START_FLAG_ONLY_IF_NEEDED,
-                                        null, null, null, UserHandle.USER_CURRENT);
+                                        null, null, UserHandle.USER_CURRENT);
                         if (result == ActivityManager.START_RETURN_INTENT_TO_CALLER) {
                             return false;
                         }
@@ -5437,7 +5437,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 mHomeIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
                                 null, null, 0,
                                 ActivityManager.START_FLAG_ONLY_IF_NEEDED,
-                                null, null, null, UserHandle.USER_CURRENT);
+                                null, null, UserHandle.USER_CURRENT);
                 if (result == ActivityManager.START_RETURN_INTENT_TO_CALLER) {
                     return false;
                 }

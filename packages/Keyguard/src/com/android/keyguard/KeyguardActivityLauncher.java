@@ -242,8 +242,7 @@ public abstract class KeyguardActivityLauncher {
                             null /*resultWho*/,
                             0 /*requestCode*/,
                             Intent.FLAG_ACTIVITY_NEW_TASK,
-                            null /*profileFile*/,
-                            null /*profileFd*/,
+                            null /*profilerInfo*/,
                             options,
                             user.getIdentifier());
                     if (DEBUG) Log.d(TAG, String.format("waitResult[%s,%s,%s,%s] at %s",
