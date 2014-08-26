@@ -108,7 +108,7 @@ public class UsageLogActivity extends ListActivity implements Runnable {
                 holder = (ViewHolder) convertView.getTag();
             }
 
-            holder.packageName.setText(mEvents.get(position).getComponent().toShortString());
+            holder.packageName.setText(mEvents.get(position).getPackageName());
             String state;
             switch (mEvents.get(position).getEventType()) {
                 case UsageEvents.Event.MOVE_TO_FOREGROUND:

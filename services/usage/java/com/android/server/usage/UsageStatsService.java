@@ -354,7 +354,8 @@ public class UsageStatsService extends SystemService implements
             }
 
             UsageEvents.Event event = new UsageEvents.Event();
-            event.mComponent = component;
+            event.mPackage = component.getPackageName();
+            event.mClass = component.getClassName();
             event.mTimeStamp = timeStamp;
             event.mEventType = eventType;
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();

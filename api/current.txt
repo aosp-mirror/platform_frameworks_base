@@ -5719,8 +5719,9 @@ package android.app.usage {
 
   public static final class UsageEvents.Event {
     ctor public UsageEvents.Event();
-    method public android.content.ComponentName getComponent();
+    method public java.lang.String getClassName();
     method public int getEventType();
+    method public java.lang.String getPackageName();
     method public long getTimeStamp();
     field public static final int MOVE_TO_BACKGROUND = 2; // 0x2
     field public static final int MOVE_TO_FOREGROUND = 1; // 0x1
