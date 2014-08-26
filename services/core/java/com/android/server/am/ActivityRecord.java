@@ -723,6 +723,22 @@ final class ActivityRecord {
                                         + pendingOptions.getThumbnail().getHeight()));
                     }
                     break;
+                case ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_UP:
+                case ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_DOWN:
+                    service.mWindowManager.overridePendingAppTransitionAspectScaledThumb(
+                            pendingOptions.getThumbnail(),
+                            pendingOptions.getStartX(), pendingOptions.getStartY(),
+                            pendingOptions.getOnAnimationStartListener(),
+                            (animationType == ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_UP));
+                    if (intent.getSourceBounds() == null) {
+                        intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
+                                pendingOptions.getStartY(),
+                                pendingOptions.getStartX()
+                                        + pendingOptions.getThumbnail().getWidth(),
+                                pendingOptions.getStartY()
+                                        + pendingOptions.getThumbnail().getHeight()));
+                    }
+                    break;
                 default:
                     Slog.e(TAG, "applyOptionsLocked: Unknown animationType=" + animationType);
                     break;

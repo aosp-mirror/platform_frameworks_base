@@ -221,6 +221,12 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void overridePendingAppTransitionAspectScaledThumb(Bitmap srcThumb, int startX,
+            int startY, IRemoteCallback startedCallback, boolean scaleUp) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
     public void pauseKeyDispatching(IBinder arg0) throws RemoteException {
         // TODO Auto-generated method stub
 

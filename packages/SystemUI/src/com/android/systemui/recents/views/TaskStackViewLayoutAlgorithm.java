@@ -33,7 +33,7 @@ import java.util.HashMap;
 public class TaskStackViewLayoutAlgorithm {
 
     // These are all going to change
-    static final float StackPeekMinScale = 0.825f; // The min scale of the last card in the peek area
+    static final float StackPeekMinScale = 0.8f; // The min scale of the last card in the peek area
 
     RecentsConfiguration mConfig;
 
@@ -157,7 +157,7 @@ public class TaskStackViewLayoutAlgorithm {
     public TaskViewTransform getStackTransform(Task task, float stackScroll, TaskViewTransform transformOut,
             TaskViewTransform prevTransform) {
         // Return early if we have an invalid index
-        if (task == null) {
+        if (task == null || !mTaskProgressMap.containsKey(task.key)) {
             transformOut.reset();
             return transformOut;
         }
@@ -197,6 +197,15 @@ public class TaskStackViewLayoutAlgorithm {
         transformOut.visible = true;
         transformOut.p = pTaskRelative;
         return transformOut;
+    }
+
+    /**
+     * Returns the untransformed task view size.
+     */
+    public Rect getUntransformedTaskViewSize() {
+        Rect tvSize = new Rect(mTaskRect);
+        tvSize.offsetTo(0, 0);
+        return tvSize;
     }
 
     /**

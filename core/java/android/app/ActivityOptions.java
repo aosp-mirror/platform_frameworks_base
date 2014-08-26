@@ -128,6 +128,10 @@ public class ActivityOptions {
     public static final int ANIM_DEFAULT = 6;
     /** @hide */
     public static final int ANIM_LAUNCH_TASK_BEHIND = 7;
+    /** @hide */
+    public static final int ANIM_THUMBNAIL_ASPECT_SCALE_UP = 8;
+    /** @hide */
+    public static final int ANIM_THUMBNAIL_ASPECT_SCALE_DOWN = 9;
 
     private String mPackageName;
     private int mAnimationType = ANIM_NONE;
@@ -338,6 +342,67 @@ public class ActivityOptions {
     }
 
     /**
+     * Create an ActivityOptions specifying an animation where the new activity
+     * window and a thumbnail is aspect-scaled to a new location.
+     *
+     * @param source The View that this thumbnail is animating from.  This
+     * defines the coordinate space for <var>startX</var> and <var>startY</var>.
+     * @param thumbnail The bitmap that will be shown as the initial thumbnail
+     * of the animation.
+     * @param startX The x starting location of the bitmap, relative to <var>source</var>.
+     * @param startY The y starting location of the bitmap, relative to <var>source</var>.
+     * @param listener Optional OnAnimationStartedListener to find out when the
+     * requested animation has started running.  If for some reason the animation
+     * is not executed, the callback will happen immediately.
+     * @return Returns a new ActivityOptions object that you can use to
+     * supply these options as the options Bundle when starting an activity.
+     * @hide
+     */
+    public static ActivityOptions makeThumbnailAspectScaleUpAnimation(View source,
+            Bitmap thumbnail, int startX, int startY, OnAnimationStartedListener listener) {
+        return makeAspectScaledThumbnailAnimation(source, thumbnail, startX, startY, listener,
+                true);
+    }
+
+    /**
+     * Create an ActivityOptions specifying an animation where the new activity
+     * window and a thumbnail is aspect-scaled to a new location.
+     *
+     * @param source The View that this thumbnail is animating to.  This
+     * defines the coordinate space for <var>startX</var> and <var>startY</var>.
+     * @param thumbnail The bitmap that will be shown as the final thumbnail
+     * of the animation.
+     * @param startX The x end location of the bitmap, relative to <var>source</var>.
+     * @param startY The y end location of the bitmap, relative to <var>source</var>.
+     * @param listener Optional OnAnimationStartedListener to find out when the
+     * requested animation has started running.  If for some reason the animation
+     * is not executed, the callback will happen immediately.
+     * @return Returns a new ActivityOptions object that you can use to
+     * supply these options as the options Bundle when starting an activity.
+     * @hide
+     */
+    public static ActivityOptions makeThumbnailAspectScaleDownAnimation(View source,
+            Bitmap thumbnail, int startX, int startY, OnAnimationStartedListener listener) {
+        return makeAspectScaledThumbnailAnimation(source, thumbnail, startX, startY, listener,
+                false);
+    }
+
+    private static ActivityOptions makeAspectScaledThumbnailAnimation(View source, Bitmap thumbnail,
+            int startX, int startY, OnAnimationStartedListener listener, boolean scaleUp) {
+        ActivityOptions opts = new ActivityOptions();
+        opts.mPackageName = source.getContext().getPackageName();
+        opts.mAnimationType = scaleUp ? ANIM_THUMBNAIL_ASPECT_SCALE_UP :
+                ANIM_THUMBNAIL_ASPECT_SCALE_DOWN;
+        opts.mThumbnail = thumbnail;
+        int[] pts = new int[2];
+        source.getLocationOnScreen(pts);
+        opts.mStartX = pts[0] + startX;
+        opts.mStartY = pts[1] + startY;
+        opts.setOnAnimationStartedListener(source.getHandler(), listener);
+        return opts;
+    }
+
+    /**
      * Create an ActivityOptions to transition between Activities using cross-Activity scene
      * animations. This method carries the position of one shared element to the started Activity.
      * The position of <code>sharedElement</code> will be used as the epicenter for the
@@ -484,7 +549,9 @@ public class ActivityOptions {
 
             case ANIM_THUMBNAIL_SCALE_UP:
             case ANIM_THUMBNAIL_SCALE_DOWN:
-                mThumbnail = (Bitmap)opts.getParcelable(KEY_ANIM_THUMBNAIL);
+            case ANIM_THUMBNAIL_ASPECT_SCALE_UP:
+            case ANIM_THUMBNAIL_ASPECT_SCALE_DOWN:
+                mThumbnail = (Bitmap) opts.getParcelable(KEY_ANIM_THUMBNAIL);
                 mStartX = opts.getInt(KEY_ANIM_START_X, 0);
                 mStartY = opts.getInt(KEY_ANIM_START_Y, 0);
                 mAnimationStartedListener = IRemoteCallback.Stub.asInterface(
@@ -635,6 +702,8 @@ public class ActivityOptions {
                 break;
             case ANIM_THUMBNAIL_SCALE_UP:
             case ANIM_THUMBNAIL_SCALE_DOWN:
+            case ANIM_THUMBNAIL_ASPECT_SCALE_UP:
+            case ANIM_THUMBNAIL_ASPECT_SCALE_DOWN:
                 mThumbnail = otherOptions.mThumbnail;
                 mStartX = otherOptions.mStartX;
                 mStartY = otherOptions.mStartY;
@@ -691,6 +760,8 @@ public class ActivityOptions {
                 break;
             case ANIM_THUMBNAIL_SCALE_UP:
             case ANIM_THUMBNAIL_SCALE_DOWN:
+            case ANIM_THUMBNAIL_ASPECT_SCALE_UP:
+            case ANIM_THUMBNAIL_ASPECT_SCALE_DOWN:
                 b.putParcelable(KEY_ANIM_THUMBNAIL, mThumbnail);
                 b.putInt(KEY_ANIM_START_X, mStartX);
                 b.putInt(KEY_ANIM_START_Y, mStartY);
