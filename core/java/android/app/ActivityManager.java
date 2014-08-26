@@ -985,7 +985,7 @@ public class ActivityManager {
         ArrayList<AppTask> tasks = new ArrayList<AppTask>();
         List<IAppTask> appTasks;
         try {
-            appTasks = ActivityManagerNative.getDefault().getAppTasks();
+            appTasks = ActivityManagerNative.getDefault().getAppTasks(mContext.getPackageName());
         } catch (RemoteException e) {
             // System dead, we will be dead too soon!
             return null;
