@@ -6615,6 +6615,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         return false;
     }
 
+    /**
+     * @param uri This uri must NOT contain an embedded userId.
+     * @param userId The userId in which the uri is to be resolved.
+     */
     @Override
     public int checkUriPermission(Uri uri, int pid, int uid,
             final int modeFlags, int userId) {
@@ -6767,6 +6771,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         return targetUid;
     }
 
+    /**
+     * @param uri This uri must NOT contain an embedded userId.
+     * @param userId The userId in which the uri is to be resolved.
+     */
     @Override
     public int checkGrantUriPermission(int callingUid, String targetPkg, Uri uri,
             final int modeFlags, int userId) {
@@ -6951,6 +6959,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         grantUriPermissionUncheckedFromIntentLocked(needed, owner);
     }
 
+    /**
+     * @param uri This uri must NOT contain an embedded userId.
+     * @param userId The userId in which the uri is to be resolved.
+     */
     @Override
     public void grantUriPermission(IApplicationThread caller, String targetPkg, Uri uri,
             final int modeFlags, int userId) {
@@ -7053,6 +7065,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    /**
+     * @param uri This uri must NOT contain an embedded userId.
+     * @param userId The userId in which the uri is to be resolved.
+     */
     @Override
     public void revokeUriPermission(IApplicationThread caller, Uri uri, final int modeFlags,
             int userId) {
@@ -7151,9 +7167,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    /**
+     * @param uri This uri must NOT contain an embedded userId.
+     * @param sourceUserId The userId in which the uri is to be resolved.
+     * @param targetUserId The userId of the app that receives the grant.
+     */
     @Override
     public void grantUriPermissionFromOwner(IBinder token, int fromUid, String targetPkg, Uri uri,
             final int modeFlags, int sourceUserId, int targetUserId) {
+        targetUserId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                targetUserId, false, ALLOW_FULL_ONLY, "grantUriPermissionFromOwner", null);
         synchronized(this) {
             UriPermissionOwner owner = UriPermissionOwner.fromExternalToken(token);
             if (owner == null) {
@@ -7178,6 +7201,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    /**
+     * @param uri This uri must NOT contain an embedded userId.
+     * @param userId The userId in which the uri is to be resolved.
+     */
     @Override
     public void revokeUriPermissionFromOwner(IBinder token, Uri uri, int mode, int userId) {
         synchronized(this) {
@@ -7318,6 +7345,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    /**
+     * @param uri This uri must NOT contain an embedded userId.
+     * @param userId The userId in which the uri is to be resolved.
+     */
     @Override
     public void takePersistableUriPermission(Uri uri, final int modeFlags, int userId) {
         enforceNotIsolatedCaller("takePersistableUriPermission");
@@ -7360,6 +7391,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    /**
+     * @param uri This uri must NOT contain an embedded userId.
+     * @param userId The userId in which the uri is to be resolved.
+     */
     @Override
     public void releasePersistableUriPermission(Uri uri, final int modeFlags, int userId) {
         enforceNotIsolatedCaller("releasePersistableUriPermission");
