@@ -29,8 +29,7 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Introduce a continuación la contraseña de encriptación del dispositivo. Esta contraseña se usará también para encriptar el archivo de copia de seguridad."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Introduce la contraseña que quieras usar para cifrar los datos de la copia de seguridad completa. Si dejas este campo en blanco, se usará tu contraseña de copia de seguridad actual:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Si quieres cifrar los datos de la copia de seguridad completa, introduce la contraseña a continuación:"</string>
-    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
-    <skip />
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Tu dispositivo está encriptado, por lo que debes encriptar tu copia de seguridad. Introduce una contraseña a continuación:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Si los datos de restauración están cifrados, introduce la contraseña a continuación:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Iniciando copia de seguridad..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Copia de seguridad finalizada"</string>
