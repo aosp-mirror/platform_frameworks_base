@@ -126,7 +126,7 @@ public class DevicePolicyManager {
      * message containing an Nfc record with MIME type {@link #MIME_TYPE_PROVISIONING_NFC}.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME
-        = "android.app.extra.DEVICE_ADMIN_PACKAGE_NAME";
+        = "android.app.extra.deviceAdminPackageName";
 
     /**
      * A String extra holding the default name of the profile that is created during managed profile
@@ -149,7 +149,7 @@ public class DevicePolicyManager {
      * It is usually used to avoid that the user has to enter their email address twice.
      */
     public static final String EXTRA_PROVISIONING_EMAIL_ADDRESS
-        = "android.app.extra.MANAGED_PROFILE_EMAIL_ADDRESS";
+        = "android.app.extra.ManagedProfileEmailAddress";
 
     /**
      * A String extra holding the time zone {@link android.app.AlarmManager} that the device
