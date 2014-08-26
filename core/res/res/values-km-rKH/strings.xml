@@ -611,10 +611,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"បិទ/បើក​ទូរស័ព្ទ"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ឲ្យ​កម្មវិធី​បិទ/បើក​កុំព្យូទ័រ​បន្ទះ។"</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"ឲ្យ​កម្មវិធី​បិទ/បើក​ទូរស័ព្ទ។"</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"កំណត់​ការ​អស់​ពេល​បង្ហាញ​ឡើងវិញ"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"ឲ្យ​កម្មវិធី​កំណត់​ការ​អស់​ពេល​បង្ហាញ​ឡើងវិញ។"</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"ដំណើរការ​ក្នុង​របៀប​សាកល្បង​ពី​រោងចក្រ"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"ដំណើរការ​សាកល្បង​ក្រុមហ៊ុន​ផលិត​កម្រិត​ទាប ដោយ​អនុញ្ញាត​ឲ្យ​ចូល​ផ្នែក​រឹង​កុំព្យូទ័រ​បន្ទះ។ អាច​ប្រើ​​បាន​តែ​ពេល​កុំព្យូទ័រ​កំពុង​ដំណើរការ​ក្នុង​របៀប​សាកល្បង​ក្រុមហ៊ុន​ផលិត។"</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"ដំណើរ​ការ​ការ​សាកល្បង​ក្រុមហ៊ុន​ផលិត​កម្រិត​ទាប ដោយ​អនុញ្ញាត​ការ​ចូល​ដំណើរការ​ផ្នែក​រឹង​ទូរស័ព្ទ។ អាច​ប្រើ​បាន​តែ​នៅ​ពេល​ទូរស័ព្ទ​កំពុង​ដំណើរការ​របៀប​សាកល្បង​ក្រុមហ៊ុន​ផលិត។"</string>
@@ -1427,10 +1425,8 @@
     <string name="deny" msgid="2081879885755434506">"បដិសេធ"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"បាន​ស្នើ​សិទ្ធិ"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"បាន​ស្នើ​សិទ្ធិ\nសម្រាប់​គណនី <xliff:g id="ACCOUNT">%s</xliff:g> ។"</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
-    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"អ្នក​កំពុង​ប្រើ​កម្មវិធី​នេះ​នៅ​ខាងក្រៅ​ប្រវត្តិរូប​​ការងារ​របស់​អ្នក"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"អ្នក​កំពុង​ប្រើ​កម្មវិធី​នេះ​ក្នុង​ប្រវត្តិរូប​ការងារ​របស់​អ្នក"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"វិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"ធ្វើ​សម​កាល​កម្ម"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ភាព​ងាយស្រួល"</string>
@@ -1572,8 +1568,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"ទទួល​ការ​ហៅ​?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ជា​និច្ច"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"តែ​ម្ដង"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s មិន​គាំទ្រ​ប្រវត្តិរូប​ការងារ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"កុំព្យូទ័រ​បន្ទះ"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"ទូរស័ព្ទ"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"កាស"</string>
@@ -1646,7 +1641,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"បាន​បើក​មធ្យោបាយ​ងាយស្រួល​។"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"បាន​បោះបង់​ភាព​ងាយស្រួល។"</string>
     <string name="user_switched" msgid="3768006783166984410">"អ្នក​ប្រើ​បច្ចុប្បន្ន <xliff:g id="NAME">%1$s</xliff:g> ។"</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
     <skip />
     <string name="owner_name" msgid="2716755460376028154">"ម្ចាស់"</string>
     <string name="error_message_title" msgid="4510373083082500195">"កំហុស"</string>
@@ -1779,12 +1774,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ចាប់ផ្ដើម"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"បាន​ភ្ជាប់​អេក្រង់"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"មិន​បាន​ភ្ជាប់​អេក្រង់"</string>
-    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
-    <skip />
-    <string name="battery_saver_description" msgid="725676363406667978">"ដើម្បី​ជួយ​កែ​លម្អ​​អាយុ​ថ្ម, កម្មវិធី​សន្សំ​ថ្ម​កាត់​បន្ថយ​ការ​អនុវត្ត​ឧបករណ៍​របស់​អ្នក និង​កម្រិត​ការ​ញ័រ និង​ទិន្នន័យ​ផ្ទៃ​ខាង​ក្រោយ​។ អ៊ីមែល, ការ​ផ្ញើ​សារ​និង​កម្មវិធី​ផ្សេងៗ​​ដែល​ផ្អែក​លើ​ការ​ធ្វើ​សមកាលកម្ម​មិន​ធ្វើ​បច្ចុប្បន្នភាព​ទេ​លុះ​ត្រា​តែ​អ្នក​បើក​ពួកវា។\n\nកម្មវិធី​សន្សំ​ថ្ម​បិទ​ដោយ​ស្វ័យ​ប្រវត្តិ​ពេល​ឧបករណ៍​របស់​អ្នក​កំពុង​បញ្ចូល​ថ្ម"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"សួរ​រក​កូដ PIN មុន​ពេល​ផ្ដាច់"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"សួរ​រក​លំនាំ​ដោះ​សោ​មុន​ពេល​ផ្ដាច់"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"សួរ​រក​ពាក្យ​សម្ងាត់​មុន​ពេល​ផ្ដាច់"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"ដើម្បី​បង្កើន​អាយុ​ថ្ម កម្មវិធី​សន្សំ​ថ្ម​កាត់​បន្ថយ​ការអនុវត្ត​ឧបករណ៍​របស់​អ្នក​ ហើយ​​កម្រិត​ការ​ញ័រ និង​ទិន្នន័យ​ផ្ទៃ​ខាង​ក្រោយ។ អ៊ីមែល, ការ​ផ្ញើ​សារ និង​កម្មវិធី​ផ្សេងៗ​ទៀត​ដែល​ផ្អែក​លើ​ការ​ធ្វើ​សម​កាល​កម្ម​​​មិន​អាច​ធ្វើ​បច្ចុប្បន្នភាព​លុះ​ត្រា​តែ​អ្នក​បើក​ពួកវា។\n\nកម្មវិធី​សន្សំ​ថ្ម​បិទ​ដោយ​ស្វ័យ​ប្រវត្តិ​ពេល​ឧបករណ៍​របស់​អ្នក​កំពុង​បញ្ចូល​ថ្ម។"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"រហូត​ដល់ម៉ោង​របស់​អ្នក​បញ្ចប់​នៅ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

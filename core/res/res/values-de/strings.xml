@@ -611,10 +611,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"Gerät ein- oder ausschalten"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Ermöglicht der App, das Tablet ein- oder auszuschalten"</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Ermöglicht der App, das Telefon ein- oder auszuschalten"</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"Display-Zeitlimit zurücksetzen"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Ermöglicht der App das Zurücksetzen des Display-Zeitlimits."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"In Werkstestmodus ausführen"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Führt einen systemnahen Herstellertest durch, in dessen Rahmen auf die gesamte Tablet-Hardware zugegriffen werden kann. Nur verfügbar, wenn ein Tablet im Herstellertestmodus ausgeführt wird."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Führt einen systemnahen Herstellertest durch, in dessen Rahmen auf die gesamte Telefon-Hardware zugegriffen werden kann. Nur verfügbar, wenn ein Telefon im Herstellertestmodus ausgeführt wird."</string>
@@ -1425,8 +1423,7 @@
     <string name="deny" msgid="2081879885755434506">"Ablehnen"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Berechtigung angefordert"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Berechtigung angefordert\nfür Konto <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Sie verwenden diese App außerhalb Ihres Arbeitsprofils."</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Sie verwenden diese App in Ihrem Arbeitsprofil."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Eingabemethode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchronisieren"</string>
@@ -1569,8 +1566,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Anruf annehmen?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Immer"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Nur diesmal"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"Das Arbeitsprofil wird von %1$s nicht unterstützt."</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Kopfhörer"</string>
@@ -1643,8 +1639,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Bedienungshilfen aktiviert"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Bedienungshilfen abgebrochen"</string>
     <string name="user_switched" msgid="3768006783166984410">"Aktueller Nutzer <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
-    <skip />
+    <string name="user_switching_message" msgid="2871009331809089783">"Wechseln zu <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Eigentümer"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Fehler"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Ihr Administrator lässt diese Änderung nicht zu."</string>
@@ -1779,6 +1774,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Vor dem Beenden nach PIN fragen"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Vor dem Beenden nach Entsperrungsmuster fragen"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Vor dem Beenden nach Passwort fragen"</string>
-    <string name="battery_saver_description" msgid="725676363406667978">"Im Energiesparmodus wird Ihr Akku geschont, indem die Geräteleistung reduziert wird und der Vibrationsmodus sowie die meisten Hintergrunddaten begrenzt werden. E-Mails, SMS/MMS und andere Apps mit Synchronisierung werden möglicherweise erst aktualisiert, sobald Sie sie öffnen.\n\nDer Energiesparmodus wird automatisch deaktiviert, wenn Ihr Gerät geladen wird."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Der Energiesparmodus hilft, den Akku zu schonen, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion und die meisten Hintergrunddatenaktivitäten einschränkt. E-Mail-, SMS/MMS- und andere Apps, die die Synchronisierungsfunktion benötigen, werden möglicherweise nicht aktualisiert, bis Sie sie öffnen.\n\nDer Energiesparmodus endet automatisch, wenn Ihr Gerät aufgeladen wird."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Bis zum Ende der Downtime um <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

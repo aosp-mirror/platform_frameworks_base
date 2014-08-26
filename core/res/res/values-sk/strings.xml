@@ -611,10 +611,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"zapnutie a vypnutie telefónu"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Umožňuje aplikácii zapnúť a vypnúť tablet."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Umožňuje aplikácii zapnúť a vypnúť telefón."</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"obnoviť časový limit obrazovky"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Umožňuje aplikácii obnoviť časový limit obrazovky."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"spustenie v režime továrenského testu"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Umožňuje aplikácii spustenie v režime nízkoúrovňového testu výrobcu a povolí úplný prístup k hardvéru tabletu. K dispozícii iba vtedy, keď je tablet spustený v režime testovania výrobcu."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Umožňuje aplikácii spustenie v režime nízkoúrovňového testu výrobcu a povolí úplný prístup k hardvéru telefónu. K dispozícii iba vtedy, keď je telefón spustený v režime testovania výrobcu."</string>
@@ -1425,10 +1423,8 @@
     <string name="deny" msgid="2081879885755434506">"Zamietnuť"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Vyžaduje sa povolenie"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Vyžaduje sa oprávnenie\npre účet <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
-    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Túto aplikáciu používate mimo svojho pracovného profilu"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Túto aplikáciu používate vo svojom pracovnom profile"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Metóda vstupu"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchronizovať"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Zjednodušenie"</string>
@@ -1570,8 +1566,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Prijať hovor?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Vždy"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Len raz"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"Spúšťač %1$s nepodporuje pracovné profily"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefón"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Slúchadlá"</string>
@@ -1644,7 +1639,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Zjednodušenie ovládania je povolené."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Zjednodušenie ovládania bolo zrušené."</string>
     <string name="user_switched" msgid="3768006783166984410">"Aktuálny používateľ je <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
     <skip />
     <string name="owner_name" msgid="2716755460376028154">"Vlastník"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Chyba"</string>
@@ -1777,12 +1772,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"SPUSTIŤ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka bola pripnutá"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Obrazovka bola uvoľnená"</string>
-    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
-    <skip />
-    <string name="battery_saver_description" msgid="725676363406667978">"S cieľom zvýšenia výdrže batérie režim úspory batérie zníži výkon vášho zariadenia a obmedzí vibrácie a väčšinu dát na pozadí. E-mail, správy a ďalšie aplikácie, ktoré používajú synchronizáciu, sa nemusia aktualizovať, dokým ich nespustíte.\n\nRežim úspory batérie sa pri nabíjaní zariadenia automaticky vypne."</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pred uvoľnením požiadať o číslo PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pred uvoľnením požiadať o bezpečnostný vzor"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pred uvoľnením požiadať o heslo"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Šetrič batérie znižuje výkonnosť vášho zariadenia a obmedzuje vibrovanie a prenos údajov na pozadí, aby tak predĺžil výdrž batérie. E-maily, správy a ďalšie aplikácie, ktorú sú závislé od synchronizácie, sa nemusia aktualizovať, dokým ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Dokým o <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> neskončí výpadok"</string>
 </resources>

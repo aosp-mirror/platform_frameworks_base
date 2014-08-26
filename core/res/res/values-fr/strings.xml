@@ -1427,8 +1427,7 @@
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Autorisation demandée\npour le compte \"<xliff:g id="ACCOUNT">%s</xliff:g>\""</string>
     <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
     <skip />
-    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
-    <skip />
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Vous utilisez cette application dans votre profil professionnel."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Mode de saisie"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchronisation"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibilité"</string>
@@ -1644,7 +1643,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"L\'accessibilité a bien été activée."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accessibilité annulée."</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
     <skip />
     <string name="owner_name" msgid="2716755460376028154">"Propriétaire"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Erreur"</string>
@@ -1777,12 +1776,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ACTIVER"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Écran épinglé."</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Épinglage de l\'écran annulé."</string>
-    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
-    <skip />
-    <string name="battery_saver_description" msgid="725676363406667978">"Pour améliorer l\'autonomie de la batterie, l\'économiseur de batterie réduit les performances de votre appareil, et il limite les vibrations et la plupart des données en arrière-plan. La messagerie électronique, la messagerie instantanée et les autres applications basées sur la synchronisation ne sont mises à jour que si vous les ouvrez.\n\nL\'économiseur de batterie s\'éteint automatiquement lorsque votre appareil est en charge."</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Demander le code PIN avant d\'annuler l\'épinglage"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Demander le schéma de déverrouillage avant d\'annuler l\'épinglage"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demander le mot de passe avant d\'annuler l\'épinglage"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Pour optimiser l\'autonomie de la batterie, l\'économiseur de batterie réduit les performances de votre appareil et limite les données en arrière-plan. Vous devrez peut-être ouvrir manuellement les applications d\'e-mail, de SMS/MMS et les autres applications synchronisées pour les mettre à jour.\n\nL\'économiseur de batterie s\'éteint automatiquement lorsque votre appareil est en charge."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Jusqu\'à ce que le temps d\'arrêt se termine à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

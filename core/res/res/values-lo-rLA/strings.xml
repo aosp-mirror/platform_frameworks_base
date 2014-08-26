@@ -611,10 +611,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ເປີດ ຫຼືປິດໂທລະສັບ"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ອະນຸຍາດໃຫ້ແອັບຯເປີດ ຫຼືປິດແທັບເລັດ."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນປິດ ຫຼືເປີດແທັບເລັດໄດ້."</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"ຣີ​ເຊັດ​ໄລ​​ຍະ​ເວ​ລາ​ກ່ອນ​ປິດ​ໜ້າ​ຈໍ."</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ຣີ​ເຊັດ​ໄລ​​ຍະ​ເວ​ລາ​ກ່ອນ​ປິດ​ໜ້າ​ຈໍ."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"ເຮັດວຽກໃນໂໝດການທົດສອບຂອງໂຮງງານ"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"ເຮັດວຽກໃນຮູບແບບທົດສອບໃນລະດັບຕໍ່າຂອງຜູ່ຜະລິດ, ອະນຸຍາດການເຂົ້າເຖິງແບບເຕັມຮູບແບບຫາຮາດແວຂອງແທັບເລັດ. ໃຊ້ໄດ້ສະເພາະໃນເວລາທີ່ແທັບເລັດກຳລັງຢູ່ໃນໂໝດ ການທົດສອບຂອງຜູ່ຜະລິດgmqjkoaho."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"ເປີດໃຊ້ໃນແບບການທົດສອບຂອງຜູ່ລະລິດໃນລະດັບຕໍ່າ, ອະນຸຍາດການເຂົ້າເຖິງຮາດແວຂອງໂທລະສັບແບບສົມບູນ. ສະເພາະເມື່ອໂທລະສັບຖືກເປີດໃຊ້ ໃນໂໝດການທົດສອບຂອງຜູ່ຜະລິດເທົ່ານັ້ນ."</string>
@@ -1425,10 +1423,8 @@
     <string name="deny" msgid="2081879885755434506">"ປະ​ຕິ​ເສດ"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"ຕ້ອງການການອະນຸຍາດ"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"ຮ້ອງຂໍການກຳນົດສິດ\nສຳລັບບັນຊີ <xliff:g id="ACCOUNT">%s</xliff:g> ແລ້ວ."</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
-    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"​ທ່ານ​ກຳ​ລັງ​ໃຊ້​ແອັບຯ​ນີ້ນອກ​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"​ທ່ານ​ກຳ​ລັງ​ໃຊ້​ແອັບຯ​ນີ້​ໃນ​ໂປຣ​ໄຟລ໌​​ບ່ອນ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ວິທີການປ້ອນຂໍ້ມູນ"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"ຊິ້ງຂໍ້ມູນ"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ການຊ່ວຍເຂົ້າເຖິງ"</string>
@@ -1570,8 +1566,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"ຮັບການໂທບໍ່?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ທຸກຄັ້ງ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"ຄັ້ງດຽວ"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ບໍ່​ຮອງ​ຮັບ​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ແທັບເລັດ"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"ໂທລະສັບ"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"ຫູຟັງ"</string>
@@ -1644,8 +1639,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"ເປີດການຊ່ວຍເຂົ້າເຖິງແລ້ວ."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ຍົກເລີກໂຕຊ່ວຍການເຂົ້າເຖິງແລ້ວ."</string>
     <string name="user_switched" msgid="3768006783166984410">"ຜູ່ໃຊ້ປັດຈຸບັນ <xliff:g id="NAME">%1$s</xliff:g> ."</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
-    <skip />
+    <string name="user_switching_message" msgid="2871009331809089783">"ກຳ​ລັງ​ສະ​ລັບ​​ໄປ​ຫາ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"ເຈົ້າຂອງ"</string>
     <string name="error_message_title" msgid="4510373083082500195">"ຜິດພາດ"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"​ຜູ່​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານບໍ່​ອະ​ນຸ​ຍາດ​ໃຫ້​ປ່ຽນ​ແປງ​ສິ່ງ​ນີ້"</string>
@@ -1777,12 +1771,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"​ເລີ່ມ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ແລ້ວ"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ຍົກ​ເລີກ​ການ​ປັກ​ໝຸນ​​ຫນ້າ​ຈໍ​ແລ້ວ"</string>
-    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
-    <skip />
-    <string name="battery_saver_description" msgid="725676363406667978">"ເພື່ອ​ຊ່ວຍ​ປັບ​ປຸ​ງ​ອາ​ຍຸ​ແບັດ​ເຕີ​ຣີ, ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະຫຼຸດ​ປະ​ສິດ​ທິ​ພາບ​ຂອງ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ລົງ ແລະ​ຈຳ​ກັດ​ການ​ສັ່ນ​ເຕືອນ ຮວມ​​ທັງ​ຂໍ້​ມູນ​ພື້ນຫຼັງ​ສ່ວນ​ໃຫຍ່. ອີ​ເມວ, ການ​ສົ່ງ​ຂໍ້​ຄ​ວາມ ແລະ​ແອັບຯ​ອື່ນໆ​ທີ່​ອີງ​ອາ​ໃສ​ການ​ຊິ້ງ​ຂໍ້​ມູນ​ອາດບໍ່​ມີ​ການ​ອັບ​ເດດ​ຈົນ​ກວ່າ​ທ່ານ​ຈະ​ເປີດ​ແອັບຯ​ເຫຼົ່າ​ນັ້ນ.\n\nໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະ​ປິດ​ໂຕ​ເອງ​​ອັດ​ຕະ​ໂນ​ມັດ​ໃນ​ເວ​ລາ​ທີ່​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ສາກ​ໄຟ​ຢູ່"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"​ຖາມ​ຫາ PIN ກ່ອນ​ຍົກ​ເລີກ​ການປັກ​ໝຸດ"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"​ຖາມ​ຫາ​ຮູບ​ແບບ​ປົດ​ລັອກ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"​ຖາມ​ຫາ​ລະ​ຫັດ​ຜ່ານ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"ເພື່ອ​ຊ່ວຍ​ປັບ​ປຸງ​ອາ​ຍຸ​ແບັດ​ເຕ​ີ​ຣີ, ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະຫຼຸດ​ປະ​ສິດ​ທິ​ພາບ​​ຂອງ​ອຸ​ປະ​ກອນ​ທ່ານ​ລົງ ແລະ​ຈຳ​ກັດ​ການ​ສັ່ນເຕືອນ ຮວມ​ເຖິງຂໍ້​ມູນ​ພື້ນຫຼັງ​ສ່ວນ​ໃຫຍ່​ນຳ. ອີ​ເມວ, ການ​ສົ່ງ​ຂໍ້​ຄວາມ ແລະ​ແອັບຯ​ອື່ນໆ​ທີ່​ອີງ​ອາ​ໃສ​ການ​ຊິ້ງ​ຂໍ້​ມູນ​ອາດບໍ່​ມີ​ການ​ອັບ​ເດດ​ຈົນ​ກວ່າ​ທ່ານ​ຈະ​ເປີດ​ພວກ​ມັນ​ຂຶ້ນ​ມາ.\n\n​ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະ​ປິດ​ໂດຍ​ອັດ​ຕະ​ໂນ​ມັດ​ເມື່ອ​ມີ​ອຸ​ປະ​ກອນ​ຖືກ​ສາກ​ໄຟ."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ຈົນ​ກວ່າ​ດາວ​ທາມ​ຂອງ​ທ່ານ​ຈະ​ສິ້ນ​ສຸດ​ທີ່ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

@@ -1427,8 +1427,7 @@
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Побарана е дозвола\nза сметка <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
     <skip />
-    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
-    <skip />
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Ја користите апликацијата во работниот профил"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Метод на внес"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Синхронизирај"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Пристапност"</string>
@@ -1646,8 +1645,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Овозможена е пристапност."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Пристапноста е откажана."</string>
     <string name="user_switched" msgid="3768006783166984410">"Тековен корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
-    <skip />
+    <string name="user_switching_message" msgid="2871009331809089783">"Се префрла на <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Сопственик"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Грешка"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Администраторот не ја дозволува промената"</string>
@@ -1779,12 +1777,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"СТАРТ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Екранот е закачен"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Екранот е откачен"</string>
-    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
-    <skip />
-    <string name="battery_saver_description" msgid="725676363406667978">"За да помогне да се подобри трајноста на батеријата, штедачот на батеријата ја намалува изведбата на уредот и ги ограничува вибрациите и повеќето податоци во заднина. Е-поштата, пораките и другите апликации што зависат од синхронизирање може нема да се ажурираат сè додека не ги отворите.\n\nШтедачот на батерија автоматски се исклучува кога уредот се полни."</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Прашај за ПИН пред откачување"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Прашај за шема за отклучување пред откачување"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Прашај за лозинка пред откачување"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"За да помогне во подобрување на трајноста на батеријата, штедачот на батерија го намалува учинокот на уредот и ги ограничува вибрациите и повеќето податоци во заднина. Е-поштата, испраќањето пораки и другите апликации кои се потпираат на синхронизирање може да не се ажурираат освен ако не ги отворите.\n\nШтедачот на батерија автоматски се исклучува кога уредот се полни."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Додека не заврши паузата во <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

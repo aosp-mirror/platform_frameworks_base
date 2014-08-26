@@ -611,10 +611,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"فون کی پاور آن یا آف کریں"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ایپ کو ٹیبلیٹ آن یا آف کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"ایپ کو فون آن یا آف کرنے کی اجازت دیتا ہے۔"</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"ڈسپلے ٹائم آؤٹ کو دوبارہ ترتیب دیں"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"ایپ کو ڈسپلے ٹائم آؤٹ کو دوبارہ ترتیب دینے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"فیکٹری ٹیسٹ وضع میں چلائیں"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"ٹیبلیٹ ہارڈویئر تک مکمل رسائی کی اجازت دے کر، ایک کم سطح والے مینوفیکچرر ٹیسٹ کے بطور چلائیں۔ صرف اس وقت دستیاب ہوتا ہے جب ایک ٹیبلیٹ مینوفیکچرر ٹیسٹ وضع میں چل رہا ہوتا ہے۔"</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"فون ہارڈویئر تک مکمل رسائی کی اجازت دے کر ایک کم سطحی مینوفیکچرر ٹیسٹ کے بطور چلائیں۔ صرف اس وقت دستیاب ہوتا ہے جب کوئی فون مینوفیکچرر ٹیسٹ وضع میں چل رہا ہوتا ہے۔"</string>
@@ -1425,10 +1423,8 @@
     <string name="deny" msgid="2081879885755434506">"مسترد کریں"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"اجازت طلب کی گئی"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"اکاؤنٹ <xliff:g id="ACCOUNT">%s</xliff:g> کیلئے\nاجازت طلب کی گئی۔"</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
-    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"آپ اس ایپ کا استعمال اپنے دفتری پروفائل کے باہر کر رہے ہیں"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"آپ اس ایپ کو اپنے دفتری پروفائل میں استعمال کر رہے ہیں"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"اندراج کا طریقہ"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"مطابقت پذیری کریں"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibility"</string>
@@ -1570,8 +1566,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"کال قبول کریں؟"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ہمیشہ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"بس ایک مرتبہ"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"‏%1$s دفتری پروفائل کا تعاون نہیں کرتا ہے"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ٹیبلیٹ"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"فون"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"ہیڈ فونز"</string>
@@ -1644,7 +1639,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"‏Accessibility فعال۔"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"‏Accessibility منسوخ ہوگئی۔"</string>
     <string name="user_switched" msgid="3768006783166984410">"موجودہ صارف <xliff:g id="NAME">%1$s</xliff:g>۔"</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
     <skip />
     <string name="owner_name" msgid="2716755460376028154">"مالک"</string>
     <string name="error_message_title" msgid="4510373083082500195">"خرابی"</string>
@@ -1777,12 +1772,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"شروع کریں"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"اسکرین کو پن کر دیا گیا"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"اسکرین کا پن ہٹا دیا گیا"</string>
-    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
-    <skip />
-    <string name="battery_saver_description" msgid="725676363406667978">"بیٹری کی زندگی بہتر بنانے میں مدد کیلئے، بیٹری سیور آپ کے آلہ کی کارکردگی کم کر دیتا ہے اور ارتعاش اور پس منظر کا بیشتر ڈیٹا محدود کر دیتا ہے۔ مطابقت پذیری پر منحصر ای میل، پیغام رسانی اور دیگر ایپس اس وقت تک اپ ڈیٹ نہیں ہوسکتی ہیں جب تک آپ انہیں نہ کھولیں۔\n\nآپ کا آلہ چارج ہو رہے ہونے کی صورت میں بیٹری سیور خود بخود آف ہو جاتا ہے"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"‏پن ہٹانے سے پہلے PIN طلب کریں"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"پن ہٹانے سے پہلے غیر مقفل کرنے کا پیٹرن طلب کریں"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"پن ہٹانے سے پہلے پاس ورڈ طلب کریں"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"بیٹری کی میعاد بہتر بنانے میں مدد کرنے کیلئے، بیٹری سیور آپ کے آلہ کی کارکردگی میں تخفیف کر دیتی ہے اور وائبریشن اور پس منظر کے زیادہ تر ڈیٹا کو محدود کر دیتی ہے۔ ای میل، پیغام رسانی اور مطابقت پذیری پر انحصار کرنے والی دیگر ایپس ممکن ہے اس وقت تک اپ ڈیٹ نہ ہوں جب تک آپ انہیں نہ کھولیں۔\n\nآپ کا آلہ چارج ہوتے وقت بیٹری سیور خود بخود آف ہو جاتی ہے۔"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> پر آپ کا آخری وقت ختم ہونے تک"</string>
 </resources>

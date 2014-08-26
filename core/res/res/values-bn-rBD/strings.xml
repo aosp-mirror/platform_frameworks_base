@@ -1639,7 +1639,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"অ্যাক্সেসযোগ্যতা সক্ষম করা হয়েছে৷"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"অ্যাক্সেসযোগ্যতা বাতিল করা হয়েছে৷"</string>
     <string name="user_switched" msgid="3768006783166984410">"বর্তমান ব্যবহারকারী <xliff:g id="NAME">%1$s</xliff:g>৷"</string>
-    <string name="user_switching_message" msgid="8664390176945256295">"<xliff:g id="NAME">%1$s</xliff:g> নামের ব্যবহারকারীতে যাচ্ছে"</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> নামের ব্যবহারকারীতে যাচ্ছে…"</string>
     <string name="owner_name" msgid="2716755460376028154">"মালিক"</string>
     <string name="error_message_title" msgid="4510373083082500195">"ত্রুটি"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"এই পরিবর্তনটি আপনার প্রশাসক দ্বারা অনুমোদিত নয়"</string>
@@ -1774,6 +1774,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"আনপিন করার আগে PIN চান"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"আনপিন করার আগে আনলক প্যাটার্ন চান"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"আনপিন করার আগে পাসওয়ার্ড চান"</string>
-    <string name="battery_saver_description" msgid="725676363406667978">"ব্যাটারির আয়ু বাড়াতে সহায়তার জন্য, ব্যাটারি সঞ্চয়কারী আপনার ডিভাইসের কার্য-সম্পাদনা কমিয়ে আনবে এবং কম্পন ও বেশিরভাগ পশ্চাদভূমি ডেটাকে সীমিত করবে। ইমেল, বার্তাপ্রেরণ ও অন্যান্য অ্যাপ্লিকেশান, যেগুলি সিঙ্ক হওয়ার উপর নির্ভরশীল সেগুলিকে আপনি না খোলা পর্যন্ত সেগুলি আপডেট নাও হতে পারে।\n\nআপনার ডিভাইস চার্জ হওয়ার সময় ব্যাটারি সঞ্চয়কারী স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যাবে।"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"ব্যাটারির আয়ু বাড়াতে সহায়তার জন্য, ব্যাটারি সঞ্চয়কারী আপনার ডিভাইসের কার্য-সম্পাদনা কমিয়ে আনবে এবং কম্পন ও পশ্চাদভূমি ডেটাকে সীমিত করবে। ইমেল, বার্তাপ্রেরণ ও অন্যান্য অ্যাপ্লিকেশান, যেগুলি সিঙ্ক হওয়ার উপর নির্ভরশীল সেগুলিকে আপনি না খোলা পর্যন্ত সেগুলি আপডেট নাও হতে পারে।\n\nআপনার ডিভাইস চার্জ হওয়ার সময় ব্যাটারি সঞ্চয়কারী স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যাবে।"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>টার সময়ে আপনার ডাউনটাইম শেষ হওয়া পর্যন্ত"</string>
 </resources>

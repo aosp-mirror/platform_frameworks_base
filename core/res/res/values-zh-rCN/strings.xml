@@ -1427,8 +1427,7 @@
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"应用对帐户 <xliff:g id="ACCOUNT">%s</xliff:g>\n 提出权限请求。"</string>
     <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
     <skip />
-    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
-    <skip />
+    <string name="forward_intent_to_work" msgid="621480743856004612">"您目前是在工作资料内使用此应用"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"输入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"辅助功能"</string>
@@ -1644,7 +1643,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"辅助功能已启用。"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"已取消辅助功能。"</string>
     <string name="user_switched" msgid="3768006783166984410">"当前用户是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
     <skip />
     <string name="owner_name" msgid="2716755460376028154">"机主"</string>
     <string name="error_message_title" msgid="4510373083082500195">"错误"</string>
@@ -1777,12 +1776,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"启动"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"已固定屏幕"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"已取消固定屏幕"</string>
-    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
-    <skip />
-    <string name="battery_saver_description" msgid="725676363406667978">"为了延长电池的续航时间，节电助手会降低设备的性能，并限制振动和大部分后台流量。对于电子邮件、聊天工具等依赖于同步功能的应用，可能要打开这类应用时才能收到新信息。\n\n节电助手会在设备充电时自动关闭"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消固定屏幕前要求输入PIN码"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消固定屏幕前要求绘制解锁图案"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消固定屏幕前要求输入密码"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"为了延长电池的续航时间，节电助手会降低设备的性能，并限制振动和大部分后台流量。对于电子邮件、聊天工具等依赖于同步功能的应用，可能要打开这类应用时才能收到新信息。\n\n节电助手会在设备充电时自动关闭。"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"直到休息时间结束（<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>）"</string>
 </resources>
