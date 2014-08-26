@@ -21,6 +21,7 @@ import android.os.SystemClock;
 import android.util.EventLog;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 /**
  * Private and debugging Binder APIs.
@@ -28,19 +29,35 @@ import java.lang.ref.WeakReference;
  * @see IBinder
  */
 public class BinderInternal {
-    static WeakReference<GcWatcher> mGcWatcher
+    static WeakReference<GcWatcher> sGcWatcher
             = new WeakReference<GcWatcher>(new GcWatcher());
-    static long mLastGcTime;
-    
+    static ArrayList<Runnable> sGcWatchers = new ArrayList<>();
+    static Runnable[] sTmpWatchers = new Runnable[1];
+    static long sLastGcTime;
+
     static final class GcWatcher {
         @Override
         protected void finalize() throws Throwable {
             handleGc();
-            mLastGcTime = SystemClock.uptimeMillis();
-            mGcWatcher = new WeakReference<GcWatcher>(new GcWatcher());
+            sLastGcTime = SystemClock.uptimeMillis();
+            synchronized (sGcWatchers) {
+                sTmpWatchers = sGcWatchers.toArray(sTmpWatchers);
+            }
+            for (int i=0; i<sTmpWatchers.length; i++) {
+                if (sTmpWatchers[i] != null) {
+                    sTmpWatchers[i].run();
+                }
+            }
+            sGcWatcher = new WeakReference<GcWatcher>(new GcWatcher());
         }
     }
-    
+
+    public static void addGcWatcher(Runnable watcher) {
+        synchronized (sGcWatchers) {
+            sGcWatchers.add(watcher);
+        }
+    }
+
     /**
      * Add the calling thread to the IPC thread pool.  This function does
      * not return until the current process is exiting.
@@ -58,7 +75,7 @@ public class BinderInternal {
      * SystemClock.uptimeMillis()} of the last garbage collection.
      */
     public static long getLastGcTime() {
-        return mLastGcTime;
+        return sLastGcTime;
     }
 
     /**
