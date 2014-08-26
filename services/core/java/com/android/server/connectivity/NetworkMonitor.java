@@ -223,9 +223,7 @@ public class NetworkMonitor extends StateMachine {
     private State mOfflineState = new OfflineState();
     private State mValidatedState = new ValidatedState();
     private State mEvaluatingState = new EvaluatingState();
-    private State mUninteractiveAppsPromptedState = new UninteractiveAppsPromptedState();
     private State mUserPromptedState = new UserPromptedState();
-    private State mInteractiveAppsPromptedState = new InteractiveAppsPromptedState();
     private State mCaptivePortalState = new CaptivePortalState();
     private State mLingeringState = new LingeringState();
 
@@ -243,9 +241,7 @@ public class NetworkMonitor extends StateMachine {
         addState(mOfflineState, mDefaultState);
         addState(mValidatedState, mDefaultState);
         addState(mEvaluatingState, mDefaultState);
-        addState(mUninteractiveAppsPromptedState, mDefaultState);
         addState(mUserPromptedState, mDefaultState);
-        addState(mInteractiveAppsPromptedState, mDefaultState);
         addState(mCaptivePortalState, mDefaultState);
         addState(mLingeringState, mDefaultState);
         setInitialState(mOfflineState);
@@ -368,7 +364,7 @@ public class NetworkMonitor extends StateMachine {
                     if (httpResponseCode == 204) {
                         transitionTo(mValidatedState);
                     } else if (httpResponseCode >= 200 && httpResponseCode <= 399) {
-                        transitionTo(mUninteractiveAppsPromptedState);
+                        transitionTo(mUserPromptedState);
                     } else if (++mRetries > MAX_RETRIES) {
                         transitionTo(mOfflineState);
                     } else if (mReevaluateDelayMs >= 0) {
@@ -379,71 +375,6 @@ public class NetworkMonitor extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
-        }
-    }
-
-    private class AppRespondedBroadcastReceiver extends BroadcastReceiver {
-        private static final int CAPTIVE_PORTAL_UNINITIALIZED_RETURN_CODE = 0;
-        private boolean mCanceled;
-        AppRespondedBroadcastReceiver() {
-            mCanceled = false;
-        }
-        public void send(String action) {
-            Intent intent = new Intent(action);
-            intent.putExtra(ConnectivityManager.EXTRA_NETWORK, mNetworkAgentInfo.network);
-            mContext.sendOrderedBroadcastAsUser(intent, UserHandle.ALL, null, this, getHandler(),
-                    CAPTIVE_PORTAL_UNINITIALIZED_RETURN_CODE, null, null);
-        }
-        public void cancel() {
-            mCanceled = true;
-        }
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (!mCanceled) {
-                cancel();
-                switch (getResultCode()) {
-                    case ConnectivityManager.CAPTIVE_PORTAL_SIGNED_IN:
-                        sendMessage(EVENT_APP_BYPASSED_CAPTIVE_PORTAL);
-                        break;
-                    case ConnectivityManager.CAPTIVE_PORTAL_DISCONNECT:
-                        sendMessage(EVENT_APP_INDICATES_SIGN_IN_IMPOSSIBLE);
-                        break;
-                    // NOTE: This case label makes compiler enforce no overlap between result codes.
-                    case CAPTIVE_PORTAL_UNINITIALIZED_RETURN_CODE:
-                    default:
-                        sendMessage(EVENT_NO_APP_RESPONSE);
-                        break;
-                }
-            }
-        }
-    }
-
-    private class UninteractiveAppsPromptedState extends State {
-        private AppRespondedBroadcastReceiver mReceiver;
-        @Override
-        public void enter() {
-            mReceiver = new AppRespondedBroadcastReceiver();
-            mReceiver.send(ConnectivityManager.ACTION_CAPTIVE_PORTAL_DETECTED);
-        }
-        @Override
-        public boolean processMessage(Message message) {
-            if (DBG) log(getName() + message.toString());
-            switch (message.what) {
-                case EVENT_APP_BYPASSED_CAPTIVE_PORTAL:
-                    transitionTo(mValidatedState);
-                    return HANDLED;
-                case EVENT_APP_INDICATES_SIGN_IN_IMPOSSIBLE:
-                    transitionTo(mOfflineState);
-                    return HANDLED;
-                case EVENT_NO_APP_RESPONSE:
-                    transitionTo(mUserPromptedState);
-                    return HANDLED;
-                default:
-                    return NOT_HANDLED;
-            }
-        }
-        public void exit() {
-            mReceiver.cancel();
         }
     }
 
@@ -487,7 +418,7 @@ public class NetworkMonitor extends StateMachine {
                 case CMD_USER_WANTS_SIGN_IN:
                     if (message.arg1 != mUserPromptedToken)
                         return HANDLED;
-                    transitionTo(mInteractiveAppsPromptedState);
+                    transitionTo(mCaptivePortalState);
                     return HANDLED;
                 default:
                     return NOT_HANDLED;
@@ -501,35 +432,6 @@ public class NetworkMonitor extends StateMachine {
             mConnectivityServiceHandler.sendMessage(message);
             mContext.unregisterReceiver(mUserRespondedBroadcastReceiver);
             mUserRespondedBroadcastReceiver = null;
-        }
-    }
-
-    private class InteractiveAppsPromptedState extends State {
-        private AppRespondedBroadcastReceiver mReceiver;
-        @Override
-        public void enter() {
-            mReceiver = new AppRespondedBroadcastReceiver();
-            mReceiver.send(ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN);
-        }
-        @Override
-        public boolean processMessage(Message message) {
-            if (DBG) log(getName() + message.toString());
-            switch (message.what) {
-                case EVENT_APP_BYPASSED_CAPTIVE_PORTAL:
-                    transitionTo(mValidatedState);
-                    return HANDLED;
-                case EVENT_APP_INDICATES_SIGN_IN_IMPOSSIBLE:
-                    transitionTo(mOfflineState);
-                    return HANDLED;
-                case EVENT_NO_APP_RESPONSE:
-                    transitionTo(mCaptivePortalState);
-                    return HANDLED;
-                default:
-                    return NOT_HANDLED;
-            }
-        }
-        public void exit() {
-            mReceiver.cancel();
         }
     }
 
