@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -199,6 +200,7 @@ public class FrameworkPerfActivity extends Activity
         mLocalCheckBox = (CheckBox)findViewById(R.id.local);
 
         mLog = (TextView)findViewById(R.id.log);
+        mLog.setTextColor(Color.RED);
 
         PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
         mPartialWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Scheduler");
