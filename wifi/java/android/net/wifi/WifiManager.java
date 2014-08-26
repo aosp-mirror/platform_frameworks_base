@@ -603,7 +603,11 @@ public class WifiManager {
      */
     public List<WifiAdapter> getAdapters() {
         try {
-            return mService.getAdaptors();
+            List<WifiAdapter> adapterList = mService.getAdaptors();
+            for (WifiAdapter a : adapterList) {
+                a.mService = mService;
+            }
+            return adapterList;
         } catch (RemoteException e) {
             return null;
         }
