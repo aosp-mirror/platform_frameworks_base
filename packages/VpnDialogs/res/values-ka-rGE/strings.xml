@@ -16,10 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for prompt (3183836924226407828) -->
-    <skip />
-    <!-- no translation found for warning (809658604548412033) -->
-    <skip />
+    <string name="prompt" msgid="3183836924226407828">"კავშირის მოთხოვნა"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> სურს დააყენოს VPN კავშირი, რაც ქსელის ტრაფიკის მონიტორინგის საშუალებას იძლევა. მიიღოთ მხოლოდ ისეთ შემთხვევაში, თუ წყაროს ენდობით. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; თქვენი ეკრანის სიის თავში გამოჩნდება, როდესაც VPN აქტიურია."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN დაკავშირებულია"</string>
     <string name="configure" msgid="4905518375574791375">"კონფიგურაცია"</string>
     <string name="disconnect" msgid="971412338304200056">"კავშირის გაწყვეტა"</string>
