@@ -17560,7 +17560,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         d.show();
     }
 
-    private boolean startUser(final int userId, boolean foreground) {
+    private boolean startUser(final int userId, final boolean foreground) {
         if (checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: switchUser() from pid="
@@ -17684,7 +17684,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     public void performReceive(Intent intent, int resultCode,
                                             String data, Bundle extras, boolean ordered,
                                             boolean sticky, int sendingUser) {
-                                        userInitialized(uss, userId);
+                                        onUserInitialized(uss, foreground, oldUserId, userId);
                                     }
                                 }, 0, null, null, null, AppOpsManager.OP_NONE,
                                 true, false, MY_PID, Process.SYSTEM_UID,
@@ -17696,15 +17696,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 if (foreground) {
-                    boolean homeInFront = mStackSupervisor.switchUserLocked(userId, uss);
-                    if (homeInFront) {
-                        startHomeActivityLocked(userId);
-                    } else {
-                        mStackSupervisor.resumeTopActivitiesLocked();
+                    if (!uss.initializing) {
+                        moveUserToForeground(uss, oldUserId, userId);
                     }
-                    EventLogTags.writeAmSwitchUser(userId);
-                    getUserManagerLocked().userForeground(userId);
-                    sendUserSwitchBroadcastsLocked(oldUserId, userId);
                 } else {
                     mStackSupervisor.startBackgroundUserLocked(userId, uss);
                 }
@@ -17830,8 +17824,26 @@ public final class ActivityManagerService extends ActivityManagerNative
                 oldUserId, newUserId, uss));
     }
 
-    void userInitialized(UserStartedState uss, int newUserId) {
+    void onUserInitialized(UserStartedState uss, boolean foreground, int oldUserId, int newUserId) {
+        synchronized (this) {
+            if (foreground) {
+                moveUserToForeground(uss, oldUserId, newUserId);
+            }
+        }
+
         completeSwitchAndInitalize(uss, newUserId, true, false);
+    }
+
+    void moveUserToForeground(UserStartedState uss, int oldUserId, int newUserId) {
+        boolean homeInFront = mStackSupervisor.switchUserLocked(newUserId, uss);
+        if (homeInFront) {
+            startHomeActivityLocked(newUserId);
+        } else {
+            mStackSupervisor.resumeTopActivitiesLocked();
+        }
+        EventLogTags.writeAmSwitchUser(newUserId);
+        getUserManagerLocked().userForeground(newUserId);
+        sendUserSwitchBroadcastsLocked(oldUserId, newUserId);
     }
 
     void continueUserSwitch(UserStartedState uss, int oldUserId, int newUserId) {
