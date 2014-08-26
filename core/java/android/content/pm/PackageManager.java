@@ -1217,6 +1217,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The heart rate sensor on this device is an Electrocargiogram.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_HEART_RATE_ECG =
+            "android.hardware.sensor.heartrate.ecg";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes a relative humidity sensor.
      */
     @SdkConstant(SdkConstantType.FEATURE)
