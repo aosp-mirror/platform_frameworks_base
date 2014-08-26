@@ -22,6 +22,7 @@ import static android.hardware.hdmi.HdmiControlManager.CLEAR_TIMER_STATUS_FAIL_T
 import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_CEC_DISABLED;
 import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION;
 import static android.hardware.hdmi.HdmiControlManager.ONE_TOUCH_RECORD_FAIL_TO_RECORD_DISPLAYED_SCREEN;
+import static android.hardware.hdmi.HdmiControlManager.OSD_MESSAGE_ARC_CONNECTED_INVALID_PORT;
 import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_RESULT_EXTRA_CEC_DISABLED;
 import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_RESULT_EXTRA_CHECK_RECORDER_CONNECTION;
 import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_RESULT_EXTRA_FAIL_TO_RECORD_SELECTED_SOURCE;
@@ -29,7 +30,6 @@ import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_ANAL
 import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_DIGITAL;
 import static android.hardware.hdmi.HdmiControlManager.TIMER_RECORDING_TYPE_EXTERNAL;
 
-import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiRecordSources;
@@ -39,7 +39,6 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -57,7 +56,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Represent a logical device of type TV residing in Android system.
@@ -70,8 +68,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     private boolean mArcEstablished = false;
 
-    // Whether ARC feature is enabled or not.
-    private boolean mArcFeatureEnabled = false;
+    // Whether ARC feature is enabled or not. The default value is true.
+    // TODO: once adding system setting for it, read the value to it.
+    private boolean mArcFeatureEnabled = true;
 
     // Whether System audio mode is activated or not.
     // This becomes true only when all system audio sequences are finished.
@@ -642,17 +641,24 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         // If there is AVR, initiate System Audio Auto initiation action,
                         // which turns on and off system audio according to last system
                         // audio setting.
-                        if (mSystemAudioActivated && getAvrDeviceInfo() != null) {
-                            addAndStartAction(new SystemAudioAutoInitiationAction(
-                                    HdmiCecLocalDeviceTv.this,
-                                    getAvrDeviceInfo().getLogicalAddress()));
-                            if (mArcEstablished) {
-                                startArcAction(true);
-                            }
+                        HdmiDeviceInfo avr = getAvrDeviceInfo();
+                        if (avr != null) {
+                            onNewAvrAdded(avr);
                         }
                     }
                 });
         addAndStartAction(action);
+    }
+
+    @ServiceThreadOnly
+    void onNewAvrAdded(HdmiDeviceInfo avr) {
+        assertRunOnServiceThread();
+        if (getSystemAudioModeSetting()) {
+            addAndStartAction(new SystemAudioAutoInitiationAction(this, avr.getLogicalAddress()));
+        }
+        if (isArcFeatureEnabled()) {
+            startArcAction(true);
+        }
     }
 
     // Clear all device info.
@@ -757,6 +763,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
 
         if (mArcFeatureEnabled != enabled) {
+            mArcFeatureEnabled = enabled;
             if (enabled) {
                 if (!mArcEstablished) {
                     startArcAction(true);
@@ -766,7 +773,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                     startArcAction(false);
                 }
             }
-            mArcFeatureEnabled = enabled;
         }
     }
 
@@ -777,13 +783,18 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    private void startArcAction(boolean enabled) {
+    void startArcAction(boolean enabled) {
         assertRunOnServiceThread();
         HdmiDeviceInfo info = getAvrDeviceInfo();
         if (info == null) {
+            Slog.w(TAG, "Failed to start arc action; No AVR device.");
             return;
         }
-        if (!isConnectedToArcPort(info.getPhysicalAddress())) {
+        if (!canStartArcUpdateAction(info.getLogicalAddress(), enabled)) {
+            Slog.w(TAG, "Failed to start arc action; ARC configuration check failed.");
+            if (enabled && !isConnectedToArcPort(info.getPhysicalAddress())) {
+                displayOsd(OSD_MESSAGE_ARC_CONNECTED_INVALID_PORT);
+            }
             return;
         }
 
@@ -799,6 +810,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 addAndStartAction(new RequestArcTerminationAction(this, info.getLogicalAddress()));
             }
         }
+    }
+
+    private boolean isDirectConnectAddress(int physicalAddress) {
+        return (physicalAddress & Constants.ROUTING_PATH_TOP_MASK) == physicalAddress;
     }
 
     void setAudioStatus(boolean mute, int volume) {
@@ -857,6 +872,15 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleInitiateArc(HdmiCecMessage message) {
         assertRunOnServiceThread();
+
+        if (!canStartArcUpdateAction(message.getSource(), true)) {
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
+            if (!isConnectedToArcPort(message.getSource())) {
+                displayOsd(OSD_MESSAGE_ARC_CONNECTED_INVALID_PORT);
+            }
+            return true;
+        }
+
         // In case where <Initiate Arc> is started by <Request ARC Initiation>
         // need to clean up RequestArcInitiationAction.
         removeAction(RequestArcInitiationAction.class);
@@ -866,10 +890,29 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return true;
     }
 
+    private boolean canStartArcUpdateAction(int avrAddress, boolean shouldCheckArcFeatureEnabled) {
+        HdmiDeviceInfo avr = getAvrDeviceInfo();
+        if (avr != null
+                && (avrAddress == avr.getLogicalAddress())
+                && isConnectedToArcPort(avr.getPhysicalAddress())
+                && isDirectConnectAddress(avr.getPhysicalAddress())) {
+            if (shouldCheckArcFeatureEnabled) {
+                return isArcFeatureEnabled();
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
     @Override
     @ServiceThreadOnly
     protected boolean handleTerminateArc(HdmiCecMessage message) {
         assertRunOnServiceThread();
+        // In cast of termination, do not check ARC configuration in that AVR device
+        // might be removed already.
+
         // In case where <Terminate Arc> is started by <Request ARC Termination>
         // need to clean up RequestArcInitiationAction.
         removeAction(RequestArcTerminationAction.class);
@@ -1000,7 +1043,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * Return a list of all {@link HdmiDeviceInfo}.
      *
      * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
-     * This is not thread-safe. For thread safety, call {@link #getSafeExternalInputs} which
+     * This is not thread-safe. For thread safety, call {@link #getSafeExternalInputsLocked} which
      * does not include local device.
      */
     @ServiceThreadOnly
@@ -1116,7 +1159,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      *
      * This is not thread-safe. For thread safety, call {@link #getSafeCecDeviceInfo(int)}.
      *
-     * @param address logical address of the device to be retrieved
+     * @param logicalAddress logical address of the device to be retrieved
      * @return {@link HdmiDeviceInfo} matched with the given {@code logicalAddress}.
      *         Returns null if no logical address matched
      */
@@ -1388,11 +1431,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return mService.isPowerStandbyOrTransient();
     }
 
+    @ServiceThreadOnly
     void displayOsd(int messageId) {
-        Intent intent = new Intent(HdmiControlManager.ACTION_OSD_MESSAGE);
-        intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_ID, messageId);
-        mService.getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
-                HdmiControlService.PERMISSION);
+        assertRunOnServiceThread();
+        mService.displayOsd(messageId);
     }
 
     // Seq #54 and #55

@@ -110,10 +110,14 @@ final class SetArcTransmissionStateAction extends HdmiCecFeatureAction {
 
         int opcode = cmd.getOpcode();
         if (opcode == Constants.MESSAGE_FEATURE_ABORT) {
-            setArcStatus(false);
+            int originalOpcode = cmd.getParams()[0] & 0xFF;
+            if (originalOpcode == Constants.MESSAGE_REPORT_ARC_INITIATED) {
+                setArcStatus(false);
+                finish();
+                return true;
+            }
         }
-        finish();
-        return true;
+        return false;
     }
 
     @Override
