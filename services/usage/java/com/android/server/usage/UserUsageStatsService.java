@@ -20,7 +20,6 @@ import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
-import android.content.ComponentName;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -114,7 +113,7 @@ class UserUsageStatsService {
 
     void reportEvent(UsageEvents.Event event) {
         if (DEBUG) {
-            Slog.d(TAG, mLogPrefix + "Got usage event for " + event.getComponent().getPackageName()
+            Slog.d(TAG, mLogPrefix + "Got usage event for " + event.mPackage
                     + "[" + event.getTimeStamp() + "]: "
                     + eventToString(event.getEventType()));
         }
@@ -130,7 +129,7 @@ class UserUsageStatsService {
         mCurrentStats[UsageStatsManager.INTERVAL_DAILY].events.put(event.getTimeStamp(), event);
 
         for (IntervalStats stats : mCurrentStats) {
-            stats.update(event.getComponent().getPackageName(), event.getTimeStamp(),
+            stats.update(event.mPackage, event.getTimeStamp(),
                     event.getEventType());
         }
 
@@ -203,17 +202,21 @@ class UserUsageStatsService {
                 return null;
             }
 
-            ArraySet<ComponentName> names = new ArraySet<>();
+            ArraySet<String> names = new ArraySet<>();
             ArrayList<UsageEvents.Event> results = new ArrayList<>();
             final int size = events.size();
             for (int i = startIndex; i < size; i++) {
                 if (events.keyAt(i) >= endTime) {
                     break;
                 }
-                names.add(events.valueAt(i).getComponent());
-                results.add(events.valueAt(i));
+                final UsageEvents.Event event = events.valueAt(i);
+                names.add(event.mPackage);
+                if (event.mClass != null) {
+                    names.add(event.mClass);
+                }
+                results.add(event);
             }
-            ComponentName[] table = names.toArray(new ComponentName[names.size()]);
+            String[] table = names.toArray(new String[names.size()]);
             Arrays.sort(table);
             return new UsageEvents(results, table);
         }
