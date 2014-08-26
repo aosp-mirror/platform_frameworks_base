@@ -32012,6 +32012,7 @@ package android.util {
     method public void ensureCapacity(int);
     method public java.util.Set<java.util.Map.Entry<K, V>> entrySet();
     method public V get(java.lang.Object);
+    method public int indexOfKey(java.lang.Object);
     method public boolean isEmpty();
     method public K keyAt(int);
     method public java.util.Set<K> keySet();
