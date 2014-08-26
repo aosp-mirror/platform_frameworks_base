@@ -7021,26 +7021,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (another == null) {
                 return 1;
             }
-            if (getClass() != another.getClass()) {
-                return 1;
-            }
-            final int topDiference = mLocation.top - another.mLocation.top;
-            if (topDiference != 0) {
-                return topDiference;
-            }
-            // LTR
+            // We are ordering left-to-right, top-to-bottom.
             if (mLayoutDirection == LAYOUT_DIRECTION_LTR) {
                 final int leftDifference = mLocation.left - another.mLocation.left;
-                // First more to the left than second.
                 if (leftDifference != 0) {
                     return leftDifference;
                 }
             } else { // RTL
                 final int rightDifference = mLocation.right - another.mLocation.right;
-                // First more to the right than second.
                 if (rightDifference != 0) {
                     return -rightDifference;
                 }
+            }
+            // We are ordering left-to-right, top-to-bottom.
+            final int topDifference = mLocation.top - another.mLocation.top;
+            if (topDifference != 0) {
+                return topDifference;
             }
             // Break tie by height.
             final int heightDiference = mLocation.height() - another.mLocation.height();
