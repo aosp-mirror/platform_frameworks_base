@@ -1277,21 +1277,29 @@ public class NotificationManagerService extends SystemService {
          * should be used.
          *
          * @param token The binder for the listener, to check that the caller is allowed
+         * @param keys An array of notification keys to fetch, or null to fetch everything
          * @returns The return value will contain the notifications specified in keys, in that
          *      order, or if keys is null, all the notifications, in natural order.
          */
         @Override
         public ParceledListSlice<StatusBarNotification> getActiveNotificationsFromListener(
-                INotificationListener token) {
+                INotificationListener token, String[] keys) {
             synchronized (mNotificationList) {
                 final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
                 final ArrayList<StatusBarNotification> list
                         = new ArrayList<StatusBarNotification>();
-                final int N = mNotificationList.size();
+                final boolean getKeys = keys != null;
+                final int N = getKeys ? keys.length : mNotificationList.size();
+                list.ensureCapacity(N);
                 for (int i=0; i<N; i++) {
-                    StatusBarNotification sbn = mNotificationList.get(i).sbn;
-                    if (isVisibleToListener(sbn, info)) {
-                        list.add(sbn);
+                    final NotificationRecord r = getKeys
+                            ? mNotificationsByKey.get(keys[i])
+                            : mNotificationList.get(i);
+                    if (r != null) {
+                        StatusBarNotification sbn = r.sbn;
+                        if (isVisibleToListener(sbn, info)) {
+                            list.add(sbn);
+                        }
                     }
                 }
                 return new ParceledListSlice<StatusBarNotification>(list);
