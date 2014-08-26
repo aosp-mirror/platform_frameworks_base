@@ -28,13 +28,22 @@ import java.util.Map;
  * @hide
  */
 public class RemoteConnectionManager {
-    private Map<ComponentName, RemoteConnectionService> mRemoteConnectionServices = new HashMap<>();
+    private final Map<ComponentName, RemoteConnectionService> mRemoteConnectionServices =
+            new HashMap<>();
+    private final ConnectionService mOurConnectionServiceImpl;
 
-    void addConnectionService(ComponentName componentName, IConnectionService connectionService) {
+    public RemoteConnectionManager(ConnectionService ourConnectionServiceImpl) {
+        mOurConnectionServiceImpl = ourConnectionServiceImpl;
+    }
+
+    void addConnectionService(
+            ComponentName componentName,
+            IConnectionService outgoingConnectionServiceRpc) {
         if (!mRemoteConnectionServices.containsKey(componentName)) {
             try {
-                RemoteConnectionService remoteConnectionService =
-                        new RemoteConnectionService(connectionService);
+                RemoteConnectionService remoteConnectionService = new RemoteConnectionService(
+                        outgoingConnectionServiceRpc,
+                        mOurConnectionServiceImpl);
                 mRemoteConnectionServices.put(componentName, remoteConnectionService);
             } catch (RemoteException ignored) {
             }
@@ -62,5 +71,18 @@ public class RemoteConnectionManager {
                     connectionManagerPhoneAccount, request, isIncoming);
         }
         return null;
+    }
+
+    public void conferenceRemoteConnections(RemoteConnection a, RemoteConnection b) {
+        if (a.getConnectionService() == b.getConnectionService()) {
+            try {
+                a.getConnectionService().conference(a.getId(), b.getId());
+            } catch (RemoteException e) {
+            }
+        } else {
+            Log.w(this, "Request to conference incompatible remote connections (%s,%s) (%s,%s)",
+                    a.getConnectionService(), a.getId(),
+                    b.getConnectionService(), b.getId());
+        }
     }
 }
