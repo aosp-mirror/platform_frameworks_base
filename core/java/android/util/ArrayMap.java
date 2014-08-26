@@ -323,7 +323,17 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     @Override
     public boolean containsKey(Object key) {
-        return key == null ? (indexOfNull() >= 0) : (indexOf(key, key.hashCode()) >= 0);
+        return indexOfKey(key) >= 0;
+    }
+
+    /**
+     * Returns the index of a key in the set.
+     *
+     * @param key The key to search for.
+     * @return Returns the index of the key if it exists, else a negative integer.
+     */
+    public int indexOfKey(Object key) {
+        return key == null ? indexOfNull() : indexOf(key, key.hashCode());
     }
 
     int indexOfValue(Object value) {
@@ -365,7 +375,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     @Override
     public V get(Object key) {
-        final int index = key == null ? indexOfNull() : indexOf(key, key.hashCode());
+        final int index = indexOfKey(key);
         return index >= 0 ? (V)mArray[(index<<1)+1] : null;
     }
 
@@ -561,7 +571,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     @Override
     public V remove(Object key) {
-        int index = key == null ? indexOfNull() : indexOf(key, key.hashCode());
+        final int index = indexOfKey(key);
         if (index >= 0) {
             return removeAt(index);
         }
@@ -747,7 +757,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
 
                 @Override
                 protected int colIndexOfKey(Object key) {
-                    return key == null ? indexOfNull() : indexOf(key, key.hashCode());
+                    return indexOfKey(key);
                 }
 
                 @Override
