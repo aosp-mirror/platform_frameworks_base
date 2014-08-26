@@ -410,14 +410,19 @@ please see themes_device_defaults.xml.
         <item name="fastScrollPreviewBackgroundLeft">@drawable/menu_submenu_background</item>
         <item name="fastScrollOverlayPosition">floating</item>
         <item name="fastScrollTextColor">@color/primary_text_dark</item>
+
         <!-- Pointer style -->
         <item name="pointerStyle">@style/Pointer</item>
 
-        <!-- Accessibility focused drawable. -->
+        <!-- Accessibility focused drawable -->
         <item name="accessibilityFocusedDrawable">@drawable/view_accessibility_focused</item>
 
-        <!-- Lighting and shadow style. -->
-        <item name="lightingStyle">@style/Lighting</item>
+        <!-- Lighting and shadow properties -->
+        <item name="lightY">@dimen/light_y</item>
+        <item name="lightZ">@dimen/light_z</item>
+        <item name="lightRadius">@dimen/light_radius</item>
+        <item name="ambientShadowAlpha">@dimen/ambient_shadow_alpha</item>
+        <item name="spotShadowAlpha">@dimen/spot_shadow_alpha</item>
     </style>
 
     <!-- Variant of {@link #Theme} with no title bar -->

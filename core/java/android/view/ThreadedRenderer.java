@@ -99,15 +99,13 @@ public class ThreadedRenderer extends HardwareRenderer {
     private boolean mRootNodeNeedsUpdate;
 
     ThreadedRenderer(Context context, boolean translucent) {
-        final TypedArray a = context.obtainStyledAttributes(
-                null, R.styleable.Lighting, R.attr.lightingStyle, 0);
+        final TypedArray a = context.obtainStyledAttributes(null, R.styleable.Lighting, 0, 0);
         mLightY = a.getDimension(R.styleable.Lighting_lightY, 0);
         mLightZ = a.getDimension(R.styleable.Lighting_lightZ, 0);
         mLightRadius = a.getDimension(R.styleable.Lighting_lightRadius, 0);
-        mAmbientShadowAlpha = Math.round(
-                255 * a.getFloat(R.styleable.Lighting_ambientShadowAlpha, 0));
-        mSpotShadowAlpha = Math.round(
-                255 * a.getFloat(R.styleable.Lighting_spotShadowAlpha, 0));
+        mAmbientShadowAlpha =
+                (int) (255 * a.getFloat(R.styleable.Lighting_ambientShadowAlpha, 0) + 0.5f);
+        mSpotShadowAlpha = (int) (255 * a.getFloat(R.styleable.Lighting_spotShadowAlpha, 0) + 0.5f);
         a.recycle();
 
         long rootNodePtr = nCreateRootRenderNode();
