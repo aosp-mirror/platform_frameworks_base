@@ -27351,7 +27351,7 @@ package android.service.notification {
     method public java.lang.String getKey();
     method public int getRank();
     method public boolean isAmbient();
-    method public boolean meetsInterruptionFilter();
+    method public boolean matchesInterruptionFilter();
   }
 
   public static class NotificationListenerService.RankingMap implements android.os.Parcelable {

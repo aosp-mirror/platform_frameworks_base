@@ -16,6 +16,14 @@ package android.os {
 
 }
 
+package android.service.notification {
+
+  public static class NotificationListenerService.Ranking {
+    method public boolean meetsInterruptionFilter();
+  }
+
+}
+
 package android.view {
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
