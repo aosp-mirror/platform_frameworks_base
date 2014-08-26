@@ -307,10 +307,22 @@ public abstract class NotificationListenerService extends Service {
      * @return An array of active notifications, sorted in natural order.
      */
     public StatusBarNotification[] getActiveNotifications() {
+        return getActiveNotifications(null);
+    }
+
+    /**
+     * Request one or more notifications by key. Useful if you have been keeping track of
+     * notifications but didn't want to retain the bits, and now need to go back and extract
+     * more data out of those notifications.
+     *
+     * @return An array of notifications corresponding to the requested keys, in the
+     * same order as the key list.
+     */
+    public StatusBarNotification[] getActiveNotifications(String[] keys) {
         if (!isBound()) return null;
         try {
             ParceledListSlice<StatusBarNotification> parceledList =
-                    getNotificationInterface().getActiveNotificationsFromListener(mWrapper);
+                    getNotificationInterface().getActiveNotificationsFromListener(mWrapper, keys);
             List<StatusBarNotification> list = parceledList.getList();
 
             int N = list.size();
