@@ -3206,8 +3206,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 Context.WINDOW_SERVICE);
         if (windowService != null) {
             final Display display = windowService.getDefaultDisplay();
-            if (display.getDisplayId() == Display.DEFAULT_DISPLAY &&
-                    a.hasValue(R.styleable.Window_windowOutsetBottom)) {
+            final boolean shouldUseBottomOutset =
+                    display.getDisplayId() == Display.DEFAULT_DISPLAY
+                            || (getForcedWindowFlags() & FLAG_FULLSCREEN) != 0;
+            if (shouldUseBottomOutset && a.hasValue(R.styleable.Window_windowOutsetBottom)) {
                 if (mOutsetBottom == null) mOutsetBottom = new TypedValue();
                 a.getValue(R.styleable.Window_windowOutsetBottom,
                         mOutsetBottom);
