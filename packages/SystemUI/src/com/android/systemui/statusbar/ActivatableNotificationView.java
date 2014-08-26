@@ -243,9 +243,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         int widthHalf = mBackgroundNormal.getWidth()/2;
         int heightHalf = mBackgroundNormal.getActualHeight()/2;
         float radius = (float) Math.sqrt(widthHalf*widthHalf + heightHalf*heightHalf);
-        Animator animator =
-                ViewAnimationUtils.createCircularReveal(mBackgroundNormal,
-                        widthHalf, heightHalf, 0, radius);
+        Animator animator;
+        if (reverse) {
+            animator = ViewAnimationUtils.createCircularReveal(mBackgroundNormal,
+                    widthHalf, heightHalf, radius, 0);
+        } else {
+            animator = ViewAnimationUtils.createCircularReveal(mBackgroundNormal,
+                    widthHalf, heightHalf, 0, radius);
+        }
         mBackgroundNormal.setVisibility(View.VISIBLE);
         Interpolator interpolator;
         Interpolator alphaInterpolator;
@@ -268,7 +273,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                     }
                 }
             });
-            animator.reverse();
+            animator.start();
         } else {
             mBackgroundNormal.setAlpha(0.4f);
             animator.start();
