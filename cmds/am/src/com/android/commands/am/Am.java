@@ -26,6 +26,7 @@ import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IInstrumentationWatcher;
 import android.app.Instrumentation;
+import android.app.ProfilerInfo;
 import android.app.UiAutomationConnection;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
@@ -76,6 +77,8 @@ public class Am extends BaseCommand {
     private String mReceiverPermission;
 
     private String mProfileFile;
+    private int mSamplingInterval;
+    private boolean mAutoStop;
 
     /**
      * Command-line entry point.
@@ -91,7 +94,7 @@ public class Am extends BaseCommand {
         out.println(
                 "usage: am [subcommand] [options]\n" +
                 "usage: am start [-D] [-W] [-P <FILE>] [--start-profiler <FILE>]\n" +
-                "               [--R COUNT] [-S] [--opengl-trace]\n" +
+                "               [--sampling INTERVAL] [-R COUNT] [-S] [--opengl-trace]\n" +
                 "               [--user <USER_ID> | current] <INTENT>\n" +
                 "       am startservice [--user <USER_ID> | current] <INTENT>\n" +
                 "       am stopservice [--user <USER_ID> | current] <INTENT>\n" +
@@ -133,6 +136,8 @@ public class Am extends BaseCommand {
                 "    -D: enable debugging\n" +
                 "    -W: wait for launch to complete\n" +
                 "    --start-profiler <FILE>: start profiler and send results to <FILE>\n" +
+                "    --sampling INTERVAL: use sample profiling with INTERVAL microseconds\n" +
+                "        between samples (use with --start-profiler)\n" +
                 "    -P <FILE>: like above, but profiling stops when app goes idle\n" +
                 "    -R: repeat the activity launch <COUNT> times.  Prior to each repeat,\n" +
                 "        the top activity will be finished.\n" +
@@ -360,6 +365,8 @@ public class Am extends BaseCommand {
         mStopOption = false;
         mRepeat = 0;
         mProfileFile = null;
+        mSamplingInterval = 0;
+        mAutoStop = false;
         mUserId = defUser;
         Uri data = null;
         String type = null;
@@ -526,10 +533,12 @@ public class Am extends BaseCommand {
                 mWaitOption = true;
             } else if (opt.equals("-P")) {
                 mProfileFile = nextArgRequired();
-                mStartFlags |= ActivityManager.START_FLAG_AUTO_STOP_PROFILER;
+                mAutoStop = true;
             } else if (opt.equals("--start-profiler")) {
                 mProfileFile = nextArgRequired();
-                mStartFlags &= ~ActivityManager.START_FLAG_AUTO_STOP_PROFILER;
+                mAutoStop = false;
+            } else if (opt.equals("--sampling")) {
+                mSamplingInterval = Integer.parseInt(nextArgRequired());
             } else if (opt.equals("-R")) {
                 mRepeat = Integer.parseInt(nextArgRequired());
             } else if (opt.equals("-S")) {
@@ -685,12 +694,13 @@ public class Am extends BaseCommand {
                 mAm.forceStopPackage(packageName, mUserId);
                 Thread.sleep(250);
             }
-    
+
             System.out.println("Starting: " + intent);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    
+
             ParcelFileDescriptor fd = null;
-    
+            ProfilerInfo profilerInfo = null;
+
             if (mProfileFile != null) {
                 try {
                     fd = ParcelFileDescriptor.open(
@@ -702,17 +712,18 @@ public class Am extends BaseCommand {
                     System.err.println("Error: Unable to open file: " + mProfileFile);
                     return;
                 }
+                profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop);
             }
 
             IActivityManager.WaitResult result = null;
             int res;
             if (mWaitOption) {
                 result = mAm.startActivityAndWait(null, null, intent, mimeType,
-                            null, null, 0, mStartFlags, mProfileFile, fd, null, mUserId);
+                            null, null, 0, mStartFlags, profilerInfo, null, mUserId);
                 res = result.result;
             } else {
                 res = mAm.startActivityAsUser(null, null, intent, mimeType,
-                        null, null, 0, mStartFlags, mProfileFile, fd, null, mUserId);
+                        null, null, 0, mStartFlags, profilerInfo, null, mUserId);
             }
             PrintStream out = mWaitOption ? System.out : System.err;
             boolean launched = false;
@@ -942,7 +953,7 @@ public class Am extends BaseCommand {
             SystemProperties.set("dalvik.vm.extra-opts", props);
         }
     }
-    
+
     private void runProfile() throws Exception {
         String profileFile = null;
         boolean start = false;
@@ -996,6 +1007,7 @@ public class Am extends BaseCommand {
         }
 
         ParcelFileDescriptor fd = null;
+        ProfilerInfo profilerInfo = null;
 
         if (start) {
             profileFile = nextArgRequired();
@@ -1009,6 +1021,7 @@ public class Am extends BaseCommand {
                 System.err.println("Error: Unable to open file: " + profileFile);
                 return;
             }
+            profilerInfo = new ProfilerInfo(profileFile, fd, 0, false);
         }
 
         try {
@@ -1022,7 +1035,7 @@ public class Am extends BaseCommand {
             } else if (start) {
                 //removeWallOption();
             }
-            if (!mAm.profileControl(process, userId, start, profileFile, fd, profileType)) {
+            if (!mAm.profileControl(process, userId, start, profilerInfo, profileType)) {
                 wall = false;
                 throw new AndroidException("PROFILE FAILED on process " + process);
             }

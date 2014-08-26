@@ -61,22 +61,19 @@ import java.util.List;
  * {@hide}
  */
 public interface IActivityManager extends IInterface {
-    public int startActivity(IApplicationThread caller, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo, String resultWho,
-            int requestCode, int flags, String profileFile,
-            ParcelFileDescriptor profileFd, Bundle options) throws RemoteException;
-    public int startActivityAsUser(IApplicationThread caller, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo, String resultWho,
-            int requestCode, int flags, String profileFile,
-            ParcelFileDescriptor profileFd, Bundle options, int userId) throws RemoteException;
+    public int startActivity(IApplicationThread caller, String callingPackage, Intent intent,
+            String resolvedType, IBinder resultTo, String resultWho, int requestCode, int flags,
+            ProfilerInfo profilerInfo, Bundle options) throws RemoteException;
+    public int startActivityAsUser(IApplicationThread caller, String callingPackage, Intent intent,
+            String resolvedType, IBinder resultTo, String resultWho, int requestCode, int flags,
+            ProfilerInfo profilerInfo, Bundle options, int userId) throws RemoteException;
     public int startActivityAsCaller(IApplicationThread caller, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo, String resultWho,
-            int requestCode, int flags, String profileFile,
-            ParcelFileDescriptor profileFd, Bundle options) throws RemoteException;
+            Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
+            int flags, ProfilerInfo profilerInfo, Bundle options) throws RemoteException;
     public WaitResult startActivityAndWait(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho,
-            int requestCode, int flags, String profileFile,
-            ParcelFileDescriptor profileFd, Bundle options, int userId) throws RemoteException;
+            int requestCode, int flags, ProfilerInfo profilerInfo, Bundle options,
+            int userId) throws RemoteException;
     public int startActivityWithConfig(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho,
             int requestCode, int startFlags, Configuration newConfig,
@@ -87,8 +84,8 @@ public interface IActivityManager extends IInterface {
             int flagsMask, int flagsValues, Bundle options) throws RemoteException;
     public int startVoiceActivity(String callingPackage, int callingPid, int callingUid,
             Intent intent, String resolvedType, IVoiceInteractionSession session,
-            IVoiceInteractor interactor, int flags, String profileFile,
-            ParcelFileDescriptor profileFd, Bundle options, int userId) throws RemoteException;
+            IVoiceInteractor interactor, int flags, ProfilerInfo profilerInfo, Bundle options,
+            int userId) throws RemoteException;
     public boolean startNextMatchingActivity(IBinder callingActivity,
             Intent intent, Bundle options) throws RemoteException;
     public int startActivityFromRecents(int taskId, Bundle options) throws RemoteException;
@@ -296,13 +293,13 @@ public interface IActivityManager extends IInterface {
             throws RemoteException;
     // Get device configuration
     public ConfigurationInfo getDeviceConfigurationInfo() throws RemoteException;
-    
+
     // Turn on/off profiling in a particular process.
     public boolean profileControl(String process, int userId, boolean start,
-            String path, ParcelFileDescriptor fd, int profileType) throws RemoteException;
-    
+            ProfilerInfo profilerInfo, int profileType) throws RemoteException;
+
     public boolean shutdown(int timeout) throws RemoteException;
-    
+
     public void stopAppSwitches() throws RemoteException;
     public void resumeAppSwitches() throws RemoteException;
 

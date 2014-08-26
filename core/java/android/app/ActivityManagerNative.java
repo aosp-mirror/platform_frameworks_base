@@ -17,6 +17,7 @@
 package android.app;
 
 import android.app.ActivityManager.StackInfo;
+import android.app.ProfilerInfo;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -132,14 +133,12 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String resultWho = data.readString();
             int requestCode = data.readInt();
             int startFlags = data.readInt();
-            String profileFile = data.readString();
-            ParcelFileDescriptor profileFd = data.readInt() != 0
-                    ? data.readFileDescriptor() : null;
+            ProfilerInfo profilerInfo = data.readInt() != 0
+                    ? ProfilerInfo.CREATOR.createFromParcel(data) : null;
             Bundle options = data.readInt() != 0
                     ? Bundle.CREATOR.createFromParcel(data) : null;
             int result = startActivity(app, callingPackage, intent, resolvedType,
-                    resultTo, resultWho, requestCode, startFlags,
-                    profileFile, profileFd, options);
+                    resultTo, resultWho, requestCode, startFlags, profilerInfo, options);
             reply.writeNoException();
             reply.writeInt(result);
             return true;
@@ -157,15 +156,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String resultWho = data.readString();
             int requestCode = data.readInt();
             int startFlags = data.readInt();
-            String profileFile = data.readString();
-            ParcelFileDescriptor profileFd = data.readInt() != 0
-                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
+            ProfilerInfo profilerInfo = data.readInt() != 0
+                    ? ProfilerInfo.CREATOR.createFromParcel(data) : null;
             Bundle options = data.readInt() != 0
                     ? Bundle.CREATOR.createFromParcel(data) : null;
             int userId = data.readInt();
             int result = startActivityAsUser(app, callingPackage, intent, resolvedType,
-                    resultTo, resultWho, requestCode, startFlags,
-                    profileFile, profileFd, options, userId);
+                    resultTo, resultWho, requestCode, startFlags, profilerInfo, options, userId);
             reply.writeNoException();
             reply.writeInt(result);
             return true;
@@ -183,14 +180,12 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String resultWho = data.readString();
             int requestCode = data.readInt();
             int startFlags = data.readInt();
-            String profileFile = data.readString();
-            ParcelFileDescriptor profileFd = data.readInt() != 0
-                    ? data.readFileDescriptor() : null;
+            ProfilerInfo profilerInfo = data.readInt() != 0
+                    ? ProfilerInfo.CREATOR.createFromParcel(data) : null;
             Bundle options = data.readInt() != 0
                     ? Bundle.CREATOR.createFromParcel(data) : null;
             int result = startActivityAsCaller(app, callingPackage, intent, resolvedType,
-                    resultTo, resultWho, requestCode, startFlags,
-                    profileFile, profileFd, options);
+                    resultTo, resultWho, requestCode, startFlags, profilerInfo, options);
             reply.writeNoException();
             reply.writeInt(result);
             return true;
@@ -208,15 +203,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String resultWho = data.readString();
             int requestCode = data.readInt();
             int startFlags = data.readInt();
-            String profileFile = data.readString();
-            ParcelFileDescriptor profileFd = data.readInt() != 0
-                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
+            ProfilerInfo profilerInfo = data.readInt() != 0
+                    ? ProfilerInfo.CREATOR.createFromParcel(data) : null;
             Bundle options = data.readInt() != 0
                     ? Bundle.CREATOR.createFromParcel(data) : null;
             int userId = data.readInt();
             WaitResult result = startActivityAndWait(app, callingPackage, intent, resolvedType,
-                    resultTo, resultWho, requestCode, startFlags,
-                    profileFile, profileFd, options, userId);
+                    resultTo, resultWho, requestCode, startFlags, profilerInfo, options, userId);
             reply.writeNoException();
             result.writeToParcel(reply, 0);
             return true;
@@ -284,15 +277,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             IVoiceInteractor interactor = IVoiceInteractor.Stub.asInterface(
                     data.readStrongBinder());
             int startFlags = data.readInt();
-            String profileFile = data.readString();
-            ParcelFileDescriptor profileFd = data.readInt() != 0
-                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
+            ProfilerInfo profilerInfo = data.readInt() != 0
+                    ? ProfilerInfo.CREATOR.createFromParcel(data) : null;
             Bundle options = data.readInt() != 0
                     ? Bundle.CREATOR.createFromParcel(data) : null;
             int userId = data.readInt();
-            int result = startVoiceActivity(callingPackage, callingPid, callingUid,
-                    intent, resolvedType, session, interactor, startFlags,
-                    profileFile, profileFd, options, userId);
+            int result = startVoiceActivity(callingPackage, callingPid, callingUid, intent,
+                    resolvedType, session, interactor, startFlags, profilerInfo, options, userId);
             reply.writeNoException();
             reply.writeInt(result);
             return true;
@@ -1468,22 +1459,21 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             config.writeToParcel(reply, 0);
             return true;
         }
-        
+
         case PROFILE_CONTROL_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String process = data.readString();
             int userId = data.readInt();
             boolean start = data.readInt() != 0;
             int profileType = data.readInt();
-            String path = data.readString();
-            ParcelFileDescriptor fd = data.readInt() != 0
-                    ? ParcelFileDescriptor.CREATOR.createFromParcel(data) : null;
-            boolean res = profileControl(process, userId, start, path, fd, profileType);
+            ProfilerInfo profilerInfo = data.readInt() != 0
+                    ? ProfilerInfo.CREATOR.createFromParcel(data) : null;
+            boolean res = profileControl(process, userId, start, profilerInfo, profileType);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
         }
-        
+
         case SHUTDOWN_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             boolean res = shutdown(data.readInt());
@@ -2343,8 +2333,7 @@ class ActivityManagerProxy implements IActivityManager
 
     public int startActivity(IApplicationThread caller, String callingPackage, Intent intent,
             String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, String profileFile,
-            ParcelFileDescriptor profileFd, Bundle options) throws RemoteException {
+            int startFlags, ProfilerInfo profilerInfo, Bundle options) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -2356,10 +2345,9 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(resultWho);
         data.writeInt(requestCode);
         data.writeInt(startFlags);
-        data.writeString(profileFile);
-        if (profileFd != null) {
+        if (profilerInfo != null) {
             data.writeInt(1);
-            profileFd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            profilerInfo.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         } else {
             data.writeInt(0);
         }
@@ -2379,8 +2367,8 @@ class ActivityManagerProxy implements IActivityManager
 
     public int startActivityAsUser(IApplicationThread caller, String callingPackage, Intent intent,
             String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, String profileFile,
-            ParcelFileDescriptor profileFd, Bundle options, int userId) throws RemoteException {
+            int startFlags, ProfilerInfo profilerInfo, Bundle options,
+            int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -2392,10 +2380,9 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(resultWho);
         data.writeInt(requestCode);
         data.writeInt(startFlags);
-        data.writeString(profileFile);
-        if (profileFd != null) {
+        if (profilerInfo != null) {
             data.writeInt(1);
-            profileFd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            profilerInfo.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         } else {
             data.writeInt(0);
         }
@@ -2415,8 +2402,7 @@ class ActivityManagerProxy implements IActivityManager
     }
     public int startActivityAsCaller(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, String profileFile,
-            ParcelFileDescriptor profileFd, Bundle options) throws RemoteException {
+            int startFlags, ProfilerInfo profilerInfo, Bundle options) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -2428,10 +2414,9 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(resultWho);
         data.writeInt(requestCode);
         data.writeInt(startFlags);
-        data.writeString(profileFile);
-        if (profileFd != null) {
+        if (profilerInfo != null) {
             data.writeInt(1);
-            profileFd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            profilerInfo.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         } else {
             data.writeInt(0);
         }
@@ -2450,8 +2435,8 @@ class ActivityManagerProxy implements IActivityManager
     }
     public WaitResult startActivityAndWait(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho,
-            int requestCode, int startFlags, String profileFile,
-            ParcelFileDescriptor profileFd, Bundle options, int userId) throws RemoteException {
+            int requestCode, int startFlags, ProfilerInfo profilerInfo, Bundle options,
+            int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -2463,10 +2448,9 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(resultWho);
         data.writeInt(requestCode);
         data.writeInt(startFlags);
-        data.writeString(profileFile);
-        if (profileFd != null) {
+        if (profilerInfo != null) {
             data.writeInt(1);
-            profileFd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            profilerInfo.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         } else {
             data.writeInt(0);
         }
@@ -2550,8 +2534,8 @@ class ActivityManagerProxy implements IActivityManager
     }
     public int startVoiceActivity(String callingPackage, int callingPid, int callingUid,
             Intent intent, String resolvedType, IVoiceInteractionSession session,
-            IVoiceInteractor interactor, int startFlags, String profileFile,
-            ParcelFileDescriptor profileFd, Bundle options, int userId) throws RemoteException {
+            IVoiceInteractor interactor, int startFlags, ProfilerInfo profilerInfo,
+            Bundle options, int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -2563,10 +2547,9 @@ class ActivityManagerProxy implements IActivityManager
         data.writeStrongBinder(session.asBinder());
         data.writeStrongBinder(interactor.asBinder());
         data.writeInt(startFlags);
-        data.writeString(profileFile);
-        if (profileFd != null) {
+        if (profilerInfo != null) {
             data.writeInt(1);
-            profileFd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            profilerInfo.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         } else {
             data.writeInt(0);
         }
@@ -4189,9 +4172,9 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         return res;
     }
-    
+
     public boolean profileControl(String process, int userId, boolean start,
-            String path, ParcelFileDescriptor fd, int profileType) throws RemoteException
+            ProfilerInfo profilerInfo, int profileType) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -4200,10 +4183,9 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(userId);
         data.writeInt(start ? 1 : 0);
         data.writeInt(profileType);
-        data.writeString(path);
-        if (fd != null) {
+        if (profilerInfo != null) {
             data.writeInt(1);
-            fd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            profilerInfo.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         } else {
             data.writeInt(0);
         }
@@ -4214,7 +4196,7 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         return res;
     }
-    
+
     public boolean shutdown(int timeout) throws RemoteException
     {
         Parcel data = Parcel.obtain();

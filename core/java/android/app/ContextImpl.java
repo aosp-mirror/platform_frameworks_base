@@ -1256,7 +1256,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().startActivityAsUser(
                 mMainThread.getApplicationThread(), getBasePackageName(), intent,
                 intent.resolveTypeIfNeeded(getContentResolver()),
-                null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, null, options,
+                null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, options,
                 user.getIdentifier());
         } catch (RemoteException re) {
         }
