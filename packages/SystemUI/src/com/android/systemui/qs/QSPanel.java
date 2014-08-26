@@ -21,15 +21,19 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.DetailAdapter;
 import com.android.systemui.settings.BrightnessController;
@@ -48,8 +52,8 @@ public class QSPanel extends ViewGroup {
     private final ArrayList<TileRecord> mRecords = new ArrayList<TileRecord>();
     private final View mDetail;
     private final ViewGroup mDetailContent;
-    private final View mDetailSettingsButton;
-    private final View mDetailDoneButton;
+    private final TextView mDetailSettingsButton;
+    private final TextView mDetailDoneButton;
     private final View mBrightnessView;
     private final QSDetailClipper mClipper;
     private final H mHandler = new H();
@@ -83,8 +87,8 @@ public class QSPanel extends ViewGroup {
 
         mDetail = LayoutInflater.from(context).inflate(R.layout.qs_detail, this, false);
         mDetailContent = (ViewGroup) mDetail.findViewById(android.R.id.content);
-        mDetailSettingsButton = mDetail.findViewById(android.R.id.button2);
-        mDetailDoneButton = mDetail.findViewById(android.R.id.button1);
+        mDetailSettingsButton = (TextView) mDetail.findViewById(android.R.id.button2);
+        mDetailDoneButton = (TextView) mDetail.findViewById(android.R.id.button1);
         mDetail.setVisibility(GONE);
         mDetail.setClickable(true);
         mBrightnessView = LayoutInflater.from(context).inflate(
@@ -146,6 +150,24 @@ public class QSPanel extends ViewGroup {
         if (mListening) {
             refreshAllTiles();
         }
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        FontSizeUtils.updateFontSize(mDetailDoneButton, R.dimen.qs_detail_button_text_size);
+        FontSizeUtils.updateFontSize(mDetailSettingsButton, R.dimen.qs_detail_button_text_size);
+
+        // We need to poke the detail views as well as they might not be attached to the view
+        // hierarchy but reused at a later point.
+        int count = mRecords.size();
+        for (int i = 0; i < count; i++) {
+            View detailView = mRecords.get(i).detailView;
+            if (detailView != null) {
+                detailView.dispatchConfigurationChanged(newConfig);
+            }
+        }
+        mFooter.onConfigurationChanged();
     }
 
     public void setExpanded(boolean expanded) {

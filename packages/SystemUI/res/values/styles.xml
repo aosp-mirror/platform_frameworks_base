@@ -85,13 +85,13 @@
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.Date">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">@dimen/qs_date_collapsed_size</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">#b2ffffff</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.AboveDateTime">
-        <item name="android:textSize">12dp</item>
+        <item name="android:textSize">@dimen/qs_emergency_calls_only_text_size</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">#66ffffff</item>
     </style>
@@ -125,16 +125,16 @@
     </style>
 
     <style name="TextAppearance.QS.DetailHeader">
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">@dimen/qs_detail_header_text_size</item>
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="TextAppearance.QS.DetailItemPrimary">
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">@dimen/qs_detail_item_primary_text_size</item>
     </style>
 
     <style name="TextAppearance.QS.DetailItemSecondary">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">@dimen/qs_detail_item_secondary_text_size</item>
         <item name="android:textColor">@color/system_accent_color</item>
     </style>
 
@@ -144,14 +144,14 @@
     </style>
 
     <style name="TextAppearance.QS.DetailButton">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">@dimen/qs_detail_button_text_size</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:gravity">center</item>
     </style>
 
     <style name="TextAppearance.QS.DetailEmpty">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">@dimen/qs_detail_empty_text_size</item>
         <item name="android:textColor">@color/qs_subhead</item>
     </style>
 
@@ -167,11 +167,11 @@
     </style>
 
     <style name="TextAppearance.QS.DataUsage">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">@dimen/qs_data_usage_text_size</item>
     </style>
 
     <style name="TextAppearance.QS.DataUsage.Usage">
-        <item name="android:textSize">36sp</item>
+        <item name="android:textSize">@dimen/qs_data_usage_usage_text_size</item>
         <item name="android:textColor">@color/system_accent_color</item>
     </style>
 

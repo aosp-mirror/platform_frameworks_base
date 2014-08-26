@@ -17,15 +17,18 @@
 package com.android.systemui.qs.tiles;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.UserAvatarView;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -104,6 +107,12 @@ public class UserDetailItemView extends LinearLayout {
             mActivatedTypeface = mName.getTypeface();
         }
         updateTypeface();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        FontSizeUtils.updateFontSize(mName, R.dimen.qs_detail_item_secondary_text_size);
     }
 
     @Override
