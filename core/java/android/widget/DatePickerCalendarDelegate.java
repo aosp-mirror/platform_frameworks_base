@@ -16,9 +16,6 @@
 
 package android.widget;
 
-import android.animation.Keyframe;
-import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -60,10 +57,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     private static final int DEFAULT_START_YEAR = 1900;
     private static final int DEFAULT_END_YEAR = 2100;
 
-    private static final int PULSE_ANIMATOR_DURATION = 544;
-
     private static final int ANIMATION_DURATION = 300;
-    private static final int ANIMATION_DELAY = 650;
 
     private static final int MONTH_INDEX = 0;
     private static final int DAY_INDEX = 1;
@@ -73,8 +67,13 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     private SimpleDateFormat mDayFormat = new SimpleDateFormat("d", Locale.getDefault());
 
     private TextView mDayOfWeekView;
-    private LinearLayout mDateLayout;
+
+    /** Layout that contains the current month, day, and year. */
+    private LinearLayout mMonthDayYearLayout;
+
+    /** Clickable layout that contains the current day and year. */
     private LinearLayout mMonthAndDayLayout;
+
     private TextView mHeaderMonthTextView;
     private TextView mHeaderDayOfMonthTextView;
     private TextView mHeaderYearTextView;
@@ -93,8 +92,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
 
     private DatePicker.OnDateChangedListener mDateChangedListener;
 
-    private boolean mDelayAnimation = true;
-
     private int mCurrentView = UNINITIALIZED;
 
     private Calendar mCurrentDate;
@@ -112,7 +109,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         mMinDate = getCalendarForLocale(mMinDate, locale);
         mMaxDate = getCalendarForLocale(mMaxDate, locale);
         mTempDate = getCalendarForLocale(mMaxDate, locale);
-
         mCurrentDate = getCalendarForLocale(mCurrentDate, locale);
 
         mMinDate.set(DEFAULT_START_YEAR, 1, 1);
@@ -129,7 +125,12 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         mDelegator.addView(mainView);
 
         mDayOfWeekView = (TextView) mainView.findViewById(R.id.date_picker_header);
-        mDateLayout = (LinearLayout) mainView.findViewById(R.id.day_picker_selector_layout);
+
+        // Layout that contains the current date and day name header.
+        final LinearLayout dateLayout = (LinearLayout) mainView.findViewById(
+                R.id.day_picker_selector_layout);
+        mMonthDayYearLayout = (LinearLayout) mainView.findViewById(
+                R.id.date_picker_month_day_year_layout);
         mMonthAndDayLayout = (LinearLayout) mainView.findViewById(
                 R.id.date_picker_month_and_day_layout);
         mMonthAndDayLayout.setOnClickListener(this);
@@ -156,7 +157,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
                 R.styleable.DatePicker_headerSelectedTextColor, defaultHighlightColor);
         final int headerBackgroundColor = a.getColor(R.styleable.DatePicker_headerBackgroundColor,
                 Color.TRANSPARENT);
-        mDateLayout.setBackgroundColor(headerBackgroundColor);
+        dateLayout.setBackgroundColor(headerBackgroundColor);
 
         final int monthTextAppearanceResId = a.getResourceId(
                 R.styleable.DatePicker_headerMonthTextAppearance, -1);
@@ -189,6 +190,10 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         mYearPickerView = new YearPickerView(mContext);
         mYearPickerView.init(this);
 
+        final int yearSelectedCircleColor = a.getColor(R.styleable.DatePicker_yearListSelectorColor,
+                defaultHighlightColor);
+        mYearPickerView.setYearSelectedCircleColor(yearSelectedCircleColor);
+
         final ColorStateList calendarTextColor = a.getColorStateList(
                 R.styleable.DatePicker_calendarTextColor);
         final int calendarSelectedTextColor = a.getColor(
@@ -205,10 +210,12 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         mAnimator.addView(mDayPickerView);
         mAnimator.addView(mYearPickerView);
         mAnimator.setDateMillis(mCurrentDate.getTimeInMillis());
-        Animation animation = new AlphaAnimation(0.0f, 1.0f);
+
+        final Animation animation = new AlphaAnimation(0.0f, 1.0f);
         animation.setDuration(ANIMATION_DURATION);
         mAnimator.setInAnimation(animation);
-        Animation animation2 = new AlphaAnimation(1.0f, 0.0f);
+
+        final Animation animation2 = new AlphaAnimation(1.0f, 0.0f);
         animation2.setDuration(ANIMATION_DURATION);
         mAnimator.setOutAnimation(animation2);
 
@@ -276,30 +283,28 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
             mDayOfWeekView.setText(mCurrentDate.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG,
                     Locale.getDefault()));
         }
-        final String bestDateTimePattern =
-                DateFormat.getBestDateTimePattern(mCurrentLocale, "yMMMd");
 
         // Compute indices of Month, Day and Year views
-        int[] viewIndices = getMonthDayYearIndexes(bestDateTimePattern);
+        final String bestDateTimePattern =
+                DateFormat.getBestDateTimePattern(mCurrentLocale, "yMMMd");
+        final int[] viewIndices = getMonthDayYearIndexes(bestDateTimePattern);
 
-        // Restart from a clean state
-        mMonthAndDayLayout.removeAllViews();
-        mDateLayout.removeView(mHeaderYearTextView);
-
-        // Position the Year View at the correct location
+        // Position the Year and MonthAndDay views within the header.
+        mMonthDayYearLayout.removeAllViews();
         if (viewIndices[YEAR_INDEX] == 0) {
-            mDateLayout.addView(mHeaderYearTextView, 1);
+            mMonthDayYearLayout.addView(mHeaderYearTextView);
+            mMonthDayYearLayout.addView(mMonthAndDayLayout);
         } else {
-            mDateLayout.addView(mHeaderYearTextView, 2);
+            mMonthDayYearLayout.addView(mMonthAndDayLayout);
+            mMonthDayYearLayout.addView(mHeaderYearTextView);
         }
 
-        // Position Day and Month Views
+        // Position Day and Month views within the MonthAndDay view.
+        mMonthAndDayLayout.removeAllViews();
         if (viewIndices[MONTH_INDEX] > viewIndices[DAY_INDEX]) {
-            // Day View is first
             mMonthAndDayLayout.addView(mHeaderDayOfMonthTextView);
             mMonthAndDayLayout.addView(mHeaderMonthTextView);
         } else {
-            // Month View is first
             mMonthAndDayLayout.addView(mHeaderMonthTextView);
             mMonthAndDayLayout.addView(mHeaderDayOfMonthTextView);
         }
@@ -329,12 +334,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
 
         switch (viewIndex) {
             case MONTH_AND_DAY_VIEW:
-                ObjectAnimator pulseAnimator = getPulseAnimator(mMonthAndDayLayout, 0.9f,
-                        1.05f);
-                if (mDelayAnimation) {
-                    pulseAnimator.setStartDelay(ANIMATION_DELAY);
-                    mDelayAnimation = false;
-                }
                 mDayPickerView.onDateChanged();
                 if (mCurrentView != viewIndex) {
                     mMonthAndDayLayout.setSelected(true);
@@ -342,19 +341,13 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
                     mAnimator.setDisplayedChild(MONTH_AND_DAY_VIEW);
                     mCurrentView = viewIndex;
                 }
-                pulseAnimator.start();
 
-                int flags = DateUtils.FORMAT_SHOW_DATE;
-                String dayString = DateUtils.formatDateTime(mContext, millis, flags);
+                final int flags = DateUtils.FORMAT_SHOW_DATE;
+                final String dayString = DateUtils.formatDateTime(mContext, millis, flags);
                 mAnimator.setContentDescription(mDayPickerDescription + ": " + dayString);
                 mAnimator.announceForAccessibility(mSelectDay);
                 break;
             case YEAR_VIEW:
-                pulseAnimator = getPulseAnimator(mHeaderYearTextView, 0.85f, 1.1f);
-                if (mDelayAnimation) {
-                    pulseAnimator.setStartDelay(ANIMATION_DELAY);
-                    mDelayAnimation = false;
-                }
                 mYearPickerView.onDateChanged();
                 if (mCurrentView != viewIndex) {
                     mMonthAndDayLayout.setSelected(false);
@@ -362,9 +355,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
                     mAnimator.setDisplayedChild(YEAR_VIEW);
                     mCurrentView = viewIndex;
                 }
-                pulseAnimator.start();
 
-                CharSequence yearString = mYearFormat.format(millis);
+                final CharSequence yearString = mYearFormat.format(millis);
                 mAnimator.setContentDescription(mYearPickerDescription + ": " + yearString);
                 mAnimator.announceForAccessibility(mSelectYear);
                 break;
@@ -788,26 +780,5 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
                 return new SavedState[size];
             }
         };
-    }
-
-    /**
-     * Render an animator to pulsate a view in place.
-     * @param labelToAnimate the view to pulsate.
-     * @return The animator object. Use .start() to begin.
-     */
-    public static ObjectAnimator getPulseAnimator(View labelToAnimate, float decreaseRatio,
-                                                  float increaseRatio) {
-        Keyframe k0 = Keyframe.ofFloat(0f, 1f);
-        Keyframe k1 = Keyframe.ofFloat(0.275f, decreaseRatio);
-        Keyframe k2 = Keyframe.ofFloat(0.69f, increaseRatio);
-        Keyframe k3 = Keyframe.ofFloat(1f, 1f);
-
-        PropertyValuesHolder scaleX = PropertyValuesHolder.ofKeyframe(View.SCALE_X, k0, k1, k2, k3);
-        PropertyValuesHolder scaleY = PropertyValuesHolder.ofKeyframe(View.SCALE_Y, k0, k1, k2, k3);
-        ObjectAnimator pulseAnimator =
-                ObjectAnimator.ofPropertyValuesHolder(labelToAnimate, scaleX, scaleY);
-        pulseAnimator.setDuration(PULSE_ANIMATOR_DURATION);
-
-        return pulseAnimator;
     }
 }

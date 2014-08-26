@@ -373,7 +373,7 @@
 
     <!-- Used by SimpleMonthView -->
     <dimen name="datepicker_day_number_size">12sp</dimen>
-    <dimen name="datepicker_month_label_size">16sp</dimen>
+    <dimen name="datepicker_month_label_size">14sp</dimen>
     <dimen name="datepicker_month_day_label_text_size">12sp</dimen>
     <dimen name="datepicker_month_list_item_header_height">48dp</dimen>
     <dimen name="datepicker_day_number_select_circle_radius">16dp</dimen>
@@ -383,9 +383,9 @@
     <dimen name="datepicker_year_label_height">64dp</dimen>
     <dimen name="datepicker_year_label_text_size">22dp</dimen>
     <dimen name="datepicker_component_width">270dp</dimen>
-    <dimen name="datepicker_selected_date_day_size">75dp</dimen>
-    <dimen name="datepicker_selected_date_month_size">30dp</dimen>
-    <dimen name="datepicker_selected_date_year_size">30dp</dimen>
+    <dimen name="datepicker_selected_date_day_size">88dp</dimen>
+    <dimen name="datepicker_selected_date_month_size">24dp</dimen>
+    <dimen name="datepicker_selected_date_year_size">24dp</dimen>
     <dimen name="datepicker_header_height">30dp</dimen>
     <dimen name="datepicker_header_text_size">14dp</dimen>
 

@@ -70,15 +70,6 @@ class YearPickerView extends ListView implements AdapterView.OnItemClickListener
                 R.dimen.datepicker_year_picker_padding_top);
         setPadding(0, paddingTop, 0, 0);
 
-        // Use Theme attributes if possible
-        final TypedArray a = context.obtainStyledAttributes(
-                attrs, R.styleable.DatePicker, defStyleAttr, defStyleRes);
-        final int colorResId = a.getResourceId(R.styleable.DatePicker_yearListSelectorColor,
-                R.color.datepicker_default_circle_background_color_holo_light);
-        mYearSelectedCircleColor = res.getColor(colorResId);
-
-        a.recycle();
-
         setOnItemClickListener(this);
         setDividerHeight(0);
     }
