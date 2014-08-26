@@ -2430,7 +2430,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         r.userId, r.info.configChanges, task.voiceSession != null,
                         r.mLaunchTaskBehind);
             }
-            mWindowManager.addTask(taskId, stackId, false);
         }
         resumeHomeStackTask(HOME_ACTIVITY_TYPE, null);
     }
