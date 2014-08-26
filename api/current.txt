@@ -27383,6 +27383,7 @@ package android.service.notification {
     method public final void cancelNotification(java.lang.String);
     method public final void cancelNotifications(java.lang.String[]);
     method public android.service.notification.StatusBarNotification[] getActiveNotifications();
+    method public android.service.notification.StatusBarNotification[] getActiveNotifications(java.lang.String[]);
     method public final int getCurrentListenerHints();
     method public android.service.notification.NotificationListenerService.RankingMap getCurrentRanking();
     method public android.os.IBinder onBind(android.content.Intent);
