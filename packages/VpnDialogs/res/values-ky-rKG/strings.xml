@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> VPN байланышын түзүүгө аракет кылууда."</string>
-    <string name="warning" msgid="5470743576660160079">"Муну иштетүү менен, сиз колдонмого бардык желе трафигин көрүүгө уруксат бересиз. "<b>"Сиз колдонмого ишенмейинче КАБЫЛ АЛБАҢЫЗ."</b>" Болбосо, зыяндуу софттордун маалыматтарыңызды сыртка чыгаруу коркунучуна кабыласыз."</string>
-    <string name="accept" msgid="2889226408765810173">"Мен бул колдонмого ишенем."</string>
+    <string name="prompt" msgid="3183836924226407828">"Туташуу сурамы"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> тармактык трафикти көзөмөлдөөгө уруксат берген VPN туташуусун орноткусу келет. Аны булакка ишенсеңиз гана кабыл алыңыз. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; VPN иштеп турганда экраныңыздын жогору жагынан көрүнөт."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN байланышта"</string>
     <string name="configure" msgid="4905518375574791375">"Конфигурациялоо"</string>
     <string name="disconnect" msgid="971412338304200056">"Ажыратуу"</string>
