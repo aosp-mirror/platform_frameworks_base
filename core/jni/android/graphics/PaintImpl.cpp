@@ -27,7 +27,8 @@ Paint::Paint() : SkPaint(),
 }
 
 Paint::Paint(const Paint& paint) : SkPaint(paint),
-        mLetterSpacing(0), mFontFeatureSettings(), mTextLocale(), mFontVariant(VARIANT_DEFAULT) {
+        mLetterSpacing(paint.mLetterSpacing), mFontFeatureSettings(paint.mFontFeatureSettings),
+        mTextLocale(paint.mTextLocale), mFontVariant(paint.mFontVariant) {
 }
 
 Paint::~Paint() {
