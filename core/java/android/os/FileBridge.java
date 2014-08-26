@@ -119,9 +119,9 @@ public class FileBridge extends Thread {
             }
 
         } catch (ErrnoException e) {
-            Log.e(TAG, "Failed during bridge: ", e);
+            Log.wtf(TAG, "Failed during bridge", e);
         } catch (IOException e) {
-            Log.e(TAG, "Failed during bridge: ", e);
+            Log.wtf(TAG, "Failed during bridge", e);
         } finally {
             IoUtils.closeQuietly(mTarget);
             IoUtils.closeQuietly(mServer);
