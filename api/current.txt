@@ -785,8 +785,8 @@ package android {
     field public static final int largeScreens = 16843398; // 0x1010286
     field public static final int largestWidthLimitDp = 16843622; // 0x1010366
     field public static final int launchMode = 16842781; // 0x101001d
-    field public static final int launchTaskBehindBackgroundAnimation = 16843921; // 0x1010491
     field public static final int launchTaskBehindSourceAnimation = 16843922; // 0x1010492
+    field public static final int launchTaskBehindTargetAnimation = 16843921; // 0x1010491
     field public static final int layerType = 16843604; // 0x1010354
     field public static final int layout = 16842994; // 0x10100f2
     field public static final int layoutAnimation = 16842988; // 0x10100ec
@@ -1349,6 +1349,7 @@ package android {
     field public static final int transitionGroup = 16843803; // 0x101041b
     field public static final int transitionName = 16843802; // 0x101041a
     field public static final int transitionOrdering = 16843744; // 0x10103e0
+    field public static final int transitionVisibilityMode = 16843900; // 0x101047c
     field public static final int translateX = 16843866; // 0x101045a
     field public static final int translateY = 16843867; // 0x101045b
     field public static final int translationX = 16843554; // 0x1010322
@@ -1385,7 +1386,6 @@ package android {
     field public static final int viewportHeight = 16843805; // 0x101041d
     field public static final int viewportWidth = 16843804; // 0x101041c
     field public static final int visibility = 16842972; // 0x10100dc
-    field public static final int visibilityMode = 16843900; // 0x101047c
     field public static final int visible = 16843156; // 0x1010194
     field public static final int vmSafeMode = 16843448; // 0x10102b8
     field public static final int voiceIcon = 16843908; // 0x1010484
@@ -3773,10 +3773,11 @@ package android.app {
 
   public class ActivityOptions {
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
-    method public static android.app.ActivityOptions makeLaunchTaskBehindAnimation();
+    method public static deprecated android.app.ActivityOptions makeLaunchTaskBehindAnimation();
     method public static android.app.ActivityOptions makeScaleUpAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.app.Activity, android.view.View, java.lang.String);
     method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.app.Activity, android.util.Pair<android.view.View, java.lang.String>...);
+    method public static android.app.ActivityOptions makeTaskLaunchBehind();
     method public static android.app.ActivityOptions makeThumbnailScaleUpAnimation(android.view.View, android.graphics.Bitmap, int, int);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
