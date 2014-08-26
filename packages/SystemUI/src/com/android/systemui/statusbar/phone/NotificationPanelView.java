@@ -58,7 +58,7 @@ public class NotificationPanelView extends PanelView implements
     private static final int CAP_HEIGHT = 1456;
     private static final int FONT_HEIGHT = 2163;
 
-    private static final float HEADER_RUBBERBAND_FACTOR = 2.15f;
+    private static final float HEADER_RUBBERBAND_FACTOR = 2.05f;
     private static final float LOCK_ICON_ACTIVE_SCALE = 1.2f;
 
     private KeyguardAffordanceHelper mAfforanceHelper;
@@ -1665,7 +1665,7 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected boolean fullyExpandedClearAllVisible() {
         return mNotificationStackScroller.isDismissViewNotGone()
-                && mNotificationStackScroller.isScrolledToBottom();
+                && mNotificationStackScroller.isScrolledToBottom() && !mTwoFingerQsExpand;
     }
 
     @Override
