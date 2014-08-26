@@ -21,8 +21,9 @@
 LOCAL_PATH:= $(call my-dir)
 testFiles := \
     ByteBucketArray_test.cpp \
+    Config_test.cpp \
+    ConfigLocale_test.cpp \
     Idmap_test.cpp \
-    ResourceTypes_test.cpp \
     ResTable_test.cpp \
     Split_test.cpp \
     TypeWrappers_test.cpp \
