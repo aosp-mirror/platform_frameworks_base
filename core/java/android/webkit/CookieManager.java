@@ -98,7 +98,7 @@ public class CookieManager {
      * @param webview the {@link WebView} instance to get the cookie policy for
      * @return true if the {@link WebView} accepts third party cookies
      */
-    public synchronized boolean acceptThirdPartyCookies(WebView webview) {
+    public boolean acceptThirdPartyCookies(WebView webview) {
         throw new MustOverrideException();
     }
 
