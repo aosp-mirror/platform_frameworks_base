@@ -518,6 +518,11 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    @Override
+    public String getCurrentMediaNotificationKey() {
+        return null;
+    }
+
     /**
      * Takes the necessary steps to prepare the status bar for starting an activity, then starts it.
      * @param action A dismiss action that is called if it's safe to start the activity.
