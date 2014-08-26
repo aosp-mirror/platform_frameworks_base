@@ -179,7 +179,7 @@ public final class TvInputManagerService extends SystemService {
                 try {
                     results = mContentResolver.applyBatch(TvContract.AUTHORITY, operations);
                 } catch (RemoteException | OperationApplicationException e) {
-                    Slog.e(TAG, "error in applyBatch" + e);
+                    Slog.e(TAG, "error in applyBatch", e);
                 }
 
                 if (DEBUG) {
@@ -216,7 +216,9 @@ public final class TvInputManagerService extends SystemService {
         UserState userState = getUserStateLocked(userId);
         userState.packageSet.clear();
 
-        if (DEBUG) Slog.d(TAG, "buildTvInputList");
+        if (DEBUG) {
+            Slog.d(TAG, "buildTvInputList");
+        }
         PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> services = pm.queryIntentServices(
                 new Intent(TvInputService.SERVICE_INTERFACE),
@@ -246,7 +248,7 @@ public final class TvInputManagerService extends SystemService {
                 try {
                     inputList.add(TvInputInfo.createTvInputInfo(mContext, ri));
                 } catch (XmlPullParserException | IOException e) {
-                    Slog.e(TAG, "Failed to load TV input " + si.name, e);
+                    Slog.e(TAG, "failed to load TV input " + si.name, e);
                     continue;
                 }
             }
@@ -258,7 +260,9 @@ public final class TvInputManagerService extends SystemService {
 
         Map<String, TvInputState> inputMap = new HashMap<String, TvInputState>();
         for (TvInputInfo info : inputList) {
-            if (DEBUG) Slog.d(TAG, "add " + info.getId());
+            if (DEBUG) {
+                Slog.d(TAG, "add " + info.getId());
+            }
             TvInputState state = userState.inputMap.get(info.getId());
             if (state == null) {
                 state = new TvInputState();
@@ -342,7 +346,13 @@ public final class TvInputManagerService extends SystemService {
             }
             userState.serviceStateMap.clear();
 
+            // Clear everything else.
+            userState.inputMap.clear();
+            userState.packageSet.clear();
+            userState.ratingSystemXmlUriSet.clear();
             userState.clientStateMap.clear();
+            userState.callbackSet.clear();
+            userState.mainSessionToken = null;
 
             mUserStates.remove(userId);
         }
@@ -453,7 +463,7 @@ public final class TvInputManagerService extends SystemService {
         try {
             clientToken.linkToDeath(clientState, 0);
         } catch (RemoteException e) {
-            Slog.e(TAG, "Client is already died.");
+            Slog.e(TAG, "client process has already died", e);
         }
         userState.clientStateMap.put(clientToken, clientState);
         return clientState;
@@ -487,7 +497,7 @@ public final class TvInputManagerService extends SystemService {
                         try {
                             session.asBinder().linkToDeath(sessionState, 0);
                         } catch (RemoteException e) {
-                            Slog.e(TAG, "Session is already died.");
+                            Slog.e(TAG, "session process has already died", e);
                         }
 
                         IBinder clientToken = sessionState.mClient.asBinder();
@@ -521,7 +531,7 @@ public final class TvInputManagerService extends SystemService {
                         // originated from.
                         sessionState.mClient.onChannelRetuned(channelUri, sessionState.mSeq);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in onChannelRetuned");
+                        Slog.e(TAG, "error in onChannelRetuned", e);
                     }
                 }
             }
@@ -538,7 +548,7 @@ public final class TvInputManagerService extends SystemService {
                     try {
                         sessionState.mClient.onTracksChanged(tracks, sessionState.mSeq);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in onTracksChanged");
+                        Slog.e(TAG, "error in onTracksChanged", e);
                     }
                 }
             }
@@ -555,7 +565,7 @@ public final class TvInputManagerService extends SystemService {
                     try {
                         sessionState.mClient.onTrackSelected(type, trackId, sessionState.mSeq);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in onTrackSelected");
+                        Slog.e(TAG, "error in onTrackSelected", e);
                     }
                 }
             }
@@ -572,7 +582,7 @@ public final class TvInputManagerService extends SystemService {
                     try {
                         sessionState.mClient.onVideoAvailable(sessionState.mSeq);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in onVideoAvailable");
+                        Slog.e(TAG, "error in onVideoAvailable", e);
                     }
                 }
             }
@@ -589,7 +599,7 @@ public final class TvInputManagerService extends SystemService {
                     try {
                         sessionState.mClient.onVideoUnavailable(reason, sessionState.mSeq);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in onVideoUnavailable");
+                        Slog.e(TAG, "error in onVideoUnavailable", e);
                     }
                 }
             }
@@ -606,7 +616,7 @@ public final class TvInputManagerService extends SystemService {
                     try {
                         sessionState.mClient.onContentAllowed(sessionState.mSeq);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in onContentAllowed");
+                        Slog.e(TAG, "error in onContentAllowed", e);
                     }
                 }
             }
@@ -623,7 +633,7 @@ public final class TvInputManagerService extends SystemService {
                     try {
                         sessionState.mClient.onContentBlocked(rating, sessionState.mSeq);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in onContentBlocked");
+                        Slog.e(TAG, "error in onContentBlocked", e);
                     }
                 }
             }
@@ -642,7 +652,7 @@ public final class TvInputManagerService extends SystemService {
                         sessionState.mClient.onLayoutSurface(left, top, right, bottom,
                                 sessionState.mSeq);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in onLayoutSurface");
+                        Slog.e(TAG, "error in onLayoutSurface", e);
                     }
                 }
             }
@@ -660,7 +670,7 @@ public final class TvInputManagerService extends SystemService {
                         sessionState.mClient.onSessionEvent(eventType, eventArgs,
                                 sessionState.mSeq);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in onSessionEvent");
+                        Slog.e(TAG, "error in onSessionEvent", e);
                     }
                 }
             }
@@ -682,8 +692,8 @@ public final class TvInputManagerService extends SystemService {
             IBinder sessionToken, InputChannel channel, int seq) {
         try {
             client.onSessionCreated(inputId, sessionToken, channel, seq);
-        } catch (RemoteException exception) {
-            Slog.e(TAG, "error in onSessionCreated", exception);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "error in onSessionCreated", e);
         }
     }
 
@@ -697,7 +707,7 @@ public final class TvInputManagerService extends SystemService {
             try {
                 sessionState.mSession.release();
             } catch (RemoteException e) {
-                Slog.w(TAG, "session is already disapeared", e);
+                Slog.e(TAG, "session process has already died", e);
             }
             sessionState.mSession = null;
         }
@@ -727,6 +737,10 @@ public final class TvInputManagerService extends SystemService {
             clientState.mSessionTokens.remove(sessionToken);
             if (clientState.isEmpty()) {
                 userState.clientStateMap.remove(sessionState.mClient.asBinder());
+                if (userState.clientStateMap.isEmpty()) {
+                    // No longer need to keep the callbacks since there is no client.
+                    userState.callbackSet.clear();
+                }
             }
         }
 
@@ -767,26 +781,26 @@ public final class TvInputManagerService extends SystemService {
 
     private void notifyInputAddedLocked(UserState userState, String inputId) {
         if (DEBUG) {
-            Slog.d(TAG, "notifyInputAdded: inputId = " + inputId);
+            Slog.d(TAG, "notifyInputAddedLocked(inputId=" + inputId + ")");
         }
         for (ITvInputManagerCallback callback : userState.callbackSet) {
             try {
                 callback.onInputAdded(inputId);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to report added input to callback.");
+                Slog.e(TAG, "failed to report added input to callback", e);
             }
         }
     }
 
     private void notifyInputRemovedLocked(UserState userState, String inputId) {
         if (DEBUG) {
-            Slog.d(TAG, "notifyInputRemovedLocked: inputId = " + inputId);
+            Slog.d(TAG, "notifyInputRemovedLocked(inputId=" + inputId + ")");
         }
         for (ITvInputManagerCallback callback : userState.callbackSet) {
             try {
                 callback.onInputRemoved(inputId);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to report removed input to callback.");
+                Slog.e(TAG, "failed to report removed input to callback", e);
             }
         }
     }
@@ -794,22 +808,22 @@ public final class TvInputManagerService extends SystemService {
     private void notifyInputStateChangedLocked(UserState userState, String inputId,
             int state, ITvInputManagerCallback targetCallback) {
         if (DEBUG) {
-            Slog.d(TAG, "notifyInputStateChangedLocked: inputId = " + inputId
-                    + "; state = " + state);
+            Slog.d(TAG, "notifyInputStateChangedLocked(inputId=" + inputId
+                    + ", state=" + state + ")");
         }
         if (targetCallback == null) {
             for (ITvInputManagerCallback callback : userState.callbackSet) {
                 try {
                     callback.onInputStateChanged(inputId, state);
                 } catch (RemoteException e) {
-                    Slog.e(TAG, "Failed to report state change to callback.");
+                    Slog.e(TAG, "failed to report state change to callback", e);
                 }
             }
         } else {
             try {
                 targetCallback.onInputStateChanged(inputId, state);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to report state change to callback.");
+                Slog.e(TAG, "failed to report state change to callback", e);
             }
         }
     }
@@ -890,8 +904,22 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(resolvedUserId);
+                    final UserState userState = getUserStateLocked(resolvedUserId);
                     userState.callbackSet.add(callback);
+                    try {
+                        callback.asBinder().linkToDeath(new IBinder.DeathRecipient() {
+                            @Override
+                            public void binderDied() {
+                                synchronized (mLock) {
+                                    if (userState.callbackSet != null) {
+                                        userState.callbackSet.remove(callback);
+                                    }
+                                }
+                            }
+                        }, 0);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "client process has already died", e);
+                    }
                     for (TvInputState state : userState.inputMap.values()) {
                         notifyInputStateChangedLocked(userState, state.mInfo.getId(),
                                 state.mState, callback);
@@ -1076,7 +1104,7 @@ public final class TvInputManagerService extends SystemService {
         @Override
         public void releaseSession(IBinder sessionToken, int userId) {
             if (DEBUG) {
-                Slog.d(TAG, "releaseSession(): " + sessionToken);
+                Slog.d(TAG, "releaseSession(sessionToken=" + sessionToken + ")");
             }
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
@@ -1094,7 +1122,7 @@ public final class TvInputManagerService extends SystemService {
         @Override
         public void setMainSession(IBinder sessionToken, int userId) {
             if (DEBUG) {
-                Slog.d(TAG, "setMainSession(): " + sessionToken);
+                Slog.d(TAG, "setMainSession(sessionToken=" + sessionToken + ")");
             }
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
@@ -1263,7 +1291,7 @@ public final class TvInputManagerService extends SystemService {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId)
                                 .requestUnblockContent(unblockedRating);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in unblockContent", e);
+                        Slog.e(TAG, "error in requestUnblockContent", e);
                     }
                 }
             } finally {
@@ -1324,7 +1352,7 @@ public final class TvInputManagerService extends SystemService {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId)
                                 .appPrivateCommand(command, data);
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "error in sendAppPrivateCommand", e);
+                        Slog.e(TAG, "error in appPrivateCommand", e);
                     }
                 }
             } finally {
@@ -1489,7 +1517,7 @@ public final class TvInputManagerService extends SystemService {
                 synchronized (mLock) {
                     UserState userState = getUserStateLocked(resolvedUserId);
                     if (userState.inputMap.get(inputId) == null) {
-                        Slog.e(TAG, "Input not found for " + inputId);
+                        Slog.e(TAG, "input not found for " + inputId);
                         return false;
                     }
                     for (SessionState sessionState : userState.sessionStateMap.values()) {
@@ -1986,7 +2014,7 @@ public final class TvInputManagerService extends SystemService {
                     buildTvInputListLocked(mUserId);
                     mTvInputHardwareManager.removeTvInput(inputId);
                 } else {
-                    Slog.e(TAG, "TvInputInfo with inputId=" + inputId + " not found.");
+                    Slog.e(TAG, "failed to remove input " + inputId);
                 }
             }
         }
