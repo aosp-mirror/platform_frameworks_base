@@ -130,7 +130,7 @@
     <drawable name="notification_template_divider">#29000000</drawable>
 
     <color name="notification_icon_bg_color">#ff9e9e9e</color>
-    <color name="notification_action_legacy_color_filter">#ff555555</color>
+    <color name="notification_action_color_filter">@color/secondary_text_material_light</color>
 
     <color name="notification_media_action_bg">#00000000</color>
     <color name="notification_media_progress">#FFFFFFFF</color>
