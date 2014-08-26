@@ -1654,6 +1654,16 @@ public class NotificationManagerService extends SystemService {
                 }
 
                 synchronized (mNotificationList) {
+                    // Clear out group children of the old notification if the update causes the
+                    // group summary to go away. This happens when the old notification was a
+                    // summary and the new one isn't, or when the old notification was a summary
+                    // and its group key changed.
+                    if (old != null && old.getNotification().isGroupSummary() &&
+                            (!notification.isGroupSummary() ||
+                                    !old.getGroupKey().equals(r.getGroupKey()))) {
+                        cancelGroupChildrenLocked(old, callingUid, callingPid, null);
+                    }
+
                     int index = indexOfNotificationLocked(n.getKey());
                     if (index < 0) {
                         mNotificationList.add(r);
@@ -2404,10 +2414,9 @@ public class NotificationManagerService extends SystemService {
         final int N = mNotificationList.size();
         for (int i = N - 1; i >= 0; i--) {
             NotificationRecord childR = mNotificationList.get(i);
-            Notification childN = childR.getNotification();
             StatusBarNotification childSbn = childR.sbn;
-            if (childR.getUserId() == userId && pkg.equals(childSbn.getPackageName()) &&
-                    n.getGroup().equals(childN.getGroup())) {
+            if (childR.getNotification().isGroupChild() &&
+                    childR.getGroupKey().equals(r.getGroupKey())) {
                 EventLogTags.writeNotificationCancel(callingUid, callingPid,
                         pkg, childSbn.getId(), childSbn.getTag(), userId, 0, 0,
                         REASON_GROUP_SUMMARY_CANCELED, listenerName);
