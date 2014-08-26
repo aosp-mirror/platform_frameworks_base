@@ -613,6 +613,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"a telefon be- és kikapcsolása"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Lehetővé teszi az alkalmazás számára a táblagép be- és kikapcsolását."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Lehetővé teszi az alkalmazás számára, hogy be- vagy kikapcsolja a telefont."</string>
+    <string name="permlab_userActivity" msgid="1677844893921729548">"a képernyő időkorlátjának visszaállítása"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Lehetővé teszi az alkalmazás számára a képernyő időkorlátjának visszaállítását."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"futtatás gyári tesztüzemmódban"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Alacsony szintű gyári tesztként fut, lehetővé téve a táblagép összes hardverének elérését. Csak akkor érhető el, ha a táblagép gyári teszt üzemmódban fut."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Futtatás alacsony szintű gyártói tesztként, lehetővé téve a telefon hardverének teljes körű elérését. Csak akkor érhető el, ha a telefon gyártói tesztüzemmódban van."</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Lehetővé teszi az alkalmazás számára a gyorsítótár-fájlrendszer olvasását és írását."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP-hívások indítása/fogadása"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP-hívások indításának és fogadásának engedélyezése az alkalmazás számára."</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"interakció a hívás közbeni képernyővel"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Lehetővé teszi, hogy az alkalmazás felügyelje, a felhasználók mikor és hogyan láthatják a hívás közbeni képernyőt."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interakció a hívás közbeni képernyővel"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Lehetővé teszi, hogy az alkalmazás felügyelje, a felhasználók mikor és hogyan láthatják a hívás közbeni képernyőt."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"együttműködés a telefonos szolgáltatásokkal"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Lehetővé teszi, hogy az alkalmazás a telefonos szolgáltatásokkal együttműködve hívásokat kezdeményezzen/fogadjon."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"hívás közbeni felhasználói élmény biztosítása"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Lehetővé teszi, hogy az alkalmazás hívás közbeni felhasználói élményt biztosítson."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"hálózathasználati előzmények beolvasása"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Lehetővé teszi az alkalmazás számára a hálózathasználati előzmények beolvasását adott hálózatok és alkalmazások esetében."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"hálózati házirend kezelése"</string>
@@ -1352,8 +1354,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Érintse meg az USB hibakeresés kikapcsolásához."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Billentyűzet megváltoztatása"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Billentyűzetek kiválasztása"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"Beviteli mód megjelenítése"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardver"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Válasszon billentyűzetkiosztást"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Érintse meg az egyik billentyűzetkiosztás kiválasztásához."</string>
@@ -1404,8 +1405,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Lehetővé teszi, hogy az alkalmazás egy trust agent szolgáltatáshoz csatlakozzon."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Kapcsolatfelvétel a frissítési és helyreállítási rendszerrel"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Lehetővé teszi egy alkalmazás számára, hogy kapcsolatba lépjen a helyreállítási rendszerrel és a rendszerfrissítésekkel."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Médiakivetítési munkamenetek létrehozása"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Lehetővé teszi egy alkalmazásnak, hogy médiakivetítési munkameneteket hozzon létre. Az ilyen munkamenetek révén az alkalmazások rögzíthetik a vizuális és audiotartalmakat. A normál alkalmazásoknak erre soha nincs szükségük."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Médiakivetítési munkamenetek kezelése"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Lehetővé teszi egy alkalmazásnak, hogy médiakivetítési munkameneteket kezeljen. Az ilyen munkamenetek révén az alkalmazások rögzíthetik a vizuális és audiotartalmakat. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Telepítési munkamenetek olvasása"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Engedélyezi az alkalmazásnak a telepítési munkamenetek olvasását. Ezáltal részleteket kaphat az egyes csomagok éppen folyamatban lévő telepítéséről."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Érintse meg kétszer a nagyítás beállításához"</string>
@@ -1426,8 +1427,8 @@
     <string name="deny" msgid="2081879885755434506">"Elutasítás"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Az engedélykérés megtörtént"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Az engedélykérés megtörtént\na(z) <xliff:g id="ACCOUNT">%s</xliff:g> fiók számára."</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"Személyes területén használja az alkalmazást"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"Munkaterületén használja az alkalmazást"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Ezt az alkalmazást munkaprofilján kívül használja"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Munkaprofiljában már használja az alkalmazást"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Beviteli mód"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Szinkronizálás"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Kisegítő lehetőségek"</string>
@@ -1502,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Óra értékének csökkentése"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Állítsa du. értékre"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Állítsa de. értékre"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"DU"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"DE"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Hónap értékének növelése"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Hónap értékének csökkentése"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Dátum értékének növelése"</string>
@@ -1536,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Szerkesztés"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Adathasználati figyelmeztetés"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Érintse meg az adatokért."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"A 2G és 3G nem használható"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"A 4G nem használható"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Mobiladat-kapcsolat kikapcsolva"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi-adatok kikapcsolva"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"Elérte a korlátot"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-/3G-adatkorlát elérve"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G-adatkorlát elérve"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Mobiladat-korlát elérve"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi-adatkorlát elérve"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"A ciklus végéig az adatforgalom szünetel"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Elérte a 2G/3G adatkorlátot"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Elérte a 4G adatkorlátot"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Túllépte a mobiladat-korlátozást"</string>
@@ -1571,7 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Fogadja a hívást?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Mindig"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Csak egyszer"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"A(z) %1$s nem támogatja a munkahelyi profilokat."</string>
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"A(z) %1$s nem támogatja a munkaprofilokat."</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Táblagép"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Fejhallgató"</string>
@@ -1644,6 +1643,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Hozzáférés engedélyezve"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hozzáférés megszakítva."</string>
     <string name="user_switched" msgid="3768006783166984410">"<xliff:g id="NAME">%1$s</xliff:g> az aktuális felhasználó."</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"Átváltás erre: <xliff:g id="NAME">%1$s</xliff:g>..."</string>
     <string name="owner_name" msgid="2716755460376028154">"Tulajdonos"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Hiba"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Rendszergazdája nem engedélyezi ezt a módosítást"</string>
@@ -1765,31 +1765,19 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> kiválasztva"</string>
     <string name="deleted_key" msgid="7659477886625566590">"A(z) <xliff:g id="KEY">%1$s</xliff:g> érték törölve"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Munkahelyi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"A képernyő rögzítésének feloldásához érintse meg és tartsa megérintve egyszerre a Vissza és a Legutóbbi feliratot."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"A képernyő rögzítésének feloldásához érintse meg és tartsa megérintve a Legutóbbi feliratot."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"A képernyő rögzítve van. Szervezete nem engedélyezi a rögzítés feloldását."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Rögzíti a képernyőt?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"A képernyő rögzítése a kijelzőt egyetlen nézetben zárolja.\n\nA kilépéshez érintse meg és tartsa megérintve egyidejűleg a Vissza és Legutóbbi feliratokat."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"A képernyő rögzítése a kijelzőt egyetlen nézetben zárolja.\n\nA kilépéshez érintse meg és tartsa megérintve a Legutóbbi feliratot."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"KÖSZÖNÖM, NEM"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"INDÍT"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN kód"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"feloldási minta"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"jelszó"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Képernyő rögzítve"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Képernyő rögzítése feloldva"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN kód kérése a rögzítés feloldásához"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Feloldási minta kérése a rögzítés feloldásához"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Jelszó kérése a rögzítés feloldásához"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Az akkumulátor üzemidejének növeléséhez az akkumulátorkímélő mód csökkenti az eszköz teljesítményét, valamint korlátozza a rezgést és a legtöbb háttéradatot. Előfordulhat, hogy az e-mailek, az üzenetküldő programok és más alkalmazások, amelyek a szinkronizálás funkciót használják, nem frissülnek addig, amíg meg nem nyitja őket.\n\nAz akkumulátorkímélő mód automatikusan kikapcsol, amikor az eszköz töltődik."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Amíg az állásidő véget nem ér ekkor: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

@@ -613,6 +613,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ເປີດ ຫຼືປິດໂທລະສັບ"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ອະນຸຍາດໃຫ້ແອັບຯເປີດ ຫຼືປິດແທັບເລັດ."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນປິດ ຫຼືເປີດແທັບເລັດໄດ້."</string>
+    <string name="permlab_userActivity" msgid="1677844893921729548">"ຣີ​ເຊັດ​ໄລ​​ຍະ​ເວ​ລາ​ກ່ອນ​ປິດ​ໜ້າ​ຈໍ."</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ຣີ​ເຊັດ​ໄລ​​ຍະ​ເວ​ລາ​ກ່ອນ​ປິດ​ໜ້າ​ຈໍ."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"ເຮັດວຽກໃນໂໝດການທົດສອບຂອງໂຮງງານ"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"ເຮັດວຽກໃນຮູບແບບທົດສອບໃນລະດັບຕໍ່າຂອງຜູ່ຜະລິດ, ອະນຸຍາດການເຂົ້າເຖິງແບບເຕັມຮູບແບບຫາຮາດແວຂອງແທັບເລັດ. ໃຊ້ໄດ້ສະເພາະໃນເວລາທີ່ແທັບເລັດກຳລັງຢູ່ໃນໂໝດ ການທົດສອບຂອງຜູ່ຜະລິດgmqjkoaho."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"ເປີດໃຊ້ໃນແບບການທົດສອບຂອງຜູ່ລະລິດໃນລະດັບຕໍ່າ, ອະນຸຍາດການເຂົ້າເຖິງຮາດແວຂອງໂທລະສັບແບບສົມບູນ. ສະເພາະເມື່ອໂທລະສັບຖືກເປີດໃຊ້ ໃນໂໝດການທົດສອບຂອງຜູ່ຜະລິດເທົ່ານັ້ນ."</string>
@@ -714,10 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານ ແລະຂຽນ ລະບົບໄຟລ໌ແຄດ."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"ຮັບສາຍ/ໂທອອກ ຜ່ານ SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"ອະນຸຍາດ​ໃຫ້ແອັບຯ​ສາມາດ​ຮັບສາຍ ແລະໂທອອກ​ຜ່ານ SIP ໄດ້"</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"ໂຕ້ຕອບກັບໜ້າຈໍການໂທ"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"ອະນຸຍາດໃຫ້ແອັບຯ ຄວບຄຸມເວລາ ແລະວິທີການທີ່ຜູ່ໃຊ້ເຫັນໜ້າຈໍການໂທໄດ້."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ໂຕ້​ຕອບ​ກັບ​ໜ້າ​ຈໍ​ການ​ໂທ"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ອະນຸຍາດ​ໃຫ້​ແອັບຯ​ຄວບຄຸມ​ເວລາ ແລະ​ວິທີ​ການ​ທີ່​ຜູ່ໃຊ້​ເຫັນ​ໜ້າ​ຈໍ​ການ​ໂທ​ໄດ້."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"ສັ່ງ​ບໍ​ລິ​ການ​ໂທ​ລະ​ສັບ"</string>
     <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ສັ່ງ​​ບໍ​ລິ​ການ​ໂທ​ລະ​ສັບ​ເພື່ອ​ໂທຫຼື​ຮັບ​ສາຍ​ໄດ້."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"ສະ​ໜອງ​ປະ​ສົບ​ການ​ຜູ່​ໃຊ້​ໃນ​ການ​ໂທ​ລະ​ສັບ"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ສະ​ໜອງ​ປະ​ສົບ​ການ​ຜູ່​ໃຊ້​ໃນ​ການ​ໂທ​ລະ​ສັບ."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ອ່ານປະຫວັດການນຳໃຊ້ເຄືອຂ່າຍ"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານປະຫວັດການນຳໃຊ້ເຄືອຂ່າຍຂອງແອັບຯ ແລະເຄືອຂ່າຍໃດນຶ່ງ."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"ຈັດການນະໂຍບາຍເຄືອຂ່າຍ"</string>
@@ -1350,8 +1354,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"ແຕະເພື່ອປິດການດີບັ໊ກຜ່ານ USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"​ປ່ຽນ​ແປ້ນ​ພິມ"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"​ເລືອກ​ແປ້ນ​ພິມ"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"​ສະ​ແດງ​ຮູບ​ແບບ​ການ​ປ້ອນ​ຂໍ້​ມູນ"</string>
     <string name="hardware" msgid="7517821086888990278">"ຮາດແວ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"ເລືອກຮູບແບບແປ້ນພິມ"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"ກົດເພື່ອເລືອກຮູບແບບແປ້ນພິມ."</string>
@@ -1402,8 +1405,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພ​ລິ​ເຄ​ຊັນເຊື່ອມ​ໂຍງ​ກັບ​ບໍ​ລິ​ການ​ຕົວ​ແທນ​ທີ່​ເຊື່ອ​ຖື​ໄດ້."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"ຕິດຕໍ່ກັບລະບົບອັບເດດ ແລະລະບົບກູ້ຂໍ້ມູນ."</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນຕິດຕໍ່ກັບລະບົບກູ້ຂໍ້ມູນ ແລະການອັບເດດລະບົບ."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"ສ້າງ​ມີ​ເດຍ​ໂປ​ຣ​ເຈັກ​ຊັນ​ເຊດ​ຊັນ"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​ສ້າງ​​ມີ​ເດຍ​ໂປ​ຣ​ເຈັກ​ຊັນ​ເຊດ​ຊັນ. ເຊດ​ຊັນ​ເຫຼົ່າ​ນີ້​ສາ​ມາດ​ສະ​ໜອງ​ຄວາມ​ສາ​ມາດ​ໃນ​ການ​ຈັບ​ພາບ ແລະ​​ສຽງ​​ໄດ້. ແອັບຯ​ທົ່ວ​ໄປ​ບໍ່​ຄວນ​ໃຊ້."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"ຈັດ​ການ​ເຊດ​ຊັນ​ຂອງມີ​ເດຍ​ໂປ​ຣ​ເຈັກ​​ຊັນ"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພລິ​ເຄ​ຊັນ​ຈັດ​ການ​ເຊດ​ຊັນ​ຂອງມີ​ເດຍ​ໂປ​ຣ​ເຈັກ​​ຊັນ. ເຊດ​ຊັນ​ນີ້​ຈະ​ເຮັດ​ໃຫ້​ແອັບ​ພລິ​ເຄ​ຊັນ​​ຕ່າງໆ​ສາ​ມາດ​ບັນ​ທຶກ​ເນື້ອ​ຫາ​ພາບ​ແລະ​ສຽງ​ໄດ້. ແອັບຯ​ທົ່ວ​ໄປ​ບໍ່​ຄວນ​ຕ້ອງ​ໃຊ້."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ອ່ານ​ເຊດ​ຊັນ​ການ​ຕິດ​ຕັ້ງ"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພລິ​ເຄ​ຊັນ​ອ່ານ​ເຊດ​ຊັນ​ການ​ຕິດ​ຕັ້ງ​ໄດ້. ນີ້​ຈະ​ອະ​ນຸ​ຍາດ​ໃຫ້​ມັນ​ເບິ່ງ​ເຫັນ​ລາຍ​ລະ​ອຽດ​ກ່ຽວ​ກັບ​ການ​ຕິດ​ຕັ້ງ​ແພັກ​ເກດ​ທີ່​ເຮັດ​​ວຽກ​ຢູ່​ໄດ້."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ແຕະສອງເທື່ອສຳລັບການຄວບຄຸມການຊູມ"</string>
@@ -1424,8 +1427,8 @@
     <string name="deny" msgid="2081879885755434506">"ປະ​ຕິ​ເສດ"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"ຕ້ອງການການອະນຸຍາດ"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"ຮ້ອງຂໍການກຳນົດສິດ\nສຳລັບບັນຊີ <xliff:g id="ACCOUNT">%s</xliff:g> ແລ້ວ."</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"​ທ່ານ​ກຳ​ລັງ​ໃຊ້​ແອັບຯ​ນີ້​ໃນ​ພື້ນ​ທີ່​ສ່ວນ​ໂຕ​ຂອງ​ທ່ານ"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"​ທ່ານ​ກຳ​ລັງ​ໃຊ້​ແອັບຯ​ນີ້​ໃນ​ພື້ນ​ທີ່​ບ່ອນ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"​ທ່ານ​ກຳ​ລັງ​ໃຊ້​ແອັບຯ​ນີ້ນອກ​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"​ທ່ານ​ກຳ​ລັງ​ໃຊ້​ແອັບຯ​ນີ້​ໃນ​ໂປຣ​ໄຟລ໌​​ບ່ອນ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ວິທີການປ້ອນຂໍ້ມູນ"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"ຊິ້ງຂໍ້ມູນ"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ການຊ່ວຍເຂົ້າເຖິງ"</string>
@@ -1500,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"ຫຼຸດຊົ່ວໂມງ"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"ຕັ້ງ PM"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"ຕັ້ງ AM"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"ຫຼັງທ່ຽງ"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"​ກ່ອນ​ທ່ຽງ"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"ເພີ່ມຈຳນວນເດືອນ"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"ຫຼຸດເດືອນ"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"ເພີ່ມຈຳນວນມື້"</string>
@@ -1534,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ແກ້ໄຂ"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ເຕືອນກ່ຽວກັບການນຳໃຊ້ຂໍ້ມູນ"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"ແຕະເພື່ອເບິ່ງການນຳໃຊ້ ແລະການຕັ້ງຄ່າ."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"ຂໍ້​ມູນ 2G-3G ​ແມ່ນ​ປິດ"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"ຂໍ້​ມູນ 4G ແມ່ນ​ປິດ"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"​ຂໍ້​ມູນ​ມື​ຖື​ຖືກ​ປິດ​ໄວ້"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"ຂໍ້​ມູນ Wi-Fi ຖືກ​ປິດ​ໄວ້"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"ຮອດຂີດຈຳກັດແລ້ວ"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"ໃຊ້​ຂໍ້​ມູນ 2G-3G ຮອດ​ຈຳ​ນວນ​ທີ່​ຈຳ​ກັດ​ແລ້ວ"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"ໃຊ້​ຂໍ້​ມູນ 4G ຮອດ​ຈຳ​ນວນ​ທີ່​ຈຳ​ກັດ​ແລ້ວ"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"ໃຊ້​ຂໍ້​ມູນ​ອິນ​ເຕີ​ເນັດ​ມື​ຖື​ຮອດ​ຈຳ​ນວນ​ທີ່​ຈຳ​ກັດ​ແລ້ວ"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"ໃຊ້​ຂໍ້​ມູນ​ອິນ​ເຕີ​ເນັດ​ Wi-Fi ​ຮອດ​ຈຳ​ນວນ​ທີ່​ຈຳ​ກັດ​ແລ້ວ"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"ຂໍ້​ມູນ​ຖືກ​ຢຸດ​ຊົ່ວ​ຄາວ​ສຳ​ລັບ​ໄລ​ຍະ​ເວ​ລາ​ທີ່​ເຫຼືອ"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"ຂໍ້ມູນ 2G-3G ຮອດຂີດຈຳກັດແລ້ວ"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"ໝົດກຳນົດການນຳໃຊ້ຂໍ້ມູນ 4G"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"​ຂໍ້​ມູນ​ມື​ຖື​ຂອງ​ຂີດ​ຈຳ​ກັດ​ທີ່​ກຳ​ນົດ​ໄວ້​ແລ້ວ"</string>
@@ -1569,7 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"ຮັບການໂທບໍ່?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ທຸກຄັ້ງ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"ຄັ້ງດຽວ"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s ບໍ່​ຮອງ​ຮັບ​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ."</string>
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ບໍ່​ຮອງ​ຮັບ​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ແທັບເລັດ"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"ໂທລະສັບ"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"ຫູຟັງ"</string>
@@ -1642,6 +1643,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"ເປີດການຊ່ວຍເຂົ້າເຖິງແລ້ວ."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ຍົກເລີກໂຕຊ່ວຍການເຂົ້າເຖິງແລ້ວ."</string>
     <string name="user_switched" msgid="3768006783166984410">"ຜູ່ໃຊ້ປັດຈຸບັນ <xliff:g id="NAME">%1$s</xliff:g> ."</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"ກຳ​ລັງ​ສະ​ລັບ​​ໄປ​ຫາ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"ເຈົ້າຂອງ"</string>
     <string name="error_message_title" msgid="4510373083082500195">"ຜິດພາດ"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"​ຜູ່​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານບໍ່​ອະ​ນຸ​ຍາດ​ໃຫ້​ປ່ຽນ​ແປງ​ສິ່ງ​ນີ້"</string>
@@ -1742,7 +1744,7 @@
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ປະ​ຈຸ​ບັນ"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"ລະຫັດ PIN ໃໝ່"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"ຢືນຢັນລະຫັດ PIN ໃໝ່"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ​"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN ບໍ່​ກົງກັນ. ລອງໃໝ່ອີກຄັ້ງ​."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ​ສັ້ນ​ເກີນ​ໄປ​. ຕ້ອງມີຢ່າງໜ້ອຍ 4 ຫຼັກ​."</string>
   <plurals name="restr_pin_countdown">
@@ -1773,10 +1775,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"​ເລີ່ມ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ແລ້ວ"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ຍົກ​ເລີກ​ການ​ປັກ​ໝຸນ​​ຫນ້າ​ຈໍ​ແລ້ວ"</string>
-    <string name="lock_to_app_use_screen_lock" msgid="5732663305876339596">"ຖາມ %1$s ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"ຮູບແບບປົດລັອກ"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"​ລະ​ຫັດ​ຜ່ານ"</string>
-    <string name="battery_saver_description" msgid="725676363406667978">"ເພື່ອ​ຊ່ວຍ​ປັບ​ປຸ​ງ​ອາ​ຍຸ​ແບັດ​ເຕີ​ຣີ, ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະຫຼຸດ​ປະ​ສິດ​ທິ​ພາບ​ຂອງ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ລົງ ແລະ​ຈຳ​ກັດ​ການ​ສັ່ນ​ເຕືອນ ຮວມ​​ທັງ​ຂໍ້​ມູນ​ພື້ນຫຼັງ​ສ່ວນ​ໃຫຍ່. ອີ​ເມວ, ການ​ສົ່ງ​ຂໍ້​ຄ​ວາມ ແລະ​ແອັບຯ​ອື່ນໆ​ທີ່​ອີງ​ອາ​ໃສ​ການ​ຊິ້ງ​ຂໍ້​ມູນ​ອາດບໍ່​ມີ​ການ​ອັບ​ເດດ​ຈົນ​ກວ່າ​ທ່ານ​ຈະ​ເປີດ​ແອັບຯ​ເຫຼົ່າ​ນັ້ນ.\n\nໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະ​ປິດ​ໂຕ​ເອງ​​ອັດ​ຕະ​ໂນ​ມັດ​ໃນ​ເວ​ລາ​ທີ່​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ສາກ​ໄຟ​ຢູ່"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"​ຖາມ​ຫາ PIN ກ່ອນ​ຍົກ​ເລີກ​ການປັກ​ໝຸດ"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"​ຖາມ​ຫາ​ຮູບ​ແບບ​ປົດ​ລັອກ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"​ຖາມ​ຫາ​ລະ​ຫັດ​ຜ່ານ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"ເພື່ອ​ຊ່ວຍ​ປັບ​ປຸງ​ອາ​ຍຸ​ແບັດ​ເຕ​ີ​ຣີ, ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະຫຼຸດ​ປະ​ສິດ​ທິ​ພາບ​​ຂອງ​ອຸ​ປະ​ກອນ​ທ່ານ​ລົງ ແລະ​ຈຳ​ກັດ​ການ​ສັ່ນເຕືອນ ຮວມ​ເຖິງຂໍ້​ມູນ​ພື້ນຫຼັງ​ສ່ວນ​ໃຫຍ່​ນຳ. ອີ​ເມວ, ການ​ສົ່ງ​ຂໍ້​ຄວາມ ແລະ​ແອັບຯ​ອື່ນໆ​ທີ່​ອີງ​ອາ​ໃສ​ການ​ຊິ້ງ​ຂໍ້​ມູນ​ອາດບໍ່​ມີ​ການ​ອັບ​ເດດ​ຈົນ​ກວ່າ​ທ່ານ​ຈະ​ເປີດ​ພວກ​ມັນ​ຂຶ້ນ​ມາ.\n\n​ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະ​ປິດ​ໂດຍ​ອັດ​ຕະ​ໂນ​ມັດ​ເມື່ອ​ມີ​ອຸ​ປະ​ກອນ​ຖືກ​ສາກ​ໄຟ."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ຈົນ​ກວ່າ​ດາວ​ທາມ​ຂອງ​ທ່ານ​ຈະ​ສິ້ນ​ສຸດ​ທີ່ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

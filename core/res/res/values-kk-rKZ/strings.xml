@@ -613,6 +613,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"телефонды қуат көзіне қосу немесе ажырату"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Қолданбаға планшетті қосуға немесе өшіруге рұқсат береді."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Қолданбаға телефонды қосуға немесе өшіруге рұқсат береді."</string>
+    <string name="permlab_userActivity" msgid="1677844893921729548">"дисплейдің күту уақытының бітуін қалпына келтіру"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Қолданбаға дисплейдің күту уақытының бітуін қалпына келтіруге рұқсат етеді."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"зауыт тесті режимінде жүргізу"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Төмен деңгейлі өндіріс тесті ретінде қосып, планшеттің қатты дискісіне кіру мүмкіндігін беру. Планшет өндіріс тесті режимінде жұмыс істегенде ғана қол жетімді."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Төмен деңгейлі өндіріс тесті ретінде қосып, телефонның қатты дискісіне кіру мүмкіндігін беру. Телефон өндіріс тесті режимінде жұмыс істегенде ғана қол жетімді."</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Қолданбаға кэш файлдық жүйесін оқуға және оған жазуға рұқсат береді."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP қоңырауларын шалу/қабылдау"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Қолданбаға SIP қоңырауларын шалуға және қабылдауға рұқсат етеді."</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"қоңырау кезінде экранды қолдану"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Қолданбаға пайдаланушының қоңырау кезінде экранды қашан және қалай көретінін басқару мүмкіндігін береді."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"қоңыраудағы экранмен өзара әрекеттесу"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Қолданбаға пайдаланушының қоңырау кезінде экранды қашан және қалай көретінін басқару мүмкіндігін береді."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"телефония қызметтерімен өзара әрекеттесу"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Қолданбаға қоңыраулар шалу/қабылдау үшін телефония қызметтерімен өзара әрекеттесуге рұқсат етеді."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"қоңыраудағы пайдаланушы тәжірибесін қамтамасыз ету"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Қолданбаға қоңыраудағы пайдаланушы тәжірибесін қамтамасыз етуге рұқсат етеді."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"тарихи желі қолданысын оқу"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Қолданбаға белгілі бір желілер және қолданбалар үшін журналдық желіні пайдалануды оқуға рұқсат береді."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"желі саясатын басқару"</string>
@@ -1352,8 +1354,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB күйін келтіруді өшіру үшін түртіңіз."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Пернетақтаны өзгерту"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Пернетақталарды таңдау"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"Енгізу әдісін көрсету"</string>
     <string name="hardware" msgid="7517821086888990278">"Компьютерлік жабдық"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Пернетақта орналасуын таңдау"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Пернетақта орналасуын таңдау үшін түртіңіз."</string>
@@ -1404,8 +1405,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Қолданбаға сенімді агент қызметіне байластыруға рұқсат береді."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Жаңарту және қалпына келтіру жүйелерімен қатынасу"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Қолданбаның қалпына келтіру жүйесімен және жүйе жаңартуларымен қатынасу мүмкіндігін береді."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Тасушыны проекциялау сеанстарын жасау"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Қолданбаға тасушыны проекциялау сеанстарын жасауға рұқсат етеді. Бұл сеанстар қолданбаларға дисплей және аудио мазмұнын түсіру мүмкіндігін қамтамасыз етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Тасушыны проекциялау сеанстарын басқару"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Қолданбаға тасушыны проекциялау сеанстарын басқаруға рұқсат етеді. Бұл сеанстар қолданбаларға дисплей және аудио мазмұнын жазу мүмкіндігін қамтамасыз етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Орнату сеанстарын оқу"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Қолданбаға орнату сеанстарын оқуға рұқсат етеді. Бұл оған белсенді бума орнатулары туралы мәліметтерді көруге рұқсат етеді."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Масштабтауды басқару үшін екі рет түртіңіз"</string>
@@ -1426,8 +1427,8 @@
     <string name="deny" msgid="2081879885755434506">"Бас тарту"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Рұқсат өтінілді"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Рұқсат \nесептік жазба үшін <xliff:g id="ACCOUNT">%s</xliff:g> өтінілді."</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"Осы қолданбаны жеке кеңістікте пайдаланып жатырсыз"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"Осы қолданбаны жұмыс кеңістігінде пайдаланып жатырсыз"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Осы қолданбаны жұмыс профиліңізден тыс пайдаланып жатырсыз"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Осы қолданбаны жұмыс профиліңізде пайдаланып жатырсыз"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Енгізу әдісі"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Синх"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Қол жетімділік"</string>
@@ -1502,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Сағат арттыру"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"КЕШКІ уақытты реттеу"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"ТАҢҒЫ уақытты реттеу"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"түстен кейін"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"түске дейін"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Ай арттыру"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Ай азайту"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Күн арттыру"</string>
@@ -1536,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Өзгерту"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Дерекқор қолдануға қатысты ескерту"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Қолданыс және параметрлерді көру үшін түртіңіз."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G деректері өшірулі"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G деректері өшірулі"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Ұялы деректер өшірулі"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi деректері өшірулі"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"Шекке жеттіңіз"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G деректер шегіне жеттіңіз"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G деректер шегіне жеттіңіз"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Ұялы деректер шегіне жеттіңіз"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi деректер шегіне жеттіңіз"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Циклдің қал. бөл. үшін дер. кід."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2Г-3Г дерекқор шектеуінен асып кетті"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4Ш дерекқор шектеуінен асып кетті"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Ұялы деректер шегі асырылды"</string>
@@ -1571,7 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Қоңырауды қабылдау?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Үнемі"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Бір рет қана"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s жұмыс профилін қолдамайды."</string>
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s жұмыс профилін қолдамайды"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Планшет"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Телефон"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Құлақаспаптар"</string>
@@ -1644,6 +1643,8 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Қол жетімділік қосылды."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Қол жетімділік өшірілді."</string>
     <string name="user_switched" msgid="3768006783166984410">"Ағымдағы пайдаланушы <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"Пайдаланушы"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Қателік"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Бұл өзгертуге әкімші рұқсат етпеген"</string>
@@ -1765,31 +1766,19 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> таңдалды"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> жойылды"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Жұмыс <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"Осы экранды босату үшін бір уақытта «Артқа» және «Жақындағылар» түймелерін түртіп, ұстап тұрыңыз."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Осы экранды босату үшін «Жақындағылар» түймесін түртіп, ұстап тұрыңыз."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Экран түйрелген. Босатуға ұйымыңыз рұқсат етпейді."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Экранды түйреуді пайдалану керек пе?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Экранды түйреу дисплейді бір көріністе бекітеді.\n\nШығу үшін бір уақытта «Артқа» және «Жақындағылар» түймелерін түртіп, ұстап тұрыңыз."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Экранды түйреу дисплейді бір көріністе бекітеді.\n\nШығу үшін бір уақытта «Жақындағылар» түймесін түртіп, ұстап тұрыңыз."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"ЖОҚ, РАҚМЕТ"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"БАСТАУ"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"бекітпесін ашу әдісі"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"құпия сөз"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Экран түйрелді"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Экран босатылды"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Босату алдында PIN кодын сұрау"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Босату алдында бекітпесін ашу өрнегін сұрау"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Босату алдында құпия сөзді сұрау"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Батареяның қызмет мерзімін жақсарту үшін батарея үнемдегіш құрылғының өнімділігін азайтады және діріл мен фондық деректердің көпшілігін шектейді. Синхрондауды қажет ететін электрондық пошта, хабар алмасу және басқа қолданбалар ашқанша жаңартылмауы мүмкін.\n\nБатарея үнемдегіш құрылғы зарядталып жатқанда автоматты түрде өшеді."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> уақытында әрекетсіздік аяқталғанша"</string>
 </resources>

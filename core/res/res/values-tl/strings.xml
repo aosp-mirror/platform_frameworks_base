@@ -613,6 +613,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"i-on o i-off ang telepono"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Pinapayagan ang app na i-on o i-off ang tablet."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Pinapayagan ang app na i-on o i-off ang telepono."</string>
+    <string name="permlab_userActivity" msgid="1677844893921729548">"i-reset ang pag-timeout ng display"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Pinapayagan ang app na i-reset ang pag-timeout ng display."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"tumakbo sa factory test mode"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Patakbuhin bilang isang pagsubok ng mababang antas na gumagawa, na pumapayag sa kumpletong access sa hardware ng tablet. Available lang kapag tumatakbo ang isang tablet sa mode na pagsubok ng gumagawa."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Patakbuhin bilang mababang antas na pagsubok ng gumawa, na nagpapahintulot ng kumpletong access sa hardware ng telepono. Available lang kapag tumatakbo ang telepono sa test mode ng gumawa."</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Pinapayagan ang app na basahin at isulat ang cache filesystem."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"magsagawa/tumanggap ng mga tawag sa SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Pinapayagan ang app na magsagawa at makatanggap ng mga tawag sa SIP."</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"makipag-ugnayan sa in-call na screen"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Nagbibigay-daan sa app na kontrolin kung kailan at kung paano makikita ng user ang in-call na screen."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"makipag-ugnayan sa in-call na screen"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Nagbibigay-daan sa app na kontrolin kung kailan at kung paano makikita ng user ang in-call na screen."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"makipag-ugnayan sa mga serbisyo sa telephony"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Pinapayagan ang app na makipag-ugnayan sa mga serbisyo sa telephony upang tumawag/makatanggap ng mga tawag."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"magbigay ng in-call na karanasan sa user"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Nagbibigay-daan sa app na magbigay ng in-call na karanasan sa user."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"basahin ang makasaysayang paggamit ng network"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Pinapayagan ang app na basahin ang makasaysayang paggamit network para sa mga tukoy na network at apps."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"pamahalaan ang patakaran ng network"</string>
@@ -1352,8 +1354,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Pindutin upang huwag paganahin ang pag-debug ng USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Baguhin ang keyboard"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Piliin ang mga keyboard"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"Ipakita ang pamamaraan ng pag-input"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Pumili ng layout ng keyboard"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Pindutin upang pumili ng layout ng keyboard."</string>
@@ -1404,8 +1405,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Pinapayagan ang isang application na sumailalim sa isang serbisyo ng trust agent."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Makipag-ugnay sa system ng pag-update at pagbawi"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Binibigyang-daan ang isang application na makipag-ugnay sa system ng pagbawi at mga pag-update ng system."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Gumawa ng mga media projection session"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Nagbibigay-daan sa isang application upang gumawa ng mga media projection session. Makakapagbigay ang mga session na ito ng kakayahan sa mga application na ma-capture ang mga nilalaman ng display at audio. Hindi kailanman dapat kailanganin ng mga normal na app."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Pamahalaan ang mga media projection session"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Nagbibigay-daan sa isang application na mapamahalaan ang mga media projection session. Makakapagbigay ang mga session na ito ng kakayahan sa mga application na kunan ang content na display at audio. Hindi kailanman dapat kailanganin ng mga normal na app."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Basahin ang mga session ng pag-install"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Pinapayagan ang isang application na magbasa ng mga session ng pag-install. Nagbibigay-daan ito upang makita ang mga detalye tungkol sa mga aktibong pag-install ng package."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Pindutin nang dalawang beses para sa pagkontrol ng zoom"</string>
@@ -1426,8 +1427,8 @@
     <string name="deny" msgid="2081879885755434506">"Tanggihan"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Hiniling ang pahintulot"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Hiniling ang pahintulot\npara sa account na <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"Ginagamit mo ang app na ito sa iyong personal na espasyo"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"Ginagamit mo ang app na ito sa iyong lugar ng trabaho"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Ginagamit mo ang app na ito sa labas ng iyong profile sa trabaho"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Ginagamit mo ang app na ito sa iyong profile sa trabaho"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Pamamaraan ng pag-input"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"I-sync"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Kakayahang Ma-access"</string>
@@ -1502,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Bawasan ang oras"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Itakda ang PM"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Itakda ang AM"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"PM"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"AM"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Dagdagan ang buwan"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Bawasan ang buwan"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Dagdagan ang araw"</string>
@@ -1536,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"I-edit"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Babala sa paggamit ng data"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Pindutin upang tingnan ang paggamit at mga setting."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"Naka-off ang 2G-3G data"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"Naka-off ang 4G data"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Naka-off ang cellular data"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Naka-off ang Wi-Fi data"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"Naabot na ang limitasyon"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Naabot na ang limitasyon sa 2G-3G data"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Naabot na ang limitasyon sa 4G data"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Naabot na ang limitasyon sa cellular data"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Naabot na ang limitasyon sa data ng Wi-Fi"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Naka-pause ang data para sa nalalabing bahagi ng pag-ikot"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"lumampas sa 2G-3G na limitasyon ng data"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Lumampas sa 4G na limitasyon ng data"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Lampas na sa cellular data limit"</string>
@@ -1571,7 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Tanggapin ang tawag?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Palagi"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Isang beses lang"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"Hindi sinusuportahan ng %1$s ang profile sa trabaho."</string>
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"Hindi sinusuportahan ng %1$s ang profile sa trabaho"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telepono"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Mga Headphone"</string>
@@ -1644,6 +1643,8 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pinagana ang accessibility."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Nakansela ang pagiging naa-access."</string>
     <string name="user_switched" msgid="3768006783166984410">"Kasalukuyang user <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"May-ari"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Error"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Ang pagbabagong ito ay hindi pinapahintulutan ng iyong administrator"</string>
@@ -1765,31 +1766,19 @@
     <string name="item_is_selected" msgid="949687401682476608">"Napili ang <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Tinanggal ang <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> sa Trabaho"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"Upang i-unpin ang screen na ito, pindutin nang matagal ang Bumalik at Mga Kamakailan nang sabay-sabay."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Upang i-unpin ang screen na ito, pindutin nang matagal ang Mga Kamakailan."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Naka-pin ang screen. Hindi pinapayagan ng iyong organisasyon ang pag-a-unpin."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Gamitin ang pagpi-pin ng screen?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Nila-lock ng pagpi-pin ng screen ang display sa iisang view.\n\nUpang lumabas, pindutin nang matagal ang Bumalik at Mga Kamakailan nang sabay-sabay."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Nila-lock ng pagpi-pin ng screen ang display sa iisang view.\n\nUpang lumabas, pindutin nang matagal ang Mga Kamakailan."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"HINDI, SALAMAT NA LANG"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"SIMULAN"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"pattern sa pag-unlock"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"password"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Naka-pin ang screen"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Naka-unpin ang screen"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Humingi ng PIN bago mag-unpin"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Humingi ng pattern sa pag-unlock bago mag-unpin"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Humingi ng password bago mag-unpin"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Upang makatulong na mas mapatagal ang baterya, binabawasan ng battery saver ang pagganap ng iyong device at nililimitahan ang pag-vibrate at ang karamihan ng data ng background. Hindi maaaring ma-update ang email, pagmemensahe at iba pang mga app na umaasa sa pagsi-sync maliban kung bubuksan mo ang mga ito.\n\nAwtomatikong mao-off ang battery saver kapag nagcha-charge ang iyong device."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Hanggang sa matapos ang iyong downtime nang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

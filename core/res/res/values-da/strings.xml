@@ -613,6 +613,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"tænd eller sluk for telefonen"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Tillader, at appen kan slukke og tænde din tablet."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Tillader, at appen kan slukke og tænde telefonen."</string>
+    <string name="permlab_userActivity" msgid="1677844893921729548">"nulstil timeout for skærmen"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Tillader, at appen kan nulstille timeout for skærmen."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"kør i fabriksindstillet testtilstand"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Kør som en producenttest på lavt niveau, der giver fuld adgang til tabletens hardware. Kun tilgængeligt når en tablet kører i producenttesttilstand."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Kør som en producenttest på lavt niveau. Giver fuld adgang til telefonens hardware. Kun tilgængeligt når en telefon kører i producenttesttilstand."</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Tillader, at appen kan læse og skrive i cachefilsystemet."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"foretage/modtage SIP-opkald"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Tillader, at appen foretager og modtager SIP-opkald."</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"interager med skærmen for indgående opkald"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Tillader, at appen styrer, hvornår og hvordan brugeren ser skærmen for indgående opkald."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interager med skærmen under opkald"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Tillader, at appen styrer, hvornår og hvordan brugeren ser skærmen for indgående opkald."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"interagere med telefonitjenester"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Tillader, at appen kan interagere med telefonitjenester for at foretage/modtage opkald."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"leverer brugeroplevelsen under opkald"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Tillader, at appen leverer brugeroplevelsen under opkald."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"læse oversigt over netværksbrug"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Tillader, at appen kan læse historisk netværksbrug for specifikke netværk og apps."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"administrer netværkspolitik"</string>
@@ -1352,8 +1354,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tryk for at deaktivere USB-fejlretning."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Skift tastatur"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Vælg tastaturer"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"Vis indtastningsmetode"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Vælg tastaturlayout"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Tryk for at vælge et tastaturlayout."</string>
@@ -1404,8 +1405,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Tillader, at en applikation knytter sig til en trust agent-tjeneste."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interager med opdaterings- og gendannelsessystemet"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Giver en applikation tilladelse til at interagere med gendannelsessystemet og systemopdateringerne."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Opret sessioner med medieprojektion"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Tillader, at en app opretter sessioner med medieprojektion. Disse sessioner kan give applikationer mulighed for at optage billed- og lydindhold. Normale apps bør aldrig have brug for dette."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Styrer sessioner med medieprojektion"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Tillader, at en app styrer sessioner med medieprojektion. Disse sessioner kan give applikationer mulighed for at optage billed- og lydindhold. Normale apps bør aldrig have brug for dette."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Læs installationssessioner"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Tillader, at en applikation læser installationssessioner. Dermed kan applikationen se oplysninger om aktive pakkeinstallationer."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Tryk to gange for zoomstyring"</string>
@@ -1426,8 +1427,8 @@
     <string name="deny" msgid="2081879885755434506">"Afvis"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Der er anmodet om tilladelse"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Der er anmodet om tilladelse\nfor kontoen <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"Du bruger denne app i dit personlige område"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"Du bruger denne app i dit arbejdsområde"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Du bruger denne app uden for din arbejdsprofil"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Du bruger denne app i din arbejdsprofil"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Inputmetode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synkroniser"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Hjælpefunktioner"</string>
@@ -1502,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Sænk timetal"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Indstil PM"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Indstil AM"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"PM"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"AM"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Senere måned"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Tidligere måned"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Senere dag"</string>
@@ -1536,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Rediger"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Advarsel om dataforbrug"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Tryk for at se brug og indstill."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G-data er deaktiveret"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G-data er deaktiveret"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Mobildata er deaktiveret"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi-data er deaktiveret"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"Grænsen er nået"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Grænsen for 2G-3G-data er nået"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Grænsen for 4G-data er nået"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Grænsen for mobildata er nået"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Grænsen for Wi-Fi-data er nået"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Data er afbrudt i resten af perioden"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G-data overskredet"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Grænsen for 4G-data er overskredet"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Grænsen for mobildata er overskredet"</string>
@@ -1571,7 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Vil du besvare opkaldet?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Altid"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Kun én gang"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s understøtter ikke arbejdsprofilen."</string>
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s understøtter ikke arbejdsprofil"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Hovedtelefoner"</string>
@@ -1644,6 +1643,8 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Hjælpefunktioner er aktiveret."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hjælpefunktioner er annulleret."</string>
     <string name="user_switched" msgid="3768006783166984410">"Nuværende bruger <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"Ejer"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Fejl"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Din administrator har ikke givet tilladelse til at foretage denne ændring"</string>
@@ -1765,31 +1766,19 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> er valgt"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> er slettet"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> – arbejde"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"Hvis du vil frigøre dette skærmbillede, skal du trykke på og holde Tilbage og Seneste nede på samme tid."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Hvis du vil frigøre dette skærmbillede, skal du trykke på og holde Seneste nede."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Skærmen er fastgjort. Frigørelse er ikke tilladt af din organisation."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Vil du bruge skærmfastholdelse?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"Skærmfastholdelse låser skærmen i en enkelt visning.\n\nAfslut ved at trykke på og holde Tilbage og Seneste nede på samme tid."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Skærmfastholdelse låser skærmen i en enkelt visning.\n\nHvis du vil afslutte, skal du trykke på og holde Seneste nede."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NEJ TAK"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"Pinkode"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"oplåsningsmønster"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"adgangskode"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Skærmen blev fastgjort"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Skærmen blev frigjort"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Bed om pinkode inden frigørelse"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Bed om oplåsningsmønster inden frigørelse"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Bed om adgangskode inden frigørelse"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"For at forbedre batteriets levetid reducerer batterisparefunktionen enhedens ydeevne og begrænser vibrationer og de fleste baggrundsdata. E-mail, beskeder og andre apps, der benytter synkronisering, opdateres ikke, medmindre du åbner dem.\n\nBatterisparefunktionen deaktiveres automatisk, når enheden oplades."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Indtil din nedetid slutter kl. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

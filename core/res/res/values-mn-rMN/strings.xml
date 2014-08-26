@@ -613,6 +613,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"утсыг унтраах эсвэл асаах"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Апп нь таблетыг асаах, унтраах боломжтой."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Апп нь утсыг асаах, унтраах боломжтой."</string>
+    <string name="permlab_userActivity" msgid="1677844893921729548">"дэлгэцийн амрах хугацааг тохируулах"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Апп-т дэлгэцийн амрах хугацааг өөрчлөхийг зөвшөөрнө."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"үйлдвэрийн тест горимд ажиллуулах"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Доод төвшиний үйлдвэрийн тестийг ажиллуулан таблетын хардверт бүрэн хандах боломжтой. Таблет нь үйлдвэрийн тестийн горимд ажиллах үед л боломжтой."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Доод төвшиний үйлдвэрийн тестийг ажиллуулан утасны хардверт бүрэн хандах боломжтой. Утас үйлдвэрийн тестийн горимд ажиллах үед л боломжтой."</string>
@@ -714,10 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Апп нь кеш файлсистемийг унших бичих боломжтой."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP дуудлага хийх/хүлээн авах"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Апп-д SIP дуудлага хийх болон хүлээн авахыг зөвшөөрөх."</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"дуудлагын дэлгэцтэй харьцах"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Апп-д дуудлагын дэлгэцийг хэрэглэгчид хэзээ хэрхэн харуулахыг удирдахыг зөвшөөрнө."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"дуудлагын дэлгэцтэй харьцах"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Апп-д дуудлагын дэлгэцийг хэрэглэгчид хэзээ хэрхэн харуулахыг удирдахыг зөвшөөрнө."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"телефоны үйлчилгээтэй харилцах"</string>
     <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Апп-д телефон үйлчилгээтэй харилцаж дуудлага хийх/авахыг зөвшөөрнө."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"дуудлага хийж байгаа хэрэглэгчтэй харьцах"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Апп-д дуудлага хийж байгаа хэрэглэгчтэй харьцахыг зөвшөөрнө."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"сүлжээний ашиглалтын түүхийг унших"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Апп нь тусгай сүлжээ болон апп-н сүлжээ ашиглалтын түүхийг унших боломжтой."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"сүлжээний бодлогыг удирдах"</string>
@@ -1350,8 +1354,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB дебаг хийхийг идэвхгүй болгох бол хүрнэ үү."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Гарыг өөрчлөх"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Гар сонгох"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"Оруулах аргыг харуулах"</string>
     <string name="hardware" msgid="7517821086888990278">"Хардвер"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Гарын схемийг сонгох"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Гарын схемийг сонгох бол хүрнэ үү."</string>
@@ -1402,8 +1405,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Аппликешнд итгэмжлэгдсэн төлөөлөгчтэй холбогдох боломж олгоно."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Шинэчлэлт болон сэргээх системтэй харилцах"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Аппликешнд сэргээх систем болон системийн шинэчлэлтэй харилцах боломж олгоно."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Медиа проекци үүсгэх"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Аппликешнд медиа проекци үүсгэхийг зөвшөөрнө. Ингэснээр аппликешнд дэлгэц болон аудио контентыг бичих боломж олгоно. Энгийн апп-д шаардагдахгүй."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Медиа проекци удирдах"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Аппликешнд медиа проекци удирдахыг зөвшөөрнө. Ингэснээр аппликешнд дэлгэц болон аудио контентыг бичих боломж олгоно. Энгийн апп-д шаардагдахгүй."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Суулгах сешн унших"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Аппликешн-д суулгах сешн уншихыг зөвшөөрнө. Энэ нь идэвхтэй багцуудыг суулгалтын талаар дэлгэрэнгүй мэдээллийг үзэх боломж олгоно."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Өсгөх контрол дээр хоёр удаа товшино уу"</string>
@@ -1424,8 +1427,8 @@
     <string name="deny" msgid="2081879885755434506">"Татгалзах"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Зөвшөөрөл хүсэв"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> акаунт зөвшөөрөл \n хүссэн"</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"Та энэ апп-г өөрийн хувийн профайл дээр ашиглаж байна"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"Та энэ апп-г өөрийн ажлын профайл дээр ашиглаж байна"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Та энэ апп-г өөрийн ажлын профайлаас гадуур ашиглаж байна"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Та энэ апп-г өөрийн ажлын профайл дотор ашиглаж байна"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Оруулах арга"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Синк"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Хандалт"</string>
@@ -1500,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Цаг бууруулах"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"PM тохируулах"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"AM тохируулах"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"ҮХ"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"ҮӨ"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Сар өсгөх"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Сарыг бууруулах"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Өдөр өсгөх"</string>
@@ -1534,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Засах"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Дата хэрэглээний анхааруулга"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Ашиглалт болон тохиргоог харах бол хүрнэ үү."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G дата идэвхгүй"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G дата идэвхгүй"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Үүрэн дата идэвхгүй"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi дата идэвхгүй"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"Хязгаарт хүрсэн"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G дата хязгаарт хүрсэн"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G дата хязгаарт хүрсэн"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Үүрэн дата хязгаарт хүрсэн"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi дата хязгаарт хүрсэн"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Циклийн үлдсэн хугацаанд датаг түр зогсоосон"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G дата хязгаар хэтрэв"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G дата хязгаар хэтрэв"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Үүрэн дата хязгаар хэтэрсэн"</string>
@@ -1569,7 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Дуудлагыг зөвшөөрөх үү?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Байнга"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Нэг удаа"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s ажлын профайлыг дэмждэггүй."</string>
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ажлын профайлыг дэмждэггүй"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Таблет"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Утас"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Чихэвч"</string>
@@ -1642,6 +1643,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Хялбаршуулсан горим идэвхжив."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Хандалт цуцлагдсан."</string>
     <string name="user_switched" msgid="3768006783166984410">"Одоогийн хэрэглэгч <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> руу сэлгэж байна…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Эзэмшигч"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Алдаа"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Энэ өөрчлөлтийг админ зөвшөөрөөгүй байна"</string>
@@ -1773,10 +1775,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ЭХЛҮҮЛЭХ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Дэлгэцийг тогтоосон"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Дэлгэцийг сулласан"</string>
-    <string name="lock_to_app_use_screen_lock" msgid="5732663305876339596">"Суллахаас өмнө %1$s хүснэ үү"</string>
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"тайлах хээ"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"нууц үг"</string>
-    <string name="battery_saver_description" msgid="725676363406667978">"Батерейны ашиглалтыг уртасгахын тулд батерей хэмнэгч нь таны төхөөрөмжийн ажиллагааг бууруулж, чичрэлт болон далд датаны ихэнх хувийг хязгаарлана. Имэйл, зурвас гэх мэт синк хийгддэг бусад апп-ууд таныг нээхээс нааш шинэчлэгдэхгүй байж болно.\n\nТаныг төхөөрөмжөө цэнэглэх үед батерей хэмнэгч автоматаар унтарна."</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Тогтоосныг суллахаас өмнө PIN асуух"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Тогтоосныг суллахаас өмнө түгжээ тайлах хээ асуух"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Тогтоосныг суллахаас өмнө нууц үг асуух"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Батерейны ашиглалтыг уртасгахын тулд батерей хэмнэгч нь таны төхөөрөмжийн ажиллагааг бууруулж, чичрэлт болон далд датаны ихэнх хувийг хязгаарлана. Имэйл, зурвас гэх мэт синк хийгддэг бусад апп-ууд таныг нээхээс нааш шинэчлэгдэхгүй байж болно.\n\nТаныг төхөөрөмжөө цэнэглэх үед батерей хэмнэгч автоматаар унтарна."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Таны уйтгартай байдал <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-д дуусах хүртэл"</string>
 </resources>

@@ -613,6 +613,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ενεργοποίηση και απενεργοποίηση τηλεφώνου"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Επιτρέπει στην εφαρμογή να ενεργοποιήσει ή να απενεργοποιήσει το tablet."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Επιτρέπει στην εφαρμογή να ενεργοποιήσει ή να απενεργοποιήσει το τηλέφωνο."</string>
+    <string name="permlab_userActivity" msgid="1677844893921729548">"επαναφορά χρονικού ορίου λήξης οθόνης"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Επιτρέπει στην εφαρμογή να επαναφέρει το χρονικό όριο λήξης της οθόνης."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"εκτέλεση σε λειτουργία εργοστασιακής δοκιμής"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Εκτέλεση ως χαμηλού επιπέδου δοκιμή κατασκευαστή, ώστε να επιτρέπεται πλήρης πρόσβαση στο υλικό του tablet. Διαθέσιμο μόνο όταν το tablet βρίσκεται σε λειτουργία δοκιμής κατασκευαστή."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Εκτέλεση ως χαμηλού επιπέδου δοκιμή κατασκευαστή, ώστε να επιτρέπεται πλήρης πρόσβαση στο υλικό του τηλεφώνου. Διαθέσιμο μόνο όταν το τηλέφωνο βρίσκεται σε λειτουργία δοκιμής κατασκευαστή."</string>
@@ -714,10 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Επιτρέπει στην εφαρμογή την ανάγνωση και την εγγραφή του συστήματος αρχείων προσωρινής μνήμης."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"πραγματοποίηση/λήψη κλήσεων SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Επιτρέπει στην εφαρμογή να πραγματοποιεί και να λαμβάνει κλήσεις SIP."</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"αλληλεπίδραση με την οθόνη κατά τη διάρκεια κλήσης"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Επιτρέπει στην εφαρμογή να ελέγχει πότε και πώς βλέπει ο χρήστης την οθόνη κατά τη διάρκεια κλήσης."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"αλληλεπίδραση με την οθόνη κατά τη διάρκεια κλήσης"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Επιτρέπει στην εφαρμογή να ελέγχει πότε και πώς βλέπει ο χρήστης την οθόνη κατά τη διάρκεια κλήσης."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"αλληλεπίδραση με υπηρεσίες τηλεφωνίας"</string>
     <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Επιτρέπει στην εφαρμογή να αλληλεπιδρά με υπηρεσίες τηλεφωνίας για την πραγματοποίηση/λήψη κλήσεων."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"παροχή εμπειρίας χρήστη κατά τη διάρκεια κλήσης"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Επιτρέπει στην εφαρμογή να παρέχει μια εμπειρία στο χρήστη κατά τη διάρκεια κλήσης."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ανάγνωση ιστορικών δεδομένων χρήσης δικτύου"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Επιτρέπει στην εφαρμογή την ανάγνωση ιστορικών στοιχείων χρήσης δικτύου για συγκεκριμένα δίκτυα και εφαρμογές."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"διαχείριση πολιτικής δικτύου"</string>
@@ -1350,8 +1354,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Αγγίξτε για απενεργοποίηση του εντοπισμού σφαλμάτων USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Αλλαγή πληκτρολογίου"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Επιλογή πληκτρολογίων"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"Εμφάνιση μεθόδου εισαγ."</string>
     <string name="hardware" msgid="7517821086888990278">"Υλικό"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Επιλογή διάταξης πληκτρολογίου"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Αγγίξτε για να επιλέξετε διάταξη πληκτρολογίου."</string>
@@ -1402,8 +1405,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Επιτρέπει σε μια εφαρμογή να συνδεθεί σε μια υπηρεσία trust agents."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Αλληλεπίδραση με το σύστημα ενημέρωσης και ανάκτησης"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Επιτρέπει σε μια εφαρμογή να αλληλεπιδρά με το σύστημα ανάκτησης και ενημερώσεων συστήματος."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Δημιουργία περιόδων σύνδεσης προβολής μέσων"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Επιτρέπει σε μια εφαρμογή τη δημιουργία περιόδων σύνδεσης προβολής μέσων. Οι περίοδοι σύνδεσης μπορούν να παρέχουν στις εφαρμογές τη δυνατότητα να καταγράφουν την οθόνη και το ηχητικό περιεχόμενο. Δεν απαιτείται από συνήθεις εφαρμογές."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Διαχείριση περιόδων σύνδεσης προβολής μέσων"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Επιτρέπει σε μια εφαρμογή να διαχειρίζεται περιόδους σύνδεσης προβολής μέσων. Αυτές οι περίοδοι σύνδεσης μπορεί να παρέχουν σε εφαρμογές τη δυνατότητα εγγραφής περιεχομένου εικόνας και ήχου. Δεν πρέπει σε καμία περίπτωση να είναι απαραίτητη από απλές εφαρμογές."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Ανάγνωση περιόδων σύνδεσης εγκατάστασης"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Επιτρέπει σε μια εφαρμογή την ανάγνωση των περιόδων σύνδεσης εγκατάστασης. Αυτό της επιτρέπει να βλέπει λεπτομέρειες σχετικά με τις εγκαταστάσεις του ενεργού πακέτου."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Αγγίξτε δύο φορές για έλεγχο εστίασης"</string>
@@ -1424,8 +1427,8 @@
     <string name="deny" msgid="2081879885755434506">"Άρνηση"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Απαιτείται άδεια"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Ζητήθηκε άδεια\nγια τον λογαριασμό <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"Χρησιμοποιείτε αυτήν την εφαρμογή στον προσωπικό σας χώρο"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"Χρησιμοποιείτε αυτήν την εφαρμογή στο χώρο εργασίας σας"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Χρησιμοποιείτε αυτήν την εφαρμογή εκτός του προφίλ εργασίας σας"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Χρησιμοποιείτε αυτήν την εφαρμογή στο προφίλ εργασίας"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Μέθοδος εισόδου"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Συγχρονισμός"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Προσβασιμότητα"</string>
@@ -1500,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"Μείωση ώρας"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"Ορισμός ΜΜ"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"Ορισμός ΠΜ"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"ΜΜ"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"ΠΜ"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"Αύξηση μήνα"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"Μείωση μήνα"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"Αύξηση ημέρας"</string>
@@ -1534,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Επεξεργασία"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Προειδοποίηση χρήσης δεδομένων"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Αγγίξτε για προβολή χρήσης/ρυθμ."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"Τα δεδομένα 2G-3G είναι ανενεργά"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"Τα δεδομένα 4G είναι ανενεργά"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Ανενεργά δεδ.κινητής τηλεφωνίας"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Τα δεδομένα Wi-Fi είναι ανενεργά"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"Εξαντλήθηκε το όριο"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Συμπλ. το όριο δεδομένων 2G-3G"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Συμπλ. το όριο δεδομένων 4G"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Συμπλ. το όριο δεδ. κιν. τηλ."</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Συμπλ. το όριο δεδ. Wi-Fi"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Παύση δεδ. για το υπ. του κύκλ."</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Ξεπεράστηκε το όριο δεδομ. 2G-3G"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Ξεπεράστηκε το όριο δεδομένων 4G"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Υπέρβαση ορίου δεδ.κιν.τηλεφ."</string>
@@ -1569,7 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Αποδοχή κλήσης;"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Πάντα"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Μόνο μία φορά"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"Το %1$s δεν υποστηρίζει προφίλ εργασίας."</string>
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"Το προφίλ εργασίας δεν υποστηρίζεται από %1$s"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Τηλέφωνο"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Ακουστικά"</string>
@@ -1642,6 +1643,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Ενεργοποιήθηκε η προσβασιμότητα."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Η λειτουργία προσβασιμότητας ακυρώθηκε."</string>
     <string name="user_switched" msgid="3768006783166984410">"Τρέχων χρήστης <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"Εναλλαγή σε <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Κάτοχος"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Σφάλμα"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Αυτή η αλλαγή δεν επιτρέπεται από το διαχειριστή σας"</string>
@@ -1773,10 +1775,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ΕΝΑΡΞΗ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Η οθόνη καρφιτσώθηκε"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Η οθόνη ξεκαρφιτσώθηκε"</string>
-    <string name="lock_to_app_use_screen_lock" msgid="5732663305876339596">"Να γίνεται ερώτηση για %1$s πριν από το ξεκαρφίτσωμα"</string>
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"Αριθμός PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"μοτίβο ξεκλειδώματος"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"κωδικός πρόσβασης"</string>
-    <string name="battery_saver_description" msgid="725676363406667978">"Για τη βελτίωση της διάρκειας ζωής της μπαταρίας, η λειτουργία εξοικονόμησης μπαταρίας μειώνει την απόδοση της συσκευής σας και περιορίζει τη δόνηση και την πλειονότητα των δεδομένων παρασκηνίου. Το ηλεκτρονικό ταχυδρομείου, η ανταλλαγή μηνυμάτων και άλλες εφαρμογές που βασίζονται στο συγχρονισμό ενδέχεται να μην ενημερώνονται, παρά μόνο εάν τις ανοίξετε.\n\nΗ λειτουργία εξοικονόμησης μπαταρίας απενεργοποιείται αυτόματα κατά τη φόρτιση της συσκευής σας."</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Να γίνεται ερώτηση για το PIN, πριν από το ξεκαρφίτσωμα"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Να γίνεται ερώτηση για το μοτίβο ξεκλειδώματος, πριν από το ξεκαρφίτσωμα"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Να γίνεται ερώτηση για τον κωδικό πρόσβασης, πριν από το ξεκαρφίτσωμα"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Για τη βελτίωση της διάρκειας ζωής της μπαταρίας, η λειτουργία εξοικονόμησης μπαταρίας μειώνει την απόδοση της συσκευής σας και περιορίζει τη δόνηση και την πλειονότητα των δεδομένων παρασκηνίου. Το ηλεκτρονικό ταχυδρομείου, η ανταλλαγή μηνυμάτων και άλλες εφαρμογές που βασίζονται στο συγχρονισμό ενδέχεται να μην ενημερώνονται, παρά μόνο εάν τις ανοίξετε.\n\nΗ λειτουργία εξοικονόμησης μπαταρίας απενεργοποιείται αυτόματα κατά τη φόρτιση της συσκευής σας."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Έως τη λήξη του νεκρού χρόνου σας στις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

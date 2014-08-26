@@ -613,6 +613,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"फ़ोन चालू या बंद करें"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ऐप्स को टेबलेट चालू या बंद करने देता है."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"ऐप्स को फ़ोन चालू या बंद करने देता है."</string>
+    <string name="permlab_userActivity" msgid="1677844893921729548">"प्रदर्शन समयबाह्य रीसेट करें"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"एेप्स को प्रदर्शन समयबाह्य रीसेट करने देती है."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"फ़ैक्‍ट्री परीक्षण मोड में चलाएं"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"टेबलेट हार्डवेयर में पूर्ण पहुंच की अनुमति देते हुए निम्‍न-स्‍तर निर्माता परीक्षण के रूप में चलाएं. केवल तभी उपलब्‍ध जब कोई टेबलेट निर्माता परीक्षण मोड में चल रहा हो."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"फ़ोन हार्डवेयर में पूर्ण पहुंच की अनुमति देते हुए निम्‍न-स्‍तर निर्माता परीक्षण के रूप में चलाएं. केवल तभी उपलब्‍ध जब कोई फ़ोन निर्माता परीक्षण मोड में चल रहा हो."</string>
@@ -664,9 +666,9 @@
     <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"एप्‍लिकेशन के द्वारा ब्लूटूथ युग्‍मन करने देती है"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"एप्‍लिकेशन को उपयोगकर्ता के इंटरैक्शन के बिना दूरस्‍थ उपकरणों के साथ युग्‍मित करने देती है."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"एप्‍लिकेशन को उपयोगकर्ता के इंटरैक्शन के बिना दूरस्‍थ उपकरणों के साथ युग्‍मित करने देती है."</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"Bluetooth नक्शा डेटा एक्सेस करें"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"ऐप्स को Bluetooth नक्शा डेटा एक्सेस करने दें."</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"ऐप्स को Bluetooth नक्शा डेटा एक्सेस करने दें."</string>
+    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"ब्लूटूथ नक्शा डेटा एक्सेस करें"</string>
+    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"ऐप्स को ब्लूटूथ नक्शा डेटा एक्सेस करने दें."</string>
+    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"ऐप्स को ब्लूटूथ नक्शा डेटा एक्सेस करने दें."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX से कनेक्ट और डिस्कनेक्ट करें"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"ऐप्स  को WiMAX सक्षम है या नहीं और कनेक्‍ट किए गए किसी WiMAX नेटवर्क के बारे में जानकारी निर्धारित करने देता है."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX स्‍थिति बदलें"</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ऐप्स को संचय फ़ाइल सिस्‍टम पढ़ने और लिखने देता है."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP कॉल करें/प्राप्‍त करें"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"ऐप्स को SIP कॉल करने और प्राप्‍त करने देती है."</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"इन-कॉल स्क्रीन से सहभागिता करें"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"ऐप्लिकेशन को यह नियंत्रित करने देती है कि उपयोगकर्ता को इन-कॉल स्क्रीन कब और कैसी दिखाई देती है."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"इन-कॉल स्क्रीन से सहभागिता करें"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ऐप्स को यह नियंत्रित करने देती है कि उपयोगकर्ता को इन-कॉल स्क्रीन कब और कैसी दिखाई देती है."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"टेलीफ़ोनी सेवाओं के साथ सहभागिता करें"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"कॉल करने/प्राप्‍त करने के लिए ऐप्स को टेलीफ़ोनी सेवा के साथ सहभागिता करने दें."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"इन कॉल उपयोगकर्ता अनुभव प्रदान करना"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"ऐप्स को इन कॉल उपयोगकर्ता अनुभव लेने देती है."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ऐतिहासिक नेटवर्क उपयोग पढें"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"किसी ऐप्स  को विशिष्ट नेटवर्क और ऐप्स के लिए ऐतिहासिक नेटवर्क उपयोग को पढ़ने देता है."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"नेटवर्क नीति प्रबंधित करें"</string>
@@ -1275,10 +1277,10 @@
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"वाई-फ़ाई  से कनेक्‍ट नहीं हो सका"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" के पास एक कमज़ोर इंटरनेट कनेक्‍शन है."</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"वाई-फ़ाई  प्रत्यक्ष"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"वाई-फ़ाई डायरेक्ट"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"वाई-फ़ाई  डायरेक्ट प्रारंभ करें. इससे वाई-फ़ाई  क्‍लाइंट/हॉटस्पॉट कार्यवाही बंद हो जाएगी."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"वाई-फ़ाई  डायरेक्ट प्रारंभ नहीं किया जा सका."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"वाई-फ़ाई  प्रत्यक्ष चालू है"</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"वाई-फ़ाई डायरेक्ट चालू है"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"सेटिंग के लिए स्‍पर्श करें"</string>
     <string name="accept" msgid="1645267259272829559">"स्वीकार करें"</string>
     <string name="decline" msgid="2112225451706137894">"अस्वीकार करें"</string>
@@ -1352,8 +1354,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB डीबग करना अक्षम करने के लिए स्‍पर्श करें."</string>
     <string name="select_input_method" msgid="8547250819326693584">"कीबोर्ड बदल सकता है"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"कीबोर्ड चुनें"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"इनपुट विधि दिखाएं"</string>
     <string name="hardware" msgid="7517821086888990278">"हार्डवेयर"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"कीबोर्ड लेआउट को चुनें"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"कीबोर्ड लेआउट का चयन करने के लिए स्‍पर्श करें."</string>
@@ -1404,8 +1405,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"किसी ऐप्लिकेशन को विश्वसनीय एजेंट सेवा से जुडॉव की अनुमति देती है."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"अपडेट और पुनर्प्राप्ति सिस्टम के साथ सहभागिता करें"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"ऐप्लिकेशन को पुनर्प्राप्ति सिस्टम और सिस्टम अपडेट के साथ सहभागिता करने देती है."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"मीडिया प्रोजेक्शन सत्र बनाएं"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"ऐप्लिकेशन को मीडिया प्रोजेक्शन सत्र बनाने देती है. ये सत्र ऐप्लिकेशन को प्रदर्शन और ऑडियो सामग्री कैप्चर करने की क्षमता प्रदान कर सकते हैं. सामान्य ऐप्लिकेशन को इसकी कभी भी आवश्यकता नहीं होगी."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"मीडिया प्रोजेक्शन सत्र प्रबंधित करना"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"ऐप्लिकेशन को मीडिया प्रोजेक्शन सत्र प्रबंधित करने देती है . ये सत्र ऐप्लिकेशन को प्रदर्शन और ऑडियो सामग्री कैप्चर करने की क्षमता देते हैं. सामान्य ऐप्स को इसकी कभी आवश्यकता नहीं होगी."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"इंस्टॉल सत्रों को पढ़ें"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ऐप्लिकेशन को इंस्टॉल सत्रों को पढ़ने देती है. इससे उसे सक्रिय पैकेज इंस्टॉलेशन के बारे में विवरण देखने की अनुमति मिल जाती है."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ज़ूम नियंत्रण के लिए दो बार स्पर्श करें"</string>
@@ -1426,8 +1427,8 @@
     <string name="deny" msgid="2081879885755434506">"अस्वीकारें"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"अनुमति अनुरोधित"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> खाते के लिए अनुमति\nका अनुरोध किया गया."</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"आप इस ऐप्स का उपयोग अपने व्यक्तिगत स्थान में कर रहे हैं"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"आप इस ऐप्स का उपयोग अपने कार्य स्थान में कर रहे हैं"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"आप इस ऐप्स का उपयोग अपनी कार्य प्रोफ़ाइल से बाहर कर रहे हैं"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"आप इस ऐप्स का उपयोग अपनी कार्य प्रोफ़ाइल में कर रहे हैं"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"इनपुट विधि"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"समन्वयन"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"आसान तरीका"</string>
@@ -1502,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"घंटे कम करें"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"सायं सेट करें"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"प्रात: सेट करें"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"अप"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"पू"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"माह बढ़ाएं"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"माह कम करें"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"दिन बढ़ाएं"</string>
@@ -1536,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"संपादित करें"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"डेटा उपयोग की चेतावनी"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"उपयोग व सेटिंग देखने हेतु स्‍पर्श करें."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G डेटा बंद है"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G डेटा बंद है"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"सेल्युलर डेटा बंद है"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"वाई-फ़ाई  डेटा बंद है"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"सीमा पार हो गई है"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G डेटा सीमा पूर्ण हो गई"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G डेटा सीमा पूर्ण हो गई"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"सेल्युलर डेटा सीमा पूर्ण हो गई"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi डेटा की सीमा पूर्ण हो गई"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"शेष चक्र के लिए डेटा रोका गया"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G डेटा सीमा पार हो गई है"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G डेटा सीमा पार हो गई है"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"सेल्युलर डेटा की सीमा पार हो गई"</string>
@@ -1571,7 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"कॉल स्वीकार करें?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"हमेशा"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"केवल एक बार"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s कार्य प्रोफ़ाइल का समर्थन नहीं करता."</string>
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s कार्य प्रोफ़ाइल का समर्थन नहीं करता"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"टेबलेट"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"फ़ोन"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"हेडफ़ोन"</string>
@@ -1639,11 +1638,13 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपने अपने अनलॉक आकार को <xliff:g id="NUMBER_0">%d</xliff:g> बार गलत तरीके से आरेखित किया है. <xliff:g id="NUMBER_1">%d</xliff:g> और असफल प्रयासों के बाद, आपसे अपने फ़ोन को किसी ईमेल खाते का उपयोग करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंड में पुन: प्रयास करें."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"निकालें"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"वॉल्यूम को अनुशंसित स्तर से ऊपर बढ़ाएं?\n\nअत्यधिक वॉल्यूम पर अधिक समय तक सुनने से आपकी सुनने की क्षमता को नुकसान हो सकता है."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"वॉल्यूम को सुझाए गए स्तर से ऊपर बढ़ाएं?\n\nअत्यधिक वॉल्यूम पर अधिक समय तक सुनने से आपकी सुनने की क्षमता को नुकसान हो सकता है."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"आसान तरीका को सक्षम करने के लिए दो अंगुलियों से नीचे दबाए रखें."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"आसान तरीका सक्षम कर दी है."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"आसान तरीका रद्द की गई."</string>
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
+    <skip />
     <string name="owner_name" msgid="2716755460376028154">"स्वामी"</string>
     <string name="error_message_title" msgid="4510373083082500195">"त्रुटि"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"यह बदलाव आपके व्यवस्थापक द्वारा अनुमत नहीं है"</string>
@@ -1765,31 +1766,19 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> चयनित"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> को हटा दिया गया"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्यस्थल का <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"इस स्‍क्रीन को अनपिन करने के लिए, वापस और हाल ही के एक साथ दबाकर रखें."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"इस स्‍क्रीन को अनपिन करने के लिए, हाल ही के दबाकर रखें."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"स्‍क्रीन पिन की गई है. आपके संगठन के द्वारा अनपिन करने की अनुमति नहीं है."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"स्‍क्रीन पिन करने का उपयोग करें?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"स्‍क्रीन को पिन करने से प्रदर्शन एकल दृश्‍य में लॉक हो जाता है.\n\nबाहर निकलने के लिए, वापस और हाल ही के एक साथ दबाकर रखें."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"स्‍क्रीन को पिन करने से प्रदर्शन एकल दृश्‍य में लॉक हो जाता है.\n\nबाहर निकलने के लिए, हाल ही के दबाकर रखें."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"नहीं, धन्यवाद"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"प्रारंभ करें"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"पिन"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"पैटर्न अनलॉक करें"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"पासवर्ड"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"स्‍क्रीन पिन की गई"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"स्‍क्रीन अनपिन की गई"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"अनपिन करने से पहले पिन के लिए पूछें"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"अनपिन करने से पहले अनलॉक पैटर्न के लिए पूछें"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"अनपिन करने से पहले पासवर्ड के लिए पूछें"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"बैटरी के जीवन काल को बेहतर बनाने में सहायता के लिए, बैटरी सेवर आपके उपकरण के प्रदर्शन को घटा देता है तथा कंपन और अधिकांश पृष्ठभूमि डेटा को सीमित कर देता है. ईमेल, संदेश सेवा और अन्य ऐप्स जो समन्वयन पर निर्भर करते हैं वे तब तक अपडेट नहीं हो सकते जब तक कि आप उन्हें नहीं खोलते.\n\nजब आपका उपकरण चार्ज हो रहा होता है तो बैटरी सेवर अपने आप बंद हो जाता है."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"जब तक कि <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> बजे आपका डाउनटाइम समाप्‍त न हो"</string>
 </resources>

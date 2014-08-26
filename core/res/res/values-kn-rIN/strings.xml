@@ -613,6 +613,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ಫೋನ್ ಆನ್ ಅಥವಾ ಆಫ್ ಮಾಡಿ"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ಟ್ಯಾಬ್ಲೆಟ್‌‌ ಅನ್ನು ಆನ್‌‌ ಅಥವಾ ಆಫ್‌ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"ಫೋನ್‌ ಅನ್ನು ಆನ್‌‌ ಅಥವಾ ಆಫ್‌ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_userActivity" msgid="1677844893921729548">"ಪ್ರದರ್ಶನ ಅವಧಿ ಮೀರುವಿಕೆಯನ್ನು ಮರುಹೊಂದಿಸಿ"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"ಪ್ರದರ್ಶನ ಅವಧಿ ಮೀರುವಿಕೆಯನ್ನು ಮರುಹೊಂದಿಸಲು ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"ಫ್ಯಾಕ್ಟರಿ ಪರೀಕ್ಷೆಯ ಮೋಡ್‌ನಲ್ಲಿ ರನ್ ಮಾಡಿ"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"ಟ್ಯಾಬ್ಲೆಟ್ ಹಾರ್ಡ್‌ವೇರ್‌ಗೆ ಸಂಪೂರ್ಣ ಪ್ರವೇಶವನ್ನು ಕಲ್ಪಿಸುವ ಮೂಲಕ ಕೆಳಮಟ್ಟದ ತಯಾರಕರ ಪರೀಕ್ಷೆಯ ರೂಪದಲ್ಲಿ ರನ್ ಆಗುತ್ತದೆ. ತಯಾರಕರ ಪರೀಕ್ಷೆಯ ಮೋಡ್‌ನಲ್ಲಿ ಟ್ಯಾಬ್ಲೆಟ್ ರನ್ ಆಗುತ್ತಿರುವಾಗ ಮಾತ್ರ ಲಭ್ಯವಿರುತ್ತದೆ."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"ಫೋನ್ ಹಾರ್ಡ್‌ವೇರ್‌ಗೆ ಸಂಪೂರ್ಣ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸುವ ಮೂಲಕ, ಕೆಳಮಟ್ಟದ ತಯಾರಕರ ಪರೀಕ್ಷೆಯ ರೂಪದಲ್ಲಿ ರನ್ ಮಾಡಿ. ತಯಾರಕರ ಪರೀಕ್ಷೆಯ ಮೋಡ್‌ನಲ್ಲಿ ಫೋನ್ ರನ್ ಆಗುತ್ತಿರುವಾಗ ಮಾತ್ರ ಲಭ್ಯವಿದೆ."</string>
@@ -714,12 +716,12 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ಕ್ಯಾಷ್‌ ಫೈಲ್‌ ವ್ಯವಸ್ಥೆಯನ್ನು ಓದಲು ಮತ್ತು ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP ಕರೆಗಳನ್ನು ಮಾಡಿ/ಸ್ವೀಕರಿಸಿ"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP ಕರೆಗಳನ್ನು ಮಾಡಲು ಮತ್ತು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_bind_call_service" msgid="6724009726671246551">"ಒಳ-ಕರೆ ಪರದೆಯ ಮೂಲಕ ಸಂವಹನ ನಡೆಸಿ"</string>
-    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"ಬಳಕೆದಾರರು ಒಳ-ಕರೆಯ ಪರದೆಯನ್ನು ಯಾವಾಗ ಮತ್ತು ಹೇಗೆ ನೋಡುತ್ತಾರೆ ಎಂಬುದನ್ನು ನಿಯಂತ್ರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
-    <!-- no translation found for permlab_bind_connection_service (3557341439297014940) -->
-    <skip />
-    <!-- no translation found for permdesc_bind_connection_service (4008754499822478114) -->
-    <skip />
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ಒಳ-ಕರೆ ಪರದೆಯ ಮೂಲಕ ಸಂವಹನ ನಡೆಸಿ"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ಬಳಕೆದಾರರು ಒಳ-ಕರೆಯ ಪರದೆಯನ್ನು ಯಾವಾಗ ಮತ್ತು ಹೇಗೆ ನೋಡುತ್ತಾರೆ ಎಂಬುದನ್ನು ನಿಯಂತ್ರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"ಟೆಲಿಫೋನಿ ಸೇವೆಗಳೊಂದಿಗೆ ಸಂವಾದ ನಡೆಸಿ"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"ಕರೆಗಳನ್ನು ಮಾಡಲು/ಸ್ವೀಕರಿಸುವ ನಿಟ್ಟಿನಲ್ಲಿ ಲಿಫೋನಿ ಸೇವೆಗಳ ಜೊತೆ ಸಂವಾದ ನಡೆಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಕೊಡಿ."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"ಒಳ ಕರೆ ಬಳಕೆದಾರರ ಅನುಭವವನ್ನು ಒದಗಿಸಿ"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"ಒಳ ಕರೆಯ ಬಳಕೆದಾರರ ಅನುಭವವನ್ನು ಒದಗಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ಐತಿಹಾಸಿಕ ನೆಟ್‌ವರ್ಕ್ ಬಳಕೆಯನ್ನು ಓದಿರಿ"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"ನಿರ್ದಿಷ್ಟ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಮತ್ತು ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಐತಿಹಾಸಿಕ ನೆಟ್‌ವರ್ಕ್‌ನ ಬಳಕೆಯನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"ನೆಟ್‌ವರ್ಕ್ ನೀತಿಯನ್ನು ನಿರ್ವಹಿಸಿ"</string>
@@ -1352,8 +1354,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
     <string name="select_input_method" msgid="8547250819326693584">"ಕೀಬೋರ್ಡ್ ಬದಲಿಸಿ"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"ಕೀಬೋರ್ಡ್‌ಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
-    <!-- no translation found for show_ime (9157568568695230830) -->
-    <skip />
+    <string name="show_ime" msgid="9157568568695230830">"ಇನ್‌ಪುಟ್‌ ವಿಧಾನವನ್ನು ತೋರಿಸು"</string>
     <string name="hardware" msgid="7517821086888990278">"ಹಾರ್ಡ್‌ವೇರ್"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"ಕೀಬೋರ್ಡ್ ಲೇಔಟ್ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"ಕೀಬೋರ್ಡ್ ಲೇಔಟ್ ಆಯ್ಕೆ ಮಾಡಲು ಸ್ಪರ್ಶಿಸಿ"</string>
@@ -1404,8 +1405,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"ವಿಶ್ವಾಸಾರ್ಹ ಏಜೆಂಟ್‌ ಸೇವೆಯನ್ನು ಪ್ರತಿಬಂಧಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"ನವೀಕರಣ ಮತ್ತು ಮರುಪ್ರಾಪ್ತಿ ಸಿಸ್ಟಂ ಜೊತೆಗೆ ಸಂವಹನ ನಡೆಸಿ"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"ಮರುಪ್ರಾಪ್ತಿ ಸಿಸ್ಟಂ ಮ್ತತು ಸಿಸ್ಟಂ ನವೀಕರಣಗಳೊಂದಿಗೆ ಸಂವಹನ ನಡೆಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
-    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"ಮೀಡಿಯಾ ಪ್ರಕ್ಷೇಪಣ ಅವಧಿಗಳನ್ನು ರಚಿಸಿ"</string>
-    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಮಾಧ್ಯಮ ಪ್ರಕ್ಷೇಪಣ ಅವಧಿಗಳನ್ನು ರಚಿಸಲು ಅನುಮತಿಸುತ್ತದೆ. ಈ ಅವಧಿಗಳು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಪ್ರದರ್ಶನವನ್ನು ಮತ್ತು ಆಡಿಯೊ ವಿಷಯಗಳನ್ನು ಸೆರೆಹಿಡಿಯುವ ಸಾಮರ್ಥ್ಯವನ್ನು ಒದಗಿಸುತ್ತವೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"ಮೀಡಿಯಾ ಪ್ರಕ್ಷೇಪಣೆ ಅವಧಿಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಮಾಧ್ಯಮ ಪ್ರಕ್ಷೇಪಣೆ ಅವಧಿಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಅನುಮತಿಸುತ್ತದೆ. ಈ ಅವಧಿಗಳು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಪ್ರದರ್ಶನವನ್ನು ಮತ್ತು ಆಡಿಯೊ ವಿಷಯಗಳನ್ನು ಸೆರೆಹಿಡಿಯುವ ಸಾಮರ್ಥ್ಯವನ್ನು ಒದಗಿಸುತ್ತವೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರಬಾರದು."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ಸ್ಥಾಪನೆ ಸೆಷನ್‌ಗಳನ್ನು ಓದಿ"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ಸ್ಥಾಪಿತ ಸೆಷನ್‌ಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ. ಸಕ್ರಿಯ ಪ್ಯಾಕೇಜ್‌ ಸ್ಥಾಪನೆಗಳ ಕುರಿತು ವಿವರಣೆಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಇದು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ಜೂಮ್‌ ನಿಯಂತ್ರಿಸಲು ಎರಡು ಬಾರಿ ಸ್ಪರ್ಶಿಸಿ"</string>
@@ -1426,8 +1427,8 @@
     <string name="deny" msgid="2081879885755434506">"ನಿರಾಕರಿಸು"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"ಅನುಮತಿ ವಿನಂತಿಸಲಾಗಿದೆ"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> ಖಾತೆಗಾಗಿ\n ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಲಾಗಿದೆ."</string>
-    <string name="forward_intent_to_owner" msgid="570916783072215572">"ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಸ್ಥಳದಲ್ಲಿ ಬಳಸುತ್ತಿರುವಿರಿ"</string>
-    <string name="forward_intent_to_work" msgid="8624579696577525279">"ನಿಮ್ಮ ಕಾರ್ಯ ಸ್ಥಳದಲ್ಲಿ ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಬಳಸುತ್ತಿರುವಿರಿ"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ನ ಹೊರಗೆ ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಬಳಸುತ್ತಿರುವಿರಿ"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಬಳಸುತ್ತಿರುವಿರಿ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"ಸಿಂಕ್ ಮಾಡು"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ಪ್ರವೇಶಿಸುವಿಕೆ"</string>
@@ -1502,8 +1503,6 @@
     <string name="time_picker_decrement_hour_button" msgid="1377479863429214792">"ಗಂಟೆಯನ್ನು ಕಡಿಮೆ ಮಾಡಿ"</string>
     <string name="time_picker_increment_set_pm_button" msgid="4147590696151230863">"PM ಹೊಂದಿಸು"</string>
     <string name="time_picker_decrement_set_am_button" msgid="8302140353539486752">"AM ಹೊಂದಿಸಿ"</string>
-    <string name="time_picker_pm_label" msgid="9075415075642718536">"PM"</string>
-    <string name="time_picker_am_label" msgid="7367798547923815593">"AM"</string>
     <string name="date_picker_increment_month_button" msgid="5369998479067934110">"ತಿಂಗಳನ್ನು ಹೆಚ್ಚಿಸಿ"</string>
     <string name="date_picker_decrement_month_button" msgid="1832698995541726019">"ತಿಂಗಳು ಕಡಿಮೆಮಾಡಿ"</string>
     <string name="date_picker_increment_day_button" msgid="7130465412308173903">"ದಿನವನ್ನು ಹೆಚ್ಚಿಸಿ"</string>
@@ -1536,11 +1535,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ಸಂಪಾದಿಸು"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ಡೇಟಾ ಬಳಕೆಯ ಎಚ್ಚರಿಕೆ"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"ಬಳಕೆ ಮತ್ತು ಸೆಟ್ಟಿಂಗ್‍ಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
-    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G-3G ಡೇಟಾ ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G ಡೇಟಾ ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"ಸೆಲ್ಯುಲಾರ್ ಡೇಟಾ ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Wi-Fi ಡೇಟಾ ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="data_usage_limit_body" msgid="6131350187562939365">"ಮಿತಿ ತಲುಪಿದೆ"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ಡೇಟಾ ಮೀತಿಯನ್ನು ತಲುಪಿದೆ"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G ಡೇಟಾ ಮೀತಿಯನ್ನು ತಲುಪಿದೆ"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"ಸೆಲ್ಯುಲಾರ್ ಡೇಟಾ ಮಿತಿಯನ್ನು ತಲುಪಿದೆ"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi ಡೇಟಾ ಮಿತಿಯನ್ನು ತಲುಪಿದೆ"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"ಉಳಿದಿರುವ ಆವರ್ತನೆಗೆ ಡೇಟಾವನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G ಡೇಟಾ ಮಿತಿ ಮೀರಿದೆ"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G ಡೇಟಾ ಮಿತಿ ಮೀರಿದೆ"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"ಸೆಲ್ಯುಲಾರ್ ಡೇಟಾ ಮಿತಿ ಮೀರಿದೆ"</string>
@@ -1571,7 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"ಕರೆ ಸ್ವೀಕರಿಸುವುದೇ?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ಯಾವಾಗಲೂ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"ಒಮ್ಮೆ ಮಾತ್ರ"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="5462991471861024343">"%1$s ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ಟ್ಯಾಬ್ಲೆಟ್‌‌"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"ಫೋನ್"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"ಹೆಡ್‌ಫೋನ್‌ಗಳು"</string>
@@ -1644,6 +1643,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"ಪ್ರವೇಶಿಸುವಿಕೆ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ಪ್ರವೇಶಿಸುವಿಕೆಯನ್ನು ರದ್ದುಮಾಡಲಾಗಿದೆ."</string>
     <string name="user_switched" msgid="3768006783166984410">"ಪ್ರಸ್ತುತ ಬಳಕೆದಾರರು <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> ಗೆ ಬದಲಾಯಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="owner_name" msgid="2716755460376028154">"ಮಾಲೀಕರು"</string>
     <string name="error_message_title" msgid="4510373083082500195">"ದೋಷ"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"ಈ ಬದಲಾವಣೆಯನ್ನು ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
@@ -1765,31 +1765,19 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ಕೆಲಸ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1230563865743799321) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (3340628918851844044) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_locked (8739004135132606329) -->
-    <skip />
-    <!-- no translation found for lock_to_app_title (1682643873107812874) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description (9076084599283282800) -->
-    <skip />
-    <!-- no translation found for lock_to_app_description_accessible (2132076937479670601) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1230563865743799321">"ಈ ಪರದೆ ಅನ್‌ಪಿನ್‌ ಮಾಡಲು, ಹಿಂದೆ ಹಾಗೂ ಇತ್ತೀಚಿನವು ಬಟನ್‌ಗಳನ್ನು ಏಕಕಾಲದಲ್ಲಿ ಸ್ಪರ್ಶಿಸಿ ಹಾಗೂ ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
+    <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"ಈ ಪರದೆ ಅನ್‌ಪಿನ್‌ ಮಾಡಲು, ಇತ್ತೀಚಿನವು ಬಟನ್‌ ಸ್ಪರ್ಶಿಸಿ ಹಾಗೂ ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"ಪರದೆ ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ. ಅನ್‌ಪಿನ್‌ ಮಾಡಲು ನಿಮ್ಮ ಸಂಸ್ಥೆ ಅವಕಾಶ ಮಾಡಿಕೊಟ್ಟಿಲ್ಲ."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"ಪರದೆ ಪಿನ್ನಿಂಗ್‌ ಬಳಸುವುದೇ?"</string>
+    <string name="lock_to_app_description" msgid="9076084599283282800">"ಪರದೆ ಪಿನ್ನಿಂಗ್‌ ಏಕವೀಕ್ಷಣೆಯಲ್ಲಿಯೇ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಲಾಕ್‌ ಮಾಡುತ್ತದೆ.\n\n ಹೊರಹೋಗಲು, ಹಿಂದೆ ಹಾಗೂ ಇತ್ತೀಚಿನವು ಬಟನ್‌ಗಳನ್ನು ಏಕಕಾಲದಲ್ಲಿ ಸ್ಪರ್ಶಿಸಿ, ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
+    <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"ಪರದೆ ಪಿನ್ನಿಂಗ್‌ ಏಕವೀಕ್ಷಣೆಯಲ್ಲಿಯೇ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಲಾಕ್‌ ಮಾಡುತ್ತದೆ.\n\nಹೊರಹೋಗಲು ಇತ್ತೀಚಿನವುಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ ಹಾಗೂ ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"ಬೇಡ, ಧನ್ಯವಾದಗಳು"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ಪ್ರಾರಂಭಿಸು"</string>
-    <!-- no translation found for lock_to_app_start (6643342070839862795) -->
-    <skip />
-    <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
-    <skip />
-    <!-- no translation found for lock_to_app_use_screen_lock (5732663305876339596) -->
-    <skip />
-    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"ಅನ್‌ಲಾಕ್ ನಮೂನೆ"</string>
-    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"ಪಾಸ್‌ವರ್ಡ್"</string>
-    <!-- no translation found for battery_saver_description (725676363406667978) -->
-    <skip />
-    <!-- no translation found for downtime_condition_summary (8761776337475705749) -->
-    <skip />
+    <string name="lock_to_app_start" msgid="6643342070839862795">"ಪರದೆಯನ್ನು ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"ಪರದೆಯನ್ನು ಅನ್‌ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ಅನ್‌ಪಿನ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು PIN ಕೇಳಿ"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ಅನ್‌ಪಿನ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು ಅನ್‌ಲಾಕ್ ನಮೂನೆಯನ್ನು ಕೇಳಿ"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ಅನ್‌ಪಿನ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು ಪಾಸ್‌ವರ್ಡ್ ಕೇಳಿ"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"ಬ್ಯಾಟರಿ ಬಾಳಿಕೆಯನ್ನು ವೃದ್ದಿಸಲು ಸಹಾಯ ಮಾಡಲು, ಬ್ಯಾಟರಿ ಉಳಿತಾಯವು ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕಡಿಮೆಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ಕಂಪನವನ್ನು ಹಾಗೂ ಹೆಚ್ಚಿನ ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಸೀಮಿತಗೊಳಿಸುತ್ತದೆ. ಇಮೇಲ್, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ, ಮತ್ತು ಸಿಂಕ್ ಮಾಡುವುದನ್ನು ಅವಲಂಬಿಸಿರುವ ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ನೀವು ತೆರೆಯುವವರೆಗೆ ಅವುಗಳನ್ನು ನವೀಕರಿಸಲಾಗುವುದಿಲ್ಲ.\n\nನಿಮ್ಮ ಸಾಧನವು ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವಾಗ ಬ್ಯಾಟರಿ ಉಳಿತಾಯವು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆಫ್ ಆಗುತ್ತದೆ."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"ನಿಮ್ಮ ಅಲಭ್ಯತೆ ಕೊನೆಗೊಳ್ಳುವವರೆಗೆ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>
