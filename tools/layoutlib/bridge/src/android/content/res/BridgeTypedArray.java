@@ -233,6 +233,20 @@ public final class BridgeTypedArray extends TypedArray {
 
         // Field is not null and is not an integer.
         // Check for possible constants and try to find them.
+        return (int) resolveEnumAttribute(index, defValue);
+    }
+
+    /**
+     * Searches for the string in the attributes (flag or enums) and returns the integer.
+     * If found, it will return an integer matching the value. However, if the value is not found,
+     * it returns {@code defValue} which may be a float.
+     *
+     * @param index Index of attribute to retrieve.
+     * @param defValue Value to return if the attribute is not found.
+     *
+     * @return Attribute int value, or defValue if not defined.
+     */
+    private float resolveEnumAttribute(int index, float defValue) {
         // Get the map of attribute-constant -> IntegerValue
         Map<String, Integer> map = null;
         if (mIsFramework[index]) {
@@ -251,7 +265,7 @@ public final class BridgeTypedArray extends TypedArray {
             int result = 0;
 
             // split the value in case this is a mix of several flags.
-            String[] keywords = s.split("\\|");
+            String[] keywords = mResourceData[index].getValue().split("\\|");
             for (String keyword : keywords) {
                 Integer i = map.get(keyword.trim());
                 if (i != null) {
@@ -441,24 +455,15 @@ public final class BridgeTypedArray extends TypedArray {
 
         if (s == null) {
             return defValue;
-        } else if (s.equals(BridgeConstants.MATCH_PARENT) ||
-                s.equals(BridgeConstants.FILL_PARENT)) {
-            return LayoutParams.MATCH_PARENT;
-        } else if (s.equals(BridgeConstants.WRAP_CONTENT)) {
-            return LayoutParams.WRAP_CONTENT;
         }
 
         if (ResourceHelper.parseFloatAttribute(mNames[index], s, mValue, true)) {
             return mValue.getDimension(mBridgeResources.getDisplayMetrics());
         }
 
-        // looks like we were unable to resolve the dimension value
-        Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
-                String.format(
-                    "\"%1$s\" in attribute \"%2$s\" is not a valid format.",
-                    s, mNames[index]), null);
-
-        return defValue;
+        // looks like we were unable to resolve the dimension value. Check if it is an attribute
+        // constant.
+        return resolveEnumAttribute(index, defValue);
     }
 
     /**
