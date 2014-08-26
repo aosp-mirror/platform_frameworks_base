@@ -35854,6 +35854,7 @@ package android.view.accessibility {
     method public android.view.accessibility.AccessibilityWindowInfo getParent();
     method public android.view.accessibility.AccessibilityNodeInfo getRoot();
     method public int getType();
+    method public boolean isAccessibilityFocused();
     method public boolean isActive();
     method public boolean isFocused();
     method public static android.view.accessibility.AccessibilityWindowInfo obtain();
