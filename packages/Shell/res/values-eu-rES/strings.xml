@@ -20,6 +20,6 @@
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Programa-akatsen txostena jaso da"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Programa-akatsen txostena partekatzeko, pasatu hatza ezkerrera"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Programa-akatsen txostena partekatzeko, ukitu"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"Errore-txostenek sistemaren erregistro-fitxategietako datuak dauzkate, informazio pertsonala eta pribatua barne. Errore-txostenak partekatzen badituzu, partekatu soilik aplikazio eta pertsona fidagarriekin."</string>
+    <string name="bugreport_confirm" msgid="5130698467795669780">"Programa-akatsen txostenek sistemaren erregistro-fitxategietako datuak dauzkate, informazio pertsonala eta pribatua barne. Programa-akatsen txostenak partekatzen badituzu, partekatu soilik aplikazio eta pertsona fidagarriekin."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Erakutsi mezu hau hurrengoan"</string>
 </resources>
