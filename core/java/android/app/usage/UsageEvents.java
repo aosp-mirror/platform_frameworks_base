@@ -65,7 +65,12 @@ public final class UsageEvents implements Parcelable {
         /**
          * {@hide}
          */
-        public ComponentName mComponent;
+        public String mPackage;
+
+        /**
+         * {@hide}
+         */
+        public String mClass;
 
         /**
          * {@hide}
@@ -78,10 +83,26 @@ public final class UsageEvents implements Parcelable {
         public int mEventType;
 
         /**
-         * The component this event represents.
+         * TODO(adamlesinski): Removed before release.
+         * {@hide}
          */
         public ComponentName getComponent() {
-            return mComponent;
+            return new ComponentName(mPackage, mClass);
+        }
+
+        /**
+         * The package name of the source of this event.
+         */
+        public String getPackageName() {
+            return mPackage;
+        }
+
+        /**
+         * The class name of the source of this event. This may be null for
+         * certain events.
+         */
+        public String getClassName() {
+            return mClass;
         }
 
         /**
@@ -115,7 +136,7 @@ public final class UsageEvents implements Parcelable {
      * In order to save space, since ComponentNames will be duplicated everywhere,
      * we use a map and index into it.
      */
-    private ComponentName[] mComponentNameTable;
+    private String[] mStringPool;
 
     /**
      * Construct the iterator from a parcel.
@@ -125,7 +146,7 @@ public final class UsageEvents implements Parcelable {
         mEventCount = in.readInt();
         mIndex = in.readInt();
         if (mEventCount > 0) {
-            mComponentNameTable = in.createTypedArray(ComponentName.CREATOR);
+            mStringPool = in.createStringArray();
 
             final int listByteLength = in.readInt();
             final int positionInParcel = in.readInt();
@@ -149,8 +170,8 @@ public final class UsageEvents implements Parcelable {
      * Construct the iterator in preparation for writing it to a parcel.
      * {@hide}
      */
-    public UsageEvents(List<Event> events, ComponentName[] nameTable) {
-        mComponentNameTable = nameTable;
+    public UsageEvents(List<Event> events, String[] stringPool) {
+        mStringPool = stringPool;
         mEventCount = events.size();
         mEventsToWrite = events;
     }
@@ -178,8 +199,19 @@ public final class UsageEvents implements Parcelable {
             return false;
         }
 
-        final int index = mParcel.readInt();
-        eventOut.mComponent = mComponentNameTable[index];
+        final int packageIndex = mParcel.readInt();
+        if (packageIndex >= 0) {
+            eventOut.mPackage = mStringPool[packageIndex];
+        } else {
+            eventOut.mPackage = null;
+        }
+
+        final int classIndex = mParcel.readInt();
+        if (classIndex >= 0) {
+            eventOut.mClass = mStringPool[classIndex];
+        } else {
+            eventOut.mClass = null;
+        }
         eventOut.mEventType = mParcel.readInt();
         eventOut.mTimeStamp = mParcel.readLong();
         mIndex++;
@@ -206,12 +238,20 @@ public final class UsageEvents implements Parcelable {
         return 0;
     }
 
+    private int findStringIndex(String str) {
+        final int index = Arrays.binarySearch(mStringPool, str);
+        if (index < 0) {
+            throw new IllegalStateException("String '" + str + "' is not in the string pool");
+        }
+        return index;
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mEventCount);
         dest.writeInt(mIndex);
         if (mEventCount > 0) {
-            dest.writeTypedArray(mComponentNameTable, flags);
+            dest.writeStringArray(mStringPool);
 
             if (mEventsToWrite != null) {
                 // Write out the events
@@ -221,12 +261,21 @@ public final class UsageEvents implements Parcelable {
                     for (int i = 0; i < mEventCount; i++) {
                         final Event event = mEventsToWrite.get(i);
 
-                        int index = Arrays.binarySearch(mComponentNameTable, event.getComponent());
-                        if (index < 0) {
-                            throw new IllegalStateException(event.getComponent().toShortString() +
-                                    " is not in the component name table");
+                        final int packageIndex;
+                        if (event.mPackage != null) {
+                            packageIndex = findStringIndex(event.mPackage);
+                        } else {
+                            packageIndex = -1;
                         }
-                        p.writeInt(index);
+
+                        final int classIndex;
+                        if (event.mClass != null) {
+                            classIndex = findStringIndex(event.mClass);
+                        } else {
+                            classIndex = -1;
+                        }
+                        p.writeInt(packageIndex);
+                        p.writeInt(classIndex);
                         p.writeInt(event.getEventType());
                         p.writeLong(event.getTimeStamp());
                     }

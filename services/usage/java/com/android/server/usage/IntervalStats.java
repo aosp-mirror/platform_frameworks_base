@@ -18,8 +18,8 @@ package com.android.server.usage;
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
-import android.content.ComponentName;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 
 class IntervalStats {
     public long beginTime;
@@ -28,10 +28,11 @@ class IntervalStats {
     public final ArrayMap<String, UsageStats> stats = new ArrayMap<>();
     public TimeSparseArray<UsageEvents.Event> events;
 
-    // Maps flattened string representations of component names to ComponentName.
-    // This helps save memory from using many duplicate ComponentNames and
-    // parse time when reading XML.
-    private final ArrayMap<String, ComponentName> mComponentNames = new ArrayMap<>();
+    // A string cache. This is important as when we're parsing XML files, we don't want to
+    // keep hundreds of strings that have the same contents. We will read the string
+    // and only keep it if it's not in the cache. The GC will take care of the
+    // strings that had identical copies in the cache.
+    private final ArraySet<String> mStringCache = new ArraySet<>();
 
     UsageStats getOrCreateUsageStats(String packageName) {
         UsageStats usageStats = stats.get(packageName);
@@ -63,19 +64,21 @@ class IntervalStats {
         endTime = timeStamp;
     }
 
-    /**
-     * Return a ComponentName for the given string representation. This will use a cached
-     * copy of the ComponentName if possible, otherwise it will parse and add it to the
-     * internal cache.
-     */
-    ComponentName getCachedComponentName(String str) {
-        ComponentName name = mComponentNames.get(str);
-        if (name == null) {
-            name = ComponentName.unflattenFromString(str);
-            if (name != null) {
-                mComponentNames.put(str, name);
-            }
+    private String getCachedStringRef(String str) {
+        final int index = mStringCache.indexOf(str);
+        if (index < 0) {
+            mStringCache.add(str);
+            return str;
         }
-        return name;
+        return mStringCache.valueAt(index);
+    }
+
+    UsageEvents.Event buildEvent(String packageName, String className) {
+        UsageEvents.Event event = new UsageEvents.Event();
+        event.mPackage = getCachedStringRef(packageName);
+        if (className != null) {
+            event.mClass = getCachedStringRef(className);
+        }
+        return event;
     }
 }
