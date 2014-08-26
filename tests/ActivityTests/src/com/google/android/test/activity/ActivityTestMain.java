@@ -21,6 +21,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -29,13 +30,15 @@ import android.content.ContentProviderClient;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.graphics.Bitmap;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -59,6 +62,28 @@ public class ActivityTestMain extends Activity {
     int mSecondUser;
 
     ArrayList<ServiceConnection> mConnections = new ArrayList<ServiceConnection>();
+
+    static final int MSG_SPAM = 1;
+
+    final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_SPAM: {
+                    boolean fg = msg.arg1 != 0;
+                    Intent intent = new Intent(ActivityTestMain.this, SpamActivity.class);
+                    Bundle options = null;
+                    if (fg) {
+                        ActivityOptions opts = ActivityOptions.makeLaunchTaskBehindAnimation();
+                        options = opts.toBundle();
+                    }
+                    startActivity(intent, options);
+                    scheduleSpam(!fg);
+                } break;
+            }
+            super.handleMessage(msg);
+        }
+    };
 
     class BroadcastResultReceiver extends BroadcastReceiver {
         @Override
@@ -143,7 +168,8 @@ public class ActivityTestMain extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add("Animate!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override public boolean onMenuItemClick(MenuItem item) {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(ActivityTestMain.this,
                         R.style.SlowDialog);
                 builder.setTitle("This is a title");
@@ -316,6 +342,49 @@ public class ActivityTestMain extends Activity {
                 return true;
             }
         });
+        menu.add("Open Doc").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                ActivityManager.AppTask task = findDocTask();
+                if (task == null) {
+                    Intent intent = new Intent(ActivityTestMain.this, DocActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+                            | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                            | Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
+                    startActivity(intent);
+                } else {
+                    task.moveToFront();
+                }
+                return true;
+            }
+        });
+        menu.add("Stack Doc").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                ActivityManager.AppTask task = findDocTask();
+                if (task != null) {
+                    ActivityManager.RecentTaskInfo recent = task.getTaskInfo();
+                    Intent intent = new Intent(ActivityTestMain.this, DocActivity.class);
+                    if (recent.id >= 0) {
+                        // Stack on top.
+                        intent.putExtra(DocActivity.LABEL, "Stacked");
+                        task.startActivity(ActivityTestMain.this, intent, null);
+                    } else {
+                        // Start root activity.
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+                                | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                                | Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
+                        intent.putExtra(DocActivity.LABEL, "New Root");
+                        task.startActivity(ActivityTestMain.this, intent, null);
+                    }
+                }
+                return true;
+            }
+        });
+        menu.add("Spam!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                scheduleSpam(false);
+                return true;
+            }
+        });
         return true;
     }
 
@@ -340,6 +409,12 @@ public class ActivityTestMain extends Activity {
             unbindService(conn);
         }
         mConnections.clear();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mHandler.removeMessages(MSG_SPAM);
     }
 
     void addAppRecents(int count) {
@@ -371,7 +446,31 @@ public class ActivityTestMain extends Activity {
             }
         }
     }
-     private View scrollWrap(View view) {
+
+    ActivityManager.AppTask findDocTask() {
+        ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.AppTask> tasks = am.getAppTasks();
+        if (tasks != null) {
+            for (int i=0; i<tasks.size(); i++) {
+                ActivityManager.AppTask task = tasks.get(i);
+                ActivityManager.RecentTaskInfo recent = task.getTaskInfo();
+                if (recent.baseIntent != null
+                        && recent.baseIntent.getComponent().getClassName().equals(
+                                DocActivity.class.getCanonicalName())) {
+                    return task;
+                }
+            }
+        }
+        return null;
+    }
+
+    void scheduleSpam(boolean fg) {
+        mHandler.removeMessages(MSG_SPAM);
+        Message msg = mHandler.obtainMessage(MSG_SPAM, fg ? 1 : 0, 0);
+        mHandler.sendMessageDelayed(msg, 500);
+    }
+
+    private View scrollWrap(View view) {
         ScrollView scroller = new ScrollView(this);
         scroller.addView(view, new ScrollView.LayoutParams(ScrollView.LayoutParams.MATCH_PARENT,
                 ScrollView.LayoutParams.MATCH_PARENT));
