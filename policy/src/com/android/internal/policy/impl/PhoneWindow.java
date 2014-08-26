@@ -876,6 +876,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
+    void doPendingInvalidatePanelMenu() {
+        if (mInvalidatePanelMenuPosted) {
+            mDecor.removeCallbacks(mInvalidatePanelMenuRunnable);
+            mInvalidatePanelMenuRunnable.run();
+        }
+    }
+
     void doInvalidatePanelMenu(int featureId) {
         PanelFeatureState st = getPanelState(featureId, true);
         Bundle savedActionViewStates = null;
@@ -1979,6 +1986,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             SparseArray<Parcelable> actionBarStates =
                     savedInstanceState.getSparseParcelableArray(ACTION_BAR_TAG);
             if (actionBarStates != null) {
+                doPendingInvalidatePanelMenu();
                 mDecorContentParent.restoreToolbarHierarchyState(actionBarStates);
             } else {
                 Log.w(TAG, "Missing saved instance states for action bar views! " +
@@ -3468,17 +3476,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     mDecorContentParent.setLogo(mLogoRes);
                 }
 
-                // Post the panel invalidate for later; avoid application onCreateOptionsMenu
+                // Invalidate if the panel menu hasn't been created before this.
+                // Panel menu invalidation is deferred avoiding application onCreateOptionsMenu
                 // being called in the middle of onCreate or similar.
-                mDecor.post(new Runnable() {
-                    public void run() {
-                        // Invalidate if the panel menu hasn't been created before this.
-                        PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
-                        if (!isDestroyed() && (st == null || st.menu == null)) {
-                            invalidatePanelMenu(FEATURE_ACTION_BAR);
-                        }
-                    }
-                });
+                // A pending invalidation will typically be resolved before the posted message
+                // would run normally in order to satisfy instance state restoration.
+                PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
+                if (!isDestroyed() && (st == null || st.menu == null)) {
+                    invalidatePanelMenu(FEATURE_ACTION_BAR);
+                }
             } else {
                 mTitleView = (TextView)findViewById(R.id.title);
                 if (mTitleView != null) {
