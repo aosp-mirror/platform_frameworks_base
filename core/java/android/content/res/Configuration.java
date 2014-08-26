@@ -533,6 +533,18 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int DENSITY_DPI_UNDEFINED = 0;
 
     /**
+     * Value for {@link #densityDpi} for resources that scale to any density (vector drawables).
+     * {@hide}
+     */
+    public static final int DENSITY_DPI_ANY = 0xfffe;
+
+    /**
+     * Value for {@link #densityDpi} for resources that are not meant to be scaled.
+     * {@hide}
+     */
+    public static final int DENSITY_DPI_NONE = 0xffff;
+
+    /**
      * The target screen density being rendered to,
      * corresponding to
      * <a href="{@docRoot}guide/topics/resources/providing-resources.html#DensityQualifier">density</a>
@@ -1453,7 +1465,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
 
         switch (config.densityDpi) {
-            case 0:
+            case DENSITY_DPI_UNDEFINED:
                 break;
             case 120:
                 parts.add("ldpi");
@@ -1476,6 +1488,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             case 640:
                 parts.add("xxxhdpi");
                 break;
+            case DENSITY_DPI_ANY:
+                parts.add("anydpi");
+                break;
+            case DENSITY_DPI_NONE:
+                parts.add("nodpi");
             default:
                 parts.add(config.densityDpi + "dpi");
                 break;
