@@ -306,6 +306,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         public String label;
         public String contentDescription;
         public String dualLabelContentDescription;
+        public boolean autoMirrorDrawable = true;
 
         public boolean copyTo(State other) {
             if (other == null) throw new IllegalArgumentException();
@@ -315,6 +316,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
                     || !Objects.equals(other.icon, icon)
                     || !Objects.equals(other.label, label)
                     || !Objects.equals(other.contentDescription, contentDescription)
+                    || !Objects.equals(other.autoMirrorDrawable, autoMirrorDrawable)
                     || !Objects.equals(other.dualLabelContentDescription,
                     dualLabelContentDescription);
             other.visible = visible;
@@ -323,6 +325,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
             other.label = label;
             other.contentDescription = contentDescription;
             other.dualLabelContentDescription = dualLabelContentDescription;
+            other.autoMirrorDrawable = autoMirrorDrawable;
             return changed;
         }
 
@@ -339,6 +342,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
             sb.append(",label=").append(label);
             sb.append(",contentDescription=").append(contentDescription);
             sb.append(",dualLabelContentDescription=").append(dualLabelContentDescription);
+            sb.append(",autoMirrorDrawable=").append(autoMirrorDrawable);
             return sb.append(']');
         }
     }
