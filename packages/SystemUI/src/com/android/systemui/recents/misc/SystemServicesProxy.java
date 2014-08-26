@@ -174,6 +174,7 @@ public class SystemServicesProxy {
         int minNumTasksToQuery = 10;
         int numTasksToQuery = Math.max(minNumTasksToQuery, numLatestTasks);
         List<ActivityManager.RecentTaskInfo> tasks = mAm.getRecentTasksForUser(numTasksToQuery,
+                ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS |
                 ActivityManager.RECENT_IGNORE_UNAVAILABLE |
                 ActivityManager.RECENT_INCLUDE_PROFILES |
                 ActivityManager.RECENT_WITH_EXCLUDED, userId);
@@ -185,11 +186,6 @@ public class SystemServicesProxy {
             // NOTE: The order of these checks happens in the expected order of the traversal of the
             // tasks
 
-            // Skip tasks from this Recents package
-            if (t.baseIntent.getComponent().getPackageName().equals(mRecentsPackage)) {
-                iter.remove();
-                continue;
-            }
             // Check the first non-recents task, include this task even if it is marked as excluded
             // from recents.  In other words, only remove excluded tasks if it is not the first task
             boolean isExcluded = (t.baseIntent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
@@ -199,11 +195,6 @@ public class SystemServicesProxy {
                 continue;
             }
             isFirstValidTask = false;
-            // Skip tasks in the home stack
-            if (isInHomeStack(t.persistentId)) {
-                iter.remove();
-                continue;
-            }
         }
 
         return tasks.subList(0, Math.min(tasks.size(), numLatestTasks));

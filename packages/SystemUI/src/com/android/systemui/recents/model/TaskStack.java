@@ -92,7 +92,10 @@ class FilteredTaskList {
 
     /** Returns the index of this task in the list of filtered tasks */
     int indexOf(Task t) {
-        return mTaskIndices.get(t.key);
+        if (mTaskIndices.containsKey(t.key)) {
+            return mTaskIndices.get(t.key);
+        }
+        return -1;
     }
 
     /** Returns the size of the list of filtered tasks */

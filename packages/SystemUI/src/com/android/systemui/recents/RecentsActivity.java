@@ -384,7 +384,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Private API calls to make the shadows look better
         try {
-            Utilities.setShadowProperty("ambientShadowStrength", String.valueOf(35f));
             Utilities.setShadowProperty("ambientRatio", String.valueOf(1.5f));
         } catch (IllegalAccessException e) {
             e.printStackTrace();

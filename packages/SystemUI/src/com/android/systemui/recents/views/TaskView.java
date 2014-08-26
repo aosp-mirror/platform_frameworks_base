@@ -235,7 +235,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         int initialDim = getDim();
         if (mConfig.launchedFromAppWithScreenshot) {
             if (isTaskViewLaunchTargetTask) {
-                mHeaderView.prepareEnterRecentsAnimation();
                 // Hide the footer during the transition in, and animate it out afterwards?
                 if (mFooterView != null) {
                     mFooterView.animateFooterVisibility(false, 0);
@@ -246,8 +245,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
         } else if (mConfig.launchedFromAppWithThumbnail) {
             if (isTaskViewLaunchTargetTask) {
-                // Hide the front most task bar view so we can animate it in
-                mHeaderView.prepareEnterRecentsAnimation();
                 // Hide the action button if it exists
                 mActionButtonView.setAlpha(0f);
                 // Set the dim to 0 so we can animate it in
@@ -306,7 +303,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     mViewBounds.animateClipBottom(getMeasuredHeight() - (windowInsetTop + size), duration);
                 }
                 // Animate the task bar of the first task view
-                mHeaderView.startEnterRecentsAnimation(0, null);
                 animate()
                         .scaleX(taskScale)
                         .scaleY(taskScale)
@@ -352,9 +348,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
         } else if (mConfig.launchedFromAppWithThumbnail) {
             if (mTask.isLaunchTarget) {
-                // Animate the task bar of the first task view
-                mHeaderView.startEnterRecentsAnimation(mConfig.taskBarEnterAnimDelay,
-                        mThumbnailView.enableTaskBarClipAsRunnable(mHeaderView));
+                // Enable the task bar clip
+                mThumbnailView.enableTaskBarClip(mHeaderView);
                 // Animate the dim/overlay
                 if (Constants.DebugFlags.App.EnableThumbnailAlphaOnFrontmost) {
                     // Animate the thumbnail alpha before the dim animation (to prevent updating the
@@ -475,14 +470,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     }
 
     /** Animates this task view as it exits recents */
-    void startLaunchTaskAnimation(final Runnable r, boolean isLaunchingTask,
+    void startLaunchTaskAnimation(final Runnable postAnimRunnable, boolean isLaunchingTask,
             boolean occludesLaunchTarget) {
         if (isLaunchingTask) {
-            // Disable the thumbnail clip and animate the bar out for the window animation out
-            mHeaderView.startLaunchTaskAnimation(mThumbnailView.disableTaskBarClipAsRunnable(), r,
-                    mIsFocused);
+            // Disable the thumbnail clip
+            mThumbnailView.disableTaskBarClip();
             // Animate the thumbnail alpha back into full opacity for the window animation out
-            mThumbnailView.startLaunchTaskAnimation();
+            mThumbnailView.startLaunchTaskAnimation(postAnimRunnable);
 
             // Animate the dim
             if (mDim > 0) {
@@ -493,7 +487,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             }
 
             // Animate the action button away
-            mActionButtonView.animate().alpha(0f)
+            float toScale = 0.9f;
+            mActionButtonView.animate()
+                    .alpha(0f)
+                    .scaleX(toScale)
+                    .scaleY(toScale)
                     .setStartDelay(0)
                     .setDuration(mConfig.taskBarExitAnimDuration)
                     .setInterpolator(mConfig.fastOutLinearInInterpolator)
@@ -706,22 +704,30 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     }
 
     /**
+     * Unsets the focused task explicitly.
+     */
+    void unsetFocusedTask() {
+        mIsFocused = false;
+        if (mFocusAnimationsEnabled) {
+            // Un-focus the header bar
+            mHeaderView.onTaskViewFocusChanged(false);
+        }
+
+        // Update the thumbnail alpha with the focus
+        mThumbnailView.onFocusChanged(false);
+        // Call the callback
+        mCb.onTaskViewFocusChanged(this, false);
+        invalidate();
+    }
+
+    /**
      * Updates the explicitly focused state when the view focus changes.
      */
     @Override
     protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
         if (!gainFocus) {
-            mIsFocused = false;
-            if (mFocusAnimationsEnabled) {
-                // Un-focus the header bar
-                mHeaderView.onTaskViewFocusChanged(false);
-            }
-            // Update the thumbnail alpha with the focus
-            mThumbnailView.onFocusChanged(false);
-            // Call the callback
-            mCb.onTaskViewFocusChanged(this, false);
-            invalidate();
+            unsetFocusedTask();
         }
     }
 

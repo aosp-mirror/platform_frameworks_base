@@ -64,25 +64,10 @@ public class TaskViewThumbnail extends FixedSizeImageView {
         setClipBounds(mClipRect);
     }
 
-    /** Convenience method to enable task bar clipping as a runnable. */
-    Runnable enableTaskBarClipAsRunnable(final View taskBar) {
-        return new Runnable() {
-            @Override
-            public void run() {
-                enableTaskBarClip(taskBar);
-            }
-        };
-    }
-
     /** Disables the task bar clipping. */
-    Runnable disableTaskBarClipAsRunnable() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                mClipRect.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
-                setClipBounds(mClipRect);
-            }
-        };
+    void disableTaskBarClip() {
+        mClipRect.set(0, 0, getMeasuredWidth(), getMeasuredHeight());
+        setClipBounds(mClipRect);
     }
 
     /** Binds the thumbnail view to the screenshot. */
@@ -140,8 +125,8 @@ public class TaskViewThumbnail extends FixedSizeImageView {
     }
 
     /** Animates this task thumbnail as it exits recents */
-    void startLaunchTaskAnimation() {
-        startFadeAnimation(1f, 0, mConfig.taskBarExitAnimDuration, null);
+    void startLaunchTaskAnimation(Runnable postAnimRunnable) {
+        startFadeAnimation(1f, 0, mConfig.taskBarExitAnimDuration, postAnimRunnable);
     }
 
     /** Animates the thumbnail alpha. */
