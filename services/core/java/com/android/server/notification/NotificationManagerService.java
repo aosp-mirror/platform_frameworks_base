@@ -1605,55 +1605,56 @@ public class NotificationManagerService extends SystemService {
             @Override
             public void run() {
 
-                // === Scoring ===
-
-                // 0. Sanitize inputs
-                notification.priority = clamp(notification.priority, Notification.PRIORITY_MIN,
-                        Notification.PRIORITY_MAX);
-                // Migrate notification flags to scores
-                if (0 != (notification.flags & Notification.FLAG_HIGH_PRIORITY)) {
-                    if (notification.priority < Notification.PRIORITY_MAX) {
-                        notification.priority = Notification.PRIORITY_MAX;
-                    }
-                } else if (SCORE_ONGOING_HIGHER &&
-                        0 != (notification.flags & Notification.FLAG_ONGOING_EVENT)) {
-                    if (notification.priority < Notification.PRIORITY_HIGH) {
-                        notification.priority = Notification.PRIORITY_HIGH;
-                    }
-                }
-
-                // 1. initial score: buckets of 10, around the app [-20..20]
-                final int score = notification.priority * NOTIFICATION_PRIORITY_MULTIPLIER;
-
-                // 2. extract ranking signals from the notification data
-                final StatusBarNotification n = new StatusBarNotification(
-                        pkg, opPkg, id, tag, callingUid, callingPid, score, notification,
-                        user);
-                NotificationRecord r = new NotificationRecord(n, score);
-                NotificationRecord old = mNotificationsByKey.get(n.getKey());
-                if (old != null) {
-                    // Retain ranking information from previous record
-                    r.copyRankingInformation(old);
-                }
-                mRankingHelper.extractSignals(r);
-
-                // 3. Apply local rules
-
-                // blocked apps
-                if (ENABLE_BLOCKED_NOTIFICATIONS && !noteNotificationOp(pkg, callingUid)) {
-                    if (!isSystemNotification) {
-                        r.score = JUNK_SCORE;
-                        Slog.e(TAG, "Suppressing notification from package " + pkg
-                                + " by user request.");
-                    }
-                }
-
-                if (r.score < SCORE_DISPLAY_THRESHOLD) {
-                    // Notification will be blocked because the score is too low.
-                    return;
-                }
-
                 synchronized (mNotificationList) {
+
+                    // === Scoring ===
+
+                    // 0. Sanitize inputs
+                    notification.priority = clamp(notification.priority, Notification.PRIORITY_MIN,
+                            Notification.PRIORITY_MAX);
+                    // Migrate notification flags to scores
+                    if (0 != (notification.flags & Notification.FLAG_HIGH_PRIORITY)) {
+                        if (notification.priority < Notification.PRIORITY_MAX) {
+                            notification.priority = Notification.PRIORITY_MAX;
+                        }
+                    } else if (SCORE_ONGOING_HIGHER &&
+                            0 != (notification.flags & Notification.FLAG_ONGOING_EVENT)) {
+                        if (notification.priority < Notification.PRIORITY_HIGH) {
+                            notification.priority = Notification.PRIORITY_HIGH;
+                        }
+                    }
+
+                    // 1. initial score: buckets of 10, around the app [-20..20]
+                    final int score = notification.priority * NOTIFICATION_PRIORITY_MULTIPLIER;
+
+                    // 2. extract ranking signals from the notification data
+                    final StatusBarNotification n = new StatusBarNotification(
+                            pkg, opPkg, id, tag, callingUid, callingPid, score, notification,
+                            user);
+                    NotificationRecord r = new NotificationRecord(n, score);
+                    NotificationRecord old = mNotificationsByKey.get(n.getKey());
+                    if (old != null) {
+                        // Retain ranking information from previous record
+                        r.copyRankingInformation(old);
+                    }
+                    mRankingHelper.extractSignals(r);
+
+                    // 3. Apply local rules
+
+                    // blocked apps
+                    if (ENABLE_BLOCKED_NOTIFICATIONS && !noteNotificationOp(pkg, callingUid)) {
+                        if (!isSystemNotification) {
+                            r.score = JUNK_SCORE;
+                            Slog.e(TAG, "Suppressing notification from package " + pkg
+                                    + " by user request.");
+                        }
+                    }
+
+                    if (r.score < SCORE_DISPLAY_THRESHOLD) {
+                        // Notification will be blocked because the score is too low.
+                        return;
+                    }
+
                     // Clear out group children of the old notification if the update causes the
                     // group summary to go away. This happens when the old notification was a
                     // summary and the new one isn't, or when the old notification was a summary
@@ -1688,24 +1689,7 @@ public class NotificationManagerService extends SystemService {
                     }
 
                     applyZenModeLocked(r);
-
-                    try {
-                        mRankingHelper.sort(mNotificationList);
-                    } catch (RuntimeException ex) {
-                        // Don't crash the system server if something bad happened.
-                        Log.e(TAG, "Extreme badness during notification sort", ex);
-                        Log.e(TAG, "Current notification list: ");
-                        for (int ii=0; ii < mNotificationList.size(); ii++) {
-                            NotificationRecord nr = mNotificationList.get(ii);
-                            Log.e(TAG, String.format(
-                                    "  [%d] %s (group %s, rank %d, sortkey %s, proxy %s)",
-                                    ii, nr, nr.getGroupKey(), nr.getAuthoritativeRank(),
-                                    nr.getNotification().getSortKey(),
-                                    nr.getRankingProxy()));
-                        }
-                        // STOPSHIP: remove once b/16626175 is found
-                        throw ex;
-                    }
+                    mRankingHelper.sort(mNotificationList);
 
                     if (notification.icon != 0) {
                         StatusBarNotification oldSbn = (old != null) ? old.sbn : null;
