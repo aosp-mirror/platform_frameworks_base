@@ -127,7 +127,8 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
         switch (mState) {
             case STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE:
                 if (cmd.getOpcode() == Constants.MESSAGE_FEATURE_ABORT
-                        && cmd.getParams()[0] == Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST) {
+                        && (cmd.getParams()[0] & 0xFF)
+                                == Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST) {
                     setSystemAudioMode(false);
                     finishWithCallback(HdmiControlManager.RESULT_EXCEPTION);
                     return true;

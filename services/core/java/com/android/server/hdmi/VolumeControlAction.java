@@ -156,10 +156,14 @@ final class VolumeControlAction extends HdmiCecFeatureAction {
                 handleReportAudioStatus(cmd);
                 return true;
             case Constants.MESSAGE_FEATURE_ABORT:
-                // TODO: handle feature abort.
-                finish();
-                return true;
-            default:
+                int originalOpcode = cmd.getParams()[0] & 0xFF;
+                if (originalOpcode == Constants.MESSAGE_USER_CONTROL_PRESSED
+                        || originalOpcode == Constants.MESSAGE_USER_CONTROL_RELEASED) {
+                    // TODO: handle feature abort.
+                    finish();
+                    return true;
+                }
+            default:  // fall through
                 return false;
         }
     }
