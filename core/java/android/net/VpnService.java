@@ -523,7 +523,8 @@ public class VpnService extends Service {
          *
          * If this method is called at least once, only applications added through this method (and
          * no others) are allowed access. Else (if this method is never called), all applications
-         * are allowed by default.
+         * are allowed by default.  If some applications are added, other, un-added applications
+         * will use networking as if the VPN wasn't running.
          *
          * A {@link Builder} may have only a set of allowed applications OR a set of disallowed
          * ones, but not both. Calling this method after {@link #addDisallowedApplication} has
@@ -548,7 +549,7 @@ public class VpnService extends Service {
          * Adds an application that's denied access to the VPN connection.
          *
          * By default, all applications are allowed access, except for those denied through this
-         * method.
+         * method.  Denied applications will use networking as if the VPN wasn't running.
          *
          * A {@link Builder} may have only a set of allowed applications OR a set of disallowed
          * ones, but not both. Calling this method after {@link #addAllowedApplication} has already
