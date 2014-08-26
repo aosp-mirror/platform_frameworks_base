@@ -37,6 +37,8 @@ final class UsageStatsXmlV1 {
     private static final String END_TIME_ATTR = "endTime";
     private static final String PACKAGE_TAG = "package";
     private static final String NAME_ATTR = "name";
+    private static final String PACKAGE_ATTR = "package";
+    private static final String CLASS_ATTR = "class";
     private static final String TOTAL_TIME_ACTIVE_ATTR = "totalTimeActive";
     private static final String LAST_TIME_ACTIVE_ATTR = "lastTimeActive";
     private static final String LAST_EVENT_ATTR = "lastEvent";
@@ -80,18 +82,27 @@ final class UsageStatsXmlV1 {
             return null;
         }
 
-        final String componentName = XmlUtils.readStringAttribute(parser, NAME_ATTR);
-        if (componentName == null) {
-            throw new ProtocolException("no " + NAME_ATTR + " attribute present");
+        String packageName = XmlUtils.readStringAttribute(parser, PACKAGE_ATTR);
+        String className;
+        if (packageName == null) {
+            // Try getting the component name if it exists.
+            final String componentName = XmlUtils.readStringAttribute(parser, NAME_ATTR);
+            if (componentName == null) {
+                throw new ProtocolException("no " + NAME_ATTR + " or " + PACKAGE_ATTR +
+                        " attribute present");
+            }
+            ComponentName component = ComponentName.unflattenFromString(componentName);
+            if (component == null) {
+                throw new ProtocolException("ComponentName " + componentName + " is invalid");
+            }
+
+            packageName = component.getPackageName();
+            className = component.getClassName();
+        } else {
+            className = XmlUtils.readStringAttribute(parser, CLASS_ATTR);
         }
 
-        ComponentName component = statsOut.getCachedComponentName(componentName);
-        if (component == null) {
-            throw new ProtocolException("ComponentName " + componentName + " is invalid");
-        }
-
-        UsageEvents.Event event = new UsageEvents.Event();
-        event.mComponent = component;
+        UsageEvents.Event event = statsOut.buildEvent(packageName, className);
         event.mEventType = XmlUtils.readIntAttribute(parser, TYPE_ATTR);
         event.mTimeStamp = XmlUtils.readLongAttribute(parser, TIME_ATTR);
         XmlUtils.skipCurrentTag(parser);
@@ -112,7 +123,10 @@ final class UsageStatsXmlV1 {
     private static void writeEvent(FastXmlSerializer serializer, UsageEvents.Event event)
             throws IOException {
         serializer.startTag(null, EVENT_LOG_TAG);
-        serializer.attribute(null, NAME_ATTR, event.getComponent().flattenToString());
+        serializer.attribute(null, PACKAGE_ATTR, event.mPackage);
+        if (event.mClass != null) {
+            serializer.attribute(null, CLASS_ATTR, event.mClass);
+        }
         serializer.attribute(null, TYPE_ATTR, Integer.toString(event.getEventType()));
         serializer.attribute(null, TIME_ATTR, Long.toString(event.getTimeStamp()));
         serializer.endTag(null, EVENT_LOG_TAG);
