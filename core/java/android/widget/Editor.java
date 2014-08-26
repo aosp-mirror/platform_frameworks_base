@@ -3295,7 +3295,9 @@ public class Editor {
 
         protected void dismiss() {
             mIsDragging = false;
-            mContainer.dismiss();
+            if (mContainer.isShowing()) {
+                mContainer.dismiss();
+            }
             onDetached();
         }
 
