@@ -76,6 +76,11 @@ public:
         return a < b ? a : b;
     }
 
+    template<typename T>
+    static inline T clamp(T a, T minValue, T maxValue) {
+        return min(max(a, minValue), maxValue);
+    }
+
     inline static float lerp(float v1, float v2, float t) {
         return v1 + ((v2 - v1) * t);
     }
