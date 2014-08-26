@@ -33,6 +33,7 @@ public class NavigationBarViewTaskSwitchHelper extends GestureDetector.SimpleOnG
     private final int mMinFlingVelocity;
     private boolean mInterceptTouches;
     private int mTouchDownX;
+    private int mTouchDownY;
 
     public NavigationBarViewTaskSwitchHelper(Context context) {
         ViewConfiguration configuration = ViewConfiguration.get(context);
@@ -58,12 +59,19 @@ public class NavigationBarViewTaskSwitchHelper extends GestureDetector.SimpleOnG
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
                 mTouchDownX = (int) event.getX();
+                mTouchDownY = (int) event.getY();
                 mInterceptTouches = false;
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
                 int x = (int) event.getX();
-                if (Math.abs(x - mTouchDownX) > mScrollTouchSlop) {
+                int y = (int) event.getY();
+                int xDiff = Math.abs(x - mTouchDownX);
+                int yDiff = Math.abs(y - mTouchDownY);
+                boolean exceededTouchSlop = !mIsVertical
+                        ? xDiff > mScrollTouchSlop && xDiff > yDiff
+                        : yDiff > mScrollTouchSlop && yDiff > xDiff;
+                if (exceededTouchSlop) {
                     mInterceptTouches = true;
                     return true;
                 }
