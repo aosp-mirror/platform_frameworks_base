@@ -298,9 +298,7 @@ public class StatusBarKeyguardViewManager {
      */
     public boolean onBackPressed() {
         if (mBouncer.isShowing()) {
-            mBouncer.hide(false /* destroyView */);
-            mPhoneStatusBar.showKeyguard();
-            updateStates();
+            reset();
             return true;
         }
         return false;
