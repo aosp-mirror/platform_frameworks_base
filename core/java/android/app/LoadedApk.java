@@ -51,8 +51,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -594,55 +594,6 @@ public final class LoadedApk {
         return app;
     }
 
-    private void rewriteIntField(Field field, int packageId) throws IllegalAccessException {
-        int requiredModifiers = Modifier.STATIC | Modifier.PUBLIC;
-        int bannedModifiers = Modifier.FINAL;
-
-        int mod = field.getModifiers();
-        if ((mod & requiredModifiers) != requiredModifiers ||
-                (mod & bannedModifiers) != 0) {
-            throw new IllegalArgumentException("Field " + field.getName() +
-                    " is not rewritable");
-        }
-
-        if (field.getType() != int.class && field.getType() != Integer.class) {
-            throw new IllegalArgumentException("Field " + field.getName() +
-                    " is not an integer");
-        }
-
-        try {
-            int resId = field.getInt(null);
-            field.setInt(null, (resId & 0x00ffffff) | (packageId << 24));
-        } catch (IllegalAccessException e) {
-            // This should not occur (we check above if we can write to it)
-            throw new IllegalArgumentException(e);
-        }
-    }
-
-    private void rewriteIntArrayField(Field field, int packageId) {
-        int requiredModifiers = Modifier.STATIC | Modifier.PUBLIC;
-
-        if ((field.getModifiers() & requiredModifiers) != requiredModifiers) {
-            throw new IllegalArgumentException("Field " + field.getName() +
-                    " is not rewritable");
-        }
-
-        if (field.getType() != int[].class) {
-            throw new IllegalArgumentException("Field " + field.getName() +
-                    " is not an integer array");
-        }
-
-        try {
-            int[] array = (int[]) field.get(null);
-            for (int i = 0; i < array.length; i++) {
-                array[i] = (array[i] & 0x00ffffff) | (packageId << 24);
-            }
-        } catch (IllegalAccessException e) {
-            // This should not occur (we check above if we can write to it)
-            throw new IllegalArgumentException(e);
-        }
-    }
-
     private void rewriteRValues(ClassLoader cl, String packageName, int id) {
         final Class<?> rClazz;
         try {
@@ -650,35 +601,30 @@ public final class LoadedApk {
         } catch (ClassNotFoundException e) {
             // This is not necessarily an error, as some packages do not ship with resources
             // (or they do not need rewriting).
-            Log.i(TAG, "Could not find R class for package '" + packageName + "'");
+            Log.i(TAG, "No resource references to update in package " + packageName);
             return;
         }
 
+        final Method callback;
         try {
-            Class<?>[] declaredClasses = rClazz.getDeclaredClasses();
-            for (Class<?> clazz : declaredClasses) {
-                try {
-                    if (clazz.getSimpleName().equals("styleable")) {
-                        for (Field field : clazz.getDeclaredFields()) {
-                            if (field.getType() == int[].class) {
-                                rewriteIntArrayField(field, id);
-                            }
-                        }
-
-                    } else {
-                        for (Field field : clazz.getDeclaredFields()) {
-                            rewriteIntField(field, id);
-                        }
-                    }
-                } catch (Exception e) {
-                    throw new IllegalArgumentException("Failed to rewrite R values for " +
-                            clazz.getName(), e);
-                }
-            }
-
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to rewrite R values", e);
+            callback = rClazz.getMethod("onResourcesLoaded", int.class);
+        } catch (NoSuchMethodException e) {
+            // No rewriting to be done.
+            return;
         }
+
+        Throwable cause;
+        try {
+            callback.invoke(null, id);
+            return;
+        } catch (IllegalAccessException e) {
+            cause = e;
+        } catch (InvocationTargetException e) {
+            cause = e.getCause();
+        }
+
+        throw new RuntimeException("Failed to rewrite resource references for " + packageName,
+                cause);
     }
 
     public void removeContextRegistrations(Context context,

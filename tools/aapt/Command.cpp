@@ -2488,10 +2488,12 @@ int doPackage(Bundle* bundle)
         if (bundle->getCustomPackage() == NULL) {
             // Write the R.java file into the appropriate class directory
             // e.g. gen/com/foo/app/R.java
-            err = writeResourceSymbols(bundle, assets, assets->getPackage(), true);
+            err = writeResourceSymbols(bundle, assets, assets->getPackage(), true,
+                    bundle->getBuildSharedLibrary());
         } else {
             const String8 customPkg(bundle->getCustomPackage());
-            err = writeResourceSymbols(bundle, assets, customPkg, true);
+            err = writeResourceSymbols(bundle, assets, customPkg, true,
+                    bundle->getBuildSharedLibrary());
         }
         if (err < 0) {
             goto bail;
@@ -2505,7 +2507,7 @@ int doPackage(Bundle* bundle)
             char* packageString = strtok(libs.lockBuffer(libs.length()), ":");
             while (packageString != NULL) {
                 // Write the R.java file out with the correct package name
-                err = writeResourceSymbols(bundle, assets, String8(packageString), true);
+                err = writeResourceSymbols(bundle, assets, String8(packageString), true, false);
                 if (err < 0) {
                     goto bail;
                 }
@@ -2514,11 +2516,11 @@ int doPackage(Bundle* bundle)
             libs.unlockBuffer();
         }
     } else {
-        err = writeResourceSymbols(bundle, assets, assets->getPackage(), false);
+        err = writeResourceSymbols(bundle, assets, assets->getPackage(), false, false);
         if (err < 0) {
             goto bail;
         }
-        err = writeResourceSymbols(bundle, assets, assets->getSymbolsPrivatePackage(), true);
+        err = writeResourceSymbols(bundle, assets, assets->getSymbolsPrivatePackage(), true, false);
         if (err < 0) {
             goto bail;
         }
