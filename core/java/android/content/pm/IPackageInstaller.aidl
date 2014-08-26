@@ -25,6 +25,8 @@ import android.content.IntentSender;
 /** {@hide} */
 interface IPackageInstaller {
     int createSession(in PackageInstaller.SessionParams params, String installerPackageName, int userId);
+    void abandonSession(int sessionId);
+
     IPackageInstallerSession openSession(int sessionId);
 
     PackageInstaller.SessionInfo getSessionInfo(int sessionId);
