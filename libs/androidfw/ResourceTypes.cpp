@@ -2206,13 +2206,30 @@ bool ResTable_config::isBetterThan(const ResTable_config& o,
 
         if (screenType || o.screenType) {
             if (density != o.density) {
-                // density is tough.  Any density is potentially useful
+                // Use the system default density (DENSITY_MEDIUM, 160dpi) if none specified.
+                const int thisDensity = density ? density : int(ResTable_config::DENSITY_MEDIUM);
+                const int otherDensity = o.density ? o.density : int(ResTable_config::DENSITY_MEDIUM);
+
+                // We always prefer DENSITY_ANY over scaling a density bucket.
+                if (thisDensity == ResTable_config::DENSITY_ANY) {
+                    return true;
+                } else if (otherDensity == ResTable_config::DENSITY_ANY) {
+                    return false;
+                }
+
+                int requestedDensity = requested->density;
+                if (requested->density == 0 ||
+                        requested->density == ResTable_config::DENSITY_ANY) {
+                    requestedDensity = ResTable_config::DENSITY_MEDIUM;
+                }
+
+                // DENSITY_ANY is now dealt with. We should look to
+                // pick a density bucket and potentially scale it.
+                // Any density is potentially useful
                 // because the system will scale it.  Scaling down
                 // is generally better than scaling up.
-                // Default density counts as 160dpi (the system default)
-                // TODO - remove 160 constants
-                int h = (density?density:160);
-                int l = (o.density?o.density:160);
+                int h = thisDensity;
+                int l = otherDensity;
                 bool bImBigger = true;
                 if (l > h) {
                     int t = h;
@@ -2221,17 +2238,16 @@ bool ResTable_config::isBetterThan(const ResTable_config& o,
                     bImBigger = false;
                 }
 
-                int reqValue = (requested->density?requested->density:160);
-                if (reqValue >= h) {
+                if (requestedDensity >= h) {
                     // requested value higher than both l and h, give h
                     return bImBigger;
                 }
-                if (l >= reqValue) {
+                if (l >= requestedDensity) {
                     // requested value lower than both l and h, give l
                     return !bImBigger;
                 }
                 // saying that scaling down is 2x better than up
-                if (((2 * l) - reqValue) * h > reqValue * reqValue) {
+                if (((2 * l) - requestedDensity) * h > requestedDensity * requestedDensity) {
                     return !bImBigger;
                 } else {
                     return bImBigger;
@@ -2701,6 +2717,9 @@ String8 ResTable_config::toString() const {
                 break;
             case ResTable_config::DENSITY_NONE:
                 res.append("nodpi");
+                break;
+            case ResTable_config::DENSITY_ANY:
+                res.append("anydpi");
                 break;
             default:
                 res.appendFormat("%ddpi", dtohs(density));
