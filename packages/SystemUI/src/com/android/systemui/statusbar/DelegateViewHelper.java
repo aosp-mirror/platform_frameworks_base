@@ -20,8 +20,7 @@ import android.app.StatusBarManager;
 import android.graphics.RectF;
 import android.view.MotionEvent;
 import android.view.View;
-
-import com.android.systemui.R;
+import android.view.ViewConfiguration;
 
 public class DelegateViewHelper {
     private View mDelegateView;
@@ -107,8 +106,8 @@ public class DelegateViewHelper {
     public void setSourceView(View view) {
         mSourceView = view;
         if (mSourceView != null) {
-            mTriggerThreshhold = mSourceView.getContext().getResources()
-                    .getDimension(R.dimen.navbar_search_up_threshhold);
+            mTriggerThreshhold =
+                    ViewConfiguration.get(mSourceView.getContext()).getScaledPagingTouchSlop();
         }
     }
 
