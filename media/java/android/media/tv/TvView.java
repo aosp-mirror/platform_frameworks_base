@@ -858,6 +858,7 @@ public class TvView extends ViewGroup {
                     mSession.setStreamVolume(mStreamVolume);
                 }
             } else {
+                mSessionCallback = null;
                 if (mListener != null) {
                     mListener.onConnectionFailed(mInputId);
                 }
