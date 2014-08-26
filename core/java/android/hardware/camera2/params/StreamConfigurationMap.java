@@ -142,7 +142,7 @@ public final class StreamConfigurationMap {
      * or in {@link PixelFormat} (and there is no possibility of collision).</p>
      *
      * <p>Formats listed in this array are guaranteed to return true if queried with
-     * {@link #isOutputSupportedFor(int).</p>
+     * {@link #isOutputSupportedFor(int)}.</p>
      *
      * @return an array of integer format
      *
