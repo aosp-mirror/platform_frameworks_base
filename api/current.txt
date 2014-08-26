@@ -8670,6 +8670,7 @@ package android.content.pm {
   }
 
   public class PackageInstaller {
+    method public void abandonSession(int);
     method public void addSessionCallback(android.content.pm.PackageInstaller.SessionCallback);
     method public void addSessionCallback(android.content.pm.PackageInstaller.SessionCallback, android.os.Handler);
     method public int createSession(android.content.pm.PackageInstaller.SessionParams) throws java.io.IOException;

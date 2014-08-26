@@ -312,6 +312,14 @@ public class PackageInstaller {
         }
     }
 
+    public void abandonSession(int sessionId) {
+        try {
+            mInstaller.abandonSession(sessionId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
     /**
      * Return details for a specific session. To succeed, the caller must either
      * own this session, or be the current home app.

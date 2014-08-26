@@ -456,6 +456,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             throw new SecurityException("User restriction prevents installing");
         }
 
+        // TODO: double check all possible install flags
+
         if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)) {
             installerPackageName = "com.android.shell";
 
@@ -578,6 +580,17 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         return sessionId;
     }
 
+    @Override
+    public void abandonSession(int sessionId) {
+        synchronized (mSessions) {
+            final PackageInstallerSession session = mSessions.get(sessionId);
+            if (session == null || !isCallingUidOwner(session)) {
+                throw new SecurityException("Caller has no access to session " + sessionId);
+            }
+            session.abandon();
+        }
+    }
+
     private void checkInternalStorage(long sizeBytes) throws IOException {
         if (sizeBytes <= 0) return;
 
@@ -606,10 +619,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     public IPackageInstallerSession openSession(int sessionId) {
         synchronized (mSessions) {
             final PackageInstallerSession session = mSessions.get(sessionId);
-            if (session == null) {
-                throw new IllegalStateException("Missing session " + sessionId);
-            }
-            if (!isCallingUidOwner(session)) {
+            if (session == null || !isCallingUidOwner(session)) {
                 throw new SecurityException("Caller has no access to session " + sessionId);
             }
             session.open();
