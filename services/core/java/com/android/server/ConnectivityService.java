@@ -2167,41 +2167,53 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (DBG) log("releasing NetworkRequest " + request);
             nri.unlinkDeathRecipient();
             mNetworkRequests.remove(request);
-            // tell the network currently servicing this that it's no longer interested
-            NetworkAgentInfo affectedNetwork = mNetworkForRequestId.get(nri.request.requestId);
-            if (affectedNetwork != null) {
-                mNetworkForRequestId.remove(nri.request.requestId);
-                affectedNetwork.networkRequests.remove(nri.request.requestId);
-                if (VDBG) {
-                    log(" Removing from current network " + affectedNetwork.name() + ", leaving " +
-                            affectedNetwork.networkRequests.size() + " requests.");
-                }
-                if (nri.isRequest && nri.request.legacyType != TYPE_NONE) {
-                    mLegacyTypeTracker.remove(nri.request.legacyType, affectedNetwork);
-                }
-            }
-
             if (nri.isRequest) {
+                // Find all networks that are satisfying this request and remove the request
+                // from their request lists.
+                for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+                    if (nai.networkRequests.get(nri.request.requestId) != null) {
+                        nai.networkRequests.remove(nri.request.requestId);
+                        if (VDBG) {
+                            log(" Removing from current network " + nai.name() +
+                                    ", leaving " + nai.networkRequests.size() +
+                                    " requests.");
+                        }
+                        // check if has any requests remaining and if not,
+                        // disconnect (unless it's a VPN).
+                        boolean keep = nai.isVPN();
+                        for (int i = 0; i < nai.networkRequests.size() && !keep; i++) {
+                            NetworkRequest r = nai.networkRequests.valueAt(i);
+                            if (mNetworkRequests.get(r).isRequest) keep = true;
+                        }
+                        if (!keep) {
+                            if (DBG) log("no live requests for " + nai.name() + "; disconnecting");
+                            nai.asyncChannel.disconnect();
+                        }
+                    }
+                }
+
+                // Maintain the illusion.  When this request arrived, we might have preteneded
+                // that a network connected to serve it, even though the network was already
+                // connected.  Now that this request has gone away, we might have to pretend
+                // that the network disconnected.  LegacyTypeTracker will generate that
+                // phatom disconnect for this type.
+                NetworkAgentInfo nai = mNetworkForRequestId.get(nri.request.requestId);
+                if (nai != null) {
+                    mNetworkForRequestId.remove(nri.request.requestId);
+                    if (nri.request.legacyType != TYPE_NONE) {
+                        mLegacyTypeTracker.remove(nri.request.legacyType, nai);
+                    }
+                }
+
                 for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
                     nfi.asyncChannel.sendMessage(android.net.NetworkFactory.CMD_CANCEL_REQUEST,
                             nri.request);
                 }
-
-                if (affectedNetwork != null) {
-                    // check if this network still has live requests - otherwise, tear down
-                    // TODO - probably push this to the NF/NA
-                    boolean keep = affectedNetwork.isVPN();
-                    for (int i = 0; i < affectedNetwork.networkRequests.size() && !keep; i++) {
-                        NetworkRequest r = affectedNetwork.networkRequests.valueAt(i);
-                        if (mNetworkRequests.get(r).isRequest) {
-                            keep = true;
-                        }
-                    }
-                    if (keep == false) {
-                        if (DBG) log("no live requests for " + affectedNetwork.name() +
-                                "; disconnecting");
-                        affectedNetwork.asyncChannel.disconnect();
-                    }
+            } else {
+                // listens don't have a singular affectedNetwork.  Check all networks to see
+                // if this listen request applies and remove it.
+                for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+                    nai.networkRequests.remove(nri.request.requestId);
                 }
             }
             callCallbackForRequest(nri, null, ConnectivityManager.CALLBACK_RELEASED);
