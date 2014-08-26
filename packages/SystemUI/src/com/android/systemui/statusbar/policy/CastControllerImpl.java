@@ -19,15 +19,25 @@ package com.android.systemui.statusbar.policy;
 import static android.media.MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
+import android.media.projection.MediaProjectionInfo;
+import android.media.projection.MediaProjectionManager;
+import android.os.Handler;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.systemui.R;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -41,12 +51,19 @@ public class CastControllerImpl implements CastController {
     private final MediaRouter mMediaRouter;
     private final ArrayMap<String, RouteInfo> mRoutes = new ArrayMap<>();
     private final Object mDiscoveringLock = new Object();
+    private final MediaProjectionManager mProjectionManager;
+    private final Object mProjectionLock = new Object();
 
     private boolean mDiscovering;
+    private MediaProjectionInfo mProjection;
 
     public CastControllerImpl(Context context) {
         mContext = context;
         mMediaRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
+        mProjectionManager = (MediaProjectionManager)
+                context.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        mProjection = mProjectionManager.getActiveProjectionInfo();
+        mProjectionManager.addCallback(mProjectionCallback, new Handler());
         if (DEBUG) Log.d(TAG, "new CastController()");
     }
 
@@ -59,6 +76,7 @@ public class CastControllerImpl implements CastController {
             final RouteInfo route = mRoutes.valueAt(i);
             pw.print("    "); pw.println(routeToString(route));
         }
+        pw.print("  mProjection="); pw.println(mProjection);
     }
 
     @Override
@@ -95,6 +113,18 @@ public class CastControllerImpl implements CastController {
     @Override
     public Set<CastDevice> getCastDevices() {
         final ArraySet<CastDevice> devices = new ArraySet<CastDevice>();
+        synchronized (mProjectionLock) {
+            if (mProjection != null) {
+                final CastDevice device = new CastDevice();
+                device.id = mProjection.getPackageName();
+                device.name = getAppName(mProjection.getPackageName());
+                device.description = mContext.getString(R.string.quick_settings_casting);
+                device.state = CastDevice.STATE_CONNECTED;
+                device.tag = mProjection;
+                devices.add(device);
+                return devices;
+            }
+        }
         synchronized(mRoutes) {
             for (RouteInfo route : mRoutes.values()) {
                 final CastDevice device = new CastDevice();
@@ -122,9 +152,55 @@ public class CastControllerImpl implements CastController {
     }
 
     @Override
-    public void stopCasting() {
-        if (DEBUG) Log.d(TAG, "stopCasting");
-        mMediaRouter.getDefaultRoute().select();
+    public void stopCasting(CastDevice device) {
+        final boolean isProjection = device.tag instanceof MediaProjectionInfo;
+        if (DEBUG) Log.d(TAG, "stopCasting isProjection=" + isProjection);
+        if (isProjection) {
+            final MediaProjectionInfo projection = (MediaProjectionInfo) device.tag;
+            if (Objects.equals(mProjectionManager.getActiveProjectionInfo(), projection)) {
+                mProjectionManager.stopActiveProjection();
+            } else {
+                Log.w(TAG, "Projection is no longer active: " + projection);
+            }
+        } else {
+            mMediaRouter.getDefaultRoute().select();
+        }
+    }
+
+    private void setProjection(MediaProjectionInfo projection, boolean started) {
+        boolean changed = false;
+        final MediaProjectionInfo oldProjection = mProjection;
+        synchronized (mProjectionLock) {
+            final boolean isCurrent = Objects.equals(projection, mProjection);
+            if (started && !isCurrent) {
+                mProjection = projection;
+                changed = true;
+            } else if (!started && isCurrent) {
+                mProjection = null;
+                changed = true;
+            }
+        }
+        if (changed) {
+            if (DEBUG) Log.d(TAG, "setProjection: " + oldProjection + " -> " + mProjection);
+            fireOnCastDevicesChanged();
+        }
+    }
+
+    private String getAppName(String packageName) {
+        final PackageManager pm = mContext.getPackageManager();
+        try {
+            final ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0);
+            if (appInfo != null) {
+                final CharSequence label = appInfo.loadLabel(pm);
+                if (!TextUtils.isEmpty(label)) {
+                    return label.toString();
+                }
+            }
+            Log.w(TAG, "No label found for package: " + packageName);
+        } catch (NameNotFoundException e) {
+            Log.w(TAG, "Error getting appName for package: " + packageName, e);
+        }
+        return packageName;
     }
 
     private void updateRemoteDisplays() {
@@ -200,6 +276,19 @@ public class CastControllerImpl implements CastController {
         public void onRouteUnselected(MediaRouter router, int type, RouteInfo route) {
             if (DEBUG) Log.d(TAG, "onRouteUnselected(" + type + "): " + routeToString(route));
             updateRemoteDisplays();
+        }
+    };
+
+    private final MediaProjectionManager.Callback mProjectionCallback
+            = new MediaProjectionManager.Callback() {
+        @Override
+        public void onStart(MediaProjectionInfo info) {
+            setProjection(info, true);
+        }
+
+        @Override
+        public void onStop(MediaProjectionInfo info) {
+            setProjection(info, false);
         }
     };
 }
