@@ -1639,7 +1639,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Хялбаршуулсан горим идэвхжив."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Хандалт цуцлагдсан."</string>
     <string name="user_switched" msgid="3768006783166984410">"Одоогийн хэрэглэгч <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="8664390176945256295">"<xliff:g id="NAME">%1$s</xliff:g> хэрэглэгч рүү сэлгэж байна"</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> руу сэлгэж байна…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Эзэмшигч"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Алдаа"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Энэ өөрчлөлтийг админ зөвшөөрөөгүй байна"</string>
@@ -1774,6 +1774,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Тогтоосныг суллахаас өмнө PIN асуух"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Тогтоосныг суллахаас өмнө түгжээ тайлах хээ асуух"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Тогтоосныг суллахаас өмнө нууц үг асуух"</string>
-    <string name="battery_saver_description" msgid="725676363406667978">"Батерейны ашиглалтыг уртасгахын тулд батерей хэмнэгч нь таны төхөөрөмжийн ажиллагааг бууруулж, чичрэлт болон далд датаны ихэнх хувийг хязгаарлана. Имэйл, зурвас гэх мэт синк хийгддэг бусад апп-ууд таныг нээхээс нааш шинэчлэгдэхгүй байж болно.\n\nТаныг төхөөрөмжөө цэнэглэх үед батерей хэмнэгч автоматаар унтарна."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Батерейны ашиглалтыг уртасгахын тулд батерей хэмнэгч нь таны төхөөрөмжийн ажиллагааг бууруулж, чичрэлт болон далд датаны ихэнх хувийг хязгаарлана. Имэйл, зурвас гэх мэт синк хийгддэг бусад апп-ууд таныг нээхээс нааш шинэчлэгдэхгүй байж болно.\n\nТаныг төхөөрөмжөө цэнэглэх үед батерей хэмнэгч автоматаар унтарна."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Таны уйтгартай байдал <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-д дуусах хүртэл"</string>
 </resources>

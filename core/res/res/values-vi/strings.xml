@@ -611,10 +611,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"bật hoặc tắt điện thoại"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Cho phép ứng dụng bật hoặc tắt máy tính bảng."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Cho phép ứng dụng bật hoặc tắt điện thoại."</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"đặt lại thời gian chờ hiển thị"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Cho phép ứng dụng đặt lại thời gian chờ hiển thị."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"chạy ở chế độ thử nghiệm trong nhà máy"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Chạy dưới dạng thử nghiệm nhà máy cấp thấp, cho phép quyền truy cập hoàn toàn vào phần cứng máy tính bảng. Chỉ khả dụng khi máy tính bảng chạy ở chế độ thử nghiệm trong nhà máy."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Chạy dưới dạng thử nghiệm nhà máy cấp thấp, cho phép quyền truy cập hoàn toàn vào phần cứng điện thoại. Chỉ khả dụng khi điện thoại chạy ở chế độ thử nghiệm trong nhà máy."</string>
@@ -1425,10 +1423,8 @@
     <string name="deny" msgid="2081879885755434506">"Từ chối"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Đã yêu cầu quyền"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Đã yêu cầu quyền\ncho tài khoản <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
-    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Bạn đang sử dụng ứng dụng này bên ngoài hồ sơ công việc của mình"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Bạn đang sử dụng ứng dụng này trong hồ sơ công việc của mình"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Phương thức nhập"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Đồng bộ hóa"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Khả năng truy cập"</string>
@@ -1537,7 +1533,7 @@
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Chạm để xem sử dụng và cài đặt."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Đã đạt tới giới hạn dữ liệu 2G-3G"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Đã đạt tới giới hạn dữ liệu 4G"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Đã đạt tới giới hạn dữ liệu DĐ"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Đã đạt tới giới hạn dữ liệu di động"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Đã đạt tới g.hạn dữ liệu Wi-Fi"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Dữ liệu bị tạm ngừng trong phần còn lại của chu kỳ"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Đã vượt quá g.hạn dữ liệu 2G-3G"</string>
@@ -1570,8 +1566,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Chấp nhận cuộc gọi?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Luôn chọn"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Chỉ một lần"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s không hỗ trợ hồ sơ công việc"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Máy tính bảng"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Điện thoại"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Tai nghe"</string>
@@ -1644,7 +1639,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Trợ năng đã được bật."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Đã hủy trợ năng."</string>
     <string name="user_switched" msgid="3768006783166984410">"Người dùng hiện tại <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
     <skip />
     <string name="owner_name" msgid="2716755460376028154">"Chủ sở hữu"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Lỗi"</string>
@@ -1777,12 +1772,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"BẮT ĐẦU"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Đã ghim màn hình"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Đã bỏ ghim màn hình"</string>
-    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
-    <skip />
-    <string name="battery_saver_description" msgid="725676363406667978">"Để giúp tăng tuổi thọ pin, trình tiết kiệm pin sẽ giảm hiệu suất thiết bị của bạn, đồng thời hạn chế rung và hầu hết dữ liệu nền. Email, nhắn tin và các ứng dụng khác dựa trên đồng bộ hóa không thể cập nhật trừ khi bạn mở chúng.\n\nTrình tiết kiệm pin tự động tắt khi thiết bị của bạn đang sạc"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Hỏi mã PIN trước khi bỏ ghim"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Hỏi hình mở khóa trước khi bỏ ghim"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Hỏi mật khẩu trước khi bỏ ghim"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Để giúp tăng tuổi thọ pin, trình tiết kiệm pin sẽ giảm hiệu suất thiết bị của bạn và hạn chế chế rung và hầu hết dữ liệu nền. Email, nhắn tin và các ứng dụng khác dựa trên đồng bộ hóa không thể cập nhật trừ khi bạn mở chúng.\n\nTrình tiết kiệm pin tự động tắt khi thiết bị của bạn đang sạc."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Cho tới khi thời gian ngừng hoạt động của bạn kết thúc vào <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

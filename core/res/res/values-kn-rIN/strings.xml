@@ -611,10 +611,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ಫೋನ್ ಆನ್ ಅಥವಾ ಆಫ್ ಮಾಡಿ"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ಟ್ಯಾಬ್ಲೆಟ್‌‌ ಅನ್ನು ಆನ್‌‌ ಅಥವಾ ಆಫ್‌ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"ಫೋನ್‌ ಅನ್ನು ಆನ್‌‌ ಅಥವಾ ಆಫ್‌ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"ಪ್ರದರ್ಶನ ಅವಧಿ ಮೀರುವಿಕೆಯನ್ನು ಮರುಹೊಂದಿಸಿ"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"ಪ್ರದರ್ಶನ ಅವಧಿ ಮೀರುವಿಕೆಯನ್ನು ಮರುಹೊಂದಿಸಲು ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"ಫ್ಯಾಕ್ಟರಿ ಪರೀಕ್ಷೆಯ ಮೋಡ್‌ನಲ್ಲಿ ರನ್ ಮಾಡಿ"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"ಟ್ಯಾಬ್ಲೆಟ್ ಹಾರ್ಡ್‌ವೇರ್‌ಗೆ ಸಂಪೂರ್ಣ ಪ್ರವೇಶವನ್ನು ಕಲ್ಪಿಸುವ ಮೂಲಕ ಕೆಳಮಟ್ಟದ ತಯಾರಕರ ಪರೀಕ್ಷೆಯ ರೂಪದಲ್ಲಿ ರನ್ ಆಗುತ್ತದೆ. ತಯಾರಕರ ಪರೀಕ್ಷೆಯ ಮೋಡ್‌ನಲ್ಲಿ ಟ್ಯಾಬ್ಲೆಟ್ ರನ್ ಆಗುತ್ತಿರುವಾಗ ಮಾತ್ರ ಲಭ್ಯವಿರುತ್ತದೆ."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"ಫೋನ್ ಹಾರ್ಡ್‌ವೇರ್‌ಗೆ ಸಂಪೂರ್ಣ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸುವ ಮೂಲಕ, ಕೆಳಮಟ್ಟದ ತಯಾರಕರ ಪರೀಕ್ಷೆಯ ರೂಪದಲ್ಲಿ ರನ್ ಮಾಡಿ. ತಯಾರಕರ ಪರೀಕ್ಷೆಯ ಮೋಡ್‌ನಲ್ಲಿ ಫೋನ್ ರನ್ ಆಗುತ್ತಿರುವಾಗ ಮಾತ್ರ ಲಭ್ಯವಿದೆ."</string>
@@ -1425,8 +1423,7 @@
     <string name="deny" msgid="2081879885755434506">"ನಿರಾಕರಿಸು"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"ಅನುಮತಿ ವಿನಂತಿಸಲಾಗಿದೆ"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> ಖಾತೆಗಾಗಿ\n ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಲಾಗಿದೆ."</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ನ ಹೊರಗೆ ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಬಳಸುತ್ತಿರುವಿರಿ"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಬಳಸುತ್ತಿರುವಿರಿ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"ಸಿಂಕ್ ಮಾಡು"</string>
@@ -1569,8 +1566,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"ಕರೆ ಸ್ವೀಕರಿಸುವುದೇ?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ಯಾವಾಗಲೂ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"ಒಮ್ಮೆ ಮಾತ್ರ"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ಟ್ಯಾಬ್ಲೆಟ್‌‌"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"ಫೋನ್"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"ಹೆಡ್‌ಫೋನ್‌ಗಳು"</string>
@@ -1643,8 +1639,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"ಪ್ರವೇಶಿಸುವಿಕೆ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ಪ್ರವೇಶಿಸುವಿಕೆಯನ್ನು ರದ್ದುಮಾಡಲಾಗಿದೆ."</string>
     <string name="user_switched" msgid="3768006783166984410">"ಪ್ರಸ್ತುತ ಬಳಕೆದಾರರು <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
-    <skip />
+    <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> ಗೆ ಬದಲಾಯಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="owner_name" msgid="2716755460376028154">"ಮಾಲೀಕರು"</string>
     <string name="error_message_title" msgid="4510373083082500195">"ದೋಷ"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"ಈ ಬದಲಾವಣೆಯನ್ನು ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
@@ -1779,6 +1774,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ಅನ್‌ಪಿನ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು PIN ಕೇಳಿ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ಅನ್‌ಪಿನ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು ಅನ್‌ಲಾಕ್ ನಮೂನೆಯನ್ನು ಕೇಳಿ"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ಅನ್‌ಪಿನ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು ಪಾಸ್‌ವರ್ಡ್ ಕೇಳಿ"</string>
-    <string name="battery_saver_description" msgid="725676363406667978">"ಬ್ಯಾಟರಿ ಬಾಳಿಕೆಯನ್ನು ಸುಧಾರಿಸುವ ನಿಟ್ಟಿನಲ್ಲಿ, ಬ್ಯಾಟರಿ ಉಳಿಸುವಿಕೆ ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ. ಜೊತೆಗೆ ವೈಬ್ರೇಷನ್‌ ಹಾಗೂ ಬಹಳಷ್ಟು ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಸೀಮಿತಗೊಳಿಸುತ್ತದೆ. ಸಿಂಕ್‌ ಅನ್ನು ಅವಲಂಭಿಸಿರುವ ಇಮೇಲ್‌, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ ಹಾಗೂ ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಅವುಗಳನ್ನು ತೆರೆಯದ ಹೊರತು ನವೀಕೃತಗೊಳ್ಳುವುದಿಲ್ಲ. \n\n ಸಾಧನವನ್ನು ಚಾರ್ಜ್ ಮಾಡುತ್ತಿರುವಾಗ ಬ್ಯಾಟರಿ ಉಳಿಸುವಿಕೆ ತನ್ನಿಂದ ತಾನೇ ಆಫ್‌ ಆಗುತ್ತದೆ"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"ಬ್ಯಾಟರಿ ಬಾಳಿಕೆಯನ್ನು ವೃದ್ದಿಸಲು ಸಹಾಯ ಮಾಡಲು, ಬ್ಯಾಟರಿ ಉಳಿತಾಯವು ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕಡಿಮೆಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ಕಂಪನವನ್ನು ಹಾಗೂ ಹೆಚ್ಚಿನ ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಸೀಮಿತಗೊಳಿಸುತ್ತದೆ. ಇಮೇಲ್, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ, ಮತ್ತು ಸಿಂಕ್ ಮಾಡುವುದನ್ನು ಅವಲಂಬಿಸಿರುವ ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ನೀವು ತೆರೆಯುವವರೆಗೆ ಅವುಗಳನ್ನು ನವೀಕರಿಸಲಾಗುವುದಿಲ್ಲ.\n\nನಿಮ್ಮ ಸಾಧನವು ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವಾಗ ಬ್ಯಾಟರಿ ಉಳಿತಾಯವು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆಫ್ ಆಗುತ್ತದೆ."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ನಿಮ್ಮ ಅಲಭ್ಯತೆ ಕೊನೆಗೊಳ್ಳುವವರೆಗೆ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

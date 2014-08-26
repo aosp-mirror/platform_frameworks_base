@@ -611,10 +611,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"روشن/خاموش کردن تلفن"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"‏به برنامه اجازه می‎دهد رایانهٔ لوحی را روشن یا خاموش کند."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"‏به برنامه اجازه می‎دهد گوشی را روشن یا خاموش کند."</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"بازنشانی مهلت زمانی صفحه‌نمایش"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"به برنامه امکان می‌دهد مهلت زمانی صفحه‌نمایش را بازیابی کند."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"اجرا در حالت تست کارخانه"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"اجرا به‌عنوان تست سازنده سطح پایین، امکان دسترسی کامل به سخت‌افزار رایانهٔ لوحی شما را فراهم می‌آورد. فقط زمانی که رایانهٔ لوحی در حالت تست سازنده در حال اجراست قابل دسترسی است."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"اجرا به‌عنوان تست سازنده سطح پایین، امکان دسترسی کامل به سخت‌افزار تلفن شما را فراهم می‌آورد. فقط زمانی که تلفن در حالت تست سازنده در حال اجراست قابل دسترسی است."</string>
@@ -1425,8 +1423,7 @@
     <string name="deny" msgid="2081879885755434506">"رد کردن"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"مجوز درخواست شد"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"مجوز\nبرای حساب <xliff:g id="ACCOUNT">%s</xliff:g> درخواست شد."</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"شما از این برنامه در خارج از نمایه کاری‌تان استفاده می‌کنید"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"از این برنامه در نمایه کاری‌تان استفاده می‌کنید"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"روش ورودی"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"همگام‌سازی"</string>
@@ -1569,8 +1566,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"تماس را می‌پذیرید؟"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"همیشه"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"فقط این بار"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"‏%1$s از نمایه کاری پشتیبانی نمی‌کند"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"رایانهٔ لوحی"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"تلفن"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"هدفون‌ها"</string>
@@ -1643,8 +1639,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"قابلیت دسترسی فعال شد."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"قابلیت دسترسی لغو شد."</string>
     <string name="user_switched" msgid="3768006783166984410">"کاربر کنونی <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
-    <skip />
+    <string name="user_switching_message" msgid="2871009331809089783">"در حالت تغییر به <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"دارنده"</string>
     <string name="error_message_title" msgid="4510373083082500195">"خطا"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"این تغییر از طرف سرپرستتان مجاز دانسته نشده است"</string>
@@ -1779,6 +1774,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"درخواست کد پین قبل از برداشتن پین"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"درخواست الگوی باز کردن قفل قبل از برداشتن پین"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"درخواست گذرواژه قبل از برداشتن پین"</string>
-    <string name="battery_saver_description" msgid="725676363406667978">"برای کمک به بهبود عمر باتری، ذخیره‌کننده باتری عملکرد دستگاهتان را کاهش می‌دهد و اکثر اطلاعات پس‌زمینه و لرزش را محدود می‌کند. ممکن است ایمیل، پیام‌رسانی و سایر برنامه‌هایی که به همگام‌سازی وابسته هستند، به‌روزرسانی نشوند مگر اینکه آنها را باز کنید.\n\nوقتی دستگاهتان در حال شارژ است، ذخیره‌کننده باتری به صورت خودکار خاموش می‌شود."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"برای کمک به بهبود عمر باتری، ذخیره‌کننده باتری عملکرد دستگاه‌تان را کاهش می‌دهد و اغلب اطلاعات پس‌زمینه و لرزش را محدود می‌کند. ایمیل، پیام‌رسانی و سایر برنامه‌هایی که به همگام‌سازی وابسته هستند ممکن است به‌روز نشوند مگر اینکه آنها را باز کنید.\n\nوقتی دستگاه‌تان شارژ می‌شود، ذخیره‌کننده باتری به صورت خودکار خاموش می‌شود."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"تا زمانی که زمان استراحت در <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> به پایان برسد"</string>
 </resources>

@@ -611,10 +611,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"फोन चालू किंवा बंद करा"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"टॅब्लेट चालू किंवा बंद करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"फोन चालू किंवा बंद करण्यासाठी अॅप ला अनुमती देते."</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"प्रदर्शन कालबाह्य रीसेट करा"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"अ‍ॅपला प्रदर्शन कालबाह्य रीसेट करण्‍याची अनुमती देते."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"फॅक्टरी चाचणी मोडमध्ये चालवा"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"टॅब्लेट हार्डवेअरमध्‍ये पूर्ण प्रवेशाची अनुमती देऊन निम्‍न-दर्जा निर्माता चाचणी म्‍हणून चालवा. टॅब्लेट केवळ निर्माता चाचणी मोडमध्‍ये चालत असताना उपलब्‍ध."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"फोन हार्डवेअरमध्‍ये पूर्ण प्रवेशाची अनुमती देऊन निम्‍न-दर्जा निर्माता चाचणी म्‍हणून चालवा. फोन केवळ निर्माता चाचणी मोडमध्‍ये चालत असताना उपलब्‍ध."</string>
@@ -1404,7 +1402,7 @@
     <string name="permlab_recovery" msgid="3157024487744125846">"अद्यतन आणि पुनर्प्राप्ती सिस्‍टमसह परस्‍परसंवाद करा"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"अनुप्रयोगाला पुनर्प्राप्ती सिस्‍ट‍मसह आणि सिस्‍टम अद्यतनांसह परस्‍परसंवाद करण्‍याची अनुमती देते."</string>
     <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"मीडिया प्रोजेक्‍शन सत्र व्‍यवस्‍थापित करा"</string>
-    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"अनुप्रयोगास मीडिया प्रोजेक्‍शन सत्र व्यवस्‍थापित करण्‍याची अनुमती देते. हे सत्र अनुप्रयोगांना प्रदर्शन आणि ऑडिओ सामग्री कॅप्‍चर करण्‍याची क्षमता प्रदान करु शकतात. सामान्य अ‍ॅप्‍स द्वारे कधीही आवश्यकता नसावी."</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"अनुप्रयोगास मीडिया प्रोजेक्‍शन सत्र व्यवस्‍थापित करण्‍याची अनुमती देते. हे सत्र अनुप्रयोगांना प्रदर्शन आणि ऑडिओ सामग्री कॅप्‍चर करण्‍याची क्षमता प्रदान करू शकतात. सामान्य अ‍ॅप्‍स द्वारे कधीही आवश्यकता नसावी."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"स्‍थापना सत्र वाचा"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"अनुप्रयोगास स्‍थापना सत्र वाचण्‍याची अनुमती देते. हे सक्रिय पॅकेज स्‍थापनांविषयी तपशील पाहाण्‍याची यास अनुमती देते."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"झूम नियंत्रणासाठी दोनदा स्पर्श करा"</string>
@@ -1425,8 +1423,7 @@
     <string name="deny" msgid="2081879885755434506">"नकार द्या"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"परवानगीची विनंती केली"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> खात्यासाठी\nपरवानगीची विनंती केली."</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"आपण हा अ‍ॅप आपल्‍या कार्य प्रोफाईलच्या बाहेर वापरत आहात"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"आपण हा अ‍ॅप आपल्या कार्य प्रोफाईलमध्‍ये वापरत आहात"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"इनपुट पद्धत"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"संकालन करा"</string>
@@ -1569,8 +1566,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"कॉल स्वीकारायचा?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"नेहमी"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"फक्त एकदाच"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s कार्य प्रोफाईलचे समर्थन करीत नाही"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"टॅब्लेट"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"फोन"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"हेडफोन"</string>
@@ -1643,8 +1639,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"प्रवेशयोग्यता सक्षम."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"प्रवेशयोग्यता रद्द."</string>
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान वापरकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
-    <skip />
+    <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> वर स्विच करत आहे…"</string>
     <string name="owner_name" msgid="2716755460376028154">"मालक"</string>
     <string name="error_message_title" msgid="4510373083082500195">"त्रुटी"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"या बदलास आपल्या प्रशासकाकडून अनुमती नाही"</string>
@@ -1779,6 +1774,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"अनपिन करण्‍यापूर्वी PIN साठी विचारा"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"अनपिन करण्‍यापूर्वी अनलॉक नमुन्यासाठी विचारा"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"अनपिन करण्‍यापूर्वी संकेतशब्दासाठी विचारा"</string>
-    <string name="battery_saver_description" msgid="725676363406667978">"बॅटरीचे आयुष्य सुधारण्यात मदत होण्यासाठी, बॅटरी बचतकर्ता आपल्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि अन्य अॅप्स आपण ते उघडल्याशिवाय अद्यतनित होऊ शकत नाहीत.\n\nआपले डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"बॅटरीचे आयुष्य सुधारण्यात मदत होण्यासाठी, बॅटरी बचतकर्ता आपल्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि अन्य अॅप्स आपण ते उघडल्याशिवाय अद्यतनित होऊ शकत नाहीत.\n\nआपले डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"आपला कार्य न करण्याचा कालावधी <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> वाजता समाप्त होईपर्यंत"</string>
 </resources>

@@ -611,10 +611,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"accensione o spegnimento del telefono"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Consente all\'applicazione di accendere o spegnere il tablet."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Consente all\'applicazione di accendere o spegnere il telefono."</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"reimpostazione del timeout del display"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Consente all\'app di reimpostare il timeout del display."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"esecuzione in modalità test di fabbrica"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"In esecuzione come test del produttore di basso livello, consentendo l\'accesso completo all\'hardware del tablet. Disponibile soltanto quando il tablet è in esecuzione in modalità test del produttore."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"In esecuzione come test del produttore di basso livello, consentendo l\'accesso completo all\'hardware del telefono. Disponibile soltanto quando il telefono è in esecuzione in modalità test del produttore."</string>
@@ -1425,8 +1423,7 @@
     <string name="deny" msgid="2081879885755434506">"Nega"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Autorizzazione richiesta"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Autorizzazione richiesta\nper l\'account <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Stai utilizzando l\'app al di fuori del tuo profilo di lavoro"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Stai utilizzando l\'app nel tuo profilo di lavoro"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Metodo inserimento"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sinc"</string>
@@ -1569,8 +1566,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Accettare la chiamata?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Sempre"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Solo una volta"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s non supporta il profilo di lavoro"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefono"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Cuffie audio"</string>
@@ -1643,8 +1639,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Accessibilità attivata."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accessibilità annullata."</string>
     <string name="user_switched" msgid="3768006783166984410">"Utente corrente <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
-    <skip />
+    <string name="user_switching_message" msgid="2871009331809089783">"Passaggio a <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Proprietario"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Errore"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Questa modifica non è consentita dal tuo amministratore"</string>
@@ -1779,6 +1774,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Richiedi il PIN prima di sbloccare"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Richiedi sequenza di sblocco prima di sbloccare"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Richiedi password prima di sbloccare"</string>
-    <string name="battery_saver_description" msgid="725676363406667978">"Per contribuire a prolungare la durata della batteria, la funzione Basso consumo riduce le prestazioni del dispositivo, oltre a limitare le emissioni di vibrazioni e l\'utilizzo di molti dati in background. Email, Messaggi e altre app che ricorrono alla sincronizzazione subiscono un aggiornamento solo se aperte.\n\nLa funzione Basso consumo viene disattivata automaticamente quando il dispositivo è in fase di ricarica"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Per aumentare la durata della batteria, la funzione Risparmio energetico riduce le prestazioni del dispositivo e limita vibrazione e gran parte dei dati in background. App di email, messaggi e altre app basate sulla sincronizzazione potrebbero non essere aggiornate se non le apri.\n\nIl risparmio energetico si disattiva automaticamente quando il dispositivo è in carica."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Fino al termine del periodo di inattività previsto per le <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

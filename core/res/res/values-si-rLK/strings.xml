@@ -1430,8 +1430,7 @@
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> ගිණුම සඳහා\nඅවසර ඉල්ලන ලදි."</string>
     <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
     <skip />
-    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
-    <skip />
+    <string name="forward_intent_to_work" msgid="621480743856004612">"මෙම යෙදුම ඔබගේ පුද්ගලික කොටසේ ඔබ භාවිතා කරයි"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ආදාන ක්‍රමය"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"සමමුහුර්තය"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ප්‍රවේශ්‍යතාව"</string>
@@ -1647,7 +1646,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"ප‍්‍රවේශ්‍යතාව සබල කරන ලදි."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ප‍්‍රවේශ්‍යතාව අවලංගු කර ඇත."</string>
     <string name="user_switched" msgid="3768006783166984410">"දැනට සිටින පරිශීලකයා <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
     <skip />
     <string name="owner_name" msgid="2716755460376028154">"හිමිකරු"</string>
     <string name="error_message_title" msgid="4510373083082500195">"දෝෂය"</string>
@@ -1780,12 +1779,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"ආරම්භය"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"තිරය අගුළුදමා ඇත"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"තිරයේ අගුළු ඇර ඇත"</string>
-    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
-    <skip />
-    <string name="battery_saver_description" msgid="725676363406667978">"බැටරියේ ජීව කාලය දියුණු කිරීමට උදව් කිරීමට, ඔබගේ උපාංගයේ ක්‍රියාකාරිත්වය සහ සීමා කළ කම්පනයන් සහ බොහොමයක් පසුබිම් දත්ත බැටරි සුරැකීමෙන් අඩු කරයි. සමමුහුර්ත කිරීම බලාපොරොත්තු වෙන ඊ-තැපෑල, පණිවිඩ යැවීම සහ වෙනත් යෙදුම් යාවත්කාලීන වන්නේ ඔබ ඒවා විවෘත කළ විට පමණි.\n\nඔබගේ උපාංගය ආරෝපණය වන විට බැටරි සුරැකීම ස්වයංක්‍රීයව අක්‍රිය වේ."</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ගැලවීමට පෙර PIN විමසන්න"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ගැලවීමට පෙර අගුළු අරින රටාව සඳහා අසන්න"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ගැලවීමට පෙර මුරපදය විමසන්න"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"බැටරියේ ජීව කාලය දියුණු කිරීමට උදව් කිරීමට, ඔබගේ උපාංගයේ ක්‍රියාකාරිත්වය සහ සීමා කළ කම්පනයන් සහ බොහොමයක් පසුබිම් දත්ත බැටරි සුරැකීමෙන් අඩු කරයි. සමමුහුර්ත කිරීම බලාපොරොත්තු වෙන ඊ-තැපෑල, පණිවිඩ යැවීම සහ වෙනත් යෙදුම් යාවත්කාලීන වන්නේ ඔබ ඒවා විවෘත කළ විට පමණි.\n\nඔබගේ උපාංගය ආරෝපණය වන විට බැටරි සුරැකීම ස්වයංක්‍රීයව අක්‍රිය වේ."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ඔබගේ බිඳවැටුම් වේලාව <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> දී අවසන්වන තුරු"</string>
 </resources>

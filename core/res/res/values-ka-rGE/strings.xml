@@ -611,10 +611,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ტელეფონის ჩართვა ან გამორთვა"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"აპს შეეძლება, ჩართოს ან გამორთოს ტაბლეტი."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"აპს შეეძლება, ჩართოს ან გამორთოს ტელეფონი."</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"დისლპეის დროის ლიმიტის ხელახლა დაყენება"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"უფლებას აძლევს აპს, ხელახლა დააყენოს დისლპეის დროის ლიმიტი."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"ქარხნულ სატესტო რეჟიმში გაშვება"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"მწარმოებლის დაბალი დონის ტესტის რეჟიმში გაშვება, რომლის დროსაც სრულად არის ხელმისაწვდომი ტაბლეტის აპარატული უზრუნველყოფა. ხელმისაწვდომია მხოლოდ მწარმოებლის ტესტის რეჟიმში ჩართულ ტაბლეტზე."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"მწარმოებლის დაბალი დონის ტესტის რეჟიმში გაშვება, რომლის დროსაც სრულად არის ხელმისაწვდომი ტელეფონის აპარატული უზრუნველყოფა. ხელმისაწვდომია მხოლოდ მწარმოებლის ტესტის რეჟიმში ჩართულ ტელეფონზე."</string>
@@ -1425,10 +1423,8 @@
     <string name="deny" msgid="2081879885755434506">"აკრძალვა"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"მოთხოვნილია ნებართვა"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"მოთხოვნილია ნებრათვა \nანგარიშისთვის: <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
-    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"იყენებთ ამ აპს თქვენს სამუშაო პროფილს მიღმა"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"ამ აპს თქვენს სამუშაო პროფილში იყენებთ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"შეყვანის მეთოდი"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"სინქრონიზაცია"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"წვდომა"</string>
@@ -1570,8 +1566,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"უპასუხებთ ზარს?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"ყოველთვის"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"მხოლოდ ერთხელ"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s მხარს არ უჭერს სამუშაო პროფილს"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ტაბლეტი"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"ტელეფონი"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"ყურსასმენები"</string>
@@ -1644,7 +1639,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"მარტივი წვდომა ჩართულია."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"მარტივი წვდომა გაუქმდა."</string>
     <string name="user_switched" msgid="3768006783166984410">"ამჟამინდელი მომხმარებელი <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
     <skip />
     <string name="owner_name" msgid="2716755460376028154">"მფლობელი"</string>
     <string name="error_message_title" msgid="4510373083082500195">"შეცდომა"</string>
@@ -1777,12 +1772,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"დაწყება"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"ეკრანი დაფიქსირდა"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ეკრანს ფიქსაცია მოეხსნა"</string>
-    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
-    <skip />
-    <string name="battery_saver_description" msgid="725676363406667978">"ბატარეის ფუნქციონალობის გახანგრძლივებისათვის, ბატარეის დამზოგი ამცირებს თქვენი მოწყობილობის წარმადობას და ზღუდავს ვიბრაციასა და უმეტეს ფონურ მონაცემებს. ელფოსტა, შეტყობინებები და ახვა აპები, რომლებიც სინქრონიზაციაზეა დამოკიდებული, შეიძლება არ განახლდეს, თუ არ გახსნით მათ.\n\nბატარეის დამზოგი ავტომატურად გამოირთვება, როდესაც თქვენი მოწყობილობა დატენვის რეჟიმში გადავა"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ფიქსაციის მოხსნამდე PIN-ის მოთხოვნა"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ფიქსაციის მოხსნამდე განბლოკვის ნიმუშის მოთხოვნა"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ფიქსაციის მოხსნამდე პაროლის მოთხოვნა"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"ბატარეის გამძლეობის გასახანგრძლივებლად, ბატარეის დამზოგი ამცირებს თქვენი მოწყობილობის წარმადობას და ზღუდავს ვიბრაციასა და უმეტეს ფონურ მონაცემს. თუ არ განაახლებთ, შეიძლება არ გაიხსნას ელფოსტა, შეტყობინებები და სხვა აპები, რომლებიც სინქრონიზაციაზეა დამოკიდებული.\n\nბატარეის დამზოგი ავტომატურად გამოირთვება, როდესაც თქვენი მოწყობილობა იტენება."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"დანამ თქვენი კავშირგარეშე დრო დასრულდებოდეს <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-ზე"</string>
 </resources>

@@ -1435,8 +1435,7 @@
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">\n"खाता <xliff:g id="ACCOUNT">%s</xliff:g>को लागि अनुरोध गरिएको अनुमति।"</string>
     <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
     <skip />
-    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
-    <skip />
+    <string name="forward_intent_to_work" msgid="621480743856004612">"तपाईँ आफ्नो कार्य प्रोफाइलमा यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"इनपुट विधि"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"सिङ्क गर्नुहोस्"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"उपलब्धता"</string>
@@ -1652,7 +1651,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"पहुँच सक्षम गरिएको।"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"पहुँचयोग्यता रद्द गरियो।"</string>
     <string name="user_switched" msgid="3768006783166984410">"अहिलेको प्रयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>।"</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
     <skip />
     <string name="owner_name" msgid="2716755460376028154">"मालिक"</string>
     <string name="error_message_title" msgid="4510373083082500195">"त्रुटि"</string>
@@ -1785,12 +1784,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रिन पिन गरियो"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"स्क्रिन अनपिन गरियो"</string>
-    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
-    <skip />
-    <string name="battery_saver_description" msgid="725676363406667978">"ब्याट्री जीवन सुधार्न, ब्याट्री बचत गर्न आफ्नो उपकरणको प्रदर्शन र सीमा कम्पन र सबै भन्दा पृष्ठभूमि डेटा कम गर्छ। इमेल, सन्देश, र तपाईँ तिनीहरूलाई खोल्न नभएसम्म अद्यावधिक गर्न सक्छ समिकरण भर पर्ने अन्य अनुप्रयोगहरू। \n\n आफ्नो उपकरण चार्ज गर्दा ब्याट्री बचत स्वचालित रूपमा बन्द"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"पिन निकाल्नुअघि PIN सोध्नुहोस्"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"पिन निकाल्नुअघि खोल्ने रूपरेखा सोध्नुहोस्"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"पिन निकाल्नुअघि पासवर्ड सोध्नुहोस्"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"ब्याट्री जीवन सुधार्न, ब्याट्री बचतले आफ्नो उपकरणको प्रदर्शन र कम्पनको सीमा र सबैभन्दा पृष्ठभूमि डेटा कम गर्छ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जसले तपाईं तिनीहरूलाई नखोले सम्म समिकरण अद्यावधिक नगर्न सक्छ भनि भर पर्छ।\n\nब्याट्री बचतले तपाईँको उपकरण चार्ज हुँदै बेला तपाईँको उपकरण स्वचालित बन्द गर्छ।"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"तपाईँको <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> डाउनटाइम समाप्त हुँदा सम्म"</string>
 </resources>

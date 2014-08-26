@@ -1427,8 +1427,7 @@
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> hesabı için\nizin isteğinde bulunuldu."</string>
     <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
     <skip />
-    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
-    <skip />
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Bu uygulamayı iş profilinizde kullanıyorsunuz"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Giriş yöntemi"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Senkronizasyon"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Erişebilirlik"</string>
@@ -1644,7 +1643,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Erişilebilirlik etkinleştirildi."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Erişilebilirlik iptal edildi."</string>
     <string name="user_switched" msgid="3768006783166984410">"Geçerli kullanıcı: <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
     <skip />
     <string name="owner_name" msgid="2716755460376028154">"Sahibi"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Hata"</string>
@@ -1777,12 +1776,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"BAŞLAT"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran sabitlendi"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekran sabitlemesi kaldırıldı"</string>
-    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
-    <skip />
-    <string name="battery_saver_description" msgid="725676363406667978">"Pil ömrünü uzatmaya yardımcı olmak için pil koruyucu, cihazınızın performansını düşürür, titreşim ve çoğu arka plan verisini sınırlandırır. E-posta, mesajlaşma ve senkronizasyona dayanan diğer uygulamalar, uygulamanın kendisi açılmadıkça güncellenmeyebilir.\n\nPil koruyucu, cihazınız şarj edilirken otomatik olarak kapanır."</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Sabitlemeyi kaldırmadan önce PIN\'i sor"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Sabitlemeyi kaldırmadan önce kilit açma desenini sor"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Sabitlemeyi kaldırmadan önce şifre sor"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Pil tasarrufu, pilin ömrünü uzatmaya yardımcı olmak amacıyla cihazınızın performansını düşürür ve arka plan verilerini sınırlar. E-posta, mesajlaşma ve senkronizasyona dayalı diğer uygulamalar siz açmadığınız müddetçe güncellenemez. \n\nPil tasarrufu, cihaz şarj olurken otomatik olarak kapanır."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Kesinti süreniz <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> saatinde sona erene kadar"</string>
 </resources>

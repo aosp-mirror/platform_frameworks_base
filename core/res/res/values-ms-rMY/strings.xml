@@ -611,10 +611,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"kuasakan telefon hidup atau mati"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Membenarkan apl menghidupkan atau mematikan tablet."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Membenarkan apl menghidupkan atau mematikan telefon."</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"tetapkan semula tamat masa paparan"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Membenarkan apl menetapkan semula tamat masa paparan."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"jalankan dalam mod ujian kilang"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Jalankan sebagai ujian pengeluar peringkat rendah, membenarkan akses penuh kepada perkakasan tablet. Hanya tersedia apabila tablet dijalankan dalam mod ujian pengeluar."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Menjalankan sebagai ujian pengilang peringkat rendah, membenarkan akses penuh kepada perkakasan telefon. Hanya tersedia apabila telefon dijalankan dalam mod ujian pengilang."</string>
@@ -1425,10 +1423,8 @@
     <string name="deny" msgid="2081879885755434506">"Nafi"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Kebenaran diminta"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Kebenaran diminta\nuntuk akaun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
-    <!-- no translation found for forward_intent_to_work (621480743856004612) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Anda menggunakan apl ini di luar profil kerja anda"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Anda menggunakan apl ini dalam profil kerja anda"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Kaedah input"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Penyegerakan"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Kebolehaksesan"</string>
@@ -1570,8 +1566,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Terima panggilan?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Sentiasa"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Hanya sekali"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s tidak menyokong profil kerja"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Fon kepala"</string>
@@ -1644,7 +1639,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Kebolehcapaian didayakan."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Kebolehcapaian dibatalkan."</string>
     <string name="user_switched" msgid="3768006783166984410">"Pengguna semasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
+    <!-- no translation found for user_switching_message (2871009331809089783) -->
     <skip />
     <string name="owner_name" msgid="2716755460376028154">"Pemilik"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Ralat"</string>
@@ -1777,12 +1772,9 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"MULA"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skrin disemat"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skrin dinyahsemat"</string>
-    <!-- no translation found for lock_to_app_unlock_pin (2552556656504331634) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_pattern (4182192144797225137) -->
-    <skip />
-    <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
-    <skip />
-    <string name="battery_saver_description" msgid="725676363406667978">"Untuk membantu memperbaik hayat bateri, penjimat bateri mengurangkan prestasi peranti anda dan menghadkan getaran serta kebanyakan data latar belakang. E-mel, pemesejan dan apl lain yang bergantung kepada penyegerakan mungkin tidak dikemas kini melainkan anda membuka apl itu. \n\n Penjimat Bateri dimatikan secara automatik semasa peranti anda mengecas"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Minta PIN sebelum menyahsemat"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Minta corak buka kunci sebelum menyahsemat"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Minta kata laluan sebelum menyahsemat"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Untuk membantu memperbaik hayat bateri, penjimat bateri mengurangkan prestasi peranti anda dan menghadkan getaran serta kebanyakan data latar belakang. E-mel, pemesejan dan apl lain yang bergantung pada penyegerakan mungkin tidak dikemas kini melainkan anda membuka apl tersebut.\n\nPenjimat bateri dimatikan secara automatik semasa peranti anda mengecas."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Sehingga waktu gendala anda berakhir pada <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

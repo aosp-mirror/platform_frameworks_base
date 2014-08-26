@@ -611,10 +611,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"telefoon in- of uitschakelen"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Hiermee kan de app de tablet in- of uitschakelen."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Hiermee kan de app de telefoon in- of uitschakelen."</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"time-out van het scherm opnieuw instellen"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Hiermee kan de app de time-out van het scherm opnieuw instellen."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"uitvoeren in fabriekstestmodus"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Uitvoeren als fabrikanttest op laag niveau, waardoor toegang wordt gegeven tot de hardware van de tablet. Alleen beschikbaar als een tablet zich in de fabrikanttestmodus bevindt."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Uitvoeren als fabrikanttest op laag niveau, waardoor toegang wordt gegeven tot de hardware van de telefoon. Alleen beschikbaar als een telefoon zich in de fabrikanttestmodus bevindt."</string>
@@ -1425,8 +1423,7 @@
     <string name="deny" msgid="2081879885755434506">"Weigeren"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Toestemming gevraagd"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Toestemming gevraagd\nvoor account <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"U gebruikt deze app buiten uw werkprofiel"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"U gebruikt deze app in uw werkprofiel"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Invoermethode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchroniseren"</string>
@@ -1569,8 +1566,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Oproep accepteren?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Altijd"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Eén keer"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ondersteunt werkprofielen niet"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefoon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Hoofdtelefoon"</string>
@@ -1643,8 +1639,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Toegankelijkheid ingeschakeld."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Toegankelijkheid geannuleerd."</string>
     <string name="user_switched" msgid="3768006783166984410">"Huidige gebruiker <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (8664390176945256295) -->
-    <skip />
+    <string name="user_switching_message" msgid="2871009331809089783">"Overschakelen naar <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Eigenaar"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Fout"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Deze wijziging is niet toegestaan door uw beheerder"</string>
@@ -1779,6 +1774,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Vragen om pincode voordat items worden losgemaakt"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Vragen om ontgrendelingspatroon voordat items worden losgemaakt"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Vragen om wachtwoord voordat items worden losgemaakt"</string>
-    <string name="battery_saver_description" msgid="725676363406667978">"Om ervoor te zorgen dat de accu langer meegaat, vermindert Accubesparing de prestaties van uw apparaat en worden trillen en de meeste achtergrondgegevens beperkt. E-mail, berichten en andere apps die afhankelijk zijn van synchronisatie worden pas bijgewerkt als u ze opent.\n\nAccubesparing wordt tijdens het opladen van uw apparaat automatisch uitgeschakeld"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Accubesparing beperkt de prestaties van uw apparaat, de trilfunctie en de meeste achtergrondgegevens om de accuduur te verlengen.\n\nAccubesparing wordt automatisch uitgeschakeld wanneer uw apparaat wordt opgeladen."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Totdat uw downtime eindigt om <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>
