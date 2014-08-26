@@ -179,6 +179,18 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nSetHighContrastText(long renderer, boolean highContrastText);
 
     @Override
+    public void insertReorderBarrier() {
+        nInsertReorderBarrier(mRenderer, true);
+    }
+
+    @Override
+    public void insertInorderBarrier() {
+        nInsertReorderBarrier(mRenderer, false);
+    }
+
+    private static native void nInsertReorderBarrier(long renderer, boolean enableReorder);
+
+    @Override
     public int onPreDraw(Rect dirty) {
         if (dirty != null) {
             return nPrepareDirty(mRenderer, dirty.left, dirty.top, dirty.right, dirty.bottom,

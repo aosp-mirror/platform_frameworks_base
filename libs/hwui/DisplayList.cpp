@@ -89,11 +89,9 @@ void DisplayListData::cleanupResources() {
     layers.clear();
 }
 
-void DisplayListData::addChild(DrawRenderNodeOp* op) {
-    LOG_ALWAYS_FATAL_IF(!op->renderNode(), "DrawRenderNodeOp with no render node!");
-
-    mChildren.push(op);
+size_t DisplayListData::addChild(DrawRenderNodeOp* op) {
     mReferenceHolders.push(op->renderNode());
+    return mChildren.add(op);
 }
 
 }; // namespace uirenderer

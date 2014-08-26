@@ -115,12 +115,23 @@ public:
  * Data structure that holds the list of commands used in display list stream
  */
 class DisplayListData {
+    friend class DisplayListRenderer;
 public:
+    struct Chunk {
+        // range of included ops in DLD::displayListOps
+        size_t beginOpIndex;
+        size_t endOpIndex;
+
+        // range of included children in DLD::mChildren
+        size_t beginChildIndex;
+        size_t endChildIndex;
+
+        // whether children with non-zero Z in the chunk should be reordered
+        bool reorderChildren;
+    };
+
     DisplayListData();
     ~DisplayListData();
-
-    // allocator into which all ops were allocated
-    LinearAllocator allocator;
 
     // pointers to all ops within display list, pointing into allocator data
     Vector<DisplayListOp*> displayListOps;
@@ -138,13 +149,12 @@ public:
     Vector<const SkRegion*> regions;
     Vector<Layer*> layers;
     Vector<Functor*> functors;
-    bool hasDrawOps;
 
-    bool isEmpty() {
-        return !displayListOps.size();
+    const Vector<Chunk>& getChunks() const {
+        return chunks;
     }
 
-    void addChild(DrawRenderNodeOp* childOp);
+    size_t addChild(DrawRenderNodeOp* childOp);
     const Vector<DrawRenderNodeOp*>& children() { return mChildren; }
 
     void refProperty(CanvasPropertyPrimitive* prop) {
@@ -155,11 +165,24 @@ public:
         mReferenceHolders.push(prop);
     }
 
+    size_t getUsedSize() {
+        return allocator.usedSize();
+    }
+    bool isEmpty() {
+        return !hasDrawOps;
+    }
+
 private:
     Vector< sp<VirtualLightRefBase> > mReferenceHolders;
 
     // list of children display lists for quick, non-drawing traversal
     Vector<DrawRenderNodeOp*> mChildren;
+
+    Vector<Chunk> chunks;
+
+    // allocator into which all ops were allocated
+    LinearAllocator allocator;
+    bool hasDrawOps;
 
     void cleanupResources();
 };
