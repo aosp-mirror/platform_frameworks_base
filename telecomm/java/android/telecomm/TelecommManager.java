@@ -24,6 +24,7 @@ import android.util.Log;
 
 import com.android.internal.telecomm.ITelecommService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -298,7 +299,7 @@ public class TelecommManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecommService#getOutgoingPhoneAccounts", e);
         }
-        return null;
+        return new ArrayList<>();
     }
 
     /**
