@@ -539,7 +539,7 @@ public abstract class NotificationListenerService extends Service {
         private String mKey;
         private int mRank = -1;
         private boolean mIsAmbient;
-        private boolean mMeetsInterruptionFilter;
+        private boolean mMatchesInterruptionFilter;
 
         public Ranking() {}
 
@@ -571,17 +571,27 @@ public abstract class NotificationListenerService extends Service {
         /**
          * Returns whether the notification meets the user's interruption
          * filter.
+         *
+         * @removed
          */
         public boolean meetsInterruptionFilter() {
-            return mMeetsInterruptionFilter;
+            return mMatchesInterruptionFilter;
+        }
+
+        /**
+         * Returns whether the notification matches the user's interruption
+         * filter.
+         */
+        public boolean matchesInterruptionFilter() {
+            return mMatchesInterruptionFilter;
         }
 
         private void populate(String key, int rank, boolean isAmbient,
-                boolean meetsInterruptionFilter) {
+                boolean matchesInterruptionFilter) {
             mKey = key;
             mRank = rank;
             mIsAmbient = isAmbient;
-            mMeetsInterruptionFilter = meetsInterruptionFilter;
+            mMatchesInterruptionFilter = matchesInterruptionFilter;
         }
     }
 
