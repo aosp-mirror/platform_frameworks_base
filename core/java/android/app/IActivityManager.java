@@ -119,7 +119,7 @@ public interface IActivityManager extends IInterface {
     public void activityDestroyed(IBinder token) throws RemoteException;
     public String getCallingPackage(IBinder token) throws RemoteException;
     public ComponentName getCallingActivity(IBinder token) throws RemoteException;
-    public List<IAppTask> getAppTasks() throws RemoteException;
+    public List<IAppTask> getAppTasks(String callingPackage) throws RemoteException;
     public int addAppTask(IBinder activityToken, Intent intent,
             ActivityManager.TaskDescription description, Bitmap thumbnail) throws RemoteException;
     public Point getAppTaskThumbnailSize() throws RemoteException;
