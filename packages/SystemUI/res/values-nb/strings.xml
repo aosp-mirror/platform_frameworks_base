@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"lås opp"</string>
     <string name="phone_label" msgid="2320074140205331708">"åpne telefonen"</string>
     <string name="camera_label" msgid="7261107956054836961">"åpne kamera"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"Enheten er sikker."</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"Enheten er ikke sikker."</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"Enheten er sikker – pålitelig agent er aktiv."</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"Enheten er ikke sikker – pålitelig agent er aktiv."</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"Ansiktsgjenkjennelse kjører – pålitelig agent er aktiv."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Bytt knapp for inndatametode."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Zoomknapp for kompatibilitet."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom fra mindre til større skjerm."</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Denne enheten administreres av:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nAdministratoren din kan overvåke nettverksaktiviteten din, inkludert e-poster, apper og sikre nettsteder. Ta kontakt med administratoren din for mer om dette.\n\nI tillegg ga du «<xliff:g id="APPLICATION">%2$s</xliff:g>» tillatelse til å konfigurere en VPN-tilkobling. Denne appen kan også overvåke nettverksaktiviteten din."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Denne enheten administreres av:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nAdministratoren din kan overvåke nettverksaktiviteten din, inkludert e-poster, apper og sikre nettsteder. Ta kontakt med administratoren din for mer om dette.\n\nI tillegg er enheten koblet til et VPN-nettverk («<xliff:g id="APPLICATION">%2$s</xliff:g>»). VPN-tjenesteleverandøren kan også overvåke nettverksaktiviteten din."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Enheten forblir låst til du låser den opp manuelt"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> har kuttet lyden"</string>
 </resources>

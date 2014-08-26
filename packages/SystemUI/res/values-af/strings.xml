@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"ontsluit"</string>
     <string name="phone_label" msgid="2320074140205331708">"maak foon oop"</string>
     <string name="camera_label" msgid="7261107956054836961">"maak kamera oop"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"Toestel beveilig."</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"Toestel nie beveilig nie."</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"Toestel beveilig, vertrouensagent aktief."</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"Toestel nie beveilig nie, vertrouensagent aktief."</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"Gesigherkenning werk tans, vertrouensagent aktief."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Knoppie vir wissel van invoermetode."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Versoenbaarheid-zoem se knoppie."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoem kleiner na groter skerm."</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Hierdie toestel word bestuur deur:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nJou administrateur kan jou netwerkaktiwiteit monitor, insluitend e-posse, programme en veilige webwerwe. Kontak jou administrateur vir meer inligting.\n\nJy het ook \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" toestemming gegee om \'n VPN-verbinding op te stel. Die program kan ook jou netwerkaktiwiteit monitor."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Hierdie toestel word bestuur deur:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nJou administrateur is in staat om jou netwerkaktiwiteit te monitor, insluitend e-posse, programme en veilige webwerwe. Kontak jou administrateur vir meer inligting.\n\nJy is ook aan \'n VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") gekoppel. Jou VPN-diensverskaffer kan ook jou netwerkaktiwiteit monitor."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Toestel sal gesluit bly totdat jy dit handmatig ontsluit"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"Gedemp deur <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"ปลดล็อก"</string>
     <string name="phone_label" msgid="2320074140205331708">"เปิดโทรศัพท์"</string>
     <string name="camera_label" msgid="7261107956054836961">"เปิดกล้อง"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"อุปกรณ์ปลอดภัยแล้ว"</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"อุปกรณ์ไม่มีการรักษาความปลอดภัย"</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"อุปกรณ์ปลอดภัยแล้ว ใช้งานเอเจนต์ความน่าเชื่อถืออยู่"</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"อุปกรณ์ไม่มีการรักษาความปลอดภัย ใช้งานเอเจนต์ความน่าเชื่อถืออยู่"</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"กำลังตรวจจับใบหน้า ใช้งานเอเจนต์ความน่าเชื่อถืออยู่"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ปุ่มสลับวิธีการป้อนข้อมูล"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ปุ่มซูมที่ใช้งานร่วมกันได้"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ซูมหน้าจอให้มีขนาดใหญ่ขึ้น"</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"อุปกรณ์นี้ได้รับการจัดการโดย:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nผู้ดูแลระบบของคุณสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณได้ รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย สำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบของคุณ\n\nนอกจากนี้ คุณได้ให้สิทธิ์ \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" เพื่อตั้งค่าการเชื่อมต่อ VPN แอปนี้สามารถตรวจสอบกิจกรรมในเครือข่ายได้เช่นกัน"</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"อุปกรณ์นี้ได้รับการจัดการโดย:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nผู้ดูแลระบบของคุณสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณได้ รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย สำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบของคุณ\n\nนอกจากนี้ คุณเชื่อมต่อกับ VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") ผู้ให้บริการ VPN ของคุณสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณได้เช่นกัน"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"อุปกรณ์จะล็อกจนกว่าคุณจะปลดล็อกด้วยตนเอง"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"ปิดเสียงโดย <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

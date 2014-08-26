@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"अनलॉक करें"</string>
     <string name="phone_label" msgid="2320074140205331708">"फ़ोन खोलें"</string>
     <string name="camera_label" msgid="7261107956054836961">"कैमरा खोलें"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"उपकरण सुरक्षित है."</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"उपकरण सुरक्षित नहीं है."</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"उपकरण सुरक्षित है, विश्वसनीय एजेंट सक्रिय है."</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"उपकरण सुरक्षित नहीं है, विश्वसनीय एजेंट सक्रिय है."</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"चेहरा पहचान सुविधा चल रही है, विश्वसनीय एजेंट सक्रिय है."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"इनपुट पद्धति‍ बटन स्विच करें."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"संगतता ज़ूम बटन."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"छोटी से बड़ी स्‍क्रीन पर ज़ूम करें."</string>
@@ -171,20 +166,20 @@
     <string name="accessibility_desc_recent_apps" msgid="8376953390514779637">"हाल ही की स्‍क्रीन."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"उपयोगकर्ता <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wifi को बंद किया गया."</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wifi को चालू किया गया."</string>
+    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"वाई-फ़ाई को बंद किया गया."</string>
+    <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"वाई-फ़ाई को चालू किया गया."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"मोबाइल <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"बैटरी <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"हवाई जहाज़ मोड बंद है."</string>
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"हवाई जहाज़ मोड चालू है."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"हवाई जहाज़ मोड को बंद किया गया."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"हवाई जहाज़ मोड को चालू किया गया."</string>
-    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth बंद है."</string>
-    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth चालू है."</string>
-    <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Bluetooth कनेक्‍ट हो रहा है."</string>
-    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"Bluetooth कनेक्ट है."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"Bluetooth को बंद किया गया."</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"Bluetooth को चालू किया गया."</string>
+    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"ब्लूटूथ बंद है."</string>
+    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"ब्लूटूथ चालू है."</string>
+    <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"ब्लूटूथ कनेक्‍ट हो रहा है."</string>
+    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"ब्लूटूथ कनेक्ट है."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"ब्लूटूथ को बंद किया गया."</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"ब्लूटूथ को चालू किया गया."</string>
     <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"स्‍थान रिपोर्टिंग बंद है."</string>
     <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"स्‍थान रिपोर्टिंग चालू है."</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"स्‍थान रिपोर्टिंग को बंद किया गया."</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"यह उपकरण इसके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर कर सकता है. अधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें.\n\nसाथ ही, आपने VPN कनेक्‍शन सेट करने के लिए \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" अनुमति भी दी है. यह ऐप्‍स नेटवर्क गतिविधि को भी मॉनीटर कर सकता है."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"यह उपकरण इसके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक, ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर कर सकता है. अधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें.\n\nसाथ ही, आप VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") से कनेक्‍ट हैं. आपका VPN सेवा प्रदाता नेटवर्क गतिविधि को भी मॉनीटर कर सकता है."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"जब तक कि आप मैन्‍युअल रूप से अनलॉक नहीं करते तब तक उपकरण लॉक रहेगा"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> द्वारा म्यूट किया गया"</string>
 </resources>

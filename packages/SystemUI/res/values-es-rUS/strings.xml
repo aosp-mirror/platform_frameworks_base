@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"desbloquear"</string>
     <string name="phone_label" msgid="2320074140205331708">"abrir teléfono"</string>
     <string name="camera_label" msgid="7261107956054836961">"abrir cámara"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"Dispositivo protegido"</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"Dispositivo no protegido"</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"Dispositivo protegido, agente de confianza activo"</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"Dispositivo no protegido, agente de confianza activo"</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"Detección de rostro en ejecución, agente de confianza activo"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Botón Cambiar método de entrada"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botón de zoom de compatibilidad"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom de pantalla más pequeña a más grande"</string>
@@ -352,6 +347,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Dispositivo está administrado por:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nEl administrador puede supervisar la actividad de red (correo electrónico, aplicaciones y sitios web seguros). Para más información, comunícate con el administrador.\n\nY permitiste que \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" configure una VPN. La aplicación también puede supervisar la actividad de red."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Dispositivo administrado por:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nEl administrador puede supervisar la actividad de red (correo electrónico, aplicaciones y sitios web seguros). Para más información, comunícate con el administrador.\n\nY estás conectado a una VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). El proveedor de servicios de VPN puede supervisar la actividad de red."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"El dispositivo permanecerá bloqueado hasta que lo desbloquees manualmente."</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"Silenciados por <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

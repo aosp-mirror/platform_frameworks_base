@@ -85,16 +85,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"သော့ဖွင့်ရန်"</string>
     <string name="phone_label" msgid="2320074140205331708">"ဖုန်းကို ဖွင့်ရန်"</string>
     <string name="camera_label" msgid="7261107956054836961">"ကင်မရာ ဖွင့်ရန်"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"စက် လုံခြုံသည်။"</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"စက် မလုံခြုံပါ။"</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"စက် လုံခြုံပြီး၊ ယုံကြည်မှု အေးဂျင့် အလုပ်လုပ်သည်။"</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"စက် မလုံခြုံပါ၊ ယုံကြည်မှု အေးဂျင့် အလုပ်လုပ်သည်။"</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"မျက်နှာ စိစစ်မှု စတင်ပြီး၊ ယုံကြည်မှု အေးဂျင့် အလုပ်လုပ်သည်။"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ထည့်သွင်းခြင်းခလုတ်အား ပြောင်းခြင်း"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"အံ့ဝင်သောချုံ့ချဲ့ခလုတ်"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ဖန်သားပြင်ပေါ်တွင် အသေးမှအကြီးသို့ချဲ့ခြင်း"</string>
@@ -346,6 +341,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"ဒီကိရိယာကို စီမံကွပ်ကဲသူမှာ:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nသင်၏ စီမံအုပ်ချုပ်သူက သင်၏ ကွန်ရက် လှုပ်ရှားမှုကို၊ အီးမေးလ်များ၊ appများ နှင့် လုံခြုံသည့် ဝက်ဘ်ဆိုက်များ အပါအဝင်ကို၊ စောင့်ကြပ် နိုင်ပါသည်။ အချက်အလက်များ ပိုပြီး ရယူရန်၊ သင်၏ စီမံအုပ်ချုပ်သူကို ဆက်သွယ်ပါ။\n\n ထို့အပြင် သင်သည် \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" အား VPN ချိတ်ဆက်မှု စဖွင့်လုပ်ကိုင်ရန် ခွင့်ပြုခဲ့သည်။ ဒီ  appကပါ သင်၏ ကွန်ရက် လှုပ်ရှားမှုကို စောင့်ကြပ် နိုင်ပါသည်။"</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"ဒီကိရိယာကို စီမံကွပ်ကဲသူမှာ:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nသင်၏  စီမံအုပ်ချုပ်သူက သင်၏ ကွန်ရက် လှုပ်ရှားမှုကို၊ အီးမေးလ်များ၊ appများ နှင့် လုံခြုံသည့် ဝက်ဘ်ဆိုက်များ အပါအဝင်ကို၊ စောင့်ကြပ် နိုင်ပါသည်။ အချက်အလက်များ ပိုပြီး ရယူရန်၊ သင်၏ စီမံအုပ်ချုပ်သူကို ဆက်သွယ်ပါ။\n\nထို့အပြင်၊ သင်သည် VPN  (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") သို့ ချိတ်ဆက်ထားသည်။ သင်၏ VPN ဝန်ဆောင်မှုကို စီမံပေးသူကပါ ကွန်ရက် လှုပ်ရှားမှုများကို စောင့်ကြပ်နိုင်သေးသည်။"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"သင်က လက်ဖြင့် သော့မဖွင့်မချင်း ကိရိယာမှာ သော့ပိတ်လျက် ရှိနေမည်"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> အသံပိတ်သည်"</string>
 </resources>

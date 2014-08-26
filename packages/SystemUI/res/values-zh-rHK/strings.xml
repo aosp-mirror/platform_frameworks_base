@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"解鎖"</string>
     <string name="phone_label" msgid="2320074140205331708">"開啟電話"</string>
     <string name="camera_label" msgid="7261107956054836961">"開啟相機"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"裝置安全。"</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"裝置不安全。"</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"裝置安全，信任代理程式已啟用。"</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"裝置不安全，信任代理程式已啟用。"</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"臉孔偵測正在執行，信任代理程式已啟用。"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"切換輸入法按鈕。"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"相容性縮放按鈕。"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"將較小螢幕的畫面放大在較大螢幕上顯示。"</string>
@@ -173,7 +168,7 @@
     <string name="accessibility_desc_recent_apps" msgid="8376953390514779637">"最近的螢幕。"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"用戶：<xliff:g id="USER">%s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>。"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wifi 已關閉。"</string>
+    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"WiFi 已關閉。"</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"WiFi 已開啟。"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"流動數據連線：<xliff:g id="SIGNAL">%1$s</xliff:g>、<xliff:g id="TYPE">%2$s</xliff:g>、<xliff:g id="NETWORK">%3$s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"電池電量：<xliff:g id="STATE">%s</xliff:g>。"</string>
@@ -352,6 +347,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"這部裝置由下列網域管理：\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>。\n\n您的管理員可以監控您的網絡活動，包括收發電郵、使用應用程式和瀏覽安全網站。如需更多資料，請與您的管理員聯絡。\n\n同時，由於您已授權「<xliff:g id="APPLICATION">%2$s</xliff:g>」設定 VPN 連線，因此這個應用程式也能監控您的網絡活動。"</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"這部裝置由下列網域管理：\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>。\n\n您的管理員可以監控您的網絡活動，包括收發電郵、使用應用程式和瀏覽安全網站。如需更多資料，請與您的管理員聯絡。\n\n同時，您的裝置已連線至 VPN (「<xliff:g id="APPLICATION">%2$s</xliff:g>」)，因此您的 VPN 服務供應商也能監控您的網絡活動。"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"裝置將保持上鎖，直到您手動解鎖"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"靜音設定者：<xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

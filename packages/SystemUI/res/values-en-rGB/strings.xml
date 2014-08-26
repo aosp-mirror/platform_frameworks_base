@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"unlock"</string>
     <string name="phone_label" msgid="2320074140205331708">"open phone"</string>
     <string name="camera_label" msgid="7261107956054836961">"open camera"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"Device secured."</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"Device not secured."</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"Device secured, trust agent active."</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"Device not secured, trust agent active."</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"Face detection running, trust agent active."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Switch input method button."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Compatibility zoom button."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom smaller to larger screen."</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"This device is managed by:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nYour administrator is capable of monitoring your network activity including emails, apps and secure websites. For more information, contact your administrator.\n\nAlso, you gave \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" permission to set up a VPN connection. This app can monitor network activity too."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"This device is managed by:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nYour administrator is capable of monitoring your network activity including emails, apps and secure websites. For more information, contact your administrator.\n\nAlso, you\'re connected to a VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). Your VPN service provider can monitor network activity too."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Device will stay locked until you manually unlock"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"Muted by <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>
