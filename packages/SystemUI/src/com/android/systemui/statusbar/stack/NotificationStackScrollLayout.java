@@ -2150,7 +2150,15 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getDismissViewHeight() {
-        return mDismissView.getHeight() + mPaddingBetweenElementsNormal;
+        int height = mDismissView.getHeight() + mPaddingBetweenElementsNormal;
+
+        // Hack: Accommodate for additional distance when we only have one notification and the
+        // dismiss all button.
+        if (getNotGoneChildCount() == 2 && getLastChildNotGone() == mDismissView
+                && getFirstChildNotGone() instanceof ActivatableNotificationView) {
+            height += mCollapseSecondCardPadding;
+        }
+        return height;
     }
 
     public float getBottomMostNotificationBottom() {
