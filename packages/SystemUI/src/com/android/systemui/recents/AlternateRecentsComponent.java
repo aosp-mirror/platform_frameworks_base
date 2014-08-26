@@ -22,6 +22,7 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -29,6 +30,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.view.LayoutInflater;
 import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
@@ -41,6 +43,7 @@ import com.android.systemui.recents.model.TaskGrouping;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskStackViewLayoutAlgorithm;
+import com.android.systemui.recents.views.TaskViewHeader;
 import com.android.systemui.recents.views.TaskViewTransform;
 
 import java.util.ArrayList;
@@ -86,6 +89,10 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     int mNavBarHeight;
     int mNavBarWidth;
 
+    // Header (for transition)
+    TaskViewHeader mHeaderBar;
+    TaskStackView mDummyStackView;
+
     // Variables to keep track of if we need to start recents after binding
     View mStatusBarView;
     boolean mTriggeredFromAltTab;
@@ -114,6 +121,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     public void onStart() {
         // Initialize some static datastructures
         TaskStackViewLayoutAlgorithm.initializeCurve();
+        reloadHeaderBarLayout();
     }
 
     public void onBootCompleted() {
@@ -169,7 +177,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
     void showRelativeAffiliatedTask(boolean showNextTask) {
         TaskStack stack = RecentsTaskLoader.getShallowTaskStack(mSystemServicesProxy,
-                Integer.MAX_VALUE);
+                Integer.MAX_VALUE, mContext.getResources());
         // Return early if there are no tasks
         if (stack.getTaskCount() == 0) return;
 
@@ -250,6 +258,28 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             mSystemInsets.set(0, mStatusBarHeight, 0, mNavBarHeight);
         }
         sLastScreenshot = null;
+        reloadHeaderBarLayout();
+    }
+
+    /** Prepares the header bar layout. */
+    void reloadHeaderBarLayout() {
+        // Inflate the header bar layout so that we can rebind and draw it for the transition
+        Resources res = mContext.getResources();
+        TaskStack stack = new TaskStack();
+        mDummyStackView = new TaskStackView(mContext, stack);
+        TaskStackViewLayoutAlgorithm algo = mDummyStackView.getStackAlgorithm();
+        Rect taskStackBounds = new Rect(mTaskStackBounds);
+        taskStackBounds.bottom -= mSystemInsets.bottom;
+        algo.computeRects(mWindowRect.width(), mWindowRect.height(), taskStackBounds);
+        Rect taskViewSize = algo.getUntransformedTaskViewSize();
+        int taskBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_bar_height);
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        mHeaderBar = (TaskViewHeader) inflater.inflate(R.layout.recents_task_view_header, null,
+                false);
+        mHeaderBar.measure(
+                View.MeasureSpec.makeMeasureSpec(taskViewSize.width(), View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(taskBarHeight, View.MeasureSpec.EXACTLY));
+        mHeaderBar.layout(0, 0, taskViewSize.width(), taskBarHeight);
     }
 
     /** Gets the top task. */
@@ -361,27 +391,37 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             }
         }
 
-        // If the screenshot fails, then load the first task thumbnail and use that
-        Bitmap firstThumbnail = mSystemServicesProxy.getTaskThumbnail(topTask.id);
-        if (firstThumbnail != null) {
-            // Update the destination rect
-            Rect toTaskRect = getThumbnailTransitionRect(topTask.id, isTopTaskHome);
-            if (toTaskRect.width() > 0 && toTaskRect.height() > 0) {
-                // Create the new thumbnail for the animation down
-                // XXX: We should find a way to optimize this so we don't need to create a new bitmap
-                Bitmap thumbnail = Bitmap.createBitmap(toTaskRect.width(), toTaskRect.height(),
-                        Bitmap.Config.ARGB_8888);
-                int size = Math.min(firstThumbnail.getWidth(), firstThumbnail.getHeight());
-                Canvas c = new Canvas(thumbnail);
-                c.drawBitmap(firstThumbnail, new Rect(0, 0, size, size),
-                        new Rect(0, 0, toTaskRect.width(), toTaskRect.height()), null);
-                c.setBitmap(null);
-                // Recycle the old thumbnail
-                firstThumbnail.recycle();
-                mStartAnimationTriggered = false;
-                return ActivityOptions.makeThumbnailScaleDownAnimation(mStatusBarView,
-                        thumbnail, toTaskRect.left, toTaskRect.top, this);
+        // Update the destination rect
+        Task toTask = new Task();
+        TaskViewTransform toTransform = getThumbnailTransitionTransform(topTask.id, isTopTaskHome,
+                toTask);
+        if (toTransform != null && toTask.key != null) {
+            Rect toTaskRect = toTransform.rect;
+            ActivityInfo info = mSystemServicesProxy.getActivityInfo(
+                    toTask.key.baseIntent.getComponent(), toTask.key.userId);
+            if (toTask.activityIcon == null) {
+                toTask.activityIcon = mSystemServicesProxy.getActivityIcon(info,
+                        toTask.key.userId);
             }
+            if (toTask.activityLabel == null) {
+                toTask.activityLabel = mSystemServicesProxy.getActivityLabel(info);
+            }
+
+            Bitmap thumbnail = Bitmap.createBitmap(toTaskRect.width(), toTaskRect.height(),
+                    Bitmap.Config.ARGB_8888);
+            if (Constants.DebugFlags.App.EnableTransitionThumbnailDebugMode) {
+                thumbnail.eraseColor(0xFFff0000);
+            } else {
+                Canvas c = new Canvas(thumbnail);
+                c.scale(toTransform.scale, toTransform.scale);
+                mHeaderBar.rebindToTask(toTask);
+                mHeaderBar.draw(c);
+                c.setBitmap(null);
+            }
+
+            mStartAnimationTriggered = false;
+            return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mStatusBarView,
+                    thumbnail, toTaskRect.left, toTaskRect.top, this);
         }
 
         // If both the screenshot and thumbnail fails, then just fall back to the default transition
@@ -389,21 +429,18 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     }
 
     /** Returns the transition rect for the given task id. */
-    Rect getThumbnailTransitionRect(int runningTaskId, boolean isTopTaskHome) {
+    TaskViewTransform getThumbnailTransitionTransform(int runningTaskId, boolean isTopTaskHome,
+                                                      Task runningTaskOut) {
         // Get the stack of tasks that we are animating into
-        TaskStack stack = RecentsTaskLoader.getShallowTaskStack(mSystemServicesProxy, -1);
+        TaskStack stack = RecentsTaskLoader.getShallowTaskStack(mSystemServicesProxy, -1,
+                mContext.getResources());
         if (stack.getTaskCount() == 0) {
-            return new Rect();
+            return null;
         }
 
         // Get the stack
-        TaskStackView tsv = new TaskStackView(mContext, stack);
-        TaskStackViewLayoutAlgorithm algo = tsv.getStackAlgorithm();
-        Rect taskStackBounds = new Rect(mTaskStackBounds);
-        taskStackBounds.bottom -= mSystemInsets.bottom;
-        tsv.computeRects(mWindowRect.width(), mWindowRect.height(), taskStackBounds,
-                mTriggeredFromAltTab, isTopTaskHome);
-        tsv.getScroller().setStackScrollToInitialState();
+        mDummyStackView.updateMinMaxScrollForStack(stack, mTriggeredFromAltTab, isTopTaskHome);
+        mDummyStackView.getScroller().setStackScrollToInitialState();
 
         // Find the running task in the TaskStack
         Task task = null;
@@ -415,6 +452,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
                 Task t = tasks.get(i);
                 if (t.key.id == runningTaskId) {
                     task = t;
+                    runningTaskOut.copyFrom(t);
                     break;
                 }
             }
@@ -425,8 +463,9 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         }
 
         // Get the transform for the running task
-        mTmpTransform = algo.getStackTransform(task, tsv.getScroller().getStackScroll(), mTmpTransform, null);
-        return new Rect(mTmpTransform.rect);
+        mTmpTransform = mDummyStackView.getStackAlgorithm().getStackTransform(task,
+                mDummyStackView.getScroller().getStackScroll(), mTmpTransform, null);
+        return mTmpTransform;
     }
 
     /** Starts the recents activity */

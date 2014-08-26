@@ -23,6 +23,6 @@
   <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
          android:fillEnabled="true"
          android:fillBefore="true" android:fillAfter="true"
-         android:interpolator="@android:interpolator/fast_out_linear_in"
-         android:duration="200"/>
+         android:interpolator="@android:interpolator/linear"
+         android:duration="100"/>
 </set>

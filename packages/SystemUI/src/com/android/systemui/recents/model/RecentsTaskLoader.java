@@ -18,6 +18,7 @@ package com.android.systemui.recents.model;
 
 import android.app.ActivityManager;
 import android.content.ComponentCallbacks2;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
@@ -31,6 +32,7 @@ import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -171,9 +173,9 @@ class TaskResourceLoader implements Runnable {
                     // Load the application icon if it is stale or we haven't cached one yet
                     if (cachedIcon == null) {
                         ActivityInfo info = ssp.getActivityInfo(t.key.baseIntent.getComponent(),
-                                t.userId);
+                                t.key.userId);
                         if (info != null) {
-                            cachedIcon = ssp.getActivityIcon(info, t.userId);
+                            cachedIcon = ssp.getActivityIcon(info, t.key.userId);
                         }
                         if (cachedIcon == null) {
                             cachedIcon = mDefaultApplicationIcon;
@@ -228,8 +230,10 @@ public class RecentsTaskLoader {
     static RecentsTaskLoader sInstance;
 
     SystemServicesProxy mSystemServicesProxy;
+    DrawableLruCache mTaskDescriptionIconCache;
     DrawableLruCache mApplicationIconCache;
     BitmapLruCache mThumbnailCache;
+    StringLruCache mActivityLabelCache;
     TaskResourceLoadQueue mLoadQueue;
     TaskResourceLoader mLoader;
 
@@ -270,8 +274,10 @@ public class RecentsTaskLoader {
         mSystemServicesProxy = new SystemServicesProxy(context);
         mPackageMonitor = new RecentsPackageMonitor();
         mLoadQueue = new TaskResourceLoadQueue();
+        mTaskDescriptionIconCache = new DrawableLruCache(iconCacheSize);
         mApplicationIconCache = new DrawableLruCache(iconCacheSize);
         mThumbnailCache = new BitmapLruCache(thumbnailCacheSize);
+        mActivityLabelCache = new StringLruCache(100);
         mLoader = new TaskResourceLoader(mLoadQueue, mApplicationIconCache, mThumbnailCache,
                 mDefaultThumbnail, mDefaultApplicationIcon);
     }
@@ -313,6 +319,7 @@ public class RecentsTaskLoader {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
         Resources res = context.getResources();
         LinkedHashSet<Task> tasksToLoad = new LinkedHashSet<Task>();
+        ArrayList<Task> tasksToAdd = new ArrayList<Task>();
         TaskStack stack = new TaskStack();
         SpaceNode root = new SpaceNode();
         root.setStack(stack);
@@ -325,55 +332,80 @@ public class RecentsTaskLoader {
         int taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = tasks.get(i);
-            ActivityInfo info = ssp.getActivityInfo(t.baseIntent.getComponent(), t.userId);
-            if (info == null) continue;
+            Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, t.baseIntent, t.userId,
+                    t.firstActiveTime, t.lastActiveTime);
+            ComponentName cn = t.baseIntent.getComponent();
+            ActivityInfo info = null;
 
             ActivityManager.TaskDescription av = t.taskDescription;
-            String activityLabel = null;
+            String activityLabel  = null;
             Drawable activityIcon = mDefaultApplicationIcon;
             int activityColor = config.taskBarViewDefaultBackgroundColor;
+            boolean loadedActivityIcon = false;
             if (av != null) {
-                activityLabel = (av.getLabel() != null ? av.getLabel() : ssp.getActivityLabel(info));
-                activityIcon = (av.getIcon() != null) ?
+                activityLabel = av.getLabel();
+                activityIcon = mTaskDescriptionIconCache.getAndInvalidateIfModified(taskKey);
+                if (activityIcon == null) {
+                    activityIcon = (av.getIcon() != null) ?
                         ssp.getBadgedIcon(new BitmapDrawable(res, av.getIcon()), t.userId) : null;
+                    if (activityIcon != null) {
+                        mTaskDescriptionIconCache.put(taskKey, activityIcon);
+                    }
+                }
                 if (av.getPrimaryColor() != 0) {
                     activityColor = av.getPrimaryColor();
                 }
-            } else {
-                activityLabel = ssp.getActivityLabel(info);
+                loadedActivityIcon = (activityIcon != null);
+            }
+            // If there is no activity label, then try and read it from the label cache before
+            // loading it from the system
+            if (activityLabel == null) {
+                activityLabel = mActivityLabelCache.getAndInvalidateIfModified(taskKey);
+                if (activityLabel == null) {
+                    if (info == null) {
+                        info = ssp.getActivityInfo(cn, t.userId);
+                    }
+                    activityLabel = ssp.getActivityLabel(info);
+                    mActivityLabelCache.put(taskKey, activityLabel);
+                }
             }
 
             // Create a new task
-            Task task = new Task(t.persistentId, (t.id > -1), t.baseIntent, t.affiliatedTaskId,
-                    t.affiliatedTaskColor, activityLabel, activityIcon, activityColor, t.userId,
-                    t.firstActiveTime, t.lastActiveTime, (i == (taskCount - 1)),
+            Task task = new Task(taskKey, (t.id > -1), t.affiliatedTaskId, t.affiliatedTaskColor,
+                    activityLabel, activityIcon, activityColor, (i == (taskCount - 1)),
                     config.lockToAppEnabled);
 
             // Preload the specified number of apps
             if (i >= (taskCount - preloadCount)) {
-                // Load the icon from the cache if possible
-                task.applicationIcon = mApplicationIconCache.getAndInvalidateIfModified(task.key);
-                if (task.applicationIcon == null) {
-                    // Load the icon from the system
-                    task.applicationIcon = ssp.getActivityIcon(info, task.userId);
-                    if (task.applicationIcon != null) {
-                        mApplicationIconCache.put(task.key, task.applicationIcon);
+                // Load the icon from the cache if possible (only if we don't have an activity icon)
+                if (!loadedActivityIcon) {
+                    task.applicationIcon =
+                            mApplicationIconCache.getAndInvalidateIfModified(taskKey);
+                    if (task.applicationIcon == null) {
+                        // Load the icon from the system
+                        if (info == null) {
+                            info = ssp.getActivityInfo(cn, t.userId);
+                        }
+                        task.applicationIcon = ssp.getActivityIcon(info, taskKey.userId);
+                        if (task.applicationIcon != null) {
+                            mApplicationIconCache.put(taskKey, task.applicationIcon);
+                        }
                     }
-                }
-                if (task.applicationIcon == null) {
-                    // Either the task has changed since the last active time, or it was not
-                    // previously cached, so try and load the task anew.
-                    tasksToLoad.add(task);
+                    if (task.applicationIcon == null) {
+                        // Either the task has changed since the last active time, or it was not
+                        // previously cached, so try and load the task anew.
+                        tasksToLoad.add(task);
+                    }
                 }
 
                 // Load the thumbnail from the cache if possible
-                task.thumbnail = mThumbnailCache.getAndInvalidateIfModified(task.key);
+                task.thumbnail = mThumbnailCache.getAndInvalidateIfModified(taskKey);
                 if (task.thumbnail == null) {
                     // Load the thumbnail from the system
-                    task.thumbnail = ssp.getTaskThumbnail(task.key.id);
+                    task.thumbnail = ssp.getTaskThumbnail(taskKey.id);
                     if (task.thumbnail != null) {
                         task.thumbnail.setHasAlpha(false);
-                        mThumbnailCache.put(task.key, task.thumbnail);
+                        mThumbnailCache.put(taskKey, task.thumbnail);
                     }
                 }
                 if (task.thumbnail == null) {
@@ -384,10 +416,11 @@ public class RecentsTaskLoader {
             }
 
             // Add the task to the stack
-            stack.addTask(task);
+            tasksToAdd.add(task);
         }
 
         // Simulate the groupings that we describe
+        stack.setTasks(tasksToAdd);
         stack.createAffiliatedGroupings(config);
 
         // Start the task loader and add all the tasks we need to load
@@ -401,21 +434,29 @@ public class RecentsTaskLoader {
     }
 
     /** Creates a lightweight stack of the current recent tasks, without thumbnails and icons. */
-    public static TaskStack getShallowTaskStack(SystemServicesProxy ssp, int numTasks) {
+    public static TaskStack getShallowTaskStack(SystemServicesProxy ssp, int numTasks,
+            Resources resources) {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
         List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp, numTasks);
+        ArrayList<Task> tasksToAdd = new ArrayList<Task>();
         TaskStack stack = new TaskStack();
 
         int taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = tasks.get(i);
-            ActivityInfo info = ssp.getActivityInfo(t.baseIntent.getComponent(), t.userId);
-            if (info == null) continue;
+            ActivityManager.TaskDescription av = t.taskDescription;
 
-            stack.addTask(new Task(t.persistentId, true, t.baseIntent, t.affiliatedTaskId,
-                    t.affiliatedTaskColor, null, null, 0, 0, t.firstActiveTime, t.lastActiveTime,
-                    (i == (taskCount - 1)), config.lockToAppEnabled));
+            BitmapDrawable icon = null;
+            if (av.getIcon() != null) {
+                icon = new BitmapDrawable(resources, av.getIcon());
+            }
+            Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, t.baseIntent, t.userId,
+                    t.firstActiveTime, t.lastActiveTime);
+            tasksToAdd.add(new Task(taskKey, true, t.affiliatedTaskId, t.affiliatedTaskColor,
+                    av.getLabel(), icon, av.getPrimaryColor(), (i == (taskCount - 1)),
+                    config.lockToAppEnabled));
         }
+        stack.setTasks(tasksToAdd);
         stack.createAffiliatedGroupings(config);
         return stack;
     }
@@ -484,18 +525,23 @@ public class RecentsTaskLoader {
                 // We are leaving recents, so trim the data a bit
                 mThumbnailCache.trimToSize(mMaxThumbnailCacheSize / 2);
                 mApplicationIconCache.trimToSize(mMaxIconCacheSize / 2);
+                mTaskDescriptionIconCache.trimToSize(mMaxIconCacheSize / 2);
                 break;
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW:
             case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
                 // We are going to be low on memory
                 mThumbnailCache.trimToSize(mMaxThumbnailCacheSize / 4);
                 mApplicationIconCache.trimToSize(mMaxIconCacheSize / 4);
+                mTaskDescriptionIconCache.trimToSize(mMaxIconCacheSize / 4);
                 break;
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
             case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
                 // We are low on memory, so release everything
                 mThumbnailCache.evictAll();
                 mApplicationIconCache.evictAll();
+                mTaskDescriptionIconCache.evictAll();
+                // The cache is small, only clear the label cache when we are critical
+                mActivityLabelCache.evictAll();
                 break;
             default:
                 break;
