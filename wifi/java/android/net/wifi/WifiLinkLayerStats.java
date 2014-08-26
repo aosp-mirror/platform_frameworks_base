@@ -102,6 +102,14 @@ public class WifiLinkLayerStats implements Parcelable {
     /** {@hide} */
     public long retries_vo;
 
+    /** {@hide} */
+    public int on_time;
+    /** {@hide} */
+    public int tx_time;
+    /** {@hide} */
+    public int rx_time;
+    /** {@hide} */
+    public int on_time_scan;
 
     /** {@hide} */
     public WifiLinkLayerStats() {
@@ -138,7 +146,10 @@ public class WifiLinkLayerStats implements Parcelable {
                 .append(" tx=").append(Long.toString(this.txmpdu_vo))
                 .append(" lost=").append(Long.toString(this.lostmpdu_vo))
                 .append(" retries=").append(Long.toString(this.retries_vo)).append('\n');
-
+        sbuf.append(" on_time : ").append(Integer.toString(this.on_time))
+                .append(" tx_time=").append(Integer.toString(this.tx_time))
+                .append(" rx_time=").append(Integer.toString(this.rx_time))
+                .append(" scan_time=").append(Integer.toString(this.on_time_scan)).append('\n');
         return sbuf.toString();
     }
 
@@ -172,6 +183,10 @@ public class WifiLinkLayerStats implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(SSID);
         dest.writeString(BSSID);
+        dest.writeInt(on_time);
+        dest.writeInt(tx_time);
+        dest.writeInt(rx_time);
+        dest.writeInt(on_time_scan);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -181,6 +196,10 @@ public class WifiLinkLayerStats implements Parcelable {
                 WifiLinkLayerStats stats = new WifiLinkLayerStats();
                 stats.SSID = in.readString();
                 stats.BSSID = in.readString();
+                stats.on_time = in.readInt();
+                stats.tx_time = in.readInt();
+                stats.rx_time = in.readInt();
+                stats.on_time_scan = in.readInt();
                 return stats;
             };
             public WifiLinkLayerStats[] newArray(int size) {
