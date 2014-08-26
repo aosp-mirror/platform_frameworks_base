@@ -36615,7 +36615,7 @@ package android.webkit {
 
   public class CookieManager {
     method public synchronized boolean acceptCookie();
-    method public synchronized boolean acceptThirdPartyCookies(android.webkit.WebView);
+    method public boolean acceptThirdPartyCookies(android.webkit.WebView);
     method public static boolean allowFileSchemeCookies();
     method public void flush();
     method public java.lang.String getCookie(java.lang.String);
