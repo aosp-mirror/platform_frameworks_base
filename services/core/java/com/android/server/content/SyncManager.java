@@ -2757,9 +2757,7 @@ public class SyncManager {
                 } else {
                     Log.d(TAG, "failed sync operation " + syncOperation + ", " + syncResult);
                     // the operation failed so increase the backoff time
-                    if (!syncResult.syncAlreadyInProgress) {
-                        increaseBackoffSetting(syncOperation);
-                    }
+                    increaseBackoffSetting(syncOperation);
                     // reschedule the sync if so indicated by the syncResult
                     maybeRescheduleSync(syncResult, syncOperation);
                     historyMessage = ContentResolver.syncErrorToString(
