@@ -298,7 +298,7 @@ public final class RemoteConnection {
      * @return The children of this {@code RemoteConnection} if this {@code RemoteConnection} is
      * a conference, or an empty {@code List} otherwise.
      */
-    public List<RemoteConnection> getChildren() { return null; }
+    public List<RemoteConnection> getChildren() { return new ArrayList<>(); }
 
     /**
      * Obtains the state of this {@code RemoteConnection}.
