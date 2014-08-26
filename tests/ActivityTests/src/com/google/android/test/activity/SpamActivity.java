@@ -1,11 +1,11 @@
-/**
- * Copyright (c) 2014, The Android Open Source Project
+/*
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package android.app;
+package com.google.android.test.activity;
 
-import android.app.ActivityManager;
-import android.content.Intent;
+import android.app.Activity;
 import android.os.Bundle;
 
-/** @hide */
-interface IAppTask {
-    void finishAndRemoveTask();
-    ActivityManager.RecentTaskInfo getTaskInfo();
-    void moveToFront();
-    int startActivity(IBinder whoThread, String callingPackage,
-            in Intent intent, String resolvedType, in Bundle options);
-    void setExcludeFromRecents(boolean exclude);
+public class SpamActivity extends Activity {
+    byte[] mBytes;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Chew up some RAM -- 8 megs worth.
+        mBytes = new byte[8*1024*1024];
+    }
 }

@@ -84,6 +84,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -115,10 +116,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final boolean DEBUG_APP = DEBUG || false;
     static final boolean DEBUG_CONTAINERS = DEBUG || false;
     static final boolean DEBUG_IDLE = DEBUG || false;
-    static final boolean DEBUG_VISIBLE_BEHIND = DEBUG || false;
+    static final boolean DEBUG_RELEASE = DEBUG || false;
     static final boolean DEBUG_SAVED_STATE = DEBUG || false;
     static final boolean DEBUG_SCREENSHOTS = DEBUG || false;
     static final boolean DEBUG_STATES = DEBUG || false;
+    static final boolean DEBUG_VISIBLE_BEHIND = DEBUG || false;
 
     public static final int HOME_STACK_ID = 0;
 
@@ -781,7 +783,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     void startHomeActivity(Intent intent, ActivityInfo aInfo) {
         moveHomeStackTaskToTop(HOME_ACTIVITY_TYPE);
         startActivityLocked(null, intent, null, aInfo, null, null, null, null, 0, 0, 0, null, 0,
-                null, false, null, null);
+                null, false, null, null, null);
     }
 
     final int startActivityMayWait(IApplicationThread caller, int callingUid,
@@ -789,7 +791,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             IBinder resultTo, String resultWho, int requestCode, int startFlags, String profileFile,
             ParcelFileDescriptor profileFd, WaitResult outResult, Configuration config,
-            Bundle options, int userId, IActivityContainer iContainer) {
+            Bundle options, int userId, IActivityContainer iContainer, TaskRecord inTask) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -899,7 +901,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             int res = startActivityLocked(caller, intent, resolvedType, aInfo,
                     voiceSession, voiceInteractor, resultTo, resultWho,
                     requestCode, callingPid, callingUid, callingPackage, startFlags, options,
-                    componentSpecified, null, container);
+                    componentSpecified, null, container, inTask);
 
             Binder.restoreCallingIdentity(origId);
 
@@ -1014,7 +1016,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     }
                     int res = startActivityLocked(caller, intent, resolvedTypes[i],
                             aInfo, null, null, resultTo, null, -1, callingPid, callingUid, callingPackage,
-                            0, theseOptions, componentSpecified, outActivity, null);
+                            0, theseOptions, componentSpecified, outActivity, null, null);
                     if (res < 0) {
                         return res;
                     }
@@ -1241,7 +1243,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             IBinder resultTo, String resultWho, int requestCode,
             int callingPid, int callingUid, String callingPackage, int startFlags, Bundle options,
-            boolean componentSpecified, ActivityRecord[] outActivity, ActivityContainer container) {
+            boolean componentSpecified, ActivityRecord[] outActivity, ActivityContainer container,
+            TaskRecord inTask) {
         int err = ActivityManager.START_SUCCESS;
 
         ProcessRecord callerApp = null;
@@ -1453,7 +1456,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         doPendingActivityLaunchesLocked(false);
 
         err = startActivityUncheckedLocked(r, sourceRecord, voiceSession, voiceInteractor,
-                startFlags, true, options);
+                startFlags, true, options, inTask);
 
         if (err < 0) {
             // If someone asked to have the keyguard dismissed on the next
@@ -1536,10 +1539,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    final int startActivityUncheckedLocked(ActivityRecord r,
-            ActivityRecord sourceRecord,
+    final int startActivityUncheckedLocked(ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor, int startFlags,
-            boolean doResume, Bundle options) {
+            boolean doResume, Bundle options, TaskRecord inTask) {
         final Intent intent = r.intent;
         final int callingUid = r.launchedFromUid;
 
@@ -1571,8 +1573,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
 
-        final boolean launchTaskBehind = r.mLaunchTaskBehind &&
-                (launchFlags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0;
+        final boolean launchTaskBehind = r.mLaunchTaskBehind
+                && !launchSingleTask && !launchSingleInstance
+                && (launchFlags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0;
 
         if (r.resultTo != null && (launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             // For whatever reason this activity is being launched into a new
@@ -1589,6 +1592,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0 && r.resultTo == null) {
             launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
+        }
+
+        // If we are actually going to launch in to a new task, there are some cases where
+        // we further want to do multiple task.
+        if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
+            if (launchTaskBehind
+                    || r.info.documentLaunchMode == ActivityInfo.DOCUMENT_LAUNCH_ALWAYS) {
+                launchFlags |= Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+            }
         }
 
         // We'll invoke onUserLeaving before onPause only if the launching
@@ -1624,7 +1636,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (sourceRecord == null) {
             // This activity is not being started from another...  in this
             // case we -always- start a new task.
-            if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
+            if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) == 0 && inTask == null) {
                 Slog.w(TAG, "startActivity called from non-Activity context; forcing " +
                         "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
                 launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -1642,7 +1654,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         ActivityInfo newTaskInfo = null;
         Intent newTaskIntent = null;
-        final ActivityStack sourceStack;
+        ActivityStack sourceStack;
         if (sourceRecord != null) {
             if (sourceRecord.finishing) {
                 // If the source is finishing, we can't further count it as our source.  This
@@ -1666,12 +1678,51 @@ public final class ActivityStackSupervisor implements DisplayListener {
             sourceStack = null;
         }
 
-        intent.setFlags(launchFlags);
-
         boolean addingToTask = false;
         boolean movedHome = false;
         TaskRecord reuseTask = null;
         ActivityStack targetStack;
+
+        intent.setFlags(launchFlags);
+
+        // If the caller is not coming from another activity, but has given us an
+        // explicit task into which they would like us to launch the new activity,
+        // then let's see about doing that.
+        if (sourceRecord == null && inTask != null && inTask.stack != null) {
+            // If this task is empty, then we are adding the first activity -- it
+            // determines the root, and must be launching as a NEW_TASK.
+            if (inTask.getRootActivity() == null) {
+                if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) == 0
+                        && !launchSingleInstance && !launchSingleTask) {
+                    throw new IllegalStateException("Caller has inTask " + inTask
+                            + " but target is not a new task");
+                } else if (inTask.getBaseIntent() == null || !intent.getComponent().equals(
+                        inTask.getBaseIntent().getComponent())) {
+                    throw new IllegalStateException("Caller requested " + inTask + " is component "
+                            + inTask.getBaseIntent() + " but starting " + intent);
+                }
+                inTask.setIntent(r);
+
+            // If the task is not empty, then we are going to add the new activity on top
+            // of the task, so it can not be launching as a new task.
+            } else {
+                if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0
+                        || launchSingleInstance || launchSingleTask) {
+                    throw new IllegalStateException("Caller has inTask " + inTask
+                            + " but target is a new task");
+                }
+            }
+            sourceStack = inTask.stack;
+            reuseTask = inTask;
+        } else {
+            inTask = null;
+        }
+
+        // We may want to try to place the new activity in to an existing task.  We always
+        // do this if the target activity is singleTask or singleInstance; we will also do
+        // this if NEW_TASK has been requested, and there is not an additional qualifier telling
+        // us to still place it in a new task: multi task, always doc mode, or being asked to
+        // launch this as a new task behind the current one.
         if (((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
                 (launchFlags & Intent.FLAG_ACTIVITY_MULTIPLE_TASK) == 0)
                 || launchSingleInstance || launchSingleTask) {
@@ -1908,8 +1959,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
                 return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
-            newTask = true;
-            targetStack = adjustStackFocus(r, newTask);
+            if (inTask == null) {
+                // If we have an incoming task, we are just going to use that.
+                newTask = true;
+                targetStack = adjustStackFocus(r, newTask);
+            } else {
+                targetStack = inTask.stack;
+            }
             if (!launchTaskBehind) {
                 targetStack.moveToFront();
             }
@@ -1986,6 +2042,20 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in existing task " + r.task + " from source " + sourceRecord);
 
+        } else if (inTask != null) {
+            // The calling is asking that the new activity be started in an explicit
+            // task it has provided to us.
+            if (isLockTaskModeViolation(inTask)) {
+                Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
+                return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
+            }
+            targetStack = inTask.stack;
+            targetStack.moveToFront();
+            mWindowManager.moveTaskToTop(targetStack.topTask().taskId);
+            r.setTask(inTask, null);
+            if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
+                    + " in explicit task " + r.task);
+
         } else {
             // This not being started from an existing activity, and not part
             // of a new task...  just put it in the top task, though these days
@@ -2023,7 +2093,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         while (!mPendingActivityLaunches.isEmpty()) {
             PendingActivityLaunch pal = mPendingActivityLaunches.remove(0);
             startActivityUncheckedLocked(pal.r, pal.sourceRecord, null, null, pal.startFlags,
-                    doResume && mPendingActivityLaunches.isEmpty(), null);
+                    doResume && mPendingActivityLaunches.isEmpty(), null, null);
         }
     }
 
@@ -2721,6 +2791,64 @@ public final class ActivityStackSupervisor implements DisplayListener {
             for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 stack.scheduleDestroyActivities(app, reason);
+            }
+        }
+    }
+
+    void releaseSomeActivitiesLocked(ProcessRecord app, String reason) {
+        // Examine all activities currently running in the process.
+        TaskRecord firstTask = null;
+        // Tasks is non-null only if two or more tasks are found.
+        ArraySet<TaskRecord> tasks = null;
+        if (DEBUG_RELEASE) Slog.d(TAG, "Trying to release some activities in " + app);
+        for (int i=0; i<app.activities.size(); i++) {
+            ActivityRecord r = app.activities.get(i);
+            // First, if we find an activity that is in the process of being destroyed,
+            // then we just aren't going to do anything for now; we want things to settle
+            // down before we try to prune more activities.
+            if (r.finishing || r.state == ActivityState.DESTROYING
+                    || r.state == ActivityState.DESTROYED) {
+                if (DEBUG_RELEASE) Slog.d(TAG, "Abort release; already destroying: " + r);
+                return;
+            }
+            // Don't consider any activies that are currently not in a state where they
+            // can be destroyed.
+            if (r.visible || !r.stopped || !r.haveState
+                    || r.state == ActivityState.RESUMED || r.state == ActivityState.PAUSING
+                    || r.state == ActivityState.PAUSED || r.state == ActivityState.STOPPING) {
+                if (DEBUG_RELEASE) Slog.d(TAG, "Not releasing in-use activity: " + r);
+                continue;
+            }
+            if (r.task != null) {
+                if (DEBUG_RELEASE) Slog.d(TAG, "Collecting release task " + r.task
+                        + " from " + r);
+                if (firstTask == null) {
+                    firstTask = r.task;
+                } else if (firstTask != r.task) {
+                    if (tasks == null) {
+                        tasks = new ArraySet<>();
+                        tasks.add(firstTask);
+                    }
+                    tasks.add(r.task);
+                }
+            }
+        }
+        if (tasks == null) {
+            if (DEBUG_RELEASE) Slog.d(TAG, "Didn't find two or more tasks to release");
+            return;
+        }
+        // If we have activities in multiple tasks that are in a position to be destroyed,
+        // let's iterate through the tasks and release the oldest one.
+        final int numDisplays = mActivityDisplays.size();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
+            // Step through all stacks starting from behind, to hit the oldest things first.
+            for (int stackNdx = 0; stackNdx < stacks.size(); stackNdx++) {
+                final ActivityStack stack = stacks.get(stackNdx);
+                // Try to release activities in this stack; if we manage to, we are done.
+                if (stack.releaseSomeActivitiesLocked(app, tasks, reason) > 0) {
+                    return;
+                }
             }
         }
     }
@@ -3498,7 +3626,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 mimeType = mService.getProviderMimeType(intent.getData(), userId);
             }
             return startActivityMayWait(null, -1, null, intent, mimeType, null, null, null, null, 0, 0, null,
-                    null, null, null, null, userId, this);
+                    null, null, null, null, userId, this, null);
         }
 
         @Override

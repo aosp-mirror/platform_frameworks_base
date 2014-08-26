@@ -1070,6 +1070,24 @@ final class ActivityRecord {
         return null;
     }
 
+    final boolean isDestroyable() {
+        if (finishing || app == null || state == ActivityState.DESTROYING
+                || state == ActivityState.DESTROYED) {
+            // This would be redundant.
+            return false;
+        }
+        if (task == null || task.stack == null || this == task.stack.mResumedActivity
+                || this == task.stack.mPausingActivity || !haveState || !stopped) {
+            // We're not ready for this kind of thing.
+            return false;
+        }
+        if (visible) {
+            // The user would notice this!
+            return false;
+        }
+        return true;
+    }
+
     private static String createImageFilename(long createTime, int taskId) {
         return String.valueOf(taskId) + ACTIVITY_ICON_SUFFIX + createTime +
                 TaskPersister.IMAGE_EXTENSION;
