@@ -78,8 +78,7 @@
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Käynnistys peruutettu"</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Poista <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> pudottamalla."</string>
     <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"Kohdetta <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ei poisteta."</string>
-    <!-- no translation found for keyguard_accessibility_next_alarm (7269583073750518672) -->
-    <skip />
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Seuraava hälytys asetettu: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>

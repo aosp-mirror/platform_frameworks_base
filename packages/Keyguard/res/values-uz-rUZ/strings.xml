@@ -78,8 +78,7 @@
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Ishga tushirish bekor qilindi"</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"O‘chirish uchun <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>ni pastga tashlang."</string>
     <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> o‘chirilmaydi."</string>
-    <!-- no translation found for keyguard_accessibility_next_alarm (7269583073750518672) -->
-    <skip />
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Keyingi uyg‘otkich <xliff:g id="ALARM">%1$s</xliff:g> uchun o‘rnatildi"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
