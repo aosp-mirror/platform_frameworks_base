@@ -1997,4 +1997,5 @@
   <java-symbol type="id" name="transitionTransform" />
   <java-symbol type="id" name="parentMatrix" />
   <java-symbol type="bool" name="config_auto_attach_data_on_creation" />
+  <java-symbol type="id" name="date_picker_month_day_year_layout" />
 </resources>
