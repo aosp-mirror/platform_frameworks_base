@@ -18,25 +18,26 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:focusable="true"
+    android:layout_marginLeft="@dimen/timepicker_minimum_margin_sides"
+    android:layout_marginRight="@dimen/timepicker_minimum_margin_sides"
+    android:layout_marginTop="@dimen/timepicker_minimum_margin_top_bottom"
+    android:layout_marginBottom="@dimen/timepicker_minimum_margin_top_bottom">
+    <FrameLayout
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:focusable="true"
-        android:layout_marginLeft="@dimen/timepicker_minimum_margin_sides"
-        android:layout_marginRight="@dimen/timepicker_minimum_margin_sides"
-        android:layout_marginTop="@dimen/timepicker_minimum_margin_top_bottom"
-        android:layout_marginBottom="@dimen/timepicker_minimum_margin_top_bottom">
-    <LinearLayout
-            android:layout_width="@dimen/timepicker_left_side_width"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+        android:layout_weight="1"
+        android:minWidth="@dimen/timepicker_left_side_width"
+        android:orientation="vertical">
         <include
-                layout="@layout/time_header_label"
-                android:layout_width="match_parent"
-                android:layout_height="0dip"
-                android:layout_weight="1"
-                android:layout_gravity="center" />
-    </LinearLayout>
+            layout="@layout/time_header_label"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center" />
+    </FrameLayout>
     <android.widget.RadialTimePickerView
         android:id="@+id/radial_picker"
         android:layout_width="@dimen/timepicker_radial_picker_dimen"
