@@ -869,6 +869,8 @@ public class TvView extends ViewGroup {
             if (this != mSessionCallback) {
                 return;
             }
+            mOverlayViewCreated = false;
+            mOverlayViewFrame = null;
             mSessionCallback = null;
             mSession = null;
             if (mListener != null) {
