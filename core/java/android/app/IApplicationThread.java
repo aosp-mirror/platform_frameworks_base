@@ -62,8 +62,7 @@ public interface IApplicationThread extends IInterface {
             IVoiceInteractor voiceInteractor, int procState, Bundle state,
             PersistableBundle persistentState, List<ResultInfo> pendingResults,
             List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
-            String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler)
-            throws RemoteException;
+            ProfilerInfo profilerInfo) throws RemoteException;
     void scheduleRelaunchActivity(IBinder token, List<ResultInfo> pendingResults,
             List<Intent> pendingNewIntents, int configChanges,
             boolean notResumed, Configuration config) throws RemoteException;
@@ -94,10 +93,9 @@ public interface IApplicationThread extends IInterface {
     static final int DEBUG_ON = 1;
     static final int DEBUG_WAIT = 2;
     void bindApplication(String packageName, ApplicationInfo info, List<ProviderInfo> providers,
-            ComponentName testName, String profileName, ParcelFileDescriptor profileFd,
-            boolean autoStopProfiler, Bundle testArguments, IInstrumentationWatcher testWatcher,
-            IUiAutomationConnection uiAutomationConnection, int debugMode,
-            boolean openGlTrace, boolean restrictedBackupMode, boolean persistent,
+            ComponentName testName, ProfilerInfo profilerInfo, Bundle testArguments,
+            IInstrumentationWatcher testWatcher, IUiAutomationConnection uiAutomationConnection,
+            int debugMode, boolean openGlTrace, boolean restrictedBackupMode, boolean persistent,
             Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
             Bundle coreSettings) throws RemoteException;
     void scheduleExit() throws RemoteException;
@@ -117,7 +115,7 @@ public interface IApplicationThread extends IInterface {
             boolean sticky, int sendingUser, int processState) throws RemoteException;
     void scheduleLowMemory() throws RemoteException;
     void scheduleActivityConfigurationChanged(IBinder token) throws RemoteException;
-    void profilerControl(boolean start, String path, ParcelFileDescriptor fd, int profileType)
+    void profilerControl(boolean start, ProfilerInfo profilerInfo, int profileType)
             throws RemoteException;
     void dumpHeap(boolean managed, String path, ParcelFileDescriptor fd)
             throws RemoteException;

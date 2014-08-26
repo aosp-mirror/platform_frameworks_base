@@ -37,6 +37,7 @@ import android.app.ApplicationThreadNative;
 import android.app.IActivityContainer;
 import android.app.IActivityContainerCallback;
 import android.app.IAppTask;
+import android.app.ProfilerInfo;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
@@ -1050,8 +1051,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     ProcessRecord mProfileProc = null;
     String mProfileFile;
     ParcelFileDescriptor mProfileFd;
-    int mProfileType = 0;
+    int mSamplingInterval = 0;
     boolean mAutoStopProfiler = false;
+    int mProfileType = 0;
     String mOpenGlTraceApp = null;
 
     static class ProcessChangeItem {
@@ -3443,33 +3445,30 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public final int startActivity(IApplicationThread caller, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags,
-            String profileFile, ParcelFileDescriptor profileFd, Bundle options) {
+            Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
+            int startFlags, ProfilerInfo profilerInfo, Bundle options) {
         return startActivityAsUser(caller, callingPackage, intent, resolvedType, resultTo,
-                resultWho, requestCode,
-                startFlags, profileFile, profileFd, options, UserHandle.getCallingUserId());
+            resultWho, requestCode, startFlags, profilerInfo, options,
+            UserHandle.getCallingUserId());
     }
 
     @Override
     public final int startActivityAsUser(IApplicationThread caller, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags,
-            String profileFile, ParcelFileDescriptor profileFd, Bundle options, int userId) {
+            Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
+            int startFlags, ProfilerInfo profilerInfo, Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivity");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, ALLOW_FULL_ONLY, "startActivity", null);
         // TODO: Switch to user app stacks here.
-        return mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
-                null, null, resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
-                null, null, options, userId, null, null);
+        return mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent,
+                resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
+                profilerInfo, null, null, options, userId, null, null);
     }
 
     @Override
     public final int startActivityAsCaller(IApplicationThread caller, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags,
-            String profileFile, ParcelFileDescriptor profileFd, Bundle options) {
+            Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
+            int startFlags, ProfilerInfo profilerInfo, Bundle options) {
 
         // This is very dangerous -- it allows you to perform a start activity (including
         // permission grants) as any app that may launch one of your own activities.  So
@@ -3510,9 +3509,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         // TODO: Switch to user app stacks here.
         try {
             int ret = mStackSupervisor.startActivityMayWait(null, targetUid, targetPackage, intent,
-                    resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
-                    null, null, null, null, options, UserHandle.getUserId(sourceRecord.app.uid),
-                    null, null);
+                    resolvedType, null, null, resultTo, resultWho, requestCode, startFlags, null,
+                    null, null, options, UserHandle.getUserId(sourceRecord.app.uid), null, null);
             return ret;
         } catch (SecurityException e) {
             // XXX need to figure out how to propagate to original app.
@@ -3532,32 +3530,30 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public final WaitResult startActivityAndWait(IApplicationThread caller, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags, String profileFile,
-            ParcelFileDescriptor profileFd, Bundle options, int userId) {
+            Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
+            int startFlags, ProfilerInfo profilerInfo, Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivityAndWait");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, ALLOW_FULL_ONLY, "startActivityAndWait", null);
         WaitResult res = new WaitResult();
         // TODO: Switch to user app stacks here.
         mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
-                null, null, resultTo, resultWho, requestCode, startFlags, profileFile, profileFd,
-                res, null, options, userId, null, null);
+                null, null, resultTo, resultWho, requestCode, startFlags, profilerInfo, res, null,
+                options, userId, null, null);
         return res;
     }
 
     @Override
     public final int startActivityWithConfig(IApplicationThread caller, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags, Configuration config,
-            Bundle options, int userId) {
+            Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
+            int startFlags, Configuration config, Bundle options, int userId) {
         enforceNotIsolatedCaller("startActivityWithConfig");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
                 false, ALLOW_FULL_ONLY, "startActivityWithConfig", null);
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent,
                 resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
-                null, null, null, config, options, userId, null, null);
+                null, null, config, options, userId, null, null);
         return ret;
     }
 
@@ -3596,8 +3592,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public int startVoiceActivity(String callingPackage, int callingPid, int callingUid,
             Intent intent, String resolvedType, IVoiceInteractionSession session,
-            IVoiceInteractor interactor, int startFlags, String profileFile,
-            ParcelFileDescriptor profileFd, Bundle options, int userId) {
+            IVoiceInteractor interactor, int startFlags, ProfilerInfo profilerInfo,
+            Bundle options, int userId) {
         if (checkCallingPermission(Manifest.permission.BIND_VOICE_INTERACTION)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: startVoiceActivity() from pid="
@@ -3614,8 +3610,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 false, ALLOW_FULL_ONLY, "startVoiceActivity", null);
         // TODO: Switch to user app stacks here.
         return mStackSupervisor.startActivityMayWait(null, callingUid, callingPackage, intent,
-                resolvedType, session, interactor, null, null, 0, startFlags,
-                profileFile, profileFd, null, null, options, userId, null, null);
+                resolvedType, session, interactor, null, null, 0, startFlags, profilerInfo, null,
+                null, options, userId, null, null);
     }
 
     @Override
@@ -3767,7 +3763,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // TODO: Switch to user app stacks here.
         int ret = mStackSupervisor.startActivityMayWait(null, uid, callingPackage, intent,
                 resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
-                null, null, null, null, options, userId, container, inTask);
+                null, null, null, options, userId, container, inTask);
         return ret;
     }
 
@@ -5613,11 +5609,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             String profileFile = app.instrumentationProfileFile;
             ParcelFileDescriptor profileFd = null;
+            int samplingInterval = 0;
             boolean profileAutoStop = false;
             if (mProfileApp != null && mProfileApp.equals(processName)) {
                 mProfileProc = app;
                 profileFile = mProfileFile;
                 profileFd = mProfileFd;
+                samplingInterval = mSamplingInterval;
                 profileAutoStop = mAutoStopProfiler;
             }
             boolean enableOpenGlTrace = false;
@@ -5648,9 +5646,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (profileFd != null) {
                 profileFd = profileFd.dup();
             }
-            thread.bindApplication(processName, appInfo, providers,
-                    app.instrumentationClass, profileFile, profileFd, profileAutoStop,
-                    app.instrumentationArguments, app.instrumentationWatcher,
+            ProfilerInfo profilerInfo = profileFile == null ? null
+                    : new ProfilerInfo(profileFile, profileFd, samplingInterval, profileAutoStop);
+            thread.bindApplication(processName, appInfo, providers, app.instrumentationClass,
+                    profilerInfo, app.instrumentationArguments, app.instrumentationWatcher,
                     app.instrumentationUiAutomationConnection, testMode, enableOpenGlTrace,
                     isRestrictedBackupMode || !normalMode, app.persistent,
                     new Configuration(mConfiguration), app.compat, getCommonServicesLocked(),
@@ -9695,8 +9694,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    void setProfileApp(ApplicationInfo app, String processName, String profileFile,
-            ParcelFileDescriptor profileFd, boolean autoStopProfiler) {
+    void setProfileApp(ApplicationInfo app, String processName, ProfilerInfo profilerInfo) {
         synchronized (this) {
             boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
             if (!isDebuggable) {
@@ -9705,7 +9703,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             mProfileApp = processName;
-            mProfileFile = profileFile;
+            mProfileFile = profilerInfo.profileFile;
             if (mProfileFd != null) {
                 try {
                     mProfileFd.close();
@@ -9713,9 +9711,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 mProfileFd = null;
             }
-            mProfileFd = profileFd;
+            mProfileFd = profilerInfo.profileFd;
+            mSamplingInterval = profilerInfo.samplingInterval;
+            mAutoStopProfiler = profilerInfo.autoStopProfiler;
             mProfileType = 0;
-            mAutoStopProfiler = autoStopProfiler;
         }
     }
 
@@ -9727,7 +9726,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         Settings.Global.putInt(
                 mContext.getContentResolver(),
                 Settings.Global.ALWAYS_FINISH_ACTIVITIES, enabled ? 1 : 0);
-        
+
         synchronized (this) {
             mAlwaysFinishActivities = enabled;
         }
@@ -12303,8 +12302,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 pw.println("  mProfileApp=" + mProfileApp + " mProfileProc=" + mProfileProc);
                 pw.println("  mProfileFile=" + mProfileFile + " mProfileFd=" + mProfileFd);
-                pw.println("  mProfileType=" + mProfileType + " mAutoStopProfiler="
+                pw.println("  mSamplingInterval=" + mSamplingInterval + " mAutoStopProfiler="
                         + mAutoStopProfiler);
+                pw.println("  mProfileType=" + mProfileType);
             }
         }
         if (dumpPackage == null) {
@@ -17310,10 +17310,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private void stopProfilerLocked(ProcessRecord proc, String path, int profileType) {
+    private void stopProfilerLocked(ProcessRecord proc, int profileType) {
         if (proc == null || proc == mProfileProc) {
             proc = mProfileProc;
-            path = mProfileFile;
             profileType = mProfileType;
             clearProfilerLocked();
         }
@@ -17321,7 +17320,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             return;
         }
         try {
-            proc.thread.profilerControl(false, path, null, profileType);
+            proc.thread.profilerControl(false, null, profileType);
         } catch (RemoteException e) {
             throw new IllegalStateException("Process disappeared");
         }
@@ -17339,10 +17338,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         mProfileFile = null;
         mProfileType = 0;
         mAutoStopProfiler = false;
+        mSamplingInterval = 0;
     }
 
     public boolean profileControl(String process, int userId, boolean start,
-            String path, ParcelFileDescriptor fd, int profileType) throws RemoteException {
+            ProfilerInfo profilerInfo, int profileType) throws RemoteException {
 
         try {
             synchronized (this) {
@@ -17354,8 +17354,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                             + android.Manifest.permission.SET_ACTIVITY_WATCHER);
                 }
 
-                if (start && fd == null) {
-                    throw new IllegalArgumentException("null fd");
+                if (start && (profilerInfo == null || profilerInfo.profileFd == null)) {
+                    throw new IllegalArgumentException("null profile info or fd");
                 }
 
                 ProcessRecord proc = null;
@@ -17368,23 +17368,25 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 if (start) {
-                    stopProfilerLocked(null, null, 0);
-                    setProfileApp(proc.info, proc.processName, path, fd, false);
+                    stopProfilerLocked(null, 0);
+                    setProfileApp(proc.info, proc.processName, profilerInfo);
                     mProfileProc = proc;
                     mProfileType = profileType;
+                    ParcelFileDescriptor fd = profilerInfo.profileFd;
                     try {
                         fd = fd.dup();
                     } catch (IOException e) {
                         fd = null;
                     }
-                    proc.thread.profilerControl(start, path, fd, profileType);
+                    profilerInfo.profileFd = fd;
+                    proc.thread.profilerControl(start, profilerInfo, profileType);
                     fd = null;
                     mProfileFd = null;
                 } else {
-                    stopProfilerLocked(proc, path, profileType);
-                    if (fd != null) {
+                    stopProfilerLocked(proc, profileType);
+                    if (profilerInfo != null && profilerInfo.profileFd != null) {
                         try {
-                            fd.close();
+                            profilerInfo.profileFd.close();
                         } catch (IOException e) {
                         }
                     }
@@ -17395,9 +17397,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         } catch (RemoteException e) {
             throw new IllegalStateException("Process disappeared");
         } finally {
-            if (fd != null) {
+            if (profilerInfo != null && profilerInfo.profileFd != null) {
                 try {
-                    fd.close();
+                    profilerInfo.profileFd.close();
                 } catch (IOException e) {
                 }
             }
@@ -18407,7 +18409,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             return mStackSupervisor.startActivityMayWait(appThread, -1, callingPackage, intent,
                     resolvedType, null, null, null, null, 0, 0, null, null,
-                    null, null, options, callingUser, null, tr);
+                    null, options, callingUser, null, tr);
         }
 
         @Override

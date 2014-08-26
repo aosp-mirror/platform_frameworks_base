@@ -45,6 +45,7 @@ import android.app.IActivityContainerCallback;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
+import android.app.ProfilerInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.IActivityManager.WaitResult;
 import android.app.ResultInfo;
@@ -734,7 +735,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     ActivityInfo resolveActivity(Intent intent, String resolvedType, int startFlags,
-            String profileFile, ParcelFileDescriptor profileFd, int userId) {
+            ProfilerInfo profilerInfo, int userId) {
         // Collect information about the target of the Intent.
         ActivityInfo aInfo;
         try {
@@ -769,11 +770,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
 
-            if (profileFile != null) {
+            if (profilerInfo != null) {
                 if (!aInfo.processName.equals("system")) {
-                    mService.setProfileApp(aInfo.applicationInfo, aInfo.processName,
-                            profileFile, profileFd,
-                            (startFlags&ActivityManager.START_FLAG_AUTO_STOP_PROFILER) != 0);
+                    mService.setProfileApp(aInfo.applicationInfo, aInfo.processName, profilerInfo);
                 }
             }
         }
@@ -789,8 +788,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     final int startActivityMayWait(IApplicationThread caller, int callingUid,
             String callingPackage, Intent intent, String resolvedType,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            IBinder resultTo, String resultWho, int requestCode, int startFlags, String profileFile,
-            ParcelFileDescriptor profileFd, WaitResult outResult, Configuration config,
+            IBinder resultTo, String resultWho, int requestCode, int startFlags,
+            ProfilerInfo profilerInfo, WaitResult outResult, Configuration config,
             Bundle options, int userId, IActivityContainer iContainer, TaskRecord inTask) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors()) {
@@ -803,7 +802,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         // Collect information about the target of the Intent.
         ActivityInfo aInfo = resolveActivity(intent, resolvedType, startFlags,
-                profileFile, profileFd, userId);
+                profilerInfo, userId);
 
         ActivityContainer container = (ActivityContainer)iContainer;
         synchronized (mService) {
@@ -996,8 +995,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     intent = new Intent(intent);
 
                     // Collect information about the target of the Intent.
-                    ActivityInfo aInfo = resolveActivity(intent, resolvedTypes[i],
-                            0, null, null, userId);
+                    ActivityInfo aInfo = resolveActivity(intent, resolvedTypes[i], 0, null, userId);
                     // TODO: New, check if this is correct
                     aInfo = mService.getActivityInfoForUser(aInfo, userId);
 
@@ -1100,13 +1098,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
             r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
             String profileFile = null;
             ParcelFileDescriptor profileFd = null;
-            boolean profileAutoStop = false;
             if (mService.mProfileApp != null && mService.mProfileApp.equals(app.processName)) {
                 if (mService.mProfileProc == null || mService.mProfileProc == app) {
                     mService.mProfileProc = app;
                     profileFile = mService.mProfileFile;
                     profileFd = mService.mProfileFd;
-                    profileAutoStop = mService.mAutoStopProfiler;
                 }
             }
             app.hasShownUi = true;
@@ -1125,13 +1121,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
 
+            ProfilerInfo profilerInfo = profileFile != null
+                    ? new ProfilerInfo(profileFile, profileFd, mService.mSamplingInterval,
+                    mService.mAutoStopProfiler) : null;
             app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_TOP);
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
-                    System.identityHashCode(r), r.info,
-                    new Configuration(mService.mConfiguration), r.compat, r.task.voiceInteractor,
-                    app.repProcState, r.icicle, r.persistentState, results, newIntents, !andResume,
-                    mService.isNextTransitionForward(), profileFile, profileFd, profileAutoStop
-            );
+                    System.identityHashCode(r), r.info, new Configuration(mService.mConfiguration),
+                    r.compat, r.task.voiceInteractor, app.repProcState, r.icicle, r.persistentState,
+                    results, newIntents, !andResume, mService.isNextTransitionForward(),
+                    profilerInfo);
 
             if ((app.info.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Note that the package
@@ -3625,8 +3623,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     && "content".equals(intent.getData().getScheme())) {
                 mimeType = mService.getProviderMimeType(intent.getData(), userId);
             }
-            return startActivityMayWait(null, -1, null, intent, mimeType, null, null, null, null, 0, 0, null,
-                    null, null, null, null, userId, this, null);
+            return startActivityMayWait(null, -1, null, intent, mimeType, null, null, null, null, 0,
+                    0, null, null, null, null, userId, this, null);
         }
 
         @Override
@@ -3652,7 +3650,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     resolvedType = mService.getProviderMimeType(intent.getData(), userId);
                 }
             }
-            ActivityInfo aInfo = resolveActivity(intent, resolvedType, 0, null, null, userId);
+            ActivityInfo aInfo = resolveActivity(intent, resolvedType, 0, null, userId);
             if (aInfo != null && (aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
                 throw new SecurityException(
                         "Attempt to embed activity that has not set allowEmbedded=\"true\"");

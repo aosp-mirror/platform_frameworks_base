@@ -193,13 +193,6 @@ public class ActivityManager {
     public static final int START_FLAG_OPENGL_TRACES = 1<<2;
 
     /**
-     * Flag for IActivityManaqer.startActivity: if the app is being
-     * launched for profiling, automatically stop the profiler once done.
-     * @hide
-     */
-    public static final int START_FLAG_AUTO_STOP_PROFILER = 1<<3;
-
-    /**
      * Result for IActivityManaqer.broadcastIntent: success!
      * @hide
      */
