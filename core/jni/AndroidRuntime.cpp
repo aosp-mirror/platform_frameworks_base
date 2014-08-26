@@ -881,7 +881,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
                            "-Xprofile-max-stack-depth:");
     }
 
-    parseRuntimeOption("dalvik.vm.native.bridge", nativeBridgeLibrary, "-XX:NativeBridge=");
+    parseRuntimeOption("ro.dalvik.vm.native.bridge", nativeBridgeLibrary, "-XX:NativeBridge=");
 
     initArgs.version = JNI_VERSION_1_4;
     initArgs.options = mOptions.editArray();
