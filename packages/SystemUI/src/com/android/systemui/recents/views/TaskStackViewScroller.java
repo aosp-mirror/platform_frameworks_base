@@ -133,12 +133,8 @@ public class TaskStackViewScroller {
         stopBoundScrollAnimation();
 
         mScrollAnimator = ObjectAnimator.ofFloat(this, "stackScroll", curScroll, newScroll);
-        mScrollAnimator.setDuration(200);
-        // We would have to project the difference into the screen coords, and then use that as the
-        // duration
-//        mScrollAnimator.setDuration(Utilities.calculateTranslationAnimationDuration(newScroll -
-//                curScroll, 250));
-        mScrollAnimator.setInterpolator(mConfig.fastOutSlowInInterpolator);
+        mScrollAnimator.setDuration(mConfig.taskStackScrollDuration);
+        mScrollAnimator.setInterpolator(mConfig.linearOutSlowInInterpolator);
         mScrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {

@@ -22,7 +22,6 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -36,7 +35,6 @@ import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskGrouping;
@@ -99,6 +97,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     long mLastToggleTime;
 
     public AlternateRecentsComponent(Context context) {
+        RecentsTaskLoader.initialize(context);
         Resources res = context.getResources();
         mContext = context;
         mSystemServicesProxy = new SystemServicesProxy(context);
@@ -176,8 +175,9 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     }
 
     void showRelativeAffiliatedTask(boolean showNextTask) {
-        TaskStack stack = RecentsTaskLoader.getShallowTaskStack(mSystemServicesProxy,
-                Integer.MAX_VALUE, mContext.getResources());
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        TaskStack stack = loader.getTaskStack(mSystemServicesProxy, mContext.getResources(),
+                -1, -1, false, null, null);
         // Return early if there are no tasks
         if (stack.getTaskCount() == 0) return;
 
@@ -385,16 +385,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
                 toTask);
         if (toTransform != null && toTask.key != null) {
             Rect toTaskRect = toTransform.rect;
-            ActivityInfo info = mSystemServicesProxy.getActivityInfo(
-                    toTask.key.baseIntent.getComponent(), toTask.key.userId);
-            if (toTask.activityIcon == null) {
-                toTask.activityIcon = mSystemServicesProxy.getActivityIcon(info,
-                        toTask.key.userId);
-            }
-            if (toTask.activityLabel == null) {
-                toTask.activityLabel = mSystemServicesProxy.getActivityLabel(info);
-            }
 
+            // XXX: Reduce the memory usage the to the task bar height
             Bitmap thumbnail = Bitmap.createBitmap(toTaskRect.width(), toTaskRect.height(),
                     Bitmap.Config.ARGB_8888);
             if (Constants.DebugFlags.App.EnableTransitionThumbnailDebugMode) {
@@ -420,8 +412,9 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     TaskViewTransform getThumbnailTransitionTransform(int runningTaskId, boolean isTopTaskHome,
                                                       Task runningTaskOut) {
         // Get the stack of tasks that we are animating into
-        TaskStack stack = RecentsTaskLoader.getShallowTaskStack(mSystemServicesProxy, -1,
-                mContext.getResources());
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        TaskStack stack = loader.getTaskStack(mSystemServicesProxy, mContext.getResources(),
+                runningTaskId, -1, false, null, null);
         if (stack.getTaskCount() == 0) {
             return null;
         }

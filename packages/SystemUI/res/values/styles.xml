@@ -33,8 +33,7 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowAnimationStyle">@style/Animation.RecentsActivity</item>
-
-        <item name="android:ambientShadowAlpha">0.30</item>
+        <item name="android:ambientShadowAlpha">0.35</item>
     </style>
 
     <!-- Animations for a non-full-screen window or activity. -->

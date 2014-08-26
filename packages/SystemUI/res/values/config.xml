@@ -123,10 +123,10 @@
     <!-- The min animation duration for animating views that are newly visible. -->
     <integer name="recents_filter_animate_new_views_duration">250</integer>
     <!-- The min animation duration for animating the task bar in. -->
-    <integer name="recents_animate_task_bar_enter_duration">275</integer>
+    <integer name="recents_animate_task_bar_enter_duration">225</integer>
     <!-- The animation delay for animating the first task in. This should roughly be the animation
      duration of the transition in to recents. -->
-    <integer name="recents_animate_task_bar_enter_delay">300</integer>
+    <integer name="recents_animate_task_bar_enter_delay">275</integer>
     <!-- The min animation duration for animating the task bar out. -->
     <integer name="recents_animate_task_exit_to_home_duration">225</integer>
     <!-- The min animation duration for animating the task bar out. -->
@@ -143,6 +143,8 @@
     <integer name="recents_nav_bar_scrim_enter_duration">400</integer>
     <!-- The animation duration for animating the removal of a task view. -->
     <integer name="recents_animate_task_view_remove_duration">250</integer>
+    <!-- The animation duration for scrolling the stack to a particular item. -->
+    <integer name="recents_animate_task_stack_scroll_duration">225</integer>
     <!-- The minimum alpha for the dim applied to cards that go deeper into the stack. -->
     <integer name="recents_max_task_stack_view_dim">96</integer>
     <!-- The delay to enforce between each alt-tab key press. -->

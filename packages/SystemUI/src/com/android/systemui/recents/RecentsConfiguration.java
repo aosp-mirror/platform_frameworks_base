@@ -67,9 +67,11 @@ public class RecentsConfiguration {
     public int searchBarSpaceHeightPx;
 
     /** Task stack */
+    public int taskStackScrollDuration;
     public int taskStackMaxDim;
     public int taskStackTopPaddingPx;
     public float taskStackWidthPaddingPct;
+    public float taskStackOverscrollPct;
 
     /** Task view animation and styles */
     public int taskViewEnterFromHomeDuration;
@@ -195,9 +197,14 @@ public class RecentsConfiguration {
         searchBarAppWidgetId = settings.getInt(Constants.Values.App.Key_SearchAppWidgetId, -1);
 
         // Task stack
+        taskStackScrollDuration =
+                res.getInteger(R.integer.recents_animate_task_stack_scroll_duration);
         TypedValue widthPaddingPctValue = new TypedValue();
         res.getValue(R.dimen.recents_stack_width_padding_percentage, widthPaddingPctValue, true);
         taskStackWidthPaddingPct = widthPaddingPctValue.getFloat();
+        TypedValue stackOverscrollPctValue = new TypedValue();
+        res.getValue(R.dimen.recents_stack_overscroll_percentage, stackOverscrollPctValue, true);
+        taskStackOverscrollPct = stackOverscrollPctValue.getFloat();
         taskStackMaxDim = res.getInteger(R.integer.recents_max_task_stack_view_dim);
         taskStackTopPaddingPx = res.getDimensionPixelSize(R.dimen.recents_stack_top_padding);
 

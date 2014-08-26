@@ -105,7 +105,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mFilterAlgorithm = new TaskStackViewFilterAlgorithm(mConfig, this, mViewPool);
         mStackScroller = new TaskStackViewScroller(context, mConfig, mLayoutAlgorithm);
         mStackScroller.setCallbacks(this);
-        mTouchHandler = new TaskStackViewTouchHandler(context, this, mStackScroller);
+        mTouchHandler = new TaskStackViewTouchHandler(context, this, mConfig, mStackScroller);
         mUIDozeTrigger = new DozeTrigger(mConfig.taskBarDismissDozeDelaySeconds, new Runnable() {
             @Override
             public void run() {
@@ -647,17 +647,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /** Animates a task view in this stack as it launches. */
-    public void startLaunchTaskAnimation(TaskView tv, final Runnable r) {
+    public void startLaunchTaskAnimation(TaskView tv, Runnable r, boolean lockToTask) {
         Task launchTargetTask = tv.getTask();
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             TaskView t = (TaskView) getChildAt(i);
             if (t == tv) {
-                t.startLaunchTaskAnimation(r, true, true);
+                t.startLaunchTaskAnimation(r, true, true, lockToTask);
             } else {
                 boolean occludesLaunchTarget = launchTargetTask.group.isTaskAboveTask(t.getTask(),
                         launchTargetTask);
-                t.startLaunchTaskAnimation(null, false, occludesLaunchTarget);
+                t.startLaunchTaskAnimation(null, false, occludesLaunchTarget, lockToTask);
             }
         }
     }
