@@ -39,6 +39,7 @@
 
     <!-- Empty text view so we have the same height when expanded/collapsed-->
     <TextView
+        android:id="@+id/empty_time_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="invisible"

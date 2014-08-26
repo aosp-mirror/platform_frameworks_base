@@ -18,10 +18,12 @@ package com.android.systemui.qs;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +32,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -76,6 +79,10 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
         } else {
             mSecurityController.removeCallback(mCallback);
         }
+    }
+
+    public void onConfigurationChanged() {
+        FontSizeUtils.updateFontSize(mFooterText, R.dimen.qs_tile_text_size);
     }
 
     public View getView() {

@@ -166,6 +166,7 @@
     <dimen name="qs_dual_tile_padding_vertical">8dp</dimen>
     <dimen name="qs_dual_tile_padding_horizontal">6dp</dimen>
     <dimen name="qs_tile_padding_top">16dp</dimen>
+    <dimen name="qs_tile_padding_top_large_text">4dp</dimen>
     <dimen name="qs_tile_padding_below_icon">12dp</dimen>
     <dimen name="qs_tile_padding_bottom">16dp</dimen>
     <dimen name="qs_tile_spacing">4dp</dimen>
@@ -173,7 +174,13 @@
     <dimen name="qs_detail_item_height">48dp</dimen>
     <dimen name="qs_detail_item_height_twoline">72dp</dimen>
     <dimen name="qs_brightness_padding_top">6dp</dimen>
-
+    <dimen name="qs_detail_header_text_size">20sp</dimen>
+    <dimen name="qs_detail_button_text_size">14sp</dimen>
+    <dimen name="qs_detail_item_primary_text_size">16sp</dimen>
+    <dimen name="qs_detail_item_secondary_text_size">14sp</dimen>
+    <dimen name="qs_detail_empty_text_size">14sp</dimen>
+    <dimen name="qs_data_usage_text_size">14sp</dimen>
+    <dimen name="qs_data_usage_usage_text_size">36sp</dimen>
 
     <dimen name="segmented_button_spacing">4dp</dimen>
     <dimen name="segmented_button_radius">2dp</dimen>
@@ -362,6 +369,9 @@
     <!-- The padding bottom of the clock group when QS is collapsed. -->
     <dimen name="clock_collapsed_bottom_margin">10dp</dimen>
 
+    <!-- The padding bottom of the clock group when QS is collapsed for large text -->
+    <dimen name="clock_collapsed_bottom_margin_large_text">6dp</dimen>
+
     <!-- The width of the multi user switch on keyguard and collapsed QS header. -->
     <dimen name="multi_user_switch_width_collapsed">34dp</dimen>
 
@@ -382,6 +392,12 @@
 
     <!-- The font size of the time when expanded in QS -->
     <dimen name="qs_time_expanded_size">20sp</dimen>
+
+    <!-- The font size of the "emergency calls only" label in QS -->
+    <dimen name="qs_emergency_calls_only_text_size">12sp</dimen>
+
+    <!-- The font size of the date in QS -->
+    <dimen name="qs_date_collapsed_size">14sp</dimen>
 
     <!-- Battery level padding end when in expanded QS (but not on Keyguard) -->
     <dimen name="battery_level_padding_end">4dp</dimen>

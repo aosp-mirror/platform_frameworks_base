@@ -87,6 +87,7 @@
         android:visibility="gone"
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
         android:text="@*android:string/emergency_calls_only"
+        android:singleLine="true"
         android:gravity="center_vertical" />
 
     <FrameLayout
