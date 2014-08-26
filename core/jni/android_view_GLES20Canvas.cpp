@@ -104,6 +104,12 @@ static void android_view_GLES20Canvas_setHighContrastText(JNIEnv* env, jobject c
     renderer->setHighContrastText(highContrastText);
 }
 
+static void android_view_GLES20Canvas_insertReorderBarrier(JNIEnv* env, jobject clazz,
+        jlong rendererPtr, jboolean reorderEnable) {
+    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    renderer->insertReorderBarrier(reorderEnable);
+}
+
 static int android_view_GLES20Canvas_prepare(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jboolean opaque) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
@@ -859,6 +865,7 @@ static JNINativeMethod gMethods[] = {
     { "nDestroyRenderer",   "(J)V",            (void*) android_view_GLES20Canvas_destroyRenderer },
     { "nSetViewport",       "(JII)V",          (void*) android_view_GLES20Canvas_setViewport },
     { "nSetHighContrastText","(JZ)V",          (void*) android_view_GLES20Canvas_setHighContrastText },
+    { "nInsertReorderBarrier","(JZ)V",         (void*) android_view_GLES20Canvas_insertReorderBarrier },
     { "nPrepare",           "(JZ)I",           (void*) android_view_GLES20Canvas_prepare },
     { "nPrepareDirty",      "(JIIIIZ)I",       (void*) android_view_GLES20Canvas_prepareDirty },
     { "nFinish",            "(J)V",            (void*) android_view_GLES20Canvas_finish },
