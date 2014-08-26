@@ -46,10 +46,14 @@
 
     <color name="hint_foreground_material_dark">@color/bright_foreground_disabled_material_dark</color>
     <color name="hint_foreground_material_light">@color/bright_foreground_disabled_material_light</color>
+
     <!-- TODO: This is 40% alpha on the default accent color. -->
-    <color name="highlighted_text_material_dark">#6640c4ff</color>
+    <color name="highlighted_text_material_dark">#6680cbc4</color>
     <!-- TODO: This is 40% alpha on the default accent color. -->
-    <color name="highlighted_text_material_light">#6640c4ff</color>
+    <color name="highlighted_text_material_light">#66009688</color>
+
+    <color name="link_text_material_dark">@color/material_deep_teal_200</color>
+    <color name="link_text_material_light">@color/material_deep_teal_500</color>
 
     <!-- Text & foreground colors -->
     <eat-comment />
@@ -71,114 +75,33 @@
     <!-- Primary & accent colors -->
     <eat-comment />
 
-    <color name="material_red_100">#fff4c7c3</color>
-    <color name="material_red_300">#ffe67c73</color>
-    <color name="material_red_500">#ffdb4437</color>
-    <color name="material_red_700">#ffc53929</color>
-    <color name="material_red_A200">#ffff5252</color>
-    <color name="material_red_A400">#ffff1744</color>
-
-    <color name="material_blue_100">#ffc6dafc</color>
-    <color name="material_blue_300">#ff7baaf7</color>
-    <color name="material_blue_500">#ff4285f4</color>
-    <color name="material_blue_700">#ff3367d6</color>
-    <color name="material_blue_A200">#ff448aff</color>
-    <color name="material_blue_A400">#ff2979ff</color>
-
-    <color name="material_light_blue_A200">#ff40c4ff</color>
-
-    <color name="material_teal_100">#ffb2ebf2</color>
-    <color name="material_teal_300">#ff4dd0e1</color>
-    <color name="material_teal_500">#ff00bcd4</color>
-    <color name="material_teal_700">#ff0097a7</color>
-    <color name="material_teal_A200">#ff18ffff</color>
-    <color name="material_teal_A400">#ff00e5ff</color>
-
-    <color name="material_deep_teal_A200">#ff80cbc4</color>
-    <color name="material_deep_teal_A500">#ff009688</color>
-
-    <color name="material_green_100">#ffb7e1cd</color>
-    <color name="material_green_300">#ff57bb8a</color>
-    <color name="material_green_500">#ff0f9d58</color>
-    <color name="material_green_700">#ff0b8043</color>
-    <color name="material_green_A200">#ff69f0ae</color>
-    <color name="material_green_A400">#ff00e676</color>
-
-    <color name="material_lime_100">#fff0f4c3</color>
-    <color name="material_lime_300">#ffdce775</color>
-    <color name="material_lime_500">#ffcddc39</color>
-    <color name="material_lime_700">#ffafb42b</color>
-    <color name="material_lime_A200">#ffeeff41</color>
-    <color name="material_lime_A400">#ffc6ff00</color>
-
-    <color name="material_yellow_100">#fffce8b2</color>
-    <color name="material_yellow_300">#fff7cb4d</color>
-    <color name="material_yellow_500">#fff4b400</color>
-    <color name="material_yellow_700">#fff09300</color>
-    <color name="material_yellow_A200">#ffffcd40</color>
-    <color name="material_yellow_A400">#ffffbc00</color>
-
-    <color name="material_orange_100">#ffffe0b2</color>
-    <color name="material_orange_300">#ffffb74d</color>
-    <color name="material_orange_500">#ffff9800</color>
-    <color name="material_orange_700">#fff57c00</color>
-    <color name="material_orange_A200">#ffffab40</color>
-    <color name="material_orange_A400">#ffff9100</color>
-
-    <color name="material_deep_orange_100">#fff4c7c3</color>
-    <color name="material_deep_orange_300">#ffe67c73</color>
-    <color name="material_deep_orange_500">#ffff5722</color>
-    <color name="material_deep_orange_700">#ffc53929</color>
-    <color name="material_deep_orange_A200">#ffff5252</color>
-    <color name="material_deep_orange_A400">#ffff1744</color>
-
-    <!-- Neutral colors -->
-    <eat-comment />
-
-    <color name="material_grey_50">#fffafafa</color>
-    <color name="material_grey_100">#fff5f5f5</color>
-    <color name="material_grey_300">#ffeeeeee</color>
-    <color name="material_grey_500">#ffa3a3a3</color>
-    <color name="material_grey_600">#ff757575</color>
-    <color name="material_grey_700">#ff717171</color>
-    <color name="material_grey_900">#ff212121</color>
+    <color name="material_deep_teal_200">#ff80cbc4</color>
+    <color name="material_deep_teal_500">#ff009688</color>
 
     <color name="material_blue_grey_50">#ffeceff1</color>
     <color name="material_blue_grey_100">#ffcfd8dc</color>
-    <color name="material_blue_grey_300">#ff90a4ae</color>
-    <color name="material_blue_grey_400">#ff78909c</color>
-    <color name="material_blue_grey_500">#ff607d8b</color>
-    <color name="material_blue_grey_600">#ff546e7a</color>
-    <color name="material_blue_grey_700">#ff455a64</color>
     <color name="material_blue_grey_800">#ff37474f</color>
-    <!-- Primary color used by Settings -->
     <color name="material_blue_grey_900">#ff263238</color>
-    <!-- Primary dark color used by Settings -->
     <color name="material_blue_grey_950">#ff21272b</color>
-
-    <color name="material_brown_100">#ffd7ccc8</color>
-    <color name="material_brown_300">#ffa1887f</color>
-    <color name="material_brown_500">#ff795548</color>
-    <color name="material_brown_700">#ff5d4037</color>
 
     <!-- Time picker defaults when no theme is set -->
     <eat-comment />
 
     <color name="timepicker_default_background_material">@color/primary_text_default_material_light</color>
     <color name="timepicker_default_text_color_material">@color/black</color>
-    <color name="timepicker_default_ampm_selected_background_color_material">@color/material_light_blue_A200</color>
+    <color name="timepicker_default_ampm_selected_background_color_material">@color/material_deep_teal_200</color>
     <color name="timepicker_default_ampm_unselected_background_color_material">@color/transparent</color>
-    <color name="timepicker_default_selector_color_material">@color/material_light_blue_A200</color>
+    <color name="timepicker_default_selector_color_material">@color/material_deep_teal_200</color>
     <color name="timepicker_default_numbers_background_color_material">@color/transparent</color>
 
     <!-- DatePicker colors -->
     <eat-comment />
 
-    <color name="datepicker_default_header_selector_background_material_light">@android:color/white</color>
+    <color name="datepicker_default_header_selector_background_material_light">@color/white</color>
     <color name="datepicker_default_header_selector_background_material_dark">#ff303030</color>
 
     <color name="datepicker_default_header_dayofweek_background_color_material_light">#999999</color>
-    <color name="datepicker_default_header_dayofweek_background_color_material_dark">@android:color/white</color>
+    <color name="datepicker_default_header_dayofweek_background_color_material_dark">@color/white</color>
 
     <color name="datepicker_default_normal_text_color_material_light">#ff999999</color>
     <color name="datepicker_default_normal_text_color_material_dark">@android:color/white</color>
@@ -192,8 +115,8 @@
     <color name="datepicker_default_pressed_text_color_material_light">#0099cc</color>
     <color name="datepicker_default_pressed_text_color_material_dark">#0099cc</color>
 
-    <color name="datepicker_default_circle_background_color_material_light">@android:color/holo_blue_light</color>
-    <color name="datepicker_default_circle_background_color_material_dark">@android:color/holo_blue_light</color>
+    <color name="datepicker_default_circle_background_color_material_light">@color/material_deep_teal_500</color>
+    <color name="datepicker_default_circle_background_color_material_dark">@color/material_deep_teal_200</color>
 
     <color name="datepicker_default_view_animator_color_material_light">#f2f2f2</color>
     <color name="datepicker_default_view_animator_color_material_dark">#ff303030</color>
