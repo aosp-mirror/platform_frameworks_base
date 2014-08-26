@@ -73,11 +73,6 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
 
     private ScrollStateRunnable mScrollStateChangedRunnable = new ScrollStateRunnable(this);
 
-    public DayPickerView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init();
-    }
-
     public DayPickerView(Context context, DatePickerController controller) {
         super(context);
         init();

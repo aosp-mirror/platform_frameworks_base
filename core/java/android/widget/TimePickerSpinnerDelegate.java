@@ -16,9 +16,6 @@
 
 package android.widget;
 
-import android.animation.Keyframe;
-import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -43,6 +40,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.R;
 
+import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
@@ -73,12 +71,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
 
     private static final int HOURS_IN_HALF_DAY = 12;
 
-    // Delay in ms before starting the pulse animation
-    private static final int PULSE_ANIMATOR_DELAY = 300;
-
-    // Duration in ms of the pulse animation
-    private static final int PULSE_ANIMATOR_DURATION = 544;
-
     private TextView mHourView;
     private TextView mMinuteView;
     private TextView mAmPmTextView;
@@ -98,7 +90,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
     private String mDoublePlaceholderText;
     private String mDeletedKeyFormat;
     private boolean mInKbMode;
-    private boolean mIsTimeValid = true;
     private ArrayList<Integer> mTypedTimes = new ArrayList<Integer>();
     private Node mLegalTimesTree;
     private int mAmKeyCode;
@@ -215,14 +206,14 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         mHourView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setCurrentItemShowing(HOUR_INDEX, true, false, true);
+                setCurrentItemShowing(HOUR_INDEX, true, true);
                 tryVibrate();
             }
         });
         mMinuteView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setCurrentItemShowing(MINUTE_INDEX, true, false, true);
+                setCurrentItemShowing(MINUTE_INDEX, true, true);
                 tryVibrate();
             }
         });
@@ -245,7 +236,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
 
     private void updateRadialPicker(int index) {
         mRadialTimePickerView.initialize(mInitialHourOfDay, mInitialMinute, mIs24HourView);
-        setCurrentItemShowing(index, false, true, true);
+        setCurrentItemShowing(index, false, true);
     }
 
     private int computeMaxWidthOfNumbers(int max) {
@@ -633,7 +624,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
             updateHeaderHour(newValue, false);
             String announcement = String.format("%d", newValue);
             if (mAllowAutoAdvance && autoAdvance) {
-                setCurrentItemShowing(MINUTE_INDEX, true, true, false);
+                setCurrentItemShowing(MINUTE_INDEX, true, false);
                 announcement += ". " + mSelectMinutes;
             } else {
                 mRadialTimePickerView.setContentDescription(
@@ -753,11 +744,9 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
     /**
      * Show either Hours or Minutes.
      */
-    private void setCurrentItemShowing(int index, boolean animateCircle, boolean delayLabelAnimate,
-                                       boolean announce) {
+    private void setCurrentItemShowing(int index, boolean animateCircle, boolean announce) {
         mRadialTimePickerView.setCurrentItemShowing(index, animateCircle);
 
-        TextView labelToAnimate;
         if (index == HOUR_INDEX) {
             int hours = mRadialTimePickerView.getCurrentHour();
             if (!mIs24HourView) {
@@ -767,24 +756,16 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
             if (announce) {
                 mRadialTimePickerView.announceForAccessibility(mSelectHours);
             }
-            labelToAnimate = mHourView;
         } else {
             int minutes = mRadialTimePickerView.getCurrentMinute();
             mRadialTimePickerView.setContentDescription(mMinutePickerDescription + ": " + minutes);
             if (announce) {
                 mRadialTimePickerView.announceForAccessibility(mSelectMinutes);
             }
-            labelToAnimate = mMinuteView;
         }
 
         mHourView.setSelected(index == HOUR_INDEX);
         mMinuteView.setSelected(index == MINUTE_INDEX);
-
-        ObjectAnimator pulseAnimator = getPulseAnimator(labelToAnimate, 0.85f, 1.1f);
-        if (delayLabelAnimate) {
-            pulseAnimator.setStartDelay(PULSE_ANIMATOR_DELAY);
-        }
-        pulseAnimator.start();
     }
 
     /**
@@ -980,7 +961,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
             if (!mIs24HourView) {
                 updateAmPmDisplay(hour < 12 ? AM : PM);
             }
-            setCurrentItemShowing(mRadialTimePickerView.getCurrentItemShowing(), true, true, true);
+            setCurrentItemShowing(mRadialTimePickerView.getCurrentItemShowing(), true, true);
             onValidationChanged(true);
         } else {
             boolean[] enteredZeros = {false, false};
@@ -1288,27 +1269,5 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
             }
             return false;
         }
-    }
-
-    /**
-     * Render an animator to pulsate a view in place.
-     *
-     * @param labelToAnimate the view to pulsate.
-     * @return The animator object. Use .start() to begin.
-     */
-    private static ObjectAnimator getPulseAnimator(View labelToAnimate, float decreaseRatio,
-            float increaseRatio) {
-        final Keyframe k0 = Keyframe.ofFloat(0f, 1f);
-        final Keyframe k1 = Keyframe.ofFloat(0.275f, decreaseRatio);
-        final Keyframe k2 = Keyframe.ofFloat(0.69f, increaseRatio);
-        final Keyframe k3 = Keyframe.ofFloat(1f, 1f);
-
-        PropertyValuesHolder scaleX = PropertyValuesHolder.ofKeyframe(View.SCALE_X, k0, k1, k2, k3);
-        PropertyValuesHolder scaleY = PropertyValuesHolder.ofKeyframe(View.SCALE_Y, k0, k1, k2, k3);
-        ObjectAnimator pulseAnimator =
-                ObjectAnimator.ofPropertyValuesHolder(labelToAnimate, scaleX, scaleY);
-        pulseAnimator.setDuration(PULSE_ANIMATOR_DURATION);
-
-        return pulseAnimator;
     }
 }
