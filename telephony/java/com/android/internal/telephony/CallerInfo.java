@@ -40,8 +40,6 @@ import com.android.i18n.phonenumbers.PhoneNumberUtil;
 import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import android.telephony.SubscriptionManager;
 
-import android.telephony.TelephonyManager;
-
 import java.util.Locale;
 
 
@@ -219,7 +217,7 @@ public class CallerInfo {
                 columnIndex = getColumnIndexForPersonId(contactRef, cursor);
                 if (columnIndex != -1) {
                     final long contactId = cursor.getLong(columnIndex);
-                    if (contactId != 0 && !Contacts.isCorpContactId(contactId)) {
+                    if (contactId != 0 && !Contacts.isEnterpriseContactId(contactId)) {
                         info.contactIdOrZero = contactId;
                         if (VDBG) {
                             Rlog.v(TAG, "==> got info.contactIdOrZero: " + info.contactIdOrZero);
