@@ -258,7 +258,7 @@ public final class HdmiControlService extends SystemService {
     private List<HdmiDeviceInfo> mMhlDevices;
 
     @Nullable
-    private HdmiMhlController mMhlController;
+    private HdmiMhlControllerStub mMhlController;
 
     // Last input port before switching to the MHL port. Should switch back to this port
     // when the mobile device sends the request one touch play with off.
@@ -307,7 +307,7 @@ public final class HdmiControlService extends SystemService {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
         }
 
-        mMhlController = HdmiMhlController.create(this);
+        mMhlController = HdmiMhlControllerStub.create(this);
         if (!mMhlController.isReady()) {
             Slog.i(TAG, "Device does not support MHL-control.");
         }
