@@ -3925,6 +3925,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         private DozeService mCurrentDozeService;
 
+        @Override
+        public String toString() {
+            return "PSB.DozeServiceHost[mCallbacks=" + mCallbacks.size() + " mCurrentDozeService="
+                    + mCurrentDozeService + "]";
+        }
+
         public void firePowerSaveChanged(boolean active) {
             for (Callback callback : mCallbacks) {
                 callback.onPowerSaveChanged(active);

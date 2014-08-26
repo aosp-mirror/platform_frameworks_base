@@ -338,10 +338,11 @@
             </intent-filter>
         </activity>
 
-        <!-- I dream of notifications -->
+        <!-- Doze with notifications, run in main sysui process for every user  -->
         <service
             android:name=".doze.DozeService"
             android:exported="true"
+            android:singleUser="true"
             android:permission="android.permission.BIND_DREAM_SERVICE" />
     </application>
 </manifest>
