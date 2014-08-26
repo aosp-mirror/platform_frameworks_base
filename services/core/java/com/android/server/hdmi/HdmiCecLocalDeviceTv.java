@@ -343,6 +343,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected void sendKeyEvent(int keyCode, boolean isPressed) {
         assertRunOnServiceThread();
+        if (!HdmiCecKeycode.isSupportedKeycode(keyCode)) {
+            Slog.w(TAG, "Unsupported key: " + keyCode);
+            return;
+        }
         List<SendKeyAction> action = getActions(SendKeyAction.class);
         if (!action.isEmpty()) {
             action.get(0).processKeyEvent(keyCode, isPressed);

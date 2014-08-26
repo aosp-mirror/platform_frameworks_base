@@ -394,4 +394,12 @@ final class HdmiCecKeycode {
         }
         return false;
     }
+
+    /**
+     * Returns {@code true} if given Android keycode is supported, otherwise {@code false}.
+     */
+    static boolean isSupportedKeycode(int androidKeycode) {
+        return HdmiCecKeycode.androidKeyToCecKey(androidKeycode)
+                != HdmiCecKeycode.UNSUPPORTED_KEYCODE;
+  }
 }
