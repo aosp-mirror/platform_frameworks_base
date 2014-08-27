@@ -4293,6 +4293,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
+        final boolean vmSafeMode = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
         boolean performed = false;
         if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
             String path = pkg.mScanPath;
@@ -4309,10 +4310,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // 2.) we are defering a needed dexopt
                 // 3.) we are skipping an unneeded dexopt
                 if (forceDex || (!defer && isDexOptNeededInternal == DexFile.DEXOPT_NEEDED)) {
-                    Log.i(TAG, "Running dexopt on: " + pkg.applicationInfo.packageName);
+                    Log.i(TAG, "Running dexopt on: " + pkg.applicationInfo.packageName
+                            + " vmSafeMode=" + vmSafeMode);
                     final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
                     int ret = mInstaller.dexopt(path, sharedGid, !isForwardLocked(pkg),
-                                                pkg.packageName, dexCodeInstructionSet);
+                                                pkg.packageName, dexCodeInstructionSet, vmSafeMode);
                     // Note that we ran dexopt, since rerunning will
                     // probably just result in an error again.
                     pkg.mDexOptNeeded = false;

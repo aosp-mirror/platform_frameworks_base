@@ -240,11 +240,12 @@ public final class Installer {
         builder.append(" *");         // No pkgName arg present
         builder.append(' ');
         builder.append(instructionSet);
+        builder.append(" 0");         // vmSafeMode=false
         return execute(builder.toString());
     }
 
     public int dexopt(String apkPath, int uid, boolean isPublic, String pkgName,
-            String instructionSet) {
+            String instructionSet, boolean vmSafeMode) {
         StringBuilder builder = new StringBuilder("dexopt");
         builder.append(' ');
         builder.append(apkPath);
@@ -255,6 +256,7 @@ public final class Installer {
         builder.append(pkgName);
         builder.append(' ');
         builder.append(instructionSet);
+        builder.append(vmSafeMode ? " 1" : " 0");
         return execute(builder.toString());
     }
 
