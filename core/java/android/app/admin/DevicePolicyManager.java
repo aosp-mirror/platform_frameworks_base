@@ -2611,6 +2611,7 @@ public class DevicePolicyManager {
      * @param agent Which component to enable features for.
      * @param features List of features to enable. Consult specific TrustAgent documentation for
      * the feature list.
+     * @hide
      */
     public void setTrustAgentFeaturesEnabled(ComponentName admin, ComponentName agent,
             List<String> features) {
@@ -2631,6 +2632,7 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param agent Which component to get enabled features for.
      * @return List of enabled features.
+     * @hide
      */
     public List<String> getTrustAgentFeaturesEnabled(ComponentName admin, ComponentName agent) {
         if (mService != null) {
@@ -2738,10 +2740,10 @@ public class DevicePolicyManager {
      * Called by a profile or device owner to set the permitted accessibility services. When
      * set by a device owner or profile owner the restriction applies to all profiles of the
      * user the device owner or profile owner is an admin for.
-     * 
+     *
      * By default the user can use any accessiblity service. When zero or more packages have
      * been added, accessiblity services that are not in the list and not part of the system
-     * can not be enabled by the user. 
+     * can not be enabled by the user.
      *
      * <p> Calling with a null value for the list disables the restriction so that all services
      * can be used, calling with an empty list only allows the builtin system's services.
