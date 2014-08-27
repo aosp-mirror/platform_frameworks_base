@@ -285,6 +285,8 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
                 }
                 mDrawable.setCallback(owner);
                 mDrawable.setLayoutDirection(orig.mDrawable.getLayoutDirection());
+                mDrawable.setBounds(orig.mDrawable.getBounds());
+                mDrawable.setLevel(orig.mDrawable.getLevel());
                 mOrientation = orig.mOrientation;
                 mGravity = orig.mGravity;
                 mCheckedConstantState = mCanConstantState = true;
