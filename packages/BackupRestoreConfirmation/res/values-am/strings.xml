@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"እባክህ የመሳሪያህ ምስጠራ የይለፍ ቃል ከታች አስገባ፡፡ይሄ ለምትኬ መዝገብ ለመመስጠርም ይጠቅማል፡፡"</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"እባክዎ የሙሉ ውሂብ መጠበቂያ ማመስጠር ለመጠቅም የይለፍ ቃል ያስገቡ። ይህም ባዶ ከሆነ፣ የእርስዎ የአሁኑ የመጠበቂያ ይለፍ ቃል ይወሰዳል፡"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"ሙሉ የውሂብ መጠበቂያ ለማመስጠር ከፈለጉ ከታች የይለፍ ቃል ያስገቡ፡"</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"ውሂብ እነበረበት መልስ የተመሳጠረ ከሆነ፣ እባክዎ ከታች የይለፍ ቃል ያስገቡ"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"መጠባበቂያ በመጀመር ላይ..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"መጠባበቂያ ጨርሷል"</string>

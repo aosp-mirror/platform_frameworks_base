@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"कृपया अपना उपकरण सुरक्षित तरीका पासवर्ड नीचे दर्ज करें. बैकअप संग्रहण को एन्‍क्रिप्‍ट करने के लिए भी इसका उपयोग किया जाएगा."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"कृपया संपूर्ण सुरक्षित डेटा को एन्‍क्रि‍प्‍ट करने में उपयोग के लि‍ए पासवर्ड डालें. यदि‍ यह खाली छोड़ दि‍या जाता है, तो आपके वर्तमान बैकअप पासवर्ड का उपयोग कि‍या जाएगा:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"यदि‍ आप संपूर्ण सुरक्षित डेटा को एन्‍क्रि‍प्‍ट करना चाहते हैं, तो नीचे पासवर्ड डालें:"</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"यदि‍ पुनर्स्थापित डेटा को एन्‍क्रि‍प्‍ट कि‍या गया है, तो कृपया नीचे पासवर्ड डालें:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"सुरक्षित करना शुरु हो रहा है..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"सुरक्षित करना पूर्ण"</string>

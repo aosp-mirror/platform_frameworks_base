@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"아래에 기기 암호화 비밀번호를 입력하세요. 백업 자료실을 암호화할 때에도 사용됩니다."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"전체 백업 데이터를 암호화하려면 사용할 비밀번호를 입력하세요. 공백으로 남겨 두면 현재 백업 비밀번호가 사용됩니다."</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"전체 백업 데이터를 암호화하려면 아래에 비밀번호를 입력하세요."</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"복원 데이터가 암호화되어 있는 경우, 아래에 비밀번호를 입력하세요."</string>
     <string name="toast_backup_started" msgid="550354281452756121">"백업 시작 중..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"백업을 완료했습니다."</string>

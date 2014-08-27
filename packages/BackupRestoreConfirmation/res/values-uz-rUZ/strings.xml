@@ -29,6 +29,8 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Qurilmangizning shifr parolini kiriting. U zahira arxivni shifrlash uchun ham ishlatiladi."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"To‘liq zahira fayllarini shifrlash uchun parol kiriting. Agar bo‘sh qoldirsangiz, joriy zahiralash parolingizdan foydalaniladi:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"To‘liq zahira ma’lumotlarini shifrlashni xohlasangiz, quyidagi parolni kiriting:"</string>
+    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
+    <skip />
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Agar tiklash ma’lumoti shifrlangan bo‘lsa, pastga parolni kiriting:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Zahiralash jarayoni boshlandi..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Zahiralash jarayoni bajarildi"</string>
