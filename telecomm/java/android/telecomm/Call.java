@@ -89,6 +89,7 @@ public final class Call {
         private final int mCallerDisplayNamePresentation;
         private final PhoneAccountHandle mAccountHandle;
         private final int mCallCapabilities;
+        private final int mCallProperties;
         private final int mDisconnectCauseCode;
         private final String mDisconnectCauseMessage;
         private final long mConnectTimeMillis;
@@ -142,6 +143,14 @@ public final class Call {
          */
         public int getCallCapabilities() {
             return mCallCapabilities;
+        }
+
+        /**
+         * @return A bitmask of the properties of the {@code Call}, as defined in
+         *         {@link CallProperties}.
+         */
+        public int getCallProperties() {
+            return mCallProperties;
         }
 
         /**
@@ -210,6 +219,7 @@ public final class Call {
                                 d.mCallerDisplayNamePresentation) &&
                         Objects.equals(mAccountHandle, d.mAccountHandle) &&
                         Objects.equals(mCallCapabilities, d.mCallCapabilities) &&
+                        Objects.equals(mCallProperties, d.mCallProperties) &&
                         Objects.equals(mDisconnectCauseCode, d.mDisconnectCauseCode) &&
                         Objects.equals(mDisconnectCauseMessage, d.mDisconnectCauseMessage) &&
                         Objects.equals(mConnectTimeMillis, d.mConnectTimeMillis) &&
@@ -230,6 +240,7 @@ public final class Call {
                     Objects.hashCode(mCallerDisplayNamePresentation) +
                     Objects.hashCode(mAccountHandle) +
                     Objects.hashCode(mCallCapabilities) +
+                    Objects.hashCode(mCallProperties) +
                     Objects.hashCode(mDisconnectCauseCode) +
                     Objects.hashCode(mDisconnectCauseMessage) +
                     Objects.hashCode(mConnectTimeMillis) +
@@ -247,6 +258,7 @@ public final class Call {
                 int callerDisplayNamePresentation,
                 PhoneAccountHandle accountHandle,
                 int capabilities,
+                int properties,
                 int disconnectCauseCode,
                 String disconnectCauseMessage,
                 long connectTimeMillis,
@@ -260,6 +272,7 @@ public final class Call {
             mCallerDisplayNamePresentation = callerDisplayNamePresentation;
             mAccountHandle = accountHandle;
             mCallCapabilities = capabilities;
+            mCallProperties = properties;
             mDisconnectCauseCode = disconnectCauseCode;
             mDisconnectCauseMessage = disconnectCauseMessage;
             mConnectTimeMillis = connectTimeMillis;
@@ -642,6 +655,7 @@ public final class Call {
                 parcelableCall.getCallerDisplayNamePresentation(),
                 parcelableCall.getAccountHandle(),
                 parcelableCall.getCapabilities(),
+                parcelableCall.getProperties(),
                 parcelableCall.getDisconnectCauseCode(),
                 parcelableCall.getDisconnectCauseMsg(),
                 parcelableCall.getConnectTimeMillis(),
