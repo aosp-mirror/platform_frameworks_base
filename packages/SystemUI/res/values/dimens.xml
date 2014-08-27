@@ -195,17 +195,14 @@
     <!-- The size of the application icon in the recents task view. -->
     <dimen name="recents_task_view_application_icon_size">48dp</dimen>
 
-    <!-- The size of the activity icon in the recents task view. -->
-    <dimen name="recents_task_view_activity_icon_size">60dp</dimen>
-
     <!-- The radius of the rounded corners on a task view. -->
     <dimen name="recents_task_view_rounded_corners_radius">2dp</dimen>
 
     <!-- The min translation in the Z index for the last task. -->
-    <dimen name="recents_task_view_z_min">25dp</dimen>
+    <dimen name="recents_task_view_z_min">20dp</dimen>
 
     <!-- The max translation in the Z index for the last task. -->
-    <dimen name="recents_task_view_z_max">100dp</dimen>
+    <dimen name="recents_task_view_z_max">80dp</dimen>
 
     <!-- The amount to translate when animating the removal of a task. -->
     <dimen name="recents_task_view_remove_anim_translation_x">100dp</dimen>
@@ -230,6 +227,9 @@
 
     <!-- The side padding for the task stack as a percentage of the width. -->
     <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.04444</item>
+
+    <!-- The overscroll percentage allowed on the stack. -->
+    <item name="recents_stack_overscroll_percentage" format="float" type="dimen">0.0875</item>
 
     <!-- The top offset for the task stack. -->
     <dimen name="recents_stack_top_padding">16dp</dimen>
