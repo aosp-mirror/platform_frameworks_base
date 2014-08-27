@@ -1898,17 +1898,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     break;
                 }
                 case NetworkMonitor.EVENT_PROVISIONING_NOTIFICATION: {
-                    NetworkAgentInfo nai = null;
-                    synchronized (mNetworkForNetId) {
-                        nai = mNetworkForNetId.get(msg.arg2);
-                    }
-                    if (nai == null) {
-                        loge("EVENT_PROVISIONING_NOTIFICATION from unknown NetworkMonitor");
-                        break;
-                    }
                     if (msg.arg1 == 0) {
                         setProvNotificationVisibleIntent(false, msg.arg2, 0, null, null);
                     } else {
+                        NetworkAgentInfo nai = null;
+                        synchronized (mNetworkForNetId) {
+                            nai = mNetworkForNetId.get(msg.arg2);
+                        }
+                        if (nai == null) {
+                            loge("EVENT_PROVISIONING_NOTIFICATION from unknown NetworkMonitor");
+                            break;
+                        }
                         setProvNotificationVisibleIntent(true, msg.arg2, nai.networkInfo.getType(),
                                 nai.networkInfo.getExtraInfo(), (PendingIntent)msg.obj);
                     }
