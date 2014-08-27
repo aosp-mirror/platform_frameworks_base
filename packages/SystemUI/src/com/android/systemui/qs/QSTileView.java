@@ -265,6 +265,10 @@ public class QSTileView extends ViewGroup {
             } else if (state.iconId > 0) {
                 iv.setImageResource(state.iconId);
             }
+            Drawable drawable = iv.getDrawable();
+            if (state.autoMirrorDrawable && drawable != null) {
+                drawable.setAutoMirrored(true);
+            }
         }
         if (mDual) {
             mDualLabel.setText(state.label);
