@@ -56,6 +56,13 @@ public class KeyguardManager {
     public static final String EXTRA_DESCRIPTION = "android.app.extra.DESCRIPTION";
 
     /**
+     * @removed
+     */
+    public Intent getConfirmDeviceCredentialIntent(CharSequence title, CharSequence description) {
+        return createConfirmDeviceCredentialIntent(title, description);
+    }
+
+    /**
      * Get an intent to prompt the user to confirm credentials (pin, pattern or password)
      * for the current user of the device. The caller is expected to launch this activity using
      * {@link android.app.Activity#startActivityForResult(Intent, int)} and check for
@@ -63,7 +70,7 @@ public class KeyguardManager {
      *
      * @return the intent for launching the activity or null if no password is required.
      **/
-    public Intent getConfirmDeviceCredentialIntent(CharSequence title, CharSequence description) {
+    public Intent createConfirmDeviceCredentialIntent(CharSequence title, CharSequence description) {
         if (!isKeyguardSecure()) return null;
         Intent intent = new Intent(ACTION_CONFIRM_DEVICE_CREDENTIAL);
         intent.putExtra(EXTRA_TITLE, title);
