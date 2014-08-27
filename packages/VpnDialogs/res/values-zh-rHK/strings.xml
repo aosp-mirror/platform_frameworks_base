@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"連線要求"</string>
-    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> 要求設定 VPN 連線以監控網絡流量。除非您信任要求來源，否則請勿任意接受要求。&lt;br /&gt; &lt;br /&gt;VPN 啟用時，畫面頂端會顯示 &lt;img src=vpn_icon /&gt;。"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> 要求設定 VPN 連線以監控網絡流量。除非您信任要求來源，否則請勿隨意接受要求。&lt;br /&gt; &lt;br /&gt;VPN 啟用時，畫面頂端會顯示 &lt;img src=vpn_icon /&gt;。"</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN 已連線"</string>
     <string name="configure" msgid="4905518375574791375">"設定"</string>
     <string name="disconnect" msgid="971412338304200056">"中斷連線"</string>
