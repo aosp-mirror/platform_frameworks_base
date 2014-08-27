@@ -36,7 +36,6 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.net.Uri.Builder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -1622,15 +1621,15 @@ public final class ContactsContract {
          *
          * @hide
          */
-        public static long CORP_CONTACT_ID_BASE = 1000000000; // slightly smaller than 2 ** 30
+        public static long ENTERPRISE_CONTACT_ID_BASE = 1000000000; // slightly smaller than 2 ** 30
 
         /**
-         * Return TRUE if a contact ID is from the contacts provider on the corp profile.
+         * Return TRUE if a contact ID is from the contacts provider on the enterprise profile.
          *
          * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI} may return such a contact.
          */
-        public static boolean isCorpContactId(long contactId) {
-            return (contactId >= CORP_CONTACT_ID_BASE) && (contactId < Profile.MIN_ID);
+        public static boolean isEnterpriseContactId(long contactId) {
+            return (contactId >= ENTERPRISE_CONTACT_ID_BASE) && (contactId < Profile.MIN_ID);
         }
 
         /**
@@ -2229,6 +2228,11 @@ public final class ContactsContract {
          * type.  For applications that need to be aware of the data set, this can
          * be used instead of account type to distinguish sets of data.  This is
          * never intended to be used for specifying accounts.
+         * <p>
+         * This column does *not* escape forward slashes in the account type or the data set.
+         * If this is an issue, consider using
+         * {@link ContactsContract.RawContacts#ACCOUNT_TYPE} and
+         * {@link ContactsContract.RawContacts#DATA_SET} directly.
          */
         public static final String ACCOUNT_TYPE_AND_DATA_SET = "account_type_and_data_set";
 
@@ -5025,7 +5029,8 @@ public final class ContactsContract {
          *     </li>
          *     <li>
          *     Corp contacts will get artificial {@link #_ID}s.  In order to tell whether a contact
-         *     is from the corp profile, use {@link ContactsContract.Contacts#isCorpContactId(long)}.
+         *     is from the corp profile, use
+         *     {@link ContactsContract.Contacts#isEnterpriseContactId(long)}.
          *     </li>
          * </ul>
          * <p>
@@ -8114,19 +8119,19 @@ public final class ContactsContract {
          * @hide
          */
         @Deprecated
-        public static final String EXTRA_TARGET_RECT = "target_rect";
+        public static final String EXTRA_TARGET_RECT = "android.provider.extra.TARGET_RECT";
 
         /**
          * Extra used to specify size of pivot dialog.
          * @hide
          */
-        public static final String EXTRA_MODE = "mode";
+        public static final String EXTRA_MODE = "android.provider.extra.MODE";
 
         /**
          * Extra used to indicate a list of specific MIME-types to exclude and not display in the
          * QuickContacts dialog. Stored as a {@link String} array.
          */
-        public static final String EXTRA_EXCLUDE_MIMES = "exclude_mimes";
+        public static final String EXTRA_EXCLUDE_MIMES = "android.provider.extra.EXCLUDE_MIMES";
 
         /**
          * Small QuickContact mode, usually presented with minimal actions.
