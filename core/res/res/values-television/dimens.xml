@@ -16,8 +16,8 @@
 <resources>
 
      <!-- Lighting and shadow properties -->
-     <dimen name="light_y">-300dp</dimen>
-     <item type="dimen" format="float" name="ambient_shadow_alpha">0.4</item>
-     <item type="dimen" format="float" name="spot_shadow_alpha">0.4</item>
+     <dimen name="light_y">-400dp</dimen>
+     <item type="dimen" format="float" name="ambient_shadow_alpha">0.06</item>
+     <item type="dimen" format="float" name="spot_shadow_alpha">0.3</item>
 
 </resources>
