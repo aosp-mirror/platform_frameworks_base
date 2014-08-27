@@ -12914,6 +12914,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Bundle extras) throws RemoteException {
                 Slog.d(TAG, "Install result for move: "
                         + PackageManager.installStatusToString(returnCode, msg));
+
+                // We usually have a new package now after the install, but if
+                // we failed we need to clear the pending flag on the original
+                // package object.
+                synchronized (mPackages) {
+                    final PackageParser.Package pkg = mPackages.get(packageName);
+                    if (pkg != null) {
+                        pkg.mOperationPending = false;
+                    }
+                }
+
                 final int status = PackageManager.installStatusToPublicStatus(returnCode);
                 switch (status) {
                     case PackageInstaller.STATUS_SUCCESS:
