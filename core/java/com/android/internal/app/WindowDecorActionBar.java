@@ -431,6 +431,11 @@ public class WindowDecorActionBar extends ActionBar implements
         mDecorToolbar.setTitle(title);
     }
 
+    @Override
+    public void setWindowTitle(CharSequence title) {
+        mDecorToolbar.setWindowTitle(title);
+    }
+
     public void setSubtitle(CharSequence subtitle) {
         mDecorToolbar.setSubtitle(subtitle);
     }
