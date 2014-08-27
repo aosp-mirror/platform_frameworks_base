@@ -545,6 +545,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_DISPATCH_SHOW_RECENTS = 9;
     private static final int MSG_DISPATCH_SHOW_GLOBAL_ACTIONS = 10;
     private static final int MSG_HIDE_BOOT_MESSAGE = 11;
+    private static final int MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK = 12;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -589,6 +590,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_HIDE_BOOT_MESSAGE:
                     handleHideBootMessage();
+                    break;
+                case MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK:
+                    launchVoiceAssistWithWakeLock(msg.arg1 != 0);
                     break;
             }
         }
@@ -2342,11 +2346,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (keyCode == KeyEvent.KEYCODE_VOICE_ASSIST) {
             if (!down) {
                 Intent voiceIntent;
-                if (!keyguardOn && mPowerManager.isInteractive()) {
+                if (!keyguardOn) {
                     voiceIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
                 } else {
                     voiceIntent = new Intent(RecognizerIntent.ACTION_VOICE_SEARCH_HANDS_FREE);
-                    voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE, keyguardOn);
+                    voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE, true);
                 }
                 mContext.startActivityAsUser(voiceIntent, UserHandle.CURRENT_OR_SELF);
             }
@@ -4445,6 +4449,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             }
+            case KeyEvent.KEYCODE_VOICE_ASSIST: {
+                // Only do this if we would otherwise not pass it to the user. In that case,
+                // interceptKeyBeforeDispatching would apply a similar but different policy in
+                // order to invoke voice assist actions. Note that we need to make a copy of the
+                // key event here because the original key event will be recycled when we return.
+                if ((result & ACTION_PASS_TO_USER) == 0 && !down) {
+                    mBroadcastWakeLock.acquire();
+                    Message msg = mHandler.obtainMessage(MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK,
+                            keyguardActive ? 1 : 0, 0);
+                    msg.setAsynchronous(true);
+                    msg.sendToTarget();
+                }
+            }
         }
 
         if (useHapticFeedback) {
@@ -4549,6 +4566,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (ActivityManagerNative.isSystemReady()) {
             MediaSessionLegacyHelper.getHelper(mContext).sendMediaButtonEvent(event, true);
         }
+    }
+
+    void launchVoiceAssistWithWakeLock(boolean keyguardActive) {
+        Intent voiceIntent =
+            new Intent(RecognizerIntent.ACTION_VOICE_SEARCH_HANDS_FREE);
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE, keyguardActive);
+        mContext.startActivityAsUser(voiceIntent, UserHandle.CURRENT_OR_SELF);
+        mBroadcastWakeLock.release();
     }
 
     BroadcastReceiver mDockReceiver = new BroadcastReceiver() {
