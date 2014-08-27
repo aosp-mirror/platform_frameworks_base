@@ -33,7 +33,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 
 import com.android.internal.R;
 
@@ -41,6 +40,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Drawable that shows a ripple effect in response to state changes. The
@@ -88,7 +88,6 @@ import java.io.IOException;
  * @attr ref android.R.styleable#RippleDrawable_color
  */
 public class RippleDrawable extends LayerDrawable {
-    private static final String LOG_TAG = RippleDrawable.class.getSimpleName();
     private static final PorterDuffXfermode DST_IN = new PorterDuffXfermode(Mode.DST_IN);
     private static final PorterDuffXfermode SRC_ATOP = new PorterDuffXfermode(Mode.SRC_ATOP);
     private static final PorterDuffXfermode SRC_OVER = new PorterDuffXfermode(Mode.SRC_OVER);
@@ -215,10 +214,14 @@ public class RippleDrawable extends LayerDrawable {
         final Ripple[] ripples = mAnimatingRipples;
         for (int i = 0; i < count; i++) {
             ripples[i].jump();
-            ripples[i] = null;
+        }
+        if (ripples != null) {
+            Arrays.fill(ripples, 0, count, null);
         }
         mAnimatingRipplesCount = 0;
         mClearingHotspots = false;
+
+        invalidateSelf();
     }
 
     @Override
@@ -549,6 +552,15 @@ public class RippleDrawable extends LayerDrawable {
         mAnimatingRipples[mAnimatingRipplesCount++] = mRipple;
     }
 
+    @Override
+    public void invalidateSelf() {
+        // Don't invalidate when we're clearing hotspots. We'll handle that
+        // manually when we're done.
+        if (!mClearingHotspots) {
+            super.invalidateSelf();
+        }
+    }
+
     private void removeRipple() {
         if (mRipple != null) {
             mRipple.exit();
@@ -572,7 +584,9 @@ public class RippleDrawable extends LayerDrawable {
         final Ripple[] ripples = mAnimatingRipples;
         for (int i = 0; i < count; i++) {
             ripples[i].cancel();
-            ripples[i] = null;
+        }
+        if (ripples != null) {
+            Arrays.fill(ripples, 0, count, null);
         }
         mAnimatingRipplesCount = 0;
         mClearingHotspots = false;
@@ -680,7 +694,7 @@ public class RippleDrawable extends LayerDrawable {
             final int count = mAnimatingRipplesCount;
             final int index = getRippleIndex(ripple);
             if (index >= 0) {
-                System.arraycopy(ripples, index + 1, ripples, index + 1 - 1, count - (index + 1));
+                System.arraycopy(ripples, index + 1, ripples, index, count - (index + 1));
                 ripples[count - 1] = null;
                 mAnimatingRipplesCount--;
                 invalidateSelf();
