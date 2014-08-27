@@ -186,4 +186,7 @@ interface IDevicePolicyManager {
     boolean addCrossProfileWidgetProvider(in ComponentName admin, String packageName);
     boolean removeCrossProfileWidgetProvider(in ComponentName admin, String packageName);
     List<String> getCrossProfileWidgetProviders(in ComponentName admin);
+
+    void setAutoTimeRequired(in ComponentName who, int userHandle, boolean required);
+    boolean getAutoTimeRequired();
 }
