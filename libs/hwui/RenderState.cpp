@@ -34,6 +34,10 @@ void RenderState::onGLContextCreated() {
     mCaches->init();
 }
 
+void RenderState::onGLContextDestroyed() {
+    LOG_ALWAYS_FATAL_IF(!mActiveLayers.empty(), "layers have survived gl context destruction");
+}
+
 void RenderState::setViewport(GLsizei width, GLsizei height) {
     mViewportWidth = width;
     mViewportHeight = height;
