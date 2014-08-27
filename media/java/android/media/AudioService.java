@@ -4290,7 +4290,8 @@ public class AudioService extends IAudioService.Stub {
         if ((state == 0) && ((device & mBecomingNoisyIntentDevices) != 0)) {
             int devices = 0;
             for (int dev : mConnectedDevices.keySet()) {
-                if ((dev & mBecomingNoisyIntentDevices) != 0) {
+                if (((dev & AudioSystem.DEVICE_BIT_IN) == 0) &&
+                        ((dev & mBecomingNoisyIntentDevices) != 0)) {
                    devices |= dev;
                 }
             }
