@@ -146,6 +146,7 @@ public final class TvInputManagerService extends SystemService {
         PackageMonitor monitor = new PackageMonitor() {
             @Override
             public void onSomePackagesChanged() {
+                if (DEBUG) Slog.d(TAG, "onSomePackagesChanged()");
                 synchronized (mLock) {
                     buildTvInputListLocked(mCurrentUserId);
                 }
@@ -275,6 +276,11 @@ public final class TvInputManagerService extends SystemService {
 
         for (String inputId : userState.inputMap.keySet()) {
             if (!inputMap.containsKey(inputId)) {
+                TvInputInfo info = userState.inputMap.get(inputId).mInfo;
+                ServiceState serviceState = userState.serviceStateMap.get(info.getComponent());
+                if (serviceState != null) {
+                    abortPendingCreateSessionRequestsLocked(serviceState, inputId, userId);
+                }
                 notifyInputRemovedLocked(userState, inputId);
             }
         }
@@ -445,6 +451,22 @@ public final class TvInputManagerService extends SystemService {
             mContext.unbindService(serviceState.mConnection);
             userState.serviceStateMap.remove(component);
         }
+    }
+
+    private void abortPendingCreateSessionRequestsLocked(ServiceState serviceState,
+            String inputId, int userId) {
+        // Let clients know the create session requests are failed.
+        UserState userState = getUserStateLocked(userId);
+        for (IBinder sessionToken : serviceState.mSessionTokens) {
+            SessionState sessionState = userState.sessionStateMap.get(sessionToken);
+            if (sessionState.mSession == null && (inputId == null
+                    || sessionState.mInfo.getId().equals(inputId))) {
+                removeSessionStateLocked(sessionToken, sessionState.mUserId);
+                sendSessionTokenToClientLocked(sessionState.mClient,
+                        sessionState.mInfo.getId(), null, null, sessionState.mSeq);
+            }
+        }
+        updateServiceConnectionLocked(serviceState.mComponent, userId);
     }
 
     private ClientState createClientStateLocked(IBinder clientToken, int userId) {
@@ -1037,7 +1059,13 @@ public final class TvInputManagerService extends SystemService {
             try {
                 synchronized (mLock) {
                     UserState userState = getUserStateLocked(resolvedUserId);
-                    TvInputInfo info = userState.inputMap.get(inputId).mInfo;
+                    TvInputState inputState = userState.inputMap.get(inputId);
+                    if (inputState == null) {
+                        Slog.w(TAG, "Failed to find input state for inputId=" + inputId);
+                        sendSessionTokenToClientLocked(client, inputId, null, null, seq);
+                        return;
+                    }
+                    TvInputInfo info = inputState.mInfo;
                     ServiceState serviceState = userState.serviceStateMap.get(info.getComponent());
                     if (serviceState == null) {
                         serviceState = new ServiceState(info.getComponent(), resolvedUserId);
@@ -1897,15 +1925,7 @@ public final class TvInputManagerService extends SystemService {
                     serviceState.mService = null;
                     serviceState.mCallback = null;
 
-                    // Send null tokens for not finishing create session events.
-                    for (IBinder sessionToken : serviceState.mSessionTokens) {
-                        SessionState sessionState = userState.sessionStateMap.get(sessionToken);
-                        if (sessionState.mSession == null) {
-                            removeSessionStateLocked(sessionToken, sessionState.mUserId);
-                            sendSessionTokenToClientLocked(sessionState.mClient,
-                                    sessionState.mInfo.getId(), null, null, sessionState.mSeq);
-                        }
-                    }
+                    abortPendingCreateSessionRequestsLocked(serviceState, null, mUserId);
 
                     for (TvInputState inputState : userState.inputMap.values()) {
                         if (inputState.mInfo.getComponent().equals(component)) {
@@ -1913,7 +1933,6 @@ public final class TvInputManagerService extends SystemService {
                                     INPUT_STATE_DISCONNECTED, null);
                         }
                     }
-                    updateServiceConnectionLocked(mComponent, mUserId);
                 }
             }
         }
