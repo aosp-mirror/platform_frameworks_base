@@ -276,7 +276,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         // Wait for activity start.
                         return handled;
                     }
-                });
+                }, false /* afterKeyguardGone */);
                 return true;
             } else {
                 return super.onClickHandler(view, pendingIntent, fillInIntent);
@@ -526,8 +526,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     /**
      * Takes the necessary steps to prepare the status bar for starting an activity, then starts it.
      * @param action A dismiss action that is called if it's safe to start the activity.
+     * @param afterKeyguardGone Whether the action should be executed after the Keyguard is gone.
      */
-    protected void dismissKeyguardThenExecute(OnDismissAction action) {
+    protected void dismissKeyguardThenExecute(OnDismissAction action, boolean afterKeyguardGone) {
         action.onDismiss();
     }
 
@@ -646,7 +647,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
                 return true;
             }
-        });
+        }, false /* afterKeyguardGone */);
     }
 
     protected SwipeHelper.LongPressListener getNotificationLongClicker() {
@@ -1339,7 +1340,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
                     return mIntent != null && mIntent.isActivity();
                 }
-            });
+            }, false /* afterKeyguardGone */);
         }
     }
 
