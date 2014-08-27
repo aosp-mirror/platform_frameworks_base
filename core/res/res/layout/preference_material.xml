@@ -20,58 +20,62 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="?android:attr/listPreferredItemHeightSmall"
+    android:minHeight="?attr/listPreferredItemHeightSmall"
     android:gravity="center_vertical"
     android:paddingStart="?attr/listPreferredItemPaddingStart"
     android:paddingEnd="?attr/listPreferredItemPaddingEnd"
-    android:background="?android:attr/activatedBackgroundIndicator">
+    android:background="?attr/activatedBackgroundIndicator">
 
     <LinearLayout
-        android:id="@+android:id/icon_frame"
+        android:id="@+id/icon_frame"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:minWidth="58dip"
+        android:layout_marginStart="-4dp"
+        android:minWidth="60dp"
         android:gravity="start|center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingEnd="12dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
         <ImageView
-            android:id="@+android:id/icon"
+            android:id="@+id/icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:scaleType="centerInside"
-            android:layout_marginEnd="8dip" />
+            android:maxWidth="48dp"
+            android:maxHeight="48dp" />
     </LinearLayout>
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:paddingTop="16dip"
-        android:paddingBottom="16dip">
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp">
 
-        <TextView android:id="@+android:id/title"
+        <TextView android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceListItem"
+            android:textAppearance="?attr/textAppearanceListItem"
             android:ellipsize="marquee" />
 
-        <TextView android:id="@+android:id/summary"
+        <TextView android:id="@+id/summary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@android:id/title"
-            android:layout_alignStart="@android:id/title"
-            android:textAppearance="?android:attr/textAppearanceListItemSecondary"
-            android:textColor="?android:attr/textColorSecondary"
+            android:layout_below="@id/title"
+            android:layout_alignStart="@id/title"
+            android:textAppearance="?attr/textAppearanceListItemSecondary"
+            android:textColor="?attr/textColorSecondary"
             android:maxLines="10" />
 
     </RelativeLayout>
 
     <!-- Preference should place its actual preference widget here. -->
-    <LinearLayout android:id="@+android:id/widget_frame"
+    <LinearLayout android:id="@+id/widget_frame"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:minWidth="58dip"
         android:gravity="end|center_vertical"
+        android:paddingStart="16dp"
         android:orientation="vertical" />
 
 </LinearLayout>
