@@ -160,6 +160,8 @@ public class NotificationPanelView extends PanelView implements
 
     private boolean mQsScrimEnabled = true;
     private boolean mLastAnnouncementWasQuickSettings;
+    private boolean mQsTouchAboveFalsingThreshold;
+    private int mQsFalsingThreshold;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -230,6 +232,8 @@ public class NotificationPanelView extends PanelView implements
         mClockPositionAlgorithm.loadDimens(getResources());
         mNotificationScrimWaitDistance =
                 getResources().getDimensionPixelSize(R.dimen.notification_scrim_wait_distance);
+        mQsFalsingThreshold = getResources().getDimensionPixelSize(
+                R.dimen.qs_falsing_threshold);
     }
 
     public void updateResources() {
@@ -526,6 +530,7 @@ public class NotificationPanelView extends PanelView implements
     private void resetDownStates(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             mOnlyAffordanceInThisMotion = false;
+            mQsTouchAboveFalsingThreshold = mQsFullyExpanded;
         }
     }
 
@@ -546,6 +551,9 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private boolean flingExpandsQs(float vel) {
+        if (!mQsTouchAboveFalsingThreshold && mStatusBarState == StatusBarState.KEYGUARD) {
+            return false;
+        }
         if (Math.abs(vel) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
             return getQsExpansionFraction() > 0.5f;
         } else {
@@ -690,6 +698,9 @@ public class NotificationPanelView extends PanelView implements
             case MotionEvent.ACTION_MOVE:
                 final float h = y - mInitialTouchY;
                 setQsExpansion(h + mInitialHeightOnTouch);
+                if (h >= mQsFalsingThreshold) {
+                    mQsTouchAboveFalsingThreshold = true;
+                }
                 trackMovement(event);
                 break;
 
