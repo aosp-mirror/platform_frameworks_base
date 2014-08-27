@@ -208,9 +208,12 @@ NotificationCompat.Builder notificationBuilder =
         <b>.setStyle(bigStyle);</b>
 </pre>
 
-<p>Notice that you can add a large background image to any notification using the
+<p>Notice that you can add a large icon image to any notification using the
 {@link android.support.v4.app.NotificationCompat.Builder#setLargeIcon setLargeIcon()}
-method. For more information about designing notifications with large images, see the
+method. However, these icons appear as large background images on a wearable and do not look
+good as they are scaled up to fit the wearable screen. To add a wearable-specific background image
+to a notification, see <a href="#AddWearableFeatures">Add Wearable Features For a Notification</a>.
+For more information about designing notifications with large images, see the
 <a href="{@docRoot}design/wear/index.html">Design Principles of Android
 Wear</a>.</p>
 
@@ -244,7 +247,8 @@ method to remove the app icon from the notification card.
 // Create a WearableExtender to add functionality for wearables
 NotificationCompat.WearableExtender wearableExtender =
         new NotificationCompat.WearableExtender()
-        .setHintHideIcon(true);
+        .setHintHideIcon(true)
+        .setBackground(mBitmap);
 
 // Create a NotificationCompat.Builder to build a standard notification
 // then extend it with the WearableExtender
@@ -257,12 +261,21 @@ Notification notif = new NotificationCompat.Builder(mContext)
 </pre>
 
 <p>The
-  {@link android.support.v4.app.NotificationCompat.WearableExtender#setHintHideIcon setHintHideIcon()}
-  method is just one example of new notification features available with
-  {@link android.support.v4.app.NotificationCompat.WearableExtender}.
-</p>
+{@link android.support.v4.app.NotificationCompat.WearableExtender#setHintHideIcon setHintHideIcon()}
+and {@link android.support.v4.app.NotificationCompat.WearableExtender#setBackground setBackground()}
+methods are just two examples of new notification features available with
+{@link android.support.v4.app.NotificationCompat.WearableExtender}.</p>
 
-<p>If you ever need to read wearable-specifc options at a later time, use the corresponding get
+<p class="note"><strong>Note:</strong> The bitmap that you use with
+{@link android.support.v4.app.NotificationCompat.WearableExtender#setBackground setBackground()}
+should have a resolution of 400x400 for non-scrolling backgrounds and 640x400 for backgrounds
+that support parallax scrolling. Place these bitmap images in the <code>res/drawable-nodpi</code>
+directory of your handheld app. Place other non-bitmap resources for wearable notifications, such
+as those used with the
+{@link android.support.v4.app.NotificationCompat.WearableExtender#setContentIcon setContentIcon()}
+method, in the <code>res/drawable-hdpi</code> directory of your handheld app.</p>
+
+<p>If you ever need to read wearable-specific options at a later time, use the corresponding get
 method for the option. This example calls the
 {@link android.support.v4.app.NotificationCompat.WearableExtender#getHintHideIcon()} method to
 get whether or not this notification hides the icon:
@@ -271,6 +284,7 @@ NotificationCompat.WearableExtender wearableExtender =
         new NotificationCompat.WearableExtender(notif);
 boolean hintHideIcon = wearableExtender.getHintHideIcon();
 </pre>
+
 
 <h2 id="Deliver">Deliver the Notification</h2>
 <p>When you want to deliver your notifications, always use the
