@@ -263,7 +263,7 @@ static bool throwExceptionAsNecessary(
 
     String8 vendorMessage;
     if (err >= ERROR_DRM_VENDOR_MIN && err <= ERROR_DRM_VENDOR_MAX) {
-        vendorMessage.format("DRM vendor-defined error: %d", err);
+        vendorMessage = String8::format("DRM vendor-defined error: %d", err);
         drmMessage = vendorMessage.string();
     }
 
@@ -285,7 +285,7 @@ static bool throwExceptionAsNecessary(
             if (msg == NULL) {
                 msg = drmMessage;
             } else {
-                errbuf.format("%s: %s", msg, drmMessage);
+                errbuf = String8::format("%s: %s", msg, drmMessage);
                 msg = errbuf.string();
             }
         }
