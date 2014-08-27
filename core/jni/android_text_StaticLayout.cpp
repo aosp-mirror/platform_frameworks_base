@@ -568,8 +568,6 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jstring javaLocaleName,
     std::vector<float> computedWidths;
     std::vector<unsigned char> computedFlags;
 
-    GreedyLineBreaker breaker(primitives, lineWidth);
-    breaker.computeBreaks(&computedBreaks, &computedWidths, &computedFlags);
     if (optimize) {
         OptimizingLineBreaker breaker(primitives, lineWidth);
         breaker.computeBreaks(&computedBreaks, &computedWidths, &computedFlags);
