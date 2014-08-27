@@ -308,7 +308,7 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.Material.Widget.TextView.PopupMenu" parent="TextAppearance.Material.Menu" />
     <style name="TextAppearance.Material.Widget.TextView.SpinnerItem" />
 
-    <style name="TextAppearance.Material.Widget.DropDownItem">
+    <style name="TextAppearance.Material.Widget.DropDownItem" parent="TextAppearance.Material.Menu">
         <item name="textColor">?attr/textColorPrimaryDisableOnly</item>
     </style>
 
@@ -759,7 +759,7 @@ please see styles_device_defaults.xml.
         <item name="overlapAnchor">true</item>
     </style>
 
-    <style name="Widget.Material.Spinner.Form">
+    <style name="Widget.Material.Spinner.Underlined">
         <item name="background">@drawable/spinner_textfield_background_material</item>
     </style>
 
@@ -1022,7 +1022,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.Spinner" parent="Widget.Material.Spinner" />
     <style name="Widget.Material.Light.Spinner.DropDown" parent="Widget.Material.Spinner.DropDown"/>
     <style name="Widget.Material.Light.Spinner.DropDown.ActionBar" parent="Widget.Material.Spinner.DropDown.ActionBar"/>
-    <style name="Widget.Material.Light.Spinner.Form" parent="Widget.Material.Spinner.Form" />
+    <style name="Widget.Material.Light.Spinner.Underlined" parent="Widget.Material.Spinner.Underlined" />
     <style name="Widget.Material.Light.TabWidget" parent="Widget.Material.TabWidget"/>
     <style name="Widget.Material.Light.WebTextView" parent="Widget.Material.WebTextView"/>
     <style name="Widget.Material.Light.WebView" parent="Widget.Material.WebView"/>
