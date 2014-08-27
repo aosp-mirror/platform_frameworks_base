@@ -2216,104 +2216,14 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast Action: Wired Headset plugged in or unplugged.
      *
-     * You <em>cannot</em> receive this through components declared
-     * in manifests, only by explicitly registering for it with
-     * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
-     * Context.registerReceiver()}.
-     *
-     * <p>The intent will have the following extra values:
-     * <ul>
-     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
-     *   <li><em>name</em> - Headset type, human readable string </li>
-     *   <li><em>microphone</em> - 1 if headset has a microphone, 0 otherwise </li>
-     * </ul>
-     * </ul>
+     * Same as {@link android.media.AudioManager#ACTION_HEADSET_PLUG}, to be consulted for value
+     *   and documentation.
+     * <p>If the minimum SDK version of your application is
+     * {@link android.os.Build.VERSION_CODES#L}, it is recommended to refer
+     * to the <code>AudioManager</code> constant in your receiver registration code instead.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_HEADSET_PLUG =
-            "android.intent.action.HEADSET_PLUG";
-
-    /**
-     * Broadcast Action: An analog audio speaker/headset plugged in or unplugged.
-     *
-     * <p>The intent will have the following extra values:
-     * <ul>
-     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
-     *   <li><em>name</em> - Headset type, human readable string </li>
-     * </ul>
-     * </ul>
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_ANALOG_AUDIO_DOCK_PLUG =
-            "android.intent.action.ANALOG_AUDIO_DOCK_PLUG";
-
-    /**
-     * Broadcast Action: A digital audio speaker/headset plugged in or unplugged.
-     *
-     * <p>The intent will have the following extra values:
-     * <ul>
-     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
-     *   <li><em>name</em> - Headset type, human readable string </li>
-     * </ul>
-     * </ul>
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_DIGITAL_AUDIO_DOCK_PLUG =
-            "android.intent.action.DIGITAL_AUDIO_DOCK_PLUG";
-
-    /**
-     * Broadcast Action: A sticky broadcast indicating an HMDI cable was plugged or unplugged
-     *
-     * <p>The intent will have the following extra values:
-     * <ul>
-     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
-     *   <li><em>name</em> - HDMI cable, human readable string </li>
-     *   <li><em>maxChannelCount</em> - the maximum number of output channels supported by the
-     *       connected HDMI device, only available when <i>state</i> is 1.</li>
-     *   <li><em>encodings</em> - an array of formats supported by the connected HDMI device,
-     *       only available when <i>state</i> is 1. Encoding values are defined in
-     *       {@link android.media.AudioFormat} (for instance see
-     *       {@link android.media.AudioFormat#ENCODING_PCM_16BIT}). Use
-     *       {@link #getIntArrayExtra(String)} to retrieve the encoding values.</li>
-     * </ul>
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_HDMI_AUDIO_PLUG =
-            "android.intent.action.HDMI_AUDIO_PLUG";
-
-    /**
-     * Broadcast Action: A USB audio accessory was plugged in or unplugged.
-     *
-     * <p>The intent will have the following extra values:
-     * <ul>
-     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
-     *   <li><em>card</em> - ALSA card number (integer) </li>
-     *   <li><em>device</em> - ALSA device number (integer) </li>
-     * </ul>
-     * </ul>
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_USB_AUDIO_ACCESSORY_PLUG =
-            "android.intent.action.USB_AUDIO_ACCESSORY_PLUG";
-
-    /**
-     * Broadcast Action: A USB audio device was plugged in or unplugged.
-     *
-     * <p>The intent will have the following extra values:
-     * <ul>
-     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
-     *   <li><em>card</em> - ALSA card number (integer) </li>
-     *   <li><em>device</em> - ALSA device number (integer) </li>
-     * </ul>
-     * </ul>
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_USB_AUDIO_DEVICE_PLUG =
-            "android.intent.action.USB_AUDIO_DEVICE_PLUG";
+    public static final String ACTION_HEADSET_PLUG = android.media.AudioManager.ACTION_HEADSET_PLUG;
 
     /**
      * <p>Broadcast Action: The user has switched on advanced settings in the settings app:</p>
