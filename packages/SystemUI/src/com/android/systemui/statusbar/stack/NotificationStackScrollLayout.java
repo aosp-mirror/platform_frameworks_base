@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.SpeedBumpView;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
 
@@ -195,6 +196,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             return true;
         }
     };
+    private PhoneStatusBar mPhoneStatusBar;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -638,6 +640,11 @@ public class NotificationStackScrollLayout extends ViewGroup
     public boolean canChildBeDismissed(View v) {
         final View veto = v.findViewById(R.id.veto);
         return (veto != null && veto.getVisibility() != View.GONE);
+    }
+
+    @Override
+    public boolean isAntiFalsingNeeded() {
+        return mPhoneStatusBar.isFalsingThresholdNeeded();
     }
 
     private void setSwipingInProgress(boolean isSwiped) {
@@ -2183,6 +2190,10 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     public void updateIsSmallScreen(int qsMinHeight) {
         mStackScrollAlgorithm.updateIsSmallScreen(mMaxLayoutHeight - qsMinHeight);
+    }
+
+    public void setPhoneStatusBar(PhoneStatusBar phoneStatusBar) {
+        this.mPhoneStatusBar = phoneStatusBar;
     }
 
     /**

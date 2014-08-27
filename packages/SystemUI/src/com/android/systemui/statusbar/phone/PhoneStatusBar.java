@@ -686,6 +686,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller = (NotificationStackScrollLayout) mStatusBarWindow.findViewById(
                 R.id.notification_stack_scroller);
         mStackScroller.setLongPressListener(getNotificationLongClicker());
+        mStackScroller.setPhoneStatusBar(this);
 
         mKeyguardIconOverflowContainer =
                 (NotificationOverflowContainer) LayoutInflater.from(mContext).inflate(
@@ -2051,6 +2052,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public boolean isQsExpanded() {
         return mNotificationPanel.isQsExpanded();
+    }
+
+    public boolean isFalsingThresholdNeeded() {
+        boolean onKeyguard = getBarState() == StatusBarState.KEYGUARD;
+        boolean isMethodInSecure = mUnlockMethodCache.isMethodInsecure();
+        return onKeyguard && isMethodInSecure;
     }
 
     @Override  // NotificationData.Environment
