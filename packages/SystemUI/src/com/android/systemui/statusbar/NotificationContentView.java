@@ -211,6 +211,7 @@ public class NotificationContentView extends FrameLayout {
     private void setImageViewDark(boolean dark, boolean fade, int imageViewId) {
         // TODO: implement fade
         final ImageView v = (ImageView) mContractedChild.findViewById(imageViewId);
+        if (v == null) return;
         final Drawable d = v.getBackground();
         if (dark) {
             v.setLayerType(LAYER_TYPE_HARDWARE, INVERT_PAINT);
