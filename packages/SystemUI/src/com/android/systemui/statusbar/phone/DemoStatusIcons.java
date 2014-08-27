@@ -120,6 +120,11 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
                         : 0;
                 updateSlot("speakerphone", null, iconId);
             }
+            String cast = args.getString("cast");
+            if (cast != null) {
+                int iconId = cast.equals("cast") ? R.drawable.stat_sys_cast : 0;
+                updateSlot("cast", null, iconId);
+            }
         }
     }
 
