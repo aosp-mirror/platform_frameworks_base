@@ -23,7 +23,7 @@
     android:orientation="horizontal"
     >
     <TextView android:id="@+id/title"
-        android:textAppearance="@style/TextAppearance.StatusBar.Material.EventContent.Title"
+        android:textAppearance="@style/TextAppearance.Material.Notification.Title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"

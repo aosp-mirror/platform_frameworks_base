@@ -234,8 +234,8 @@
         <item name="android:windowExitAnimation">@*android:anim/popup_exit_material</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.Material.EventContent.Parenthetical"
-           parent="@*android:style/TextAppearance.StatusBar.Material.EventContent">
+    <style name="TextAppearance.Material.Notification.Parenthetical"
+           parent="@*android:style/TextAppearance.Material.Notification">
         <item name="android:textStyle">italic</item>
         <item name="android:textColor">#60000000</item>
     </style>

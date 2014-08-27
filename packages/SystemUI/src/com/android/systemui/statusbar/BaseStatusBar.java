@@ -1231,7 +1231,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (text != null) {
                 text.setText(R.string.notification_hidden_text);
                 text.setTextAppearance(mContext,
-                        R.style.TextAppearance_StatusBar_Material_EventContent_Parenthetical);
+                        R.style.TextAppearance_Material_Notification_Parenthetical);
             }
 
             int topPadding = Notification.Builder.calculateTopPadding(mContext,

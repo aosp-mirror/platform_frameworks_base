@@ -2527,13 +2527,13 @@
 
   <public type="style" name="Theme.Leanback.FormWizard"/>
 
-  <public type="style" name="TextAppearance.StatusBar.Material" />
-  <public type="style" name="TextAppearance.StatusBar.Material.EventContent" />
-  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Title" />
-  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Line2" />
-  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Info" />
-  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Time" />
-  <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Emphasis" />
+  <public type="style" name="__removed" />
+  <public type="style" name="TextAppearance.Material.Notification" />
+  <public type="style" name="TextAppearance.Material.Notification.Title" />
+  <public type="style" name="TextAppearance.Material.Notification.Line2" />
+  <public type="style" name="TextAppearance.Material.Notification.Info" />
+  <public type="style" name="TextAppearance.Material.Notification.Time" />
+  <public type="style" name="TextAppearance.Material.Notification.Emphasis" />
 
   <public type="style" name="Widget.Material.Spinner.Underlined" />
   <public type="style" name="Widget.Material.Light.Spinner.Underlined" />

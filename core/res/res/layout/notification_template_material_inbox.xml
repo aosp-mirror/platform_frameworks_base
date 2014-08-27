@@ -50,7 +50,7 @@
                 android:orientation="vertical"
                 >
                 <TextView android:id="@+id/inbox_text0"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Material.EventContent"
+                    android:textAppearance="@style/TextAppearance.Material.Notification"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:singleLine="true"
@@ -59,7 +59,7 @@
                     android:layout_weight="1"
                     />
                 <TextView android:id="@+id/inbox_text1"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Material.EventContent"
+                    android:textAppearance="@style/TextAppearance.Material.Notification"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:singleLine="true"
@@ -68,7 +68,7 @@
                     android:layout_weight="1"
                     />
                 <TextView android:id="@+id/inbox_text2"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Material.EventContent"
+                    android:textAppearance="@style/TextAppearance.Material.Notification"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:singleLine="true"
@@ -77,7 +77,7 @@
                     android:layout_weight="1"
                     />
                 <TextView android:id="@+id/inbox_text3"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Material.EventContent"
+                    android:textAppearance="@style/TextAppearance.Material.Notification"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:singleLine="true"
@@ -86,7 +86,7 @@
                     android:layout_weight="1"
                     />
                 <TextView android:id="@+id/inbox_text4"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Material.EventContent"
+                    android:textAppearance="@style/TextAppearance.Material.Notification"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:singleLine="true"
@@ -95,7 +95,7 @@
                     android:layout_weight="1"
                     />
                 <TextView android:id="@+id/inbox_text5"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Material.EventContent"
+                    android:textAppearance="@style/TextAppearance.Material.Notification"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:singleLine="true"
@@ -104,7 +104,7 @@
                     android:layout_weight="1"
                     />
                 <TextView android:id="@+id/inbox_text6"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Material.EventContent"
+                    android:textAppearance="@style/TextAppearance.Material.Notification"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:singleLine="true"
@@ -113,7 +113,7 @@
                     android:layout_weight="1"
                     />
                 <TextView android:id="@+id/inbox_more"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Material.EventContent"
+                    android:textAppearance="@style/TextAppearance.Material.Notification"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:singleLine="true"
