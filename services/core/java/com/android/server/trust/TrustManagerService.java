@@ -48,6 +48,7 @@ import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -228,10 +229,10 @@ public class TrustManagerService extends SystemService {
 
                 if (!enabledAgents.contains(name)) continue;
                 if (disableTrustAgents) {
-                    List<String> features =
-                            dpm.getTrustAgentFeaturesEnabled(null /* admin */, name);
+                    List<PersistableBundle> config =
+                            dpm.getTrustAgentConfiguration(null /* admin */, name, userInfo.id);
                     // Disable agent if no features are enabled.
-                    if (features == null || features.isEmpty()) continue;
+                    if (config == null || config.isEmpty()) continue;
                 }
 
                 AgentInfo agentInfo = new AgentInfo();

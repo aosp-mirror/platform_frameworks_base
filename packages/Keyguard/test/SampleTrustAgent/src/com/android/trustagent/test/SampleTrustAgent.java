@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.service.trust.TrustAgentService;
 import android.support.v4.content.LocalBroadcastManager;
@@ -90,8 +90,15 @@ public class SampleTrustAgent extends TrustAgentService
     }
 
     @Override
-    public boolean onSetTrustAgentFeaturesEnabled(Bundle options) {
-        Log.v(TAG, "Policy options received: " + options.getStringArrayList(KEY_FEATURES));
+    public boolean onConfigure(Configuration config) {
+        if (config != null && config.options != null) {
+           for (int i = 0; i < config.options.size(); i++) {
+               PersistableBundle options = config.options.get(i);
+               Log.v(TAG, "Policy options received: " + options.toString());
+           }
+        } else {
+            Log.w(TAG, "onConfigure() called with no options");
+        }
         // TODO: Handle options
         return true; // inform DPM that we support it
     }

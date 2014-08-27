@@ -27,11 +27,11 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PatternMatcher;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -218,7 +218,7 @@ public class TrustAgentWrapper {
         }
 
         @Override
-        public void onSetTrustAgentFeaturesEnabledCompleted(boolean result, IBinder token) {
+        public void onConfigureCompleted(boolean result, IBinder token) {
             if (DEBUG) Slog.v(TAG, "onSetTrustAgentFeaturesEnabledCompleted(result=" + result);
             mHandler.obtainMessage(MSG_SET_TRUST_AGENT_FEATURES_COMPLETED,
                     result ? 1 : 0, 0, token).sendToTarget();
@@ -318,23 +318,19 @@ public class TrustAgentWrapper {
                 DevicePolicyManager dpm =
                     (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
 
-                if ((dpm.getKeyguardDisabledFeatures(null)
+                if ((dpm.getKeyguardDisabledFeatures(null, mUserId)
                         & DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS) != 0) {
-                    List<String> features = dpm.getTrustAgentFeaturesEnabled(null, mName);
+                    List<PersistableBundle> config = dpm.getTrustAgentConfiguration(
+                            null, mName, mUserId);
                     trustDisabled = true;
-                    if (DEBUG) Slog.v(TAG, "Detected trust agents disabled. Features = "
-                            + features);
-                    if (features != null && features.size() > 0) {
-                        Bundle bundle = new Bundle();
-                        bundle.putStringArrayList(TrustAgentService.KEY_FEATURES,
-                                (ArrayList<String>)features);
+                    if (DEBUG) Slog.v(TAG, "Detected trust agents disabled. Config = " + config);
+                    if (config != null && config.size() > 0) {
                         if (DEBUG) {
                             Slog.v(TAG, "TrustAgent " + mName.flattenToShortString()
-                                    + " disabled until it acknowledges "+ features);
+                                    + " disabled until it acknowledges "+ config);
                         }
                         mSetTrustAgentFeaturesToken = new Binder();
-                        mTrustAgentService.setTrustAgentFeaturesEnabled(bundle,
-                                mSetTrustAgentFeaturesToken);
+                        mTrustAgentService.onConfigure(config, mSetTrustAgentFeaturesToken);
                     }
                 }
                 final long maxTimeToLock = dpm.getMaximumTimeToLock(null);
