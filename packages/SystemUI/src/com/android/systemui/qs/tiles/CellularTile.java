@@ -95,6 +95,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
                 : !cb.enabled || cb.airplaneModeEnabled ? R.drawable.ic_qs_signal_disabled
                 : cb.mobileSignalIconId > 0 ? cb.mobileSignalIconId
                 : R.drawable.ic_qs_signal_no_signal;
+        state.autoMirrorDrawable = !cb.noSim;
         state.overlayIconId = cb.enabled && (cb.dataTypeIconId > 0) && !cb.wifiConnected
                 ? cb.dataTypeIconId
                 : 0;

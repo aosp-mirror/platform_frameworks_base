@@ -18,6 +18,7 @@ package com.android.systemui.qs;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -78,10 +79,19 @@ public final class SignalTileView extends QSTileView {
     }
 
     private void layoutIndicator(View indicator) {
+        boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
+        int left, right;
+        if (isRtl) {
+            right = mIconFrame.getLeft();
+            left = right - indicator.getMeasuredWidth();
+        } else {
+            left = mIconFrame.getRight();
+            right = left + indicator.getMeasuredWidth();
+        }
         indicator.layout(
-                mIconFrame.getRight(),
+                left,
                 mIconFrame.getBottom() - indicator.getMeasuredHeight(),
-                mIconFrame.getRight() + indicator.getMeasuredWidth(),
+                right,
                 mIconFrame.getBottom());
     }
 
@@ -95,6 +105,10 @@ public final class SignalTileView extends QSTileView {
             mOverlay.setImageResource(s.overlayIconId);
         } else {
             mOverlay.setVisibility(GONE);
+        }
+        Drawable drawable = mSignal.getDrawable();
+        if (state.autoMirrorDrawable && drawable != null) {
+            drawable.setAutoMirrored(true);
         }
         final boolean shown = isShown();
         setVisibility(mIn, shown, s.activityIn);

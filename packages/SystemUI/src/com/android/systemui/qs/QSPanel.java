@@ -401,16 +401,23 @@ public class QSPanel extends ViewGroup {
         mBrightnessView.layout(0, mBrightnessPaddingTop,
                 mBrightnessView.getMeasuredWidth(),
                 mBrightnessPaddingTop + mBrightnessView.getMeasuredHeight());
+        boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
         for (TileRecord record : mRecords) {
             if (record.tileView.getVisibility() == GONE) continue;
             final int cols = getColumnCount(record.row);
             final int cw = record.row == 0 ? mLargeCellWidth : mCellWidth;
             final int extra = (w - cw * cols) / (cols + 1);
-            final int left = record.col * cw + (record.col + 1) * extra;
+            int left = record.col * cw + (record.col + 1) * extra;
             final int top = getRowTop(record.row);
-            record.tileView.layout(left, top,
-                    left + record.tileView.getMeasuredWidth(),
-                    top + record.tileView.getMeasuredHeight());
+            int right;
+            int tileWith = record.tileView.getMeasuredWidth();
+            if (isRtl) {
+                right = w - left;
+                left = right - tileWith;
+            } else {
+                right = left + tileWith;
+            }
+            record.tileView.layout(left, top, right, top + record.tileView.getMeasuredHeight());
         }
         final int dh = Math.max(mDetail.getMeasuredHeight(), getMeasuredHeight());
         mDetail.layout(0, 0, mDetail.getMeasuredWidth(), dh);
