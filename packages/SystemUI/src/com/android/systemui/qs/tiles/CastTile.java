@@ -93,6 +93,7 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         state.visible = !(mKeyguard.isSecure() && mKeyguard.isShowing());
         state.label = mContext.getString(R.string.quick_settings_cast_title);
         state.value = false;
+        state.autoMirrorDrawable = false;
         final Set<CastDevice> devices = mController.getCastDevices();
         boolean connecting = false;
         for (CastDevice device : devices) {
