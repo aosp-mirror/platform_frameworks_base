@@ -471,7 +471,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Animates this task view as it exits recents */
     void startLaunchTaskAnimation(final Runnable postAnimRunnable, boolean isLaunchingTask,
-            boolean occludesLaunchTarget) {
+            boolean occludesLaunchTarget, boolean lockToTask) {
         if (isLaunchingTask) {
             // Disable the thumbnail clip
             mThumbnailView.disableTaskBarClip();
@@ -487,11 +487,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             }
 
             // Animate the action button away
-            float toScale = 0.9f;
+            if (!lockToTask) {
+                float toScale = 0.9f;
+                mActionButtonView.animate()
+                        .scaleX(toScale)
+                        .scaleY(toScale);
+            }
             mActionButtonView.animate()
                     .alpha(0f)
-                    .scaleX(toScale)
-                    .scaleY(toScale)
                     .setStartDelay(0)
                     .setDuration(mConfig.taskBarExitAnimDuration)
                     .setInterpolator(mConfig.fastOutLinearInInterpolator)
@@ -621,6 +624,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /** Sets the current task progress. */
     public void setTaskProgress(float p) {
         mTaskProgress = p;
+        mViewBounds.setAlpha(p);
         updateDimFromTaskProgress();
     }
 

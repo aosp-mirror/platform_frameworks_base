@@ -23,11 +23,13 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewParent;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.RecentsConfiguration;
 
 /* Handles touch events for a TaskStackView. */
 class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     static int INACTIVE_POINTER_ID = -1;
 
+    RecentsConfiguration mConfig;
     TaskStackView mSv;
     TaskStackViewScroller mScroller;
     VelocityTracker mVelocityTracker;
@@ -52,7 +54,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     SwipeHelper mSwipeHelper;
     boolean mInterceptedBySwipeHelper;
 
-    public TaskStackViewTouchHandler(Context context, TaskStackView sv, TaskStackViewScroller scroller) {
+    public TaskStackViewTouchHandler(Context context, TaskStackView sv,
+            RecentsConfiguration config, TaskStackViewScroller scroller) {
         ViewConfiguration configuration = ViewConfiguration.get(context);
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
@@ -60,6 +63,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         mPagingTouchSlop = configuration.getScaledPagingTouchSlop();
         mSv = sv;
         mScroller = scroller;
+        mConfig = config;
 
         float densityScale = context.getResources().getDisplayMetrics().density;
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, mPagingTouchSlop);
@@ -258,7 +262,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     if (Float.compare(overScrollAmount, 0f) != 0) {
                         // Bound the overscroll to a fixed amount, and inversely scale the y-movement
                         // relative to how close we are to the max overscroll
-                        float maxOverScroll = 0.25f;
+                        float maxOverScroll = mConfig.taskStackOverscrollPct;
                         deltaP *= (1f - (Math.min(maxOverScroll, overScrollAmount)
                                 / maxOverScroll));
                     }
@@ -280,7 +284,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                 int velocity = (int) velocityTracker.getYVelocity(mActivePointerId);
                 if (mIsScrolling && (Math.abs(velocity) > mMinimumVelocity)) {
-                    // XXX: Should this be calculated as a percentage of a curve?
                     int overscrollRange = (int) (Math.min(1f,
                             Math.abs((float) velocity / mMaximumVelocity)) *
                             Constants.Values.TaskStackView.TaskStackOverscrollRange);
