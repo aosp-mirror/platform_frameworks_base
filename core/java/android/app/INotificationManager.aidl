@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.net.Uri;
+import android.os.Bundle;
 import android.service.notification.Condition;
 import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
@@ -65,6 +66,7 @@ interface INotificationManager
     int getInterruptionFilterFromListener(in INotificationListener token);
 
     ComponentName getEffectsSuppressor();
+    boolean matchesCallFilter(in Bundle extras);
 
     ZenModeConfig getZenModeConfig();
     boolean setZenModeConfig(in ZenModeConfig config);
