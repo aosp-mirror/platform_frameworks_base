@@ -354,6 +354,7 @@ public class ScanResult implements Parcelable {
                 sr.autoJoinStatus = in.readInt();
                 sr.untrusted = in.readInt() != 0;
                 sr.numConnection = in.readInt();
+                sr.numUsage = in.readInt();
                 int n = in.readInt();
                 if (n != 0) {
                     sr.informationElements = new InformationElement[n];
