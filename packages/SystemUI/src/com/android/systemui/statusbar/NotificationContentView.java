@@ -202,7 +202,7 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public void setDark(boolean dark, boolean fade) {
-        if (mDark == dark) return;
+        if (mDark == dark || mContractedChild == null) return;
         mDark = dark;
         setImageViewDark(dark, fade, com.android.internal.R.id.right_icon);
         setImageViewDark(dark, fade, com.android.internal.R.id.icon);
