@@ -2208,7 +2208,7 @@
     <permission android:name="android.permission.MODIFY_PARENTAL_CONTROLS"
         android:label="@string/permlab_modifyParentalControls"
         android:description="@string/permdesc_modifyParentalControls"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|system" />
 
     <!-- Must be required by device administration receiver, to ensure that only the
          system can interact with it. -->
