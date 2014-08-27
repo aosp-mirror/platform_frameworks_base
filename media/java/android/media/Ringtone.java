@@ -115,6 +115,15 @@ public class Ringtone {
     }
 
     /**
+     * Returns the {@link AudioAttributes} used by this object.
+     * @return the {@link AudioAttributes} that were set with
+     *     {@link #setAudioAttributes(AudioAttributes)} or the default attributes if none were set.
+     */
+    public AudioAttributes getAudioAttributes() {
+        return mAudioAttributes;
+    }
+
+    /**
      * Returns a human-presentable title for ringtone. Looks in media
      * content provider. If not in either, uses the filename
      * 

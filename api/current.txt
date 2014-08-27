@@ -15706,6 +15706,7 @@ package android.media {
   }
 
   public class Ringtone {
+    method public android.media.AudioAttributes getAudioAttributes();
     method public deprecated int getStreamType();
     method public java.lang.String getTitle(android.content.Context);
     method public boolean isPlaying();
