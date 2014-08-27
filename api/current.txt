@@ -24647,7 +24647,7 @@ package android.provider {
   public static class ContactsContract.Contacts implements android.provider.BaseColumns android.provider.ContactsContract.ContactNameColumns android.provider.ContactsContract.ContactOptionsColumns android.provider.ContactsContract.ContactStatusColumns android.provider.ContactsContract.ContactsColumns {
     method public static android.net.Uri getLookupUri(android.content.ContentResolver, android.net.Uri);
     method public static android.net.Uri getLookupUri(long, java.lang.String);
-    method public static boolean isCorpContactId(long);
+    method public static boolean isEnterpriseContactId(long);
     method public static android.net.Uri lookupContact(android.content.ContentResolver, android.net.Uri);
     method public static deprecated void markAsContacted(android.content.ContentResolver, long);
     method public static java.io.InputStream openContactPhotoInputStream(android.content.ContentResolver, android.net.Uri, boolean);
@@ -24960,7 +24960,7 @@ package android.provider {
     method public static void showQuickContact(android.content.Context, android.view.View, android.net.Uri, int, java.lang.String[]);
     method public static void showQuickContact(android.content.Context, android.graphics.Rect, android.net.Uri, int, java.lang.String[]);
     field public static final java.lang.String ACTION_QUICK_CONTACT = "com.android.contacts.action.QUICK_CONTACT";
-    field public static final java.lang.String EXTRA_EXCLUDE_MIMES = "exclude_mimes";
+    field public static final java.lang.String EXTRA_EXCLUDE_MIMES = "android.provider.extra.EXCLUDE_MIMES";
     field public static final int MODE_LARGE = 3; // 0x3
     field public static final int MODE_MEDIUM = 2; // 0x2
     field public static final int MODE_SMALL = 1; // 0x1
