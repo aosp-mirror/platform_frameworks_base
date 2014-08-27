@@ -24676,6 +24676,7 @@ package android.provider {
 
   public static final class ContactsContract.PinnedPositions {
     ctor public ContactsContract.PinnedPositions();
+    method public static void pin(android.content.ContentResolver, long, int);
     method public static void undemote(android.content.ContentResolver, long);
     field public static final int DEMOTED = -1; // 0xffffffff
     field public static final int UNPINNED = 0; // 0x0
@@ -24755,7 +24756,6 @@ package android.provider {
     field public static final java.lang.String CONTACT_ID = "contact_id";
     field public static final java.lang.String DATA_SET = "data_set";
     field public static final java.lang.String DELETED = "deleted";
-    field public static final java.lang.String NAME_VERIFIED = "name_verified";
     field public static final java.lang.String RAW_CONTACT_IS_READ_ONLY = "raw_contact_is_read_only";
     field public static final java.lang.String RAW_CONTACT_IS_USER_PROFILE = "raw_contact_is_user_profile";
   }
