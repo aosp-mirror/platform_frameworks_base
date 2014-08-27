@@ -2535,11 +2535,16 @@
   <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Time" />
   <public type="style" name="TextAppearance.StatusBar.Material.EventContent.Emphasis" />
 
-  <public type="style" name="Widget.Material.Spinner.Form" />
-  <public type="style" name="Widget.Material.Light.Spinner.Form" />
+  <public type="style" name="Widget.Material.Spinner.Underlined" />
+  <public type="style" name="Widget.Material.Light.Spinner.Underlined" />
 
   <public type="style" name="TextAppearance.Material.Widget.Toolbar.Title" />
   <public type="style" name="TextAppearance.Material.Widget.Toolbar.Subtitle" />
+
+  <public type="style" name="Theme.Material.Dialog.Alert" />
+  <public type="style" name="Theme.Material.Dialog.Presentation" />
+  <public type="style" name="Theme.Material.Light.Dialog.Alert" />
+  <public type="style" name="Theme.Material.Light.Dialog.Presentation" />
 
   <public-padding type="string" name="l_resource_pad" end="0x01040030" />
 
