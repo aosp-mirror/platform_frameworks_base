@@ -273,11 +273,14 @@ public class TaskPersister {
                         if (TAG_TASK.equals(name)) {
                             final TaskRecord task =
                                     TaskRecord.restoreFromXml(in, mStackSupervisor);
-                            if (true || DEBUG) Slog.d(TAG, "restoreTasksLocked: restored task=" +
+                            if (DEBUG) Slog.d(TAG, "restoreTasksLocked: restored task=" +
                                     task);
                             if (task != null) {
                                 task.isPersistable = true;
-                                mWriteQueue.add(new TaskWriteQueueItem(task));
+                                // XXX Don't add to write queue... there is no reason to write
+                                // out the stuff we just read, if we don't write it we will
+                                // read the same thing again.
+                                //mWriteQueue.add(new TaskWriteQueueItem(task));
                                 tasks.add(task);
                                 final int taskId = task.taskId;
                                 recoveredTaskIds.add(taskId);
@@ -486,24 +489,24 @@ public class TaskPersister {
                             } catch (XmlPullParserException e) {
                             }
                         }
-                        if (stringWriter != null) {
-                            // Write out xml file while not holding mService lock.
-                            FileOutputStream file = null;
-                            AtomicFile atomicFile = null;
-                            try {
-                                atomicFile = new AtomicFile(new File(sTasksDir, String.valueOf(
-                                        task.taskId) + RECENTS_FILENAME + TASK_EXTENSION));
-                                file = atomicFile.startWrite();
-                                file.write(stringWriter.toString().getBytes());
-                                file.write('\n');
-                                atomicFile.finishWrite(file);
-                            } catch (IOException e) {
-                                if (file != null) {
-                                    atomicFile.failWrite(file);
-                                }
-                                Slog.e(TAG, "Unable to open " + atomicFile + " for persisting. " +
-                                        e);
+                    }
+                    if (stringWriter != null) {
+                        // Write out xml file while not holding mService lock.
+                        FileOutputStream file = null;
+                        AtomicFile atomicFile = null;
+                        try {
+                            atomicFile = new AtomicFile(new File(sTasksDir, String.valueOf(
+                                    task.taskId) + RECENTS_FILENAME + TASK_EXTENSION));
+                            file = atomicFile.startWrite();
+                            file.write(stringWriter.toString().getBytes());
+                            file.write('\n');
+                            atomicFile.finishWrite(file);
+                        } catch (IOException e) {
+                            if (file != null) {
+                                atomicFile.failWrite(file);
                             }
+                            Slog.e(TAG, "Unable to open " + atomicFile + " for persisting. " +
+                                    e);
                         }
                     }
                 }

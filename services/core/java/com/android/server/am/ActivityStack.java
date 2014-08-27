@@ -4040,7 +4040,7 @@ final class ActivityStack {
                 // Task creator asked to remove this when done, or this task was a voice
                 // interaction, so it should not remain on the recent tasks list.
                 mService.mRecentTasks.remove(task);
-                task.closeRecentsChain();
+                task.removedFromRecents(mService.mTaskPersister);
             }
         }
 

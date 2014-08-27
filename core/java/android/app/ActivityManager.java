@@ -67,6 +67,8 @@ public class ActivityManager {
     private static String TAG = "ActivityManager";
     private static boolean localLOGV = false;
 
+    private static int gMaxRecentTasks = -1;
+
     private final Context mContext;
     private final Handler mHandler;
 
@@ -442,7 +444,7 @@ public class ActivityManager {
         // Really brain dead right now -- just take this from the configured
         // vm heap size, and assume it is in megabytes and thus ends with "m".
         String vmHeapSize = SystemProperties.get("dalvik.vm.heapsize", "16m");
-        return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length()-1));
+        return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length() - 1));
     }
 
     /**
@@ -470,6 +472,33 @@ public class ActivityManager {
     static public boolean isHighEndGfx() {
         return !isLowRamDeviceStatic() &&
                 !Resources.getSystem().getBoolean(com.android.internal.R.bool.config_avoidGfxAccel);
+    }
+
+    /**
+     * Return the maximum number of recents entries that we will maintain and show.
+     * @hide
+     */
+    static public int getMaxRecentTasksStatic() {
+        if (gMaxRecentTasks < 0) {
+            return gMaxRecentTasks = isLowRamDeviceStatic() ? 50 : 100;
+        }
+        return gMaxRecentTasks;
+    }
+
+    /**
+     * Return the default limit on the number of recents that an app can make.
+     * @hide
+     */
+    static public int getDefaultAppRecentsLimitStatic() {
+        return getMaxRecentTasksStatic() / 6;
+    }
+
+    /**
+     * Return the maximum limit on the number of recents that an app can make.
+     * @hide
+     */
+    static public int getMaxAppRecentsLimitStatic() {
+        return getMaxRecentTasksStatic() / 2;
     }
 
     /**
@@ -1184,13 +1213,13 @@ public class ActivityManager {
         public void writeToParcel(Parcel dest, int flags) {
             if (mainThumbnail != null) {
                 dest.writeInt(1);
-                mainThumbnail.writeToParcel(dest, 0);
+                mainThumbnail.writeToParcel(dest, flags);
             } else {
                 dest.writeInt(0);
             }
             if (thumbnailFileDescriptor != null) {
                 dest.writeInt(1);
-                thumbnailFileDescriptor.writeToParcel(dest, 0);
+                thumbnailFileDescriptor.writeToParcel(dest, flags);
             } else {
                 dest.writeInt(0);
             }
