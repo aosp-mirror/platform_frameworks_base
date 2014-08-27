@@ -29,8 +29,7 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"הזן את סיסמת ההצפנה של המכשיר שלך בהמשך. הסיסמה תשמש גם להצפנת ארכיון הגיבוי."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"הזן סיסמה שתשמש להצפנה של נתוני הגיבוי המלא. אם תשאיר שדה זה ריק, ייעשה שימוש בסיסמת הגיבוי הנוכחית שלך:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"אם אתה רוצה להצפין את נתוני הגיבוי המלא, הזן סיסמה בהמשך:"</string>
-    <!-- no translation found for backup_enc_password_required (7889652203371654149) -->
-    <skip />
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"מכיוון שהמכשיר מוצפן, אתה נדרש להצפין את הגיבוי. הזן סיסמה בהמשך:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"אם נתוני השחזור מוצפנים, הזן את הסיסמה למטה:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"מתחיל בגיבוי..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"הגיבוי הסתיים"</string>
