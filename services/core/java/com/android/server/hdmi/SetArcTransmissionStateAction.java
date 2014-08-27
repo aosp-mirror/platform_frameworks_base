@@ -92,7 +92,7 @@ final class SetArcTransmissionStateAction extends HdmiCecFeatureAction {
 
     private void setArcStatus(boolean enabled) {
         boolean wasEnabled = tv().setArcStatus(enabled);
-        Slog.i(TAG, "Change arc status [old:" + wasEnabled + " ,new:" + enabled);
+        Slog.i(TAG, "Change arc status [old:" + wasEnabled + ", new:" + enabled + "]");
 
         // If enabled before and set to "disabled" and send <Report Arc Terminated> to
         // av reciever.
