@@ -151,6 +151,10 @@ public class SoundPool {
 
         /**
          * Constructs a new Builder with the defaults format values.
+         * If not provided, the maximum number of streams is 1 (see {@link #setMaxStreams(int)} to
+         * change it), and the audio attributes have a usage value of
+         * {@link AudioAttributes#USAGE_MEDIA} (see {@link #setAudioAttributes(AudioAttributes)} to
+         * change them).
          */
         public Builder() {
         }
