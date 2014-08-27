@@ -214,6 +214,7 @@ void EglManager::destroy() {
         Caches::getInstance().terminate();
     }
 
+    mRenderThread.renderState().onGLContextDestroyed();
     eglDestroyContext(mEglDisplay, mEglContext);
     eglDestroySurface(mEglDisplay, mPBufferSurface);
     eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);

@@ -54,9 +54,11 @@ Layer::Layer(RenderState& renderState, const uint32_t layerWidth, const uint32_t
     convexMask = NULL;
     caches.resourceCache.incrementRefcount(this);
     rendererLightPosDirty = true;
+    renderState.registerLayer(this);
 }
 
 Layer::~Layer() {
+    renderState.unregisterLayer(this);
     SkSafeUnref(colorFilter);
     removeFbo();
     deleteTexture();
