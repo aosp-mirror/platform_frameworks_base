@@ -33,6 +33,8 @@ import android.util.Log;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.CastController;
+import com.android.systemui.statusbar.policy.CastController.CastDevice;
 
 /**
  * This class contains all of the policy about which icons are installed in the status
@@ -46,6 +48,7 @@ public class PhoneStatusBarPolicy {
     private static final boolean SHOW_SYNC_ICON = false;
 
     private static final String SLOT_SYNC_ACTIVE = "sync_active";
+    private static final String SLOT_CAST = "cast";
     private static final String SLOT_BLUETOOTH = "bluetooth";
     private static final String SLOT_TTY = "tty";
     private static final String SLOT_ZEN = "zen";
@@ -56,6 +59,7 @@ public class PhoneStatusBarPolicy {
     private final Context mContext;
     private final StatusBarManager mService;
     private final Handler mHandler = new Handler();
+    private final CastController mCast;
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
@@ -98,8 +102,9 @@ public class PhoneStatusBarPolicy {
         }
     };
 
-    public PhoneStatusBarPolicy(Context context) {
+    public PhoneStatusBarPolicy(Context context, CastController cast) {
         mContext = context;
+        mCast = cast;
         mService = (StatusBarManager)context.getSystemService(Context.STATUS_BAR_SERVICE);
 
         // listen for broadcasts
@@ -151,6 +156,11 @@ public class PhoneStatusBarPolicy {
         mService.setIcon(SLOT_VOLUME, R.drawable.stat_sys_ringer_vibrate, 0, null);
         mService.setIconVisibility(SLOT_VOLUME, false);
         updateVolumeZen();
+
+        // cast
+        mService.setIcon(SLOT_CAST, R.drawable.stat_sys_cast, 0, null);
+        mService.setIconVisibility(SLOT_CAST, false);
+        mCast.addCallback(mCastCallback);
     }
 
     public void setZenMode(int zen) {
@@ -287,4 +297,28 @@ public class PhoneStatusBarPolicy {
             mService.setIconVisibility(SLOT_TTY, false);
         }
     }
+
+    private void updateCast() {
+        boolean isCasting = false;
+        for (CastDevice device : mCast.getCastDevices()) {
+            if (device.state == CastDevice.STATE_CONNECTING
+                    || device.state == CastDevice.STATE_CONNECTED) {
+                isCasting = true;
+                break;
+            }
+        }
+        if (DEBUG) Log.v(TAG, "updateCast: isCasting: " + isCasting);
+        if (isCasting) {
+            mService.setIcon(SLOT_CAST, R.drawable.stat_sys_cast, 0,
+                    mContext.getString(R.string.accessibility_casting));
+        }
+        mService.setIconVisibility(SLOT_CAST, isCasting);
+    }
+
+    private final CastController.Callback mCastCallback = new CastController.Callback() {
+        @Override
+        public void onCastDevicesChanged() {
+            updateCast();
+        }
+    };
 }

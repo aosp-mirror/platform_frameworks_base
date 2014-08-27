@@ -26,6 +26,7 @@
        <item><xliff:g id="id">ime</xliff:g></item>
        <item><xliff:g id="id">sync_failing</xliff:g></item>
        <item><xliff:g id="id">sync_active</xliff:g></item>
+       <item><xliff:g id="id">cast</xliff:g></item>
        <item><xliff:g id="id">location</xliff:g></item>
        <item><xliff:g id="id">bluetooth</xliff:g></item>
        <item><xliff:g id="id">nfc</xliff:g></item>
