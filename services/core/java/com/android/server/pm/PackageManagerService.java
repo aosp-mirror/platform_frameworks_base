@@ -11051,34 +11051,34 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.w(TAG, "Attempt to delete null packageName.");
             return false;
         }
-        PackageParser.Package p;
+        PackageParser.Package pkg;
         boolean dataOnly = false;
         final int appId;
         synchronized (mPackages) {
-            p = mPackages.get(packageName);
-            if (p == null) {
+            pkg = mPackages.get(packageName);
+            if (pkg == null) {
                 dataOnly = true;
                 PackageSetting ps = mSettings.mPackages.get(packageName);
                 if ((ps == null) || (ps.pkg == null)) {
                     Slog.w(TAG, "Package named '" + packageName + "' doesn't exist.");
                     return false;
                 }
-                p = ps.pkg;
+                pkg = ps.pkg;
             }
             if (!dataOnly) {
                 // need to check this only for fully installed applications
-                if (p == null) {
+                if (pkg == null) {
                     Slog.w(TAG, "Package named '" + packageName + "' doesn't exist.");
                     return false;
                 }
-                final ApplicationInfo applicationInfo = p.applicationInfo;
+                final ApplicationInfo applicationInfo = pkg.applicationInfo;
                 if (applicationInfo == null) {
                     Slog.w(TAG, "Package " + packageName + " has no applicationInfo.");
                     return false;
                 }
             }
-            if (p != null && p.applicationInfo != null) {
-                appId = p.applicationInfo.uid;
+            if (pkg != null && pkg.applicationInfo != null) {
+                appId = pkg.applicationInfo.uid;
             } else {
                 appId = -1;
             }
@@ -11090,6 +11090,19 @@ public class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
         removeKeystoreDataIfNeeded(userId, appId);
+
+        // Create a native library symlink only if we have native libraries
+        // and if the native libraries are 32 bit libraries. We do not provide
+        // this symlink for 64 bit libraries.
+        if (pkg != null && pkg.applicationInfo.primaryCpuAbi != null &&
+                !VMRuntime.is64BitAbi(pkg.applicationInfo.primaryCpuAbi)) {
+            final String nativeLibPath = pkg.applicationInfo.nativeLibraryDir;
+            if (mInstaller.linkNativeLibraryDirectory(pkg.packageName, nativeLibPath, userId) < 0) {
+                Slog.w(TAG, "Failed linking native library dir");
+                return false;
+            }
+        }
+
         return true;
     }
 
