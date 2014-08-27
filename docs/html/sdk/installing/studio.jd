@@ -251,7 +251,7 @@ download (or continue to use)
     <td>Windows</td>
     <td>
   <a onclick="return onDownload(this)" id="win-studio"
-      href="http://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-windows.exe">
+      href="https://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-windows.exe">
       android-studio-bundle-135.1339820-windows.exe
       </a>
     </td>
@@ -263,7 +263,7 @@ download (or continue to use)
     <td><nobr>Mac OS X</nobr></td>
     <td>
   <a onclick="return onDownload(this)" id="mac-studio"
-    href="http://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-mac.dmg">
+    href="https://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-mac.dmg">
     android-studio-bundle-135.1339820-mac.dmg
     </a>
     </td>
@@ -275,7 +275,7 @@ download (or continue to use)
     <td>Linux</td>
     <td>
   <a onclick="return onDownload(this)" id="linux-studio"
-    href="http://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-linux.tgz">
+    href="https://dl.google.com/android/studio/install/0.8.6/android-studio-bundle-135.1339820-linux.tgz">
     android-studio-bundle-135.1339820-linux.tgz
     </a>
     </td>

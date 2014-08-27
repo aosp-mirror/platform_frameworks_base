@@ -104,7 +104,7 @@ manually install it:</p>
   </tr>
   <tr>
     <td>
-      <a href="http://dl.google.com/android/{@adtZipDownload}">{@adtZipDownload}</a>
+      <a href="https://dl.google.com/android/{@adtZipDownload}">{@adtZipDownload}</a>
     </td>
     <td>{@adtZipBytes} bytes</td>
     <td>{@adtZipChecksum}</td>
