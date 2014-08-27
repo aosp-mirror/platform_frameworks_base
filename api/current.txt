@@ -7151,6 +7151,7 @@ package android.content {
     field public static final java.lang.String ANY_CURSOR_ITEM_TYPE = "vnd.android.cursor.item/*";
     field public static final java.lang.String CURSOR_DIR_BASE_TYPE = "vnd.android.cursor.dir";
     field public static final java.lang.String CURSOR_ITEM_BASE_TYPE = "vnd.android.cursor.item";
+    field public static final java.lang.String EXTRA_SIZE = "android.content.extra.SIZE";
     field public static final java.lang.String SCHEME_ANDROID_RESOURCE = "android.resource";
     field public static final java.lang.String SCHEME_CONTENT = "content";
     field public static final java.lang.String SCHEME_FILE = "file";
@@ -32239,17 +32240,23 @@ package android.util {
     field public static final android.util.Rational ZERO;
   }
 
-  public final class Size {
+  public final class Size implements android.os.Parcelable {
     ctor public Size(int, int);
+    method public int describeContents();
     method public int getHeight();
     method public int getWidth();
     method public static android.util.Size parseSize(java.lang.String) throws java.lang.NumberFormatException;
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public final class SizeF {
+  public final class SizeF implements android.os.Parcelable {
     ctor public SizeF(float, float);
+    method public int describeContents();
     method public float getHeight();
     method public float getWidth();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public class SparseArray implements java.lang.Cloneable {
