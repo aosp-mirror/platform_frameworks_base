@@ -31,13 +31,14 @@ final class HdmiLogger {
     // Logging duration for same error message.
     private static final long ERROR_LOG_DURATTION_MILLIS = 20 * 1000;  // 20s
 
+    private static final boolean DEBUG = false;
+
     // Key (String): log message.
     // Value (Pair(Long, Integer)): a pair of last log time millis and the number of logMessage.
     // Cache for warning.
     private final HashMap<String, Pair<Long, Integer>> mWarningTimingCache = new HashMap<>();
     // Cache for error.
     private final HashMap<String, Pair<Long, Integer>> mErrorTimingCache = new HashMap<>();
-
     private final String mTag;
 
     HdmiLogger(String tag) {
@@ -45,41 +46,54 @@ final class HdmiLogger {
     }
 
     void warning(String logMessage) {
-        long curTime = SystemClock.uptimeMillis();
-        Pair<Long, Integer> timing = mWarningTimingCache.get(logMessage);
-        if (shouldLogNow(timing, curTime)) {
-            Slog.w(mTag, buildMessage(logMessage, timing));
-            mWarningTimingCache.put(logMessage, new Pair<>(curTime, 1));
-        } else {
-            increaseLogCount(mWarningTimingCache, logMessage);
+        String log = updateLog(mWarningTimingCache, logMessage);
+        if (!log.isEmpty()) {
+            Slog.w(mTag, log);
         }
     }
 
     void error(String logMessage) {
-        long curTime = SystemClock.uptimeMillis();
-        Pair<Long, Integer> timing = mErrorTimingCache.get(logMessage);
-        if (shouldLogNow(timing, curTime)) {
-            Slog.e(mTag, buildMessage(logMessage, timing));
-            mErrorTimingCache.put(logMessage, new Pair<>(curTime, 1));
-        } else {
-            increaseLogCount(mErrorTimingCache, logMessage);
+        String log = updateLog(mErrorTimingCache, logMessage);
+        if (!log.isEmpty()) {
+            Slog.e(mTag, log);
         }
     }
 
-    private String buildMessage(String message, @Nullable Pair<Long, Integer> timing) {
-        return new StringBuilder()
-            .append("[").append(timing == null ? 1 : timing.second).append("]:")
-            .append(message).toString();
+    void debug(String logMessage) {
+        if (!DEBUG) {
+            return;
+        }
+        Slog.d(mTag, logMessage);
     }
 
-    private void increaseLogCount(HashMap<String, Pair<Long, Integer>> cache, String message) {
+    private static String updateLog(HashMap<String, Pair<Long, Integer>> cache, String logMessage) {
+        long curTime = SystemClock.uptimeMillis();
+        Pair<Long, Integer> timing = cache.get(logMessage);
+        if (shouldLogNow(timing, curTime)) {
+            String log = buildMessage(logMessage, timing);
+            cache.put(logMessage, new Pair<>(curTime, 1));
+            return log;
+        } else {
+            increaseLogCount(cache, logMessage);
+        }
+        return "";
+    }
+
+    private static String buildMessage(String message, @Nullable Pair<Long, Integer> timing) {
+        return new StringBuilder()
+                .append("[").append(timing == null ? 1 : timing.second).append("]:")
+                .append(message).toString();
+    }
+
+    private static void increaseLogCount(HashMap<String, Pair<Long, Integer>> cache,
+            String message) {
         Pair<Long, Integer> timing = cache.get(message);
         if (timing != null) {
             cache.put(message, new Pair<>(timing.first, timing.second + 1));
         }
     }
 
-    private boolean shouldLogNow(@Nullable Pair<Long, Integer> timing, long curTime) {
+    private static boolean shouldLogNow(@Nullable Pair<Long, Integer> timing, long curTime) {
         return timing == null || curTime - timing.first > ERROR_LOG_DURATTION_MILLIS;
     }
 }
