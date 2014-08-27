@@ -162,6 +162,8 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
             }
 
             a.recycle();
+        } else {
+            mDisplayOpts = detectDisplayOptions();
         }
 
         if (TextUtils.isEmpty(mToolbar.getNavigationContentDescription())) {
@@ -179,6 +181,15 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
                 }
             }
         });
+    }
+
+    private int detectDisplayOptions() {
+        int opts = ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_HOME |
+                ActionBar.DISPLAY_USE_LOGO;
+        if (mToolbar.getNavigationIcon() != null) {
+            opts |= ActionBar.DISPLAY_HOME_AS_UP;
+        }
+        return opts;
     }
 
     @Override
