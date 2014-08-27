@@ -167,13 +167,12 @@ public class MainActivity extends FragmentActivity {
                     "Google Play services is available.");
             // Continue
             return true;
-        // Google Play services was not available for some reason
+        // Google Play services was not available for some reason.
+        // resultCode holds the error code.
         } else {
-            // Get the error code
-            int errorCode = connectionResult.getErrorCode();
             // Get the error dialog from Google Play services
             Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
-                    errorCode,
+                    resultCode,
                     this,
                     CONNECTION_FAILURE_RESOLUTION_REQUEST);
 
