@@ -507,21 +507,23 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         private boolean mCanConstantState;
         private boolean mCheckedConstantState;
 
-        public RotateState(RotateState source, RotateDrawable owner, Resources res) {
-            if (source != null) {
+        public RotateState(RotateState orig, RotateDrawable owner, Resources res) {
+            if (orig != null) {
                 if (res != null) {
-                    mDrawable = source.mDrawable.getConstantState().newDrawable(res);
+                    mDrawable = orig.mDrawable.getConstantState().newDrawable(res);
                 } else {
-                    mDrawable = source.mDrawable.getConstantState().newDrawable();
+                    mDrawable = orig.mDrawable.getConstantState().newDrawable();
                 }
                 mDrawable.setCallback(owner);
-                mDrawable.setLayoutDirection(source.mDrawable.getLayoutDirection());
-                mPivotXRel = source.mPivotXRel;
-                mPivotX = source.mPivotX;
-                mPivotYRel = source.mPivotYRel;
-                mPivotY = source.mPivotY;
-                mFromDegrees = mCurrentDegrees = source.mFromDegrees;
-                mToDegrees = source.mToDegrees;
+                mDrawable.setLayoutDirection(orig.mDrawable.getLayoutDirection());
+                mDrawable.setBounds(orig.mDrawable.getBounds());
+                mDrawable.setLevel(orig.mDrawable.getLevel());
+                mPivotXRel = orig.mPivotXRel;
+                mPivotX = orig.mPivotX;
+                mPivotYRel = orig.mPivotYRel;
+                mPivotY = orig.mPivotY;
+                mFromDegrees = mCurrentDegrees = orig.mFromDegrees;
+                mToDegrees = orig.mToDegrees;
                 mCanConstantState = mCheckedConstantState = true;
             }
         }
