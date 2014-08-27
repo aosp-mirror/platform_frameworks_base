@@ -195,5 +195,8 @@
 
     <!-- Tiles with feature timeouts: number of days to show after feature is used. -->
     <integer name="days_to_show_timeout_tiles">30</integer>
+
+    <!-- Number of times to show the strong alarm warning text in the volume dialog -->
+    <integer name="zen_mode_alarm_warning_threshold">5</integer>
 </resources>
 
