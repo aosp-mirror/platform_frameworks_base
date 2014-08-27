@@ -961,20 +961,22 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             // Default empty constructor.
         }
 
-        ChildDrawable(ChildDrawable or, LayerDrawable owner, Resources res) {
+        ChildDrawable(ChildDrawable orig, LayerDrawable owner, Resources res) {
             if (res != null) {
-                mDrawable = or.mDrawable.getConstantState().newDrawable(res);
+                mDrawable = orig.mDrawable.getConstantState().newDrawable(res);
             } else {
-                mDrawable = or.mDrawable.getConstantState().newDrawable();
+                mDrawable = orig.mDrawable.getConstantState().newDrawable();
             }
             mDrawable.setCallback(owner);
-            mDrawable.setLayoutDirection(or.mDrawable.getLayoutDirection());
-            mThemeAttrs = or.mThemeAttrs;
-            mInsetL = or.mInsetL;
-            mInsetT = or.mInsetT;
-            mInsetR = or.mInsetR;
-            mInsetB = or.mInsetB;
-            mId = or.mId;
+            mDrawable.setLayoutDirection(orig.mDrawable.getLayoutDirection());
+            mDrawable.setBounds(orig.mDrawable.getBounds());
+            mDrawable.setLevel(orig.mDrawable.getLevel());
+            mThemeAttrs = orig.mThemeAttrs;
+            mInsetL = orig.mInsetL;
+            mInsetT = orig.mInsetT;
+            mInsetR = orig.mInsetR;
+            mInsetB = orig.mInsetB;
+            mId = orig.mId;
         }
     }
 

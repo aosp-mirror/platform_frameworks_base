@@ -295,6 +295,8 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
                 }
                 mDrawable.setCallback(owner);
                 mDrawable.setLayoutDirection(orig.mDrawable.getLayoutDirection());
+                mDrawable.setBounds(orig.mDrawable.getBounds());
+                mDrawable.setLevel(orig.mDrawable.getLevel());
                 mScaleWidth = orig.mScaleWidth;
                 mScaleHeight = orig.mScaleHeight;
                 mGravity = orig.mGravity;
