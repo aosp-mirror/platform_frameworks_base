@@ -287,6 +287,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_DISABLE_CALLER_ID = "disable-caller-id";
         private static final String TAG_DISABLE_SCREEN_CAPTURE = "disable-screen-capture";
         private static final String TAG_DISABLE_ACCOUNT_MANAGEMENT = "disable-account-management";
+        private static final String TAG_REQUIRE_AUTO_TIME = "require_auto_time";
         private static final String TAG_ACCOUNT_TYPE = "account-type";
         private static final String TAG_PERMITTED_ACCESSIBILITY_SERVICES
                 = "permitted-accessiblity-services";
@@ -365,6 +366,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean disableCamera = false;
         boolean disableCallerId = false;
         boolean disableScreenCapture = false; // Can only be set by a device/profile owner.
+        boolean requireAutoTime = false; // Can only be set by a device owner.
 
         Set<String> accountTypesWithManagementDisabled = new HashSet<String>();
 
@@ -501,6 +503,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_VALUE, Boolean.toString(disableScreenCapture));
                 out.endTag(null, TAG_DISABLE_SCREEN_CAPTURE);
             }
+            if (requireAutoTime) {
+                out.startTag(null, TAG_REQUIRE_AUTO_TIME);
+                out.attribute(null, ATTR_VALUE, Boolean.toString(requireAutoTime));
+                out.endTag(null, TAG_REQUIRE_AUTO_TIME);
+            }
             if (disabledKeyguardFeatures != DEF_KEYGUARD_FEATURES_DISABLED) {
                 out.startTag(null, TAG_DISABLE_KEYGUARD_FEATURES);
                 out.attribute(null, ATTR_VALUE, Integer.toString(disabledKeyguardFeatures));
@@ -633,6 +640,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_DISABLE_SCREEN_CAPTURE.equals(tag)) {
                     disableScreenCapture = Boolean.parseBoolean(
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_REQUIRE_AUTO_TIME.equals(tag)) {
+                    requireAutoTime= Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_DISABLE_KEYGUARD_FEATURES.equals(tag)) {
                     disabledKeyguardFeatures = Integer.parseInt(
@@ -818,6 +828,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     pw.println(disableCallerId);
             pw.print(prefix); pw.print("disableScreenCapture=");
                     pw.println(disableScreenCapture);
+            pw.print(prefix); pw.print("requireAutoTime=");
+                    pw.println(requireAutoTime);
             pw.print(prefix); pw.print("disabledKeyguardFeatures=");
                     pw.println(disabledKeyguardFeatures);
             pw.print(prefix); pw.print("crossProfileWidgetProviders=");
@@ -3291,6 +3303,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        enforceCrossUserPermission(userHandle);
         synchronized (this) {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
@@ -3339,6 +3352,51 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Log.w(LOG_TAG, "Unable to notify WindowManager.", e);
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * Set whether auto time is required by the specified admin (must be device owner).
+     */
+    public void setAutoTimeRequired(ComponentName who, int userHandle, boolean required) {
+        if (!mHasFeature) {
+            return;
+        }
+        enforceCrossUserPermission(userHandle);
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            if (admin.requireAutoTime != required) {
+                admin.requireAutoTime = required;
+                saveSettingsLocked(userHandle);
+            }
+        }
+
+        // Turn AUTO_TIME on in settings if it is required
+        if (required) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                Settings.Global.putInt(mContext.getContentResolver(),
+                        Settings.Global.AUTO_TIME, 1 /* AUTO_TIME on */);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    /**
+     * Returns whether or not auto time is required by the device owner.
+     */
+    public boolean getAutoTimeRequired() {
+        if (!mHasFeature) {
+            return false;
+        }
+        synchronized (this) {
+            ActiveAdmin deviceOwner = getDeviceOwnerAdmin();
+            return (deviceOwner != null) ? deviceOwner.requireAutoTime : false;
         }
     }
 
@@ -3517,6 +3575,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             if (mDeviceOwner != null) {
                 return mDeviceOwner.getDeviceOwnerName();
+            }
+        }
+        return null;
+    }
+
+    // Returns the active device owner or null if there is no device owner.
+    private ActiveAdmin getDeviceOwnerAdmin() {
+        String deviceOwnerPackageName = getDeviceOwner();
+        if (deviceOwnerPackageName == null) {
+            return null;
+        }
+
+        DevicePolicyData policy = getUserData(UserHandle.USER_OWNER);
+        final int n = policy.mAdminList.size();
+        for (int i = 0; i < n; i++) {
+            ActiveAdmin admin = policy.mAdminList.get(i);
+            if (deviceOwnerPackageName.equals(admin.info.getPackageName())) {
+                return admin;
             }
         }
         return null;
