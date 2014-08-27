@@ -266,7 +266,7 @@ public interface IActivityManager extends IInterface {
     // Special low-level communication with activity manager.
     public void handleApplicationCrash(IBinder app,
             ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException;
-    public boolean handleApplicationWtf(IBinder app, String tag,
+    public boolean handleApplicationWtf(IBinder app, String tag, boolean system,
             ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException;
 
     // A StrictMode violation to be handled.  The violationMask is a

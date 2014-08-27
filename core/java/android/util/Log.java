@@ -96,12 +96,12 @@ public final class Log {
      * @hide
      */
     public interface TerribleFailureHandler {
-        void onTerribleFailure(String tag, TerribleFailure what);
+        void onTerribleFailure(String tag, TerribleFailure what, boolean system);
     }
 
     private static TerribleFailureHandler sWtfHandler = new TerribleFailureHandler() {
-            public void onTerribleFailure(String tag, TerribleFailure what) {
-                RuntimeInit.wtf(tag, what);
+            public void onTerribleFailure(String tag, TerribleFailure what, boolean system) {
+                RuntimeInit.wtf(tag, what, system);
             }
         };
 
@@ -253,7 +253,7 @@ public final class Log {
      * @param msg The message you would like logged.
      */
     public static int wtf(String tag, String msg) {
-        return wtf(LOG_ID_MAIN, tag, msg, null, false);
+        return wtf(LOG_ID_MAIN, tag, msg, null, false, false);
     }
 
     /**
@@ -262,7 +262,7 @@ public final class Log {
      * @hide
      */
     public static int wtfStack(String tag, String msg) {
-        return wtf(LOG_ID_MAIN, tag, msg, null, true);
+        return wtf(LOG_ID_MAIN, tag, msg, null, true, false);
     }
 
     /**
@@ -272,7 +272,7 @@ public final class Log {
      * @param tr An exception to log.
      */
     public static int wtf(String tag, Throwable tr) {
-        return wtf(LOG_ID_MAIN, tag, tr.getMessage(), tr, false);
+        return wtf(LOG_ID_MAIN, tag, tr.getMessage(), tr, false, false);
     }
 
     /**
@@ -283,14 +283,15 @@ public final class Log {
      * @param tr An exception to log.  May be null.
      */
     public static int wtf(String tag, String msg, Throwable tr) {
-        return wtf(LOG_ID_MAIN, tag, msg, tr, false);
+        return wtf(LOG_ID_MAIN, tag, msg, tr, false, false);
     }
 
-    static int wtf(int logId, String tag, String msg, Throwable tr, boolean localStack) {
+    static int wtf(int logId, String tag, String msg, Throwable tr, boolean localStack,
+            boolean system) {
         TerribleFailure what = new TerribleFailure(msg, tr);
         int bytes = println_native(logId, ASSERT, tag, msg + '\n'
                 + getStackTraceString(localStack ? what : tr));
-        sWtfHandler.onTerribleFailure(tag, what);
+        sWtfHandler.onTerribleFailure(tag, what, system);
         return bytes;
     }
 
