@@ -2272,6 +2272,8 @@ public final class ContactsContract {
          * The default value is "0"
          * </p>
          * <p>Type: INTEGER</p>
+         *
+         * @hide
          */
         public static final String NAME_VERIFIED = "name_verified";
 
@@ -8063,6 +8065,21 @@ public final class ContactsContract {
         public static void undemote(ContentResolver contentResolver, long contactId) {
             contentResolver.call(ContactsContract.AUTHORITY_URI, PinnedPositions.UNDEMOTE_METHOD,
                     String.valueOf(contactId), null);
+        }
+
+        /**
+         * Pins a contact at a provided position, or unpins a contact.
+         *
+         * @param contentResolver to perform the pinning operation on.
+         * @param pinnedPosition the position to pin the contact at. To unpin a contact, use
+         *         {@link PinnedPositions#UNPINNED}.
+         */
+        public static void pin(
+                ContentResolver contentResolver, long contactId, int pinnedPosition) {
+            final Uri uri = Uri.withAppendedPath(Contacts.CONTENT_URI, String.valueOf(contactId));
+            final ContentValues values = new ContentValues();
+            values.put(Contacts.PINNED, pinnedPosition);
+            contentResolver.update(uri, values, null, null);
         }
 
         /**
