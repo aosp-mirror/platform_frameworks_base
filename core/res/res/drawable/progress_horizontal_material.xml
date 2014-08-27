@@ -17,7 +17,8 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@id/background">
         <nine-patch android:src="@drawable/progress_mtrl_alpha"
-            android:tint="?attr/colorControlNormal" />
+            android:tint="?attr/colorControlNormal"
+            android:alpha="0.5" />
     </item>
     <item android:id="@id/secondaryProgress">
         <scale android:scaleWidth="100%">

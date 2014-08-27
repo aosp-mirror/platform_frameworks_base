@@ -400,6 +400,8 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
                 }
                 mDrawable.setCallback(owner);
                 mDrawable.setLayoutDirection(orig.mDrawable.getLayoutDirection());
+                mDrawable.setBounds(orig.mDrawable.getBounds());
+                mDrawable.setLevel(orig.mDrawable.getLevel());
                 mInsetLeft = orig.mInsetLeft;
                 mInsetTop = orig.mInsetTop;
                 mInsetRight = orig.mInsetRight;
