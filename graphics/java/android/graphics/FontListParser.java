@@ -33,23 +33,48 @@ import java.util.List;
  */
 public class FontListParser {
 
+    public static class Config {
+        Config() {
+            families = new ArrayList<Family>();
+            aliases = new ArrayList<Alias>();
+        }
+        public List<Family> families;
+        public List<Alias> aliases;
+    }
+
+    public static class Font {
+        Font(String fontName, int weight, boolean isItalic) {
+            this.fontName = fontName;
+            this.weight = weight;
+            this.isItalic = isItalic;
+        }
+        public String fontName;
+        public int weight;
+        public boolean isItalic;
+    }
+
+    public static class Alias {
+        public String name;
+        public String toName;
+        public int weight;
+    }
+
     public static class Family {
-        public Family(List<String> names, List<String> fontFiles, String lang, String variant) {
-            this.names = names;
-            this.fontFiles = fontFiles;
+        public Family(String name, List<Font> fonts, String lang, String variant) {
+            this.name = name;
+            this.fonts = fonts;
             this.lang = lang;
             this.variant = variant;
         }
 
-        public List<String> names;
-        // todo: need attributes for font files
-        public List<String> fontFiles;
+        public String name;
+        public List<Font> fonts;
         public String lang;
         public String variant;
     }
 
     /* Parse fallback list (no names) */
-    public static List<Family> parse(InputStream in) throws XmlPullParserException, IOException {
+    public static Config parse(InputStream in) throws XmlPullParserException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(in, null);
@@ -60,57 +85,59 @@ public class FontListParser {
         }
     }
 
-    private static List<Family> readFamilies(XmlPullParser parser)
+    private static Config readFamilies(XmlPullParser parser)
             throws XmlPullParserException, IOException {
-        List<Family> families = new ArrayList<Family>();
+        Config config = new Config();
         parser.require(XmlPullParser.START_TAG, null, "familyset");
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             if (parser.getName().equals("family")) {
-                families.add(readFamily(parser));
+                config.families.add(readFamily(parser));
+            } else if (parser.getName().equals("alias")) {
+                config.aliases.add(readAlias(parser));
             } else {
                 skip(parser);
             }
         }
-        return families;
+        return config;
     }
 
     private static Family readFamily(XmlPullParser parser)
             throws XmlPullParserException, IOException {
-        List<String> names = null;
-        List<String> fontFiles = new ArrayList<String>();
-        String lang = null;
-        String variant = null;
+        String name = parser.getAttributeValue(null, "name");
+        String lang = parser.getAttributeValue(null, "lang");
+        String variant = parser.getAttributeValue(null, "variant");
+        List<Font> fonts = new ArrayList<Font>();
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String tag = parser.getName();
-            if (tag.equals("fileset")) {
-                while (parser.next() != XmlPullParser.END_TAG) {
-                    if (parser.getEventType() != XmlPullParser.START_TAG) continue;
-                    if (parser.getName().equals("file")) {
-                        if (lang == null) {
-                            lang = parser.getAttributeValue(null, "lang");
-                        }
-                        if (variant == null) {
-                            variant = parser.getAttributeValue(null, "variant");
-                        }
-                        String filename = parser.nextText();
-                        String fullFilename = "/system/fonts/" + filename;
-                        fontFiles.add(fullFilename);
-                    }
-                }
-            } else if (tag.equals("nameset")) {
-                names = new ArrayList<String>();
-                while (parser.next() != XmlPullParser.END_TAG) {
-                    if (parser.getEventType() != XmlPullParser.START_TAG) continue;
-                    if (parser.getName().equals("name")) {
-                        String name = parser.nextText();
-                        names.add(name);
-                    }
-                }
+            if (tag.equals("font")) {
+                String weightStr = parser.getAttributeValue(null, "weight");
+                int weight = weightStr == null ? 400 : Integer.parseInt(weightStr);
+                boolean isItalic = "italic".equals(parser.getAttributeValue(null, "style"));
+                String filename = parser.nextText();
+                String fullFilename = "/system/fonts/" + filename;
+                fonts.add(new Font(fullFilename, weight, isItalic));
+            } else {
+                skip(parser);
             }
         }
-        return new Family(names, fontFiles, lang, variant);
+        return new Family(name, fonts, lang, variant);
+    }
+
+    private static Alias readAlias(XmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        Alias alias = new Alias();
+        alias.name = parser.getAttributeValue(null, "name");
+        alias.toName = parser.getAttributeValue(null, "to");
+        String weightStr = parser.getAttributeValue(null, "weight");
+        if (weightStr == null) {
+            alias.weight = 400;
+        } else {
+            alias.weight = Integer.parseInt(weightStr);
+        }
+        skip(parser);  // alias tag is empty, ignore any contents and consume end tag
+        return alias;
     }
 
     private static void skip(XmlPullParser parser) throws XmlPullParserException, IOException {

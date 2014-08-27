@@ -28,6 +28,13 @@ namespace android {
 
 struct TypefaceImpl {
     FontCollection *fFontCollection;
+
+    // style used for constructing and querying Typeface objects
+    SkTypeface::Style fSkiaStyle;
+    // base weight in CSS-style units, 100..900
+    int fBaseWeight;
+
+    // resolved style actually used for rendering
     FontStyle fStyle;
 };
 
@@ -40,6 +47,8 @@ struct TypefaceImpl {
 TypefaceImpl* TypefaceImpl_resolveDefault(TypefaceImpl* src);
 
 TypefaceImpl* TypefaceImpl_createFromTypeface(TypefaceImpl* src, SkTypeface::Style style);
+
+TypefaceImpl* TypefaceImpl_createWeightAlias(TypefaceImpl* src, int baseweight);
 
 // When we remove the USE_MINIKIN ifdef, probably a good idea to move the casting
 // (from jlong to FontFamily*) to the caller in Typeface.cpp.
