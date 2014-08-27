@@ -245,7 +245,7 @@ public class CameraBinderTest extends AndroidTestCase {
          * android.hardware.camera2.CaptureResultExtras)
          */
         @Override
-        public void onCameraError(int errorCode, CaptureResultExtras resultExtras)
+        public void onDeviceError(int errorCode, CaptureResultExtras resultExtras)
                 throws RemoteException {
             // TODO Auto-generated method stub
 
@@ -283,7 +283,7 @@ public class CameraBinderTest extends AndroidTestCase {
          * @see android.hardware.camera2.ICameraDeviceCallbacks#onCameraIdle()
          */
         @Override
-        public void onCameraIdle() throws RemoteException {
+        public void onDeviceIdle() throws RemoteException {
             // TODO Auto-generated method stub
 
         }
