@@ -25,6 +25,7 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -3077,7 +3078,7 @@ public class PackageParser {
                     ActivityInfo.DOCUMENT_LAUNCH_NONE);
             a.info.maxRecents = sa.getInt(
                     com.android.internal.R.styleable.AndroidManifestActivity_maxRecents,
-                    15);
+                    ActivityManager.getDefaultAppRecentsLimitStatic());
             a.info.screenOrientation = sa.getInt(
                     com.android.internal.R.styleable.AndroidManifestActivity_screenOrientation,
                     ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);

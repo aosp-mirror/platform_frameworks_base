@@ -284,9 +284,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
 
-    // Maximum number of recent tasks that we can remember.
-    static final int MAX_RECENT_TASKS = ActivityManager.isLowRamDeviceStatic() ? 100 : 200;
-
     // Maximum number recent bitmaps to keep in memory.
     static final int MAX_RECENT_BITMAPS = 5;
 
@@ -3804,8 +3801,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (tr.userId == userId) {
                 if(DEBUG_TASKS) Slog.i(TAG, "remove RecentTask " + tr
                         + " when finishing user" + userId);
-                tr.disposeThumbnail();
                 mRecentTasks.remove(i);
+                tr.removedFromRecents(mTaskPersister);
             }
         }
 
@@ -3813,25 +3810,385 @@ public final class ActivityManagerService extends ActivityManagerNative
         mTaskPersister.wakeup(null, true);
     }
 
+    /**
+     * Update the recent tasks lists: make sure tasks should still be here (their
+     * applications / activities still exist), update their availability, fixup ordering
+     * of affiliations.
+     */
+    void cleanupRecentTasksLocked(int userId) {
+        final HashMap<ComponentName, ActivityInfo> availActCache = new HashMap<>();
+        final HashMap<String, ApplicationInfo> availAppCache = new HashMap<>();
+        final IPackageManager pm = AppGlobals.getPackageManager();
+        final ActivityInfo dummyAct = new ActivityInfo();
+        final ApplicationInfo dummyApp = new ApplicationInfo();
+
+        int N = mRecentTasks.size();
+
+        int[] users = userId == UserHandle.USER_ALL
+                ? getUsersLocked() : new int[] { userId };
+        for (int user : users) {
+            for (int i = 0; i < N; i++) {
+                TaskRecord task = mRecentTasks.get(i);
+                if (task.userId != user) {
+                    // Only look at tasks for the user ID of interest.
+                    continue;
+                }
+                if (task.autoRemoveRecents && task.getTopActivity() == null) {
+                    // This situation is broken, and we should just get rid of it now.
+                    mRecentTasks.remove(i);
+                    task.removedFromRecents(mTaskPersister);
+                    i--;
+                    N--;
+                    Slog.w(TAG, "Removing auto-remove without activity: " + task);
+                    continue;
+                }
+                // Check whether this activity is currently available.
+                if (task.realActivity != null) {
+                    ActivityInfo ai = availActCache.get(task.realActivity);
+                    if (ai == null) {
+                        try {
+                            ai = pm.getActivityInfo(task.realActivity,
+                                    PackageManager.GET_UNINSTALLED_PACKAGES
+                                    | PackageManager.GET_DISABLED_COMPONENTS, user);
+                        } catch (RemoteException e) {
+                            // Will never happen.
+                            continue;
+                        }
+                        if (ai == null) {
+                            ai = dummyAct;
+                        }
+                        availActCache.put(task.realActivity, ai);
+                    }
+                    if (ai == dummyAct) {
+                        // This could be either because the activity no longer exists, or the
+                        // app is temporarily gone.  For the former we want to remove the recents
+                        // entry; for the latter we want to mark it as unavailable.
+                        ApplicationInfo app = availAppCache.get(task.realActivity.getPackageName());
+                        if (app == null) {
+                            try {
+                                app = pm.getApplicationInfo(task.realActivity.getPackageName(),
+                                        PackageManager.GET_UNINSTALLED_PACKAGES
+                                        | PackageManager.GET_DISABLED_COMPONENTS, user);
+                            } catch (RemoteException e) {
+                                // Will never happen.
+                                continue;
+                            }
+                            if (app == null) {
+                                app = dummyApp;
+                            }
+                            availAppCache.put(task.realActivity.getPackageName(), app);
+                        }
+                        if (app == dummyApp || (app.flags&ApplicationInfo.FLAG_INSTALLED) == 0) {
+                            // Doesn't exist any more!  Good-bye.
+                            mRecentTasks.remove(i);
+                            task.removedFromRecents(mTaskPersister);
+                            i--;
+                            N--;
+                            Slog.w(TAG, "Removing no longer valid recent: " + task);
+                            continue;
+                        } else {
+                            // Otherwise just not available for now.
+                            if (task.isAvailable) {
+                                if (DEBUG_RECENTS) Slog.d(TAG, "Making recent unavailable: "
+                                        + task);
+                            }
+                            task.isAvailable = false;
+                        }
+                    } else {
+                        if (!ai.enabled || !ai.applicationInfo.enabled
+                                || (ai.applicationInfo.flags&ApplicationInfo.FLAG_INSTALLED) == 0) {
+                            if (task.isAvailable) {
+                                if (DEBUG_RECENTS) Slog.d(TAG, "Making recent unavailable: "
+                                        + task + " (enabled=" + ai.enabled + "/"
+                                        + ai.applicationInfo.enabled +  " flags="
+                                        + Integer.toHexString(ai.applicationInfo.flags) + ")");
+                            }
+                            task.isAvailable = false;
+                        } else {
+                            if (!task.isAvailable) {
+                                if (DEBUG_RECENTS) Slog.d(TAG, "Making recent available: "
+                                        + task);
+                            }
+                            task.isAvailable = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Verify the affiliate chain for each task.
+        for (int i = 0; i < N; ) {
+            TaskRecord task = mRecentTasks.remove(i);
+            if (mTmpRecents.contains(task)) {
+                continue;
+            }
+            int affiliatedTaskId = task.mAffiliatedTaskId;
+            while (true) {
+                TaskRecord next = task.mNextAffiliate;
+                if (next == null) {
+                    break;
+                }
+                if (next.mAffiliatedTaskId != affiliatedTaskId) {
+                    Slog.e(TAG, "Error in Recents: next.affiliatedTaskId=" +
+                            next.mAffiliatedTaskId + " affiliatedTaskId=" + affiliatedTaskId);
+                    task.setNextAffiliate(null);
+                    if (next.mPrevAffiliate == task) {
+                        next.setPrevAffiliate(null);
+                    }
+                    break;
+                }
+                if (next.mPrevAffiliate != task) {
+                    Slog.e(TAG, "Error in Recents chain prev.mNextAffiliate=" +
+                            next.mPrevAffiliate + " task=" + task);
+                    next.setPrevAffiliate(null);
+                    task.setNextAffiliate(null);
+                    break;
+                }
+                if (!mRecentTasks.contains(next)) {
+                    Slog.e(TAG, "Error in Recents: next=" + next + " not in mRecentTasks");
+                    task.setNextAffiliate(null);
+                    // We know that next.mPrevAffiliate is always task, from above, so clear
+                    // its previous affiliate.
+                    next.setPrevAffiliate(null);
+                    break;
+                }
+                task = next;
+            }
+            // task is now the end of the list
+            do {
+                mRecentTasks.remove(task);
+                mRecentTasks.add(i++, task);
+                mTmpRecents.add(task);
+                task.inRecents = true;
+            } while ((task = task.mPrevAffiliate) != null);
+        }
+        mTmpRecents.clear();
+        // mRecentTasks is now in sorted, affiliated order.
+    }
+
+    private final boolean moveAffiliatedTasksToFront(TaskRecord task, int taskIndex) {
+        int N = mRecentTasks.size();
+        TaskRecord top = task;
+        int topIndex = taskIndex;
+        while (top.mNextAffiliate != null && topIndex > 0) {
+            top = top.mNextAffiliate;
+            topIndex--;
+        }
+        if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: adding affilliates starting at "
+                + topIndex + " from intial " + taskIndex);
+        // Find the end of the chain, doing a sanity check along the way.
+        boolean sane = top.mAffiliatedTaskId == task.mAffiliatedTaskId;
+        int endIndex = topIndex;
+        TaskRecord prev = top;
+        while (endIndex < N) {
+            TaskRecord cur = mRecentTasks.get(endIndex);
+            if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: looking at next chain @"
+                    + endIndex + " " + cur);
+            if (cur == top) {
+                // Verify start of the chain.
+                if (cur.mNextAffiliate != null || cur.mNextAffiliateTaskId != -1) {
+                    Slog.wtf(TAG, "Bad chain @" + endIndex
+                            + ": first task has next affiliate: " + prev);
+                    sane = false;
+                    break;
+                }
+            } else {
+                // Verify middle of the chain's next points back to the one before.
+                if (cur.mNextAffiliate != prev
+                        || cur.mNextAffiliateTaskId != prev.taskId) {
+                    Slog.wtf(TAG, "Bad chain @" + endIndex
+                            + ": middle task " + cur + " @" + endIndex
+                            + " has bad next affiliate "
+                            + cur.mNextAffiliate + " id " + cur.mNextAffiliateTaskId
+                            + ", expected " + prev);
+                    sane = false;
+                    break;
+                }
+            }
+            if (cur.mPrevAffiliateTaskId == -1) {
+                // Chain ends here.
+                if (cur.mPrevAffiliate != null) {
+                    Slog.wtf(TAG, "Bad chain @" + endIndex
+                            + ": last task " + cur + " has previous affiliate "
+                            + cur.mPrevAffiliate);
+                    sane = false;
+                }
+                if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: end of chain @" + endIndex);
+                break;
+            } else {
+                // Verify middle of the chain's prev points to a valid item.
+                if (cur.mPrevAffiliate == null) {
+                    Slog.wtf(TAG, "Bad chain @" + endIndex
+                            + ": task " + cur + " has previous affiliate "
+                            + cur.mPrevAffiliate + " but should be id "
+                            + cur.mPrevAffiliate);
+                    sane = false;
+                    break;
+                }
+            }
+            if (cur.mAffiliatedTaskId != task.mAffiliatedTaskId) {
+                Slog.wtf(TAG, "Bad chain @" + endIndex
+                        + ": task " + cur + " has affiliated id "
+                        + cur.mAffiliatedTaskId + " but should be "
+                        + task.mAffiliatedTaskId);
+                sane = false;
+                break;
+            }
+            prev = cur;
+            endIndex++;
+            if (endIndex >= N) {
+                Slog.wtf(TAG, "Bad chain ran off index " + endIndex
+                        + ": last task " + prev);
+                sane = false;
+                break;
+            }
+        }
+        if (sane) {
+            if (endIndex < taskIndex) {
+                Slog.wtf(TAG, "Bad chain @" + endIndex
+                        + ": did not extend to task " + task + " @" + taskIndex);
+                sane = false;
+            }
+        }
+        if (sane) {
+            // All looks good, we can just move all of the affiliated tasks
+            // to the top.
+            for (int i=topIndex; i<=endIndex; i++) {
+                if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: moving affiliated " + task
+                        + " from " + i + " to " + (i-topIndex));
+                TaskRecord cur = mRecentTasks.remove(i);
+                mRecentTasks.add(i-topIndex, cur);
+            }
+            if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: done moving tasks  " +  topIndex
+                    + " to " + endIndex);
+            return true;
+        }
+
+        // Whoops, couldn't do it.
+        return false;
+    }
+
     final void addRecentTaskLocked(TaskRecord task) {
-        final int N = mRecentTasks.size();
+        final boolean isAffiliated = task.mAffiliatedTaskId != task.taskId
+                || task.mNextAffiliateTaskId != -1 || task.mPrevAffiliateTaskId != -1;
+
+        int N = mRecentTasks.size();
         // Quick case: check if the top-most recent task is the same.
-        if (N > 0 && mRecentTasks.get(0) == task) {
+        if (!isAffiliated && N > 0 && mRecentTasks.get(0) == task) {
+            if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: already at top: " + task);
+            return;
+        }
+        // Another quick case: check if this is part of a set of affiliated
+        // tasks that are at the top.
+        if (isAffiliated && N > 0 && task.inRecents
+                && task.mAffiliatedTaskId == mRecentTasks.get(0).mAffiliatedTaskId) {
+            if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: affiliated " + mRecentTasks.get(0)
+                    + " at top when adding " + task);
             return;
         }
         // Another quick case: never add voice sessions.
         if (task.voiceSession != null) {
+            if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: not adding voice interaction " + task);
             return;
         }
 
+        boolean needAffiliationFix = false;
+
+        // Slightly less quick case: the task is already in recents, so all we need
+        // to do is move it.
+        if (task.inRecents) {
+            int taskIndex = mRecentTasks.indexOf(task);
+            if (taskIndex >= 0) {
+                if (!isAffiliated) {
+                    // Simple case: this is not an affiliated task, so we just move it to the front.
+                    mRecentTasks.remove(taskIndex);
+                    mRecentTasks.add(0, task);
+                    notifyTaskPersisterLocked(task, false);
+                    if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: moving to top " + task
+                            + " from " + taskIndex);
+                    return;
+                } else {
+                    // More complicated: need to keep all affiliated tasks together.
+                    if (moveAffiliatedTasksToFront(task, taskIndex)) {
+                        // All went well.
+                        return;
+                    }
+
+                    // Uh oh...  something bad in the affiliation chain, try to rebuild
+                    // everything and then go through our general path of adding a new task.
+                    needAffiliationFix = true;
+                }
+            } else {
+                Slog.wtf(TAG, "Task with inRecent not in recents: " + task);
+                needAffiliationFix = true;
+            }
+        }
+
+        if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: trimming tasks for " + task);
         trimRecentsForTask(task, true);
 
-        if (N >= MAX_RECENT_TASKS) {
+        N = mRecentTasks.size();
+        while (N >= ActivityManager.getMaxRecentTasksStatic()) {
             final TaskRecord tr = mRecentTasks.remove(N - 1);
-            tr.disposeThumbnail();
-            tr.closeRecentsChain();
+            tr.removedFromRecents(mTaskPersister);
+            N--;
         }
-        mRecentTasks.add(0, task);
+        task.inRecents = true;
+        if (!isAffiliated || needAffiliationFix) {
+            // If this is a simple non-affiliated task, or we had some failure trying to
+            // handle it as part of an affilated task, then just place it at the top.
+            mRecentTasks.add(0, task);
+        } else if (isAffiliated) {
+            // If this is a new affiliated task, then move all of the affiliated tasks
+            // to the front and insert this new one.
+            TaskRecord other = task.mNextAffiliate;
+            if (other == null) {
+                other = task.mPrevAffiliate;
+            }
+            if (other != null) {
+                int otherIndex = mRecentTasks.indexOf(other);
+                if (otherIndex >= 0) {
+                    // Insert new task at appropriate location.
+                    int taskIndex;
+                    if (other == task.mNextAffiliate) {
+                        // We found the index of our next affiliation, which is who is
+                        // before us in the list, so add after that point.
+                        taskIndex = otherIndex+1;
+                    } else {
+                        // We found the index of our previous affiliation, which is who is
+                        // after us in the list, so add at their position.
+                        taskIndex = otherIndex;
+                    }
+                    if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: new affiliated task added at "
+                            + taskIndex + ": " + task);
+                    mRecentTasks.add(taskIndex, task);
+
+                    // Now move everything to the front.
+                    if (moveAffiliatedTasksToFront(task, taskIndex)) {
+                        // All went well.
+                        return;
+                    }
+
+                    // Uh oh...  something bad in the affiliation chain, try to rebuild
+                    // everything and then go through our general path of adding a new task.
+                    needAffiliationFix = true;
+                } else {
+                    if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: couldn't find other affiliation "
+                            + other);
+                    needAffiliationFix = true;
+                }
+            } else {
+                if (DEBUG_RECENTS) Slog.d(TAG,
+                        "addRecent: adding affiliated task without next/prev:" + task);
+                needAffiliationFix = true;
+            }
+        }
+        if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: adding " + task);
+
+        if (needAffiliationFix) {
+            if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: regrouping affiliations");
+            cleanupRecentTasksLocked(task.userId);
+        }
     }
 
     /**
@@ -3885,7 +4242,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             tr.disposeThumbnail();
             mRecentTasks.remove(i);
             if (task != tr) {
-                tr.closeRecentsChain();
+                tr.removedFromRecents(mTaskPersister);
             }
             i--;
             N--;
@@ -7688,8 +8045,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     android.Manifest.permission.GET_DETAILED_TASKS)
                     == PackageManager.PERMISSION_GRANTED;
 
-            IPackageManager pm = AppGlobals.getPackageManager();
-
             final int N = mRecentTasks.size();
             ArrayList<ActivityManager.RecentTaskInfo> res
                     = new ArrayList<ActivityManager.RecentTaskInfo>(
@@ -7702,53 +8057,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 includedUsers = new HashSet<Integer>();
             }
             includedUsers.add(Integer.valueOf(userId));
-
-            // Regroup affiliated tasks together.
-            for (int i = 0; i < N; ) {
-                TaskRecord task = mRecentTasks.remove(i);
-                if (mTmpRecents.contains(task)) {
-                    continue;
-                }
-                int affiliatedTaskId = task.mAffiliatedTaskId;
-                while (true) {
-                    TaskRecord next = task.mNextAffiliate;
-                    if (next == null) {
-                        break;
-                    }
-                    if (next.mAffiliatedTaskId != affiliatedTaskId) {
-                        Slog.e(TAG, "Error in Recents: next.affiliatedTaskId=" +
-                                next.mAffiliatedTaskId + " affiliatedTaskId=" + affiliatedTaskId);
-                        task.setNextAffiliate(null);
-                        if (next.mPrevAffiliate == task) {
-                            next.setPrevAffiliate(null);
-                        }
-                        break;
-                    }
-                    if (next.mPrevAffiliate != task) {
-                        Slog.e(TAG, "Error in Recents chain prev.mNextAffiliate=" +
-                                next.mPrevAffiliate + " task=" + task);
-                        next.setPrevAffiliate(null);
-                        break;
-                    }
-                    if (!mRecentTasks.contains(next)) {
-                        Slog.e(TAG, "Error in Recents: next=" + next + " not in mRecentTasks");
-                        task.setNextAffiliate(null);
-                        if (next.mPrevAffiliate == task) {
-                            next.setPrevAffiliate(null);
-                        }
-                        break;
-                    }
-                    task = next;
-                }
-                // task is now the end of the list
-                do {
-                    mRecentTasks.remove(task);
-                    mRecentTasks.add(i++, task);
-                    mTmpRecents.add(task);
-                } while ((task = task.mPrevAffiliate) != null);
-            }
-            mTmpRecents.clear();
-            // mRecentTasks is now in sorted, affiliated order.
 
             for (int i=0; i<N && maxNum > 0; i++) {
                 TaskRecord tr = mRecentTasks.get(i);
@@ -7789,33 +8097,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 + tr);
                         continue;
                     }
+                    if ((flags&ActivityManager.RECENT_IGNORE_UNAVAILABLE) != 0
+                            && !tr.isAvailable) {
+                        if (DEBUG_RECENTS) Slog.d(TAG, "Skipping, unavail real act: " + tr);
+                        continue;
+                    }
 
                     ActivityManager.RecentTaskInfo rti = createRecentTaskInfoFromTaskRecord(tr);
                     if (!detailed) {
                         rti.baseIntent.replaceExtras((Bundle)null);
-                    }
-
-                    if ((flags&ActivityManager.RECENT_IGNORE_UNAVAILABLE) != 0) {
-                        // Check whether this activity is currently available.
-                        try {
-                            if (rti.origActivity != null) {
-                                if (pm.getActivityInfo(rti.origActivity, 0, userId)
-                                        == null) {
-                                    if (DEBUG_RECENTS) Slog.d(TAG, "Skipping, unavail orig act: "
-                                            + tr);
-                                    continue;
-                                }
-                            } else if (rti.baseIntent != null) {
-                                if (pm.queryIntentActivities(rti.baseIntent,
-                                        null, 0, userId) == null) {
-                                    if (DEBUG_RECENTS) Slog.d(TAG, "Skipping, unavail intent: "
-                                            + tr);
-                                    continue;
-                                }
-                            }
-                        } catch (RemoteException e) {
-                            // Will never happen.
-                        }
                     }
 
                     res.add(rti);
@@ -7915,12 +8205,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 final int N = mRecentTasks.size();
-                if (N >= (MAX_RECENT_TASKS-1)) {
+                if (N >= (ActivityManager.getMaxRecentTasksStatic()-1)) {
                     final TaskRecord tr = mRecentTasks.remove(N - 1);
-                    tr.disposeThumbnail();
-                    tr.closeRecentsChain();
+                    tr.removedFromRecents(mTaskPersister);
                 }
 
+                task.inRecents = true;
                 mRecentTasks.add(task);
                 r.task.stack.addTask(task, false, false);
 
@@ -7953,9 +8243,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void cleanUpRemovedTaskLocked(TaskRecord tr, int flags) {
-        tr.disposeThumbnail();
         mRecentTasks.remove(tr);
-        tr.closeRecentsChain();
+        tr.removedFromRecents(mTaskPersister);
         final boolean killProcesses = (flags&ActivityManager.REMOVE_TASK_KILL_PROCESS) != 0;
         Intent baseIntent = new Intent(
                 tr.intent != null ? tr.intent : tr.affinityIntent);
@@ -10565,6 +10854,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (!mRecentTasks.isEmpty()) {
                     mStackSupervisor.createStackForRestoredTaskHistory(mRecentTasks);
                 }
+                cleanupRecentTasksLocked(UserHandle.USER_ALL);
                 mTaskPersister.startPersisting();
             }
 
@@ -14799,6 +15089,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())
                 || Intent.ACTION_PACKAGE_CHANGED.equals(intent.getAction())
                 || Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(intent.getAction())
+                || Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(intent.getAction())
                 || uidRemoved) {
             if (checkComponentPermission(
                     android.Manifest.permission.BROADCAST_PACKAGE_REMOVED,
@@ -14825,9 +15116,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 forceStopPackageLocked(pkg, -1, false, true, true, false, false, userId,
                                         "storage unmount");
                             }
+                            cleanupRecentTasksLocked(UserHandle.USER_ALL);
                             sendPackageBroadcastLocked(
                                     IApplicationThread.EXTERNAL_STORAGE_UNAVAILABLE, list, userId);
                         }
+                    } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(
+                            intent.getAction())) {
+                        cleanupRecentTasksLocked(UserHandle.USER_ALL);
                     } else {
                         Uri data = intent.getData();
                         String ssp;
