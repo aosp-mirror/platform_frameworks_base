@@ -1492,6 +1492,9 @@ final class ActivityStack {
             ActivityOptions.abort(options);
             if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: Top activity resumed " + next);
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
+
+            // Make sure to notify Keyguard as well if it is waiting for an activity to be drawn.
+            mStackSupervisor.notifyActivityDrawnForKeyguard();
             return false;
         }
 
