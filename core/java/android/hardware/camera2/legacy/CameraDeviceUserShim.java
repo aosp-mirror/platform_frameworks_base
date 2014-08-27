@@ -211,7 +211,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         }
 
         @Override
-        public void onCameraError(final int errorCode, final CaptureResultExtras resultExtras) {
+        public void onDeviceError(final int errorCode, final CaptureResultExtras resultExtras) {
             Message msg = getHandler().obtainMessage(CAMERA_ERROR,
                 /*arg1*/ errorCode, /*arg2*/ 0,
                 /*obj*/ resultExtras);
@@ -219,7 +219,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         }
 
         @Override
-        public void onCameraIdle() {
+        public void onDeviceIdle() {
             Message msg = getHandler().obtainMessage(CAMERA_IDLE);
             getHandler().sendMessage(msg);
         }
@@ -267,11 +267,11 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
                         case CAMERA_ERROR: {
                             int errorCode = msg.arg1;
                             CaptureResultExtras resultExtras = (CaptureResultExtras) msg.obj;
-                            mCallbacks.onCameraError(errorCode, resultExtras);
+                            mCallbacks.onDeviceError(errorCode, resultExtras);
                             break;
                         }
                         case CAMERA_IDLE:
-                            mCallbacks.onCameraIdle();
+                            mCallbacks.onDeviceIdle();
                             break;
                         case CAPTURE_STARTED: {
                             long timestamp = msg.arg2 & 0xFFFFFFFFL;

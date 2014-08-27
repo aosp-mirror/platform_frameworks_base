@@ -88,10 +88,10 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         /*
          * (non-Javadoc)
          * @see
-         * android.hardware.camera2.ICameraDeviceCallbacks#onCameraError(int,
+         * android.hardware.camera2.ICameraDeviceCallbacks#onDeviceError(int,
          * android.hardware.camera2.CaptureResultExtras)
          */
-        public void onCameraError(int errorCode, CaptureResultExtras resultExtras)
+        public void onDeviceError(int errorCode, CaptureResultExtras resultExtras)
                 throws RemoteException {
             // TODO Auto-generated method stub
 
@@ -99,9 +99,9 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
         /*
          * (non-Javadoc)
-         * @see android.hardware.camera2.ICameraDeviceCallbacks#onCameraIdle()
+         * @see android.hardware.camera2.ICameraDeviceCallbacks#onDeviceIdle()
          */
-        public void onCameraIdle() throws RemoteException {
+        public void onDeviceIdle() throws RemoteException {
             // TODO Auto-generated method stub
 
         }
@@ -432,7 +432,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         // Cancel and make sure we eventually quiesce
         status = mCameraUser.cancelRequest(streamingId, null);
 
-        verify(mMockCb, timeout(WAIT_FOR_IDLE_TIMEOUT_MS).times(1)).onCameraIdle();
+        verify(mMockCb, timeout(WAIT_FOR_IDLE_TIMEOUT_MS).times(1)).onDeviceIdle();
 
         // Submit a few capture requests
         int requestId1 = submitCameraRequest(request, /* streaming */false);
@@ -442,7 +442,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         int requestId5 = submitCameraRequest(request, /* streaming */false);
 
         // And wait for more idle
-        verify(mMockCb, timeout(WAIT_FOR_IDLE_TIMEOUT_MS).times(2)).onCameraIdle();
+        verify(mMockCb, timeout(WAIT_FOR_IDLE_TIMEOUT_MS).times(2)).onDeviceIdle();
 
     }
 
@@ -472,7 +472,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         status = mCameraUser.flush(null);
         assertEquals(CameraBinderTestUtils.NO_ERROR, status);
 
-        verify(mMockCb, timeout(WAIT_FOR_FLUSH_TIMEOUT_MS).times(1)).onCameraIdle();
+        verify(mMockCb, timeout(WAIT_FOR_FLUSH_TIMEOUT_MS).times(1)).onDeviceIdle();
 
         // Now a streaming request
         int streamingId = submitCameraRequest(request, /* streaming */true);
@@ -484,7 +484,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         status = mCameraUser.flush(null);
         assertEquals(CameraBinderTestUtils.NO_ERROR, status);
 
-        verify(mMockCb, timeout(WAIT_FOR_FLUSH_TIMEOUT_MS).times(2)).onCameraIdle();
+        verify(mMockCb, timeout(WAIT_FOR_FLUSH_TIMEOUT_MS).times(2)).onDeviceIdle();
 
         // TODO: When errors are hooked up, count that errors + successful
         // requests equal to 5.
