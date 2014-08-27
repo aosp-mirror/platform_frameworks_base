@@ -248,7 +248,7 @@ public final class PowerManager {
      * {@link #PROXIMITY_SCREEN_OFF_WAKE_LOCK} wake lock until the proximity sensor
      * indicates that an object is not in close proximity.
      */
-    public static final int WAIT_FOR_PROXIMITY_NEGATIVE = 1;
+    public static final int WAIT_FOR_DISTANT_PROXIMITY = 1;
 
     /**
      * Brightness value for fully on.
@@ -961,7 +961,8 @@ public final class PowerManager {
          * </p>
          *
          * @param flags Combination of flag values to modify the release behavior.
-         * Currently only {@link #WAIT_FOR_PROXIMITY_NEGATIVE} is supported.
+         * Currently only {@link #WAIT_FOR_DISTANT_PROXIMITY} is supported. Passing 0 is
+         * equivalent to calling {@link #release()}.
          */
         public void release(int flags) {
             synchronized (mToken) {
