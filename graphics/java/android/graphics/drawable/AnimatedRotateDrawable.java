@@ -346,22 +346,24 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
         private boolean mCanConstantState;
         private boolean mCheckedConstantState;
 
-        public AnimatedRotateState(AnimatedRotateState source, AnimatedRotateDrawable owner,
+        public AnimatedRotateState(AnimatedRotateState orig, AnimatedRotateDrawable owner,
                 Resources res) {
-            if (source != null) {
+            if (orig != null) {
                 if (res != null) {
-                    mDrawable = source.mDrawable.getConstantState().newDrawable(res);
+                    mDrawable = orig.mDrawable.getConstantState().newDrawable(res);
                 } else {
-                    mDrawable = source.mDrawable.getConstantState().newDrawable();
+                    mDrawable = orig.mDrawable.getConstantState().newDrawable();
                 }
                 mDrawable.setCallback(owner);
-                mDrawable.setLayoutDirection(source.mDrawable.getLayoutDirection());
-                mPivotXRel = source.mPivotXRel;
-                mPivotX = source.mPivotX;
-                mPivotYRel = source.mPivotYRel;
-                mPivotY = source.mPivotY;
-                mFramesCount = source.mFramesCount;
-                mFrameDuration = source.mFrameDuration;
+                mDrawable.setLayoutDirection(orig.mDrawable.getLayoutDirection());
+                mDrawable.setBounds(orig.mDrawable.getBounds());
+                mDrawable.setLevel(orig.mDrawable.getLevel());
+                mPivotXRel = orig.mPivotXRel;
+                mPivotX = orig.mPivotX;
+                mPivotYRel = orig.mPivotYRel;
+                mPivotY = orig.mPivotY;
+                mFramesCount = orig.mFramesCount;
+                mFrameDuration = orig.mFrameDuration;
                 mCanConstantState = mCheckedConstantState = true;
             }
         }
