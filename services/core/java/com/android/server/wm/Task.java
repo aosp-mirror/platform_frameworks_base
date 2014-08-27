@@ -41,11 +41,11 @@ class Task {
 
     void addAppToken(int addPos, AppWindowToken wtoken) {
         final int lastPos = mAppTokens.size();
-        if (addPos > lastPos) {
-            // We lost an app token. Don't crash though.
-            Slog.e(TAG, "Task.addAppToken: Out of bounds attempt token=" + wtoken + " addPos="
-                    + addPos + " lastPos=" + lastPos);
-            addPos = lastPos;
+        for (int pos = 0; pos < lastPos && pos < addPos; ++pos) {
+            if (mAppTokens.get(pos).removed) {
+                // addPos assumes removed tokens are actually gone.
+                ++addPos;
+            }
         }
         mAppTokens.add(addPos, wtoken);
         mDeferRemoval = false;
