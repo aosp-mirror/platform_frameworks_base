@@ -904,6 +904,15 @@ public final class Settings {
     public static final String ACTION_APP_NOTIFICATION_SETTINGS
             = "android.settings.APP_NOTIFICATION_SETTINGS";
 
+    /**
+     * Activity Action: Show notification redaction settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APP_NOTIFICATION_REDACTION
+            = "android.settings.ACTION_APP_NOTIFICATION_REDACTION";
+
     /** @hide */ public static final String EXTRA_APP_UID = "app_uid";
     /** @hide */ public static final String EXTRA_APP_PACKAGE = "app_package";
 
@@ -3705,6 +3714,14 @@ public final class Settings {
          */
         public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS =
                 "lock_screen_allow_private_notifications";
+
+        /**
+         * Set by the system to track if the user needs to see the call to action for
+         * the lockscreen notification policy.
+         * @hide
+         */
+        public static final String SHOW_NOTE_ABOUT_NOTIFICATION_HIDING =
+                "show_note_about_notification_hiding";
 
         /**
          * The Logging ID (a unique 64-bit value) as a hex string.
