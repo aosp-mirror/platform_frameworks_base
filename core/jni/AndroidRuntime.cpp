@@ -879,9 +879,17 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         parseRuntimeOption("dalvik.vm.profile.max-stack-depth",
                            profileMaxStackDepth,
                            "-Xprofile-max-stack-depth:");
-    }
 
-    parseRuntimeOption("ro.dalvik.vm.native.bridge", nativeBridgeLibrary, "-XX:NativeBridge=");
+        // Native bridge library. "0" means that native bridge is disabled.
+        property_get("ro.dalvik.vm.native.bridge", propBuf, "");
+        if (propBuf[0] == '\0') {
+            ALOGW("ro.dalvik.vm.native.bridge is not expected to be empty");
+        } else if (strcmp(propBuf, "0") != 0) {
+            snprintf(nativeBridgeLibrary, sizeof("-XX:NativeBridge=") + PROPERTY_VALUE_MAX,
+                     "-XX:NativeBridge=%s", propBuf);
+            addOption(nativeBridgeLibrary);
+        }
+    }
 
     initArgs.version = JNI_VERSION_1_4;
     initArgs.options = mOptions.editArray();
