@@ -3816,6 +3816,11 @@ public final class ActivityManagerService extends ActivityManagerNative
      * of affiliations.
      */
     void cleanupRecentTasksLocked(int userId) {
+        if (mRecentTasks == null) {
+            // Happens when called from the packagemanager broadcast before boot.
+            return;
+        }
+
         final HashMap<ComponentName, ActivityInfo> availActCache = new HashMap<>();
         final HashMap<String, ApplicationInfo> availAppCache = new HashMap<>();
         final IPackageManager pm = AppGlobals.getPackageManager();
