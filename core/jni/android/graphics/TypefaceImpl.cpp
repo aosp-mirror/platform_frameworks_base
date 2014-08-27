@@ -39,14 +39,17 @@
 
 namespace android {
 
-// Any weight greater than or equal to this is considered "bold" for
-// legacy API.
-static const int kBoldThreshold = 6;
-
-static FontStyle styleFromSkiaStyle(SkTypeface::Style skiaStyle) {
-    int weight = (skiaStyle & SkTypeface::kBold) != 0 ? 7 : 4;
-    bool italic = (skiaStyle & SkTypeface::kItalic) != 0;
-    return FontStyle(weight, italic);
+// Resolve the 1..9 weight based on base weight and bold flag
+static void resolveStyle(TypefaceImpl* typeface) {
+    int weight = typeface->fBaseWeight / 100;
+    if (typeface->fSkiaStyle & SkTypeface::kBold) {
+        weight += 3;
+    }
+    if (weight > 9) {
+        weight = 9;
+    }
+    bool italic = (typeface->fSkiaStyle & SkTypeface::kItalic) != 0;
+    typeface->fStyle = FontStyle(weight, italic);
 }
 
 TypefaceImpl* gDefaultTypeface = NULL;
@@ -90,7 +93,9 @@ static void getDefaultTypefaceOnce() {
         // default so we can make progress before that happens.
         gDefaultTypeface = new TypefaceImpl;
         gDefaultTypeface->fFontCollection = makeFontCollection();
-        gDefaultTypeface->fStyle = FontStyle();
+        gDefaultTypeface->fSkiaStyle = SkTypeface::kNormal;
+        gDefaultTypeface->fBaseWeight = 400;
+        resolveStyle(gDefaultTypeface);
     }
 }
 
@@ -109,25 +114,23 @@ TypefaceImpl* TypefaceImpl_createFromTypeface(TypefaceImpl* src, SkTypeface::Sty
     if (result != 0) {
         result->fFontCollection = resolvedFace->fFontCollection;
         result->fFontCollection->Ref();
-        result->fStyle = styleFromSkiaStyle(style);
+        result->fSkiaStyle = style;
+        result->fBaseWeight = resolvedFace->fBaseWeight;
+        resolveStyle(result);
     }
     return result;
 }
 
-static TypefaceImpl* createFromSkTypeface(SkTypeface* typeface) {
-    if (typeface == NULL) {
-        return NULL;
-    }
-    MinikinFont* minikinFont = new MinikinFontSkia(typeface);
-    std::vector<FontFamily *> typefaces;
-    FontFamily* family = new FontFamily();
-    family->addFont(minikinFont);
-    minikinFont->Unref();
-    typefaces.push_back(family);
+TypefaceImpl* TypefaceImpl_createWeightAlias(TypefaceImpl* src, int weight) {
+    TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(src);
     TypefaceImpl* result = new TypefaceImpl;
-    result->fFontCollection = new FontCollection(typefaces);
-    family->Unref();
-    result->fStyle = FontStyle();  // TODO: improve
+    if (result != 0) {
+        result->fFontCollection = resolvedFace->fFontCollection;
+        result->fFontCollection->Ref();
+        result->fSkiaStyle = resolvedFace->fSkiaStyle;
+        result->fBaseWeight = weight;
+        resolveStyle(result);
+    }
     return result;
 }
 
@@ -141,7 +144,7 @@ TypefaceImpl* TypefaceImpl_createFromFamilies(const jlong* families, size_t size
     result->fFontCollection = new FontCollection(familyVec);
     if (size == 0) {
         ALOGW("createFromFamilies creating empty collection");
-        result->fStyle = FontStyle();
+        result->fSkiaStyle = SkTypeface::kNormal;
     } else {
         const FontStyle defaultStyle;
         FontFamily* firstFamily = reinterpret_cast<FontFamily*>(families[0]);
@@ -150,11 +153,13 @@ TypefaceImpl* TypefaceImpl_createFromFamilies(const jlong* families, size_t size
             SkTypeface* skTypeface = reinterpret_cast<MinikinFontSkia*>(mf)->GetSkTypeface();
             // TODO: probably better to query more precise style from family, will be important
             // when we open up API to access 100..900 weights
-            result->fStyle = styleFromSkiaStyle(skTypeface->style());
+            result->fSkiaStyle = skTypeface->style();
         } else {
-            result->fStyle = defaultStyle;
+            result->fSkiaStyle = SkTypeface::kNormal;
         }
     }
+    result->fBaseWeight = 400;
+    resolveStyle(result);
     return result;
 }
 
@@ -166,12 +171,7 @@ void TypefaceImpl_unref(TypefaceImpl* face) {
 }
 
 int TypefaceImpl_getStyle(TypefaceImpl* face) {
-    FontStyle style = face->fStyle;
-    int result = style.getItalic() ? SkTypeface::kItalic : 0;
-    if (style.getWeight() >= kBoldThreshold) {
-        result |= SkTypeface::kBold;
-    }
-    return result;
+    return face->fSkiaStyle;
 }
 
 void TypefaceImpl_setDefault(TypefaceImpl* face) {

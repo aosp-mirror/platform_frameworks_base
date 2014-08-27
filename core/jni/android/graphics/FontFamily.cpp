@@ -62,8 +62,24 @@ static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, 
         ALOGE("addFont failed to create font %s", str.c_str());
         return false;
     }
-    FontFamily* fontFamily = (FontFamily*)familyPtr;
+    FontFamily* fontFamily = reinterpret_cast<FontFamily*>(familyPtr);
     return addSkTypeface(fontFamily, face);
+}
+
+static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong familyPtr,
+        jstring path, jint weight, jboolean isItalic) {
+    NPE_CHECK_RETURN_ZERO(env, path);
+    ScopedUtfChars str(env, path);
+    SkTypeface* face = SkTypeface::CreateFromFile(str.c_str());
+    if (face == NULL) {
+        ALOGE("addFont failed to create font %s", str.c_str());
+        return false;
+    }
+    FontFamily* fontFamily = reinterpret_cast<FontFamily*>(familyPtr);
+    MinikinFont* minikinFont = new MinikinFontSkia(face);
+    fontFamily->addFont(minikinFont, FontStyle(weight / 100, isItalic));
+    minikinFont->Unref();
+    return true;
 }
 
 static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPtr,
@@ -92,17 +108,18 @@ static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPt
         ALOGE("addFontFromAsset failed to create font %s", str.c_str());
         return false;
     }
-    FontFamily* fontFamily = (FontFamily*)familyPtr;
+    FontFamily* fontFamily = reinterpret_cast<FontFamily*>(familyPtr);
     return addSkTypeface(fontFamily, face);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gFontFamilyMethods[] = {
-    { "nCreateFamily",            "(Ljava/lang/String;I)J", (void*)FontFamily_create },
-    { "nUnrefFamily",             "(J)V", (void*)FontFamily_unref },
-    { "nAddFont",                 "(JLjava/lang/String;)Z", (void*)FontFamily_addFont },
-    { "nAddFontFromAsset",        "(JLandroid/content/res/AssetManager;Ljava/lang/String;)Z",
+    { "nCreateFamily",         "(Ljava/lang/String;I)J", (void*)FontFamily_create },
+    { "nUnrefFamily",          "(J)V", (void*)FontFamily_unref },
+    { "nAddFont",              "(JLjava/lang/String;)Z", (void*)FontFamily_addFont },
+    { "nAddFontWeightStyle",   "(JLjava/lang/String;IZ)Z", (void*)FontFamily_addFontWeightStyle },
+    { "nAddFontFromAsset",     "(JLandroid/content/res/AssetManager;Ljava/lang/String;)Z",
                                            (void*)FontFamily_addFontFromAsset },
 };
 
