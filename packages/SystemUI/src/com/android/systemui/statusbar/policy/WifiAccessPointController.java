@@ -134,6 +134,9 @@ public class WifiAccessPointController {
         final List<AccessPoint> aps = new ArrayList<AccessPoint>(scanResults.size());
         final ArraySet<String> ssids = new ArraySet<String>();
         for (ScanResult scanResult : scanResults) {
+            if (scanResult == null) {
+                continue;
+            }
             final String ssid = scanResult.SSID;
             if (TextUtils.isEmpty(ssid) || ssids.contains(ssid)) continue;
             if (!configured.containsKey(ssid)) continue;
