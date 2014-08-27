@@ -2015,7 +2015,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 .alpha(1f)
                 .setDuration(320)
                 .setInterpolator(ALPHA_IN)
-                .setStartDelay(50);
+                .setStartDelay(50)
+
+                // We need to clean up any pending end action from animateStatusBarHide if we call
+                // both hide and show in the same frame before the animation actually gets started.
+                // cancel() doesn't really remove the end action.
+                .withEndAction(null);
 
         // Synchronize the motion with the Keyguard fading if necessary.
         if (mKeyguardFadingAway) {
