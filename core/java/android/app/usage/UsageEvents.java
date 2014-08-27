@@ -106,7 +106,9 @@ public final class UsageEvents implements Parcelable {
         }
 
         /**
-         * The time at which this event occurred.
+         * The time at which this event occurred, measured in milliseconds since the epoch.
+         * <p/>
+         * See {@link System#currentTimeMillis()}.
          */
         public long getTimeStamp() {
             return mTimeStamp;

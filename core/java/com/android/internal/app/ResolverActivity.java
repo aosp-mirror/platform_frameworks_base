@@ -23,7 +23,6 @@ import android.app.usage.UsageStatsManager;
 import android.os.AsyncTask;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.Slog;
 import android.widget.AbsListView;
 import android.widget.GridView;
@@ -73,6 +72,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -100,7 +100,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     private boolean mResolvingHome = false;
 
     private UsageStatsManager mUsm;
-    private ArrayMap<String, UsageStats> mStats;
+    private Map<String, UsageStats> mStats;
     private static final long USAGE_STATS_PERIOD = 1000 * 60 * 60 * 24 * 14;
 
     private boolean mRegistered;
