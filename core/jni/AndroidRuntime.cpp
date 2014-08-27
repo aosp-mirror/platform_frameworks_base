@@ -872,7 +872,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         parseRuntimeOption("dalvik.vm.profiler.type", profileType, "-Xprofile-type:");
 
         // Depth of bounded stack data
-        parseRuntimeOption("dalvik.vm.profile.max-stack-depth",
+        parseRuntimeOption("dalvik.vm.profile.stack-depth",
                            profileMaxStackDepth,
                            "-Xprofile-max-stack-depth:");
 
