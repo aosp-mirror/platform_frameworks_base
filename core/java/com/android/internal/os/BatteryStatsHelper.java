@@ -993,6 +993,6 @@ public final class BatteryStatsHelper {
         } catch (RemoteException e) {
             Log.w(TAG, "RemoteException:", e);
         }
-        return null;
+        return new BatteryStatsImpl();
     }
 }

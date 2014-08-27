@@ -1543,6 +1543,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final Intent intent = r.intent;
         final int callingUid = r.launchedFromUid;
 
+        // In some flows in to this function, we retrieve the task record and hold on to it
+        // without a lock before calling back in to here...  so the task at this point may
+        // not actually be in recents.  Check for that, and if it isn't in recents just
+        // consider it invalid.
+        if (inTask != null && !inTask.inRecents) {
+            Slog.w(TAG, "Starting activity in task not in recents: " + inTask);
+            inTask = null;
+        }
+
         final boolean launchSingleTop = r.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP;
         final boolean launchSingleInstance = r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE;
         final boolean launchSingleTask = r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK;
@@ -1686,32 +1695,50 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // If the caller is not coming from another activity, but has given us an
         // explicit task into which they would like us to launch the new activity,
         // then let's see about doing that.
-        if (sourceRecord == null && inTask != null && inTask.stack != null && inTask.inRecents) {
+        if (sourceRecord == null && inTask != null && inTask.stack != null) {
+            final Intent baseIntent = inTask.getBaseIntent();
+            final ActivityRecord root = inTask.getRootActivity();
+            if (baseIntent == null) {
+                ActivityOptions.abort(options);
+                throw new IllegalArgumentException("Launching into task without base intent: "
+                        + inTask);
+            }
+
             // If this task is empty, then we are adding the first activity -- it
             // determines the root, and must be launching as a NEW_TASK.
-            if (inTask.getRootActivity() == null) {
-                if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) == 0
-                        && !launchSingleInstance && !launchSingleTask) {
-                    throw new IllegalStateException("Caller has inTask " + inTask
-                            + " but target is not a new task");
-                } else if (inTask.getBaseIntent() == null || !intent.getComponent().equals(
-                        inTask.getBaseIntent().getComponent())) {
-                    throw new IllegalStateException("Caller requested " + inTask + " is component "
-                            + inTask.getBaseIntent() + " but starting " + intent);
+            if (launchSingleInstance || launchSingleTask) {
+                if (!baseIntent.getComponent().equals(r.intent.getComponent())) {
+                    ActivityOptions.abort(options);
+                    throw new IllegalArgumentException("Trying to launch singleInstance/Task "
+                            + r + " into different task " + inTask);
                 }
+                if (root != null) {
+                    ActivityOptions.abort(options);
+                    throw new IllegalArgumentException("Caller with inTask " + inTask
+                            + " has root " + root + " but target is singleInstance/Task");
+                }
+            }
+
+            // If task is empty, then adopt the interesting intent launch flags in to the
+            // activity being started.
+            if (root == null) {
+                final int flagsOfInterest = Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_MULTIPLE_TASK | Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+                        | Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
+                launchFlags = (launchFlags&~flagsOfInterest)
+                        | (baseIntent.getFlags()&flagsOfInterest);
+                intent.setFlags(launchFlags);
                 inTask.setIntent(r);
 
             // If the task is not empty, then we are going to add the new activity on top
             // of the task, so it can not be launching as a new task.
-            } else {
-                if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0
-                        || launchSingleInstance || launchSingleTask) {
-                    throw new IllegalStateException("Caller has inTask " + inTask
-                            + " but target is a new task");
-                }
+            } else if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
+                ActivityOptions.abort(options);
+                throw new IllegalStateException("Caller has inTask " + inTask
+                        + " but target is a new task");
             }
-            sourceStack = inTask.stack;
             reuseTask = inTask;
+            addingToTask = true;
         } else {
             inTask = null;
         }
@@ -1724,10 +1751,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
                 (launchFlags & Intent.FLAG_ACTIVITY_MULTIPLE_TASK) == 0)
                 || launchSingleInstance || launchSingleTask) {
-            // If bring to front is requested, and no result is requested, and
+            // If bring to front is requested, and no result is requested and we have not
+            // been given an explicit task to launch in to, and
             // we can find a task that was started with this same
             // component, then instead of launching bring that one to the front.
-            if (r.resultTo == null) {
+            if (inTask == null && r.resultTo == null) {
                 // See if there is a task to bring to the front.  If this is
                 // a SINGLE_INSTANCE activity, there can be one and only one
                 // instance of it in the history, and it is always in its own
@@ -1957,13 +1985,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
                 return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
-            if (inTask == null) {
-                // If we have an incoming task, we are just going to use that.
-                newTask = true;
-                targetStack = adjustStackFocus(r, newTask);
-            } else {
-                targetStack = inTask.stack;
-            }
+            newTask = true;
+            targetStack = adjustStackFocus(r, newTask);
             if (!launchTaskBehind) {
                 targetStack.moveToFront();
             }
@@ -2048,8 +2071,27 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
             targetStack = inTask.stack;
-            targetStack.moveToFront();
+            targetStack.moveTaskToFrontLocked(inTask, r, options);
             mWindowManager.moveTaskToTop(targetStack.topTask().taskId);
+
+            // Check whether we should actually launch the new activity in to the task,
+            // or just reuse the current activity on top.
+            ActivityRecord top = inTask.getTopActivity();
+            if (top != null && top.realActivity.equals(r.realActivity) && top.userId == r.userId) {
+                if ((launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
+                        || launchSingleTop || launchSingleTask) {
+                    ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, top, top.task);
+                    if ((startFlags&ActivityManager.START_FLAG_ONLY_IF_NEEDED) != 0) {
+                        // We don't need to start a new activity, and
+                        // the client said not to do anything if that
+                        // is the case, so this is it!
+                        return ActivityManager.START_RETURN_INTENT_TO_CALLER;
+                    }
+                    top.deliverNewIntentLocked(callingUid, r.intent);
+                    return ActivityManager.START_DELIVERED_TO_TOP;
+                }
+            }
+
             r.setTask(inTask, null);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in explicit task " + r.task);

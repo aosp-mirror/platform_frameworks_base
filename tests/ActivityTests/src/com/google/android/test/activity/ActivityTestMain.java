@@ -366,15 +366,11 @@ public class ActivityTestMain extends Activity {
                     if (recent.id >= 0) {
                         // Stack on top.
                         intent.putExtra(DocActivity.LABEL, "Stacked");
-                        task.startActivity(ActivityTestMain.this, intent, null);
                     } else {
                         // Start root activity.
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT
-                                | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
-                                | Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
                         intent.putExtra(DocActivity.LABEL, "New Root");
-                        task.startActivity(ActivityTestMain.this, intent, null);
                     }
+                    task.startActivity(ActivityTestMain.this, intent, null);
                 }
                 return true;
             }
