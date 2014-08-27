@@ -23,6 +23,7 @@ import android.util.ArrayMap;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Provides access to device usage history and statistics. Usage data is aggregated into
@@ -149,7 +150,6 @@ public final class UsageStatsManager {
      * @param endTime The exclusive end of the range of events to include in the results.
      * @return A {@link UsageEvents}.
      */
-    @SuppressWarnings("unchecked")
     public UsageEvents queryEvents(long beginTime, long endTime) {
         try {
             UsageEvents iter = mService.queryEvents(beginTime, endTime,
@@ -170,15 +170,13 @@ public final class UsageStatsManager {
      *
      * @param beginTime The inclusive beginning of the range of stats to include in the results.
      * @param endTime The exclusive end of the range of stats to include in the results.
-     * @return An {@link android.util.ArrayMap} keyed by package name or null if no stats are
+     * @return A {@link java.util.Map} keyed by package name, or null if no stats are
      *         available.
      */
-    public ArrayMap<String, UsageStats> queryAndAggregateUsageStats(long beginTime, long endTime) {
+    public Map<String, UsageStats> queryAndAggregateUsageStats(long beginTime, long endTime) {
         List<UsageStats> stats = queryUsageStats(INTERVAL_BEST, beginTime, endTime);
         if (stats.isEmpty()) {
-            @SuppressWarnings("unchecked")
-            ArrayMap<String, UsageStats> emptyStats = ArrayMap.EMPTY;
-            return emptyStats;
+            return Collections.emptyMap();
         }
 
         ArrayMap<String, UsageStats> aggregatedStats = new ArrayMap<>();
