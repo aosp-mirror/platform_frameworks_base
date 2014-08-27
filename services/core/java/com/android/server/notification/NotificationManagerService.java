@@ -57,7 +57,6 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -127,6 +126,7 @@ public class NotificationManagerService extends SystemService {
     static final int MESSAGE_RANKING_CONFIG_CHANGE = 5;
     static final int MESSAGE_SEND_RANKING_UPDATE = 6;
     static final int MESSAGE_LISTENER_HINTS_CHANGED = 7;
+    static final int MESSAGE_LISTENER_NOTIFICATION_FILTER_CHANGED = 8;
 
     static final int LONG_DELAY = 3500; // 3.5 seconds
     static final int SHORT_DELAY = 2000; // 2 seconds
@@ -178,6 +178,7 @@ public class NotificationManagerService extends SystemService {
     private final ArraySet<ManagedServiceInfo> mListenersDisablingEffects = new ArraySet<>();
     private ComponentName mEffectsSuppressor;
     private int mListenerHints;  // right now, all hints are global
+    private int mInterruptionFilter;  // current ZEN mode as communicated to listeners
 
     // for enabling and disabling notification pulse behavior
     private boolean mScreenOn = true;
@@ -806,7 +807,7 @@ public class NotificationManagerService extends SystemService {
             @Override
             void onZenModeChanged() {
                 synchronized(mNotificationList) {
-                    updateListenerHintsLocked();
+                    updateInterruptionFilterLocked();
                 }
             }
         });
@@ -938,8 +939,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void updateListenerHintsLocked() {
-        final int hints = (mListenersDisablingEffects.isEmpty() ? 0 : HINT_HOST_DISABLE_EFFECTS) |
-                mZenModeHelper.getZenModeListenerHint();
+        final int hints = mListenersDisablingEffects.isEmpty() ? 0 : HINT_HOST_DISABLE_EFFECTS;
         if (hints == mListenerHints) return;
         mListenerHints = hints;
         scheduleListenerHintsChanged(hints);
@@ -952,6 +952,13 @@ public class NotificationManagerService extends SystemService {
         mEffectsSuppressor = suppressor;
         getContext().sendBroadcast(new Intent(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED)
                 .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY));
+    }
+
+    private void updateInterruptionFilterLocked() {
+        int interruptionFilter = mZenModeHelper.getZenModeListenerInterruptionFilter();
+        if (interruptionFilter == mInterruptionFilter) return;
+        mInterruptionFilter = interruptionFilter;
+        scheduleInterruptionFilterChanged(interruptionFilter);
     }
 
     private final IBinder mService = new INotificationManager.Stub() {
@@ -1318,7 +1325,6 @@ public class NotificationManagerService extends SystemService {
                     } else {
                         mListenersDisablingEffects.remove(info);
                     }
-                    mZenModeHelper.requestFromListener(hints);
                     updateListenerHintsLocked();
                     updateEffectsSuppressorLocked();
                 }
@@ -1331,6 +1337,29 @@ public class NotificationManagerService extends SystemService {
         public int getHintsFromListener(INotificationListener token) {
             synchronized (mNotificationList) {
                 return mListenerHints;
+            }
+        }
+
+        @Override
+        public void requestInterruptionFilterFromListener(INotificationListener token,
+                int interruptionFilter) throws RemoteException {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mNotificationList) {
+                    mListeners.checkServiceTokenLocked(token);
+                    mZenModeHelper.requestFromListener(interruptionFilter);
+                    updateInterruptionFilterLocked();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public int getInterruptionFilterFromListener(INotificationListener token)
+                throws RemoteException {
+            synchronized (mNotificationLight) {
+                return mInterruptionFilter;
             }
         }
 
@@ -2058,9 +2087,23 @@ public class NotificationManagerService extends SystemService {
         mHandler.obtainMessage(MESSAGE_LISTENER_HINTS_CHANGED, state, 0).sendToTarget();
     }
 
+    private void scheduleInterruptionFilterChanged(int listenerInterruptionFilter) {
+        mHandler.removeMessages(MESSAGE_LISTENER_NOTIFICATION_FILTER_CHANGED);
+        mHandler.obtainMessage(
+                MESSAGE_LISTENER_NOTIFICATION_FILTER_CHANGED,
+                listenerInterruptionFilter,
+                0).sendToTarget();
+    }
+
     private void handleListenerHintsChanged(int hints) {
         synchronized (mNotificationList) {
             mListeners.notifyListenerHintsChangedLocked(hints);
+        }
+    }
+
+    private void handleListenerInterruptionFilterChanged(int interruptionFilter) {
+        synchronized (mNotificationList) {
+            mListeners.notifyInterruptionFilterChanged(interruptionFilter);
         }
     }
 
@@ -2082,6 +2125,9 @@ public class NotificationManagerService extends SystemService {
                     break;
                 case MESSAGE_LISTENER_HINTS_CHANGED:
                     handleListenerHintsChanged(msg.arg1);
+                    break;
+                case MESSAGE_LISTENER_NOTIFICATION_FILTER_CHANGED:
+                    handleListenerInterruptionFilterChanged(msg.arg1);
                     break;
             }
         }
@@ -2701,6 +2747,20 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        public void notifyInterruptionFilterChanged(final int interruptionFilter) {
+            for (final ManagedServiceInfo serviceInfo : mServices) {
+                if (!serviceInfo.isEnabledForCurrentProfiles()) {
+                    continue;
+                }
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        notifyInterruptionFilterChanged(serviceInfo, interruptionFilter);
+                    }
+                });
+            }
+        }
+
         private void notifyPosted(final ManagedServiceInfo info,
                 final StatusBarNotification sbn, NotificationRankingUpdate rankingUpdate) {
             final INotificationListener listener = (INotificationListener)info.service;
@@ -2740,6 +2800,16 @@ public class NotificationManagerService extends SystemService {
                 listener.onListenerHintsChanged(hints);
             } catch (RemoteException ex) {
                 Log.e(TAG, "unable to notify listener (listener hints): " + listener, ex);
+            }
+        }
+
+        private void notifyInterruptionFilterChanged(ManagedServiceInfo info,
+                int interruptionFilter) {
+            final INotificationListener listener = (INotificationListener) info.service;
+            try {
+                listener.onInterruptionFilterChanged(interruptionFilter);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "unable to notify listener (interruption filter): " + listener, ex);
             }
         }
 
