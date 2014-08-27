@@ -1914,7 +1914,7 @@ public class DevicePolicyManager {
      * security exception will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param disabled Whether or not screen capture should be disabled.
+     * @param disabled Whether screen capture is disabled or not.
      */
     public void setScreenCaptureDisabled(ComponentName admin, boolean disabled) {
         if (mService != null) {
@@ -1941,6 +1941,42 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.getScreenCaptureDisabled(admin, userHandle);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Called by a device owner to set whether auto time is required. If auto time is
+     * required the user cannot set the date and time, but has to use network date and time.
+     *
+     * <p>Note: if auto time is required the user can still manually set the time zone.
+     *
+     * <p>The calling device admin must be a device owner. If it is not, a security exception will
+     * be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param required Whether auto time is set required or not.
+     */
+    public void setAutoTimeRequired(ComponentName admin, boolean required) {
+        if (mService != null) {
+            try {
+                mService.setAutoTimeRequired(admin, UserHandle.myUserId(), required);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * @return true if auto time is required.
+     */
+    public boolean getAutoTimeRequired() {
+        if (mService != null) {
+            try {
+                return mService.getAutoTimeRequired();
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }

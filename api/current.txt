@@ -5427,6 +5427,7 @@ package android.app.admin {
     method public java.lang.String[] getAccountTypesWithManagementDisabled();
     method public java.util.List<android.content.ComponentName> getActiveAdmins();
     method public android.os.Bundle getApplicationRestrictions(android.content.ComponentName, java.lang.String);
+    method public boolean getAutoTimeRequired();
     method public boolean getCameraDisabled(android.content.ComponentName);
     method public boolean getCrossProfileCallerIdDisabled(android.content.ComponentName);
     method public java.util.List<java.lang.String> getCrossProfileWidgetProviders(android.content.ComponentName);
@@ -5474,6 +5475,7 @@ package android.app.admin {
     method public void setAccountManagementDisabled(android.content.ComponentName, java.lang.String, boolean);
     method public boolean setApplicationHidden(android.content.ComponentName, java.lang.String, boolean);
     method public void setApplicationRestrictions(android.content.ComponentName, java.lang.String, android.os.Bundle);
+    method public void setAutoTimeRequired(android.content.ComponentName, boolean);
     method public void setCameraDisabled(android.content.ComponentName, boolean);
     method public void setCrossProfileCallerIdDisabled(android.content.ComponentName, boolean);
     method public void setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String);
