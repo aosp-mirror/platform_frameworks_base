@@ -51,7 +51,7 @@ import java.util.List;
 public class TrustAgentWrapper {
     private static final String EXTRA_COMPONENT_NAME = "componentName";
     private static final String TRUST_EXPIRED_ACTION = "android.server.trust.TRUST_EXPIRED_ACTION";
-    private static final String PERMISSION = "android.permission.PROVIDE_TRUST_AGENT";
+    private static final String PERMISSION = android.Manifest.permission.PROVIDE_TRUST_AGENT;
     private static final boolean DEBUG = false;
     private static final String TAG = "TrustAgentWrapper";
 
@@ -81,6 +81,7 @@ public class TrustAgentWrapper {
     private ITrustAgentService mTrustAgentService;
     private boolean mBound;
     private long mScheduledRestartUptimeMillis;
+    private long mMaximumTimeToLock; // from DevicePolicyManager
 
     // Trust state
     private boolean mTrusted;
@@ -90,6 +91,7 @@ public class TrustAgentWrapper {
     private IBinder mSetTrustAgentFeaturesToken;
     private AlarmManager mAlarmManager;
     private final Intent mAlarmIntent;
+    private PendingIntent mAlarmPendingIntent;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -118,10 +120,25 @@ public class TrustAgentWrapper {
                     boolean initiatedByUser = msg.arg1 != 0;
                     long durationMs = msg.getData().getLong(DATA_DURATION);
                     if (durationMs > 0) {
-                        long expiration = SystemClock.elapsedRealtime() + durationMs;
-                        PendingIntent op = PendingIntent.getBroadcast(mContext, 0, mAlarmIntent,
+                        final long duration;
+                        if (mMaximumTimeToLock != 0) {
+                            // Enforce DevicePolicyManager timeout.  This is here as a safeguard to
+                            // ensure trust agents are evaluating trust state at least as often as
+                            // the policy dictates. Admins that want more guarantees should be using
+                            // DevicePolicyManager#KEYGUARD_DISABLE_TRUST_AGENTS.
+                            duration = Math.min(durationMs, mMaximumTimeToLock);
+                            if (DEBUG) {
+                                Log.v(TAG, "DPM lock timeout in effect. Timeout adjusted from "
+                                    + durationMs + " to " + duration);
+                            }
+                        } else {
+                            duration = durationMs;
+                        }
+                        long expiration = SystemClock.elapsedRealtime() + duration;
+                        mAlarmPendingIntent = PendingIntent.getBroadcast(mContext, 0, mAlarmIntent,
                                 PendingIntent.FLAG_CANCEL_CURRENT);
-                        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, expiration, op);
+                        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, expiration,
+                                mAlarmPendingIntent);
                     }
                     mTrustManagerService.mArchive.logGrantTrust(mUserId, mName,
                             (mMessage != null ? mMessage.toString() : null),
@@ -244,12 +261,13 @@ public class TrustAgentWrapper {
 
         mAlarmIntent = new Intent(TRUST_EXPIRED_ACTION).putExtra(EXTRA_COMPONENT_NAME, mName);
         mAlarmIntent.setData(Uri.parse(mAlarmIntent.toUri(Intent.URI_INTENT_SCHEME)));
+        mAlarmIntent.setPackage(context.getPackageName());
 
         final IntentFilter alarmFilter = new IntentFilter(TRUST_EXPIRED_ACTION);
         alarmFilter.addDataScheme(mAlarmIntent.getScheme());
         final String pathUri = mAlarmIntent.toUri(Intent.URI_INTENT_SCHEME);
         alarmFilter.addDataPath(pathUri, PatternMatcher.PATTERN_LITERAL);
-        mContext.registerReceiver(mBroadcastReceiver, alarmFilter);
+        mContext.registerReceiver(mBroadcastReceiver, alarmFilter, PERMISSION, null);
 
         // Schedules a restart for when connecting times out. If the connection succeeds,
         // the restart is canceled in mCallback's onConnected.
@@ -317,6 +335,17 @@ public class TrustAgentWrapper {
                         mSetTrustAgentFeaturesToken = new Binder();
                         mTrustAgentService.setTrustAgentFeaturesEnabled(bundle,
                                 mSetTrustAgentFeaturesToken);
+                    }
+                }
+                final long maxTimeToLock = dpm.getMaximumTimeToLock(null);
+                if (maxTimeToLock != mMaximumTimeToLock) {
+                    // If the timeout changes, cancel the alarm and send a timeout event to have
+                    // the agent re-evaluate trust.
+                    mMaximumTimeToLock = maxTimeToLock;
+                    if (mAlarmPendingIntent != null) {
+                        mAlarmManager.cancel(mAlarmPendingIntent);
+                        mAlarmPendingIntent = null;
+                        mHandler.sendEmptyMessage(MSG_TRUST_TIMEOUT);
                     }
                 }
             }
