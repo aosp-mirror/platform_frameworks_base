@@ -119,6 +119,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // other CEC devices since they might not have logical address.
     private final ArraySet<Integer> mCecSwitches = new ArraySet<Integer>();
 
+    private final HdmiLogger mSafeLogger = new HdmiLogger(TAG);
+
     HdmiCecLocalDeviceTv(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_TV);
         mPrevPortId = Constants.INVALID_PORT_ID;
@@ -698,6 +700,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     // # Seq 25
     void setSystemAudioMode(boolean on, boolean updateSetting) {
+        mSafeLogger.debug(String.format("System Audio Mode change[old:%b new:%b]",
+                mSystemAudioActivated, on));
+
         if (updateSetting) {
             mService.writeBooleanSetting(Global.HDMI_SYSTEM_AUDIO_ENABLED, on);
         }
@@ -711,7 +716,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     private void updateAudioManagerForSystemAudio(boolean on) {
-        // TODO: remove output device, once update AudioManager api.
         mService.getAudioManager().setHdmiSystemAudioSupported(on);
     }
 
@@ -931,6 +935,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected boolean handleSetSystemAudioMode(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (!isMessageForSystemAudio(message)) {
+            mSafeLogger.warning("Invalid <Set System Audio Mode> message:" + message);
             return false;
         }
         SystemAudioActionFromAvr action = new SystemAudioActionFromAvr(this,
@@ -944,6 +949,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected boolean handleSystemAudioModeStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (!isMessageForSystemAudio(message)) {
+            mSafeLogger.warning("Invalid <System Audio Mode Status> message:" + message);
             return false;
         }
         setSystemAudioMode(HdmiUtils.parseCommandParamSystemAudioStatus(message), true);
@@ -992,13 +998,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     private boolean isMessageForSystemAudio(HdmiCecMessage message) {
-        if (message.getSource() != Constants.ADDR_AUDIO_SYSTEM
-                || message.getDestination() != Constants.ADDR_TV
-                || getAvrDeviceInfo() == null) {
-            Slog.w(TAG, "Skip abnormal CecMessage: " + message);
-            return false;
-        }
-        return true;
+        return message.getSource() == Constants.ADDR_AUDIO_SYSTEM
+                && (message.getDestination() == Constants.ADDR_TV
+                        || message.getDestination() == Constants.ADDR_BROADCAST)
+                && getAvrDeviceInfo() != null;
     }
 
     /**
