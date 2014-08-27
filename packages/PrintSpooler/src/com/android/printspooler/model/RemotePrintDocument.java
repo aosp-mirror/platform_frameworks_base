@@ -258,7 +258,8 @@ public final class RemotePrintDocument {
             Log.i(LOG_TAG, "[CALLED] finish()");
         }
         if (mState != STATE_STARTED && mState != STATE_UPDATED
-                && mState != STATE_FAILED && mState != STATE_CANCELING) {
+                && mState != STATE_FAILED && mState != STATE_CANCELING
+                && mState != STATE_CANCELED) {
             throw new IllegalStateException("Cannot finish in state:"
                     + stateToString(mState));
         }
