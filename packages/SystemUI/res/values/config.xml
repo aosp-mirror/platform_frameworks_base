@@ -62,6 +62,9 @@
     <!-- Vibration duration for GlowPadView used in SearchPanelView -->
     <integer translatable="false" name="config_search_panel_view_vibration_duration">20</integer>
 
+    <!-- Show camera affordance on Keyguard -->
+    <bool name="config_keyguardShowCameraAffordance">true</bool>
+
     <!-- The length of the vibration when the notification pops open. -->
     <integer name="one_finger_pop_duration_ms">10</integer>
 
