@@ -89,6 +89,7 @@ public class TrustAgentService extends Service {
     /**
      * A white list of features that the given trust agent should support when otherwise disabled
      * by device policy.
+     * @hide
      */
     public static final String KEY_FEATURES = "trust_agent_features";
 
@@ -184,6 +185,7 @@ public class TrustAgentService extends Service {
      *
      * @param options Option feature bundle.
      * @return true if the {@link TrustAgentService} supports this feature.
+     * @hide
      */
     public boolean onSetTrustAgentFeaturesEnabled(Bundle options) {
         return false;
