@@ -99,6 +99,11 @@ final class HdmiCecController {
     // Stores the local CEC devices in the system. Device type is used for key.
     private final SparseArray<HdmiCecLocalDevice> mLocalDevices = new SparseArray<>();
 
+    @IoThreadOnly
+    private final HdmiLogger mIoThreadLogger = new HdmiLogger(TAG);
+    @ServiceThreadOnly
+    private final HdmiLogger mServiceThreadLogger = new HdmiLogger(TAG);
+
     // Private constructor.  Use HdmiCecController.create().
     private HdmiCecController(HdmiControlService service) {
         mService = service;
@@ -202,6 +207,9 @@ final class HdmiCecController {
         }
 
         final int assignedAddress = logicalAddress;
+        mIoThreadLogger.debug(
+                String.format("New logical address for device [%d]: [preferred:%d, assigned:%d]",
+                        deviceType, preferredAddress, assignedAddress));
         if (callback != null) {
             runOnServiceThread(new Runnable() {
                 @Override
@@ -438,6 +446,7 @@ final class HdmiCecController {
                         allocated.add(address);
                     }
                 }
+                mIoThreadLogger.debug("DevicePollingResult:" + allocated);
                 if (callback != null) {
                     runOnServiceThread(new Runnable() {
                         @Override
@@ -539,6 +548,7 @@ final class HdmiCecController {
         runOnIoThread(new Runnable() {
             @Override
             public void run() {
+                mIoThreadLogger.debug("SendCommand:" + cecMessage);
                 byte[] body = buildBody(cecMessage.getOpcode(), cecMessage.getParams());
                 int i = 0;
                 int errorCode = Constants.SEND_RESULT_SUCCESS;
@@ -572,7 +582,9 @@ final class HdmiCecController {
     @ServiceThreadOnly
     private void handleIncomingCecCommand(int srcAddress, int dstAddress, byte[] body) {
         assertRunOnServiceThread();
-        onReceiveCommand(HdmiCecMessageBuilder.of(srcAddress, dstAddress, body));
+        HdmiCecMessage command = HdmiCecMessageBuilder.of(srcAddress, dstAddress, body);
+        mServiceThreadLogger.debug("ReceiveCommand:" + command);
+        onReceiveCommand(command);
     }
 
     /**
@@ -581,6 +593,8 @@ final class HdmiCecController {
     @ServiceThreadOnly
     private void handleHotplug(int port, boolean connected) {
         assertRunOnServiceThread();
+        mServiceThreadLogger.debug(
+                "Hotplug event:[port:" + port + " , connected:" + connected + "]");
         mService.onHotplug(port, connected);
     }
 
