@@ -226,6 +226,11 @@ public class ToolbarActionBar extends ActionBar {
     }
 
     @Override
+    public void setWindowTitle(CharSequence title) {
+        mDecorToolbar.setWindowTitle(title);
+    }
+
+    @Override
     public void setSubtitle(CharSequence subtitle) {
         mDecorToolbar.setSubtitle(subtitle);
     }
