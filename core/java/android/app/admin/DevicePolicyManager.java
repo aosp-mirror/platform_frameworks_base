@@ -2456,10 +2456,10 @@ public class DevicePolicyManager {
      * @throws IllegalArgumentException if the userId is invalid.
      */
     @SystemApi
-    public String getProfileOwnerNameAsUser(UserHandle user) throws IllegalArgumentException {
+    public String getProfileOwnerNameAsUser(int userId) throws IllegalArgumentException {
         if (mService != null) {
             try {
-                return mService.getProfileOwnerName(user.getIdentifier());
+                return mService.getProfileOwnerName(userId);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to get profile owner");
                 throw new IllegalArgumentException(

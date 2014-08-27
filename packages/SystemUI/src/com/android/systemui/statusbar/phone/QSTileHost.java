@@ -119,6 +119,7 @@ public class QSTileHost implements QSTile.Host {
                 for (QSTile<?> tile : mTiles.values()) {
                     tile.userSwitch(newUserId);
                 }
+                mSecurity.onUserSwitched(newUserId);
                 mObserver.register();
             }
         };
