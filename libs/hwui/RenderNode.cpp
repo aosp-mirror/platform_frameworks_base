@@ -653,41 +653,12 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
     handler(shadowOp, PROPERTY_SAVECOUNT, properties().getClipToBounds());
 }
 
-template <class T>
-int RenderNode::issueOperationsOfNegZChildren(
-        const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
-        OpenGLRenderer& renderer, T& handler) {
-    if (zTranslatedNodes.isEmpty()) return -1;
-
-    // create a save around the body of the ViewGroup's draw method, so that
-    // matrix/clip methods don't affect composited children
-    int shadowSaveCount = renderer.getSaveCount();
-    handler(new (handler.allocator()) SaveOp(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag),
-            PROPERTY_SAVECOUNT, properties().getClipToBounds());
-
-    issueOperationsOf3dChildren(zTranslatedNodes, kNegativeZChildren, renderer, handler);
-    return shadowSaveCount;
-}
-
-template <class T>
-void RenderNode::issueOperationsOfPosZChildren(int shadowRestoreTo,
-        const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
-        OpenGLRenderer& renderer, T& handler) {
-    if (zTranslatedNodes.isEmpty()) return;
-
-    LOG_ALWAYS_FATAL_IF(shadowRestoreTo < 0, "invalid save to restore to");
-    handler(new (handler.allocator()) RestoreToCountOp(shadowRestoreTo),
-            PROPERTY_SAVECOUNT, properties().getClipToBounds());
-    renderer.setOverrideLayerAlpha(1.0f);
-
-    issueOperationsOf3dChildren(zTranslatedNodes, kPositiveZChildren, renderer, handler);
-}
-
 #define SHADOW_DELTA 0.1f
 
 template <class T>
-void RenderNode::issueOperationsOf3dChildren(const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
-        ChildrenSelectMode mode, OpenGLRenderer& renderer, T& handler) {
+void RenderNode::issueOperationsOf3dChildren(ChildrenSelectMode mode,
+        const Matrix4& initialTransform, const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
+        OpenGLRenderer& renderer, T& handler) {
     const int size = zTranslatedNodes.size();
     if (size == 0
             || (mode == kNegativeZChildren && zTranslatedNodes[0].key > 0.0f)
@@ -695,6 +666,11 @@ void RenderNode::issueOperationsOf3dChildren(const Vector<ZDrawRenderNodeOpPair>
         // no 3d children to draw
         return;
     }
+
+    // Apply the base transform of the parent of the 3d children. This isolates
+    // 3d children of the current chunk from transformations made in previous chunks.
+    int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
+    renderer.setMatrix(initialTransform);
 
     /**
      * Draw shadows and (potential) casters mostly in order, but allow the shadows of casters
@@ -750,6 +726,7 @@ void RenderNode::issueOperationsOf3dChildren(const Vector<ZDrawRenderNodeOpPair>
         renderer.restoreToCount(restoreTo);
         drawIndex++;
     }
+    renderer.restoreToCount(rootRestoreTo);
 }
 
 template <class T>
@@ -869,6 +846,8 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
     bool quickRejected = properties().getClipToBounds()
             && renderer.quickRejectConservative(0, 0, properties().getWidth(), properties().getHeight());
     if (!quickRejected) {
+        Matrix4 initialTransform(*(renderer.currentTransform()));
+
         if (drawLayer) {
             handler(new (alloc) DrawLayerOp(mLayer, 0, 0),
                     renderer.getSaveCount() - 1, properties().getClipToBounds());
@@ -880,9 +859,9 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
                 Vector<ZDrawRenderNodeOpPair> zTranslatedNodes;
                 buildZSortedChildList(chunk, zTranslatedNodes);
 
-                // for 3d root, draw children with negative z values
-                int shadowRestoreTo = issueOperationsOfNegZChildren(zTranslatedNodes,
-                        renderer, handler);
+                issueOperationsOf3dChildren(kNegativeZChildren,
+                        initialTransform, zTranslatedNodes, renderer, handler);
+
                 const int saveCountOffset = renderer.getSaveCount() - 1;
                 const int projectionReceiveIndex = mDisplayListData->projectionReceiveIndex;
 
@@ -899,8 +878,8 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
                     }
                 }
 
-                // for 3d root, draw children with positive z values
-                issueOperationsOfPosZChildren(shadowRestoreTo, zTranslatedNodes, renderer, handler);
+                issueOperationsOf3dChildren(kPositiveZChildren,
+                        initialTransform, zTranslatedNodes, renderer, handler);
             }
         }
     }
