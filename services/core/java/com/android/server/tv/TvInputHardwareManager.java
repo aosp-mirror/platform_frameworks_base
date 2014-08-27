@@ -1021,7 +1021,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             synchronized (mLock) {
                 for (int i = 0; i < mConnections.size(); ++i) {
                     TvInputHardwareImpl impl = mConnections.valueAt(i).getHardwareImplLocked();
-                    impl.handleAudioSinkUpdated();
+                    if (impl != null) {
+                        impl.handleAudioSinkUpdated();
+                    }
                 }
             }
         }
