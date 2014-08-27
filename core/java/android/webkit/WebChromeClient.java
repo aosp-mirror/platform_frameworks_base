@@ -452,14 +452,16 @@ public class WebChromeClient {
      */
     public static abstract class FileChooserParams {
         /** Open single file. Requires that the file exists before allowing the user to pick it. */
-        public static final int OPEN = 0;
+        public static final int MODE_OPEN = 0;
         /** Like Open but allows multiple files to be selected. */
-        public static final int OPEN_MULTIPLE = 1;
+        public static final int MODE_OPEN_MULTIPLE = 1;
         /** Like Open but allows a folder to be selected. The implementation should enumerate
-            all files selected by this operation. */
-        public static final int OPEN_FOLDER = 2;
+            all files selected by this operation.
+            This feature is not supported at the moment.
+            @hide */
+        public static final int MODE_OPEN_FOLDER = 2;
         /**  Allows picking a nonexistent file and saving it. */
-        public static final int SAVE = 3;
+        public static final int MODE_SAVE = 3;
 
         /**
          * Returns a helper to simplify choosing and uploading files. The helper builds a default
@@ -474,7 +476,8 @@ public class WebChromeClient {
         public abstract int getMode();
 
         /**
-         * Returns an array of acceptable MIME types. The array will be empty if no
+         * Returns an array of acceptable MIME types. The returned MIME type
+         * could be partial such as audio/*. The array will be empty if no
          * acceptable types are specified.
          */
         public abstract String[] getAcceptTypes();
@@ -494,9 +497,9 @@ public class WebChromeClient {
         public abstract CharSequence getTitle();
 
         /**
-         * The file path of a default selection if specified, or null.
+         * The file name of a default selection if specified, or null.
          */
-        public abstract String getDefaultFilename();
+        public abstract String getFilenameHint();
     };
 
     /**

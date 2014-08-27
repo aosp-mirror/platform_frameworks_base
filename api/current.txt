@@ -36785,15 +36785,14 @@ package android.webkit {
   public static abstract class WebChromeClient.FileChooserParams {
     ctor public WebChromeClient.FileChooserParams();
     method public abstract java.lang.String[] getAcceptTypes();
-    method public abstract java.lang.String getDefaultFilename();
+    method public abstract java.lang.String getFilenameHint();
     method public abstract int getMode();
     method public abstract java.lang.CharSequence getTitle();
     method public abstract android.webkit.WebChromeClient.UploadHelper getUploadHelper();
     method public abstract boolean isCaptureEnabled();
-    field public static final int OPEN = 0; // 0x0
-    field public static final int OPEN_FOLDER = 2; // 0x2
-    field public static final int OPEN_MULTIPLE = 1; // 0x1
-    field public static final int SAVE = 3; // 0x3
+    field public static final int MODE_OPEN = 0; // 0x0
+    field public static final int MODE_OPEN_MULTIPLE = 1; // 0x1
+    field public static final int MODE_SAVE = 3; // 0x3
   }
 
   public static abstract class WebChromeClient.UploadHelper {
