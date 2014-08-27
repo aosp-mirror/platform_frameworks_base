@@ -66,8 +66,7 @@ public class Typeface {
     static Map<String, Typeface> sSystemFontMap;
     static FontFamily[] sFallbackFonts;
 
-    static final String SYSTEM_FONTS_CONFIG = "system_fonts.xml";
-    static final String FALLBACK_FONTS_CONFIG = "fallback_fonts.xml";
+    static final String FONTS_CONFIG = "fonts.xml";
 
     /**
      * @hide
@@ -261,10 +260,9 @@ public class Typeface {
     }
 
     private static FontFamily makeFamilyFromParsed(FontListParser.Family family) {
-        // TODO: expand to handle attributes like lang and variant
         FontFamily fontFamily = new FontFamily(family.lang, family.variant);
-        for (String fontFile : family.fontFiles) {
-            fontFamily.addFont(fontFile);
+        for (FontListParser.Font font : family.fonts) {
+            fontFamily.addFontWeightStyle(font.fontName, font.weight, font.isItalic);
         }
         return fontFamily;
     }
@@ -277,48 +275,53 @@ public class Typeface {
     private static void init() {
         // Load font config and initialize Minikin state
         File systemFontConfigLocation = getSystemFontConfigLocation();
-        File systemConfigFilename = new File(systemFontConfigLocation, SYSTEM_FONTS_CONFIG);
-        File configFilename = new File(systemFontConfigLocation, FALLBACK_FONTS_CONFIG);
+        File configFilename = new File(systemFontConfigLocation, FONTS_CONFIG);
         try {
-            // TODO: throws an exception non-Minikin builds, to fail early;
-            // remove when Minikin-only
-            new FontFamily();
+            FileInputStream fontsIn = new FileInputStream(configFilename);
+            FontListParser.Config fontConfig = FontListParser.parse(fontsIn);
 
-            FileInputStream systemIn = new FileInputStream(systemConfigFilename);
-            List<FontListParser.Family> systemFontConfig = FontListParser.parse(systemIn);
-
-            FileInputStream fallbackIn = new FileInputStream(configFilename);
             List<FontFamily> familyList = new ArrayList<FontFamily>();
             // Note that the default typeface is always present in the fallback list;
             // this is an enhancement from pre-Minikin behavior.
-            familyList.add(makeFamilyFromParsed(systemFontConfig.get(0)));
-            for (Family f : FontListParser.parse(fallbackIn)) {
-                familyList.add(makeFamilyFromParsed(f));
+            for (int i = 0; i < fontConfig.families.size(); i++) {
+                Family f = fontConfig.families.get(i);
+                if (i == 0 || f.name == null) {
+                    familyList.add(makeFamilyFromParsed(f));
+                }
             }
             sFallbackFonts = familyList.toArray(new FontFamily[familyList.size()]);
             setDefault(Typeface.createFromFamilies(sFallbackFonts));
 
             Map<String, Typeface> systemFonts = new HashMap<String, Typeface>();
-            for (int i = 0; i < systemFontConfig.size(); i++) {
+            for (int i = 0; i < fontConfig.families.size(); i++) {
                 Typeface typeface;
-                Family f = systemFontConfig.get(i);
-                if (i == 0) {
-                    // The first entry is the default typeface; no sense in duplicating
-                    // the corresponding FontFamily.
-                    typeface = sDefaultTypeface;
-                } else {
-                    FontFamily fontFamily = makeFamilyFromParsed(f);
-                    FontFamily[] families = { fontFamily };
-                    typeface = Typeface.createFromFamiliesWithDefault(families);
+                Family f = fontConfig.families.get(i);
+                if (f.name != null) {
+                    if (i == 0) {
+                        // The first entry is the default typeface; no sense in
+                        // duplicating the corresponding FontFamily.
+                        typeface = sDefaultTypeface;
+                    } else {
+                        FontFamily fontFamily = makeFamilyFromParsed(f);
+                        FontFamily[] families = { fontFamily };
+                        typeface = Typeface.createFromFamiliesWithDefault(families);
+                    }
+                    systemFonts.put(f.name, typeface);
                 }
-                for (String name : f.names) {
-                    systemFonts.put(name, typeface);
+            }
+            for (FontListParser.Alias alias : fontConfig.aliases) {
+                Typeface base = systemFonts.get(alias.toName);
+                Typeface newFace = base;
+                int weight = alias.weight;
+                if (weight != 400) {
+                    newFace = new Typeface(nativeCreateWeightAlias(base.native_instance, weight));
                 }
+                systemFonts.put(alias.name, newFace);
             }
             sSystemFontMap = systemFonts;
 
         } catch (RuntimeException e) {
-            Log.w(TAG, "Didn't create default family (most likely, non-Minikin build)");
+            Log.w(TAG, "Didn't create default family (most likely, non-Minikin build)", e);
             // TODO: normal in non-Minikin case, remove or make error when Minikin-only
         } catch (FileNotFoundException e) {
             Log.e(TAG, "Error opening " + configFilename);
@@ -383,6 +386,7 @@ public class Typeface {
     }
 
     private static native long nativeCreateFromTypeface(long native_instance, int style);
+    private static native long nativeCreateWeightAlias(long native_instance, int weight);
     private static native void nativeUnref(long native_instance);
     private static native int  nativeGetStyle(long native_instance);
     private static native long nativeCreateFromArray(long[] familyArray);

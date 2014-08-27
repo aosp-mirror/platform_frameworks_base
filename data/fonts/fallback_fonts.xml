@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
+    NOTE: this file is the legacy format, for compatibility with apps. The new,
+    more flexible format is fonts.xml. Please keep the two in sync until the legacy
+    format can be fully removed.
+
     Fallback Fonts
 
     This file specifies the fonts, and the priority order, that will be searched for any
