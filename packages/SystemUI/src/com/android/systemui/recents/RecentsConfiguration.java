@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -187,7 +188,7 @@ public class RecentsConfiguration {
                 res.getInteger(R.integer.recents_filter_animate_new_views_duration);
 
         // Loading
-        maxNumTasksToLoad = res.getInteger(R.integer.recents_max_num_tasks_to_load);
+        maxNumTasksToLoad = ActivityManager.getMaxRecentTasksStatic();
 
         // Search Bar
         searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);

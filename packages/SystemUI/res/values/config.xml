@@ -145,8 +145,6 @@
     <integer name="recents_animate_task_view_remove_duration">250</integer>
     <!-- The minimum alpha for the dim applied to cards that go deeper into the stack. -->
     <integer name="recents_max_task_stack_view_dim">96</integer>
-    <!-- The number of tasks that RecentsTaskLoader should load. -->
-    <integer name="recents_max_num_tasks_to_load">50</integer>
     <!-- The delay to enforce between each alt-tab key press. -->
     <integer name="recents_alt_tab_key_delay">200</integer>
     <!-- Transposes the recents layout in landscape. -->

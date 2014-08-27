@@ -94,6 +94,8 @@ final class TaskRecord {
     ComponentName realActivity; // The actual activity component that started the task.
     long firstActiveTime;   // First time this task was active.
     long lastActiveTime;    // Last time this task was active, including sleep.
+    boolean inRecents;      // Actually in the recents list?
+    boolean isAvailable;    // Is the activity available to be launched?
     boolean rootWasReset;   // True if the intent at the root of the task had
                             // the FLAG_ACTIVITY_RESET_TASK_IF_NEEDED flag.
     boolean autoRemoveRecents;  // If true, we should automatically remove the task from
@@ -170,6 +172,7 @@ final class TaskRecord {
         mAffiliatedTaskId = _taskId;
         voiceSession = _voiceSession;
         voiceInteractor = _voiceInteractor;
+        isAvailable = true;
         mActivities = new ArrayList<ActivityRecord>();
         setIntent(_intent, info);
     }
@@ -184,6 +187,7 @@ final class TaskRecord {
         mAffiliatedTaskId = _taskId;
         voiceSession = null;
         voiceInteractor = null;
+        isAvailable = true;
         mActivities = new ArrayList<ActivityRecord>();
         setIntent(_intent, info);
 
@@ -191,8 +195,9 @@ final class TaskRecord {
         isPersistable = true;
         mCallingUid = info.applicationInfo.uid;
         mCallingPackage = info.packageName;
-        // Clamp to [1, 100].
-        maxRecents = Math.min(Math.max(info.maxRecents, 1), 100);
+        // Clamp to [1, max].
+        maxRecents = Math.min(Math.max(info.maxRecents, 1),
+                ActivityManager.getMaxAppRecentsLimitStatic());
 
         taskType = APPLICATION_ACTIVITY_TYPE;
         mTaskToReturnTo = HOME_ACTIVITY_TYPE;
@@ -224,6 +229,7 @@ final class TaskRecord {
         realActivity = _realActivity;
         origActivity = _origActivity;
         rootWasReset = _rootWasReset;
+        isAvailable = true;
         autoRemoveRecents = _autoRemoveRecents;
         askedCompatMode = _askedCompatMode;
         taskType = _taskType;
@@ -369,6 +375,15 @@ final class TaskRecord {
         }
         setPrevAffiliate(null);
         setNextAffiliate(null);
+    }
+
+    void removedFromRecents(TaskPersister persister) {
+        disposeThumbnail();
+        closeRecentsChain();
+        if (inRecents) {
+            inRecents = false;
+            persister.wakeup(this, false);
+        }
     }
 
     void setTaskToAffiliateWith(TaskRecord taskToAffiliateWith) {
@@ -531,8 +546,9 @@ final class TaskRecord {
             isPersistable = r.isPersistable();
             mCallingUid = r.launchedFromUid;
             mCallingPackage = r.launchedFromPackage;
-            // Clamp to [1, 100].
-            maxRecents = Math.min(Math.max(r.info.maxRecents, 1), 100);
+            // Clamp to [1, max].
+            maxRecents = Math.min(Math.max(r.info.maxRecents, 1),
+                    ActivityManager.getMaxAppRecentsLimitStatic());
         } else {
             // Otherwise make all added activities match this one.
             r.mActivityType = taskType;
@@ -1062,8 +1078,10 @@ final class TaskRecord {
             pw.print(prefix); pw.print("realActivity=");
             pw.println(realActivity.flattenToShortString());
         }
-        if (autoRemoveRecents || taskType != 0 || mTaskToReturnTo != 0 || numFullscreen != 0) {
+        if (autoRemoveRecents || isPersistable || taskType != 0 || mTaskToReturnTo != 0
+                || numFullscreen != 0) {
             pw.print(prefix); pw.print("autoRemoveRecents="); pw.print(autoRemoveRecents);
+                    pw.print(" isPersistable="); pw.print(isPersistable);
                     pw.print(" numFullscreen="); pw.print(numFullscreen);
                     pw.print(" taskType="); pw.print(taskType);
                     pw.print(" mTaskToReturnTo="); pw.println(mTaskToReturnTo);
@@ -1073,22 +1091,41 @@ final class TaskRecord {
                     pw.print(" mNeverRelinquishIdentity="); pw.print(mNeverRelinquishIdentity);
                     pw.print(" mReuseTask="); pw.println(mReuseTask);
         }
+        if (mAffiliatedTaskId != taskId || mPrevAffiliateTaskId != -1 || mPrevAffiliate != null
+                || mNextAffiliateTaskId != -1 || mNextAffiliate != null) {
+            pw.print(prefix); pw.print("affiliation="); pw.print(mAffiliatedTaskId);
+                    pw.print(" prevAffiliation="); pw.print(mPrevAffiliateTaskId);
+                    pw.print(" (");
+                    if (mPrevAffiliate == null) {
+                        pw.print("null");
+                    } else {
+                        pw.print(Integer.toHexString(System.identityHashCode(mPrevAffiliate)));
+                    }
+                    pw.print(") nextAffiliation="); pw.print(mNextAffiliateTaskId);
+                    pw.print(" (");
+                    if (mNextAffiliate == null) {
+                        pw.print("null");
+                    } else {
+                        pw.print(Integer.toHexString(System.identityHashCode(mNextAffiliate)));
+                    }
+                    pw.println(")");
+        }
         pw.print(prefix); pw.print("Activities="); pw.println(mActivities);
-        if (!askedCompatMode) {
-            pw.print(prefix); pw.print("askedCompatMode="); pw.println(askedCompatMode);
+        if (!askedCompatMode || !inRecents || !isAvailable) {
+            pw.print(prefix); pw.print("askedCompatMode="); pw.print(askedCompatMode);
+                    pw.print(" inRecents="); pw.print(inRecents);
+                    pw.print(" isAvailable="); pw.println(isAvailable);
         }
         pw.print(prefix); pw.print("lastThumbnail="); pw.print(mLastThumbnail);
-                pw.print(" lastThumbnailFile="); pw.print(mLastThumbnailFile);
-                pw.print(" lastDescription="); pw.println(lastDescription);
+                pw.print(" lastThumbnailFile="); pw.println(mLastThumbnailFile);
+        if (lastDescription != null) {
+            pw.print(prefix); pw.print("lastDescription="); pw.println(lastDescription);
+        }
         pw.print(prefix); pw.print("hasBeenVisible="); pw.print(hasBeenVisible);
                 pw.print(" firstActiveTime="); pw.print(lastActiveTime);
                 pw.print(" lastActiveTime="); pw.print(lastActiveTime);
                 pw.print(" (inactive for ");
                 pw.print((getInactiveDuration()/1000)); pw.println("s)");
-        pw.print(prefix); pw.print("isPersistable="); pw.print(isPersistable);
-                pw.print(" affiliation="); pw.print(mAffiliatedTaskId);
-                pw.print(" prevAffiliation="); pw.print(mPrevAffiliateTaskId);
-                pw.print(" nextAffiliation="); pw.println(mNextAffiliateTaskId);
     }
 
     @Override
