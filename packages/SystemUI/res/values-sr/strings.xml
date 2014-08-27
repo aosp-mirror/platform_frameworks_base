@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"откључај"</string>
     <string name="phone_label" msgid="2320074140205331708">"отвори телефон"</string>
     <string name="camera_label" msgid="7261107956054836961">"отвори камеру"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"Уређај је заштићен."</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"Уређај није заштићен."</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"Уређај је заштићен, поуздани агент је активан."</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"Уређај није заштићен, поуздани агент је активан."</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"Покренуто је препознавање лица, поуздани агент је активан."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Дугме Промени метод уноса."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Дугме Зум компатибилности."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Зумирање са мањег на већи екран."</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Овим уређајем управља:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nАдминистратор може да надгледа мрежне активности, укључујући имејлове, апликације и безбедне веб-сајтове. Више информација потражите од администратора.\n\nДали сте и дозволу апликацији <xliff:g id="APPLICATION">%2$s</xliff:g> да подешава VPN везу. И та апликација може да надгледа мрежне активности."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Овим уређајем управља:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nАдминистратор може да надгледа мрежне активности, укључујући имејлове, апликације и безбедне веб-сајтове. Више информација потражите од администратора.\n\nПовезани сте и са VPN-ом („<xliff:g id="APPLICATION">%2$s</xliff:g>“). И добављач VPN услуге може да надгледа мрежне активности."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Уређај ће остати закључан док га не откључате ручно"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"Звук је искључио/ла <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

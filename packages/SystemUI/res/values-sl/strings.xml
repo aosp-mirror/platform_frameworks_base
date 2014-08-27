@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"odkleni"</string>
     <string name="phone_label" msgid="2320074140205331708">"odpri telefon"</string>
     <string name="camera_label" msgid="7261107956054836961">"odpri fotoaparat"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"Naprava zavarovana."</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"Naprava ni zavarovana."</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"Naprava zavarovana, posrednik zaupanja aktiven."</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"Naprava ni zavarovana, posrednik zaupanja aktiven."</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"Prepoznavanje obraza vklopljeno, posrednik zaupanja aktiven."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Gumb za preklop načina vnosa."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Gumb povečave za združljivost."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Povečava manjšega na večji zaslon."</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"To napravo upravlja:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nSkrbnik lahko nadzira vašo dejavnost v omrežju, vključno z e-pošto, aplikacijami in varnimi spletnimi mesti. Če želite več informacij, se obrnite na skrbnika.\n\nPoleg tega ste aplikaciji »<xliff:g id="APPLICATION">%2$s</xliff:g>« dovolili vzpostavitev povezave z omrežjem VPN. Vašo dejavnost v omrežju lahko nadzoruje tudi ta aplikacija."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"To napravo upravlja:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nSkrbnik lahko nadzira vašo dejavnost v omrežju, vključno z e-pošto, aplikacijami in varnimi spletnimi mesti. Če želite več informacij, se obrnite na skrbnika.\n\nPoleg tega ste povezani v omrežje VPN (»<xliff:g id="APPLICATION">%2$s</xliff:g>«). Vašo dejavnost v omrežju lahko nadzira tudi ponudnik omrežja VPN."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Naprava bo ostala zaklenjena, dokler je ročno ne odklenete."</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"Izklop zvoka: <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

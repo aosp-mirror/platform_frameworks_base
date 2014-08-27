@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"qulfdan chiqarish"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefonni ochish"</string>
     <string name="camera_label" msgid="7261107956054836961">"kamerani ochish"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"Qurilma himoyalangan."</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"Qurilma himoyalanmagan."</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"Qurilma himoyalangan, ishonchli agent ishlab turibdi."</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"Qurilma himoyalanmagan, ishonchli agent ishlab turibdi."</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"Yuzingiz tekshirilmoqda, ishonchli agent ishlab turibdi."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Kiritish uslubi tugmasini almashtirish."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Kattalashtirish tugmasi mosligi."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Kattaroq ekran uchun kichikroqni kattalashtirish."</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Bu qurilma boshqaruvchisi:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nAdmin-ngiz tarmoqdagi faollik – e-pochta, ilova va xavfsiz veb-saytlardagi harakat-ni kuzatishi m-n. Qo‘shimcha ma’lumot olish u-n admin-ga murojaat qiling.\n\nSiz “<xliff:g id="APPLICATION">%2$s</xliff:g>” ilovasiga VPN ulanishini sozlash u-n ruxsat berdingiz. U ham tarmoqdagi faolligingizni kuzatishi mumkin."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Bu qurilma boshqaruvchisi:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nAdmin-ngiz tarmoqdagi faollik – e-pochta, ilova va xavfsiz veb-saytlardagi harakat-ni kuzatishi m-n. Qo‘shimcha ma’lumot olish u-n admin-ga murojaat qiling.\n\nSiz VPN tarmog‘iga ham ulangansiz (“<xliff:g id="APPLICATION">%2$s</xliff:g>”). VPN xizmati ta’minotchingiz ham tarmoqdagi faollingizni kuzatishi m-n."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Qurilma qo‘lda qulfdan chiqarilmaguncha qulflangan holatda qoladi"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"“<xliff:g id="THIRD_PARTY">%1$s</xliff:g>” tomonidan ovozsiz qilingan"</string>
 </resources>

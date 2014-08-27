@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"بازکردن قفل"</string>
     <string name="phone_label" msgid="2320074140205331708">"باز کردن تلفن"</string>
     <string name="camera_label" msgid="7261107956054836961">"باز کردن دوربین"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"دستگاه ایمن شد."</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"دستگاه ایمن نشده است."</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"دستگاه ایمن شد، نماینده معتمد فعال است."</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"دستگاه ایمن نشده است، نماینده معتمد فعال است."</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"تشخیص چهره در حال اجرا و نماینده معتمد فعال است."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"کلید تغییر روش ورود متن."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"دکمه بزرگنمایی سازگار."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"بزرگنمایی از صفحه‌های کوچک تا بزرگ."</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"‏مدیریت این دستگاه توسط:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nسرپرستتان می‌تواند فعالیت شبکه‌تان را کنترل کند، از جمله ایمیل‌ها، برنامه‌ها و وب‌سایت‌های ایمن. برای کسب اطلاعات بیشتر، با سرپرستتان تماس بگیرید.\n\nهمچنین، به \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" اجازه دادید تا اتصال VPN را تنظیم کند. این برنامه می‌تواند فعالیت شبکه را نیز کنترل کند."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"‏مدیریت این دستگاه توسط:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nسرپرستتان می‌تواند فعالیت شبکه‌تان را کنترل کند از جمله ایمیل‌ها، برنامه‌ها، و وب‌سایت‌های ایمن. برای کسب اطلاعات بیشتر، با سرپرستتان تماس بگیرید.\n\nهمچنین، به VPN‏ ‎‏(\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") وصل هستید. ارائه‌دهنده سرویس VPN شما می‌تواند فعالیت شبکه را نیز کنترل کند."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"دستگاه قفل باقی می‌ماند تا زمانی که قفل آن را به صورت دستی باز کنید"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> آن را بی‌صدا کرد"</string>
 </resources>

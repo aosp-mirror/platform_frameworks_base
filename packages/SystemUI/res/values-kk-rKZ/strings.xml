@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"бекітпесін ашу"</string>
     <string name="phone_label" msgid="2320074140205331708">"телефонды ашу"</string>
     <string name="camera_label" msgid="7261107956054836961">"камераны ашу"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"Құрылғы қорғалған."</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"Құрылғы қорғалмаған."</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"Құрылғы қорғалған, сенімді агент белсенді."</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"Құрылғы қорғалмаған, сенімді агент белсенді."</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"Бетті анықтау орындалуда, сенімді агент белсенді."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Енгізу әдісі түймесін ауыстыру."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Үйлесімділік ұлғайту түймесі."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Үлкендеу экранда кішірейту."</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Бұл құр. келесі ұйым бас.:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nӘкімші желілік белсенділікті, соның ішінде, электрондық хаб-ды, қолд-ды және қорғалған веб-сайттарды бақ. мүмкін. Қосымша ақпарат алу үшін әкімшіге хабарласыңыз.\n\nСондай-ақ, сіз «<xliff:g id="APPLICATION">%2$s</xliff:g>» қолд-на VPN байланысын орнатуға рұқсат еттіңіз. Бұл қолд. да желілік белс-ті бақылауы мүмкін."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Бұл құрылғыны келесі ұйым басқарады:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nӘкімші желілік белсенділікті, соның ішінде, электрондық хабарларды, қолданбаларды және қорғалған веб-сайттарды бақылауы мүмкін. Қосымша ақпарат алу үшін әкімшіге хабарласыңыз.\n\nСондай-ақ, сіз VPN («<xliff:g id="APPLICATION">%2$s</xliff:g>») желісіне қосылғансыз. VPN қызмет жет-сі де жел. белс-ті бақ. мүм."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Қолмен бекітпесін ашқанша құрылғы бекітілген күйде қалады"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> үнін өшірген"</string>
 </resources>

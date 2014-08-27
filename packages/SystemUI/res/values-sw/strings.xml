@@ -85,16 +85,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"fungua"</string>
     <string name="phone_label" msgid="2320074140205331708">"fungua simu"</string>
     <string name="camera_label" msgid="7261107956054836961">"fungua kamera"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"Kifaa kimewekewa ulinzi."</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"Kifaa hakijawekewa ulinzi."</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"Kifaa kimewekewa ulinzi, kipengele cha kutathmini hali ya kuaminika kimewashwa."</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"Kifaa hakijawekewa ulinzi, kipengele cha kutathmini hali ya kuaminika kimewashwa."</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"Utambuzi wa uso unaendeshwa, kipengele cha kutathmini hali ya kuaminika kimewashwa."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Swichi kitufe cha mbinu ingizi."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Kichupo cha kukuza kwa utangamanifu"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Kuza kidogo kwa skrini kubwa."</string>
@@ -197,8 +192,8 @@
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Tochi imewashwa."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Ugeuzaji rangi umezimwa."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Ugeuzaji rangi umewashwa."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mtandao-hewa wa simu ya mkononi umezimwa."</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mtandao-hewa wa simu ya mkononi umewashwa."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mtandao-hewa unaoweza kuhamishika umezimwa."</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mtandao-hewa unaoweza kuhamishika umewashwa."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Utumaji wa skrini umesitishwa."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Ung\'aavu wa skrini"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Data ya 2G-3G imezimwa"</string>
@@ -271,7 +266,7 @@
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Data ya simu ya mkononi"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Matumizi ya data"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Data iliyosalia"</string>
-    <string name="quick_settings_cellular_detail_over_limit" msgid="3242930457130971204">"Kikomo kimefikiwa - matumizi ya data yamesitishwa"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="3242930457130971204">"Kikomo kimefikiwa – matumizi ya data yamesitishwa"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> imetumika"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"kikomo <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Onyo <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
@@ -311,7 +306,7 @@
     <string name="guest_nickname" msgid="8059989128963789678">"Aliyealikwa"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"Ongeza aliyealikwa"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Ondoa aliyealikwa"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Ungependa kumuondoa aliyealikwa?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Ungependa kumwondoa aliyealikwa?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Programu zote na data katika kipindi hiki zitafutwa."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Ondoa"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Karibu tena, mwalikwa!"</string>
@@ -348,6 +343,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Kifaa hiki kinasimamiwa na:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nMsimamizi anaweza kufuatilia shughuli za mtandao wako ikiwa ni pamoja na barua pepe, programu na tovuti salama. Kwa maelezo zaidi, wasiliana na msimamizi wako.\n\nPia, umeruhusu \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" isanidi muunganisho wa VPN. Programu hii pia inaweza kufuatilia shughuli za mtandao wako."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Kifaa hiki kinasimamiwa na:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nMsimamizi anaweza kufuatilia shughuli za mtandao wako ikiwa ni pamoja na barua pepe, programu na tovuti salama. Kwa maelezo zaidi, wasiliana na msimamizi wako.\n\nPia, umeunganishwa kwenye VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). Mtoa huduma wako wa VPN pia anaweza kufuatilia shughuli za mtandao."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Kifaa kitaendelea kuwa katika hali ya kufungwa hadi utakapokifungua mwenyewe"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"Sauti imezimwa na <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

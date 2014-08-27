@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"i-unlock"</string>
     <string name="phone_label" msgid="2320074140205331708">"buksan ang telepono"</string>
     <string name="camera_label" msgid="7261107956054836961">"buksan ang camera"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"Naka-secure ang device."</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"Hindi naka-secure ang device."</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"Hindi naka-secure ang device, aktibo ang trust agent."</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"Hind naka-secure ang device, aktibo ang trust agent."</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"Gumagana ang face detection, aktibo ang trust agent."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Ilipat ang button na pamamaraan ng pag-input."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Button ng zoom ng pagiging tugma."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Mag-zoom nang mas maliit sa mas malaking screen."</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Ang device ay pinapamahalaan ng:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nMay kakayahan ang iyong administrator na subaybayan ang iyong aktibidad sa network kabilang ang mga email, apps at secure na website. Para sa higit pang impormasyon, makipag-ugnayan sa iyong administrator.\n\nGayundin, pinahintulutan mo ang \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" na mag-set up ng koneksyon sa VPN. Maaari ding subaybayan ng app na ito ang aktibidad sa network."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Ang device ay pinapamahalaan ng:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nMay kakayahan ang iyong administrator na subaybayan ang iyong aktibidad sa network kabilang ang mga email, apps at secure na website. Para sa higit pang impormasyon, makipag-ugnayan sa iyong administrator.\n\nGayundin, nakakonekta ka sa isang VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). Maaari ding subaybayan ng iyong VPN service provider ang mga aktibidad sa network."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Mananatiling naka-lock ang device hanggang sa manu-mano mong i-unlock"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"Na-mute ng <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

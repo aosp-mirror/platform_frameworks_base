@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"غیر مقفل کریں"</string>
     <string name="phone_label" msgid="2320074140205331708">"فون کھولیں"</string>
     <string name="camera_label" msgid="7261107956054836961">"کیمرا کھولیں"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"آلہ محفوظ ہے۔"</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"آلہ محفوظ نہیں ہے۔"</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"آلہ محفوظ ہے، ٹرسٹ ایجنٹ فعال ہے۔"</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"آلہ محفوظ نہیں ہے، ٹرسٹ ایجنٹ فعال ہے۔"</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"چہرے کی شناخت چل رہی ہے، ٹرسٹ ایجنٹ فعال ہے۔"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"اندراج کا طریقہ سوئچ کرنے کا بٹن۔"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"مطابقت پذیری زوم بٹن۔"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"چھوٹی سے بڑی اسکرین پر زوم کریں۔"</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"‏اس آلہ کا نظم مندرجہ ذیل کے ذریعے کیا جاتا ہے:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nآپ کا منتظم آپ کے نیٹ ورک کی سرگرمی بشمول ای میلز، ایپس اور محفوظ ویب سائٹس کو مانیٹر کرنے کا اہل ہے۔ مزید معلومات کیلئے، اپنے منتظم سے رابطہ کریں۔\n\nنیز، آپ نے \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" کو ایک VPN کنکشن ترتیب دینے کی اجازت دی ہے۔ یہ ایپ نیٹ ورک کی سرگرمی بھی مانیٹر کر سکتی ہے۔"</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"‏اس آلہ کا نظم مندرجہ ذیل کے ذریعے کیا جاتا ہے:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nآپ کا منتظم آپ کے نیٹ ورک کی سرگرمی بشمول ای میلز، ایپس اور محفوظ ویب سائٹس کو مانیٹر کرنے کا اہل ہے۔ مزید معلومات کیلئے، اپنے منتظم سے رابطہ کریں۔\n\nنیز، آپ ایک VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") سے منسلک ہیں۔ آپ کی VPN سروس کا فراہم کنندہ نیٹورک کی سرگرمی کو بھی مانیٹر کر سکتا ہے۔"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"آلہ اس وقت تک مقفل رہے گا جب تک آپ دستی طور پر اسے غیر مقفل نہ کریں"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> کے ذریعے خاموش کردہ"</string>
 </resources>

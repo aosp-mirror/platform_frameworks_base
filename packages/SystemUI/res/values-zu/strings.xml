@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"vula"</string>
     <string name="phone_label" msgid="2320074140205331708">"vula ifoni"</string>
     <string name="camera_label" msgid="7261107956054836961">"vula ikhamera"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"Idivayisi ivikelekile."</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"Idivayisi ayivikelekile."</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"Idivayisi ivikelekile, isisebenzeli esethembekile siyasebenza."</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"Idivayisi ayivikelekile, isisebenzeli esethembekile siyasebenza.."</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"Ukutholakala kobuso kuyasebenza, isisebenzeli esethembekile siyasebenza."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Vula indlela yokungena yenkinobho"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Inkinobho evumelekile yokusondeza"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Sondeza kancane esikrinini esikhudlwana"</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Le divayisi iphethwe i-:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nUmqondisi wakho uyakwazi ukwengamela umsebenzi wakho wenethiwekhi kufaka phakathi ama-imeyili, izinhlelo zokusebenza, namawebhusayithi aphephile. Ngolwazi olubanzi, xhumana nomqondisi wakho.\n\nFuthi, unike i-\"<xliff:g id="APPLICATION">%2$s</xliff:g>\" imvume yokusetha uxhumo le-VPN. Lolu hlelo lokusebenza lungangamela futhi umsebenzi wenethiwekhi."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Le divayisi iphathwe i-:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nUmqondisi wakho uyakwazi ukwengamela umsebenzi wenethiwekhi yakho kufaka phakathi ama-imeyili, izinhlelo zokusebenza, namawebhusayithi aphephile. Ngolwazi olubanzi, xhumana nomqondisi wakho.\n\nFuthi, uxhumekile ku-VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). Umhlinzeki wakho wesevisi ye-VPN angangamela futhi umsebenzi wenethiwekhi."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Idivayisi izohlala ikhiyekile uze uyivule ngokwenza"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"Ithuliswe ngu-<xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

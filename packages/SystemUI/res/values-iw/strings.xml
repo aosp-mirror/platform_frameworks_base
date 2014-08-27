@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"בטל את הנעילה"</string>
     <string name="phone_label" msgid="2320074140205331708">"פתח את הטלפון"</string>
     <string name="camera_label" msgid="7261107956054836961">"פתח את המצלמה"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"המכשיר מאובטח."</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"המכשיר אינו מאובטח."</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"המכשיר מאובטח, סביבה אמינה פעילה."</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"המכשיר אינו מאובטח, סביבה אמינה פעילה."</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"זיהוי פנים פועל, סביבה אמינה פעילה."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"לחצן החלפת שיטת קלט."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"לחצן מרחק מתצוגה של תאימות."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"שנה מרחק מתצוגה של מסך קטן לגדול יותר."</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"‏מכשיר זה מנוהל על ידי:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nמנהל המערכת שלך יכול לעקוב אחר הפעילות שלך ברשת, כולל הודעות דוא\"ל, אפליקציות, ואתרים מאובטחים. למידע נוסף, צור קשר עם מנהל המערכת שלך.\n\nכמו כן, נתת ל-\"<xliff:g id="APPLICATION">%2$s</xliff:g>\" הרשאה להגדרת חיבור VPN. גם אפליקציה זו יכולה לעקוב אחר הפעילות שלך ברשת."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"‏מכשיר זה מנוהל על ידי:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nמנהל המערכת שלך יכול לעקוב אחר הפעילות שלך ברשת, כולל הודעות דוא\"ל, אפליקציות, ואתרים מאובטחים. למידע נוסף, צור קשר עם מנהל המערכת שלך.\n\nכמו כן, אתה מחובר ל-VPN ‏‏(\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). גם ספק שירות ה-VPN שלך יכול לעקוב אחר הפעילות שלך ברשת."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"המכשיר יישאר נעול עד שתבטל את נעילתו באופן ידני"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"הושתק על ידי <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

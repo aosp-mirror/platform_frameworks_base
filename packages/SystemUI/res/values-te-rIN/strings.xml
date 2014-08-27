@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"అన్‌లాక్ చేయి"</string>
     <string name="phone_label" msgid="2320074140205331708">"ఫోన్‌ను తెరువు"</string>
     <string name="camera_label" msgid="7261107956054836961">"కెమెరాను తెరువు"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"పరికరం సురక్షితంగా ఉంది."</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"పరికరం సురక్షితంగా లేదు."</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"పరికరం సురక్షితంగా ఉంది, విశ్వసనీయ ఏజెంట్ సక్రియంగా ఉంది."</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"పరికరం సురక్షితంగా లేదు, విశ్వసనీయ ఏజెంట్ సక్రియంగా ఉంది."</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"ముఖం గుర్తింపు అమలవుతోంది, విశ్వసనీయ ఏజెంట్ సక్రియంగా ఉంది."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ఇన్‌పుట్ పద్ధతి మార్చే బటన్."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"అనుకూలత జూమ్ బటన్."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"చిన్న స్క్రీన్ నుండి పెద్దదానికి జూమ్ చేయండి."</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"ఈ పరికరం దీని నిర్వహణలో ఉంది:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nమీ నిర్వాహకుడు ఇమెయిల్‌లు, అనువర్తనాలు మరియు సురక్షిత వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలరు. మరింత సమాచారం కోసం, మీ నిర్వాహకుడిని సంప్రదించండి.\n\nఅలాగే, మీరు VPN కనెక్షన్‌ను సెటప్ చేయడానికి \"<xliff:g id="APPLICATION">%2$s</xliff:g>\"ని అనుమతించారు. కనుక ఈ అనువర్తనం కూడా నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"ఈ పరికరం దీని నిర్వహణలో ఉంది:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nమీ నిర్వాహకుడు ఇమెయిల్‌లు, అనువర్తనాలు మరియు సురక్షిత వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలరు. మరింత సమాచారం కోసం, మీ నిర్వాహకుడిని సంప్రదించండి.\n\nఅలాగే, మీరు VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\")కి కనెక్ట్ చేయబడ్డారు. కనుక మీ VPN సేవా ప్రదాత కూడా నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలరు."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"మీరు మాన్యువల్‌గా అన్‌లాక్ చేస్తే మినహా పరికరం లాక్ చేయబడి ఉంటుంది"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ద్వారా మ్యూట్ చేయబడింది"</string>
 </resources>

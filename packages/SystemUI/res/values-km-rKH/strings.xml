@@ -87,16 +87,11 @@
     <string name="unlock_label" msgid="8779712358041029439">"ដោះ​សោ"</string>
     <string name="phone_label" msgid="2320074140205331708">"បើក​ទូរស័ព្ទ"</string>
     <string name="camera_label" msgid="7261107956054836961">"បើក​ម៉ាស៊ីន​ថត"</string>
-    <!-- no translation found for accessibility_unlock_button_secured (8165840811789635668) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured (7905679894326511625) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_secured_trust_managed (6463973986970587223) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_not_secured_trust_managed (419377005316443992) -->
-    <skip />
-    <!-- no translation found for accessibility_unlock_button_face_unlock_running (1144920873023669283) -->
-    <skip />
+    <string name="accessibility_unlock_button_secured" msgid="8165840811789635668">"ឧបករណ៍​មាន​សុវត្ថិភាព។"</string>
+    <string name="accessibility_unlock_button_not_secured" msgid="7905679894326511625">"ឧបករណ៍​គ្មាន​សុវត្ថិភាព។"</string>
+    <string name="accessibility_unlock_button_secured_trust_managed" msgid="6463973986970587223">"ឧបករណ៍​មាន​សុវត្ថិភាព, ភ្នាក់ងារ​ទុកចិត្ត​សកម្ម។"</string>
+    <string name="accessibility_unlock_button_not_secured_trust_managed" msgid="419377005316443992">"ឧបករណ៍​គ្មាន​សុវត្ថិភាព, ភ្នាក់ងារ​ទុកចិត្ត​សកម្ម។"</string>
+    <string name="accessibility_unlock_button_face_unlock_running" msgid="1144920873023669283">"កំពុង​ដំណើរការ​រក​ឃើញ​ទម្រង់​មុខ, ភ្នាក់ងារ​ទុកចិត្ត​សកម្ម។"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ប្ដូរ​ប៊ូតុង​វិធីសាស្ត្រ​បញ្ចូល។"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ប៊ូតុង​ពង្រីក​ត្រូវ​គ្នា។"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ពង្រីក/បង្រួម​​អេក្រង់​ពី​​ទៅធំ"</string>
@@ -350,6 +345,5 @@
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"ឧបករណ៍នេះត្រូវបានគ្រប់គ្រងដោយ​ \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n អ្នកគ្រប់គ្រងរបស់អ្នកមានសមត្ថភាពក្នុងការត្រួតពិនិត្យសកម្មភាពបណ្ដាញរបស់អ្នក រួមមានអ៊ីមែល​, កម្មវិធី​, និងតំបន់បណ្ដាញសុវត្ថិភាព​។ សម្រាប់ព័ត៌មានបន្ថែមសូមទាក់ទងអ្នកគ្រប់គ្រងរបស់អ្នក​។ \n\n អ្នកបានផ្ដល់សិទ្ធិ\"<xliff:g id="APPLICATION">%2$s</xliff:g>\" ដើម្បីរៀបចំការតភ្ជាប់ VPN ។ កម្មវិធីនេះអាចតាមដានសកម្មភាពបណ្ដាញ។"</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"ឧបករណ៍នេះត្រូវបានគ្រប់គ្រងដោយ \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n អ្នកគ្រប់គ្រងរបស់អ្នកមានសមត្ថភាពក្នុងការត្រួតពិនិត្យសកម្មភាពបណ្ដាញរបស់អ្នករួមមានអ៊ីមែល​, កម្មវិធី និងតំបន់បណ្ដាញសុវត្ថិភាព។ សម្រាប់ព័ត៌មានបន្ថែមសូមទាក់ទងអ្នកគ្រប់គ្រងរបស់អ្នក។ \n\n ​អ្នកត្រូវបានតភ្ជាប់ទៅ VPN (\" <xliff:g id="APPLICATION">%2$s</xliff:g> \") ។ ក្រុមហ៊ុនផ្ដល់​សេវា VPN របស់អ្នកអាចតាមដានសកម្មភាពរបស់​អ្នក។"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"ឧបករណ៍​នឹង​ចាក់​សោ​រហូត​ដល់​អ្នក​ដោះ​សោ​ដោយ​ដៃ"</string>
-    <!-- no translation found for muted_by (6147073845094180001) -->
-    <skip />
+    <string name="muted_by" msgid="6147073845094180001">"បាន​បិទ​សំឡេង​ដោយ <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>
