@@ -1374,7 +1374,7 @@ public class DevicePolicyManager {
      * @param admin The name of the admin component to check, or null to aggregate
      * all admins.
      * @return time in milliseconds for the given admin or the minimum value (strictest) of
-     * all admins if admin is null.
+     * all admins if admin is null. Returns 0 if there are no restrictions.
      */
     public long getMaximumTimeToLock(ComponentName admin) {
         return getMaximumTimeToLock(admin, UserHandle.myUserId());
