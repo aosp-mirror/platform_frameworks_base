@@ -6,14 +6,6 @@ package android {
 
 }
 
-package android.app {
-
-  public class KeyguardManager {
-    method public android.content.Intent getConfirmDeviceCredentialIntent(java.lang.CharSequence, java.lang.CharSequence);
-  }
-
-}
-
 package android.media {
 
   public class AudioFormat {
