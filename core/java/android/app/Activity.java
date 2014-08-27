@@ -5038,9 +5038,9 @@ public class Activity extends ContextThemeWrapper
                     win.setTitleColor(color);
                 }
             }
-        }
-        if (mActionBar != null) {
-            mActionBar.setTitle(title);
+            if (mActionBar != null) {
+                mActionBar.setWindowTitle(title);
+            }
         }
     }
 
