@@ -16,6 +16,7 @@
 #ifndef RENDERSTATE_H
 #define RENDERSTATE_H
 
+#include <set>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
@@ -37,6 +38,7 @@ class RenderState {
     PREVENT_COPY_AND_ASSIGN(RenderState);
 public:
     void onGLContextCreated();
+    void onGLContextDestroyed();
 
     void setViewport(GLsizei width, GLsizei height);
     void getViewport(GLsizei* outWidth, GLsizei* outHeight);
@@ -48,6 +50,13 @@ public:
 
     void debugOverdraw(bool enable, bool clear);
 
+    void registerLayer(const Layer* layer) {
+        mActiveLayers.insert(layer);
+    }
+    void unregisterLayer(const Layer* layer) {
+        mActiveLayers.erase(layer);
+    }
+
 private:
     friend class renderthread::RenderThread;
 
@@ -58,6 +67,7 @@ private:
     ~RenderState();
 
     Caches* mCaches;
+    std::set<const Layer*> mActiveLayers;
 
     GLsizei mViewportWidth;
     GLsizei mViewportHeight;
