@@ -10229,13 +10229,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (r == null) {
                     return false;
                 }
-                if (r.changeWindowTranslucency(true)) {
-                    mWindowManager.setAppFullscreen(token, true);
+                final boolean translucentChanged = r.changeWindowTranslucency(true);
+                if (translucentChanged) {
                     r.task.stack.releaseBackgroundResources();
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
-                    return true;
                 }
-                return false;
+                mWindowManager.setAppFullscreen(token, true);
+                return translucentChanged;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -10256,15 +10256,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                     ActivityRecord under = r.task.mActivities.get(index - 1);
                     under.returningOptions = options;
                 }
-                if (r.changeWindowTranslucency(false)) {
+                final boolean translucentChanged = r.changeWindowTranslucency(false);
+                if (translucentChanged) {
                     r.task.stack.convertToTranslucent(r);
-                    mWindowManager.setAppFullscreen(token, false);
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
-                    return true;
-                } else {
-                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
-                    return false;
                 }
+                mWindowManager.setAppFullscreen(token, false);
+                return translucentChanged;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

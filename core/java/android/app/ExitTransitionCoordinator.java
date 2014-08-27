@@ -19,6 +19,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
@@ -221,10 +222,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             delayCancel();
             moveSharedElementsToOverlay();
             if (getDecor().getBackground() == null) {
-                ColorDrawable black = new ColorDrawable(0xFF000000);
-                black.setAlpha(0);
-                getWindow().setBackgroundDrawable(black);
-                black.setAlpha(255);
+                getWindow().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
             }
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(mActivity, this,
                     mAllSharedElementNames, resultCode, data);
