@@ -1576,6 +1576,7 @@ public class UserManagerService extends IUserManager.Stub {
                     String valType = parser.getAttributeValue(null, ATTR_VALUE_TYPE);
                     String multiple = parser.getAttributeValue(null, ATTR_MULTIPLE);
                     if (multiple != null) {
+                        values.clear();
                         int count = Integer.parseInt(multiple);
                         while (count > 0 && (type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                             if (type == XmlPullParser.START_TAG
