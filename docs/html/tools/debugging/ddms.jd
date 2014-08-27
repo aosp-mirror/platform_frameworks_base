@@ -140,7 +140,7 @@ parent.link=index.html
 
     <li>Click <strong>Get Allocations</strong> to see a list of objects that have been allocated
     since you clicked on the <strong>Start Tracking</strong> button. You can click on <strong>Get
-    Allocations</strong> again to append to the list new objects that that have been
+    Allocations</strong> again to append to the list new objects that have been
     allocated.</li>
 
     <li>To stop tracking or to clear the data and start over, click the <strong>Stop Tracking

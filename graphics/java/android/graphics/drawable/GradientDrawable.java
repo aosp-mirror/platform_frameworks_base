@@ -406,9 +406,9 @@ public class GradientDrawable extends Drawable {
     /**
      * <p>Sets the colors used to draw the gradient. Each color is specified as an
      * ARGB integer and the array must contain at least 2 colors.</p>
-     * <p><strong>Note</strong>: changing orientation will affect all instances
+     * <p><strong>Note</strong>: changing colors will affect all instances
      * of a drawable loaded from a resource. It is recommended to invoke
-     * {@link #mutate()} before changing the orientation.</p>
+     * {@link #mutate()} before changing the colors.</p>
      *
      * @param colors 2 or more ARGB colors
      *
@@ -610,7 +610,7 @@ public class GradientDrawable extends Drawable {
     }
 
     /**
-     * <p>Changes this drawbale to use a single color instead of a gradient.</p>
+     * <p>Changes this drawable to use a single color instead of a gradient.</p>
      * <p><strong>Note</strong>: changing color will affect all instances
      * of a drawable loaded from a resource. It is recommended to invoke
      * {@link #mutate()} before changing the color.</p>
