@@ -338,10 +338,10 @@ public class RuntimeInit {
      * @param tag to record with the error
      * @param t exception describing the error site and conditions
      */
-    public static void wtf(String tag, Throwable t) {
+    public static void wtf(String tag, Throwable t, boolean system) {
         try {
             if (ActivityManagerNative.getDefault().handleApplicationWtf(
-                    mApplicationObject, tag, new ApplicationErrorReport.CrashInfo(t))) {
+                    mApplicationObject, tag, system, new ApplicationErrorReport.CrashInfo(t))) {
                 // The Activity Manager has already written us off -- now exit.
                 Process.killProcess(Process.myPid());
                 System.exit(10);

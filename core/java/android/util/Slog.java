@@ -74,19 +74,19 @@ public final class Slog {
     }
 
     public static int wtf(String tag, String msg) {
-        return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, null, false);
+        return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, null, false, true);
     }
 
     public static int wtfStack(String tag, String msg) {
-        return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, null, true);
+        return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, null, true, true);
     }
 
     public static int wtf(String tag, Throwable tr) {
-        return Log.wtf(Log.LOG_ID_SYSTEM, tag, tr.getMessage(), tr, false);
+        return Log.wtf(Log.LOG_ID_SYSTEM, tag, tr.getMessage(), tr, false, true);
     }
 
     public static int wtf(String tag, String msg, Throwable tr) {
-        return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, tr, false);
+        return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, tr, false, true);
     }
 
     public static int println(int priority, String tag, String msg) {

@@ -11417,12 +11417,13 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Used by {@link Log} via {@link com.android.internal.os.RuntimeInit} to report serious errors.
      * @param app object of the crashing app, null for the system server
      * @param tag reported by the caller
+     * @param system whether this wtf is coming from the system
      * @param crashInfo describing the context of the error
      * @return true if the process should exit immediately (WTF is fatal)
      */
-    public boolean handleApplicationWtf(IBinder app, String tag,
-            ApplicationErrorReport.CrashInfo crashInfo) {
-        ProcessRecord r = findAppProcess(app, "WTF");
+    public boolean handleApplicationWtf(IBinder app, final String tag, boolean system,
+            final ApplicationErrorReport.CrashInfo crashInfo) {
+        final ProcessRecord r = findAppProcess(app, "WTF");
         final String processName = app == null ? "system_server"
                 : (r == null ? "unknown" : r.processName);
 
@@ -11431,6 +11432,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                 processName,
                 r == null ? -1 : r.info.flags,
                 tag, crashInfo.exceptionMessage);
+
+        if (system) {
+            // If this is coming from the system, we could very well have low-level
+            // system locks held, so we want to do this all asynchronously.  And we
+            // never want this to become fatal, so there is that too.
+            mHandler.post(new Runnable() {
+                @Override public void run() {
+                    addErrorToDropBox("wtf", r, processName, null, null, tag, null, null,
+                            crashInfo);
+                }
+            });
+            return false;
+        }
 
         addErrorToDropBox("wtf", r, processName, null, null, tag, null, null, crashInfo);
 
@@ -11602,6 +11616,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     try {
                         java.lang.Process logcat = new ProcessBuilder("/system/bin/logcat",
                                 "-v", "time", "-b", "events", "-b", "system", "-b", "main",
+                                "-b", "crash",
                                 "-t", String.valueOf(lines)).redirectErrorStream(true).start();
 
                         try { logcat.getOutputStream().close(); } catch (IOException e) {}

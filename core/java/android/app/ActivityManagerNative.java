@@ -1392,8 +1392,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             IBinder app = data.readStrongBinder();
             String tag = data.readString();
+            boolean system = data.readInt() != 0;
             ApplicationErrorReport.CrashInfo ci = new ApplicationErrorReport.CrashInfo(data);
-            boolean res = handleApplicationWtf(app, tag, ci);
+            boolean res = handleApplicationWtf(app, tag, system, ci);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
@@ -4069,7 +4070,7 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
     }
 
-    public boolean handleApplicationWtf(IBinder app, String tag,
+    public boolean handleApplicationWtf(IBinder app, String tag, boolean system,
             ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException
     {
         Parcel data = Parcel.obtain();
@@ -4077,6 +4078,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(app);
         data.writeString(tag);
+        data.writeInt(system ? 1 : 0);
         crashInfo.writeToParcel(data, 0);
         mRemote.transact(HANDLE_APPLICATION_WTF_TRANSACTION, data, reply, 0);
         reply.readException();
