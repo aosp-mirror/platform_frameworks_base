@@ -2382,7 +2382,6 @@ public class WindowManagerService extends IWindowManager.Stub
             origId = Binder.clearCallingIdentity();
 
             if (addToken) {
-                Slog.w("BadTokenDebug", "addWindow: Adding token=" + token + " attrs.token=" + attrs.token);
                 mTokenMap.put(attrs.token, token);
             }
             win.attach();
@@ -2664,9 +2663,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 + token.windows.size());
         if (token.windows.size() == 0) {
             if (!token.explicit) {
-                WindowToken wtoken = mTokenMap.remove(token.token);
-                Slog.w("BadTokenDebug", "removeWindowInnerLocked: Removing token=" + token + " removed=" +
-                        wtoken + " Callers=" + Debug.getCallers(4));
+                mTokenMap.remove(token.token);
             } else if (atoken != null) {
                 atoken.firstWindowDrawn = false;
             }
@@ -3452,7 +3449,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             wtoken = new WindowToken(this, token, type, true);
-            Slog.w("BadTokenDebug", "addWindowToken: Adding token=" + token + " wtoken=" + wtoken);
             mTokenMap.put(token, wtoken);
             if (type == TYPE_WALLPAPER) {
                 mWallpaperTokens.add(wtoken);
@@ -3471,8 +3467,6 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             DisplayContent displayContent = null;
             WindowToken wtoken = mTokenMap.remove(token);
-            Slog.w("BadTokenDebug", "removeWindowToken: Removing token=" + token + " removed=" + wtoken
-                    + " Callers=" + Debug.getCallers(3));
             if (wtoken != null) {
                 boolean delayed = false;
                 if (!wtoken.hidden) {
@@ -3589,7 +3583,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 task.addAppToken(addPos, atoken);
             }
 
-            Slog.w("BadTokenDebug", "addAppToken: Adding token=" + token.asBinder() + " atoken=" + atoken);
             mTokenMap.put(token.asBinder(), atoken);
 
             // Application tokens start out hidden.
@@ -4689,7 +4682,6 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         synchronized(mWindowMap) {
             WindowToken basewtoken = mTokenMap.remove(token);
-            Slog.w("BadTokenDebug", "removeAppToke: Removing token=" + token + " removed=" + basewtoken);
             if (basewtoken != null && (wtoken=basewtoken.appWindowToken) != null) {
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Removing app token: " + wtoken);
                 delayed = setTokenVisibilityLocked(wtoken, null, false,
