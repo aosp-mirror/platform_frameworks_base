@@ -248,6 +248,10 @@ public class WindowAnimator {
 
         mForceHiding = KEYGUARD_NOT_SHOWN;
 
+        final WindowState imeTarget = mService.mInputMethodTarget;
+        final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisibleNow() &&
+                (imeTarget.getAttrs().flags & FLAG_SHOW_WHEN_LOCKED) != 0;
+
         for (int i = windows.size() - 1; i >= 0; i--) {
             WindowState win = windows.get(i);
             WindowStateAnimator winAnimator = win.mWinAnimator;
@@ -312,7 +316,8 @@ public class WindowAnimator {
                             + " hidden=" + win.mRootToken.hidden
                             + " anim=" + win.mWinAnimator.mAnimation);
                 } else if (mPolicy.canBeForceHidden(win, win.mAttrs)) {
-                    final boolean hideWhenLocked = (flags & FLAG_SHOW_WHEN_LOCKED) == 0;
+                    final boolean hideWhenLocked = (flags & FLAG_SHOW_WHEN_LOCKED) == 0 &&
+                            !(win.mIsImWindow && showImeOverKeyguard);
                     final boolean changed;
                     if (((mForceHiding == KEYGUARD_ANIMATING_IN)
                                 && (!winAnimator.isAnimating() || hideWhenLocked))
