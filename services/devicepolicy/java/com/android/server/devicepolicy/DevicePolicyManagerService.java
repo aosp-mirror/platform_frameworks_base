@@ -167,6 +167,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_SMS);
     }
 
+    private static final Set<String> SECURE_SETTINGS_WHITELIST;
+    private static final Set<String> GLOBAL_SETTINGS_WHITELIST;
+    static {
+        SECURE_SETTINGS_WHITELIST = new HashSet();
+        SECURE_SETTINGS_WHITELIST.add(Settings.Secure.DEFAULT_INPUT_METHOD);
+        SECURE_SETTINGS_WHITELIST.add(Settings.Secure.SKIP_FIRST_USE_HINTS);
+
+        GLOBAL_SETTINGS_WHITELIST = new HashSet();
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.ADB_ENABLED);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME_ZONE);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.BLUETOOTH_ON);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.DATA_ROAMING);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.DEVELOPMENT_SETTINGS_ENABLED);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.MODE_RINGER);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.NETWORK_PREFERENCE);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.USB_MASS_STORAGE_ENABLED);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.WIFI_ON);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.WIFI_SLEEP_POLICY);
+    }
+
     final Context mContext;
     final UserManager mUserManager;
     final PowerManager.WakeLock mWakeLock;
@@ -5040,6 +5061,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
+            if (!GLOBAL_SETTINGS_WHITELIST.contains(setting)) {
+                throw new SecurityException(String.format(
+                        "Permission denial: device owners cannot update %1$s", setting));
+            }
+
             long id = Binder.clearCallingIdentity();
             try {
                 Settings.Global.putString(contentResolver, setting, value);
@@ -5059,6 +5085,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new NullPointerException("ComponentName is null");
             }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            if (!SECURE_SETTINGS_WHITELIST.contains(setting)) {
+                throw new SecurityException(String.format(
+                        "Permission denial: profile/device owners cannot update %1$s", setting));
+            }
 
             long id = Binder.clearCallingIdentity();
             try {
