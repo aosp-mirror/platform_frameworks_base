@@ -141,13 +141,13 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
                     if (widthRatio > 0 && widthRatio < 1.33
                             && heightRatio > 0 && heightRatio < 1.33) {
                         // sufficiently close to our resolution; go ahead and use it
-                        if (DEBUG) Slog.d(TAG, "wallpaper dimension match; using");
+                        Slog.d(TAG, "Applying restored wallpaper image.");
                         f.renameTo(new File(WALLPAPER_IMAGE));
                         // TODO: spin a service to copy the restored image to sd/usb storage,
                         // since it does not exist anywhere other than the private wallpaper
                         // file.
                     } else {
-                        if (DEBUG) Slog.d(TAG, "dimensions too far off: wr=" + widthRatio
+                        Slog.i(TAG, "Dimensions too far off; using default wallpaper. wr=" + widthRatio
                                 + " hr=" + heightRatio);
                         f.delete();
                     }
