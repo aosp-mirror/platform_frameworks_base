@@ -3193,6 +3193,20 @@ public class DevicePolicyManager {
     /**
      * Called by device owners to update {@link Settings.Global} settings. Validation that the value
      * of the setting is in the correct form for the setting type should be performed by the caller.
+     * <p>The settings that can be updated with this method are:
+     * <ul>
+     * <li>{@link Settings.Global#ADB_ENABLED}</li>
+     * <li>{@link Settings.Global#AUTO_TIME}</li>
+     * <li>{@link Settings.Global#AUTO_TIME_ZONE}</li>
+     * <li>{@link Settings.Global#BLUETOOTH_ON}</li>
+     * <li>{@link Settings.Global#DATA_ROAMING}</li>
+     * <li>{@link Settings.Global#DEVELOPMENT_SETTINGS_ENABLED}</li>
+     * <li>{@link Settings.Global#MODE_RINGER}</li>
+     * <li>{@link Settings.Global#NETWORK_PREFERENCE}</li>
+     * <li>{@link Settings.Global#USB_MASS_STORAGE_ENABLED}</li>
+     * <li>{@link Settings.Global#WIFI_ON}</li>
+     * <li>{@link Settings.Global#WIFI_SLEEP_POLICY}</li>
+     * </ul>
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param setting The name of the setting to update.
@@ -3212,7 +3226,11 @@ public class DevicePolicyManager {
      * Called by profile or device owners to update {@link Settings.Secure} settings. Validation
      * that the value of the setting is in the correct form for the setting type should be performed
      * by the caller.
-     *
+     * <p>The settings that can be updated with this method are:
+     * <ul>
+     * <li>{@link Settings.Secure#DEFAULT_INPUT_METHOD}</li>
+     * <li>{@link Settings.Secure#SKIP_FIRST_USE_HINTS}</li>
+     * </ul>
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param setting The name of the setting to update.
      * @param value The value to update the setting to.
