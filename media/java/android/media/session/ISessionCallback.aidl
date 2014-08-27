@@ -30,7 +30,7 @@ oneway interface ISessionCallback {
 
     // These callbacks are for the TransportPerformer
     void onPlay();
-    void onPlayUri(in Uri uri, in Bundle extras);
+    void onPlayFromMediaId(String uri, in Bundle extras);
     void onPlayFromSearch(String query, in Bundle extras);
     void onSkipToTrack(long id);
     void onPause();
