@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g>, VPN bağlantısı kurmaya çalışıyor."</string>
-    <string name="warning" msgid="5470743576660160079">"Devam ederek uygulamaya tüm ağ trafiğini kesme iznini veriyorsunuz. "<b>"Uygulamaya güvenmiyorsanız kabul ETMEYİN."</b>" Aksi halde kötü amaçlı yazılımlar verilerinizin güvenliğini tamamen tehlikeye atabilir."</string>
-    <string name="accept" msgid="2889226408765810173">"Bu uygulamaya güveniyorum."</string>
+    <string name="prompt" msgid="3183836924226407828">"Bağlantı isteği"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> ağ trafiğini izlemesine olanak veren bir VPN bağlantısı oluşturmak istiyor. Sadece, ilgili kaynağa güveniyorsanız kabul edin. &lt;br /&gt; &lt;br /&gt; VPN aktif olduğunda ekranınızın üst tarafında &lt;img src=vpn_icon /&gt; simgesi görünür."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN bağlı"</string>
     <string name="configure" msgid="4905518375574791375">"Yapılandır"</string>
     <string name="disconnect" msgid="971412338304200056">"Bağlantıyı kes"</string>

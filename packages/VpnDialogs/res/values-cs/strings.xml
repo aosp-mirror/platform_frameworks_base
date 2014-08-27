@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"Aplikace <xliff:g id="APP">%s</xliff:g> se pokouší připojit k síti VPN."</string>
-    <string name="warning" msgid="5470743576660160079">"Pokračováním souhlasíte s tím, aby aplikace sledovala veškerou vaši síťovou aktivitu. "<b>" Pokud aplikaci nevěříte, nepokračujte."</b>" V opačném případě riskujete vystavení svých dat škodlivému softwaru."</string>
-    <string name="accept" msgid="2889226408765810173">"Této aplikaci věřím."</string>
+    <string name="prompt" msgid="3183836924226407828">"Žádost o připojení"</string>
+    <string name="warning" msgid="809658604548412033">"Aplikace <xliff:g id="APP">%s</xliff:g> žádá o nastavení připojení VPN, pomocí kterého bude moci sledovat síťový provoz. Povolte, jen pokud zdroji důvěřujete. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; – když je síť VPN aktivní, v horní části obrazovky se zobrazuje tato ikona."</string>
     <string name="legacy_title" msgid="192936250066580964">"Síť VPN je připojena"</string>
     <string name="configure" msgid="4905518375574791375">"Konfigurovat"</string>
     <string name="disconnect" msgid="971412338304200056">"Odpojit"</string>
