@@ -1594,6 +1594,11 @@ const ResTable& AaptAssets::getIncludedResources() const
     return mIncludedAssets.getResources(false);
 }
 
+AssetManager& AaptAssets::getAssetManager()
+{
+    return mIncludedAssets;
+}
+
 void AaptAssets::print(const String8& prefix) const
 {
     String8 innerPrefix(prefix);

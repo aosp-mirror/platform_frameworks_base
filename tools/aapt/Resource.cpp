@@ -4,6 +4,7 @@
 // Build resource files from raw assets.
 //
 #include "AaptAssets.h"
+#include "AaptXml.h"
 #include "CacheUpdater.h"
 #include "CrunchCache.h"
 #include "FileFinder.h"
@@ -805,6 +806,20 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
         }
     }
 
+    if (bundle->getPlatformBuildVersionCode() != "") {
+        if (!addTagAttribute(root, "", "platformBuildVersionCode",
+                    bundle->getPlatformBuildVersionCode(), errorOnFailedInsert, true)) {
+            return UNKNOWN_ERROR;
+        }
+    }
+
+    if (bundle->getPlatformBuildVersionName() != "") {
+        if (!addTagAttribute(root, "", "platformBuildVersionName",
+                    bundle->getPlatformBuildVersionName(), errorOnFailedInsert, true)) {
+            return UNKNOWN_ERROR;
+        }
+    }
+
     if (bundle->getDebugMode()) {
         sp<XMLNode> application = root->getChildElement(String16(), String16("application"));
         if (application != NULL) {
@@ -879,6 +894,106 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
     }
 
     return NO_ERROR;
+}
+
+static int32_t getPlatformAssetCookie(const AssetManager& assets) {
+    // Find the system package (0x01). AAPT always generates attributes
+    // with the type 0x01, so we're looking for the first attribute
+    // resource in the system package.
+    const ResTable& table = assets.getResources(true);
+    Res_value val;
+    ssize_t idx = table.getResource(0x01010000, &val, true);
+    if (idx != NO_ERROR) {
+        // Try as a bag.
+        const ResTable::bag_entry* entry;
+        ssize_t cnt = table.lockBag(0x01010000, &entry);
+        if (cnt >= 0) {
+            idx = entry->stringBlock;
+        }
+        table.unlockBag(entry);
+    }
+
+    if (idx < 0) {
+        return 0;
+    }
+    return table.getTableCookie(idx);
+}
+
+enum {
+    VERSION_CODE_ATTR = 0x0101021b,
+    VERSION_NAME_ATTR = 0x0101021c,
+};
+
+static ssize_t extractPlatformBuildVersion(ResXMLTree& tree, Bundle* bundle) {
+    size_t len;
+    ResXMLTree::event_code_t code;
+    while ((code = tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
+        if (code != ResXMLTree::START_TAG) {
+            continue;
+        }
+
+        const char16_t* ctag16 = tree.getElementName(&len);
+        if (ctag16 == NULL) {
+            fprintf(stderr, "ERROR: failed to get XML element name (bad string pool)\n");
+            return UNKNOWN_ERROR;
+        }
+
+        String8 tag(ctag16, len);
+        if (tag != "manifest") {
+            continue;
+        }
+
+        String8 error;
+        int32_t versionCode = AaptXml::getIntegerAttribute(tree, VERSION_CODE_ATTR, &error);
+        if (error != "") {
+            fprintf(stderr, "ERROR: failed to get platform version code\n");
+            return UNKNOWN_ERROR;
+        }
+
+        if (versionCode >= 0 && bundle->getPlatformBuildVersionCode() == "") {
+            bundle->setPlatformBuildVersionCode(String8::format("%d", versionCode));
+        }
+
+        String8 versionName = AaptXml::getAttribute(tree, VERSION_NAME_ATTR, &error);
+        if (error != "") {
+            fprintf(stderr, "ERROR: failed to get platform version name\n");
+            return UNKNOWN_ERROR;
+        }
+
+        if (versionName != "" && bundle->getPlatformBuildVersionName() == "") {
+            bundle->setPlatformBuildVersionName(versionName);
+        }
+        return NO_ERROR;
+    }
+
+    fprintf(stderr, "ERROR: no <manifest> tag found in platform AndroidManifest.xml\n");
+    return UNKNOWN_ERROR;
+}
+
+static ssize_t extractPlatformBuildVersion(AssetManager& assets, Bundle* bundle) {
+    int32_t cookie = getPlatformAssetCookie(assets);
+    if (cookie == 0) {
+        fprintf(stderr, "ERROR: Platform package not found\n");
+        return UNKNOWN_ERROR;
+    }
+
+    ResXMLTree tree;
+    Asset* asset = assets.openNonAsset(cookie, "AndroidManifest.xml", Asset::ACCESS_STREAMING);
+    if (asset == NULL) {
+        fprintf(stderr, "ERROR: Platform AndroidManifest.xml not found\n");
+        return UNKNOWN_ERROR;
+    }
+
+    ssize_t result = NO_ERROR;
+    if (tree.setTo(asset->getBuffer(true), asset->getLength()) != NO_ERROR) {
+        fprintf(stderr, "ERROR: Platform AndroidManifest.xml is corrupt\n");
+        result = UNKNOWN_ERROR;
+    } else {
+        result = extractPlatformBuildVersion(tree, bundle);
+    }
+
+    delete asset;
+    return result;
 }
 
 #define ASSIGN_IT(n) \
@@ -1354,6 +1469,17 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     
     if (hasErrors) {
         return UNKNOWN_ERROR;
+    }
+
+    // If we're not overriding the platform build versions,
+    // extract them from the platform APK.
+    if (packageType != ResourceTable::System &&
+            (bundle->getPlatformBuildVersionCode() == "" ||
+            bundle->getPlatformBuildVersionName() == "")) {
+        err = extractPlatformBuildVersion(assets->getAssetManager(), bundle);
+        if (err != NO_ERROR) {
+            return UNKNOWN_ERROR;
+        }
     }
 
     const sp<AaptFile> manifestFile(androidManifestFile->getFiles().valueAt(0));
@@ -2636,13 +2762,14 @@ writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& ass
                 fprintf(stderr, "ERROR: manifest does not start with <manifest> tag\n");
                 return -1;
             }
-            pkg = getAttribute(tree, NULL, "package", NULL);
+            pkg = AaptXml::getAttribute(tree, NULL, "package");
         } else if (depth == 2) {
             if (tag == "application") {
                 inApplication = true;
                 keepTag = true;
 
-                String8 agent = getAttribute(tree, "http://schemas.android.com/apk/res/android",
+                String8 agent = AaptXml::getAttribute(tree,
+                        "http://schemas.android.com/apk/res/android",
                         "backupAgent", &error);
                 if (agent.length() > 0) {
                     addProguardKeepRule(keep, agent, pkg.string(),
@@ -2658,8 +2785,8 @@ writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& ass
             }
         }
         if (keepTag) {
-            String8 name = getAttribute(tree, "http://schemas.android.com/apk/res/android",
-                    "name", &error);
+            String8 name = AaptXml::getAttribute(tree,
+                    "http://schemas.android.com/apk/res/android", "name", &error);
             if (error != "") {
                 fprintf(stderr, "ERROR: %s\n", error.string());
                 return -1;

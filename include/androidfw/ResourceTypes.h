@@ -1557,7 +1557,7 @@ public:
     };
     const char16_t* valueToString(const Res_value* value, size_t stringBlock,
                                   char16_t tmpBuffer[TMP_BUFFER_SIZE],
-                                  size_t* outLen);
+                                  size_t* outLen) const;
 
     struct bag_entry {
         ssize_t stringBlock;
