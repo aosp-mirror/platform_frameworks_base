@@ -1963,8 +1963,9 @@ public class BackupManagerService extends IBackupManager.Stub {
         return packages;
     }
 
-    // Called from the backup task: record that the given app has been successfully
-    // backed up at least once
+    // Called from the backup tasks: record that the given app has been successfully
+    // backed up at least once.  This includes both key/value and full-data backups
+    // through the transport.
     void logBackupComplete(String packageName) {
         if (packageName.equals(PACKAGE_MANAGER_SENTINEL)) return;
 
@@ -3837,6 +3838,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                         // Success!
                         EventLog.writeEvent(EventLogTags.FULL_BACKUP_SUCCESS,
                                 currentPackage.packageName);
+                        logBackupComplete(currentPackage.packageName);
                     }
                     cleanUpPipes(transportPipes);
                     cleanUpPipes(enginePipes);
