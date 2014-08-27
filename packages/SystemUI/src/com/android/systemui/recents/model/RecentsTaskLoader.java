@@ -35,10 +35,15 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+
+/** Handle to an ActivityInfo */
+class ActivityInfoHandle {
+    ActivityInfo info;
+}
 
 /** A bitmap load queue */
 class TaskResourceLoadQueue {
@@ -230,7 +235,6 @@ public class RecentsTaskLoader {
     static RecentsTaskLoader sInstance;
 
     SystemServicesProxy mSystemServicesProxy;
-    DrawableLruCache mTaskDescriptionIconCache;
     DrawableLruCache mApplicationIconCache;
     BitmapLruCache mThumbnailCache;
     StringLruCache mActivityLabelCache;
@@ -274,7 +278,6 @@ public class RecentsTaskLoader {
         mSystemServicesProxy = new SystemServicesProxy(context);
         mPackageMonitor = new RecentsPackageMonitor();
         mLoadQueue = new TaskResourceLoadQueue();
-        mTaskDescriptionIconCache = new DrawableLruCache(iconCacheSize);
         mApplicationIconCache = new DrawableLruCache(iconCacheSize);
         mThumbnailCache = new BitmapLruCache(thumbnailCacheSize);
         mActivityLabelCache = new StringLruCache(100);
@@ -301,103 +304,151 @@ public class RecentsTaskLoader {
     }
 
     /** Gets the list of recent tasks, ordered from back to front. */
-    private static List<ActivityManager.RecentTaskInfo> getRecentTasks(SystemServicesProxy ssp,
-            int numTasks) {
-        // Set a default number of tasks to query if none is provided
-        if (numTasks < 0) {
-            RecentsConfiguration config = RecentsConfiguration.getInstance();
-            numTasks = config.maxNumTasksToLoad;
-        }
+    private static List<ActivityManager.RecentTaskInfo> getRecentTasks(SystemServicesProxy ssp) {
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
         List<ActivityManager.RecentTaskInfo> tasks =
-                ssp.getRecentTasks(numTasks, UserHandle.CURRENT.getIdentifier());
+                ssp.getRecentTasks(config.maxNumTasksToLoad,
+                        UserHandle.CURRENT.getIdentifier());
         Collections.reverse(tasks);
         return tasks;
     }
 
+    /** Returns the activity icon using as many cached values as we can. */
+    public Drawable getAndUpdateActivityIcon(Task.TaskKey taskKey,
+             ActivityManager.TaskDescription td, SystemServicesProxy ssp,
+             Resources res, ActivityInfoHandle infoHandle, boolean preloadTask) {
+        // Return the cached activity icon if it exists
+        Drawable icon = mApplicationIconCache.getAndInvalidateIfModified(taskKey);
+        if (icon != null) {
+            return icon;
+        }
+        // Return the task description icon if it exists
+        if (td != null && td.getIcon() != null) {
+            icon = ssp.getBadgedIcon(new BitmapDrawable(res, td.getIcon()), taskKey.userId);
+            mApplicationIconCache.put(taskKey, icon);
+            return icon;
+        }
+        // If we are preloading this task, continue to load the activity icon
+        if (preloadTask) {
+            // All short paths failed, load the icon from the activity info and cache it
+            if (infoHandle.info == null) {
+                infoHandle.info = ssp.getActivityInfo(taskKey.baseIntent.getComponent(),
+                        taskKey.userId);
+            }
+            icon = ssp.getActivityIcon(infoHandle.info, taskKey.userId);
+            mApplicationIconCache.put(taskKey, icon);
+            return icon;
+        }
+        // If we are not preloading, return the default icon to show
+        return null;
+    }
+
+    /** Returns the activity label using as many cached values as we can. */
+    public String getAndUpdateActivityLabel(Task.TaskKey taskKey,
+            ActivityManager.TaskDescription td, SystemServicesProxy ssp,
+            ActivityInfoHandle infoHandle) {
+        // Return the task description label if it exists
+        if (td != null && td.getLabel() != null) {
+            return td.getLabel();
+        }
+        // Return the cached activity label if it exists
+        String label = mActivityLabelCache.getAndInvalidateIfModified(taskKey);
+        if (label != null) {
+            return label;
+        }
+        // All short paths failed, load the label from the activity info and cache it
+        if (infoHandle.info == null) {
+            infoHandle.info = ssp.getActivityInfo(taskKey.baseIntent.getComponent(),
+                    taskKey.userId);
+        }
+        label = ssp.getActivityLabel(infoHandle.info);
+        mActivityLabelCache.put(taskKey, label);
+        return label;
+    }
+
+    /** Returns the activity's primary color. */
+    public int getActivityPrimaryColor(ActivityManager.TaskDescription td,
+            RecentsConfiguration config) {
+        if (td != null && td.getPrimaryColor() != 0) {
+            return td.getPrimaryColor();
+        }
+        return config.taskBarViewDefaultBackgroundColor;
+    }
+
     /** Reload the set of recent tasks */
     public SpaceNode reload(Context context, int preloadCount) {
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-        Resources res = context.getResources();
-        LinkedHashSet<Task> tasksToLoad = new LinkedHashSet<Task>();
-        ArrayList<Task> tasksToAdd = new ArrayList<Task>();
-        TaskStack stack = new TaskStack();
+        ArrayList<Task.TaskKey> taskKeys = new ArrayList<Task.TaskKey>();
+        ArrayList<Task> tasksToLoad = new ArrayList<Task>();
+        TaskStack stack = getTaskStack(mSystemServicesProxy, context.getResources(),
+                -1, preloadCount, true, taskKeys, tasksToLoad);
         SpaceNode root = new SpaceNode();
         root.setStack(stack);
 
-        // Get the recent tasks
-        SystemServicesProxy ssp = mSystemServicesProxy;
-        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp, -1);
+        // Start the task loader and add all the tasks we need to load
+        mLoader.start(context);
+        mLoadQueue.addTasks(tasksToLoad);
 
-        // From back to front, add each task to the task stack
+        // Update the package monitor with the list of packages to listen for
+        mPackageMonitor.setTasks(taskKeys);
+
+        return root;
+    }
+
+    /** Creates a lightweight stack of the current recent tasks, without thumbnails and icons. */
+    public TaskStack getTaskStack(SystemServicesProxy ssp, Resources res,
+            int preloadTaskId, int preloadTaskCount,
+            boolean loadTaskThumbnails, List<Task.TaskKey> taskKeysOut,
+            List<Task> tasksToLoadOut) {
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp);
+        HashMap<ComponentName, ActivityInfoHandle> activityInfoCache =
+                new HashMap<ComponentName, ActivityInfoHandle>();
+        ArrayList<Task> tasksToAdd = new ArrayList<Task>();
+        TaskStack stack = new TaskStack();
+
         int taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = tasks.get(i);
+
+            // Get an existing activity info handle if possible
+            ComponentName cn = t.baseIntent.getComponent();
+            ActivityInfoHandle infoHandle = new ActivityInfoHandle();
+            boolean hasCachedActivityInfo = false;
+            if (activityInfoCache.containsKey(cn)) {
+                infoHandle = activityInfoCache.get(cn);
+                hasCachedActivityInfo = true;
+            }
+
+            // Compose the task key
             Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, t.baseIntent, t.userId,
                     t.firstActiveTime, t.lastActiveTime);
-            ComponentName cn = t.baseIntent.getComponent();
-            ActivityInfo info = null;
 
-            ActivityManager.TaskDescription av = t.taskDescription;
-            String activityLabel  = null;
-            Drawable activityIcon = mDefaultApplicationIcon;
-            int activityColor = config.taskBarViewDefaultBackgroundColor;
-            boolean loadedActivityIcon = false;
-            if (av != null) {
-                activityLabel = av.getLabel();
-                activityIcon = mTaskDescriptionIconCache.getAndInvalidateIfModified(taskKey);
-                if (activityIcon == null) {
-                    activityIcon = (av.getIcon() != null) ?
-                        ssp.getBadgedIcon(new BitmapDrawable(res, av.getIcon()), t.userId) : null;
-                    if (activityIcon != null) {
-                        mTaskDescriptionIconCache.put(taskKey, activityIcon);
-                    }
-                }
-                if (av.getPrimaryColor() != 0) {
-                    activityColor = av.getPrimaryColor();
-                }
-                loadedActivityIcon = (activityIcon != null);
-            }
-            // If there is no activity label, then try and read it from the label cache before
-            // loading it from the system
-            if (activityLabel == null) {
-                activityLabel = mActivityLabelCache.getAndInvalidateIfModified(taskKey);
-                if (activityLabel == null) {
-                    if (info == null) {
-                        info = ssp.getActivityInfo(cn, t.userId);
-                    }
-                    activityLabel = ssp.getActivityLabel(info);
-                    mActivityLabelCache.put(taskKey, activityLabel);
-                }
+            // Determine whether to preload this task
+            boolean preloadTask = false;
+            if (preloadTaskId > 0) {
+                preloadTask = (t.id == preloadTaskId);
+            } else if (preloadTaskCount > 0) {
+                preloadTask = (i >= (taskCount - preloadTaskCount));
             }
 
-            // Create a new task
+            // Load the label, icon, and color
+            String activityLabel  = getAndUpdateActivityLabel(taskKey, t.taskDescription,
+                    ssp, infoHandle);
+            Drawable activityIcon = getAndUpdateActivityIcon(taskKey, t.taskDescription,
+                    ssp, res, infoHandle, preloadTask);
+            int activityColor = getActivityPrimaryColor(t.taskDescription, config);
+
+            // Update the activity info cache
+            if (!hasCachedActivityInfo && infoHandle.info != null) {
+                activityInfoCache.put(cn, infoHandle);
+            }
+
+            // Add the task to the stack
             Task task = new Task(taskKey, (t.id > -1), t.affiliatedTaskId, t.affiliatedTaskColor,
                     activityLabel, activityIcon, activityColor, (i == (taskCount - 1)),
                     config.lockToAppEnabled);
 
-            // Preload the specified number of apps
-            if (i >= (taskCount - preloadCount)) {
-                // Load the icon from the cache if possible (only if we don't have an activity icon)
-                if (!loadedActivityIcon) {
-                    task.applicationIcon =
-                            mApplicationIconCache.getAndInvalidateIfModified(taskKey);
-                    if (task.applicationIcon == null) {
-                        // Load the icon from the system
-                        if (info == null) {
-                            info = ssp.getActivityInfo(cn, t.userId);
-                        }
-                        task.applicationIcon = ssp.getActivityIcon(info, taskKey.userId);
-                        if (task.applicationIcon != null) {
-                            mApplicationIconCache.put(taskKey, task.applicationIcon);
-                        }
-                    }
-                    if (task.applicationIcon == null) {
-                        // Either the task has changed since the last active time, or it was not
-                        // previously cached, so try and load the task anew.
-                        tasksToLoad.add(task);
-                    }
-                }
-
+            if (preloadTask && loadTaskThumbnails) {
                 // Load the thumbnail from the cache if possible
                 task.thumbnail = mThumbnailCache.getAndInvalidateIfModified(taskKey);
                 if (task.thumbnail == null) {
@@ -408,53 +459,19 @@ public class RecentsTaskLoader {
                         mThumbnailCache.put(taskKey, task.thumbnail);
                     }
                 }
-                if (task.thumbnail == null) {
+                if (task.thumbnail == null && tasksToLoadOut != null) {
                     // Either the task has changed since the last active time, or it was not
                     // previously cached, so try and load the task anew.
-                    tasksToLoad.add(task);
+                    tasksToLoadOut.add(task);
                 }
             }
 
+            // Add to the list of task keys
+            if (taskKeysOut != null) {
+                taskKeysOut.add(taskKey);
+            }
             // Add the task to the stack
             tasksToAdd.add(task);
-        }
-
-        // Simulate the groupings that we describe
-        stack.setTasks(tasksToAdd);
-        stack.createAffiliatedGroupings(config);
-
-        // Start the task loader and add all the tasks we need to load
-        mLoader.start(context);
-        mLoadQueue.addTasks(tasksToLoad);
-
-        // Update the package monitor with the list of packages to listen for
-        mPackageMonitor.setTasks(tasks);
-
-        return root;
-    }
-
-    /** Creates a lightweight stack of the current recent tasks, without thumbnails and icons. */
-    public static TaskStack getShallowTaskStack(SystemServicesProxy ssp, int numTasks,
-            Resources resources) {
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp, numTasks);
-        ArrayList<Task> tasksToAdd = new ArrayList<Task>();
-        TaskStack stack = new TaskStack();
-
-        int taskCount = tasks.size();
-        for (int i = 0; i < taskCount; i++) {
-            ActivityManager.RecentTaskInfo t = tasks.get(i);
-            ActivityManager.TaskDescription av = t.taskDescription;
-
-            BitmapDrawable icon = null;
-            if (av.getIcon() != null) {
-                icon = new BitmapDrawable(resources, av.getIcon());
-            }
-            Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, t.baseIntent, t.userId,
-                    t.firstActiveTime, t.lastActiveTime);
-            tasksToAdd.add(new Task(taskKey, true, t.affiliatedTaskId, t.affiliatedTaskColor,
-                    av.getLabel(), icon, av.getPrimaryColor(), (i == (taskCount - 1)),
-                    config.lockToAppEnabled));
         }
         stack.setTasks(tasksToAdd);
         stack.createAffiliatedGroupings(config);
@@ -525,21 +542,18 @@ public class RecentsTaskLoader {
                 // We are leaving recents, so trim the data a bit
                 mThumbnailCache.trimToSize(mMaxThumbnailCacheSize / 2);
                 mApplicationIconCache.trimToSize(mMaxIconCacheSize / 2);
-                mTaskDescriptionIconCache.trimToSize(mMaxIconCacheSize / 2);
                 break;
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW:
             case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
                 // We are going to be low on memory
                 mThumbnailCache.trimToSize(mMaxThumbnailCacheSize / 4);
                 mApplicationIconCache.trimToSize(mMaxIconCacheSize / 4);
-                mTaskDescriptionIconCache.trimToSize(mMaxIconCacheSize / 4);
                 break;
             case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
             case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
                 // We are low on memory, so release everything
                 mThumbnailCache.evictAll();
                 mApplicationIconCache.evictAll();
-                mTaskDescriptionIconCache.evictAll();
                 // The cache is small, only clear the label cache when we are critical
                 mActivityLabelCache.evictAll();
                 break;

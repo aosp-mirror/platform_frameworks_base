@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents.model;
 
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Looper;
@@ -36,7 +35,7 @@ public class RecentsPackageMonitor extends PackageMonitor {
     }
 
     PackageCallbacks mCb;
-    List<ActivityManager.RecentTaskInfo> mTasks;
+    List<Task.TaskKey> mTasks;
     SystemServicesProxy mSystemServicesProxy;
 
     /** Registers the broadcast receivers with the specified callbacks. */
@@ -64,7 +63,7 @@ public class RecentsPackageMonitor extends PackageMonitor {
     }
 
     /** Sets the list of tasks to match against package broadcast changes. */
-    void setTasks(List<ActivityManager.RecentTaskInfo> tasks) {
+    void setTasks(List<Task.TaskKey> tasks) {
         mTasks = tasks;
     }
 
@@ -75,7 +74,7 @@ public class RecentsPackageMonitor extends PackageMonitor {
         // Identify all the tasks that should be removed as a result of the package being removed.
         // Using a set to ensure that we callback once per unique component.
         HashSet<ComponentName> componentsToRemove = new HashSet<ComponentName>();
-        for (ActivityManager.RecentTaskInfo t : mTasks) {
+        for (Task.TaskKey t : mTasks) {
             ComponentName cn = t.baseIntent.getComponent();
             if (cn.getPackageName().equals(packageName)) {
                 componentsToRemove.add(cn);
@@ -99,7 +98,7 @@ public class RecentsPackageMonitor extends PackageMonitor {
         // Using a set to ensure that we callback once per unique component.
         HashSet<ComponentName> componentsKnownToExist = new HashSet<ComponentName>();
         HashSet<ComponentName> componentsToRemove = new HashSet<ComponentName>();
-        for (ActivityManager.RecentTaskInfo t : mTasks) {
+        for (Task.TaskKey t : mTasks) {
             ComponentName cn = t.baseIntent.getComponent();
             if (cn.getPackageName().equals(packageName)) {
                 if (componentsKnownToExist.contains(cn)) {

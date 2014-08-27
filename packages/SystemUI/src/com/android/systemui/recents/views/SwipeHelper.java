@@ -28,6 +28,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
+import com.android.systemui.recents.RecentsConfiguration;
 
 /**
  * This class facilitates swipe to dismiss. It defines an interface to be implemented by the
@@ -50,7 +51,7 @@ public class SwipeHelper {
     private int DEFAULT_ESCAPE_ANIMATION_DURATION = 75; // ms
     private int MAX_ESCAPE_ANIMATION_DURATION = 150; // ms
     private int MAX_DISMISS_VELOCITY = 2000; // dp/sec
-    private static final int SNAP_ANIM_LEN = SLOW_ANIMATIONS ? 1000 : 150; // ms
+    private static final int SNAP_ANIM_LEN = SLOW_ANIMATIONS ? 1000 : 250; // ms
 
     public static float ALPHA_FADE_START = 0.15f; // fraction of thumbnail width
                                                  // where fade starts
@@ -265,6 +266,7 @@ public class SwipeHelper {
         ValueAnimator anim = createTranslationAnimation(view, 0);
         int duration = SNAP_ANIM_LEN;
         anim.setDuration(duration);
+        anim.setInterpolator(RecentsConfiguration.getInstance().linearOutSlowInInterpolator);
         anim.addUpdateListener(new AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {

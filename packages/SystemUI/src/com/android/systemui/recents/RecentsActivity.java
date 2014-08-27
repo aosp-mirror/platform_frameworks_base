@@ -343,7 +343,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         super.onCreate(savedInstanceState);
 
         // Initialize the loader and the configuration
-        RecentsTaskLoader.initialize(this);
         mConfig = RecentsConfiguration.reinitialize(this,
                 RecentsTaskLoader.getInstance().getSystemServicesProxy());
 

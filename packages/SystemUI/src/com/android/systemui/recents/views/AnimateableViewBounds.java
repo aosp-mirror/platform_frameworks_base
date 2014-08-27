@@ -33,6 +33,8 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     Rect mClipRect = new Rect();
     Rect mOutlineClipRect = new Rect();
     int mCornerRadius;
+    float mAlpha = 1f;
+    final float mMinAlpha = 0.25f;
 
     ObjectAnimator mClipTopAnimator;
     ObjectAnimator mClipRightAnimator;
@@ -51,11 +53,20 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
 
     @Override
     public void getOutline(View view, Outline outline) {
+        outline.setAlpha(mMinAlpha + mAlpha / (1f - mMinAlpha));
         outline.setRoundRect(Math.max(mClipRect.left, mOutlineClipRect.left),
                 Math.max(mClipRect.top, mOutlineClipRect.top),
                 mSourceView.getMeasuredWidth() - Math.max(mClipRect.right, mOutlineClipRect.right),
                 mSourceView.getMeasuredHeight() - Math.max(mClipRect.bottom, mOutlineClipRect.bottom),
                 mCornerRadius);
+    }
+
+    /** Sets the view outline alpha. */
+    void setAlpha(float alpha) {
+        if (Float.compare(alpha, mAlpha) != 0) {
+            mAlpha = alpha;
+            mSourceView.invalidateOutline();
+        }
     }
 
     /** Animates the top clip. */

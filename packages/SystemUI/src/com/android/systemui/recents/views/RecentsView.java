@@ -477,10 +477,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             if (!task.group.isFrontMostTask(task)) {
                 // For affiliated tasks that are behind other tasks, we must animate the front cards
                 // out of view before starting the task transition
-                stackView.startLaunchTaskAnimation(tv, launchRunnable);
+                stackView.startLaunchTaskAnimation(tv, launchRunnable, lockToTask);
             } else {
                 // Otherwise, we can start the task transition immediately
-                stackView.startLaunchTaskAnimation(tv, null);
+                stackView.startLaunchTaskAnimation(tv, null, lockToTask);
                 postDelayed(launchRunnable, 17);
             }
         }
