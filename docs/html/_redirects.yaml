@@ -1,3 +1,10 @@
+# WARNING: THIS FILE IS NOT USED IN PRODUCTION
+# CHANGES MADE HERE **DO NOT EFFECT** developer.android.com
+
+# Instead, update the following file in the current docs release branch:
+# <docs-release-branch>/vendor/google/docs/app-engine-server/v3/redirects.yaml
+
+#=============================================================================
 # Redirects file.
 # This file contains the list of rewrite rules that are applied when serving
 # pages. Add "pattern: True" to use python regex in to or from.
