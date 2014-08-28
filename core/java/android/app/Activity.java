@@ -5459,7 +5459,7 @@ public class Activity extends ContextThemeWrapper
      * this method anytime before a return from {@link #onPause()}. If this call is successful
      * then the activity will remain visible when {@link #onPause()} is called, and can continue to
      * play media in the background, but it must stop playing and release resources prior to or
-     * within the call to {@link #onVisibleBehindCancelled()}. If this call returns false, the 
+     * within the call to {@link #onVisibleBehindCanceled()}. If this call returns false, the 
      * activity will not be visible in the background, and must release any media resources 
      * immediately.
      *
@@ -5475,10 +5475,10 @@ public class Activity extends ContextThemeWrapper
      * @return the resulting visibiity state. If true the activity may remain visible beyond
      *      {@link #onPause()}. If false then the activity may not count on being visible behind
      *      other translucent activities, and must stop any media playback and release resources.
-     *      Returning false may occur in lieu of a call to onVisibleBehindCancelled() so the return
+     *      Returning false may occur in lieu of a call to onVisibleBehindCanceled() so the return
      *      value must be checked.
      *
-     * @see #onVisibleBehindCancelled()
+     * @see #onVisibleBehindCanceled()
      * @see #onBackgroundVisibleBehindChanged(boolean)
      */
     public boolean requestVisibleBehind(boolean visible) {
@@ -5498,7 +5498,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * Called when a translucent activity over this activity is becoming opaque or another
      * activity is being launched. Activities that override this method must call
-     * <code>super.onVisibleBehindCancelled()</code> or a SuperNotCalledException will be thrown.
+     * <code>super.onVisibleBehindCanceled()</code> or a SuperNotCalledException will be thrown.
      *
      * <p>When this method is called the activity has 500 msec to release any resources it may be
      * using while visible in the background.
@@ -5509,7 +5509,7 @@ public class Activity extends ContextThemeWrapper
      * @see #requestVisibleBehind(boolean)
      * @see #onBackgroundVisibleBehindChanged(boolean)
      */
-    public void onVisibleBehindCancelled() {
+    public void onVisibleBehindCanceled() {
         mCalled = true;
     }
 
@@ -5521,7 +5521,7 @@ public class Activity extends ContextThemeWrapper
      * {@link #requestVisibleBehind(boolean)}, false otherwise.
      *
      * @see #requestVisibleBehind(boolean)
-     * @see #onVisibleBehindCancelled()
+     * @see #onVisibleBehindCanceled()
      * @see #onBackgroundVisibleBehindChanged(boolean)
      * @hide
      */
@@ -5544,7 +5544,7 @@ public class Activity extends ContextThemeWrapper
      * @param visible true if a background activity is visible, false otherwise.
      *
      * @see #requestVisibleBehind(boolean)
-     * @see #onVisibleBehindCancelled()
+     * @see #onVisibleBehindCanceled()
      * @hide
      */
     @SystemApi
