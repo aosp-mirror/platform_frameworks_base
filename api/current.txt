@@ -8898,6 +8898,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_HOME_SCREEN = "android.software.home_screen";
     field public static final java.lang.String FEATURE_INPUT_METHODS = "android.software.input_methods";
     field public static final java.lang.String FEATURE_LEANBACK = "android.software.leanback";
+    field public static final java.lang.String FEATURE_LIVE_TV = "android.software.live_tv";
     field public static final java.lang.String FEATURE_LIVE_WALLPAPER = "android.software.live_wallpaper";
     field public static final java.lang.String FEATURE_LOCATION = "android.hardware.location";
     field public static final java.lang.String FEATURE_LOCATION_GPS = "android.hardware.location.gps";
