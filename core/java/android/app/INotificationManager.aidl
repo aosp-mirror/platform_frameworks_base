@@ -61,6 +61,8 @@ interface INotificationManager
     ParceledListSlice getActiveNotificationsFromListener(in INotificationListener token, in String[] keys);
     void requestHintsFromListener(in INotificationListener token, int hints);
     int getHintsFromListener(in INotificationListener token);
+    void requestInterruptionFilterFromListener(in INotificationListener token, int interruptionFilter);
+    int getInterruptionFilterFromListener(in INotificationListener token);
 
     ComponentName getEffectsSuppressor();
 
