@@ -115,35 +115,35 @@ public class ZenModeHelper {
         mAudioManager = audioManager;
     }
 
-    public int getZenModeListenerHint() {
-        switch(mZenMode) {
+    public int getZenModeListenerInterruptionFilter() {
+        switch (mZenMode) {
             case Global.ZEN_MODE_OFF:
-                return NotificationListenerService.HINT_HOST_INTERRUPTION_LEVEL_ALL;
+                return NotificationListenerService.INTERRUPTION_FILTER_ALL;
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
-                return NotificationListenerService.HINT_HOST_INTERRUPTION_LEVEL_PRIORITY;
+                return NotificationListenerService.INTERRUPTION_FILTER_PRIORITY;
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
-                return NotificationListenerService.HINT_HOST_INTERRUPTION_LEVEL_NONE;
+                return NotificationListenerService.INTERRUPTION_FILTER_NONE;
             default:
                 return 0;
         }
     }
 
-    private static int zenFromListenerHint(int hints, int defValue) {
-        final int level = hints & NotificationListenerService.HOST_INTERRUPTION_LEVEL_MASK;
-        switch(level) {
-            case NotificationListenerService.HINT_HOST_INTERRUPTION_LEVEL_ALL:
+    private static int zenModeFromListenerInterruptionFilter(int listenerInterruptionFilter,
+            int defValue) {
+        switch (listenerInterruptionFilter) {
+            case NotificationListenerService.INTERRUPTION_FILTER_ALL:
                 return Global.ZEN_MODE_OFF;
-            case NotificationListenerService.HINT_HOST_INTERRUPTION_LEVEL_PRIORITY:
+            case NotificationListenerService.INTERRUPTION_FILTER_PRIORITY:
                 return Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-            case NotificationListenerService.HINT_HOST_INTERRUPTION_LEVEL_NONE:
+            case NotificationListenerService.INTERRUPTION_FILTER_NONE:
                 return Global.ZEN_MODE_NO_INTERRUPTIONS;
             default:
                 return defValue;
         }
     }
 
-    public void requestFromListener(int hints) {
-        final int newZen = zenFromListenerHint(hints, -1);
+    public void requestFromListener(int interruptionFilter) {
+        final int newZen = zenModeFromListenerInterruptionFilter(interruptionFilter, -1);
         if (newZen != -1) {
             setZenMode(newZen, "listener");
         }

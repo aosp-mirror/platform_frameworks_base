@@ -29,4 +29,5 @@ oneway interface INotificationListener
             in NotificationRankingUpdate update);
     void onNotificationRankingUpdate(in NotificationRankingUpdate update);
     void onListenerHintsChanged(int hints);
+    void onInterruptionFilterChanged(int interruptionFilter);
 }
