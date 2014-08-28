@@ -2039,8 +2039,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void startActivity(Intent intent, boolean dismissShade) {
-        startActivityDismissingKeyguard(intent, false, dismissShade);
+    public void startActivity(Intent intent, boolean dismissShade, boolean afterKeyguardGone) {
+        startActivityDismissingKeyguard(intent, false, dismissShade, afterKeyguardGone);
     }
 
     public ScrimController getScrimController() {
@@ -2929,7 +2929,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
-            final boolean dismissShade) {
+            final boolean dismissShade, final boolean afterKeyguardGone) {
         if (onlyProvisioned && !isDeviceProvisioned()) return;
 
         final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
@@ -2939,7 +2939,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 AsyncTask.execute(new Runnable() {
                     public void run() {
                         try {
-                            if (keyguardShowing) {
+                            if (keyguardShowing && !afterKeyguardGone) {
                                 ActivityManagerNative.getDefault()
                                         .keyguardWaitingForActivityDrawn();
                             }
@@ -2947,7 +2947,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             mContext.startActivityAsUser(
                                     intent, new UserHandle(UserHandle.USER_CURRENT));
-                            overrideActivityPendingAppTransition(keyguardShowing);
+                            overrideActivityPendingAppTransition(
+                                    keyguardShowing && !afterKeyguardGone);
                         } catch (RemoteException e) {
                         }
                     }
@@ -2957,7 +2958,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 }
                 return true;
             }
-        });
+        }, afterKeyguardGone);
     }
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -3019,10 +3020,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    protected void dismissKeyguardThenExecute(final OnDismissAction action) {
+    protected void dismissKeyguardThenExecute(final OnDismissAction action,
+            boolean afterKeyguardGone) {
         if (mStatusBarKeyguardViewManager.isShowing()) {
             if (UnlockMethodCache.getInstance(mContext).isMethodInsecure()
-                    && mNotificationPanel.isLaunchTransitionRunning()) {
+                    && mNotificationPanel.isLaunchTransitionRunning() && !afterKeyguardGone) {
                 action.onDismiss();
                 mNotificationPanel.setLaunchTransitionEndRunnable(new Runnable() {
                     @Override
@@ -3031,7 +3033,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     }
                 });
             } else {
-                mStatusBarKeyguardViewManager.dismissWithAction(action);
+                mStatusBarKeyguardViewManager.dismissWithAction(action, afterKeyguardGone);
             }
         } else {
             action.onDismiss();
@@ -3270,7 +3272,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void handleStartSettingsActivity(Intent intent, boolean onlyProvisioned) {
-        startActivityDismissingKeyguard(intent, onlyProvisioned, true /* dismissShade */);
+        startActivityDismissingKeyguard(intent, onlyProvisioned, true /* dismissShade */,
+                false /* afterKeyguardGone */);
     }
 
     private static class FastColorDrawable extends Drawable {

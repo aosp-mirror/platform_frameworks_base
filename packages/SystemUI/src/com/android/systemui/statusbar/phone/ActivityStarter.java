@@ -24,5 +24,5 @@ import android.content.Intent;
  * Keyguard.
  */
 public interface ActivityStarter {
-    public void startActivity(Intent intent, boolean dismissShade);
+    public void startActivity(Intent intent, boolean dismissShade, boolean afterKeyguardGone);
 }
