@@ -467,14 +467,18 @@ public final class TvInputManagerService extends SystemService {
             String inputId, int userId) {
         // Let clients know the create session requests are failed.
         UserState userState = getUserStateLocked(userId);
+        List<SessionState> sessionsToAbort = new ArrayList<>();
         for (IBinder sessionToken : serviceState.mSessionTokens) {
             SessionState sessionState = userState.sessionStateMap.get(sessionToken);
             if (sessionState.mSession == null && (inputId == null
                     || sessionState.mInfo.getId().equals(inputId))) {
-                removeSessionStateLocked(sessionToken, sessionState.mUserId);
-                sendSessionTokenToClientLocked(sessionState.mClient,
-                        sessionState.mInfo.getId(), null, null, sessionState.mSeq);
+                sessionsToAbort.add(sessionState);
             }
+        }
+        for (SessionState sessionState : sessionsToAbort) {
+            removeSessionStateLocked(sessionState.mSessionToken, sessionState.mUserId);
+            sendSessionTokenToClientLocked(sessionState.mClient,
+                    sessionState.mInfo.getId(), null, null, sessionState.mSeq);
         }
         updateServiceConnectionLocked(serviceState.mComponent, userId);
     }
@@ -759,10 +763,6 @@ public final class TvInputManagerService extends SystemService {
             clientState.mSessionTokens.remove(sessionToken);
             if (clientState.isEmpty()) {
                 userState.clientStateMap.remove(sessionState.mClient.asBinder());
-                if (userState.clientStateMap.isEmpty()) {
-                    // No longer need to keep the callbacks since there is no client.
-                    userState.callbackSet.clear();
-                }
             }
         }
 
