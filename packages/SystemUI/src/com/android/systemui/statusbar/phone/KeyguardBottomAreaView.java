@@ -222,7 +222,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         ResolveInfo resolved = mContext.getPackageManager().resolveActivityAsUser(getCameraIntent(),
                 PackageManager.MATCH_DEFAULT_ONLY,
                 mLockPatternUtils.getCurrentUser());
-        boolean visible = !isCameraDisabledByDpm() && resolved != null;
+        boolean visible = !isCameraDisabledByDpm() && resolved != null
+                && getResources().getBoolean(R.bool.config_keyguardShowCameraAffordance);
         mCameraImageView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
