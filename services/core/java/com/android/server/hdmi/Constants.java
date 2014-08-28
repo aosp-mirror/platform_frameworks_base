@@ -248,6 +248,11 @@ final class Constants {
     static final int DISABLED = 0;
     static final int ENABLED = 1;
 
+    // Property name for the local device configurations.
+    // TODO(OEM): OEM should provide this property, and the value is the comma separated integer
+    //     values which denotes the device type in HDMI Spec 1.4.
+    static final String PROPERTY_DEVICE_TYPE = "ro.hdmi.device_type";
+
     // --------------------------------------------------
     // MHL sub command message types.
     static final int MHL_MSG_MSGE  = 0x02;
@@ -274,11 +279,6 @@ final class Constants {
     static final int MHL_CBUS_MODE_OCBUS = 1;
     static final int MHL_CBUS_MODE_ECBUS_S = 2;
     static final int MHL_CBUS_MODE_ECBUS_D = 3;
-
-    // Property name for the local device configurations.
-    // TODO(OEM): OEM should provide this property, and the value is the comma separated integer
-    //     values which denotes the device type in HDMI Spec 1.4.
-    static final String PROPERTY_DEVICE_TYPE = "ro.hdmi.device_type";
 
     // MHL RCPE messages
     static final int MHL_RCPE_NO_ERROR = 0x00;
