@@ -511,8 +511,6 @@ public final class DocumentsContract {
     public static final String METHOD_DELETE_DOCUMENT = "android:deleteDocument";
 
     /** {@hide} */
-    public static final String EXTRA_THUMBNAIL_SIZE = "thumbnail_size";
-    /** {@hide} */
     public static final String EXTRA_URI = "uri";
 
     private static final String PATH_ROOT = "root";
@@ -819,7 +817,7 @@ public final class DocumentsContract {
             ContentProviderClient client, Uri documentUri, Point size, CancellationSignal signal)
             throws RemoteException, IOException {
         final Bundle openOpts = new Bundle();
-        openOpts.putParcelable(DocumentsContract.EXTRA_THUMBNAIL_SIZE, size);
+        openOpts.putParcelable(ContentResolver.EXTRA_SIZE, size);
 
         AssetFileDescriptor afd = null;
         Bitmap bitmap = null;

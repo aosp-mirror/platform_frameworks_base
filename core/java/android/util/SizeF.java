@@ -16,7 +16,10 @@
 
 package android.util;
 
-import static com.android.internal.util.Preconditions.*;
+import static com.android.internal.util.Preconditions.checkArgumentFinite;
+
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Immutable class for describing width and height dimensions in some arbitrary
@@ -25,7 +28,7 @@ import static com.android.internal.util.Preconditions.*;
  * Width and height are finite values stored as a floating point representation.
  * </p>
  */
-public final class SizeF {
+public final class SizeF implements Parcelable {
     /**
      * Create a new immutable SizeF instance.
      *
@@ -41,6 +44,11 @@ public final class SizeF {
     public SizeF(final float width, final float height) {
         mWidth = checkArgumentFinite(width, "width");
         mHeight = checkArgumentFinite(height, "height");
+    }
+
+    private SizeF(Parcel in) {
+        mWidth = in.readFloat();
+        mHeight = in.readFloat();
     }
 
     /**
@@ -103,6 +111,29 @@ public final class SizeF {
         return Float.floatToIntBits(mWidth) ^ Float.floatToIntBits(mHeight);
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeFloat(mWidth);
+        out.writeFloat(mHeight);
+    }
+
+    public static final Parcelable.Creator<SizeF> CREATOR = new Parcelable.Creator<SizeF>() {
+        @Override
+        public SizeF createFromParcel(Parcel in) {
+            return new SizeF(in);
+        }
+
+        @Override
+        public SizeF[] newArray(int size) {
+            return new SizeF[size];
+        }
+    };
+
     private final float mWidth;
     private final float mHeight;
-};
+}
