@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
+import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
@@ -441,7 +442,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     private String getShortMetadataString() {
         int fields = mMetadata == null ? 0 : mMetadata.size();
-        MediaMetadata.Description description = mMetadata == null ? null : mMetadata
+        MediaDescription description = mMetadata == null ? null : mMetadata
                 .getDescription();
         return "size=" + fields + ", description=" + description;
     }
@@ -820,9 +821,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             }
         }
 
-        public void playUri(Uri uri, Bundle extras) {
+        public void playFromMediaId(String mediaId, Bundle extras) {
             try {
-                mCb.onPlayUri(uri, extras);
+                mCb.onPlayFromMediaId(mediaId, extras);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in playUri.", e);
             }
@@ -1042,8 +1043,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void playUri(Uri uri, Bundle extras) throws RemoteException {
-            mSessionCb.playUri(uri, extras);
+        public void playFromMediaId(String mediaId, Bundle extras) throws RemoteException {
+            mSessionCb.playFromMediaId(mediaId, extras);
         }
 
         @Override
@@ -1052,7 +1053,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void skipToTrack(long id) {
+        public void skipToQueueItem(long id) {
             mSessionCb.skipToTrack(id);
         }
 
