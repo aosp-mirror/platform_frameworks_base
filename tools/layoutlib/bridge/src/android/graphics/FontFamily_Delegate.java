@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
@@ -50,10 +52,12 @@ import static android.graphics.Typeface_Delegate.SYSTEM_FONTS;
  */
 public class FontFamily_Delegate {
 
+    public static final int DEFAULT_FONT_WEIGHT = 400;
+    public static final int BOLD_FONT_WEIGHT_DELTA = 300;
+    public static final int BOLD_FONT_WEIGHT = 700;
+
     // FONT_SUFFIX_ITALIC will always match FONT_SUFFIX_BOLDITALIC and hence it must be checked
     // separately.
-    private static final String FONT_SUFFIX_BOLDITALIC = "BoldItalic.ttf";
-    private static final String FONT_SUFFIX_BOLD = "Bold.ttf";
     private static final String FONT_SUFFIX_ITALIC = "Italic.ttf";
     private static final String FN_ALL_FONTS_LIST = "fontsInSdk.txt";
 
@@ -61,9 +65,10 @@ public class FontFamily_Delegate {
      * A class associating {@link Font} with its metadata.
      */
     private static final class FontInfo {
+        @Nullable
         Font mFont;
-        /** Regular, Bold, Italic, or BoldItalic. */
-        int mStyle;
+        int mWeight;
+        boolean mIsItalic;
     }
 
     // ---- delegate manager ----
@@ -79,16 +84,18 @@ public class FontFamily_Delegate {
 
     // ---- delegate data ----
     private List<FontInfo> mFonts = new ArrayList<FontInfo>();
+
     /**
      * The variant of the Font Family - compact or elegant.
+     * <p/>
      * 0 is unspecified, 1 is compact and 2 is elegant. This needs to be kept in sync with values in
      * android.graphics.FontFamily
      *
      * @see Paint#setElegantTextHeight(boolean)
      */
     private FontVariant mVariant;
-    // Path of fonts that haven't been created since sFontLoader hasn't been initialized.
-    private List<String> mPath = new ArrayList<String>();
+    // List of runnables to process fonts after sFontLoader is initialized.
+    private List<Runnable> mPostInitRunnables = new ArrayList<Runnable>();
     /** @see #isValid() */
     private boolean mValid = false;
 
@@ -139,27 +146,30 @@ public class FontFamily_Delegate {
         sPostInitDelegate.clear();
     }
 
-    public Font getFont(int style) {
-        FontInfo plainFont = null;
+    @Nullable
+    public Font getFont(int desiredWeight, boolean isItalic) {
+        FontInfo desiredStyle = new FontInfo();
+        desiredStyle.mWeight = desiredWeight;
+        desiredStyle.mIsItalic = isItalic;
+        FontInfo bestFont = null;
+        int bestMatch = Integer.MAX_VALUE;
         for (FontInfo font : mFonts) {
-            if (font.mStyle == style) {
-                return font.mFont;
-            }
-            if (font.mStyle == Font.PLAIN && plainFont == null) {
-                plainFont = font;
+            int match = computeMatch(font, desiredStyle);
+            if (match < bestMatch) {
+                bestMatch = match;
+                bestFont = font;
             }
         }
-
-        // No font with the mentioned style is found. Try to derive one.
-        if (plainFont != null && style > 0 && style < 4) {
-            FontInfo styledFont = new FontInfo();
-            styledFont.mFont = plainFont.mFont.deriveFont(style);
-            styledFont.mStyle = style;
-            // Add the font to the list of fonts so that we don't have to derive it the next time.
-            mFonts.add(styledFont);
-            return styledFont.mFont;
+        if (bestFont == null) {
+            return null;
         }
-        return null;
+        if (bestMatch == 0) {
+            return bestFont.mFont;
+        }
+        // Derive the font as required and add it to the list of Fonts.
+        deriveFont(bestFont, desiredStyle);
+        addFont(desiredStyle);
+        return desiredStyle.mFont;
     }
 
     public FontVariant getVariant() {
@@ -168,25 +178,12 @@ public class FontFamily_Delegate {
 
     /**
      * Returns if the FontFamily should contain any fonts. If this returns true and
-     * {@link #getFont(int)} returns an empty list, it means that an error occurred while loading
-     * the fonts. However, some fonts are deliberately skipped, for example they are not bundled
-     * with the SDK. In such a case, this method returns false.
+     * {@link #getFont(int, boolean)} returns an empty list, it means that an error occurred while
+     * loading the fonts. However, some fonts are deliberately skipped, for example they are not
+     * bundled with the SDK. In such a case, this method returns false.
      */
     public boolean isValid() {
         return mValid;
-    }
-
-    /*package*/ static int getFontStyle(String path) {
-        int style = Font.PLAIN;
-        String fontName = path.substring(path.lastIndexOf('/'));
-        if (fontName.endsWith(FONT_SUFFIX_BOLDITALIC)) {
-            style = Font.BOLD | Font.ITALIC;
-        } else if (fontName.endsWith(FONT_SUFFIX_BOLD)) {
-            style = Font.BOLD;
-        } else if (fontName.endsWith(FONT_SUFFIX_ITALIC)) {
-            style = Font.ITALIC;
-        }
-        return style;
     }
 
     /*package*/ static Font loadFont(String path) {
@@ -242,14 +239,38 @@ public class FontFamily_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nAddFont(long nativeFamily, String path) {
-        FontFamily_Delegate delegate = getDelegate(nativeFamily);
+    /*package*/ static boolean nAddFont(long nativeFamily, final String path) {
+        final FontFamily_Delegate delegate = getDelegate(nativeFamily);
         if (delegate != null) {
             if (sFontLocation == null) {
-                delegate.mPath.add(path);
+                delegate.mPostInitRunnables.add(new Runnable() {
+                    @Override
+                    public void run() {
+                        delegate.addFont(path);
+                    }
+                });
                 return true;
             }
             return delegate.addFont(path);
+        }
+        return false;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static boolean nAddFontWeightStyle(long nativeFamily, final String path,
+            final int weight, final boolean isItalic) {
+        final FontFamily_Delegate delegate = getDelegate(nativeFamily);
+        if (delegate != null) {
+            if (sFontLocation == null) {
+                delegate.mPostInitRunnables.add(new Runnable() {
+                    @Override
+                    public void run() {
+                        delegate.addFont(path, weight, isItalic);
+                    }
+                });
+                return true;
+            }
+            return delegate.addFont(path, weight, isItalic);
         }
         return false;
     }
@@ -265,15 +286,17 @@ public class FontFamily_Delegate {
     // ---- private helper methods ----
 
     private void init() {
-        for (String path : mPath) {
-            addFont(path);
+        for (Runnable postInitRunnable : mPostInitRunnables) {
+            postInitRunnable.run();
         }
-        mPath = null;
+        mPostInitRunnables = null;
     }
 
-    private boolean addFont(String path) {
-        // If the font is not in the list of fonts bundled with the SDK, don't try to load it and
-        // mark the FontFamily to be not valid.
+     private boolean addFont(@NonNull String path) {
+         return addFont(path, DEFAULT_FONT_WEIGHT, path.endsWith(FONT_SUFFIX_ITALIC));
+     }
+
+    private boolean addFont(@NonNull String path, int weight, boolean isItalic) {
         if (path.startsWith(SYSTEM_FONTS) &&
                 !SDK_FONTS.contains(path.substring(SYSTEM_FONTS.length()))) {
             return mValid = false;
@@ -286,9 +309,67 @@ public class FontFamily_Delegate {
         }
         FontInfo fontInfo = new FontInfo();
         fontInfo.mFont = font;
-        fontInfo.mStyle = getFontStyle(path);
-        // TODO ensure that mFonts doesn't have the font with this style already.
+        fontInfo.mWeight = weight;
+        fontInfo.mIsItalic = isItalic;
+        addFont(fontInfo);
+        return true;
+    }
+
+    private boolean addFont(@NonNull FontInfo fontInfo) {
+        int weight = fontInfo.mWeight;
+        boolean isItalic = fontInfo.mIsItalic;
+        // The list is usually just two fonts big. So iterating over all isn't as bad as it looks.
+        // It's biggest for roboto where the size is 12.
+        for (FontInfo font : mFonts) {
+            if (font.mWeight == weight && font.mIsItalic == isItalic) {
+                return false;
+            }
+        }
         mFonts.add(fontInfo);
         return true;
+    }
+
+    /**
+     * Compute matching metric between two styles - 0 is an exact match.
+     */
+    private static int computeMatch(@NonNull FontInfo font1, @NonNull FontInfo font2) {
+        int score = Math.abs(font1.mWeight - font2.mWeight);
+        if (font1.mIsItalic != font2.mIsItalic) {
+            score += 200;
+        }
+        return score;
+    }
+
+    /**
+     * Try to derive a font from {@code srcFont} for the style in {@code outFont}.
+     * <p/>
+     * {@code outFont} is updated to reflect the style of the derived font.
+     * @param srcFont the source font
+     * @param outFont contains the desired font style. Updated to contain the derived font and
+     *                its style
+     * @return outFont
+     */
+    @NonNull
+    private FontInfo deriveFont(@NonNull FontInfo srcFont, @NonNull FontInfo outFont) {
+        int desiredWeight = outFont.mWeight;
+        int srcWeight = srcFont.mWeight;
+        Font derivedFont = srcFont.mFont;
+        // Embolden the font if required.
+        if (desiredWeight >= BOLD_FONT_WEIGHT && desiredWeight - srcWeight > BOLD_FONT_WEIGHT_DELTA / 2) {
+            derivedFont = derivedFont.deriveFont(Font.BOLD);
+            srcWeight += BOLD_FONT_WEIGHT_DELTA;
+        }
+        // Italicize the font if required.
+        if (outFont.mIsItalic && !srcFont.mIsItalic) {
+            derivedFont = derivedFont.deriveFont(Font.ITALIC);
+        } else if (outFont.mIsItalic != srcFont.mIsItalic) {
+            // The desired font is plain, but the src font is italics. We can't convert it back. So
+            // we update the value to reflect the true style of the font we're deriving.
+            outFont.mIsItalic = srcFont.mIsItalic;
+        }
+        outFont.mFont = derivedFont;
+        outFont.mWeight = srcWeight;
+        // No need to update mIsItalics, as it's already been handled above.
+        return outFont;
     }
 }
