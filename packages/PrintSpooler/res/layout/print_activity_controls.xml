@@ -55,8 +55,7 @@
                     android:text="@string/label_copies">
                 </TextView>
 
-                <view
-                    class="com.android.printspooler.widget.FirstFocusableEditText"
+                <EditText
                     android:id="@+id/copies_edittext"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
@@ -64,7 +63,7 @@
                     android:singleLine="true"
                     android:ellipsize="end"
                     android:inputType="numberDecimal">
-                </view>
+                </EditText>
 
             </LinearLayout>
 
@@ -198,8 +197,7 @@
                     android:visibility="visible">
                 </TextView>
 
-                <view
-                    class="com.android.printspooler.widget.FirstFocusableEditText"
+                <EditText
                     android:id="@+id/page_range_edittext"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
@@ -208,7 +206,7 @@
                     android:ellipsize="end"
                     android:visibility="visible"
                     android:inputType="textNoSuggestions">
-                </view>
+                </EditText>
 
             </LinearLayout>
 

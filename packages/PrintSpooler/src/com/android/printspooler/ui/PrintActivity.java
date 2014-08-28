@@ -982,21 +982,21 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         // Media size.
         mMediaSizeSpinnerAdapter = new ArrayAdapter<>(
-                this, R.layout.spinner_dropdown_item, R.id.title);
+                this, android.R.layout.simple_spinner_dropdown_item, android.R.id.text1);
         mMediaSizeSpinner = (Spinner) findViewById(R.id.paper_size_spinner);
         mMediaSizeSpinner.setAdapter(mMediaSizeSpinnerAdapter);
         mMediaSizeSpinner.setOnItemSelectedListener(itemSelectedListener);
 
         // Color mode.
         mColorModeSpinnerAdapter = new ArrayAdapter<>(
-                this, R.layout.spinner_dropdown_item, R.id.title);
+                this, android.R.layout.simple_spinner_dropdown_item, android.R.id.text1);
         mColorModeSpinner = (Spinner) findViewById(R.id.color_spinner);
         mColorModeSpinner.setAdapter(mColorModeSpinnerAdapter);
         mColorModeSpinner.setOnItemSelectedListener(itemSelectedListener);
 
         // Orientation
         mOrientationSpinnerAdapter = new ArrayAdapter<>(
-                this, R.layout.spinner_dropdown_item, R.id.title);
+                this, android.R.layout.simple_spinner_dropdown_item, android.R.id.text1);
         String[] orientationLabels = getResources().getStringArray(
                 R.array.orientation_labels);
         mOrientationSpinnerAdapter.add(new SpinnerItem<>(
@@ -1008,8 +1008,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         mOrientationSpinner.setOnItemSelectedListener(itemSelectedListener);
 
         // Range options
-        ArrayAdapter<SpinnerItem<Integer>> rangeOptionsSpinnerAdapter =
-                new ArrayAdapter<>(this, R.layout.spinner_dropdown_item, R.id.title);
+        ArrayAdapter<SpinnerItem<Integer>> rangeOptionsSpinnerAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_dropdown_item, android.R.id.text1);
         mRangeOptionsSpinner = (Spinner) findViewById(R.id.range_options_spinner);
         mRangeOptionsSpinner.setAdapter(rangeOptionsSpinnerAdapter);
         mRangeOptionsSpinner.setOnItemSelectedListener(itemSelectedListener);
@@ -1075,6 +1075,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 mDestinationSpinner.setEnabled(false);
             }
             mCopiesEditText.setEnabled(false);
+            mCopiesEditText.setFocusable(false);
             mMediaSizeSpinner.setEnabled(false);
             mColorModeSpinner.setEnabled(false);
             mOrientationSpinner.setEnabled(false);
@@ -1089,6 +1090,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // available, we disable all print options except the destination.
         if (mCurrentPrinter == null || !canPrint(mCurrentPrinter)) {
             mCopiesEditText.setEnabled(false);
+            mCopiesEditText.setFocusable(false);
             mMediaSizeSpinner.setEnabled(false);
             mColorModeSpinner.setEnabled(false);
             mOrientationSpinner.setEnabled(false);
@@ -1316,8 +1318,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // Copies
         if (mDestinationSpinnerAdapter.getPdfPrinter() != mCurrentPrinter) {
             mCopiesEditText.setEnabled(true);
+            mCopiesEditText.setFocusableInTouchMode(true);
         } else {
             mCopiesEditText.setEnabled(false);
+            mCopiesEditText.setFocusable(false);
         }
         if (mCopiesEditText.getError() == null
                 && TextUtils.isEmpty(mCopiesEditText.getText())) {
