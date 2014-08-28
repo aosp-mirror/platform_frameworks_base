@@ -310,7 +310,6 @@ package android {
     field public static final int addStatesFromChildren = 16842992; // 0x10100f0
     field public static final int adjustViewBounds = 16843038; // 0x101011e
     field public static final int advancedPrintOptionsActivity = 16843761; // 0x10103f1
-    field public static final int ageHint = 16843962; // 0x10104ba
     field public static final int alertDialogIcon = 16843605; // 0x1010355
     field public static final int alertDialogStyle = 16842845; // 0x101005d
     field public static final int alertDialogTheme = 16843529; // 0x1010309
@@ -460,6 +459,7 @@ package android {
     field public static final int configure = 16843357; // 0x101025d
     field public static final int constantSize = 16843158; // 0x1010196
     field public static final int content = 16843355; // 0x101025b
+    field public static final int contentAgeHint = 16843962; // 0x10104ba
     field public static final int contentAuthority = 16843408; // 0x1010290
     field public static final int contentDescription = 16843379; // 0x1010273
     field public static final int contentInsetEnd = 16843860; // 0x1010454
