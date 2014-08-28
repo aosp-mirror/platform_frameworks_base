@@ -123,7 +123,7 @@ public abstract class Image implements AutoCloseable {
      */
     public abstract long getTimestamp();
 
-    protected Rect mCropRect;
+    private Rect mCropRect;
 
     /**
      * Get the crop rectangle associated with this frame.

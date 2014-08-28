@@ -665,7 +665,7 @@ final public class MediaCodec {
      * Thrown when an internal codec error occurs.
      */
     public final static class CodecException extends IllegalStateException {
-        public CodecException(int errorCode, int actionCode, String detailMessage) {
+        CodecException(int errorCode, int actionCode, String detailMessage) {
             super(detailMessage);
             mErrorCode = errorCode;
             mActionCode = actionCode;
@@ -1729,7 +1729,7 @@ final public class MediaCodec {
             if (cropRect != null) {
                 cropRect.offset(-xOffset, -yOffset);
             }
-            mCropRect = cropRect;
+            setCropRect(cropRect);
 
             // save offsets and info
             mXOffset = xOffset;
