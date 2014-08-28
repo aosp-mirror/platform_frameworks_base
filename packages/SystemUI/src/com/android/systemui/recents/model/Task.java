@@ -16,11 +16,14 @@
 
 package com.android.systemui.recents.model;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import com.android.systemui.recents.misc.Utilities;
+
+import java.util.Objects;
 
 
 /**
@@ -35,8 +38,35 @@ public class Task {
         public void onTaskDataUnloaded();
     }
 
+    /** The ComponentNameKey represents the unique primary key for a component
+     * belonging to a specified user. */
+    public static class ComponentNameKey {
+        final ComponentName component;
+        final int userId;
+
+        public ComponentNameKey(ComponentName cn, int user) {
+            component = cn;
+            userId = user;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(component, userId);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof ComponentNameKey)) {
+                return false;
+            }
+            return component.equals(((ComponentNameKey) o).component) &&
+                    userId == ((ComponentNameKey) o).userId;
+        }
+    }
+
     /* The Task Key represents the unique primary key for the task */
     public static class TaskKey {
+        final ComponentNameKey mComponentNameKey;
         public final int id;
         public final Intent baseIntent;
         public final int userId;
@@ -44,11 +74,17 @@ public class Task {
         public long lastActiveTime;
 
         public TaskKey(int id, Intent intent, int userId, long firstActiveTime, long lastActiveTime) {
+            mComponentNameKey = new ComponentNameKey(intent.getComponent(), userId);
             this.id = id;
             this.baseIntent = intent;
             this.userId = userId;
             this.firstActiveTime = firstActiveTime;
             this.lastActiveTime = lastActiveTime;
+        }
+
+        /** Returns the component name key for this task. */
+        public ComponentNameKey getComponentNameKey() {
+            return mComponentNameKey;
         }
 
         @Override
