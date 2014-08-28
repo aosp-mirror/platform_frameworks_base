@@ -46,7 +46,7 @@
             android:gravity="top"
             >
             <TextView android:id="@+id/big_text"
-                android:textAppearance="@style/TextAppearance.StatusBar.Material.EventContent"
+                android:textAppearance="@style/TextAppearance.Material.Notification"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

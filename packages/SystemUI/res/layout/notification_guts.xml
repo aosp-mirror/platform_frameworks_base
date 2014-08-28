@@ -53,7 +53,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|start"
                     android:layout_weight="1"
-                    android:textAppearance="@*android:style/TextAppearance.StatusBar.Material.EventContent.Title"
+                    android:textAppearance="@*android:style/TextAppearance.Material.Notification.Title"
                     android:textColor="@color/notification_guts_title_color"
                     />
             <DateTimeView
@@ -62,7 +62,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
                     android:layout_gravity="center_vertical|start"
-                    android:textAppearance="@*android:style/TextAppearance.StatusBar.Material.EventContent.Time"
+                    android:textAppearance="@*android:style/TextAppearance.Material.Notification.Time"
                     android:textColor="@color/notification_guts_text_color"
                     />
             <TextView
@@ -70,7 +70,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/debug_info"
                     android:layout_weight="0"
-                    android:textAppearance="@*android:style/TextAppearance.StatusBar.Material.EventContent.Time"
+                    android:textAppearance="@*android:style/TextAppearance.Material.Notification.Time"
                     android:layout_gravity="bottom|start"
                     android:visibility="gone"
                     android:textColor="@color/notification_guts_text_color"
