@@ -20,11 +20,14 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.MathUtils;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +39,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.android.keyguard.KeyguardStatusView;
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
@@ -57,11 +61,11 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private View mDateGroup;
     private View mClock;
     private TextView mTime;
-    private View mAmPm;
+    private TextView mAmPm;
     private MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
-    private View mDateCollapsed;
-    private View mDateExpanded;
+    private TextView mDateCollapsed;
+    private TextView mDateExpanded;
     private LinearLayout mSystemIcons;
     private View mStatusIcons;
     private View mSignalCluster;
@@ -70,7 +74,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private TextView mQsDetailHeaderTitle;
     private Switch mQsDetailHeaderSwitch;
     private ImageView mQsDetailHeaderProgress;
-    private View mEmergencyCallsOnly;
+    private TextView mEmergencyCallsOnly;
     private TextView mBatteryLevel;
     private TextView mAlarmStatus;
 
@@ -129,11 +133,11 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mDateGroup = findViewById(R.id.date_group);
         mClock = findViewById(R.id.clock);
         mTime = (TextView) findViewById(R.id.time_view);
-        mAmPm = findViewById(R.id.am_pm_view);
+        mAmPm = (TextView) findViewById(R.id.am_pm_view);
         mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = (ImageView) findViewById(R.id.multi_user_avatar);
-        mDateCollapsed = findViewById(R.id.date_collapsed);
-        mDateExpanded = findViewById(R.id.date_expanded);
+        mDateCollapsed = (TextView) findViewById(R.id.date_collapsed);
+        mDateExpanded = (TextView) findViewById(R.id.date_expanded);
         mSettingsButton = findViewById(R.id.settings_button);
         mSettingsButton.setOnClickListener(this);
         mQsDetailHeader = findViewById(R.id.qs_detail_header);
@@ -141,7 +145,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mQsDetailHeaderTitle = (TextView) mQsDetailHeader.findViewById(android.R.id.title);
         mQsDetailHeaderSwitch = (Switch) mQsDetailHeader.findViewById(android.R.id.toggle);
         mQsDetailHeaderProgress = (ImageView) findViewById(R.id.qs_detail_header_progress);
-        mEmergencyCallsOnly = findViewById(R.id.header_emergency_calls_only);
+        mEmergencyCallsOnly = (TextView) findViewById(R.id.header_emergency_calls_only);
         mBatteryLevel = (TextView) findViewById(R.id.battery_level);
         mAlarmStatus = (TextView) findViewById(R.id.alarm_status);
         mAlarmStatus.setOnClickListener(this);
@@ -187,6 +191,39 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mAlarmStatus.setX(mDateGroup.getLeft() + mDateCollapsed.getRight());
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        FontSizeUtils.updateFontSize(mBatteryLevel, R.dimen.battery_level_text_size);
+        FontSizeUtils.updateFontSize(mEmergencyCallsOnly,
+                R.dimen.qs_emergency_calls_only_text_size);
+        FontSizeUtils.updateFontSize(mDateCollapsed, R.dimen.qs_date_collapsed_size);
+        FontSizeUtils.updateFontSize(mDateExpanded, R.dimen.qs_date_collapsed_size);
+        FontSizeUtils.updateFontSize(mAlarmStatus, R.dimen.qs_date_collapsed_size);
+        FontSizeUtils.updateFontSize(this, android.R.id.title, R.dimen.qs_detail_header_text_size);
+        FontSizeUtils.updateFontSize(this, android.R.id.toggle, R.dimen.qs_detail_header_text_size);
+        FontSizeUtils.updateFontSize(mAmPm, R.dimen.qs_time_collapsed_size);
+        FontSizeUtils.updateFontSize(this, R.id.empty_time_view, R.dimen.qs_time_expanded_size);
+
+        mClockCollapsedSize = getResources().getDimensionPixelSize(R.dimen.qs_time_collapsed_size);
+        mClockExpandedSize = getResources().getDimensionPixelSize(R.dimen.qs_time_expanded_size);
+        mClockCollapsedScaleFactor = (float) mClockCollapsedSize / (float) mClockExpandedSize;
+
+        updateClockScale();
+        updateClockCollapsedMargin();
+    }
+
+    private void updateClockCollapsedMargin() {
+        Resources res = getResources();
+        int padding = res.getDimensionPixelSize(R.dimen.clock_collapsed_bottom_margin);
+        int largePadding = res.getDimensionPixelSize(
+                R.dimen.clock_collapsed_bottom_margin_large_text);
+        float largeFactor = (MathUtils.constrain(getResources().getConfiguration().fontScale, 1.0f,
+                FontSizeUtils.LARGE_TEXT_SCALE) - 1f) / (FontSizeUtils.LARGE_TEXT_SCALE - 1f);
+        mClockMarginBottomCollapsed = Math.round((1 - largeFactor) * padding + largeFactor * largePadding);
+        requestLayout();
+    }
+
     private void requestCaptureValues() {
         mCaptureValues = true;
         requestLayout();
@@ -200,11 +237,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 getResources().getDimensionPixelSize(R.dimen.multi_user_switch_expanded_margin);
         mMultiUserCollapsedMargin =
                 getResources().getDimensionPixelSize(R.dimen.multi_user_switch_collapsed_margin);
-
         mClockMarginBottomExpanded =
                 getResources().getDimensionPixelSize(R.dimen.clock_expanded_bottom_margin);
-        mClockMarginBottomCollapsed =
-                getResources().getDimensionPixelSize(R.dimen.clock_collapsed_bottom_margin);
+        updateClockCollapsedMargin();
         mMultiUserSwitchWidthCollapsed =
                 getResources().getDimensionPixelSize(R.dimen.multi_user_switch_width_collapsed);
         mMultiUserSwitchWidthExpanded =
@@ -732,7 +767,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             final boolean showingDetail = detail != null;
             transition(mClock, !showingDetail);
             transition(mDateGroup, !showingDetail);
-            transition(mAlarmStatus, !showingDetail);
+            if (mAlarmShowing) {
+                transition(mAlarmStatus, !showingDetail);
+            }
             transition(mQsDetailHeader, showingDetail);
             mShowingDetail = showingDetail;
             if (showingDetail) {

@@ -44,7 +44,7 @@
             android:id="@+id/user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
+            android:textSize="@dimen/qs_detail_item_secondary_text_size"
             android:textColor="@color/qs_user_detail_name"
             android:gravity="center_horizontal" />
 
