@@ -7364,7 +7364,8 @@
         <attr name="title" />
         <!-- The short description of the content rating system. -->
         <attr name="description" />
-        <!-- The country associated with the content rating system. -->
+        <!-- The country code associated with the content rating system, which consists of two
+             uppercase letters that conform to the ISO 3166 standard. -->
         <attr name="country" format="string" />
     </declare-styleable>
 
@@ -7381,7 +7382,7 @@
         <attr name="description" />
         <!-- The age associated with the content rating. The content of this rating is suitable for
              people of this age or above. -->
-        <attr name="ageHint" format="integer" />
+        <attr name="contentAgeHint" format="integer" />
     </declare-styleable>
 
     <declare-styleable name="ResolverDrawerLayout">
