@@ -163,6 +163,9 @@ public class KeyguardAffordanceView extends ImageView {
 
     public void setPreviewView(View v) {
         mPreviewView = v;
+        if (mPreviewView != null) {
+            mPreviewView.setVisibility(INVISIBLE);
+        }
     }
 
     private void drawArrow(Canvas canvas) {
@@ -295,7 +298,7 @@ public class KeyguardAffordanceView extends ImageView {
             duration = Math.min(duration, CIRCLE_DISAPPEAR_MAX_DURATION);
             animator.setDuration(duration);
             animator.start();
-            if (mPreviewView != null) {
+            if (mPreviewView != null && mPreviewView.getVisibility() == View.VISIBLE) {
                 mPreviewView.setVisibility(View.VISIBLE);
                 mPreviewClipper = ViewAnimationUtils.createCircularReveal(
                         mPreviewView, getLeft() + mCenterX, getTop() + mCenterY, mCircleRadius,
