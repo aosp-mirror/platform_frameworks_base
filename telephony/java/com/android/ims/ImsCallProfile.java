@@ -172,11 +172,25 @@ public class ImsCallProfile implements Parcelable {
      *  cna : Calling name
      *  ussd : For network-initiated USSD, MT only
      *  remote_uri : Connected user identity (it can be used for the conference)
+     *  parrentCallId: Parent call ID info.
+     *  ChildNum: Child number info.
+     *  Codec: Codec info.
+     *  DisplayText: Display text for the call.
+     *  AdditionalCallInfo: Additional call info.
      */
     public static final String EXTRA_OI = "oi";
     public static final String EXTRA_CNA = "cna";
     public static final String EXTRA_USSD = "ussd";
     public static final String EXTRA_REMOTE_URI = "remote_uri";
+    public static final String EXTRA_PARENT_CALL_ID = "parentCallId";
+    public static final String EXTRA_CHILD_NUMBER = "ChildNum";
+    public static final String EXTRA_CODEC = "Codec";
+    public static final String EXTRA_DISPLAY_TEXT = "DisplayText";
+    public static final String EXTRA_ADDITIONAL_CALL_INFO = "AdditionalCallInfo";
+
+    // Extra string for internal use only. OEMs should not use
+    // this for packing extras.
+    public static final String EXTRA_OEM_EXTRAS = "OemCallExtras";
 
     public int mServiceType;
     public int mCallType;
