@@ -581,9 +581,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected void applyColorsAndBackgrounds(StatusBarNotification sbn,
             NotificationData.Entry entry) {
+        PackageManager pmUser = getPackageManagerForUser(
+                entry.notification.getUser().getIdentifier());
         int version = 0;
         try {
-            ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(sbn.getPackageName(), 0);
+            ApplicationInfo info = pmUser.getApplicationInfo(sbn.getPackageName(), 0);
             version = info.targetSdkVersion;
         } catch (NameNotFoundException ex) {
             Log.e(TAG, "Failed looking up ApplicationInfo for " + sbn.getPackageName(), ex);
