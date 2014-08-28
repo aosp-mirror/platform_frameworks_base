@@ -120,19 +120,6 @@ public final class MediaFormat {
     private Map<String, Object> mMap;
 
     /**
-     * A key prefix used together with a {@link MediaCodecInfo.CodecCapabilities}
-     * feature name describing a required or optional feature for a codec capabilities
-     * query.
-     * The associated value is an integer, where non-0 value means the feature is
-     * requested to be present, while 0 value means the feature is requested to be not
-     * present.
-     * @see MediaCodecList#findDecoderForFormat
-     * @see MediaCodecList#findEncoderForFormat
-     * @see MediaCodecInfo.CodecCapabilities#isFormatSupported
-     */
-    public static final String KEY_FEATURE_ = "feature-";
-
-    /**
      * A key describing the mime type of the MediaFormat.
      * The associated value is a string.
      */
@@ -422,6 +409,8 @@ public final class MediaFormat {
      * codec specific, but lower values generally result in more efficient
      * (smaller-sized) encoding.
      *
+     * @hide
+     *
      * @see MediaCodecInfo.CodecCapabilities.EncoderCapabilities#getQualityRange
      */
     public static final String KEY_QUALITY = "quality";
@@ -510,6 +499,21 @@ public final class MediaFormat {
     }
 
     /**
+     * A key prefix used together with a {@link MediaCodecInfo.CodecCapabilities}
+     * feature name describing a required or optional feature for a codec capabilities
+     * query.
+     * The associated value is an integer, where non-0 value means the feature is
+     * requested to be present, while 0 value means the feature is requested to be not
+     * present.
+     * @see MediaCodecList#findDecoderForFormat
+     * @see MediaCodecList#findEncoderForFormat
+     * @see MediaCodecInfo.CodecCapabilities#isFormatSupported
+     *
+     * @hide
+     */
+    public static final String KEY_FEATURE_ = "feature-";
+
+    /**
      * Returns the value of an integer key.
      */
     public final int getInteger(String name) {
@@ -559,6 +563,23 @@ public final class MediaFormat {
     }
 
     /**
+     * Returns whether a feature is to be enabled ({@code true}) or disabled
+     * ({@code false}).
+     *
+     * @param feature the name of a {@link MediaCodecInfo.CodecCapabilities} feature.
+     *
+     * @throws IllegalArgumentException if the feature was neither set to be enabled
+     *        nor to be disabled.
+     */
+    public boolean getFeatureEnabled(String feature) {
+        Integer enabled = (Integer)mMap.get(KEY_FEATURE_ + feature);
+        if (enabled == null) {
+            throw new IllegalArgumentException("feature is not specified");
+        }
+        return enabled != 0;
+    }
+
+    /**
      * Sets the value of an integer key.
      */
     public final void setInteger(String name, int value) {
@@ -591,6 +612,23 @@ public final class MediaFormat {
      */
     public final void setByteBuffer(String name, ByteBuffer bytes) {
         mMap.put(name, bytes);
+    }
+
+    /**
+     * Sets whether a feature is to be enabled ({@code true}) or disabled
+     * ({@code false}).
+     *
+     * If {@code enabled} is {@code true}, the feature is requested to be present.
+     * Otherwise, the feature is requested to be not present.
+     *
+     * @param feature the name of a {@link MediaCodecInfo.CodecCapabilities} feature.
+     *
+     * @see MediaCodecList#findDecoderForFormat
+     * @see MediaCodecList#findEncoderForFormat
+     * @see MediaCodecInfo.CodecCapabilities#isFormatSupported
+     */
+    public void setFeatureEnabled(String feature, boolean enabled) {
+        setInteger(KEY_FEATURE_ + feature, enabled ? 1 : 0);
     }
 
     /**
