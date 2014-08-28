@@ -285,6 +285,20 @@ public class TelecommManager {
     }
 
     /**
+     * Sets the default account for making outgoing phone calls.
+     * @hide
+     */
+    public void setDefaultOutgoingPhoneAccount(PhoneAccountHandle accountHandle) {
+        try {
+            if (isServiceConnected()) {
+                getTelecommService().setDefaultOutgoingPhoneAccount(accountHandle);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#setDefaultOutgoingPhoneAccount");
+        }
+    }
+
+    /**
      * Return a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
      * calls.
      *
@@ -298,6 +312,55 @@ public class TelecommManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecommService#getOutgoingPhoneAccounts", e);
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Returns the current SIM call manager. Apps must be prepared for this method to return
+     * {@code null}, indicating that there currently exists no user-chosen default
+     * {@code PhoneAccount}.
+     * @return The phone account handle of the current sim call manager.
+     * @hide
+     */
+    public PhoneAccountHandle getSimCallManager() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecommService().getSimCallManager();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#getSimCallManager");
+        }
+        return null;
+    }
+
+    /**
+     * Sets the SIM call manager to the specified phone account.
+     * @param accountHandle The phone account handle of the account to set as the sim call manager.
+     * @hide
+     */
+    public void setSimCallManager(PhoneAccountHandle accountHandle) {
+        try {
+            if (isServiceConnected()) {
+                getTelecommService().setSimCallManager(accountHandle);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#setSimCallManager");
+        }
+    }
+
+    /**
+     * Returns the list of registered SIM call managers.
+     * @return List of registered SIM call managers.
+     * @hide
+     */
+    public List<PhoneAccountHandle> getSimCallManagers() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecommService().getSimCallManagers();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#getSimCallManagers");
         }
         return new ArrayList<>();
     }
