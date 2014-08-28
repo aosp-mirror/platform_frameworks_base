@@ -262,6 +262,8 @@ public class StaticLayout extends Layout {
             int fit = paraStart;
             float fitWidth = w;
             int fitAscent = 0, fitDescent = 0, fitTop = 0, fitBottom = 0;
+            // same as fitWidth but not including any trailing whitespace
+            float fitWidthGraphing = w;
 
             boolean hasTabOrEmoji = false;
             boolean hasTab = false;
@@ -346,6 +348,9 @@ public class StaticLayout extends Layout {
 
                     if (w <= width || isSpaceOrTab) {
                         fitWidth = w;
+                        if (!isSpaceOrTab) {
+                            fitWidthGraphing = w;
+                        }
                         fit = j + 1;
 
                         if (fmTop < fitTop)
@@ -365,7 +370,7 @@ public class StaticLayout extends Layout {
                                 breakOpp[breakOppIndex] == j - paraStart + 1;
 
                         if (isLineBreak) {
-                            okWidth = w;
+                            okWidth = fitWidthGraphing;
                             ok = j + 1;
 
                             if (fitTop < okTop)
@@ -426,6 +431,7 @@ public class StaticLayout extends Layout {
                         j = here - 1; // restart j-span loop from here, compensating for the j++
                         ok = fit = here;
                         w = 0;
+                        fitWidthGraphing = w;
                         fitAscent = fitDescent = fitTop = fitBottom = 0;
                         okAscent = okDescent = okTop = okBottom = 0;
 
@@ -842,7 +848,7 @@ public class StaticLayout extends Layout {
     void prepare() {
         mMeasured = MeasuredText.obtain();
     }
-    
+
     void finish() {
         mMeasured = MeasuredText.recycle(mMeasured);
     }
