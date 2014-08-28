@@ -1868,6 +1868,15 @@ public class Notification implements Parcelable
         private Notification mRebuildNotification = null;
 
         /**
+         * Whether the build notification has three lines. This is used to make the top padding for
+         * both the contracted and expanded layout consistent.
+         *
+         * <p>
+         * This field is only valid during the build phase.
+         */
+        private boolean mHasThreeLines;
+
+        /**
          * Constructs a new Builder with the defaults:
          *
 
@@ -2564,19 +2573,23 @@ public class Notification implements Parcelable
             return this;
         }
 
-        private Bitmap getProfileBadge() {
+        private Drawable getProfileBadgeDrawable() {
             // Note: This assumes that the current user can read the profile badge of the
             // originating user.
             UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            Drawable badge = userManager.getBadgeForUser(new UserHandle(mOriginatingUserId), 0);
+            return userManager.getBadgeForUser(new UserHandle(mOriginatingUserId), 0);
+        }
+
+        private Bitmap getProfileBadge() {
+            Drawable badge = getProfileBadgeDrawable();
             if (badge == null) {
                 return null;
             }
-            final int width = badge.getIntrinsicWidth();
-            final int height = badge.getIntrinsicHeight();
-            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            final int size = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.notification_badge_size);
+            Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
-            badge.setBounds(0, 0, width, height);
+            badge.setBounds(0, 0, size, size);
             badge.draw(canvas);
             return bitmap;
         }
@@ -2600,6 +2613,12 @@ public class Notification implements Parcelable
                 return true;
             }
             return false;
+        }
+
+        private void shrinkLine3Text(RemoteViews contentView) {
+            float subTextSize = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.notification_subtext_size);
+            contentView.setTextViewTextSize(R.id.text, TypedValue.COMPLEX_UNIT_PX, subTextSize);
         }
 
         private RemoteViews applyStandardTemplate(int resId) {
@@ -2674,10 +2693,7 @@ public class Notification implements Parcelable
             if (showLine2) {
 
                 // need to shrink all the type to make sure everything fits
-                final Resources res = mContext.getResources();
-                final float subTextSize = res.getDimensionPixelSize(
-                        R.dimen.notification_subtext_size);
-                contentView.setTextViewTextSize(R.id.text, TypedValue.COMPLEX_UNIT_PX, subTextSize);
+                shrinkLine3Text(contentView);
             }
 
             if (mWhen != 0 && mShowWhen) {
@@ -2696,7 +2712,7 @@ public class Notification implements Parcelable
 
             // Adjust padding depending on line count and font size.
             contentView.setViewPadding(R.id.line1, 0, calculateTopPadding(mContext,
-                    hasThreeLines(), mContext.getResources().getConfiguration().fontScale),
+                    mHasThreeLines, mContext.getResources().getConfiguration().fontScale),
                     0, 0);
 
             // We want to add badge to first line of text.
@@ -2721,7 +2737,12 @@ public class Notification implements Parcelable
          *         is going to have one or two lines
          */
         private boolean hasThreeLines() {
-            boolean hasLine3 = mContentText != null || mContentInfo != null || mNumber > 0;
+            boolean contentTextInLine2 = mSubText != null && mContentText != null;
+
+            // If we have content text in line 2, badge goes into line 2, or line 3 otherwise
+            boolean badgeInLine3 = getProfileBadgeDrawable() != null && !contentTextInLine2;
+            boolean hasLine3 = mContentText != null || mContentInfo != null || mNumber > 0
+                    || badgeInLine3;
             boolean hasLine2 = (mSubText != null && mContentText != null) ||
                     (mSubText == null && (mProgressMax != 0 || mProgressIndeterminate));
             return hasLine2 && hasLine3;
@@ -3092,6 +3113,7 @@ public class Notification implements Parcelable
             if (mRebuildNotification == null) {
                 throw new IllegalStateException("rebuild() only valid when in 'rebuild' mode.");
             }
+            mHasThreeLines = hasThreeLines();
 
             Bundle extras = mRebuildNotification.extras;
 
@@ -3124,6 +3146,7 @@ public class Notification implements Parcelable
             }
             extras.remove(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW);
 
+            mHasThreeLines = false;
             return mRebuildNotification;
         }
 
@@ -3238,6 +3261,7 @@ public class Notification implements Parcelable
          */
         public Notification build() {
             mOriginatingUserId = mContext.getUserId();
+            mHasThreeLines = hasThreeLines();
 
             Notification n = buildUnstyled();
 
@@ -3259,6 +3283,7 @@ public class Notification implements Parcelable
                 mStyle.addExtras(n.extras);
             }
 
+            mHasThreeLines = false;
             return n;
         }
 
@@ -3388,7 +3413,7 @@ public class Notification implements Parcelable
          */
         protected void applyTopPadding(RemoteViews contentView) {
             int topPadding = Builder.calculateTopPadding(mBuilder.mContext,
-                    mBuilder.hasThreeLines(),
+                    mBuilder.mHasThreeLines,
                     mBuilder.mContext.getResources().getConfiguration().fontScale);
             contentView.setViewPadding(R.id.line1, 0, topPadding, 0, 0);
         }
@@ -3661,6 +3686,8 @@ public class Notification implements Parcelable
 
             applyTopPadding(contentView);
 
+            mBuilder.shrinkLine3Text(contentView);
+
             mBuilder.addProfileBadge(contentView, R.id.profile_badge_large_template);
 
             return contentView;
@@ -3799,6 +3826,8 @@ public class Notification implements Parcelable
                     mTexts.size() > rowIds.length ? View.VISIBLE : View.GONE);
 
             applyTopPadding(contentView);
+
+            mBuilder.shrinkLine3Text(contentView);
 
             mBuilder.addProfileBadge(contentView, R.id.profile_badge_large_template);
 
