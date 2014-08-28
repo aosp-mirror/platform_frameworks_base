@@ -15,7 +15,10 @@
 -->
 
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-       android:inset="@dimen/control_inset_material">
+       android:insetLeft="@dimen/button_inset_horizontal_material"
+       android:insetTop="@dimen/button_inset_vertical_material"
+       android:insetRight="@dimen/button_inset_horizontal_material"
+       android:insetBottom="@dimen/button_inset_vertical_material">
     <layer-list android:paddingMode="stack">
         <item>
             <ripple android:color="?attr/colorControlHighlight">
@@ -25,10 +28,10 @@
                         <corners android:topLeftRadius="@dimen/control_corner_material"
                                  android:topRightRadius="@dimen/control_corner_material"/>
                         <solid android:color="?attr/colorButtonNormal" />
-                        <padding android:top="@dimen/control_padding_material"
-                                 android:bottom="@dimen/control_padding_material"
-                                 android:left="@dimen/control_padding_material"
-                                 android:right="@dimen/control_padding_material" />
+                        <padding android:left="@dimen/button_padding_horizontal_material"
+                                 android:top="@dimen/button_padding_vertical_material"
+                                 android:right="@dimen/button_padding_horizontal_material"
+                                 android:bottom="@dimen/button_padding_vertical_material" />
                     </shape>
                 </item>
             </ripple>

@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -40,6 +41,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
+import com.android.internal.R;
 import com.android.internal.widget.AutoScrollHelper.AbsListViewAutoScroller;
 
 import java.util.Locale;
@@ -208,6 +210,18 @@ public class ListPopupWindow {
      */
     public ListPopupWindow(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         mContext = context;
+
+        final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ListPopupWindow,
+                defStyleAttr, defStyleRes);
+        mDropDownHorizontalOffset = a.getDimensionPixelOffset(
+                R.styleable.ListPopupWindow_dropDownHorizontalOffset, 0);
+        mDropDownVerticalOffset = a.getDimensionPixelOffset(
+                R.styleable.ListPopupWindow_dropDownVerticalOffset, 0);
+        if (mDropDownVerticalOffset != 0) {
+            mDropDownVerticalOffsetSet = true;
+        }
+        a.recycle();
+
         mPopup = new PopupWindow(context, attrs, defStyleAttr, defStyleRes);
         mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
         // Set the default layout direction to match the default locale one
