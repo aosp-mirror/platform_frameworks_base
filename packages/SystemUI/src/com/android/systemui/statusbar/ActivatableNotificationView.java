@@ -461,6 +461,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         if (mDrawingAppearAnimation) {
             startAppearAnimation(false /* isAppearing */, translationDirection,
                     0, duration, onFinishedRunnable);
+        } else if (onFinishedRunnable != null) {
+            onFinishedRunnable.run();
         }
     }
 
