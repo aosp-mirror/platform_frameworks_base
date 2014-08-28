@@ -697,7 +697,7 @@
     <string name="description_direction_left">"Slide left for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
 
     <!-- Zen mode: No interruptions title, with a warning about alarms. [CHAR LIMIT=60] -->
-    <string name="zen_no_interruptions_with_warning">No interruptions, including alarms</string>
+    <string name="zen_no_interruptions_with_warning">No interruptions. Not even alarms.</string>
 
     <!-- Zen mode: No interruptions. [CHAR LIMIT=40] -->
     <string name="zen_no_interruptions">No interruptions</string>
