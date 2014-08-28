@@ -135,6 +135,9 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
                             mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
                 }
                 break;
+            case BUTTON_NEGATIVE:
+                cancel();
+                break;
         }
     }
 
