@@ -77,9 +77,9 @@ public class PowerTest extends TestActivity
                 mProx.release();
             }
         },
-        new Test("Disable proximity (WAIT_FOR_PROXIMITY_NEGATIVE)") {
+        new Test("Disable proximity (WAIT_FOR_DISTANT_PROXIMITY") {
             public void run() {
-                mProx.release(PowerManager.WAIT_FOR_PROXIMITY_NEGATIVE);
+                mProx.release(PowerManager.WAIT_FOR_DISTANT_PROXIMITY);
             }
         },
         new Test("Enable proximity, wait 5 seconds then disable") {
@@ -93,13 +93,13 @@ public class PowerTest extends TestActivity
                 }, 5000);
             }
         },
-        new Test("Enable proximity, wait 5 seconds then disable  (WAIT_FOR_PROXIMITY_NEGATIVE)") {
+        new Test("Enable proximity, wait 5 seconds then disable  (WAIT_FOR_DISTANT_PROXIMITY)") {
             public void run() {
                 mProx.acquire();
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        mProx.release(PowerManager.WAIT_FOR_PROXIMITY_NEGATIVE);
+                        mProx.release(PowerManager.WAIT_FOR_DISTANT_PROXIMITY);
                     }
                 }, 5000);
             }
