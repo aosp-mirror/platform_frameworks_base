@@ -3559,7 +3559,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             // Check for  apps that can handle provisioning first
             Intent provisioningIntent = new Intent(TelephonyIntents.ACTION_CARRIER_SETUP);
             List<String> carrierPackages =
-                    mTelephonyManager.getCarrierPackageNamesForBroadcastIntent(provisioningIntent);
+                    mTelephonyManager.getCarrierPackageNamesForIntent(provisioningIntent);
             if (carrierPackages != null && !carrierPackages.isEmpty()) {
                 if (carrierPackages.size() != 1) {
                     if (DBG) log("Multiple matching carrier apps found, launching the first.");
