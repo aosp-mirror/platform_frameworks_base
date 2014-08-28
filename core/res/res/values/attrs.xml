@@ -4219,7 +4219,6 @@
         <!-- Whether the popup window should overlap its anchor view. -->
         <attr name="overlapAnchor" format="boolean" />
     </declare-styleable>
-    <!-- @hide -->
     <declare-styleable name="ListPopupWindow">
         <!-- Amount of pixels by which the drop down should be offset vertically. -->
         <attr name="dropDownVerticalOffset" format="dimension" />
