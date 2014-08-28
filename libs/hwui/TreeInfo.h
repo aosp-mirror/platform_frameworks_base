@@ -26,17 +26,8 @@
 namespace android {
 namespace uirenderer {
 
-class BaseRenderNodeAnimator;
-class AnimationListener;
 class OpenGLRenderer;
 class RenderState;
-
-class AnimationHook {
-public:
-    virtual void callOnFinished(BaseRenderNodeAnimator* animator, AnimationListener* listener) = 0;
-protected:
-    ~AnimationHook() {}
-};
 
 class ErrorHandler {
 public:
@@ -62,8 +53,6 @@ public:
 
     explicit TreeInfo(TraversalMode mode, RenderState& renderState)
         : mode(mode)
-        , frameTimeMs(0)
-        , animationHook(NULL)
         , prepareTextures(mode == MODE_FULL)
         , runAnimations(true)
         , damageAccumulator(NULL)
@@ -74,8 +63,6 @@ public:
 
     explicit TreeInfo(TraversalMode mode, const TreeInfo& clone)
         : mode(mode)
-        , frameTimeMs(clone.frameTimeMs)
-        , animationHook(clone.animationHook)
         , prepareTextures(mode == MODE_FULL)
         , runAnimations(clone.runAnimations)
         , damageAccumulator(clone.damageAccumulator)
@@ -85,8 +72,6 @@ public:
     {}
 
     const TraversalMode mode;
-    nsecs_t frameTimeMs;
-    AnimationHook* animationHook;
     // TODO: Remove this? Currently this is used to signal to stop preparing
     // textures if we run out of cache space.
     bool prepareTextures;

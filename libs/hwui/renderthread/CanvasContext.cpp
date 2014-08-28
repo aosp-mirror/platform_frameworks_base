@@ -21,6 +21,7 @@
 
 #include "EglManager.h"
 #include "RenderThread.h"
+#include "../AnimationContext.h"
 #include "../Caches.h"
 #include "../DeferredLayerUpdater.h"
 #include "../RenderState.h"
@@ -35,7 +36,8 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode)
+CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
+        RenderNode* rootRenderNode, IContextFactory* contextFactory)
         : mRenderThread(thread)
         , mEglManager(thread.eglManager())
         , mEglSurface(EGL_NO_SURFACE)
@@ -44,11 +46,13 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode*
         , mCanvas(NULL)
         , mHaveNewSurface(false)
         , mRootRenderNode(rootRenderNode) {
+    mAnimationContext = contextFactory->createAnimationContext(mRenderThread.timeLord());
 }
 
 CanvasContext::~CanvasContext() {
     destroyCanvasAndSurface();
     mRenderThread.removeFrameCallback(this);
+    delete mAnimationContext;
 }
 
 void CanvasContext::destroyCanvasAndSurface() {
@@ -136,10 +140,11 @@ void CanvasContext::processLayerUpdate(DeferredLayerUpdater* layerUpdater) {
 void CanvasContext::prepareTree(TreeInfo& info) {
     mRenderThread.removeFrameCallback(this);
 
-    info.frameTimeMs = mRenderThread.timeLord().frameTimeMs();
     info.damageAccumulator = &mDamageAccumulator;
     info.renderer = mCanvas;
+    mAnimationContext->startFrame();
     mRootRenderNode->prepareTree(info);
+    mAnimationContext->runRemainingAnimations(info);
 
     int runningBehind = 0;
     // TODO: This query is moderately expensive, investigate adding some sort
@@ -254,7 +259,6 @@ void CanvasContext::buildLayer(RenderNode* node) {
     stopDrawing();
 
     TreeInfo info(TreeInfo::MODE_FULL, mRenderThread.renderState());
-    info.frameTimeMs = mRenderThread.timeLord().frameTimeMs();
     info.damageAccumulator = &mDamageAccumulator;
     info.renderer = mCanvas;
     info.runAnimations = false;

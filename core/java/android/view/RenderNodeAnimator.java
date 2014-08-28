@@ -19,7 +19,6 @@ package android.view;
 import android.animation.Animator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
-import android.animation.Animator.AnimatorListener;
 import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
 import android.graphics.Paint;
@@ -30,7 +29,6 @@ import com.android.internal.view.animation.FallbackLUTInterpolator;
 import com.android.internal.view.animation.HasNativeInterpolator;
 import com.android.internal.view.animation.NativeInterpolatorFactory;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -111,13 +109,11 @@ public class RenderNodeAnimator extends Animator {
         mRenderProperty = property;
         mFinalValue = finalValue;
         mUiThreadHandlesDelay = true;
-        init(nCreateAnimator(new WeakReference<RenderNodeAnimator>(this),
-                property, finalValue));
+        init(nCreateAnimator(property, finalValue));
     }
 
     public RenderNodeAnimator(CanvasProperty<Float> property, float finalValue) {
         init(nCreateCanvasPropertyFloatAnimator(
-                new WeakReference<RenderNodeAnimator>(this),
                 property.getNativeContainer(), finalValue));
         mUiThreadHandlesDelay = false;
     }
@@ -132,14 +128,12 @@ public class RenderNodeAnimator extends Animator {
      */
     public RenderNodeAnimator(CanvasProperty<Paint> property, int paintField, float finalValue) {
         init(nCreateCanvasPropertyPaintAnimator(
-                new WeakReference<RenderNodeAnimator>(this),
                 property.getNativeContainer(), paintField, finalValue));
         mUiThreadHandlesDelay = false;
     }
 
     public RenderNodeAnimator(int x, int y, float startRadius, float endRadius) {
-        init(nCreateRevealAnimator(new WeakReference<RenderNodeAnimator>(this),
-                x, y, startRadius, endRadius));
+        init(nCreateRevealAnimator(x, y, startRadius, endRadius));
         mUiThreadHandlesDelay = true;
     }
 
@@ -192,7 +186,7 @@ public class RenderNodeAnimator extends Animator {
     }
 
     private void doStart() {
-        nStart(mNativePtr.get());
+        nStart(mNativePtr.get(), this);
 
         // Alpha is a special snowflake that has the canonical value stored
         // in mTransformationInfo instead of in RenderNode, so we need to update
@@ -248,24 +242,21 @@ public class RenderNodeAnimator extends Animator {
 
     public void setTarget(View view) {
         mViewTarget = view;
-        mTarget = view.mRenderNode;
-        mTarget.addAnimator(this);
+        setTarget(mViewTarget.mRenderNode);
     }
 
     public void setTarget(Canvas canvas) {
         if (!(canvas instanceof GLES20RecordingCanvas)) {
             throw new IllegalArgumentException("Not a GLES20RecordingCanvas");
         }
-
         final GLES20RecordingCanvas recordingCanvas = (GLES20RecordingCanvas) canvas;
         setTarget(recordingCanvas.mNode);
     }
 
-    public void setTarget(RenderNode node) {
+    private void setTarget(RenderNode node) {
         if (mTarget != null) {
             throw new IllegalStateException("Target already set!");
         }
-        mViewTarget = null;
         mTarget = node;
         mTarget.addAnimator(this);
     }
@@ -335,6 +326,12 @@ public class RenderNodeAnimator extends Animator {
         for (int i = 0; i < numListeners; i++) {
             listeners.get(i).onAnimationEnd(this);
         }
+
+        // Release the native object, as it has a global reference to us. This
+        // breaks the cyclic reference chain, and allows this object to be
+        // GC'd
+        mNativePtr.release();
+        mNativePtr = null;
     }
 
     @SuppressWarnings("unchecked")
@@ -427,11 +424,8 @@ public class RenderNodeAnimator extends Animator {
     }
 
     // Called by native
-    private static void callOnFinished(WeakReference<RenderNodeAnimator> weakThis) {
-        RenderNodeAnimator animator = weakThis.get();
-        if (animator != null) {
-            animator.onFinished();
-        }
+    private static void callOnFinished(RenderNodeAnimator animator) {
+        animator.onFinished();
     }
 
     @Override
@@ -439,22 +433,20 @@ public class RenderNodeAnimator extends Animator {
         throw new IllegalStateException("Cannot clone this animator");
     }
 
-    private static native long nCreateAnimator(WeakReference<RenderNodeAnimator> weakThis,
-            int property, float finalValue);
-    private static native long nCreateCanvasPropertyFloatAnimator(WeakReference<RenderNodeAnimator> weakThis,
+    private static native long nCreateAnimator(int property, float finalValue);
+    private static native long nCreateCanvasPropertyFloatAnimator(
             long canvasProperty, float finalValue);
-    private static native long nCreateCanvasPropertyPaintAnimator(WeakReference<RenderNodeAnimator> weakThis,
+    private static native long nCreateCanvasPropertyPaintAnimator(
             long canvasProperty, int paintField, float finalValue);
-    private static native long nCreateRevealAnimator(WeakReference<RenderNodeAnimator> weakThis,
+    private static native long nCreateRevealAnimator(
             int x, int y, float startRadius, float endRadius);
 
     private static native void nSetStartValue(long nativePtr, float startValue);
     private static native void nSetDuration(long nativePtr, long duration);
     private static native long nGetDuration(long nativePtr);
     private static native void nSetStartDelay(long nativePtr, long startDelay);
-    private static native long nGetStartDelay(long nativePtr);
     private static native void nSetInterpolator(long animPtr, long interpolatorPtr);
 
-    private static native void nStart(long animPtr);
+    private static native void nStart(long animPtr, RenderNodeAnimator finishListener);
     private static native void nEnd(long animPtr);
 }

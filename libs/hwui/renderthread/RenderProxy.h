@@ -30,6 +30,7 @@
 #include <utils/Vector.h>
 
 #include "../Caches.h"
+#include "../IContextFactory.h"
 #include "DrawFrameTask.h"
 
 namespace android {
@@ -58,7 +59,7 @@ class RenderProxyBridge;
  */
 class ANDROID_API RenderProxy {
 public:
-    ANDROID_API RenderProxy(bool translucent, RenderNode* rootNode);
+    ANDROID_API RenderProxy(bool translucent, RenderNode* rootNode, IContextFactory* contextFactory);
     ANDROID_API virtual ~RenderProxy();
 
     ANDROID_API void setFrameInterval(nsecs_t frameIntervalNanos);

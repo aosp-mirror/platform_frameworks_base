@@ -52,17 +52,20 @@ namespace renderthread {
     MethodInvokeRenderTask* task = new MethodInvokeRenderTask((RunnableMethod) Bridge_ ## method); \
     ARGS(method) *args = (ARGS(method) *) task->payload()
 
-CREATE_BRIDGE3(createContext, RenderThread* thread, bool translucent, RenderNode* rootRenderNode) {
-    return new CanvasContext(*args->thread, args->translucent, args->rootRenderNode);
+CREATE_BRIDGE4(createContext, RenderThread* thread, bool translucent,
+        RenderNode* rootRenderNode, IContextFactory* contextFactory) {
+    return new CanvasContext(*args->thread, args->translucent,
+            args->rootRenderNode, args->contextFactory);
 }
 
-RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode)
+RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode, IContextFactory* contextFactory)
         : mRenderThread(RenderThread::getInstance())
         , mContext(0) {
     SETUP_TASK(createContext);
     args->translucent = translucent;
     args->rootRenderNode = rootRenderNode;
     args->thread = &mRenderThread;
+    args->contextFactory = contextFactory;
     mContext = (CanvasContext*) postAndWait(task);
     mDrawFrameTask.setContext(&mRenderThread, mContext);
 }
