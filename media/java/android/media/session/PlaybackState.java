@@ -36,95 +36,95 @@ public final class PlaybackState implements Parcelable {
     private static final String TAG = "PlaybackState";
 
     /**
-     * Indicates this performer supports the stop command.
+     * Indicates this session supports the stop command.
      *
      * @see Builder#setActions(long)
      */
     public static final long ACTION_STOP = 1 << 0;
 
     /**
-     * Indicates this performer supports the pause command.
+     * Indicates this session supports the pause command.
      *
      * @see Builder#setActions(long)
      */
     public static final long ACTION_PAUSE = 1 << 1;
 
     /**
-     * Indicates this performer supports the play command.
+     * Indicates this session supports the play command.
      *
      * @see Builder#setActions(long)
      */
     public static final long ACTION_PLAY = 1 << 2;
 
     /**
-     * Indicates this performer supports the rewind command.
+     * Indicates this session supports the rewind command.
      *
      * @see Builder#setActions(long)
      */
     public static final long ACTION_REWIND = 1 << 3;
 
     /**
-     * Indicates this performer supports the previous command.
+     * Indicates this session supports the previous command.
      *
      * @see Builder#setActions(long)
      */
     public static final long ACTION_SKIP_TO_PREVIOUS = 1 << 4;
 
     /**
-     * Indicates this performer supports the next command.
+     * Indicates this session supports the next command.
      *
      * @see Builder#setActions(long)
      */
     public static final long ACTION_SKIP_TO_NEXT = 1 << 5;
 
     /**
-     * Indicates this performer supports the fast forward command.
+     * Indicates this session supports the fast forward command.
      *
      * @see Builder#setActions(long)
      */
     public static final long ACTION_FAST_FORWARD = 1 << 6;
 
     /**
-     * Indicates this performer supports the set rating command.
+     * Indicates this session supports the set rating command.
      *
      * @see Builder#setActions(long)
      */
     public static final long ACTION_SET_RATING = 1 << 7;
 
     /**
-     * Indicates this performer supports the seek to command.
+     * Indicates this session supports the seek to command.
      *
      * @see Builder#setActions(long)
      */
     public static final long ACTION_SEEK_TO = 1 << 8;
 
     /**
-     * Indicates this performer supports the play/pause toggle command.
+     * Indicates this session supports the play/pause toggle command.
      *
      * @see Builder#setActions(long)
      */
     public static final long ACTION_PLAY_PAUSE = 1 << 9;
 
     /**
-     * Indicates this performer supports the play from uri command.
+     * Indicates this session supports the play from media id command.
      *
      * @see Builder#setActions(long)
      */
-    public static final long ACTION_PLAY_URI = 1 << 10;
+    public static final long ACTION_PLAY_FROM_MEDIA_ID = 1 << 10;
 
     /**
-     * Indicates this performer supports the play from search command.
+     * Indicates this session supports the play from search command.
      *
      * @see Builder#setActions(long)
      */
     public static final long ACTION_PLAY_FROM_SEARCH = 1 << 11;
 
     /**
-     * Indicates this performer supports the skip to item command.
+     * Indicates this session supports the skip to queue item command.
      *
      * @see Builder#setActions(long)
      */
-    public static final long ACTION_SKIP_TO_ITEM = 1 << 12;
+    public static final long ACTION_SKIP_TO_QUEUE_ITEM = 1 << 12;
 
     /**
      * This is the default playback state and indicates that no media has been
@@ -209,6 +209,14 @@ public final class PlaybackState implements Parcelable {
      * @see Builder#setState
      */
     public final static int STATE_SKIPPING_TO_NEXT = 10;
+
+    /**
+     * State indicating the player is currently skipping to a specific item in
+     * the queue.
+     *
+     * @see Builder#setState
+     */
+    public final static int STATE_SKIPPING_TO_QUEUE_ITEM = 11;
 
     /**
      * Use this value for the position to indicate the position is not known.
@@ -371,6 +379,18 @@ public final class PlaybackState implements Parcelable {
      */
     public long getLastPositionUpdateTime() {
         return mUpdateTime;
+    }
+
+    /**
+     * Get the id of the currently active item in the queue. If there is no
+     * queue or a queue is not supported by the session this will be
+     * {@link MediaSession.QueueItem#UNKNOWN_ID}.
+     *
+     * @return The id of the currently active item in the queue or
+     *         {@link MediaSession.QueueItem#UNKNOWN_ID}.
+     */
+    public long getActiveQueueItemId() {
+        return mActiveItemId;
     }
 
     /**
@@ -716,7 +736,7 @@ public final class PlaybackState implements Parcelable {
         private long mActions;
         private CharSequence mErrorMessage;
         private long mUpdateTime;
-        private long mActiveItemId = MediaSession.Item.UNKNOWN_ID;
+        private long mActiveItemId = MediaSession.QueueItem.UNKNOWN_ID;
 
         /**
          * Creates an initially empty state builder.
@@ -904,12 +924,12 @@ public final class PlaybackState implements Parcelable {
 
         /**
          * Set the active item in the play queue by specifying its id. The
-         * default value is {@link MediaSession.Item#UNKNOWN_ID}
+         * default value is {@link MediaSession.QueueItem#UNKNOWN_ID}
          *
          * @param id The id of the active item.
          * @return this
          */
-        public Builder setActiveItem(long id) {
+        public Builder setActiveQueueItemId(long id) {
             mActiveItemId = id;
             return this;
         }

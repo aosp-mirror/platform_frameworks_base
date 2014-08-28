@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
+import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
@@ -38,6 +39,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
+import android.service.media.MediaBrowserService;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -426,9 +428,9 @@ public final class MediaSession {
      *
      * @param queue A list of items in the play queue.
      */
-    public void setQueue(@Nullable List<Item> queue) {
+    public void setQueue(@Nullable List<QueueItem> queue) {
         try {
-            mBinder.setQueue(new ParceledListSlice<Item>(queue));
+            mBinder.setQueue(new ParceledListSlice<QueueItem>(queue));
         } catch (RemoteException e) {
             Log.wtf("Dead object in setQueue.", e);
         }
@@ -486,8 +488,8 @@ public final class MediaSession {
         postToCallback(CallbackMessageHandler.MSG_PLAY);
     }
 
-    private void dispatchPlayUri(Uri uri, Bundle extras) {
-        postToCallback(CallbackMessageHandler.MSG_PLAY_URI, uri, extras);
+    private void dispatchPlayFromMediaId(String mediaId, Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_PLAY_MEDIA_ID, mediaId, extras);
     }
 
     private void dispatchPlayFromSearch(String query, Bundle extras) {
@@ -752,9 +754,10 @@ public final class MediaSession {
         }
 
         /**
-         * Override to handle requests to play a specific {@link Uri}.
+         * Override to handle requests to play a specific mediaId that was
+         * provided by your app's {@link MediaBrowserService}.
          */
-        public void onPlayUri(Uri uri, Bundle extras) {
+        public void onPlayFromMediaId(String mediaId, Bundle extras) {
         }
 
         /**
@@ -767,7 +770,7 @@ public final class MediaSession {
          * Override to handle requests to play an item with a given id from the
          * play queue.
          */
-        public void onSkipToItem(long id) {
+        public void onSkipToQueueItem(long id) {
         }
 
         /**
@@ -876,10 +879,10 @@ public final class MediaSession {
         }
 
         @Override
-        public void onPlayUri(Uri uri, Bundle extras) {
+        public void onPlayFromMediaId(String mediaId, Bundle extras) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchPlayUri(uri, extras);
+                session.dispatchPlayFromMediaId(mediaId, extras);
             }
         }
 
@@ -994,125 +997,59 @@ public final class MediaSession {
     }
 
     /**
-     * A single item that is part of the play queue. It contains information
-     * necessary to display a single item in the queue.
+     * A single item that is part of the play queue. It contains a description
+     * of the item and its id in the queue.
      */
-    public static final class Item implements Parcelable {
+    public static final class QueueItem implements Parcelable {
         /**
          * This id is reserved. No items can be explicitly asigned this id.
          */
         public static final int UNKNOWN_ID = -1;
 
-        private final MediaMetadata mMetadata;
+        private final MediaDescription mDescription;
         private final long mId;
-        private final Uri mUri;
-        private final Bundle mExtras;
 
         /**
-         * Create a new {@link MediaSession.Item}.
+         * Create a new {@link MediaSession.QueueItem}.
          *
-         * @param metadata The metadata for this item.
+         * @param description The {@link MediaDescription} for this item.
          * @param id An identifier for this item. It must be unique within the
-         *            play queue.
-         * @param uri The uri for this item.
-         * @param extras A bundle of extras that can be used to add extra
-         *            information about this item.
+         *            play queue and cannot be {@link #UNKNOWN_ID}.
          */
-        private Item(MediaMetadata metadata, long id, Uri uri, Bundle extras) {
-            mMetadata = metadata;
+        public QueueItem(MediaDescription description, long id) {
+            if (description == null) {
+                throw new IllegalArgumentException("Description cannot be null.");
+            }
+            if (id == UNKNOWN_ID) {
+                throw new IllegalArgumentException("Id cannot be QueueItem.UNKNOWN_ID");
+            }
+            mDescription = description;
             mId = id;
-            mUri = uri;
-            mExtras = extras;
         }
 
-        private Item(Parcel in) {
-            mMetadata = MediaMetadata.CREATOR.createFromParcel(in);
+        private QueueItem(Parcel in) {
+            mDescription = MediaDescription.CREATOR.createFromParcel(in);
             mId = in.readLong();
-            mUri = Uri.CREATOR.createFromParcel(in);
-            mExtras = in.readBundle();
         }
 
         /**
-         * Get the metadata for this item.
+         * Get the description for this item.
          */
-        public MediaMetadata getMetadata() {
-            return mMetadata;
+        public MediaDescription getDescription() {
+            return mDescription;
         }
 
         /**
-         * Get the id for this item.
+         * Get the queue id for this item.
          */
-        public long getId() {
+        public long getQueueId() {
             return mId;
-        }
-
-        /**
-         * Get the Uri for this item.
-         */
-        public Uri getUri() {
-            return mUri;
-        }
-
-        /**
-         * Get the extras for this item.
-         */
-        public Bundle getExtras() {
-            return mExtras;
-        }
-
-        /**
-         * Builder for {@link MediaSession.Item} objects.
-         */
-        public static final class Builder {
-            private final MediaMetadata mMetadata;
-            private final long mId;
-            private final Uri mUri;
-
-            private Bundle mExtras;
-
-            /**
-             * Create a builder with the metadata, id, and uri already set.
-             */
-            public Builder(MediaMetadata metadata, long id, Uri uri) {
-                if (metadata == null) {
-                    throw new IllegalArgumentException(
-                            "You must specify a non-null MediaMetadata to build an Item.");
-                }
-                if (uri == null) {
-                    throw new IllegalArgumentException(
-                            "You must specify a non-null Uri to build an Item.");
-                }
-                if (id == UNKNOWN_ID) {
-                    throw new IllegalArgumentException(
-                            "You must specify an id other than UNKNOWN_ID to build an Item.");
-                }
-                mMetadata = metadata;
-                mId = id;
-                mUri = uri;
-            }
-
-            /**
-             * Set optional extras for the item.
-             */
-            public MediaSession.Item.Builder setExtras(Bundle extras) {
-                mExtras = extras;
-                return this;
-            }
-
-            /**
-             * Create the {@link Item}.
-             */
-            public MediaSession.Item build() {
-                return new MediaSession.Item(mMetadata, mId, mUri, mExtras);
-            }
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            mMetadata.writeToParcel(dest, flags);
+            mDescription.writeToParcel(dest, flags);
             dest.writeLong(mId);
-            mUri.writeToParcel(dest, flags);
-            dest.writeBundle(mExtras);
         }
 
         @Override
@@ -1120,28 +1057,24 @@ public final class MediaSession {
             return 0;
         }
 
-        public static final Creator<MediaSession.Item> CREATOR
-                = new Creator<MediaSession.Item>() {
+        public static final Creator<MediaSession.QueueItem> CREATOR = new Creator<MediaSession.QueueItem>() {
 
             @Override
-            public MediaSession.Item createFromParcel(Parcel p) {
-                return new MediaSession.Item(p);
+            public MediaSession.QueueItem createFromParcel(Parcel p) {
+                return new MediaSession.QueueItem(p);
             }
 
             @Override
-            public MediaSession.Item[] newArray(int size) {
-                return new MediaSession.Item[size];
+            public MediaSession.QueueItem[] newArray(int size) {
+                return new MediaSession.QueueItem[size];
             }
         };
 
         @Override
         public String toString() {
-            return "MediaSession.Item {" +
-                    "Metadata=" + mMetadata +
-                    ", Id=" + mId +
-                    ", Uri=" + mUri +
-                    ", Extras=" + mExtras +
-                    " }";
+            return "MediaSession.QueueItem {" +
+                    "Description=" + mDescription +
+                    ", Id=" + mId + " }";
         }
     }
 
@@ -1160,7 +1093,7 @@ public final class MediaSession {
     private class CallbackMessageHandler extends Handler {
 
         private static final int MSG_PLAY = 1;
-        private static final int MSG_PLAY_URI = 2;
+        private static final int MSG_PLAY_MEDIA_ID = 2;
         private static final int MSG_PLAY_SEARCH = 3;
         private static final int MSG_SKIP_TO_ITEM = 4;
         private static final int MSG_PAUSE = 5;
@@ -1206,14 +1139,14 @@ public final class MediaSession {
                 case MSG_PLAY:
                     mCallback.onPlay();
                     break;
-                case MSG_PLAY_URI:
-                    mCallback.onPlayUri((Uri) msg.obj, msg.getData());
+                case MSG_PLAY_MEDIA_ID:
+                    mCallback.onPlayFromMediaId((String) msg.obj, msg.getData());
                     break;
                 case MSG_PLAY_SEARCH:
                     mCallback.onPlayFromSearch((String) msg.obj, msg.getData());
                     break;
                 case MSG_SKIP_TO_ITEM:
-                    mCallback.onSkipToItem((Long) msg.obj);
+                    mCallback.onSkipToQueueItem((Long) msg.obj);
                 case MSG_PAUSE:
                     mCallback.onPause();
                     break;

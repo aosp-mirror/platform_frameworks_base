@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.media.browse;
+package android.service.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -27,6 +27,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.media.browse.MediaBrowser;
+import android.media.browse.MediaBrowser.MediaItem;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Binder;
@@ -34,6 +36,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.service.media.IMediaBrowserService;
+import android.service.media.IMediaBrowserServiceCallbacks;
+import android.service.media.IMediaBrowserService.Stub;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -264,59 +269,6 @@ public abstract class MediaBrowserService extends Service {
                 }
             });
         }
-
-        @Override
-        public void loadIcon(final int seq, final Uri uri, final int width, final int height,
-                final IMediaBrowserServiceCallbacks callbacks) {
-            if (uri == null) {
-                throw new IllegalStateException("loadIcon sent null list for uri " + uri);
-            }
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    // In theory we could return a result to a new connection, but in practice
-                    // the other side in MediaBrowser uses a new IMediaBrowserServiceCallbacks
-                    // object every time it calls connect(), so as long as it does that we won't
-                    // see results sent for the wrong connection.
-                    final ConnectionRecord connection = mConnections.get(callbacks.asBinder());
-                    if (connection == null) {
-                        if (DBG) {
-                            Log.d(TAG, "Not loading bitmap for invalid connection. uri=" + uri);
-                        }
-                        return;
-                    }
-
-                    final Result<Bitmap> result = new Result<Bitmap>(uri) {
-                        @Override
-                        void onResultSent(Bitmap bitmap) {
-                            if (mConnections.get(connection.callbacks.asBinder()) != connection) {
-                                if (DBG) {
-                                    Log.d(TAG, "Not sending onLoadIcon result for connection"
-                                            + " that has been disconnected. pkg=" + connection.pkg
-                                            + " uri=" + uri);
-                                }
-                                return;
-                            }
-
-                            try {
-                                callbacks.onLoadIcon(seq, bitmap);
-                            } catch (RemoteException e) {
-                                // The other side is in the process of crashing.
-                                Log.w(TAG, "RemoteException in calling onLoadIcon", e);
-                            }
-                        }
-                    };
-
-                    onLoadIcon(uri, width, height, result);
-
-                    if (!result.isDone()) {
-                        throw new IllegalStateException("onLoadIcon must call detach() or"
-                                + " sendResult() before returning for package=" + connection.pkg
-                                + " uri=" + uri);
-                    }
-                }
-            });
-        }
     }
 
     @Override
@@ -372,26 +324,7 @@ public abstract class MediaBrowserService extends Service {
      * @return The list of children, or null if the uri is invalid.
      */
     public abstract void onLoadChildren(@NonNull Uri parentUri,
-            @NonNull Result<List<MediaBrowserItem>> result);
-
-    /**
-     * Called to get the icon of a particular media item.
-     * <p>
-     * Implementations must call result.{@link Result#sendResult result.sendResult} with the bitmap.
-     * If loading the bitmap will be an expensive operation that should be performed
-     * on another thread, result.{@link Result#detach result.detach} may be called before returning
-     * from this function, and then {@link Result#sendResult result.sendResult} called when
-     * the loading is complete.
-     *
-     * @param uri The uri of the media item.
-     * @param width The requested width of the icon in dp.
-     * @param height The requested height of the icon in dp.
-     *
-     * @return The file descriptor of the icon, which may then be loaded
-     *          using a bitmap factory, or null if the item does not have an icon.
-     */
-    public abstract void onLoadIcon(@NonNull Uri uri, int width, int height,
-            @NonNull Result<Bitmap> result);
+            @NonNull Result<List<MediaBrowser.MediaItem>> result);
 
     /**
      * Call to set the media session.
@@ -478,9 +411,11 @@ public abstract class MediaBrowserService extends Service {
      * Callers must make sure that this connection is still connected.
      */
     private void performLoadChildren(final Uri uri, final ConnectionRecord connection) {
-        final Result<List<MediaBrowserItem>> result = new Result<List<MediaBrowserItem>>(uri) {
+        final Result<List<MediaBrowser.MediaItem>> result
+ = new Result<List<MediaBrowser.MediaItem>>(
+                uri) {
             @Override
-            void onResultSent(List<MediaBrowserItem> list) {
+            void onResultSent(List<MediaBrowser.MediaItem> list) {
                 if (list == null) {
                     throw new IllegalStateException("onLoadChildren sent null list for uri " + uri);
                 }
@@ -492,7 +427,7 @@ public abstract class MediaBrowserService extends Service {
                     return;
                 }
 
-                final ParceledListSlice<MediaBrowserItem> pls = new ParceledListSlice(list);
+                final ParceledListSlice<MediaBrowser.MediaItem> pls = new ParceledListSlice(list);
                 try {
                     connection.callbacks.onLoadChildren(uri, pls);
                 } catch (RemoteException ex) {

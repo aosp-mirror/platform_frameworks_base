@@ -17,15 +17,22 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.browse.MediaBrowser;
+import android.media.session.MediaController;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CancellationSignal;
+import android.os.OperationCanceledException;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.text.format.Time;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Size;
 import android.util.SparseArray;
 
 import java.util.Set;
@@ -119,7 +126,9 @@ public final class MediaMetadata implements Parcelable {
     public static final String METADATA_KEY_ART = "android.media.metadata.ART";
 
     /**
-     * The artwork for the media as a Uri.
+     * The artwork for the media as a Uri formatted String. The artwork can be
+     * loaded using a combination of {@link ContentResolver#openInputStream} and
+     * {@link BitmapFactory#decodeStream}.
      */
     public static final String METADATA_KEY_ART_URI = "android.media.metadata.ART_URI";
 
@@ -130,7 +139,10 @@ public final class MediaMetadata implements Parcelable {
     public static final String METADATA_KEY_ALBUM_ART = "android.media.metadata.ALBUM_ART";
 
     /**
-     * The artwork for the album of the media's original source as a Uri.
+     * The artwork for the album of the media's original source as a Uri
+     * formatted String. The artwork can be loaded using a combination of
+     * {@link ContentResolver#openInputStream} and
+     * {@link BitmapFactory#decodeStream}.
      */
     public static final String METADATA_KEY_ALBUM_ART_URI = "android.media.metadata.ALBUM_ART_URI";
 
@@ -181,12 +193,25 @@ public final class MediaMetadata implements Parcelable {
             = "android.media.metadata.DISPLAY_ICON";
 
     /**
-     * An icon or thumbnail that is suitable for display to the user. When
-     * displaying more information for media described by this metadata the
-     * display description should be preferred to other fields when present.
+     * A Uri formatted String for an icon or thumbnail that is suitable for
+     * display to the user. When displaying more information for media described
+     * by this metadata the display description should be preferred to other
+     * fields when present. The icon can be loaded using a combination of
+     * {@link ContentResolver#openInputStream} and
+     * {@link BitmapFactory#decodeStream}.
      */
     public static final String METADATA_KEY_DISPLAY_ICON_URI
             = "android.media.metadata.DISPLAY_ICON_URI";
+
+    /**
+     * A String key for identifying the content. This value is specific to the
+     * service providing the content. If used, this should be a persistent
+     * unique key for the underlying content. It may be used with
+     * {@link MediaController.TransportControls#playFromMediaId(String, Bundle)}
+     * to initiate playback when provided by a {@link MediaBrowser} connected to
+     * the same app.
+     */
+    public static final String METADATA_KEY_MEDIA_ID = "android.media.metadata.MEDIA_ID";
 
     private static final String[] PREFERRED_DESCRIPTION_ORDER = {
             METADATA_KEY_TITLE,
@@ -277,7 +302,7 @@ public final class MediaMetadata implements Parcelable {
     }
 
     private final Bundle mBundle;
-    private Description mDescription;
+    private MediaDescription mDescription;
 
     private MediaMetadata(Bundle bundle) {
         mBundle = new Bundle(bundle);
@@ -406,10 +431,12 @@ public final class MediaMetadata implements Parcelable {
      *
      * @return A simple description of this metadata.
      */
-    public @NonNull Description getDescription() {
+    public @NonNull MediaDescription getDescription() {
         if (mDescription != null) {
             return mDescription;
         }
+
+        String mediaId = getString(METADATA_KEY_MEDIA_ID);
 
         CharSequence[] text = new CharSequence[3];
         Bitmap icon = null;
@@ -454,7 +481,15 @@ public final class MediaMetadata implements Parcelable {
             }
         }
 
-        mDescription = new Description(text[0], text[1], text[2], icon, iconUri);
+        MediaDescription.Builder bob = new MediaDescription.Builder();
+        bob.setMediaId(mediaId);
+        bob.setTitle(text[0]);
+        bob.setSubtitle(text[1]);
+        bob.setDescription(text[2]);
+        bob.setIconBitmap(icon);
+        bob.setIconUri(iconUri);
+        mDescription = bob.build();
+
         return mDescription;
     }
 
@@ -668,90 +703,4 @@ public final class MediaMetadata implements Parcelable {
             return new MediaMetadata(mBundle);
         }
     }
-
-    /**
-     * A simple form of the metadata that can be used for display.
-     */
-    public final class Description {
-        /**
-         * A primary title suitable for display or null.
-         */
-        private final CharSequence mTitle;
-        /**
-         * A subtitle suitable for display or null.
-         */
-        private final CharSequence mSubtitle;
-        /**
-         * A description suitable for display or null.
-         */
-        private final CharSequence mDescription;
-        /**
-         * A bitmap icon suitable for display or null.
-         */
-        private final Bitmap mIcon;
-        /**
-         * A Uri for an icon suitable for display or null.
-         */
-        private final Uri mIconUri;
-
-        /**
-         * Returns the best available title or null.
-         *
-         * @return A title or null.
-         */
-        public @Nullable CharSequence getTitle() {
-            return mTitle;
-        }
-
-        /**
-         * Returns the best available subtitle or null.
-         *
-         * @return A subtitle or null.
-         */
-        public @Nullable CharSequence getSubtitle() {
-            return mSubtitle;
-        }
-
-        /**
-         * Returns the best available description or null.
-         *
-         * @return A description or null.
-         */
-        public @Nullable CharSequence getDescription() {
-            return mDescription;
-        }
-
-        /**
-         * Returns the best available icon or null.
-         *
-         * @return An icon or null.
-         */
-        public @Nullable Bitmap getIcon() {
-            return mIcon;
-        }
-
-        /**
-         * Returns the best available icon Uri or null.
-         *
-         * @return An icon uri or null.
-         */
-        public @Nullable Uri getIconUri() {
-            return mIconUri;
-        }
-
-        private Description(CharSequence title, CharSequence subtitle, CharSequence description,
-                Bitmap icon, Uri iconUri) {
-            mTitle = title;
-            mSubtitle = subtitle;
-            mDescription = description;
-            mIcon = icon;
-            mIconUri = iconUri;
-        }
-
-        @Override
-        public String toString() {
-            return mTitle + ", " + mSubtitle + ", " + mDescription;
-        }
-    }
-
 }
