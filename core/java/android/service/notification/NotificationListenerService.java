@@ -58,26 +58,28 @@ public abstract class NotificationListenerService extends Service {
     private final String TAG = NotificationListenerService.class.getSimpleName()
             + "[" + getClass().getSimpleName() + "]";
 
-    /** {@link #getCurrentListenerHints() Listener hints} constant - default state. */
-    public static final int HINTS_NONE = 0;
+    /**
+     * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
+     *     Normal interruption filter.
+     */
+    public static final int INTERRUPTION_FILTER_ALL = 1;
 
-    /** Bitmask range for {@link #getCurrentListenerHints() Listener hints} host interruption level
-     * constants.  */
-    public static final int HOST_INTERRUPTION_LEVEL_MASK = 0x3;
+    /**
+     * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
+     *     Priority interruption filter.
+     */
+    public static final int INTERRUPTION_FILTER_PRIORITY = 2;
 
-    /** {@link #getCurrentListenerHints() Listener hints} constant - Normal interruption level. */
-    public static final int HINT_HOST_INTERRUPTION_LEVEL_ALL = 1;
-
-    /** {@link #getCurrentListenerHints() Listener hints} constant - Priority interruption level. */
-    public static final int HINT_HOST_INTERRUPTION_LEVEL_PRIORITY = 2;
-
-    /** {@link #getCurrentListenerHints() Listener hints} constant - No interruptions level. */
-    public static final int HINT_HOST_INTERRUPTION_LEVEL_NONE = 3;
+    /**
+     * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
+     *     No interruptions filter.
+     */
+    public static final int INTERRUPTION_FILTER_NONE = 3;
 
     /** {@link #getCurrentListenerHints() Listener hints} constant - the primary device UI
      * should disable notification sound, vibrating and other visual or aural effects.
-     * This does not change the interruption level, only the effects. **/
-    public static final int HINT_HOST_DISABLE_EFFECTS = 1 << 2;
+     * This does not change the interruption filter, only the effects. **/
+    public static final int HINT_HOST_DISABLE_EFFECTS = 1;
 
     private INotificationListenerWrapper mWrapper = null;
     private RankingMap mRankingMap;
@@ -194,6 +196,17 @@ public abstract class NotificationListenerService extends Service {
      * @param hints The current {@link #getCurrentListenerHints() listener hints}.
      */
     public void onListenerHintsChanged(int hints) {
+        // optional
+    }
+
+    /**
+     * Implement this method to be notified when the
+     * {@link #getCurrentInterruptionFilter() interruption filter} changed.
+     *
+     * @param interruptionFilter The current
+     *     {@link #getCurrentInterruptionFilter() interruption filter}.
+     */
+    public void onInterruptionFilterChanged(int interruptionFilter) {
         // optional
     }
 
@@ -345,15 +358,42 @@ public abstract class NotificationListenerService extends Service {
      * shared across all listeners or a feature the notification host does not support or refuses
      * to grant.
      *
-     * @return One or more of the HINT_ constants.
+     * @return Zero or more of the HINT_ constants.
      */
     public final int getCurrentListenerHints() {
-        if (!isBound()) return HINTS_NONE;
+        if (!isBound()) return 0;
         try {
             return getNotificationInterface().getHintsFromListener(mWrapper);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
-            return HINTS_NONE;
+            return 0;
+        }
+    }
+
+    /**
+     * Gets the current notification interruption filter active on the host.
+     *
+     * <p>
+     * The interruption filter defines which notifications are allowed to interrupt the user
+     * (e.g. via sound &amp; vibration) and is applied globally. Listeners can find out whether
+     * a specific notification matched the interruption filter via
+     * {@link Ranking#matchesInterruptionFilter()}.
+     * <p>
+     * The current filter may differ from the previously requested filter if the notification host
+     * does not support or refuses to apply the requested filter, or if another component changed
+     * the filter in the meantime.
+     * <p>
+     * Listen for updates using {@link #onInterruptionFilterChanged(int)}.
+     *
+     * @return One of the INTERRUPTION_FILTER_ constants, or 0 on errors.
+     */
+    public final int getCurrentInterruptionFilter() {
+        if (!isBound()) return 0;
+        try {
+            return getNotificationInterface().getHintsFromListener(mWrapper);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+            return 0;
         }
     }
 
@@ -361,7 +401,7 @@ public abstract class NotificationListenerService extends Service {
      * Sets the desired {@link #getCurrentListenerHints() listener hints}.
      *
      * <p>
-     * This is merely a request, the host may or not choose to take action depending
+     * This is merely a request, the host may or may not choose to take action depending
      * on other listener requests or other global state.
      * <p>
      * Listen for updates using {@link #onListenerHintsChanged(int)}.
@@ -372,6 +412,27 @@ public abstract class NotificationListenerService extends Service {
         if (!isBound()) return;
         try {
             getNotificationInterface().requestHintsFromListener(mWrapper, hints);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+    }
+
+    /**
+     * Sets the desired {@link #getCurrentInterruptionFilter() interruption filter}.
+     *
+     * <p>
+     * This is merely a request, the host may or may not choose to apply the requested
+     * interruption filter depending on other listener requests or other global state.
+     * <p>
+     * Listen for updates using {@link #onInterruptionFilterChanged(int)}.
+     *
+     * @param interruptionFilter One of the INTERRUPTION_FILTER_ constants.
+     */
+    public final void requestInterruptionFilter(int interruptionFilter) {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface()
+                    .requestInterruptionFilterFromListener(mWrapper, interruptionFilter);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
@@ -512,6 +573,15 @@ public abstract class NotificationListenerService extends Service {
                 NotificationListenerService.this.onListenerHintsChanged(hints);
             } catch (Throwable t) {
                 Log.w(TAG, "Error running onListenerHintsChanged", t);
+            }
+        }
+
+        @Override
+        public void onInterruptionFilterChanged(int interruptionFilter) throws RemoteException {
+            try {
+                NotificationListenerService.this.onInterruptionFilterChanged(interruptionFilter);
+            } catch (Throwable t) {
+                Log.w(TAG, "Error running onInterruptionFilterChanged", t);
             }
         }
     }
