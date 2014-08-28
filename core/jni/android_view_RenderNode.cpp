@@ -455,6 +455,12 @@ static void android_view_RenderNode_addAnimator(JNIEnv* env, jobject clazz,
     renderNode->addAnimator(animator);
 }
 
+static void android_view_RenderNode_endAllAnimators(JNIEnv* env, jobject clazz,
+        jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->animators().endAllAnimators();
+}
+
 #endif // USE_OPENGL_RENDERER
 
 // ----------------------------------------------------------------------------
@@ -534,6 +540,7 @@ static JNINativeMethod gMethods[] = {
     { "nGetPivotY",                "(J)F",  (void*) android_view_RenderNode_getPivotY },
 
     { "nAddAnimator",              "(JJ)V", (void*) android_view_RenderNode_addAnimator },
+    { "nEndAllAnimators",          "(J)V", (void*) android_view_RenderNode_endAllAnimators },
 #endif
 };
 

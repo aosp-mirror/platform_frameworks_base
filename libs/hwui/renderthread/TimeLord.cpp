@@ -30,7 +30,7 @@ void TimeLord::vsyncReceived(nsecs_t vsync) {
     }
 }
 
-nsecs_t TimeLord::frameTimeMs() {
+nsecs_t TimeLord::computeFrameTimeMs() {
     // Logic copied from Choreographer.java
     nsecs_t now = systemTime(CLOCK_MONOTONIC);
     nsecs_t jitterNanos = now - mFrameTimeNanos;

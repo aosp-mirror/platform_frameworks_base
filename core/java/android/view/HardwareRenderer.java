@@ -485,4 +485,6 @@ public abstract class HardwareRenderer {
      * Called by {@link ViewRootImpl} when a new performTraverals is scheduled.
      */
     abstract void notifyFramePending();
+
+    abstract void registerAnimatingRenderNode(RenderNode animator);
 }

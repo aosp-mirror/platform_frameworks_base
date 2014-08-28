@@ -3565,7 +3565,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         setOverScrollMode(OVER_SCROLL_IF_CONTENT_SCROLLS);
         mUserPaddingStart = UNDEFINED_PADDING;
         mUserPaddingEnd = UNDEFINED_PADDING;
-        mRenderNode = RenderNode.create(getClass().getName());
+        mRenderNode = RenderNode.create(getClass().getName(), this);
 
         if (!sCompatibilityDone && context != null) {
             final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
@@ -4161,7 +4161,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     View() {
         mResources = null;
-        mRenderNode = RenderNode.create(getClass().getName());
+        mRenderNode = RenderNode.create(getClass().getName(), this);
     }
 
     private static SparseArray<String> getAttributeMap() {
@@ -15183,9 +15183,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param renderNode Existing RenderNode, or {@code null}
      * @return A valid display list for the specified drawable
      */
-    private static RenderNode getDrawableRenderNode(Drawable drawable, RenderNode renderNode) {
+    private RenderNode getDrawableRenderNode(Drawable drawable, RenderNode renderNode) {
         if (renderNode == null) {
-            renderNode = RenderNode.create(drawable.getClass().getName());
+            renderNode = RenderNode.create(drawable.getClass().getName(), this);
         }
 
         final Rect bounds = drawable.getBounds();
@@ -19911,6 +19911,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean mHardwareAccelerated;
         boolean mHardwareAccelerationRequested;
         HardwareRenderer mHardwareRenderer;
+        List<RenderNode> mPendingAnimatingRenderNodes;
 
         /**
          * The state of the display to which the window is attached, as reported

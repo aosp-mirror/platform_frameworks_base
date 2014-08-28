@@ -19,6 +19,7 @@
 #include <inttypes.h>
 #include <set>
 
+#include "AnimationContext.h"
 #include "RenderNode.h"
 #include "RenderProperties.h"
 
@@ -85,7 +86,7 @@ void BaseRenderNodeAnimator::attach(RenderNode* target) {
     onAttached();
 }
 
-void BaseRenderNodeAnimator::pushStaging(TreeInfo& info) {
+void BaseRenderNodeAnimator::pushStaging(AnimationContext& context) {
     if (!mHasStartValue) {
         doSetStartValue(getValue(mTarget));
     }
@@ -93,21 +94,22 @@ void BaseRenderNodeAnimator::pushStaging(TreeInfo& info) {
         mPlayState = mStagingPlayState;
         // Oh boy, we're starting! Man the battle stations!
         if (mPlayState == RUNNING) {
-            transitionToRunning(info);
+            transitionToRunning(context);
         }
     }
 }
 
-void BaseRenderNodeAnimator::transitionToRunning(TreeInfo& info) {
-    LOG_ALWAYS_FATAL_IF(info.frameTimeMs <= 0, "%" PRId64 " isn't a real frame time!", info.frameTimeMs);
+void BaseRenderNodeAnimator::transitionToRunning(AnimationContext& context) {
+    nsecs_t frameTimeMs = context.frameTimeMs();
+    LOG_ALWAYS_FATAL_IF(frameTimeMs <= 0, "%" PRId64 " isn't a real frame time!", frameTimeMs);
     if (mStartDelay < 0 || mStartDelay > 50000) {
         ALOGW("Your start delay is strange and confusing: %" PRId64, mStartDelay);
     }
-    mStartTime = info.frameTimeMs + mStartDelay;
+    mStartTime = frameTimeMs + mStartDelay;
     if (mStartTime < 0) {
         ALOGW("Ended up with a really weird start time of %" PRId64
                 " with frame time %" PRId64 " and start delay %" PRId64,
-                mStartTime, info.frameTimeMs, mStartDelay);
+                mStartTime, frameTimeMs, mStartDelay);
         // Set to 0 so that the animate() basically instantly finishes
         mStartTime = 0;
     }
@@ -120,7 +122,7 @@ void BaseRenderNodeAnimator::transitionToRunning(TreeInfo& info) {
     }
 }
 
-bool BaseRenderNodeAnimator::animate(TreeInfo& info) {
+bool BaseRenderNodeAnimator::animate(AnimationContext& context) {
     if (mPlayState < RUNNING) {
         return false;
     }
@@ -132,15 +134,14 @@ bool BaseRenderNodeAnimator::animate(TreeInfo& info) {
     // because the staging properties reflect the final value, we always need
     // to call setValue even if the animation isn't yet running or is still
     // being delayed as we need to override the staging value
-    if (mStartTime > info.frameTimeMs) {
-        info.out.hasAnimations |= true;
+    if (mStartTime > context.frameTimeMs()) {
         setValue(mTarget, mFromValue);
         return false;
     }
 
     float fraction = 1.0f;
     if (mPlayState == RUNNING && mDuration > 0) {
-        fraction = (float)(info.frameTimeMs - mStartTime) / mDuration;
+        fraction = (float)(context.frameTimeMs() - mStartTime) / mDuration;
     }
     if (fraction >= 1.0f) {
         fraction = 1.0f;
@@ -151,21 +152,16 @@ bool BaseRenderNodeAnimator::animate(TreeInfo& info) {
     setValue(mTarget, mFromValue + (mDeltaValue * fraction));
 
     if (mPlayState == FINISHED) {
-        callOnFinishedListener(info);
+        callOnFinishedListener(context);
         return true;
     }
 
-    info.out.hasAnimations |= true;
     return false;
 }
 
-void BaseRenderNodeAnimator::callOnFinishedListener(TreeInfo& info) {
+void BaseRenderNodeAnimator::callOnFinishedListener(AnimationContext& context) {
     if (mListener.get()) {
-        if (!info.animationHook) {
-            mListener->onAnimationFinished(this);
-        } else {
-            info.animationHook->callOnFinished(this, mListener.get());
-        }
+        context.callOnFinished(this, mListener.get());
     }
 }
 
