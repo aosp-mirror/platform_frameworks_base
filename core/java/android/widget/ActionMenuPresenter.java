@@ -19,6 +19,8 @@ package android.widget;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseBooleanArray;
@@ -644,6 +646,23 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(info);
             info.setCanOpenPopup(true);
+        }
+
+        @Override
+        protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+            super.onLayout(changed, left, top, right, bottom);
+
+            // Set up the hotspot bounds to be centered on the image.
+            final Drawable d = getDrawable();
+            final Drawable bg = getBackground();
+            if (d != null && bg != null) {
+                final Rect bounds = d.getBounds();
+                final int height = bottom - top;
+                final int offset = (height - bounds.width()) / 2;
+                final int hotspotLeft = bounds.left - offset;
+                final int hotspotRight = bounds.right + offset;
+                bg.setHotspotBounds(hotspotLeft, 0, hotspotRight, height);
+            }
         }
     }
 
