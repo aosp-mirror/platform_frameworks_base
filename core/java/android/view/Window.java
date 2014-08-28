@@ -1304,12 +1304,22 @@ public abstract class Window {
     public abstract int getVolumeControlStream();
 
     /**
+     * Sets a {@link MediaController} to send media keys and volume changes to.
+     * If set, this should be preferred for all media keys and volume requests
+     * sent to this window.
+     *
+     * @param controller The controller for the session which should receive
+     *            media keys and volume changes.
      * @see android.app.Activity#setMediaController(android.media.session.MediaController)
      */
     public void setMediaController(MediaController controller) {
     }
 
     /**
+     * Gets the {@link MediaController} that was previously set.
+     *
+     * @return The controller which should receive events.
+     * @see #setMediaController(android.media.session.MediaController)
      * @see android.app.Activity#getMediaController()
      */
     public MediaController getMediaController() {
