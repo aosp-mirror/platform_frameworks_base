@@ -84,8 +84,8 @@ import java.lang.ref.WeakReference;
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownAnchor
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownWidth
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownHeight
- * @attr ref android.R.styleable#AutoCompleteTextView_dropDownVerticalOffset
- * @attr ref android.R.styleable#AutoCompleteTextView_dropDownHorizontalOffset
+ * @attr ref android.R.styleable#ListPopupWindow_dropDownVerticalOffset
+ * @attr ref android.R.styleable#ListPopupWindow_dropDownHorizontalOffset
  */
 public class AutoCompleteTextView extends EditText implements Filter.FilterListener {
     static final boolean DEBUG = false;
@@ -364,6 +364,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * <p>Sets the vertical offset used for the auto-complete drop-down list.</p>
      * 
      * @param offset the vertical offset
+     *
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownVerticalOffset
      */
     public void setDropDownVerticalOffset(int offset) {
         mPopup.setVerticalOffset(offset);
@@ -373,6 +375,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * <p>Gets the vertical offset used for the auto-complete drop-down list.</p>
      * 
      * @return the vertical offset
+     *
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownVerticalOffset
      */
     public int getDropDownVerticalOffset() {
         return mPopup.getVerticalOffset();
@@ -382,6 +386,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * <p>Sets the horizontal offset used for the auto-complete drop-down list.</p>
      * 
      * @param offset the horizontal offset
+     *
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownHorizontalOffset
      */
     public void setDropDownHorizontalOffset(int offset) {
         mPopup.setHorizontalOffset(offset);
@@ -391,6 +397,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * <p>Gets the horizontal offset used for the auto-complete drop-down list.</p>
      * 
      * @return the horizontal offset
+     *
+     * @attr ref android.R.styleable#ListPopupWindow_dropDownHorizontalOffset
      */
     public int getDropDownHorizontalOffset() {
         return mPopup.getHorizontalOffset();
