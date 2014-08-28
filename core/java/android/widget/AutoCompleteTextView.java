@@ -35,9 +35,8 @@ import android.view.WindowManager;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-
 import com.android.internal.R;
-
+import java.lang.ref.WeakReference;
 
 /**
  * <p>An editable text view that shows completion suggestions automatically
@@ -629,7 +628,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      */
     public <T extends ListAdapter & Filterable> void setAdapter(T adapter) {
         if (mObserver == null) {
-            mObserver = new PopupDataSetObserver();
+            mObserver = new PopupDataSetObserver(this);
         } else if (mAdapter != null) {
             mAdapter.unregisterDataSetObserver(mObserver);
         }
@@ -1255,25 +1254,44 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         }
     }
 
-    private class PopupDataSetObserver extends DataSetObserver {
+    /**
+     * Static inner listener that keeps a WeakReference to the actual AutoCompleteTextView.
+     * <p>
+     * This way, if adapter has a longer life span than the View, we won't leak the View, instead
+     * we will just leak a small Observer with 1 field.
+     */
+    private static class PopupDataSetObserver extends DataSetObserver {
+        private final WeakReference<AutoCompleteTextView> mViewReference;
+
+        private PopupDataSetObserver(AutoCompleteTextView view) {
+            mViewReference = new WeakReference<AutoCompleteTextView>(view);
+        }
+
         @Override
         public void onChanged() {
-            if (mAdapter != null) {
+            final AutoCompleteTextView textView = mViewReference.get();
+            if (textView != null && textView.mAdapter != null) {
                 // If the popup is not showing already, showing it will cause
                 // the list of data set observers attached to the adapter to
                 // change. We can't do it from here, because we are in the middle
                 // of iterating through the list of observers.
-                post(new Runnable() {
-                    public void run() {
-                        final ListAdapter adapter = mAdapter;
-                        if (adapter != null) {
-                            // This will re-layout, thus resetting mDataChanged, so that the
-                            // listView click listener stays responsive
-                            updateDropDownForFilter(adapter.getCount());
-                        }
-                    }
-                });
+                textView.post(updateRunnable);
             }
         }
+
+        private final Runnable updateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                final AutoCompleteTextView textView = mViewReference.get();
+                if (textView == null) {
+                    return;
+                }
+                final ListAdapter adapter = textView.mAdapter;
+                if (adapter == null) {
+                    return;
+                }
+                textView.updateDropDownForFilter(adapter.getCount());
+            }
+        };
     }
 }
