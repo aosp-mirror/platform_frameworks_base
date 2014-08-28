@@ -16,7 +16,6 @@
 
 package com.android.test.hwui;
 
-import android.animation.TimeInterpolator;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -28,11 +27,6 @@ import android.os.Trace;
 import android.view.HardwareCanvas;
 import android.view.RenderNodeAnimator;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.OvershootInterpolator;
-import android.webkit.WebChromeClient;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ProgressBar;

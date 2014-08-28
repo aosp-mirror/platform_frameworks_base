@@ -17,6 +17,7 @@
 
 #include <algorithm>
 
+#include "AnimationContext.h"
 #include "RenderNode.h"
 
 namespace android {
@@ -30,7 +31,8 @@ static void unref(BaseRenderNodeAnimator* animator) {
 }
 
 AnimatorManager::AnimatorManager(RenderNode& parent)
-        : mParent(parent) {
+        : mParent(parent)
+        , mAnimationHandle(NULL) {
 }
 
 AnimatorManager::~AnimatorManager() {
@@ -44,6 +46,11 @@ void AnimatorManager::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
     mNewAnimators.push_back(animator.get());
 }
 
+void AnimatorManager::setAnimationHandle(AnimationHandle* handle) {
+    LOG_ALWAYS_FATAL_IF(mAnimationHandle && handle, "Already have an AnimationHandle!");
+    mAnimationHandle = handle;
+}
+
 template<typename T>
 static void move_all(T& source, T& dest) {
     dest.reserve(source.size() + dest.size());
@@ -53,26 +60,30 @@ static void move_all(T& source, T& dest) {
     source.clear();
 }
 
-void AnimatorManager::pushStaging(TreeInfo& info) {
+void AnimatorManager::pushStaging() {
     if (mNewAnimators.size()) {
         // Since this is a straight move, we don't need to inc/dec the ref count
         move_all(mNewAnimators, mAnimators);
     }
     for (vector<BaseRenderNodeAnimator*>::iterator it = mAnimators.begin(); it != mAnimators.end(); it++) {
-        (*it)->pushStaging(info);
+        (*it)->pushStaging(mAnimationHandle->context());
     }
 }
 
 class AnimateFunctor {
 public:
-    AnimateFunctor(RenderNode& target, TreeInfo& info)
-            : dirtyMask(0), mTarget(target), mInfo(info) {}
+    AnimateFunctor(TreeInfo& info, AnimationContext& context)
+            : dirtyMask(0), mInfo(info), mContext(context) {}
 
     bool operator() (BaseRenderNodeAnimator* animator) {
         dirtyMask |= animator->dirtyMask();
-        bool remove = animator->animate(mInfo);
+        bool remove = animator->animate(mContext);
         if (remove) {
             animator->decStrong(0);
+        } else {
+            if (animator->isRunning()) {
+                mInfo.out.hasAnimations = true;
+            }
         }
         return remove;
     }
@@ -80,8 +91,8 @@ public:
     uint32_t dirtyMask;
 
 private:
-    RenderNode& mTarget;
     TreeInfo& mInfo;
+    AnimationContext& mContext;
 };
 
 uint32_t AnimatorManager::animate(TreeInfo& info) {
@@ -93,16 +104,69 @@ uint32_t AnimatorManager::animate(TreeInfo& info) {
     mParent.damageSelf(info);
     info.damageAccumulator->popTransform();
 
-    AnimateFunctor functor(mParent, info);
-    std::vector< BaseRenderNodeAnimator* >::iterator newEnd;
-    newEnd = std::remove_if(mAnimators.begin(), mAnimators.end(), functor);
-    mAnimators.erase(newEnd, mAnimators.end());
+    uint32_t dirty = animateCommon(info);
 
     mParent.mProperties.updateMatrix();
     info.damageAccumulator->pushTransform(&mParent);
     mParent.damageSelf(info);
 
+    return dirty;
+}
+
+void AnimatorManager::animateNoDamage(TreeInfo& info) {
+    if (!mAnimators.size()) return;
+
+    animateCommon(info);
+}
+
+uint32_t AnimatorManager::animateCommon(TreeInfo& info) {
+    AnimateFunctor functor(info, mAnimationHandle->context());
+    std::vector< BaseRenderNodeAnimator* >::iterator newEnd;
+    newEnd = std::remove_if(mAnimators.begin(), mAnimators.end(), functor);
+    mAnimators.erase(newEnd, mAnimators.end());
+    mAnimationHandle->notifyAnimationsRan();
     return functor.dirtyMask;
+}
+
+class EndAnimatorsFunctor {
+public:
+    EndAnimatorsFunctor(AnimationContext& context) : mContext(context) {}
+
+    void operator() (BaseRenderNodeAnimator* animator) {
+        animator->end();
+        animator->pushStaging(mContext);
+        animator->animate(mContext);
+        animator->decStrong(0);
+    }
+
+private:
+    AnimationContext& mContext;
+};
+
+static void endAnimatorsHard(BaseRenderNodeAnimator* animator) {
+    animator->end();
+    if (animator->listener()) {
+        animator->listener()->onAnimationFinished(animator);
+    }
+    animator->decStrong(0);
+}
+
+void AnimatorManager::endAllAnimators() {
+    if (mNewAnimators.size()) {
+        // Since this is a straight move, we don't need to inc/dec the ref count
+        move_all(mNewAnimators, mAnimators);
+    }
+    // First try gracefully ending them
+    if (mAnimationHandle) {
+        EndAnimatorsFunctor functor(mAnimationHandle->context());
+        for_each(mAnimators.begin(), mAnimators.end(), functor);
+    } else {
+        // We have no context, so bust out the sledgehammer
+        // This works because this state can only happen on the UI thread,
+        // which means we're already on the right thread to invoke listeners
+        for_each(mAnimators.begin(), mAnimators.end(), endAnimatorsHard);
+    }
+    mAnimators.clear();
 }
 
 } /* namespace uirenderer */

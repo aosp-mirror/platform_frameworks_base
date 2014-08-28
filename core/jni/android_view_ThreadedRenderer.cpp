@@ -33,6 +33,8 @@
 #include "android_view_GraphicBuffer.h"
 
 #include <Animator.h>
+#include <AnimationContext.h>
+#include <IContextFactory.h>
 #include <RenderNode.h>
 #include <renderthread/CanvasContext.h>
 #include <renderthread/RenderProxy.h>
@@ -103,7 +105,7 @@ private:
     std::string mMessage;
 };
 
-class RootRenderNode : public RenderNode, AnimationHook, ErrorHandler {
+class RootRenderNode : public RenderNode, ErrorHandler {
 public:
     RootRenderNode(JNIEnv* env) : RenderNode() {
         mLooper = Looper::getForThread();
@@ -114,34 +116,84 @@ public:
 
     virtual ~RootRenderNode() {}
 
-    virtual void callOnFinished(BaseRenderNodeAnimator* animator, AnimationListener* listener) {
-        OnFinishedEvent event(animator, listener);
-        mOnFinishedEvents.push_back(event);
-    }
-
     virtual void onError(const std::string& message) {
         mLooper->sendMessage(new RenderingException(mVm, message), 0);
     }
 
     virtual void prepareTree(TreeInfo& info) {
-        info.animationHook = this;
         info.errorHandler = this;
         RenderNode::prepareTree(info);
-        info.animationHook = NULL;
         info.errorHandler = NULL;
+    }
 
-        // post all the finished stuff
-        if (mOnFinishedEvents.size()) {
-            sp<InvokeAnimationListeners> message
-                    = new InvokeAnimationListeners(mOnFinishedEvents);
-            mLooper->sendMessage(message, 0);
+    void sendMessage(const sp<MessageHandler>& handler) {
+        mLooper->sendMessage(handler, 0);
+    }
+
+    void attachAnimatingNode(RenderNode* animatingNode) {
+        mPendingAnimatingRenderNodes.push_back(animatingNode);
+    }
+
+    void doAttachAnimatingNodes(AnimationContext* context) {
+        for (size_t i = 0; i < mPendingAnimatingRenderNodes.size(); i++) {
+            RenderNode* node = mPendingAnimatingRenderNodes[i].get();
+            context->addAnimatingRenderNode(*node);
         }
+        mPendingAnimatingRenderNodes.clear();
     }
 
 private:
     sp<Looper> mLooper;
-    std::vector<OnFinishedEvent> mOnFinishedEvents;
     JavaVM* mVm;
+    std::vector< sp<RenderNode> > mPendingAnimatingRenderNodes;
+};
+
+class AnimationContextBridge : public AnimationContext {
+public:
+    AnimationContextBridge(renderthread::TimeLord& clock, RootRenderNode* rootNode)
+            : AnimationContext(clock), mRootNode(rootNode) {
+    }
+
+    virtual ~AnimationContextBridge() {}
+
+    // Marks the start of a frame, which will update the frame time and move all
+    // next frame animations into the current frame
+    virtual void startFrame() {
+        mRootNode->doAttachAnimatingNodes(this);
+        AnimationContext::startFrame();
+    }
+
+    // Runs any animations still left in mCurrentFrameAnimations
+    virtual void runRemainingAnimations(TreeInfo& info) {
+        AnimationContext::runRemainingAnimations(info);
+        // post all the finished stuff
+        if (mOnFinishedEvents.size()) {
+            sp<InvokeAnimationListeners> message
+                    = new InvokeAnimationListeners(mOnFinishedEvents);
+            mRootNode->sendMessage(message);
+        }
+    }
+
+    virtual void callOnFinished(BaseRenderNodeAnimator* animator, AnimationListener* listener) {
+        OnFinishedEvent event(animator, listener);
+        mOnFinishedEvents.push_back(event);
+    }
+
+private:
+    sp<RootRenderNode> mRootNode;
+    std::vector<OnFinishedEvent> mOnFinishedEvents;
+};
+
+class ContextFactoryImpl : public IContextFactory {
+public:
+    ContextFactoryImpl(RootRenderNode* rootNode) : mRootNode(rootNode) {}
+
+    virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) {
+        return new AnimationContextBridge(clock, mRootNode);
+    }
+
+private:
+    RootRenderNode* mRootNode;
 };
 
 static void android_view_ThreadedRenderer_setAtlas(JNIEnv* env, jobject clazz,
@@ -168,8 +220,9 @@ static jlong android_view_ThreadedRenderer_createRootRenderNode(JNIEnv* env, job
 
 static jlong android_view_ThreadedRenderer_createProxy(JNIEnv* env, jobject clazz,
         jboolean translucent, jlong rootRenderNodePtr) {
-    RenderNode* rootRenderNode = reinterpret_cast<RenderNode*>(rootRenderNodePtr);
-    return (jlong) new RenderProxy(translucent, rootRenderNode);
+    RootRenderNode* rootRenderNode = reinterpret_cast<RootRenderNode*>(rootRenderNodePtr);
+    ContextFactoryImpl factory(rootRenderNode);
+    return (jlong) new RenderProxy(translucent, rootRenderNode, &factory);
 }
 
 static void android_view_ThreadedRenderer_deleteProxy(JNIEnv* env, jobject clazz,
@@ -242,6 +295,13 @@ static void android_view_ThreadedRenderer_destroyCanvasAndSurface(JNIEnv* env, j
         jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     proxy->destroyCanvasAndSurface();
+}
+
+static void android_view_ThreadedRenderer_registerAnimatingRenderNode(JNIEnv* env, jobject clazz,
+        jlong rootNodePtr, jlong animatingNodePtr) {
+    RootRenderNode* rootRenderNode = reinterpret_cast<RootRenderNode*>(rootNodePtr);
+    RenderNode* animatingNode = reinterpret_cast<RenderNode*>(animatingNodePtr);
+    rootRenderNode->attachAnimatingNode(animatingNode);
 }
 
 static void android_view_ThreadedRenderer_invokeFunctor(JNIEnv* env, jobject clazz,
@@ -371,6 +431,7 @@ static JNINativeMethod gMethods[] = {
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },
     { "nSyncAndDrawFrame", "(JJJF)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
     { "nDestroyCanvasAndSurface", "(J)V", (void*) android_view_ThreadedRenderer_destroyCanvasAndSurface },
+    { "nRegisterAnimatingRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_registerAnimatingRenderNode },
     { "nInvokeFunctor", "(JZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
     { "nCreateDisplayListLayer", "(JII)J", (void*) android_view_ThreadedRenderer_createDisplayListLayer },
     { "nCreateTextureLayer", "(J)J", (void*) android_view_ThreadedRenderer_createTextureLayer },
