@@ -3512,7 +3512,7 @@ package android.app {
     method public void onTrimMemory(int);
     method public void onUserInteraction();
     method protected void onUserLeaveHint();
-    method public void onVisibleBehindCancelled();
+    method public void onVisibleBehindCanceled();
     method public void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
     method public void onWindowFocusChanged(boolean);
     method public android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
