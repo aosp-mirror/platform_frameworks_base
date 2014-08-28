@@ -743,6 +743,16 @@ public final class Call {
         fireStartActivity(intent);
     }
 
+    /** {@hide} */
+    final void internalSetDisconnected() {
+        if (mState != Call.STATE_DISCONNECTED) {
+            mState = Call.STATE_DISCONNECTED;
+            fireStateChanged(mState);
+            fireCallDestroyed();
+            mPhone.internalRemoveCall(this);
+        }
+    }
+
     private void fireStateChanged(int newState) {
         for (Listener listener : mListeners) {
             listener.onStateChanged(this, newState);
