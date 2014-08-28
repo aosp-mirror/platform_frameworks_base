@@ -174,6 +174,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 });
         setGhostVisibility(View.INVISIBLE);
         scheduleGhostVisibilityChange(View.INVISIBLE);
+        mListener.setSharedElementEnd(mSharedElementNames, mSharedElements, sharedElementSnapshots);
         TransitionManager.beginDelayedTransition(getDecor(), transition);
         scheduleGhostVisibilityChange(View.VISIBLE);
         setGhostVisibility(View.VISIBLE);
