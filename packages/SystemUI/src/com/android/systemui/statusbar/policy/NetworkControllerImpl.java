@@ -64,6 +64,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     static final boolean CHATTY = false; // additional diagnostics, but not logspew
 
     private static final int FLIGHT_MODE_ICON = R.drawable.stat_sys_signal_flightmode;
+    private static final int ROAMING_ICON = R.drawable.stat_sys_data_fully_connected_roam;
 
     // telephony
     boolean mHspaDataDistinguishable;
@@ -164,7 +165,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     public interface SignalCluster {
         void setWifiIndicators(boolean visible, int strengthIcon, String contentDescription);
         void setMobileDataIndicators(boolean visible, int strengthIcon, int typeIcon,
-                String contentDescription, String typeContentDescription);
+                String contentDescription, String typeContentDescription, boolean roaming);
         void setIsAirplaneMode(boolean is, int airplaneIcon);
     }
 
@@ -372,7 +373,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     mAlwaysShowCdmaRssi ? mPhoneSignalIconId : mWimaxIconId,
                     mDataTypeIconId,
                     mContentDescriptionWimax,
-                    mContentDescriptionDataType);
+                    mContentDescriptionDataType,
+                    mDataTypeIconId == ROAMING_ICON);
         } else {
             // normal mobile data
             cluster.setMobileDataIndicators(
@@ -380,7 +382,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     mShowPhoneRSSIForData ? mPhoneSignalIconId : mDataSignalIconId,
                     mDataTypeIconId,
                     mContentDescriptionPhoneSignal,
-                    mContentDescriptionDataType);
+                    mContentDescriptionDataType,
+                    mDataTypeIconId == ROAMING_ICON);
         }
         cluster.setIsAirplaneMode(mAirplaneMode, mAirplaneIconId);
     }
@@ -777,11 +780,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         if (isCdma()) {
             if (isCdmaEri()) {
-                mDataTypeIconId = R.drawable.stat_sys_data_fully_connected_roam;
+                mDataTypeIconId = ROAMING_ICON;
                 mQSDataTypeIconId = TelephonyIcons.QS_DATA_R[mInetCondition];
             }
         } else if (mPhone.isNetworkRoaming()) {
-                mDataTypeIconId = R.drawable.stat_sys_data_fully_connected_roam;
+                mDataTypeIconId = ROAMING_ICON;
                 mQSDataTypeIconId = TelephonyIcons.QS_DATA_R[mInetCondition];
         }
     }
@@ -1195,11 +1198,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mQSDataTypeIconId = 0;
             if (isCdma()) {
                 if (isCdmaEri()) {
-                    mDataTypeIconId = R.drawable.stat_sys_data_fully_connected_roam;
+                    mDataTypeIconId = ROAMING_ICON;
                     mQSDataTypeIconId = TelephonyIcons.QS_DATA_R[mInetCondition];
                 }
             } else if (mPhone.isNetworkRoaming()) {
-                mDataTypeIconId = R.drawable.stat_sys_data_fully_connected_roam;
+                mDataTypeIconId = ROAMING_ICON;
                 mQSDataTypeIconId = TelephonyIcons.QS_DATA_R[mInetCondition];
             }
         }
@@ -1544,8 +1547,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             datatype.equals("g") ? R.drawable.stat_sys_data_fully_connected_g :
                             datatype.equals("h") ? R.drawable.stat_sys_data_fully_connected_h :
                             datatype.equals("lte") ? R.drawable.stat_sys_data_fully_connected_lte :
-                            datatype.equals("roam")
-                                    ? R.drawable.stat_sys_data_fully_connected_roam :
+                            datatype.equals("roam") ? ROAMING_ICON :
                             0;
                     mDemoQSDataTypeIconId =
                             datatype.equals("1x") ? R.drawable.ic_qs_signal_1x :
@@ -1572,7 +1574,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             iconId,
                             mDemoDataTypeIconId,
                             "Demo",
-                            "Demo");
+                            "Demo",
+                            mDemoDataTypeIconId == ROAMING_ICON);
                 }
                 refreshViews();
             }
