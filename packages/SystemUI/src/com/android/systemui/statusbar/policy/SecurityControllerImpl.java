@@ -15,6 +15,7 @@
  */
 package com.android.systemui.statusbar.policy;
 
+import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -52,11 +53,13 @@ public class SecurityControllerImpl implements SecurityController {
     private final IConnectivityManager mConnectivityService = IConnectivityManager.Stub.asInterface(
                 ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
     private final DevicePolicyManager mDevicePolicyManager;
-    private final ArrayList<VpnCallback> mCallbacks = new ArrayList<VpnCallback>();
+    private final ArrayList<SecurityControllerCallback> mCallbacks
+            = new ArrayList<SecurityControllerCallback>();
 
     private VpnConfig mVpnConfig;
     private String mVpnName;
     private int mCurrentVpnNetworkId = NO_NETWORK;
+    private int mCurrentUserId;
 
     public SecurityControllerImpl(Context context) {
         mContext = context;
@@ -67,6 +70,7 @@ public class SecurityControllerImpl implements SecurityController {
 
         // TODO: re-register network callback on user change.
         mConnectivityManager.registerNetworkCallback(REQUEST, mNetworkCallback);
+        mCurrentUserId = ActivityManager.getCurrentUser();
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -82,9 +86,20 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     @Override
+    public boolean hasProfileOwner() {
+        return !TextUtils.isEmpty(mDevicePolicyManager.getProfileOwnerNameAsUser(mCurrentUserId));
+    }
+
+    @Override
     public String getDeviceOwnerName() {
         return mDevicePolicyManager.getDeviceOwnerName();
     }
+
+    @Override
+    public String getProfileOwnerName() {
+        return mDevicePolicyManager.getProfileOwnerNameAsUser(mCurrentUserId);
+    }
+
 
     @Override
     public boolean isVpnEnabled() {
@@ -124,17 +139,23 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     @Override
-    public void addCallback(VpnCallback callback) {
+    public void addCallback(SecurityControllerCallback callback) {
         if (callback == null) return;
         if (DEBUG) Log.d(TAG, "removeCallback " + callback);
         mCallbacks.remove(callback);
     }
 
     @Override
-    public void removeCallback(VpnCallback callback) {
+    public void removeCallback(SecurityControllerCallback callback) {
         if (callback == null || mCallbacks.contains(callback)) return;
         if (DEBUG) Log.d(TAG, "addCallback " + callback);
         mCallbacks.add(callback);
+    }
+
+    @Override
+    public void onUserSwitched(int newUserId) {
+        mCurrentUserId = newUserId;
+        fireCallbacks();
     }
 
     private void setCurrentNetid(int netId) {
@@ -146,8 +167,8 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     private void fireCallbacks() {
-        for (VpnCallback callback : mCallbacks) {
-            callback.onVpnStateChanged();
+        for (SecurityControllerCallback callback : mCallbacks) {
+            callback.onStateChanged();
         }
     }
 

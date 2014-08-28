@@ -18,18 +18,21 @@ package com.android.systemui.statusbar.policy;
 public interface SecurityController {
 
     boolean hasDeviceOwner();
+    boolean hasProfileOwner();
     String getDeviceOwnerName();
+    String getProfileOwnerName();
     boolean isVpnEnabled();
     String getVpnApp();
     boolean isLegacyVpn();
     String getLegacyVpnName();
     void disconnectFromVpn();
+    void onUserSwitched(int newUserId);
 
-    void addCallback(VpnCallback callback);
-    void removeCallback(VpnCallback callback);
+    void addCallback(SecurityControllerCallback callback);
+    void removeCallback(SecurityControllerCallback callback);
 
-    public interface VpnCallback {
-        void onVpnStateChanged();
+    public interface SecurityControllerCallback {
+        void onStateChanged();
     }
 
 }
