@@ -338,9 +338,9 @@ public class PopupWindow {
     }
     
     /**
-     * Set the flag on popup to ignore cheek press eventt; by default this flag
+     * Set the flag on popup to ignore cheek press events; by default this flag
      * is set to false
-     * which means the pop wont ignore cheek press dispatch events.
+     * which means the popup will not ignore cheek press dispatch events.
      * 
      * <p>If the popup is showing, calling this method will take effect only
      * the next time the popup is shown or through a manual call to one of
