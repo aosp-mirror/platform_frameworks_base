@@ -3740,6 +3740,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
             // Check for permissions
             if (who == null) {
@@ -3753,7 +3754,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try {
                 mUserManager.setUserEnabled(userId);
                 Intent intent = new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED);
-                intent.putExtra(Intent.EXTRA_USER, new UserHandle(UserHandle.getCallingUserId()));
+                intent.putExtra(Intent.EXTRA_USER, new UserHandle(userHandle));
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY |
                         Intent.FLAG_RECEIVER_FOREGROUND);
                 // TODO This should send to parent of profile (which is always owner at the moment).
@@ -3940,6 +3941,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void addPersistentPreferredActivity(ComponentName who, IntentFilter filter,
             ComponentName activity) {
+        final int userHandle = UserHandle.getCallingUserId();
+
         synchronized (this) {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
@@ -3949,7 +3952,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             IPackageManager pm = AppGlobals.getPackageManager();
             long id = Binder.clearCallingIdentity();
             try {
-                pm.addPersistentPreferredActivity(filter, activity, UserHandle.getCallingUserId());
+                pm.addPersistentPreferredActivity(filter, activity, userHandle);
             } catch (RemoteException re) {
                 // Shouldn't happen
             } finally {
@@ -3960,6 +3963,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void clearPackagePersistentPreferredActivities(ComponentName who, String packageName) {
+        final int userHandle = UserHandle.getCallingUserId();
+
         synchronized (this) {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
@@ -3969,7 +3974,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             IPackageManager pm = AppGlobals.getPackageManager();
             long id = Binder.clearCallingIdentity();
             try {
-                pm.clearPackagePersistentPreferredActivities(packageName, UserHandle.getCallingUserId());
+                pm.clearPackagePersistentPreferredActivities(packageName, userHandle);
             } catch (RemoteException re) {
                 // Shouldn't happen
             } finally {
