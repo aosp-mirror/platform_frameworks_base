@@ -15208,6 +15208,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             final int is24Hour = intent.getBooleanExtra(
                     Intent.EXTRA_TIME_PREF_24_HOUR_FORMAT, false) ? 1 : 0;
             mHandler.sendMessage(mHandler.obtainMessage(UPDATE_TIME, is24Hour, 0));
+            BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+            synchronized (stats) {
+                stats.noteCurrentTimeChangedLocked();
+            }
         }
 
         if (Intent.ACTION_CLEAR_DNS_CACHE.equals(intent.getAction())) {
