@@ -185,7 +185,7 @@ public final class MediaController {
      *
      * @return The current play queue or null.
      */
-    public @Nullable List<MediaSession.Item> getQueue() {
+    public @Nullable List<MediaSession.QueueItem> getQueue() {
         try {
             ParceledListSlice queue = mSessionBinder.getQueue();
             if (queue != null) {
@@ -550,9 +550,9 @@ public final class MediaController {
          * @param queue A list of items in the current play queue. It should
          *            include the currently playing item as well as previous and
          *            upcoming items if applicable.
-         * @see MediaSession.Item
+         * @see MediaSession.QueueItem
          */
-        public void onQueueChanged(@Nullable List<MediaSession.Item> queue) {
+        public void onQueueChanged(@Nullable List<MediaSession.QueueItem> queue) {
         }
 
         /**
@@ -606,18 +606,19 @@ public final class MediaController {
         /**
          * Request that the player start playback for a specific {@link Uri}.
          *
-         * @param uri The uri of the requested media.
+         * @param mediaId The uri of the requested media.
          * @param extras Optional extras that can include extra information about the media item
          *               to be played.
          */
-        public void playUri(Uri uri, Bundle extras) {
-            if (uri == null) {
-                throw new IllegalArgumentException("You must specify a non-null Uri for playUri.");
+        public void playFromMediaId(String mediaId, Bundle extras) {
+            if (TextUtils.isEmpty(mediaId)) {
+                throw new IllegalArgumentException(
+                        "You must specify a non-empty String for playFromMediaId.");
             }
             try {
-                mSessionBinder.playUri(uri, extras);
+                mSessionBinder.playFromMediaId(mediaId, extras);
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling play(" + uri + ").", e);
+                Log.wtf(TAG, "Error calling play(" + mediaId + ").", e);
             }
         }
 
@@ -643,9 +644,9 @@ public final class MediaController {
          * Play an item with a specific id in the play queue. If you specify an
          * id that is not in the play queue, the behavior is undefined.
          */
-        public void skipToItem(long id) {
+        public void skipToQueueItem(long id) {
             try {
-                mSessionBinder.skipToTrack(id);
+                mSessionBinder.skipToQueueItem(id);
             } catch (RemoteException e) {
                 Log.wtf(TAG, "Error calling skipToItem(" + id + ").", e);
             }
@@ -916,7 +917,7 @@ public final class MediaController {
 
         @Override
         public void onQueueChanged(ParceledListSlice parceledQueue) {
-            List<MediaSession.Item> queue = parceledQueue.getList();
+            List<MediaSession.QueueItem> queue = parceledQueue.getList();
             MediaController controller = mController.get();
             if (controller != null) {
                 controller.postMessage(MSG_UPDATE_QUEUE, queue, null);
@@ -972,7 +973,7 @@ public final class MediaController {
                     mCallback.onMetadataChanged((MediaMetadata) msg.obj);
                     break;
                 case MSG_UPDATE_QUEUE:
-                    mCallback.onQueueChanged((List<MediaSession.Item>) msg.obj);
+                    mCallback.onQueueChanged((List<MediaSession.QueueItem>) msg.obj);
                     break;
                 case MSG_UPDATE_QUEUE_TITLE:
                     mCallback.onQueueTitleChanged((CharSequence) msg.obj);

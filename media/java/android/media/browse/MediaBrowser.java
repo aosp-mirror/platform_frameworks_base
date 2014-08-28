@@ -16,6 +16,7 @@
 
 package android.media.browse;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -23,26 +24,27 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ParceledListSlice;
-import android.content.res.Configuration;
-import android.graphics.Bitmap;
+import android.media.MediaDescription;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
+import android.service.media.MediaBrowserService;
+import android.service.media.IMediaBrowserService;
+import android.service.media.IMediaBrowserServiceCallbacks;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.SparseArray;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * Browses media content offered by a link MediaBrowserService.
@@ -67,8 +69,6 @@ public final class MediaBrowser {
     private final Handler mHandler = new Handler();
     private final ArrayMap<Uri,Subscription> mSubscriptions =
             new ArrayMap<Uri, MediaBrowser.Subscription>();
-    private final SparseArray<IconRequest> mIconRequests =
-            new SparseArray<IconRequest>();
 
     private int mState = CONNECT_STATE_DISCONNECTED;
     private MediaServiceConnection mServiceConnection;
@@ -77,7 +77,6 @@ public final class MediaBrowser {
     private Uri mRootUri;
     private MediaSession.Token mMediaSessionToken;
     private Bundle mExtras;
-    private int mNextSeq;
 
     /**
      * Creates a media browser for the specified media browse service.
@@ -363,49 +362,6 @@ public final class MediaBrowser {
     }
 
     /**
-     * Loads the icon of a media item.
-     *
-     * @param uri The uri of the Icon.
-     * @param width The preferred width of the icon in dp.
-     * @param height The preferred width of the icon in dp.
-     * @param callback The callback to receive the icon.
-     */
-    public void loadIcon(final @NonNull Uri uri, final int width, final int height,
-            final @NonNull IconCallback callback) {
-        if (uri == null) {
-            throw new IllegalArgumentException("Icon uri cannot be null");
-        }
-        if (callback == null) {
-            throw new IllegalArgumentException("Icon callback cannot be null");
-        }
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < mIconRequests.size(); i++) {
-                    IconRequest existingRequest = mIconRequests.valueAt(i);
-                    if (existingRequest.isSameRequest(uri, width, height)) {
-                        existingRequest.addCallback(callback);
-                        return;
-                    }
-                }
-                final int seq = mNextSeq++;
-                IconRequest request = new IconRequest(seq, uri, width, height);
-                request.addCallback(callback);
-                mIconRequests.put(seq, request);
-                if (mState == CONNECT_STATE_CONNECTED) {
-                    try {
-                        mServiceBinder.loadIcon(seq, uri, width, height, mServiceCallbacks);
-                    } catch (RemoteException e) {
-                        // Process is crashing.  We will disconnect, and upon reconnect we will
-                        // automatically reload the icons. So nothing to do here.
-                        Log.d(TAG, "loadIcon failed with RemoteException uri=" + uri);
-                    }
-                }
-            }
-        });
-    }
-
-    /**
      * For debugging.
      */
     private static String getStateLabel(int state) {
@@ -461,18 +417,6 @@ public final class MediaBrowser {
                         Log.d(TAG, "addSubscription failed with RemoteException parentUri=" + uri);
                     }
                 }
-
-                for (int i = 0; i < mIconRequests.size(); i++) {
-                    IconRequest request = mIconRequests.valueAt(i);
-                    try {
-                        mServiceBinder.loadIcon(request.mSeq, request.mUri,
-                                request.mWidth, request.mHeight, mServiceCallbacks);
-                    } catch (RemoteException e) {
-                        // Process is crashing.  We will disconnect, and upon reconnect we will
-                        // automatically reload. So nothing to do here.
-                        Log.d(TAG, "loadIcon failed with RemoteException request=" + request);
-                    }
-                }
             }
         });
     }
@@ -515,7 +459,7 @@ public final class MediaBrowser {
                     return;
                 }
 
-                List<MediaBrowserItem> data = list.getList();
+                List<MediaItem> data = list.getList();
                 if (DBG) {
                     Log.d(TAG, "onLoadChildren for " + mServiceComponent + " uri=" + uri);
                 }
@@ -538,32 +482,6 @@ public final class MediaBrowser {
             }
         });
     }
-
-    private final void onLoadIcon(final IMediaBrowserServiceCallbacks callback,
-            final int seqNum, final Bitmap bitmap) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                // Check that there hasn't been a disconnect or a different
-                // ServiceConnection.
-                if (!isCurrent(callback, "onLoadIcon")) {
-                    return;
-                }
-
-                IconRequest request = mIconRequests.get(seqNum);
-                if (request == null) {
-                    Log.d(TAG, "onLoadIcon called for seqNum=" + seqNum + " request="
-                            + request + " but the request is not registered");
-                    return;
-                }
-                mIconRequests.delete(seqNum);
-                for (IconCallback IconCallback : request.getCallbacks()) {
-                    IconCallback.onIconLoaded(request.mUri, bitmap);
-                }
-            }
-        });
-    }
-
 
     /**
      * Return true if {@code callback} is the current ServiceCallbacks.  Also logs if it's not.
@@ -600,6 +518,126 @@ public final class MediaBrowser {
         Log.d(TAG, "  mMediaSessionToken=" + mMediaSessionToken);
     }
 
+    public static class MediaItem implements Parcelable {
+        private final int mFlags;
+        private final MediaDescription mDescription;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag=true, value = { FLAG_BROWSABLE, FLAG_PLAYABLE })
+        public @interface Flags { }
+
+        /**
+         * Flag: Indicates that the item has children of its own.
+         */
+        public static final int FLAG_BROWSABLE = 1 << 0;
+
+        /**
+         * Flag: Indicates that the item is playable.
+         * <p>
+         * The Uri of this item may be passed to link android.media.session.MediaController#play(Uri)
+         * to start playing it.
+         * </p>
+         */
+        public static final int FLAG_PLAYABLE = 1 << 1;
+
+        /**
+         * Create a new MediaItem for use in browsing media.
+         *
+         * @param flags The flags for this item.
+         * @param description The description of the media, which must include a
+         *            media id.
+         */
+        public MediaItem(@Flags int flags, @NonNull MediaDescription description) {
+            if (description == null) {
+                throw new IllegalArgumentException("description cannot be null");
+            }
+            if (TextUtils.isEmpty(description.getMediaId())) {
+                throw new IllegalArgumentException("description must have a non-empty media id");
+            }
+            mFlags = flags;
+            mDescription = description;
+        }
+
+        /**
+         * Private constructor.
+         */
+        private MediaItem(Parcel in) {
+            mFlags = in.readInt();
+            mDescription = MediaDescription.CREATOR.createFromParcel(in);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeInt(mFlags);
+            mDescription.writeToParcel(out, flags);
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("MediaItem{");
+            sb.append("mFlags=").append(mFlags);
+            sb.append(", mDescription=").append(mDescription);
+            sb.append('}');
+            return sb.toString();
+        }
+
+        public static final Parcelable.Creator<MediaItem> CREATOR =
+                new Parcelable.Creator<MediaItem>() {
+                    @Override
+                    public MediaItem createFromParcel(Parcel in) {
+                        return new MediaItem(in);
+                    }
+
+                    @Override
+                    public MediaItem[] newArray(int size) {
+                        return new MediaItem[size];
+                    }
+                };
+
+        /**
+         * Gets the flags of the item.
+         */
+        public @Flags int getFlags() {
+            return mFlags;
+        }
+
+        /**
+         * Returns whether this item is browsable.
+         * @see #FLAG_BROWSABLE
+         */
+        public boolean isBrowsable() {
+            return (mFlags & FLAG_BROWSABLE) != 0;
+        }
+
+        /**
+         * Returns whether this item is playable.
+         * @see #FLAG_PLAYABLE
+         */
+        public boolean isPlayable() {
+            return (mFlags & FLAG_PLAYABLE) != 0;
+        }
+
+        /**
+         * Returns the description of the media.
+         */
+        public @NonNull MediaDescription getDescription() {
+            return mDescription;
+        }
+
+        /**
+         * Returns the media id for this item.
+         */
+        public @NonNull String getMediaId() {
+            return mDescription.getMediaId();
+        }
+    }
+
 
     /**
      * Callbacks for connection related events.
@@ -632,7 +670,7 @@ public final class MediaBrowser {
          * Called when the list of children is loaded or updated.
          */
         public void onChildrenLoaded(@NonNull Uri parentUri,
-                                     @NonNull List<MediaBrowserItem> children) {
+                                     @NonNull List<MediaItem> children) {
         }
 
         /**
@@ -643,87 +681,6 @@ public final class MediaBrowser {
          * </p>
          */
         public void onError(@NonNull Uri uri) {
-        }
-    }
-
-    /**
-     * Callbacks for icon loading.
-     */
-    public static abstract class IconCallback {
-        /**
-         * Called when the icon is loaded.
-         */
-        public void onIconLoaded(@NonNull Uri uri, @NonNull Bitmap bitmap) {
-        }
-
-        /**
-         * Called when the Uri doesn’t exist or the bitmap cannot be loaded.
-         */
-        public void onError(@NonNull Uri uri) {
-        }
-    }
-
-    private static class IconRequest {
-        final int mSeq;
-        final Uri mUri;
-        final int mWidth;
-        final int mHeight;
-        final List<IconCallback> mCallbacks;
-
-        /**
-         * Constructs an icon request.
-         * @param seq The unique sequence number assigned to the request by the media browser.
-         * @param uri The Uri for the icon.
-         * @param width The width for the icon.
-         * @param height The height for the icon.
-         */
-        IconRequest(int seq, @NonNull Uri uri, int width, int height) {
-            if (uri == null) {
-                throw new IllegalArgumentException("Icon uri cannot be null");
-            }
-            this.mSeq = seq;
-            this.mUri = uri;
-            this.mWidth = width;
-            this.mHeight = height;
-            mCallbacks = new ArrayList<IconCallback>();
-        }
-
-        /**
-         * Adds a callback to the icon request.
-         * If the callback already exists, it will not be added again.
-         */
-        public void addCallback(@NonNull IconCallback callback) {
-            if (callback == null) {
-                throw new IllegalArgumentException("callback cannot be null in IconRequest");
-            }
-            if (!mCallbacks.contains(callback)) {
-                mCallbacks.add(callback);
-            }
-        }
-
-        /**
-         * Checks if the icon request has the same uri, width, and height as the given values.
-         */
-        public boolean isSameRequest(@Nullable Uri uri, int width, int height) {
-            return Objects.equals(mUri, uri) && mWidth == width && mHeight == height;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder("IconRequest{");
-            sb.append("uri=").append(mUri);
-            sb.append(", width=").append(mWidth);
-            sb.append(", height=").append(mHeight);
-            sb.append(", seq=").append(mSeq);
-            sb.append('}');
-            return sb.toString();
-        }
-
-        /**
-         * Gets an unmodifiable view of the list of callbacks associated with the request.
-         */
-        public List<IconCallback> getCallbacks() {
-            return Collections.unmodifiableList(mCallbacks);
         }
     }
 
@@ -809,7 +766,7 @@ public final class MediaBrowser {
             }
             return true;
         }
-    };
+    }
 
     /**
      * Callbacks from the service.
@@ -850,14 +807,6 @@ public final class MediaBrowser {
             MediaBrowser mediaBrowser = mMediaBrowser.get();
             if (mediaBrowser != null) {
                 mediaBrowser.onLoadChildren(this, uri, list);
-            }
-        }
-
-        @Override
-        public void onLoadIcon(final int seqNum, final Bitmap bitmap) {
-            MediaBrowser mediaBrowser = mMediaBrowser.get();
-            if (mediaBrowser != null) {
-                mediaBrowser.onLoadIcon(this, seqNum, bitmap);
             }
         }
     }

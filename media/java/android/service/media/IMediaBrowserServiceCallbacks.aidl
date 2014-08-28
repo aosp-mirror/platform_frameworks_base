@@ -1,6 +1,6 @@
 // Copyright 2014 Google Inc. All Rights Reserved.
 
-package android.media.browse;
+package android.service.media;
 
 import android.content.pm.ParceledListSlice;
 import android.graphics.Bitmap;
@@ -24,5 +24,4 @@ oneway interface IMediaBrowserServiceCallbacks {
     void onConnect(in Uri root, in MediaSession.Token session, in Bundle extras);
     void onConnectFailed();
     void onLoadChildren(in Uri uri, in ParceledListSlice list);
-    void onLoadIcon(int seqNum, in Bitmap bitmap);
 }

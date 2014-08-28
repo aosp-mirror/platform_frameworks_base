@@ -55,9 +55,9 @@ interface ISessionController {
 
     // These commands are for the TransportControls
     void play();
-    void playUri(in Uri uri, in Bundle extras);
+    void playFromMediaId(String uri, in Bundle extras);
     void playFromSearch(String string, in Bundle extras);
-    void skipToTrack(long id);
+    void skipToQueueItem(long id);
     void pause();
     void stop();
     void next();

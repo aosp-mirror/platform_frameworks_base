@@ -14924,6 +14924,31 @@ package android.media {
     ctor public MediaCryptoException(java.lang.String);
   }
 
+  public class MediaDescription implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.CharSequence getDescription();
+    method public android.os.Bundle getExtras();
+    method public android.graphics.Bitmap getIconBitmap();
+    method public android.net.Uri getIconUri();
+    method public java.lang.String getMediaId();
+    method public java.lang.CharSequence getSubtitle();
+    method public java.lang.CharSequence getTitle();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public static class MediaDescription.Builder {
+    ctor public MediaDescription.Builder();
+    method public android.media.MediaDescription build();
+    method public android.media.MediaDescription.Builder setDescription(java.lang.CharSequence);
+    method public android.media.MediaDescription.Builder setExtras(android.os.Bundle);
+    method public android.media.MediaDescription.Builder setIconBitmap(android.graphics.Bitmap);
+    method public android.media.MediaDescription.Builder setIconUri(android.net.Uri);
+    method public android.media.MediaDescription.Builder setMediaId(java.lang.String);
+    method public android.media.MediaDescription.Builder setSubtitle(java.lang.CharSequence);
+    method public android.media.MediaDescription.Builder setTitle(java.lang.CharSequence);
+  }
+
   public final class MediaDrm {
     ctor public MediaDrm(java.util.UUID) throws android.media.UnsupportedSchemeException;
     method public void closeSession(byte[]);
@@ -15102,7 +15127,7 @@ package android.media {
     method public boolean containsKey(java.lang.String);
     method public int describeContents();
     method public android.graphics.Bitmap getBitmap(java.lang.String);
-    method public android.media.MediaMetadata.Description getDescription();
+    method public android.media.MediaDescription getDescription();
     method public long getLong(java.lang.String);
     method public android.media.Rating getRating(java.lang.String);
     method public java.lang.String getString(java.lang.String);
@@ -15130,6 +15155,7 @@ package android.media {
     field public static final java.lang.String METADATA_KEY_DISPLAY_TITLE = "android.media.metadata.DISPLAY_TITLE";
     field public static final java.lang.String METADATA_KEY_DURATION = "android.media.metadata.DURATION";
     field public static final java.lang.String METADATA_KEY_GENRE = "android.media.metadata.GENRE";
+    field public static final java.lang.String METADATA_KEY_MEDIA_ID = "android.media.metadata.MEDIA_ID";
     field public static final java.lang.String METADATA_KEY_NUM_TRACKS = "android.media.metadata.NUM_TRACKS";
     field public static final java.lang.String METADATA_KEY_RATING = "android.media.metadata.RATING";
     field public static final java.lang.String METADATA_KEY_TITLE = "android.media.metadata.TITLE";
@@ -15148,14 +15174,6 @@ package android.media {
     method public android.media.MediaMetadata.Builder putRating(java.lang.String, android.media.Rating);
     method public android.media.MediaMetadata.Builder putString(java.lang.String, java.lang.String);
     method public android.media.MediaMetadata.Builder putText(java.lang.String, java.lang.CharSequence);
-  }
-
-  public final class MediaMetadata.Description {
-    method public java.lang.CharSequence getDescription();
-    method public android.graphics.Bitmap getIcon();
-    method public android.net.Uri getIconUri();
-    method public java.lang.CharSequence getSubtitle();
-    method public java.lang.CharSequence getTitle();
   }
 
   public abstract deprecated class MediaMetadataEditor {
@@ -16243,7 +16261,6 @@ package android.media.browse {
     method public android.content.ComponentName getServiceComponent();
     method public android.media.session.MediaSession.Token getSessionToken();
     method public boolean isConnected();
-    method public void loadIcon(android.net.Uri, int, int, android.media.browse.MediaBrowser.IconCallback);
     method public void subscribe(android.net.Uri, android.media.browse.MediaBrowser.SubscriptionCallback);
     method public void unsubscribe(android.net.Uri);
   }
@@ -16255,27 +16272,12 @@ package android.media.browse {
     method public void onConnectionSuspended();
   }
 
-  public static abstract class MediaBrowser.IconCallback {
-    ctor public MediaBrowser.IconCallback();
-    method public void onError(android.net.Uri);
-    method public void onIconLoaded(android.net.Uri, android.graphics.Bitmap);
-  }
-
-  public static abstract class MediaBrowser.SubscriptionCallback {
-    ctor public MediaBrowser.SubscriptionCallback();
-    method public void onChildrenLoaded(android.net.Uri, java.util.List<android.media.browse.MediaBrowserItem>);
-    method public void onError(android.net.Uri);
-  }
-
-  public final class MediaBrowserItem implements android.os.Parcelable {
+  public static class MediaBrowser.MediaItem implements android.os.Parcelable {
+    ctor public MediaBrowser.MediaItem(int, android.media.MediaDescription);
     method public int describeContents();
-    method public android.os.Bundle getExtras();
+    method public android.media.MediaDescription getDescription();
     method public int getFlags();
-    method public int getIconResourceId();
-    method public android.net.Uri getIconUri();
-    method public java.lang.CharSequence getSummary();
-    method public java.lang.CharSequence getTitle();
-    method public android.net.Uri getUri();
+    method public java.lang.String getMediaId();
     method public boolean isBrowsable();
     method public boolean isPlayable();
     method public void writeToParcel(android.os.Parcel, int);
@@ -16284,37 +16286,10 @@ package android.media.browse {
     field public static final int FLAG_PLAYABLE = 2; // 0x2
   }
 
-  public static final class MediaBrowserItem.Builder {
-    ctor public MediaBrowserItem.Builder(android.net.Uri, int, java.lang.CharSequence);
-    method public android.media.browse.MediaBrowserItem build();
-    method public android.media.browse.MediaBrowserItem.Builder setExtras(android.os.Bundle);
-    method public android.media.browse.MediaBrowserItem.Builder setIconResourceId(int);
-    method public android.media.browse.MediaBrowserItem.Builder setIconUri(android.net.Uri);
-    method public android.media.browse.MediaBrowserItem.Builder setSummary(java.lang.CharSequence);
-  }
-
-  public abstract class MediaBrowserService extends android.app.Service {
-    ctor public MediaBrowserService();
-    method public void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
-    method public android.media.session.MediaSession.Token getSessionToken();
-    method public void notifyChildrenChanged(android.net.Uri);
-    method public android.os.IBinder onBind(android.content.Intent);
-    method public abstract android.media.browse.MediaBrowserService.BrowserRoot onGetRoot(java.lang.String, int, android.os.Bundle);
-    method public abstract void onLoadChildren(android.net.Uri, android.media.browse.MediaBrowserService.Result<java.util.List<android.media.browse.MediaBrowserItem>>);
-    method public abstract void onLoadIcon(android.net.Uri, int, int, android.media.browse.MediaBrowserService.Result<android.graphics.Bitmap>);
-    method public void setSessionToken(android.media.session.MediaSession.Token);
-    field public static final java.lang.String SERVICE_ACTION = "android.media.browse.MediaBrowserService";
-  }
-
-  public static final class MediaBrowserService.BrowserRoot {
-    ctor public MediaBrowserService.BrowserRoot(android.net.Uri, android.os.Bundle);
-    method public android.os.Bundle getExtras();
-    method public android.net.Uri getRootUri();
-  }
-
-  public class MediaBrowserService.Result {
-    method public void detach();
-    method public void sendResult(T);
+  public static abstract class MediaBrowser.SubscriptionCallback {
+    ctor public MediaBrowser.SubscriptionCallback();
+    method public void onChildrenLoaded(android.net.Uri, java.util.List<android.media.browse.MediaBrowser.MediaItem>);
+    method public void onError(android.net.Uri);
   }
 
 }
@@ -16646,7 +16621,7 @@ package android.media.session {
     method public java.lang.String getPackageName();
     method public android.media.session.MediaController.PlaybackInfo getPlaybackInfo();
     method public android.media.session.PlaybackState getPlaybackState();
-    method public java.util.List<android.media.session.MediaSession.Item> getQueue();
+    method public java.util.List<android.media.session.MediaSession.QueueItem> getQueue();
     method public java.lang.CharSequence getQueueTitle();
     method public int getRatingType();
     method public android.app.PendingIntent getSessionActivity();
@@ -16663,7 +16638,7 @@ package android.media.session {
     method public void onExtrasChanged(android.os.Bundle);
     method public void onMetadataChanged(android.media.MediaMetadata);
     method public void onPlaybackStateChanged(android.media.session.PlaybackState);
-    method public void onQueueChanged(java.util.List<android.media.session.MediaSession.Item>);
+    method public void onQueueChanged(java.util.List<android.media.session.MediaSession.QueueItem>);
     method public void onQueueTitleChanged(java.lang.CharSequence);
     method public void onSessionDestroyed();
     method public void onSessionEvent(java.lang.String, android.os.Bundle);
@@ -16683,16 +16658,16 @@ package android.media.session {
     method public void fastForward();
     method public void pause();
     method public void play();
+    method public void playFromMediaId(java.lang.String, android.os.Bundle);
     method public void playFromSearch(java.lang.String, android.os.Bundle);
-    method public void playUri(android.net.Uri, android.os.Bundle);
     method public void rewind();
     method public void seekTo(long);
     method public void sendCustomAction(android.media.session.PlaybackState.CustomAction, android.os.Bundle);
     method public void sendCustomAction(java.lang.String, android.os.Bundle);
     method public void setRating(android.media.Rating);
-    method public void skipToItem(long);
     method public void skipToNext();
     method public void skipToPrevious();
+    method public void skipToQueueItem(long);
     method public void stop();
   }
 
@@ -16714,7 +16689,7 @@ package android.media.session {
     method public void setPlaybackState(android.media.session.PlaybackState);
     method public void setPlaybackToLocal(android.media.AudioAttributes);
     method public void setPlaybackToRemote(android.media.VolumeProvider);
-    method public void setQueue(java.util.List<android.media.session.MediaSession.Item>);
+    method public void setQueue(java.util.List<android.media.session.MediaSession.QueueItem>);
     method public void setQueueTitle(java.lang.CharSequence);
     method public void setSessionActivity(android.app.PendingIntent);
     field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
@@ -16729,32 +16704,25 @@ package android.media.session {
     method public boolean onMediaButtonEvent(android.content.Intent);
     method public void onPause();
     method public void onPlay();
+    method public void onPlayFromMediaId(java.lang.String, android.os.Bundle);
     method public void onPlayFromSearch(java.lang.String, android.os.Bundle);
-    method public void onPlayUri(android.net.Uri, android.os.Bundle);
     method public void onRewind();
     method public void onSeekTo(long);
     method public void onSetRating(android.media.Rating);
-    method public void onSkipToItem(long);
     method public void onSkipToNext();
     method public void onSkipToPrevious();
+    method public void onSkipToQueueItem(long);
     method public void onStop();
   }
 
-  public static final class MediaSession.Item implements android.os.Parcelable {
+  public static final class MediaSession.QueueItem implements android.os.Parcelable {
+    ctor public MediaSession.QueueItem(android.media.MediaDescription, long);
     method public int describeContents();
-    method public android.os.Bundle getExtras();
-    method public long getId();
-    method public android.media.MediaMetadata getMetadata();
-    method public android.net.Uri getUri();
+    method public android.media.MediaDescription getDescription();
+    method public long getQueueId();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int UNKNOWN_ID = -1; // 0xffffffff
-  }
-
-  public static final class MediaSession.Item.Builder {
-    ctor public MediaSession.Item.Builder(android.media.MediaMetadata, long, android.net.Uri);
-    method public android.media.session.MediaSession.Item build();
-    method public android.media.session.MediaSession.Item.Builder setExtras(android.os.Bundle);
   }
 
   public static final class MediaSession.Token implements android.os.Parcelable {
@@ -16777,6 +16745,7 @@ package android.media.session {
   public final class PlaybackState implements android.os.Parcelable {
     method public int describeContents();
     method public long getActions();
+    method public long getActiveQueueItemId();
     method public long getBufferedPosition();
     method public java.util.List<android.media.session.PlaybackState.CustomAction> getCustomActions();
     method public java.lang.CharSequence getErrorMessage();
@@ -16788,15 +16757,15 @@ package android.media.session {
     field public static final long ACTION_FAST_FORWARD = 64L; // 0x40L
     field public static final long ACTION_PAUSE = 2L; // 0x2L
     field public static final long ACTION_PLAY = 4L; // 0x4L
+    field public static final long ACTION_PLAY_FROM_MEDIA_ID = 1024L; // 0x400L
     field public static final long ACTION_PLAY_FROM_SEARCH = 2048L; // 0x800L
     field public static final long ACTION_PLAY_PAUSE = 512L; // 0x200L
-    field public static final long ACTION_PLAY_URI = 1024L; // 0x400L
     field public static final long ACTION_REWIND = 8L; // 0x8L
     field public static final long ACTION_SEEK_TO = 256L; // 0x100L
     field public static final long ACTION_SET_RATING = 128L; // 0x80L
-    field public static final long ACTION_SKIP_TO_ITEM = 4096L; // 0x1000L
     field public static final long ACTION_SKIP_TO_NEXT = 32L; // 0x20L
     field public static final long ACTION_SKIP_TO_PREVIOUS = 16L; // 0x10L
+    field public static final long ACTION_SKIP_TO_QUEUE_ITEM = 4096L; // 0x1000L
     field public static final long ACTION_STOP = 1L; // 0x1L
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final long PLAYBACK_POSITION_UNKNOWN = -1L; // 0xffffffffffffffffL
@@ -16810,6 +16779,7 @@ package android.media.session {
     field public static final int STATE_REWINDING = 5; // 0x5
     field public static final int STATE_SKIPPING_TO_NEXT = 10; // 0xa
     field public static final int STATE_SKIPPING_TO_PREVIOUS = 9; // 0x9
+    field public static final int STATE_SKIPPING_TO_QUEUE_ITEM = 11; // 0xb
     field public static final int STATE_STOPPED = 1; // 0x1
   }
 
@@ -16820,7 +16790,7 @@ package android.media.session {
     method public android.media.session.PlaybackState.Builder addCustomAction(android.media.session.PlaybackState.CustomAction);
     method public android.media.session.PlaybackState build();
     method public android.media.session.PlaybackState.Builder setActions(long);
-    method public android.media.session.PlaybackState.Builder setActiveItem(long);
+    method public android.media.session.PlaybackState.Builder setActiveQueueItemId(long);
     method public android.media.session.PlaybackState.Builder setBufferedPosition(long);
     method public android.media.session.PlaybackState.Builder setErrorMessage(java.lang.CharSequence);
     method public android.media.session.PlaybackState.Builder setState(int, long, float, long);
@@ -27333,6 +27303,33 @@ package android.service.dreams {
     method public final void wakeUp();
     field public static final java.lang.String DREAM_META_DATA = "android.service.dream";
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.dreams.DreamService";
+  }
+
+}
+
+package android.service.media {
+
+  public abstract class MediaBrowserService extends android.app.Service {
+    ctor public MediaBrowserService();
+    method public void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
+    method public android.media.session.MediaSession.Token getSessionToken();
+    method public void notifyChildrenChanged(android.net.Uri);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract android.service.media.MediaBrowserService.BrowserRoot onGetRoot(java.lang.String, int, android.os.Bundle);
+    method public abstract void onLoadChildren(android.net.Uri, android.service.media.MediaBrowserService.Result<java.util.List<android.media.browse.MediaBrowser.MediaItem>>);
+    method public void setSessionToken(android.media.session.MediaSession.Token);
+    field public static final java.lang.String SERVICE_ACTION = "android.media.browse.MediaBrowserService";
+  }
+
+  public static final class MediaBrowserService.BrowserRoot {
+    ctor public MediaBrowserService.BrowserRoot(android.net.Uri, android.os.Bundle);
+    method public android.os.Bundle getExtras();
+    method public android.net.Uri getRootUri();
+  }
+
+  public class MediaBrowserService.Result {
+    method public void detach();
+    method public void sendResult(T);
   }
 
 }
