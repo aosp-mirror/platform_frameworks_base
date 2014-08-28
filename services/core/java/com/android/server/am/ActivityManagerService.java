@@ -8952,6 +8952,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         return false;
     }
 
+    private void checkTime(long startTime, String where) {
+        long now = SystemClock.elapsedRealtime();
+        if ((now-startTime) > 1000) {
+            // If we are taking more than a second, log about it.
+            Slog.w(TAG, "Slow operation: " + (now-startTime) + "ms so far, now at " + where);
+        }
+    }
+
     private final ContentProviderHolder getContentProviderImpl(IApplicationThread caller,
             String name, IBinder token, boolean stable, int userId) {
         ContentProviderRecord cpr;
@@ -8959,6 +8967,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         ProviderInfo cpi = null;
 
         synchronized(this) {
+            long startTime = SystemClock.elapsedRealtime();
+
             ProcessRecord r = null;
             if (caller != null) {
                 r = getRecordForAppLocked(caller);
@@ -8971,6 +8981,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             boolean checkCrossUser = true;
+
+            checkTime(startTime, "getContentProviderImpl: getProviderByName");
 
             // First check if this content provider has been published...
             cpr = mProviderMap.getProviderByName(name, userId);
@@ -8996,10 +9008,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (providerRunning) {
                 cpi = cpr.info;
                 String msg;
+                checkTime(startTime, "getContentProviderImpl: before checkContentProviderPermission");
                 if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, checkCrossUser))
                         != null) {
                     throw new SecurityException(msg);
                 }
+                checkTime(startTime, "getContentProviderImpl: after checkContentProviderPermission");
 
                 if (r != null && cpr.canRunHere(r)) {
                     // This provider has been published or is in the process
@@ -9015,6 +9029,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 final long origId = Binder.clearCallingIdentity();
 
+                checkTime(startTime, "getContentProviderImpl: incProviderCountLocked");
+
                 // In this case the provider instance already exists, so we can
                 // return it right away.
                 conn = incProviderCountLocked(r, cpr, token, stable);
@@ -9024,7 +9040,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // make sure to count it as being accessed and thus
                         // back up on the LRU list.  This is good because
                         // content providers are often expensive to start.
+                        checkTime(startTime, "getContentProviderImpl: before updateLruProcess");
                         updateLruProcessLocked(cpr.proc, false, null);
+                        checkTime(startTime, "getContentProviderImpl: after updateLruProcess");
                     }
                 }
 
@@ -9037,7 +9055,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                             Process.killProcess(cpr.proc.pid);
                         }
                     }
+                    checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
                     boolean success = updateOomAdjLocked(cpr.proc);
+                    checkTime(startTime, "getContentProviderImpl: after updateOomAdj");
                     if (DEBUG_PROVIDER) Slog.i(TAG, "Adjust success: " + success);
                     // NOTE: there is still a race here where a signal could be
                     // pending on the process even though we managed to update its
@@ -9052,7 +9072,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 "Existing provider " + cpr.name.flattenToShortString()
                                 + " is crashing; detaching " + r);
                         boolean lastRef = decProviderCountLocked(conn, cpr, token, stable);
+                        checkTime(startTime, "getContentProviderImpl: before appDied");
                         appDiedLocked(cpr.proc);
+                        checkTime(startTime, "getContentProviderImpl: after appDied");
                         if (!lastRef) {
                             // This wasn't the last ref our process had on
                             // the provider...  we have now been killed, bail.
