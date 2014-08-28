@@ -350,6 +350,15 @@ public class CallLog {
         public static final String PHONE_ACCOUNT_ID = "subscription_id";
 
         /**
+         * The identifier of a account that is unique to a specified component. Equivalent value
+         * to {@link #PHONE_ACCOUNT_ID}. For ContactsProvider internal use only.
+         * <P>Type: INTEGER</P>
+         *
+         * @hide
+         */
+        public static final String SUB_ID = "sub_id";
+
+        /**
          * If a successful call is made that is longer than this duration, update the phone number
          * in the ContactsProvider with the normalized version of the number, based on the user's
          * current country code.
