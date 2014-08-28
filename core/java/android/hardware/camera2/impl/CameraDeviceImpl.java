@@ -721,6 +721,13 @@ public class CameraDeviceImpl extends CameraDevice {
             checkIfCameraClosedOrInError();
 
             mDeviceHandler.post(mCallOnBusy);
+
+            // If already idle, just do a busy->idle transition immediately, don't actually
+            // flush.
+            if (mIdle) {
+                mDeviceHandler.post(mCallOnIdle);
+                return;
+            }
             try {
                 LongParcelable lastFrameNumberRef = new LongParcelable();
                 mRemoteDevice.flush(/*out*/lastFrameNumberRef);
