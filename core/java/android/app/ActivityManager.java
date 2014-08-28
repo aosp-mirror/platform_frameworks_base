@@ -52,6 +52,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Size;
 import android.util.Slog;
 
 import java.io.FileDescriptor;
@@ -1026,24 +1027,13 @@ public class ActivityManager {
     }
 
     /**
-     * Return the current design width for {@link AppTask} thumbnails, for use
+     * Return the current design dimensions for {@link AppTask} thumbnails, for use
      * with {@link #addAppTask}.
      */
-    public int getAppTaskThumbnailWidth() {
+    public Size getAppTaskThumbnailSize() {
         synchronized (this) {
             ensureAppTaskThumbnailSizeLocked();
-            return mAppTaskThumbnailSize.x;
-        }
-    }
-
-    /**
-     * Return the current design height for {@link AppTask} thumbnails, for use
-     * with {@link #addAppTask}.
-     */
-    public int getAppTaskThumbnailHeight() {
-        synchronized (this) {
-            ensureAppTaskThumbnailSizeLocked();
-            return mAppTaskThumbnailSize.y;
+            return new Size(mAppTaskThumbnailSize.x, mAppTaskThumbnailSize.y);
         }
     }
 
@@ -1072,9 +1062,9 @@ public class ActivityManager {
      * set on it.
      * @param description Optional additional description information.
      * @param thumbnail Thumbnail to use for the recents entry.  Should be the size given by
-     * {@link #getAppTaskThumbnailWidth()} and {@link #getAppTaskThumbnailHeight()}.  If the
-     * bitmap is not that exact size, it will be recreated in your process, probably in a way
-     * you don't like, before the recents entry is added.
+     * {@link #getAppTaskThumbnailSize()}.  If the bitmap is not that exact size, it will be
+     * recreated in your process, probably in a way you don't like, before the recents entry
+     * is added.
      *
      * @return Returns the task id of the newly added app task, or -1 if the add failed.  The
      * most likely cause of failure is that there is no more room for more tasks for your app.
