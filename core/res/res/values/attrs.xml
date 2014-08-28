@@ -7348,14 +7348,15 @@
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. -->
         <attr name="settingsActivity" />
-        <!-- Reference to an XML document that describes TV content rating. -->
-        <attr name="tvContentRatingDescription" format="reference" />
     </declare-styleable>
 
+    <!-- @removed -->
+    <attr name="__removed1" format="reference" />
+
     <!-- Attributes that can be used with <code>rating-system-definition</code> tags inside of the
-         XML resource that describes TV content rating of a
-         {@link android.media.tv.TvInputService}, which is referenced from
-         {@link android.R.attr#tvContentRatingDescription}. -->
+         XML resource that describes TV content rating of a {@link android.media.tv.TvInputService},
+         which is referenced from its
+         {@link android.media.tv.TvInputManager#META_DATA_CONTENT_RATING_SYSTEMS}. -->
     <declare-styleable name="RatingSystemDefinition">
         <!-- The unique name of the content rating system. -->
         <attr name="name" />
@@ -7369,7 +7370,8 @@
 
     <!-- Attributes that can be used with <code>rating-definition</code> tags inside of the XML
          resource that describes TV content rating of a {@link android.media.tv.TvInputService},
-         which is referenced from {@link android.R.attr#tvContentRatingDescription}. -->
+         which is referenced from its
+         {@link android.media.tv.TvInputManager#META_DATA_CONTENT_RATING_SYSTEMS}. -->
     <declare-styleable name="RatingDefinition">
         <!-- The unique name of the content rating. -->
         <attr name="name" />

@@ -1,3 +1,11 @@
+package android {
+
+  public static final class R.attr {
+    field public static final int __removed1 = 16843955; // 0x10104b3
+  }
+
+}
+
 package android.app {
 
   public class KeyguardManager {
@@ -36,6 +44,14 @@ package android.view {
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     field public static final int TYPE_KEYGUARD = 2004; // 0x7d4
+  }
+
+}
+
+package com.android.internal {
+
+  public static final class R.attr {
+    field public static final int __removed1 = 16843955; // 0x10104b3
   }
 
 }
