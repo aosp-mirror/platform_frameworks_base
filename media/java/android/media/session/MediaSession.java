@@ -180,18 +180,26 @@ public final class MediaSession {
      * @param handler The handler that events should be posted on.
      */
     public void setCallback(@Nullable Callback callback, @Nullable Handler handler) {
-        if (callback == null) {
-            mCallback = null;
-            return;
-        }
         synchronized (mLock) {
-            if (mCallback != null && mCallback.mCallback == callback) {
-                Log.w(TAG, "Tried to set same callback, ignoring");
+            if (callback == null) {
+                if (mCallback != null) {
+                    mCallback.mCallback.mSession = null;
+                }
+                mCallback = null;
                 return;
+            }
+            if (mCallback != null) {
+                if (mCallback.mCallback == callback) {
+                    Log.w(TAG, "Tried to set same callback, ignoring");
+                    return;
+                }
+                // We're changing callbacks, clear the session from the old one.
+                mCallback.mCallback.mSession = null;
             }
             if (handler == null) {
                 handler = new Handler();
             }
+            callback.mSession = this;
             CallbackMessageHandler msgHandler = new CallbackMessageHandler(handler.getLooper(),
                     callback);
             mCallback = msgHandler;
@@ -823,10 +831,6 @@ public final class MediaSession {
          * @param extras Optional extras specified by the {@link MediaController}.
          */
         public void onCustomAction(@NonNull String action, @Nullable Bundle extras) {
-        }
-
-        private void setSession(MediaSession session) {
-            mSession = session;
         }
     }
 
