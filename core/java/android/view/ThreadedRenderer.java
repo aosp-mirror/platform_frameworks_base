@@ -277,7 +277,11 @@ public class ThreadedRenderer extends HardwareRenderer {
                 final int saveCount = canvas.save();
                 canvas.translate(mInsetLeft, mInsetTop);
                 callbacks.onHardwarePreDraw(canvas);
+
+                canvas.insertReorderBarrier();
                 canvas.drawRenderNode(view.getDisplayList());
+                canvas.insertInorderBarrier();
+
                 callbacks.onHardwarePostDraw(canvas);
                 canvas.restoreToCount(saveCount);
                 mRootNodeNeedsUpdate = false;
