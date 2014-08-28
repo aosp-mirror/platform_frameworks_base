@@ -72,6 +72,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     static RecentsComponent.Callbacks sRecentsComponentCallbacks;
 
     Context mContext;
+    LayoutInflater mInflater;
     SystemServicesProxy mSystemServicesProxy;
     Handler mHandler;
     boolean mBootCompleted;
@@ -98,32 +99,20 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
     public AlternateRecentsComponent(Context context) {
         RecentsTaskLoader.initialize(context);
-        Resources res = context.getResources();
+        mInflater = LayoutInflater.from(context);
         mContext = context;
         mSystemServicesProxy = new SystemServicesProxy(context);
         mHandler = new Handler();
-        mConfig = RecentsConfiguration.reinitialize(context, mSystemServicesProxy);
-        mWindowRect = mSystemServicesProxy.getWindowRect();
         mTaskStackBounds = new Rect();
-        mStatusBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-        mNavBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
-        mNavBarWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
-        mConfig.getTaskStackBounds(mWindowRect.width(), mWindowRect.height(), mStatusBarHeight,
-                mNavBarWidth, mTaskStackBounds);
-        if (mConfig.isLandscape && mConfig.transposeRecentsLayoutWithOrientation) {
-            mSystemInsets.set(0, mStatusBarHeight, mNavBarWidth, 0);
-        } else {
-            mSystemInsets.set(0, mStatusBarHeight, 0, mNavBarHeight);
-        }
     }
 
-    public void onStart() {
-        // Initialize some static datastructures
-        TaskStackViewLayoutAlgorithm.initializeCurve();
-        reloadHeaderBarLayout();
-    }
+    public void onStart() {}
 
     public void onBootCompleted() {
+        // Initialize some static datastructures
+        TaskStackViewLayoutAlgorithm.initializeCurve();
+        // Load the header bar layout
+        reloadHeaderBarLayout();
         mBootCompleted = true;
     }
 
@@ -235,9 +224,19 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
+        reloadHeaderBarLayout();
+        sLastScreenshot = null;
+    }
+
+    /** Prepares the header bar layout. */
+    void reloadHeaderBarLayout() {
+        Resources res = mContext.getResources();
+        mWindowRect = mSystemServicesProxy.getWindowRect();
+        mStatusBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+        mNavBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
+        mNavBarWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
         mConfig = RecentsConfiguration.reinitialize(mContext, mSystemServicesProxy);
         mConfig.updateOnConfigurationChange();
-        mWindowRect = mSystemServicesProxy.getWindowRect();
         mConfig.getTaskStackBounds(mWindowRect.width(), mWindowRect.height(), mStatusBarHeight,
                 mNavBarWidth, mTaskStackBounds);
         if (mConfig.isLandscape && mConfig.transposeRecentsLayoutWithOrientation) {
@@ -245,14 +244,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         } else {
             mSystemInsets.set(0, mStatusBarHeight, 0, mNavBarHeight);
         }
-        sLastScreenshot = null;
-        reloadHeaderBarLayout();
-    }
 
-    /** Prepares the header bar layout. */
-    void reloadHeaderBarLayout() {
         // Inflate the header bar layout so that we can rebind and draw it for the transition
-        Resources res = mContext.getResources();
         TaskStack stack = new TaskStack();
         mDummyStackView = new TaskStackView(mContext, stack);
         TaskStackViewLayoutAlgorithm algo = mDummyStackView.getStackAlgorithm();
@@ -261,8 +254,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         algo.computeRects(mWindowRect.width(), mWindowRect.height(), taskStackBounds);
         Rect taskViewSize = algo.getUntransformedTaskViewSize();
         int taskBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_bar_height);
-        LayoutInflater inflater = LayoutInflater.from(mContext);
-        mHeaderBar = (TaskViewHeader) inflater.inflate(R.layout.recents_task_view_header, null,
+        mHeaderBar = (TaskViewHeader) mInflater.inflate(R.layout.recents_task_view_header, null,
                 false);
         mHeaderBar.measure(
                 View.MeasureSpec.makeMeasureSpec(taskViewSize.width(), View.MeasureSpec.EXACTLY),
@@ -419,10 +411,6 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             return null;
         }
 
-        // Get the stack
-        mDummyStackView.updateMinMaxScrollForStack(stack, mTriggeredFromAltTab, isTopTaskHome);
-        mDummyStackView.getScroller().setStackScrollToInitialState();
-
         // Find the running task in the TaskStack
         Task task = null;
         ArrayList<Task> tasks = stack.getTasks();
@@ -444,6 +432,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         }
 
         // Get the transform for the running task
+        mDummyStackView.updateMinMaxScrollForStack(stack, mTriggeredFromAltTab, isTopTaskHome);
+        mDummyStackView.getScroller().setStackScrollToInitialState();
         mTmpTransform = mDummyStackView.getStackAlgorithm().getStackTransform(task,
                 mDummyStackView.getScroller().getStackScroll(), mTmpTransform, null);
         return mTmpTransform;

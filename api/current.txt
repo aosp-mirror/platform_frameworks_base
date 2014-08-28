@@ -3607,8 +3607,7 @@ package android.app {
     method public int addAppTask(android.app.Activity, android.content.Intent, android.app.ActivityManager.TaskDescription, android.graphics.Bitmap);
     method public boolean clearApplicationUserData();
     method public void dumpPackageState(java.io.FileDescriptor, java.lang.String);
-    method public int getAppTaskThumbnailHeight();
-    method public int getAppTaskThumbnailWidth();
+    method public android.util.Size getAppTaskThumbnailSize();
     method public java.util.List<android.app.ActivityManager.AppTask> getAppTasks();
     method public android.content.pm.ConfigurationInfo getDeviceConfigurationInfo();
     method public int getLargeMemoryClass();

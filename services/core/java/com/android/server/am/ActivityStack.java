@@ -229,9 +229,6 @@ final class ActivityStack {
     private ActivityRecord mLastScreenshotActivity = null;
     private Bitmap mLastScreenshotBitmap = null;
 
-    int mThumbnailWidth = -1;
-    int mThumbnailHeight = -1;
-
     int mCurrentUser;
 
     final int mStackId;
@@ -355,10 +352,6 @@ final class ActivityStack {
         mWindowManager = mService.mWindowManager;
         mStackId = activityContainer.mStackId;
         mCurrentUser = mService.mCurrentUserId;
-        // Get the activity screenshot thumbnail dimensions
-        Resources res = mService.mContext.getResources();
-        mThumbnailWidth = mService.mThumbnailWidth;
-        mThumbnailHeight = mService.mThumbnailHeight;
     }
 
     /**
@@ -773,8 +766,8 @@ final class ActivityStack {
             return null;
         }
 
-        int w = mThumbnailWidth;
-        int h = mThumbnailHeight;
+        int w = mService.mThumbnailWidth;
+        int h = mService.mThumbnailHeight;
         if (w > 0) {
             if (who != mLastScreenshotActivity || mLastScreenshotBitmap == null
                     || mLastScreenshotActivity.state == ActivityState.RESUMED
