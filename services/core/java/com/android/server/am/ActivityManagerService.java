@@ -1198,11 +1198,12 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     private boolean mUserIsMonkey;
 
-    /** Flag whether the device has a recents UI */
-    final boolean mHasRecents;
+    /** Flag whether the device has a Recents UI */
+    boolean mHasRecents;
 
-    final int mThumbnailWidth;
-    final int mThumbnailHeight;
+    /** The dimensions of the thumbnails in the Recents UI. */
+    int mThumbnailWidth;
+    int mThumbnailHeight;
 
     final ServiceThread mHandlerThread;
     final MainHandler mHandler;
@@ -2256,11 +2257,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         mConfigurationSeq = mConfiguration.seq = 1;
         mProcessCpuTracker.init();
-
-        final Resources res = mContext.getResources();
-        mHasRecents = res.getBoolean(com.android.internal.R.bool.config_hasRecents);
-        mThumbnailWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_width);
-        mThumbnailHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_height);
 
         mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
@@ -10680,6 +10676,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    /** Loads resources after the current configuration has been set. */
+    private void loadResourcesOnSystemReady() {
+        final Resources res = mContext.getResources();
+        mHasRecents = res.getBoolean(com.android.internal.R.bool.config_hasRecents);
+        mThumbnailWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_width);
+        mThumbnailHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_height);
+    }
+
     public boolean testIsSystemReady() {
         // no need to synchronize(this) just to read & return the value
         return mSystemReady;
@@ -10961,6 +10965,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         retrieveSettings();
+        loadResourcesOnSystemReady();
 
         synchronized (this) {
             readGrantedUriPermissionsLocked();

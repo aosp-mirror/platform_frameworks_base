@@ -58,6 +58,9 @@
     <!-- Size of fading edge for scrolling -->
     <dimen name="status_bar_recents_scroll_fading_edge_length">10dip</dimen>
 
+    <!-- The radius of the rounded corners on a task view. -->
+    <dimen name="recents_task_view_rounded_corners_radius">3dp</dimen>
+
     <!-- Where to place the app icon over the thumbnail -->
     <dimen name="status_bar_recents_app_icon_left_margin">0dp</dimen>
     <dimen name="status_bar_recents_app_icon_top_margin">8dp</dimen>
