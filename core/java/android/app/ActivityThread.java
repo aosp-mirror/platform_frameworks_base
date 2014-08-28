@@ -2485,11 +2485,11 @@ public final class ActivityThread {
             final Activity activity = r.activity;
             if (activity.mVisibleBehind) {
                 activity.mCalled = false;
-                activity.onVisibleBehindCancelled();
+                activity.onVisibleBehindCanceled();
                 // Tick, tick, tick. The activity has 500 msec to return or it will be destroyed.
                 if (!activity.mCalled) {
                     throw new SuperNotCalledException("Activity " + activity.getLocalClassName() +
-                            " did not call through to super.onVisibleBehindCancelled()");
+                            " did not call through to super.onVisibleBehindCanceled()");
                 }
                 activity.mVisibleBehind = false;
             }
