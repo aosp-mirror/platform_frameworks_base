@@ -20,7 +20,6 @@ import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.util.ArrayMap;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +82,7 @@ public final class Phone {
 
     // A List allows us to keep the Calls in a stable iteration order so that casually developed
     // user interface components do not incur any spurious jank
-    private final List<Call> mCalls = new ArrayList<>();
+    private final List<Call> mCalls = new CopyOnWriteArrayList<>();
 
     // An unmodifiable view of the above List can be safely shared with subclass implementations
     private final List<Call> mUnmodifiableCalls = Collections.unmodifiableList(mCalls);
@@ -156,6 +155,18 @@ public final class Phone {
         Call call = mCallByTelecommCallId.get(telecommId);
         if (call != null) {
             call.internalStartActivity(intent);
+        }
+    }
+
+    /**
+     * Called to destroy the phone and cleanup any lingering calls.
+     * @hide
+     */
+    final void destroy() {
+        for (Call call : mCalls) {
+            if (call.getState() != Call.STATE_DISCONNECTED) {
+                call.internalSetDisconnected();
+            }
         }
     }
 
