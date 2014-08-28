@@ -19,7 +19,6 @@ package android.telecomm;
 /**
  * Defines capabilities a phone call can support, such as conference calling and video telephony.
  * Also defines properties of a phone call, such as whether it is using VoLTE technology.
-
  */
 public final class PhoneCapabilities {
     /** Call can currently be put on hold or unheld. */

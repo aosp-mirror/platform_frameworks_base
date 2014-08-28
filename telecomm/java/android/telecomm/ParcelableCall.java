@@ -40,6 +40,7 @@ public final class ParcelableCall implements Parcelable {
     private final String mDisconnectCauseMsg;
     private final List<String> mCannedSmsResponses;
     private final int mCapabilities;
+    private final int mProperties;
     private final long mConnectTimeMillis;
     private final Uri mHandle;
     private final int mHandlePresentation;
@@ -63,6 +64,7 @@ public final class ParcelableCall implements Parcelable {
             String disconnectCauseMsg,
             List<String> cannedSmsResponses,
             int capabilities,
+            int properties,
             long connectTimeMillis,
             Uri handle,
             int handlePresentation,
@@ -83,6 +85,7 @@ public final class ParcelableCall implements Parcelable {
         mDisconnectCauseMsg = disconnectCauseMsg;
         mCannedSmsResponses = cannedSmsResponses;
         mCapabilities = capabilities;
+        mProperties = properties;
         mConnectTimeMillis = connectTimeMillis;
         mHandle = handle;
         mHandlePresentation = handlePresentation;
@@ -136,6 +139,9 @@ public final class ParcelableCall implements Parcelable {
     public int getCapabilities() {
         return mCapabilities;
     }
+
+    /** Bitmask of properties of the call. */
+    public int getProperties() { return mProperties; }
 
     /** The time that the call switched to the active state. */
     public long getConnectTimeMillis() {
@@ -246,6 +252,7 @@ public final class ParcelableCall implements Parcelable {
             List<String> cannedSmsResponses = new ArrayList<>();
             source.readList(cannedSmsResponses, classLoader);
             int capabilities = source.readInt();
+            int properties = source.readInt();
             long connectTimeMillis = source.readLong();
             Uri handle = source.readParcelable(classLoader);
             int handlePresentation = source.readInt();
@@ -264,10 +271,10 @@ public final class ParcelableCall implements Parcelable {
             source.readList(conferenceableCallIds, classLoader);
             Bundle extras = source.readParcelable(classLoader);
             return new ParcelableCall(id, state, disconnectCauseCode, disconnectCauseMsg,
-                    cannedSmsResponses, capabilities, connectTimeMillis, handle, handlePresentation,
-                    callerDisplayName, callerDisplayNamePresentation, gatewayInfo,
-                    accountHandle, videoCallProvider, parentCallId, childCallIds, statusHints,
-                    videoState, conferenceableCallIds, extras);
+                    cannedSmsResponses, capabilities, properties, connectTimeMillis, handle,
+                    handlePresentation, callerDisplayName, callerDisplayNamePresentation,
+                    gatewayInfo, accountHandle, videoCallProvider, parentCallId, childCallIds,
+                    statusHints, videoState, conferenceableCallIds, extras);
         }
 
         @Override
@@ -291,6 +298,7 @@ public final class ParcelableCall implements Parcelable {
         destination.writeString(mDisconnectCauseMsg);
         destination.writeList(mCannedSmsResponses);
         destination.writeInt(mCapabilities);
+        destination.writeInt(mProperties);
         destination.writeLong(mConnectTimeMillis);
         destination.writeParcelable(mHandle, 0);
         destination.writeInt(mHandlePresentation);
