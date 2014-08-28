@@ -430,6 +430,10 @@ public class ViewPropertyAnimator {
             }
         }
         mPendingAnimations.clear();
+        mPendingSetupAction = null;
+        mPendingCleanupAction = null;
+        mPendingOnStartAction = null;
+        mPendingOnEndAction = null;
         mView.removeCallbacks(mAnimationStarter);
         if (mRTBackend != null) {
             mRTBackend.cancelAll();
