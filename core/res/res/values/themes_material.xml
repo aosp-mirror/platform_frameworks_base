@@ -1257,4 +1257,6 @@ please see themes_device_defaults.xml.
         <item name="colorAccent">@color/material_deep_teal_500</item>
     </style>
 
+    <!-- TODO: Spacer to be removed from here and public.xml -->
+    <style name="__removed" />
 </resources>

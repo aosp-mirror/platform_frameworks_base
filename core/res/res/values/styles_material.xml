@@ -410,37 +410,35 @@ please see styles_device_defaults.xml.
         <item name="textSize">@dimen/datepicker_year_label_text_size</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.Material" />
-
-    <style name="TextAppearance.StatusBar.Material.EventContent">
+    <style name="TextAppearance.Material.Notification">
         <item name="textColor">@color/secondary_text_material_light</item>
         <item name="textSize">@dimen/notification_text_size</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.Material.EventContent.Title">
+    <style name="TextAppearance.Material.Notification.Title">
         <item name="textColor">@color/primary_text_default_material_light</item>
         <item name="textSize">@dimen/notification_title_text_size</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.Material.EventContent.Line2">
+    <style name="TextAppearance.Material.Notification.Line2">
         <item name="textSize">@dimen/notification_subtext_size</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.Material.EventContent.Info">
+    <style name="TextAppearance.Material.Notification.Info">
         <item name="textSize">@dimen/notification_subtext_size</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.Material.EventContent.Time">
+    <style name="TextAppearance.Material.Notification.Time">
         <item name="textSize">@dimen/notification_subtext_size</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.Material.EventContent.Emphasis">
+    <style name="TextAppearance.Material.Notification.Emphasis">
         <item name="textColor">#66000000</item>
     </style>
 
-    <style name="Widget.StatusBar.Material.ProgressBar" parent="Widget.Material.Light.ProgressBar.Horizontal" />
+    <style name="Widget.Material.Notification.ProgressBar" parent="Widget.Material.Light.ProgressBar.Horizontal" />
 
-    <style name="Widget.StatusBar.Material.ProgressBar.Media">
+    <style name="Widget.Material.Notification.ProgressBar.Media">
         <item name="progressDrawable">@drawable/notification_material_media_progress</item>
     </style>
 
