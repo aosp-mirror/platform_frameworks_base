@@ -1,9 +1,9 @@
 // Copyright 2014 Google Inc. All Rights Reserved.
 
-package android.media.browse;
+package android.service.media;
 
 import android.content.res.Configuration;
-import android.media.browse.IMediaBrowserServiceCallbacks;
+import android.service.media.IMediaBrowserServiceCallbacks;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -18,6 +18,4 @@ oneway interface IMediaBrowserService {
 
     void addSubscription(in Uri uri, IMediaBrowserServiceCallbacks callbacks);
     void removeSubscription(in Uri uri, IMediaBrowserServiceCallbacks callbacks);
-    void loadIcon(in int seqNum, in Uri uri, int width, int height,
-            IMediaBrowserServiceCallbacks callbacks);
 }

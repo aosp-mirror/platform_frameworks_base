@@ -13,7 +13,6 @@
 ** limitations under the License.
 */
 
-package android.media.session;
+package android.media;
 
-parcelable MediaSession.Token;
-parcelable MediaSession.QueueItem;
+parcelable MediaDescription;

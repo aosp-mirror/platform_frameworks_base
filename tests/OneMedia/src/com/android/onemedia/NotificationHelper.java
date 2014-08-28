@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -185,10 +186,10 @@ public class NotificationHelper extends BroadcastReceiver {
             text = "Empty metadata!";
             art = null;
         } else {
-            MediaMetadata.Description description = mMetadata.getDescription();
+            MediaDescription description = mMetadata.getDescription();
             title = description.getTitle();
             text = description.getSubtitle();
-            art = description.getIcon();
+            art = description.getIconBitmap();
         }
 
         String playPauseLabel = "";

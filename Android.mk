@@ -325,8 +325,6 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IRemoteVolumeObserver.aidl \
 	media/java/android/media/IRingtonePlayer.aidl \
 	media/java/android/media/IVolumeController.aidl \
-	media/java/android/media/browse/IMediaBrowserService.aidl \
-	media/java/android/media/browse/IMediaBrowserServiceCallbacks.aidl \
 	media/java/android/media/projection/IMediaProjection.aidl \
 	media/java/android/media/projection/IMediaProjectionCallback.aidl \
 	media/java/android/media/projection/IMediaProjectionManager.aidl \
@@ -346,6 +344,8 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/tv/ITvInputServiceCallback.aidl \
 	media/java/android/media/tv/ITvInputSession.aidl \
 	media/java/android/media/tv/ITvInputSessionCallback.aidl \
+	media/java/android/service/media/IMediaBrowserService.aidl \
+	media/java/android/service/media/IMediaBrowserServiceCallbacks.aidl \
 	telecomm/java/com/android/internal/telecomm/IVideoCallback.aidl \
 	telecomm/java/com/android/internal/telecomm/IVideoProvider.aidl \
 	telecomm/java/com/android/internal/telecomm/IConnectionService.aidl \
