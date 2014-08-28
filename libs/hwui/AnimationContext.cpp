@@ -37,7 +37,7 @@ AnimationContext::~AnimationContext() {
         AnimatorManager& animators = current->mRenderNode->animators();
         animators.endAllAnimators();
         LOG_ALWAYS_FATAL_IF(mCurrentFrameAnimations.mNextHandle == current,
-                "Animate failed to remove from current frame list!");
+                "endAllAnimators failed to remove from current frame list!");
     }
 }
 
