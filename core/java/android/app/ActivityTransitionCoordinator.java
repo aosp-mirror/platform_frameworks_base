@@ -217,7 +217,10 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     }
 
     protected void viewsReady(ArrayMap<String, View> sharedElements) {
-        setSharedElements(sharedElements);
+        sharedElements.retainAll(mAllSharedElementNames);
+        mListener.remapSharedElements(mAllSharedElementNames, sharedElements);
+        mSharedElementNames.addAll(sharedElements.keySet());
+        mSharedElements.addAll(sharedElements.values());
         if (getViewsTransition() != null) {
             getDecor().captureTransitioningViews(mTransitioningViews);
             mTransitioningViews.removeAll(mSharedElements);
@@ -339,30 +342,14 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     protected ArrayMap<String, View> mapSharedElements(ArrayList<String> accepted,
             ArrayList<View> localViews) {
         ArrayMap<String, View> sharedElements = new ArrayMap<String, View>();
-        if (!mAllSharedElementNames.isEmpty()) {
-            if (accepted != null) {
-                for (int i = 0; i < accepted.size(); i++) {
-                    sharedElements.put(accepted.get(i), localViews.get(i));
-                }
-            } else {
-                getDecor().findNamedViews(sharedElements);
+        if (accepted != null) {
+            for (int i = 0; i < accepted.size(); i++) {
+                sharedElements.put(accepted.get(i), localViews.get(i));
             }
+        } else {
+            getDecor().findNamedViews(sharedElements);
         }
         return sharedElements;
-    }
-
-    private void setSharedElements(ArrayMap<String, View> sharedElements) {
-        sharedElements.retainAll(mAllSharedElementNames);
-        mListener.remapSharedElements(mAllSharedElementNames, sharedElements);
-        sharedElements.retainAll(mAllSharedElementNames);
-        for (int i = 0; i < mAllSharedElementNames.size(); i++) {
-            String name = mAllSharedElementNames.get(i);
-            View sharedElement = sharedElements.get(name);
-            if (sharedElement != null) {
-                mSharedElementNames.add(name);
-                mSharedElements.add(sharedElement);
-            }
-        }
     }
 
     protected void setResultReceiver(ResultReceiver resultReceiver) {
