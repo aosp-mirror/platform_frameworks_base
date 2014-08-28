@@ -45,7 +45,7 @@ public abstract class NetworkAgent extends Handler {
     private volatile AsyncChannel mAsyncChannel;
     private final String LOG_TAG;
     private static final boolean DBG = true;
-    private static final boolean VDBG = true;
+    private static final boolean VDBG = false;
     private final Context mContext;
     private final ArrayList<Message>mPreConnectedQueue = new ArrayList<Message>();
 
@@ -134,7 +134,7 @@ public abstract class NetworkAgent extends Handler {
             throw new IllegalArgumentException();
         }
 
-        if (DBG) log("Registering NetworkAgent");
+        if (VDBG) log("Registering NetworkAgent");
         ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
         cm.registerNetworkAgent(new Messenger(this), new NetworkInfo(ni),
@@ -148,7 +148,7 @@ public abstract class NetworkAgent extends Handler {
                 if (mAsyncChannel != null) {
                     log("Received new connection while already connected!");
                 } else {
-                    if (DBG) log("NetworkAgent fully connected");
+                    if (VDBG) log("NetworkAgent fully connected");
                     AsyncChannel ac = new AsyncChannel();
                     ac.connected(null, this, msg.replyTo);
                     ac.replyToMessage(msg, AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED,
@@ -164,7 +164,7 @@ public abstract class NetworkAgent extends Handler {
                 break;
             }
             case AsyncChannel.CMD_CHANNEL_DISCONNECT: {
-                if (DBG) log("CMD_CHANNEL_DISCONNECT");
+                if (VDBG) log("CMD_CHANNEL_DISCONNECT");
                 if (mAsyncChannel != null) mAsyncChannel.disconnect();
                 break;
             }
