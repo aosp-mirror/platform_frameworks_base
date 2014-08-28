@@ -17,12 +17,14 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +33,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 
 /**
@@ -74,6 +77,20 @@ public class QSDetailItems extends FrameLayout {
         mEmpty.setVisibility(GONE);
         mEmptyText = (TextView) mEmpty.findViewById(android.R.id.title);
         mEmptyIcon = (ImageView) mEmpty.findViewById(android.R.id.icon);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        FontSizeUtils.updateFontSize(mEmptyText, R.dimen.qs_detail_empty_text_size);
+        int count = mItems.getChildCount();
+        for (int i = 0; i < count; i++) {
+            View item = mItems.getChildAt(i);
+            FontSizeUtils.updateFontSize(item, android.R.id.title,
+                    R.dimen.qs_detail_item_primary_text_size);
+            FontSizeUtils.updateFontSize(item, android.R.id.summary,
+                    R.dimen.qs_detail_item_secondary_text_size);
+        }
     }
 
     public void setTagSuffix(String suffix) {
