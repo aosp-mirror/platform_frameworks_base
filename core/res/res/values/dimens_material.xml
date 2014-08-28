@@ -33,7 +33,6 @@
 
     <dimen name="action_button_min_width_material">48dp</dimen>
     <dimen name="action_button_min_height_material">48dp</dimen>
-    <dimen name="action_overflow_min_width_material">36dp</dimen>
 
     <dimen name="text_size_display_4_material">112sp</dimen>
     <dimen name="text_size_display_3_material">56sp</dimen>
@@ -64,6 +63,13 @@
     <dimen name="button_elevation_material">1dp</dimen>
     <!-- Z translation to apply when button is pressed -->
     <dimen name="button_pressed_z_material">2dp</dimen>
+    <!-- Default insets (outer padding) around buttons -->
+    <dimen name="button_inset_vertical_material">6dp</dimen>
+    <dimen name="button_inset_horizontal_material">@dimen/control_inset_material</dimen>
+    <!-- Default inner padding within buttons -->
+    <dimen name="button_padding_vertical_material">@dimen/control_padding_material</dimen>
+    <dimen name="button_padding_horizontal_material">8dp</dimen>
+
     <!-- Default insets (outer padding) around controls -->
     <dimen name="control_inset_material">4dp</dimen>
     <!-- Default inner padding within controls -->
