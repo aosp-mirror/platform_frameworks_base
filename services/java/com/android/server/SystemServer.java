@@ -918,7 +918,7 @@ public final class SystemServer {
                 mSystemServiceManager.startService(HdmiControlService.class);
             }
 
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_LIVE_TV)) {
                 mSystemServiceManager.startService(TvInputManagerService.class);
             }
 
