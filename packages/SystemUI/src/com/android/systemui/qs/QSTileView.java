@@ -17,6 +17,7 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
@@ -25,6 +26,7 @@ import android.graphics.drawable.RippleDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.MathUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -33,6 +35,7 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.State;
 
@@ -47,7 +50,7 @@ public class QSTileView extends ViewGroup {
     private final H mHandler = new H();
     private final int mIconSizePx;
     private final int mTileSpacingPx;
-    private final int mTilePaddingTopPx;
+    private int mTilePaddingTopPx;
     private final int mTilePaddingBelowIconPx;
     private final int mDualTileVerticalPaddingPx;
     private final View mTopBackgroundView;
@@ -66,7 +69,6 @@ public class QSTileView extends ViewGroup {
         final Resources res = context.getResources();
         mIconSizePx = res.getDimensionPixelSize(R.dimen.qs_tile_icon_size);
         mTileSpacingPx = res.getDimensionPixelSize(R.dimen.qs_tile_spacing);
-        mTilePaddingTopPx = res.getDimensionPixelSize(R.dimen.qs_tile_padding_top);
         mTilePaddingBelowIconPx =  res.getDimensionPixelSize(R.dimen.qs_tile_padding_below_icon);
         mDualTileVerticalPaddingPx =
                 res.getDimensionPixelSize(R.dimen.qs_dual_tile_padding_vertical);
@@ -86,6 +88,29 @@ public class QSTileView extends ViewGroup {
         addView(mDivider);
 
         setClickable(true);
+
+        updateTopPadding();
+    }
+
+    private void updateTopPadding() {
+        Resources res = getResources();
+        int padding = res.getDimensionPixelSize(R.dimen.qs_tile_padding_top);
+        int largePadding = res.getDimensionPixelSize(R.dimen.qs_tile_padding_top_large_text);
+        float largeFactor = (MathUtils.constrain(getResources().getConfiguration().fontScale,
+                1.0f, FontSizeUtils.LARGE_TEXT_SCALE) - 1f) / (FontSizeUtils.LARGE_TEXT_SCALE - 1f);
+        mTilePaddingTopPx = Math.round((1 - largeFactor) * padding + largeFactor * largePadding);
+        requestLayout();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        updateTopPadding();
+        FontSizeUtils.updateFontSize(mLabel, R.dimen.qs_tile_text_size);
+        if (mDualLabel != null) {
+            mDualLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    getResources().getDimensionPixelSize(R.dimen.qs_tile_text_size));
+        }
     }
 
     private void recreateLabel() {
