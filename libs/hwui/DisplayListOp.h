@@ -1528,8 +1528,7 @@ public:
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         TessellationCache::vertexBuffer_pair_t buffers;
-        Matrix4 drawTransform;
-        renderer.getMatrix(&drawTransform);
+        Matrix4 drawTransform(*(renderer.currentTransform()));
         renderer.getCaches().tessellationCache.getShadowBuffers(&drawTransform,
                 renderer.getLocalClipBounds(), isCasterOpaque(), mCasterOutline,
                 &mTransformXY, &mTransformZ, renderer.getLightCenter(), renderer.getLightRadius(),
