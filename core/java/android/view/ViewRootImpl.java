@@ -333,6 +333,8 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mRemoved;
 
     private boolean mIsEmulator;
+    private boolean mIsCircularEmulator;
+    private final boolean mWindowIsRound;
 
     /**
      * Consistency verifier for debugging purposes.
@@ -388,6 +390,8 @@ public final class ViewRootImpl implements ViewParent,
         mChoreographer = Choreographer.getInstance();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         loadSystemProperties();
+        mWindowIsRound = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_windowIsRound);
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -1183,14 +1187,7 @@ public final class ViewRootImpl implements ViewParent,
     void dispatchApplyInsets(View host) {
         mDispatchContentInsets.set(mAttachInfo.mContentInsets);
         mDispatchStableInsets.set(mAttachInfo.mStableInsets);
-        boolean isRound = false;
-        if ((mWindowAttributes.flags & WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN) != 0
-                && mDisplay.getDisplayId() == 0) {
-            // we're fullscreen and not hosted in an ActivityView
-            isRound = (mIsEmulator && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))
-                    || mContext.getResources().getBoolean(
-                            com.android.internal.R.bool.config_windowIsRound);
-        }
+        final boolean isRound = (mIsEmulator && mIsCircularEmulator) || mWindowIsRound;
         host.dispatchApplyWindowInsets(new WindowInsets(
                 mDispatchContentInsets, null /* windowDecorInsets */,
                 mDispatchStableInsets, isRound));
@@ -5431,6 +5428,8 @@ public final class ViewRootImpl implements ViewParent,
 
                 // detect emulator
                 mIsEmulator = Build.HARDWARE.contains("goldfish");
+                mIsCircularEmulator =
+                        SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false);
             }
         });
     }
