@@ -208,16 +208,9 @@ private:
     inline void issueDrawShadowOperation(const Matrix4& transformFromParent, T& handler);
 
     template <class T>
-    inline int issueOperationsOfNegZChildren(
-            const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
+    inline void issueOperationsOf3dChildren(ChildrenSelectMode mode,
+            const Matrix4& initialTransform, const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
             OpenGLRenderer& renderer, T& handler);
-    template <class T>
-    inline void issueOperationsOfPosZChildren(int shadowRestoreTo,
-            const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
-            OpenGLRenderer& renderer, T& handler);
-    template <class T>
-    inline void issueOperationsOf3dChildren(const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
-            ChildrenSelectMode mode, OpenGLRenderer& renderer, T& handler);
 
     template <class T>
     inline void issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T& handler);
