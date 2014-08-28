@@ -102,10 +102,6 @@ void StatefulBaseRenderer::restoreToCount(int saveCount) {
 // Matrix
 ///////////////////////////////////////////////////////////////////////////////
 
-void StatefulBaseRenderer::getMatrix(Matrix4* matrix) const {
-    matrix->load(*(mSnapshot->transform));
-}
-
 void StatefulBaseRenderer::getMatrix(SkMatrix* matrix) const {
     mSnapshot->transform->copyTo(*matrix);
 }
