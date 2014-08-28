@@ -1688,11 +1688,19 @@ public class AudioManager {
 
     /**
      * Return a new audio session identifier not associated with any player or effect.
-     * It can for instance be used to create one of the {@link android.media.audiofx.AudioEffect}
-     * objects or specify a session for speech synthesis in
-     * {@link android.speech.tts.TextToSpeech.Engine}.
+     * An audio session identifier is a system wide unique identifier for a set of audio streams
+     * (one or more mixed together).
+     * <p>The primary use of the audio session ID is to associate audio effects to audio players,
+     * such as {@link MediaPlayer} or {@link AudioTrack}: all audio effects sharing the same audio
+     * session ID will be applied to the mixed audio content of the players that share the same
+     * audio session.
+     * <p>This method can for instance be used when creating one of the
+     * {@link android.media.audiofx.AudioEffect} objects to define the audio session of the effect,
+     * or to specify a session for a speech synthesis utterance
+     * in {@link android.speech.tts.TextToSpeech.Engine}.
      * @return a new unclaimed and unused audio session identifier, or {@link #ERROR} when the
-     *   system failed to generate a new session.
+     *   system failed to generate a new session, a condition in which audio playback or recording
+     *   will subsequently fail as well.
      */
     public int generateAudioSessionId() {
         int session = AudioSystem.newAudioSessionId();
