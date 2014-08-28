@@ -3327,10 +3327,10 @@ public class DevicePolicyManager {
      * @param packageName package to check.
      * @return true if the user shouldn't be able to uninstall the package.
      */
-    public boolean getUninstallBlocked(ComponentName admin, String packageName) {
+    public boolean isUninstallBlocked(ComponentName admin, String packageName) {
         if (mService != null) {
             try {
-                return mService.getUninstallBlocked(admin, packageName);
+                return mService.isUninstallBlocked(admin, packageName);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to call block uninstall on device policy service");
             }

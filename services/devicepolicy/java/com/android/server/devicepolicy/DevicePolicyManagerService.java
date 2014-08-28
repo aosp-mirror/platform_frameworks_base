@@ -4890,7 +4890,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean getUninstallBlocked(ComponentName who, String packageName) {
+    public boolean isUninstallBlocked(ComponentName who, String packageName) {
         final int userId = UserHandle.getCallingUserId();
 
         synchronized (this) {
