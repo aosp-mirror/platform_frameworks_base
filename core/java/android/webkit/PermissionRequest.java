@@ -19,8 +19,10 @@ package android.webkit;
 import android.net.Uri;
 
 /**
- * This interface defines a permission request and is used when web content
- * requests access to protected resources.
+ * This class defines a permission request and is used when web content
+ * requests access to protected resources. The permission request related events
+ * are delivered via {@link WebChromeClient#onPermissionRequest} and
+ * {@link WebChromeClient#onPermissionRequestCanceled}.
  *
  * Either {@link #grant(String[]) grant()} or {@link #deny()} must be called in UI
  * thread to respond to the request.

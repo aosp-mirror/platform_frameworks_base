@@ -1624,10 +1624,18 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Enable drawing the entire HTML document at a significant performance
-     * cost. Call this to enable drawing and capturing HTML content outside of
-     * the WebView's viewport. This should be called before any WebViews are
-     * created.
+     * For apps targeting the L release, WebView has a new default behavior that reduces
+     * memory footprint and increases performance by intelligently choosing
+     * the portion of the HTML document that needs to be drawn. These
+     * optimizations are transparent to the developers. However, under certain
+     * circumstances, an App developer may want to disable them:
+     * 1. When an app uses {@link #onDraw} to do own drawing and accesses portions
+     * of the page that is way outside the visible portion of the page.
+     * 2. When an app uses {@link #capturePicture} to capture a very large HTML document.
+     * Note that capturePicture is a deprecated API.
+     *
+     * Enabling drawing the entire HTML document has a significant performance
+     * cost. This method should be called before any WebViews are created.
      */
     public static void enableSlowWholeDocumentDraw() {
         getFactory().getStatics().enableSlowWholeDocumentDraw();
