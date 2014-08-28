@@ -8634,10 +8634,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             skip = true;
         }
 
-        if (!mAutoRestore || !mProvisioned) {
+        if (!mAutoRestore) {
             if (DEBUG) {
-                Slog.w(TAG, "Non-restorable state: auto=" + mAutoRestore
-                        + " prov=" + mProvisioned);
+                Slog.w(TAG, "Non-restorable state: auto=" + mAutoRestore);
             }
             skip = true;
         }
