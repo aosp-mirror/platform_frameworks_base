@@ -37,10 +37,9 @@ import android.os.ParcelFileDescriptor;
  */
 public interface BackupHelper {
     /**
-     * Based on <code>oldState</code>, determine which of the files from the
-     * application's data directory need to be backed up, write them to
-     * <code>data</code>, and fill in <code>newState</code> with the state as it
-     * exists now.
+     * Based on <code>oldState</code>, determine what application content
+     * needs to be backed up, write it to <code>data</code>, and fill in
+     * <code>newState</code> with the complete state as it exists now.
      * <p>
      * Implementing this method is much like implementing
      * {@link BackupAgent#onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor)
