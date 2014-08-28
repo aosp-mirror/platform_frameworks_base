@@ -54,12 +54,7 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleClick() {
         final boolean wasEnabled = (Boolean) mState.value;
-        final boolean changed = mController.setLocationEnabled(!wasEnabled);
-        if (!wasEnabled && changed) {
-            // If we've successfully switched from location off to on, close the
-            // notifications tray to show the network location provider consent dialog.
-            mHost.collapsePanels();
-        }
+        mController.setLocationEnabled(!wasEnabled);
     }
 
     @Override
