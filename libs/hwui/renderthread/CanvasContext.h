@@ -17,6 +17,8 @@
 #ifndef CANVASCONTEXT_H_
 #define CANVASCONTEXT_H_
 
+#include <set>
+
 #include <cutils/compiler.h>
 #include <EGL/egl.h>
 #include <SkBitmap.h>
@@ -71,6 +73,7 @@ public:
 
     void buildLayer(RenderNode* node);
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
+    void markLayerInUse(RenderNode* node);
 
     void destroyHardwareResources();
     static void trimMemory(RenderThread& thread, int level);
@@ -99,6 +102,8 @@ private:
 
     void requireGlContext();
 
+    void freePrefetechedLayers();
+
     RenderThread& mRenderThread;
     EglManager& mEglManager;
     sp<ANativeWindow> mNativeWindow;
@@ -114,6 +119,8 @@ private:
     const sp<RenderNode> mRootRenderNode;
 
     DrawProfiler mProfiler;
+
+    std::set<RenderNode*> mPrefetechedLayers;
 };
 
 } /* namespace renderthread */
