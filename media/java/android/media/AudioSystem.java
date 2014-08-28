@@ -371,6 +371,7 @@ public class AudioSystem
     public static final String DEVICE_OUT_HDMI_ARC_NAME = "hmdi_arc";
     public static final String DEVICE_OUT_SPDIF_NAME = "spdif";
     public static final String DEVICE_OUT_FM_NAME = "fm_transmitter";
+    public static final String DEVICE_OUT_AUX_LINE_NAME = "aux_line";
 
     public static String getOutputDeviceName(int device)
     {
@@ -417,6 +418,8 @@ public class AudioSystem
             return DEVICE_OUT_SPDIF_NAME;
         case DEVICE_OUT_FM:
             return DEVICE_OUT_FM_NAME;
+        case DEVICE_OUT_AUX_LINE:
+            return DEVICE_OUT_AUX_LINE_NAME;
         case DEVICE_OUT_DEFAULT:
         default:
             return "";
