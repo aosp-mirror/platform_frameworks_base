@@ -4172,10 +4172,6 @@
         <attr name="completionThreshold" format="integer" min="1" />
         <!-- Selector in a drop down list. -->
         <attr name="dropDownSelector" format="reference|color" />
-        <!-- Amount of pixels by which the drop down should be offset vertically. -->
-        <attr name="dropDownVerticalOffset" format="dimension" />
-        <!-- Amount of pixels by which the drop down should be offset horizontally. -->
-        <attr name="dropDownHorizontalOffset" format="dimension" />
         <!-- View to anchor the auto-complete dropdown to. If not specified, the text view itself
              is used. -->
         <attr name="dropDownAnchor" format="reference" />
@@ -4222,6 +4218,13 @@
         <attr name="popupAnimationStyle" format="reference" />
         <!-- Whether the popup window should overlap its anchor view. -->
         <attr name="overlapAnchor" format="boolean" />
+    </declare-styleable>
+    <!-- @hide -->
+    <declare-styleable name="ListPopupWindow">
+        <!-- Amount of pixels by which the drop down should be offset vertically. -->
+        <attr name="dropDownVerticalOffset" format="dimension" />
+        <!-- Amount of pixels by which the drop down should be offset horizontally. -->
+        <attr name="dropDownHorizontalOffset" format="dimension" />
     </declare-styleable>
     <declare-styleable name="ViewAnimator">
         <!-- Identifier for the animation to use when a view is shown. -->
@@ -4281,12 +4284,6 @@
         <attr name="popupBackground" />
         <!-- Window elevation to use for the dropdown in spinnerMode="dropdown". -->
         <attr name="popupElevation" />
-        <!-- Vertical offset from the spinner widget for positioning the dropdown in
-             spinnerMode="dropdown". -->
-        <attr name="dropDownVerticalOffset" />
-        <!-- Horizontal offset from the spinner widget for positioning the dropdown
-             in spinnerMode="dropdown". -->
-        <attr name="dropDownHorizontalOffset" />
         <!-- Width of the dropdown in spinnerMode="dropdown". -->
         <attr name="dropDownWidth" />
         <!-- Reference to a layout to use for displaying a prompt in the dropdown for

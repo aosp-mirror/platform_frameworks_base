@@ -306,7 +306,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Material.Widget.TextView.PopupMenu" parent="TextAppearance.Material.Menu" />
-    <style name="TextAppearance.Material.Widget.TextView.SpinnerItem" />
+    <style name="TextAppearance.Material.Widget.TextView.SpinnerItem" parent="TextAppearance.Material.Menu" />
 
     <style name="TextAppearance.Material.Widget.DropDownItem" parent="TextAppearance.Material.Menu">
         <item name="textColor">?attr/textColorPrimaryDisableOnly</item>
@@ -746,6 +746,7 @@ please see styles_device_defaults.xml.
         <item name="popupElevation">@dimen/floating_window_z</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
+        <item name="overlapAnchor">true</item>
         <item name="dropDownWidth">wrap_content</item>
         <item name="popupPromptView">@layout/simple_dropdown_hint</item>
         <item name="gravity">start|center_vertical</item>
@@ -829,6 +830,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.PopupMenu.Overflow">
         <item name="overlapAnchor">true</item>
+        <item name="dropDownHorizontalOffset">-4dip</item>
     </style>
 
     <style name="Widget.Material.ActionButton" parent="Widget.ActionButton">
@@ -837,6 +839,8 @@ please see styles_device_defaults.xml.
         <item name="gravity">center</item>
         <item name="scaleType">center</item>
         <item name="maxLines">2</item>
+        <item name="paddingStart">0dp</item>
+        <item name="paddingEnd">0dp</item>
     </style>
 
     <style name="Widget.Material.ActionButton.CloseMode">
@@ -847,8 +851,9 @@ please see styles_device_defaults.xml.
         <item name="src">@drawable/ic_menu_moreoverflow_material</item>
         <item name="background">?attr/actionBarItemBackground</item>
         <item name="contentDescription">@string/action_menu_overflow_description</item>
-        <item name="minWidth">@dimen/action_overflow_min_width_material</item>
+        <item name="minWidth">@dimen/action_button_min_width_material</item>
         <item name="minHeight">@dimen/action_button_min_height_material</item>
+        <item name="paddingEnd">12dp</item>
         <item name="scaleType">center</item>
     </style>
 

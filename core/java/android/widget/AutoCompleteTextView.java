@@ -130,7 +130,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     public AutoCompleteTextView(Context context, AttributeSet attrs) {
-        this(context, attrs, com.android.internal.R.attr.autoCompleteTextViewStyle);
+        this(context, attrs, R.attr.autoCompleteTextViewStyle);
     }
 
     public AutoCompleteTextView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -141,23 +141,17 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        mPopup = new ListPopupWindow(context, attrs,
-                com.android.internal.R.attr.autoCompleteTextViewStyle);
+        mPopup = new ListPopupWindow(context, attrs, defStyleAttr, defStyleRes);
         mPopup.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         mPopup.setPromptPosition(ListPopupWindow.POSITION_PROMPT_BELOW);
 
-        final TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.AutoCompleteTextView, defStyleAttr, defStyleRes);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.AutoCompleteTextView, defStyleAttr, defStyleRes);
 
-        mThreshold = a.getInt(
-                R.styleable.AutoCompleteTextView_completionThreshold, 2);
+        mThreshold = a.getInt(R.styleable.AutoCompleteTextView_completionThreshold, 2);
 
         mPopup.setListSelector(a.getDrawable(R.styleable.AutoCompleteTextView_dropDownSelector));
-        mPopup.setVerticalOffset((int)
-                a.getDimension(R.styleable.AutoCompleteTextView_dropDownVerticalOffset, 0.0f));
-        mPopup.setHorizontalOffset((int)
-                a.getDimension(R.styleable.AutoCompleteTextView_dropDownHorizontalOffset, 0.0f));
-        
+
         // Get the anchor's id now, but the view won't be ready, so wait to actually get the
         // view and store it in mDropDownAnchorView lazily in getDropDownAnchorView later.
         // Defaults to NO_ID, in which case the getDropDownAnchorView method will simply return
@@ -167,11 +161,9 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         
         // For dropdown width, the developer can specify a specific width, or MATCH_PARENT
         // (for full screen width) or WRAP_CONTENT (to match the width of the anchored view).
-        mPopup.setWidth(a.getLayoutDimension(
-                R.styleable.AutoCompleteTextView_dropDownWidth,
+        mPopup.setWidth(a.getLayoutDimension(R.styleable.AutoCompleteTextView_dropDownWidth,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
-        mPopup.setHeight(a.getLayoutDimension(
-                R.styleable.AutoCompleteTextView_dropDownHeight,
+        mPopup.setHeight(a.getLayoutDimension(R.styleable.AutoCompleteTextView_dropDownHeight,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
 
         mHintResource = a.getResourceId(R.styleable.AutoCompleteTextView_completionHintView,
