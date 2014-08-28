@@ -65,6 +65,7 @@ public class StatusBarKeyguardViewManager {
     private boolean mLastOccluded;
     private boolean mLastBouncerShowing;
     private boolean mLastBouncerDismissible;
+    private OnDismissAction mAfterKeyguardGoneAction;
 
     public StatusBarKeyguardViewManager(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils) {
@@ -118,9 +119,14 @@ public class StatusBarKeyguardViewManager {
         updateStates();
     }
 
-    public void dismissWithAction(OnDismissAction r) {
+    public void dismissWithAction(OnDismissAction r, boolean afterKeyguardGone) {
         if (mShowing) {
-            mBouncer.showWithDismissAction(r);
+            if (!afterKeyguardGone) {
+                mBouncer.showWithDismissAction(r);
+            } else {
+                mBouncer.show();
+                mAfterKeyguardGoneAction = r;
+            }
         }
         updateStates();
     }
@@ -245,6 +251,7 @@ public class StatusBarKeyguardViewManager {
                     mPhoneStatusBar.hideKeyguard();
                     mStatusBarWindowManager.setKeyguardFadingAway(false);
                     mViewMediatorCallback.keyguardGone();
+                    executeAfterKeyguardGoneAction();
                 }
             });
         } else {
@@ -266,9 +273,17 @@ public class StatusBarKeyguardViewManager {
             mStatusBarWindowManager.setKeyguardShowing(false);
             mBouncer.hide(true /* destroyView */);
             mViewMediatorCallback.keyguardGone();
+            executeAfterKeyguardGoneAction();
             updateStates();
         }
 
+    }
+
+    private void executeAfterKeyguardGoneAction() {
+        if (mAfterKeyguardGoneAction != null) {
+            mAfterKeyguardGoneAction.onDismiss();
+            mAfterKeyguardGoneAction = null;
+        }
     }
 
     /**
