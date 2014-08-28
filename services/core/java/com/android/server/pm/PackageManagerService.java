@@ -1497,29 +1497,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
-            if (didDexOptLibraryOrTool) {
-                // If we dexopted a library or tool, then something on the system has
-                // changed. Consider this significant, and wipe away all other
-                // existing dexopt files to ensure we don't leave any dangling around.
-                //
-                // TODO: This should be revisited because it isn't as good an indicator
-                // as it used to be. It used to include the boot classpath but at some point
-                // DexFile.isDexOptNeeded started returning false for the boot
-                // class path files in all cases. It is very possible in a
-                // small maintenance release update that the library and tool
-                // jars may be unchanged but APK could be removed resulting in
-                // unused dalvik-cache files.
-                for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-                    mInstaller.pruneDexCache(dexCodeInstructionSet);
-                }
-
-                // Additionally, delete all dex files from the root directory
-                // since there shouldn't be any there anyway, unless we're upgrading
-                // from an older OS version or a build that contained the "old" style
-                // flat scheme.
-                mInstaller.pruneDexCache(".");
-            }
-
             // Collect vendor overlay packages.
             // (Do this before scanning any apps.)
             // For security and version matching reason, only consider
