@@ -3105,13 +3105,13 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    public List<String> getCarrierPackageNamesForBroadcastIntent(Intent intent) {
+    public List<String> getCarrierPackageNamesForIntent(Intent intent) {
         try {
-            return getITelephony().getCarrierPackageNamesForBroadcastIntent(intent);
+            return getITelephony().getCarrierPackageNamesForIntent(intent);
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "getCarrierPackageNamesForBroadcastIntent RemoteException", ex);
+            Rlog.e(TAG, "getCarrierPackageNamesForIntent RemoteException", ex);
         } catch (NullPointerException ex) {
-            Rlog.e(TAG, "getCarrierPackageNamesForBroadcastIntent NPE", ex);
+            Rlog.e(TAG, "getCarrierPackageNamesForIntent NPE", ex);
         }
         return null;
     }
