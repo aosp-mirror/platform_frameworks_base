@@ -235,7 +235,7 @@ void RenderNode::pushStagingPropertiesChanges(TreeInfo& info) {
     // before properties() is trampled by stagingProperties(), as they are
     // required by some animators.
     if (CC_LIKELY(info.runAnimations)) {
-        mAnimatorManager.pushStaging(info);
+        mAnimatorManager.pushStaging();
     }
     if (mDirtyPropertyFields) {
         mDirtyPropertyFields = 0;

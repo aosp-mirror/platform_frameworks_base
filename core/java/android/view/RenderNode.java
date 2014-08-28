@@ -167,10 +167,13 @@ public class RenderNode {
     public static final int STATUS_DREW = 0x4;
 
     private boolean mValid;
-    private final long mNativeRenderNode;
+    // Do not access directly unless you are ThreadedRenderer
+    final long mNativeRenderNode;
+    private final View mOwningView;
 
-    private RenderNode(String name) {
+    private RenderNode(String name, View owningView) {
         mNativeRenderNode = nCreate(name);
+        mOwningView = owningView;
     }
 
     /**
@@ -178,6 +181,7 @@ public class RenderNode {
      */
     private RenderNode(long nativePtr) {
         mNativeRenderNode = nativePtr;
+        mOwningView = null;
     }
 
     /**
@@ -188,8 +192,8 @@ public class RenderNode {
      *
      * @return A new RenderNode.
      */
-    public static RenderNode create(String name) {
-        return new RenderNode(name);
+    public static RenderNode create(String name, @Nullable View owningView) {
+        return new RenderNode(name, owningView);
     }
 
     /**
@@ -805,7 +809,15 @@ public class RenderNode {
     ///////////////////////////////////////////////////////////////////////////
 
     public void addAnimator(RenderNodeAnimator animator) {
+        if (mOwningView == null || mOwningView.mAttachInfo == null) {
+            throw new IllegalStateException("Cannot start this animator on a detached view!");
+        }
         nAddAnimator(mNativeRenderNode, animator.getNativeAnimator());
+        mOwningView.mAttachInfo.mViewRootImpl.registerAnimatingRenderNode(this);
+    }
+
+    public void endAllAnimators() {
+        nEndAllAnimators(mNativeRenderNode);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -891,6 +903,7 @@ public class RenderNode {
     ///////////////////////////////////////////////////////////////////////////
 
     private static native void nAddAnimator(long renderNode, long animatorPtr);
+    private static native void nEndAllAnimators(long renderNode);
 
     ///////////////////////////////////////////////////////////////////////////
     // Finalization

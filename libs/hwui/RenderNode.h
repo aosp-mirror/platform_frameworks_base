@@ -174,6 +174,8 @@ public:
     // UI thread only!
     ANDROID_API void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
 
+    AnimatorManager& animators() { return mAnimatorManager; }
+
     void applyViewPropertyTransforms(mat4& matrix, bool true3dTransform = false) const;
 
 private:

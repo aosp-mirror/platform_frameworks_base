@@ -13,37 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TIMELORD_H
-#define TIMELORD_H
-
-#include <utils/Timers.h>
+#ifndef CONTEXTFACTORY_H_
+#define CONTEXTFACTORY_H_
 
 namespace android {
 namespace uirenderer {
+
 namespace renderthread {
+class TimeLord;
+}
 
-class RenderThread;
+class AnimationContext;
 
-// This class serves as a helper to filter & manage frame times from multiple sources
-// ensuring that time flows linearly and smoothly
-class TimeLord {
+class IContextFactory {
 public:
-    void setFrameInterval(nsecs_t intervalNanos) { mFrameIntervalNanos = intervalNanos; }
-    void vsyncReceived(nsecs_t vsync);
-    nsecs_t computeFrameTimeMs();
+    virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) = 0;
 
-private:
-    friend class RenderThread;
-
-    TimeLord();
-    ~TimeLord() {}
-
-    nsecs_t mFrameIntervalNanos;
-    nsecs_t mFrameTimeNanos;
+protected:
+    virtual ~IContextFactory() {}
 };
 
-} /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */
 
-#endif /* TIMELORD_H */
+#endif /* CONTEXTFACTORY_H_ */

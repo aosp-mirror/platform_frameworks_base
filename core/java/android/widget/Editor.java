@@ -147,7 +147,7 @@ public class Editor {
         boolean isDirty;
         public TextDisplayList(String name) {
             isDirty = true;
-            displayList = RenderNode.create(name);
+            displayList = RenderNode.create(name, null);
         }
         boolean needsRecord() { return isDirty || !displayList.isValid(); }
     }

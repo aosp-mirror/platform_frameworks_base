@@ -675,6 +675,17 @@ public final class ViewRootImpl implements ViewParent,
         ThreadedRenderer.invokeFunctor(functor, waitForCompletion);
     }
 
+    public void registerAnimatingRenderNode(RenderNode animator) {
+        if (mAttachInfo.mHardwareRenderer != null) {
+            mAttachInfo.mHardwareRenderer.registerAnimatingRenderNode(animator);
+        } else {
+            if (mAttachInfo.mPendingAnimatingRenderNodes == null) {
+                mAttachInfo.mPendingAnimatingRenderNodes = new ArrayList<RenderNode>();
+            }
+            mAttachInfo.mPendingAnimatingRenderNodes.add(animator);
+        }
+    }
+
     private void enableHardwareAcceleration(WindowManager.LayoutParams attrs) {
         mAttachInfo.mHardwareAccelerated = false;
         mAttachInfo.mHardwareAccelerationRequested = false;
@@ -2324,6 +2335,16 @@ public final class ViewRootImpl implements ViewParent,
         } finally {
             mIsDrawing = false;
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
+
+        // For whatever reason we didn't create a HardwareRenderer, end any
+        // hardware animations that are now dangling
+        if (mAttachInfo.mPendingAnimatingRenderNodes != null) {
+            final int count = mAttachInfo.mPendingAnimatingRenderNodes.size();
+            for (int i = 0; i < count; i++) {
+                mAttachInfo.mPendingAnimatingRenderNodes.get(i).endAllAnimators();
+            }
+            mAttachInfo.mPendingAnimatingRenderNodes.clear();
         }
 
         if (mReportNextDraw) {

@@ -312,6 +312,20 @@ public class ThreadedRenderer extends HardwareRenderer {
 
         attachInfo.mIgnoreDirtyState = false;
 
+        // register animating rendernodes which started animating prior to renderer
+        // creation, which is typical for animators started prior to first draw
+        if (attachInfo.mPendingAnimatingRenderNodes != null) {
+            final int count = attachInfo.mPendingAnimatingRenderNodes.size();
+            for (int i = 0; i < count; i++) {
+                registerAnimatingRenderNode(
+                        attachInfo.mPendingAnimatingRenderNodes.get(i));
+            }
+            attachInfo.mPendingAnimatingRenderNodes.clear();
+            // We don't need this anymore as subsequent calls to
+            // ViewRootImpl#attachRenderNodeAnimator will go directly to us.
+            attachInfo.mPendingAnimatingRenderNodes = null;
+        }
+
         int syncResult = nSyncAndDrawFrame(mNativeProxy, frameTimeNanos,
                 recordDuration, view.getResources().getDisplayMetrics().density);
         if ((syncResult & SYNC_INVALIDATE_REQUIRED) != 0) {
@@ -367,6 +381,11 @@ public class ThreadedRenderer extends HardwareRenderer {
     @Override
     public void notifyFramePending() {
         nNotifyFramePending(mNativeProxy);
+    }
+
+    @Override
+    void registerAnimatingRenderNode(RenderNode animator) {
+        nRegisterAnimatingRenderNode(mRootNode.mNativeRenderNode, animator.mNativeRenderNode);
     }
 
     @Override
@@ -466,6 +485,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native int nSyncAndDrawFrame(long nativeProxy,
             long frameTimeNanos, long recordDuration, float density);
     private static native void nDestroyCanvasAndSurface(long nativeProxy);
+    private static native void nRegisterAnimatingRenderNode(long rootRenderNode, long animatingNode);
 
     private static native void nInvokeFunctor(long functor, boolean waitForCompletion);
 
