@@ -46,7 +46,14 @@ class AnimationHandle {
 public:
     AnimationContext& context() { return mContext; }
 
+    // Called by the RenderNode when it has internally pulsed its own animations
+    // this frame and does not need to be run again this frame.
     void notifyAnimationsRan();
+
+    // Stops tracking the RenderNode and destroys the handle. The node must be
+    // re-attached to the AnimationContext to receive managed animation
+    // pulses.
+    void release();
 
 private:
     friend class AnimationContext;

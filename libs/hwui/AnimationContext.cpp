@@ -31,6 +31,14 @@ AnimationContext::AnimationContext(renderthread::TimeLord& clock)
 }
 
 AnimationContext::~AnimationContext() {
+    startFrame();
+    while (mCurrentFrameAnimations.mNextHandle) {
+        AnimationHandle* current = mCurrentFrameAnimations.mNextHandle;
+        AnimatorManager& animators = current->mRenderNode->animators();
+        animators.endAllAnimators();
+        LOG_ALWAYS_FATAL_IF(mCurrentFrameAnimations.mNextHandle == current,
+                "Animate failed to remove from current frame list!");
+    }
 }
 
 void AnimationContext::addAnimatingRenderNode(RenderNode& node) {
@@ -96,9 +104,16 @@ void AnimationHandle::notifyAnimationsRan() {
     if (mRenderNode->animators().hasAnimators()) {
         mContext.addAnimationHandle(this);
     } else {
-        mRenderNode->animators().setAnimationHandle(NULL);
-        delete this;
+        release();
     }
+}
+
+void AnimationHandle::release() {
+    LOG_ALWAYS_FATAL_IF(mRenderNode->animators().hasAnimators(),
+            "Releasing the handle for an RenderNode with outstanding animators!");
+    removeFromList();
+    mRenderNode->animators().setAnimationHandle(NULL);
+    delete this;
 }
 
 void AnimationHandle::insertAfter(AnimationHandle* prev) {
