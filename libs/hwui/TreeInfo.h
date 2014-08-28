@@ -26,6 +26,10 @@
 namespace android {
 namespace uirenderer {
 
+namespace renderthread {
+class CanvasContext;
+}
+
 class OpenGLRenderer;
 class RenderState;
 
@@ -59,6 +63,7 @@ public:
         , renderState(renderState)
         , renderer(NULL)
         , errorHandler(NULL)
+        , canvasContext(NULL)
     {}
 
     explicit TreeInfo(TraversalMode mode, const TreeInfo& clone)
@@ -69,6 +74,7 @@ public:
         , renderState(clone.renderState)
         , renderer(clone.renderer)
         , errorHandler(clone.errorHandler)
+        , canvasContext(clone.canvasContext)
     {}
 
     const TraversalMode mode;
@@ -89,6 +95,8 @@ public:
     // layer updates or similar. May be NULL.
     OpenGLRenderer* renderer;
     ErrorHandler* errorHandler;
+    // TODO: Remove this? May be NULL
+    renderthread::CanvasContext* canvasContext;
 
     struct Out {
         Out()

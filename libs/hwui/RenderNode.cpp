@@ -34,6 +34,7 @@
 #include "LayerRenderer.h"
 #include "OpenGLRenderer.h"
 #include "utils/MathUtils.h"
+#include "renderthread/CanvasContext.h"
 
 namespace android {
 namespace uirenderer {
@@ -207,6 +208,13 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     // updateDeferred on a previous prepare pass that didn't have a renderer
     if (info.renderer && mLayer->deferredUpdateScheduled) {
         info.renderer->pushLayerUpdate(mLayer);
+    }
+
+    if (CC_UNLIKELY(info.canvasContext)) {
+        // If canvasContext is not null that means there are prefetched layers
+        // that need to be accounted for. That might be us, so tell CanvasContext
+        // that this layer is in the tree and should not be destroyed.
+        info.canvasContext->markLayerInUse(this);
     }
 }
 

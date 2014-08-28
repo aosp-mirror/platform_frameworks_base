@@ -16,6 +16,7 @@
 
 #include "CanvasContext.h"
 
+#include <algorithm>
 #include <private/hwui/DrawGlInfo.h>
 #include <strings.h>
 
@@ -53,6 +54,7 @@ CanvasContext::~CanvasContext() {
     destroyCanvasAndSurface();
     mRenderThread.removeFrameCallback(this);
     delete mAnimationContext;
+    freePrefetechedLayers();
 }
 
 void CanvasContext::destroyCanvasAndSurface() {
@@ -142,9 +144,16 @@ void CanvasContext::prepareTree(TreeInfo& info) {
 
     info.damageAccumulator = &mDamageAccumulator;
     info.renderer = mCanvas;
+    if (mPrefetechedLayers.size() && info.mode == TreeInfo::MODE_FULL) {
+        info.canvasContext = this;
+    }
     mAnimationContext->startFrame();
     mRootRenderNode->prepareTree(info);
     mAnimationContext->runRemainingAnimations(info);
+
+    if (info.canvasContext) {
+        freePrefetechedLayers();
+    }
 
     int runningBehind = 0;
     // TODO: This query is moderately expensive, investigate adding some sort
@@ -249,6 +258,26 @@ void CanvasContext::invokeFunctor(RenderThread& thread, Functor* functor) {
     thread.renderState().invokeFunctor(functor, mode, NULL);
 }
 
+void CanvasContext::markLayerInUse(RenderNode* node) {
+    if (mPrefetechedLayers.erase(node)) {
+        node->decStrong(0);
+    }
+}
+
+static void destroyPrefetechedNode(RenderNode* node) {
+    ALOGW("Incorrectly called buildLayer on View: %s, destroying layer...", node->getName());
+    node->destroyHardwareResources();
+    node->decStrong(0);
+}
+
+void CanvasContext::freePrefetechedLayers() {
+    if (mPrefetechedLayers.size()) {
+        requireGlContext();
+        std::for_each(mPrefetechedLayers.begin(), mPrefetechedLayers.end(), destroyPrefetechedNode);
+        mPrefetechedLayers.clear();
+    }
+}
+
 void CanvasContext::buildLayer(RenderNode* node) {
     ATRACE_CALL();
     if (!mEglManager.hasEglContext() || !mCanvas) {
@@ -270,6 +299,9 @@ void CanvasContext::buildLayer(RenderNode* node) {
     node->setPropertyFieldsDirty(RenderNode::GENERIC);
 
     mCanvas->flushLayerUpdates();
+
+    node->incStrong(0);
+    mPrefetechedLayers.insert(node);
 }
 
 bool CanvasContext::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {

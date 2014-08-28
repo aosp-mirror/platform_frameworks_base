@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "EglContext"
-
 #include "EglManager.h"
 
 #include <cutils/log.h>
