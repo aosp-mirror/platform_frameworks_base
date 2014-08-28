@@ -2487,6 +2487,16 @@ public final class BatteryStatsImpl extends BatteryStats {
         addHistoryEventLocked(elapsedRealtime, uptime, code, name, uid);
     }
 
+    public void noteCurrentTimeChangedLocked() {
+        final long currentTime = System.currentTimeMillis();
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        recordCurrentTimeChangeLocked(currentTime, elapsedRealtime, uptime);
+        if (isStartClockTimeValid()) {
+            mStartClockTime = currentTime;
+        }
+    }
+
     public void noteProcessStartLocked(String name, int uid) {
         uid = mapUid(uid);
         if (isOnBattery()) {
@@ -4060,7 +4070,20 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    boolean isStartClockTimeValid() {
+        return mStartClockTime > 365*24*60*60*1000L;
+    }
+
     @Override public long getStartClockTime() {
+        if (!isStartClockTimeValid()) {
+            // If the last clock time we got was very small, then we hadn't had a real
+            // time yet, so try to get it again.
+            mStartClockTime = System.currentTimeMillis();
+            if (isStartClockTimeValid()) {
+                recordCurrentTimeChangeLocked(mStartClockTime, SystemClock.elapsedRealtime(),
+                        SystemClock.uptimeMillis());
+            }
+        }
         return mStartClockTime;
     }
 
@@ -6799,6 +6822,16 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    private void recordCurrentTimeChangeLocked(final long currentTime, final long elapsedRealtimeMs,
+            final long uptimeMs) {
+        if (mRecordingHistory) {
+            mHistoryCur.currentTime = currentTime;
+            addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_CURRENT_TIME,
+                    mHistoryCur);
+            mHistoryCur.currentTime = 0;
+        }
+    }
+
     // This should probably be exposed in the API, though it's not critical
     private static final int BATTERY_PLUGGED_NONE = 0;
 
@@ -8004,6 +8037,10 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void writeSummaryToParcel(Parcel out, boolean inclHistory) {
         pullPendingStateUpdatesLocked();
 
+        // Pull the clock time.  This may update the time and make a new history entry
+        // if we had originally pulled a time before the RTC was set.
+        long startClockTime = getStartClockTime();
+
         final long NOW_SYS = SystemClock.uptimeMillis() * 1000;
         final long NOWREAL_SYS = SystemClock.elapsedRealtime() * 1000;
 
@@ -8014,7 +8051,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mStartCount);
         out.writeLong(computeUptime(NOW_SYS, STATS_SINCE_CHARGED));
         out.writeLong(computeRealtime(NOWREAL_SYS, STATS_SINCE_CHARGED));
-        out.writeLong(mStartClockTime);
+        out.writeLong(startClockTime);
         out.writeString(mStartPlatformVersion);
         out.writeString(mEndPlatformVersion);
         mOnBatteryTimeBase.writeSummaryToParcel(out, NOW_SYS, NOWREAL_SYS);
@@ -8453,6 +8490,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         // Need to update with current kernel wake lock counts.
         pullPendingStateUpdatesLocked();
 
+        // Pull the clock time.  This may update the time and make a new history entry
+        // if we had originally pulled a time before the RTC was set.
+        long startClockTime = getStartClockTime();
+
         final long uSecUptime = SystemClock.uptimeMillis() * 1000;
         final long uSecRealtime = SystemClock.elapsedRealtime() * 1000;
         final long batteryRealtime = mOnBatteryTimeBase.getRealtime(uSecRealtime);
@@ -8463,7 +8504,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         writeHistory(out, true, false);
 
         out.writeInt(mStartCount);
-        out.writeLong(mStartClockTime);
+        out.writeLong(startClockTime);
         out.writeString(mStartPlatformVersion);
         out.writeString(mEndPlatformVersion);
         out.writeLong(mUptime);
@@ -8588,6 +8629,10 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void prepareForDumpLocked() {
         // Need to retrieve current kernel wake lock stats before printing.
         pullPendingStateUpdatesLocked();
+
+        // Pull the clock time.  This may update the time and make a new history entry
+        // if we had originally pulled a time before the RTC was set.
+        getStartClockTime();
     }
 
     public void dumpLocked(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {
