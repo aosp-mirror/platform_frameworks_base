@@ -5456,7 +5456,6 @@ package android.app.admin {
     method public boolean getScreenCaptureDisabled(android.content.ComponentName);
     method public boolean getStorageEncryption(android.content.ComponentName);
     method public int getStorageEncryptionStatus();
-    method public boolean getUninstallBlocked(android.content.ComponentName, java.lang.String);
     method public boolean hasCaCertInstalled(byte[]);
     method public boolean hasGrantedPolicy(android.content.ComponentName, int);
     method public boolean installCaCert(android.content.ComponentName, byte[]);
@@ -5468,6 +5467,7 @@ package android.app.admin {
     method public boolean isLockTaskPermitted(java.lang.String);
     method public boolean isMasterVolumeMuted(android.content.ComponentName);
     method public boolean isProfileOwnerApp(java.lang.String);
+    method public boolean isUninstallBlocked(android.content.ComponentName, java.lang.String);
     method public void lockNow();
     method public void registerPrivateKeyAccessListener(android.content.ComponentName, android.content.ComponentName);
     method public void removeActiveAdmin(android.content.ComponentName);
