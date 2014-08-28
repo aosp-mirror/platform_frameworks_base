@@ -116,7 +116,8 @@ public class CallLog {
          * </pre>
          * </p>
          */
-        public static final String EXTRA_CALL_TYPE_FILTER = "extra_call_type_filter";
+        public static final String EXTRA_CALL_TYPE_FILTER
+                = "android.provider.extra.call_type_filter";
 
         /**
          * Content uri used to access call log entries, including voicemail records. You must have
