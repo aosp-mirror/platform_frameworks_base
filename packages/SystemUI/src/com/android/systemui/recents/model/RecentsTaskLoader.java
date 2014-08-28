@@ -18,7 +18,6 @@ package com.android.systemui.recents.model;
 
 import android.app.ActivityManager;
 import android.content.ComponentCallbacks2;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
@@ -28,6 +27,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.UserHandle;
+import android.util.Log;
+
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -232,6 +233,8 @@ class TaskResourceLoader implements Runnable {
 /* Recents task loader
  * NOTE: We should not hold any references to a Context from a static instance */
 public class RecentsTaskLoader {
+    private static final String TAG = "RecentsTaskLoader";
+
     static RecentsTaskLoader sInstance;
 
     SystemServicesProxy mSystemServicesProxy;
@@ -335,11 +338,15 @@ public class RecentsTaskLoader {
                 infoHandle.info = ssp.getActivityInfo(taskKey.baseIntent.getComponent(),
                         taskKey.userId);
             }
-            icon = ssp.getActivityIcon(infoHandle.info, taskKey.userId);
-            mApplicationIconCache.put(taskKey, icon);
-            return icon;
+            if (infoHandle.info != null) {
+                icon = ssp.getActivityIcon(infoHandle.info, taskKey.userId);
+                if (icon != null) {
+                    mApplicationIconCache.put(taskKey, icon);
+                    return icon;
+                }
+            }
         }
-        // If we are not preloading, return the default icon to show
+        // If we couldn't load any icon, return null
         return null;
     }
 
@@ -361,8 +368,13 @@ public class RecentsTaskLoader {
             infoHandle.info = ssp.getActivityInfo(taskKey.baseIntent.getComponent(),
                     taskKey.userId);
         }
-        label = ssp.getActivityLabel(infoHandle.info);
-        mActivityLabelCache.put(taskKey, label);
+        if (infoHandle.info != null) {
+            label = ssp.getActivityLabel(infoHandle.info);
+            mActivityLabelCache.put(taskKey, label);
+        } else {
+            Log.w(TAG, "Missing ActivityInfo for " + taskKey.baseIntent.getComponent()
+                    + " u=" + taskKey.userId);
+        }
         return label;
     }
 
@@ -401,8 +413,8 @@ public class RecentsTaskLoader {
             List<Task> tasksToLoadOut) {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
         List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp);
-        HashMap<ComponentName, ActivityInfoHandle> activityInfoCache =
-                new HashMap<ComponentName, ActivityInfoHandle>();
+        HashMap<Task.ComponentNameKey, ActivityInfoHandle> activityInfoCache =
+                new HashMap<Task.ComponentNameKey, ActivityInfoHandle>();
         ArrayList<Task> tasksToAdd = new ArrayList<Task>();
         TaskStack stack = new TaskStack();
 
@@ -410,18 +422,20 @@ public class RecentsTaskLoader {
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = tasks.get(i);
 
-            // Get an existing activity info handle if possible
-            ComponentName cn = t.baseIntent.getComponent();
-            ActivityInfoHandle infoHandle = new ActivityInfoHandle();
-            boolean hasCachedActivityInfo = false;
-            if (activityInfoCache.containsKey(cn)) {
-                infoHandle = activityInfoCache.get(cn);
-                hasCachedActivityInfo = true;
-            }
-
             // Compose the task key
             Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, t.baseIntent, t.userId,
                     t.firstActiveTime, t.lastActiveTime);
+
+            // Get an existing activity info handle if possible
+            Task.ComponentNameKey cnKey = taskKey.getComponentNameKey();
+            ActivityInfoHandle infoHandle;
+            boolean hasCachedActivityInfo = false;
+            if (activityInfoCache.containsKey(cnKey)) {
+                infoHandle = activityInfoCache.get(cnKey);
+                hasCachedActivityInfo = true;
+            } else {
+                infoHandle = new ActivityInfoHandle();
+            }
 
             // Determine whether to preload this task
             boolean preloadTask = false;
@@ -440,7 +454,7 @@ public class RecentsTaskLoader {
 
             // Update the activity info cache
             if (!hasCachedActivityInfo && infoHandle.info != null) {
-                activityInfoCache.put(cn, infoHandle);
+                activityInfoCache.put(cnKey, infoHandle);
             }
 
             // Add the task to the stack
