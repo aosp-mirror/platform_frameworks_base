@@ -33,10 +33,9 @@ import java.util.Objects;
  * {@link #createRating TvContentRating.createRating} method with valid rating system string
  * constants.
  * <p>
- * It is possible for a TV input to define its own content rating system by supplying a content
- * rating system definition XML resource (see example below) and having the
- * {@link android.R.attr#tvContentRatingDescription tvContentRatingDescription} attribute in
- * {@link TvInputService#SERVICE_META_DATA} of the TV input point to it.
+ * It is possible for an application to define its own content rating system by supplying a content
+ * rating system definition XML resource (see example below) and declaring a broadcast receiver that
+ * filters {@link TvInputManager#ACTION_QUERY_CONTENT_RATING_SYSTEMS} in its manifest.
  * </p>
  * <h3> Example: Rating system definition for the TV Parental Guidelines</h3>
  * The following XML example shows how the TV Parental Guidelines in the United States can be

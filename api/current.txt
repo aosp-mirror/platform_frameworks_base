@@ -1361,7 +1361,6 @@ package android {
     field public static final int trimPathEnd = 16843811; // 0x1010423
     field public static final int trimPathOffset = 16843812; // 0x1010424
     field public static final int trimPathStart = 16843810; // 0x1010422
-    field public static final int tvContentRatingDescription = 16843955; // 0x10104b3
     field public static final int type = 16843169; // 0x10101a1
     field public static final int typeface = 16842902; // 0x1010096
     field public static final int uiOptions = 16843672; // 0x1010398
@@ -17023,11 +17022,13 @@ package android.media.tv {
     method public boolean isRatingBlocked(android.media.tv.TvContentRating);
     method public void registerListener(android.media.tv.TvInputManager.TvInputListener, android.os.Handler);
     method public void unregisterListener(android.media.tv.TvInputManager.TvInputListener);
-    field public static final java.lang.String ACTION_BLOCKED_RATINGS_CHANGED = "android.media.tv.action.BLOCKED_RATINGS_CHANGED";
-    field public static final java.lang.String ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED = "android.media.tv.action.PARENTAL_CONTROLS_ENABLED_CHANGED";
+    field public static final java.lang.String ACTION_BLOCKED_RATINGS_CHANGED = "android.media.tv.TvInputManager.ACTION_BLOCKED_RATINGS_CHANGED";
+    field public static final java.lang.String ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED = "android.media.tv.TvInputManager.ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED";
+    field public static final java.lang.String ACTION_QUERY_CONTENT_RATING_SYSTEMS = "android.media.tv.TvInputManager.ACTION_QUERY_CONTENT_RATING_SYSTEMS";
     field public static final int INPUT_STATE_CONNECTED = 0; // 0x0
     field public static final int INPUT_STATE_CONNECTED_STANDBY = 1; // 0x1
     field public static final int INPUT_STATE_DISCONNECTED = 2; // 0x2
+    field public static final java.lang.String META_DATA_CONTENT_RATING_SYSTEMS = "android.media.tv.TvInputManager.META_DATA_CONTENT_RATING_SYSTEMS";
     field public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = 3; // 0x3
     field public static final int VIDEO_UNAVAILABLE_REASON_TUNING = 1; // 0x1
     field public static final int VIDEO_UNAVAILABLE_REASON_UNKNOWN = 0; // 0x0

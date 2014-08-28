@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.OperationApplicationException;
 import android.content.ServiceConnection;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -49,9 +50,11 @@ import android.media.tv.ITvInputServiceCallback;
 import android.media.tv.ITvInputSession;
 import android.media.tv.ITvInputSessionCallback;
 import android.media.tv.TvContentRating;
+import android.media.tv.TvContentRatingSystemInfo;
 import android.media.tv.TvContract;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvInputInfo;
+import android.media.tv.TvInputManager;
 import android.media.tv.TvInputService;
 import android.media.tv.TvStreamConfig;
 import android.media.tv.TvTrackInfo;
@@ -137,6 +140,7 @@ public final class TvInputManagerService extends SystemService {
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             synchronized (mLock) {
                 buildTvInputListLocked(mCurrentUserId);
+                buildTvContentRatingSystemListLocked(mCurrentUserId);
             }
         }
         mTvInputHardwareManager.onBootPhase(phase);
@@ -149,6 +153,7 @@ public final class TvInputManagerService extends SystemService {
                 if (DEBUG) Slog.d(TAG, "onSomePackagesChanged()");
                 synchronized (mLock) {
                     buildTvInputListLocked(mCurrentUserId);
+                    buildTvContentRatingSystemListLocked(mCurrentUserId);
                 }
             }
 
@@ -291,15 +296,32 @@ public final class TvInputManagerService extends SystemService {
 
         userState.inputMap.clear();
         userState.inputMap = inputMap;
+    }
 
-        userState.ratingSystemXmlUriSet.clear();
-        for (TvInputState state : userState.inputMap.values()) {
-            Uri ratingSystemXmlUri = state.mInfo.getRatingSystemXmlUri();
-            if (ratingSystemXmlUri != null) {
-                // TODO: need to check the validation of xml format and the duplication of rating
-                // systems.
-                userState.ratingSystemXmlUriSet.add(state.mInfo.getRatingSystemXmlUri());
+    private void buildTvContentRatingSystemListLocked(int userId) {
+        UserState userState = getUserStateLocked(userId);
+        userState.contentRatingSystemList.clear();
+
+        final PackageManager pm = mContext.getPackageManager();
+        Intent intent = new Intent(TvInputManager.ACTION_QUERY_CONTENT_RATING_SYSTEMS);
+        for (ResolveInfo resolveInfo :
+                pm.queryBroadcastReceivers(intent, PackageManager.GET_META_DATA)) {
+            ActivityInfo receiver = resolveInfo.activityInfo;
+            Bundle metaData = receiver.metaData;
+            if (metaData == null) {
+                continue;
             }
+
+            int xmlResId = metaData.getInt(TvInputManager.META_DATA_CONTENT_RATING_SYSTEMS);
+            if (xmlResId == 0) {
+                Slog.w(TAG, "Missing meta-data '"
+                        + TvInputManager.META_DATA_CONTENT_RATING_SYSTEMS + "' on receiver "
+                        + receiver.packageName + "/" + receiver.name);
+                continue;
+            }
+            userState.contentRatingSystemList.add(
+                    TvContentRatingSystemInfo.createTvContentRatingSystemInfo(xmlResId,
+                            receiver.applicationInfo));
         }
     }
 
@@ -318,6 +340,7 @@ public final class TvInputManagerService extends SystemService {
             }
             mUserStates.put(userId, userState);
             buildTvInputListLocked(userId);
+            buildTvContentRatingSystemListLocked(userId);
         }
     }
 
@@ -355,7 +378,7 @@ public final class TvInputManagerService extends SystemService {
             // Clear everything else.
             userState.inputMap.clear();
             userState.packageSet.clear();
-            userState.ratingSystemXmlUriSet.clear();
+            userState.contentRatingSystemList.clear();
             userState.clientStateMap.clear();
             userState.callbackSet.clear();
             userState.mainSessionToken = null;
@@ -903,16 +926,14 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public List<Uri> getTvContentRatingSystemXmls(int userId) {
+        public List<TvContentRatingSystemInfo> getTvContentRatingSystemList(int userId) {
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
-                    Binder.getCallingUid(), userId, "getTvContentRatingSystemXmls");
+                    Binder.getCallingUid(), userId, "getTvContentRatingSystemList");
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     UserState userState = getUserStateLocked(resolvedUserId);
-                    List<Uri> ratingSystemXmlUriList = new ArrayList<Uri>();
-                    ratingSystemXmlUriList.addAll(userState.ratingSystemXmlUriSet);
-                    return ratingSystemXmlUriList;
+                    return userState.contentRatingSystemList;
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -1735,8 +1756,9 @@ public final class TvInputManagerService extends SystemService {
         // A set of all TV input packages.
         private final Set<String> packageSet = new HashSet<String>();
 
-        // A set of all TV content rating system xml uris.
-        private final Set<Uri> ratingSystemXmlUriSet = new HashSet<Uri>();
+        // A list of all TV content rating systems defined.
+        private final List<TvContentRatingSystemInfo>
+                contentRatingSystemList = new ArrayList<TvContentRatingSystemInfo>();
 
         // A mapping from the token of a client to its state.
         private final Map<IBinder, ClientState> clientStateMap =

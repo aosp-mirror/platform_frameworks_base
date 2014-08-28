@@ -101,14 +101,58 @@ public final class TvInputManager {
      * {@link #isRatingBlocked}.
      */
     public static final String ACTION_BLOCKED_RATINGS_CHANGED =
-            "android.media.tv.action.BLOCKED_RATINGS_CHANGED";
+            "android.media.tv.TvInputManager.ACTION_BLOCKED_RATINGS_CHANGED";
 
     /**
      * Broadcast intent action when the parental controls enabled state changes. For use with the
      * {@link #isParentalControlsEnabled}.
      */
     public static final String ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED =
-            "android.media.tv.action.PARENTAL_CONTROLS_ENABLED_CHANGED";
+            "android.media.tv.TvInputManager.ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED";
+
+    /**
+     * Broadcast intent action used to query available content rating systems.
+     * <p>
+     * The TV input manager service locates available content rating systems by querying broadcast
+     * receivers that are registered for this action. An application can offer additional content
+     * rating systems to the user by declaring a suitable broadcast receiver in its manifest.
+     * </p><p>
+     * Here is an example broadcast receiver declaration that an application might include in its
+     * AndroidManifest.xml to advertise custom content rating systems. The meta-data specifies a
+     * resource that contains a description of each content rating system that is provided by the
+     * application.
+     * <p><pre class="prettyprint">
+     * {@literal
+     * <receiver android:name=".TvInputReceiver">
+     *     <intent-filter>
+     *         <action android:name=
+     *                 "android.media.tv.TvInputManager.ACTION_QUERY_CONTENT_RATING_SYSTEMS" />
+     *     </intent-filter>
+     *     <meta-data
+     *             android:name="android.media.tv.TvInputManager.META_DATA_CONTENT_RATING_SYSTEMS"
+     *             android:resource="@xml/tv_content_rating_systems" />
+     * </receiver>}</pre></p>
+     * In the above example, the <code>@xml/tv_content_rating_systems</code> resource refers to an
+     * XML resource whose root element is <code>&lt;rating-system-definitions&gt;</code> that
+     * contains zero or more <code>&lt;rating-system-definition&gt;</code> elements. Each <code>
+     * &lt;rating-system-definition&gt;</code> element specifies the ratings, sub-ratings and rating
+     * orders of a particular content rating system.
+     * </p>
+     *
+     * @see TvContentRating
+     */
+    public static final String ACTION_QUERY_CONTENT_RATING_SYSTEMS =
+            "android.media.tv.TvInputManager.ACTION_QUERY_CONTENT_RATING_SYSTEMS";
+
+    /**
+     * Content rating systems metadata associated with {@link #ACTION_QUERY_CONTENT_RATING_SYSTEMS}.
+     * <p>
+     * Specifies the resource ID of an XML resource that describes the content rating systems that
+     * are provided by the application.
+     * </p>
+     */
+    public static final String META_DATA_CONTENT_RATING_SYSTEMS =
+            "android.media.tv.TvInputManager.META_DATA_CONTENT_RATING_SYSTEMS";
 
     private final ITvInputManager mService;
 
@@ -863,13 +907,13 @@ public final class TvInputManager {
     }
 
     /**
-     * Returns the list of xml resource uris for TV content rating systems.
+     * Returns the list of all TV content rating systems defined.
      * @hide
      */
     @SystemApi
-    public List<Uri> getTvContentRatingSystemXmls() {
+    public List<TvContentRatingSystemInfo> getTvContentRatingSystemList() {
         try {
-            return mService.getTvContentRatingSystemXmls(mUserId);
+            return mService.getTvContentRatingSystemList(mUserId);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
