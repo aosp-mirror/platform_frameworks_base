@@ -18,7 +18,6 @@ package android.media.tv;
 
 import android.annotation.SystemApi;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -125,7 +124,6 @@ public final class TvInputInfo implements Parcelable {
     private String mLabel;
     private Uri mIconUri;
     private boolean mIsConnectedToHdmiSwitch;
-    private Uri mRatingSystemXmlUri;
 
     static {
         sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_OTHER_HARDWARE,
@@ -245,19 +243,6 @@ public final class TvInputInfo implements Parcelable {
                 Log.d(TAG, "Settings activity loaded. [" + input.mSettingsActivity + "] for "
                         + si.name);
             }
-            int tvContentRatingDescription = sa.getResourceId(
-                    com.android.internal.R.styleable.TvInputService_tvContentRatingDescription, -1);
-            if (tvContentRatingDescription != -1) {
-                input.mRatingSystemXmlUri = new Uri.Builder()
-                        .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                        .authority(si.packageName)
-                        .appendPath(Integer.toString(tvContentRatingDescription))
-                        .build();
-                if (DEBUG) {
-                    Log.d(TAG, "Content rating xml loaded. [" + tvContentRatingDescription
-                            + "] for " + si.name);
-                }
-            }
             sa.recycle();
 
             input.mLabel = label;
@@ -364,15 +349,6 @@ public final class TvInputInfo implements Parcelable {
      */
     public int getType() {
         return mType;
-    }
-
-    /**
-     * Returns the resource uri for the rating system xml of this TV input service.
-     * @hide
-     */
-    @SystemApi
-    public Uri getRatingSystemXmlUri() {
-        return mRatingSystemXmlUri;
     }
 
     /**
@@ -508,7 +484,6 @@ public final class TvInputInfo implements Parcelable {
         dest.writeParcelable(mIconUri, flags);
         dest.writeString(mLabel);
         dest.writeByte(mIsConnectedToHdmiSwitch ? (byte) 1 : 0);
-        dest.writeParcelable(mRatingSystemXmlUri, flags);
     }
 
     private Drawable loadDefaultIcon(Context context) {
@@ -581,7 +556,6 @@ public final class TvInputInfo implements Parcelable {
         mIconUri = in.readParcelable(null);
         mLabel = in.readString();
         mIsConnectedToHdmiSwitch = in.readByte() == 1 ? true : false;
-        mRatingSystemXmlUri = in.readParcelable(null);
     }
 
     /**
