@@ -160,13 +160,15 @@ void AnimatorManager::endAllAnimators() {
     if (mAnimationHandle) {
         EndAnimatorsFunctor functor(mAnimationHandle->context());
         for_each(mAnimators.begin(), mAnimators.end(), functor);
+        mAnimators.clear();
+        mAnimationHandle->release();
     } else {
         // We have no context, so bust out the sledgehammer
         // This works because this state can only happen on the UI thread,
         // which means we're already on the right thread to invoke listeners
         for_each(mAnimators.begin(), mAnimators.end(), endAnimatorsHard);
+        mAnimators.clear();
     }
-    mAnimators.clear();
 }
 
 } /* namespace uirenderer */
