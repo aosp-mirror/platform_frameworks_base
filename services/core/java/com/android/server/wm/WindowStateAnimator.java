@@ -754,7 +754,11 @@ class WindowStateAnimator {
                 final boolean isHwAccelerated = (attrs.flags &
                         WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
                 final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
-                if (!PixelFormat.formatHasAlpha(attrs.format)) {
+                if (!PixelFormat.formatHasAlpha(attrs.format)
+                        && attrs.surfaceInsets.left == 0
+                        && attrs.surfaceInsets.top == 0
+                        && attrs.surfaceInsets.right == 0
+                        && attrs.surfaceInsets.bottom  == 0) {
                     flags |= SurfaceControl.OPAQUE;
                 }
 
