@@ -23,6 +23,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.Slog;
 
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 /**
@@ -218,5 +219,11 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         }
         mIsActiveSource = false;
         checkIfPendingActionsCleared();
+    }
+
+    @Override
+    protected void dump(final IndentingPrintWriter pw) {
+        super.dump(pw);
+        pw.println("mIsActiveSource: " + mIsActiveSource);
     }
 }

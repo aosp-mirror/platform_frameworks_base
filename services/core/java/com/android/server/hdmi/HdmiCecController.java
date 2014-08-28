@@ -23,6 +23,7 @@ import android.os.MessageQueue;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Predicate;
 import com.android.server.hdmi.HdmiAnnotations.IoThreadOnly;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
@@ -30,6 +31,8 @@ import com.android.server.hdmi.HdmiControlService.DevicePollingCallback;
 
 import libcore.util.EmptyArray;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -596,6 +599,15 @@ final class HdmiCecController {
         mServiceThreadLogger.debug(
                 "Hotplug event:[port:" + port + " , connected:" + connected + "]");
         mService.onHotplug(port, connected);
+    }
+
+    void dump(final IndentingPrintWriter pw) {
+        for (int i = 0; i < mLocalDevices.size(); ++i) {
+            pw.println("HdmiCecLocalDevice #" + i + ":");
+            pw.increaseIndent();
+            mLocalDevices.valueAt(i).dump(pw);
+            pw.decreaseIndent();
+        }
     }
 
     private static native long nativeInit(HdmiCecController handler, MessageQueue messageQueue);

@@ -45,6 +45,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
@@ -1609,5 +1610,17 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         addDeviceInfo(newInfo);
 
         invokeDeviceEventListener(newInfo, HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE);
+    }
+
+    @Override
+    protected void dump(final IndentingPrintWriter pw) {
+        super.dump(pw);
+        pw.println("mArcEstablished: " + mArcEstablished);
+        pw.println("mArcFeatureEnabled: " + mArcFeatureEnabled);
+        pw.println("mSystemAudioActivated: " + mSystemAudioActivated);
+        pw.println("mSystemAudioMute: " + mSystemAudioMute);
+        pw.println("mAutoDeviceOff: " + mAutoDeviceOff);
+        pw.println("mAutoWakeup: " + mAutoWakeup);
+        pw.println("mSkipRoutingControl: " + mSkipRoutingControl);
     }
 }

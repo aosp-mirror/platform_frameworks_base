@@ -67,6 +67,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.SystemService;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
@@ -75,6 +76,8 @@ import com.android.server.hdmi.HdmiCecLocalDevice.PendingActionClearedCallback;
 
 import libcore.util.EmptyArray;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1394,6 +1397,28 @@ public final class HdmiControlService extends SystemService {
                 IHdmiMhlScratchpadCommandListener listener) {
             enforceAccessPermission();
             HdmiControlService.this.addHdmiMhlScratchpadCommandListener(listener);
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {
+            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+            final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
+
+            pw.println("mHdmiControlEnabled: " + mHdmiControlEnabled);
+            pw.println("mProhibitMode: " + mProhibitMode);
+            if (mCecController != null) {
+                pw.println("mCecController: ");
+                pw.increaseIndent();
+                mCecController.dump(pw);
+                pw.decreaseIndent();
+            }
+            pw.println("mPortInfo: ");
+            pw.increaseIndent();
+            for (HdmiPortInfo hdmiPortInfo : mPortInfo) {
+                pw.println("- " + hdmiPortInfo);
+            }
+            pw.decreaseIndent();
+            pw.println("mPowerStatus: " + mPowerStatus);
         }
     }
 
