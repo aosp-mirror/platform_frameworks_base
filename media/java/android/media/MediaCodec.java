@@ -1619,8 +1619,7 @@ final public class MediaCodec {
      * @throws IllegalStateException if in the Uninitialized state.
      */
     public MediaCodecInfo getCodecInfo() {
-        return MediaCodecList.getCodecInfoAt(
-                   MediaCodecList.findCodecByName(getName()));
+        return MediaCodecList.getInfoFor(getName());
     }
 
     private native final ByteBuffer[] getBuffers(boolean input);
