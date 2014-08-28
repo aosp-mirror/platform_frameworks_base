@@ -22303,7 +22303,7 @@ package android.os {
     field public static final int PROXIMITY_SCREEN_OFF_WAKE_LOCK = 32; // 0x20
     field public static final deprecated int SCREEN_BRIGHT_WAKE_LOCK = 10; // 0xa
     field public static final deprecated int SCREEN_DIM_WAKE_LOCK = 6; // 0x6
-    field public static final int WAIT_FOR_PROXIMITY_NEGATIVE = 1; // 0x1
+    field public static final int WAIT_FOR_DISTANT_PROXIMITY = 1; // 0x1
   }
 
   public final class PowerManager.WakeLock {
