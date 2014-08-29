@@ -314,6 +314,7 @@ void CanvasContext::destroyHardwareResources() {
     stopDrawing();
     if (mEglManager.hasEglContext()) {
         requireGlContext();
+        freePrefetechedLayers();
         mRootRenderNode->destroyHardwareResources();
         Caches::getInstance().flush(Caches::kFlushMode_Layers);
     }
