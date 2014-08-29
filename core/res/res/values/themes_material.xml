@@ -46,7 +46,7 @@ please see themes_device_defaults.xml.
         <item name="colorForegroundInverse">@color/bright_foreground_material_light</item>
         <item name="colorBackground">@color/background_material_dark</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_dark</item>
-        <item name="disabledAlpha">@dimen/disabled_alpha_material</item>
+        <item name="disabledAlpha">@dimen/disabled_alpha_material_dark</item>
         <item name="backgroundDimAmount">0.6</item>
 
         <!-- Text styles -->
@@ -58,8 +58,8 @@ please see themes_device_defaults.xml.
         <item name="textColorPrimaryDisableOnly">@color/primary_text_disable_only_material_dark</item>
         <item name="textColorSecondary">@color/secondary_text_material_dark</item>
         <item name="textColorSecondaryInverse">@color/secondary_text_material_light</item>
-        <item name="textColorTertiary">@color/tertiary_text_material_dark</item>
-        <item name="textColorTertiaryInverse">@color/tertiary_text_material_light</item>
+        <item name="textColorTertiary">@color/secondary_text_material_dark</item>
+        <item name="textColorTertiaryInverse">@color/secondary_text_material_light</item>
         <item name="textColorHint">@color/hint_foreground_material_dark</item>
         <item name="textColorHintInverse">@color/hint_foreground_material_light</item>
         <item name="textColorHighlight">@color/highlighted_text_material_dark</item>
@@ -387,7 +387,7 @@ please see themes_device_defaults.xml.
         <item name="colorForegroundInverse">@color/bright_foreground_material_dark</item>
         <item name="colorBackground">@color/background_material_light</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_light</item>
-        <item name="disabledAlpha">@dimen/disabled_alpha_material</item>
+        <item name="disabledAlpha">@dimen/disabled_alpha_material_light</item>
         <item name="backgroundDimAmount">0.6</item>
 
         <!-- Text styles -->
@@ -398,8 +398,8 @@ please see themes_device_defaults.xml.
         <item name="textColorPrimaryInverse">@color/primary_text_material_dark</item>
         <item name="textColorSecondary">@color/secondary_text_material_light</item>
         <item name="textColorSecondaryInverse">@color/secondary_text_material_dark</item>
-        <item name="textColorTertiary">@color/tertiary_text_material_light</item>
-        <item name="textColorTertiaryInverse">@color/tertiary_text_material_dark</item>
+        <item name="textColorTertiary">@color/secondary_text_material_light</item>
+        <item name="textColorTertiaryInverse">@color/secondary_text_material_dark</item>
         <item name="textColorPrimaryDisableOnly">@color/primary_text_disable_only_material_light</item>
         <item name="textColorPrimaryInverseDisableOnly">@color/primary_text_disable_only_material_dark</item>
         <item name="textColorHint">@color/hint_foreground_material_light</item>
@@ -750,8 +750,8 @@ please see themes_device_defaults.xml.
         <item name="textColorPrimaryInverse">@color/primary_text_material_dark</item>
         <item name="textColorSecondary">@color/secondary_text_material_light</item>
         <item name="textColorSecondaryInverse">@color/secondary_text_material_dark</item>
-        <item name="textColorTertiary">@color/tertiary_text_material_light</item>
-        <item name="textColorTertiaryInverse">@color/tertiary_text_material_dark</item>
+        <item name="textColorTertiary">@color/secondary_text_material_light</item>
+        <item name="textColorTertiaryInverse">@color/secondary_text_material_dark</item>
         <item name="textColorPrimaryDisableOnly">@color/primary_text_disable_only_material_light</item>
         <item name="textColorPrimaryInverseDisableOnly">@color/primary_text_disable_only_material_dark</item>
         <item name="textColorHint">@color/hint_foreground_material_light</item>
@@ -790,8 +790,8 @@ please see themes_device_defaults.xml.
         <item name="textColorPrimaryDisableOnly">@color/primary_text_disable_only_material_dark</item>
         <item name="textColorSecondary">@color/secondary_text_material_dark</item>
         <item name="textColorSecondaryInverse">@color/secondary_text_material_light</item>
-        <item name="textColorTertiary">@color/tertiary_text_material_dark</item>
-        <item name="textColorTertiaryInverse">@color/tertiary_text_material_light</item>
+        <item name="textColorTertiary">@color/secondary_text_material_dark</item>
+        <item name="textColorTertiaryInverse">@color/secondary_text_material_light</item>
         <item name="textColorHint">@color/hint_foreground_material_dark</item>
         <item name="textColorHintInverse">@color/hint_foreground_material_light</item>
         <item name="textColorHighlight">@color/highlighted_text_material_dark</item>
