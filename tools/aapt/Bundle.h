@@ -130,6 +130,10 @@ public:
     void setErrorOnFailedInsert(bool val) { mErrorOnFailedInsert = val; }
     bool getErrorOnMissingConfigEntry() { return mErrorOnMissingConfigEntry; }
     void setErrorOnMissingConfigEntry(bool val) { mErrorOnMissingConfigEntry = val; }
+    const android::String8& getPlatformBuildVersionCode() { return mPlatformVersionCode; }
+    void setPlatformBuildVersionCode(const android::String8& code) { mPlatformVersionCode = code; }
+    const android::String8& getPlatformBuildVersionName() { return mPlatformVersionName; }
+    void setPlatformBuildVersionName(const android::String8& name) { mPlatformVersionName = name; }
 
     bool getUTF16StringsOption() {
         return mWantUTF16 || !isMinSdkAtLeast(SDK_FROYO);
@@ -323,6 +327,8 @@ private:
     const char* mSingleCrunchInputFile;
     const char* mSingleCrunchOutputFile;
     bool        mBuildSharedLibrary;
+    android::String8 mPlatformVersionCode;
+    android::String8 mPlatformVersionName;
 
     /* file specification */
     int         mArgc;

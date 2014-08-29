@@ -561,6 +561,7 @@ public:
     status_t buildIncludedResources(Bundle* bundle);
     status_t addIncludedResources(const sp<AaptFile>& file);
     const ResTable& getIncludedResources() const;
+    AssetManager& getAssetManager();
 
     void print(const String8& prefix) const;
 

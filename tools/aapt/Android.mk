@@ -28,6 +28,7 @@ aaptSources := \
     AaptAssets.cpp \
     AaptConfig.cpp \
     AaptUtil.cpp \
+    AaptXml.cpp \
     ApkBuilder.cpp \
     Command.cpp \
     CrunchCache.cpp \
