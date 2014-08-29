@@ -87,4 +87,6 @@
   <item type="id" name="transitionPosition" />
   <item type="id" name="transitionTransform" />
   <item type="id" name="parentMatrix" />
+  <item type="id" name="statusBarBackground" />
+  <item type="id" name="navigationBarBackground" />
 </resources>
