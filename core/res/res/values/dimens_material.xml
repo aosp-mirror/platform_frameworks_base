@@ -77,8 +77,5 @@
     <!-- Default rounded corner for controls -->
     <dimen name="control_corner_material">2dp</dimen>
 
-    <!-- Default alpha value for disabled elements. -->
-    <item name="disabled_alpha_material" format="float" type="dimen">0.26</item>
-
-    <dimen name="alert_dialog_padding_material">12dp</dimen>
+    <dimen name="alert_dialog_padding_material">18dp</dimen>
 </resources>
