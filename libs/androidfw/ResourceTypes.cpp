@@ -2939,7 +2939,7 @@ struct ResTable::PackageGroup
             for (size_t i = 0; i < bags->size(); i++) {
                 TABLE_NOISY(printf("type=%d\n", i));
                 const TypeList& typeList = types[i];
-                if (typeList.isEmpty()) {
+                if (!typeList.isEmpty()) {
                     bag_set** typeBags = bags->get(i);
                     TABLE_NOISY(printf("typeBags=%p\n", typeBags));
                     if (typeBags) {
