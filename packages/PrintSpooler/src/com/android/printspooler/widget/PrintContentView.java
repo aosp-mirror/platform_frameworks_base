@@ -152,6 +152,17 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
 
         // Make sure we start in a closed options state.
         onDragProgress(1.0f);
+
+        // The framework gives focus to the frist focusable and we
+        // do not want that, hence we will take focus instead.
+        setFocusableInTouchMode(true);
+    }
+
+    @Override
+    public void focusableViewAvailable(View v) {
+        // The framework gives focus to the frist focusable and we
+        // do not want that, hence do not announce new focusables.
+        return;
     }
 
     @Override
@@ -309,6 +320,7 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
             mSummaryContent.setLayerType(View.LAYER_TYPE_NONE, null);
             mDraggableContent.setLayerType(View.LAYER_TYPE_NONE, null);
             mMoreOptionsButton.setLayerType(View.LAYER_TYPE_NONE, null);
+            mMoreOptionsButton.setLayerType(View.LAYER_TYPE_NONE, null);
         }
 
         mDragProgress = progress;
@@ -320,7 +332,6 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
         mMoreOptionsButton.setAlpha(inverseAlpha);
 
         mEmbeddedContentScrim.setBackgroundColor(computeScrimColor());
-
         if (progress == 0) {
             if (mOptionsStateChangeListener != null) {
                 mOptionsStateChangeListener.onOptionsOpened();
@@ -354,14 +365,15 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
     }
 
     private void ensureImeClosedAndInputFocusCleared() {
-        View focus = findFocus();
-        if (focus != null) {
+        View focused = findFocus();
+
+        if (focused != null && focused.isFocused()) {
             InputMethodManager imm = (InputMethodManager) mContext.getSystemService(
                     Context.INPUT_METHOD_SERVICE);
-            if (imm.isActive(focus)) {
+            if (imm.isActive(focused)) {
                 imm.hideSoftInputFromWindow(getWindowToken(), 0);
             }
-            focus.clearFocus();
+            focused.clearFocus();
         }
     }
 
