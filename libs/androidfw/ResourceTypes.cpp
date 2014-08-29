@@ -3728,7 +3728,7 @@ ssize_t ResTable::resolveReference(Res_value* value, ssize_t blockIndex,
 
 const char16_t* ResTable::valueToString(
     const Res_value* value, size_t stringBlock,
-    char16_t /*tmpBuffer*/ [TMP_BUFFER_SIZE], size_t* outLen)
+    char16_t /*tmpBuffer*/ [TMP_BUFFER_SIZE], size_t* outLen) const
 {
     if (!value) {
         return NULL;
