@@ -449,7 +449,7 @@ final class HdmiCecController {
                         allocated.add(address);
                     }
                 }
-                mIoThreadLogger.debug("DevicePollingResult:" + allocated);
+                mIoThreadLogger.debug("[P]:Allocated Address=" + allocated);
                 if (callback != null) {
                     runOnServiceThread(new Runnable() {
                         @Override
@@ -551,7 +551,7 @@ final class HdmiCecController {
         runOnIoThread(new Runnable() {
             @Override
             public void run() {
-                mIoThreadLogger.debug("SendCommand:" + cecMessage);
+                mIoThreadLogger.debug("[S]:" + cecMessage);
                 byte[] body = buildBody(cecMessage.getOpcode(), cecMessage.getParams());
                 int i = 0;
                 int errorCode = Constants.SEND_RESULT_SUCCESS;
@@ -586,7 +586,7 @@ final class HdmiCecController {
     private void handleIncomingCecCommand(int srcAddress, int dstAddress, byte[] body) {
         assertRunOnServiceThread();
         HdmiCecMessage command = HdmiCecMessageBuilder.of(srcAddress, dstAddress, body);
-        mServiceThreadLogger.debug("ReceiveCommand:" + command);
+        mServiceThreadLogger.debug("[R]:" + command);
         onReceiveCommand(command);
     }
 
