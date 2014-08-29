@@ -679,6 +679,8 @@ public class Toolbar extends ViewGroup {
      * as screen readers or tooltips.
      *
      * @return The navigation button's content description
+     *
+     * @attr ref android.R.styleable#Toolbar_navigationContentDescription
      */
     @Nullable
     public CharSequence getNavigationContentDescription() {
@@ -692,6 +694,8 @@ public class Toolbar extends ViewGroup {
      *
      * @param resId Resource ID of a content description string to set, or 0 to
      *              clear the description
+     *
+     * @attr ref android.R.styleable#Toolbar_navigationContentDescription
      */
     public void setNavigationContentDescription(int resId) {
         setNavigationContentDescription(resId != 0 ? getContext().getText(resId) : null);
@@ -704,6 +708,8 @@ public class Toolbar extends ViewGroup {
      *
      * @param description Content description to set, or <code>null</code> to
      *                    clear the content description
+     *
+     * @attr ref android.R.styleable#Toolbar_navigationContentDescription
      */
     public void setNavigationContentDescription(@Nullable CharSequence description) {
         if (!TextUtils.isEmpty(description)) {
@@ -725,6 +731,8 @@ public class Toolbar extends ViewGroup {
      * tooltips.</p>
      *
      * @param resId Resource ID of a drawable to set
+     *
+     * @attr ref android.R.styleable#Toolbar_navigationIcon
      */
     public void setNavigationIcon(int resId) {
         setNavigationIcon(getContext().getDrawable(resId));
@@ -741,6 +749,8 @@ public class Toolbar extends ViewGroup {
      * tooltips.</p>
      *
      * @param icon Drawable to set, may be null to clear the icon
+     *
+     * @attr ref android.R.styleable#Toolbar_navigationIcon
      */
     public void setNavigationIcon(@Nullable Drawable icon) {
         if (icon != null) {
@@ -761,6 +771,8 @@ public class Toolbar extends ViewGroup {
      * Return the current drawable used as the navigation icon.
      *
      * @return The navigation icon drawable
+     *
+     * @attr ref android.R.styleable#Toolbar_navigationIcon
      */
     @Nullable
     public Drawable getNavigationIcon() {
