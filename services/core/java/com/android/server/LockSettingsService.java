@@ -16,9 +16,12 @@
 
 package com.android.server;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 
@@ -31,6 +34,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.storage.IMountService;
 import android.os.ServiceManager;
@@ -41,11 +45,14 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
+import android.security.KeyChain;
+import android.security.KeyChain.KeyChainConnection;
 import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.ILockSettingsObserver;
 import com.android.internal.widget.LockPatternUtils;
@@ -99,7 +106,29 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         mLockPatternUtils = new LockPatternUtils(context);
         mFirstCallToVold = true;
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_USER_ADDED);
+        mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
     }
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Update keystore settings for profiles which use the same password as their parent
+            if (Intent.ACTION_USER_STARTED.equals(intent.getAction())) {
+                final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
+                final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
+                final UserInfo parentInfo = um.getProfileParent(userHandle);
+                if (parentInfo != null) {
+                    final KeyStore ks = KeyStore.getInstance();
+                    final int profileUid = UserHandle.getUid(userHandle, Process.SYSTEM_UID);
+                    final int parentUid = UserHandle.getUid(parentInfo.id, Process.SYSTEM_UID);
+                    ks.syncUid(parentUid, profileUid);
+                }
+            }
+        }
+    };
 
     public void systemReady() {
         migrateOldData();
@@ -275,6 +304,17 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
+    private int getUserParentOrSelfId(int userId) {
+        if (userId != 0) {
+            final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
+            final UserInfo pi = um.getProfileParent(userId);
+            if (pi != null) {
+                return pi.id;
+            }
+        }
+        return userId;
+    }
+
     private String getLockPatternFilename(int userId) {
         String dataSystemDirectory =
                 android.os.Environment.getDataDirectory().getAbsolutePath() +
@@ -283,6 +323,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Leave it in the same place for user 0
             return dataSystemDirectory + LOCK_PATTERN_FILE;
         } else {
+            userId = getUserParentOrSelfId(userId);
             return  new File(Environment.getUserSystemDirectory(userId), LOCK_PATTERN_FILE)
                     .getAbsolutePath();
         }
@@ -296,7 +337,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Leave it in the same place for user 0
             return dataSystemDirectory + LOCK_PASSWORD_FILE;
         } else {
-            return  new File(Environment.getUserSystemDirectory(userId), LOCK_PASSWORD_FILE)
+            userId = getUserParentOrSelfId(userId);
+            return new File(Environment.getUserSystemDirectory(userId), LOCK_PASSWORD_FILE)
                     .getAbsolutePath();
         }
     }
@@ -315,16 +357,27 @@ public class LockSettingsService extends ILockSettings.Stub {
         return new File(getLockPatternFilename(userId)).length() > 0;
     }
 
-    private void maybeUpdateKeystore(String password, int userId) {
-        if (userId == UserHandle.USER_OWNER) {
-            final KeyStore keyStore = KeyStore.getInstance();
-            // Conditionally reset the keystore if empty. If non-empty, we are just
-            // switching key guard type
-            if (TextUtils.isEmpty(password) && keyStore.isEmpty()) {
-                keyStore.reset();
+    private void maybeUpdateKeystore(String password, int userHandle) {
+        final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
+        final KeyStore ks = KeyStore.getInstance();
+
+        final List<UserInfo> profiles = um.getProfiles(userHandle);
+        boolean shouldReset = TextUtils.isEmpty(password);
+
+        // For historical reasons, don't wipe a non-empty keystore if we have a single user with a
+        // single profile.
+        if (userHandle == UserHandle.USER_OWNER && profiles.size() == 1) {
+            if (!ks.isEmpty()) {
+                shouldReset = false;
+            }
+        }
+
+        for (UserInfo pi : profiles) {
+            final int profileUid = UserHandle.getUid(pi.id, Process.SYSTEM_UID);
+            if (shouldReset) {
+                ks.resetUid(profileUid);
             } else {
-                // Update the keystore password
-                keyStore.password(password);
+                ks.passwordUid(password, profileUid);
             }
         }
     }
