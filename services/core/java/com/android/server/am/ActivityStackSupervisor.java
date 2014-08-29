@@ -2072,7 +2072,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
             targetStack = inTask.stack;
             targetStack.moveTaskToFrontLocked(inTask, r, options);
-            mWindowManager.moveTaskToTop(targetStack.topTask().taskId);
+            mWindowManager.moveTaskToTop(inTask.taskId);
 
             // Check whether we should actually launch the new activity in to the task,
             // or just reuse the current activity on top.
