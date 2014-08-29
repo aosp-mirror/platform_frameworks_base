@@ -864,7 +864,7 @@ public class RemoteViews implements Parcelable, Filter {
                 if (alpha != -1) {
                     targetDrawable.setAlpha(alpha);
                 }
-                if (colorFilter != -1 && filterMode != null) {
+                if (filterMode != null) {
                     targetDrawable.setColorFilter(colorFilter, filterMode);
                 }
                 if (level != -1) {
@@ -2189,8 +2189,8 @@ public class RemoteViews implements Parcelable, Filter {
      * @param alpha Specify an alpha value for the drawable, or -1 to leave
      *            unchanged.
      * @param colorFilter Specify a color for a
-     *            {@link android.graphics.ColorFilter} for this drawable, or -1
-     *            to leave unchanged.
+     *            {@link android.graphics.ColorFilter} for this drawable. This will be ignored if
+     *            {@code mode} is {@code null}.
      * @param mode Specify a PorterDuff mode for this drawable, or null to leave
      *            unchanged.
      * @param level Specify the level for the drawable, or -1 to leave
