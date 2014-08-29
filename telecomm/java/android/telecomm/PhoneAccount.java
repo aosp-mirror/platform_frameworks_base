@@ -93,7 +93,7 @@ public class PhoneAccount implements Parcelable {
         private CharSequence mLabel;
         private CharSequence mShortDescription;
 
-        private Builder() {}
+        public Builder() {}
 
         public Builder withAccountHandle(PhoneAccountHandle value) {
             this.mAccountHandle = value;
