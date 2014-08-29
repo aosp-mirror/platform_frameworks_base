@@ -1073,7 +1073,13 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             // is dismissed on the first down while the global gesture is a long press
             // with two fingers anywhere on the screen.
             if (EnableAccessibilityController.canEnableAccessibilityViaGesture(mContext)) {
-                mEnableAccessibilityController = new EnableAccessibilityController(mContext);
+                mEnableAccessibilityController = new EnableAccessibilityController(mContext,
+                        new Runnable() {
+                    @Override
+                    public void run() {
+                        dismiss();
+                    }
+                });
                 super.setCanceledOnTouchOutside(false);
             } else {
                 mEnableAccessibilityController = null;
