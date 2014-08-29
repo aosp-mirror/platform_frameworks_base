@@ -2754,11 +2754,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 mStatusColorView = updateColorViewInt(mStatusColorView,
                         SYSTEM_UI_FLAG_FULLSCREEN, FLAG_TRANSLUCENT_STATUS,
                         mStatusBarColor, mLastTopInset, Gravity.TOP,
-                        STATUS_BAR_BACKGROUND_TRANSITION_NAME);
+                        STATUS_BAR_BACKGROUND_TRANSITION_NAME,
+                        com.android.internal.R.id.statusBarBackground);
                 mNavigationColorView = updateColorViewInt(mNavigationColorView,
                         SYSTEM_UI_FLAG_HIDE_NAVIGATION, FLAG_TRANSLUCENT_NAVIGATION,
                         mNavigationBarColor, mLastBottomInset, Gravity.BOTTOM,
-                        NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME);
+                        NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME,
+                        com.android.internal.R.id.navigationBarBackground);
             }
             if (insets != null) {
                 insets = insets.consumeStableInsets();
@@ -2767,7 +2769,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         private View updateColorViewInt(View view, int systemUiHideFlag, int translucentFlag,
-                int color, int height, int verticalGravity, String transitionName) {
+                int color, int height, int verticalGravity, String transitionName, int id) {
             boolean show = height > 0 && (mLastSystemUiVisibility & systemUiHideFlag) == 0
                     && (getAttributes().flags & translucentFlag) == 0
                     && (color & Color.BLACK) != 0
@@ -2778,6 +2780,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     view = new View(mContext);
                     view.setBackgroundColor(color);
                     view.setTransitionName(transitionName);
+                    view.setId(id);
                     addView(view, new LayoutParams(LayoutParams.MATCH_PARENT, height,
                             Gravity.START | verticalGravity));
                 }
