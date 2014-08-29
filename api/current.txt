@@ -14710,6 +14710,7 @@ package android.media {
     field public static final int COLOR_Format24bitBGR888 = 12; // 0xc
     field public static final int COLOR_Format24bitRGB888 = 11; // 0xb
     field public static final int COLOR_Format25bitARGB1888 = 14; // 0xe
+    field public static final int COLOR_Format32BitRGBA8888 = 2130747392; // 0x7f00a000
     field public static final int COLOR_Format32bitARGB8888 = 16; // 0x10
     field public static final int COLOR_Format32bitBGRA8888 = 15; // 0xf
     field public static final int COLOR_Format8bitRGB332 = 2; // 0x2

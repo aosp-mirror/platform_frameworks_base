@@ -170,6 +170,7 @@ public final class MediaCodecInfo {
         // COLOR_FormatSurface indicates that the data will be a GraphicBuffer metadata reference.
         // In OMX this is called OMX_COLOR_FormatAndroidOpaque.
         public static final int COLOR_FormatSurface                   = 0x7F000789;
+        public static final int COLOR_Format32BitRGBA8888             = 0x7F00A000;
         // This corresponds to YUV_420_888 format
         public static final int COLOR_FormatYUV420Flexible            = 0x7F420888;
         public static final int COLOR_QCOM_FormatYUV420SemiPlanar     = 0x7fa30c00;
