@@ -28,9 +28,6 @@
 
     <dimen name="print_dialog_frame_max_width_dip">400dip</dimen>
 
-    <dimen name="printer_list_view_padding_start">16dip</dimen>
-    <dimen name="printer_list_view_padding_end">16dip</dimen>
-
     <dimen name="selected_page_elevation">6dip</dimen>
     <dimen name="unselected_page_elevation">2dip</dimen>
 
@@ -46,6 +43,6 @@
     <fraction name="page_unselected_alpha">50%</fraction>
 
     <dimen name="preview_page_footer_height">32dip</dimen>
-    <dimen name="preview_page_min_width">130dip</dimen>
+    <dimen name="preview_page_min_width">128dip</dimen>
 
 </resources>

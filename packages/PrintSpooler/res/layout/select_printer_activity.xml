@@ -23,8 +23,6 @@
         android:id="@android:id/list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:paddingStart="@dimen/printer_list_view_padding_start"
-        android:paddingEnd="@dimen/printer_list_view_padding_end"
         android:scrollbarStyle="outsideOverlay"
         android:cacheColorHint="@android:color/transparent"
         android:scrollbarAlwaysDrawVerticalTrack="true" >

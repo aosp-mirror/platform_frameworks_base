@@ -289,15 +289,11 @@ public final class PageAdapter extends Adapter implements
                     + " for position: " + position);
         }
 
-        final int pageCount = getItemCount();
         MyViewHolder myHolder = (MyViewHolder) holder;
 
         View page = holder.itemView;
-        if (pageCount > 1) {
-            page.setOnClickListener(mPageClickListener);
-        } else {
-            page.setOnClickListener(null);
-        }
+        page.setOnClickListener(mPageClickListener);
+
         page.setTag(holder);
 
         myHolder.mPageInAdapter = position;
@@ -339,16 +335,9 @@ public final class PageAdapter extends Adapter implements
         }
         content.init(provider, mMediaSize, mMinMargins);
 
-
         View pageSelector = page.findViewById(R.id.page_selector);
         pageSelector.setTag(myHolder);
-        if (pageCount > 1) {
-            pageSelector.setOnClickListener(mPageClickListener);
-            pageSelector.setVisibility(View.VISIBLE);
-        } else {
-            pageSelector.setOnClickListener(null);
-            pageSelector.setVisibility(View.GONE);
-        }
+        pageSelector.setOnClickListener(mPageClickListener);
 
         if (mConfirmedPagesInDocument.indexOfKey(pageInDocument) >= 0) {
             pageSelector.setSelected(true);
@@ -449,8 +438,9 @@ public final class PageAdapter extends Adapter implements
 
         final int verticalPadding;
         if (mPageContentHeight + mFooterHeight + mPreviewListPadding > availableHeight) {
-            verticalPadding = Math.max(mPreviewPageMargin,
-                    (availableHeight - totalContentHeight) / 2);
+            verticalPadding = Math.max(0,
+                    (availableHeight - mPageContentHeight - mFooterHeight) / 2
+                            - mPreviewPageMargin);
         } else {
             verticalPadding = Math.max(mPreviewListPadding,
                     (availableHeight - totalContentHeight) / 2);
@@ -791,6 +781,9 @@ public final class PageAdapter extends Adapter implements
                 page.animate().translationZ(mSelectedPageElevation)
                         .alpha(mSelectedPageAlpha);
             } else {
+                if (mConfirmedPagesInDocument.size() <= 1) {
+                    return;
+                }
                 mConfirmedPagesInDocument.remove(pageInDocument);
                 pageSelector.setSelected(false);
                 page.animate().translationZ(mUnselectedPageElevation)
