@@ -19,6 +19,7 @@ package android.service.voice;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.content.Intent;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
@@ -84,20 +85,31 @@ public class AlwaysOnHotwordDetector {
     private static final int STATE_NOT_READY = 0;
 
     // Keyphrase management actions. Used in getManageIntent() ----//
-    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {
                 MANAGE_ACTION_ENROLL,
                 MANAGE_ACTION_RE_ENROLL,
                 MANAGE_ACTION_UN_ENROLL
             })
-    public @interface ManageActions {}
+    private @interface ManageActions {}
 
-    /** Indicates that we need to enroll. */
+    /**
+     * Indicates that we need to enroll.
+     *
+     * @hide
+     */
     public static final int MANAGE_ACTION_ENROLL = 0;
-    /** Indicates that we need to re-enroll. */
+    /**
+     * Indicates that we need to re-enroll.
+     *
+     * @hide
+     */
     public static final int MANAGE_ACTION_RE_ENROLL = 1;
-    /** Indicates that we need to un-enroll. */
+    /**
+     * Indicates that we need to un-enroll.
+     *
+     * @hide
+     */
     public static final int MANAGE_ACTION_UN_ENROLL = 2;
 
     //-- Flags for startRecognition    ----//
@@ -111,7 +123,11 @@ public class AlwaysOnHotwordDetector {
             })
     public @interface RecognitionFlags {}
 
-    /** Empty flag for {@link #startRecognition(int)}. */
+    /**
+     * Empty flag for {@link #startRecognition(int)}.
+     *
+     * @hide
+     */
     public static final int RECOGNITION_FLAG_NONE = 0;
     /**
      * Recognition flag for {@link #startRecognition(int)} that indicates
@@ -264,7 +280,7 @@ public class AlwaysOnHotwordDetector {
     /**
      * Callbacks for always-on hotword detection.
      */
-    public interface Callback {
+    public static abstract class Callback {
         /**
          * Called when the hotword availability changes.
          * This indicates a change in the availability of recognition for the given keyphrase.
@@ -278,7 +294,7 @@ public class AlwaysOnHotwordDetector {
          * @see AlwaysOnHotwordDetector#STATE_KEYPHRASE_UNENROLLED
          * @see AlwaysOnHotwordDetector#STATE_KEYPHRASE_ENROLLED
          */
-        void onAvailabilityChanged(int status);
+        public abstract void onAvailabilityChanged(int status);
         /**
          * Called when the keyphrase is spoken.
          * This implicitly stops listening for the keyphrase once it's detected.
@@ -289,23 +305,23 @@ public class AlwaysOnHotwordDetector {
          *        This may contain the trigger audio, if requested when calling
          *        {@link AlwaysOnHotwordDetector#startRecognition(int)}.
          */
-        void onDetected(@NonNull EventPayload eventPayload);
+        public abstract void onDetected(@NonNull EventPayload eventPayload);
         /**
          * Called when the detection fails due to an error.
          */
-        void onError();
+        public abstract void onError();
         /**
          * Called when the recognition is paused temporarily for some reason.
          * This is an informational callback, and the clients shouldn't be doing anything here
          * except showing an indication on their UI if they have to.
          */
-        void onRecognitionPaused();
+        public abstract void onRecognitionPaused();
         /**
          * Called when the recognition is resumed after it was temporarily paused.
          * This is an informational callback, and the clients shouldn't be doing anything here
          * except showing an indication on their UI if they have to.
          */
-        void onRecognitionResumed();
+        public abstract void onRecognitionResumed();
     }
 
     /**
@@ -372,10 +388,10 @@ public class AlwaysOnHotwordDetector {
     /**
      * Starts recognition for the associated keyphrase.
      *
+     * @see #RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+     * @see #RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS
+     *
      * @param recognitionFlags The flags to control the recognition properties.
-     *        The allowed flags are {@link #RECOGNITION_FLAG_NONE},
-     *        {@link #RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO} and
-     *        {@link #RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS}.
      * @return Indicates whether the call succeeded or not.
      * @throws UnsupportedOperationException if the recognition isn't supported.
      *         Callers should only call this method after a supported state callback on
@@ -430,12 +446,13 @@ public class AlwaysOnHotwordDetector {
     }
 
     /**
-     * Gets an intent to manage the associated keyphrase.
+     * Creates an intent to start the enrollment for the associated keyphrase.
+     * This intent must be invoked using {@link Activity#startActivityForResult(Intent, int)}.
+     * Starting re-enrollment is only valid if the keyphrase is un-enrolled,
+     * i.e. {@link #STATE_KEYPHRASE_UNENROLLED},
+     * otherwise {@link #createIntentToReEnroll()} should be preferred.
      *
-     * @param action The manage action that needs to be performed.
-     *        One of {@link #MANAGE_ACTION_ENROLL}, {@link #MANAGE_ACTION_RE_ENROLL} or
-     *        {@link #MANAGE_ACTION_UN_ENROLL}.
-     * @return An {@link Intent} to manage the given keyphrase.
+     * @return An {@link Intent} to start enrollment for the given keyphrase.
      * @throws UnsupportedOperationException if managing they keyphrase isn't supported.
      *         Callers should only call this method after a supported state callback on
      *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
@@ -443,10 +460,52 @@ public class AlwaysOnHotwordDetector {
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
-    public Intent getManageIntent(@ManageActions int action) {
-        if (DBG) Slog.d(TAG, "getManageIntent(" + action + ")");
+    public Intent createIntentToEnroll() {
+        if (DBG) Slog.d(TAG, "createIntentToEnroll");
         synchronized (mLock) {
-            return getManageIntentLocked(action);
+            return getManageIntentLocked(MANAGE_ACTION_ENROLL);
+        }
+    }
+
+    /**
+     * Creates an intent to start the un-enrollment for the associated keyphrase.
+     * This intent must be invoked using {@link Activity#startActivityForResult(Intent, int)}.
+     * Starting re-enrollment is only valid if the keyphrase is already enrolled,
+     * i.e. {@link #STATE_KEYPHRASE_ENROLLED}, otherwise invoking this may result in an error.
+     *
+     * @return An {@link Intent} to start un-enrollment for the given keyphrase.
+     * @throws UnsupportedOperationException if managing they keyphrase isn't supported.
+     *         Callers should only call this method after a supported state callback on
+     *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+     * @throws IllegalStateException if the detector is in an invalid state.
+     *         This may happen if another detector has been instantiated or the
+     *         {@link VoiceInteractionService} hosting this detector has been shut down.
+     */
+    public Intent createIntentToUnEnroll() {
+        if (DBG) Slog.d(TAG, "createIntentToUnEnroll");
+        synchronized (mLock) {
+            return getManageIntentLocked(MANAGE_ACTION_UN_ENROLL);
+        }
+    }
+
+    /**
+     * Creates an intent to start the re-enrollment for the associated keyphrase.
+     * This intent must be invoked using {@link Activity#startActivityForResult(Intent, int)}.
+     * Starting re-enrollment is only valid if the keyphrase is already enrolled,
+     * i.e. {@link #STATE_KEYPHRASE_ENROLLED}, otherwise invoking this may result in an error.
+     *
+     * @return An {@link Intent} to start re-enrollment for the given keyphrase.
+     * @throws UnsupportedOperationException if managing they keyphrase isn't supported.
+     *         Callers should only call this method after a supported state callback on
+     *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+     * @throws IllegalStateException if the detector is in an invalid state.
+     *         This may happen if another detector has been instantiated or the
+     *         {@link VoiceInteractionService} hosting this detector has been shut down.
+     */
+    public Intent createIntentToReEnroll() {
+        if (DBG) Slog.d(TAG, "createIntentToReEnroll");
+        synchronized (mLock) {
+            return getManageIntentLocked(MANAGE_ACTION_RE_ENROLL);
         }
     }
 
@@ -460,12 +519,6 @@ public class AlwaysOnHotwordDetector {
                 && mAvailability != STATE_KEYPHRASE_UNENROLLED) {
             throw new UnsupportedOperationException(
                     "Managing the given keyphrase is not supported");
-        }
-
-        if (action != MANAGE_ACTION_ENROLL
-                && action != MANAGE_ACTION_RE_ENROLL
-                && action != MANAGE_ACTION_UN_ENROLL) {
-            throw new IllegalArgumentException("Invalid action specified " + action);
         }
 
         return mKeyphraseEnrollmentInfo.getManageKeyphraseIntent(action, mText, mLocale);
