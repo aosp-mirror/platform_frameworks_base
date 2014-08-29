@@ -170,7 +170,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private void sendSharedElementDestination() {
         boolean allReady;
-        if (allowOverlappingTransitions()) {
+        if (allowOverlappingTransitions() && getEnterViewsTransition() != null) {
             allReady = false;
         } else {
             allReady = !getDecor().isLayoutRequested();
