@@ -20,6 +20,8 @@ import android.content.ComponentName;
 
 /**
  * Simple response callback object.
+ *
+ * {@hide}
  */
 oneway interface RemoteServiceCallback {
     void onError();
