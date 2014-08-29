@@ -27198,16 +27198,14 @@ package android.service.textservice {
 package android.service.voice {
 
   public class AlwaysOnHotwordDetector {
-    method public android.content.Intent getManageIntent(int);
+    method public android.content.Intent createIntentToEnroll();
+    method public android.content.Intent createIntentToReEnroll();
+    method public android.content.Intent createIntentToUnEnroll();
     method public int getSupportedRecognitionModes();
     method public boolean startRecognition(int);
     method public boolean stopRecognition();
-    field public static final int MANAGE_ACTION_ENROLL = 0; // 0x0
-    field public static final int MANAGE_ACTION_RE_ENROLL = 1; // 0x1
-    field public static final int MANAGE_ACTION_UN_ENROLL = 2; // 0x2
     field public static final int RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS = 2; // 0x2
     field public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 1; // 0x1
-    field public static final int RECOGNITION_FLAG_NONE = 0; // 0x0
     field public static final int RECOGNITION_MODE_USER_IDENTIFICATION = 2; // 0x2
     field public static final int RECOGNITION_MODE_VOICE_TRIGGER = 1; // 0x1
     field public static final int STATE_HARDWARE_UNAVAILABLE = -2; // 0xfffffffe
@@ -27216,7 +27214,8 @@ package android.service.voice {
     field public static final int STATE_KEYPHRASE_UNSUPPORTED = -1; // 0xffffffff
   }
 
-  public static abstract interface AlwaysOnHotwordDetector.Callback {
+  public static abstract class AlwaysOnHotwordDetector.Callback {
+    ctor public AlwaysOnHotwordDetector.Callback();
     method public abstract void onAvailabilityChanged(int);
     method public abstract void onDetected(android.service.voice.AlwaysOnHotwordDetector.EventPayload);
     method public abstract void onError();
