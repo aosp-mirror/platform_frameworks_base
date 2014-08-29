@@ -118,11 +118,11 @@ public class BrowserService extends MediaBrowserService {
 
     @Override
     public BrowserRoot onGetRoot(String clientPackageName, int clientUid, Bundle rootHints) {
-        return new BrowserRoot(BROWSE_URI, null);
+        return new BrowserRoot(BROWSE_URI.toString(), null);
     }
 
     @Override
-    public void onLoadChildren(final Uri parentUri,
+    public void onLoadChildren(final String parentId,
             final Result<List<MediaBrowser.MediaItem>> result) {
         new Handler().postDelayed(new Runnable() {
                 public void run() {
