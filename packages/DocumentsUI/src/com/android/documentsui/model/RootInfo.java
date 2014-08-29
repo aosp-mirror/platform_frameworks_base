@@ -211,9 +211,17 @@ public class RootInfo implements Durable, Parcelable {
         }
     }
 
+    public Drawable loadDrawerIcon(Context context) {
+        if (derivedIcon != 0) {
+            return IconUtils.applyTintColor(context, derivedIcon, R.color.item_root_icon);
+        } else {
+            return IconUtils.loadPackageIcon(context, authority, icon);
+        }
+    }
+
     public Drawable loadGridIcon(Context context) {
         if (derivedIcon != 0) {
-            return IconUtils.applyTint(context, derivedIcon,
+            return IconUtils.applyTintAttr(context, derivedIcon,
                     android.R.attr.textColorPrimaryInverse);
         } else {
             return IconUtils.loadPackageIcon(context, authority, icon);
@@ -222,7 +230,7 @@ public class RootInfo implements Durable, Parcelable {
 
     public Drawable loadToolbarIcon(Context context) {
         if (derivedIcon != 0) {
-            return IconUtils.applyTint(context, derivedIcon,
+            return IconUtils.applyTintAttr(context, derivedIcon,
                     android.R.attr.colorControlNormal);
         } else {
             return IconUtils.loadPackageIcon(context, authority, icon);
