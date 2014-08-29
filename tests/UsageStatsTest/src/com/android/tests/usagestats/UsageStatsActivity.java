@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.format.DateUtils;
-import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,6 +35,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
 
 public class UsageStatsActivity extends ListActivity {
     private static final long USAGE_STATS_PERIOD = 1000 * 60 * 60 * 24 * 14;
@@ -84,7 +84,7 @@ public class UsageStatsActivity extends ListActivity {
     private void updateAdapter() {
         long now = System.currentTimeMillis();
         long beginTime = now - USAGE_STATS_PERIOD;
-        ArrayMap<String, UsageStats> stats = mUsageStatsManager.queryAndAggregateUsageStats(
+        Map<String, UsageStats> stats = mUsageStatsManager.queryAndAggregateUsageStats(
                 beginTime, now);
         mAdapter.update(stats);
     }
@@ -92,17 +92,13 @@ public class UsageStatsActivity extends ListActivity {
     private class Adapter extends BaseAdapter {
         private ArrayList<UsageStats> mStats = new ArrayList<>();
 
-        public void update(ArrayMap<String, UsageStats> stats) {
+        public void update(Map<String, UsageStats> stats) {
             mStats.clear();
             if (stats == null) {
                 return;
             }
 
-            final int packageCount = stats.size();
-            for (int i = 0; i < packageCount; i++) {
-                mStats.add(stats.valueAt(i));
-            }
-
+            mStats.addAll(stats.values());
             Collections.sort(mStats, mComparator);
             notifyDataSetChanged();
         }
