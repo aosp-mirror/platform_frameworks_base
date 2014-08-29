@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <public name="background" type="attr" id="0x01010000"/>
+    <public name="foreground" type="attr" id="0x01010001"/>
+    <public name="Theme.One" type="style" id="0x01020000"/>
+
+    <attr name="background" format="color|reference"/>
+    <attr name="foreground" format="color|reference"/>
+    <style name="Theme.One" parent="">
+        <item name="android:background">#ff0000</item>
+        <item name="android:foreground">#000000</item>
+    </style>
+</resources>
