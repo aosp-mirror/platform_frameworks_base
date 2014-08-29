@@ -131,11 +131,13 @@ public class FileBridge extends Thread {
     }
 
     public static class FileBridgeOutputStream extends OutputStream {
+        private final ParcelFileDescriptor mClientPfd;
         private final FileDescriptor mClient;
         private final byte[] mTemp = new byte[MSG_LENGTH];
 
-        public FileBridgeOutputStream(FileDescriptor client) {
-            mClient = client;
+        public FileBridgeOutputStream(ParcelFileDescriptor clientPfd) {
+            mClientPfd = clientPfd;
+            mClient = clientPfd.getFileDescriptor();
         }
 
         @Override
