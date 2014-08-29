@@ -191,6 +191,20 @@ public class EditableInputConnection extends BaseInputConnection {
     public boolean requestUpdateCursorAnchorInfo(int cursorUpdateMode) {
         if (DEBUG) Log.v(TAG, "requestUpdateCursorAnchorInfo " + cursorUpdateMode);
 
+        // It is possible that any other bit is used as a valid flag in a future release.
+        // We should reject the entire request in such a case.
+        final int KNOWN_FLAGS_MASK = InputConnection.REQUEST_UPDATE_CURSOR_ANCHOR_INFO_IMMEDIATE |
+                InputConnection.REQUEST_UPDATE_CURSOR_ANCHOR_INFO_MONITOR;
+        final int unknownFlags = cursorUpdateMode & ~KNOWN_FLAGS_MASK;
+        if (unknownFlags != 0) {
+            if (DEBUG) {
+                Log.d(TAG, "Rejecting requestUpdateCursorAnchorInfo due to unknown flags." +
+                        " cursorUpdateMode=" + cursorUpdateMode +
+                        " unknownFlags=" + unknownFlags);
+            }
+            return false;
+        }
+
         if (mIMM == null) {
             // In this case, TYPE_CURSOR_ANCHOR_INFO is not handled.
             // TODO: Return some notification code rather than false to indicate method that
