@@ -28,27 +28,12 @@ namespace uirenderer {
 
 /**
  * AmbientShadow is used to calculate the ambient shadow value around a polygon.
- *
- * TODO: calculateIntersection() now is O(N*M), where N is the number of
- * polygon's vertics and M is the number of rays. In fact, by staring tracing
- * the vertex from the previous intersection, the algorithm can be O(N + M);
  */
 class AmbientShadow {
 public:
     static void createAmbientShadow(bool isCasterOpaque, const Vector3* poly,
             int polyLength, const Vector3& centroid3d, float heightFactor,
             float geomFactor, VertexBuffer& shadowVertexBuffer);
-
-private:
-    static void calculateRayDirections(const int rays, const Vector3* vertices,
-            const int vertexCount, const Vector3& centroid3d, Vector2* dir);
-
-    static void calculateIntersection(const Vector3* poly, int nbVertices,
-            const Vector3& start, const Vector2& dir, int& outEdgeIndex,
-            float& outEdgeFraction, float& outRayDist);
-
-    static void calculateNormal(int rays, int currentRayIndex, const Vector2* dir,
-            const float* rayDist, Vector2& normal);
 }; // AmbientShadow
 
 }; // namespace uirenderer
