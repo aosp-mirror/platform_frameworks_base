@@ -21,6 +21,7 @@ import android.os.Parcelable;
 
 /**
  * Represents the camera capabilities important to a Video Telephony provider.
+ * @hide
  */
 public final class CameraCapabilities implements Parcelable {
 

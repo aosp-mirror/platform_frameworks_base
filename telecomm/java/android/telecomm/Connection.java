@@ -1012,8 +1012,17 @@ public abstract class Connection {
      * a request to accept.
      *
      * @param videoState The video state in which to answer the call.
+     * @hide
      */
     public void onAnswer(int videoState) {}
+
+    /**
+     * Notifies this Connection, which is in {@link #STATE_RINGING}, of
+     * a request to accept.
+     */
+    public void onAnswer() {
+        onAnswer(VideoProfile.VideoState.AUDIO_ONLY);
+    }
 
     /**
      * Notifies this Connection, which is in {@link #STATE_RINGING}, of

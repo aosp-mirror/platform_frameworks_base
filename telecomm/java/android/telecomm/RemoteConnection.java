@@ -426,12 +426,25 @@ public final class RemoteConnection {
 
     /**
      * Instructs this {@link Connection#STATE_RINGING} {@code RemoteConnection} to answer.
+     */
+    public void answer() {
+        try {
+            if (mConnected) {
+                mConnectionService.answer(mConnectionId);
+            }
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Instructs this {@link Connection#STATE_RINGING} {@code RemoteConnection} to answer.
      * @param videoState The video state in which to answer the call.
+     * @hide
      */
     public void answer(int videoState) {
         try {
             if (mConnected) {
-                mConnectionService.answer(mConnectionId, videoState);
+                mConnectionService.answerVideo(mConnectionId, videoState);
             }
         } catch (RemoteException ignored) {
         }
