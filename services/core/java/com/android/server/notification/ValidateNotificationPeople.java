@@ -71,8 +71,17 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
     private LruCache<String, LookupResult> mPeopleCache;
 
     private RankingReconsideration validatePeople(final NotificationRecord record) {
+        final String key = record.getKey();
+        final Bundle extras = record.getNotification().extras;
+        final float[] affinityOut = new float[1];
+        final RankingReconsideration rr = validatePeople(key, extras, affinityOut);
+        record.setContactAffinity(affinityOut[0]);
+        return rr;
+    }
+
+    private PeopleRankingReconsideration validatePeople(String key, Bundle extras,
+            float[] affinityOut) {
         float affinity = NONE;
-        Bundle extras = record.getNotification().extras;
         if (extras == null) {
             return null;
         }
@@ -82,7 +91,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
             return null;
         }
 
-        if (INFO) Slog.i(TAG, "Validating: " + record.sbn.getKey());
+        if (INFO) Slog.i(TAG, "Validating: " + key);
         final LinkedList<String> pendingLookups = new LinkedList<String>();
         for (int personIdx = 0; personIdx < people.length && personIdx < MAX_PEOPLE; personIdx++) {
             final String handle = people[personIdx];
@@ -102,51 +111,15 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         }
 
         // record the best available data, so far:
-        record.setContactAffinity(affinity);
+        affinityOut[0] = affinity;
 
         if (pendingLookups.isEmpty()) {
             if (INFO) Slog.i(TAG, "final affinity: " + affinity);
             return null;
         }
 
-        if (DEBUG) Slog.d(TAG, "Pending: future work scheduled for: " + record.sbn.getKey());
-        return new RankingReconsideration(record.getKey()) {
-            float mContactAffinity = NONE;
-            @Override
-            public void work() {
-                if (INFO) Slog.i(TAG, "Executing: validation for: " + record.getKey());
-                for (final String handle: pendingLookups) {
-                    LookupResult lookupResult = null;
-                    final Uri uri = Uri.parse(handle);
-                    if ("tel".equals(uri.getScheme())) {
-                        if (DEBUG) Slog.d(TAG, "checking telephone URI: " + handle);
-                        lookupResult = resolvePhoneContact(uri.getSchemeSpecificPart());
-                    } else if ("mailto".equals(uri.getScheme())) {
-                        if (DEBUG) Slog.d(TAG, "checking mailto URI: " + handle);
-                        lookupResult = resolveEmailContact(uri.getSchemeSpecificPart());
-                    } else if (handle.startsWith(Contacts.CONTENT_LOOKUP_URI.toString())) {
-                        if (DEBUG) Slog.d(TAG, "checking lookup URI: " + handle);
-                        lookupResult = searchContacts(uri);
-                    } else {
-                        lookupResult = new LookupResult();  // invalid person for the cache
-                        Slog.w(TAG, "unsupported URI " + handle);
-                    }
-                    if (lookupResult != null) {
-                        synchronized (mPeopleCache) {
-                            mPeopleCache.put(handle, lookupResult);
-                        }
-                        mContactAffinity = Math.max(mContactAffinity, lookupResult.getAffinity());
-                    }
-                }
-            }
-
-            @Override
-            public void applyChangesLocked(NotificationRecord operand) {
-                float affinityBound = operand.getContactAffinity();
-                operand.setContactAffinity(Math.max(mContactAffinity, affinityBound));
-                if (INFO) Slog.i(TAG, "final affinity: " + operand.getContactAffinity());
-            }
-        };
+        if (DEBUG) Slog.d(TAG, "Pending: future work scheduled for: " + key);
+        return new PeopleRankingReconsideration(key, pendingLookups);
     }
 
     // VisibleForTesting
@@ -269,6 +242,19 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         // ignore: config has no relevant information yet.
     }
 
+    public float getContactAffinity(Bundle extras) {
+        if (extras == null) return NONE;
+        final String key = Long.toString(System.nanoTime());
+        final float[] affinityOut = new float[1];
+        final PeopleRankingReconsideration prr = validatePeople(key, extras, affinityOut);
+        float affinity = affinityOut[0];
+        if (prr != null) {
+            prr.work();
+            affinity = Math.max(prr.getContactAffinity(), affinity);
+        }
+        return affinity;
+    }
+
     private static class LookupResult {
         private static final long CONTACT_REFRESH_MILLIS = 60 * 60 * 1000;  // 1hr
         public static final int INVALID_ID = -1;
@@ -326,6 +312,56 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         public LookupResult setId(int id) {
             mId = id;
             return this;
+        }
+    }
+
+    private class PeopleRankingReconsideration extends RankingReconsideration {
+        private final LinkedList<String> mPendingLookups;
+
+        private float mContactAffinity = NONE;
+
+        private PeopleRankingReconsideration(String key, LinkedList<String> pendingLookups) {
+            super(key);
+            mPendingLookups = pendingLookups;
+        }
+
+        @Override
+        public void work() {
+            if (INFO) Slog.i(TAG, "Executing: validation for: " + mKey);
+            for (final String handle: mPendingLookups) {
+                LookupResult lookupResult = null;
+                final Uri uri = Uri.parse(handle);
+                if ("tel".equals(uri.getScheme())) {
+                    if (DEBUG) Slog.d(TAG, "checking telephone URI: " + handle);
+                    lookupResult = resolvePhoneContact(uri.getSchemeSpecificPart());
+                } else if ("mailto".equals(uri.getScheme())) {
+                    if (DEBUG) Slog.d(TAG, "checking mailto URI: " + handle);
+                    lookupResult = resolveEmailContact(uri.getSchemeSpecificPart());
+                } else if (handle.startsWith(Contacts.CONTENT_LOOKUP_URI.toString())) {
+                    if (DEBUG) Slog.d(TAG, "checking lookup URI: " + handle);
+                    lookupResult = searchContacts(uri);
+                } else {
+                    lookupResult = new LookupResult();  // invalid person for the cache
+                    Slog.w(TAG, "unsupported URI " + handle);
+                }
+                if (lookupResult != null) {
+                    synchronized (mPeopleCache) {
+                        mPeopleCache.put(handle, lookupResult);
+                    }
+                    mContactAffinity = Math.max(mContactAffinity, lookupResult.getAffinity());
+                }
+            }
+        }
+
+        @Override
+        public void applyChangesLocked(NotificationRecord operand) {
+            float affinityBound = operand.getContactAffinity();
+            operand.setContactAffinity(Math.max(mContactAffinity, affinityBound));
+            if (INFO) Slog.i(TAG, "final affinity: " + operand.getContactAffinity());
+        }
+
+        public float getContactAffinity() {
+            return mContactAffinity;
         }
     }
 }
