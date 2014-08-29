@@ -87,8 +87,11 @@ public class RenderNodeAnimator extends Animator {
     private float mFinalValue;
     private TimeInterpolator mInterpolator;
 
-    private boolean mStarted = false;
-    private boolean mFinished = false;
+    private static final int STATE_PREPARE = 0;
+    private static final int STATE_DELAYED = 1;
+    private static final int STATE_RUNNING = 2;
+    private static final int STATE_FINISHED = 3;
+    private int mState = STATE_PREPARE;
 
     private long mUnscaledDuration = 300;
     private long mUnscaledStartDelay = 0;
@@ -142,7 +145,7 @@ public class RenderNodeAnimator extends Animator {
     }
 
     private void checkMutable() {
-        if (mStarted) {
+        if (mState != STATE_PREPARE) {
             throw new IllegalStateException("Animator has already started, cannot change it now!");
         }
     }
@@ -170,11 +173,11 @@ public class RenderNodeAnimator extends Animator {
             throw new IllegalStateException("Missing target!");
         }
 
-        if (mStarted) {
+        if (mState != STATE_PREPARE) {
             throw new IllegalStateException("Already started!");
         }
 
-        mStarted = true;
+        mState = STATE_DELAYED;
         applyInterpolator();
 
         if (mStartDelay <= 0 || !mUiThreadHandlesDelay) {
@@ -186,6 +189,7 @@ public class RenderNodeAnimator extends Animator {
     }
 
     private void doStart() {
+        mState = STATE_RUNNING;
         nStart(mNativePtr.get(), this);
 
         // Alpha is a special snowflake that has the canonical value stored
@@ -197,11 +201,7 @@ public class RenderNodeAnimator extends Animator {
             mViewTarget.mTransformationInfo.mAlpha = mFinalValue;
         }
 
-        final ArrayList<AnimatorListener> listeners = cloneListeners();
-        final int numListeners = listeners == null ? 0 : listeners.size();
-        for (int i = 0; i < numListeners; i++) {
-            listeners.get(i).onAnimationStart(this);
-        }
+        notifyStartListeners();
 
         if (mViewTarget != null) {
             // Kick off a frame to start the process
@@ -209,10 +209,21 @@ public class RenderNodeAnimator extends Animator {
         }
     }
 
+    private void notifyStartListeners() {
+        final ArrayList<AnimatorListener> listeners = cloneListeners();
+        final int numListeners = listeners == null ? 0 : listeners.size();
+        for (int i = 0; i < numListeners; i++) {
+            listeners.get(i).onAnimationStart(this);
+        }
+    }
+
     @Override
     public void cancel() {
-        if (!mFinished) {
-            getHelper().removeDelayedAnimation(this);
+        if (mState != STATE_FINISHED) {
+            if (mState == STATE_DELAYED) {
+                getHelper().removeDelayedAnimation(this);
+                notifyStartListeners();
+            }
             nEnd(mNativePtr.get());
 
             final ArrayList<AnimatorListener> listeners = cloneListeners();
@@ -220,12 +231,17 @@ public class RenderNodeAnimator extends Animator {
             for (int i = 0; i < numListeners; i++) {
                 listeners.get(i).onAnimationCancel(this);
             }
+
+            if (mViewTarget != null) {
+                // Kick off a frame to flush the state change
+                mViewTarget.invalidateViewProperty(true, false);
+            }
         }
     }
 
     @Override
     public void end() {
-        if (!mFinished) {
+        if (mState != STATE_FINISHED) {
             nEnd(mNativePtr.get());
         }
     }
@@ -299,12 +315,12 @@ public class RenderNodeAnimator extends Animator {
 
     @Override
     public boolean isRunning() {
-        return mStarted && !mFinished;
+        return mState == STATE_DELAYED || mState == STATE_RUNNING;
     }
 
     @Override
     public boolean isStarted() {
-        return mStarted;
+        return mState != STATE_PREPARE;
     }
 
     @Override
@@ -319,7 +335,11 @@ public class RenderNodeAnimator extends Animator {
     }
 
     protected void onFinished() {
-        mFinished = true;
+        if (mState == STATE_DELAYED) {
+            getHelper().removeDelayedAnimation(this);
+            notifyStartListeners();
+        }
+        mState = STATE_FINISHED;
 
         final ArrayList<AnimatorListener> listeners = cloneListeners();
         final int numListeners = listeners == null ? 0 : listeners.size();
