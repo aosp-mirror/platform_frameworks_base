@@ -26,7 +26,6 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -46,7 +45,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
-import android.provider.Settings.Global;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.KeyEvent;
@@ -58,6 +56,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -97,6 +96,7 @@ public class VolumePanel extends Handler {
     private static final int TIMEOUT_DELAY_SHORT = 1500;
     private static final int TIMEOUT_DELAY_COLLAPSED = 4500;
     private static final int TIMEOUT_DELAY_SAFETY_WARNING = 5000;
+    private static final int TIMEOUT_DELAY_SAFETY_WARNING_TALKBACK = 25000;
     private static final int TIMEOUT_DELAY_EXPANDED = 10000;
 
     private static final int MSG_VOLUME_CHANGED = 0;
@@ -161,6 +161,7 @@ public class VolumePanel extends Handler {
     private int mActiveStreamType = -1;
     /** All the slider controls mapped by stream type */
     private SparseArray<StreamControl> mStreamControls;
+    private final AccessibilityManager mAccessibilityManager;
 
     private enum StreamResources {
         BluetoothSCOStream(AudioManager.STREAM_BLUETOOTH_SCO,
@@ -332,6 +333,8 @@ public class VolumePanel extends Handler {
         mContext = context;
         mZenController = zenController;
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        mAccessibilityManager = (AccessibilityManager) context.getSystemService(
+                Context.ACCESSIBILITY_SERVICE);
 
         // For now, only show master volume if master volume is supported
         final Resources res = context.getResources();
@@ -791,7 +794,8 @@ public class VolumePanel extends Handler {
     }
 
     private void updateTimeoutDelay() {
-        mTimeoutDelay = sSafetyWarning != null ? TIMEOUT_DELAY_SAFETY_WARNING
+        mTimeoutDelay = sSafetyWarning != null ? mAccessibilityManager.isEnabled() ?
+                TIMEOUT_DELAY_SAFETY_WARNING_TALKBACK : TIMEOUT_DELAY_SAFETY_WARNING
                 : mActiveStreamType == AudioManager.STREAM_MUSIC ? TIMEOUT_DELAY_SHORT
                 : mZenPanelExpanded ? TIMEOUT_DELAY_EXPANDED
                 : isZenPanelVisible() ? TIMEOUT_DELAY_COLLAPSED
@@ -1214,6 +1218,7 @@ public class VolumePanel extends Handler {
             }
             updateStates();
         }
+        updateTimeoutDelay();
         resetTimeout();
     }
 
