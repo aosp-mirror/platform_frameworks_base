@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import android.app.ActivityManager;
+import android.os.SystemClock;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.wm.WindowManagerService;
 
@@ -528,12 +529,18 @@ final class ProcessList {
         if (amt == UNKNOWN_ADJ)
             return;
 
+        long start = SystemClock.elapsedRealtime();
         ByteBuffer buf = ByteBuffer.allocate(4 * 4);
         buf.putInt(LMK_PROCPRIO);
         buf.putInt(pid);
         buf.putInt(uid);
         buf.putInt(amt);
         writeLmkd(buf);
+        long now = SystemClock.elapsedRealtime();
+        if ((now-start) > 250) {
+            Slog.w("ActivityManager", "SLOW OOM ADJ: " + (now-start) + "ms for pid " + pid
+                    + " = " + amt);
+        }
     }
 
     /*
