@@ -41,6 +41,7 @@ import android.view.Surface;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -967,6 +968,8 @@ public class CameraDeviceImpl extends CameraDevice {
 
         private long mCompletedFrameNumber = -1;
         private final TreeSet<Long> mFutureErrorSet = new TreeSet<Long>();
+        /** Map frame numbers to list of partial results */
+        private final HashMap<Long, List<CaptureResult>> mPartialResults = new HashMap<>();
 
         private void update() {
             Iterator<Long> iter = mFutureErrorSet.iterator();
@@ -983,8 +986,8 @@ public class CameraDeviceImpl extends CameraDevice {
 
         /**
          * This function is called every time when a result or an error is received.
-         * @param frameNumber: the frame number corresponding to the result or error
-         * @param isError: true if it is an error, false if it is not an error
+         * @param frameNumber the frame number corresponding to the result or error
+         * @param isError true if it is an error, false if it is not an error
          */
         public void updateTracker(long frameNumber, boolean isError) {
             if (isError) {
@@ -1004,6 +1007,55 @@ public class CameraDeviceImpl extends CameraDevice {
                 mCompletedFrameNumber++;
             }
             update();
+        }
+
+        /**
+         * This function is called every time a result has been completed.
+         *
+         * <p>It keeps a track of all the partial results already created for a particular
+         * frame number.</p>
+         *
+         * @param frameNumber the frame number corresponding to the result
+         * @param result the total or partial result
+         * @param partial {@true} if the result is partial, {@code false} if total
+         */
+        public void updateTracker(long frameNumber, CaptureResult result, boolean partial) {
+
+            if (!partial) {
+                // Update the total result's frame status as being successful
+                updateTracker(frameNumber, /*isError*/false);
+                // Don't keep a list of total results, we don't need to track them
+                return;
+            }
+
+            if (result == null) {
+                // Do not record blank results; this also means there will be no total result
+                // so it doesn't matter that the partials were not recorded
+                return;
+            }
+
+            // Partial results must be aggregated in-order for that frame number
+            List<CaptureResult> partials = mPartialResults.get(frameNumber);
+            if (partials == null) {
+                partials = new ArrayList<>();
+                mPartialResults.put(frameNumber, partials);
+            }
+
+            partials.add(result);
+        }
+
+        /**
+         * Attempt to pop off all of the partial results seen so far for the {@code frameNumber}.
+         *
+         * <p>Once popped-off, the partial results are forgotten (unless {@code updateTracker}
+         * is called again with new partials for that frame number).</p>
+         *
+         * @param frameNumber the frame number corresponding to the result
+         * @return a list of partial results for that frame with at least 1 element,
+         *         or {@code null} if there were no partials recorded for that frame
+         */
+        public List<CaptureResult> popPartialResults(long frameNumber) {
+            return mPartialResults.remove(frameNumber);
         }
 
         public long getCompletedFrameNumber() {
@@ -1244,12 +1296,6 @@ public class CameraDeviceImpl extends CameraDevice {
                 boolean isPartialResult =
                         (resultExtras.getPartialResultCount() < mTotalPartialCount);
 
-                // Update tracker (increment counter) when it's not a partial result.
-                if (!isPartialResult) {
-                    mFrameNumberTracker.updateTracker(frameNumber,
-                            /*error*/false);
-                }
-
                 // Check if we have a listener for this
                 if (holder == null) {
                     if (DEBUG) {
@@ -1257,6 +1303,9 @@ public class CameraDeviceImpl extends CameraDevice {
                                 "holder is null, early return at frame "
                                         + frameNumber);
                     }
+
+                    mFrameNumberTracker.updateTracker(frameNumber, /*result*/null, isPartialResult);
+
                     return;
                 }
 
@@ -1266,12 +1315,16 @@ public class CameraDeviceImpl extends CameraDevice {
                                 "camera is closed, early return at frame "
                                         + frameNumber);
                     }
+
+                    mFrameNumberTracker.updateTracker(frameNumber, /*result*/null, isPartialResult);
                     return;
                 }
 
                 final CaptureRequest request = holder.getRequest(resultExtras.getSubsequenceId());
 
                 Runnable resultDispatch = null;
+
+                CaptureResult finalResult;
 
                 // Either send a partial result or the final capture completed result
                 if (isPartialResult) {
@@ -1290,9 +1343,14 @@ public class CameraDeviceImpl extends CameraDevice {
                             }
                         }
                     };
+
+                    finalResult = resultAsCapture;
                 } else {
+                    List<CaptureResult> partialResults =
+                            mFrameNumberTracker.popPartialResults(frameNumber);
+
                     final TotalCaptureResult resultAsCapture =
-                            new TotalCaptureResult(result, request, resultExtras);
+                            new TotalCaptureResult(result, request, resultExtras, partialResults);
 
                     // Final capture result
                     resultDispatch = new Runnable() {
@@ -1306,9 +1364,14 @@ public class CameraDeviceImpl extends CameraDevice {
                             }
                         }
                     };
+
+                    finalResult = resultAsCapture;
                 }
 
                 holder.getHandler().post(resultDispatch);
+
+                // Collect the partials for a total result; or mark the frame as totally completed
+                mFrameNumberTracker.updateTracker(frameNumber, finalResult, isPartialResult);
 
                 // Fire onCaptureSequenceCompleted
                 if (!isPartialResult) {
