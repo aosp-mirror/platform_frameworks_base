@@ -293,6 +293,10 @@ public class UserManagerService extends IUserManager.Stub {
     private List<UserInfo> getProfilesLocked(int userId, boolean enabledOnly) {
         UserInfo user = getUserInfoLocked(userId);
         ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
+        if (user == null) {
+            // Probably a dying user
+            return users;
+        }
         for (int i = 0; i < mUsers.size(); i++) {
             UserInfo profile = mUsers.valueAt(i);
             if (!isProfileOf(user, profile)) {
@@ -1280,7 +1284,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     private void removeUserStateLocked(final int userHandle) {
         // Cleanup package manager settings
-        mPm.cleanUpUserLILPw(userHandle);
+        mPm.cleanUpUserLILPw(this, userHandle);
 
         // Remove this user from the list
         mUsers.remove(userHandle);
