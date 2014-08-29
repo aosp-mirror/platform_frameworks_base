@@ -7698,8 +7698,21 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void installPackage(String originPath, IPackageInstallObserver2 observer,
             int installFlags, String installerPackageName, VerificationParams verificationParams,
             String packageAbiOverride) {
+        installPackageAsUser(originPath, observer, installFlags, installerPackageName, verificationParams,
+                packageAbiOverride, UserHandle.getCallingUserId());
+    }
+
+    @Override
+    public void installPackageAsUser(String originPath, IPackageInstallObserver2 observer,
+            int installFlags, String installerPackageName, VerificationParams verificationParams,
+            String packageAbiOverride, int userId) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES,
                 null);
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "installPackage " + userId);
+        }
 
         final File originFile = new File(originPath);
         final int uid = Binder.getCallingUid();
@@ -7717,7 +7730,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if ((installFlags & PackageManager.INSTALL_ALL_USERS) != 0) {
             user = UserHandle.ALL;
         } else {
-            user = new UserHandle(UserHandle.getUserId(uid));
+            user = new UserHandle(userId);
         }
 
         final int filteredInstallFlags;
@@ -12965,7 +12978,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /** Called by UserManagerService */
-    void cleanUpUserLILPw(int userHandle) {
+    void cleanUpUserLILPw(UserManagerService userManager, int userHandle) {
         mDirtyUsers.remove(userHandle);
         mSettings.removeUserLPw(userHandle);
         mPendingBroadcasts.remove(userHandle);
@@ -12976,6 +12989,50 @@ public class PackageManagerService extends IPackageManager.Stub {
             mInstaller.removeUserDataDirs(userHandle);
         }
         mUserNeedsBadging.delete(userHandle);
+        removeUnusedPackagesLILPw(userManager, userHandle);
+    }
+
+    /**
+     * We're removing userHandle and would like to remove any downloaded packages
+     * that are no longer in use by any other user.
+     * @param userHandle the user being removed
+     */
+    private void removeUnusedPackagesLILPw(UserManagerService userManager, final int userHandle) {
+        final boolean DEBUG_CLEAN_APKS = false;
+        int [] users = userManager.getUserIdsLPr();
+        Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
+        while (psit.hasNext()) {
+            PackageSetting ps = psit.next();
+            final String packageName = ps.pkg.packageName;
+            // Skip over if system app
+            if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                continue;
+            }
+            if (DEBUG_CLEAN_APKS) {
+                Slog.i(TAG, "Checking package " + packageName);
+            }
+            boolean keep = false;
+            for (int i = 0; i < users.length; i++) {
+                if (users[i] != userHandle && ps.getInstalled(users[i])) {
+                    keep = true;
+                    if (DEBUG_CLEAN_APKS) {
+                        Slog.i(TAG, "  Keeping package " + packageName + " for user "
+                                + users[i]);
+                    }
+                    break;
+                }
+            }
+            if (!keep) {
+                if (DEBUG_CLEAN_APKS) {
+                    Slog.i(TAG, "  Removing package " + packageName);
+                }
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        deletePackageX(packageName, userHandle, 0);
+                    } //end run
+                });
+            }
+        }
     }
 
     /** Called by UserManagerService */
