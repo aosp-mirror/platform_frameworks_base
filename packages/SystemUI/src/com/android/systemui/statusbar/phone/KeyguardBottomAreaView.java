@@ -380,21 +380,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLockIcon.setImageResource(iconRes);
         boolean trustManaged = mUnlockMethodCache.isTrustManaged();
         mTrustDrawable.setTrustManaged(trustManaged);
-
         updateLockIconClickability();
-        updateLockIconContentDescription(mUnlockMethodCache.isFaceUnlockRunning(),
-                mUnlockMethodCache.isMethodInsecure(), trustManaged);
     }
 
-    private void updateLockIconContentDescription(boolean faceUnlockRunning, boolean insecure,
-            boolean trustManaged) {
-        mLockIcon.setContentDescription(getResources().getString(
-                faceUnlockRunning ? R.string.accessibility_unlock_button_face_unlock_running
-                : insecure && !trustManaged ? R.string.accessibility_unlock_button_not_secured
-                : insecure ? R.string.accessibility_unlock_button_not_secured_trust_managed
-                : !trustManaged ? R.string.accessibility_unlock_button_secured
-                : R.string.accessibility_unlock_button_secured_trust_managed));
-    }
+
 
     public KeyguardAffordanceView getPhoneView() {
         return mPhoneImageView;
