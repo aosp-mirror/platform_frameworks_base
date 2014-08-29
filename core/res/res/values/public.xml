@@ -2280,6 +2280,8 @@
   <public type="attr" name="reparentWithOverlay" />
   <public type="attr" name="ambientShadowAlpha" />
   <public type="attr" name="spotShadowAlpha" />
+  <public type="attr" name="navigationIcon" />
+  <public type="attr" name="navigationContentDescription" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 

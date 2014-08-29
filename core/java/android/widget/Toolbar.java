@@ -244,6 +244,16 @@ public class Toolbar extends ViewGroup {
         // Set the default context, since setPopupTheme() may be a no-op.
         mPopupContext = mContext;
         setPopupTheme(a.getResourceId(R.styleable.Toolbar_popupTheme, 0));
+
+        final Drawable navIcon = a.getDrawable(R.styleable.Toolbar_navigationIcon);
+        if (navIcon != null) {
+            setNavigationIcon(navIcon);
+            final CharSequence navDesc = a.getText(
+                    R.styleable.Toolbar_navigationContentDescription);
+            if (!TextUtils.isEmpty(navDesc)) {
+                setNavigationContentDescription(navDesc);
+            }
+        }
         a.recycle();
     }
 

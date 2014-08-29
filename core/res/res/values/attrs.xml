@@ -7318,6 +7318,8 @@
         <!-- Reference to a theme that should be used to inflate popups
              shown by widgets in the toolbar. -->
         <attr name="popupTheme" format="reference" />
+        <attr name="navigationIcon" format="reference" />
+        <attr name="navigationContentDescription" format="string|reference" />
     </declare-styleable>
 
     <declare-styleable name="Toolbar_LayoutParams">
