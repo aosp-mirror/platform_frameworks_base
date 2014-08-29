@@ -44,8 +44,8 @@
         android:paddingStart="8dp"
         />
     <ImageView android:id="@+id/profile_badge_line3"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="@dimen/notification_badge_size"
+        android:layout_height="@dimen/notification_badge_size"
         android:layout_gravity="center"
         android:layout_weight="0"
         android:layout_marginStart="4dp"
