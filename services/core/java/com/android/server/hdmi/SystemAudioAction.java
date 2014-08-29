@@ -73,9 +73,9 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
 
     // Seq #27
     protected void sendSystemAudioModeRequest() {
-        mState = STATE_CHECK_ROUTING_IN_PRGRESS;
         List<RoutingControlAction> routingActions = getActions(RoutingControlAction.class);
         if (!routingActions.isEmpty()) {
+            mState = STATE_CHECK_ROUTING_IN_PRGRESS;
             // Should have only one Routing Control Action
             RoutingControlAction routingAction = routingActions.get(0);
             routingAction.addOnFinishedCallback(this, new Runnable() {
@@ -97,20 +97,21 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error == Constants.SEND_RESULT_SUCCESS) {
-                    mState = STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE;
-                    addTimer(mState, mTargetAudioStatus ? ON_TIMEOUT_MS : OFF_TIMEOUT_MS);
-                } else {
+                if (error != Constants.SEND_RESULT_SUCCESS) {
+                    DLOGGER.debug("Failed to send <System Audio Mode Request>:" + error);
                     setSystemAudioMode(false);
                     finishWithCallback(HdmiControlManager.RESULT_COMMUNICATION_FAILED);
                 }
             }
         });
+        mState = STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE;
+        addTimer(mState, mTargetAudioStatus ? ON_TIMEOUT_MS : OFF_TIMEOUT_MS);
     }
 
     private void handleSendSystemAudioModeRequestTimeout() {
         if (!mTargetAudioStatus  // Don't retry for Off case.
                 || mSendRetryCount++ >= MAX_SEND_RETRY_COUNT) {
+            DLOGGER.debug("[T]:wait for <Set System Audio Mode>.");
             setSystemAudioMode(false);
             finishWithCallback(HdmiControlManager.RESULT_TIMEOUT);
             return;
@@ -129,6 +130,7 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
                 if (cmd.getOpcode() == Constants.MESSAGE_FEATURE_ABORT
                         && (cmd.getParams()[0] & 0xFF)
                                 == Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST) {
+                    DLOGGER.debug("Failed to start system audio mode request.");
                     setSystemAudioMode(false);
                     finishWithCallback(HdmiControlManager.RESULT_EXCEPTION);
                     return true;
@@ -143,6 +145,7 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
                     startAudioStatusAction();
                     return true;
                 } else {
+                    DLOGGER.debug("Unexpected system audio mode request:" + receivedStatus);
                     // Unexpected response, consider the request is newly initiated by AVR.
                     // To return 'false' will initiate new SystemAudioActionFromAvr by the control
                     // service.

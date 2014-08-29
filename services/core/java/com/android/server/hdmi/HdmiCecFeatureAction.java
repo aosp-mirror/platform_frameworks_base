@@ -43,6 +43,9 @@ import java.util.List;
  */
 abstract class HdmiCecFeatureAction {
     private static final String TAG = "HdmiCecFeatureAction";
+    // As all actions run in the same thread (service thread), it's fine to have single logger.
+    // TODO: create global logger for each threads and use them.
+    protected static final HdmiLogger DLOGGER = new HdmiLogger(TAG);
 
     // Timer handler message used for timeout event
     protected static final int MSG_TIMEOUT = 100;
