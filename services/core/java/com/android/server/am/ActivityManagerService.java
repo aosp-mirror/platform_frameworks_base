@@ -9087,9 +9087,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             boolean singleton;
             if (!providerRunning) {
                 try {
+                    checkTime(startTime, "getContentProviderImpl: before resolveContentProvider");
                     cpi = AppGlobals.getPackageManager().
                         resolveContentProvider(name,
                             STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS, userId);
+                    checkTime(startTime, "getContentProviderImpl: after resolveContentProvider");
                 } catch (RemoteException ex) {
                 }
                 if (cpi == null) {
@@ -9106,12 +9108,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     userId = UserHandle.USER_OWNER;
                 }
                 cpi.applicationInfo = getAppInfoForUser(cpi.applicationInfo, userId);
+                checkTime(startTime, "getContentProviderImpl: got app info for user");
 
                 String msg;
+                checkTime(startTime, "getContentProviderImpl: before checkContentProviderPermission");
                 if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, !singleton))
                         != null) {
                     throw new SecurityException(msg);
                 }
+                checkTime(startTime, "getContentProviderImpl: after checkContentProviderPermission");
 
                 if (!mProcessesReady && !mDidUpdate && !mWaitingUpdate
                         && !cpi.processName.equals("system")) {
@@ -9133,15 +9138,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 ComponentName comp = new ComponentName(cpi.packageName, cpi.name);
+                checkTime(startTime, "getContentProviderImpl: before getProviderByClass");
                 cpr = mProviderMap.getProviderByClass(comp, userId);
+                checkTime(startTime, "getContentProviderImpl: after getProviderByClass");
                 final boolean firstClass = cpr == null;
                 if (firstClass) {
                     try {
+                        checkTime(startTime, "getContentProviderImpl: before getApplicationInfo");
                         ApplicationInfo ai =
                             AppGlobals.getPackageManager().
                                 getApplicationInfo(
                                         cpi.applicationInfo.packageName,
                                         STOCK_PM_FLAGS, userId);
+                        checkTime(startTime, "getContentProviderImpl: after getApplicationInfo");
                         if (ai == null) {
                             Slog.w(TAG, "No package info for content provider "
                                     + cpi.name);
@@ -9153,6 +9162,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // pm is in same process, this will never happen.
                     }
                 }
+
+                checkTime(startTime, "getContentProviderImpl: now have ContentProviderRecord");
 
                 if (r != null && cpr.canRunHere(r)) {
                     // If this is a multiprocess provider, then just return its
@@ -9187,8 +9198,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     try {
                         // Content provider is now in use, its package can't be stopped.
                         try {
+                            checkTime(startTime, "getContentProviderImpl: before set stopped state");
                             AppGlobals.getPackageManager().setPackageStoppedState(
                                     cpr.appInfo.packageName, false, userId);
+                            checkTime(startTime, "getContentProviderImpl: after set stopped state");
                         } catch (RemoteException e) {
                         } catch (IllegalArgumentException e) {
                             Slog.w(TAG, "Failed trying to unstop package "
@@ -9196,22 +9209,26 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
 
                         // Use existing process if already started
+                        checkTime(startTime, "getContentProviderImpl: looking for process record");
                         ProcessRecord proc = getProcessRecordLocked(
                                 cpi.processName, cpr.appInfo.uid, false);
                         if (proc != null && proc.thread != null) {
                             if (DEBUG_PROVIDER) {
                                 Slog.d(TAG, "Installing in existing process " + proc);
                             }
+                            checkTime(startTime, "getContentProviderImpl: scheduling install");
                             proc.pubProviders.put(cpi.name, cpr);
                             try {
                                 proc.thread.scheduleInstallProvider(cpi);
                             } catch (RemoteException e) {
                             }
                         } else {
+                            checkTime(startTime, "getContentProviderImpl: before start process");
                             proc = startProcessLocked(cpi.processName,
                                     cpr.appInfo, false, 0, "content provider",
                                     new ComponentName(cpi.applicationInfo.packageName,
                                             cpi.name), false, false, false);
+                            checkTime(startTime, "getContentProviderImpl: after start process");
                             if (proc == null) {
                                 Slog.w(TAG, "Unable to launch app "
                                         + cpi.applicationInfo.packageName + "/"
@@ -9227,6 +9244,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
+                checkTime(startTime, "getContentProviderImpl: updating data structures");
+
                 // Make sure the provider is published (the same provider class
                 // may be published under multiple names).
                 if (firstClass) {
@@ -9239,6 +9258,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     conn.waiting = true;
                 }
             }
+            checkTime(startTime, "getContentProviderImpl: done!");
         }
 
         // Wait for the provider to be published...
