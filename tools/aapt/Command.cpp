@@ -1038,9 +1038,9 @@ int doDump(Bundle* bundle)
                                     splitName.string()).string());
                     }
 
-                    int32_t platformVersionCode = AaptXml::getIntegerAttribute(tree, NULL,
-                            "platformBuildVersionCode");
-                    printf(" platformBuildVersionCode='%d'", platformVersionCode);
+                    String8 platformVersionName = AaptXml::getAttribute(tree, NULL,
+                            "platformBuildVersionName");
+                    printf(" platformBuildVersionName='%s'", platformVersionName.string());
                     printf("\n");
 
                     int32_t installLocation = AaptXml::getResolvedIntegerAttribute(res, tree,
