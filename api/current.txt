@@ -17199,10 +17199,6 @@ package android.net {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public abstract interface NetworkBoundURLFactory {
-    method public abstract java.net.URL getBoundURL(android.net.Network, java.net.URL) throws java.net.MalformedURLException;
-  }
-
   public final class NetworkCapabilities implements android.os.Parcelable {
     ctor public NetworkCapabilities(android.net.NetworkCapabilities);
     method public int describeContents();
