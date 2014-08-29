@@ -17,13 +17,16 @@
 package android.content.pm;
 
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Represents a {@code KeySet} that has been declared in the AndroidManifest.xml
  * file for the application.  A {@code KeySet} can be used explicitly to
  * represent a trust relationship with other applications on the device.
+ * @hide
  */
-public class KeySet {
+public class KeySet implements Parcelable {
 
     private IBinder token;
 
@@ -40,6 +43,7 @@ public class KeySet {
         return token;
     }
 
+    /** @hide */
     @Override
     public boolean equals(Object o) {
         if (o instanceof KeySet) {
@@ -47,5 +51,59 @@ public class KeySet {
             return token == ks.token;
         }
         return false;
+    }
+
+    /** @hide */
+    @Override
+    public int hashCode() {
+        return token.hashCode();
+    }
+
+    /**
+     * Implement Parcelable
+     * @hide
+     */
+    public static final Parcelable.Creator<KeySet> CREATOR
+            = new Parcelable.Creator<KeySet>() {
+
+        /**
+         * Create a KeySet from a Parcel
+         *
+         * @param in The parcel containing the KeySet
+         */
+        public KeySet createFromParcel(Parcel source) {
+            return readFromParcel(source);
+        }
+
+        /**
+         * Create an array of null KeySets
+         */
+        public KeySet[] newArray(int size) {
+            return new KeySet[size];
+        }
+    };
+
+    /**
+     * @hide
+     */
+    private static KeySet readFromParcel(Parcel in) {
+        IBinder token = in.readStrongBinder();
+        return new KeySet(token);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeStrongBinder(token);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int describeContents() {
+        return 0;
     }
 }
