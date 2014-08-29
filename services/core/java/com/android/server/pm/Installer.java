@@ -224,10 +224,6 @@ public final class Installer extends SystemService {
         }
     }
 
-    public int pruneDexCache(String cacheSubDir) {
-        return mInstaller.execute("prunedexcache " + cacheSubDir);
-    }
-
     public int freeCache(long freeStorageSize) {
         StringBuilder builder = new StringBuilder("freecache");
         builder.append(' ');
