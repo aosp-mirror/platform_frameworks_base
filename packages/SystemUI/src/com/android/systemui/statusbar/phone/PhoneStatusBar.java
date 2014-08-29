@@ -582,6 +582,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         putComponent(PhoneStatusBar.class, this);
 
         setControllerUsers();
+
+        notifyUserAboutHiddenNotifications();
     }
 
     // ================================================================================
