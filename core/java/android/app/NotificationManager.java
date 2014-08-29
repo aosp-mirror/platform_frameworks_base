@@ -20,6 +20,7 @@ import android.annotation.SdkConstant;
 import android.app.Notification.Builder;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -248,6 +249,18 @@ public class NotificationManager
             return service.getEffectsSuppressor();
         } catch (RemoteException e) {
             return null;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public boolean matchesCallFilter(Bundle extras) {
+        INotificationManager service = getService();
+        try {
+            return service.matchesCallFilter(extras);
+        } catch (RemoteException e) {
+            return false;
         }
     }
 

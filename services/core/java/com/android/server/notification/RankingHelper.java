@@ -87,6 +87,17 @@ public class RankingHelper implements RankingConfig {
         mProxyByGroupTmp = new ArrayMap<String, NotificationRecord>();
     }
 
+    public <T extends NotificationSignalExtractor> T findExtractor(Class<T> extractorClass) {
+        final int N = mSignalExtractors.length;
+        for (int i = 0; i < N; i++) {
+            final NotificationSignalExtractor extractor = mSignalExtractors[i];
+            if (extractorClass.equals(extractor.getClass())) {
+                return (T) extractor;
+            }
+        }
+        return null;
+    }
+
     public void extractSignals(NotificationRecord r) {
         final int N = mSignalExtractors.length;
         for (int i = 0; i < N; i++) {
