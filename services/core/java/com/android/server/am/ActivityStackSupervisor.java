@@ -1729,16 +1729,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         | (baseIntent.getFlags()&flagsOfInterest);
                 intent.setFlags(launchFlags);
                 inTask.setIntent(r);
+                addingToTask = true;
 
-            // If the task is not empty, then we are going to add the new activity on top
-            // of the task, so it can not be launching as a new task.
+            // If the task is not empty and the caller is asking to start it as the root
+            // of a new task, then we don't actually want to start this on the task.  We
+            // will bring the task to the front, and possibly give it a new intent.
             } else if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
-                ActivityOptions.abort(options);
-                throw new IllegalStateException("Caller has inTask " + inTask
-                        + " but target is a new task");
+                addingToTask = false;
+
+            } else {
+                addingToTask = true;
             }
+
             reuseTask = inTask;
-            addingToTask = true;
         } else {
             inTask = null;
         }
@@ -1979,7 +1982,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 sourceRecord.task : null;
 
         // Should this be considered a new task?
-        if (r.resultTo == null && !addingToTask
+        if (r.resultTo == null && inTask == null && !addingToTask
                 && (launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             if (isLockTaskModeViolation(reuseTask)) {
                 Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
@@ -2090,6 +2093,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     top.deliverNewIntentLocked(callingUid, r.intent);
                     return ActivityManager.START_DELIVERED_TO_TOP;
                 }
+            }
+
+            if (!addingToTask) {
+                // We don't actually want to have this activity added to the task, so just
+                // stop here but still tell the caller that we consumed the intent.
+                ActivityOptions.abort(options);
+                return ActivityManager.START_TASK_TO_FRONT;
             }
 
             r.setTask(inTask, null);
