@@ -27,6 +27,7 @@
         android:id="@+id/static_content"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:paddingStart="8dip"
         android:elevation="@dimen/preview_controls_elevation"
         android:background="?android:attr/colorPrimary">
 
