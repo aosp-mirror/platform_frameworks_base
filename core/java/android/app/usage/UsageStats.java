@@ -81,36 +81,28 @@ public final class UsageStats implements Parcelable {
     }
 
     /**
-     * Get the beginning of the time range this {@link android.app.usage.UsageStats} represents,
-     * measured in milliseconds since the epoch.
-     * <p/>
-     * See {@link System#currentTimeMillis()}.
+     * Get the beginning of the time range this {@link android.app.usage.UsageStats} represents.
      */
     public long getFirstTimeStamp() {
         return mBeginTimeStamp;
     }
 
     /**
-     * Get the end of the time range this {@link android.app.usage.UsageStats} represents,
-     * measured in milliseconds since the epoch.
-     * <p/>
-     * See {@link System#currentTimeMillis()}.
+     * Get the end of the time range this {@link android.app.usage.UsageStats} represents.
      */
     public long getLastTimeStamp() {
         return mEndTimeStamp;
     }
 
     /**
-     * Get the last time this package was used, measured in milliseconds since the epoch.
-     * <p/>
-     * See {@link System#currentTimeMillis()}.
+     * Get the last time this package was used.
      */
     public long getLastTimeUsed() {
         return mLastTimeUsed;
     }
 
     /**
-     * Get the total time this package spent in the foreground, measured in milliseconds.
+     * Get the total time this package spent in the foreground.
      */
     public long getTotalTimeInForeground() {
         return mTotalTimeInForeground;
