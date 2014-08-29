@@ -35,37 +35,57 @@ interface ITelecommService {
     void showInCallScreen(boolean showDialpad);
 
     /**
-     * @see TelecommManager#getDefaultOutgoingPhoneAccount
+     * @see TelecommServiceImpl#getDefaultOutgoingPhoneAccount
      */
     PhoneAccountHandle getDefaultOutgoingPhoneAccount();
 
     /**
-     * @see TelecommManager#getOutgoingPhoneAccounts
+     * @see TelecommServiceImpl#setDefaultOutgoingPhoneAccount
+     */
+    void setDefaultOutgoingPhoneAccount(in PhoneAccountHandle account);
+
+    /**
+     * @see TelecommServiceImpl#getOutgoingPhoneAccounts
      */
     List<PhoneAccountHandle> getOutgoingPhoneAccounts();
 
     /**
-     * @see TelecommManager#getPhoneAccount
+     * @see TelecommServiceImpl#getPhoneAccount
      */
     PhoneAccount getPhoneAccount(in PhoneAccountHandle account);
 
     /**
-     * @see TelecommManager#registerPhoneAccount
+     * @see TelecommServiceImpl#getSimCallManager
+     */
+    PhoneAccountHandle getSimCallManager();
+
+    /**
+     * @see TelecommServiceImpl#setSimCallManager
+     */
+    void setSimCallManager(in PhoneAccountHandle account);
+
+    /**
+     * @see TelecommServiceImpl#getSimCallManagers
+     */
+    List<PhoneAccountHandle> getSimCallManagers();
+
+    /**
+     * @see TelecommServiceImpl#registerPhoneAccount
      */
     void registerPhoneAccount(in PhoneAccount metadata);
 
     /**
-     * @see TelecommManager#unregisterPhoneAccount
+     * @see TelecommServiceImpl#unregisterPhoneAccount
      */
     void unregisterPhoneAccount(in PhoneAccountHandle account);
 
     /**
-     * @see TelecommManager#clearAccounts
+     * @see TelecommServiceImpl#clearAccounts
      */
     void clearAccounts(String packageName);
 
     /**
-     * @see TelecommManager#getDefaultPhoneApp
+     * @see TelecommServiceImpl#getDefaultPhoneApp
      */
     ComponentName getDefaultPhoneApp();
 
@@ -74,52 +94,52 @@ interface ITelecommService {
     //
 
     /**
-     * @see TelecommManager#silenceRinger
+     * @see TelecommServiceImpl#silenceRinger
      */
     void silenceRinger();
 
     /**
-     * @see TelecommManager#isInCall
+     * @see TelecommServiceImpl#isInCall
      */
     boolean isInCall();
 
     /**
-     * @see TelecomManager#isRinging
+     * @see TelecommServiceImpl#isRinging
      */
     boolean isRinging();
 
     /**
-     * @see TelecommManager#endCall
+     * @see TelecommServiceImpl#endCall
      */
     boolean endCall();
 
     /**
-     * @see TelecommManager#acceptRingingCall
+     * @see TelecommServiceImpl#acceptRingingCall
      */
     void acceptRingingCall();
 
     /**
-     * @see TelecommManager#cancelMissedCallsNotification
+     * @see TelecommServiceImpl#cancelMissedCallsNotification
      */
     void cancelMissedCallsNotification();
 
     /**
-     * @see TelecommManager#handleMmi
+     * @see TelecommServiceImpl#handleMmi
      */
     boolean handlePinMmi(String dialString);
 
     /**
-     * @see TelecomManager#isTtySupported
+     * @see TelecommServiceImpl#isTtySupported
      */
     boolean isTtySupported();
 
     /**
-     * @see TelecomManager#getCurrentTtyMode
+     * @see TelecommServiceImpl#getCurrentTtyMode
      */
     int getCurrentTtyMode();
 
     /**
-     * @see TelecommManager#addNewIncomingCall
+     * @see TelecommServiceImpl#addNewIncomingCall
      */
     void addNewIncomingCall(in PhoneAccountHandle phoneAccount, in Bundle extras);
 }
