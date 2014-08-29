@@ -734,6 +734,13 @@ final public class MediaCodec {
         public static final int ERROR_RESOURCE_BUSY = 3;
 
         /**
+         * This indicates that the output protection levels supported by the
+         * device are not sufficient to meet the requirements set by the
+         * content owner in the license policy.
+         */
+        public static final int ERROR_INSUFFICIENT_OUTPUT_PROTECTION = 4;
+
+        /**
          * Retrieve the error code associated with a CryptoException
          */
         public int getErrorCode() {
