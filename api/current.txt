@@ -39587,22 +39587,6 @@ package android.widget {
 
 }
 
-package com.android.internal.telecomm {
-
-  public abstract interface RemoteServiceCallback implements android.os.IInterface {
-    method public abstract void onError() throws android.os.RemoteException;
-    method public abstract void onResult(java.util.List<android.content.ComponentName>, java.util.List<android.os.IBinder>) throws android.os.RemoteException;
-  }
-
-  public static abstract class RemoteServiceCallback.Stub extends android.os.Binder implements com.android.internal.telecomm.RemoteServiceCallback {
-    ctor public RemoteServiceCallback.Stub();
-    method public android.os.IBinder asBinder();
-    method public static com.android.internal.telecomm.RemoteServiceCallback asInterface(android.os.IBinder);
-    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
-  }
-
-}
-
 package com.android.internal.util {
 
   public abstract interface Predicate {
