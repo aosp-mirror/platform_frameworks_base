@@ -905,6 +905,8 @@ package android {
     field public static final int multiprocess = 16842771; // 0x1010013
     field public static final int name = 16842755; // 0x1010003
     field public static final int navigationBarColor = 16843858; // 0x1010452
+    field public static final int navigationContentDescription = 16843970; // 0x10104c2
+    field public static final int navigationIcon = 16843969; // 0x10104c1
     field public static final int navigationMode = 16843471; // 0x10102cf
     field public static final int negativeButtonText = 16843254; // 0x10101f6
     field public static final int nestedScrollingEnabled = 16843830; // 0x1010436
