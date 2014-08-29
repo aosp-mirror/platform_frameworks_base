@@ -819,24 +819,6 @@ public abstract class ConnectionService extends Service {
      */
     public void onConference(Connection connection1, Connection connection2) {}
 
-    /**
-     * Notifies that a connection has been added to this connection service and sent to Telecomm.
-     *
-     * @param connection The connection which was added.
-     */
-    public void onConnectionAdded(Connection connection) {}
-
-    /**
-     * Notified that a connection has been removed from this connection service.
-     * <p>
-     * TODO: Deprecate this since we can listen to the Connection onDestroyed() to determine when
-     * it is destroyed. This then percolates down to the RemoteConference stuff, where we can also
-     * have a callback for one being added, but we don't need one for being destroyed.
-     *
-     * @param connection The connection which was removed.
-     */
-    public void onConnectionRemoved(Connection connection) {}
-
     public void onRemoteConferenceAdded(RemoteConference conference) {}
 
     /**
@@ -864,7 +846,6 @@ public abstract class ConnectionService extends Service {
         mIdByConnection.put(connection, callId);
         connection.addConnectionListener(mConnectionListener);
         connection.setConnectionService(this);
-        onConnectionAdded(connection);
     }
 
     private void removeConnection(Connection connection) {
@@ -873,7 +854,6 @@ public abstract class ConnectionService extends Service {
         connection.removeConnectionListener(mConnectionListener);
         mConnectionById.remove(mIdByConnection.get(connection));
         mIdByConnection.remove(connection);
-        onConnectionRemoved(connection);
         mAdapter.removeCall(id);
     }
 
