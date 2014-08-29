@@ -680,7 +680,7 @@ public final class TvContract {
          * <p>
          * A value of 1 indicates the channel is included in the channel list that applications use
          * to browse channels, a value of 0 indicates the channel is not included in the list. If
-         * not specified, this value is set to 1 (browsable) by default.
+         * not specified, this value is set to 0 (not browsable) by default.
          * </p><p>
          * Type: INTEGER (boolean)
          * </p>
