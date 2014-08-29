@@ -41,9 +41,9 @@ import android.util.FloatMath;
  * {@code
  * &lt;changeBounds>
  *   &lt;arcMotion android:minimumHorizontalAngle="15"
- *     android:minimumVerticalAngle="0" android:maximumAngle="90"/>
- * &lt;/changeBounds>
- * }
+ *              android:minimumVerticalAngle="0"
+ *              android:maximumAngle="90"/>
+ * &lt;/changeBounds>}
  * </pre>
  */
 public class ArcMotion extends PathMotion {
