@@ -52,6 +52,7 @@ import android.media.AudioManager;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -1438,7 +1439,7 @@ public class NotificationManagerService extends SystemService {
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                     != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump NotificationManager from from pid="
+                pw.println("Permission Denial: can't dump NotificationManager from pid="
                         + Binder.getCallingPid()
                         + ", uid=" + Binder.getCallingUid());
                 return;
@@ -1451,6 +1452,13 @@ public class NotificationManagerService extends SystemService {
         public ComponentName getEffectsSuppressor() {
             enforceSystemOrSystemUI("INotificationManager.getEffectsSuppressor");
             return mEffectsSuppressor;
+        }
+
+        @Override
+        public boolean matchesCallFilter(Bundle extras) {
+            enforceSystemOrSystemUI("INotificationManager.matchesCallFilter");
+            return mZenModeHelper.matchesCallFilter(extras,
+                    mRankingHelper.findExtractor(ValidateNotificationPeople.class));
         }
     };
 
