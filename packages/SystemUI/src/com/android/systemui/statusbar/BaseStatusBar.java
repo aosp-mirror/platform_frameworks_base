@@ -22,6 +22,7 @@ import android.animation.TimeInterpolator;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.app.admin.DevicePolicyManager;
@@ -35,7 +36,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -78,6 +83,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SearchPanelView;
@@ -125,6 +131,12 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public static final int EXPANDED_LEAVE_ALONE = -10000;
     public static final int EXPANDED_FULL_OPEN = -10001;
+
+    private static final int HIDDEN_NOTIFICATION_ID = 10000;
+    private static final String BANNER_ACTION_CANCEL =
+            "com.android.systemui.statusbar.banner_action_cancel";
+    private static final String BANNER_ACTION_SETUP =
+            "com.android.systemui.statusbar.banner_action_setup";
 
     protected CommandQueue mCommandQueue;
     protected IStatusBarService mBarService;
@@ -308,6 +320,20 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mUsersAllowingPrivateNotifications.clear();
                 updateLockscreenNotificationSetting();
                 updateNotifications();
+            } else if (BANNER_ACTION_CANCEL.equals(action) || BANNER_ACTION_SETUP.equals(action)) {
+                NotificationManager noMan = (NotificationManager)
+                        mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                noMan.cancel(HIDDEN_NOTIFICATION_ID);
+
+                Settings.Secure.putInt(mContext.getContentResolver(),
+                        Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 0);
+                if (BANNER_ACTION_SETUP.equals(action)) {
+                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+                    mContext.startActivity(new Intent(Settings.ACTION_APP_NOTIFICATION_REDACTION)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+                    );
+                }
             }
         }
     };
@@ -490,10 +516,59 @@ public abstract class BaseStatusBar extends SystemUI implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
+        filter.addAction(BANNER_ACTION_CANCEL);
+        filter.addAction(BANNER_ACTION_SETUP);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
         updateCurrentProfilesCache();
+    }
+
+    protected void notifyUserAboutHiddenNotifications() {
+        if (0 != Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 1)) {
+            Log.d(TAG, "user hasn't seen notification about hidden notifications");
+            final LockPatternUtils lockPatternUtils = new LockPatternUtils(mContext);
+            if (!lockPatternUtils.isSecure()) {
+                Log.d(TAG, "insecure lockscreen, skipping notification");
+                Settings.Secure.putInt(mContext.getContentResolver(),
+                        Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 0);
+                return;
+            }
+            Log.d(TAG, "disabling lockecreen notifications and alerting the user");
+            // disable lockscreen notifications until user acts on the banner.
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 0);
+
+            final String packageName = mContext.getPackageName();
+            PendingIntent cancelIntent = PendingIntent.getBroadcast(mContext, 0,
+                    new Intent(BANNER_ACTION_CANCEL).setPackage(packageName),
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+            PendingIntent setupIntent = PendingIntent.getBroadcast(mContext, 0,
+                    new Intent(BANNER_ACTION_SETUP).setPackage(packageName),
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+
+            final Resources res = mContext.getResources();
+            final int colorRes = com.android.internal.R.color.system_notification_accent_color;
+            Notification.Builder note = new Notification.Builder(mContext)
+                    .setSmallIcon(R.drawable.ic_android)
+                    .setContentTitle(mContext.getString(R.string.hidden_notifications_title))
+                    .setContentText(mContext.getString(R.string.hidden_notifications_text))
+                    .setPriority(Notification.PRIORITY_HIGH)
+                    .setOngoing(true)
+                    .setColor(res.getColor(colorRes))
+                    .setContentIntent(setupIntent)
+                    .addAction(R.drawable.ic_close,
+                            mContext.getString(R.string.hidden_notifications_cancel),
+                            cancelIntent)
+                    .addAction(R.drawable.ic_settings,
+                            mContext.getString(R.string.hidden_notifications_setup),
+                            setupIntent);
+
+            NotificationManager noMan =
+                    (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+            noMan.notify(HIDDEN_NOTIFICATION_ID, note.build());
+        }
     }
 
     public void userSwitched(int newUserId) {

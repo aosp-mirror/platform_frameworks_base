@@ -70,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 108;
+    private static final int DATABASE_VERSION = 109;
 
     private Context mContext;
     private int mUserHandle;
@@ -1673,8 +1673,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             try {
                 stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
                         + " VALUES(?,?);");
-                loadBooleanSetting(stmt, Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
-                        R.bool.def_guest_user_enabled);
+                loadIntegerSetting(stmt, Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
+                        R.integer.def_lock_screen_show_notifications);
                 if (mUserHandle == UserHandle.USER_OWNER) {
                     final int oldShow = getIntValueFromTable(db,
                             TABLE_GLOBAL, Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, -1);
@@ -1731,6 +1731,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 if (stmt != null) stmt.close();
             }
             upgradeVersion = 108;
+        }
+
+        if (upgradeVersion < 109) {
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
+                        R.bool.def_lock_screen_allow_private_notifications);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 109;
         }
 
         // *** Remember to update DATABASE_VERSION above!
@@ -2300,6 +2316,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
                     R.integer.def_lock_screen_show_notifications);
+
+            loadBooleanSetting(stmt, Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
+                    R.bool.def_lock_screen_allow_private_notifications);
 
         } finally {
             if (stmt != null) stmt.close();
