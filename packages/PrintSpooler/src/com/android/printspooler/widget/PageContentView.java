@@ -73,9 +73,8 @@ public class PageContentView extends View
 
     @Override
     public void onPageContentAvailable(BitmapDrawable content) {
-        if (getBackground() != content) {
-            setBackground(content);
-        }
+        assert (getBackground() != content);
+        setBackground(content);
     }
 
     public PageContentProvider getPageContentProvider() {

@@ -22,9 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.IBinder;
@@ -38,10 +36,10 @@ import android.view.View;
 import com.android.internal.annotations.GuardedBy;
 import com.android.printspooler.renderer.IPdfRenderer;
 import com.android.printspooler.renderer.PdfRendererService;
+import com.android.printspooler.util.BitmapSerializeUtils;
 import dalvik.system.CloseGuard;
 import libcore.io.IoUtils;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -804,9 +802,7 @@ public final class PageContentRepository {
                     // ownership, so close our copy for the write to complete.
                     destination.close();
 
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inBitmap = bitmap;
-                    BitmapFactory.decodeFileDescriptor(source.getFileDescriptor(), null, options);
+                    BitmapSerializeUtils.readBitmapPixels(bitmap, source);
                 } catch (IOException|RemoteException e) {
                     Log.e(LOG_TAG, "Error rendering page:" + mPageIndex, e);
                 } finally {
