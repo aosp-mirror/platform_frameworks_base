@@ -106,6 +106,9 @@ class RippleBackground {
     /** Whether we have an explicit maximum radius. */
     private boolean mHasMaxRadius;
 
+    /** Whether we were canceled externally and should avoid self-removal. */
+    private boolean mCanceled;
+
     /**
      * Creates a new ripple.
      */
@@ -283,6 +286,8 @@ class RippleBackground {
      * Starts the enter animation.
      */
     public void enter() {
+        cancel();
+
         final int radiusDuration = (int)
                 (1000 * Math.sqrt(mOuterRadius / WAVE_TOUCH_DOWN_ACCELERATION * mDensity) + 0.5);
         final int outerDuration = (int) (1000 * 1.0f / WAVE_OUTER_OPACITY_VELOCITY_MIN);
@@ -320,7 +325,7 @@ class RippleBackground {
      * Starts the exit animation.
      */
     public void exit() {
-        cancelSoftwareAnimations();
+        cancel();
 
         // Scale the outer max opacity and opacity velocity based
         // on the size of the outer radius.
@@ -403,9 +408,15 @@ class RippleBackground {
         invalidateSelf();
     }
 
+    /**
+     * Jump all animations to their end state. The caller is responsible for
+     * removing the ripple from the list of animating ripples.
+     */
     public void jump() {
+        mCanceled = true;
         endSoftwareAnimations();
         endHardwareAnimations();
+        mCanceled = false;
     }
 
     private void endSoftwareAnimations() {
@@ -436,6 +447,8 @@ class RippleBackground {
             mPendingAnimations.clear();
             removeSelf();
         }
+
+        mHardwareAnimating = false;
     }
 
     private Paint getTempPaint() {
@@ -508,11 +521,14 @@ class RippleBackground {
     }
 
     /**
-     * Cancel all animations.
+     * Cancel all animations. The caller is responsible for removing
+     * the ripple from the list of animating ripples.
      */
     public void cancel() {
+        mCanceled = true;
         cancelSoftwareAnimations();
         cancelHardwareAnimations(true);
+        mCanceled = false;
     }
 
     private void cancelSoftwareAnimations() {
@@ -543,13 +559,16 @@ class RippleBackground {
 
         if (cancelPending && !mPendingAnimations.isEmpty()) {
             mPendingAnimations.clear();
-            removeSelf();
         }
+
+        mHardwareAnimating = false;
     }
 
     private void removeSelf() {
         // The owner will invalidate itself.
-        mOwner.removeBackground(this);
+        if (!mCanceled) {
+            mOwner.removeBackground(this);
+        }
     }
 
     private void invalidateSelf() {
