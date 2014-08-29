@@ -136,7 +136,7 @@ import java.util.Objects;
  * <table>
  *     <tr>
  *         <th>Constant Value</th>
- *         <th>Comment</th>
+ *         <th>Description</th>
  *     </tr>
  *     <tr>
  *         <td>com.android.tv</td>
@@ -148,7 +148,7 @@ import java.util.Objects;
  * <table>
  *     <tr>
  *         <th>Constant Value</th>
- *         <th>Comment</th>
+ *         <th>Description</th>
  *     </tr>
  *     <tr>
  *         <td>AM_TV_RS</td>
@@ -346,7 +346,7 @@ import java.util.Objects;
  *     <tr>
  *         <th>Rating System</th>
  *         <th>Constant Value</th>
- *         <th>Comment</th>
+ *         <th>Description</th>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="6">AM_TV_RS</td>
@@ -1419,7 +1419,7 @@ import java.util.Objects;
  *     <tr>
  *         <th>Rating System</th>
  *         <th>Constant Value</th>
- *         <th>Comment</th>
+ *         <th>Description</th>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="6">NL_TV</td>
