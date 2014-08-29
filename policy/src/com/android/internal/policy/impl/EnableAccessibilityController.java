@@ -83,6 +83,7 @@ public class EnableAccessibilityController {
 
 
     private final Context mContext;
+    private final Runnable mOnAccessibilityEnabledCallback;
     private final UserManager mUserManager;
     private final TextToSpeech mTts;
     private final Ringtone mTone;
@@ -97,8 +98,9 @@ public class EnableAccessibilityController {
     private float mSecondPointerDownX;
     private float mSecondPointerDownY;
 
-    public EnableAccessibilityController(Context context) {
+    public EnableAccessibilityController(Context context, Runnable onAccessibilityEnabledCallback) {
         mContext = context;
+        mOnAccessibilityEnabledCallback = onAccessibilityEnabledCallback;
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mTts = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
             @Override
@@ -275,5 +277,7 @@ public class EnableAccessibilityController {
                 /* ignore */
             }
         }
+
+        mOnAccessibilityEnabledCallback.run();
     }
 }
