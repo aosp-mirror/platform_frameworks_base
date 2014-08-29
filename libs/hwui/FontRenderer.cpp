@@ -182,6 +182,8 @@ void FontRenderer::flushAllAndInvalidate() {
     for (uint32_t i = 0; i < mRGBACacheTextures.size(); i++) {
         mRGBACacheTextures[i]->init();
     }
+
+    mDrawn = false;
 }
 
 void FontRenderer::flushLargeCaches(Vector<CacheTexture*>& cacheTextures) {
