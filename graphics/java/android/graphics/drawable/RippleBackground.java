@@ -42,8 +42,9 @@ class RippleBackground {
     private static final float GLOBAL_SPEED = 1.0f;
     private static final float WAVE_TOUCH_DOWN_ACCELERATION = 1024.0f * GLOBAL_SPEED;
     private static final float WAVE_OPACITY_DECAY_VELOCITY = 3.0f / GLOBAL_SPEED;
-    private static final float WAVE_OUTER_OPACITY_VELOCITY_MAX = 4.5f * GLOBAL_SPEED;
-    private static final float WAVE_OUTER_OPACITY_VELOCITY_MIN = 1.5f * GLOBAL_SPEED;
+    private static final float WAVE_OUTER_OPACITY_EXIT_VELOCITY_MAX = 4.5f * GLOBAL_SPEED;
+    private static final float WAVE_OUTER_OPACITY_EXIT_VELOCITY_MIN = 1.5f * GLOBAL_SPEED;
+    private static final float WAVE_OUTER_OPACITY_ENTER_VELOCITY = 10.0f * GLOBAL_SPEED;
     private static final float WAVE_OUTER_SIZE_INFLUENCE_MAX = 200f;
     private static final float WAVE_OUTER_SIZE_INFLUENCE_MIN = 40f;
 
@@ -285,7 +286,7 @@ class RippleBackground {
     public void enter() {
         final int radiusDuration = (int)
                 (1000 * Math.sqrt(mOuterRadius / WAVE_TOUCH_DOWN_ACCELERATION * mDensity) + 0.5);
-        final int outerDuration = (int) (1000 * 1.0f / WAVE_OUTER_OPACITY_VELOCITY_MIN);
+        final int outerDuration = (int) (1000 * 1.0f / WAVE_OUTER_OPACITY_ENTER_VELOCITY);
 
         final ObjectAnimator cX = ObjectAnimator.ofFloat(this, "xGravity", 1);
         cX.setAutoCancel(true);
@@ -328,8 +329,8 @@ class RippleBackground {
         final float outerSizeInfluence = MathUtils.constrain(
                 (mOuterRadius - WAVE_OUTER_SIZE_INFLUENCE_MIN * mDensity)
                 / (WAVE_OUTER_SIZE_INFLUENCE_MAX * mDensity), 0, 1);
-        final float outerOpacityVelocity = MathUtils.lerp(WAVE_OUTER_OPACITY_VELOCITY_MIN,
-                WAVE_OUTER_OPACITY_VELOCITY_MAX, outerSizeInfluence);
+        final float outerOpacityVelocity = MathUtils.lerp(WAVE_OUTER_OPACITY_EXIT_VELOCITY_MIN,
+                WAVE_OUTER_OPACITY_EXIT_VELOCITY_MAX, outerSizeInfluence);
 
         // Determine at what time the inner and outer opacity intersect.
         // inner(t) = mOpacity - t * WAVE_OPACITY_DECAY_VELOCITY / 1000

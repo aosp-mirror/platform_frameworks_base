@@ -58,19 +58,14 @@
     <!-- Text & foreground colors -->
     <eat-comment />
 
-    <!-- Black 87% -->
     <color name="primary_text_default_material_light">#de000000</color>
-    <!-- Black 54% -->
-    <color name="secondary_text_material_light">#8a000000</color>
-    <!-- Black 54% (TODO: same as secondary?) -->
-    <color name="tertiary_text_material_light">#8a000000</color>
+    <color name="secondary_text_default_material_light">#8a000000</color>
 
-    <!-- White 87% -->
-    <color name="primary_text_default_material_dark">#deffffff</color>
-    <!-- White 38% -->
-    <color name="secondary_text_material_dark">#61ffffff</color>
-    <!-- White 38% (TODO: same as secondary?) -->
-    <color name="tertiary_text_material_dark">#61ffffff</color>
+    <color name="primary_text_default_material_dark">#ffffffff</color>
+    <color name="secondary_text_default_material_dark">#b3ffffff</color>
+
+    <item name="disabled_alpha_material_light" format="float" type="dimen">0.26</item>
+    <item name="disabled_alpha_material_dark" format="float" type="dimen">0.30</item>
 
     <!-- Primary & accent colors -->
     <eat-comment />
