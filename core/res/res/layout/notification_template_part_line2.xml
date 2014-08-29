@@ -20,8 +20,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:visibility="gone"
-        android:layout_weight="0"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         >
@@ -39,8 +37,8 @@
             android:layout_weight="1"
         />
         <ImageView android:id="@+id/profile_badge_line2"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="@dimen/notification_badge_size"
+            android:layout_height="@dimen/notification_badge_size"
             android:layout_weight="0"
             android:layout_marginStart="4dp"
             android:scaleType="fitCenter"
