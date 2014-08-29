@@ -28,6 +28,7 @@
         <item name="android:colorAccent">@*android:color/material_deep_teal_500</item>
 
         <item name="android:windowActionBar">false</item>
+        <item name="android:windowActionModeOverlay">true</item>
         <item name="android:windowNoTitle">true</item>
 
         <item name="*android:windowFixedWidthMajor">@null</item>

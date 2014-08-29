@@ -15,11 +15,8 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_focused="true" android:state_activated="true">
-        <color android:color="@color/accent_color_overlay" />
-    </item>
-    <item android:state_focused="false" android:state_activated="true">
-        <color android:color="@color/accent_color_overlay" />
-    </item>
+    <item android:state_focused="true" android:state_activated="true" android:drawable="@color/item_doc_grid_overlay_activated" />
+    <item android:state_focused="false" android:state_activated="true" android:drawable="@color/item_doc_grid_overlay_activated" />
+    <item android:state_enabled="false" android:drawable="@color/item_doc_grid_overlay_disabled" />
     <item android:drawable="@android:color/transparent" />
 </selector>

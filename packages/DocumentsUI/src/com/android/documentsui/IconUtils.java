@@ -266,15 +266,16 @@ public class IconUtils {
         }
     }
 
-    public static Drawable applyTint(Context context, int drawableId, int tintAttrId) {
-        final Resources res = context.getResources();
-
-        final TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(tintAttrId, outValue, true);
-
+    public static Drawable applyTintColor(Context context, int drawableId, int tintColorId) {
         final Drawable icon = context.getDrawable(drawableId);
         icon.mutate();
-        icon.setTintList(res.getColorStateList(outValue.resourceId));
+        icon.setTintList(context.getResources().getColorStateList(tintColorId));
         return icon;
+    }
+
+    public static Drawable applyTintAttr(Context context, int drawableId, int tintAttrId) {
+        final TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(tintAttrId, outValue, true);
+        return applyTintColor(context, drawableId, outValue.resourceId);
     }
 }

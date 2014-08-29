@@ -58,7 +58,7 @@ import java.util.concurrent.TimeUnit;
  * Cache of known storage backends and their roots.
  */
 public class RootsCache {
-    private static final boolean LOGD = true;
+    private static final boolean LOGD = false;
 
     public static final Uri sNotificationUri = Uri.parse(
             "content://com.android.documentsui.roots/");
