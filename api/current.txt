@@ -28420,6 +28420,7 @@ package android.telecomm {
   }
 
   public static class PhoneAccount.Builder {
+    ctor public PhoneAccount.Builder();
     method public android.telecomm.PhoneAccount build();
     method public android.telecomm.PhoneAccount.Builder withAccountHandle(android.telecomm.PhoneAccountHandle);
     method public android.telecomm.PhoneAccount.Builder withCapabilities(int);
