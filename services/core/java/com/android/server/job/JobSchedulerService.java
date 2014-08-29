@@ -819,6 +819,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     };
 
     void dumpInternal(PrintWriter pw) {
+        final long now = SystemClock.elapsedRealtime();
         synchronized (mJobs) {
             pw.print("Started users: ");
             for (int i=0; i<mStartedUsers.size(); i++) {
@@ -833,15 +834,14 @@ public class JobSchedulerService extends com.android.server.SystemService
                     job.dump(pw, "  ");
                 }
             } else {
-                pw.println();
-                pw.println("No jobs scheduled.");
+                pw.println("  None.");
             }
             for (int i=0; i<mControllers.size(); i++) {
                 pw.println();
                 mControllers.get(i).dumpControllerState(pw);
             }
             pw.println();
-            pw.println("Pending");
+            pw.println("Pending:");
             for (int i=0; i<mPendingJobs.size(); i++) {
                 pw.println(mPendingJobs.get(i).hashCode());
             }
@@ -852,10 +852,14 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if (jsc.isAvailable()) {
                     continue;
                 } else {
-                    pw.println(jsc.getRunningJob().hashCode() + " for: " +
-                            (SystemClock.elapsedRealtime()
-                                    - jsc.getExecutionStartTimeElapsed())/1000 + "s " +
-                            "timeout: " + jsc.getTimeoutElapsed());
+                    final long timeout = jsc.getTimeoutElapsed();
+                    pw.print("Running for: ");
+                    pw.print((now - jsc.getExecutionStartTimeElapsed())/1000);
+                    pw.print("s timeout=");
+                    pw.print(timeout);
+                    pw.print(" fromnow=");
+                    pw.println(timeout-now);
+                    jsc.getRunningJob().dump(pw, "  ");
                 }
             }
             pw.println();
