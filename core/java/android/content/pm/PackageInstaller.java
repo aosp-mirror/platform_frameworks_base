@@ -623,7 +623,7 @@ public class PackageInstaller {
             try {
                 final ParcelFileDescriptor clientSocket = mSession.openWrite(name,
                         offsetBytes, lengthBytes);
-                return new FileBridge.FileBridgeOutputStream(clientSocket.getFileDescriptor());
+                return new FileBridge.FileBridgeOutputStream(clientSocket);
             } catch (RuntimeException e) {
                 ExceptionUtils.maybeUnwrapIOException(e);
                 throw e;
