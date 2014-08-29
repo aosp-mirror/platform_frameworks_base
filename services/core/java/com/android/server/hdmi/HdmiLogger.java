@@ -42,7 +42,7 @@ final class HdmiLogger {
     private final String mTag;
 
     HdmiLogger(String tag) {
-        mTag = tag;
+        mTag = "HDMI:" + tag;
     }
 
     void warning(String logMessage) {
