@@ -31,6 +31,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.IntProperty;
 import android.util.Property;
 import android.view.View;
 import android.view.ViewGroup;
@@ -185,25 +186,36 @@ public class ChangeBounds extends Transition {
             }
             if (numChanges > 0) {
                 if (!mResizeClip) {
-                    if (startLeft != endLeft) view.setLeft(startLeft);
-                    if (startTop != endTop) view.setTop(startTop);
-                    if (startRight != endRight) view.setRight(startRight);
-                    if (startBottom != endBottom) view.setBottom(startBottom);
-                    ObjectAnimator topLeftAnimator = null;
-                    if (startLeft != endLeft || startTop != endTop) {
-                        Path topLeftPath = getPathMotion().getPath(startLeft, startTop,
-                                endLeft, endTop);
-                        topLeftAnimator = ObjectAnimator.ofInt(view, "left", "top", topLeftPath);
+                    Animator anim;
+                    if (startWidth == endWidth && startHeight == endHeight) {
+                        view.offsetLeftAndRight(startLeft - view.getLeft());
+                        view.offsetTopAndBottom(startTop - view.getTop());
+                        Path positionPath = getPathMotion().getPath(0, 0, endLeft - startLeft,
+                                endTop - startTop);
+                        anim = ObjectAnimator.ofInt(view, new HorizontalOffsetProperty(),
+                                new VerticalOffsetProperty(), positionPath);
+                    } else {
+                        if (startLeft != endLeft) view.setLeft(startLeft);
+                        if (startTop != endTop) view.setTop(startTop);
+                        if (startRight != endRight) view.setRight(startRight);
+                        if (startBottom != endBottom) view.setBottom(startBottom);
+                        ObjectAnimator topLeftAnimator = null;
+                        if (startLeft != endLeft || startTop != endTop) {
+                            Path topLeftPath = getPathMotion().getPath(startLeft, startTop,
+                                    endLeft, endTop);
+                            topLeftAnimator = ObjectAnimator
+                                    .ofInt(view, "left", "top", topLeftPath);
+                        }
+                        ObjectAnimator bottomRightAnimator = null;
+                        if (startRight != endRight || startBottom != endBottom) {
+                            Path bottomRightPath = getPathMotion().getPath(startRight, startBottom,
+                                    endRight, endBottom);
+                            bottomRightAnimator = ObjectAnimator.ofInt(view, "right", "bottom",
+                                    bottomRightPath);
+                        }
+                        anim = TransitionUtils.mergeAnimators(topLeftAnimator,
+                                bottomRightAnimator);
                     }
-                    ObjectAnimator bottomRightAnimator = null;
-                    if (startRight != endRight || startBottom != endBottom) {
-                        Path bottomRightPath = getPathMotion().getPath(startRight, startBottom,
-                                endRight, endBottom);
-                        bottomRightAnimator = ObjectAnimator.ofInt(view, "right", "bottom",
-                                bottomRightPath);
-                    }
-                    Animator anim = TransitionUtils.mergeAnimators(topLeftAnimator,
-                            bottomRightAnimator);
                     if (view.getParent() instanceof ViewGroup) {
                         final ViewGroup parent = (ViewGroup) view.getParent();
                         parent.suppressLayout(true);
@@ -340,5 +352,49 @@ public class ChangeBounds extends Transition {
             }
         }
         return null;
+    }
+
+    private abstract static class OffsetProperty extends IntProperty<View> {
+        int mPreviousValue;
+
+        public OffsetProperty(String name) {
+            super(name);
+        }
+
+        @Override
+        public void setValue(View view, int value) {
+            int offset = value - mPreviousValue;
+            offsetBy(view, offset);
+            mPreviousValue = value;
+        }
+
+        @Override
+        public Integer get(View object) {
+            return null;
+        }
+
+        protected abstract void offsetBy(View view, int by);
+    }
+
+    private static class HorizontalOffsetProperty extends OffsetProperty {
+        public HorizontalOffsetProperty() {
+            super("offsetLeftAndRight");
+        }
+
+        @Override
+        protected void offsetBy(View view, int by) {
+            view.offsetLeftAndRight(by);
+        }
+    }
+
+    private static class VerticalOffsetProperty extends OffsetProperty {
+        public VerticalOffsetProperty() {
+            super("offsetTopAndBottom");
+        }
+
+        @Override
+        protected void offsetBy(View view, int by) {
+            view.offsetTopAndBottom(by);
+        }
     }
 }
