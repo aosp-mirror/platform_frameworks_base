@@ -1326,6 +1326,8 @@ public class Toolbar extends ViewGroup {
             final View bottomChild = layoutSubtitle ? mSubtitleTextView : mTitleTextView;
             final LayoutParams toplp = (LayoutParams) topChild.getLayoutParams();
             final LayoutParams bottomlp = (LayoutParams) bottomChild.getLayoutParams();
+            final boolean titleHasWidth = layoutTitle && mTitleTextView.getMeasuredWidth() > 0
+                    || layoutSubtitle && mSubtitleTextView.getMeasuredWidth() > 0;
 
             switch (mGravity & Gravity.VERTICAL_GRAVITY_MASK) {
                 case Gravity.TOP:
@@ -1353,7 +1355,7 @@ public class Toolbar extends ViewGroup {
                     break;
             }
             if (isRtl) {
-                final int rd = mTitleMarginStart - collapsingMargins[1];
+                final int rd = (titleHasWidth ? mTitleMarginStart : 0) - collapsingMargins[1];
                 right -= Math.max(0, rd);
                 collapsingMargins[1] = Math.max(0, -rd);
                 int titleRight = right;
@@ -1376,9 +1378,11 @@ public class Toolbar extends ViewGroup {
                     subtitleRight = subtitleRight - mTitleMarginEnd;
                     titleTop = subtitleBottom + lp.bottomMargin;
                 }
-                right = Math.min(titleRight, subtitleRight);
+                if (titleHasWidth) {
+                    right = Math.min(titleRight, subtitleRight);
+                }
             } else {
-                final int ld = mTitleMarginStart - collapsingMargins[0];
+                final int ld = (titleHasWidth ? mTitleMarginStart : 0) - collapsingMargins[0];
                 left += Math.max(0, ld);
                 collapsingMargins[0] = Math.max(0, -ld);
                 int titleLeft = left;
@@ -1401,7 +1405,9 @@ public class Toolbar extends ViewGroup {
                     subtitleLeft = subtitleRight + mTitleMarginEnd;
                     titleTop = subtitleBottom + lp.bottomMargin;
                 }
-                left = Math.max(titleLeft, subtitleLeft);
+                if (titleHasWidth) {
+                    left = Math.max(titleLeft, subtitleLeft);
+                }
             }
         }
 
