@@ -432,8 +432,58 @@ def verify_builder(clazz):
 
 def verify_aidl(clazz):
     """Catch people exposing raw AIDL."""
-    if "extends android.os.Binder" in clazz.raw:
+    if "extends android.os.Binder" in clazz.raw or "implements android.os.IInterface" in clazz.raw:
         error(clazz, None, "Exposing raw AIDL interface")
+
+
+def verify_internal(clazz):
+    """Catch people exposing internal classes."""
+    if clazz.pkg.name.startswith("com.android"):
+        error(clazz, None, "Exposing internal class")
+
+
+def verify_layering(clazz):
+    """Catch package layering violations.
+    For example, something in android.os depending on android.app."""
+    ranking = [
+        ["android.service","android.accessibilityservice","android.inputmethodservice","android.printservice","android.appwidget","android.webkit","android.preference","android.gesture","android.print"],
+        "android.app",
+        "android.widget",
+        "android.view",
+        "android.animation",
+        "android.provider",
+        "android.content",
+        "android.database",
+        "android.graphics",
+        "android.text",
+        "android.os",
+        "android.util"
+    ]
+
+    def rank(p):
+        for i in range(len(ranking)):
+            if isinstance(ranking[i], list):
+                for j in ranking[i]:
+                    if p.startswith(j): return i
+            else:
+                if p.startswith(ranking[i]): return i
+
+    cr = rank(clazz.pkg.name)
+    if cr is None: return
+
+    for f in clazz.fields:
+        ir = rank(f.typ)
+        if ir and ir < cr:
+            warn(clazz, f, "Field type violates package layering")
+
+    for m in clazz.methods:
+        ir = rank(m.typ)
+        if ir and ir < cr:
+            warn(clazz, m, "Method return type violates package layering")
+        for arg in m.args:
+            ir = rank(arg)
+            if ir and ir < cr:
+                warn(clazz, m, "Method argument type violates package layering")
 
 
 def verify_all(api):
@@ -466,6 +516,8 @@ def verify_all(api):
         verify_helper_classes(clazz)
         verify_builder(clazz)
         verify_aidl(clazz)
+        verify_internal(clazz)
+        verify_layering(clazz)
 
     return failures
 
