@@ -140,6 +140,11 @@ public class FileBridge extends Thread {
             mClient = clientPfd.getFileDescriptor();
         }
 
+        public FileBridgeOutputStream(FileDescriptor client) {
+            mClientPfd = null;
+            mClient = client;
+        }
+
         @Override
         public void close() throws IOException {
             try {
