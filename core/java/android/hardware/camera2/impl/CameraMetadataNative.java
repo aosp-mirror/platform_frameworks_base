@@ -67,7 +67,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Implementation of camera metadata marshal/unmarshal across Binder to
@@ -655,6 +654,15 @@ public class CameraMetadataNative implements Parcelable {
 
     private Face[] getFaces() {
         Integer faceDetectMode = get(CaptureResult.STATISTICS_FACE_DETECT_MODE);
+        byte[] faceScores = get(CaptureResult.STATISTICS_FACE_SCORES);
+        Rect[] faceRectangles = get(CaptureResult.STATISTICS_FACE_RECTANGLES);
+        int[] faceIds = get(CaptureResult.STATISTICS_FACE_IDS);
+        int[] faceLandmarks = get(CaptureResult.STATISTICS_FACE_LANDMARKS);
+
+        if (areValuesAllNull(faceDetectMode, faceScores, faceRectangles, faceIds, faceLandmarks)) {
+            return null;
+        }
+
         if (faceDetectMode == null) {
             Log.w(TAG, "Face detect mode metadata is null, assuming the mode is SIMPLE");
             faceDetectMode = CaptureResult.STATISTICS_FACE_DETECT_MODE_SIMPLE;
@@ -670,8 +678,6 @@ public class CameraMetadataNative implements Parcelable {
         }
 
         // Face scores and rectangles are required by SIMPLE and FULL mode.
-        byte[] faceScores = get(CaptureResult.STATISTICS_FACE_SCORES);
-        Rect[] faceRectangles = get(CaptureResult.STATISTICS_FACE_RECTANGLES);
         if (faceScores == null || faceRectangles == null) {
             Log.w(TAG, "Expect face scores and rectangles to be non-null");
             return new Face[0];
@@ -683,8 +689,6 @@ public class CameraMetadataNative implements Parcelable {
         // To be safe, make number of faces is the minimal of all face info metadata length.
         int numFaces = Math.min(faceScores.length, faceRectangles.length);
         // Face id and landmarks are only required by FULL mode.
-        int[] faceIds = get(CaptureResult.STATISTICS_FACE_IDS);
-        int[] faceLandmarks = get(CaptureResult.STATISTICS_FACE_LANDMARKS);
         if (faceDetectMode == CaptureResult.STATISTICS_FACE_DETECT_MODE_FULL) {
             if (faceIds == null || faceLandmarks == null) {
                 Log.w(TAG, "Expect face ids and landmarks to be non-null for FULL mode," +
@@ -755,22 +759,32 @@ public class CameraMetadataNative implements Parcelable {
 
     private LensShadingMap getLensShadingMap() {
         float[] lsmArray = getBase(CaptureResult.STATISTICS_LENS_SHADING_MAP);
+        Size s = get(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE);
+
+        // Do not warn if lsmArray is null while s is not. This is valid.
         if (lsmArray == null) {
-            Log.w(TAG, "getLensShadingMap - Lens shading map was null.");
             return null;
         }
-        Size s = get(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE);
+
+        if (s == null) {
+            Log.w(TAG, "getLensShadingMap - Lens shading map size was null.");
+            return null;
+        }
+
         LensShadingMap map = new LensShadingMap(lsmArray, s.getHeight(), s.getWidth());
         return map;
     }
 
     private Location getGpsLocation() {
         String processingMethod = get(CaptureResult.JPEG_GPS_PROCESSING_METHOD);
-        Location l = new Location(translateProcessToLocationProvider(processingMethod));
-
         double[] coords = get(CaptureResult.JPEG_GPS_COORDINATES);
         Long timeStamp = get(CaptureResult.JPEG_GPS_TIMESTAMP);
 
+        if (areValuesAllNull(processingMethod, coords, timeStamp)) {
+            return null;
+        }
+
+        Location l = new Location(translateProcessToLocationProvider(processingMethod));
         if (timeStamp != null) {
             l.setTime(timeStamp);
         } else {
@@ -873,7 +887,13 @@ public class CameraMetadataNative implements Parcelable {
         float[] red = getBase(CaptureRequest.TONEMAP_CURVE_RED);
         float[] green = getBase(CaptureRequest.TONEMAP_CURVE_GREEN);
         float[] blue = getBase(CaptureRequest.TONEMAP_CURVE_BLUE);
+
+        if (areValuesAllNull(red, green, blue)) {
+            return null;
+        }
+
         if (red == null || green == null || blue == null) {
+            Log.w(TAG, "getTonemapCurve - missing tone curve components");
             return null;
         }
         TonemapCurve tc = new TonemapCurve(red, green, blue);
@@ -1206,6 +1226,18 @@ public class CameraMetadataNative implements Parcelable {
         if (VERBOSE) {
             Log.v(TAG, "Registered metadata marshalers");
         }
+    }
+
+    /** Check if input arguments are all {@code null}.
+     *
+     * @param objs Input arguments for null check
+     * @return {@code true} if input arguments are all {@code null}, otherwise {@code false}
+     */
+    private static boolean areValuesAllNull(Object... objs) {
+        for (Object o : objs) {
+            if (o != null) return false;
+        }
+        return true;
     }
 
     static {
