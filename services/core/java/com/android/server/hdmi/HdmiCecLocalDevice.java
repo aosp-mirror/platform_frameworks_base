@@ -28,6 +28,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 import java.util.ArrayList;
@@ -96,6 +97,17 @@ abstract class HdmiCecLocalDevice {
         @Override
         public int hashCode() {
             return logicalAddress * 29 + physicalAddress;
+        }
+        @Override
+        public String toString() {
+            StringBuffer s = new StringBuffer();
+            String logicalAddressString = (logicalAddress == Constants.ADDR_INVALID)
+                    ? "invalid" : String.format("0x%02x", logicalAddress);
+            s.append("logical_address: ").append(logicalAddressString);
+            String physicalAddressString = (physicalAddress == Constants.INVALID_PHYSICAL_ADDRESS)
+                    ? "invalid" : String.format("0x%04x", physicalAddress);
+            s.append(", physical_address: ").append(physicalAddressString);
+            return s.toString();
         }
     }
     // Logical address of the active source.
@@ -792,5 +804,17 @@ abstract class HdmiCecLocalDevice {
      */
     protected void sendKeyEvent(int keyCode, boolean isPressed) {
         Slog.w(TAG, "sendKeyEvent not implemented");
+    }
+
+    /**
+     * Dump internal status of HdmiCecLocalDevice object.
+     */
+    protected void dump(final IndentingPrintWriter pw) {
+        pw.println("mDeviceType: " + mDeviceType);
+        pw.println("mAddress: " + mAddress);
+        pw.println("mPreferredAddress: " + mPreferredAddress);
+        pw.println("mDeviceInfo: " + mDeviceInfo);
+        pw.println("mActiveSource: " + mActiveSource);
+        pw.println(String.format("mActiveRoutingPath: 0x%04x", mActiveRoutingPath));
     }
 }
