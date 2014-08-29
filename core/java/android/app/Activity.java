@@ -788,8 +788,8 @@ public class Activity extends ContextThemeWrapper
     final Handler mHandler = new Handler();
 
     ActivityTransitionState mActivityTransitionState = new ActivityTransitionState();
-    SharedElementListener mEnterTransitionListener = SharedElementListener.NULL_LISTENER;
-    SharedElementListener mExitTransitionListener = SharedElementListener.NULL_LISTENER;
+    SharedElementCallback mEnterTransitionListener = SharedElementCallback.NULL_CALLBACK;
+    SharedElementCallback mExitTransitionListener = SharedElementCallback.NULL_CALLBACK;
 
     /** Return the intent that started this activity. */
     public Intent getIntent() {
@@ -5779,33 +5779,33 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * When {@link android.app.ActivityOptions#makeSceneTransitionAnimation(Activity,
-     * android.view.View, String)} was used to start an Activity, <var>listener</var>
+     * android.view.View, String)} was used to start an Activity, <var>callback</var>
      * will be called to handle shared elements on the <i>launched</i> Activity. This requires
      * {@link Window#FEATURE_CONTENT_TRANSITIONS}.
      *
-     * @param listener Used to manipulate shared element transitions on the launched Activity.
+     * @param callback Used to manipulate shared element transitions on the launched Activity.
      */
-    public void setEnterSharedElementListener(SharedElementListener listener) {
-        if (listener == null) {
-            listener = SharedElementListener.NULL_LISTENER;
+    public void setEnterSharedElementCallback(SharedElementCallback callback) {
+        if (callback == null) {
+            callback = SharedElementCallback.NULL_CALLBACK;
         }
-        mEnterTransitionListener = listener;
+        mEnterTransitionListener = callback;
     }
 
     /**
      * When {@link android.app.ActivityOptions#makeSceneTransitionAnimation(Activity,
-     * android.view.View, String)} was used to start an Activity, <var>listener</var>
+     * android.view.View, String)} was used to start an Activity, <var>callback</var>
      * will be called to handle shared elements on the <i>launching</i> Activity. Most
      * calls will only come when returning from the started Activity.
      * This requires {@link Window#FEATURE_CONTENT_TRANSITIONS}.
      *
-     * @param listener Used to manipulate shared element transitions on the launching Activity.
+     * @param callback Used to manipulate shared element transitions on the launching Activity.
      */
-    public void setExitSharedElementListener(SharedElementListener listener) {
-        if (listener == null) {
-            listener = SharedElementListener.NULL_LISTENER;
+    public void setExitSharedElementCallback(SharedElementCallback callback) {
+        if (callback == null) {
+            callback = SharedElementCallback.NULL_CALLBACK;
         }
-        mExitTransitionListener = listener;
+        mExitTransitionListener = callback;
     }
 
     /**
