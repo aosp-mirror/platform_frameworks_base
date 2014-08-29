@@ -1486,8 +1486,6 @@ public abstract class Context {
      * @see #sendBroadcast(Intent)
      * @see #sendBroadcast(Intent, String)
      * @see #sendOrderedBroadcast(Intent, String)
-     * @see #sendStickyBroadcast(Intent)
-     * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
      * @see android.content.BroadcastReceiver
      * @see #registerReceiver
      * @see android.app.Activity#RESULT_OK
@@ -1584,7 +1582,7 @@ public abstract class Context {
             @Nullable  Bundle initialExtras);
 
     /**
-     * Perform a {@link #sendBroadcast(Intent)} that is "sticky," meaning the
+     * <p>Perform a {@link #sendBroadcast(Intent)} that is "sticky," meaning the
      * Intent you are sending stays around after the broadcast is complete,
      * so that others can quickly retrieve that data through the return
      * value of {@link #registerReceiver(BroadcastReceiver, IntentFilter)}.  In
@@ -1595,6 +1593,12 @@ public abstract class Context {
      * permission in order to use this API.  If you do not hold that
      * permission, {@link SecurityException} will be thrown.
      *
+     * @deprecated Sticky broadcasts should not be used.  They provide no security (anyone
+     * can access them), no protection (anyone can modify them), and many other problems.
+     * The recommended pattern is to use a non-sticky broadcast to report that <em>something</em>
+     * has changed, with another mechanism for apps to retrieve the current value whenever
+     * desired.
+     *
      * @param intent The Intent to broadcast; all receivers matching this
      * Intent will receive the broadcast, and the Intent will be held to
      * be re-broadcast to future receivers.
@@ -1602,10 +1606,11 @@ public abstract class Context {
      * @see #sendBroadcast(Intent)
      * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
      */
+    @Deprecated
     public abstract void sendStickyBroadcast(Intent intent);
 
     /**
-     * Version of {@link #sendStickyBroadcast} that allows you to
+     * <p>Version of {@link #sendStickyBroadcast} that allows you to
      * receive data back from the broadcast.  This is accomplished by
      * supplying your own BroadcastReceiver when calling, which will be
      * treated as a final receiver at the end of the broadcast -- its
@@ -1621,6 +1626,12 @@ public abstract class Context {
      * the result of any changes made by the receivers.
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @deprecated Sticky broadcasts should not be used.  They provide no security (anyone
+     * can access them), no protection (anyone can modify them), and many other problems.
+     * The recommended pattern is to use a non-sticky broadcast to report that <em>something</em>
+     * has changed, with another mechanism for apps to retrieve the current value whenever
+     * desired.
      *
      * @param intent The Intent to broadcast; all receivers matching this
      *               Intent will receive the broadcast.
@@ -1644,30 +1655,44 @@ public abstract class Context {
      * @see #registerReceiver
      * @see android.app.Activity#RESULT_OK
      */
+    @Deprecated
     public abstract void sendStickyOrderedBroadcast(Intent intent,
             BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
             @Nullable Bundle initialExtras);
 
     /**
-     * Remove the data previously sent with {@link #sendStickyBroadcast},
+     * <p>Remove the data previously sent with {@link #sendStickyBroadcast},
      * so that it is as if the sticky broadcast had never happened.
      *
      * <p>You must hold the {@link android.Manifest.permission#BROADCAST_STICKY}
      * permission in order to use this API.  If you do not hold that
      * permission, {@link SecurityException} will be thrown.
      *
+     * @deprecated Sticky broadcasts should not be used.  They provide no security (anyone
+     * can access them), no protection (anyone can modify them), and many other problems.
+     * The recommended pattern is to use a non-sticky broadcast to report that <em>something</em>
+     * has changed, with another mechanism for apps to retrieve the current value whenever
+     * desired.
+     *
      * @param intent The Intent that was previously broadcast.
      *
      * @see #sendStickyBroadcast
      */
+    @Deprecated
     public abstract void removeStickyBroadcast(Intent intent);
 
     /**
-     * Version of {@link #sendStickyBroadcast(Intent)} that allows you to specify the
+     * <p>Version of {@link #sendStickyBroadcast(Intent)} that allows you to specify the
      * user the broadcast will be sent to.  This is not available to applications
      * that are not pre-installed on the system image.  Using it requires holding
      * the INTERACT_ACROSS_USERS permission.
+     *
+     * @deprecated Sticky broadcasts should not be used.  They provide no security (anyone
+     * can access them), no protection (anyone can modify them), and many other problems.
+     * The recommended pattern is to use a non-sticky broadcast to report that <em>something</em>
+     * has changed, with another mechanism for apps to retrieve the current value whenever
+     * desired.
      *
      * @param intent The Intent to broadcast; all receivers matching this
      * Intent will receive the broadcast, and the Intent will be held to
@@ -1676,10 +1701,11 @@ public abstract class Context {
      *
      * @see #sendBroadcast(Intent)
      */
+    @Deprecated
     public abstract void sendStickyBroadcastAsUser(Intent intent, UserHandle user);
 
     /**
-     * Version of
+     * <p>Version of
      * {@link #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)}
      * that allows you to specify the
      * user the broadcast will be sent to.  This is not available to applications
@@ -1687,6 +1713,12 @@ public abstract class Context {
      * the INTERACT_ACROSS_USERS permission.
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @deprecated Sticky broadcasts should not be used.  They provide no security (anyone
+     * can access them), no protection (anyone can modify them), and many other problems.
+     * The recommended pattern is to use a non-sticky broadcast to report that <em>something</em>
+     * has changed, with another mechanism for apps to retrieve the current value whenever
+     * desired.
      *
      * @param intent The Intent to broadcast; all receivers matching this
      *               Intent will receive the broadcast.
@@ -1705,13 +1737,14 @@ public abstract class Context {
      *
      * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
      */
+    @Deprecated
     public abstract void sendStickyOrderedBroadcastAsUser(Intent intent,
             UserHandle user, BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
             @Nullable Bundle initialExtras);
 
     /**
-     * Version of {@link #removeStickyBroadcast(Intent)} that allows you to specify the
+     * <p>Version of {@link #removeStickyBroadcast(Intent)} that allows you to specify the
      * user the broadcast will be sent to.  This is not available to applications
      * that are not pre-installed on the system image.  Using it requires holding
      * the INTERACT_ACROSS_USERS permission.
@@ -1720,11 +1753,18 @@ public abstract class Context {
      * permission in order to use this API.  If you do not hold that
      * permission, {@link SecurityException} will be thrown.
      *
+     * @deprecated Sticky broadcasts should not be used.  They provide no security (anyone
+     * can access them), no protection (anyone can modify them), and many other problems.
+     * The recommended pattern is to use a non-sticky broadcast to report that <em>something</em>
+     * has changed, with another mechanism for apps to retrieve the current value whenever
+     * desired.
+     *
      * @param intent The Intent that was previously broadcast.
      * @param user UserHandle to remove the sticky broadcast from.
      *
      * @see #sendStickyBroadcastAsUser
      */
+    @Deprecated
     public abstract void removeStickyBroadcastAsUser(Intent intent, UserHandle user);
 
     /**
