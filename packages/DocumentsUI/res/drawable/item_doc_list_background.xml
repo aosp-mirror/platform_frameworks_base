@@ -14,20 +14,8 @@
      limitations under the License.
 -->
 
-<resources>
-    <color name="material_grey_50">#fffafafa</color>
-    <color name="material_grey_300">#ffeeeeee</color>
-
-    <color name="item_doc_grid_background">@color/material_grey_300</color>
-
-    <color name="item_doc_grid_protect_background">#88000000</color>
-
-    <color name="item_doc_grid_overlay_activated">#88000000</color>
-    <color name="item_doc_grid_overlay_disabled">#88ffffff</color>
-
-    <color name="item_doc_list_overlay_disabled">#88ffffff</color>
-
-    <!-- 10% alpha of material_deep_teal_500 -->
-    <color name="item_doc_list_background_activated">#1a009688</color>
-
-</resources>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true" android:state_activated="true" android:drawable="@color/item_doc_list_background_activated" />
+    <item android:state_focused="false" android:state_activated="true" android:drawable="@color/item_doc_list_background_activated" />
+    <item android:drawable="@android:color/transparent" />
+</selector>

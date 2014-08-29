@@ -235,7 +235,7 @@ public class RootsFragment extends Fragment {
             final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
 
             final Context context = convertView.getContext();
-            icon.setImageDrawable(root.loadIcon(context));
+            icon.setImageDrawable(root.loadDrawerIcon(context));
             title.setText(root.title);
 
             // Show available space if no summary
