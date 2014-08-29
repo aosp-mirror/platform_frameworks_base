@@ -95,6 +95,8 @@ void BaseRenderNodeAnimator::pushStaging(AnimationContext& context) {
         // Oh boy, we're starting! Man the battle stations!
         if (mPlayState == RUNNING) {
             transitionToRunning(context);
+        } else if (mPlayState == FINISHED) {
+            callOnFinishedListener(context);
         }
     }
 }
