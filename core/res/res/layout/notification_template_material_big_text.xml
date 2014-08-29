@@ -39,11 +39,12 @@
         <include layout="@layout/notification_template_part_line2" />
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="10dp"
             android:orientation="horizontal"
             android:gravity="top"
+            android:layout_weight="1"
             >
             <TextView android:id="@+id/big_text"
                 android:textAppearance="@style/TextAppearance.Material.Notification"
@@ -54,8 +55,8 @@
                 android:visibility="gone"
                 />
             <ImageView android:id="@+id/profile_badge_large_template"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="@dimen/notification_badge_size"
+                android:layout_height="@dimen/notification_badge_size"
                 android:layout_weight="0"
                 android:layout_marginStart="4dp"
                 android:scaleType="fitCenter"
