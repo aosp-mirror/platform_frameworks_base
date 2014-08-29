@@ -166,8 +166,16 @@ final class ContentProviderRecord {
         }
         if (full) {
             if (hasExternalProcessHandles()) {
-                pw.print(prefix); pw.print("externals=");
-                        pw.println(externalProcessTokenToHandle.size());
+                pw.print(prefix); pw.print("externals:");
+                if (externalProcessTokenToHandle != null) {
+                    pw.print(" w/token=");
+                    pw.print(externalProcessTokenToHandle.size());
+                }
+                if (externalProcessNoHandleCount > 0) {
+                    pw.print(" notoken=");
+                    pw.print(externalProcessNoHandleCount);
+                }
+                pw.println();
             }
         } else {
             if (connections.size() > 0 || externalProcessNoHandleCount > 0) {
