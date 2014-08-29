@@ -16,10 +16,6 @@
 
 <resources>
 
-    <dimen name="printer_list_view_padding_start">48dip</dimen>
-
-    <dimen name="printer_list_view_padding_end">48dip</dimen>
-
     <integer name="preview_page_per_row_count">2</integer>
 
     <integer name="print_option_column_count">3</integer>
