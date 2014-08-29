@@ -534,9 +534,13 @@ void Caches::bindTexture(GLuint texture) {
 }
 
 void Caches::bindTexture(GLenum target, GLuint texture) {
-    if (mBoundTextures[mTextureUnit] != texture) {
+    if (target == GL_TEXTURE_2D) {
+        bindTexture(texture);
+    } else {
+        // GLConsumer directly calls glBindTexture() with
+        // target=GL_TEXTURE_EXTERNAL_OES, don't cache this target
+        // since the cached state could be stale
         glBindTexture(target, texture);
-        mBoundTextures[mTextureUnit] = texture;
     }
 }
 
