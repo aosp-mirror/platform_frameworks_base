@@ -97,6 +97,14 @@ public class SystemBarScrimViews {
      * going home).
      */
     public void startExitRecentsAnimation() {
+        if (mHasStatusBarScrim && mShouldAnimateStatusBarScrim) {
+            mStatusBarScrimView.animate()
+                    .translationY(-mStatusBarScrimView.getMeasuredHeight())
+                    .setStartDelay(0)
+                    .setDuration(mConfig.taskBarExitAnimDuration)
+                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
+                    .start();
+        }
         if (mHasNavBarScrim && mShouldAnimateNavBarScrim) {
             mNavBarScrimView.animate()
                     .translationY(mNavBarScrimView.getMeasuredHeight())
