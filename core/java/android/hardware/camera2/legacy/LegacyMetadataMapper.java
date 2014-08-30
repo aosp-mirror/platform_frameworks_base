@@ -882,6 +882,7 @@ public class LegacyMetadataMapper {
         Parameters.SCENE_MODE_PARTY,
         Parameters.SCENE_MODE_CANDLELIGHT,
         Parameters.SCENE_MODE_BARCODE,
+        Parameters.SCENE_MODE_HDR,
     };
 
     private final static int[] sSceneModes = {
@@ -901,6 +902,7 @@ public class LegacyMetadataMapper {
         CameraCharacteristics.CONTROL_SCENE_MODE_PARTY,
         CameraCharacteristics.CONTROL_SCENE_MODE_CANDLELIGHT,
         CameraCharacteristics.CONTROL_SCENE_MODE_BARCODE,
+        CameraCharacteristics.CONTROL_SCENE_MODE_HDR,
     };
 
     static int convertSceneModeFromLegacy(String mode) {
