@@ -73,6 +73,7 @@ public class PhoneAccount implements Parcelable {
      * Flag indicating that this {@code PhoneAccount} is capable of placing video calls.
      * <p>
      * See {@link #getCapabilities}
+     * @hide
      */
     public static final int CAPABILITY_VIDEO_CALLING = 0x8;
 
