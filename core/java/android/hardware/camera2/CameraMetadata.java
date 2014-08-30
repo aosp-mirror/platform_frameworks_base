@@ -1575,6 +1575,13 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO = 17;
 
+    /**
+     * <p>Turn on custom high dynamic range (HDR) mode.</p>
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     * @hide
+     */
+    public static final int CONTROL_SCENE_MODE_HDR = 18;
+
     //
     // Enumeration values for CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
     //
