@@ -28266,17 +28266,6 @@ package android.telecomm {
     field public final int supportedRouteMask;
   }
 
-  public final class CameraCapabilities implements android.os.Parcelable {
-    ctor public CameraCapabilities(boolean, float, int, int);
-    method public int describeContents();
-    method public int getHeight();
-    method public float getMaxZoom();
-    method public int getWidth();
-    method public boolean isZoomSupported();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-  }
-
   public abstract class Conference {
     ctor public Conference(android.telecomm.PhoneAccountHandle);
     method public boolean addConnection(android.telecomm.Connection);
@@ -28316,7 +28305,7 @@ package android.telecomm {
     method public final android.telecomm.StatusHints getStatusHints();
     method public final boolean isRequestingRingback();
     method public void onAbort();
-    method public void onAnswer(int);
+    method public void onAnswer();
     method public void onConferenceWith(android.telecomm.Connection);
     method public void onDisconnect();
     method public void onHold();
@@ -28357,7 +28346,7 @@ package android.telecomm {
   }
 
   public final class ConnectionRequest implements android.os.Parcelable {
-    ctor public ConnectionRequest(android.telecomm.PhoneAccountHandle, android.net.Uri, int, android.os.Bundle, int);
+    ctor public ConnectionRequest(android.telecomm.PhoneAccountHandle, android.net.Uri, int, android.os.Bundle);
     method public int describeContents();
     method public android.telecomm.PhoneAccountHandle getAccountHandle();
     method public android.os.Bundle getExtras();
@@ -28408,7 +28397,6 @@ package android.telecomm {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CAPABILITY_CONNECTION_MANAGER = 1; // 0x1
     field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
-    field public static final int CAPABILITY_VIDEO_CALLING = 8; // 0x8
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
@@ -28436,18 +28424,14 @@ package android.telecomm {
   public final class PhoneCapabilities {
     method public static java.lang.String toString(int);
     field public static final int ADD_CALL = 16; // 0x10
-    field public static final int ALL = 3327; // 0xcff
+    field public static final int ALL = 255; // 0xff
     field public static final int GENERIC_CONFERENCE = 128; // 0x80
     field public static final int HOLD = 1; // 0x1
     field public static final int MERGE_CALLS = 4; // 0x4
     field public static final int MUTE = 64; // 0x40
     field public static final int RESPOND_VIA_TEXT = 32; // 0x20
-    field public static final int SUPPORTS_VT_LOCAL = 256; // 0x100
-    field public static final int SUPPORTS_VT_REMOTE = 512; // 0x200
     field public static final int SUPPORT_HOLD = 2; // 0x2
     field public static final int SWAP_CALLS = 8; // 0x8
-    field public static final int VoLTE = 1024; // 0x400
-    field public static final int VoWIFI = 2048; // 0x800
   }
 
   public class PropertyPresentation {
@@ -28485,7 +28469,7 @@ package android.telecomm {
   public final class RemoteConnection {
     method public void abort();
     method public void addListener(android.telecomm.RemoteConnection.Listener);
-    method public void answer(int);
+    method public void answer();
     method public void disconnect();
     method public boolean getAudioModeIsVoip();
     method public int getCallCapabilities();
