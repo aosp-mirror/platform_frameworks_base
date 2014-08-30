@@ -105,6 +105,9 @@ class Ripple {
     /** Whether we have an explicit maximum radius. */
     private boolean mHasMaxRadius;
 
+    /** Whether we were canceled externally and should avoid self-removal. */
+    private boolean mCanceled;
+
     /**
      * Creates a new ripple.
      */
@@ -295,6 +298,8 @@ class Ripple {
      * Starts the enter animation.
      */
     public void enter() {
+        cancel();
+
         final int radiusDuration = (int)
                 (1000 * Math.sqrt(mOuterRadius / WAVE_TOUCH_DOWN_ACCELERATION * mDensity) + 0.5);
 
@@ -332,7 +337,8 @@ class Ripple {
      * Starts the exit animation.
      */
     public void exit() {
-        cancelSoftwareAnimations();
+        cancel();
+
         final float radius = MathUtils.lerp(0, mOuterRadius, mTweenRadius);
         final float remaining;
         if (mAnimRadius != null && mAnimRadius.isRunning()) {
@@ -399,9 +405,15 @@ class Ripple {
         invalidateSelf();
     }
 
+    /**
+     * Jump all animations to their end state. The caller is responsible for
+     * removing the ripple from the list of animating ripples.
+     */
     public void jump() {
+        mCanceled = true;
         endSoftwareAnimations();
         endHardwareAnimations();
+        mCanceled = false;
     }
 
     private void endSoftwareAnimations() {
@@ -436,6 +448,8 @@ class Ripple {
             mPendingAnimations.clear();
             removeSelf();
         }
+
+        mHardwareAnimating = false;
     }
 
     private Paint getTempPaint() {
@@ -479,11 +493,14 @@ class Ripple {
     }
 
     /**
-     * Cancel all animations.
+     * Cancels all animations. The caller is responsible for removing
+     * the ripple from the list of animating ripples.
      */
     public void cancel() {
+        mCanceled = true;
         cancelSoftwareAnimations();
         cancelHardwareAnimations(true);
+        mCanceled = false;
     }
 
     private void cancelSoftwareAnimations() {
@@ -517,13 +534,16 @@ class Ripple {
 
         if (cancelPending && !mPendingAnimations.isEmpty()) {
             mPendingAnimations.clear();
-            removeSelf();
         }
+
+        mHardwareAnimating = false;
     }
 
     private void removeSelf() {
         // The owner will invalidate itself.
-        mOwner.removeRipple(this);
+        if (!mCanceled) {
+            mOwner.removeRipple(this);
+        }
     }
 
     private void invalidateSelf() {
