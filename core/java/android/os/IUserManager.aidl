@@ -52,4 +52,5 @@ interface IUserManager {
     void removeRestrictions();
     void setDefaultGuestRestrictions(in Bundle restrictions);
     Bundle getDefaultGuestRestrictions();
+    boolean markGuestForDeletion(int userHandle);
 }
