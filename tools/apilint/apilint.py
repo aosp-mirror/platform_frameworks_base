@@ -22,7 +22,7 @@ Usage: apilint.py current.txt
 Usage: apilint.py current.txt previous.txt
 """
 
-import re, sys
+import re, sys, collections
 
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
@@ -149,6 +149,9 @@ def parse_api(fn):
 
 failures = []
 
+def filter_dupe(s):
+    return s.replace(" deprecated ", " ")
+
 def _fail(clazz, detail, msg):
     """Records an API failure to be processed later."""
     global failures
@@ -158,7 +161,7 @@ def _fail(clazz, detail, msg):
         res += "\n    in " + repr(detail)
     res += "\n    in " + repr(clazz)
     res += "\n    in " + repr(clazz.pkg)
-    failures.append(res)
+    failures.append(filter_dupe(res))
 
 def warn(clazz, detail, msg):
     _fail(clazz, detail, "%sWarning:%s %s" % (format(fg=YELLOW, bg=BLACK), format(reset=True), msg))
@@ -393,16 +396,31 @@ def verify_intent_builder(clazz):
 
 
 def verify_helper_classes(clazz):
-    """Verify that helper classes are named consistently with what they extend."""
+    """Verify that helper classes are named consistently with what they extend.
+    All developer extendable methods should be named onFoo()."""
+    test_methods = False
     if "extends android.app.Service" in clazz.raw:
+        test_methods = True
         if not clazz.name.endswith("Service"):
             error(clazz, None, "Inconsistent class name")
     if "extends android.content.ContentProvider" in clazz.raw:
+        test_methods = True
         if not clazz.name.endswith("Provider"):
             error(clazz, None, "Inconsistent class name")
     if "extends android.content.BroadcastReceiver" in clazz.raw:
+        test_methods = True
         if not clazz.name.endswith("Receiver"):
             error(clazz, None, "Inconsistent class name")
+    if "extends android.app.Activity" in clazz.raw:
+        test_methods = True
+        if not clazz.name.endswith("Activity"):
+            error(clazz, None, "Inconsistent class name")
+
+    if test_methods:
+        for m in clazz.methods:
+            if "final" in m.split: continue
+            if not re.match("on[A-Z]", m.name):
+                error(clazz, m, "Extendable methods should be onFoo() style, otherwise final")
 
 
 def verify_builder(clazz):
@@ -423,8 +441,12 @@ def verify_builder(clazz):
         if m.name.startswith("get"): continue
         if m.name.startswith("clear"): continue
 
-        if not m.typ.endswith(clazz.fullname):
-            warn(clazz, m, "Should return the builder")
+        if m.name.startswith("with"):
+            error(clazz, m, "Builder methods must be setFoo()")
+
+        if m.name.startswith("set"):
+            if not m.typ.endswith(clazz.fullname):
+                warn(clazz, m, "Should return the builder")
 
     if not has_build:
         warn(clazz, None, "Missing build() method")
@@ -486,6 +508,47 @@ def verify_layering(clazz):
                 warn(clazz, m, "Method argument type violates package layering")
 
 
+def verify_boolean(clazz):
+    """Catches people returning boolean from getFoo() style methods.
+    Ignores when matching setFoo() is present."""
+    methods = [ m.name for m in clazz.methods ]
+    for m in clazz.methods:
+        if m.typ == "boolean" and m.name.startswith("get") and m.name != "get" and len(m.args) == 0:
+            setter = "set" + m.name[3:]
+            if setter not in methods:
+                error(clazz, m, "Methods returning boolean should be isFoo or hasFoo")
+
+
+def verify_collections(clazz):
+    """Verifies that collection types are interfaces."""
+    bad = ["java.util.Vector", "java.util.LinkedList", "java.util.ArrayList", "java.util.Stack",
+           "java.util.HashMap", "java.util.HashSet", "android.util.ArraySet", "android.util.ArrayMap"]
+    for m in clazz.methods:
+        filt = re.sub("<.+>", "", m.typ)
+        if filt in bad:
+            error(clazz, m, "Return type is concrete collection")
+        for arg in m.args:
+            filt = re.sub("<.+>", "", arg)
+            if filt in bad:
+                error(clazz, m, "Argument is concrete collection")
+
+
+def verify_flags(clazz):
+    """Verifies that flags are non-overlapping."""
+    known = collections.defaultdict(int)
+    for f in clazz.fields:
+        if "FLAG_" in f.name:
+            try:
+                val = int(f.value)
+            except:
+                continue
+
+            scope = f.name[0:f.name.index("FLAG_")]
+            if val & known[scope]:
+                warn(clazz, f, "Found overlapping flag")
+            known[scope] |= val
+
+
 def verify_all(api):
     global failures
 
@@ -518,6 +581,9 @@ def verify_all(api):
         verify_aidl(clazz)
         verify_internal(clazz)
         verify_layering(clazz)
+        verify_boolean(clazz)
+        verify_collections(clazz)
+        verify_flags(clazz)
 
     return failures
 
