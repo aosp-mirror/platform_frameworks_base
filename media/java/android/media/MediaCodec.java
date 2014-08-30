@@ -557,12 +557,15 @@ final public class MediaCodec {
             int i = 0;
             for (Map.Entry<String, Object> entry: formatMap.entrySet()) {
                 if (entry.getKey().equals(MediaFormat.KEY_AUDIO_SESSION_ID)) {
-                    // TODO: Wire up as soon as AudioService is ready. Check entry.getValue() for
-                    // non-integral type.
-                    // long audioHwSync = audioService.getAudioHwSyncForSession(entry.getValue());
-                    long audioHwSync = 0;
+                    int sessionId = 0;
+                    try {
+                        sessionId = (Integer)entry.getValue();
+                    }
+                    catch (Exception e) {
+                        throw new IllegalArgumentException("Wrong Session ID Parameter!");
+                    }
                     keys[i] = "audio-hw-sync";
-                    values[i] = audioHwSync;
+                    values[i] = AudioSystem.getAudioHwSyncForSession(sessionId);
                 } else {
                     keys[i] = entry.getKey();
                     values[i] = entry.getValue();
