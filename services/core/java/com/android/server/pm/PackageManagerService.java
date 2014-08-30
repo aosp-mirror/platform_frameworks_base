@@ -3035,115 +3035,125 @@ public class PackageManagerService extends IPackageManager.Stub {
                             (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0, userId)
                     : null;
             if (prefs != null && prefs.size() > 0) {
-                // First figure out how good the original match set is.
-                // We will only allow preferred activities that came
-                // from the same match quality.
-                int match = 0;
+                boolean changed = false;
+                try {
+                    // First figure out how good the original match set is.
+                    // We will only allow preferred activities that came
+                    // from the same match quality.
+                    int match = 0;
 
-                if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Figuring out best match...");
+                    if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Figuring out best match...");
 
-                final int N = query.size();
-                for (int j=0; j<N; j++) {
-                    final ResolveInfo ri = query.get(j);
-                    if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Match for " + ri.activityInfo
-                            + ": 0x" + Integer.toHexString(match));
-                    if (ri.match > match) {
-                        match = ri.match;
-                    }
-                }
-
-                if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Best match: 0x"
-                        + Integer.toHexString(match));
-
-                match &= IntentFilter.MATCH_CATEGORY_MASK;
-                final int M = prefs.size();
-                for (int i=0; i<M; i++) {
-                    final PreferredActivity pa = prefs.get(i);
-                    if (DEBUG_PREFERRED || debug) {
-                        Slog.v(TAG, "Checking PreferredActivity ds="
-                                + (pa.countDataSchemes() > 0 ? pa.getDataScheme(0) : "<none>")
-                                + "\n  component=" + pa.mPref.mComponent);
-                        pa.dump(new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM), "  ");
-                    }
-                    if (pa.mPref.mMatch != match) {
-                        if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Skipping bad match "
-                                + Integer.toHexString(pa.mPref.mMatch));
-                        continue;
-                    }
-                    // If it's not an "always" type preferred activity and that's what we're
-                    // looking for, skip it.
-                    if (always && !pa.mPref.mAlways) {
-                        if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Skipping mAlways=false entry");
-                        continue;
-                    }
-                    final ActivityInfo ai = getActivityInfo(pa.mPref.mComponent,
-                            flags | PackageManager.GET_DISABLED_COMPONENTS, userId);
-                    if (DEBUG_PREFERRED || debug) {
-                        Slog.v(TAG, "Found preferred activity:");
-                        if (ai != null) {
-                            ai.dump(new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM), "  ");
-                        } else {
-                            Slog.v(TAG, "  null");
-                        }
-                    }
-                    if (ai == null) {
-                        // This previously registered preferred activity
-                        // component is no longer known.  Most likely an update
-                        // to the app was installed and in the new version this
-                        // component no longer exists.  Clean it up by removing
-                        // it from the preferred activities list, and skip it.
-                        Slog.w(TAG, "Removing dangling preferred activity: "
-                                + pa.mPref.mComponent);
-                        pir.removeFilter(pa);
-                        continue;
-                    }
+                    final int N = query.size();
                     for (int j=0; j<N; j++) {
                         final ResolveInfo ri = query.get(j);
-                        if (!ri.activityInfo.applicationInfo.packageName
-                                .equals(ai.applicationInfo.packageName)) {
+                        if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Match for " + ri.activityInfo
+                                + ": 0x" + Integer.toHexString(match));
+                        if (ri.match > match) {
+                            match = ri.match;
+                        }
+                    }
+
+                    if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Best match: 0x"
+                            + Integer.toHexString(match));
+
+                    match &= IntentFilter.MATCH_CATEGORY_MASK;
+                    final int M = prefs.size();
+                    for (int i=0; i<M; i++) {
+                        final PreferredActivity pa = prefs.get(i);
+                        if (DEBUG_PREFERRED || debug) {
+                            Slog.v(TAG, "Checking PreferredActivity ds="
+                                    + (pa.countDataSchemes() > 0 ? pa.getDataScheme(0) : "<none>")
+                                    + "\n  component=" + pa.mPref.mComponent);
+                            pa.dump(new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM), "  ");
+                        }
+                        if (pa.mPref.mMatch != match) {
+                            if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Skipping bad match "
+                                    + Integer.toHexString(pa.mPref.mMatch));
                             continue;
                         }
-                        if (!ri.activityInfo.name.equals(ai.name)) {
+                        // If it's not an "always" type preferred activity and that's what we're
+                        // looking for, skip it.
+                        if (always && !pa.mPref.mAlways) {
+                            if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Skipping mAlways=false entry");
                             continue;
                         }
-
-                        if (removeMatches) {
-                            pir.removeFilter(pa);
-                            if (DEBUG_PREFERRED) {
-                                Slog.v(TAG, "Removing match " + pa.mPref.mComponent);
+                        final ActivityInfo ai = getActivityInfo(pa.mPref.mComponent,
+                                flags | PackageManager.GET_DISABLED_COMPONENTS, userId);
+                        if (DEBUG_PREFERRED || debug) {
+                            Slog.v(TAG, "Found preferred activity:");
+                            if (ai != null) {
+                                ai.dump(new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM), "  ");
+                            } else {
+                                Slog.v(TAG, "  null");
                             }
-                            break;
                         }
-
-                        // Okay we found a previously set preferred or last chosen app.
-                        // If the result set is different from when this
-                        // was created, we need to clear it and re-ask the
-                        // user their preference, if we're looking for an "always" type entry.
-                        if (always && !pa.mPref.sameSet(query, priority)) {
-                            Slog.i(TAG, "Result set changed, dropping preferred activity for "
-                                    + intent + " type " + resolvedType);
-                            if (DEBUG_PREFERRED) {
-                                Slog.v(TAG, "Removing preferred activity since set changed "
-                                        + pa.mPref.mComponent);
-                            }
+                        if (ai == null) {
+                            // This previously registered preferred activity
+                            // component is no longer known.  Most likely an update
+                            // to the app was installed and in the new version this
+                            // component no longer exists.  Clean it up by removing
+                            // it from the preferred activities list, and skip it.
+                            Slog.w(TAG, "Removing dangling preferred activity: "
+                                    + pa.mPref.mComponent);
                             pir.removeFilter(pa);
-                            // Re-add the filter as a "last chosen" entry (!always)
-                            PreferredActivity lastChosen = new PreferredActivity(
-                                    pa, pa.mPref.mMatch, null, pa.mPref.mComponent, false);
-                            pir.addFilter(lastChosen);
-                            mSettings.writePackageRestrictionsLPr(userId);
-                            return null;
+                            changed = true;
+                            continue;
                         }
+                        for (int j=0; j<N; j++) {
+                            final ResolveInfo ri = query.get(j);
+                            if (!ri.activityInfo.applicationInfo.packageName
+                                    .equals(ai.applicationInfo.packageName)) {
+                                continue;
+                            }
+                            if (!ri.activityInfo.name.equals(ai.name)) {
+                                continue;
+                            }
 
-                        // Yay! Either the set matched or we're looking for the last chosen
-                        if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Returning preferred activity: "
-                                + ri.activityInfo.packageName + "/" + ri.activityInfo.name);
+                            if (removeMatches) {
+                                pir.removeFilter(pa);
+                                changed = true;
+                                if (DEBUG_PREFERRED) {
+                                    Slog.v(TAG, "Removing match " + pa.mPref.mComponent);
+                                }
+                                break;
+                            }
+
+                            // Okay we found a previously set preferred or last chosen app.
+                            // If the result set is different from when this
+                            // was created, we need to clear it and re-ask the
+                            // user their preference, if we're looking for an "always" type entry.
+                            if (always && !pa.mPref.sameSet(query, priority)) {
+                                Slog.i(TAG, "Result set changed, dropping preferred activity for "
+                                        + intent + " type " + resolvedType);
+                                if (DEBUG_PREFERRED) {
+                                    Slog.v(TAG, "Removing preferred activity since set changed "
+                                            + pa.mPref.mComponent);
+                                }
+                                pir.removeFilter(pa);
+                                // Re-add the filter as a "last chosen" entry (!always)
+                                PreferredActivity lastChosen = new PreferredActivity(
+                                        pa, pa.mPref.mMatch, null, pa.mPref.mComponent, false);
+                                pir.addFilter(lastChosen);
+                                changed = true;
+                                return null;
+                            }
+
+                            // Yay! Either the set matched or we're looking for the last chosen
+                            if (DEBUG_PREFERRED || debug) Slog.v(TAG, "Returning preferred activity: "
+                                    + ri.activityInfo.packageName + "/" + ri.activityInfo.name);
+                            return ri;
+                        }
+                    }
+                } finally {
+                    if (changed) {
+                        if (DEBUG_PREFERRED) {
+                            Slog.v(TAG, "Preferred activity bookkeeping changed; writing restrictions");
+                        }
                         mSettings.writePackageRestrictionsLPr(userId);
-                        return ri;
                     }
                 }
             }
-            mSettings.writePackageRestrictionsLPr(userId);
         }
         if (DEBUG_PREFERRED || debug) Slog.v(TAG, "No preferred activity to return");
         return null;
