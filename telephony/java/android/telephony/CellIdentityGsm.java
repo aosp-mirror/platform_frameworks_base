@@ -20,6 +20,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Rlog;
 
+import java.util.Objects;
+
 /**
  * CellIdentity to represent a unique GSM cell
  */
@@ -113,25 +115,24 @@ public final class CellIdentityGsm implements Parcelable {
 
     @Override
     public int hashCode() {
-        int primeNum = 31;
-        return (mMcc * primeNum) + (mMnc * primeNum) + (mLac * primeNum) + (mCid * primeNum);
+        return Objects.hash(mMcc, mMnc, mLac, mCid);
     }
 
     @Override
     public boolean equals(Object other) {
-        if (super.equals(other)) {
-            try {
-                CellIdentityGsm o = (CellIdentityGsm)other;
-                return mMcc == o.mMcc &&
-                        mMnc == o.mMnc &&
-                        mLac == o.mLac &&
-                        mCid == o.mCid;
-            } catch (ClassCastException e) {
-                return false;
-            }
-        } else {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof CellIdentityGsm)) {
             return false;
         }
+
+        CellIdentityGsm o = (CellIdentityGsm) other;
+        return mMcc == o.mMcc &&
+                mMnc == o.mMnc &&
+                mLac == o.mLac &&
+                mCid == o.mCid;
     }
 
     @Override

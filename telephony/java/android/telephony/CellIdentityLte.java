@@ -20,6 +20,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Rlog;
 
+import java.util.Objects;
+
 /**
  * CellIdentity is to represent a unique LTE cell
  */
@@ -117,27 +119,25 @@ public final class CellIdentityLte implements Parcelable {
 
     @Override
     public int hashCode() {
-        int primeNum = 31;
-        return (mMcc * primeNum) + (mMnc * primeNum) + (mCi * primeNum) + (mPci * primeNum) +
-                (mTac * primeNum);
+        return Objects.hash(mMcc, mMnc, mCi, mPci, mTac);
     }
 
     @Override
     public boolean equals(Object other) {
-        if (super.equals(other)) {
-            try {
-                CellIdentityLte o = (CellIdentityLte)other;
-                return mMcc == o.mMcc &&
-                        mMnc == o.mMnc &&
-                        mCi == o.mCi &&
-                        mPci == o.mPci &&
-                        mTac == o.mTac;
-            } catch (ClassCastException e) {
-                return false;
-            }
-        } else {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof CellIdentityLte)) {
             return false;
         }
+
+        CellIdentityLte o = (CellIdentityLte) other;
+        return mMcc == o.mMcc &&
+                mMnc == o.mMnc &&
+                mCi == o.mCi &&
+                mPci == o.mPci &&
+                mTac == o.mTac;
     }
 
     @Override

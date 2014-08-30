@@ -20,6 +20,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Rlog;
 
+import java.util.Objects;
+
 /**
  * CellIdentity is to represent a unique CDMA cell
  */
@@ -137,27 +139,25 @@ public final class CellIdentityCdma implements Parcelable {
 
     @Override
     public int hashCode() {
-        int primeNum = 31;
-        return (mNetworkId * primeNum) + (mSystemId * primeNum) + (mBasestationId * primeNum) +
-                (mLatitude * primeNum) + (mLongitude * primeNum);
+        return Objects.hash(mNetworkId, mSystemId, mBasestationId, mLatitude, mLongitude);
     }
 
     @Override
     public boolean equals(Object other) {
-        if (super.equals(other)) {
-            try {
-                CellIdentityCdma o = (CellIdentityCdma)other;
-                return mNetworkId == o.mNetworkId &&
-                        mSystemId == o.mSystemId &&
-                        mBasestationId == o.mBasestationId &&
-                        mLatitude == o.mLatitude &&
-                        mLongitude == o.mLongitude;
-            } catch (ClassCastException e) {
-                return false;
-            }
-        } else {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof CellIdentityCdma)) {
             return false;
         }
+
+        CellIdentityCdma o = (CellIdentityCdma) other;
+        return mNetworkId == o.mNetworkId &&
+                mSystemId == o.mSystemId &&
+                mBasestationId == o.mBasestationId &&
+                mLatitude == o.mLatitude &&
+                mLongitude == o.mLongitude;
     }
 
     @Override

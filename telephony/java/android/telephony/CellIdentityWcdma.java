@@ -20,6 +20,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Rlog;
 
+import java.util.Objects;
+
 /**
  * CellIdentity to represent a unique UMTS cell
  */
@@ -118,27 +120,25 @@ public final class CellIdentityWcdma implements Parcelable {
 
     @Override
     public int hashCode() {
-        int primeNum = 31;
-        return (mMcc * primeNum) + (mMnc * primeNum) + (mLac * primeNum) + (mCid * primeNum) +
-                (mPsc * primeNum);
+        return Objects.hash(mMcc, mMnc, mLac, mCid, mPsc);
     }
 
     @Override
     public boolean equals(Object other) {
-        if (super.equals(other)) {
-            try {
-                CellIdentityWcdma o = (CellIdentityWcdma)other;
-                return mMcc == o.mMcc &&
-                        mMnc == o.mMnc &&
-                        mLac == o.mLac &&
-                        mCid == o.mCid &&
-                        mPsc == o.mPsc;
-            } catch (ClassCastException e) {
-                return false;
-            }
-        } else {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof CellIdentityWcdma)) {
             return false;
         }
+
+        CellIdentityWcdma o = (CellIdentityWcdma) other;
+        return mMcc == o.mMcc &&
+                mMnc == o.mMnc &&
+                mLac == o.mLac &&
+                mCid == o.mCid &&
+                mPsc == o.mPsc;
     }
 
     @Override
