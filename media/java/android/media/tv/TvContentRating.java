@@ -126,7 +126,7 @@ import java.util.Objects;
  * code snippet:
  * </p>
  * <pre>
- * String rating = TvContentRating.createRating(
+ * TvContentRating rating = TvContentRating.createRating(
  *         "com.android.tv",
  *         "US_TV",
  *         "US_TV_PG",
