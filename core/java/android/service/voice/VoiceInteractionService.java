@@ -40,16 +40,15 @@ import java.util.Locale;
 
 /**
  * Top-level service of the current global voice interactor, which is providing
- * support for hotwording, the back-end of a {@link android.app.VoiceInteractor}, etc.
+ * support for hotwording etc.
  * The current VoiceInteractionService that has been selected by the user is kept
  * always running by the system, to allow it to do things like listen for hotwords
- * in the background to instigate voice interactions.
+ * in the background.
  *
  * <p>Because this service is always running, it should be kept as lightweight as
  * possible.  Heavy-weight operations (including showing UI) should be implemented
- * in the associated {@link android.service.voice.VoiceInteractionSessionService} when
- * an actual voice interaction is taking place, and that service should run in a
- * separate process from this one.
+ * in the associated {@link android.service.voice.VoiceInteractionSessionService}
+ * that only runs while the operation is active.
  */
 public class VoiceInteractionService extends Service {
     /**

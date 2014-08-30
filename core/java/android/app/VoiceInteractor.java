@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -33,6 +34,7 @@ import com.android.internal.os.SomeArgs;
 import java.util.ArrayList;
 
 /**
+ * @hide
  * Interface for an {@link Activity} to interact with the user through voice.  Use
  * {@link android.app.Activity#getVoiceInteractor() Activity.getVoiceInteractor}
  * to retrieve the interface, if the activity is currently involved in a voice interaction.
@@ -54,6 +56,7 @@ import java.util.ArrayList;
  * request, rather than holding on to the activity instance yourself, either explicitly
  * or implicitly through a non-static inner class.
  */
+@SystemApi
 public class VoiceInteractor {
     static final String TAG = "VoiceInteractor";
     static final boolean DEBUG = true;
