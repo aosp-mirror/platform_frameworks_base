@@ -18,7 +18,6 @@ package android.animation;
 
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.util.FloatMath;
 import android.util.FloatProperty;
 import android.util.IntProperty;
 import android.util.Log;
@@ -26,6 +25,7 @@ import android.util.Property;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -75,7 +75,7 @@ public class PropertyValuesHolder implements Cloneable {
     /**
      * The set of keyframes (time/value pairs) that define this animation.
      */
-    KeyframeSet mKeyframeSet = null;
+    Keyframes mKeyframes = null;
 
 
     // type evaluators for the primitive types handled by this implementation
@@ -219,11 +219,9 @@ public class PropertyValuesHolder implements Cloneable {
      * @see ObjectAnimator#ofPropertyValuesHolder(Object, PropertyValuesHolder...)
      */
     public static PropertyValuesHolder ofMultiInt(String propertyName, Path path) {
-        Keyframe[] keyframes = createKeyframes(path);
-        KeyframeSet keyframeSet = KeyframeSet.ofKeyframe(keyframes);
-        TypeEvaluator<PointF> evaluator = new PointFEvaluator(new PointF());
+        Keyframes keyframes = KeyframeSet.ofPath(path);
         PointFToIntArray converter = new PointFToIntArray();
-        return new MultiIntValuesHolder(propertyName, converter, evaluator, keyframeSet);
+        return new MultiIntValuesHolder(propertyName, converter, null, keyframes);
     }
 
     /**
@@ -339,11 +337,9 @@ public class PropertyValuesHolder implements Cloneable {
      * @see ObjectAnimator#ofPropertyValuesHolder(Object, PropertyValuesHolder...)
      */
     public static PropertyValuesHolder ofMultiFloat(String propertyName, Path path) {
-        Keyframe[] keyframes = createKeyframes(path);
-        KeyframeSet keyframeSet = KeyframeSet.ofKeyframe(keyframes);
-        TypeEvaluator<PointF> evaluator = new PointFEvaluator(new PointF());
+        Keyframes keyframes = KeyframeSet.ofPath(path);
         PointFToFloatArray converter = new PointFToFloatArray();
-        return new MultiFloatValuesHolder(propertyName, converter, evaluator, keyframeSet);
+        return new MultiFloatValuesHolder(propertyName, converter, null, keyframes);
     }
 
     /**
@@ -415,6 +411,10 @@ public class PropertyValuesHolder implements Cloneable {
      * <code>TypeConverter</code> to convert from <code>PointF</code> to the target
      * type.
      *
+     * <p>The PointF passed to <code>converter</code> or <code>property</code>, if
+     * <code>converter</code> is <code>null</code>, is reused on each animation frame and should
+     * not be stored by the setter or TypeConverter.</p>
+     *
      * @param propertyName The name of the property being animated.
      * @param converter Converts a PointF to the type associated with the setter. May be
      *                  null if conversion is unnecessary.
@@ -423,9 +423,9 @@ public class PropertyValuesHolder implements Cloneable {
      */
     public static PropertyValuesHolder ofObject(String propertyName,
             TypeConverter<PointF, ?> converter, Path path) {
-        Keyframe[] keyframes = createKeyframes(path);
-        PropertyValuesHolder pvh = ofKeyframe(propertyName, keyframes);
-        pvh.setEvaluator(new PointFEvaluator(new PointF()));
+        PropertyValuesHolder pvh = new PropertyValuesHolder(propertyName);
+        pvh.mKeyframes = KeyframeSet.ofPath(path);
+        pvh.mValueType = PointF.class;
         pvh.setConverter(converter);
         return pvh;
     }
@@ -484,6 +484,10 @@ public class PropertyValuesHolder implements Cloneable {
      * <code>TypeConverter</code> to convert from <code>PointF</code> to the target
      * type.
      *
+     * <p>The PointF passed to <code>converter</code> or <code>property</code>, if
+     * <code>converter</code> is <code>null</code>, is reused on each animation frame and should
+     * not be stored by the setter or TypeConverter.</p>
+     *
      * @param property The property being animated. Should not be null.
      * @param converter Converts a PointF to the type associated with the setter. May be
      *                  null if conversion is unnecessary.
@@ -492,9 +496,9 @@ public class PropertyValuesHolder implements Cloneable {
      */
     public static <V> PropertyValuesHolder ofObject(Property<?, V> property,
             TypeConverter<PointF, V> converter, Path path) {
-        Keyframe[] keyframes = createKeyframes(path);
-        PropertyValuesHolder pvh = ofKeyframe(property, keyframes);
-        pvh.setEvaluator(new PointFEvaluator(new PointF()));
+        PropertyValuesHolder pvh = new PropertyValuesHolder(property);
+        pvh.mKeyframes = KeyframeSet.ofPath(path);
+        pvh.mValueType = PointF.class;
         pvh.setConverter(converter);
         return pvh;
     }
@@ -520,17 +524,7 @@ public class PropertyValuesHolder implements Cloneable {
      */
     public static PropertyValuesHolder ofKeyframe(String propertyName, Keyframe... values) {
         KeyframeSet keyframeSet = KeyframeSet.ofKeyframe(values);
-        if (keyframeSet instanceof IntKeyframeSet) {
-            return new IntPropertyValuesHolder(propertyName, (IntKeyframeSet) keyframeSet);
-        } else if (keyframeSet instanceof FloatKeyframeSet) {
-            return new FloatPropertyValuesHolder(propertyName, (FloatKeyframeSet) keyframeSet);
-        }
-        else {
-            PropertyValuesHolder pvh = new PropertyValuesHolder(propertyName);
-            pvh.mKeyframeSet = keyframeSet;
-            pvh.mValueType = ((Keyframe)values[0]).getType();
-            return pvh;
-        }
+        return ofKeyframes(propertyName, keyframeSet);
     }
 
     /**
@@ -551,15 +545,32 @@ public class PropertyValuesHolder implements Cloneable {
      */
     public static PropertyValuesHolder ofKeyframe(Property property, Keyframe... values) {
         KeyframeSet keyframeSet = KeyframeSet.ofKeyframe(values);
-        if (keyframeSet instanceof IntKeyframeSet) {
-            return new IntPropertyValuesHolder(property, (IntKeyframeSet) keyframeSet);
-        } else if (keyframeSet instanceof FloatKeyframeSet) {
-            return new FloatPropertyValuesHolder(property, (FloatKeyframeSet) keyframeSet);
+        return ofKeyframes(property, keyframeSet);
+    }
+
+    static PropertyValuesHolder ofKeyframes(String propertyName, Keyframes keyframes) {
+        if (keyframes instanceof Keyframes.IntKeyframes) {
+            return new IntPropertyValuesHolder(propertyName, (Keyframes.IntKeyframes) keyframes);
+        } else if (keyframes instanceof Keyframes.FloatKeyframes) {
+            return new FloatPropertyValuesHolder(propertyName,
+                    (Keyframes.FloatKeyframes) keyframes);
+        } else {
+            PropertyValuesHolder pvh = new PropertyValuesHolder(propertyName);
+            pvh.mKeyframes = keyframes;
+            pvh.mValueType = keyframes.getType();
+            return pvh;
         }
-        else {
+    }
+
+    static PropertyValuesHolder ofKeyframes(Property property, Keyframes keyframes) {
+        if (keyframes instanceof Keyframes.IntKeyframes) {
+            return new IntPropertyValuesHolder(property, (Keyframes.IntKeyframes) keyframes);
+        } else if (keyframes instanceof Keyframes.FloatKeyframes) {
+            return new FloatPropertyValuesHolder(property, (Keyframes.FloatKeyframes) keyframes);
+        } else {
             PropertyValuesHolder pvh = new PropertyValuesHolder(property);
-            pvh.mKeyframeSet = keyframeSet;
-            pvh.mValueType = ((Keyframe)values[0]).getType();
+            pvh.mKeyframes = keyframes;
+            pvh.mValueType = keyframes.getType();
             return pvh;
         }
     }
@@ -579,7 +590,7 @@ public class PropertyValuesHolder implements Cloneable {
      */
     public void setIntValues(int... values) {
         mValueType = int.class;
-        mKeyframeSet = KeyframeSet.ofInt(values);
+        mKeyframes = KeyframeSet.ofInt(values);
     }
 
     /**
@@ -597,7 +608,7 @@ public class PropertyValuesHolder implements Cloneable {
      */
     public void setFloatValues(float... values) {
         mValueType = float.class;
-        mKeyframeSet = KeyframeSet.ofFloat(values);
+        mKeyframes = KeyframeSet.ofFloat(values);
     }
 
     /**
@@ -612,7 +623,7 @@ public class PropertyValuesHolder implements Cloneable {
         for (int i = 0; i < numKeyframes; ++i) {
             keyframes[i] = (Keyframe)values[i];
         }
-        mKeyframeSet = new KeyframeSet(keyframes);
+        mKeyframes = new KeyframeSet(keyframes);
     }
 
     /**
@@ -630,9 +641,9 @@ public class PropertyValuesHolder implements Cloneable {
      */
     public void setObjectValues(Object... values) {
         mValueType = values[0].getClass();
-        mKeyframeSet = KeyframeSet.ofObject(values);
+        mKeyframes = KeyframeSet.ofObject(values);
         if (mEvaluator != null) {
-            mKeyframeSet.setEvaluator(mEvaluator);
+            mKeyframes.setEvaluator(mEvaluator);
         }
     }
 
@@ -775,12 +786,15 @@ public class PropertyValuesHolder implements Cloneable {
      * @param target The object on which the setter (and possibly getter) exist.
      */
     void setupSetterAndGetter(Object target) {
-        mKeyframeSet.invalidateCache();
+        mKeyframes.invalidateCache();
         if (mProperty != null) {
             // check to make sure that mProperty is on the class of target
             try {
                 Object testValue = null;
-                for (Keyframe kf : mKeyframeSet.mKeyframes) {
+                ArrayList<Keyframe> keyframes = mKeyframes.getKeyframes();
+                int keyframeCount = keyframes == null ? 0 : keyframes.size();
+                for (int i = 0; i < keyframeCount; i++) {
+                    Keyframe kf = keyframes.get(i);
                     if (!kf.hasValue() || kf.valueWasSetOnStart()) {
                         if (testValue == null) {
                             testValue = convertBack(mProperty.get(target));
@@ -800,7 +814,10 @@ public class PropertyValuesHolder implements Cloneable {
         if (mSetter == null) {
             setupSetter(targetClass);
         }
-        for (Keyframe kf : mKeyframeSet.mKeyframes) {
+        ArrayList<Keyframe> keyframes = mKeyframes.getKeyframes();
+        int keyframeCount = keyframes == null ? 0 : keyframes.size();
+        for (int i = 0; i < keyframeCount; i++) {
+            Keyframe kf = keyframes.get(i);
             if (!kf.hasValue() || kf.valueWasSetOnStart()) {
                 if (mGetter == null) {
                     setupGetter(targetClass);
@@ -873,7 +890,10 @@ public class PropertyValuesHolder implements Cloneable {
      * @param target The object which holds the start values that should be set.
      */
     void setupStartValue(Object target) {
-        setupValue(target, mKeyframeSet.mKeyframes.get(0));
+        ArrayList<Keyframe> keyframes = mKeyframes.getKeyframes();
+        if (!keyframes.isEmpty()) {
+            setupValue(target, keyframes.get(0));
+        }
     }
 
     /**
@@ -885,7 +905,10 @@ public class PropertyValuesHolder implements Cloneable {
      * @param target The object which holds the start values that should be set.
      */
     void setupEndValue(Object target) {
-        setupValue(target, mKeyframeSet.mKeyframes.get(mKeyframeSet.mKeyframes.size() - 1));
+        ArrayList<Keyframe> keyframes = mKeyframes.getKeyframes();
+        if (!keyframes.isEmpty()) {
+            setupValue(target, keyframes.get(keyframes.size() - 1));
+        }
     }
 
     @Override
@@ -894,7 +917,7 @@ public class PropertyValuesHolder implements Cloneable {
             PropertyValuesHolder newPVH = (PropertyValuesHolder) super.clone();
             newPVH.mPropertyName = mPropertyName;
             newPVH.mProperty = mProperty;
-            newPVH.mKeyframeSet = mKeyframeSet.clone();
+            newPVH.mKeyframes = mKeyframes.clone();
             newPVH.mEvaluator = mEvaluator;
             return newPVH;
         } catch (CloneNotSupportedException e) {
@@ -941,7 +964,7 @@ public class PropertyValuesHolder implements Cloneable {
         if (mEvaluator != null) {
             // KeyframeSet knows how to evaluate the common types - only give it a custom
             // evaluator if one has been set on this class
-            mKeyframeSet.setEvaluator(mEvaluator);
+            mKeyframes.setEvaluator(mEvaluator);
         }
     }
 
@@ -957,7 +980,7 @@ public class PropertyValuesHolder implements Cloneable {
      */
     public void setEvaluator(TypeEvaluator evaluator) {
         mEvaluator = evaluator;
-        mKeyframeSet.setEvaluator(evaluator);
+        mKeyframes.setEvaluator(evaluator);
     }
 
     /**
@@ -967,7 +990,7 @@ public class PropertyValuesHolder implements Cloneable {
      * @param fraction The elapsed, interpolated fraction of the animation.
      */
     void calculateValue(float fraction) {
-        Object value = mKeyframeSet.getValue(fraction);
+        Object value = mKeyframes.getValue(fraction);
         mAnimatedValue = mConverter == null ? value : mConverter.convert(value);
     }
 
@@ -1025,7 +1048,7 @@ public class PropertyValuesHolder implements Cloneable {
 
     @Override
     public String toString() {
-        return mPropertyName + ": " + mKeyframeSet.toString();
+        return mPropertyName + ": " + mKeyframes.toString();
     }
 
     /**
@@ -1059,21 +1082,21 @@ public class PropertyValuesHolder implements Cloneable {
         long mJniSetter;
         private IntProperty mIntProperty;
 
-        IntKeyframeSet mIntKeyframeSet;
+        Keyframes.IntKeyframes mIntKeyframes;
         int mIntAnimatedValue;
 
-        public IntPropertyValuesHolder(String propertyName, IntKeyframeSet keyframeSet) {
+        public IntPropertyValuesHolder(String propertyName, Keyframes.IntKeyframes keyframes) {
             super(propertyName);
             mValueType = int.class;
-            mKeyframeSet = keyframeSet;
-            mIntKeyframeSet = (IntKeyframeSet) mKeyframeSet;
+            mKeyframes = keyframes;
+            mIntKeyframes = keyframes;
         }
 
-        public IntPropertyValuesHolder(Property property, IntKeyframeSet keyframeSet) {
+        public IntPropertyValuesHolder(Property property, Keyframes.IntKeyframes keyframes) {
             super(property);
             mValueType = int.class;
-            mKeyframeSet = keyframeSet;
-            mIntKeyframeSet = (IntKeyframeSet) mKeyframeSet;
+            mKeyframes = keyframes;
+            mIntKeyframes = keyframes;
             if (property instanceof  IntProperty) {
                 mIntProperty = (IntProperty) mProperty;
             }
@@ -1095,12 +1118,12 @@ public class PropertyValuesHolder implements Cloneable {
         @Override
         public void setIntValues(int... values) {
             super.setIntValues(values);
-            mIntKeyframeSet = (IntKeyframeSet) mKeyframeSet;
+            mIntKeyframes = (Keyframes.IntKeyframes) mKeyframes;
         }
 
         @Override
         void calculateValue(float fraction) {
-            mIntAnimatedValue = mIntKeyframeSet.getIntValue(fraction);
+            mIntAnimatedValue = mIntKeyframes.getIntValue(fraction);
         }
 
         @Override
@@ -1111,7 +1134,7 @@ public class PropertyValuesHolder implements Cloneable {
         @Override
         public IntPropertyValuesHolder clone() {
             IntPropertyValuesHolder newPVH = (IntPropertyValuesHolder) super.clone();
-            newPVH.mIntKeyframeSet = (IntKeyframeSet) newPVH.mKeyframeSet;
+            newPVH.mIntKeyframes = (Keyframes.IntKeyframes) newPVH.mKeyframes;
             return newPVH;
         }
 
@@ -1196,21 +1219,21 @@ public class PropertyValuesHolder implements Cloneable {
         long mJniSetter;
         private FloatProperty mFloatProperty;
 
-        FloatKeyframeSet mFloatKeyframeSet;
+        Keyframes.FloatKeyframes mFloatKeyframes;
         float mFloatAnimatedValue;
 
-        public FloatPropertyValuesHolder(String propertyName, FloatKeyframeSet keyframeSet) {
+        public FloatPropertyValuesHolder(String propertyName, Keyframes.FloatKeyframes keyframes) {
             super(propertyName);
             mValueType = float.class;
-            mKeyframeSet = keyframeSet;
-            mFloatKeyframeSet = (FloatKeyframeSet) mKeyframeSet;
+            mKeyframes = keyframes;
+            mFloatKeyframes = keyframes;
         }
 
-        public FloatPropertyValuesHolder(Property property, FloatKeyframeSet keyframeSet) {
+        public FloatPropertyValuesHolder(Property property, Keyframes.FloatKeyframes keyframes) {
             super(property);
             mValueType = float.class;
-            mKeyframeSet = keyframeSet;
-            mFloatKeyframeSet = (FloatKeyframeSet) mKeyframeSet;
+            mKeyframes = keyframes;
+            mFloatKeyframes = keyframes;
             if (property instanceof FloatProperty) {
                 mFloatProperty = (FloatProperty) mProperty;
             }
@@ -1232,12 +1255,12 @@ public class PropertyValuesHolder implements Cloneable {
         @Override
         public void setFloatValues(float... values) {
             super.setFloatValues(values);
-            mFloatKeyframeSet = (FloatKeyframeSet) mKeyframeSet;
+            mFloatKeyframes = (Keyframes.FloatKeyframes) mKeyframes;
         }
 
         @Override
         void calculateValue(float fraction) {
-            mFloatAnimatedValue = mFloatKeyframeSet.getFloatValue(fraction);
+            mFloatAnimatedValue = mFloatKeyframes.getFloatValue(fraction);
         }
 
         @Override
@@ -1248,7 +1271,7 @@ public class PropertyValuesHolder implements Cloneable {
         @Override
         public FloatPropertyValuesHolder clone() {
             FloatPropertyValuesHolder newPVH = (FloatPropertyValuesHolder) super.clone();
-            newPVH.mFloatKeyframeSet = (FloatKeyframeSet) newPVH.mKeyframeSet;
+            newPVH.mFloatKeyframes = (Keyframes.FloatKeyframes) newPVH.mKeyframes;
             return newPVH;
         }
 
@@ -1340,10 +1363,10 @@ public class PropertyValuesHolder implements Cloneable {
         }
 
         public MultiFloatValuesHolder(String propertyName, TypeConverter converter,
-                TypeEvaluator evaluator, KeyframeSet keyframeSet) {
+                TypeEvaluator evaluator, Keyframes keyframes) {
             super(propertyName);
             setConverter(converter);
-            mKeyframeSet = keyframeSet;
+            mKeyframes = keyframes;
             setEvaluator(evaluator);
         }
 
@@ -1443,10 +1466,10 @@ public class PropertyValuesHolder implements Cloneable {
         }
 
         public MultiIntValuesHolder(String propertyName, TypeConverter converter,
-                TypeEvaluator evaluator, KeyframeSet keyframeSet) {
+                TypeEvaluator evaluator, Keyframes keyframes) {
             super(propertyName);
             setConverter(converter);
-            mKeyframeSet = keyframeSet;
+            mKeyframes = keyframes;
             setEvaluator(evaluator);
         }
 
@@ -1530,77 +1553,6 @@ public class PropertyValuesHolder implements Cloneable {
                 mPropertyMapLock.writeLock().unlock();
             }
         }
-    }
-
-    /* Path interpolation relies on approximating the Path as a series of line segments.
-       The line segments are recursively divided until there is less than 1/2 pixel error
-       between the lines and the curve. Each point of the line segment is converted
-       to a Keyframe and a linear interpolation between Keyframes creates a good approximation
-       of the curve.
-
-       The fraction for each Keyframe is the length along the Path to the point, divided by
-       the total Path length. Two points may have the same fraction in the case of a move
-       command causing a disjoint Path.
-
-       The value for each Keyframe is either the point as a PointF or one of the x or y
-       coordinates as an int or float. In the latter case, two Keyframes are generated for
-       each point that have the same fraction. */
-
-    /**
-     * Returns separate Keyframes arrays for the x and y coordinates along a Path. If
-     * isInt is true, the Keyframes will be IntKeyframes, otherwise they will be FloatKeyframes.
-     * The element at index 0 are the x coordinate Keyframes and element at index 1 are the
-     * y coordinate Keyframes. The returned values can be linearly interpolated and get less
-     * than 1/2 pixel error.
-     */
-    static Keyframe[][] createKeyframes(Path path, boolean isInt) {
-        if (path == null || path.isEmpty()) {
-            throw new IllegalArgumentException("The path must not be null or empty");
-        }
-        float[] pointComponents = path.approximate(0.5f);
-
-        int numPoints = pointComponents.length / 3;
-
-        Keyframe[][] keyframes = new Keyframe[2][];
-        keyframes[0] = new Keyframe[numPoints];
-        keyframes[1] = new Keyframe[numPoints];
-        int componentIndex = 0;
-        for (int i = 0; i < numPoints; i++) {
-            float fraction = pointComponents[componentIndex++];
-            float x = pointComponents[componentIndex++];
-            float y = pointComponents[componentIndex++];
-            if (isInt) {
-                keyframes[0][i] = Keyframe.ofInt(fraction, Math.round(x));
-                keyframes[1][i] = Keyframe.ofInt(fraction, Math.round(y));
-            } else {
-                keyframes[0][i] = Keyframe.ofFloat(fraction, x);
-                keyframes[1][i] = Keyframe.ofFloat(fraction, y);
-            }
-        }
-        return keyframes;
-    }
-
-    /**
-     * Returns PointF Keyframes for a Path. The resulting points can be linearly interpolated
-     * with less than 1/2 pixel in error.
-     */
-    private static Keyframe[] createKeyframes(Path path) {
-        if (path == null || path.isEmpty()) {
-            throw new IllegalArgumentException("The path must not be null or empty");
-        }
-        float[] pointComponents = path.approximate(0.5f);
-
-        int numPoints = pointComponents.length / 3;
-
-        Keyframe[] keyframes = new Keyframe[numPoints];
-        int componentIndex = 0;
-        for (int i = 0; i < numPoints; i++) {
-            float fraction = pointComponents[componentIndex++];
-            float x = pointComponents[componentIndex++];
-            float y = pointComponents[componentIndex++];
-            keyframes[i] = Keyframe.ofObject(fraction, new PointF(x, y));
-        }
-        return keyframes;
     }
 
     /**
