@@ -899,11 +899,15 @@ public class LayoutTransition {
                     PropertyValuesHolder[] oldValues = valueAnim.getValues();
                     for (int i = 0; i < oldValues.length; ++i) {
                         PropertyValuesHolder pvh = oldValues[i];
-                        KeyframeSet keyframeSet = pvh.mKeyframeSet;
-                        if (keyframeSet.mFirstKeyframe == null ||
-                                keyframeSet.mLastKeyframe == null ||
-                                !keyframeSet.mFirstKeyframe.getValue().equals(
-                                keyframeSet.mLastKeyframe.getValue())) {
+                        if (pvh.mKeyframes instanceof KeyframeSet) {
+                            KeyframeSet keyframeSet = (KeyframeSet) pvh.mKeyframes;
+                            if (keyframeSet.mFirstKeyframe == null ||
+                                    keyframeSet.mLastKeyframe == null ||
+                                    !keyframeSet.mFirstKeyframe.getValue().equals(
+                                            keyframeSet.mLastKeyframe.getValue())) {
+                                valuesDiffer = true;
+                            }
+                        } else if (!pvh.mKeyframes.getValue(0).equals(pvh.mKeyframes.getValue(1))) {
                             valuesDiffer = true;
                         }
                     }
