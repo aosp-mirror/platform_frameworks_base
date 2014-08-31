@@ -1294,8 +1294,10 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Dovoli"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Zavrni"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; želi poslati sporočilo na &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"S tem bo "<font fgcolor="#ffffb060">"morda bremenjen"</font>" vaš račun za mobilno napravo."</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"S tem bo bremenjen vaš račun za mobilno napravo."</font></string>
+    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
+    <skip />
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Pošlji"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Prekliči"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Zapomni si mojo izbiro"</string>
@@ -1639,8 +1641,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pripomočki za ljudi s posebnimi potrebami so omogočeni."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Omogočanje pripomočkov za ljudi s posebnimi potrebami preklicano."</string>
     <string name="user_switched" msgid="3768006783166984410">"Trenutni uporabnik <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (2871009331809089783) -->
-    <skip />
+    <string name="user_switching_message" msgid="2871009331809089783">"Preklop na uporabnika <xliff:g id="NAME">%1$s</xliff:g> …"</string>
     <string name="owner_name" msgid="2716755460376028154">"Lastnik"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Napaka"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Skrbnik ne dovoli te spremembe"</string>

@@ -1294,8 +1294,10 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"अनुमति दें"</string>
     <string name="sms_control_no" msgid="625438561395534982">"अस्वीकार करें"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; पर संदेश भेजना चाहता है."</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"इससे आपके मोबाइल खाते पर "<font fgcolor="#ffffb060">"शुल्क लग सकते हैं"</font>"."</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"इससे आपके मोबाइल खाते पर शुल्क लगेंगे."</font></string>
+    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
+    <skip />
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"भेजें"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"रद्द करें"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"मेरी पसंद को याद रखें"</string>
@@ -1639,8 +1641,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"आसान तरीका सक्षम कर दी है."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"आसान तरीका रद्द की गई."</string>
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान उपयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (2871009331809089783) -->
-    <skip />
+    <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> पर स्विच किया जा रहा है…"</string>
     <string name="owner_name" msgid="2716755460376028154">"स्वामी"</string>
     <string name="error_message_title" msgid="4510373083082500195">"त्रुटि"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"यह बदलाव आपके व्यवस्थापक द्वारा अनुमत नहीं है"</string>
