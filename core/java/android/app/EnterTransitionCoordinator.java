@@ -194,10 +194,12 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                         @Override
                         public boolean onPreDraw() {
                             getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
-                            Bundle state = captureSharedElementState();
-                            setSharedElementMatrices();
-                            moveSharedElementsToOverlay();
-                            mResultReceiver.send(MSG_SHARED_ELEMENT_DESTINATION, state);
+                            if (mResultReceiver != null) {
+                                Bundle state = captureSharedElementState();
+                                setSharedElementMatrices();
+                                moveSharedElementsToOverlay();
+                                mResultReceiver.send(MSG_SHARED_ELEMENT_DESTINATION, state);
+                            }
                             return true;
                         }
                     });
