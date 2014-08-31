@@ -71,6 +71,7 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_ON_POST_DIAL_CONTINUE = 14;
     private static final int MSG_ON_PHONE_ACCOUNT_CLICKED = 15;
     private static final int MSG_REMOVE_CONNECTION_SERVICE_ADAPTER = 16;
+    private static final int MSG_ANSWER_VIDEO = 17;
 
     private static Connection sNullConnection;
 
@@ -116,11 +117,17 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void answer(String callId, int videoState) {
+        /** @hide */
+        public void answerVideo(String callId, int videoState) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = callId;
             args.argi1 = videoState;
-            mHandler.obtainMessage(MSG_ANSWER, args).sendToTarget();
+            mHandler.obtainMessage(MSG_ANSWER_VIDEO, args).sendToTarget();
+        }
+
+        @Override
+        public void answer(String callId) {
+            mHandler.obtainMessage(MSG_ANSWER, callId).sendToTarget();
         }
 
         @Override
@@ -234,12 +241,15 @@ public abstract class ConnectionService extends Service {
                 case MSG_ABORT:
                     abort((String) msg.obj);
                     break;
-                case MSG_ANSWER: {
+                case MSG_ANSWER:
+                    answer((String) msg.obj);
+                    break;
+                case MSG_ANSWER_VIDEO: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         String callId = (String) args.arg1;
                         int videoState = args.argi1;
-                        answer(callId, videoState);
+                        answerVideo(callId, videoState);
                     } finally {
                         args.recycle();
                     }
@@ -545,9 +555,14 @@ public abstract class ConnectionService extends Service {
         findConnectionForAction(callId, "abort").onAbort();
     }
 
-    private void answer(String callId, int videoState) {
-        Log.d(this, "answer %s", callId);
+    private void answerVideo(String callId, int videoState) {
+        Log.d(this, "answerVideo %s", callId);
         findConnectionForAction(callId, "answer").onAnswer(videoState);
+    }
+
+    private void answer(String callId) {
+        Log.d(this, "answer %s", callId);
+        findConnectionForAction(callId, "answer").onAnswer();
     }
 
     private void reject(String callId) {

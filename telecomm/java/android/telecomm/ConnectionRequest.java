@@ -40,7 +40,23 @@ public final class ConnectionRequest implements Parcelable {
      * @param handlePresentation The {@link PropertyPresentation} which controls how the handle
      *         is shown.
      * @param extras Application-specific extra data.
+     */
+    public ConnectionRequest(
+            PhoneAccountHandle accountHandle,
+            Uri handle,
+            int handlePresentation,
+            Bundle extras) {
+        this(accountHandle, handle, handlePresentation, extras, VideoProfile.VideoState.AUDIO_ONLY);
+    }
+
+    /**
+     * @param accountHandle The accountHandle which should be used to place the call.
+     * @param handle The handle (e.g., phone number) to which the {@link Connection} is to connect.
+     * @param handlePresentation The {@link PropertyPresentation} which controls how the handle
+     *         is shown.
+     * @param extras Application-specific extra data.
      * @param videoState Determines the video state for the connection.
+     * @hide
      */
     public ConnectionRequest(
             PhoneAccountHandle accountHandle,
