@@ -1298,8 +1298,10 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"অনুমতি দিন"</string>
     <string name="sms_control_no" msgid="625438561395534982">"আস্বীকার করুন"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; এ একটি বার্তা পাঠাতে চায়৷"</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"এটির জন্য আপনার মোবাইল অ্যাকাউন্টে "<font fgcolor="#ffffb060">"চার্জ করা হতে পারে"</font>"৷"</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"এর ফলে আপনার মোবাইল অ্যাকাউন্টের উপরে চার্জ করা হবে৷"</font></string>
+    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
+    <skip />
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"পাঠান"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"বাতিল করুন"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"আমার পছন্দ মনে রাখুন"</string>

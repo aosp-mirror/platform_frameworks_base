@@ -1298,8 +1298,10 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"ခွင့်ပြုရန်"</string>
     <string name="sms_control_no" msgid="625438561395534982">"ငြင်းပယ်ခြင်း"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; မှ &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ကို စာတို ပို့ချင်ပါသည်"</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"ဒီ "<font fgcolor="#ffffb060">"သည် သင့် မိုဘိုင်းအကောင့်တွင်"</font>" အကုန်အကျ ဖြစ်စေနိုင်ပါသည်"</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"သင့်မိုဘိုင်း အကောင့်တွင် ပိုက်ဆံကုန်ကျပါမည်"</font></string>
+    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
+    <skip />
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"ပို့ရန်"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"ပယ်ဖျက်သည်"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"ကျွန်ပ်၏ရွေးချယ်မှုကို မှတ်ထားရန်"</string>

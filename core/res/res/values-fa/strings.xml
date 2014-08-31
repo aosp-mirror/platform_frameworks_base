@@ -1298,8 +1298,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"اجازه دادن"</string>
     <string name="sms_control_no" msgid="625438561395534982">"ردکردن"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; مایل است پیامی به &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ارسال کند."</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"این کار "<font fgcolor="#ffffb060">"می‌تواند منجر به شارژ"</font>" حساب تلفن همراه شما شود."</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"این کار حساب تلفن همراه شما را شارژ خواهد کرد."</font></string>
+    <string name="sms_short_code_details" msgid="5873295990846059400">"این مورد "<b>"شاید هزینه‌ای"</b>" را به حساب دستگاه همراهتان بگذارد."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"این مورد هزینه‌ای را به حساب دستگاه همراهتان می‌گذارد."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"ارسال"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"لغو"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"این انتخاب را به خاطر بسپار"</string>
