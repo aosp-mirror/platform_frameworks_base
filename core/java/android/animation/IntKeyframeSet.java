@@ -30,7 +30,7 @@ import java.util.ArrayList;
  * TypeEvaluator set for the animation, so that values can be calculated without autoboxing to the
  * Object equivalents of these primitive types.</p>
  */
-class IntKeyframeSet extends KeyframeSet {
+class IntKeyframeSet extends KeyframeSet implements Keyframes.IntKeyframes {
     private int firstValue;
     private int lastValue;
     private int deltaValue;
@@ -58,10 +58,11 @@ class IntKeyframeSet extends KeyframeSet {
     }
 
     @Override
-    void invalidateCache() {
+    public void invalidateCache() {
         firstTime = true;
     }
 
+    @Override
     public int getIntValue(float fraction) {
         if (mNumKeyframes == 2) {
             if (firstTime) {
@@ -134,5 +135,9 @@ class IntKeyframeSet extends KeyframeSet {
         return ((Number)mKeyframes.get(mNumKeyframes - 1).getValue()).intValue();
     }
 
+    @Override
+    public Class getType() {
+        return Integer.class;
+    }
 }
 
