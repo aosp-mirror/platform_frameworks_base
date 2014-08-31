@@ -1294,8 +1294,10 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"അനുവദിക്കുക"</string>
     <string name="sms_control_no" msgid="625438561395534982">"നിരസിക്കുക"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; എന്നതിലേക്ക് ഒരു സന്ദേശം അയയ്‌ക്കാൻ താൽപ്പര്യപ്പെടുന്നു."</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"ഇത് നിങ്ങളുടെ മൊബൈൽ അക്കൗണ്ടിൽ നിന്ന് "<font fgcolor="#ffffb060">"നിരക്കീടാക്കാൻ കാരണമാകാം."</font></string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"ഇത് നിങ്ങളുടെ മൊബൈൽ അക്കൗണ്ടിൽ നിന്നും നിരക്ക് ഈടാക്കുന്നതിന് കാരണമാകും."</font></string>
+    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
+    <skip />
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"അയയ്‌ക്കുക"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"റദ്ദാക്കുക"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"എന്റെ ചോയ്‌സ് ഓർമ്മിക്കുക"</string>

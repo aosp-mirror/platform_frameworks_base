@@ -1294,8 +1294,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Allow"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Deny"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; would like to send a message to &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"This "<font fgcolor="#ffffb060">"may cause charges"</font>" on your mobile account."</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"This will cause charges on your mobile account."</font></string>
+    <string name="sms_short_code_details" msgid="5873295990846059400">"This "<b>"may cause charges"</b>" on your mobile account."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"This will cause charges on your mobile account."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Send"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Cancel"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Remember my choice"</string>
