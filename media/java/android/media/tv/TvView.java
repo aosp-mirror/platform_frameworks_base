@@ -964,6 +964,9 @@ public class TvView extends ViewGroup {
 
         @Override
         public void onContentBlocked(Session session, TvContentRating rating) {
+            if (this != mSessionCallback) {
+                return;
+            }
             if (DEBUG) {
                 Log.d(TAG, "onContentBlocked()");
             }
@@ -974,6 +977,9 @@ public class TvView extends ViewGroup {
 
         @Override
         public void onLayoutSurface(Session session, int left, int top, int right, int bottom) {
+            if (this != mSessionCallback) {
+                return;
+            }
             if (DEBUG) {
                 Log.d(TAG, "onLayoutSurface (left=" + left + ", top=" + top + ", right="
                         + right + ", bottom=" + bottom + ",)");
