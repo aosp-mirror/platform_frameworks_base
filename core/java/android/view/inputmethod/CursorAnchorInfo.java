@@ -211,9 +211,6 @@ public final class CursorAnchorInfo implements Parcelable {
                 || !areSameFloatImpl(mInsertionMarkerBottom, that.mInsertionMarkerBottom)) {
             return false;
         }
-        if (!Objects.equals(mComposingTextStart, that.mComposingTextStart)) {
-            return false;
-        }
         if (!Objects.equals(mCharacterRects, that.mCharacterRects)) {
             return false;
         }
