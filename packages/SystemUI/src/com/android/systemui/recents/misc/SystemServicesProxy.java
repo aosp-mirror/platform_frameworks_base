@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -363,6 +364,43 @@ public class SystemServicesProxy {
         return icon;
     }
 
+    /** Returns the package name of the home activity. */
+    public String getHomeActivityPackageName() {
+        if (mPm == null) return null;
+        if (Constants.DebugFlags.App.EnableSystemServicesProxy) return null;
+
+        ArrayList<ResolveInfo> homeActivities = new ArrayList<ResolveInfo>();
+        ComponentName defaultHomeActivity = mPm.getHomeActivities(homeActivities);
+        if (defaultHomeActivity != null) {
+            return defaultHomeActivity.getPackageName();
+        } else if (homeActivities.size() == 1) {
+            ResolveInfo info = homeActivities.get(0);
+            if (info.activityInfo != null) {
+                return info.activityInfo.packageName;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Resolves and returns the first Recents widget from the same package as the global
+     * assist activity.
+     */
+    public AppWidgetProviderInfo resolveSearchAppWidget() {
+        if (mAwm == null) return null;
+        if (mAssistComponent == null) return null;
+
+        // Find the first Recents widget from the same package as the global assist activity
+        List<AppWidgetProviderInfo> widgets = mAwm.getInstalledProviders(
+                AppWidgetProviderInfo.WIDGET_CATEGORY_RECENTS);
+        for (AppWidgetProviderInfo info : widgets) {
+            if (info.provider.getPackageName().equals(mAssistComponent.getPackageName())) {
+                return info;
+            }
+        }
+        return null;
+    }
+
     /**
      * Resolves and binds the search app widget that is to appear in the recents.
      */
@@ -371,15 +409,7 @@ public class SystemServicesProxy {
         if (mAssistComponent == null) return null;
 
         // Find the first Recents widget from the same package as the global assist activity
-        List<AppWidgetProviderInfo> widgets = mAwm.getInstalledProviders(
-                AppWidgetProviderInfo.WIDGET_CATEGORY_RECENTS);
-        AppWidgetProviderInfo searchWidgetInfo = null;
-        for (AppWidgetProviderInfo info : widgets) {
-            if (info.provider.getPackageName().equals(mAssistComponent.getPackageName())) {
-                searchWidgetInfo = info;
-                break;
-            }
-        }
+        AppWidgetProviderInfo searchWidgetInfo = resolveSearchAppWidget();
 
         // Return early if there is no search widget
         if (searchWidgetInfo == null) return null;

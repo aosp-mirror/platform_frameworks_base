@@ -18,6 +18,7 @@ package com.android.systemui.recents;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -52,6 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AlternateRecentsComponent implements ActivityOptions.OnAnimationStartedListener {
 
     final public static String EXTRA_FROM_HOME = "recents.triggeredOverHome";
+    final public static String EXTRA_FROM_SEARCH_HOME = "recents.triggeredOverSearchHome";
     final public static String EXTRA_FROM_APP_THUMBNAIL = "recents.animatingWithThumbnail";
     final public static String EXTRA_FROM_APP_FULL_SCREENSHOT = "recents.thumbnail";
     final public static String EXTRA_FROM_TASK_ID = "recents.activeTaskId";
@@ -62,7 +64,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     final public static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
     final public static String ACTION_HIDE_RECENTS_ACTIVITY = "action_hide_recents_activity";
 
-    final static int sMinToggleDelay = 425;
+    final static int sMinToggleDelay = 350;
 
     final static String sToggleRecentsAction = "com.android.systemui.recents.SHOW_RECENTS";
     final static String sRecentsPackage = "com.android.systemui";
@@ -224,6 +226,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
+        // Reload the header bar layout
         reloadHeaderBarLayout();
         sLastScreenshot = null;
     }
@@ -344,8 +347,13 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     /**
      * Creates the activity options for a home->recents transition.
      */
-    ActivityOptions getHomeTransitionActivityOptions() {
+    ActivityOptions getHomeTransitionActivityOptions(boolean fromSearchHome) {
         mStartAnimationTriggered = false;
+        if (fromSearchHome) {
+            return ActivityOptions.makeCustomAnimation(mContext,
+                    R.anim.recents_from_search_launcher_enter,
+                    R.anim.recents_from_search_launcher_exit, mHandler, this);
+        }
         return ActivityOptions.makeCustomAnimation(mContext,
                 R.anim.recents_from_launcher_enter,
                 R.anim.recents_from_launcher_exit, mHandler, this);
@@ -470,8 +478,30 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             // If there is no thumbnail transition, but is launching from home into recents, then
             // use a quick home transition and do the animation from home
             if (hasRecentTasks) {
-                ActivityOptions opts = getHomeTransitionActivityOptions();
-                startAlternateRecentsActivity(topTask, opts, EXTRA_FROM_HOME);
+                // Get the home activity info
+                String homeActivityPackage = mSystemServicesProxy.getHomeActivityPackageName();
+                // Get the search widget info
+                AppWidgetProviderInfo searchWidget = null;
+                String searchWidgetPackage = null;
+                if (mConfig.hasSearchBarAppWidget()) {
+                    searchWidget = mSystemServicesProxy.getAppWidgetInfo(
+                            mConfig.searchBarAppWidgetId);
+                } else {
+                    searchWidget = mSystemServicesProxy.resolveSearchAppWidget();
+                }
+                if (searchWidget != null && searchWidget.provider != null) {
+                    searchWidgetPackage = searchWidget.provider.getPackageName();
+                }
+                // Determine whether we are coming from a search owned home activity
+                boolean fromSearchHome = false;
+                if (homeActivityPackage != null && searchWidgetPackage != null &&
+                        homeActivityPackage.equals(searchWidgetPackage)) {
+                    fromSearchHome = true;
+                }
+
+                ActivityOptions opts = getHomeTransitionActivityOptions(fromSearchHome);
+                startAlternateRecentsActivity(topTask, opts,
+                        fromSearchHome ? EXTRA_FROM_SEARCH_HOME : EXTRA_FROM_HOME);
             } else {
                 // Otherwise we do the normal fade from an unknown source
                 ActivityOptions opts = getUnknownTransitionActivityOptions();
