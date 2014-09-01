@@ -87,7 +87,7 @@ public class NavigationBarView extends LinearLayout {
     private final NavTransitionListener mTransitionListener = new NavTransitionListener();
 
     private OnVerticalChangedListener mOnVerticalChangedListener;
-    private boolean mIsLtr;
+    private boolean mIsLayoutRtl;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -394,7 +394,7 @@ public class NavigationBarView extends LinearLayout {
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
-        updateLTROrder();
+        updateRTLOrder();
     }
 
     public boolean isVertical() {
@@ -460,17 +460,17 @@ public class NavigationBarView extends LinearLayout {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        updateLTROrder();
+        updateRTLOrder();
     }
 
     /**
      * In landscape, the LinearLayout is not auto mirrored since it is vertical. Therefore we
      * have to do it manually
      */
-    private void updateLTROrder() {
-        boolean isLtr = getResources().getConfiguration()
+    private void updateRTLOrder() {
+        boolean isLayoutRtl = getResources().getConfiguration()
                 .getLayoutDirection() == LAYOUT_DIRECTION_RTL;
-        if (mIsLtr != isLtr) {
+        if (mIsLayoutRtl != isLayoutRtl) {
 
             // We swap all children of the 90 and 270 degree layouts, since they are vertical
             View rotation90 = mRotatedViews[Surface.ROTATION_90];
@@ -480,7 +480,7 @@ public class NavigationBarView extends LinearLayout {
             if (rotation90 != rotation270) {
                 swapChildrenOrderIfVertical(rotation270.findViewById(R.id.nav_buttons));
             }
-            mIsLtr = isLtr;
+            mIsLayoutRtl = isLayoutRtl;
         }
     }
 
