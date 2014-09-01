@@ -1298,8 +1298,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"ອະນຸຍາດ"</string>
     <string name="sms_control_no" msgid="625438561395534982">"ປະຕິເສດ"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ຕ້ອງການສົ່ງຂໍ້ຄວາມຫາ &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"ນີ້ "<font fgcolor="#ffffb060">"ອາດເຮັດໃຫ້ເກີດຄ່າໃຊ້ຈ່າຍ"</font>" ໃນບັນຊີມືຖືຂອງທ່ານໄດ້."</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"ມັນຈະເຮັດໃຫ້ທ່ານເສຍຄ່າບໍລິການໃນບັນຊີຂອງທ່ານ."</font></string>
+    <string name="sms_short_code_details" msgid="5873295990846059400">"ນີ້ "<b>"ອາດ​ເຮັດ​ໃຫ້​ເກີດ​ມີການ​ຮຽກ​ເກັບ​ຄ່າ​ໃຊ້​ຈ່າຍ"</b>" ໃນ​ບັນ​ຊີ​ມື​ຖື​ຂອງ​ທ່ານ."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"ນີ້​ອາດ​​ເຮັດ​ໃຫ້​ເກີດ​ມີ​ການ​ຮຽກ​ເກັບ​ຄ່າ​ໃຊ້​ຈ່າຍ​ໃນ​ບັນ​ຊີ​ມື​ຖື​ຂອງ​ທ່ານ."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"ສົ່ງ"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"ຍົກເລີກ"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"ຈື່ການເລືອກຂອງຂ້ອຍ"</string>

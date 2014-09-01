@@ -613,10 +613,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"telefonu aç veya kapat"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Uygulamaya, tabletinizi açma veya kapatma izni verir."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Uygulamaya, telefonu açıp kapatma izni verir."</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"ekran zaman aşımını sıfırlama"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Uygulamanın ekran zaman aşımı süresini sıfırlamasına olanak verir."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"fabrika test modunda çalıştır"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Tabletin donanımına tam erişim veren alt düzey bir üretici testi olarak çalıştırılır. Yalnızca tablet üretici test modunda çalışırken kullanılabilir."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Telefon donanımına tam erişim veren alt düzey bir üretici testi olarak çalıştırılır. Yalnızca telefon üretici test modunda çalışırken kullanılabilir."</string>
@@ -1300,8 +1298,10 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"İzin ver"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Reddet"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; adresine bir mesaj göndermek istiyor."</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"Bu işlem, mobil hesabınızdan "<font fgcolor="#ffffb060">"ücret alınmasına neden olabilir"</font>"."</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"Bu işlem, mobil hesabınızdan ücret alınmasına neden olacaktır."</font></string>
+    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
+    <skip />
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Gönder"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"İptal"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Seçimimi hatırla"</string>
@@ -1429,8 +1429,7 @@
     <string name="deny" msgid="2081879885755434506">"Reddet"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"İzin istendi"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> hesabı için\nizin isteğinde bulunuldu."</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Bu uygulamayı iş profilinizin dışında kullanıyorsunuz"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Bu uygulamayı iş profilinizde kullanıyorsunuz"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Giriş yöntemi"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Senkronizasyon"</string>
@@ -1573,8 +1572,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Çağrı kabul edilsin mi?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Her zaman"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Yalnızca bir defa"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s, iş profilini desteklemiyor"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Kulaklıklar"</string>
@@ -1647,8 +1645,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Erişilebilirlik etkinleştirildi."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Erişilebilirlik iptal edildi."</string>
     <string name="user_switched" msgid="3768006783166984410">"Geçerli kullanıcı: <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (2871009331809089783) -->
-    <skip />
+    <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> adlı kullanıcıya geçiliyor…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Sahibi"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Hata"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Yöneticiniz bu değişikliğe izin vermiyor"</string>
