@@ -862,14 +862,23 @@ public class LockPatternUtils {
      * @return stored password quality
      */
     public int getKeyguardStoredPasswordQuality() {
-        int quality =
-                (int) getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
+        return getKeyguardStoredPasswordQuality(getCurrentOrCallingUserId());
+    }
+
+    /**
+     * Retrieves the quality mode for {@param userHandle}.
+     * {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+     *
+     * @return stored password quality
+     */
+    public int getKeyguardStoredPasswordQuality(int userHandle) {
+        int quality = (int) getLong(PASSWORD_TYPE_KEY,
+                DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userHandle);
         // If the user has chosen to use weak biometric sensor, then return the backup locking
         // method and treat biometric as a special case.
         if (quality == DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK) {
-            quality =
-                (int) getLong(PASSWORD_TYPE_ALTERNATE_KEY,
-                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
+            quality = (int) getLong(PASSWORD_TYPE_ALTERNATE_KEY,
+                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userHandle);
         }
         return quality;
     }
