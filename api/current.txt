@@ -5753,7 +5753,7 @@ package android.app.usage {
   }
 
   public final class UsageStatsManager {
-    method public android.util.ArrayMap<java.lang.String, android.app.usage.UsageStats> queryAndAggregateUsageStats(long, long);
+    method public java.util.Map<java.lang.String, android.app.usage.UsageStats> queryAndAggregateUsageStats(long, long);
     method public android.app.usage.UsageEvents queryEvents(long, long);
     method public java.util.List<android.app.usage.UsageStats> queryUsageStats(int, long, long);
     field public static final int INTERVAL_BEST = 4; // 0x4
