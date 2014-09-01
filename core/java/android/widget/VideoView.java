@@ -407,7 +407,7 @@ public class VideoView extends SurfaceView
     private boolean isHTTPStreaming(Uri mUri) {
         if (mUri != null) {
             String scheme = mUri.getScheme();
-            if (scheme.equals("http") || scheme.equals("https")) {
+            if ((scheme != null) && (scheme.equals("http") || scheme.equals("https"))) {
                 String path = mUri.getPath();
                 if (path == null || path.endsWith(".m3u8") || path.endsWith(".m3u")
                         || path.endsWith(".mpd")) {
