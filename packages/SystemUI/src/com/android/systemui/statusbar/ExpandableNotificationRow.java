@@ -60,6 +60,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private ExpansionLogger mLogger;
     private String mLoggingKey;
     private boolean mWasReset;
+    private NotificationGuts mGuts;
 
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
@@ -103,6 +104,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         super.onFinishInflate();
         mPublicLayout = (NotificationContentView) findViewById(R.id.expandedPublic);
         mPrivateLayout = (NotificationContentView) findViewById(R.id.expanded);
+        mGuts = (NotificationGuts) findViewById(R.id.notification_guts);
         mVetoButton = findViewById(R.id.veto);
     }
 
@@ -360,6 +362,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void setActualHeight(int height, boolean notifyListeners) {
         mPrivateLayout.setActualHeight(height);
         mPublicLayout.setActualHeight(height);
+        mGuts.setActualHeight(height);
         invalidate();
         super.setActualHeight(height, notifyListeners);
     }
@@ -381,6 +384,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         super.setClipTopAmount(clipTopAmount);
         mPrivateLayout.setClipTopAmount(clipTopAmount);
         mPublicLayout.setClipTopAmount(clipTopAmount);
+        mGuts.setClipTopAmount(clipTopAmount);
     }
 
     public void notifyContentUpdated() {
