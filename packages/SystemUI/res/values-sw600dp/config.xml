@@ -32,4 +32,7 @@
 
     <!-- Set to true to enable the user switcher on the keyguard. -->
     <bool name="config_keyguardUserSwitcher">true</bool>
+
+    <!-- Transposes the recents layout in landscape. -->
+    <bool name="recents_transpose_layout_with_orientation">false</bool>
 </resources>

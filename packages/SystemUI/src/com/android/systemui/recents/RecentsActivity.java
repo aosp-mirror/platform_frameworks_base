@@ -107,9 +107,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             // Finish Recents
             if (mLaunchIntent != null) {
                 if (mLaunchOpts != null) {
-                    startActivityAsUser(mLaunchIntent, UserHandle.CURRENT);
-                } else {
                     startActivityAsUser(mLaunchIntent, mLaunchOpts.toBundle(), UserHandle.CURRENT);
+                } else {
+                    startActivityAsUser(mLaunchIntent, UserHandle.CURRENT);
                 }
             } else {
                 finish();
@@ -188,7 +188,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
 
         // Update the configuration based on the launch intent
-        mConfig.launchedFromHome = launchIntent.getBooleanExtra(
+        boolean fromSearchHome = launchIntent.getBooleanExtra(
+                AlternateRecentsComponent.EXTRA_FROM_SEARCH_HOME, false);
+        mConfig.launchedFromHome = fromSearchHome || launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_FROM_HOME, false);
         mConfig.launchedFromAppWithThumbnail = launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_FROM_APP_THUMBNAIL, false);
@@ -199,6 +201,18 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mConfig.launchedWithAltTab = launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_ALT_TAB, false);
         mConfig.launchedWithNoRecentTasks = !root.hasTasks();
+
+        // Create the home intent runnable
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN, null);
+        homeIntent.addCategory(Intent.CATEGORY_HOME);
+        homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        mFinishLaunchHomeRunnable = new FinishRecentsRunnable(homeIntent,
+            ActivityOptions.makeCustomAnimation(this,
+                fromSearchHome ? R.anim.recents_to_search_launcher_enter :
+                        R.anim.recents_to_launcher_enter,
+                fromSearchHome ? R.anim.recents_to_search_launcher_exit :
+                        R.anim.recents_to_launcher_exit));
 
         // Mark the task that is the launch target
         int taskStackCount = stacks.size();
@@ -345,15 +359,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Initialize the loader and the configuration
         mConfig = RecentsConfiguration.reinitialize(this,
                 RecentsTaskLoader.getInstance().getSystemServicesProxy());
-
-        // Create the home intent runnable
-        Intent homeIntent = new Intent(Intent.ACTION_MAIN, null);
-        homeIntent.addCategory(Intent.CATEGORY_HOME);
-        homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                            Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-        mFinishLaunchHomeRunnable = new FinishRecentsRunnable(homeIntent,
-                ActivityOptions.makeCustomAnimation(this, R.anim.recents_to_launcher_enter,
-                        R.anim.recents_to_launcher_exit));
 
         // Initialize the widget host (the host id is static and does not change)
         mAppWidgetHost = new RecentsAppWidgetHost(this, Constants.Values.App.AppWidgetHostId);
