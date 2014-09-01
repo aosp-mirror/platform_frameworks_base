@@ -2623,9 +2623,38 @@ public class Notification implements Parcelable
             contentView.setTextViewTextSize(R.id.text, TypedValue.COMPLEX_UNIT_PX, subTextSize);
         }
 
+        private void unshrinkLine3Text(RemoteViews contentView) {
+            float regularTextSize = mContext.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.notification_text_size);
+            contentView.setTextViewTextSize(R.id.text, TypedValue.COMPLEX_UNIT_PX, regularTextSize);
+        }
+
+        private void resetStandardTemplate(RemoteViews contentView) {
+            removeLargeIconBackground(contentView);
+            contentView.setViewPadding(R.id.icon, 0, 0, 0, 0);
+            contentView.setImageViewResource(R.id.icon, 0);
+            contentView.setInt(R.id.icon, "setBackgroundResource", 0);
+            contentView.setViewVisibility(R.id.right_icon, View.GONE);
+            contentView.setInt(R.id.right_icon, "setBackgroundResource", 0);
+            contentView.setImageViewResource(R.id.right_icon, 0);
+            contentView.setImageViewResource(R.id.icon, 0);
+            contentView.setTextViewText(R.id.title, null);
+            contentView.setTextViewText(R.id.text, null);
+            unshrinkLine3Text(contentView);
+            contentView.setTextViewText(R.id.text2, null);
+            contentView.setViewVisibility(R.id.text2, View.GONE);
+            contentView.setViewVisibility(R.id.info, View.GONE);
+            contentView.setViewVisibility(R.id.time, View.GONE);
+            contentView.setViewVisibility(R.id.line3, View.GONE);
+            contentView.setViewVisibility(R.id.overflow_divider, View.GONE);
+            contentView.setViewVisibility(R.id.progress, View.GONE);
+        }
+
         private RemoteViews applyStandardTemplate(int resId) {
             RemoteViews contentView = new BuilderRemoteViews(mContext.getPackageName(),
                     mOriginatingUserId, resId);
+
+            resetStandardTemplate(contentView);
 
             boolean showLine3 = false;
             boolean showLine2 = false;
@@ -2769,15 +2798,22 @@ public class Notification implements Parcelable
             return Math.round((1 - largeFactor) * padding + largeFactor * largePadding);
         }
 
+        private void resetStandardTemplateWithActions(RemoteViews big) {
+            big.setViewVisibility(R.id.actions, View.GONE);
+            big.setViewVisibility(R.id.action_divider, View.GONE);
+            big.removeAllViews(R.id.actions);
+        }
+
         private RemoteViews applyStandardTemplateWithActions(int layoutId) {
             RemoteViews big = applyStandardTemplate(layoutId);
+
+            resetStandardTemplateWithActions(big);
 
             int N = mActions.size();
             if (N > 0) {
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
                 big.setViewVisibility(R.id.action_divider, View.VISIBLE);
                 if (N>MAX_ACTION_BUTTONS) N=MAX_ACTION_BUTTONS;
-                big.removeAllViews(R.id.actions);
                 for (int i=0; i<N; i++) {
                     final RemoteViews button = generateActionButton(mActions.get(i));
                     big.addView(R.id.actions, button);
