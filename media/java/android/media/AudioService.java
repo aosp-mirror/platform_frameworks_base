@@ -544,6 +544,9 @@ public class AudioService extends IAudioService.Stub {
         MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = SystemProperties.getInt(
             "ro.config.vc_call_vol_steps",
            MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL]);
+        MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC] = SystemProperties.getInt(
+            "ro.config.music_vol_steps",
+           MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC]);
 
         sSoundEffectVolumeDb = context.getResources().getInteger(
                 com.android.internal.R.integer.config_soundEffectVolumeDb);
