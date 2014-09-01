@@ -2400,7 +2400,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (down) {
                 mPendingMetaAction = true;
             } else if (mPendingMetaAction) {
-                launchAssistAction();
+                launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD);
             }
             return -1;
         }
@@ -2620,10 +2620,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void launchAssistAction() {
+        launchAssistAction(null);
+    }
+
+    private void launchAssistAction(String hint) {
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_ASSIST);
         Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
                 .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
         if (intent != null) {
+            if (hint != null) {
+                intent.putExtra(hint, true);
+            }
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP
                     | Intent.FLAG_ACTIVITY_CLEAR_TOP);

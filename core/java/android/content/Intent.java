@@ -1213,6 +1213,13 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.extra.ASSIST_CONTEXT";
 
     /**
+     * An optional field on {@link #ACTION_ASSIST} suggesting that the user will likely use a
+     * keyboard as the primary input device for assistance.
+     */
+    public static final String EXTRA_ASSIST_INPUT_HINT_KEYBOARD =
+            "android.intent.extra.ASSIST_INPUT_HINT_KEYBOARD";
+
+    /**
      * Activity Action: List all available applications
      * <p>Input: Nothing.
      * <p>Output: nothing.
