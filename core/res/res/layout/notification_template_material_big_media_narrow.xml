@@ -15,26 +15,23 @@
   ~ limitations under the License
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:internal="http://schemas.android.com/apk/prv/res/android"
+<!-- Layout to be used with only max 3 actions. It has a much larger picture at the left side-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
-    android:layout_height="64dp"
-    android:orientation="horizontal"
+    android:layout_height="128dp"
     android:background="#00000000"
-    internal:layout_minHeight="64dp"
-    internal:layout_maxHeight="64dp"
     >
-    <include layout="@layout/notification_template_icon_group"
-        android:layout_width="@dimen/notification_large_icon_width"
-        android:layout_height="@dimen/notification_large_icon_height"
-        android:layout_weight="0"
+    <ImageView android:id="@+id/icon"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:scaleType="centerCrop"
         />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_gravity="fill_vertical"
+        android:layout_marginStart="12dp"
+        android:layout_toEndOf="@id/icon"
         android:minHeight="@dimen/notification_large_icon_height"
         android:orientation="vertical"
         >
@@ -44,13 +41,22 @@
     </LinearLayout>
     <LinearLayout
         android:id="@+id/media_actions"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginEnd="6dp"
-        android:layout_gravity="center_vertical|end"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_toEndOf="@id/icon"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
         android:orientation="horizontal"
         android:layoutDirection="ltr"
         >
         <!-- media buttons will be added here -->
     </LinearLayout>
-</LinearLayout>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_toEndOf="@id/icon"
+        android:layout_above="@id/media_actions"
+        android:id="@+id/action_divider"
+        android:background="@drawable/notification_template_divider_media" />
+</RelativeLayout>

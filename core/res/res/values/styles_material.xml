@@ -438,10 +438,6 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.Notification.ProgressBar" parent="Widget.Material.Light.ProgressBar.Horizontal" />
 
-    <style name="Widget.Material.Notification.ProgressBar.Media">
-        <item name="progressDrawable">@drawable/notification_material_media_progress</item>
-    </style>
-
     <!-- Widget Styles -->
 
     <style name="Material"/>
