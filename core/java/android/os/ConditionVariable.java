@@ -109,7 +109,7 @@ public class ConditionVariable
      * <p>
      * If the condition is already opened, return immediately.
      *
-     * @param timeout the minimum time to wait in milliseconds.
+     * @param timeout the maximum time to wait in milliseconds.
      *
      * @return true if the condition was opened, false if the call returns
      * because of the timeout.
