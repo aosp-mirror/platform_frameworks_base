@@ -66,6 +66,11 @@ public final class WebViewFactory {
         return false;  // User has not modifed Developer Settings
     }
 
+    public static String getWebViewPackageName() {
+        // TODO: Make this dynamic based on resource configuration.
+        return "com.android.webview";
+    }
+
     static WebViewFactoryProvider getProvider() {
         synchronized (sProviderLock) {
             // For now the main purpose of this function (and the factory abstraction) is to keep
@@ -103,8 +108,7 @@ public final class WebViewFactory {
             return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY, true,
                                                                  clazzLoader);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(LOGTAG, "Chromium WebView package does not exist");
-            return (Class<WebViewFactoryProvider>) Class.forName(NULL_WEBVIEW_FACTORY);
+            throw new ClassNotFoundException("Chromium WebView package does not exist", e);
         }
     }
 }
