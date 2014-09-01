@@ -96,7 +96,6 @@ public class VolumePanel extends Handler {
     private static final int TIMEOUT_DELAY_SHORT = 1500;
     private static final int TIMEOUT_DELAY_COLLAPSED = 4500;
     private static final int TIMEOUT_DELAY_SAFETY_WARNING = 5000;
-    private static final int TIMEOUT_DELAY_SAFETY_WARNING_TALKBACK = 25000;
     private static final int TIMEOUT_DELAY_EXPANDED = 10000;
 
     private static final int MSG_VOLUME_CHANGED = 0;
@@ -794,8 +793,7 @@ public class VolumePanel extends Handler {
     }
 
     private void updateTimeoutDelay() {
-        mTimeoutDelay = sSafetyWarning != null ? mAccessibilityManager.isEnabled() ?
-                TIMEOUT_DELAY_SAFETY_WARNING_TALKBACK : TIMEOUT_DELAY_SAFETY_WARNING
+        mTimeoutDelay = sSafetyWarning != null ? TIMEOUT_DELAY_SAFETY_WARNING
                 : mActiveStreamType == AudioManager.STREAM_MUSIC ? TIMEOUT_DELAY_SHORT
                 : mZenPanelExpanded ? TIMEOUT_DELAY_EXPANDED
                 : isZenPanelVisible() ? TIMEOUT_DELAY_COLLAPSED
@@ -1218,8 +1216,12 @@ public class VolumePanel extends Handler {
             }
             updateStates();
         }
-        updateTimeoutDelay();
-        resetTimeout();
+        if (mAccessibilityManager.isTouchExplorationEnabled()) {
+            removeMessages(MSG_TIMEOUT);
+        } else {
+            updateTimeoutDelay();
+            resetTimeout();
+        }
     }
 
     /**
@@ -1373,10 +1375,12 @@ public class VolumePanel extends Handler {
     private void resetTimeout() {
         if (LOGD) Log.d(mTag, "resetTimeout at " + System.currentTimeMillis()
                 + " delay=" + mTimeoutDelay);
-        removeMessages(MSG_TIMEOUT);
-        sendEmptyMessageDelayed(MSG_TIMEOUT, mTimeoutDelay);
-        removeMessages(MSG_USER_ACTIVITY);
-        sendEmptyMessage(MSG_USER_ACTIVITY);
+        if (sSafetyWarning == null || !mAccessibilityManager.isTouchExplorationEnabled()) {
+            removeMessages(MSG_TIMEOUT);
+            sendEmptyMessageDelayed(MSG_TIMEOUT, mTimeoutDelay);
+            removeMessages(MSG_USER_ACTIVITY);
+            sendEmptyMessage(MSG_USER_ACTIVITY);
+        }
     }
 
     private void forceTimeout(long delay) {
