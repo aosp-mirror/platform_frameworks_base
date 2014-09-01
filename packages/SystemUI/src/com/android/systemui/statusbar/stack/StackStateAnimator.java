@@ -166,6 +166,7 @@ public class StackStateAnimator {
         boolean hasDelays = mAnimationFilter.hasDelays;
         boolean isDelayRelevant = yTranslationChanging || zTranslationChanging || scaleChanging ||
                 alphaChanging || heightChanging || topInsetChanging;
+        boolean noAnimation = wasAdded && !mAnimationFilter.hasGoToFullShadeEvent;
         long delay = 0;
         long duration = mCurrentLength;
         if (hasDelays && isDelayRelevant || wasAdded) {
@@ -183,46 +184,72 @@ public class StackStateAnimator {
 
         // start translationY animation
         if (yTranslationChanging) {
-            startYTranslationAnimation(child, viewState, duration, delay);
+            if (noAnimation) {
+                child.setTranslationY(viewState.yTranslation);
+            } else {
+                startYTranslationAnimation(child, viewState, duration, delay);
+            }
         }
 
         // start translationZ animation
         if (zTranslationChanging) {
-            startZTranslationAnimation(child, viewState, duration, delay);
+            if (noAnimation) {
+                child.setTranslationZ(viewState.zTranslation);
+            } else {
+                startZTranslationAnimation(child, viewState, duration, delay);
+            }
         }
 
         // start scale animation
         if (scaleChanging) {
-            startScaleAnimation(child, viewState, duration);
+            if (noAnimation) {
+                child.setScaleX(viewState.scale);
+                child.setScaleY(viewState.scale);
+            } else {
+                startScaleAnimation(child, viewState, duration);
+            }
         }
 
         // start alpha animation
         if (alphaChanging && child.getTranslationX() == 0) {
-            startAlphaAnimation(child, viewState, duration, delay);
+            if (noAnimation) {
+                child.setAlpha(viewState.alpha);
+            } else {
+                startAlphaAnimation(child, viewState, duration, delay);
+            }
         }
 
         // start height animation
-        if (heightChanging) {
-            startHeightAnimation(child, viewState, duration, delay);
+        if (heightChanging && child.getActualHeight() != 0) {
+            if (noAnimation) {
+                child.setActualHeight(viewState.height, false);
+            } else {
+                startHeightAnimation(child, viewState, duration, delay);
+            }
         }
 
         // start top inset animation
         if (topInsetChanging) {
-            startInsetAnimation(child, viewState, duration, delay);
+            if (noAnimation) {
+                child.setClipTopAmount(viewState.clipTopAmount);
+            } else {
+                startInsetAnimation(child, viewState, duration, delay);
+            }
         }
 
         // start dimmed animation
-        child.setDimmed(viewState.dimmed, mAnimationFilter.animateDimmed && !wasAdded);
+        child.setDimmed(viewState.dimmed, mAnimationFilter.animateDimmed && !wasAdded
+                && !noAnimation);
 
         // start dark animation
-        child.setDark(viewState.dark, mAnimationFilter.animateDark);
+        child.setDark(viewState.dark, mAnimationFilter.animateDark && !noAnimation);
 
         // apply speed bump state
         child.setBelowSpeedBump(viewState.belowSpeedBump);
 
         // start hiding sensitive animation
-        child.setHideSensitive(viewState.hideSensitive,
-                mAnimationFilter.animateHideSensitive && !wasAdded, delay, duration);
+        child.setHideSensitive(viewState.hideSensitive, mAnimationFilter.animateHideSensitive &&
+                !wasAdded && !noAnimation, delay, duration);
 
         // apply scrimming
         child.setScrimAmount(viewState.scrimAmount);

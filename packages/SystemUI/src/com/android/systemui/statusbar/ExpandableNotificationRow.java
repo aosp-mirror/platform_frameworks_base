@@ -276,11 +276,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         boolean updateExpandHeight = mMaxExpandHeight == 0 && !mWasReset;
-        mMaxExpandHeight = mPrivateLayout.getMaxHeight();
+        updateMaxExpandHeight();
         if (updateExpandHeight) {
             applyExpansionToLayout();
         }
         mWasReset = false;
+    }
+
+    private void updateMaxExpandHeight() {
+        int intrinsicBefore = getIntrinsicHeight();
+        mMaxExpandHeight = mPrivateLayout.getMaxHeight();
+        if (intrinsicBefore != getIntrinsicHeight()) {
+            notifyHeightChanged();
+        }
     }
 
     public void setSensitive(boolean sensitive) {
