@@ -1294,8 +1294,10 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Рұқсат беру"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Өшіру"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасы &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; мекенжайына хабар жіберуді қалайды."</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"Бұл ұялы есептік жазбадан "<font fgcolor="#ffffb060">" төлем талап етуі"</font>" мүмкін."</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"Ұялы есептік жазбаңыздан төлемдер талап етілуіне себеп болады."</font></string>
+    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
+    <skip />
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Жіберу"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Бас тарту"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Менің таңдауым есте сақталсын"</string>
@@ -1639,8 +1641,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"Қол жетімділік қосылды."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Қол жетімділік өшірілді."</string>
     <string name="user_switched" msgid="3768006783166984410">"Ағымдағы пайдаланушы <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for user_switching_message (2871009331809089783) -->
-    <skip />
+    <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> ауысу орындалуда…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Пайдаланушы"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Қателік"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Бұл өзгертуге әкімші рұқсат етпеген"</string>

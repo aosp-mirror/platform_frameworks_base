@@ -611,10 +611,8 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"вклучи или исклучи телефон"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Дозволува апликацијата да го вклучува или исклучува таблетот."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Дозволува апликацијата да го вклучува или исклучува телефонот."</string>
-    <!-- no translation found for permlab_userActivity (1677844893921729548) -->
-    <skip />
-    <!-- no translation found for permdesc_userActivity (651746160252248024) -->
-    <skip />
+    <string name="permlab_userActivity" msgid="1677844893921729548">"ресетирај истечено време на екран"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Овозможува апликацијата да го ресетира истеченото време на екранот."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"извршувај во режим на фабричко тестирање"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Изврши во режим на фабричко тестирање од ниско ниво; дозволи целосен пристап кон хардверот на таблетот. Достапно само кога таблетот работи во режимот на фабричко тестирање."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Изврши во режим на фабричко тестирање од ниско ниво; дозволи целосен пристап кон хардверот на телефонот. Достапно само кога телефонот работи во режимот на фабричко тестирање."</string>
@@ -1296,8 +1294,10 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Дозволи"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Одбиј"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; би сакала да испрати порака до &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"Ова "<font fgcolor="#ffffb060">"може да направи трошоци"</font>" на вашата сметка за мобилен телефон."</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"Ова ќе направи трошоци на вашата сметка за мобилен телефон."</font></string>
+    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
+    <skip />
+    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
+    <skip />
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Испрати"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Откажи"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Запомни го мојот избор"</string>
@@ -1425,8 +1425,7 @@
     <string name="deny" msgid="2081879885755434506">"Одбиј"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Побарана е дозвола"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Побарана е дозвола\nза сметка <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <!-- no translation found for forward_intent_to_owner (1207197447013960896) -->
-    <skip />
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Ја користите апликацијата надвор од работниот профил"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Ја користите апликацијата во работниот профил"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Метод на внес"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Синхронизирај"</string>
@@ -1571,8 +1570,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Прифати повик?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Секогаш"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Само еднаш"</string>
-    <!-- no translation found for activity_resolver_work_profiles_support (185598180676883455) -->
-    <skip />
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s не поддржува работен профил"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Таблет"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Телефон"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Слушалки"</string>
