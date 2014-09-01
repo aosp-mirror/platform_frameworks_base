@@ -66,6 +66,13 @@ interface ISub {
     int getAllSubInfoCount();
 
     /**
+     * Get the count of activated SUB(s)
+     * @param context Context provided by caller
+     * @return activated SIM count
+     */
+    int getActivatedSubInfoCount();
+
+    /**
      * Add a new SubInfoRecord to subinfo database if needed
      * @param context Context provided by caller
      * @param iccId the IccId of the SIM card
@@ -109,7 +116,7 @@ interface ISub {
      * @param subId the unique SubInfoRecord index in database
      * @return the number of records updated
      */
-    int setDispalyNumber(String number, long subId);
+    int setDisplayNumber(String number, long subId);
 
     /**
      * Set number display format. 0: none, 1: the first four digits, 2: the last four digits
@@ -150,4 +157,12 @@ interface ISub {
     long getDefaultVoiceSubId();
 
     void setDefaultVoiceSubId(long subId);
+
+    long getDefaultSmsSubId();
+
+    void setDefaultSmsSubId(long subId);
+
+    void clearDefaultsForInactiveSubIds();
+
+    long[] getActivatedSubIdList();
 }

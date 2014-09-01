@@ -115,6 +115,7 @@ public class DctConstants {
     public static final int APN_EMERGENCY_ID = 9;
     public static final int APN_NUM_TYPES = 10;
 
+    public static final int INVALID = -1;
     public static final int DISABLED = 0;
     public static final int ENABLED = 1;
 

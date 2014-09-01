@@ -391,4 +391,29 @@ public class TelephonyIntents {
      */
     public static final String ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED
             = "android.intent.action.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED";
+
+    /**
+     * Broadcast Action: The default sms subscription has changed.  This has the following
+     * extra values:</p>
+     * <ul>
+     *   <li><em>subscription</em> - A int, the current sms default subscription.</li>
+     * </ul>
+     */
+    public static final String ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED
+            = "android.intent.action.ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED";
+
+    /**
+     * To notify the capability switch procedure start
+     */
+    // FIXME maybe these should be removed - sprout only
+    public static final String ACTION_CAPABILITY_SWITCH_START
+            = "com.android.phone.ACTION_CAPABILITY_SWITCH_START";
+
+    /**
+     * To notify the capability switch procedure end
+     */
+    // FIXME maybe these should be removed - sprout only
+    public static final String ACTION_CAPABILITY_SWITCH_DONE
+            = "com.android.phone.ACTION_CAPABILITY_SWITCH_DONE";
+
 }

@@ -136,14 +136,6 @@ public class PhoneConstants {
     /** APN type for IA Emergency PDN */
     public static final String APN_TYPE_EMERGENCY = "emergency";
 
-    // FIXME: This looks to be used as default phoneId, rename
-    // or use SubscriptionManager.DEFAULT_SUB_ID
-    public static final int DEFAULT_SUBSCRIPTION = 0;
-
-    // FIXME: This looks to be used as invalid phoneId, rename
-    // or use SubscriptionManager.INVALID_SUB_ID
-    public static final int INVALID_SUBSCRIPTION = -1;
-
     public static final int RIL_CARD_MAX_APPS    = 8;
 
     public static final int DEFAULT_CARD_INDEX   = 0;
@@ -154,18 +146,19 @@ public class PhoneConstants {
 
     public static final int MAX_PHONE_COUNT_TRI_SIM = 3;
 
-    public static final String SUBSCRIPTION_KEY  = "subscription";
+    public static final String PHONE_KEY = "phone";
 
     public static final String SLOT_KEY  = "slot";
+
+    // FIXME: This is used to pass a subId via intents, we need to look at its usage, which is
+    // FIXME: extensive, and see if this should be an array of all active subId's or ...?
+    public static final String SUBSCRIPTION_KEY  = "subscription";
 
     public static final String SUB_SETTING  = "subSettings";
 
     public static final int SUB1 = 0;
     public static final int SUB2 = 1;
     public static final int SUB3 = 2;
-
-    public static final int EVENT_SUBSCRIPTION_ACTIVATED   = 500;
-    public static final int EVENT_SUBSCRIPTION_DEACTIVATED = 501;
 
     // TODO: Remove these constants and use an int instead.
     public static final int SIM_ID_1 = 0;
@@ -190,4 +183,7 @@ public class PhoneConstants {
 
     // Initial MTU value.
     public static final int UNSET_MTU = 0;
+
+    //FIXME maybe this shouldn't be here - sprout only
+    public static final int CAPABILITY_3G   = 1;
 }
