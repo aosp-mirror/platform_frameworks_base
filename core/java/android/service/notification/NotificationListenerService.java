@@ -81,6 +81,33 @@ public abstract class NotificationListenerService extends Service {
      * This does not change the interruption filter, only the effects. **/
     public static final int HINT_HOST_DISABLE_EFFECTS = 1;
 
+    /**
+     * The full trim of the StatusBarNotification including all its features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int TRIM_FULL = 0;
+
+    /**
+     * A light trim of the StatusBarNotification excluding the following features:
+     *
+     * <ol>
+     *     <li>{@link Notification#tickerView tickerView}</li>
+     *     <li>{@link Notification#contentView contentView}</li>
+     *     <li>{@link Notification#largeIcon largeIcon}</li>
+     *     <li>{@link Notification#bigContentView bigContentView}</li>
+     *     <li>{@link Notification#headsUpContentView headsUpContentView}</li>
+     *     <li>{@link Notification#EXTRA_LARGE_ICON extras[EXTRA_LARGE_ICON]}</li>
+     *     <li>{@link Notification#EXTRA_LARGE_ICON_BIG extras[EXTRA_LARGE_ICON_BIG]}</li>
+     *     <li>{@link Notification#EXTRA_PICTURE extras[EXTRA_PICTURE]}</li>
+     * </ol>
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int TRIM_LIGHT = 1;
+
     private INotificationListenerWrapper mWrapper = null;
     private RankingMap mRankingMap;
 
@@ -314,13 +341,53 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /**
+     * Sets the notification trim that will be received via {@link #onNotificationPosted}.
+     *
+     * <p>
+     * Setting a trim other than {@link #TRIM_FULL} enables listeners that don't need access to the
+     * full notification features right away to reduce their memory footprint. Full notifications
+     * can be requested on-demand via {@link #getActiveNotifications(int)}.
+     *
+     * <p>
+     * Set to {@link #TRIM_FULL} initially.
+     *
+     * @hide
+     *
+     * @param trim trim of the notifications to be passed via {@link #onNotificationPosted}.
+     *             See <code>TRIM_*</code> constants.
+     */
+    @SystemApi
+    public final void setOnNotificationPostedTrim(int trim) {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().setOnNotificationPostedTrimFromListener(mWrapper, trim);
+        } catch (RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+    }
+
+    /**
      * Request the list of outstanding notifications (that is, those that are visible to the
      * current user). Useful when you don't know what's already been posted.
      *
      * @return An array of active notifications, sorted in natural order.
      */
     public StatusBarNotification[] getActiveNotifications() {
-        return getActiveNotifications(null);
+        return getActiveNotifications(null, TRIM_FULL);
+    }
+
+    /**
+     * Request the list of outstanding notifications (that is, those that are visible to the
+     * current user). Useful when you don't know what's already been posted.
+     *
+     * @hide
+     *
+     * @param trim trim of the notifications to be returned. See <code>TRIM_*</code> constants.
+     * @return An array of active notifications, sorted in natural order.
+     */
+    @SystemApi
+    public StatusBarNotification[] getActiveNotifications(int trim) {
+        return getActiveNotifications(null, trim);
     }
 
     /**
@@ -328,14 +395,33 @@ public abstract class NotificationListenerService extends Service {
      * notifications but didn't want to retain the bits, and now need to go back and extract
      * more data out of those notifications.
      *
+     * @param keys the keys of the notifications to request
      * @return An array of notifications corresponding to the requested keys, in the
      * same order as the key list.
      */
     public StatusBarNotification[] getActiveNotifications(String[] keys) {
-        if (!isBound()) return null;
+        return getActiveNotifications(keys, TRIM_FULL);
+    }
+
+    /**
+     * Request one or more notifications by key. Useful if you have been keeping track of
+     * notifications but didn't want to retain the bits, and now need to go back and extract
+     * more data out of those notifications.
+     *
+     * @hide
+     *
+     * @param keys the keys of the notifications to request
+     * @param trim trim of the notifications to be returned. See <code>TRIM_*</code> constants.
+     * @return An array of notifications corresponding to the requested keys, in the
+     * same order as the key list.
+     */
+    @SystemApi
+    public StatusBarNotification[] getActiveNotifications(String[] keys, int trim) {
+        if (!isBound())
+            return null;
         try {
-            ParceledListSlice<StatusBarNotification> parceledList =
-                    getNotificationInterface().getActiveNotificationsFromListener(mWrapper, keys);
+            ParceledListSlice<StatusBarNotification> parceledList = getNotificationInterface()
+                    .getActiveNotificationsFromListener(mWrapper, keys, trim);
             List<StatusBarNotification> list = parceledList.getList();
 
             int N = list.size();

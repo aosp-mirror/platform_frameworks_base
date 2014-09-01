@@ -58,11 +58,12 @@ interface INotificationManager
     void cancelNotificationFromListener(in INotificationListener token, String pkg, String tag, int id);
     void cancelNotificationsFromListener(in INotificationListener token, in String[] keys);
 
-    ParceledListSlice getActiveNotificationsFromListener(in INotificationListener token, in String[] keys);
+    ParceledListSlice getActiveNotificationsFromListener(in INotificationListener token, in String[] keys, int trim);
     void requestHintsFromListener(in INotificationListener token, int hints);
     int getHintsFromListener(in INotificationListener token);
     void requestInterruptionFilterFromListener(in INotificationListener token, int interruptionFilter);
     int getInterruptionFilterFromListener(in INotificationListener token);
+    void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
 
     ComponentName getEffectsSuppressor();
 
