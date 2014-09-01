@@ -31,11 +31,9 @@ public abstract class ExpandableOutlineView extends ExpandableView {
 
     private final Rect mOutlineRect = new Rect();
     private boolean mCustomOutline;
-    private float mDensity;
 
     public ExpandableOutlineView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mDensity = getResources().getDisplayMetrics().density;
         setOutlineProvider(new ViewOutlineProvider() {
             @Override
             public void getOutline(View view, Outline outline) {
@@ -78,8 +76,8 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         mOutlineRect.set((int) left, (int) top, (int) right, (int) bottom);
 
         // Outlines need to be at least 1 dp
-        mOutlineRect.bottom = (int) Math.max(top + mDensity, mOutlineRect.bottom);
-        mOutlineRect.right = (int) Math.max(left + mDensity, mOutlineRect.right);
+        mOutlineRect.bottom = (int) Math.max(top, mOutlineRect.bottom);
+        mOutlineRect.right = (int) Math.max(left, mOutlineRect.right);
 
         invalidateOutline();
     }
