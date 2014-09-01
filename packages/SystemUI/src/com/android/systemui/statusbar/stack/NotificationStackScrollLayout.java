@@ -2094,15 +2094,16 @@ public class NotificationStackScrollLayout extends ViewGroup
         int oldVisibility = mEmptyShadeView.willBeGone() ? GONE : mEmptyShadeView.getVisibility();
         int newVisibility = visible ? VISIBLE : GONE;
         if (oldVisibility != newVisibility) {
-            if (oldVisibility == GONE) {
+            if (newVisibility != GONE) {
                 if (mEmptyShadeView.willBeGone()) {
                     mEmptyShadeView.cancelAnimation();
                 } else {
                     mEmptyShadeView.setInvisible();
-                    mEmptyShadeView.setVisibility(newVisibility);
                 }
+                mEmptyShadeView.setVisibility(newVisibility);
                 mEmptyShadeView.setWillBeGone(false);
                 updateContentHeight();
+                notifyHeightChangeListener(mDismissView);
             } else {
                 mEmptyShadeView.setWillBeGone(true);
                 mEmptyShadeView.performVisibilityAnimation(false, new Runnable() {
@@ -2111,6 +2112,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                         mEmptyShadeView.setVisibility(GONE);
                         mEmptyShadeView.setWillBeGone(false);
                         updateContentHeight();
+                        notifyHeightChangeListener(mDismissView);
                     }
                 });
             }
@@ -2121,15 +2123,16 @@ public class NotificationStackScrollLayout extends ViewGroup
         int oldVisibility = mDismissView.willBeGone() ? GONE : mDismissView.getVisibility();
         int newVisibility = visible ? VISIBLE : GONE;
         if (oldVisibility != newVisibility) {
-            if (oldVisibility == GONE) {
+            if (newVisibility != GONE) {
                 if (mDismissView.willBeGone()) {
                     mDismissView.cancelAnimation();
                 } else {
                     mDismissView.setInvisible();
-                    mDismissView.setVisibility(newVisibility);
                 }
+                mDismissView.setVisibility(newVisibility);
                 mDismissView.setWillBeGone(false);
                 updateContentHeight();
+                notifyHeightChangeListener(mDismissView);
             } else {
                 mDismissView.setWillBeGone(true);
                 mDismissView.performVisibilityAnimation(false, new Runnable() {
@@ -2138,6 +2141,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                         mDismissView.setVisibility(GONE);
                         mDismissView.setWillBeGone(false);
                         updateContentHeight();
+                        notifyHeightChangeListener(mDismissView);
                     }
                 });
             }
