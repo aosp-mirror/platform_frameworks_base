@@ -3772,6 +3772,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      */
     public void goToKeyguard() {
         if (mState == StatusBarState.SHADE_LOCKED) {
+            mStackScroller.onGoToKeyguard();
             setBarState(StatusBarState.KEYGUARD);
             updateKeyguardState(false /* goingToFullShade */, true /* fromShadeLocked*/);
         }
