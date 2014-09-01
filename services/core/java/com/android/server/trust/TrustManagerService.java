@@ -168,7 +168,7 @@ public class TrustManagerService extends SystemService {
         obsoleteAgents.addAll(mActiveAgents);
 
         for (UserInfo userInfo : userInfos) {
-            if (lockPatternUtils.getKeyguardStoredPasswordQuality()
+            if (lockPatternUtils.getKeyguardStoredPasswordQuality(userInfo.id)
                     == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) continue;
             DevicePolicyManager dpm = lockPatternUtils.getDevicePolicyManager();
             int disabledFeatures = dpm.getKeyguardDisabledFeatures(null, userInfo.id);
