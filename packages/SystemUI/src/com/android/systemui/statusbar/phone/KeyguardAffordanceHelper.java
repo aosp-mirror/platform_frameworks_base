@@ -59,9 +59,9 @@ public class KeyguardAffordanceHelper {
     private int mMinTranslationAmount;
     private int mMinFlingVelocity;
     private int mHintGrowAmount;
-    private final KeyguardAffordanceView mLeftIcon;
-    private final KeyguardAffordanceView mCenterIcon;
-    private final KeyguardAffordanceView mRightIcon;
+    private KeyguardAffordanceView mLeftIcon;
+    private KeyguardAffordanceView mCenterIcon;
+    private KeyguardAffordanceView mRightIcon;
     private Interpolator mAppearInterpolator;
     private Interpolator mDisappearInterpolator;
     private Animator mSwipeAnimator;
@@ -84,12 +84,7 @@ public class KeyguardAffordanceHelper {
     KeyguardAffordanceHelper(Callback callback, Context context) {
         mContext = context;
         mCallback = callback;
-        mLeftIcon = mCallback.getLeftIcon();
-        mLeftIcon.setIsLeft(true);
-        mCenterIcon = mCallback.getCenterIcon();
-        mRightIcon = mCallback.getRightIcon();
-        mLeftIcon.setPreviewView(mCallback.getLeftPreview());
-        mRightIcon.setPreviewView(mCallback.getRightPreview());
+        initIcons();
         updateIcon(mLeftIcon, 0.0f, SWIPE_RESTING_ALPHA_AMOUNT, false);
         updateIcon(mCenterIcon, 0.0f, SWIPE_RESTING_ALPHA_AMOUNT, false);
         updateIcon(mRightIcon, 0.0f, SWIPE_RESTING_ALPHA_AMOUNT, false);
@@ -111,6 +106,16 @@ public class KeyguardAffordanceHelper {
                 android.R.interpolator.linear_out_slow_in);
         mDisappearInterpolator = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.fast_out_linear_in);
+    }
+
+    private void initIcons() {
+        mLeftIcon = mCallback.getLeftIcon();
+        mLeftIcon.setIsLeft(true);
+        mCenterIcon = mCallback.getCenterIcon();
+        mRightIcon = mCallback.getRightIcon();
+        mRightIcon.setIsLeft(false);
+        mLeftIcon.setPreviewView(mCallback.getLeftPreview());
+        mRightIcon.setPreviewView(mCallback.getRightPreview());
     }
 
     public boolean onTouchEvent(MotionEvent event) {
@@ -436,6 +441,7 @@ public class KeyguardAffordanceHelper {
 
     public void onConfigurationChanged() {
         initDimens();
+        initIcons();
     }
 
     public void reset(boolean animate) {
