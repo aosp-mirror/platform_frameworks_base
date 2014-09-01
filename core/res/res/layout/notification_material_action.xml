@@ -29,4 +29,5 @@
     android:textSize="13sp"
     android:singleLine="true"
     android:ellipsize="end"
+    android:background="@drawable/notification_material_action_background"
     />
