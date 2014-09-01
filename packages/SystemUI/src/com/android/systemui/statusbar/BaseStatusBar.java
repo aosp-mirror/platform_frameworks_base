@@ -203,7 +203,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected int mZenMode;
 
     // which notification is currently being longpress-examined by the user
-    private View mNotificationGutsExposed;
+    private NotificationGuts mNotificationGutsExposed;
 
     private TimeInterpolator mLinearOutSlowIn, mFastOutLinearIn;
 
@@ -739,15 +739,16 @@ public abstract class BaseStatusBar extends SystemUI implements
                 if (v.getWindowToken() == null) return false;
 
                 // Assume we are a status_bar_notification_row
-                final View guts = v.findViewById(R.id.notification_guts);
+                final NotificationGuts guts = (NotificationGuts) v.findViewById(
+                        R.id.notification_guts);
                 if (guts == null) return false;
 
                 // Already showing?
                 if (guts.getVisibility() == View.VISIBLE) return false;
 
                 guts.setVisibility(View.VISIBLE);
-                final double horz = Math.max(v.getWidth() - x, x);
-                final double vert = Math.max(v.getHeight() - y, y);
+                final double horz = Math.max(guts.getWidth() - x, x);
+                final double vert = Math.max(guts.getActualHeight() - y, y);
                 final float r = (float) Math.hypot(horz, vert);
                 final Animator a
                         = ViewAnimationUtils.createCircularReveal(guts, x, y, 0, r);
@@ -764,11 +765,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public void dismissPopups() {
         if (mNotificationGutsExposed != null) {
-            final View v = mNotificationGutsExposed;
+            final NotificationGuts v = mNotificationGutsExposed;
             mNotificationGutsExposed = null;
 
             final int x = (v.getLeft() + v.getRight()) / 2;
-            final int y = (v.getTop() + v.getBottom()) / 2;
+            final int y = (v.getTop() + v.getActualHeight() / 2);
             final Animator a = ViewAnimationUtils.createCircularReveal(v,
                     x, y, x, 0);
             a.setDuration(200);
