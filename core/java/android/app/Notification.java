@@ -22,7 +22,6 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
@@ -2624,6 +2623,13 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews applyStandardTemplate(int resId) {
+            return applyStandardTemplate(resId, true /* hasProgress */);
+        }
+
+        /**
+         * @param hasProgress whether the progress bar should be shown and set
+         */
+        private RemoteViews applyStandardTemplate(int resId, boolean hasProgress) {
             RemoteViews contentView = new BuilderRemoteViews(mContext.getPackageName(),
                     mOriginatingUserId, resId);
 
@@ -2683,7 +2689,7 @@ public class Notification implements Parcelable
                 }
             } else {
                 contentView.setViewVisibility(R.id.text2, View.GONE);
-                if (mProgressMax != 0 || mProgressIndeterminate) {
+                if (hasProgress && (mProgressMax != 0 || mProgressIndeterminate)) {
                     contentView.setProgressBar(
                             R.id.progress, mProgressMax, mProgress, mProgressIndeterminate);
                     contentView.setViewVisibility(R.id.progress, View.VISIBLE);
@@ -2698,7 +2704,7 @@ public class Notification implements Parcelable
                 shrinkLine3Text(contentView);
             }
 
-            if (mWhen != 0 && mShowWhen) {
+            if (showsTimeOrChronometer()) {
                 if (mUseChronometer) {
                     contentView.setViewVisibility(R.id.chronometer, View.VISIBLE);
                     contentView.setLong(R.id.chronometer, "setBase",
@@ -2732,6 +2738,14 @@ public class Notification implements Parcelable
         }
 
         /**
+         * @return true if the built notification will show the time or the chronometer; false
+         *         otherwise
+         */
+        private boolean showsTimeOrChronometer() {
+            return mWhen != 0 && mShowWhen;
+        }
+
+        /**
          * Logic to find out whether the notification is going to have three lines in the contracted
          * layout. This is used to adjust the top padding.
          *
@@ -2740,13 +2754,14 @@ public class Notification implements Parcelable
          */
         private boolean hasThreeLines() {
             boolean contentTextInLine2 = mSubText != null && mContentText != null;
-
+            boolean hasProgress = mStyle == null || mStyle.hasProgress();
             // If we have content text in line 2, badge goes into line 2, or line 3 otherwise
             boolean badgeInLine3 = getProfileBadgeDrawable() != null && !contentTextInLine2;
             boolean hasLine3 = mContentText != null || mContentInfo != null || mNumber > 0
                     || badgeInLine3;
             boolean hasLine2 = (mSubText != null && mContentText != null) ||
-                    (mSubText == null && (mProgressMax != 0 || mProgressIndeterminate));
+                    (hasProgress && mSubText == null
+                            && (mProgressMax != 0 || mProgressIndeterminate));
             return hasLine2 && hasLine3;
         }
 
@@ -3488,6 +3503,15 @@ public class Notification implements Parcelable
             checkBuilder();
             return mBuilder.build();
         }
+
+        /**
+         * @hide
+         * @return true if the style positions the progress bar on the second line; false if the
+         *         style hides the progress bar
+         */
+        protected boolean hasProgress() {
+            return true;
+        }
     }
 
     /**
@@ -3885,7 +3909,7 @@ public class Notification implements Parcelable
      * @see Notification#bigContentView
      */
     public static class MediaStyle extends Style {
-        static final int MAX_MEDIA_BUTTONS_IN_COMPACT = 2;
+        static final int MAX_MEDIA_BUTTONS_IN_COMPACT = 3;
         static final int MAX_MEDIA_BUTTONS = 5;
 
         private int[] mActionsToShowInCompact = null;
@@ -3899,8 +3923,10 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Request up to 2 actions (by index in the order of addition) to be shown in the compact
+         * Request up to 3 actions (by index in the order of addition) to be shown in the compact
          * notification view.
+         *
+         * @param actions the indices of the actions to show in the compact notification view
          */
         public MediaStyle setShowActionsInCompactView(int...actions) {
             mActionsToShowInCompact = actions;
@@ -3977,6 +4003,9 @@ public class Notification implements Parcelable
             RemoteViews button = new RemoteViews(mBuilder.mContext.getPackageName(),
                     R.layout.notification_material_media_action);
             button.setImageViewResource(R.id.action0, action.icon);
+            button.setDrawableParameters(R.id.action0, false, -1,
+                    0xFFFFFFFF,
+                    PorterDuff.Mode.SRC_ATOP, -1);
             if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
             }
@@ -3986,14 +4015,14 @@ public class Notification implements Parcelable
 
         private RemoteViews makeMediaContentView() {
             RemoteViews view = mBuilder.applyStandardTemplate(
-                    R.layout.notification_template_material_media);
+                    R.layout.notification_template_material_media, false /* hasProgress */);
 
             final int numActions = mBuilder.mActions.size();
             final int N = mActionsToShowInCompact == null
                     ? 0
                     : Math.min(mActionsToShowInCompact.length, MAX_MEDIA_BUTTONS_IN_COMPACT);
             if (N > 0) {
-                view.removeAllViews(R.id.actions);
+                view.removeAllViews(com.android.internal.R.id.media_actions);
                 for (int i = 0; i < N; i++) {
                     if (i >= numActions) {
                         throw new IllegalArgumentException(String.format(
@@ -4003,25 +4032,72 @@ public class Notification implements Parcelable
 
                     final Action action = mBuilder.mActions.get(mActionsToShowInCompact[i]);
                     final RemoteViews button = generateMediaActionButton(action);
-                    view.addView(R.id.actions, button);
+                    view.addView(com.android.internal.R.id.media_actions, button);
                 }
             }
+            styleText(view);
+            hideRightIcon(view);
             return view;
         }
 
         private RemoteViews makeMediaBigContentView() {
-            RemoteViews big = mBuilder.applyStandardTemplate(
-                    R.layout.notification_template_material_big_media);
+            final int actionCount = Math.min(mBuilder.mActions.size(), MAX_MEDIA_BUTTONS);
+            RemoteViews big = mBuilder.applyStandardTemplate(getBigLayoutResource(actionCount),
+                    false /* hasProgress */);
 
-            final int N = Math.min(mBuilder.mActions.size(), MAX_MEDIA_BUTTONS);
-            if (N > 0) {
-                big.removeAllViews(R.id.actions);
-                for (int i=0; i<N; i++) {
+            if (actionCount > 0) {
+                big.removeAllViews(com.android.internal.R.id.media_actions);
+                for (int i = 0; i < actionCount; i++) {
                     final RemoteViews button = generateMediaActionButton(mBuilder.mActions.get(i));
-                    big.addView(R.id.actions, button);
+                    big.addView(com.android.internal.R.id.media_actions, button);
                 }
             }
+            styleText(big);
+            hideRightIcon(big);
+            applyTopPadding(big);
+            big.setViewVisibility(android.R.id.progress, View.GONE);
             return big;
+        }
+
+        private int getBigLayoutResource(int actionCount) {
+            if (actionCount <= 3) {
+                return R.layout.notification_template_material_big_media_narrow;
+            } else {
+                return R.layout.notification_template_material_big_media;
+            }
+        }
+
+        private void hideRightIcon(RemoteViews contentView) {
+            contentView.setViewVisibility(R.id.right_icon, View.GONE);
+        }
+
+        /**
+         * Applies the special text colors for media notifications to all text views.
+         */
+        private void styleText(RemoteViews contentView) {
+            int primaryColor = mBuilder.mContext.getResources().getColor(
+                    R.color.notification_media_primary_color);
+            int secondaryColor = mBuilder.mContext.getResources().getColor(
+                    R.color.notification_media_secondary_color);
+            contentView.setTextColor(R.id.title, primaryColor);
+            if (mBuilder.showsTimeOrChronometer()) {
+                if (mBuilder.mUseChronometer) {
+                    contentView.setTextColor(R.id.chronometer, secondaryColor);
+                } else {
+                    contentView.setTextColor(R.id.time, secondaryColor);
+                }
+            }
+            contentView.setTextColor(R.id.text2, secondaryColor);
+            contentView.setTextColor(R.id.text, secondaryColor);
+            contentView.setTextColor(R.id.info, secondaryColor);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        protected boolean hasProgress() {
+            return false;
         }
     }
 

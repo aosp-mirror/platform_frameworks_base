@@ -677,7 +677,10 @@ public abstract class BaseStatusBar extends SystemUI implements
             // Using platform templates
             final int color = sbn.getNotification().color;
             if (isMediaNotification(entry)) {
-                entry.row.setTintColor(color);
+                entry.row.setTintColor(color == Notification.COLOR_DEFAULT
+                        ? mContext.getResources().getColor(
+                                R.color.notification_material_background_media_default_color)
+                        : color);
             }
         }
 
@@ -693,7 +696,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     public boolean isMediaNotification(NotificationData.Entry entry) {
         // TODO: confirm that there's a valid media key
         return entry.expandedBig != null &&
-               entry.expandedBig.findViewById(com.android.internal.R.id.media_action_area) != null;
+               entry.expandedBig.findViewById(com.android.internal.R.id.media_actions) != null;
     }
 
     private void startAppNotificationSettingsActivity(String packageName, final int appUid) {
