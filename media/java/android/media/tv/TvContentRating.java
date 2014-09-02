@@ -300,11 +300,7 @@ import java.util.Objects;
  *         <td>TV content rating system for Serbia</td>
  *     </tr>
  *     <tr>
- *         <td>SG_FTV</td>
- *         <td>TV content rating system for Singapore</td>
- *     </tr>
- *     <tr>
- *         <td>SG_PTV</td>
+ *         <td>SG_TV</td>
  *         <td>TV content rating system for Singapore</td>
  *     </tr>
  *     <tr>
@@ -1215,22 +1211,30 @@ import java.util.Objects;
  *         <td>Program not suitable for minors under the age of 18</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="2">SG_FTV</td>
- *         <td>SG_FTV_PG</td>
- *         <td>Suitable for most but parents should guide their young</td>
+ *         <td valign="top" rowspan="6">SG_TV</td>
+ *         <td>SG_TV_G</td>
+ *         <td>Suitable for all ages</td>
  *     </tr>
  *     <tr>
- *         <td>SG_FTV_PG13</td>
- *         <td>Parental Guidance Strongly Cautioned - Suitable for 13 And Above</td>
+ *         <td>SG_TV_PG</td>
+ *         <td>Suitable for all but parents should guide their young</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="2">SG_PTV</td>
- *         <td>SG_PTV_NC16</td>
- *         <td>No Children Under 16</td>
+ *         <td>SG_TV_PG13</td>
+ *         <td>Suitable for persons aged 13 and above but parental guidance is advised for children
+ *         below 13</td>
  *     </tr>
  *     <tr>
- *         <td>SG_PTV_M18</td>
- *         <td>Nobody under age 18 is admitted</td>
+ *         <td>SG_TV_NC16</td>
+ *         <td>Suitable for persons aged 16 and above</td>
+ *     </tr>
+ *     <tr>
+ *         <td>SG_TV_M18</td>
+ *         <td>Suitable for persons aged 18 and above</td>
+ *     </tr>
+ *     <tr>
+ *         <td>SG_TV_R21</td>
+ *         <td>Suitable for adults aged 21 and above</td>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="4">SI_TV</td>
