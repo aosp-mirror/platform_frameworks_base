@@ -457,7 +457,7 @@ final class AccessibilityController {
                 availableBounds.set(0, 0, screenWidth, screenHeight);
 
                 Region nonMagnifiedBounds = mTempRegion4;
-                nonMagnifiedBounds.set(0,  0,  0,  0);
+                nonMagnifiedBounds.set(0, 0, 0, 0);
 
                 SparseArray<WindowState> visibleWindows = mTempWindowStates;
                 visibleWindows.clear();
@@ -566,7 +566,7 @@ final class AccessibilityController {
             public void setMagnifiedRegionBorderShownLocked(boolean shown, boolean animate) {
                 if (shown) {
                     mFullRedrawNeeded = true;
-                    mOldMagnifiedBounds.set(0,  0,  0,  0);
+                    mOldMagnifiedBounds.set(0, 0, 0, 0);
                 }
                 mWindow.setShown(shown, animate);
             }
@@ -614,18 +614,14 @@ final class AccessibilityController {
             private final class ViewportWindow {
                 private static final String SURFACE_TITLE = "Magnification Overlay";
 
-                private static final String PROPERTY_NAME_ALPHA = "alpha";
-
-                private static final int MIN_ALPHA = 0;
-                private static final int MAX_ALPHA = 255;
-
                 private final Region mBounds = new Region();
                 private final Rect mDirtyRect = new Rect();
                 private final Paint mPaint = new Paint();
 
-                private final ValueAnimator mShowHideFrameAnimator;
                 private final SurfaceControl mSurfaceControl;
                 private final Surface mSurface = new Surface();
+
+                private final AnimationController mAnimationController;
 
                 private boolean mShown;
                 private int mAlpha;
@@ -651,6 +647,9 @@ final class AccessibilityController {
                     mSurfaceControl.setPosition(0, 0);
                     mSurface.copyFrom(mSurfaceControl);
 
+                    mAnimationController = new AnimationController(context,
+                            mWindowManagerService.mH.getLooper());
+
                     TypedValue typedValue = new TypedValue();
                     context.getTheme().resolveAttribute(R.attr.colorActivatedHighlight,
                             typedValue, true);
@@ -660,14 +659,6 @@ final class AccessibilityController {
                     mPaint.setStrokeWidth(mBorderWidth);
                     mPaint.setColor(borderColor);
 
-                    Interpolator interpolator = new DecelerateInterpolator(2.5f);
-                    final long longAnimationDuration = context.getResources().getInteger(
-                            com.android.internal.R.integer.config_longAnimTime);
-
-                    mShowHideFrameAnimator = ObjectAnimator.ofInt(this, PROPERTY_NAME_ALPHA,
-                            MIN_ALPHA, MAX_ALPHA);
-                    mShowHideFrameAnimator.setInterpolator(interpolator);
-                    mShowHideFrameAnimator.setDuration(longAnimationDuration);
                     mInvalidated = true;
                 }
 
@@ -677,24 +668,7 @@ final class AccessibilityController {
                             return;
                         }
                         mShown = shown;
-                        if (animate) {
-                            if (mShowHideFrameAnimator.isRunning()) {
-                                mShowHideFrameAnimator.reverse();
-                            } else {
-                                if (shown) {
-                                    mShowHideFrameAnimator.start();
-                                } else {
-                                    mShowHideFrameAnimator.reverse();
-                                }
-                            }
-                        } else {
-                            mShowHideFrameAnimator.cancel();
-                            if (shown) {
-                                setAlpha(MAX_ALPHA);
-                            } else {
-                                setAlpha(MIN_ALPHA);
-                            }
-                        }
+                        mAnimationController.onFrameShownStateChanged(shown, animate);
                         if (DEBUG_VIEWPORT_WINDOW) {
                             Slog.i(LOG_TAG, "ViewportWindow shown: " + mShown);
                         }
@@ -800,6 +774,64 @@ final class AccessibilityController {
                 public void releaseSurface() {
                     mSurfaceControl.release();
                     mSurface.release();
+                }
+
+                private final class AnimationController extends Handler {
+                    private static final String PROPERTY_NAME_ALPHA = "alpha";
+
+                    private static final int MIN_ALPHA = 0;
+                    private static final int MAX_ALPHA = 255;
+
+                    private static final int MSG_FRAME_SHOWN_STATE_CHANGED = 1;
+
+                    private final ValueAnimator mShowHideFrameAnimator;
+
+                    public AnimationController(Context context, Looper looper) {
+                        super(looper);
+                        mShowHideFrameAnimator = ObjectAnimator.ofInt(ViewportWindow.this,
+                                PROPERTY_NAME_ALPHA, MIN_ALPHA, MAX_ALPHA);
+
+                        Interpolator interpolator = new DecelerateInterpolator(2.5f);
+                        final long longAnimationDuration = context.getResources().getInteger(
+                                com.android.internal.R.integer.config_longAnimTime);
+
+                        mShowHideFrameAnimator.setInterpolator(interpolator);
+                        mShowHideFrameAnimator.setDuration(longAnimationDuration);
+                    }
+
+                    public void onFrameShownStateChanged(boolean shown, boolean animate) {
+                        obtainMessage(MSG_FRAME_SHOWN_STATE_CHANGED,
+                                shown ? 1 : 0, animate ? 1 : 0).sendToTarget();
+                    }
+
+                    @Override
+                    public void handleMessage(Message message) {
+                        switch (message.what) {
+                            case MSG_FRAME_SHOWN_STATE_CHANGED: {
+                                final boolean shown = message.arg1 == 1;
+                                final boolean animate = message.arg2 == 1;
+
+                                if (animate) {
+                                    if (mShowHideFrameAnimator.isRunning()) {
+                                        mShowHideFrameAnimator.reverse();
+                                    } else {
+                                        if (shown) {
+                                            mShowHideFrameAnimator.start();
+                                        } else {
+                                            mShowHideFrameAnimator.reverse();
+                                        }
+                                    }
+                                } else {
+                                    mShowHideFrameAnimator.cancel();
+                                    if (shown) {
+                                        setAlpha(MAX_ALPHA);
+                                    } else {
+                                        setAlpha(MIN_ALPHA);
+                                    }
+                                }
+                            } break;
+                        }
+                    }
                 }
             }
         }
