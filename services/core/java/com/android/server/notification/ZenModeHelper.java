@@ -34,6 +34,7 @@ import android.database.ContentObserver;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
@@ -189,7 +190,7 @@ public class ZenModeHelper {
     }
 
     private boolean shouldInterceptAudience(NotificationRecord record) {
-        if (!audienceMatches(record)) {
+        if (!audienceMatches(record.getContactAffinity())) {
             ZenLog.traceIntercepted(record, "!audienceMatches");
             return true;
         }
@@ -372,14 +373,27 @@ public class ZenModeHelper {
         return record.isCategory(Notification.CATEGORY_MESSAGE) || isDefaultMessagingApp(record);
     }
 
-    private boolean audienceMatches(NotificationRecord record) {
+    public boolean matchesCallFilter(Bundle extras, ValidateNotificationPeople validator) {
+        final int zen = mZenMode;
+        if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) return false; // nothing gets through
+        if (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
+            if (!mConfig.allowCalls) return false; // no calls get through
+            if (validator != null) {
+                final float contactAffinity = validator.getContactAffinity(extras);
+                return audienceMatches(contactAffinity);
+            }
+        }
+        return true;
+    }
+
+    private boolean audienceMatches(float contactAffinity) {
         switch (mConfig.allowFrom) {
             case ZenModeConfig.SOURCE_ANYONE:
                 return true;
             case ZenModeConfig.SOURCE_CONTACT:
-                return record.getContactAffinity() >= ValidateNotificationPeople.VALID_CONTACT;
+                return contactAffinity >= ValidateNotificationPeople.VALID_CONTACT;
             case ZenModeConfig.SOURCE_STAR:
-                return record.getContactAffinity() >= ValidateNotificationPeople.STARRED_CONTACT;
+                return contactAffinity >= ValidateNotificationPeople.STARRED_CONTACT;
             default:
                 Slog.w(TAG, "Encountered unknown source: " + mConfig.allowFrom);
                 return true;
