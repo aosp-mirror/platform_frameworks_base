@@ -961,6 +961,10 @@ public class MediaPlayer implements SubtitleController.Listener
      * @param context the Context to use when resolving the Uri
      * @param uri the Content URI of the data you want to play
      * @param headers the headers to be sent together with the request for the data
+     *                Note that the cross domain redirection is allowed by default, but that can be
+     *                changed with key/value pairs through the headers parameter with
+     *                "android-allow-cross-domain-redirect" as the key and "0" or "1" as the value
+     *                to disallow or allow cross domain redirection.
      * @throws IllegalStateException if it is called in an invalid state
      */
     public void setDataSource(Context context, Uri uri, Map<String, String> headers)
