@@ -251,6 +251,7 @@ public class JobStatus {
 
     // Dumpsys infrastructure
     public void dump(PrintWriter pw, String prefix) {
+        pw.print(prefix);
         pw.println(this.toString());
     }
 }
