@@ -91,7 +91,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
         if (cb == null) return;
 
         final Resources r = mContext.getResources();
-        state.iconId = cb.noSim ? R.drawable.stat_sys_no_sim
+        state.iconId = cb.noSim ? R.drawable.ic_qs_no_sim
                 : !cb.enabled || cb.airplaneModeEnabled ? R.drawable.ic_qs_signal_disabled
                 : cb.mobileSignalIconId > 0 ? cb.mobileSignalIconId
                 : R.drawable.ic_qs_signal_no_signal;
@@ -99,7 +99,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
         state.overlayIconId = cb.enabled && (cb.dataTypeIconId > 0) && !cb.wifiConnected
                 ? cb.dataTypeIconId
                 : 0;
-        state.filter = state.iconId != R.drawable.stat_sys_no_sim;
+        state.filter = state.iconId != R.drawable.ic_qs_no_sim;
         state.activityIn = cb.enabled && cb.activityIn;
         state.activityOut = cb.enabled && cb.activityOut;
 

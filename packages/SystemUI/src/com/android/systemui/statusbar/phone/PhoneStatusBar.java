@@ -112,6 +112,7 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogTags;
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeService;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -1228,11 +1229,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 + " icon=" + icon);
         StatusBarIconView view = new StatusBarIconView(mContext, slot, null);
         view.set(icon);
-        mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(mIconSize, mIconSize));
+        mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(
+                LayoutParams.WRAP_CONTENT, mIconSize));
         view = new StatusBarIconView(mContext, slot, null);
         view.set(icon);
-        mStatusIconsKeyguard.addView(view, viewIndex,
-                new LinearLayout.LayoutParams(mIconSize, mIconSize));
+        mStatusIconsKeyguard.addView(view, viewIndex, new LinearLayout.LayoutParams(
+                LayoutParams.WRAP_CONTENT, mIconSize));
     }
 
     public void updateIcon(String slot, int index, int viewIndex,
@@ -3057,6 +3059,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateDisplaySize(); // populates mDisplayMetrics
 
         updateResources();
+        updateClockSize();
         repositionNavigationBar();
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
         updateShowSearchHoldoff();
@@ -3128,6 +3131,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
+    private void updateClockSize() {
+        if (mStatusBarView == null) return;
+        TextView clock = (TextView) mStatusBarView.findViewById(R.id.clock);
+        if (clock != null) {
+            FontSizeUtils.updateFontSize(clock, R.dimen.status_bar_clock_size);
+        }
+    }
     protected void loadDimens() {
         final Resources res = mContext.getResources();
 
