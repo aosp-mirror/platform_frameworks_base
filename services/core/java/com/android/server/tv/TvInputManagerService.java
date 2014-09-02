@@ -247,6 +247,7 @@ public final class TvInputManagerService extends SystemService {
                     // let it add TvInputInfo objects to mInputList if there's any.
                     serviceState = new ServiceState(component, userId);
                     userState.serviceStateMap.put(component, serviceState);
+                    updateServiceConnectionLocked(component, userId);
                 } else {
                     inputList.addAll(serviceState.inputList);
                 }
