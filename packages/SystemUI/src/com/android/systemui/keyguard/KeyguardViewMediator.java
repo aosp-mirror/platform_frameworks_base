@@ -27,6 +27,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.UserInfo;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
@@ -302,6 +303,13 @@ public class KeyguardViewMediator extends SystemUI {
         @Override
         public void onUserSwitchComplete(int userId) {
             mSwitchingUser = false;
+            if (userId != UserHandle.USER_OWNER) {
+                UserInfo info = UserManager.get(mContext).getUserInfo(userId);
+                if (info != null && info.isGuest()) {
+                    // If we just switched to a guest, try to dismiss keyguard.
+                    dismiss();
+                }
+            }
         }
 
         @Override
