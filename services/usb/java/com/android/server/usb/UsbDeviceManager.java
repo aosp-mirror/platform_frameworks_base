@@ -30,6 +30,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
+import android.media.AudioManager;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
@@ -587,7 +588,7 @@ public class UsbDeviceManager {
                     UsbManager.USB_FUNCTION_AUDIO_SOURCE);
             if (enabled != mAudioSourceEnabled) {
                 // send a sticky broadcast containing current USB state
-                Intent intent = new Intent(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG);
+                Intent intent = new Intent(AudioManager.ACTION_USB_AUDIO_ACCESSORY_PLUG);
                 intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                 intent.putExtra("state", (enabled ? 1 : 0));

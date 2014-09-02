@@ -25,6 +25,7 @@ import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
@@ -124,7 +125,7 @@ public class UsbHostManager {
     private void sendDeviceNotification(int card, int device, boolean enabled,
             boolean hasPlayback, boolean hasCapture, boolean hasMIDI) {
         // send a sticky broadcast containing current USB state
-        Intent intent = new Intent(Intent.ACTION_USB_AUDIO_DEVICE_PLUG);
+        Intent intent = new Intent(AudioManager.ACTION_USB_AUDIO_DEVICE_PLUG);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         intent.putExtra("state", enabled ? 1 : 0);
