@@ -281,7 +281,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return;
         }
         setPrevPortId(getActivePortId());
-        int portId = mService.pathToPortId(path);
         setActivePath(path);
         // TODO: Handle PAP/PIP case.
         // Show OSD port change banner
@@ -289,7 +288,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             ActiveSource activeSource = getActiveSource();
             HdmiDeviceInfo info = getCecDeviceInfo(activeSource.logicalAddress);
             if (info == null) {
-                info = new HdmiDeviceInfo(Constants.ADDR_INVALID, path, portId,
+                info = new HdmiDeviceInfo(Constants.ADDR_INVALID, path, getActivePortId(),
                         HdmiDeviceInfo.DEVICE_RESERVED, 0, null);
             }
             mService.invokeInputChangeListener(info);
@@ -470,7 +469,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return true;
         }
 
-        if (!isInDeviceList(path, address)) {
+        if (!isInDeviceList(address, path)) {
             handleNewDeviceAtTheTailOfActivePath(path);
         }
         startNewDeviceAction(ActiveSource.of(address, path));
@@ -1055,9 +1054,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * does not include local device.
      */
     @ServiceThreadOnly
-    List<HdmiDeviceInfo> getDeviceInfoList(boolean includelLocalDevice) {
+    List<HdmiDeviceInfo> getDeviceInfoList(boolean includeLocalDevice) {
         assertRunOnServiceThread();
-        if (includelLocalDevice) {
+        if (includeLocalDevice) {
             return HdmiUtils.sparseArrayToList(mDeviceInfos);
         } else {
             ArrayList<HdmiDeviceInfo> infoList = new ArrayList<>();
@@ -1243,7 +1242,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             int newPath = mService.portIdToPath(getActivePortId());
             mService.sendCecCommand(HdmiCecMessageBuilder.buildRoutingChange(
                     mAddress, getActivePath(), newPath));
-            addAndStartAction(new RoutingControlAction(this, getActivePortId(), true, null));
+            mActiveSource.invalidate();
+            addAndStartAction(new RoutingControlAction(this, getActivePath(), true, null));
         }
     }
 
@@ -1306,7 +1306,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * @return true if exist; otherwise false
      */
     @ServiceThreadOnly
-    boolean isInDeviceList(int logicalAddress, int physicalAddress) {
+    private boolean isInDeviceList(int logicalAddress, int physicalAddress) {
         assertRunOnServiceThread();
         HdmiDeviceInfo device = getCecDeviceInfo(logicalAddress);
         if (device == null) {
@@ -1622,5 +1622,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         pw.println("mAutoDeviceOff: " + mAutoDeviceOff);
         pw.println("mAutoWakeup: " + mAutoWakeup);
         pw.println("mSkipRoutingControl: " + mSkipRoutingControl);
+        pw.println("CEC devices:");
+        pw.increaseIndent();
+        for (HdmiDeviceInfo info : mSafeAllDeviceInfos) {
+            pw.println(info);
+        }
+        pw.decreaseIndent();
     }
 }
