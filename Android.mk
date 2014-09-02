@@ -150,7 +150,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/ISerialManager.aidl \
 	core/java/android/hardware/display/IDisplayManager.aidl \
 	core/java/android/hardware/display/IDisplayManagerCallback.aidl \
-	core/java/android/hardware/display/IVirtualDisplayCallbacks.aidl \
+	core/java/android/hardware/display/IVirtualDisplayCallback.aidl \
 	core/java/android/hardware/hdmi/IHdmiControlCallback.aidl \
 	core/java/android/hardware/hdmi/IHdmiControlService.aidl \
 	core/java/android/hardware/hdmi/IHdmiDeviceEventListener.aidl \
