@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -693,10 +694,15 @@ public abstract class NotificationListenerService extends Service {
      * current {@link RankingMap}.
      */
     public static class Ranking {
+        /** Value signifying that the user has not expressed a per-app visibility override value.
+         * @hide */
+        public static final int VISIBILITY_NO_OVERRIDE = -1000;
+
         private String mKey;
         private int mRank = -1;
         private boolean mIsAmbient;
         private boolean mMatchesInterruptionFilter;
+        private int mVisibilityOverride;
 
         public Ranking() {}
 
@@ -726,6 +732,17 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
+         * Returns the user specificed visibility for the package that posted
+         * this notification, or
+         * {@link NotificationListenerService.Ranking#VISIBILITY_NO_OVERRIDE} if
+         * no such preference has been expressed.
+         * @hide
+         */
+        public int getVisibilityOverride() {
+            return mVisibilityOverride;
+        }
+
+        /**
          * Returns whether the notification meets the user's interruption
          * filter.
          *
@@ -744,11 +761,12 @@ public abstract class NotificationListenerService extends Service {
         }
 
         private void populate(String key, int rank, boolean isAmbient,
-                boolean matchesInterruptionFilter) {
+                boolean matchesInterruptionFilter, int visibilityOverride) {
             mKey = key;
             mRank = rank;
             mIsAmbient = isAmbient;
             mMatchesInterruptionFilter = matchesInterruptionFilter;
+            mVisibilityOverride = visibilityOverride;
         }
     }
 
@@ -764,6 +782,7 @@ public abstract class NotificationListenerService extends Service {
         private final NotificationRankingUpdate mRankingUpdate;
         private ArrayMap<String,Integer> mRanks;
         private ArraySet<Object> mIntercepted;
+        private ArrayMap<String, Integer> mVisibilityOverrides;
 
         private RankingMap(NotificationRankingUpdate rankingUpdate) {
             mRankingUpdate = rankingUpdate;
@@ -788,7 +807,8 @@ public abstract class NotificationListenerService extends Service {
          */
         public boolean getRanking(String key, Ranking outRanking) {
             int rank = getRank(key);
-            outRanking.populate(key, rank, isAmbient(key), !isIntercepted(key));
+            outRanking.populate(key, rank, isAmbient(key), !isIntercepted(key),
+                    getVisibilityOverride(key));
             return rank >= 0;
         }
 
@@ -820,6 +840,19 @@ public abstract class NotificationListenerService extends Service {
             return mIntercepted.contains(key);
         }
 
+        private int getVisibilityOverride(String key) {
+            synchronized (this) {
+                if (mVisibilityOverrides == null) {
+                    buildVisibilityOverridesLocked();
+                }
+            }
+            Integer overide = mVisibilityOverrides.get(key);
+            if (overide == null) {
+                return Ranking.VISIBILITY_NO_OVERRIDE;
+            }
+            return overide.intValue();
+        }
+
         // Locked by 'this'
         private void buildRanksLocked() {
             String[] orderedKeys = mRankingUpdate.getOrderedKeys();
@@ -835,6 +868,15 @@ public abstract class NotificationListenerService extends Service {
             String[] dndInterceptedKeys = mRankingUpdate.getInterceptedKeys();
             mIntercepted = new ArraySet<>(dndInterceptedKeys.length);
             Collections.addAll(mIntercepted, dndInterceptedKeys);
+        }
+
+        // Locked by 'this'
+        private void buildVisibilityOverridesLocked() {
+            Bundle visibilityBundle = mRankingUpdate.getVisibilityOverrides();
+            mVisibilityOverrides = new ArrayMap<>(visibilityBundle.size());
+            for (String key: visibilityBundle.keySet()) {
+               mVisibilityOverrides.put(key, visibilityBundle.getInt(key));
+            }
         }
 
         // ----------- Parcelable
