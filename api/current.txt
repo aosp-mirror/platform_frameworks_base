@@ -13278,7 +13278,7 @@ package android.hardware.display {
 
   public final class DisplayManager {
     method public android.hardware.display.VirtualDisplay createVirtualDisplay(java.lang.String, int, int, int, android.view.Surface, int);
-    method public android.hardware.display.VirtualDisplay createVirtualDisplay(java.lang.String, int, int, int, android.view.Surface, int, android.hardware.display.VirtualDisplay.Callbacks, android.os.Handler);
+    method public android.hardware.display.VirtualDisplay createVirtualDisplay(java.lang.String, int, int, int, android.view.Surface, int, android.hardware.display.VirtualDisplay.Callback, android.os.Handler);
     method public android.view.Display getDisplay(int);
     method public android.view.Display[] getDisplays();
     method public android.view.Display[] getDisplays(java.lang.String);
@@ -13306,11 +13306,11 @@ package android.hardware.display {
     method public void setSurface(android.view.Surface);
   }
 
-  public static abstract class VirtualDisplay.Callbacks {
-    ctor public VirtualDisplay.Callbacks();
-    method public void onDisplayPaused();
-    method public void onDisplayResumed();
-    method public void onDisplayStopped();
+  public static abstract class VirtualDisplay.Callback {
+    ctor public VirtualDisplay.Callback();
+    method public void onPaused();
+    method public void onResumed();
+    method public void onStopped();
   }
 
 }
@@ -16351,7 +16351,7 @@ package android.media.projection {
 
   public final class MediaProjection {
     method public void addCallback(android.media.projection.MediaProjection.Callback, android.os.Handler);
-    method public android.hardware.display.VirtualDisplay createVirtualDisplay(java.lang.String, int, int, int, int, android.view.Surface, android.hardware.display.VirtualDisplay.Callbacks, android.os.Handler);
+    method public android.hardware.display.VirtualDisplay createVirtualDisplay(java.lang.String, int, int, int, int, android.view.Surface, android.hardware.display.VirtualDisplay.Callback, android.os.Handler);
     method public void removeCallback(android.media.projection.MediaProjection.Callback);
     method public void stop();
   }
