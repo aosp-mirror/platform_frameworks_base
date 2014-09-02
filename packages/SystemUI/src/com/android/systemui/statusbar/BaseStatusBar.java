@@ -754,15 +754,20 @@ public abstract class BaseStatusBar extends SystemUI implements
             public boolean onLongPress(View v, int x, int y) {
                 dismissPopups();
 
-                if (v.getWindowToken() == null) return false;
+                if (v.getWindowToken() == null) {
+                    Log.e(TAG, "Trying to show notification guts, but not attached to window");
+                    return false;
+                }
 
                 // Assume we are a status_bar_notification_row
                 final NotificationGuts guts = (NotificationGuts) v.findViewById(
                         R.id.notification_guts);
-                if (guts == null) return false;
 
                 // Already showing?
-                if (guts.getVisibility() == View.VISIBLE) return false;
+                if (guts.getVisibility() == View.VISIBLE) {
+                    Log.e(TAG, "Trying to show notification guts, but already visible");
+                    return false;
+                }
 
                 guts.setVisibility(View.VISIBLE);
                 final double horz = Math.max(guts.getWidth() - x, x);
