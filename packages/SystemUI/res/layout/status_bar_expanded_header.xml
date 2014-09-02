@@ -64,7 +64,10 @@
         <FrameLayout android:id="@+id/system_icons_container"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/status_bar_height"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            >
+            <include layout="@layout/system_icons" />
+        </FrameLayout>
         <TextView android:id="@+id/battery_level"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
