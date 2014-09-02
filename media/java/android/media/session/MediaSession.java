@@ -701,6 +701,7 @@ public final class MediaSession {
          *
          * @param mediaButtonIntent an intent containing the KeyEvent as an
          *            extra
+         * @return True if the event was handled, false otherwise.
          */
         public boolean onMediaButtonEvent(@NonNull Intent mediaButtonIntent) {
             if (mSession != null
@@ -713,36 +714,43 @@ public final class MediaSession {
                         case KeyEvent.KEYCODE_MEDIA_PLAY:
                             if ((validActions & PlaybackState.ACTION_PLAY) != 0) {
                                 onPlay();
+                                return true;
                             }
                             break;
                         case KeyEvent.KEYCODE_MEDIA_PAUSE:
                             if ((validActions & PlaybackState.ACTION_PAUSE) != 0) {
                                 onPause();
+                                return true;
                             }
                             break;
                         case KeyEvent.KEYCODE_MEDIA_NEXT:
                             if ((validActions & PlaybackState.ACTION_SKIP_TO_NEXT) != 0) {
                                 onSkipToNext();
+                                return true;
                             }
                             break;
                         case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
                             if ((validActions & PlaybackState.ACTION_SKIP_TO_PREVIOUS) != 0) {
                                 onSkipToPrevious();
+                                return true;
                             }
                             break;
                         case KeyEvent.KEYCODE_MEDIA_STOP:
                             if ((validActions & PlaybackState.ACTION_STOP) != 0) {
                                 onStop();
+                                return true;
                             }
                             break;
                         case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
                             if ((validActions & PlaybackState.ACTION_FAST_FORWARD) != 0) {
                                 onFastForward();
+                                return true;
                             }
                             break;
                         case KeyEvent.KEYCODE_MEDIA_REWIND:
                             if ((validActions & PlaybackState.ACTION_REWIND) != 0) {
                                 onRewind();
+                                return true;
                             }
                             break;
                         case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
@@ -755,8 +763,10 @@ public final class MediaSession {
                                     | PlaybackState.ACTION_PAUSE)) != 0;
                             if (isPlaying && canPause) {
                                 onPause();
+                                return true;
                             } else if (!isPlaying && canPlay) {
                                 onPlay();
+                                return true;
                             }
                             break;
                     }
