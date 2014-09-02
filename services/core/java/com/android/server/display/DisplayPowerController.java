@@ -438,7 +438,7 @@ final class DisplayPowerController {
                 y[i] = normalizeAbsoluteBrightness(brightness[i]);
             }
 
-            Spline spline = Spline.createMonotoneCubicSpline(x, y);
+            Spline spline = Spline.createSpline(x, y);
             if (DEBUG) {
                 Slog.d(TAG, "Auto-brightness spline: " + spline);
                 for (float v = 1f; v < lux[lux.length - 1] * 1.25f; v *= 1.25f) {
