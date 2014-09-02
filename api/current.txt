@@ -16250,12 +16250,12 @@ package android.media.browse {
     method public void connect();
     method public void disconnect();
     method public android.os.Bundle getExtras();
-    method public android.net.Uri getRoot();
+    method public java.lang.String getRoot();
     method public android.content.ComponentName getServiceComponent();
     method public android.media.session.MediaSession.Token getSessionToken();
     method public boolean isConnected();
-    method public void subscribe(android.net.Uri, android.media.browse.MediaBrowser.SubscriptionCallback);
-    method public void unsubscribe(android.net.Uri);
+    method public void subscribe(java.lang.String, android.media.browse.MediaBrowser.SubscriptionCallback);
+    method public void unsubscribe(java.lang.String);
   }
 
   public static class MediaBrowser.ConnectionCallback {
@@ -16281,8 +16281,8 @@ package android.media.browse {
 
   public static abstract class MediaBrowser.SubscriptionCallback {
     ctor public MediaBrowser.SubscriptionCallback();
-    method public void onChildrenLoaded(android.net.Uri, java.util.List<android.media.browse.MediaBrowser.MediaItem>);
-    method public void onError(android.net.Uri);
+    method public void onChildrenLoaded(java.lang.String, java.util.List<android.media.browse.MediaBrowser.MediaItem>);
+    method public void onError(java.lang.String);
   }
 
 }
@@ -27063,18 +27063,18 @@ package android.service.media {
     ctor public MediaBrowserService();
     method public void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
     method public android.media.session.MediaSession.Token getSessionToken();
-    method public void notifyChildrenChanged(android.net.Uri);
+    method public void notifyChildrenChanged(java.lang.String);
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract android.service.media.MediaBrowserService.BrowserRoot onGetRoot(java.lang.String, int, android.os.Bundle);
-    method public abstract void onLoadChildren(android.net.Uri, android.service.media.MediaBrowserService.Result<java.util.List<android.media.browse.MediaBrowser.MediaItem>>);
+    method public abstract void onLoadChildren(java.lang.String, android.service.media.MediaBrowserService.Result<java.util.List<android.media.browse.MediaBrowser.MediaItem>>);
     method public void setSessionToken(android.media.session.MediaSession.Token);
     field public static final java.lang.String SERVICE_ACTION = "android.media.browse.MediaBrowserService";
   }
 
   public static final class MediaBrowserService.BrowserRoot {
-    ctor public MediaBrowserService.BrowserRoot(android.net.Uri, android.os.Bundle);
+    ctor public MediaBrowserService.BrowserRoot(java.lang.String, android.os.Bundle);
     method public android.os.Bundle getExtras();
-    method public android.net.Uri getRootUri();
+    method public java.lang.String getRootId();
   }
 
   public class MediaBrowserService.Result {

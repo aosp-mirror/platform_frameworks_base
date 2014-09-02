@@ -16,6 +16,6 @@ oneway interface IMediaBrowserService {
     void connect(String pkg, in Bundle rootHints, IMediaBrowserServiceCallbacks callbacks);
     void disconnect(IMediaBrowserServiceCallbacks callbacks);
 
-    void addSubscription(in Uri uri, IMediaBrowserServiceCallbacks callbacks);
-    void removeSubscription(in Uri uri, IMediaBrowserServiceCallbacks callbacks);
+    void addSubscription(String uri, IMediaBrowserServiceCallbacks callbacks);
+    void removeSubscription(String uri, IMediaBrowserServiceCallbacks callbacks);
 }
