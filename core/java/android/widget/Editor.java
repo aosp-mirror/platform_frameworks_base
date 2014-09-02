@@ -3060,47 +3060,69 @@ public class Editor {
                     final CharSequence composingText = text.subSequence(composingTextStart,
                             composingTextEnd);
                     builder.setComposingText(composingTextStart, composingText);
-                }
-                // TODO: Optimize this loop by caching the result.
-                for (int offset = composingTextStart; offset < composingTextEnd; offset++) {
-                    if (offset < 0) {
-                        continue;
+
+                    final int minLine = layout.getLineForOffset(composingTextStart);
+                    final int maxLine = layout.getLineForOffset(composingTextEnd - 1);
+                    for (int line = minLine; line <= maxLine; ++line) {
+                        final int lineStart = layout.getLineStart(line);
+                        final int lineEnd = layout.getLineEnd(line);
+                        final int offsetStart = Math.max(lineStart, composingTextStart);
+                        final int offsetEnd = Math.min(lineEnd, composingTextEnd);
+                        final boolean ltrLine =
+                                layout.getParagraphDirection(line) == Layout.DIR_LEFT_TO_RIGHT;
+                        final float[] widths = new float[offsetEnd - offsetStart];
+                        layout.getPaint().getTextWidths(text, offsetStart, offsetEnd, widths);
+                        final float top = layout.getLineTop(line);
+                        final float bottom = layout.getLineBottom(line);
+                        for (int offset = offsetStart; offset < offsetEnd; ++offset) {
+                            final float charWidth = widths[offset - offsetStart];
+                            final boolean isRtl = layout.isRtlCharAt(offset);
+                            final float primary = layout.getPrimaryHorizontal(offset);
+                            final float secondary = layout.getSecondaryHorizontal(offset);
+                            // TODO: This doesn't work perfectly for text with custom styles and
+                            // TAB chars.
+                            final float left;
+                            final float right;
+                            if (ltrLine) {
+                                if (isRtl) {
+                                    left = secondary - charWidth;
+                                    right = secondary;
+                                } else {
+                                    left = primary;
+                                    right = primary + charWidth;
+                                }
+                            } else {
+                                if (!isRtl) {
+                                    left = secondary;
+                                    right = secondary + charWidth;
+                                } else {
+                                    left = primary - charWidth;
+                                    right = primary;
+                                }
+                            }
+                            // TODO: Check top-right and bottom-left as well.
+                            final float localLeft = left + viewportToContentHorizontalOffset;
+                            final float localRight = right + viewportToContentHorizontalOffset;
+                            final float localTop = top + viewportToContentVerticalOffset;
+                            final float localBottom = bottom + viewportToContentVerticalOffset;
+                            final boolean isTopLeftVisible = isPositionVisible(localLeft, localTop);
+                            final boolean isBottomRightVisible =
+                                    isPositionVisible(localRight, localBottom);
+                            int characterBoundsFlags = 0;
+                            if (isTopLeftVisible || isBottomRightVisible) {
+                                characterBoundsFlags |= CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
+                            }
+                            if (!isTopLeftVisible || !isTopLeftVisible) {
+                                characterBoundsFlags |= CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
+                            }
+                            if (isRtl) {
+                                characterBoundsFlags |= CursorAnchorInfo.FLAG_IS_RTL;
+                            }
+                            // Here offset is the index in Java chars.
+                            builder.addCharacterBounds(offset, localLeft, localTop, localRight,
+                                    localBottom, characterBoundsFlags);
+                        }
                     }
-                    final boolean isRtl = layout.isRtlCharAt(offset);
-                    final int line = layout.getLineForOffset(offset);
-                    final int nextCharIndex = offset + 1;
-                    final float localLeadingEdgeX = layout.getPrimaryHorizontal(offset);
-                    final float localTrailingEdgeX;
-                    if (nextCharIndex != layout.getLineEnd(line)) {
-                        localTrailingEdgeX = layout.getPrimaryHorizontal(nextCharIndex);
-                    } else if (isRtl) {
-                        localTrailingEdgeX = layout.getLineLeft(line);
-                    } else {
-                        localTrailingEdgeX = layout.getLineRight(line);
-                    }
-                    final float leadingEdgeX = localLeadingEdgeX
-                            + viewportToContentHorizontalOffset;
-                    final float trailingEdgeX = localTrailingEdgeX
-                            + viewportToContentHorizontalOffset;
-                    final float top = layout.getLineTop(line) + viewportToContentVerticalOffset;
-                    final float bottom = layout.getLineBottom(line)
-                            + viewportToContentVerticalOffset;
-                    // TODO: Check right-top and left-bottom as well.
-                    final boolean isLeadingEdgeTopVisible = isPositionVisible(leadingEdgeX, top);
-                    final boolean isTrailingEdgeBottomVisible =
-                            isPositionVisible(trailingEdgeX, bottom);
-                    int characterRectFlags = 0;
-                    if (isLeadingEdgeTopVisible || isTrailingEdgeBottomVisible) {
-                        characterRectFlags |= CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
-                    }
-                    if (!isLeadingEdgeTopVisible || !isTrailingEdgeBottomVisible) {
-                        characterRectFlags |= CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
-                    }
-                    // Here offset is the index in Java chars.
-                    // TODO: We must have a well-defined specification. For example, how
-                    // surrogate pairs and composition letters are handled must be documented.
-                    builder.addCharacterRect(offset, leadingEdgeX, top, trailingEdgeX, bottom,
-                            characterRectFlags);
                 }
             }
 
@@ -3126,6 +3148,9 @@ public class Editor {
                 }
                 if (!isTopVisible || !isBottomVisible) {
                     insertionMarkerFlags |= CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
+                }
+                if (layout.isRtlCharAt(offset)) {
+                    insertionMarkerFlags |= CursorAnchorInfo.FLAG_IS_RTL;
                 }
                 builder.setInsertionMarkerLocation(insertionMarkerX, insertionMarkerTop,
                         insertionMarkerBaseline, insertionMarkerBottom, insertionMarkerFlags);
