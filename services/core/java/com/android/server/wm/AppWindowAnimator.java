@@ -114,6 +114,10 @@ public class AppWindowAnimator {
         transformation.clear();
         transformation.setAlpha(mAppToken.isVisible() ? 1 : 0);
         hasTransformation = true;
+
+        if (!mAppToken.appFullscreen) {
+            anim.setBackgroundColor(0);
+        }
     }
 
     public void setDummyAnimation() {
