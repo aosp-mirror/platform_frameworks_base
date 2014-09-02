@@ -96,7 +96,10 @@ public abstract class ExpandableView extends FrameLayout {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         if (!mActualHeightInitialized && mActualHeight == 0) {
-            setActualHeight(getInitialHeight());
+            int initialHeight = getInitialHeight();
+            if (initialHeight != 0) {
+                setActualHeight(initialHeight);
+            }
         }
     }
 
