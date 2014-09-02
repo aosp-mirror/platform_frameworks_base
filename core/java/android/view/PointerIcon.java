@@ -149,9 +149,9 @@ public final class PointerIcon implements Parcelable {
      * Creates a custom pointer from the given bitmap and hotspot information.
      *
      * @param bitmap The bitmap for the icon.
-     * @param hotspotX The X offset of the pointer icon hotspot in the bitmap.
+     * @param hotSpotX The X offset of the pointer icon hotspot in the bitmap.
      *        Must be within the [0, bitmap.getWidth()) range.
-     * @param hotspotY The Y offset of the pointer icon hotspot in the bitmap.
+     * @param hotSpotY The Y offset of the pointer icon hotspot in the bitmap.
      *        Must be within the [0, bitmap.getHeight()) range.
      * @return A pointer icon for this bitmap.
      *
@@ -374,18 +374,18 @@ public final class PointerIcon implements Parcelable {
     }
 
     private void loadResource(Context context, Resources resources, int resourceId) {
-        XmlResourceParser parser = resources.getXml(resourceId);
+        final XmlResourceParser parser = resources.getXml(resourceId);
         final int bitmapRes;
         final float hotSpotX;
         final float hotSpotY;
         try {
             XmlUtils.beginDocument(parser, "pointer-icon");
 
-            TypedArray a = resources.obtainAttributes(
+            final TypedArray a = resources.obtainAttributes(
                     parser, com.android.internal.R.styleable.PointerIcon);
             bitmapRes = a.getResourceId(com.android.internal.R.styleable.PointerIcon_bitmap, 0);
-            hotSpotX = a.getFloat(com.android.internal.R.styleable.PointerIcon_hotSpotX, 0);
-            hotSpotY = a.getFloat(com.android.internal.R.styleable.PointerIcon_hotSpotY, 0);
+            hotSpotX = a.getDimension(com.android.internal.R.styleable.PointerIcon_hotSpotX, 0);
+            hotSpotY = a.getDimension(com.android.internal.R.styleable.PointerIcon_hotSpotY, 0);
             a.recycle();
         } catch (Exception ex) {
             throw new IllegalArgumentException("Exception parsing pointer icon resource.", ex);

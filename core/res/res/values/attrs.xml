@@ -7112,9 +7112,9 @@
         <!-- Drawable to use as the icon bitmap. -->
         <attr name="bitmap" format="reference" />
         <!-- X coordinate of the icon hot spot. -->
-        <attr name="hotSpotX" format="float" />
+        <attr name="hotSpotX" format="dimension" />
         <!-- Y coordinate of the icon hot spot. -->
-        <attr name="hotSpotY" format="float" />
+        <attr name="hotSpotY" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="Storage">
