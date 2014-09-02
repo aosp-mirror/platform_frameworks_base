@@ -18,6 +18,7 @@ package android.view;
 
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -96,7 +97,7 @@ final class AccessibilityInteractionController {
     }
 
     public void findAccessibilityNodeInfoByAccessibilityIdClientThread(
-            long accessibilityNodeId, int interactionId,
+            long accessibilityNodeId, Region interactiveRegion, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
             long interrogatingTid, MagnificationSpec spec) {
         Message message = mHandler.obtainMessage();
@@ -109,6 +110,7 @@ final class AccessibilityInteractionController {
         args.argi3 = interactionId;
         args.arg1 = callback;
         args.arg2 = spec;
+        args.arg3 = interactiveRegion;
         message.obj = args;
 
         // If the interrogation is performed by the same thread as the main UI
@@ -133,6 +135,7 @@ final class AccessibilityInteractionController {
         final IAccessibilityInteractionConnectionCallback callback =
             (IAccessibilityInteractionConnectionCallback) args.arg1;
         final MagnificationSpec spec = (MagnificationSpec) args.arg2;
+        final Region interactiveRegion = (Region) args.arg3;
 
         args.recycle();
 
@@ -159,6 +162,7 @@ final class AccessibilityInteractionController {
                 if (spec != null) {
                     spec.recycle();
                 }
+                adjustIsVisibleToUserIfNeeded(infos, interactiveRegion);
                 callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
                 infos.clear();
             } catch (RemoteException re) {
@@ -168,8 +172,9 @@ final class AccessibilityInteractionController {
     }
 
     public void findAccessibilityNodeInfosByViewIdClientThread(long accessibilityNodeId,
-            String viewId, int interactionId, IAccessibilityInteractionConnectionCallback callback,
-            int flags, int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
+            String viewId, Region interactiveRegion, int interactionId,
+            IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
+            long interrogatingTid, MagnificationSpec spec) {
         Message message = mHandler.obtainMessage();
         message.what = PrivateHandler.MSG_FIND_ACCESSIBLITY_NODE_INFOS_BY_VIEW_ID;
         message.arg1 = flags;
@@ -180,6 +185,7 @@ final class AccessibilityInteractionController {
         args.arg1 = callback;
         args.arg2 = spec;
         args.arg3 = viewId;
+        args.arg4 = interactiveRegion;
 
         message.obj = args;
 
@@ -205,6 +211,7 @@ final class AccessibilityInteractionController {
             (IAccessibilityInteractionConnectionCallback) args.arg1;
         final MagnificationSpec spec = (MagnificationSpec) args.arg2;
         final String viewId = (String) args.arg3;
+        final Region interactiveRegion = (Region) args.arg4;
 
         args.recycle();
 
@@ -241,6 +248,7 @@ final class AccessibilityInteractionController {
                 if (spec != null) {
                     spec.recycle();
                 }
+                adjustIsVisibleToUserIfNeeded(infos, interactiveRegion);
                 callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
             } catch (RemoteException re) {
                 /* ignore - the other side will time out */
@@ -249,8 +257,9 @@ final class AccessibilityInteractionController {
     }
 
     public void findAccessibilityNodeInfosByTextClientThread(long accessibilityNodeId,
-            String text, int interactionId, IAccessibilityInteractionConnectionCallback callback,
-            int flags, int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
+            String text, Region interactiveRegion, int interactionId,
+            IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
+            long interrogatingTid, MagnificationSpec spec) {
         Message message = mHandler.obtainMessage();
         message.what = PrivateHandler.MSG_FIND_ACCESSIBLITY_NODE_INFO_BY_TEXT;
         message.arg1 = flags;
@@ -262,6 +271,7 @@ final class AccessibilityInteractionController {
         args.argi1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
         args.argi2 = AccessibilityNodeInfo.getVirtualDescendantId(accessibilityNodeId);
         args.argi3 = interactionId;
+        args.arg4 = interactiveRegion;
         message.obj = args;
 
         // If the interrogation is performed by the same thread as the main UI
@@ -287,6 +297,7 @@ final class AccessibilityInteractionController {
         final int accessibilityViewId = args.argi1;
         final int virtualDescendantId = args.argi2;
         final int interactionId = args.argi3;
+        final Region interactiveRegion = (Region) args.arg4;
         args.recycle();
 
         List<AccessibilityNodeInfo> infos = null;
@@ -347,6 +358,7 @@ final class AccessibilityInteractionController {
                 if (spec != null) {
                     spec.recycle();
                 }
+                adjustIsVisibleToUserIfNeeded(infos, interactiveRegion);
                 callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
             } catch (RemoteException re) {
                 /* ignore - the other side will time out */
@@ -354,7 +366,8 @@ final class AccessibilityInteractionController {
         }
     }
 
-    public void findFocusClientThread(long accessibilityNodeId, int focusType, int interactionId,
+    public void findFocusClientThread(long accessibilityNodeId, int focusType,
+            Region interactiveRegion, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags, int interogatingPid,
             long interrogatingTid, MagnificationSpec spec) {
         Message message = mHandler.obtainMessage();
@@ -368,6 +381,7 @@ final class AccessibilityInteractionController {
         args.argi3 = AccessibilityNodeInfo.getVirtualDescendantId(accessibilityNodeId);
         args.arg1 = callback;
         args.arg2 = spec;
+        args.arg3 = interactiveRegion;
 
         message.obj = args;
 
@@ -394,6 +408,7 @@ final class AccessibilityInteractionController {
         final IAccessibilityInteractionConnectionCallback callback =
             (IAccessibilityInteractionConnectionCallback) args.arg1;
         final MagnificationSpec spec = (MagnificationSpec) args.arg2;
+        final Region interactiveRegion = (Region) args.arg3;
         args.recycle();
 
         AccessibilityNodeInfo focused = null;
@@ -457,6 +472,7 @@ final class AccessibilityInteractionController {
                 if (spec != null) {
                     spec.recycle();
                 }
+                adjustIsVisibleToUserIfNeeded(focused, interactiveRegion);
                 callback.setFindAccessibilityNodeInfoResult(focused, interactionId);
             } catch (RemoteException re) {
                 /* ignore - the other side will time out */
@@ -464,7 +480,8 @@ final class AccessibilityInteractionController {
         }
     }
 
-    public void focusSearchClientThread(long accessibilityNodeId, int direction, int interactionId,
+    public void focusSearchClientThread(long accessibilityNodeId, int direction,
+            Region interactiveRegion, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags, int interogatingPid,
             long interrogatingTid, MagnificationSpec spec) {
         Message message = mHandler.obtainMessage();
@@ -477,6 +494,7 @@ final class AccessibilityInteractionController {
         args.argi3 = interactionId;
         args.arg1 = callback;
         args.arg2 = spec;
+        args.arg3 = interactiveRegion;
 
         message.obj = args;
 
@@ -502,6 +520,7 @@ final class AccessibilityInteractionController {
         final IAccessibilityInteractionConnectionCallback callback =
             (IAccessibilityInteractionConnectionCallback) args.arg1;
         final MagnificationSpec spec = (MagnificationSpec) args.arg2;
+        final Region interactiveRegion = (Region) args.arg3;
 
         args.recycle();
 
@@ -530,6 +549,7 @@ final class AccessibilityInteractionController {
                 if (spec != null) {
                     spec.recycle();
                 }
+                adjustIsVisibleToUserIfNeeded(next, interactiveRegion);
                 callback.setFindAccessibilityNodeInfoResult(next, interactionId);
             } catch (RemoteException re) {
                 /* ignore - the other side will time out */
@@ -641,6 +661,30 @@ final class AccessibilityInteractionController {
                 AccessibilityNodeInfo info = infos.get(i);
                 applyAppScaleAndMagnificationSpecIfNeeded(info, spec);
             }
+        }
+    }
+
+    private void adjustIsVisibleToUserIfNeeded(List<AccessibilityNodeInfo> infos,
+            Region interactiveRegion) {
+        if (interactiveRegion == null || infos == null) {
+            return;
+        }
+        final int infoCount = infos.size();
+        for (int i = 0; i < infoCount; i++) {
+            AccessibilityNodeInfo info = infos.get(i);
+            adjustIsVisibleToUserIfNeeded(info, interactiveRegion);
+        }
+    }
+
+    private void adjustIsVisibleToUserIfNeeded(AccessibilityNodeInfo info,
+            Region interactiveRegion) {
+        if (interactiveRegion == null || info == null) {
+            return;
+        }
+        Rect boundsInScreen = mTempRect;
+        info.getBoundsInScreen(boundsInScreen);
+        if (interactiveRegion.quickReject(boundsInScreen)) {
+            info.setVisibleToUser(false);
         }
     }
 

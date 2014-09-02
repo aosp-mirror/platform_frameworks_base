@@ -42,6 +42,7 @@ import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.input.InputManager;
 import android.net.Uri;
@@ -161,6 +162,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private final List<AccessibilityServiceInfo> mEnabledServicesForFeedbackTempList =
             new ArrayList<>();
+
+    private final Region mTempRegion = new Region();
 
     private final Rect mTempRect = new Rect();
 
@@ -2161,6 +2164,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 throws RemoteException {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
+            Region partialInteractiveRegion = mTempRegion;
             synchronized (mLock) {
                 // We treat calls from a profile as if made by its parent as profiles
                 // share the accessibility state of the parent. The call below
@@ -2182,13 +2186,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         return false;
                     }
                 }
+                if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
+                        resolvedWindowId, partialInteractiveRegion)) {
+                    partialInteractiveRegion = null;
+                }
             }
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
-                connection.findAccessibilityNodeInfosByViewId(accessibilityNodeId,
-                        viewIdResName, interactionId, callback, mFetchFlags, interrogatingPid,
+                connection.findAccessibilityNodeInfosByViewId(accessibilityNodeId, viewIdResName,
+                        partialInteractiveRegion, interactionId, callback, mFetchFlags, interrogatingPid,
                         interrogatingTid, spec);
                 return true;
             } catch (RemoteException re) {
@@ -2208,6 +2216,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 throws RemoteException {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
+            Region partialInteractiveRegion = mTempRegion;
             synchronized (mLock) {
                 // We treat calls from a profile as if made by its parent as profiles
                 // share the accessibility state of the parent. The call below
@@ -2229,14 +2238,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         return false;
                     }
                 }
+                if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
+                        resolvedWindowId, partialInteractiveRegion)) {
+                    partialInteractiveRegion = null;
+                }
             }
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
                 connection.findAccessibilityNodeInfosByText(accessibilityNodeId, text,
-                        interactionId, callback, mFetchFlags, interrogatingPid, interrogatingTid,
-                        spec);
+                        partialInteractiveRegion, interactionId, callback, mFetchFlags, interrogatingPid,
+                        interrogatingTid, spec);
                 return true;
             } catch (RemoteException re) {
                 if (DEBUG) {
@@ -2255,6 +2268,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 long interrogatingTid) throws RemoteException {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
+            Region partialInteractiveRegion = mTempRegion;
             synchronized (mLock) {
                 // We treat calls from a profile as if made by its parent as profiles
                 // share the accessibility state of the parent. The call below
@@ -2276,14 +2290,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         return false;
                     }
                 }
+                if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
+                        resolvedWindowId, partialInteractiveRegion)) {
+                    partialInteractiveRegion = null;
+                }
             }
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
                 connection.findAccessibilityNodeInfoByAccessibilityId(accessibilityNodeId,
-                        interactionId, callback, mFetchFlags | flags, interrogatingPid,
-                        interrogatingTid, spec);
+                        partialInteractiveRegion, interactionId, callback, mFetchFlags | flags,
+                        interrogatingPid, interrogatingTid, spec);
                 return true;
             } catch (RemoteException re) {
                 if (DEBUG) {
@@ -2302,6 +2320,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 throws RemoteException {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
+            Region partialInteractiveRegion = mTempRegion;
             synchronized (mLock) {
                 // We treat calls from a profile as if made by its parent as profiles
                 // share the accessibility state of the parent. The call below
@@ -2324,13 +2343,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         return false;
                     }
                 }
+                if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
+                        resolvedWindowId, partialInteractiveRegion)) {
+                    partialInteractiveRegion = null;
+                }
             }
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
-                connection.findFocus(accessibilityNodeId, focusType, interactionId, callback,
-                        mFetchFlags, interrogatingPid, interrogatingTid, spec);
+                connection.findFocus(accessibilityNodeId, focusType, partialInteractiveRegion, interactionId,
+                        callback, mFetchFlags, interrogatingPid, interrogatingTid, spec);
                 return true;
             } catch (RemoteException re) {
                 if (DEBUG) {
@@ -2349,6 +2372,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 throws RemoteException {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
+            Region partialInteractiveRegion = mTempRegion;
             synchronized (mLock) {
                 // We treat calls from a profile as if made by its parent as profiles
                 // share the accessibility state of the parent. The call below
@@ -2370,13 +2394,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         return false;
                     }
                 }
+                if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
+                        resolvedWindowId, partialInteractiveRegion)) {
+                    partialInteractiveRegion = null;
+                }
             }
             final int interrogatingPid = Binder.getCallingPid();
             final long identityToken = Binder.clearCallingIdentity();
             MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
-                connection.focusSearch(accessibilityNodeId, direction, interactionId, callback,
-                        mFetchFlags, interrogatingPid, interrogatingTid, spec);
+                connection.focusSearch(accessibilityNodeId, direction, partialInteractiveRegion, interactionId,
+                        callback, mFetchFlags, interrogatingPid, interrogatingTid, spec);
                 return true;
             } catch (RemoteException re) {
                 if (DEBUG) {
@@ -3286,6 +3314,42 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
                 mShowingFocusedWindowEvent = null;
             }
+        }
+
+        public boolean computePartialInteractiveRegionForWindowLocked(int windowId,
+                Region outRegion) {
+            if (mWindows == null) {
+                return false;
+            }
+
+            // Windows are ordered in z order so start from the botton and find
+            // the window of interest. After that all windows that cover it should
+            // be subtracted from the resulting region. Note that for accessibility
+            // we are returning only interactive windows.
+            Region windowInteractiveRegion = null;
+            boolean windowInteractiveRegionChanged = false;
+
+            final int windowCount = mWindows.size();
+            for (int i = windowCount - 1; i >= 0; i--) {
+                AccessibilityWindowInfo currentWindow = mWindows.get(i);
+                if (windowInteractiveRegion == null) {
+                    if (currentWindow.getId() == windowId) {
+                        Rect currentWindowBounds = mTempRect;
+                        currentWindow.getBoundsInScreen(currentWindowBounds);
+                        outRegion.set(currentWindowBounds);
+                        windowInteractiveRegion = outRegion;
+                        continue;
+                    }
+                } else {
+                    Rect currentWindowBounds = mTempRect;
+                    currentWindow.getBoundsInScreen(currentWindowBounds);
+                    if (windowInteractiveRegion.op(currentWindowBounds, Region.Op.DIFFERENCE)) {
+                        windowInteractiveRegionChanged = true;
+                    }
+                }
+            }
+
+            return windowInteractiveRegionChanged;
         }
 
         public void updateEventSourceLocked(AccessibilityEvent event) {
