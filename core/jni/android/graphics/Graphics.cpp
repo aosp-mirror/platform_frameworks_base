@@ -419,6 +419,7 @@ jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buff
 {
     SkASSERT(bitmap);
     SkASSERT(bitmap->pixelRef());
+    SkASSERT(!env->ExceptionCheck());
     bool isMutable = bitmapCreateFlags & kBitmapCreateFlag_Mutable;
     bool isPremultiplied = bitmapCreateFlags & kBitmapCreateFlag_Premultiplied;
 
