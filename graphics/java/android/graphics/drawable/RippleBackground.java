@@ -107,9 +107,6 @@ class RippleBackground {
     /** Whether we have an explicit maximum radius. */
     private boolean mHasMaxRadius;
 
-    /** Whether we were canceled externally and should avoid self-removal. */
-    private boolean mCanceled;
-
     /**
      * Creates a new ripple.
      */
@@ -406,6 +403,9 @@ class RippleBackground {
 
         mHardwareAnimating = true;
 
+        // Set up the software values to match the hardware end values.
+        mOuterOpacity = 0;
+
         invalidateSelf();
     }
 
@@ -414,10 +414,8 @@ class RippleBackground {
      * removing the ripple from the list of animating ripples.
      */
     public void jump() {
-        mCanceled = true;
         endSoftwareAnimations();
         endHardwareAnimations();
-        mCanceled = false;
     }
 
     private void endSoftwareAnimations() {
@@ -446,7 +444,6 @@ class RippleBackground {
         // listener on a pending animation, we also need to remove ourselves.
         if (!mPendingAnimations.isEmpty()) {
             mPendingAnimations.clear();
-            removeSelf();
         }
 
         mHardwareAnimating = false;
@@ -526,10 +523,8 @@ class RippleBackground {
      * the ripple from the list of animating ripples.
      */
     public void cancel() {
-        mCanceled = true;
         cancelSoftwareAnimations();
         cancelHardwareAnimations(true);
-        mCanceled = false;
     }
 
     private void cancelSoftwareAnimations() {
@@ -555,7 +550,6 @@ class RippleBackground {
         for (int i = 0; i < N; i++) {
             runningAnimations.get(i).cancel();
         }
-
         runningAnimations.clear();
 
         if (cancelPending && !mPendingAnimations.isEmpty()) {
@@ -565,13 +559,6 @@ class RippleBackground {
         mHardwareAnimating = false;
     }
 
-    private void removeSelf() {
-        // The owner will invalidate itself.
-        if (!mCanceled) {
-            mOwner.removeBackground(this);
-        }
-    }
-
     private void invalidateSelf() {
         mOwner.invalidateSelf();
     }
@@ -579,7 +566,7 @@ class RippleBackground {
     private final AnimatorListenerAdapter mAnimationListener = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
-            removeSelf();
+            mHardwareAnimating = false;
         }
     };
 
