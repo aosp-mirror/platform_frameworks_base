@@ -25,12 +25,8 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
-import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.media.browse.MediaBrowser;
-import android.media.browse.MediaBrowser.MediaItem;
 import android.media.session.MediaSession;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -38,18 +34,13 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.service.media.IMediaBrowserService;
 import android.service.media.IMediaBrowserServiceCallbacks;
-import android.service.media.IMediaBrowserService.Stub;
 import android.util.ArrayMap;
 import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Base class for media browse services.
@@ -96,7 +87,7 @@ public abstract class MediaBrowserService extends Service {
         Bundle rootHints;
         IMediaBrowserServiceCallbacks callbacks;
         BrowserRoot root;
-        HashSet<Uri> subscriptions = new HashSet();
+        HashSet<String> subscriptions = new HashSet();
     }
 
     /**
@@ -199,7 +190,7 @@ public abstract class MediaBrowserService extends Service {
                         } else {
                             try {
                                 mConnections.put(b, connection);
-                                callbacks.onConnect(connection.root.getRootUri(),
+                                callbacks.onConnect(connection.root.getRootId(),
                                         mSession, connection.root.getExtras());
                             } catch (RemoteException ex) {
                                 Log.w(TAG, "Calling onConnect() failed. Dropping client. "
@@ -229,7 +220,7 @@ public abstract class MediaBrowserService extends Service {
 
 
         @Override
-        public void addSubscription(final Uri uri, final IMediaBrowserServiceCallbacks callbacks) {
+        public void addSubscription(final String id, final IMediaBrowserServiceCallbacks callbacks) {
             mHandler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -238,18 +229,18 @@ public abstract class MediaBrowserService extends Service {
                         // Get the record for the connection
                         final ConnectionRecord connection = mConnections.get(b);
                         if (connection == null) {
-                            Log.w(TAG, "addSubscription for callback that isn't registered uri="
-                                + uri);
+                            Log.w(TAG, "addSubscription for callback that isn't registered id="
+                                + id);
                             return;
                         }
 
-                        MediaBrowserService.this.addSubscription(uri, connection);
+                        MediaBrowserService.this.addSubscription(id, connection);
                     }
                 });
         }
 
         @Override
-        public void removeSubscription(final Uri uri,
+        public void removeSubscription(final String id,
                 final IMediaBrowserServiceCallbacks callbacks) {
             mHandler.post(new Runnable() {
                 @Override
@@ -258,12 +249,12 @@ public abstract class MediaBrowserService extends Service {
 
                     ConnectionRecord connection = mConnections.get(b);
                     if (connection == null) {
-                        Log.w(TAG, "removeSubscription for callback that isn't registered uri="
-                                + uri);
+                        Log.w(TAG, "removeSubscription for callback that isn't registered id="
+                                + id);
                         return;
                     }
-                    if (!connection.subscriptions.remove(uri)) {
-                        Log.w(TAG, "removeSubscription called for " + uri
+                    if (!connection.subscriptions.remove(id)) {
+                        Log.w(TAG, "removeSubscription called for " + id
                                 + " which is not subscribed");
                     }
                 }
@@ -294,7 +285,7 @@ public abstract class MediaBrowserService extends Service {
      * <p>
      * The implementation should verify that the client package has
      * permission to access browse media information before returning
-     * the root uri; it should return null if the client is not
+     * the root id; it should return null if the client is not
      * allowed to access this information.
      * </p>
      *
@@ -303,7 +294,7 @@ public abstract class MediaBrowserService extends Service {
      * @param clientUid The uid of the application which is requesting
      * access to browse media.
      * @param rootHints An optional bundle of service-specific arguments to send
-     * to the media browse service when connecting and retrieving the root uri
+     * to the media browse service when connecting and retrieving the root id
      * for browsing, or null if none.  The contents of this bundle may affect
      * the information returned when browsing.
      */
@@ -319,11 +310,11 @@ public abstract class MediaBrowserService extends Service {
      * from this function, and then {@link Result#sendResult result.sendResult} called when
      * the loading is complete.
      *
-     * @param parentUri The uri of the parent media item whose
+     * @param parentId The id of the parent media item whose
      * children are to be queried.
-     * @return The list of children, or null if the uri is invalid.
+     * @return The list of children, or null if the id is invalid.
      */
-    public abstract void onLoadChildren(@NonNull Uri parentUri,
+    public abstract void onLoadChildren(@NonNull String parentId,
             @NonNull Result<List<MediaBrowser.MediaItem>> result);
 
     /**
@@ -351,23 +342,23 @@ public abstract class MediaBrowserService extends Service {
 
     /**
      * Notifies all connected media browsers that the children of
-     * the specified Uri have changed in some way.
+     * the specified parent id have changed in some way.
      * This will cause browsers to fetch subscribed content again.
      *
-     * @param parentUri The uri of the parent media item whose
+     * @param parentId The id of the parent media item whose
      * children changed.
      */
-    public void notifyChildrenChanged(@NonNull final Uri parentUri) {
-        if (parentUri == null) {
-            throw new IllegalArgumentException("parentUri cannot be null in notifyChildrenChanged");
+    public void notifyChildrenChanged(@NonNull final String parentId) {
+        if (parentId == null) {
+            throw new IllegalArgumentException("parentId cannot be null in notifyChildrenChanged");
         }
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 for (IBinder binder : mConnections.keySet()) {
                     ConnectionRecord connection = mConnections.get(binder);
-                    if (connection.subscriptions.contains(parentUri)) {
-                        performLoadChildren(parentUri, connection);
+                    if (connection.subscriptions.contains(parentId)) {
+                        performLoadChildren(parentId, connection);
                     }
                 }
             }
@@ -395,13 +386,13 @@ public abstract class MediaBrowserService extends Service {
     /**
      * Save the subscription and if it is a new subscription send the results.
      */
-    private void addSubscription(Uri uri, ConnectionRecord connection) {
+    private void addSubscription(String id, ConnectionRecord connection) {
         // Save the subscription
-        final boolean added = connection.subscriptions.add(uri);
+        final boolean added = connection.subscriptions.add(id);
 
         // If this is a new subscription, send the results
         if (added) {
-            performLoadChildren(uri, connection);
+            performLoadChildren(id, connection);
         }
     }
 
@@ -410,39 +401,39 @@ public abstract class MediaBrowserService extends Service {
      * <p>
      * Callers must make sure that this connection is still connected.
      */
-    private void performLoadChildren(final Uri uri, final ConnectionRecord connection) {
+    private void performLoadChildren(final String parentId, final ConnectionRecord connection) {
         final Result<List<MediaBrowser.MediaItem>> result
- = new Result<List<MediaBrowser.MediaItem>>(
-                uri) {
+                = new Result<List<MediaBrowser.MediaItem>>(parentId) {
             @Override
             void onResultSent(List<MediaBrowser.MediaItem> list) {
                 if (list == null) {
-                    throw new IllegalStateException("onLoadChildren sent null list for uri " + uri);
+                    throw new IllegalStateException("onLoadChildren sent null list for id "
+                            + parentId);
                 }
                 if (mConnections.get(connection.callbacks.asBinder()) != connection) {
                     if (DBG) {
                         Log.d(TAG, "Not sending onLoadChildren result for connection that has"
-                                + " been disconnected. pkg=" + connection.pkg + " uri=" + uri);
+                                + " been disconnected. pkg=" + connection.pkg + " id=" + parentId);
                     }
                     return;
                 }
 
                 final ParceledListSlice<MediaBrowser.MediaItem> pls = new ParceledListSlice(list);
                 try {
-                    connection.callbacks.onLoadChildren(uri, pls);
+                    connection.callbacks.onLoadChildren(parentId, pls);
                 } catch (RemoteException ex) {
                     // The other side is in the process of crashing.
-                    Log.w(TAG, "Calling onLoadChildren() failed for uri=" + uri
+                    Log.w(TAG, "Calling onLoadChildren() failed for id=" + parentId
                             + " package=" + connection.pkg);
                 }
             }
         };
 
-        onLoadChildren(uri, result);
+        onLoadChildren(parentId, result);
 
         if (!result.isDone()) {
             throw new IllegalStateException("onLoadChildren must call detach() or sendResult()"
-                    + " before returning for package=" + connection.pkg + " uri=" + uri);
+                    + " before returning for package=" + connection.pkg + " id=" + parentId);
         }
     }
 
@@ -451,28 +442,28 @@ public abstract class MediaBrowserService extends Service {
      * when first connected.
      */
     public static final class BrowserRoot {
-        final private Uri mUri;
+        final private String mRootId;
         final private Bundle mExtras;
 
         /**
          * Constructs a browser root.
-         * @param uri The root Uri for browsing.
+         * @param rootId The root id for browsing.
          * @param extras Any extras about the browser service.
          */
-        public BrowserRoot(@NonNull Uri uri, @Nullable Bundle extras) {
-            if (uri == null) {
-                throw new IllegalArgumentException("The root uri in BrowserRoot cannot be null. " +
+        public BrowserRoot(@NonNull String rootId, @Nullable Bundle extras) {
+            if (rootId == null) {
+                throw new IllegalArgumentException("The root id in BrowserRoot cannot be null. " +
                         "Use null for BrowserRoot instead.");
             }
-            mUri = uri;
+            mRootId = rootId;
             mExtras = extras;
         }
 
         /**
-         * Gets the root uri for browsing.
+         * Gets the root id for browsing.
          */
-        public Uri getRootUri() {
-            return mUri;
+        public String getRootId() {
+            return mRootId;
         }
 
         /**

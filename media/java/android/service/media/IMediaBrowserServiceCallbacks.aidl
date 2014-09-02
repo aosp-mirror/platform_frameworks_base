@@ -5,7 +5,6 @@ package android.service.media;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Bitmap;
 import android.media.session.MediaSession;
-import android.net.Uri;
 import android.os.Bundle;
 
 /**
@@ -16,12 +15,12 @@ import android.os.Bundle;
 oneway interface IMediaBrowserServiceCallbacks {
     /**
      * Invoked when the connected has been established.
-     * @param root The root Uri for browsing.
+     * @param root The root media id for browsing.
      * @param session The {@link MediaSession.Token media session token} that can be used to control
      *         the playback of the media app.
      * @param extra Extras returned by the media service.
      */
-    void onConnect(in Uri root, in MediaSession.Token session, in Bundle extras);
+    void onConnect(String root, in MediaSession.Token session, in Bundle extras);
     void onConnectFailed();
-    void onLoadChildren(in Uri uri, in ParceledListSlice list);
+    void onLoadChildren(String mediaId, in ParceledListSlice list);
 }
