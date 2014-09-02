@@ -39,6 +39,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.android.keyguard.KeyguardStatusView;
+import com.android.systemui.BatteryMeterView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
@@ -67,7 +68,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private TextView mDateCollapsed;
     private TextView mDateExpanded;
     private LinearLayout mSystemIcons;
-    private View mStatusIcons;
     private View mSignalCluster;
     private View mSettingsButton;
     private View mQsDetailHeader;
@@ -149,6 +149,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mBatteryLevel = (TextView) findViewById(R.id.battery_level);
         mAlarmStatus = (TextView) findViewById(R.id.alarm_status);
         mAlarmStatus.setOnClickListener(this);
+        mSignalCluster = findViewById(R.id.signal_cluster);
+        mSystemIcons = (LinearLayout) findViewById(R.id.system_icons);
         loadDimens();
         updateVisibilities();
         updateClockScale();
@@ -259,6 +261,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     public void setBatteryController(BatteryController batteryController) {
         mBatteryController = batteryController;
+        ((BatteryMeterView) findViewById(R.id.battery)).setBatteryController(batteryController);
     }
 
     public void setNextAlarmController(NextAlarmController nextAlarmController) {
@@ -474,36 +477,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mClipBounds.set(getPaddingLeft(), 0, getWidth() - getPaddingRight(), (int) height);
         setClipBounds(mClipBounds);
         invalidateOutline();
-    }
-
-    public void attachSystemIcons(LinearLayout systemIcons) {
-        mSystemIconsContainer.addView(systemIcons);
-        mStatusIcons = systemIcons.findViewById(R.id.statusIcons);
-        mSignalCluster = systemIcons.findViewById(R.id.signal_cluster);
-        mSystemIcons = systemIcons;
-        updateVisibilities();
-        if (mStatusIcons != null) {
-            mStatusIcons.setVisibility(View.GONE);
-        }
-    }
-
-    public void onSystemIconsDetached() {
-        if (mSignalClusterDetached) {
-            reattachSignalCluster();
-            mSignalClusterDetached = false;
-        }
-        if (mStatusIcons != null) {
-            mStatusIcons.setVisibility(View.VISIBLE);
-        }
-        if (mSignalCluster != null) {
-            mSignalCluster.setVisibility(View.VISIBLE);
-            mSignalCluster.setAlpha(1f);
-            mSignalCluster.setTranslationX(0f);
-            mSignalCluster.setTranslationY(0f);
-        }
-        mStatusIcons = null;
-        mSignalCluster = null;
-        mSystemIcons = null;
     }
 
     public void setUserInfoController(UserInfoController userInfoController) {

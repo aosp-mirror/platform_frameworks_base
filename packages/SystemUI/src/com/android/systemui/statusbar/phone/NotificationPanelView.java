@@ -28,21 +28,19 @@ import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
-import com.android.systemui.statusbar.MirrorView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
@@ -71,7 +69,6 @@ public class NotificationPanelView extends PanelView implements
     private ObservableScrollView mScrollView;
     private TextView mClockView;
     private View mReserveNotificationSpace;
-    private MirrorView mSystemIconsCopy;
     private View mQsNavbarScrim;
     private View mNotificationContainerParent;
     private NotificationStackScrollLayout mNotificationStackScroller;
@@ -165,7 +162,6 @@ public class NotificationPanelView extends PanelView implements
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mSystemIconsCopy = new MirrorView(context);
     }
 
     public void setStatusBar(PhoneStatusBar bar) {
@@ -1164,43 +1160,6 @@ public class NotificationPanelView extends PanelView implements
             return onHeader || (mScrollView.isScrolledToBottom() && yDiff < 0) && isInQsArea(x, y);
         } else {
             return onHeader;
-        }
-    }
-
-    @Override
-    public void setVisibility(int visibility) {
-        int oldVisibility = getVisibility();
-        super.setVisibility(visibility);
-        if (visibility != oldVisibility) {
-            reparentStatusIcons(visibility == VISIBLE);
-        }
-    }
-
-    /**
-     * When the notification panel gets expanded, we need to move the status icons in the header
-     * card.
-     */
-    private void reparentStatusIcons(boolean toHeader) {
-        if (mStatusBar == null) {
-            return;
-        }
-        LinearLayout systemIcons = mStatusBar.getSystemIcons();
-        ViewGroup parent = ((ViewGroup) systemIcons.getParent());
-        if (toHeader) {
-            int index = parent.indexOfChild(systemIcons);
-            parent.removeView(systemIcons);
-            mSystemIconsCopy.setMirroredView(
-                    systemIcons, systemIcons.getWidth(), systemIcons.getHeight());
-            parent.addView(mSystemIconsCopy, index);
-            mHeader.attachSystemIcons(systemIcons);
-        } else {
-            ViewGroup newParent = mStatusBar.getSystemIconArea();
-            int index = newParent.indexOfChild(mSystemIconsCopy);
-            parent.removeView(systemIcons);
-            mHeader.onSystemIconsDetached();
-            mSystemIconsCopy.setMirroredView(null, 0, 0);
-            newParent.removeView(mSystemIconsCopy);
-            newParent.addView(systemIcons, index);
         }
     }
 
