@@ -365,6 +365,24 @@ public abstract class BaseStatusBar extends SystemUI implements
                     Notification n = sbn.getNotification();
                     boolean isUpdate = mNotificationData.get(sbn.getKey()) != null
                             || isHeadsUp(sbn.getKey());
+
+                    // Ignore children of notifications that have a summary, since we're not
+                    // going to show them anyway. This is true also when the summary is canceled,
+                    // because children are automatically canceled by NoMan in that case.
+                    if (n.isGroupChild() &&
+                            mNotificationData.isGroupWithSummary(sbn.getGroupKey())) {
+                        if (DEBUG) {
+                            Log.d(TAG, "Ignoring group child due to existing summary: " + sbn);
+                        }
+
+                        // Remove existing notification to avoid stale data.
+                        if (isUpdate) {
+                            removeNotification(sbn.getKey(), rankingMap);
+                        } else {
+                            mNotificationData.updateRanking(rankingMap);
+                        }
+                        return;
+                    }
                     if (isUpdate) {
                         updateNotification(sbn, rankingMap);
                     } else {
