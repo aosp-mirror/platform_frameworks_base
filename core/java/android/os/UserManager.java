@@ -676,6 +676,22 @@ public class UserManager {
     }
 
     /**
+     * @hide
+     * Marks the guest user for deletion to allow a new guest to be created before deleting
+     * the current user who is a guest.
+     * @param userHandle
+     * @return
+     */
+    public boolean markGuestForDeletion(int userHandle) {
+        try {
+            return mService.markGuestForDeletion(userHandle);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not mark guest for deletion", re);
+            return false;
+        }
+    }
+
+    /**
      * Sets the user as enabled, if such an user exists.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * Note that the default is true, it's only that managed profiles might not be enabled.

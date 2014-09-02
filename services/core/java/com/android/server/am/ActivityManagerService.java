@@ -1107,7 +1107,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final ActivityThread mSystemThread;
 
+    // Holds the current foreground user's id
     int mCurrentUserId = 0;
+    // Holds the target user's id during a user switch
+    int mTargetUserId = UserHandle.USER_NULL;
+    // If there are multiple profiles for the current user, their ids are here
+    // Currently only the primary user can have managed profiles
     int[] mCurrentProfileIds = new int[] {UserHandle.USER_OWNER}; // Accessed by ActivityStack
 
     /**
@@ -17935,6 +17940,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return false;
             }
             userName = userInfo.name;
+            mTargetUserId = userId;
         }
         mHandler.removeMessages(START_USER_SWITCH_MSG);
         mHandler.sendMessage(mHandler.obtainMessage(START_USER_SWITCH_MSG, userId, 0, userName));
@@ -18002,6 +18008,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 if (foreground) {
                     mCurrentUserId = userId;
+                    mTargetUserId = UserHandle.USER_NULL; // reset, mCurrentUserId has caught up
                     updateCurrentProfileIdsLocked();
                     mWindowManager.setCurrentUser(userId, mCurrentProfileIds);
                     // Once the internal notion of the active user has switched, we lock the device
@@ -18369,7 +18376,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private int stopUserLocked(final int userId, final IStopUserCallback callback) {
         if (DEBUG_MU) Slog.i(TAG_MU, "stopUserLocked userId=" + userId);
-        if (mCurrentUserId == userId) {
+        if (mCurrentUserId == userId && mTargetUserId == UserHandle.USER_NULL) {
             return ActivityManager.USER_OP_IS_CURRENT;
         }
 
@@ -18509,12 +18516,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException(msg);
         }
         synchronized (this) {
-            return getUserManagerLocked().getUserInfo(mCurrentUserId);
+            int userId = mTargetUserId != UserHandle.USER_NULL ? mTargetUserId : mCurrentUserId;
+            return getUserManagerLocked().getUserInfo(userId);
         }
     }
 
     int getCurrentUserIdLocked() {
-        return mCurrentUserId;
+        return mTargetUserId != UserHandle.USER_NULL ? mTargetUserId : mCurrentUserId;
     }
 
     @Override

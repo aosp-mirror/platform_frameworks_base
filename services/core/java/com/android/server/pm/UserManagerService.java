@@ -519,7 +519,7 @@ public class UserManagerService extends IUserManager.Stub {
         for (int i = 0; i < totalUserCount; i++) {
             UserInfo user = mUsers.valueAt(i);
             if (!mRemovingUserIds.get(user.id)
-                    && !user.isGuest()) {
+                    && !user.isGuest() && !user.partial) {
                 aliveUserCount++;
             }
         }
@@ -1177,6 +1177,47 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         return count;
+    }
+
+    /**
+     * Mark this guest user for deletion to allow us to create another guest
+     * and switch to that user before actually removing this guest.
+     * @param userHandle the userid of the current guest
+     * @return whether the user could be marked for deletion
+     */
+    public boolean markGuestForDeletion(int userHandle) {
+        checkManageUsersPermission("Only the system can remove users");
+        if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(
+                UserManager.DISALLOW_REMOVE_USER, false)) {
+            Log.w(LOG_TAG, "Cannot remove user. DISALLOW_REMOVE_USER is enabled.");
+            return false;
+        }
+
+        long ident = Binder.clearCallingIdentity();
+        try {
+            final UserInfo user;
+            synchronized (mPackagesLock) {
+                user = mUsers.get(userHandle);
+                if (userHandle == 0 || user == null || mRemovingUserIds.get(userHandle)) {
+                    return false;
+                }
+                if (!user.isGuest()) {
+                    return false;
+                }
+                // Set this to a partially created user, so that the user will be purged
+                // on next startup, in case the runtime stops now before stopping and
+                // removing the user completely.
+                user.partial = true;
+                // Mark it as disabled, so that it isn't returned any more when
+                // profiles are queried.
+                user.flags |= UserInfo.FLAG_DISABLED;
+                user.flags &= ~UserInfo.FLAG_GUEST;
+                writeUserLocked(user);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        return true;
     }
 
     /**
