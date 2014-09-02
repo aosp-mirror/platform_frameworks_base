@@ -239,9 +239,11 @@ public final class ObjectAnimator extends ValueAnimator {
      */
     public static ObjectAnimator ofInt(Object target, String xPropertyName, String yPropertyName,
             Path path) {
-        Keyframe[][] keyframes = PropertyValuesHolder.createKeyframes(path, true);
-        PropertyValuesHolder x = PropertyValuesHolder.ofKeyframe(xPropertyName, keyframes[0]);
-        PropertyValuesHolder y = PropertyValuesHolder.ofKeyframe(yPropertyName, keyframes[1]);
+        PathKeyframes keyframes = KeyframeSet.ofPath(path);
+        PropertyValuesHolder x = PropertyValuesHolder.ofKeyframes(xPropertyName,
+                keyframes.createXIntKeyframes());
+        PropertyValuesHolder y = PropertyValuesHolder.ofKeyframes(yPropertyName,
+                keyframes.createYIntKeyframes());
         return ofPropertyValuesHolder(target, x, y);
     }
 
@@ -278,9 +280,11 @@ public final class ObjectAnimator extends ValueAnimator {
      */
     public static <T> ObjectAnimator ofInt(T target, Property<T, Integer> xProperty,
             Property<T, Integer> yProperty, Path path) {
-        Keyframe[][] keyframes = PropertyValuesHolder.createKeyframes(path, true);
-        PropertyValuesHolder x = PropertyValuesHolder.ofKeyframe(xProperty, keyframes[0]);
-        PropertyValuesHolder y = PropertyValuesHolder.ofKeyframe(yProperty, keyframes[1]);
+        PathKeyframes keyframes = KeyframeSet.ofPath(path);
+        PropertyValuesHolder x = PropertyValuesHolder.ofKeyframes(xProperty,
+                keyframes.createXIntKeyframes());
+        PropertyValuesHolder y = PropertyValuesHolder.ofKeyframes(yProperty,
+                keyframes.createYIntKeyframes());
         return ofPropertyValuesHolder(target, x, y);
     }
 
@@ -429,9 +433,11 @@ public final class ObjectAnimator extends ValueAnimator {
      */
     public static ObjectAnimator ofFloat(Object target, String xPropertyName, String yPropertyName,
             Path path) {
-        Keyframe[][] keyframes = PropertyValuesHolder.createKeyframes(path, false);
-        PropertyValuesHolder x = PropertyValuesHolder.ofKeyframe(xPropertyName, keyframes[0]);
-        PropertyValuesHolder y = PropertyValuesHolder.ofKeyframe(yPropertyName, keyframes[1]);
+        PathKeyframes keyframes = KeyframeSet.ofPath(path);
+        PropertyValuesHolder x = PropertyValuesHolder.ofKeyframes(xPropertyName,
+                keyframes.createXFloatKeyframes());
+        PropertyValuesHolder y = PropertyValuesHolder.ofKeyframes(yPropertyName,
+                keyframes.createYFloatKeyframes());
         return ofPropertyValuesHolder(target, x, y);
     }
 
@@ -469,9 +475,11 @@ public final class ObjectAnimator extends ValueAnimator {
      */
     public static <T> ObjectAnimator ofFloat(T target, Property<T, Float> xProperty,
             Property<T, Float> yProperty, Path path) {
-        Keyframe[][] keyframes = PropertyValuesHolder.createKeyframes(path, false);
-        PropertyValuesHolder x = PropertyValuesHolder.ofKeyframe(xProperty, keyframes[0]);
-        PropertyValuesHolder y = PropertyValuesHolder.ofKeyframe(yProperty, keyframes[1]);
+        PathKeyframes keyframes = KeyframeSet.ofPath(path);
+        PropertyValuesHolder x = PropertyValuesHolder.ofKeyframes(xProperty,
+                keyframes.createXFloatKeyframes());
+        PropertyValuesHolder y = PropertyValuesHolder.ofKeyframes(yProperty,
+                keyframes.createYFloatKeyframes());
         return ofPropertyValuesHolder(target, x, y);
     }
 
@@ -652,6 +660,10 @@ public final class ObjectAnimator extends ValueAnimator {
      * uses a type other than <code>PointF</code>, <code>converter</code> can be used to change
      * from <code>PointF</code> to the type associated with the <code>Property</code>.
      *
+     * <p>The PointF passed to <code>converter</code> or <code>property</code>, if
+     * <code>converter</code> is <code>null</code>, is reused on each animation frame and should
+     * not be stored by the setter or TypeConverter.</p>
+     *
      * @param target The object whose property is to be animated.
      * @param property The property being animated. Should not be null.
      * @param converter Converts a PointF to the type associated with the setter. May be
@@ -809,10 +821,9 @@ public final class ObjectAnimator extends ValueAnimator {
             Log.d(LOG_TAG, "Anim target, duration: " + getTarget() + ", " + getDuration());
             for (int i = 0; i < mValues.length; ++i) {
                 PropertyValuesHolder pvh = mValues[i];
-                ArrayList<Keyframe> keyframes = pvh.mKeyframeSet.mKeyframes;
                 Log.d(LOG_TAG, "   Values[" + i + "]: " +
-                    pvh.getPropertyName() + ", " + keyframes.get(0).getValue() + ", " +
-                    keyframes.get(pvh.mKeyframeSet.mNumKeyframes - 1).getValue());
+                    pvh.getPropertyName() + ", " + pvh.mKeyframes.getValue(0) + ", " +
+                    pvh.mKeyframes.getValue(1));
             }
         }
         super.start();

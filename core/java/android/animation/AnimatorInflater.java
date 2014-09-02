@@ -370,14 +370,23 @@ public class AnimatorInflater {
                         + " propertyXName or propertyYName is needed for PathData");
             } else {
                 Path path = PathParser.createPathFromPathData(pathData);
-                Keyframe[][] keyframes = PropertyValuesHolder.createKeyframes(path, !getFloats);
+                PathKeyframes keyframeSet = KeyframeSet.ofPath(path);
+                Keyframes xKeyframes;
+                Keyframes yKeyframes;
+                if (getFloats) {
+                    xKeyframes = keyframeSet.createXFloatKeyframes();
+                    yKeyframes = keyframeSet.createYFloatKeyframes();
+                } else {
+                    xKeyframes = keyframeSet.createXIntKeyframes();
+                    yKeyframes = keyframeSet.createYIntKeyframes();
+                }
                 PropertyValuesHolder x = null;
                 PropertyValuesHolder y = null;
                 if (propertyXName != null) {
-                    x = PropertyValuesHolder.ofKeyframe(propertyXName, keyframes[0]);
+                    x = PropertyValuesHolder.ofKeyframes(propertyXName, xKeyframes);
                 }
                 if (propertyYName != null) {
-                    y = PropertyValuesHolder.ofKeyframe(propertyYName, keyframes[1]);
+                    y = PropertyValuesHolder.ofKeyframes(propertyYName, yKeyframes);
                 }
                 if (x == null) {
                     oa.setValues(y);
