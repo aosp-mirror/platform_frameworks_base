@@ -599,8 +599,8 @@ public class AudioService extends IAudioService.Stub {
                 new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
         intentFilter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
         intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
-        intentFilter.addAction(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG);
-        intentFilter.addAction(Intent.ACTION_USB_AUDIO_DEVICE_PLUG);
+        intentFilter.addAction(AudioManager.ACTION_USB_AUDIO_ACCESSORY_PLUG);
+        intentFilter.addAction(AudioManager.ACTION_USB_AUDIO_DEVICE_PLUG);
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
@@ -4363,10 +4363,10 @@ public class AudioService extends IAudioService.Stub {
             intent.putExtra("microphone", 0);
         } else if (device == AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET) {
             connType = AudioRoutesInfo.MAIN_DOCK_SPEAKERS;
-            intent.setAction(Intent.ACTION_ANALOG_AUDIO_DOCK_PLUG);
+            intent.setAction(AudioManager.ACTION_ANALOG_AUDIO_DOCK_PLUG);
         } else if (device == AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET) {
             connType = AudioRoutesInfo.MAIN_DOCK_SPEAKERS;
-            intent.setAction(Intent.ACTION_DIGITAL_AUDIO_DOCK_PLUG);
+            intent.setAction(AudioManager.ACTION_DIGITAL_AUDIO_DOCK_PLUG);
         } else if (device == AudioSystem.DEVICE_OUT_HDMI) {
             connType = AudioRoutesInfo.MAIN_HDMI;
             configureHdmiPlugIntent(intent, state);
@@ -4452,7 +4452,8 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private void configureHdmiPlugIntent(Intent intent, int state) {
-        intent.setAction(Intent.ACTION_HDMI_AUDIO_PLUG);
+        intent.setAction(AudioManager.ACTION_HDMI_AUDIO_PLUG);
+        intent.putExtra(AudioManager.EXTRA_AUDIO_PLUG_STATE, state);
         if (state == 1) {
             ArrayList<AudioPort> ports = new ArrayList<AudioPort>();
             int[] portGeneration = new int[1];
@@ -4476,7 +4477,7 @@ public class AudioService extends IAudioService.Stub {
                                 for (int i = 0 ; i < encodingArray.length ; i++) {
                                     encodingArray[i] = encodingList.get(i);
                                 }
-                                intent.putExtra("encodings", encodingArray);
+                                intent.putExtra(AudioManager.EXTRA_ENCODINGS, encodingArray);
                             }
                             // find the maximum supported number of channels
                             int maxChannels = 0;
@@ -4486,7 +4487,7 @@ public class AudioService extends IAudioService.Stub {
                                     maxChannels = channelCount;
                                 }
                             }
-                            intent.putExtra("maxChannelCount", maxChannels);
+                            intent.putExtra(AudioManager.EXTRA_MAX_CHANNEL_COUNT, maxChannels);
                         }
                     }
                 }
@@ -4580,7 +4581,7 @@ public class AudioService extends IAudioService.Stub {
                         }
                     }
                 }
-            } else if (action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG)) {
+            } else if (action.equals(AudioManager.ACTION_USB_AUDIO_ACCESSORY_PLUG)) {
                 state = intent.getIntExtra("state", 0);
 
                 int alsaCard = intent.getIntExtra("card", -1);
@@ -4592,7 +4593,7 @@ public class AudioService extends IAudioService.Stub {
                 // Playback Device
                 outDevice = AudioSystem.DEVICE_OUT_USB_ACCESSORY;
                 setWiredDeviceConnectionState(outDevice, state, params);
-            } else if (action.equals(Intent.ACTION_USB_AUDIO_DEVICE_PLUG)) {
+            } else if (action.equals(AudioManager.ACTION_USB_AUDIO_DEVICE_PLUG)) {
                 // FIXME Does not yet handle the case where the setting is changed
                 // after device connection.  Ideally we should handle the settings change
                 // in SettingsObserver. Here we should log that a USB device is connected
