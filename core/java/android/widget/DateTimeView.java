@@ -29,6 +29,7 @@ import android.util.Log;
 import android.provider.Settings;
 import android.widget.TextView;
 import android.widget.RemoteViews.RemoteView;
+import android.os.UserHandle;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -190,8 +191,15 @@ public class DateTimeView extends TextView {
     }
 
     private DateFormat getDateFormat() {
-        String format = Settings.System.getString(getContext().getContentResolver(),
-                Settings.System.DATE_FORMAT);
+        // OK, this is gross but needed. This class is supported by the
+        // remote views mechanism and as a part of that the remote views
+        // can be inflated by a context for another user without the app
+        // having interact users permission - just for loading resources.
+        // For example, when adding widgets from a user profile to the
+        // home screen. Therefore, we access settings as the user the app
+        // is running as not the one the context is for.
+        String format = Settings.System.getStringForUser(getContext().getContentResolver(),
+                Settings.System.DATE_FORMAT, UserHandle.myUserId());
         if (format == null || "".equals(format)) {
             return DateFormat.getDateInstance(DateFormat.SHORT);
         } else {
@@ -212,10 +220,20 @@ public class DateTimeView extends TextView {
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-        context.registerReceiver(mBroadcastReceiver, filter);
+
+        // OK, this is gross but needed. This class is supported by the
+        // remote views mechanism and as a part of that the remote views
+        // can be inflated by a context for another user without the app
+        // having interact users permission - just for loading resources.
+        // For example, when adding widgets from a user profile to the
+        // home screen. Therefore, we register the receiver and content
+        // observer as the user the app is running as not the one the context is for.
+        context.registerReceiverAsUser(mBroadcastReceiver, android.os.Process.myUserHandle(),
+                filter, null, null);
 
         Uri uri = Settings.System.getUriFor(Settings.System.DATE_FORMAT);
-        context.getContentResolver().registerContentObserver(uri, true, mContentObserver);
+        context.getContentResolver().registerContentObserver(uri, true, mContentObserver,
+                UserHandle.myUserId());
     }
 
     private void unregisterReceivers() {

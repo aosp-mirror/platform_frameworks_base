@@ -1653,8 +1653,10 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @param application The application whose content is shown by the views.
      * @param layoutId The id of the layout resource.
+     *
+     * @hide
      */
-    private RemoteViews(ApplicationInfo application, int layoutId) {
+    protected RemoteViews(ApplicationInfo application, int layoutId) {
         mApplication = application;
         mLayoutId = layoutId;
         mBitmapCache = new BitmapCache();
