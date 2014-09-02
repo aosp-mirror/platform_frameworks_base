@@ -206,6 +206,125 @@ public class AudioManager {
     public static final String EXTRA_MASTER_VOLUME_MUTED =
         "android.media.EXTRA_MASTER_VOLUME_MUTED";
 
+    /**
+     * Broadcast Action: Wired Headset plugged in or unplugged.
+     *
+     * You <em>cannot</em> receive this through components declared
+     * in manifests, only by explicitly registering for it with
+     * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     * Context.registerReceiver()}.
+     *
+     * <p>The intent will have the following extra values:
+     * <ul>
+     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
+     *   <li><em>name</em> - Headset type, human readable string </li>
+     *   <li><em>microphone</em> - 1 if headset has a microphone, 0 otherwise </li>
+     * </ul>
+     * </ul>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_HEADSET_PLUG =
+            "android.intent.action.HEADSET_PLUG";
+
+    /**
+     * Broadcast Action: A sticky broadcast indicating an HMDI cable was plugged or unplugged
+     *
+     * The intent will have the following extra values: {@link #EXTRA_AUDIO_PLUG_STATE},
+     * {@link #EXTRA_MAX_CHANNEL_COUNT}, {@link #EXTRA_ENCODINGS}.
+     * <p>It can only be received by explicitly registering for it with
+     * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)}.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_HDMI_AUDIO_PLUG =
+            "android.media.action.HDMI_AUDIO_PLUG";
+
+    /**
+     * Extra used in {@link #ACTION_HDMI_AUDIO_PLUG} to communicate whether HDMI is plugged in
+     * or unplugged.
+     * An integer value of 1 indicates a plugged-in state, 0 is unplugged.
+     */
+    public static final String EXTRA_AUDIO_PLUG_STATE = "android.media.extra.audio_plug_state";
+
+    /**
+     * Extra used in {@link #ACTION_HDMI_AUDIO_PLUG} to define the maximum number of channels
+     * supported by the HDMI device.
+     * The corresponding integer value is only available when the device is plugged in (as expressed
+     * by {@link #EXTRA_AUDIO_PLUG_STATE}).
+     */
+    public static final String EXTRA_MAX_CHANNEL_COUNT = "android.media.extra.max_channel_count";
+
+    /**
+     * Extra used in {@link #ACTION_HDMI_AUDIO_PLUG} to define the audio encodings supported by
+     * the connected HDMI device.
+     * The corresponding array of encoding values is only available when the device is plugged in
+     * (as expressed by {@link #EXTRA_AUDIO_PLUG_STATE}). Encoding values are defined in
+     * {@link AudioFormat} (for instance see {@link AudioFormat#ENCODING_PCM_16BIT}). Use
+     * {@link android.content.Intent#getIntArrayExtra(String)} to retrieve the encoding values.
+     */
+    public static final String EXTRA_ENCODINGS = "android.media.extra.encodings";
+
+    /**
+     * Broadcast Action: An analog audio speaker/headset plugged in or unplugged.
+     *
+     * <p>The intent will have the following extra values:
+     * <ul>
+     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
+     *   <li><em>name</em> - Headset type, human readable string </li>
+     * </ul>
+     * </ul>
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ANALOG_AUDIO_DOCK_PLUG =
+            "android.media.action.ANALOG_AUDIO_DOCK_PLUG";
+
+    /**
+     * Broadcast Action: A digital audio speaker/headset plugged in or unplugged.
+     *
+     * <p>The intent will have the following extra values:
+     * <ul>
+     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
+     *   <li><em>name</em> - Headset type, human readable string </li>
+     * </ul>
+     * </ul>
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DIGITAL_AUDIO_DOCK_PLUG =
+            "android.media.action.DIGITAL_AUDIO_DOCK_PLUG";
+
+    /**
+     * Broadcast Action: A USB audio accessory was plugged in or unplugged.
+     *
+     * <p>The intent will have the following extra values:
+     * <ul>
+     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
+     *   <li><em>card</em> - ALSA card number (integer) </li>
+     *   <li><em>device</em> - ALSA device number (integer) </li>
+     * </ul>
+     * </ul>
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_USB_AUDIO_ACCESSORY_PLUG =
+            "android.media.action.USB_AUDIO_ACCESSORY_PLUG";
+
+    /**
+     * Broadcast Action: A USB audio device was plugged in or unplugged.
+     *
+     * <p>The intent will have the following extra values:
+     * <ul>
+     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
+     *   <li><em>card</em> - ALSA card number (integer) </li>
+     *   <li><em>device</em> - ALSA device number (integer) </li>
+     * </ul>
+     * </ul>
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_USB_AUDIO_DEVICE_PLUG =
+            "android.media.action.USB_AUDIO_DEVICE_PLUG";
+
     /** The audio stream for phone calls */
     public static final int STREAM_VOICE_CALL = AudioSystem.STREAM_VOICE_CALL;
     /** The audio stream for system sounds */
