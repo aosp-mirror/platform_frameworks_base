@@ -25,8 +25,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ParceledListSlice;
 import android.media.MediaDescription;
+import android.media.session.MediaController;
 import android.media.session.MediaSession;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -67,14 +67,14 @@ public final class MediaBrowser {
     private final ConnectionCallback mCallback;
     private final Bundle mRootHints;
     private final Handler mHandler = new Handler();
-    private final ArrayMap<Uri,Subscription> mSubscriptions =
-            new ArrayMap<Uri, MediaBrowser.Subscription>();
+    private final ArrayMap<String,Subscription> mSubscriptions =
+            new ArrayMap<String, MediaBrowser.Subscription>();
 
     private int mState = CONNECT_STATE_DISCONNECTED;
     private MediaServiceConnection mServiceConnection;
     private IMediaBrowserService mServiceBinder;
     private IMediaBrowserServiceCallbacks mServiceCallbacks;
-    private Uri mRootUri;
+    private String mRootId;
     private MediaSession.Token mMediaSessionToken;
     private Bundle mExtras;
 
@@ -85,7 +85,7 @@ public final class MediaBrowser {
      * @param serviceComponent The component name of the media browse service.
      * @param callback The connection callback.
      * @param rootHints An optional bundle of service-specific arguments to send
-     * to the media browse service when connecting and retrieving the root uri
+     * to the media browse service when connecting and retrieving the root id
      * for browsing, or null if none.  The contents of this bundle may affect
      * the information returned when browsing.
      */
@@ -212,7 +212,7 @@ public final class MediaBrowser {
         mServiceConnection = null;
         mServiceBinder = null;
         mServiceCallbacks = null;
-        mRootUri = null;
+        mRootId = null;
         mMediaSessionToken = null;
     }
 
@@ -235,20 +235,20 @@ public final class MediaBrowser {
     }
 
     /**
-     * Gets the root Uri.
+     * Gets the root id.
      * <p>
-     * Note that the root uri may become invalid or change when when the
+     * Note that the root id may become invalid or change when when the
      * browser is disconnected.
      * </p>
      *
      * @throws IllegalStateException if not connected.
      */
-    public @NonNull Uri getRoot() {
+    public @NonNull String getRoot() {
         if (!isConnected()) {
             throw new IllegalStateException("getSessionToken() called while not connected (state="
                     + getStateLabel(mState) + ")");
         }
-        return mRootUri;
+        return mRootId;
     }
 
     /**
@@ -285,35 +285,35 @@ public final class MediaBrowser {
 
     /**
      * Queries for information about the media items that are contained within
-     * the specified Uri and subscribes to receive updates when they change.
+     * the specified id and subscribes to receive updates when they change.
      * <p>
      * The list of subscriptions is maintained even when not connected and is
      * restored after reconnection.  It is ok to subscribe while not connected
      * but the results will not be returned until the connection completes.
      * </p><p>
-     * If the uri is already subscribed with a different callback then the new
+     * If the id is already subscribed with a different callback then the new
      * callback will replace the previous one.
      * </p>
      *
-     * @param parentUri The uri of the parent media item whose list of children
+     * @param parentId The id of the parent media item whose list of children
      * will be subscribed.
      * @param callback The callback to receive the list of children.
      */
-    public void subscribe(@NonNull Uri parentUri, @NonNull SubscriptionCallback callback) {
+    public void subscribe(@NonNull String parentId, @NonNull SubscriptionCallback callback) {
         // Check arguments.
-        if (parentUri == null) {
-            throw new IllegalArgumentException("parentUri is null");
+        if (parentId == null) {
+            throw new IllegalArgumentException("parentId is null");
         }
         if (callback == null) {
             throw new IllegalArgumentException("callback is null");
         }
 
         // Update or create the subscription.
-        Subscription sub = mSubscriptions.get(parentUri);
+        Subscription sub = mSubscriptions.get(parentId);
         boolean newSubscription = sub == null;
         if (newSubscription) {
-            sub = new Subscription(parentUri);
-            mSubscriptions.put(parentUri, sub);
+            sub = new Subscription(parentId);
+            mSubscriptions.put(parentId, sub);
         }
         sub.callback = callback;
 
@@ -321,42 +321,42 @@ public final class MediaBrowser {
         // connected, the service will be told when we connect.
         if (mState == CONNECT_STATE_CONNECTED && newSubscription) {
             try {
-                mServiceBinder.addSubscription(parentUri, mServiceCallbacks);
+                mServiceBinder.addSubscription(parentId, mServiceCallbacks);
             } catch (RemoteException ex) {
                 // Process is crashing.  We will disconnect, and upon reconnect we will
                 // automatically reregister. So nothing to do here.
-                Log.d(TAG, "addSubscription failed with RemoteException parentUri=" + parentUri);
+                Log.d(TAG, "addSubscription failed with RemoteException parentId=" + parentId);
             }
         }
     }
 
     /**
-     * Unsubscribes for changes to the children of the specified Uri.
+     * Unsubscribes for changes to the children of the specified media id.
      * <p>
      * The query callback will no longer be invoked for results associated with
-     * this Uri once this method returns.
+     * this id once this method returns.
      * </p>
      *
-     * @param parentUri The uri of the parent media item whose list of children
+     * @param parentId The id of the parent media item whose list of children
      * will be unsubscribed.
      */
-    public void unsubscribe(@NonNull Uri parentUri) {
+    public void unsubscribe(@NonNull String parentId) {
         // Check arguments.
-        if (parentUri == null) {
-            throw new IllegalArgumentException("parentUri is null");
+        if (parentId == null) {
+            throw new IllegalArgumentException("parentId is null");
         }
 
         // Remove from our list.
-        final Subscription sub = mSubscriptions.remove(parentUri);
+        final Subscription sub = mSubscriptions.remove(parentId);
 
         // Tell the service if necessary.
         if (mState == CONNECT_STATE_CONNECTED && sub != null) {
             try {
-                mServiceBinder.removeSubscription(parentUri, mServiceCallbacks);
+                mServiceBinder.removeSubscription(parentId, mServiceCallbacks);
             } catch (RemoteException ex) {
                 // Process is crashing.  We will disconnect, and upon reconnect we will
                 // automatically reregister. So nothing to do here.
-                Log.d(TAG, "removeSubscription failed with RemoteException parentUri=" + parentUri);
+                Log.d(TAG, "removeSubscription failed with RemoteException parentId=" + parentId);
             }
         }
     }
@@ -380,7 +380,7 @@ public final class MediaBrowser {
     }
 
     private final void onServiceConnected(final IMediaBrowserServiceCallbacks callback,
-            final Uri root, final MediaSession.Token session, final Bundle extra) {
+            final String root, final MediaSession.Token session, final Bundle extra) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -395,7 +395,7 @@ public final class MediaBrowser {
                             + getStateLabel(mState) + "... ignoring");
                     return;
                 }
-                mRootUri = root;
+                mRootId = root;
                 mMediaSessionToken = session;
                 mExtras = extra;
                 mState = CONNECT_STATE_CONNECTED;
@@ -408,13 +408,13 @@ public final class MediaBrowser {
 
                 // we may receive some subscriptions before we are connected, so re-subscribe
                 // everything now
-                for (Uri uri : mSubscriptions.keySet()) {
+                for (String id : mSubscriptions.keySet()) {
                     try {
-                        mServiceBinder.addSubscription(uri, mServiceCallbacks);
+                        mServiceBinder.addSubscription(id, mServiceCallbacks);
                     } catch (RemoteException ex) {
                         // Process is crashing.  We will disconnect, and upon reconnect we will
                         // automatically reregister. So nothing to do here.
-                        Log.d(TAG, "addSubscription failed with RemoteException parentUri=" + uri);
+                        Log.d(TAG, "addSubscription failed with RemoteException parentId=" + id);
                     }
                 }
             }
@@ -448,8 +448,8 @@ public final class MediaBrowser {
         });
     }
 
-    private final void onLoadChildren(final IMediaBrowserServiceCallbacks callback, final Uri uri,
-            final ParceledListSlice list) {
+    private final void onLoadChildren(final IMediaBrowserServiceCallbacks callback,
+            final String parentId, final ParceledListSlice list) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -461,24 +461,24 @@ public final class MediaBrowser {
 
                 List<MediaItem> data = list.getList();
                 if (DBG) {
-                    Log.d(TAG, "onLoadChildren for " + mServiceComponent + " uri=" + uri);
+                    Log.d(TAG, "onLoadChildren for " + mServiceComponent + " id=" + parentId);
                 }
                 if (data == null) {
                     data = Collections.emptyList();
                 }
 
                 // Check that the subscription is still subscribed.
-                final Subscription subscription = mSubscriptions.get(uri);
+                final Subscription subscription = mSubscriptions.get(parentId);
                 if (subscription == null) {
                     if (DBG) {
-                        Log.d(TAG, "onLoadChildren for uri that isn't subscribed uri="
-                                + uri);
+                        Log.d(TAG, "onLoadChildren for id that isn't subscribed id="
+                                + parentId);
                     }
                     return;
                 }
 
                 // Tell the app.
-                subscription.callback.onChildrenLoaded(uri, data);
+                subscription.callback.onChildrenLoaded(parentId, data);
             }
         });
     }
@@ -514,7 +514,7 @@ public final class MediaBrowser {
         Log.d(TAG, "  mServiceConnection=" + mServiceConnection);
         Log.d(TAG, "  mServiceBinder=" + mServiceBinder);
         Log.d(TAG, "  mServiceCallbacks=" + mServiceCallbacks);
-        Log.d(TAG, "  mRootUri=" + mRootUri);
+        Log.d(TAG, "  mRootId=" + mRootId);
         Log.d(TAG, "  mMediaSessionToken=" + mMediaSessionToken);
     }
 
@@ -535,7 +535,8 @@ public final class MediaBrowser {
         /**
          * Flag: Indicates that the item is playable.
          * <p>
-         * The Uri of this item may be passed to link android.media.session.MediaController#play(Uri)
+         * The id of this item may be passed to
+         * {@link MediaController.TransportControls#playFromMediaId(String, Bundle)}
          * to start playing it.
          * </p>
          */
@@ -669,18 +670,18 @@ public final class MediaBrowser {
         /**
          * Called when the list of children is loaded or updated.
          */
-        public void onChildrenLoaded(@NonNull Uri parentUri,
+        public void onChildrenLoaded(@NonNull String parentId,
                                      @NonNull List<MediaItem> children) {
         }
 
         /**
-         * Called when the Uri doesn't exist or other errors in subscribing.
+         * Called when the id doesn't exist or other errors in subscribing.
          * <p>
          * If this is called, the subscription remains until {@link MediaBrowser#unsubscribe}
          * called, because some errors may heal themselves.
          * </p>
          */
-        public void onError(@NonNull Uri uri) {
+        public void onError(@NonNull String id) {
         }
     }
 
@@ -783,7 +784,7 @@ public final class MediaBrowser {
          * are the initial data as requested.
          */
         @Override
-        public void onConnect(final Uri root, final MediaSession.Token session,
+        public void onConnect(final String root, final MediaSession.Token session,
                 final Bundle extras) {
             MediaBrowser mediaBrowser = mMediaBrowser.get();
             if (mediaBrowser != null) {
@@ -803,20 +804,20 @@ public final class MediaBrowser {
         }
 
         @Override
-        public void onLoadChildren(final Uri uri, final ParceledListSlice list) {
+        public void onLoadChildren(final String parentId, final ParceledListSlice list) {
             MediaBrowser mediaBrowser = mMediaBrowser.get();
             if (mediaBrowser != null) {
-                mediaBrowser.onLoadChildren(this, uri, list);
+                mediaBrowser.onLoadChildren(this, parentId, list);
             }
         }
     }
 
     private static class Subscription {
-        final Uri uri;
+        final String id;
         SubscriptionCallback callback;
 
-        Subscription(Uri u) {
-            this.uri = u;
+        Subscription(String id) {
+            this.id = id;
         }
     }
 }
