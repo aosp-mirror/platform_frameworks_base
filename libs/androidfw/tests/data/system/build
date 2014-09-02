@@ -1,0 +1,6 @@
+#!/bin/bash
+
+aapt package -x -M AndroidManifest.xml -S res -F bundle.apk -f && \
+unzip bundle.apk resources.arsc && \
+mv resources.arsc system.arsc && \
+xxd -i system.arsc > system_arsc.h
