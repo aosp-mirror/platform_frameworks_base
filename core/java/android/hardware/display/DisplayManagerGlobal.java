@@ -372,7 +372,7 @@ public final class DisplayManagerGlobal {
 
     public VirtualDisplay createVirtualDisplay(Context context, MediaProjection projection,
             String name, int width, int height, int densityDpi, Surface surface, int flags,
-            VirtualDisplay.Callbacks callbacks, Handler handler) {
+            VirtualDisplay.Callback callback, Handler handler) {
         if (TextUtils.isEmpty(name)) {
             throw new IllegalArgumentException("name must be non-null and non-empty");
         }
@@ -381,7 +381,7 @@ public final class DisplayManagerGlobal {
                     + "greater than 0");
         }
 
-        VirtualDisplayCallbacks callbackWrapper = new VirtualDisplayCallbacks(callbacks, handler);
+        VirtualDisplayCallback callbackWrapper = new VirtualDisplayCallback(callback, handler);
         IMediaProjection projectionToken = projection != null ? projection.getProjection() : null;
         int displayId;
         try {
@@ -408,7 +408,7 @@ public final class DisplayManagerGlobal {
         return new VirtualDisplay(this, display, callbackWrapper, surface);
     }
 
-    public void setVirtualDisplaySurface(IVirtualDisplayCallbacks token, Surface surface) {
+    public void setVirtualDisplaySurface(IVirtualDisplayCallback token, Surface surface) {
         try {
             mDm.setVirtualDisplaySurface(token, surface);
         } catch (RemoteException ex) {
@@ -416,7 +416,7 @@ public final class DisplayManagerGlobal {
         }
     }
 
-    public void resizeVirtualDisplay(IVirtualDisplayCallbacks token,
+    public void resizeVirtualDisplay(IVirtualDisplayCallback token,
             int width, int height, int densityDpi) {
         try {
             mDm.resizeVirtualDisplay(token, width, height, densityDpi);
@@ -425,7 +425,7 @@ public final class DisplayManagerGlobal {
         }
     }
 
-    public void releaseVirtualDisplay(IVirtualDisplayCallbacks token) {
+    public void releaseVirtualDisplay(IVirtualDisplayCallback token) {
         try {
             mDm.releaseVirtualDisplay(token);
         } catch (RemoteException ex) {
@@ -476,61 +476,61 @@ public final class DisplayManagerGlobal {
         }
     }
 
-    private final static class VirtualDisplayCallbacks extends IVirtualDisplayCallbacks.Stub {
-        private VirtualDisplayCallbacksDelegate mDelegate;
+    private final static class VirtualDisplayCallback extends IVirtualDisplayCallback.Stub {
+        private VirtualDisplayCallbackDelegate mDelegate;
 
-        public VirtualDisplayCallbacks(VirtualDisplay.Callbacks callbacks, Handler handler) {
-            if (callbacks != null) {
-                mDelegate = new VirtualDisplayCallbacksDelegate(callbacks, handler);
+        public VirtualDisplayCallback(VirtualDisplay.Callback callback, Handler handler) {
+            if (callback != null) {
+                mDelegate = new VirtualDisplayCallbackDelegate(callback, handler);
             }
         }
 
         @Override // Binder call
-        public void onDisplayPaused() {
+        public void onPaused() {
             if (mDelegate != null) {
-                mDelegate.sendEmptyMessage(VirtualDisplayCallbacksDelegate.MSG_DISPLAY_PAUSED);
+                mDelegate.sendEmptyMessage(VirtualDisplayCallbackDelegate.MSG_DISPLAY_PAUSED);
             }
         }
 
         @Override // Binder call
-        public void onDisplayResumed() {
+        public void onResumed() {
             if (mDelegate != null) {
-                mDelegate.sendEmptyMessage(VirtualDisplayCallbacksDelegate.MSG_DISPLAY_RESUMED);
+                mDelegate.sendEmptyMessage(VirtualDisplayCallbackDelegate.MSG_DISPLAY_RESUMED);
             }
         }
 
         @Override // Binder call
-        public void onDisplayStopped() {
+        public void onStopped() {
             if (mDelegate != null) {
-                mDelegate.sendEmptyMessage(VirtualDisplayCallbacksDelegate.MSG_DISPLAY_STOPPED);
+                mDelegate.sendEmptyMessage(VirtualDisplayCallbackDelegate.MSG_DISPLAY_STOPPED);
             }
         }
     }
 
-    private final static class VirtualDisplayCallbacksDelegate extends Handler {
+    private final static class VirtualDisplayCallbackDelegate extends Handler {
         public static final int MSG_DISPLAY_PAUSED = 0;
         public static final int MSG_DISPLAY_RESUMED = 1;
         public static final int MSG_DISPLAY_STOPPED = 2;
 
-        private final VirtualDisplay.Callbacks mCallbacks;
+        private final VirtualDisplay.Callback mCallback;
 
-        public VirtualDisplayCallbacksDelegate(VirtualDisplay.Callbacks callbacks,
+        public VirtualDisplayCallbackDelegate(VirtualDisplay.Callback callback,
                 Handler handler) {
             super(handler != null ? handler.getLooper() : Looper.myLooper(), null, true /*async*/);
-            mCallbacks = callbacks;
+            mCallback = callback;
         }
 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_DISPLAY_PAUSED:
-                    mCallbacks.onDisplayPaused();
+                    mCallback.onPaused();
                     break;
                 case MSG_DISPLAY_RESUMED:
-                    mCallbacks.onDisplayResumed();
+                    mCallback.onResumed();
                     break;
                 case MSG_DISPLAY_STOPPED:
-                    mCallbacks.onDisplayStopped();
+                    mCallback.onStopped();
                     break;
             }
         }
