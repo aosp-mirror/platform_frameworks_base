@@ -49,7 +49,7 @@ public class GpsMeasurement implements Parcelable {
     private double mCarrierPhase;
     private double mCarrierPhaseUncertainty;
     private byte mLossOfLock;
-    private short mBitNumber;
+    private int mBitNumber;
     private short mTimeFromLastBitInMs;
     private double mDopplerShiftInHz;
     private double mDopplerShiftUncertaintyInHz;
@@ -784,14 +784,14 @@ public class GpsMeasurement implements Parcelable {
      *
      * The value is only available if {@link #hasBitNumber()} is true.
      */
-    public short getBitNumber() {
+    public int getBitNumber() {
         return mBitNumber;
     }
 
     /**
      * Sets the bit number within the broadcast frame.
      */
-    public void setBitNumber(short bitNumber) {
+    public void setBitNumber(int bitNumber) {
         setFlag(HAS_BIT_NUMBER);
         mBitNumber = bitNumber;
     }
@@ -801,7 +801,7 @@ public class GpsMeasurement implements Parcelable {
      */
     public void resetBitNumber() {
         resetFlag(HAS_BIT_NUMBER);
-        mBitNumber = Short.MIN_VALUE;
+        mBitNumber = Integer.MIN_VALUE;
     }
 
     /**
@@ -1161,7 +1161,7 @@ public class GpsMeasurement implements Parcelable {
             gpsMeasurement.mCarrierPhase = parcel.readDouble();
             gpsMeasurement.mCarrierPhaseUncertainty = parcel.readDouble();
             gpsMeasurement.mLossOfLock = parcel.readByte();
-            gpsMeasurement.mBitNumber = (short) parcel.readInt();
+            gpsMeasurement.mBitNumber = parcel.readInt();
             gpsMeasurement.mTimeFromLastBitInMs = (short) parcel.readInt();
             gpsMeasurement.mDopplerShiftInHz = parcel.readDouble();
             gpsMeasurement.mDopplerShiftUncertaintyInHz = parcel.readDouble();

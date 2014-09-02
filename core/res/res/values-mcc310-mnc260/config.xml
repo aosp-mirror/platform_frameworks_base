@@ -25,4 +25,9 @@
     -->
     <integer name="config_mobile_mtu">1440</integer>
 
+    <!-- Values for GPS configuration -->
+    <string-array translatable="false" name="config_gpsParameters">
+        <item>"SUPL_PORT=7279"</item>
+        <item>GPS_LOCK=1</item>
+    </string-array>
 </resources>
