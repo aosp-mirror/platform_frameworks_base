@@ -89,6 +89,7 @@ public class NotificationData {
 
     private final ArrayMap<String, Entry> mEntries = new ArrayMap<>();
     private final ArrayList<Entry> mSortedAndFiltered = new ArrayList<>();
+    private ArraySet<String> mGroupsWithSummaries = new ArraySet<>();
 
     private RankingMap mRankingMap;
     private final Ranking mTmpRanking = new Ranking();
@@ -183,8 +184,8 @@ public class NotificationData {
     // anything changed, and this class should call back the UI so it updates itself.
     public void filterAndSort() {
         mSortedAndFiltered.clear();
+        mGroupsWithSummaries.clear();
 
-        ArraySet<String> groupsWithSummaries = null;
         final int N = mEntries.size();
         for (int i = 0; i < N; i++) {
             Entry entry = mEntries.valueAt(i);
@@ -195,28 +196,29 @@ public class NotificationData {
             }
 
             if (sbn.getNotification().isGroupSummary()) {
-                if (groupsWithSummaries == null) {
-                    groupsWithSummaries = new ArraySet<>();
-                }
-                groupsWithSummaries.add(sbn.getGroupKey());
+                mGroupsWithSummaries.add(sbn.getGroupKey());
             }
             mSortedAndFiltered.add(entry);
         }
 
         // Second pass: Filter out group children with summary.
-        if (groupsWithSummaries != null) {
+        if (!mGroupsWithSummaries.isEmpty()) {
             final int M = mSortedAndFiltered.size();
             for (int i = M - 1; i >= 0; i--) {
                 Entry ent = mSortedAndFiltered.get(i);
                 StatusBarNotification sbn = ent.notification;
                 if (sbn.getNotification().isGroupChild() &&
-                        groupsWithSummaries.contains(sbn.getGroupKey())) {
+                        mGroupsWithSummaries.contains(sbn.getGroupKey())) {
                     mSortedAndFiltered.remove(i);
                 }
             }
         }
 
         Collections.sort(mSortedAndFiltered, mRankingComparator);
+    }
+
+    public boolean isGroupWithSummary(String groupKey) {
+        return mGroupsWithSummaries.contains(groupKey);
     }
 
     private boolean shouldFilterOut(StatusBarNotification sbn) {
