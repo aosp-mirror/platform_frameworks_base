@@ -720,6 +720,8 @@ public abstract class PanelView extends FrameLayout {
         abortAnimations();
         if (mTracking) {
             onTrackingStopped(true /* expands */); // The panel is expanded after this call.
+        }
+        if (mExpanding) {
             notifyExpandingFinished();
         }
         setVisibility(VISIBLE);
