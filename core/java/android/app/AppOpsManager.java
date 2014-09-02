@@ -220,6 +220,9 @@ public class AppOpsManager {
     /** Continually monitoring location data with a relatively high power request. */
     public static final String OPSTR_MONITOR_HIGH_POWER_LOCATION
             = "android:monitor_location_high_power";
+    /** Access to {@link android.app.usage.UsageStatsManager}. */
+    public static final String OPSTR_GET_USAGE_STATS
+            = "android:get_usage_stats";
     /** Activate a VPN connection without user intervention. @hide */
     @SystemApi
     public static final String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
@@ -331,7 +334,7 @@ public class AppOpsManager {
             null,
             OPSTR_MONITOR_LOCATION,
             OPSTR_MONITOR_HIGH_POWER_LOCATION,
-            null,
+            OPSTR_GET_USAGE_STATS,
             null,
             null,
             null,
