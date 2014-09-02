@@ -771,7 +771,10 @@ public final class MediaSession {
         }
 
         /**
-         * Override to handle requests to begin playback from a search query.
+         * Override to handle requests to begin playback from a search query. An
+         * empty query indicates that the app may play any music. The
+         * implementation should attempt to make a smart choice about what to
+         * play.
          */
         public void onPlayFromSearch(String query, Bundle extras) {
         }
