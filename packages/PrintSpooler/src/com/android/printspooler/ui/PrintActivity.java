@@ -319,6 +319,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
             mProgressMessageController.cancel();
             mPrinterRegistry.setTrackedPrinter(null);
+            mPrintPreviewController.destroy();
             mSpoolerProvider.destroy();
             mPrintedDocument.finish();
             mPrintedDocument.destroy();

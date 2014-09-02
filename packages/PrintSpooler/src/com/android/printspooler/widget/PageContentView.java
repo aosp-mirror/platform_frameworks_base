@@ -20,6 +20,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.print.PrintAttributes;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Margins;
 import android.util.AttributeSet;
@@ -38,12 +39,11 @@ import com.android.printspooler.model.PageContentRepository.RenderSpec;
 public class PageContentView extends View
         implements PageContentRepository.OnPageContentAvailableCallback {
 
+    private final PrintAttributes mAttributes = new PrintAttributes.Builder().build();
+
     private final ColorDrawable mEmptyState;
 
     private PageContentProvider mProvider;
-
-    private MediaSize mMediaSize;
-    private Margins mMinMargins;
 
     private boolean mContentRequested;
 
@@ -83,15 +83,17 @@ public class PageContentView extends View
     }
 
     public void init(PageContentProvider provider, MediaSize mediaSize, Margins minMargins) {
-        if (mProvider == provider
-                && ((mMediaSize == null) ? mediaSize == null : mMediaSize.equals(mediaSize))
-                && ((mMinMargins == null) ? minMargins == null : mMinMargins.equals(minMargins))) {
+        if (mProvider == null ? provider == null : mProvider.equals(provider)
+                && ((mAttributes.getMediaSize() == null)
+                        ? mediaSize == null : mAttributes.getMediaSize().equals(mediaSize))
+                && ((mAttributes.getMinMargins() == null)
+                        ? minMargins == null : mAttributes.getMinMargins().equals(minMargins))) {
             return;
         }
 
         mProvider = provider;
-        mMediaSize = mediaSize;
-        mMinMargins = minMargins;
+        mAttributes.setMediaSize(mediaSize);
+        mAttributes.setMinMargins(minMargins);
         mContentRequested = false;
 
         // If there is no provider we want immediately to switch to
@@ -106,8 +108,7 @@ public class PageContentView extends View
     private void requestPageContentIfNeeded() {
         if (getWidth() > 0 && getHeight() > 0 && !mContentRequested && mProvider != null) {
             mContentRequested = true;
-            mProvider.getPageContent(new RenderSpec(getWidth(), getHeight(), mMediaSize,
-                    mMinMargins), this);
+            mProvider.getPageContent(new RenderSpec(getWidth(), getHeight(), mAttributes), this);
         }
     }
 }
