@@ -137,6 +137,14 @@ public final class SELinuxMMAC {
     }
 
     public static boolean readInstallPolicy() {
+        return readInstallPolicy(MAC_PERMISSIONS);
+    }
+
+    public static boolean readInstallPolicy(String macPermsPath) {
+        if (macPermsPath == null) {
+            throw new NullPointerException("mac_permissions.xml file path is null");
+        }
+
         // Temp structures to hold the rules while we parse the xml file.
         // We add all the rules together once we know there's no structural problems.
         HashMap<Signature, Policy> sigSeinfo = new HashMap<Signature, Policy>();
@@ -144,8 +152,8 @@ public final class SELinuxMMAC {
 
         FileReader policyFile = null;
         try {
-            policyFile = new FileReader(MAC_PERMISSIONS);
-            Slog.d(TAG, "Using policy file " + MAC_PERMISSIONS);
+            policyFile = new FileReader(macPermsPath);
+            Slog.d(TAG, "Using policy file " + macPermsPath);
 
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(policyFile);
@@ -190,10 +198,10 @@ public final class SELinuxMMAC {
                 }
             }
         } catch (XmlPullParserException xpe) {
-            Slog.w(TAG, "Got exception parsing " + MAC_PERMISSIONS, xpe);
+            Slog.w(TAG, "Got exception parsing " + macPermsPath, xpe);
             return false;
         } catch (IOException ioe) {
-            Slog.w(TAG, "Got exception parsing " + MAC_PERMISSIONS, ioe);
+            Slog.w(TAG, "Got exception parsing " + macPermsPath, ioe);
             return false;
         } finally {
             IoUtils.closeQuietly(policyFile);
