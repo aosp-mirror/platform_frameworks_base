@@ -3817,6 +3817,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void onScreenTurnedOn() {
         mStackScroller.setAnimationsEnabled(true);
+        mNotificationPanel.onScreenTurnedOn();
     }
 
     /**
