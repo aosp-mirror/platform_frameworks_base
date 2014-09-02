@@ -116,7 +116,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Update keystore settings for profiles which use the same password as their parent
-            if (Intent.ACTION_USER_STARTED.equals(intent.getAction())) {
+            if (Intent.ACTION_USER_ADDED.equals(intent.getAction())) {
                 final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                 final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
                 final UserInfo parentInfo = um.getProfileParent(userHandle);
@@ -319,17 +319,18 @@ public class LockSettingsService extends ILockSettings.Stub {
         String dataSystemDirectory =
                 android.os.Environment.getDataDirectory().getAbsolutePath() +
                 SYSTEM_DIRECTORY;
+        userId = getUserParentOrSelfId(userId);
         if (userId == 0) {
             // Leave it in the same place for user 0
             return dataSystemDirectory + LOCK_PATTERN_FILE;
         } else {
-            userId = getUserParentOrSelfId(userId);
             return  new File(Environment.getUserSystemDirectory(userId), LOCK_PATTERN_FILE)
                     .getAbsolutePath();
         }
     }
 
     private String getLockPasswordFilename(int userId) {
+        userId = getUserParentOrSelfId(userId);
         String dataSystemDirectory =
                 android.os.Environment.getDataDirectory().getAbsolutePath() +
                 SYSTEM_DIRECTORY;
@@ -337,7 +338,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Leave it in the same place for user 0
             return dataSystemDirectory + LOCK_PASSWORD_FILE;
         } else {
-            userId = getUserParentOrSelfId(userId);
             return new File(Environment.getUserSystemDirectory(userId), LOCK_PASSWORD_FILE)
                     .getAbsolutePath();
         }
@@ -510,13 +510,18 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         try {
-            File file = new File(getLockPasswordFilename(userId));
-            if (file.exists()) {
-                file.delete();
-            }
-            file = new File(getLockPatternFilename(userId));
-            if (file.exists()) {
-                file.delete();
+            final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
+            final UserInfo parentInfo = um.getProfileParent(userId);
+            if (parentInfo == null) {
+                // This user owns its lock settings files - safe to delete them
+                File file = new File(getLockPasswordFilename(userId));
+                if (file.exists()) {
+                    file.delete();
+                }
+                file = new File(getLockPatternFilename(userId));
+                if (file.exists()) {
+                    file.delete();
+                }
             }
 
             db.beginTransaction();
