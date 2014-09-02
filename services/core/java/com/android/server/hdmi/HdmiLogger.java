@@ -31,7 +31,7 @@ final class HdmiLogger {
     // Logging duration for same error message.
     private static final long ERROR_LOG_DURATTION_MILLIS = 20 * 1000;  // 20s
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     // Key (String): log message.
     // Value (Pair(Long, Integer)): a pair of last log time millis and the number of logMessage.
