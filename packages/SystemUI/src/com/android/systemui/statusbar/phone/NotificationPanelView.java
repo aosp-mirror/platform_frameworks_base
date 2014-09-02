@@ -35,6 +35,7 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.ExpandableView;
@@ -65,7 +66,7 @@ public class NotificationPanelView extends PanelView implements
     private KeyguardStatusBarView mKeyguardStatusBar;
     private View mQsContainer;
     private QSPanel mQsPanel;
-    private View mKeyguardStatusView;
+    private KeyguardStatusView mKeyguardStatusView;
     private ObservableScrollView mScrollView;
     private TextView mClockView;
     private View mReserveNotificationSpace;
@@ -174,7 +175,7 @@ public class NotificationPanelView extends PanelView implements
         mHeader = (StatusBarHeaderView) findViewById(R.id.header);
         mHeader.setOnClickListener(this);
         mKeyguardStatusBar = (KeyguardStatusBarView) findViewById(R.id.keyguard_header);
-        mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
+        mKeyguardStatusView = (KeyguardStatusView) findViewById(R.id.keyguard_status_view);
         mQsContainer = findViewById(R.id.quick_settings_container);
         mQsPanel = (QSPanel) findViewById(R.id.quick_settings_panel);
         mClockView = (TextView) findViewById(R.id.clock_view);
@@ -1749,4 +1750,8 @@ public class NotificationPanelView extends PanelView implements
             mHeader.updateEverything();
         }
     };
+
+    public void onScreenTurnedOn() {
+        mKeyguardStatusView.refreshTime();
+    }
 }
