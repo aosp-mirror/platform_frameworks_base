@@ -29,10 +29,12 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
 
@@ -228,21 +230,8 @@ public class MmsServiceBroker extends SystemService {
         }
 
         @Override
-        public boolean getCarrierConfigBoolean(long subId, String name, boolean defaultValue)
-                throws RemoteException {
-            return getServiceGuarded().getCarrierConfigBoolean(subId, name, defaultValue);
-        }
-
-        @Override
-        public int getCarrierConfigInt(long subId, String name, int defaultValue)
-                throws RemoteException {
-            return getServiceGuarded().getCarrierConfigInt(subId, name, defaultValue);
-        }
-
-        @Override
-        public String getCarrierConfigString(long subId, String name, String defaultValue)
-                throws RemoteException {
-            return getServiceGuarded().getCarrierConfigString(subId, name, defaultValue);
+        public Bundle getCarrierConfigValues(long subId) throws RemoteException {
+            return getServiceGuarded().getCarrierConfigValues(subId);
         }
 
         @Override

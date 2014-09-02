@@ -19,6 +19,7 @@ package com.android.internal.telephony;
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.net.Uri;
+import android.os.Bundle;
 
 /**
  * Service interface to handle MMS API requests
@@ -78,33 +79,11 @@ interface IMms {
     void updateMmsDownloadStatus(int messageRef, in byte[] pdu);
 
     /**
-     * Get carrier-dependent configuration value as boolean. For example, if multipart SMS
-     * is supported.
+     * Get carrier-dependent configuration values.
      *
      * @param subId the SIM id
-     * @param name the configuration name
-     * @param defaultValue the default value if fail to find the name
      */
-    boolean getCarrierConfigBoolean(long subId, String name, boolean defaultValue);
-
-    /**
-     * Get carrier-dependent configuration value as int. For example, the MMS message size limit.
-     *
-     * @param subId the SIM id
-     * @param name the configuration name
-     * @param defaultValue the default value if fail to find the name
-     */
-    int getCarrierConfigInt(long subId, String name, int defaultValue);
-
-    /**
-     * Get carrier-dependent configuration value as String. For example, extra HTTP headers for
-     * MMS request.
-     *
-     * @param subId the SIM id
-     * @param name the configuration name
-     * @param defaultValue the default value if fail to find the name
-     */
-    String getCarrierConfigString(long subId, String name, String defaultValue);
+    Bundle getCarrierConfigValues(long subId);
 
     /**
      * Import a text message into system's SMS store
