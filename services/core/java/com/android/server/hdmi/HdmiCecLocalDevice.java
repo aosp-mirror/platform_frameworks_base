@@ -549,6 +549,10 @@ abstract class HdmiCecLocalDevice {
         setPreferredAddress(logicalAddress);
     }
 
+    int getType() {
+        return mDeviceType;
+    }
+
     @ServiceThreadOnly
     HdmiDeviceInfo getDeviceInfo() {
         assertRunOnServiceThread();
