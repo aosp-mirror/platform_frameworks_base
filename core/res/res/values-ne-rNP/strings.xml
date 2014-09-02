@@ -1401,12 +1401,12 @@
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"अनुप्रयोगलाई किगार्ड नियन्त्रण गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"भरोसा स्थितिमा परिवर्तनको सुन्नुहोस्।"</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"भरोसा स्थितिमा परिवर्तनको लागि सुन्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
-    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"विश्वस्त प्रतिनिधि प्रदान गर्नुहोस्।"</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"अनुप्रयोगलाई विश्वस्त प्रतिनिधि प्रदान गर्न अनुमति दिन्छ।"</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"विश्वस्त प्रतिनिधि सेटिङ्हरूका मेनु सुरुवात गर्नुहोस्।"</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"उपकरणलाई विश्वस्त प्रतिनिधिको ब्यवहार परिवर्तन गर्ने गतिविधि सुरुवात गर्न अनुमति दिन्छ।"</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"विश्वस्त प्रतिनिधि सेवासँग जोडिएको"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"विश्वस्त प्रतिनिधि सेवालाई बाँध्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"विश्वस्त एजेन्ट उपलब्ध गराउने।"</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"अनुप्रयोगलाई एक विश्वस्त एजेन्ट उपलब्ध गराउन अनुमति दिन्छ।"</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"विश्वस्त एजेन्ट सेटिङ मेनु सुरूवात गर्ने।"</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"अनुप्रयोगलाई विश्वस्त एजेन्ट ब्यवहार परिवर्तन गर्ने गतिविधि सुरूवात गर्न अनुमति दिन्छ।"</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"विश्वस्त एजेन्ट सेवासँग सम्बद्ध हुनु"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"विश्वस्त एजेन्ट सेवासँग सम्बद्ध हुन एक अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"अद्यावधिक र रिकभरी प्रणालीको साथ अन्तर्क्रिया"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"अनुप्रयोगलाई रिकभरी प्रणाली र प्रणाली अद्यावधिकहरूको साथ अन्तर्क्रिया गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"मिडिया प्रक्षेपण सत्र व्यवस्थापन गर्नुहोस्"</string>

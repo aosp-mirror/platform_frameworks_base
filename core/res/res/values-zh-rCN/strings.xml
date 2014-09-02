@@ -1294,10 +1294,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"允许"</string>
     <string name="sms_control_no" msgid="625438561395534982">"拒绝"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;想要向 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; 发送一条短信。"</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400"><b>"这可能会导致您的手机号产生费用。"</b></string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"这会导致您的手机号产生费用。"</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"发送"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"取消"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"记住我的选择"</string>
