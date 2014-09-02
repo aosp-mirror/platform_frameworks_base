@@ -18,13 +18,13 @@
     <item android:id="@id/background">
         <nine-patch android:src="@drawable/progress_mtrl_alpha"
             android:tint="?attr/colorControlNormal"
-            android:alpha="0.5" />
+            android:alpha="?attr/disabledAlpha" />
     </item>
     <item android:id="@id/secondaryProgress">
         <scale android:scaleWidth="100%">
             <nine-patch android:src="@drawable/progress_mtrl_alpha"
                 android:tint="?attr/colorControlActivated"
-                android:alpha="0.5" />
+                android:alpha="?attr/disabledAlpha" />
         </scale>
     </item>
     <item android:id="@id/progress">
