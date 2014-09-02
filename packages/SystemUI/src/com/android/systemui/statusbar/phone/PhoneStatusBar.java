@@ -779,10 +779,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 (SignalClusterView) mStatusBarView.findViewById(R.id.signal_cluster);
         final SignalClusterView signalClusterKeyguard =
                 (SignalClusterView) mKeyguardStatusBar.findViewById(R.id.signal_cluster);
+        final SignalClusterView signalClusterQs =
+                (SignalClusterView) mHeader.findViewById(R.id.signal_cluster);
         mNetworkController.addSignalCluster(signalCluster);
         mNetworkController.addSignalCluster(signalClusterKeyguard);
+        mNetworkController.addSignalCluster(signalClusterQs);
         signalCluster.setNetworkController(mNetworkController);
         signalClusterKeyguard.setNetworkController(mNetworkController);
+        signalClusterQs.setNetworkController(mNetworkController);
         final boolean isAPhone = mNetworkController.hasVoiceCallingFeature();
         if (isAPhone) {
             mNetworkController.addEmergencyLabelView(mHeader);
