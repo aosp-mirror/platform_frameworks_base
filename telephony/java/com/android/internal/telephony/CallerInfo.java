@@ -100,6 +100,7 @@ public class CallerInfo {
     public long contactIdOrZero;
     public boolean needUpdate;
     public Uri contactRefUri;
+    public String lookupKey;
 
     /**
      * Contact display photo URI.  If a contact has no display photo but a thumbnail, it'll be
@@ -229,6 +230,12 @@ public class CallerInfo {
                     // Watch out: this means that anything that depends on
                     // person_id will be broken (like contact photo lookups in
                     // the in-call UI, for example.)
+                }
+
+                // Contact lookupKey
+                columnIndex = cursor.getColumnIndex(PhoneLookup.LOOKUP_KEY);
+                if (columnIndex != -1) {
+                    info.lookupKey = cursor.getString(columnIndex);
                 }
 
                 // Display photo URI.
