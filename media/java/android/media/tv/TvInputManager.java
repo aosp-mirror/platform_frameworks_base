@@ -33,6 +33,7 @@ import android.util.SparseArray;
 import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventSender;
+import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.View;
 
@@ -520,6 +521,16 @@ public final class TvInputManager {
     }
 
     /**
+     * Interface used to receive events from Hardware objects.
+     * @hide
+     */
+    @SystemApi
+    public abstract static class HardwareCallback {
+        public abstract void onReleased();
+        public abstract void onStreamConfigChanged(TvStreamConfig[] configs);
+    }
+
+    /**
      * @hide
      */
     public TvInputManager(ITvInputManager service, int userId) {
@@ -1000,6 +1011,64 @@ public final class TvInputManager {
     public boolean isSingleSessionActive() {
         try {
             return mService.isSingleSessionActive(mUserId);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Returns a list of TvInputHardwareInfo objects representing available hardware.
+     *
+     * @hide
+     */
+    @SystemApi
+    public List<TvInputHardwareInfo> getHardwareList() {
+        try {
+            return mService.getHardwareList();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Returns acquired TvInputManager.Hardware object for given deviceId.
+     *
+     * If there are other Hardware object acquired for the same deviceId, calling this method will
+     * preempt the previously acquired object and report {@link HardwareCallback#onReleased} to the
+     * old object.
+     *
+     * @hide
+     */
+    @SystemApi
+    public Hardware acquireTvInputHardware(int deviceId, final HardwareCallback callback,
+            TvInputInfo info) {
+        try {
+            return new Hardware(
+                    mService.acquireTvInputHardware(deviceId, new ITvInputHardwareCallback.Stub() {
+                @Override
+                public void onReleased() {
+                    callback.onReleased();
+                }
+
+                @Override
+                public void onStreamConfigChanged(TvStreamConfig[] configs) {
+                    callback.onStreamConfigChanged(configs);
+                }
+            }, info, mUserId));
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Releases previously acquired hardware object.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void releaseTvInputHardware(int deviceId, Hardware hardware) {
+        try {
+            mService.releaseTvInputHardware(deviceId, hardware.getInterface(), mUserId);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -1649,6 +1718,62 @@ public final class TvInputManager {
                 synchronized (mEventHandler) {
                     recyclePendingEventLocked(this);
                 }
+            }
+        }
+    }
+
+    /**
+     * The Hardware provides the per-hardware functionality of TV hardware.
+     *
+     * TV hardware is physical hardware attached to the Android device; for example, HDMI ports,
+     * Component/Composite ports, etc. Specifically, logical devices such as HDMI CEC logical
+     * devices don't fall into this category.
+     *
+     * @hide
+     */
+    @SystemApi
+    public final static class Hardware {
+        private final ITvInputHardware mInterface;
+
+        private Hardware(ITvInputHardware hardwareInterface) {
+            mInterface = hardwareInterface;
+        }
+
+        private ITvInputHardware getInterface() {
+            return mInterface;
+        }
+
+        public boolean setSurface(Surface surface, TvStreamConfig config) {
+            try {
+                return mInterface.setSurface(surface, config);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public void setStreamVolume(float volume) {
+            try {
+                mInterface.setStreamVolume(volume);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public boolean dispatchKeyEventToHdmi(KeyEvent event) {
+            try {
+                return mInterface.dispatchKeyEventToHdmi(event);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public void overrideAudioSink(int audioType, String audioAddress, int samplingRate,
+                int channelMask, int format) {
+            try {
+                mInterface.overrideAudioSink(audioType, audioAddress, samplingRate, channelMask,
+                        format);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
             }
         }
     }
