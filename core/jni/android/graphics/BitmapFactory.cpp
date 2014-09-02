@@ -367,6 +367,9 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
                 peeker.mOpticalInsets[0], peeker.mOpticalInsets[1], peeker.mOpticalInsets[2], peeker.mOpticalInsets[3],
                 peeker.mOutlineInsets[0], peeker.mOutlineInsets[1], peeker.mOutlineInsets[2], peeker.mOutlineInsets[3],
                 peeker.mOutlineRadius, peeker.mOutlineAlpha, scale);
+        if (ninePatchInsets == NULL) {
+            return nullObjectReturn("nine patch insets == null");
+        }
         if (javaBitmap != NULL) {
             env->SetObjectField(javaBitmap, gBitmap_ninePatchInsetsFieldID, ninePatchInsets);
         }
