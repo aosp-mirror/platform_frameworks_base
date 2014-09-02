@@ -166,6 +166,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mDontReportNextOverScroll;
     private boolean mRequestViewResizeAnimationOnLayout;
     private boolean mNeedViewResizeAnimation;
+    private boolean mEverythingNeedsAnimation;
 
     /**
      * The maximum scrollPosition which we are allowed to reach when a notification was expanded.
@@ -1619,6 +1620,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         generateDarkEvent();
         generateGoToFullShadeEvent();
         generateViewResizeEvent();
+        generateAnimateEverythingEvent();
         mNeedsAnimation = false;
     }
 
@@ -1699,6 +1701,14 @@ public class NotificationStackScrollLayout extends ViewGroup
                     new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_ACTIVATED_CHILD));
         }
         mActivateNeedsAnimation = false;
+    }
+
+    private void generateAnimateEverythingEvent() {
+        if (mEverythingNeedsAnimation) {
+            mAnimationEvents.add(
+                    new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_EVERYTHING));
+        }
+        mEverythingNeedsAnimation = false;
     }
 
     private void generateDimmedEvent() {
@@ -2200,6 +2210,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         this.mPhoneStatusBar = phoneStatusBar;
     }
 
+    public void onGoToKeyguard() {
+        if (mIsExpanded && mAnimationsEnabled) {
+            mEverythingNeedsAnimation = true;
+            requestChildrenUpdate();
+        }
+    }
+
     /**
      * A listener that is notified when some child locations might have changed.
      */
@@ -2327,6 +2344,18 @@ public class NotificationStackScrollLayout extends ViewGroup
                         .animateTopInset()
                         .animateY()
                         .animateZ(),
+
+                // ANIMATION_TYPE_EVERYTHING
+                new AnimationFilter()
+                        .animateAlpha()
+                        .animateDark()
+                        .animateScale()
+                        .animateDimmed()
+                        .animateHideSensitive()
+                        .animateHeight()
+                        .animateTopInset()
+                        .animateY()
+                        .animateZ(),
         };
 
         static int[] LENGTHS = new int[] {
@@ -2369,6 +2398,9 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_VIEW_RESIZE
                 StackStateAnimator.ANIMATION_DURATION_STANDARD,
+
+                // ANIMATION_TYPE_EVERYTHING
+                StackStateAnimator.ANIMATION_DURATION_STANDARD,
         };
 
         static final int ANIMATION_TYPE_ADD = 0;
@@ -2384,6 +2416,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         static final int ANIMATION_TYPE_GO_TO_FULL_SHADE = 10;
         static final int ANIMATION_TYPE_HIDE_SENSITIVE = 11;
         static final int ANIMATION_TYPE_VIEW_RESIZE = 12;
+        static final int ANIMATION_TYPE_EVERYTHING = 13;
 
         final long eventStartTime;
         final View changingView;
