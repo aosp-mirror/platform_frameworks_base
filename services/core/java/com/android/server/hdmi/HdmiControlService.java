@@ -98,6 +98,7 @@ public final class HdmiControlService extends SystemService {
     static final int INITIATED_BY_BOOT_UP = 1;
     static final int INITIATED_BY_SCREEN_ON = 2;
     static final int INITIATED_BY_WAKE_UP_MESSAGE = 3;
+    static final int INITIATED_BY_HOTPLUG = 4;
 
     /**
      * Interface to report send result.
@@ -408,20 +409,31 @@ public final class HdmiControlService extends SystemService {
 
     private void initializeCec(int initiatedBy) {
         mCecController.setOption(OPTION_CEC_SERVICE_CONTROL, ENABLED);
-        initializeLocalDevices(mLocalDevices, initiatedBy);
+        initializeLocalDevices(initiatedBy);
     }
 
     @ServiceThreadOnly
-    private void initializeLocalDevices(final List<Integer> deviceTypes, final int initiatedBy) {
+    private void initializeLocalDevices(final int initiatedBy) {
         assertRunOnServiceThread();
-        // A container for [Logical Address, Local device info].
-        final SparseArray<HdmiCecLocalDevice> devices = new SparseArray<>();
-        final int[] finished = new int[1];
+        // A container for [Device type, Local device info].
+        ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
         clearLocalDevices();
-        for (int type : deviceTypes) {
+        for (int type : mLocalDevices) {
             final HdmiCecLocalDevice localDevice = HdmiCecLocalDevice.create(this, type);
             localDevice.init();
-            mCecController.allocateLogicalAddress(type,
+            localDevices.add(localDevice);
+        }
+        allocateLogicalAddress(localDevices, initiatedBy);
+    }
+
+    @ServiceThreadOnly
+    private void allocateLogicalAddress(final ArrayList<HdmiCecLocalDevice> allocatingDevices,
+            final int initiatedBy) {
+        assertRunOnServiceThread();
+        final ArrayList<HdmiCecLocalDevice> allocatedDevices = new ArrayList<>();
+        final int[] finished = new int[1];
+        for (final HdmiCecLocalDevice localDevice : allocatingDevices) {
+            mCecController.allocateLogicalAddress(localDevice.getType(),
                     localDevice.getPreferredAddress(), new AllocateAddressCallback() {
                 @Override
                 public void onAllocated(int deviceType, int logicalAddress) {
@@ -435,13 +447,17 @@ public final class HdmiControlService extends SystemService {
                         localDevice.setDeviceInfo(deviceInfo);
                         mCecController.addLocalDevice(deviceType, localDevice);
                         mCecController.addLogicalAddress(logicalAddress);
-                        devices.append(logicalAddress, localDevice);
+                        allocatedDevices.add(localDevice);
                     }
 
                     // Address allocation completed for all devices. Notify each device.
-                    if (deviceTypes.size() == ++finished[0]) {
-                        onInitializeCecComplete();
-                        notifyAddressAllocated(devices, initiatedBy);
+                    if (allocatingDevices.size() == ++finished[0]) {
+                        if (initiatedBy != INITIATED_BY_HOTPLUG) {
+                            // In case of the hotplug we don't call onInitializeCecComplete()
+                            // since we reallocate the logical address only.
+                            onInitializeCecComplete();
+                        }
+                        notifyAddressAllocated(allocatedDevices, initiatedBy);
                     }
                 }
             });
@@ -449,11 +465,10 @@ public final class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    private void notifyAddressAllocated(SparseArray<HdmiCecLocalDevice> devices, int initiatedBy) {
+    private void notifyAddressAllocated(ArrayList<HdmiCecLocalDevice> devices, int initiatedBy) {
         assertRunOnServiceThread();
-        for (int i = 0; i < devices.size(); ++i) {
-            int address = devices.keyAt(i);
-            HdmiCecLocalDevice device = devices.valueAt(i);
+        for (HdmiCecLocalDevice device : devices) {
+            int address = device.getDeviceInfo().getLogicalAddress();
             device.handleAddressAllocated(address, initiatedBy);
         }
     }
@@ -704,6 +719,22 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
+
+        ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
+        for (int type : mLocalDevices) {
+            if (type == HdmiDeviceInfo.DEVICE_TV) {
+                // Skip the reallocation of the logical address on TV.
+                continue;
+            }
+            HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(type);
+            if (localDevice == null) {
+                localDevice = HdmiCecLocalDevice.create(this, type);
+                localDevice.init();
+            }
+            localDevices.add(localDevice);
+        }
+        allocateLogicalAddress(localDevices, INITIATED_BY_HOTPLUG);
+
         for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
             device.onHotplug(portId, connected);
         }
