@@ -45,18 +45,32 @@ public final class PhoneCapabilities {
     /** Call supports generic conference mode. */
     public static final int GENERIC_CONFERENCE = 0x00000080;
 
-    /** Local device supports video telephony. */
+    /**
+     * Local device supports video telephony.
+     * @hide
+     */
     public static final int SUPPORTS_VT_LOCAL  = 0x00000100;
 
-    /** Remote device supports video telephony. */
+    /**
+     * Remote device supports video telephony.
+     * @hide
+     */
     public static final int SUPPORTS_VT_REMOTE = 0x00000200;
 
+    /**
+     * Call is using voice over LTE.
+     * @hide
+     */
     public static final int VoLTE = 0x00000400;
 
+    /**
+     * Call is using voice over WIFI.
+     * @hide
+     */
     public static final int VoWIFI = 0x00000800;
 
     public static final int ALL = HOLD | SUPPORT_HOLD | MERGE_CALLS | SWAP_CALLS | ADD_CALL
-            | RESPOND_VIA_TEXT | MUTE | GENERIC_CONFERENCE | VoLTE | VoWIFI;
+            | RESPOND_VIA_TEXT | MUTE | GENERIC_CONFERENCE;
 
     public static String toString(int capabilities) {
         StringBuilder builder = new StringBuilder();
