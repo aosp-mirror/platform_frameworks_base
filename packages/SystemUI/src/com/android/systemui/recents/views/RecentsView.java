@@ -67,6 +67,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     ArrayList<TaskStack> mStacks;
     View mSearchBar;
     RecentsViewCallbacks mCb;
+    boolean mAlreadyLaunchingTask;
 
     public RecentsView(Context context) {
         super(context);
@@ -120,6 +121,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             }
             addView(stackView);
         }
+
+        // Reset the launched state
+        mAlreadyLaunchingTask = false;
     }
 
     /** Removes all the task stack views from this recents view. */
@@ -381,6 +385,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         if (mCb != null) {
             mCb.onTaskViewClicked();
         }
+        // Skip if we are already launching tasks
+        if (mAlreadyLaunchingTask) {
+            return;
+        }
+        mAlreadyLaunchingTask = true;
 
         // Upfront the processing of the thumbnail
         TaskViewTransform transform = new TaskViewTransform();
