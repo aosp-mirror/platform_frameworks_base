@@ -472,7 +472,7 @@ public final class DisplayManager {
     /**
      * Creates a virtual display.
      *
-     * @see #createVirtualDisplay(String, int, int, int, Surface, int, VirtualDisplay.Callbacks)
+     * @see #createVirtualDisplay(String, int, int, int, Surface, int, VirtualDisplay.Callback)
      */
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
             int width, int height, int densityDpi, @Nullable Surface surface, int flags) {
@@ -513,7 +513,7 @@ public final class DisplayManager {
      * {@link #VIRTUAL_DISPLAY_FLAG_PUBLIC}, {@link #VIRTUAL_DISPLAY_FLAG_PRESENTATION},
      * {@link #VIRTUAL_DISPLAY_FLAG_SECURE}, {@link #VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY},
      * or {@link #VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR}.
-     * @param callbacks Callbacks to call when the state of the {@link VirtualDisplay} changes
+     * @param callback Callback to call when the state of the {@link VirtualDisplay} changes
      * @param handler The handler on which the listener should be invoked, or null
      * if the listener should be invoked on the calling thread's looper.
      * @return The newly created virtual display, or null if the application could
@@ -524,17 +524,17 @@ public final class DisplayManager {
      */
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
             int width, int height, int densityDpi, @Nullable Surface surface, int flags,
-            @Nullable VirtualDisplay.Callbacks callbacks, @Nullable Handler handler) {
+            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
         return createVirtualDisplay(null,
-                name, width, height, densityDpi, surface, flags, callbacks, handler);
+                name, width, height, densityDpi, surface, flags, callback, handler);
     }
 
     /** @hide */
     public VirtualDisplay createVirtualDisplay(@Nullable MediaProjection projection,
             @NonNull String name, int width, int height, int densityDpi, @Nullable Surface surface,
-            int flags, @Nullable VirtualDisplay.Callbacks callbacks, @Nullable Handler handler) {
+            int flags, @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
         return mGlobal.createVirtualDisplay(mContext, projection,
-                name, width, height, densityDpi, surface, flags, callbacks, handler);
+                name, width, height, densityDpi, surface, flags, callback, handler);
     }
 
     /**

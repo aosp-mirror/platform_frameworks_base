@@ -17,7 +17,7 @@
 package android.hardware.display;
 
 import android.hardware.display.IDisplayManagerCallback;
-import android.hardware.display.IVirtualDisplayCallbacks;
+import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
 import android.media.projection.IMediaProjection;
@@ -61,17 +61,17 @@ interface IDisplayManager {
 
     // Requires CAPTURE_VIDEO_OUTPUT, CAPTURE_SECURE_VIDEO_OUTPUT, or an appropriate
     // MediaProjection token for certain combinations of flags.
-    int createVirtualDisplay(in IVirtualDisplayCallbacks callbacks,
+    int createVirtualDisplay(in IVirtualDisplayCallback callback,
             in IMediaProjection projectionToken, String packageName, String name,
             int width, int height, int densityDpi, in Surface surface, int flags);
 
     // No permissions required, but must be same Uid as the creator.
-    void resizeVirtualDisplay(in IVirtualDisplayCallbacks token,
+    void resizeVirtualDisplay(in IVirtualDisplayCallback token,
             int width, int height, int densityDpi);
 
     // No permissions required but must be same Uid as the creator.
-    void setVirtualDisplaySurface(in IVirtualDisplayCallbacks token, in Surface surface);
+    void setVirtualDisplaySurface(in IVirtualDisplayCallback token, in Surface surface);
 
     // No permissions required but must be same Uid as the creator.
-    void releaseVirtualDisplay(in IVirtualDisplayCallbacks token);
+    void releaseVirtualDisplay(in IVirtualDisplayCallback token);
 }
