@@ -8655,7 +8655,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void startLockTaskModeOnCurrent() throws RemoteException {
-        checkCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS);
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "startLockTaskModeOnCurrent");
         ActivityRecord r = null;
         synchronized (this) {
             r = mStackSupervisor.topRunningActivityLocked();
@@ -8697,7 +8698,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void stopLockTaskModeOnCurrent() throws RemoteException {
-        checkCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS);
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "stopLockTaskModeOnCurrent");
         long ident = Binder.clearCallingIdentity();
         try {
             stopLockTaskMode();
