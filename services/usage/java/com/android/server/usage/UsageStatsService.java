@@ -18,6 +18,7 @@ package com.android.server.usage;
 
 import android.Manifest;
 import android.app.AppOpsManager;
+import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
@@ -30,11 +31,13 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
+import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArraySet;
@@ -218,8 +221,7 @@ public class UsageStatsService extends SystemService implements
      * Called by the Binder stub.
      */
     List<UsageStats> queryUsageStats(int userId, int bucketType, long beginTime, long endTime) {
-        final long timeNow = System.currentTimeMillis();
-        if (beginTime > timeNow) {
+        if (!validRange(beginTime, endTime)) {
             return null;
         }
 
@@ -232,15 +234,23 @@ public class UsageStatsService extends SystemService implements
     /**
      * Called by the Binder stub.
      */
+    List<ConfigurationStats> queryConfigurationStats(int userId, int bucketType, long beginTime,
+            long endTime) {
+        if (!validRange(beginTime, endTime)) {
+            return null;
+        }
+
+        synchronized (mLock) {
+            UserUsageStatsService service = getUserDataAndInitializeIfNeededLocked(userId);
+            return service.queryConfigurationStats(bucketType, beginTime, endTime);
+        }
+    }
+
+    /**
+     * Called by the Binder stub.
+     */
     UsageEvents queryEvents(int userId, long beginTime, long endTime) {
-        final long timeNow = System.currentTimeMillis();
-
-        // Adjust the endTime so that we don't query for the latest events.
-        // This is to prevent apps from making decision based on what app launched them,
-        // etc.
-        endTime = Math.min(endTime, timeNow - END_TIME_DELAY);
-
-        if (beginTime > endTime) {
+        if (!validRange(beginTime, endTime)) {
             return null;
         }
 
@@ -248,6 +258,11 @@ public class UsageStatsService extends SystemService implements
             UserUsageStatsService service = getUserDataAndInitializeIfNeededLocked(userId);
             return service.queryEvents(beginTime, endTime);
         }
+    }
+
+    private static boolean validRange(long beginTime, long endTime) {
+        final long timeNow = System.currentTimeMillis();
+        return beginTime <= timeNow && beginTime < endTime;
     }
 
     private void flushToDiskLocked() {
@@ -323,6 +338,28 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
+        public ParceledListSlice<ConfigurationStats> queryConfigurationStats(int bucketType,
+                long beginTime, long endTime, String callingPackage) throws RemoteException {
+            if (!hasPermission(callingPackage)) {
+                return null;
+            }
+
+            final int userId = UserHandle.getCallingUserId();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final List<ConfigurationStats> results =
+                        UsageStatsService.this.queryConfigurationStats(userId, bucketType,
+                                beginTime, endTime);
+                if (results != null) {
+                    return new ParceledListSlice<>(results);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            return null;
+        }
+
+        @Override
         public UsageEvents queryEvents(long beginTime, long endTime, String callingPackage) {
             if (!hasPermission(callingPackage)) {
                 return null;
@@ -346,8 +383,7 @@ public class UsageStatsService extends SystemService implements
     private class LocalService extends UsageStatsManagerInternal {
 
         @Override
-        public void reportEvent(ComponentName component, int userId,
-                long timeStamp, int eventType) {
+        public void reportEvent(ComponentName component, int userId, int eventType) {
             if (component == null) {
                 Slog.w(TAG, "Event reported without a component name");
                 return;
@@ -356,8 +392,23 @@ public class UsageStatsService extends SystemService implements
             UsageEvents.Event event = new UsageEvents.Event();
             event.mPackage = component.getPackageName();
             event.mClass = component.getClassName();
-            event.mTimeStamp = timeStamp;
+            event.mTimeStamp = System.currentTimeMillis();
             event.mEventType = eventType;
+            mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+        }
+
+        @Override
+        public void reportConfigurationChange(Configuration config, int userId) {
+            if (config == null) {
+                Slog.w(TAG, "Configuration event reported with a null config");
+                return;
+            }
+
+            UsageEvents.Event event = new UsageEvents.Event();
+            event.mPackage = "android";
+            event.mTimeStamp = System.currentTimeMillis();
+            event.mEventType = UsageEvents.Event.CONFIGURATION_CHANGE;
+            event.mConfiguration = new Configuration(config);
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
         }
 

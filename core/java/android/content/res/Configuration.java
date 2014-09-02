@@ -16,6 +16,12 @@
 
 package android.content.res;
 
+import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Parcel;
@@ -23,7 +29,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.view.View;
 
-import java.text.Format;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -1353,8 +1359,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * Returns a string representation of the configuration that can be parsed
      * by build tools (like AAPT).
      *
-     *
-     *
      * @hide
      */
     public static String resourceQualifierString(Configuration config) {
@@ -1567,5 +1571,230 @@ public final class Configuration implements Parcelable, Comparable<Configuration
 
         parts.add("v" + Build.VERSION.RESOURCES_SDK_INT);
         return TextUtils.join("-", parts);
+    }
+
+    /**
+     * Generate a delta Configuration between <code>base</code> and <code>change</code>. The
+     * resulting delta can be used with {@link #updateFrom(Configuration)}.
+     * <p />
+     * Caveat: If the any of the Configuration's members becomes undefined, then
+     * {@link #updateFrom(Configuration)} will treat it as a no-op and not update that member.
+     *
+     * This is fine for device configurations as no member is ever undefined.
+     * {@hide}
+     */
+    public static Configuration generateDelta(Configuration base, Configuration change) {
+        final Configuration delta = new Configuration();
+        if (base.fontScale != change.fontScale) {
+            delta.fontScale = change.fontScale;
+        }
+
+        if (base.mcc != change.mcc) {
+            delta.mcc = change.mcc;
+        }
+
+        if (base.mnc != change.mnc) {
+            delta.mnc = change.mnc;
+        }
+
+        if ((base.locale == null && change.locale != null) ||
+                (base.locale != null && !base.locale.equals(change.locale)))  {
+            delta.locale = change.locale;
+        }
+
+        if (base.touchscreen != change.touchscreen) {
+            delta.touchscreen = change.touchscreen;
+        }
+
+        if (base.keyboard != change.keyboard) {
+            delta.keyboard = change.keyboard;
+        }
+
+        if (base.keyboardHidden != change.keyboardHidden) {
+            delta.keyboardHidden = change.keyboardHidden;
+        }
+
+        if (base.navigation != change.navigation) {
+            delta.navigation = change.navigation;
+        }
+
+        if (base.navigationHidden != change.navigationHidden) {
+            delta.navigationHidden = change.navigationHidden;
+        }
+
+        if (base.orientation != change.orientation) {
+            delta.orientation = change.orientation;
+        }
+
+        if ((base.screenLayout & SCREENLAYOUT_SIZE_MASK) !=
+                (change.screenLayout & SCREENLAYOUT_SIZE_MASK)) {
+            delta.screenLayout |= change.screenLayout & SCREENLAYOUT_SIZE_MASK;
+        }
+
+        if ((base.screenLayout & SCREENLAYOUT_LAYOUTDIR_MASK) !=
+                (change.screenLayout & SCREENLAYOUT_LAYOUTDIR_MASK)) {
+            delta.screenLayout |= change.screenLayout & SCREENLAYOUT_LAYOUTDIR_MASK;
+        }
+
+        if ((base.screenLayout & SCREENLAYOUT_LONG_MASK) !=
+                (change.screenLayout & SCREENLAYOUT_LONG_MASK)) {
+            delta.screenLayout |= change.screenLayout & SCREENLAYOUT_LONG_MASK;
+        }
+
+        if ((base.uiMode & UI_MODE_TYPE_MASK) != (change.uiMode & UI_MODE_TYPE_MASK)) {
+            delta.uiMode |= change.uiMode & UI_MODE_TYPE_MASK;
+        }
+
+        if ((base.uiMode & UI_MODE_NIGHT_MASK) != (change.uiMode & UI_MODE_NIGHT_MASK)) {
+            delta.uiMode |= change.uiMode & UI_MODE_NIGHT_MASK;
+        }
+
+        if (base.screenWidthDp != change.screenWidthDp) {
+            delta.screenWidthDp = change.screenWidthDp;
+        }
+
+        if (base.screenHeightDp != change.screenHeightDp) {
+            delta.screenHeightDp = change.screenHeightDp;
+        }
+
+        if (base.smallestScreenWidthDp != change.smallestScreenWidthDp) {
+            delta.smallestScreenWidthDp = change.smallestScreenWidthDp;
+        }
+
+        if (base.densityDpi != change.densityDpi) {
+            delta.densityDpi = change.densityDpi;
+        }
+        return delta;
+    }
+
+    private static final String XML_ATTR_FONT_SCALE = "fs";
+    private static final String XML_ATTR_MCC = "mcc";
+    private static final String XML_ATTR_MNC = "mnc";
+    private static final String XML_ATTR_LOCALE = "locale";
+    private static final String XML_ATTR_TOUCHSCREEN = "touch";
+    private static final String XML_ATTR_KEYBOARD = "key";
+    private static final String XML_ATTR_KEYBOARD_HIDDEN = "keyHid";
+    private static final String XML_ATTR_HARD_KEYBOARD_HIDDEN = "hardKeyHid";
+    private static final String XML_ATTR_NAVIGATION = "nav";
+    private static final String XML_ATTR_NAVIGATION_HIDDEN = "navHid";
+    private static final String XML_ATTR_ORIENTATION = "ori";
+    private static final String XML_ATTR_SCREEN_LAYOUT = "scrLay";
+    private static final String XML_ATTR_UI_MODE = "ui";
+    private static final String XML_ATTR_SCREEN_WIDTH = "width";
+    private static final String XML_ATTR_SCREEN_HEIGHT = "height";
+    private static final String XML_ATTR_SMALLEST_WIDTH = "sw";
+    private static final String XML_ATTR_DENSITY = "density";
+
+    /**
+     * Reads the attributes corresponding to Configuration member fields from the Xml parser.
+     * The parser is expected to be on a tag which has Configuration attributes.
+     *
+     * @param parser The Xml parser from which to read attributes.
+     * @param configOut The Configuration to populate from the Xml attributes.
+     * {@hide}
+     */
+    public static void readXmlAttrs(XmlPullParser parser, Configuration configOut)
+            throws XmlPullParserException, IOException {
+        configOut.fontScale = Float.intBitsToFloat(
+                XmlUtils.readIntAttribute(parser, XML_ATTR_FONT_SCALE, 0));
+        configOut.mcc = XmlUtils.readIntAttribute(parser, XML_ATTR_MCC, 0);
+        configOut.mnc = XmlUtils.readIntAttribute(parser, XML_ATTR_MNC, 0);
+
+        final String localeStr = XmlUtils.readStringAttribute(parser, XML_ATTR_LOCALE);
+        if (localeStr != null) {
+            configOut.locale = Locale.forLanguageTag(localeStr);
+        }
+
+        configOut.touchscreen = XmlUtils.readIntAttribute(parser, XML_ATTR_TOUCHSCREEN,
+                TOUCHSCREEN_UNDEFINED);
+        configOut.keyboard = XmlUtils.readIntAttribute(parser, XML_ATTR_KEYBOARD,
+                KEYBOARD_UNDEFINED);
+        configOut.keyboardHidden = XmlUtils.readIntAttribute(parser, XML_ATTR_KEYBOARD_HIDDEN,
+                KEYBOARDHIDDEN_UNDEFINED);
+        configOut.hardKeyboardHidden =
+                XmlUtils.readIntAttribute(parser, XML_ATTR_HARD_KEYBOARD_HIDDEN,
+                        HARDKEYBOARDHIDDEN_UNDEFINED);
+        configOut.navigation = XmlUtils.readIntAttribute(parser, XML_ATTR_NAVIGATION,
+                NAVIGATION_UNDEFINED);
+        configOut.navigationHidden = XmlUtils.readIntAttribute(parser, XML_ATTR_NAVIGATION_HIDDEN,
+                NAVIGATIONHIDDEN_UNDEFINED);
+        configOut.orientation = XmlUtils.readIntAttribute(parser, XML_ATTR_ORIENTATION,
+                ORIENTATION_UNDEFINED);
+        configOut.screenLayout = XmlUtils.readIntAttribute(parser, XML_ATTR_SCREEN_LAYOUT,
+                SCREENLAYOUT_UNDEFINED);
+        configOut.uiMode = XmlUtils.readIntAttribute(parser, XML_ATTR_UI_MODE, 0);
+        configOut.screenWidthDp = XmlUtils.readIntAttribute(parser, XML_ATTR_SCREEN_WIDTH,
+                SCREEN_WIDTH_DP_UNDEFINED);
+        configOut.screenHeightDp = XmlUtils.readIntAttribute(parser, XML_ATTR_SCREEN_HEIGHT,
+                SCREEN_HEIGHT_DP_UNDEFINED);
+        configOut.smallestScreenWidthDp =
+                XmlUtils.readIntAttribute(parser, XML_ATTR_SMALLEST_WIDTH,
+                        SMALLEST_SCREEN_WIDTH_DP_UNDEFINED);
+        configOut.densityDpi = XmlUtils.readIntAttribute(parser, XML_ATTR_DENSITY,
+                DENSITY_DPI_UNDEFINED);
+    }
+
+
+    /**
+     * Writes the Configuration's member fields as attributes into the XmlSerializer.
+     * The serializer is expected to have already started a tag so that attributes can be
+     * immediately written.
+     *
+     * @param xml The serializer to which to write the attributes.
+     * @param config The Configuration whose member fields to write.
+     * {@hide}
+     */
+    public static void writeXmlAttrs(XmlSerializer xml, Configuration config) throws IOException {
+        XmlUtils.writeIntAttribute(xml, XML_ATTR_FONT_SCALE,
+                Float.floatToIntBits(config.fontScale));
+        if (config.mcc != 0) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_MCC, config.mcc);
+        }
+        if (config.mnc != 0) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_MNC, config.mnc);
+        }
+        if (config.locale != null) {
+            XmlUtils.writeStringAttribute(xml, XML_ATTR_LOCALE, config.locale.toLanguageTag());
+        }
+        if (config.touchscreen != TOUCHSCREEN_UNDEFINED) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_TOUCHSCREEN, config.touchscreen);
+        }
+        if (config.keyboard != KEYBOARD_UNDEFINED) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_KEYBOARD, config.keyboard);
+        }
+        if (config.keyboardHidden != KEYBOARDHIDDEN_UNDEFINED) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_KEYBOARD_HIDDEN, config.keyboardHidden);
+        }
+        if (config.hardKeyboardHidden != HARDKEYBOARDHIDDEN_UNDEFINED) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_HARD_KEYBOARD_HIDDEN,
+                    config.hardKeyboardHidden);
+        }
+        if (config.navigation != NAVIGATION_UNDEFINED) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_NAVIGATION, config.navigation);
+        }
+        if (config.navigationHidden != NAVIGATIONHIDDEN_UNDEFINED) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_NAVIGATION_HIDDEN, config.navigationHidden);
+        }
+        if (config.orientation != ORIENTATION_UNDEFINED) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_ORIENTATION, config.orientation);
+        }
+        if (config.screenLayout != SCREENLAYOUT_UNDEFINED) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_SCREEN_LAYOUT, config.screenLayout);
+        }
+        if (config.uiMode != 0) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_UI_MODE, config.uiMode);
+        }
+        if (config.screenWidthDp != SCREEN_WIDTH_DP_UNDEFINED) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_SCREEN_WIDTH, config.screenWidthDp);
+        }
+        if (config.screenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_SCREEN_HEIGHT, config.screenHeightDp);
+        }
+        if (config.smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_SMALLEST_WIDTH, config.smallestScreenWidthDp);
+        }
+        if (config.densityDpi != DENSITY_DPI_UNDEFINED) {
+            XmlUtils.writeIntAttribute(xml, XML_ATTR_DENSITY, config.densityDpi);
+        }
     }
 }

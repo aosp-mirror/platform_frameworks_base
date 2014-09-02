@@ -3209,7 +3209,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (resumed) {
             if (mUsageStatsService != null) {
                 mUsageStatsService.reportEvent(component.realActivity, component.userId,
-                        System.currentTimeMillis(),
                         UsageEvents.Event.MOVE_TO_FOREGROUND);
             }
             synchronized (stats) {
@@ -3218,7 +3217,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         } else {
             if (mUsageStatsService != null) {
                 mUsageStatsService.reportEvent(component.realActivity, component.userId,
-                        System.currentTimeMillis(),
                         UsageEvents.Event.MOVE_TO_BACKGROUND);
             }
             synchronized (stats) {
@@ -15918,6 +15916,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 newConfig.seq = mConfigurationSeq;
                 mConfiguration = newConfig;
                 Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + newConfig);
+                mUsageStatsService.reportConfigurationChange(newConfig, mCurrentUserId);
                 //mUsageStatsService.noteStartConfig(newConfig);
 
                 final Configuration configCopy = new Configuration(mConfiguration);
