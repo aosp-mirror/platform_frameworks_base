@@ -416,23 +416,22 @@ public final class TvInputInfo implements Parcelable {
      * Loads the user-displayed icon for this TV input.
      *
      * @param context Supplies a {@link Context} used to load the icon.
-     * @return a Drawable containing the TV input's icon. If the TV input does not have
-     *         an icon, application icon is returned. If it's unavailable too, system default is
-     *         returned.
+     * @return a Drawable containing the TV input's icon. If the TV input does not have an icon,
+     *         application's icon is returned. If it's unavailable too, {@code null} is returned.
      */
     public Drawable loadIcon(Context context) {
         if (mIconUri == null) {
-            return loadDefaultIcon(context);
+            return loadServiceIcon(context);
         }
         try (InputStream is = context.getContentResolver().openInputStream(mIconUri)) {
             Drawable drawable = Drawable.createFromStream(is, null);
             if (drawable == null) {
-                return loadDefaultIcon(context);
+                return loadServiceIcon(context);
             }
             return drawable;
         } catch (IOException e) {
             Log.w(TAG, "Loading the default icon due to a failure on loading " + mIconUri, e);
-            return loadDefaultIcon(context);
+            return loadServiceIcon(context);
         }
     }
 
@@ -486,7 +485,11 @@ public final class TvInputInfo implements Parcelable {
         dest.writeByte(mIsConnectedToHdmiSwitch ? (byte) 1 : 0);
     }
 
-    private Drawable loadDefaultIcon(Context context) {
+    private Drawable loadServiceIcon(Context context) {
+        if (mService.serviceInfo.icon == 0
+                && mService.serviceInfo.applicationInfo.icon == 0) {
+            return null;
+        }
         return mService.serviceInfo.loadIcon(context.getPackageManager());
     }
 
