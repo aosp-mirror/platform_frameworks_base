@@ -447,7 +447,7 @@ class GLES20Canvas extends HardwareCanvas {
             return saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, paint, saveFlags);
         }
 
-        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
         return nSaveLayer(mRenderer, nativePaint, saveFlags);
     }
 
@@ -457,7 +457,7 @@ class GLES20Canvas extends HardwareCanvas {
     public int saveLayer(float left, float top, float right, float bottom, Paint paint,
             int saveFlags) {
         if (left < right && top < bottom) {
-            final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+            final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
             return nSaveLayer(mRenderer, left, top, right, bottom, nativePaint, saveFlags);
         }
         return save(saveFlags);
@@ -541,7 +541,7 @@ class GLES20Canvas extends HardwareCanvas {
     public void drawArc(float left, float top, float right, float bottom,
             float startAngle, float sweepAngle, boolean useCenter, Paint paint) {
         nDrawArc(mRenderer, left, top, right, bottom,
-                startAngle, sweepAngle, useCenter, paint.mNativePaint);
+                startAngle, sweepAngle, useCenter, paint.getNativeInstance());
     }
 
     private static native void nDrawArc(long renderer, float left, float top,
@@ -557,7 +557,7 @@ class GLES20Canvas extends HardwareCanvas {
     public void drawPatch(NinePatch patch, Rect dst, Paint paint) {
         Bitmap bitmap = patch.getBitmap();
         throwIfCannotDraw(bitmap);
-        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
         nDrawPatch(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, patch.mNativeChunk,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint);
     }
@@ -566,7 +566,7 @@ class GLES20Canvas extends HardwareCanvas {
     public void drawPatch(NinePatch patch, RectF dst, Paint paint) {
         Bitmap bitmap = patch.getBitmap();
         throwIfCannotDraw(bitmap);
-        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
         nDrawPatch(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, patch.mNativeChunk,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint);
     }
@@ -577,7 +577,7 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
         throwIfCannotDraw(bitmap);
-        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
         nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, left, top, nativePaint);
     }
 
@@ -587,7 +587,7 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
         throwIfCannotDraw(bitmap);
-        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
         nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer,
                 matrix.native_instance, nativePaint);
     }
@@ -598,7 +598,7 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
         throwIfCannotDraw(bitmap);
-        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
 
         int left, top, right, bottom;
         if (src == null) {
@@ -619,7 +619,7 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, RectF dst, Paint paint) {
         throwIfCannotDraw(bitmap);
-        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
 
         float left, top, right, bottom;
         if (src == null) {
@@ -664,7 +664,7 @@ class GLES20Canvas extends HardwareCanvas {
             throw new ArrayIndexOutOfBoundsException();
         }
 
-        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
         nDrawBitmap(mRenderer, colors, offset, stride, x, y,
                 width, height, hasAlpha, nativePaint);
     }
@@ -697,7 +697,7 @@ class GLES20Canvas extends HardwareCanvas {
             checkRange(colors.length, colorOffset, count);
         }
 
-        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
         nDrawBitmapMesh(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, meshWidth, meshHeight,
                 verts, vertOffset, colors, colorOffset, nativePaint);
     }
@@ -708,7 +708,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawCircle(float cx, float cy, float radius, Paint paint) {
-        nDrawCircle(mRenderer, cx, cy, radius, paint.mNativePaint);
+        nDrawCircle(mRenderer, cx, cy, radius, paint.getNativeInstance());
     }
 
     private static native void nDrawCircle(long renderer, float cx, float cy,
@@ -766,7 +766,7 @@ class GLES20Canvas extends HardwareCanvas {
         if ((offset | count) < 0 || offset + count > pts.length) {
             throw new IllegalArgumentException("The lines array must contain 4 elements per line.");
         }
-        nDrawLines(mRenderer, pts, offset, count, paint.mNativePaint);
+        nDrawLines(mRenderer, pts, offset, count, paint.getNativeInstance());
     }
 
     private static native void nDrawLines(long renderer, float[] points,
@@ -779,7 +779,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawOval(float left, float top, float right, float bottom, Paint paint) {
-        nDrawOval(mRenderer, left, top, right, bottom, paint.mNativePaint);
+        nDrawOval(mRenderer, left, top, right, bottom, paint.getNativeInstance());
     }
 
     private static native void nDrawOval(long renderer, float left, float top,
@@ -796,10 +796,10 @@ class GLES20Canvas extends HardwareCanvas {
     public void drawPath(Path path, Paint paint) {
         if (path.isSimplePath) {
             if (path.rects != null) {
-                nDrawRects(mRenderer, path.rects.mNativeRegion, paint.mNativePaint);
+                nDrawRects(mRenderer, path.rects.mNativeRegion, paint.getNativeInstance());
             }
         } else {
-            nDrawPath(mRenderer, path.mNativePath, paint.mNativePaint);
+            nDrawPath(mRenderer, path.mNativePath, paint.getNativeInstance());
         }
     }
 
@@ -829,7 +829,7 @@ class GLES20Canvas extends HardwareCanvas {
     public void drawPoints(float[] pts, int offset, int count, Paint paint) {
         if (count < 2) return;
 
-        nDrawPoints(mRenderer, pts, offset, count, paint.mNativePaint);
+        nDrawPoints(mRenderer, pts, offset, count, paint.getNativeInstance());
     }
 
     private static native void nDrawPoints(long renderer, float[] points,
@@ -840,7 +840,7 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawRect(float left, float top, float right, float bottom, Paint paint) {
         if (left == right || top == bottom) return;
-        nDrawRect(mRenderer, left, top, right, bottom, paint.mNativePaint);
+        nDrawRect(mRenderer, left, top, right, bottom, paint.getNativeInstance());
     }
 
     private static native void nDrawRect(long renderer, float left, float top,
@@ -864,7 +864,7 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
             Paint paint) {
-        nDrawRoundRect(mRenderer, left, top, right, bottom, rx, ry, paint.mNativePaint);
+        nDrawRoundRect(mRenderer, left, top, right, bottom, rx, ry, paint.getNativeInstance());
     }
 
     private static native void nDrawRoundRect(long renderer, float left, float top,
@@ -877,7 +877,7 @@ class GLES20Canvas extends HardwareCanvas {
         }
 
         nDrawText(mRenderer, text, index, count, x, y,
-                paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
+                paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
     }
 
     private static native void nDrawText(long renderer, char[] text, int index, int count,
@@ -888,14 +888,14 @@ class GLES20Canvas extends HardwareCanvas {
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
             nDrawText(mRenderer, text.toString(), start, end, x, y, paint.mBidiFlags,
-                    paint.mNativePaint, paint.mNativeTypeface);
+                    paint.getNativeInstance(), paint.mNativeTypeface);
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawText(this, start, end, x, y, paint);
         } else {
             char[] buf = TemporaryBuffer.obtain(end - start);
             TextUtils.getChars(text, start, end, buf, 0);
             nDrawText(mRenderer, buf, 0, end - start, x, y,
-                    paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
+                    paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
             TemporaryBuffer.recycle(buf);
         }
     }
@@ -907,7 +907,7 @@ class GLES20Canvas extends HardwareCanvas {
         }
 
         nDrawText(mRenderer, text, start, end, x, y,
-                paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
+                paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
     }
 
     private static native void nDrawText(long renderer, String text, int start, int end,
@@ -916,7 +916,7 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawText(String text, float x, float y, Paint paint) {
         nDrawText(mRenderer, text, 0, text.length(), x, y,
-                paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
+                paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
     }
 
     @Override
@@ -927,7 +927,7 @@ class GLES20Canvas extends HardwareCanvas {
         }
 
         nDrawTextOnPath(mRenderer, text, index, count, path.mNativePath, hOffset, vOffset,
-                paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
+                paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
     }
 
     private static native void nDrawTextOnPath(long renderer, char[] text, int index, int count,
@@ -939,7 +939,7 @@ class GLES20Canvas extends HardwareCanvas {
         if (text.length() == 0) return;
 
         nDrawTextOnPath(mRenderer, text, 0, text.length(), path.mNativePath, hOffset, vOffset,
-                paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
+                paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
     }
 
     private static native void nDrawTextOnPath(long renderer, String text, int start, int end,
@@ -954,7 +954,7 @@ class GLES20Canvas extends HardwareCanvas {
         }
 
         nDrawTextRun(mRenderer, text, index, count, contextIndex, contextCount, x, y, isRtl,
-                paint.mNativePaint, paint.mNativeTypeface);
+                paint.getNativeInstance(), paint.mNativeTypeface);
     }
 
     private static native void nDrawTextRun(long renderer, char[] text, int index, int count,
@@ -970,7 +970,7 @@ class GLES20Canvas extends HardwareCanvas {
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
             nDrawTextRun(mRenderer, text.toString(), start, end, contextStart,
-                    contextEnd, x, y, isRtl, paint.mNativePaint, paint.mNativeTypeface);
+                    contextEnd, x, y, isRtl, paint.getNativeInstance(), paint.mNativeTypeface);
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawTextRun(this, start, end,
                     contextStart, contextEnd, x, y, isRtl, paint);
@@ -980,7 +980,7 @@ class GLES20Canvas extends HardwareCanvas {
             char[] buf = TemporaryBuffer.obtain(contextLen);
             TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
             nDrawTextRun(mRenderer, buf, start - contextStart, len, 0, contextLen,
-                    x, y, isRtl, paint.mNativePaint, paint.mNativeTypeface);
+                    x, y, isRtl, paint.getNativeInstance(), paint.mNativeTypeface);
             TemporaryBuffer.recycle(buf);
         }
     }

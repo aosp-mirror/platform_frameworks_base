@@ -305,7 +305,7 @@ public class RenderNode {
     }
 
     public boolean setLayerPaint(Paint paint) {
-        return nSetLayerPaint(mNativeRenderNode, paint != null ? paint.mNativePaint : 0);
+        return nSetLayerPaint(mNativeRenderNode, paint != null ? paint.getNativeInstance() : 0);
     }
 
     public boolean setClipBounds(@Nullable Rect rect) {

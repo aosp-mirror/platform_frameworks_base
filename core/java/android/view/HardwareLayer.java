@@ -52,7 +52,7 @@ final class HardwareLayer {
      * @see View#setLayerPaint(android.graphics.Paint)
      */
     public void setLayerPaint(Paint paint) {
-        nSetLayerPaint(mFinalizer.get(), paint.mNativePaint);
+        nSetLayerPaint(mFinalizer.get(), paint.getNativeInstance());
         mRenderer.pushLayerUpdate(this);
     }
 

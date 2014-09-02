@@ -31,7 +31,7 @@ public final class CanvasProperty<T> {
     }
 
     public static CanvasProperty<Paint> createPaint(Paint initialValue) {
-        return new CanvasProperty<Paint>(nCreatePaint(initialValue.mNativePaint));
+        return new CanvasProperty<Paint>(nCreatePaint(initialValue.getNativeInstance()));
     }
 
     private CanvasProperty(long nativeContainer) {

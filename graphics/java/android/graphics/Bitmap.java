@@ -1542,7 +1542,7 @@ public final class Bitmap implements Parcelable {
      */
     public Bitmap extractAlpha(Paint paint, int[] offsetXY) {
         checkRecycled("Can't extractAlpha on a recycled bitmap");
-        long nativePaint = paint != null ? paint.mNativePaint : 0;
+        long nativePaint = paint != null ? paint.getNativeInstance() : 0;
         Bitmap bm = nativeExtractAlpha(mNativeBitmap, nativePaint, offsetXY);
         if (bm == null) {
             throw new RuntimeException("Failed to extractAlpha on Bitmap");
