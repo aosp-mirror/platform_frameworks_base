@@ -288,8 +288,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"Vyhľadávanie"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Prejdite prstom nahor: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Prejdite prstom doľava: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <!-- no translation found for zen_no_interruptions_with_warning (4396898053735625287) -->
-    <skip />
+    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Žiadne prerušenia. Dokonca ani budíky"</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Žiadne prerušenia"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"Iba prioritné prerušenia"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"Ďalší budík: <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
@@ -339,12 +338,10 @@
     <string name="media_projection_action_text" msgid="8470872969457985954">"Spustiť"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Žiadne upozornenia"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"Zariadenie môže byť sledované"</string>
-    <!-- no translation found for profile_owned_footer (8021888108553696069) -->
-    <skip />
+    <string name="profile_owned_footer" msgid="8021888108553696069">"Profil môže byť monitorovaný"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Sieť môže byť sledovaná"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Sledovanie zariadenia"</string>
-    <!-- no translation found for monitoring_title_profile_owned (6790109874733501487) -->
-    <skip />
+    <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Monitorovanie profilu"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Sledovanie siete"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Deaktivovať VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Odpojiť sieť VPN"</string>
@@ -353,26 +350,16 @@
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Ste pripojený/-á k sieti VPN (<xliff:g id="APPLICATION">%1$s</xliff:g>).\n\nPoskytovateľ služby VPN môže sledovať vaše zariadenie a aktivitu v sieti vrátane správ, aplikácií a zabezpečených webových stránok."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Toto zariadenie spravuje organizácia:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nSprávca môže sledovať vašu aktivitu v sieti vrátane e-mailov, aplikácií a zabezpečených webových stránok. Ďalšie informácie získate od svojho správcu.\n\nZároveň ste aplikácii <xliff:g id="APPLICATION">%2$s</xliff:g> povolili nastaviť pripojenie VPN. Táto aplikácia môže tiež sledovať vašu aktivitu v sieti."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Toto zariadenie spravuje organizácia:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nSprávca môže sledovať vašu aktivitu v sieti vrátane e-mailov, aplikácií a zabezpečených webových stránok. Ďalšie informácie získate od svojho správcu.\n\nZároveň ste pripojený/-á aj k sieti VPN (<xliff:g id="APPLICATION">%2$s</xliff:g>). Poskytovateľ služby VPN môže tiež sledovať vašu aktivitu v sieti."</string>
-    <!-- no translation found for monitoring_description_profile_owned (2370062794285691713) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (8685301493845456293) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (847491346263295767) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_profile_owned (4095516964132237051) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (9193588924767232909) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_device_and_profile_owned (6935475023447698473) -->
-    <skip />
+    <string name="monitoring_description_profile_owned" msgid="2370062794285691713">"Tento profil spravuje organizácia:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nSprávca môže sledovať vaše zariadenie a aktivitu v sieti vrátane správ, aplikácií a zabezpečených webových stránok.\n\nĎalšie informácie získate od svojho správcu."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="8685301493845456293">"Toto zariadenie spravuje organizácia:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nVáš profil spravuje organizácia:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nSprávca môže sledovať vaše zariadenie a aktivitu v sieti vrátane správ, aplikácií a zabezpečených webových stránok.\n\nĎalšie informácie získate od svojho správcu."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="847491346263295767">"Tento profil spravuje organizácia:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nSprávca môže sledovať vašu aktivitu v sieti vrátane správ, aplikácií a zabezpečených webových stránok. Ďalšie informácie získate od svojho správcu.\n\nZároveň ste aplikácii <xliff:g id="APPLICATION">%2$s</xliff:g> povolili možnosť nastaviť pripojenie VPN. Táto aplikácia tiež môže sledovať vašu aktivitu v sieti."</string>
+    <string name="monitoring_description_legacy_vpn_profile_owned" msgid="4095516964132237051">"Tento profil spravuje organizácia:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nSprávca môže sledovať vašu aktivitu v sieti vrátane správ, aplikácií a zabezpečených webových stránok. Ďalšie informácie získate od svojho správcu.\n\nZároveň ste pripojený/-á k sieti VPN (<xliff:g id="APPLICATION">%2$s</xliff:g>). Poskytovateľ služby VPN môže tiež sledovať vašu aktivitu v sieti."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"Toto zariadenie spravuje organizácia:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nVáš profil spravuje organizácia:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nSprávca môže sledovať vašu aktivitu v sieti vrátane správ, aplikácií a zabezpečených webových stránok. Ďalšie informácie získate od svojho správcu.\n\nZároveň ste aplikácii <xliff:g id="APPLICATION">%3$s</xliff:g> povolili možnosť nastaviť pripojenie VPN. Táto aplikácia tiež môže sledovať vašu aktivitu v sieti."</string>
+    <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"Toto zariadenie spravuje organizácia:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nVáš profil spravuje organizácia:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nSprávca môže sledovať vašu aktivitu v sieti vrátane správ, aplikácií a zabezpečených webových stránok. Ďalšie informácie získate od svojho správcu.\n\nZároveň ste pripojený/-á k sieti VPN (<xliff:g id="APPLICATION">%3$s</xliff:g>). Poskytovateľ služby VPN môže tiež sledovať vašu aktivitu v sieti."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Zariadenie zostane uzamknuté, dokým ho ručne neodomknete."</string>
-    <!-- no translation found for hidden_notifications_title (7139628534207443290) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_text (2326409389088668981) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_cancel (3690709735122344913) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_setup (41079514801976810) -->
-    <skip />
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"Získavať upozornenia rýchlejšie"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"Zobraziť pred odomknutím"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nie, vďaka"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"Nastaviť"</string>
     <string name="muted_by" msgid="6147073845094180001">"Stlmené aplikáciou <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

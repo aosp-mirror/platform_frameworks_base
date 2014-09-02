@@ -286,8 +286,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"Sesha"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Shelelisela ngenhla ku-<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Shelelisela ngakwesokunxele ku-<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <!-- no translation found for zen_no_interruptions_with_warning (4396898053735625287) -->
-    <skip />
+    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Akukho ukuphazamiseka. Nama-alamu imbala."</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Azikho iziphazamiso"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"Iziphazamiso ezibalulekile kuphela"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"I-alamu yakho elandelayo ingo<xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
@@ -337,12 +336,10 @@
     <string name="media_projection_action_text" msgid="8470872969457985954">"Qala manje"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Azikho izaziso"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"Idivayisi inganganyelwa"</string>
-    <!-- no translation found for profile_owned_footer (8021888108553696069) -->
-    <skip />
+    <string name="profile_owned_footer" msgid="8021888108553696069">"Iphrofayela ingaqashwa"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Inethiwekhi kungenzeka iqashiwe"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Ukwengamela idivayisi"</string>
-    <!-- no translation found for monitoring_title_profile_owned (6790109874733501487) -->
-    <skip />
+    <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Ukuqapha iphrofayela"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Ukuqashwa kwenethiwekhi"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Khubaza i-VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Nqamula i-VPN"</string>
@@ -351,26 +348,16 @@
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Uxhumekile ku-VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\").\n\nUmhlinzeki wakho wesevisi ye-VPN angangamela idivayisi yakho nomsebenzi wenethiwekhi kufaka phakathi ama-imeyili, izinhlelo zokusebenza, namawebhusayithi aphephile."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Le divayisi iphethwe i-:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nUmqondisi wakho uyakwazi ukwengamela umsebenzi wakho wenethiwekhi kufaka phakathi ama-imeyili, izinhlelo zokusebenza, namawebhusayithi aphephile. Ngolwazi olubanzi, xhumana nomqondisi wakho.\n\nFuthi, unike i-\"<xliff:g id="APPLICATION">%2$s</xliff:g>\" imvume yokusetha uxhumo le-VPN. Lolu hlelo lokusebenza lungangamela futhi umsebenzi wenethiwekhi."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Le divayisi iphathwe i-:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nUmqondisi wakho uyakwazi ukwengamela umsebenzi wenethiwekhi yakho kufaka phakathi ama-imeyili, izinhlelo zokusebenza, namawebhusayithi aphephile. Ngolwazi olubanzi, xhumana nomqondisi wakho.\n\nFuthi, uxhumekile ku-VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). Umhlinzeki wakho wesevisi ye-VPN angangamela futhi umsebenzi wenethiwekhi."</string>
-    <!-- no translation found for monitoring_description_profile_owned (2370062794285691713) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (8685301493845456293) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (847491346263295767) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_profile_owned (4095516964132237051) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (9193588924767232909) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_device_and_profile_owned (6935475023447698473) -->
-    <skip />
+    <string name="monitoring_description_profile_owned" msgid="2370062794285691713">"Le phrofayela iphethwe yi-:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nUmlawuli wakho angaqapha idivayisi yakho nomsebenzi wenethiwekhi, ofaka ama-imeyili, izinhlelo zokusebenza namawebhusayithi avikelekile.\n\nUkuze uthole olunye ulwazi, xhumana nomlawuli wakho."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="8685301493845456293">"Le divayisi iphethwe yi-:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nIphrofayela yakho iphethwe yi-:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nUmlawuli wakho angaqapha idivayisi yakho kanye nomsebenzi wenethiwekhi, okufaka ama-imeyili, izinhlelo zokusebenza namawebhusayithi avikelekile.\n\nUkuze uthole olunye ulwazi, xhumana nomlawuli wakho."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="847491346263295767">"Le phrofayela iphethwe yi-:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nUmlawuli wakho uyakwazi ukuqapha umsebenzi wakho wenethiwekhi ofaka ama-imeyili, izinhlelo zokusebenza, namawebhusayithi avikelekile. Ukuze uthole olunye ulwazi, xhumana nomlawuli wakho.\n\nFuthi, unikeze i-\"<xliff:g id="APPLICATION">%2$s</xliff:g>\" imvume yokusetha ukuxhumeka kwe-VPN. Lolu hlelo lokusebenza lungaphinda luqaphe umsebenzi wakho."</string>
+    <string name="monitoring_description_legacy_vpn_profile_owned" msgid="4095516964132237051">"Le phrofayela iphethwe yi-:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nUmlawuli wakho uyakwazi ukuqapha umsebenzi wenethiwekhi yakho ofaka ama-imeyili, izinhlelo zokusebenza, namawebhusayithi avikelekile. Ukuze uthole ulwazi olungeziwe, xhumana nomlawuli wakho.\n\nFuthi, uxhumeke ku-VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). Umhlinzeki wakho wesevisi ye-VPN angaphinda aqaphele nomsebenzi wenethiwekhi."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"Le divayisi iphethwe yi-:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nIphrofayela yakho iphethwe yi-:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nUmlawuli wakho uyakwazi ukuqapha umsebenzi wakho wenethiwekhi ofaka ama-imeyili, izinhlelo zokusebenza namawebhusayithi avikelekile. Ukuze uthole olunye ulwazi, xhumana nomlawuli wakho.\n\nFuthi unikeze i-\"<xliff:g id="APPLICATION">%3$s</xliff:g>\" imvume yokusetha ukuxhumeka kwe-VPN. Lolu hlelo lokusebenza lungaqapha nomsebenzi wenethiwekhi."</string>
+    <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"Le divayisi iphethwe yi-:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nIphrofayela yakho iphethwe yi-:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nUmlawuli wakho uyakwazi ukuqapha umsebenzi wakho wenethiwekhi ofaka ama-imeyili, izinhlelo zokusebenza, namawebhusayithi avikelekile. Ukuze uthole olunye ulwazi, xhumana nomlawuli wakho.\n\nFuthi, uxhumeke ku-VPN (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\"). Umhlinzeki wakho wesevisi ye-VPN angaqapha nomsebenzi wenethiwekhi."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Idivayisi izohlala ikhiyekile uze uyivule ngokwenza"</string>
-    <!-- no translation found for hidden_notifications_title (7139628534207443290) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_text (2326409389088668981) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_cancel (3690709735122344913) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_setup (41079514801976810) -->
-    <skip />
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"Thola izaziso ngokushesha"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"Ibone ngaphambi kokuthi uyivule"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Cha ngiyabonga"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"Lungisa"</string>
     <string name="muted_by" msgid="6147073845094180001">"Ithuliswe ngu-<xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

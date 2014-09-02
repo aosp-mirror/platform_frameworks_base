@@ -286,8 +286,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"Tìm kiếm"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Trượt lên để <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Trượt sang trái để <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <!-- no translation found for zen_no_interruptions_with_warning (4396898053735625287) -->
-    <skip />
+    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Không có gián đoạn. Thậm chí không có cảnh báo."</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Không có gián đoạn nào"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"Chỉ các gián đoạn ưu tiên"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"Lần báo thức tiếp theo của bạn vào lúc <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
@@ -337,12 +336,10 @@
     <string name="media_projection_action_text" msgid="8470872969457985954">"Bắt đầu ngay"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Không có thông báo nào"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"Thiết bị có thể được giám sát"</string>
-    <!-- no translation found for profile_owned_footer (8021888108553696069) -->
-    <skip />
+    <string name="profile_owned_footer" msgid="8021888108553696069">"Hồ sơ có thể được giám sát"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Mạng có thể được giám sát"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Giám sát thiết bị"</string>
-    <!-- no translation found for monitoring_title_profile_owned (6790109874733501487) -->
-    <skip />
+    <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Giám sát hồ sơ"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Giám sát mạng"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Tắt VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Ngắt kết nối VPN"</string>
@@ -351,26 +348,16 @@
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Bạn đang kết nối với VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\").\n\nNhà cung cấp dịch vụ VPN có thể giám sát hoạt động mạng và thiết bị của bạn bao gồm email, ứng dụng và các trang web an toàn."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Thiết bị này được quản lý bởi:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nQuản trị viên có thể giám sát hoạt động mạng gồm email, ứng dụng và trang web an toàn. Để biết thêm thông tin, hãy liên hệ với quản trị viên.\n\nNgoài ra, bạn đã cấp cho \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" quyền thiết lập kết nối VPN. Ứng dụng này có thể giám sát hoạt động mạng."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Thiết bị này được quản lý bởi:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nQuản trị viên có thể giám sát hoạt động mạng của bạn bao gồm email, ứng dụng và các trang web an toàn. Để biết thêm thông tin, hãy liên hệ với quản trị viên của bạn.\n\nNgoài ra, bạn được kết nối với VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). Nhà cung cấp dịch vụ VPN cũng có thể giám sát hoạt động mạng."</string>
-    <!-- no translation found for monitoring_description_profile_owned (2370062794285691713) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (8685301493845456293) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (847491346263295767) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_profile_owned (4095516964132237051) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (9193588924767232909) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_device_and_profile_owned (6935475023447698473) -->
-    <skip />
+    <string name="monitoring_description_profile_owned" msgid="2370062794285691713">"Hồ sơ này được quản lý bởi:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nQuản trị viên có thể giám sát thiết bị và hoạt động mạng của bạn, bao gồm email, ứng dụng và các trang web an toàn.\n\nĐể biết thêm thông tin, hãy liên hệ với quản trị viên của bạn."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="8685301493845456293">"Thiết bị này được quản lý bởi:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nHồ sơ của bạn được quản lý bởi:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nQuản trị viên có thể giám sát thiết bị và hoạt động mạng của bạn, bao gồm email, ứng dụng và các trang web an toàn.\n\nĐể biết thêm thông tin, hãy liên hệ với quản trị viên của bạn."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="847491346263295767">"Hồ sơ này được quản lý bởi:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nQuản trị viên có thể giám sát hoạt động mạng của bạn, bao gồm email, ứng dụng và các trang web an toàn. Để biết thêm thông tin, hãy liên hệ với quản trị viên của bạn.\n\nNgoài ra, bạn đã cấp cho \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" quyền thiết lập kết nối VPN. Ứng dụng này cũng có thể giám sát hoạt động mạng."</string>
+    <string name="monitoring_description_legacy_vpn_profile_owned" msgid="4095516964132237051">"Hồ sơ này được quản lý bởi:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nQuản trị viên có thể giám sát hoạt động mạng của bạn, bao gồm email, ứng dụng và các trang web an toàn. Để biết thêm thông tin, hãy liên hệ với quản trị viên của bạn.\n\nNgoài ra, bạn được kết nối với VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). Nhà cung cấp dịch vụ VPN của bạn cũng có thể giám sát hoạt động mạng."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"Thiết bị này được quản lý bởi:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nHồ sơ của bạn được quản lý bởi:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nQuản trị viên có thể giám sát hoạt động mạng của bạn, bao gồm email, ứng dụng và các trang web an toàn. Để biết thêm thông tin, hãy liên hệ với quản trị viên của bạn.\n\nNgoài ra, bạn đã cấp cho \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" quyền thiết lập kết nối VPN. Ứng dụng này cũng có thể giám sát hoạt động mạng."</string>
+    <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"Thiết bị này được quản lý bởi:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nHồ sơ của bạn được quản lý bởi:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nQuản trị viên có thể giám sát thiết bị và hoạt động mạng của bạn, bao gồm email, ứng dụng và các trang web an toàn. Để biết thêm thông tin, hãy liên hệ với quản trị viên của bạn.\n\nNgoài ra, bạn được kết nối với VPN (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\"). Nhà cung cấp dịch vụ VPN của bạn cũng có thể giám sát hoạt động mạng."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Thiết bị sẽ vẫn bị khóa cho tới khi bạn mở khóa theo cách thủ công"</string>
-    <!-- no translation found for hidden_notifications_title (7139628534207443290) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_text (2326409389088668981) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_cancel (3690709735122344913) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_setup (41079514801976810) -->
-    <skip />
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"Nhận thông báo nhanh hơn"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"Xem thông báo trước khi bạn mở khóa"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ko, cảm ơn"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"Thiết lập"</string>
     <string name="muted_by" msgid="6147073845094180001">"Do <xliff:g id="THIRD_PARTY">%1$s</xliff:g> tắt tiếng"</string>
 </resources>
