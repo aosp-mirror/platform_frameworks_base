@@ -195,6 +195,7 @@ public final class PdfRenderer implements AutoCloseable {
     public Page openPage(int index) {
         throwIfClosed();
         throwIfPageOpened();
+        throwIfPageNotInDocument(index);
         mCurrentPage = new Page(index);
         return mCurrentPage;
     }
@@ -234,6 +235,12 @@ public final class PdfRenderer implements AutoCloseable {
     private void throwIfPageOpened() {
         if (mCurrentPage != null) {
             throw new IllegalStateException("Current page not closed");
+        }
+    }
+
+    private void throwIfPageNotInDocument(int pageIndex) {
+        if (pageIndex >= mPageCount) {
+            throw new IllegalArgumentException("Invalid page index");
         }
     }
 
