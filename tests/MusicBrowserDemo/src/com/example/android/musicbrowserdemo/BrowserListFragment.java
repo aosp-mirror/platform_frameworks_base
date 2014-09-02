@@ -47,12 +47,12 @@ public class BrowserListFragment extends ListFragment {
 
     // For args
     public static final String ARG_COMPONENT = "component";
-    public static final String ARG_URI = "uri";
+    public static final String ARG_ID = "uri";
 
     private Adapter mAdapter;
     private List<Item> mItems = new ArrayList();
     private ComponentName mComponent;
-    private Uri mUri;
+    private String mNodeId;
     private MediaBrowser mBrowser;
 
     private static class Item {
@@ -76,7 +76,7 @@ public class BrowserListFragment extends ListFragment {
         // Get our arguments
         final Bundle args = getArguments();
         mComponent = args.getParcelable(ARG_COMPONENT);
-        mUri = args.getParcelable(ARG_URI);
+        mNodeId = args.getString(ARG_ID);
 
         // A hint about who we are, so the service can customize the results if it wants to.
         final Bundle rootHints = new Bundle();
@@ -108,7 +108,7 @@ public class BrowserListFragment extends ListFragment {
 
         final Bundle args = new Bundle();
         args.putParcelable(BrowserListFragment.ARG_COMPONENT, mComponent);
-        args.putParcelable(BrowserListFragment.ARG_URI, item.media.getDescription().getIconUri());
+        args.putParcelable(BrowserListFragment.ARG_ID, item.media.getDescription().getIconUri());
         fragment.setArguments(args);
 
         getFragmentManager().beginTransaction()
@@ -124,14 +124,14 @@ public class BrowserListFragment extends ListFragment {
         @Override
         public void onConnected() {
             Log.d(TAG, "mConnectionCallbacks.onConnected");
-            if (mUri == null) {
-                mUri = mBrowser.getRoot();
+            if (mNodeId == null) {
+                mNodeId = mBrowser.getRoot();
             }
-            mBrowser.subscribe(mUri, new MediaBrowser.SubscriptionCallback() {
+            mBrowser.subscribe(mNodeId, new MediaBrowser.SubscriptionCallback() {
                     @Override
-                    public void onChildrenLoaded(Uri parentUri,
+                public void onChildrenLoaded(String parentId,
                             List<MediaBrowser.MediaItem> children) {
-                        Log.d(TAG, "onChildrenLoaded parentUri=" + parentUri
+                    Log.d(TAG, "onChildrenLoaded parentId=" + parentId
                                 + " children= " + children);
                         mItems.clear();
                         final int N = children.size();
@@ -142,8 +142,8 @@ public class BrowserListFragment extends ListFragment {
                     }
 
                     @Override
-                    public void onError(Uri parentUri) {
-                        Log.d(TAG, "onError parentUri=" + parentUri);
+                public void onError(String parentId) {
+                    Log.d(TAG, "onError parentId=" + parentId);
                     }
                 });
         }
