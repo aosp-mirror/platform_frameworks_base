@@ -22,6 +22,7 @@ import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
+import com.android.internal.R;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 
@@ -76,6 +77,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -138,7 +140,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int LOCATION_HAS_BEARING = 8;
     private static final int LOCATION_HAS_ACCURACY = 16;
 
-// IMPORTANT - the GPS_DELETE_* symbols here must match constants in gps.h
+    // IMPORTANT - the GPS_DELETE_* symbols here must match constants in gps.h
     private static final int GPS_DELETE_EPHEMERIS = 0x0001;
     private static final int GPS_DELETE_ALMANAC = 0x0002;
     private static final int GPS_DELETE_POSITION = 0x0004;
@@ -367,6 +369,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // Alarms
     private final static String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
     private final static String ALARM_TIMEOUT = "com.android.internal.location.ALARM_TIMEOUT";
+
+    // SIM/Carrier info.
+    private final static String SIM_STATE_CHANGED = "android.intent.action.SIM_STATE_CHANGED";
+
     private final PowerManager mPowerManager;
     private final AlarmManager mAlarmManager;
     private final PendingIntent mWakeupIntent;
@@ -443,7 +449,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         return mGpsNavigationMessageProvider;
     }
 
-    private final BroadcastReceiver mBroadcastReciever = new BroadcastReceiver() {
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
@@ -477,6 +483,19 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     || Intent.ACTION_SCREEN_OFF.equals(action)
                     || Intent.ACTION_SCREEN_ON.equals(action)) {
                 updateLowPowerMode();
+            } else if (action.equals(SIM_STATE_CHANGED)) {
+                TelephonyManager phone = (TelephonyManager)
+                        mContext.getSystemService(Context.TELEPHONY_SERVICE);
+                int simState = phone.getSimState();
+                Log.d(TAG, "SIM STATE CHANGED to " + simState);
+                String mccMnc = phone.getSimOperator();
+                if (simState == TelephonyManager.SIM_STATE_READY &&
+                    !TextUtils.isEmpty(mccMnc)) {
+                    Log.d(TAG, "SIM STATE is ready, SIM MCC/MNC is " + mccMnc);
+                    synchronized (mLock) {
+                        reloadGpsProperties(context, mProperties);
+                    }
+                }
             }
         }
     };
@@ -514,37 +533,73 @@ public class GpsLocationProvider implements LocationProviderInterface {
         return native_is_supported();
     }
 
-    private boolean loadPropertiesFile(String filename) {
-        mProperties = new Properties();
+    private void reloadGpsProperties(Context context, Properties properties) {
+        Log.d(TAG, "Reset GPS properties, previous size = " + properties.size());
+        loadPropertiesFromResource(context, properties);
+        boolean isPropertiesLoadedFromFile = false;
+        final String gpsHardware = SystemProperties.get("ro.hardware.gps");
+        if (!TextUtils.isEmpty(gpsHardware)) {
+            final String propFilename =
+                    PROPERTIES_FILE_PREFIX + "." + gpsHardware + PROPERTIES_FILE_SUFFIX;
+            isPropertiesLoadedFromFile =
+                    loadPropertiesFromFile(propFilename, properties);
+        }
+        if (!isPropertiesLoadedFromFile) {
+            loadPropertiesFromFile(DEFAULT_PROPERTIES_FILE, properties);
+        }
+        Log.d(TAG, "GPS properties reloaded, size = " + properties.size());
+
+        // TODO: we should get rid of C2K specific setting.
+        setSuplHostPort(properties.getProperty("SUPL_HOST"),
+                        properties.getProperty("SUPL_PORT"));
+        mC2KServerHost = properties.getProperty("C2K_HOST");
+        String portString = properties.getProperty("C2K_PORT");
+        if (mC2KServerHost != null && portString != null) {
+            try {
+                mC2KServerPort = Integer.parseInt(portString);
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "unable to parse C2K_PORT: " + portString);
+            }
+        }
+
+        try {
+            // Convert properties to string contents and send it to HAL.
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(4096);
+            properties.store(baos, null);
+            native_configuration_update(baos.toString());
+            Log.d(TAG, "final config = " + baos.toString());
+        } catch (IOException ex) {
+            Log.w(TAG, "failed to dump properties contents");
+        }
+    }
+
+    private void loadPropertiesFromResource(Context context,
+                                            Properties properties) {
+        String[] configValues = context.getResources().getStringArray(
+                com.android.internal.R.array.config_gpsParameters);
+        for (String item : configValues) {
+            Log.d(TAG, "GpsParamsResource: " + item);
+            String[] split = item.split("=");
+            if (split.length == 2) {
+                properties.setProperty(split[0].trim().toUpperCase(), split[1]);
+            } else {
+                Log.w(TAG, "malformed contents: " + item);
+            }
+        }
+    }
+
+    private boolean loadPropertiesFromFile(String filename,
+                                           Properties properties) {
         try {
             File file = new File(filename);
             FileInputStream stream = null;
             try {
                 stream = new FileInputStream(file);
-                mProperties.load(stream);
+                properties.load(stream);
             } finally {
                 IoUtils.closeQuietly(stream);
             }
 
-            mSuplServerHost = mProperties.getProperty("SUPL_HOST");
-            String portString = mProperties.getProperty("SUPL_PORT");
-            if (mSuplServerHost != null && portString != null) {
-                try {
-                    mSuplServerPort = Integer.parseInt(portString);
-                } catch (NumberFormatException e) {
-                    Log.e(TAG, "unable to parse SUPL_PORT: " + portString);
-                }
-            }
-
-            mC2KServerHost = mProperties.getProperty("C2K_HOST");
-            portString = mProperties.getProperty("C2K_PORT");
-            if (mC2KServerHost != null && portString != null) {
-                try {
-                    mC2KServerPort = Integer.parseInt(portString);
-                } catch (NumberFormatException e) {
-                    Log.e(TAG, "unable to parse C2K_PORT: " + portString);
-                }
-            }
         } catch (IOException e) {
             Log.w(TAG, "Could not open GPS configuration file " + filename);
             return false;
@@ -580,16 +635,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
         mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService(
                 BatteryStats.SERVICE_NAME));
 
-        boolean propertiesLoaded = false;
-        final String gpsHardware = SystemProperties.get("ro.hardware.gps");
-        if (!TextUtils.isEmpty(gpsHardware)) {
-            final String propFilename = PROPERTIES_FILE_PREFIX + "." + gpsHardware + PROPERTIES_FILE_SUFFIX;
-            propertiesLoaded = loadPropertiesFile(propFilename);
-        }
-
-        if (!propertiesLoaded) {
-            loadPropertiesFile(DEFAULT_PROPERTIES_FILE);
-        }
+        // Load GPS configuration.
+        mProperties = new Properties();
+        reloadGpsProperties(mContext, mProperties);
 
         // construct handler, listen for events
         mHandler = new ProviderHandler(looper);
@@ -625,7 +673,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         intentFilter.addAction(Intents.DATA_SMS_RECEIVED_ACTION);
         intentFilter.addDataScheme("sms");
         intentFilter.addDataAuthority("localhost","7275");
-        mContext.registerReceiver(mBroadcastReciever, intentFilter, null, mHandler);
+        mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, mHandler);
 
         intentFilter = new IntentFilter();
         intentFilter.addAction(Intents.WAP_PUSH_RECEIVED_ACTION);
@@ -634,7 +682,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         } catch (IntentFilter.MalformedMimeTypeException e) {
             Log.w(TAG, "Malformed SUPL init mime type");
         }
-        mContext.registerReceiver(mBroadcastReciever, intentFilter, null, mHandler);
+        mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, mHandler);
 
         intentFilter = new IntentFilter();
         intentFilter.addAction(ALARM_WAKEUP);
@@ -643,7 +691,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
         intentFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-        mContext.registerReceiver(mBroadcastReciever, intentFilter, null, mHandler);
+        intentFilter = new IntentFilter();
+        intentFilter.addAction(SIM_STATE_CHANGED);
+        mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, mHandler);
     }
 
     /**
@@ -842,6 +892,19 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         sendMessage(ENABLE, 1, null);
+    }
+
+    private void setSuplHostPort(String hostString, String portString) {
+        if (hostString != null) {
+            mSuplServerHost = hostString;
+        }
+        if (portString != null) {
+            try {
+                mSuplServerPort = Integer.parseInt(portString);
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "unable to parse SUPL_PORT: " + portString);
+            }
+        }
     }
 
     private void handleEnable() {
@@ -2055,5 +2118,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static native boolean native_is_navigation_message_supported();
     private native boolean native_start_navigation_message_collection();
     private native boolean native_stop_navigation_message_collection();
+
+    // GNSS Configuration
+    private static native void native_configuration_update(String configData);
 }
 
