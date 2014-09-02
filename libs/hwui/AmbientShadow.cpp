@@ -93,6 +93,10 @@ inline float getTransformedAlphaFromFactoredZ(float factoredZ) {
 
 inline int getExtraVertexNumber(const Vector2& vector1, const Vector2& vector2,
         float divisor) {
+    // When there is no distance difference, there is no need for extra vertices.
+    if (vector1.lengthSquared() == 0 || vector2.lengthSquared() == 0) {
+        return 0;
+    }
     // The formula is :
     // extraNumber = floor(acos(dot(n1, n2)) / (M_PI / EXTRA_VERTEX_PER_PI))
     // The value ranges for each step are:
