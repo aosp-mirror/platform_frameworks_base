@@ -768,6 +768,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             final NotificationGuts v = mNotificationGutsExposed;
             mNotificationGutsExposed = null;
 
+            if (v.getWindowToken() == null) return;
+
             final int x = (v.getLeft() + v.getRight()) / 2;
             final int y = (v.getTop() + v.getActualHeight() / 2);
             final Animator a = ViewAnimationUtils.createCircularReveal(v,
