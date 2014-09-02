@@ -945,8 +945,8 @@ public final class TvContract {
         /**
          * The comma-separated audio languages of this TV program.
          * <p>
-         * This is used to describe available audio languages included in the program. Use
-         * 3-character language code as specified by ISO 639-2.
+         * This is used to describe available audio languages included in the program. Use either
+         * ISO 639-1 or 639-2/T codes.
          * </p><p>
          * Type: TEXT
          * </p>
