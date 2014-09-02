@@ -1518,10 +1518,14 @@ public interface IMountService extends IInterface {
     static final int ENCRYPTION_STATE_NONE = 1;
     /** The volume has been encrypted succesfully. */
     static final int ENCRYPTION_STATE_OK = 0;
-    /** The volume is in a bad state. */
+    /** The volume is in a bad state.*/
     static final int ENCRYPTION_STATE_ERROR_UNKNOWN = -1;
-    /** The volume is in a bad state - partially encrypted. Data is likely irrecoverable. */
+    /** Encryption is incomplete */
     static final int ENCRYPTION_STATE_ERROR_INCOMPLETE = -2;
+    /** Encryption is incomplete and irrecoverable */
+    static final int ENCRYPTION_STATE_ERROR_INCONSISTENT = -3;
+    /** Underlying data is corrupt */
+    static final int ENCRYPTION_STATE_ERROR_CORRUPT = -4;
 
     /**
      * Determines the encryption state of the volume.
