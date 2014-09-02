@@ -88,7 +88,7 @@ const char* gVS_Header_Varyings_HasGradient[6] = {
         "varying vec2 ditherTexCoords;\n",
 };
 const char* gVS_Header_Varyings_HasRoundRectClip =
-        "varying vec2 roundRectPos;\n";
+        "varying highp vec2 roundRectPos;\n";
 const char* gVS_Main =
         "\nvoid main(void) {\n";
 const char* gVS_Main_OutTexCoords =
