@@ -17,6 +17,7 @@
 #ifndef ANDROID_HWUI_VERTEX_BUFFER_H
 #define ANDROID_HWUI_VERTEX_BUFFER_H
 
+#include "utils/MathUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -26,19 +27,27 @@ public:
     enum Mode {
         kStandard = 0,
         kOnePolyRingShadow = 1,
-        kTwoPolyRingShadow = 2
+        kTwoPolyRingShadow = 2,
+        kIndices = 3
     };
 
     VertexBuffer()
             : mBuffer(0)
+            , mIndices(0)
             , mVertexCount(0)
+            , mIndexCount(0)
+            , mAllocatedVertexCount(0)
+            , mAllocatedIndexCount(0)
             , mByteCount(0)
             , mMode(kStandard)
+            , mReallocBuffer(0)
             , mCleanupMethod(NULL)
+            , mCleanupIndexMethod(NULL)
     {}
 
     ~VertexBuffer() {
         if (mCleanupMethod) mCleanupMethod(mBuffer);
+        if (mCleanupIndexMethod) mCleanupIndexMethod(mIndices);
     }
 
     /**
@@ -59,6 +68,7 @@ public:
             mReallocBuffer = reallocBuffer + vertexCount;
             return reallocBuffer;
         }
+        mAllocatedVertexCount = vertexCount;
         mVertexCount = vertexCount;
         mByteCount = mVertexCount * sizeof(TYPE);
         mReallocBuffer = mBuffer = (void*)new TYPE[vertexCount];
@@ -66,6 +76,17 @@ public:
         mCleanupMethod = &(cleanup<TYPE>);
 
         return (TYPE*)mBuffer;
+    }
+
+    template <class TYPE>
+    TYPE* allocIndices(int indexCount) {
+        mAllocatedIndexCount = indexCount;
+        mIndexCount = indexCount;
+        mIndices = (void*)new TYPE[indexCount];
+
+        mCleanupIndexMethod = &(cleanup<TYPE>);
+
+        return (TYPE*)mIndices;
     }
 
     template <class TYPE>
@@ -103,9 +124,17 @@ public:
     }
 
     const void* getBuffer() const { return mBuffer; }
+    const void* getIndices() const { return mIndices; }
     const Rect& getBounds() const { return mBounds; }
     unsigned int getVertexCount() const { return mVertexCount; }
     unsigned int getSize() const { return mByteCount; }
+    unsigned int getIndexCount() const { return mIndexCount; }
+    void updateIndexCount(unsigned int newCount)  {
+        mIndexCount = MathUtils::min(newCount, mAllocatedIndexCount);
+    }
+    void updateVertexCount(unsigned int newCount)  {
+        newCount = MathUtils::min(newCount, mAllocatedVertexCount);
+    }
     Mode getMode() const { return mMode; }
 
     void setBounds(Rect bounds) { mBounds = bounds; }
@@ -127,14 +156,22 @@ private:
     }
 
     Rect mBounds;
+
     void* mBuffer;
+    void* mIndices;
+
     unsigned int mVertexCount;
+    unsigned int mIndexCount;
+    unsigned int mAllocatedVertexCount;
+    unsigned int mAllocatedIndexCount;
     unsigned int mByteCount;
+
     Mode mMode;
 
     void* mReallocBuffer; // used for multi-allocation
 
     void (*mCleanupMethod)(void*);
+    void (*mCleanupIndexMethod)(void*);
 };
 
 }; // namespace uirenderer
