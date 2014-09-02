@@ -70,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 109;
+    private static final int DATABASE_VERSION = 110;
 
     private Context mContext;
     private int mUserHandle;
@@ -1747,6 +1747,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 if (stmt != null) stmt.close();
             }
             upgradeVersion = 109;
+        }
+
+        if (upgradeVersion < 110) {
+            // The SIP_CALL_OPTIONS value SIP_ASK_EACH_TIME is being deprecated.
+            // If the SIP_CALL_OPTIONS setting is set to SIP_ASK_EACH_TIME, default to
+            // SIP_ADDRESS_ONLY.
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("UPDATE system SET value = ? " +
+                        "WHERE name = ? AND value = ?;");
+                stmt.bindString(1, Settings.System.SIP_ADDRESS_ONLY);
+                stmt.bindString(2, Settings.System.SIP_CALL_OPTIONS);
+                stmt.bindString(3, Settings.System.SIP_ASK_ME_EACH_TIME);
+                stmt.execute();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 110;
         }
 
         // *** Remember to update DATABASE_VERSION above!

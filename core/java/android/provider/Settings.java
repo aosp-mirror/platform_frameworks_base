@@ -2561,7 +2561,6 @@ public final class Settings {
          * Call Preference String.
          * "SIP_ALWAYS" : Always use SIP with network access
          * "SIP_ADDRESS_ONLY" : Only if destination is a SIP address
-         * "SIP_ASK_ME_EACH_TIME" : Always ask me each time
          * @hide
          */
         public static final String SIP_CALL_OPTIONS = "sip_call_options";
@@ -2579,9 +2578,13 @@ public final class Settings {
         public static final String SIP_ADDRESS_ONLY = "SIP_ADDRESS_ONLY";
 
         /**
-         * One of the sip call options: Always ask me each time.
+         * @deprecated Use SIP_ALWAYS or SIP_ADDRESS_ONLY instead.  Formerly used to indicate that
+         * the user should be prompted each time a call is made whether it should be placed using
+         * SIP.  The {@link com.android.providers.settings.DatabaseHelper} replaces this with
+         * SIP_ADDRESS_ONLY.
          * @hide
          */
+        @Deprecated
         public static final String SIP_ASK_ME_EACH_TIME = "SIP_ASK_ME_EACH_TIME";
 
         /**
