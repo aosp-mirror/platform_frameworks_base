@@ -18,7 +18,7 @@ package com.android.server.display;
 
 import android.content.Context;
 import android.hardware.display.DisplayManager;
-import android.hardware.display.IVirtualDisplayCallbacks;
+import android.hardware.display.IVirtualDisplayCallback;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
 import android.os.Handler;
@@ -55,15 +55,15 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         mHandler = handler;
     }
 
-    public DisplayDevice createVirtualDisplayLocked(IVirtualDisplayCallbacks callbacks,
+    public DisplayDevice createVirtualDisplayLocked(IVirtualDisplayCallback callback,
             IMediaProjection projection, int ownerUid, String ownerPackageName,
             String name, int width, int height, int densityDpi, Surface surface, int flags) {
         boolean secure = (flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) != 0;
-        IBinder appToken = callbacks.asBinder();
+        IBinder appToken = callback.asBinder();
         IBinder displayToken = SurfaceControl.createDisplay(name, secure);
         VirtualDisplayDevice device = new VirtualDisplayDevice(displayToken, appToken,
                 ownerUid, ownerPackageName, name, width, height, densityDpi, surface, flags,
-                new Callbacks(callbacks, mHandler));
+                new Callback(callback, mHandler));
 
         mVirtualDisplayDevices.put(appToken, device);
 
@@ -139,7 +139,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         final String mOwnerPackageName;
         final String mName;
         private final int mFlags;
-        private final Callbacks mCallbacks;
+        private final Callback mCallback;
 
         private int mWidth;
         private int mHeight;
@@ -153,7 +153,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         public VirtualDisplayDevice(IBinder displayToken, IBinder appToken,
                 int ownerUid, String ownerPackageName,
                 String name, int width, int height, int densityDpi, Surface surface, int flags,
-                Callbacks callbacks) {
+                Callback callback) {
             super(VirtualDisplayAdapter.this, displayToken);
             mAppToken = appToken;
             mOwnerUid = ownerUid;
@@ -164,7 +164,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
             mDensityDpi = densityDpi;
             mSurface = surface;
             mFlags = flags;
-            mCallbacks = callbacks;
+            mCallback = callback;
             mDisplayState = Display.STATE_UNKNOWN;
             mPendingChanges |= PENDING_SURFACE_CHANGE;
         }
@@ -184,7 +184,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 mSurface = null;
             }
             SurfaceControl.destroyDisplay(getDisplayTokenLocked());
-            mCallbacks.dispatchDisplayStopped();
+            mCallback.dispatchDisplayStopped();
         }
 
         @Override
@@ -192,9 +192,9 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
             if (state != mDisplayState) {
                 mDisplayState = state;
                 if (state == Display.STATE_OFF) {
-                    mCallbacks.dispatchDisplayPaused();
+                    mCallback.dispatchDisplayPaused();
                 } else {
-                    mCallbacks.dispatchDisplayResumed();
+                    mCallback.dispatchDisplayResumed();
                 }
             }
         }
@@ -287,16 +287,16 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         }
     }
 
-    private static class Callbacks extends Handler {
+    private static class Callback extends Handler {
         private static final int MSG_ON_DISPLAY_PAUSED = 0;
         private static final int MSG_ON_DISPLAY_RESUMED = 1;
         private static final int MSG_ON_DISPLAY_STOPPED = 2;
 
-        private final IVirtualDisplayCallbacks mCallbacks;
+        private final IVirtualDisplayCallback mCallback;
 
-        public Callbacks(IVirtualDisplayCallbacks callbacks, Handler handler) {
+        public Callback(IVirtualDisplayCallback callback, Handler handler) {
             super(handler.getLooper());
-            mCallbacks = callbacks;
+            mCallback = callback;
         }
 
         @Override
@@ -304,13 +304,13 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
             try {
                 switch (msg.what) {
                     case MSG_ON_DISPLAY_PAUSED:
-                        mCallbacks.onDisplayPaused();
+                        mCallback.onPaused();
                         break;
                     case MSG_ON_DISPLAY_RESUMED:
-                        mCallbacks.onDisplayResumed();
+                        mCallback.onResumed();
                         break;
                     case MSG_ON_DISPLAY_STOPPED:
-                        mCallbacks.onDisplayStopped();
+                        mCallback.onStopped();
                         break;
                 }
             } catch (RemoteException e) {
