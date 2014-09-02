@@ -580,7 +580,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
             float childTop = slidingChild.getTranslationY();
             float top = childTop + slidingChild.getClipTopAmount();
-            float bottom = top + slidingChild.getActualHeight();
+            float bottom = childTop + slidingChild.getActualHeight();
 
             // Allow the full width of this view to prevent gesture conflict on Keyguard (phone and
             // camera affordance).
@@ -1530,7 +1530,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 return position;
             }
             if (child.getVisibility() != View.GONE) {
-                position += child.getHeight();
+                position += getIntrinsicHeight(child);
                 if (i < getChildCount()-1) {
                     position += mPaddingBetweenElements;
                 }
