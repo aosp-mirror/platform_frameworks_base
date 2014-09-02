@@ -87,7 +87,9 @@ public class ObservableScrollView extends ScrollView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        if (!mTouchEnabled) {
+        boolean isEndGuesture = (ev.getAction() == MotionEvent.ACTION_UP
+                || ev.getAction() == MotionEvent.ACTION_CANCEL);
+        if (!mTouchEnabled && !isEndGuesture) {
             return false;
         }
         return super.dispatchTouchEvent(ev);
