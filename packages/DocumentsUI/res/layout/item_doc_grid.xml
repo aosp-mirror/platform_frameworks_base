@@ -17,9 +17,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/grid_item_height"
-    android:orientation="vertical"
-    android:background="@color/grid_item_background"
-    android:foreground="@drawable/item_activated_overlay">
+    android:background="@color/item_doc_grid_background">
 
     <ImageView
         android:id="@+id/icon_thumb"
@@ -44,7 +42,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/grid_protect_background"
+            android:background="@color/item_doc_grid_protect_background"
             android:orientation="vertical"
             android:paddingStart="16dp"
             android:paddingEnd="12dp"
@@ -68,7 +66,7 @@
                     android:ellipsize="middle"
                     android:textAlignment="viewStart"
                     android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-                    android:textColor="?android:attr/textColorPrimaryInverse" />
+                    android:textColor="@*android:color/primary_text_default_material_dark" />
 
                 <ImageView
                     android:id="@android:id/icon1"
@@ -97,7 +95,7 @@
                     android:ellipsize="end"
                     android:textAlignment="viewStart"
                     android:textAppearance="@android:style/TextAppearance.Material.Caption"
-                    android:textColor="?android:attr/textColorPrimaryInverse" />
+                    android:textColor="@*android:color/primary_text_default_material_dark" />
 
                 <TextView
                     android:id="@+id/size"
@@ -109,7 +107,7 @@
                     android:ellipsize="end"
                     android:textAlignment="viewStart"
                     android:textAppearance="@android:style/TextAppearance.Material.Caption"
-                    android:textColor="?android:attr/textColorPrimaryInverse" />
+                    android:textColor="@*android:color/primary_text_default_material_dark" />
 
                 <ImageView
                     android:id="@android:id/icon2"
@@ -125,5 +123,20 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/item_doc_grid_overlay"
+        android:contentDescription="@null"
+        android:duplicateParentState="true" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/item_doc_grid_overlay_icon"
+        android:scaleType="center"
+        android:contentDescription="@null"
+        android:duplicateParentState="true" />
 
 </FrameLayout>

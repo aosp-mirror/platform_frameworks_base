@@ -807,6 +807,9 @@ public class DirectoryFragment extends Fragment {
                     || MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, docMimeType);
             final boolean showThumbnail = supportsThumbnail && allowThumbnail && !mSvelteRecents;
 
+            final boolean enabled = isDocumentEnabled(docMimeType, docFlags);
+            final float iconAlpha = (state.derivedMode == MODE_LIST && !enabled) ? 0.5f : 1f;
+
             boolean cacheHit = false;
             if (showThumbnail) {
                 final Uri uri = DocumentsContract.buildDocumentUri(docAuthority, docId);
@@ -817,7 +820,7 @@ public class DirectoryFragment extends Fragment {
                 } else {
                     iconThumb.setImageDrawable(null);
                     final ThumbnailAsyncTask task = new ThumbnailAsyncTask(
-                            uri, iconMime, iconThumb, mThumbSize);
+                            uri, iconMime, iconThumb, mThumbSize, iconAlpha);
                     iconThumb.setTag(task);
                     ProviderExecutor.forAuthority(docAuthority).execute(task);
                 }
@@ -886,7 +889,7 @@ public class DirectoryFragment extends Fragment {
                 // hint to remind user they're a directory.
                 if (Document.MIME_TYPE_DIR.equals(docMimeType) && state.derivedMode == MODE_GRID
                         && showThumbnail) {
-                    iconDrawable = IconUtils.applyTint(context, R.drawable.ic_doc_folder,
+                    iconDrawable = IconUtils.applyTintAttr(context, R.drawable.ic_doc_folder,
                             android.R.attr.textColorPrimaryInverse);
                 }
 
@@ -940,20 +943,12 @@ public class DirectoryFragment extends Fragment {
                 line2.setVisibility(hasLine2 ? View.VISIBLE : View.GONE);
             }
 
-            final boolean enabled = isDocumentEnabled(docMimeType, docFlags);
-            if (enabled) {
-                setEnabledRecursive(convertView, true);
-                iconMime.setAlpha(1f);
-                iconThumb.setAlpha(1f);
-                if (icon1 != null) icon1.setAlpha(1f);
-                if (icon2 != null) icon2.setAlpha(1f);
-            } else {
-                setEnabledRecursive(convertView, false);
-                iconMime.setAlpha(0.5f);
-                iconThumb.setAlpha(0.5f);
-                if (icon1 != null) icon1.setAlpha(0.5f);
-                if (icon2 != null) icon2.setAlpha(0.5f);
-            }
+            setEnabledRecursive(convertView, enabled);
+
+            iconMime.setAlpha(iconAlpha);
+            iconThumb.setAlpha(iconAlpha);
+            if (icon1 != null) icon1.setAlpha(iconAlpha);
+            if (icon2 != null) icon2.setAlpha(iconAlpha);
 
             return convertView;
         }
@@ -1000,14 +995,16 @@ public class DirectoryFragment extends Fragment {
         private final ImageView mIconMime;
         private final ImageView mIconThumb;
         private final Point mThumbSize;
+        private final float mTargetAlpha;
         private final CancellationSignal mSignal;
 
-        public ThumbnailAsyncTask(
-                Uri uri, ImageView iconMime, ImageView iconThumb, Point thumbSize) {
+        public ThumbnailAsyncTask(Uri uri, ImageView iconMime, ImageView iconThumb, Point thumbSize,
+                float targetAlpha) {
             mUri = uri;
             mIconMime = iconMime;
             mIconThumb = iconThumb;
             mThumbSize = thumbSize;
+            mTargetAlpha = targetAlpha;
             mSignal = new CancellationSignal();
         }
 
@@ -1051,11 +1048,10 @@ public class DirectoryFragment extends Fragment {
                 mIconThumb.setTag(null);
                 mIconThumb.setImageBitmap(result);
 
-                final float targetAlpha = mIconMime.isEnabled() ? 1f : 0.5f;
-                mIconMime.setAlpha(targetAlpha);
+                mIconMime.setAlpha(mTargetAlpha);
                 mIconMime.animate().alpha(0f).start();
                 mIconThumb.setAlpha(0f);
-                mIconThumb.animate().alpha(targetAlpha).start();
+                mIconThumb.animate().alpha(mTargetAlpha).start();
             }
         }
     }
