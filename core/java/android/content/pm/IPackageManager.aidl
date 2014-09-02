@@ -198,6 +198,14 @@ interface IPackageManager {
             in VerificationParams verificationParams,
             in String packageAbiOverride);
 
+    void installPackageAsUser(in String originPath,
+            in IPackageInstallObserver2 observer,
+            int flags,
+            in String installerPackageName,
+            in VerificationParams verificationParams,
+            in String packageAbiOverride,
+            int userId);
+
     void finishPackageInstall(int token);
 
     void setInstallerPackageName(in String targetPackage, in String installerPackageName);

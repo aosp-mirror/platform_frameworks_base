@@ -866,6 +866,7 @@ public final class Pm {
 
     private void runInstall() {
         int installFlags = PackageManager.INSTALL_ALL_USERS;
+        int userId = UserHandle.USER_ALL;
         String installerPackageName = null;
 
         String opt;
@@ -909,6 +910,13 @@ public final class Pm {
                 }
             } else if (opt.equals("--abi")) {
                 abi = checkAbiArgument(nextOptionData());
+            } else if (opt.equals("--user")) {
+                userId = Integer.parseInt(nextOptionData());
+                if (userId == UserHandle.USER_ALL) {
+                    installFlags |= PackageManager.INSTALL_ALL_USERS;
+                } else {
+                    installFlags &= ~PackageManager.INSTALL_ALL_USERS;
+                }
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 return;
@@ -953,8 +961,8 @@ public final class Pm {
             VerificationParams verificationParams = new VerificationParams(verificationURI,
                     originatingURI, referrerURI, VerificationParams.NO_UID, null);
 
-            mPm.installPackage(apkFilePath, obs.getBinder(), installFlags, installerPackageName,
-                    verificationParams, abi);
+            mPm.installPackageAsUser(apkFilePath, obs.getBinder(), installFlags, installerPackageName,
+                    verificationParams, abi, userId);
 
             synchronized (obs) {
                 while (!obs.finished) {
