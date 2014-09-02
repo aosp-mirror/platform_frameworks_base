@@ -112,17 +112,23 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
             return;
         }
 
-        userManager.removeUser(currentUser.id);
+        boolean marked = userManager.markGuestForDeletion(currentUser.id);
+        if (!marked) {
+            Log.w(TAG, "Couldn't mark the guest for deletion for user " + userId);
+            return;
+        }
         UserInfo newGuest = userManager.createGuest(context, currentUser.name);
 
         try {
             if (newGuest == null) {
                 Log.e(TAG, "Could not create new guest, switching back to owner");
                 ActivityManagerNative.getDefault().switchUser(UserHandle.USER_OWNER);
+                userManager.removeUser(currentUser.id);
                 WindowManagerGlobal.getWindowManagerService().lockNow(null /* options */);
                 return;
             }
             ActivityManagerNative.getDefault().switchUser(newGuest.id);
+            userManager.removeUser(currentUser.id);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't wipe session because ActivityManager or WindowManager is dead");
             return;
