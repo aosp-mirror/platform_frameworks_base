@@ -1564,6 +1564,9 @@ public class AudioService extends IAudioService.Stub {
                 callingPackage) != AppOpsManager.MODE_ALLOWED) {
             return;
         }
+        if (!checkAudioSettingsPermission("setMicrophoneMute()")) {
+            return;
+        }
 
         AudioSystem.muteMicrophone(on);
         // Post a persist microphone msg.
