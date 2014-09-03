@@ -27,17 +27,21 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
+import com.android.systemui.statusbar.policy.SecurityController;
 
 // Intimately tied to the design of res/layout/signal_cluster_view.xml
 public class SignalClusterView
         extends LinearLayout
-        implements NetworkControllerImpl.SignalCluster {
+        implements NetworkControllerImpl.SignalCluster,
+        SecurityController.SecurityControllerCallback {
 
     static final String TAG = "SignalClusterView";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     NetworkControllerImpl mNC;
+    SecurityController mSC;
 
+    private boolean mVpnVisible = false;
     private boolean mWifiVisible = false;
     private int mWifiStrengthId = 0;
     private boolean mMobileVisible = false;
@@ -48,7 +52,7 @@ public class SignalClusterView
     private boolean mRoaming;
 
     ViewGroup mWifiGroup, mMobileGroup;
-    ImageView mWifi, mMobile, mMobileType, mAirplane;
+    ImageView mVpn, mWifi, mMobile, mMobileType, mAirplane;
     View mWifiAirplaneSpacer;
 
     public SignalClusterView(Context context) {
@@ -68,10 +72,18 @@ public class SignalClusterView
         mNC = nc;
     }
 
+    public void setSecurityController(SecurityController sc) {
+        if (DEBUG) Log.d(TAG, "SecurityController=" + sc);
+        mSC = sc;
+        mSC.addCallback(this);
+        mVpnVisible = mSC.isVpnEnabled();
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
+        mVpn            = (ImageView) findViewById(R.id.vpn);
         mWifiGroup      = (ViewGroup) findViewById(R.id.wifi_combo);
         mWifi           = (ImageView) findViewById(R.id.wifi_signal);
         mMobileGroup    = (ViewGroup) findViewById(R.id.mobile_combo);
@@ -85,6 +97,7 @@ public class SignalClusterView
 
     @Override
     protected void onDetachedFromWindow() {
+        mVpn            = null;
         mWifiGroup      = null;
         mWifi           = null;
         mMobileGroup    = null;
@@ -93,6 +106,18 @@ public class SignalClusterView
         mAirplane       = null;
 
         super.onDetachedFromWindow();
+    }
+
+    // From SecurityController.
+    @Override
+    public void onStateChanged() {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                mVpnVisible = mSC.isVpnEnabled();
+                apply();
+            }
+        });
     }
 
     @Override
@@ -168,6 +193,8 @@ public class SignalClusterView
     private void apply() {
         if (mWifiGroup == null) return;
 
+        mVpn.setVisibility(mVpnVisible ? View.VISIBLE : View.GONE);
+        if (DEBUG) Log.d(TAG, String.format("vpn: %s", mVpnVisible ? "VISIBLE" : "GONE"));
         if (mWifiVisible) {
             mWifi.setImageResource(mWifiStrengthId);
             mWifiGroup.setContentDescription(mWifiDescription);
