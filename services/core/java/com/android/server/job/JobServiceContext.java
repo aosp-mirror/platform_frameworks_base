@@ -157,6 +157,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
             mExecutionStartTimeElapsed = SystemClock.elapsedRealtime();
 
             mVerb = VERB_BINDING;
+            scheduleOpTimeOut();
             final Intent intent = new Intent().setComponent(job.getServiceComponent());
             boolean binding = mContext.bindServiceAsUser(intent, this,
                     Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND,
@@ -253,8 +254,6 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
             return;
         }
         this.service = IJobService.Stub.asInterface(service);
-        // Remove all timeouts.
-        mCallbackHandler.removeMessages(MSG_TIMEOUT);
         final PowerManager pm =
                 (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mRunningJob.getTag());
@@ -299,6 +298,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
         public void handleMessage(Message message) {
             switch (message.what) {
                 case MSG_SERVICE_BOUND:
+                    removeMessages(MSG_TIMEOUT);
                     handleServiceBoundH();
                     break;
                 case MSG_CALLBACK:
@@ -337,6 +337,9 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
 
         /** Start the job on the service. */
         private void handleServiceBoundH() {
+            if (DEBUG) {
+                Slog.d(TAG, "MSG_SERVICE_BOUND for " + mRunningJob.toShortString());
+            }
             if (mVerb != VERB_BINDING) {
                 Slog.e(TAG, "Sending onStartJob for a job that isn't pending. "
                         + VERB_STRINGS[mVerb]);
@@ -456,42 +459,36 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
 
         /** Process MSG_TIMEOUT here. */
         private void handleOpTimeoutH() {
-            if (JobSchedulerService.DEBUG) {
-                Slog.d(TAG, "MSG_TIMEOUT of " +
-                        mRunningJob.getServiceComponent().getShortClassName() + " : "
-                        + mParams.getJobId());
-            }
-
-            final int jobId = mParams.getJobId();
             switch (mVerb) {
+                case VERB_BINDING:
+                    Slog.e(TAG, "Time-out while trying to bind " + mRunningJob.toShortString() +
+                            ", dropping.");
+                    closeAndCleanupJobH(false /* needsReschedule */);
+                    break;
                 case VERB_STARTING:
                     // Client unresponsive - wedged or failed to respond in time. We don't really
                     // know what happened so let's log it and notify the JobScheduler
                     // FINISHED/NO-RETRY.
                     Slog.e(TAG, "No response from client for onStartJob '" +
-                            mRunningJob.getServiceComponent().getShortClassName() + "' jId: "
-                            + jobId);
+                            mRunningJob.toShortString());
                     closeAndCleanupJobH(false /* needsReschedule */);
                     break;
                 case VERB_STOPPING:
                     // At least we got somewhere, so fail but ask the JobScheduler to reschedule.
                     Slog.e(TAG, "No response from client for onStopJob, '" +
-                            mRunningJob.getServiceComponent().getShortClassName() + "' jId: "
-                            + jobId);
+                            mRunningJob.toShortString());
                     closeAndCleanupJobH(true /* needsReschedule */);
                     break;
                 case VERB_EXECUTING:
                     // Not an error - client ran out of time.
                     Slog.i(TAG, "Client timed out while executing (no jobFinished received)." +
-                            " sending onStop. "  +
-                            mRunningJob.getServiceComponent().getShortClassName() + "' jId: "
-                            + jobId);
+                            " sending onStop. "  + mRunningJob.toShortString());
                     sendStopMessageH();
                     break;
                 default:
-                    Slog.e(TAG, "Handling timeout for an unknown active job state: "
-                            + mRunningJob);
-                    return;
+                    Slog.e(TAG, "Handling timeout for an invalid job state: " +
+                            mRunningJob.toShortString() + ", dropping.");
+                    closeAndCleanupJobH(false /* needsReschedule */);
             }
         }
 
@@ -530,7 +527,9 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 } catch (RemoteException e) {
                     // Whatever.
                 }
-                mWakeLock.release();
+                if (mWakeLock != null) {
+                    mWakeLock.release();
+                }
                 mContext.unbindService(JobServiceContext.this);
                 mWakeLock = null;
                 mRunningJob = null;
@@ -547,25 +546,25 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
             removeMessages(MSG_SHUTDOWN_EXECUTION);
             mCompletedListener.onJobCompleted(completedJob, reschedule);
         }
+    }
 
-        /**
-         * Called when sending a message to the client, over whose execution we have no control. If
-         * we haven't received a response in a certain amount of time, we want to give up and carry
-         * on with life.
-         */
-        private void scheduleOpTimeOut() {
-            mCallbackHandler.removeMessages(MSG_TIMEOUT);
+    /**
+     * Called when sending a message to the client, over whose execution we have no control. If
+     * we haven't received a response in a certain amount of time, we want to give up and carry
+     * on with life.
+     */
+    private void scheduleOpTimeOut() {
+        mCallbackHandler.removeMessages(MSG_TIMEOUT);
 
-            final long timeoutMillis = (mVerb == VERB_EXECUTING) ?
-                    EXECUTING_TIMESLICE_MILLIS : OP_TIMEOUT_MILLIS;
-            if (DEBUG) {
-                Slog.d(TAG, "Scheduling time out for '" +
-                        mRunningJob.getServiceComponent().getShortClassName() + "' jId: " +
-                        mParams.getJobId() + ", in " + (timeoutMillis / 1000) + " s");
-            }
-            Message m = mCallbackHandler.obtainMessage(MSG_TIMEOUT);
-            mCallbackHandler.sendMessageDelayed(m, timeoutMillis);
-            mTimeoutElapsed = SystemClock.elapsedRealtime() + timeoutMillis;
+        final long timeoutMillis = (mVerb == VERB_EXECUTING) ?
+                EXECUTING_TIMESLICE_MILLIS : OP_TIMEOUT_MILLIS;
+        if (DEBUG) {
+            Slog.d(TAG, "Scheduling time out for '" +
+                    mRunningJob.getServiceComponent().getShortClassName() + "' jId: " +
+                    mParams.getJobId() + ", in " + (timeoutMillis / 1000) + " s");
         }
+        Message m = mCallbackHandler.obtainMessage(MSG_TIMEOUT);
+        mCallbackHandler.sendMessageDelayed(m, timeoutMillis);
+        mTimeoutElapsed = SystemClock.elapsedRealtime() + timeoutMillis;
     }
 }
