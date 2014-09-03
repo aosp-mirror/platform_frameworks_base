@@ -317,6 +317,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     final Context mContext;
     final boolean mFactoryTest;
     final boolean mOnlyCore;
+    final boolean mLazyDexOpt;
     final DisplayMetrics mMetrics;
     final int mDefParseFlags;
     final String[] mSeparateProcesses;
@@ -1266,6 +1267,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         mContext = context;
         mFactoryTest = factoryTest;
         mOnlyCore = onlyCore;
+        mLazyDexOpt = "eng".equals(SystemProperties.get("ro.build.type"));
         mMetrics = new DisplayMetrics();
         mSettings = new Settings(context);
         mSettings.addSharedUserLPw("android.uid.system", Process.SYSTEM_UID,
@@ -4451,13 +4453,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (pkgs != null) {
             // Filter out packages that aren't recently used.
             //
-            // The exception is first boot of a non-eng device, which
+            // The exception is first boot of a non-eng device (aka !mLazyDexOpt), which
             // should do a full dexopt.
-            boolean eng = "eng".equals(SystemProperties.get("ro.build.type"));
-            if (eng || (!isFirstBoot() && mPackageUsage.isHistoricalPackageUsageAvailable())) {
+            if (mLazyDexOpt || (!isFirstBoot() && mPackageUsage.isHistoricalPackageUsageAvailable())) {
                 // TODO: add a property to control this?
                 long dexOptLRUThresholdInMinutes;
-                if (eng) {
+                if (mLazyDexOpt) {
                     dexOptLRUThresholdInMinutes = 30; // only last 30 minutes of apps for eng builds.
                 } else {
                     dexOptLRUThresholdInMinutes = 7 * 24 * 60; // apps used in the 7 days for users.
@@ -4523,6 +4524,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     public boolean performDexOpt(String packageName, String instructionSet, boolean updateUsage) {
+        if (!mLazyDexOpt) {
+            return false;
+        }
         PackageParser.Package p;
         final String targetInstructionSet;
         synchronized (mPackages) {
