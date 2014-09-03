@@ -15,14 +15,11 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
+
 <resources>
-    <!-- Margin on the right side of the system icon group on Keyguard. -->
-    <fraction name="battery_button_height_fraction">10.5%</fraction>
 
     <!-- Fraction value to smooth the edges of the battery icon. The path will be inset by this
          fraction of a pixel.-->
-    <fraction name="battery_subpixel_smoothing_left">20%</fraction>
-    <fraction name="battery_subpixel_smoothing_right">12%</fraction>
-
-    <dimen name="battery_margin_bottom">1px</dimen>
+    <fraction name="battery_subpixel_smoothing_left">33%</fraction>
+    <fraction name="battery_subpixel_smoothing_right">33%</fraction>
 </resources>
