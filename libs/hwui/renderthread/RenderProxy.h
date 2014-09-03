@@ -73,7 +73,7 @@ public:
     ANDROID_API void setOpaque(bool opaque);
     ANDROID_API int syncAndDrawFrame(nsecs_t frameTimeNanos, nsecs_t recordDurationNanos,
             float density);
-    ANDROID_API void destroyCanvasAndSurface();
+    ANDROID_API void destroy();
 
     ANDROID_API static void invokeFunctor(Functor* functor, bool waitForCompletion);
 

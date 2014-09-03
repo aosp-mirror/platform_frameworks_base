@@ -126,7 +126,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     void destroy() {
         mInitialized = false;
         updateEnabledState(null);
-        nDestroyCanvasAndSurface(mNativeProxy);
+        nDestroy(mNativeProxy);
     }
 
     private void updateEnabledState(Surface surface) {
@@ -488,7 +488,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
     private static native int nSyncAndDrawFrame(long nativeProxy,
             long frameTimeNanos, long recordDuration, float density);
-    private static native void nDestroyCanvasAndSurface(long nativeProxy);
+    private static native void nDestroy(long nativeProxy);
     private static native void nRegisterAnimatingRenderNode(long rootRenderNode, long animatingNode);
 
     private static native void nInvokeFunctor(long functor, boolean waitForCompletion);
