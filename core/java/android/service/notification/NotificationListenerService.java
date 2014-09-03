@@ -101,6 +101,7 @@ public abstract class NotificationListenerService extends Service {
      *     <li>{@link Notification#EXTRA_LARGE_ICON extras[EXTRA_LARGE_ICON]}</li>
      *     <li>{@link Notification#EXTRA_LARGE_ICON_BIG extras[EXTRA_LARGE_ICON_BIG]}</li>
      *     <li>{@link Notification#EXTRA_PICTURE extras[EXTRA_PICTURE]}</li>
+     *     <li>{@link Notification#EXTRA_BIG_TEXT extras[EXTRA_BIG_TEXT]}</li>
      * </ol>
      *
      * @hide
