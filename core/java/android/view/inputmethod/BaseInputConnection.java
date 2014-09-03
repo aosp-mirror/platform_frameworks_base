@@ -431,7 +431,15 @@ public class BaseInputConnection implements InputConnection {
     /**
      * The default implementation does nothing.
      */
-    public boolean requestUpdateCursorAnchorInfo(int cursorUpdateMode) {
+    public boolean requestCursorUpdates(int cursorUpdateMode) {
+        return false;
+    }
+
+    /**
+     * The default implementation does nothing.
+     * @removed
+     */
+    public final boolean requestUpdateCursorAnchorInfo(int cursorUpdateMode) {
         return false;
     }
 

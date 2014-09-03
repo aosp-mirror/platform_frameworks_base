@@ -36042,7 +36042,7 @@ package android.view.inputmethod {
     method public boolean performPrivateCommand(java.lang.String, android.os.Bundle);
     method public static final void removeComposingSpans(android.text.Spannable);
     method public boolean reportFullscreenMode(boolean);
-    method public boolean requestUpdateCursorAnchorInfo(int);
+    method public boolean requestCursorUpdates(int);
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
     method public static void setComposingSpans(android.text.Spannable);
@@ -36201,15 +36201,15 @@ package android.view.inputmethod {
     method public abstract boolean performEditorAction(int);
     method public abstract boolean performPrivateCommand(java.lang.String, android.os.Bundle);
     method public abstract boolean reportFullscreenMode(boolean);
-    method public abstract boolean requestUpdateCursorAnchorInfo(int);
+    method public abstract boolean requestCursorUpdates(int);
     method public abstract boolean sendKeyEvent(android.view.KeyEvent);
     method public abstract boolean setComposingRegion(int, int);
     method public abstract boolean setComposingText(java.lang.CharSequence, int);
     method public abstract boolean setSelection(int, int);
+    field public static final int CURSOR_UPDATE_IMMEDIATE = 1; // 0x1
+    field public static final int CURSOR_UPDATE_MONITOR = 2; // 0x2
     field public static final int GET_EXTRACTED_TEXT_MONITOR = 1; // 0x1
     field public static final int GET_TEXT_WITH_STYLES = 1; // 0x1
-    field public static final int REQUEST_UPDATE_CURSOR_ANCHOR_INFO_IMMEDIATE = 1; // 0x1
-    field public static final int REQUEST_UPDATE_CURSOR_ANCHOR_INFO_MONITOR = 2; // 0x2
   }
 
   public class InputConnectionWrapper implements android.view.inputmethod.InputConnection {
@@ -36231,7 +36231,7 @@ package android.view.inputmethod {
     method public boolean performEditorAction(int);
     method public boolean performPrivateCommand(java.lang.String, android.os.Bundle);
     method public boolean reportFullscreenMode(boolean);
-    method public boolean requestUpdateCursorAnchorInfo(int);
+    method public boolean requestCursorUpdates(int);
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
     method public boolean setComposingText(java.lang.CharSequence, int);
