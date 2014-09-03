@@ -538,14 +538,17 @@ public class KeySetManagerService {
                     pw.println("");
                 }
                 printedLabel = false;
-                for (long keySetId : pkg.keySetData.getSigningKeySets()) {
-                    if (!printedLabel) {
-                        pw.print("      Signing KeySets: ");
-                        printedLabel = true;
-                    } else {
-                        pw.print(", ");
+                final long[] signingKeySets = pkg.keySetData.getSigningKeySets();
+                if (signingKeySets != null) {
+                    for (long keySetId : signingKeySets) {
+                        if (!printedLabel) {
+                            pw.print("      Signing KeySets: ");
+                            printedLabel = true;
+                        } else {
+                            pw.print(", ");
+                        }
+                        pw.print(Long.toString(keySetId));
                     }
-                    pw.print(Long.toString(keySetId));
                 }
                 if (printedLabel) {
                     pw.println("");
