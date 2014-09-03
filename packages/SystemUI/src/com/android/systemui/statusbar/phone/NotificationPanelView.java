@@ -548,7 +548,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private boolean flingExpandsQs(float vel) {
-        if (!mQsTouchAboveFalsingThreshold && mStatusBarState == StatusBarState.KEYGUARD) {
+        if (isBelowFalsingThreshold()) {
             return false;
         }
         if (Math.abs(vel) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
@@ -556,6 +556,10 @@ public class NotificationPanelView extends PanelView implements
         } else {
             return vel > 0;
         }
+    }
+
+    private boolean isBelowFalsingThreshold() {
+        return !mQsTouchAboveFalsingThreshold && mStatusBar.isFalsingThresholdNeeded();
     }
 
     private float getQsExpansionFraction() {
@@ -1122,9 +1126,16 @@ public class NotificationPanelView extends PanelView implements
             }
             return;
         }
+        boolean belowFalsingThreshold = isBelowFalsingThreshold();
+        if (belowFalsingThreshold) {
+            vel = 0;
+        }
         mScrollView.setBlockFlinging(true);
         ValueAnimator animator = ValueAnimator.ofFloat(mQsExpansionHeight, target);
         mFlingAnimationUtils.apply(animator, mQsExpansionHeight, target, vel);
+        if (belowFalsingThreshold) {
+            animator.setDuration(350);
+        }
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -1692,9 +1703,9 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void setEmptyDragAmount(float amount) {
-        float factor = 1f;
+        float factor = 0.8f;
         if (mNotificationStackScroller.getNotGoneChildCount() > 0) {
-            factor = 0.6f;
+            factor = 0.4f;
         } else if (!mStatusBar.hasActiveNotifications()) {
             factor = 0.4f;
         }
