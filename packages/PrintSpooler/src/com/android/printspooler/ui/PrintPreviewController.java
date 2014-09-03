@@ -24,6 +24,7 @@ import android.print.PageRange;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Margins;
 import android.print.PrintDocumentInfo;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -51,7 +52,7 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
     private final MyHandler mHandler;
 
     private final PageAdapter mPageAdapter;
-    private final StaggeredGridLayoutManager mLayoutManger;
+    private final GridLayoutManager mLayoutManger;
 
     private final PrintOptionsLayout mPrintOptionsLayout;
     private final RecyclerView mRecyclerView;
@@ -73,7 +74,7 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
         final int columnCount = mActivity.getResources().getInteger(
                 R.integer.preview_page_per_row_count);
 
-        mLayoutManger = new StaggeredGridLayoutManager(columnCount, OrientationHelper.VERTICAL);
+        mLayoutManger = new GridLayoutManager(mActivity, columnCount);
 
         mRecyclerView = (RecyclerView) activity.findViewById(R.id.preview_content);
         mRecyclerView.setLayoutManager(mLayoutManger);
