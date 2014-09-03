@@ -357,13 +357,9 @@
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"Este dispositivo é gerenciado por:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nSeu perfil é gerenciado por:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nO administrador pode monitorar sua atividade na rede, como e-mails, apps e sites seguros. Para mais informações, contate o administrador.\n\nVocê autorizou \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" a fazer conexões VPN e o provedor de serviços de VPN também pode monitorar atividades de rede."</string>
     <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"Este dispositivo é gerenciado por:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nSeu perfil é gerenciado por:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nO administrador pode monitorar sua atividade na rede, como e-mails, apps e sites seguros. Para mais informações, contate o administrador.\n\nVocê está conectado a uma VPN (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\") e o provedor de serviços de VPN também pode monitorar atividades de rede."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"O dispositivo permanecerá bloqueado até que você o desbloqueie manualmente"</string>
-    <!-- no translation found for hidden_notifications_title (7139628534207443290) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_text (2326409389088668981) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_cancel (3690709735122344913) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_setup (41079514801976810) -->
-    <skip />
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"Receba notificações mais rápido"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"Veja-as antes de desbloquear"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Não, obrigado"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"Configurar"</string>
     <string name="muted_by" msgid="6147073845094180001">"Som desativado por <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

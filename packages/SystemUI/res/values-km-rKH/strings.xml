@@ -355,13 +355,9 @@
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"ឧបករណ៍នេះត្រូវបានគ្រប់គ្រងដោយ៖\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nប្រវត្តិរូបរបស់អ្នកត្រូវបានគ្រប់គ្រង៖\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nអ្នកគ្រប់គ្រងរបស់អ្នកអាចតាមដានសកម្មភាពបណ្ដាញ រួមមានអ៊ីមែល កម្មវិធី និងតំបន់បណ្ដាញមានសុវត្ថិភាព។ ចំពោះព័ត៌មានបន្ថែម ទាក់ទងអ្នកគ្រប់គ្រងរបស់អ្នក។\n\nអ្នកបានផ្ដល់សិទ្ធិ \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" ឲ្យកំណត់ការភ្ជាប់ VPN ។ កម្មវិធីនេះអាចតាមដានសកម្មភាពបណ្ដាញផងដែរ។"</string>
     <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"ឧបករណ៍នេះត្រូវបា​នគ្រប់គ្រងដោយ៖\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nប្រវត្តិរូបរបស់អ្នកត្រូវបានគ្រប់គ្រង​ដោយ៖\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nអ្នកគ្រប់គ្រងរបស់អ្នកអាចតាមដានសកម្មភាពបណ្ដាញរបស់អ្នក  រួមមានអ៊ីមែល, កម្មវិធី និងតំបន់បណ្ដាញមានសុវត្ថិភាព​​​។ ចំពោះព័ត៌មានបន្ថែម ទាក់ទង​អ្នកគ្រប់គ្រងរបស់​អ្នក។\n\nអ្នកក៏បានភ្ជាប់ទៅ​ VPN (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\") ។ ក្រុមហ៊ុនផ្ដល់សេវាកម្ម VPN របស់អ្នកអាចតាមដានសកម្មភាពបណ្ដាញបានផងដែរ។"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"ឧបករណ៍​នឹង​ចាក់​សោ​រហូត​ដល់​អ្នក​ដោះ​សោ​ដោយ​ដៃ"</string>
-    <!-- no translation found for hidden_notifications_title (7139628534207443290) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_text (2326409389088668981) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_cancel (3690709735122344913) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_setup (41079514801976810) -->
-    <skip />
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"ទទួល​បាន​ការ​ជូន​ដំណឹង​កាន់តែ​លឿន"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"ឃើញ​ពួកវា​មុន​ពេល​ដោះ​សោ"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"ទេ អរគុណ!"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"រៀបចំ"</string>
     <string name="muted_by" msgid="6147073845094180001">"បាន​បិទ​សំឡេង​ដោយ <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

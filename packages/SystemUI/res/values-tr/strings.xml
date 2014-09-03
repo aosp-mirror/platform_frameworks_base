@@ -355,13 +355,9 @@
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"Bu cihazı yöneten kuruluş:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nProfilinizi yöneten kuruluş:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nYöneticiniz; e-postalar, uygulamalar ve güvenli web siteleri de dahil olmak üzere ağ etkinliğinizi izleyebilir. Daha fazla bilgi için yöneticinize başvurun.\n\nAyrıca \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" uygulamasına VPN kurma izni verdiniz. Bu uygulama da ağ etkinliğini izleyebilir."</string>
     <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"Bu cihazı yöneten kuruluş:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nProfilinizi yöneten kuruluş:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nYöneticiniz; e-postalar, uygulamalar ve güvenli web siteleri de dahil olmak üzere ağ etkinliğinizi izleyebilir. Daha fazla bilgi için yöneticinize başvurun.\n\nAyrıca, bir VPN\'ye (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\") bağlısınız. VPN hizmet sağlayıcınız da ağ etkinliğini izleyebilir."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Cihazınızın kilidini manuel olarak açmadıkça cihaz kilitli kalacak"</string>
-    <!-- no translation found for hidden_notifications_title (7139628534207443290) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_text (2326409389088668981) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_cancel (3690709735122344913) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_setup (41079514801976810) -->
-    <skip />
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"Bildirimleri daha hızlı alın"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"Kilidi açmadan bildirimleri görün"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Hayır, teşekkürler"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"Kur"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> tarafından kapatıldı"</string>
 </resources>

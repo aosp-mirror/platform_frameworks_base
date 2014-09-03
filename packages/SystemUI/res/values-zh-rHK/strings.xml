@@ -338,7 +338,7 @@
     <string name="media_projection_action_text" msgid="8470872969457985954">"立即開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"沒有通知"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"裝置可能會受到監控"</string>
-    <string name="profile_owned_footer" msgid="8021888108553696069">"個人檔案可能會受到監控"</string>
+    <string name="profile_owned_footer" msgid="8021888108553696069">"個人檔案可能受到監控"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"網絡可能會受到監控"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"裝置監控"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"個人檔案監控"</string>
@@ -357,7 +357,7 @@
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"這部裝置的管理機構：\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\n您的個人檔案的管理機構：\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\n您的管理員可以監控您的網絡活動，包括電郵、應用程式及安全網站。如需瞭解詳情，請聯絡您的管理員。\n\n同時，由於您已授權「<xliff:g id="APPLICATION">%3$s</xliff:g>」設定 VPN 連線，因此這個應用程式也能監控您的網絡活動。"</string>
     <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"這部裝置的管理機構：\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\n您的個人檔案的管理機構：\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\n您的管理員可以監控您的網絡活動，包括電郵、應用程式及安全網站。如需瞭解詳情，請聯絡您的管理員。\n\n同時，由於您的裝置已與 VPN (「<xliff:g id="APPLICATION">%3$s</xliff:g>」) 連線，因此您的 VPN 服務供應商也能監控您的網絡活動。"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"裝置將保持上鎖，直到您手動解鎖"</string>
-    <string name="hidden_notifications_title" msgid="7139628534207443290">"更快取得通知"</string>
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"快速取得通知"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"解鎖前顯示"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"不用了，謝謝"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"設定"</string>

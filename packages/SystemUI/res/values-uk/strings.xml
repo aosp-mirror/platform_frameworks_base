@@ -286,7 +286,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"Пошук"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Проведіть пальцем угору, щоб <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Проведіть пальцем ліворуч, щоб <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Без сповіщень. Навіть без сигналів будильника."</string>
+    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Без сповіщень і сигналів будильника."</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Без сповіщень"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"Лише пріоритетні сповіщення"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"Наступний сигнал: <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
