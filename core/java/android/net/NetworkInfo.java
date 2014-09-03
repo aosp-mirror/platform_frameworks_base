@@ -128,14 +128,6 @@ public class NetworkInfo implements Parcelable {
     private boolean mIsAvailable;
 
     /**
-     * @param type network type
-     * @deprecated
-     * @hide because this constructor was only meant for internal use (and
-     * has now been superseded by the package-private constructor below).
-     */
-    public NetworkInfo(int type) {}
-
-    /**
      * @hide
      */
     public NetworkInfo(int type, int subtype, String typeName, String subtypeName) {
