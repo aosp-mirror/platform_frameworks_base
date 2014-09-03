@@ -201,20 +201,16 @@ public class NativeDaemonEvent {
         }
         while (current < length) {
             // find the end of the word
-            if (quoted) {
-                wordEnd = current;
-                while ((wordEnd = rawEvent.indexOf('\"', wordEnd)) != -1) {
-                    if (rawEvent.charAt(wordEnd - 1) != '\\') {
-                        break;
-                    } else {
-                        wordEnd++; // skip this escaped quote and keep looking
-                    }
+            char terminator = quoted ? '\"' : ' ';
+            wordEnd = current;
+            while (wordEnd < length && rawEvent.charAt(wordEnd) != terminator) {
+                if (rawEvent.charAt(wordEnd) == '\\') {
+                    // skip the escaped char
+                    ++wordEnd;
                 }
-            } else {
-                wordEnd = rawEvent.indexOf(' ', current);
+                ++wordEnd;
             }
-            // if we didn't find the end-o-word token, take the rest of the string
-            if (wordEnd == -1) wordEnd = length;
+            if (wordEnd > length) wordEnd = length;
             String word = rawEvent.substring(current, wordEnd);
             current += word.length();
             if (!quoted) {
