@@ -45,6 +45,10 @@ public class ChangeTransform extends Transition {
     private static final String PROPNAME_TRANSFORMS = "android:changeTransform:transforms";
     private static final String PROPNAME_PARENT = "android:changeTransform:parent";
     private static final String PROPNAME_PARENT_MATRIX = "android:changeTransform:parentMatrix";
+    private static final String PROPNAME_INTERMEDIATE_PARENT_MATRIX =
+            "android:changeTransform:intermediateParentMatrix";
+    private static final String PROPNAME_INTERMEDIATE_MATRIX =
+            "android:changeTransform:intermediateMatrix";
 
     private static final String[] sTransitionProperties = {
             PROPNAME_MATRIX,
@@ -172,6 +176,10 @@ public class ChangeTransform extends Transition {
             parent.transformMatrixToGlobal(parentMatrix);
             parentMatrix.preTranslate(-parent.getScrollX(), -parent.getScrollY());
             transitionValues.values.put(PROPNAME_PARENT_MATRIX, parentMatrix);
+            transitionValues.values.put(PROPNAME_INTERMEDIATE_MATRIX,
+                    view.getTag(R.id.transitionTransform));
+            transitionValues.values.put(PROPNAME_INTERMEDIATE_PARENT_MATRIX,
+                    view.getTag(R.id.parentMatrix));
         }
         return;
     }
@@ -199,12 +207,13 @@ public class ChangeTransform extends Transition {
         ViewGroup endParent = (ViewGroup) endValues.values.get(PROPNAME_PARENT);
         boolean handleParentChange = mReparent && !parentsMatch(startParent, endParent);
 
-        Matrix startMatrix = (Matrix) startValues.view.getTag(R.id.transitionTransform);
+        Matrix startMatrix = (Matrix) startValues.values.get(PROPNAME_INTERMEDIATE_MATRIX);
         if (startMatrix != null) {
             startValues.values.put(PROPNAME_MATRIX, startMatrix);
         }
 
-        Matrix startParentMatrix = (Matrix) startValues.view.getTag(R.id.parentMatrix);
+        Matrix startParentMatrix = (Matrix)
+                startValues.values.get(PROPNAME_INTERMEDIATE_PARENT_MATRIX);
         if (startParentMatrix != null) {
             startValues.values.put(PROPNAME_PARENT_MATRIX, startParentMatrix);
         }
@@ -250,9 +259,11 @@ public class ChangeTransform extends Transition {
         ObjectAnimator animator = ObjectAnimator.ofObject(view, ANIMATION_MATRIX_PROPERTY,
                 new TransitionUtils.MatrixEvaluator(), startMatrix, endMatrix);
 
+        final Matrix finalEndMatrix = endMatrix;
+
         AnimatorListenerAdapter listener = new AnimatorListenerAdapter() {
             private boolean mIsCanceled;
-            private Matrix mTempMatrix;
+            private Matrix mTempMatrix = new Matrix();
 
             @Override
             public void onAnimationCancel(Animator animation) {
@@ -262,8 +273,7 @@ public class ChangeTransform extends Transition {
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (!mIsCanceled) {
-                    view.setTagInternal(R.id.transitionTransform, null);
-                    view.setTagInternal(R.id.parentMatrix, null);
+                    setCurrentMatrix(finalEndMatrix);
                 }
                 ANIMATION_MATRIX_PROPERTY.set(view, null);
                 transforms.restore(view);
@@ -273,18 +283,18 @@ public class ChangeTransform extends Transition {
             public void onAnimationPause(Animator animation) {
                 ValueAnimator animator = (ValueAnimator) animation;
                 Matrix currentMatrix = (Matrix) animator.getAnimatedValue();
-                if (mTempMatrix == null) {
-                    mTempMatrix = new Matrix(currentMatrix);
-                } else {
-                    mTempMatrix.set(currentMatrix);
-                }
-                view.setTagInternal(R.id.transitionTransform, mTempMatrix);
-                transforms.restore(view);
+                setCurrentMatrix(currentMatrix);
             }
 
             @Override
             public void onAnimationResume(Animator animation) {
                 setIdentityTransforms(view);
+            }
+
+            private void setCurrentMatrix(Matrix currentMatrix) {
+                mTempMatrix.set(currentMatrix);
+                view.setTagInternal(R.id.transitionTransform, mTempMatrix);
+                transforms.restore(view);
             }
         };
 
@@ -423,6 +433,8 @@ public class ChangeTransform extends Transition {
         public void onTransitionEnd(Transition transition) {
             transition.removeListener(this);
             GhostView.removeGhost(mView);
+            mView.setTagInternal(R.id.transitionTransform, null);
+            mView.setTagInternal(R.id.parentMatrix, null);
         }
 
         @Override
