@@ -36,21 +36,10 @@
             android:layout_width="wrap_content"
             />
     </FrameLayout>
-    <View
-        android:layout_height="6dp"
-        android:layout_width="6dp"
-        android:visibility="gone"
-        android:id="@+id/spacer"
-        />
     <FrameLayout
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         >
-        <View
-            android:layout_height="6dp"
-            android:layout_width="6dp"
-            android:visibility="invisible"
-            />
         <FrameLayout
             android:id="@+id/mobile_combo"
             android:layout_width="wrap_content"
@@ -68,6 +57,12 @@
                 />
         </FrameLayout>
     </FrameLayout>
+    <View
+        android:id="@+id/wifi_airplane_spacer"
+        android:layout_width="4dp"
+        android:layout_height="4dp"
+        android:visibility="gone"
+        />
     <ImageView
         android:id="@+id/airplane"
         android:layout_height="wrap_content"
