@@ -19,13 +19,10 @@ package com.android.connectivitymanagertest.stress;
 import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.IpConfiguration.IpAssignment;
-import android.net.IpConfiguration.ProxySettings;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Environment;
@@ -37,6 +34,7 @@ import android.util.Log;
 
 import com.android.connectivitymanagertest.ConnectivityManagerStressTestRunner;
 import com.android.connectivitymanagertest.ConnectivityManagerTestBase;
+import com.android.connectivitymanagertest.WifiConfigurationHelper;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -52,8 +50,6 @@ import java.util.List;
  *                  -w com.android.connectivitymanagertest/.ConnectivityManagerStressTestRunner
  */
 public class WifiStressTest extends ConnectivityManagerTestBase {
-    private final static String TAG = "WifiStressTest";
-
     private final static long SCREEN_OFF_TIMER = 500; //500ms
     /**
      * Wi-Fi idle time for default sleep policy
@@ -78,6 +74,10 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
     private BufferedWriter mOutputWriter = null;
     private boolean mWifiOnlyFlag;
 
+    public WifiStressTest() {
+        super(WifiStressTest.class.getSimpleName());
+    }
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -89,14 +89,14 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
         mScanIterations = mRunner.getScanIterations();
         mWifiSleepTime = mRunner.getSleepTime();
         mWifiOnlyFlag = mRunner.isWifiOnly();
-        log(String.format("mReconnectIterations(%d), mSsid(%s), mPassword(%s),"
+        logv(String.format("mReconnectIterations(%d), mSsid(%s), mPassword(%s),"
             + "mScanIterations(%d), mWifiSleepTime(%d)", mReconnectIterations, mSsid,
             mPassword, mScanIterations, mWifiSleepTime));
         mOutputWriter = new BufferedWriter(new FileWriter(new File(
                 Environment.getExternalStorageDirectory(), OUTPUT_FILE), true));
         turnScreenOn();
         if (!mWifiManager.isWifiEnabled()) {
-            log("Enable wi-fi before stress tests.");
+            logv("Enable wi-fi before stress tests.");
             if (!enableWifi()) {
                 tearDown();
                 fail("enable wifi failed.");
@@ -107,7 +107,7 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
 
     @Override
     protected void tearDown() throws Exception {
-        log("tearDown()");
+        logv("tearDown()");
         if (mOutputWriter != null) {
             mOutputWriter.close();
         }
@@ -115,21 +115,17 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
     }
 
     private void writeOutput(String s) {
-        log("write message: " + s);
+        logv("write message: " + s);
         if (mOutputWriter == null) {
-            log("no writer attached to file " + OUTPUT_FILE);
+            logv("no writer attached to file " + OUTPUT_FILE);
             return;
         }
         try {
             mOutputWriter.write(s + "\n");
             mOutputWriter.flush();
         } catch (IOException e) {
-            log("failed to write output.");
+            logv("failed to write output.");
         }
-    }
-
-    public void log(String message) {
-        Log.v(TAG, message);
     }
 
     private void sleep(long sometime, String errorMsg) {
@@ -149,7 +145,7 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
         long scanTimeSum = 0, i, averageScanTime = -1;
         int ssidAppearInScanResultsCount = 0; // count times of given ssid appear in scan results.
         for (i = 1; i <= mScanIterations; i++) {
-            log("testWifiScanning: iteration: " + i);
+            logv("testWifiScanning: iteration: " + i);
             averageScanTime = scanTimeSum / i;
             writeOutput(String.format("iteration %d out of %d", i, mScanIterations));
             writeOutput(String.format("average scanning time is %d", averageScanTime));
@@ -173,9 +169,9 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
             if (scanResultLocal == null || scanResultLocal.isEmpty()) {
                 fail("Scan results are empty ");
             }
-            log("size of scan result list: " + scanResultLocal.size());
+            logv("size of scan result list: " + scanResultLocal.size());
             for (ScanResult sr : scanResultLocal) {
-                log(String.format("scan result: " + sr.toString()));
+                logv(String.format("scan result: " + sr.toString()));
                 if (mSsid.equals(sr.SSID)) {
                     ssidAppearInScanResultsCount += 1;
                     break;
@@ -208,21 +204,12 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
         Settings.Global.putLong(mRunner.getContext().getContentResolver(),
                 Settings.Global.WIFI_IDLE_MS, WIFI_IDLE_MS);
 
-        // Connect to a Wi-Fi network
-        WifiConfiguration config = new WifiConfiguration();
-        config.SSID = mSsid;
-        if (mPassword != null) {
-            config.allowedKeyManagement.set(KeyMgmt.WPA_PSK);
-            if (isHex(mPassword, 64)) {
-                config.preSharedKey = mPassword;
-            } else {
-                config.preSharedKey = '"' + mPassword + '"';
-            }
+        WifiConfiguration config;
+        if (mPassword == null) {
+            config = WifiConfigurationHelper.createOpenConfig(mSsid);
         } else {
-            config.allowedKeyManagement.set(KeyMgmt.NONE);
+            config = WifiConfigurationHelper.createPskConfig(mSsid, mPassword);
         }
-        config.setIpAssignment(IpAssignment.DHCP);
-        config.setProxySettings(ProxySettings.NONE);
 
         assertTrue("Failed to connect to Wi-Fi network: " + mSsid,
                 connectToWifiWithConfiguration(config));
@@ -240,7 +227,7 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
             // 5. Wake up the device, verify Wi-Fi is enabled and connected.
             writeOutput(String.format("iteration %d out of %d",
                     i, mReconnectIterations));
-            log("iteration: " + i);
+            logv("iteration: " + i);
             turnScreenOff();
             // Use clock time since boot for intervals.
             long start = SystemClock.uptimeMillis();
@@ -271,7 +258,7 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
             if (mWifiOnlyFlag) {
                 NetworkInfo ni = mCm.getActiveNetworkInfo();
                 if (ni != null) {
-                    Log.e(TAG, "has active network while in wifi sleep: " + ni.toString());
+                    Log.e(mLogTag, "has active network while in wifi sleep: " + ni.toString());
                     fail("active network detected");
                 }
             } else {
@@ -292,7 +279,7 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
             long connectionTime = SystemClock.uptimeMillis() - startTime;
             sum += connectionTime;
             avgReconnectTime = sum / i;
-            log("average reconnection time is: " + avgReconnectTime);
+            logv("average reconnection time is: " + avgReconnectTime);
 
             assertTrue("Reconnect to Wi-Fi network, but no data connection.", pingTest(null));
         }
