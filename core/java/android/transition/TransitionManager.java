@@ -182,11 +182,15 @@ public class TransitionManager {
 
         final ViewGroup sceneRoot = scene.getSceneRoot();
 
-        Transition transitionClone = transition.clone();
-        transitionClone.setSceneRoot(sceneRoot);
+        Transition transitionClone = null;
+        if (transition != null) {
+            transitionClone = transition.clone();
+            transitionClone.setSceneRoot(sceneRoot);
+        }
 
         Scene oldScene = Scene.getCurrentScene(sceneRoot);
-        if (oldScene != null && oldScene.isCreatedFromLayoutResource()) {
+        if (oldScene != null && transitionClone != null &&
+                oldScene.isCreatedFromLayoutResource()) {
             transitionClone.setCanRemoveViews(true);
         }
 
