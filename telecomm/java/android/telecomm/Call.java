@@ -347,14 +347,6 @@ public final class Call {
         public void onVideoCallChanged(Call call, InCallService.VideoCall videoCall) {}
 
         /**
-         * Launches an activity for this connection on top of the in-call UI.
-         *
-         * @param call The {@code Call} invoking this method.
-         * @param intent The intent to use to start the activity.
-         */
-        public void onStartActivity(Call call, PendingIntent intent) {}
-
-        /**
          * Invoked when the {@code Call} is destroyed. Clients should refrain from cleaning
          * up their UI for the {@code Call} in response to state transitions. Specifically,
          * clients should not assume that a {@link #onStateChanged(Call, int)} with a state of
@@ -753,11 +745,6 @@ public final class Call {
     }
 
     /** {@hide} */
-    final void internalStartActivity(PendingIntent intent) {
-        fireStartActivity(intent);
-    }
-
-    /** {@hide} */
     final void internalSetDisconnected() {
         if (mState != Call.STATE_DISCONNECTED) {
             mState = Call.STATE_DISCONNECTED;
@@ -806,12 +793,6 @@ public final class Call {
     private void firePostDialWait(String remainingPostDialSequence) {
         for (Listener listener : mListeners) {
             listener.onPostDialWait(this, remainingPostDialSequence);
-        }
-    }
-
-    private void fireStartActivity(PendingIntent intent) {
-        for (Listener listener : mListeners) {
-            listener.onStartActivity(this, intent);
         }
     }
 
