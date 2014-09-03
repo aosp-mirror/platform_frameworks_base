@@ -24,8 +24,6 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.TextView;
 
 /**
@@ -39,7 +37,6 @@ public abstract class TwoStatePreference extends Preference {
     private CharSequence mSummaryOff;
     boolean mChecked;
     private boolean mCheckedSet;
-    private boolean mSendClickAccessibilityEvent;
     private boolean mDisableDependentsState;
 
     public TwoStatePreference(
@@ -63,15 +60,10 @@ public abstract class TwoStatePreference extends Preference {
     protected void onClick() {
         super.onClick();
 
-        boolean newValue = !isChecked();
-
-        mSendClickAccessibilityEvent = true;
-
-        if (!callChangeListener(newValue)) {
-            return;
+        final boolean newValue = !isChecked();
+        if (callChangeListener(newValue)) {
+            setChecked(newValue);
         }
-
-        setChecked(newValue);
     }
 
     /**
@@ -194,21 +186,6 @@ public abstract class TwoStatePreference extends Preference {
     protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
         setChecked(restoreValue ? getPersistedBoolean(mChecked)
                 : (Boolean) defaultValue);
-    }
-
-    void sendAccessibilityEvent(View view) {
-        // Since the view is still not attached we create, populate,
-        // and send the event directly since we do not know when it
-        // will be attached and posting commands is not as clean.
-        AccessibilityManager accessibilityManager = AccessibilityManager.getInstance(getContext());
-        if (mSendClickAccessibilityEvent && accessibilityManager.isEnabled()) {
-            AccessibilityEvent event = AccessibilityEvent.obtain();
-            event.setEventType(AccessibilityEvent.TYPE_VIEW_CLICKED);
-            view.onInitializeAccessibilityEvent(event);
-            view.dispatchPopulateAccessibilityEvent(event);
-            accessibilityManager.sendAccessibilityEvent(event);
-        }
-        mSendClickAccessibilityEvent = false;
     }
 
     /**
