@@ -17,16 +17,15 @@
 package com.android.connectivitymanagertest.stress;
 
 
-import com.android.connectivitymanagertest.ConnectivityManagerStressTestRunner;
-import com.android.connectivitymanagertest.ConnectivityManagerTestBase;
-
 import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.AuthAlgorithm;
+import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.util.Log;
+
+import com.android.connectivitymanagertest.ConnectivityManagerStressTestRunner;
+import com.android.connectivitymanagertest.ConnectivityManagerTestBase;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -35,9 +34,7 @@ import java.io.FileWriter;
 /**
  * Stress test setting up device as wifi hotspot
  */
-public class WifiApStress
-    extends ConnectivityManagerTestBase {
-    private final static String TAG = "WifiApStress";
+public class WifiApStress extends ConnectivityManagerTestBase {
     private static String NETWORK_ID = "AndroidAPTest";
     private static String PASSWD = "androidwifi";
     private final static String OUTPUT_FILE = "WifiStressTestOutput.txt";
@@ -45,6 +42,10 @@ public class WifiApStress
     private BufferedWriter mOutputWriter = null;
     private int mLastIteration = 0;
     private boolean mWifiOnlyFlag;
+
+    public WifiApStress() {
+        super(WifiApStress.class.getSimpleName());
+    }
 
     @Override
     protected void setUp() throws Exception {
@@ -71,7 +72,7 @@ public class WifiApStress
     @LargeTest
     public void testWifiHotSpot() {
         if (mWifiOnlyFlag) {
-            Log.v(TAG, this.getName() + " is excluded for wi-fi only test");
+            logv(getName() + " is excluded for wi-fi only test");
             return;
         }
         WifiConfiguration config = new WifiConfiguration();
@@ -95,7 +96,7 @@ public class WifiApStress
         }
         int i;
         for (i = 0; i < mTotalIterations; i++) {
-            Log.v(TAG, "iteration: " + i);
+            logv("iteration: " + i);
             mLastIteration = i;
             // enable Wifi tethering
             assertTrue("failed to enable wifi hotspot",
