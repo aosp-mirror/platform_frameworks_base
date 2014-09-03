@@ -318,7 +318,6 @@ public class MediaFocusControl implements OnFinished {
     //==========================================================================================
 
     // event handler messages
-    private static final int MSG_PERSIST_MEDIABUTTONRECEIVER = 0;
     private static final int MSG_RCDISPLAY_CLEAR = 1;
     private static final int MSG_RCDISPLAY_UPDATE = 2;
     private static final int MSG_REEVALUATE_REMOTE = 3;
@@ -359,9 +358,6 @@ public class MediaFocusControl implements OnFinished {
         @Override
         public void handleMessage(Message msg) {
             switch(msg.what) {
-                case MSG_PERSIST_MEDIABUTTONRECEIVER:
-                    onHandlePersistMediaButtonReceiver( (ComponentName) msg.obj );
-                    break;
 
                 case MSG_RCDISPLAY_CLEAR:
                     onRcDisplayClear();
@@ -1427,47 +1423,7 @@ public class MediaFocusControl implements OnFinished {
                         }
                     }
                 }
-                if (mRCStack.empty()) {
-                    // no saved media button receiver
-                    mEventHandler.sendMessage(
-                            mEventHandler.obtainMessage(MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0,
-                                    null));
-                } else if (oldTop != mRCStack.peek()) {
-                    // the top of the stack has changed, save it in the system settings
-                    // by posting a message to persist it; only do this however if it has
-                    // a concrete component name (is not a transient registration)
-                    RemoteControlStackEntry rcse = mRCStack.peek();
-                    if (rcse.mReceiverComponent != null) {
-                        mEventHandler.sendMessage(
-                                mEventHandler.obtainMessage(MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0,
-                                        rcse.mReceiverComponent));
-                    }
-                }
             }
-        }
-    }
-
-    /**
-     * Helper function:
-     * Restore remote control receiver from the system settings.
-     */
-    protected void restoreMediaButtonReceiver() {
-        String receiverName = Settings.System.getStringForUser(mContentResolver,
-                Settings.System.MEDIA_BUTTON_RECEIVER, UserHandle.USER_CURRENT);
-        if ((null != receiverName) && !receiverName.isEmpty()) {
-            ComponentName eventReceiver = ComponentName.unflattenFromString(receiverName);
-            if (eventReceiver == null) {
-                // an invalid name was persisted
-                return;
-            }
-            // construct a PendingIntent targeted to the restored component name
-            // for the media button and register it
-            Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-            //     the associated intent will be handled by the component being registered
-            mediaButtonIntent.setComponent(eventReceiver);
-            PendingIntent pi = PendingIntent.getBroadcast(mContext,
-                    0/*requestCode, ignored*/, mediaButtonIntent, 0/*flags*/);
-            registerMediaButtonIntent(pi, eventReceiver, null);
         }
     }
 
@@ -1509,12 +1465,6 @@ public class MediaFocusControl implements OnFinished {
         }
         mRCStack.push(rcse); // rcse is never null
 
-        // post message to persist the default media button receiver
-        if (target != null) {
-            mEventHandler.sendMessage( mEventHandler.obtainMessage(
-                    MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0, target/*obj*/) );
-        }
-
         // RC stack was modified
         return true;
     }
@@ -1553,12 +1503,6 @@ public class MediaFocusControl implements OnFinished {
         return false;
     }
 
-    private void onHandlePersistMediaButtonReceiver(ComponentName receiver) {
-        Settings.System.putStringForUser(mContentResolver,
-                                         Settings.System.MEDIA_BUTTON_RECEIVER,
-                                         receiver == null ? "" : receiver.flattenToString(),
-                                         UserHandle.USER_CURRENT);
-    }
 
     //==========================================================================================
     // Remote control display / client
