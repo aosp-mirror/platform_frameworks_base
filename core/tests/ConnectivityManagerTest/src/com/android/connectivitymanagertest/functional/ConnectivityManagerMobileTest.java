@@ -23,14 +23,15 @@ import android.net.wifi.WifiManager;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.util.Log;
 
 import com.android.connectivitymanagertest.ConnectivityManagerTestBase;
 import com.android.connectivitymanagertest.ConnectivityManagerTestRunner;
 
-public class ConnectivityManagerMobileTest extends
-        ConnectivityManagerTestBase {
-    private static final String TAG = "ConnectivityManagerMobileTest";
+public class ConnectivityManagerMobileTest extends  ConnectivityManagerTestBase {
+
+    public ConnectivityManagerMobileTest() {
+        super(ConnectivityManagerMobileTest.class.getSimpleName());
+    }
 
     private String mTestAccessPoint;
     private boolean mWifiOnlyFlag;
@@ -46,7 +47,7 @@ public class ConnectivityManagerMobileTest extends
         // Each test case will start with cellular connection
         if (Settings.Global.getInt(getInstrumentation().getContext().getContentResolver(),
                 Settings.Global.AIRPLANE_MODE_ON) == 1) {
-            log("airplane is not disabled, disable it.");
+            logv("airplane is not disabled, disable it.");
             mCm.setAirplaneMode(false);
         }
 
@@ -77,16 +78,14 @@ public class ConnectivityManagerMobileTest extends
         assertTrue("not connected to cellular network", extraNetInfo.isConnected());
     }
 
-    private void log(String message) {
-        Log.v(TAG, message);
-    }
+
 
     // Test case 1: Test enabling Wifi without associating with any AP, no broadcast on network
     //              event should be expected.
     @LargeTest
     public void test3GToWifiNotification() {
         if (mWifiOnlyFlag) {
-            Log.v(TAG, getName() + " is excluded for wifi-only test");
+            logv(getName() + " is excluded for wifi-only test");
             return;
         }
 
@@ -225,7 +224,7 @@ public class ConnectivityManagerMobileTest extends
     @LargeTest
     public void testDataConnectionWith3GToAmTo3G() {
         if (mWifiOnlyFlag) {
-            Log.v(TAG, getName() + " is excluded for wifi-only test");
+            logv(getName() + " is excluded for wifi-only test");
             return;
         }
         // disable wifi
