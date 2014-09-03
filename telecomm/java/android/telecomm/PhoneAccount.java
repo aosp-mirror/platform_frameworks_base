@@ -23,7 +23,12 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
+import java.lang.String;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.MissingResourceException;
 
 /**
@@ -77,6 +82,21 @@ public class PhoneAccount implements Parcelable {
      */
     public static final int CAPABILITY_VIDEO_CALLING = 0x8;
 
+    /**
+     * URI scheme for telephone number URIs.
+     */
+    public static final String SCHEME_TEL = "tel";
+
+    /**
+     * URI scheme for voicemail URIs.
+     */
+    public static final String SCHEME_VOICEMAIL = "voicemail";
+
+    /**
+     * URI scheme for SIP URIs.
+     */
+    public static final String SCHEME_SIP = "sip";
+
     private final PhoneAccountHandle mAccountHandle;
     private final Uri mHandle;
     private final String mSubscriptionNumber;
@@ -84,6 +104,7 @@ public class PhoneAccount implements Parcelable {
     private final int mIconResId;
     private final CharSequence mLabel;
     private final CharSequence mShortDescription;
+    private final List<String> mSupportedUriSchemes;
 
     public static class Builder {
         private PhoneAccountHandle mAccountHandle;
@@ -93,6 +114,7 @@ public class PhoneAccount implements Parcelable {
         private int mIconResId;
         private CharSequence mLabel;
         private CharSequence mShortDescription;
+        private List<String> mSupportedUriSchemes = new ArrayList<String>();
 
         public Builder() {}
 
@@ -131,7 +153,40 @@ public class PhoneAccount implements Parcelable {
             return this;
         }
 
+        /**
+         * Specifies an additional URI scheme supported by the {@link PhoneAccount}.
+         *
+         * @param uriScheme The URI scheme.
+         * @return The Builder.
+         */
+        public Builder withSupportedUriScheme(String uriScheme) {
+            if (!TextUtils.isEmpty(uriScheme) && !mSupportedUriSchemes.contains(uriScheme)) {
+                this.mSupportedUriSchemes.add(uriScheme);
+            }
+            return this;
+        }
+
+        /**
+         * Specifies additional URI schemes supported by the {@link PhoneAccount}.
+         *
+         * @param uriSchemes The URI schemes.
+         * @return The Builder.
+         */
+        public Builder withSupportedUriSchemes(List<String> uriSchemes) {
+            if (uriSchemes != null && !uriSchemes.isEmpty()) {
+                for (String uriScheme : uriSchemes) {
+                    withSupportedUriScheme(uriScheme);
+                }
+            }
+            return this;
+        }
+
         public PhoneAccount build() {
+            // If no supported URI schemes were defined, assume "tel" is supported.
+            if (mSupportedUriSchemes.isEmpty()) {
+                withSupportedUriScheme(SCHEME_TEL);
+            }
+
             return new PhoneAccount(
                     mAccountHandle,
                     mHandle,
@@ -139,7 +194,8 @@ public class PhoneAccount implements Parcelable {
                     mCapabilities,
                     mIconResId,
                     mLabel,
-                    mShortDescription);
+                    mShortDescription,
+                    mSupportedUriSchemes);
         }
     }
 
@@ -150,7 +206,8 @@ public class PhoneAccount implements Parcelable {
             int capabilities,
             int iconResId,
             CharSequence label,
-            CharSequence shortDescription) {
+            CharSequence shortDescription,
+            List<String> supportedUriSchemes) {
         mAccountHandle = account;
         mHandle = handle;
         mSubscriptionNumber = subscriptionNumber;
@@ -158,6 +215,7 @@ public class PhoneAccount implements Parcelable {
         mIconResId = iconResId;
         mLabel = label;
         mShortDescription = shortDescription;
+        mSupportedUriSchemes = Collections.unmodifiableList(supportedUriSchemes);
     }
 
     public static Builder builder() { return new Builder(); }
@@ -228,6 +286,36 @@ public class PhoneAccount implements Parcelable {
     }
 
     /**
+     * The URI schemes supported by this {@code PhoneAccount}.
+     *
+     * @return The URI schemes.
+     */
+    public List<String> getSupportedUriSchemes() {
+        return mSupportedUriSchemes;
+    }
+
+    /**
+     * Determines if the {@link PhoneAccount} supports calls to/from handles with a specified URI
+     * scheme.
+     *
+     * @param uriScheme The URI scheme to check.
+     * @return {@code True} if the {@code PhoneAccount} supports calls to/from handles with the
+     * specified URI scheme.
+     */
+    public boolean supportsUriScheme(String uriScheme) {
+        if (mSupportedUriSchemes == null || uriScheme == null) {
+            return false;
+        }
+
+        for (String scheme : mSupportedUriSchemes) {
+            if (scheme != null && scheme.equals(uriScheme)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * The icon resource ID for the icon of this {@code PhoneAccount}.
      *
      * @return A resource ID.
@@ -281,6 +369,7 @@ public class PhoneAccount implements Parcelable {
         out.writeInt(mIconResId);
         out.writeCharSequence(mLabel);
         out.writeCharSequence(mShortDescription);
+        out.writeList(mSupportedUriSchemes);
     }
 
     public static final Creator<PhoneAccount> CREATOR
@@ -297,6 +386,8 @@ public class PhoneAccount implements Parcelable {
     };
 
     private PhoneAccount(Parcel in) {
+        ClassLoader classLoader = PhoneAccount.class.getClassLoader();
+
         mAccountHandle = in.readParcelable(getClass().getClassLoader());
         mHandle = in.readParcelable(getClass().getClassLoader());
         mSubscriptionNumber = in.readString();
@@ -304,5 +395,9 @@ public class PhoneAccount implements Parcelable {
         mIconResId = in.readInt();
         mLabel = in.readCharSequence();
         mShortDescription = in.readCharSequence();
+
+        List<String> supportedUriSchemes = new ArrayList<>();
+        in.readList(supportedUriSchemes, classLoader);
+        mSupportedUriSchemes = Collections.unmodifiableList(supportedUriSchemes);
     }
 }
