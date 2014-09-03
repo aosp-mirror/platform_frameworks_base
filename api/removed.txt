@@ -48,6 +48,24 @@ package android.view {
 
 }
 
+package android.view.inputmethod {
+
+  public final class CursorAnchorInfo implements android.os.Parcelable {
+    method public boolean isInsertionMarkerClipped();
+    field public static final int CHARACTER_RECT_TYPE_FULLY_VISIBLE = 1; // 0x1
+    field public static final int CHARACTER_RECT_TYPE_INVISIBLE = 3; // 0x3
+    field public static final int CHARACTER_RECT_TYPE_MASK = 15; // 0xf
+    field public static final int CHARACTER_RECT_TYPE_NOT_FEASIBLE = 4; // 0x4
+    field public static final int CHARACTER_RECT_TYPE_PARTIALLY_VISIBLE = 2; // 0x2
+    field public static final int CHARACTER_RECT_TYPE_UNSPECIFIED = 0; // 0x0
+  }
+
+  public static final class CursorAnchorInfo.Builder {
+    method public android.view.inputmethod.CursorAnchorInfo.Builder setInsertionMarkerLocation(float, float, float, float, boolean);
+  }
+
+}
+
 package com.android.internal {
 
   public static final class R.attr {
