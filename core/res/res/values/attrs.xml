@@ -514,8 +514,8 @@
         <!-- Flag indicating whether this Window's transition should overlap with
              the exiting transition of the called Activity when the called Activity
              finishes. Corresponds to
-             {@link android.view.Window#setAllowExitTransitionOverlap(boolean)}. -->
-        <attr name="windowAllowExitTransitionOverlap" format="boolean"/>
+             {@link android.view.Window#setAllowReturnTransitionOverlap(boolean)}. -->
+        <attr name="windowAllowReturnTransitionOverlap" format="boolean"/>
 
         <!-- Indicates whether or not shared elements should use an overlay
              during transitions. The default value is true. -->
@@ -1853,8 +1853,8 @@
         <!-- Flag indicating whether this Window's transition should overlap with
              the exiting transition of the called Activity when the called Activity
              finishes. Corresponds to
-             {@link android.view.Window#setAllowExitTransitionOverlap(boolean)}. -->
-        <attr name="windowAllowExitTransitionOverlap"/>
+             {@link android.view.Window#setAllowReturnTransitionOverlap(boolean)}. -->
+        <attr name="windowAllowReturnTransitionOverlap"/>
 
         <!-- Indicates whether or not shared elements should use an overlay
              during transitions. The default value is true. -->
@@ -6627,6 +6627,53 @@
              IDs (through the android:id attribute) instead of tags because
              they are faster and allow for compile-time type checking. -->
         <attr name="tag" />
+
+        <!-- The Transition that will be used to move Views out of the scene when the
+             fragment is removed, hidden, or detached when not popping the back stack.
+             Corresponds to {@link android.app.Fragment#setExitTransition(
+             android.transition.Transition)} -->
+        <attr name="fragmentExitTransition" format="reference"/>
+
+        <!-- The Transition that will be used to move Views into the initial scene.
+             Corresponds to {@link android.app.Fragment#setEnterTransition(
+             android.transition.Transition)} -->
+        <attr name="fragmentEnterTransition" format="reference"/>
+
+        <!-- The Transition that will be used for shared elements transferred into the content
+             Scene.
+             Corresponds to {@link android.app.Fragment#setSharedElementEnterTransition(
+             android.transition.Transition)} -->
+        <attr name="fragmentSharedElementEnterTransition" format="reference"/>
+
+        <!-- The Transition that will be used to move Views out of the scene when the Fragment is
+             preparing to be removed, hidden, or detached because of popping the back stack.
+             Corresponds to {@link android.app.Fragment#setReturnTransition(
+             android.transition.Transition)} -->
+        <attr name="fragmentReturnTransition" format="reference"/>
+
+        <!-- The Transition that will be used for shared elements transferred back during a
+             pop of the back stack. This Transition acts in the leaving Fragment.
+             Corresponds to {@link android.app.Fragment#setSharedElementReturnTransition(
+             android.transition.Transition)} -->
+        <attr name="fragmentSharedElementReturnTransition" format="reference"/>
+
+        <!-- The Transition that will be used to move Views in to the scene when returning due
+             to popping a back stack.
+             Corresponds to {@link android.app.Fragment#setReenterTransition(
+             android.transition.Transition)} -->
+        <attr name="fragmentReenterTransition" format="reference"/>
+
+        <!-- Sets whether the enter and exit transitions should overlap when transitioning
+             forward.
+             Corresponds to {@link android.app.Fragment#setAllowEnterTransitionOverlap(
+             boolean)} -->
+        <attr name="fragmentAllowEnterTransitionOverlap" format="reference"/>
+
+        <!-- Sets whether the enter and exit transitions should overlap when transitioning
+             because of popping the back stack.
+             Corresponds to {@link android.app.Fragment#setAllowReturnTransitionOverlap(
+             boolean)} -->
+        <attr name="fragmentAllowReturnTransitionOverlap" format="reference"/>
     </declare-styleable>
 
     <!-- Use <code>device-admin</code> as the root tag of the XML resource that
