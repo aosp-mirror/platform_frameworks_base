@@ -259,6 +259,8 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             ViewGroup decor = getDecor();
             Drawable background;
             if (decor != null && (background = decor.getBackground()) != null) {
+                background = background.mutate();
+                getWindow().setBackgroundDrawable(background);
                 mBackgroundAnimator = ObjectAnimator.ofInt(background, "alpha", 0);
                 mBackgroundAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override

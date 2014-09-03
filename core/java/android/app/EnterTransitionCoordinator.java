@@ -466,6 +466,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             Drawable background = getDecor().getBackground();
             if (background != null) {
                 background = background.mutate();
+                getWindow().setBackgroundDrawable(background);
                 mBackgroundAnimator = ObjectAnimator.ofInt(background, "alpha", 255);
                 mBackgroundAnimator.setDuration(getFadeDuration());
                 mBackgroundAnimator.addListener(new AnimatorListenerAdapter() {
