@@ -1286,7 +1286,7 @@ public class AudioTrack
 
     public int write(short[] audioData, int offsetInShorts, int sizeInShorts) {
 
-        if (mState == STATE_UNINITIALIZED || mAudioFormat != AudioFormat.ENCODING_PCM_16BIT) {
+        if (mState == STATE_UNINITIALIZED || mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT) {
             return ERROR_INVALID_OPERATION;
         }
 
