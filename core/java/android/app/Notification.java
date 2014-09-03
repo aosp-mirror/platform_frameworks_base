@@ -129,6 +129,14 @@ public class Notification implements Parcelable
     public static final int DEFAULT_LIGHTS = 4;
 
     /**
+     * Maximum length of CharSequences accepted by Builder and friends.
+     *
+     * <p>
+     * Avoids spamming the system with overly large strings such as full e-mails.
+     */
+    private static final int MAX_CHARSEQUENCE_LENGTH = 5 * 1024;
+
+    /**
      * A timestamp related to this notification, in milliseconds since the epoch.
      *
      * Default value: {@link System#currentTimeMillis() Now}.
@@ -1434,6 +1442,10 @@ public class Notification implements Parcelable
      * @hide
      */
     public static CharSequence safeCharSequence(CharSequence cs) {
+        if (cs == null) return cs;
+        if (cs.length() > MAX_CHARSEQUENCE_LENGTH) {
+            cs = cs.subSequence(0, MAX_CHARSEQUENCE_LENGTH);
+        }
         if (cs instanceof Parcelable) {
             Log.e(TAG, "warning: " + cs.getClass().getCanonicalName()
                     + " instance is a custom Parcelable and not allowed in Notification");
