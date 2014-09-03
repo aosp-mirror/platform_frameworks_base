@@ -428,7 +428,7 @@ public class InputConnectionWrapper implements InputConnection {
         }
     }
 
-    public boolean requestUpdateCursorAnchorInfo(int cursorUpdateMode) {
+    public boolean requestCursorUpdates(int cursorUpdateMode) {
         boolean result = false;
         try {
             InputContextCallback callback = InputContextCallback.getInstance();
@@ -444,5 +444,12 @@ public class InputConnectionWrapper implements InputConnection {
             return false;
         }
         return result;
+    }
+
+    /**
+     * @removed
+     */
+    public boolean requestUpdateCursorAnchorInfo(int cursorUpdateMode) {
+        return requestCursorUpdates(cursorUpdateMode);
     }
 }

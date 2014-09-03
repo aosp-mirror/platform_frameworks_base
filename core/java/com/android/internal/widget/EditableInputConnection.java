@@ -188,13 +188,13 @@ public class EditableInputConnection extends BaseInputConnection {
     }
 
     @Override
-    public boolean requestUpdateCursorAnchorInfo(int cursorUpdateMode) {
+    public boolean requestCursorUpdates(int cursorUpdateMode) {
         if (DEBUG) Log.v(TAG, "requestUpdateCursorAnchorInfo " + cursorUpdateMode);
 
         // It is possible that any other bit is used as a valid flag in a future release.
         // We should reject the entire request in such a case.
-        final int KNOWN_FLAGS_MASK = InputConnection.REQUEST_UPDATE_CURSOR_ANCHOR_INFO_IMMEDIATE |
-                InputConnection.REQUEST_UPDATE_CURSOR_ANCHOR_INFO_MONITOR;
+        final int KNOWN_FLAGS_MASK = InputConnection.CURSOR_UPDATE_IMMEDIATE |
+                InputConnection.CURSOR_UPDATE_MONITOR;
         final int unknownFlags = cursorUpdateMode & ~KNOWN_FLAGS_MASK;
         if (unknownFlags != 0) {
             if (DEBUG) {
@@ -212,7 +212,7 @@ public class EditableInputConnection extends BaseInputConnection {
             return false;
         }
         mIMM.setUpdateCursorAnchorInfoMode(cursorUpdateMode);
-        if ((cursorUpdateMode & InputConnection.REQUEST_UPDATE_CURSOR_ANCHOR_INFO_IMMEDIATE) != 0) {
+        if ((cursorUpdateMode & InputConnection.CURSOR_UPDATE_IMMEDIATE) != 0) {
             if (mTextView == null) {
                 // In this case, FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE is silently ignored.
                 // TODO: Return some notification code for the input method that indicates
