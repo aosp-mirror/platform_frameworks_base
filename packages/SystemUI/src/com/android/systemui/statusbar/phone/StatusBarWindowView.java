@@ -42,6 +42,7 @@ public class StatusBarWindowView extends FrameLayout {
     private DragDownHelper mDragDownHelper;
     private NotificationStackScrollLayout mStackScrollLayout;
     private NotificationPanelView mNotificationPanel;
+    private View mBrightnessMirror;
 
     PhoneStatusBar mService;
 
@@ -72,6 +73,7 @@ public class StatusBarWindowView extends FrameLayout {
                 R.id.notification_stack_scroller);
         mNotificationPanel = (NotificationPanelView) findViewById(R.id.notification_panel);
         mDragDownHelper = new DragDownHelper(getContext(), this, mStackScrollLayout, mService);
+        mBrightnessMirror = findViewById(R.id.brightness_mirror);
 
         // We really need to be able to animate while window animations are going on
         // so that activities may be started asynchronously from panel animations
@@ -103,6 +105,19 @@ public class StatusBarWindowView extends FrameLayout {
             return true;
         }
         return super.dispatchKeyEvent(event);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (mBrightnessMirror != null && mBrightnessMirror.getVisibility() == VISIBLE) {
+            // Disallow new pointers while the brightness mirror is visible. This is so that you
+            // can't touch anything other than the brightness slider while the mirror is showing
+            // and the rest of the panel is transparent.
+            if (ev.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN) {
+                return false;
+            }
+        }
+        return super.dispatchTouchEvent(ev);
     }
 
     @Override
