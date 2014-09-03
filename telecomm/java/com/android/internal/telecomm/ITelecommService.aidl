@@ -40,9 +40,14 @@ interface ITelecommService {
     PhoneAccountHandle getDefaultOutgoingPhoneAccount(in String uriScheme);
 
     /**
-     * @see TelecommServiceImpl#setDefaultOutgoingPhoneAccount
+     * @see TelecommServiceImpl#getUserSelectedOutgoingPhoneAccount
      */
-    void setDefaultOutgoingPhoneAccount(in PhoneAccountHandle account);
+    PhoneAccountHandle getUserSelectedOutgoingPhoneAccount();
+
+    /**
+     * @see TelecommServiceImpl#setUserSelectedOutgoingPhoneAccount
+     */
+    void setUserSelectedOutgoingPhoneAccount(in PhoneAccountHandle account);
 
     /**
      * @see TelecommServiceImpl#getOutgoingPhoneAccounts
