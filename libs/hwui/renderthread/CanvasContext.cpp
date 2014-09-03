@@ -110,8 +110,7 @@ void CanvasContext::updateSurface(ANativeWindow* window) {
 }
 
 void CanvasContext::pauseSurface(ANativeWindow* window) {
-    // TODO: For now we just need a fence, in the future suspend any animations
-    // and such to prevent from trying to render into this surface
+    stopDrawing();
 }
 
 void CanvasContext::setup(int width, int height, const Vector3& lightCenter, float lightRadius,
