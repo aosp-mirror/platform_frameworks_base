@@ -355,6 +355,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // For the non-primary user, ensure that the SystemSericesProxy is initialized
+        RecentsTaskLoader.initialize(this);
 
         // Initialize the loader and the configuration
         mConfig = RecentsConfiguration.reinitialize(this,
