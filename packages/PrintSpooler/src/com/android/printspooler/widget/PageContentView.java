@@ -20,7 +20,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
-import android.print.PrintAttributes;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Margins;
 import android.util.AttributeSet;
@@ -39,13 +38,17 @@ import com.android.printspooler.model.PageContentRepository.RenderSpec;
 public class PageContentView extends View
         implements PageContentRepository.OnPageContentAvailableCallback {
 
-    private final PrintAttributes mAttributes = new PrintAttributes.Builder().build();
-
     private final ColorDrawable mEmptyState;
 
     private PageContentProvider mProvider;
 
+    private MediaSize mMediaSize;
+
+    private Margins mMinMargins;
+
     private boolean mContentRequested;
+
+    private boolean mNeedsLayout;
 
     public PageContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -68,6 +71,7 @@ public class PageContentView extends View
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
+        mNeedsLayout = false;
         requestPageContentIfNeeded();
     }
 
@@ -83,18 +87,23 @@ public class PageContentView extends View
     }
 
     public void init(PageContentProvider provider, MediaSize mediaSize, Margins minMargins) {
-        if (mProvider == null ? provider == null : mProvider.equals(provider)
-                && ((mAttributes.getMediaSize() == null)
-                        ? mediaSize == null : mAttributes.getMediaSize().equals(mediaSize))
-                && ((mAttributes.getMinMargins() == null)
-                        ? minMargins == null : mAttributes.getMinMargins().equals(minMargins))) {
+        final boolean providerChanged = (mProvider == null)
+                ? provider != null : !mProvider.equals(provider);
+        final boolean mediaSizeChanged = (mMediaSize == null)
+                ? mediaSize != null : !mMediaSize.equals(mediaSize);
+        final boolean marginsChanged = (mMinMargins == null)
+                ? minMargins != null : !mMinMargins.equals(minMargins);
+
+        if (!providerChanged && !mediaSizeChanged && !marginsChanged) {
             return;
         }
 
         mProvider = provider;
-        mAttributes.setMediaSize(mediaSize);
-        mAttributes.setMinMargins(minMargins);
+        mMediaSize = mediaSize;
+        mMinMargins = minMargins;
+
         mContentRequested = false;
+        mNeedsLayout = mNeedsLayout || mediaSizeChanged || marginsChanged;
 
         // If there is no provider we want immediately to switch to
         // the empty state, so pages with no content appear blank.
@@ -106,9 +115,11 @@ public class PageContentView extends View
     }
 
     private void requestPageContentIfNeeded() {
-        if (getWidth() > 0 && getHeight() > 0 && !mContentRequested && mProvider != null) {
+        if (getWidth() > 0 && getHeight() > 0 && !mContentRequested
+                && mProvider != null && !mNeedsLayout) {
             mContentRequested = true;
-            mProvider.getPageContent(new RenderSpec(getWidth(), getHeight(), mAttributes), this);
+            mProvider.getPageContent(new RenderSpec(getWidth(), getHeight(),
+                    mMediaSize, mMinMargins), this);
         }
     }
 }

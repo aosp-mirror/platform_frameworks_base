@@ -55,7 +55,7 @@ import java.util.Arrays;
 public final class RemotePrintDocument {
     private static final String LOG_TAG = "RemotePrintDocument";
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final int STATE_INITIAL = 0;
     private static final int STATE_STARTED = 1;
