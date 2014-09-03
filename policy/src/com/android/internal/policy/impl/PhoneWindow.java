@@ -264,7 +264,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private Transition mSharedElementReturnTransition = USE_DEFAULT_TRANSITION;
     private Transition mSharedElementExitTransition = null;
     private Transition mSharedElementReenterTransition = USE_DEFAULT_TRANSITION;
-    private Boolean mAllowExitTransitionOverlap;
+    private Boolean mAllowReturnTransitionOverlap;
     private Boolean mAllowEnterTransitionOverlap;
     private long mBackgroundFadeDurationMillis = -1;
     private Boolean mSharedElementsUseOverlay;
@@ -3549,9 +3549,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     mAllowEnterTransitionOverlap = getWindowStyle().getBoolean(
                             R.styleable.Window_windowAllowEnterTransitionOverlap, true);
                 }
-                if (mAllowExitTransitionOverlap == null) {
-                    mAllowExitTransitionOverlap = getWindowStyle().getBoolean(
-                            R.styleable.Window_windowAllowExitTransitionOverlap, true);
+                if (mAllowReturnTransitionOverlap == null) {
+                    mAllowReturnTransitionOverlap = getWindowStyle().getBoolean(
+                            R.styleable.Window_windowAllowReturnTransitionOverlap, true);
                 }
                 if (mBackgroundFadeDurationMillis < 0) {
                     mBackgroundFadeDurationMillis = getWindowStyle().getInteger(
@@ -4017,13 +4017,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
-    public void setAllowExitTransitionOverlap(boolean allowExitTransitionOverlap) {
-        mAllowExitTransitionOverlap = allowExitTransitionOverlap;
+    public void setAllowReturnTransitionOverlap(boolean allowExitTransitionOverlap) {
+        mAllowReturnTransitionOverlap = allowExitTransitionOverlap;
     }
 
     @Override
-    public boolean getAllowExitTransitionOverlap() {
-        return (mAllowExitTransitionOverlap == null) ? true : mAllowExitTransitionOverlap;
+    public boolean getAllowReturnTransitionOverlap() {
+        return (mAllowReturnTransitionOverlap == null) ? true : mAllowReturnTransitionOverlap;
     }
 
     @Override
