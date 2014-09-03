@@ -2903,9 +2903,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             boolean knownToBeDead, int intentFlags, String hostingType, ComponentName hostingName,
             boolean allowWhileBooting, boolean isolated, int isolatedUid, boolean keepIfLarge,
             String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
+        long startTime = SystemClock.elapsedRealtime();
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(processName, info.uid, keepIfLarge);
+            checkTime(startTime, "startProcess: after getProcessRecord");
         } else {
             // If this is an isolated process, it can't re-use an existing process.
             app = null;
@@ -2927,14 +2929,17 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_PROCESSES) Slog.v(TAG, "App already running: " + app);
                 // If this is a new package in the process, add the package to the list
                 app.addPackage(info.packageName, info.versionCode, mProcessStats);
+                checkTime(startTime, "startProcess: done, added package to proc");
                 return app;
             }
 
             // An application record is attached to a previous process,
             // clean it up now.
             if (DEBUG_PROCESSES || DEBUG_CLEANUP) Slog.v(TAG, "App died: " + app);
+            checkTime(startTime, "startProcess: bad proc running, killing");
             Process.killProcessGroup(app.info.uid, app.pid);
             handleAppDiedLocked(app, true, true);
+            checkTime(startTime, "startProcess: done killing old proc");
         }
 
         String hostingNameStr = hostingName != null
@@ -2970,6 +2975,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (app == null) {
+            checkTime(startTime, "startProcess: creating new process record");
             app = newProcessRecordLocked(info, processName, isolated, isolatedUid);
             app.crashHandler = crashHandler;
             if (app == null) {
@@ -2981,9 +2987,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (isolated) {
                 mIsolatedProcesses.put(app.uid, app);
             }
+            checkTime(startTime, "startProcess: done creating new process record");
         } else {
             // If this is a new package in the process, add the package to the list
             app.addPackage(info.packageName, info.versionCode, mProcessStats);
+            checkTime(startTime, "startProcess: added package to existing proc");
         }
 
         // If the system is not ready yet, then hold off on starting this
@@ -2995,11 +3003,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mProcessesOnHold.add(app);
             }
             if (DEBUG_PROCESSES) Slog.v(TAG, "System not ready, putting on hold: " + app);
+            checkTime(startTime, "startProcess: returning with proc on hold");
             return app;
         }
 
+        checkTime(startTime, "startProcess: stepping in to startProcess");
         startProcessLocked(
                 app, hostingType, hostingNameStr, abiOverride, entryPoint, entryPointArgs);
+        checkTime(startTime, "startProcess: done starting proc!");
         return (app.pid != 0) ? app : null;
     }
 
@@ -3015,11 +3026,14 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private final void startProcessLocked(ProcessRecord app, String hostingType,
             String hostingNameStr, String abiOverride, String entryPoint, String[] entryPointArgs) {
+        long startTime = SystemClock.elapsedRealtime();
         if (app.pid > 0 && app.pid != MY_PID) {
+            checkTime(startTime, "startProcess: removing from pids map");
             synchronized (mPidsSelfLocked) {
                 mPidsSelfLocked.remove(app.pid);
                 mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             }
+            checkTime(startTime, "startProcess: done removing from pids map");
             app.setPid(0);
         }
 
@@ -3027,7 +3041,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 "startProcessLocked removing on hold: " + app);
         mProcessesOnHold.remove(app);
 
+        checkTime(startTime, "startProcess: starting to update cpu stats");
         updateCpuStats();
+        checkTime(startTime, "startProcess: done updating cpu stats");
 
         try {
             int uid = app.uid;
@@ -3037,10 +3053,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (!app.isolated) {
                 int[] permGids = null;
                 try {
+                    checkTime(startTime, "startProcess: getting gids from package manager");
                     final PackageManager pm = mContext.getPackageManager();
                     permGids = pm.getPackageGids(app.info.packageName);
 
                     if (Environment.isExternalStorageEmulated()) {
+                        checkTime(startTime, "startProcess: checking external storage perm");
                         if (pm.checkPermission(
                                 android.Manifest.permission.ACCESS_ALL_EXTERNAL_STORAGE,
                                 app.info.packageName) == PERMISSION_GRANTED) {
@@ -3066,6 +3084,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 gids[0] = UserHandle.getSharedAppGid(UserHandle.getAppId(uid));
                 gids[1] = UserHandle.getUserGid(UserHandle.getUserId(uid));
             }
+            checkTime(startTime, "startProcess: building args");
             if (mFactoryTest != FactoryTest.FACTORY_TEST_OFF) {
                 if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL
                         && mTopComponent != null
@@ -3109,14 +3128,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             // the PID of the new process, or else throw a RuntimeException.
             boolean isActivityProcess = (entryPoint == null);
             if (entryPoint == null) entryPoint = "android.app.ActivityThread";
+            checkTime(startTime, "startProcess: asking zygote to start proc");
             Process.ProcessStartResult startResult = Process.start(entryPoint,
                     app.processName, uid, uid, gids, debugFlags, mountExternal,
                     app.info.targetSdkVersion, app.info.seinfo, requiredAbi, entryPointArgs);
+            checkTime(startTime, "startProcess: returned from zygote!");
 
             if (app.isolated) {
                 mBatteryStatsService.addIsolatedUid(app.uid, app.info.uid);
             }
             mBatteryStatsService.noteProcessStart(app.processName, app.info.uid);
+            checkTime(startTime, "startProcess: done updating battery stats");
 
             EventLog.writeEvent(EventLogTags.AM_PROC_START,
                     UserHandle.getUserId(uid), startResult.pid, uid,
@@ -3127,6 +3149,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Watchdog.getInstance().processStarted(app.processName, startResult.pid);
             }
 
+            checkTime(startTime, "startProcess: building log message");
             StringBuilder buf = mStringBuilder;
             buf.setLength(0);
             buf.append("Start proc ");
@@ -3164,6 +3187,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.usingWrapper = startResult.usingWrapper;
             app.removed = false;
             app.killedByAm = false;
+            checkTime(startTime, "startProcess: starting to update pids map");
             synchronized (mPidsSelfLocked) {
                 this.mPidsSelfLocked.put(startResult.pid, app);
                 if (isActivityProcess) {
@@ -3173,6 +3197,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             ? PROC_START_TIMEOUT_WITH_WRAPPER : PROC_START_TIMEOUT);
                 }
             }
+            checkTime(startTime, "startProcess: done updating pids map");
         } catch (RuntimeException e) {
             // XXX do better error recovery.
             app.setPid(0);
