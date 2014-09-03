@@ -107,6 +107,7 @@ struct CacheLogger {
 ///////////////////////////////////////////////////////////////////////////////
 
 class RenderNode;
+class RenderState;
 
 class ANDROID_API Caches: public Singleton<Caches> {
     Caches();
@@ -131,6 +132,8 @@ public:
      * Initialize global system properties.
      */
     bool initProperties();
+
+    void setRenderState(RenderState* renderState) { mRenderState = renderState; }
 
     /**
      * Flush the cache.
@@ -431,6 +434,8 @@ private:
     GLuint mBoundTextures[REQUIRED_TEXTURE_UNITS_COUNT];
 
     OverdrawColorSet mOverdrawDebugColorSet;
+
+    RenderState* mRenderState;
 }; // class Caches
 
 }; // namespace uirenderer

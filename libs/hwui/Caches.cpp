@@ -24,6 +24,7 @@
 #include "Properties.h"
 #include "LayerRenderer.h"
 #include "ShadowTessellator.h"
+#include "RenderState.h"
 
 namespace android {
 
@@ -49,7 +50,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 Caches::Caches(): Singleton<Caches>(),
-        mExtensions(Extensions::getInstance()), mInitialized(false) {
+        mExtensions(Extensions::getInstance()), mInitialized(false), mRenderState(NULL) {
     init();
     initFont();
     initConstraints();
@@ -267,8 +268,11 @@ void Caches::dumpMemoryUsage(String8 &log) {
     log.appendFormat("Current memory usage / total memory usage (bytes):\n");
     log.appendFormat("  TextureCache         %8d / %8d\n",
             textureCache.getSize(), textureCache.getMaxSize());
-    log.appendFormat("  LayerCache           %8d / %8d\n",
-            layerCache.getSize(), layerCache.getMaxSize());
+    log.appendFormat("  LayerCache           %8d / %8d (numLayers = %zu)\n",
+            layerCache.getSize(), layerCache.getMaxSize(), layerCache.getCount());
+    log.appendFormat("  Garbage layers       %8zu\n", mLayerGarbage.size());
+    log.appendFormat("  Active layers        %8zu\n",
+            mRenderState ? mRenderState->mActiveLayers.size() : 0);
     log.appendFormat("  RenderBufferCache    %8d / %8d\n",
             renderBufferCache.getSize(), renderBufferCache.getMaxSize());
     log.appendFormat("  GradientCache        %8d / %8d\n",
