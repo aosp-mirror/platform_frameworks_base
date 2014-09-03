@@ -46,7 +46,8 @@ public class KeyButtonView extends ImageView {
     private static final String TAG = "StatusBar.KeyButtonView";
     private static final boolean DEBUG = false;
 
-    public static final float DEFAULT_QUIESCENT_ALPHA = 0.70f;
+    // TODO: Get rid of this
+    public static final float DEFAULT_QUIESCENT_ALPHA = 1f;
 
     private long mDownTime;
     private int mCode;

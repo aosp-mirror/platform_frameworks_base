@@ -49,7 +49,7 @@ public class SignalClusterView
 
     ViewGroup mWifiGroup, mMobileGroup;
     ImageView mWifi, mMobile, mMobileType, mAirplane;
-    View mSpacer;
+    View mWifiAirplaneSpacer;
 
     public SignalClusterView(Context context) {
         this(context, null);
@@ -77,8 +77,8 @@ public class SignalClusterView
         mMobileGroup    = (ViewGroup) findViewById(R.id.mobile_combo);
         mMobile         = (ImageView) findViewById(R.id.mobile_signal);
         mMobileType     = (ImageView) findViewById(R.id.mobile_type);
-        mSpacer         =             findViewById(R.id.spacer);
         mAirplane       = (ImageView) findViewById(R.id.airplane);
+        mWifiAirplaneSpacer =         findViewById(R.id.wifi_airplane_spacer);
 
         apply();
     }
@@ -90,7 +90,6 @@ public class SignalClusterView
         mMobileGroup    = null;
         mMobile         = null;
         mMobileType     = null;
-        mSpacer         = null;
         mAirplane       = null;
 
         super.onDetachedFromWindow();
@@ -198,10 +197,10 @@ public class SignalClusterView
             mAirplane.setVisibility(View.GONE);
         }
 
-        if (mMobileVisible && mWifiVisible && mIsAirplaneMode) {
-            mSpacer.setVisibility(View.INVISIBLE);
+        if (mIsAirplaneMode && mWifiVisible) {
+            mWifiAirplaneSpacer.setVisibility(View.VISIBLE);
         } else {
-            mSpacer.setVisibility(View.GONE);
+            mWifiAirplaneSpacer.setVisibility(View.GONE);
         }
 
         if (DEBUG) Log.d(TAG,

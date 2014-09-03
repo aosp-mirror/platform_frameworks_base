@@ -73,6 +73,9 @@
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
 
+    <!-- The font size for the clock -->
+    <dimen name="status_bar_clock_size">14sp</dimen>
+
     <!-- Height of a small notification in the status bar -->
     <dimen name="notification_min_height">64dp</dimen>
 
@@ -86,10 +89,10 @@
     <dimen name="notification_summary_height">44dp</dimen>
 
     <!-- size at which Notification icons will be drawn in the status bar -->
-    <dimen name="status_bar_icon_drawing_size">18dip</dimen>
+    <dimen name="status_bar_icon_drawing_size">17dip</dimen>
 
     <!-- opacity at which Notification icons will be drawn in the status bar -->
-    <item type="dimen" name="status_bar_icon_drawing_alpha">75%</item>
+    <item type="dimen" name="status_bar_icon_drawing_alpha">90%</item>
 
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">0dp</dimen>
@@ -405,8 +408,8 @@
     <!-- The font size of the date in QS -->
     <dimen name="qs_date_collapsed_size">14sp</dimen>
 
-    <!-- Battery level padding end when in expanded QS (but not on Keyguard) -->
-    <dimen name="battery_level_padding_end">4dp</dimen>
+    <!-- Battery level text padding end when in expanded QS and on Keyguard -->
+    <dimen name="battery_level_padding_end">2dp</dimen>
 
     <!-- The top padding of the clear all button -->
     <dimen name="clear_all_padding_top">12dp</dimen>
@@ -419,10 +422,13 @@
     <dimen name="keyguard_carrier_text_margin">16dp</dimen>
 
     <!-- Margin on the left side of the battery % in the header. -->
-    <dimen name="header_battery_margin_expanded">8dp</dimen>
+    <dimen name="header_battery_margin_expanded">6dp</dimen>
 
     <!-- Margin on the left side of the battery % when on Keyguard. -->
     <dimen name="header_battery_margin_keyguard">6dp</dimen>
+
+    <!-- Margin on the right side of the system icon group on Keyguard. -->
+    <dimen name="system_icons_keyguard_padding_end">4dp</dimen>
 
     <!-- Additional translation (downwards) for appearing notifications when going to the full shade
          from Keyguard. -->
@@ -461,4 +467,6 @@
     <!-- TrustDrawable: Thickness of the circle -->
     <dimen name="trust_circle_thickness">2dp</dimen>
 
+    <!-- Margin on the right side of the system icon group on Keyguard. -->
+    <fraction name="battery_button_height_fraction">10.5%</fraction>
 </resources>
