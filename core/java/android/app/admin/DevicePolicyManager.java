@@ -1786,16 +1786,24 @@ public class DevicePolicyManager {
      * If a user has installed any certificates by other means than device policy these will be
      * included too.
      *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return a List of byte[] arrays, each encoding one user CA certificate.
      */
-    public List<byte[]> getInstalledCaCerts() {
-        final TrustedCertificateStore certStore = new TrustedCertificateStore();
+    public List<byte[]> getInstalledCaCerts(ComponentName admin) {
         List<byte[]> certs = new ArrayList<byte[]>();
-        for (String alias : certStore.userAliases()) {
+        if (mService != null) {
             try {
-                certs.add(certStore.getCertificate(alias).getEncoded());
-            } catch (CertificateException ce) {
-                Log.w(TAG, "Could not encode certificate: " + alias, ce);
+                mService.enforceCanManageCaCerts(admin);
+                final TrustedCertificateStore certStore = new TrustedCertificateStore();
+                for (String alias : certStore.userAliases()) {
+                    try {
+                        certs.add(certStore.getCertificate(alias).getEncoded());
+                    } catch (CertificateException ce) {
+                        Log.w(TAG, "Could not encode certificate: " + alias, ce);
+                    }
+                }
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed talking with device policy service", re);
             }
         }
         return certs;
@@ -1822,13 +1830,19 @@ public class DevicePolicyManager {
     /**
      * Returns whether this certificate is installed as a trusted CA.
      *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param certBuffer encoded form of the certificate to look up.
      */
-    public boolean hasCaCertInstalled(byte[] certBuffer) {
-        try {
-            return getCaCertAlias(certBuffer) != null;
-        } catch (CertificateException ce) {
-            Log.w(TAG, "Could not parse certificate", ce);
+    public boolean hasCaCertInstalled(ComponentName admin, byte[] certBuffer) {
+        if (mService != null) {
+            try {
+                mService.enforceCanManageCaCerts(admin);
+                return getCaCertAlias(certBuffer) != null;
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed talking with device policy service", re);
+            } catch (CertificateException ce) {
+                Log.w(TAG, "Could not parse certificate", ce);
+            }
         }
         return false;
     }

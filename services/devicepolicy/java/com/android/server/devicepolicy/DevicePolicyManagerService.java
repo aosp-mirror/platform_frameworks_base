@@ -40,7 +40,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -70,7 +69,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.security.Credentials;
-import android.security.IKeyChainService;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
 import android.util.Log;
@@ -2749,7 +2747,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return !"".equals(state);
     }
 
-    public boolean installCaCert(ComponentName who, byte[] certBuffer) throws RemoteException {
+    @Override
+    public void enforceCanManageCaCerts(ComponentName who) {
         if (who == null) {
             mContext.enforceCallingOrSelfPermission(MANAGE_CA_CERTIFICATES, null);
         } else {
@@ -2757,6 +2756,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             }
         }
+    }
+
+    @Override
+    public boolean installCaCert(ComponentName admin, byte[] certBuffer) throws RemoteException {
+        enforceCanManageCaCerts(admin);
 
         byte[] pemCert;
         try {
@@ -2791,21 +2795,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return false;
     }
 
-    private static X509Certificate parseCert(byte[] certBuffer)
-            throws CertificateException, IOException {
+    private static X509Certificate parseCert(byte[] certBuffer) throws CertificateException {
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
         return (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(
                 certBuffer));
     }
 
-    public void uninstallCaCert(ComponentName who, String alias) {
-        if (who == null) {
-            mContext.enforceCallingOrSelfPermission(MANAGE_CA_CERTIFICATES, null);
-        } else {
-            synchronized (this) {
-                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            }
-        }
+    @Override
+    public void uninstallCaCert(ComponentName admin, String alias) {
+        enforceCanManageCaCerts(admin);
 
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
         final long id = Binder.clearCallingIdentity();
