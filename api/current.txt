@@ -28320,10 +28320,15 @@ package android.telecomm {
     method public java.lang.CharSequence getLabel();
     method public java.lang.CharSequence getShortDescription();
     method public java.lang.String getSubscriptionNumber();
+    method public java.util.List<java.lang.String> getSupportedUriSchemes();
+    method public boolean supportsUriScheme(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CAPABILITY_CONNECTION_MANAGER = 1; // 0x1
     field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final java.lang.String SCHEME_SIP = "sip";
+    field public static final java.lang.String SCHEME_TEL = "tel";
+    field public static final java.lang.String SCHEME_VOICEMAIL = "voicemail";
   }
 
   public static class PhoneAccount.Builder {
@@ -28336,6 +28341,8 @@ package android.telecomm {
     method public android.telecomm.PhoneAccount.Builder withLabel(java.lang.CharSequence);
     method public android.telecomm.PhoneAccount.Builder withShortDescription(java.lang.CharSequence);
     method public android.telecomm.PhoneAccount.Builder withSubscriptionNumber(java.lang.String);
+    method public android.telecomm.PhoneAccount.Builder withSupportedUriScheme(java.lang.String);
+    method public android.telecomm.PhoneAccount.Builder withSupportedUriSchemes(java.util.List<java.lang.String>);
   }
 
   public class PhoneAccountHandle implements android.os.Parcelable {
@@ -28464,9 +28471,10 @@ package android.telecomm {
     method public void addNewIncomingCall(android.telecomm.PhoneAccountHandle, android.os.Bundle);
     method public void cancelMissedCallsNotification();
     method public void clearAccounts(java.lang.String);
-    method public android.telecomm.PhoneAccountHandle getDefaultOutgoingPhoneAccount();
+    method public android.telecomm.PhoneAccountHandle getDefaultOutgoingPhoneAccount(java.lang.String);
     method public java.util.List<android.telecomm.PhoneAccountHandle> getEnabledPhoneAccounts();
     method public android.telecomm.PhoneAccount getPhoneAccount(android.telecomm.PhoneAccountHandle);
+    method public java.util.List<android.telecomm.PhoneAccountHandle> getPhoneAccountsSupportingScheme(java.lang.String);
     method public boolean handleMmi(java.lang.String);
     method public boolean hasMultipleEnabledAccounts();
     method public boolean isInCall();
