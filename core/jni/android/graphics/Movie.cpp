@@ -68,7 +68,7 @@ static jboolean movie_setTime(JNIEnv* env, jobject movie, jint ms) {
 }
 
 static void movie_draw(JNIEnv* env, jobject movie, jobject canvas,
-                       jfloat fx, jfloat fy, jobject jpaint) {
+                       jfloat fx, jfloat fy, jlong paintHandle) {
     NPE_CHECK_RETURN_VOID(env, movie);
     NPE_CHECK_RETURN_VOID(env, canvas);
     // its OK for paint to be null
@@ -76,7 +76,7 @@ static void movie_draw(JNIEnv* env, jobject movie, jobject canvas,
     SkMovie* m = J2Movie(env, movie);
     SkCanvas* c = GraphicsJNI::getNativeCanvas(env, canvas);
     const SkBitmap& b = m->bitmap();
-    const SkPaint* p = jpaint ? GraphicsJNI::getNativePaint(env, jpaint) : NULL;
+    const android::Paint* p = reinterpret_cast<android::Paint*>(paintHandle);
 
     c->drawBitmap(b, fx, fy, p);
 }
@@ -146,7 +146,7 @@ static JNINativeMethod gMethods[] = {
     {   "isOpaque", "()Z",  (void*)movie_isOpaque  },
     {   "duration", "()I",  (void*)movie_duration  },
     {   "setTime",  "(I)Z", (void*)movie_setTime  },
-    {   "draw",     "(Landroid/graphics/Canvas;FFLandroid/graphics/Paint;)V",
+    {   "nDraw",    "(Landroid/graphics/Canvas;FFJ)V",
                             (void*)movie_draw  },
     { "nativeDecodeAsset", "(J)Landroid/graphics/Movie;",
                             (void*)movie_decodeAsset },

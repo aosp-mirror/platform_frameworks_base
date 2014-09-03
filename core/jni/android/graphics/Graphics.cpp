@@ -166,10 +166,6 @@ static jmethodID gBitmapRegionDecoder_constructorMethodID;
 static jclass   gCanvas_class;
 static jfieldID gCanvas_nativeInstanceID;
 
-static jclass   gPaint_class;
-static jfieldID gPaint_nativeInstanceID;
-static jfieldID gPaint_nativeTypefaceID;
-
 static jclass   gPicture_class;
 static jfieldID gPicture_nativeInstanceID;
 
@@ -368,25 +364,6 @@ SkCanvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {
     SkCanvas* c = reinterpret_cast<android::Canvas*>(canvasHandle)->getSkCanvas();
     SkASSERT(c);
     return c;
-}
-
-android::Paint* GraphicsJNI::getNativePaint(JNIEnv* env, jobject paint) {
-    SkASSERT(env);
-    SkASSERT(paint);
-    SkASSERT(env->IsInstanceOf(paint, gPaint_class));
-    jlong paintHandle = env->GetLongField(paint, gPaint_nativeInstanceID);
-    android::Paint* p = reinterpret_cast<android::Paint*>(paintHandle);
-    SkASSERT(p);
-    return p;
-}
-
-android::TypefaceImpl* GraphicsJNI::getNativeTypeface(JNIEnv* env, jobject paint) {
-    SkASSERT(env);
-    SkASSERT(paint);
-    SkASSERT(env->IsInstanceOf(paint, gPaint_class));
-    jlong typefaceHandle = env->GetLongField(paint, gPaint_nativeTypefaceID);
-    android::TypefaceImpl* p = reinterpret_cast<android::TypefaceImpl*>(typefaceHandle);
-    return p;
 }
 
 SkRegion* GraphicsJNI::getNativeRegion(JNIEnv* env, jobject region)
@@ -727,10 +704,6 @@ int register_android_graphics_Graphics(JNIEnv* env)
 
     gCanvas_class = make_globalref(env, "android/graphics/Canvas");
     gCanvas_nativeInstanceID = getFieldIDCheck(env, gCanvas_class, "mNativeCanvasWrapper", "J");
-
-    gPaint_class = make_globalref(env, "android/graphics/Paint");
-    gPaint_nativeInstanceID = getFieldIDCheck(env, gPaint_class, "mNativePaint", "J");
-    gPaint_nativeTypefaceID = getFieldIDCheck(env, gPaint_class, "mNativeTypeface", "J");
 
     gPicture_class = make_globalref(env, "android/graphics/Picture");
     gPicture_nativeInstanceID = getFieldIDCheck(env, gPicture_class, "mNativePicture", "J");
