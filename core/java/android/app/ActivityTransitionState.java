@@ -151,6 +151,7 @@ class ActivityTransitionState {
             mEnterActivityOptions = options;
             mIsEnterTriggered = false;
             if (mEnterActivityOptions.isReturning()) {
+                restoreExitedViews();
                 int result = mEnterActivityOptions.getResultCode();
                 if (result != 0) {
                     activity.onActivityReenter(result, mEnterActivityOptions.getResultData());
