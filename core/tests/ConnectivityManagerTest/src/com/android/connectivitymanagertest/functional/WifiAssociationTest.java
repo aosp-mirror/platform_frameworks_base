@@ -21,16 +21,15 @@ import android.net.NetworkInfo.State;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.AuthAlgorithm;
 import android.net.wifi.WifiConfiguration.GroupCipher;
-import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.PairwiseCipher;
 import android.net.wifi.WifiConfiguration.Protocol;
 import android.net.wifi.WifiInfo;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.util.Log;
 
 import com.android.connectivitymanagertest.ConnectivityManagerTestBase;
 import com.android.connectivitymanagertest.WifiAssociationTestRunner;
+import com.android.connectivitymanagertest.WifiConfigurationHelper;
 
 /**
  * Test Wi-Fi connection with different configuration
@@ -40,7 +39,6 @@ import com.android.connectivitymanagertest.WifiAssociationTestRunner;
  * -w com.android.connectivitymanagertest/.WifiAssociationTestRunner"
  */
 public class WifiAssociationTest extends ConnectivityManagerTestBase {
-    private static final String TAG = "WifiAssociationTest";
     private String mSsid = null;
     private String mPassword = null;
     private String mSecurityType = null;
@@ -49,6 +47,10 @@ public class WifiAssociationTest extends ConnectivityManagerTestBase {
 
     enum SECURITY_TYPE {
         OPEN, WEP64, WEP128, WPA_TKIP, WPA2_AES
+    }
+
+    public WifiAssociationTest() {
+        super(WifiAssociationTest.class.getSimpleName());
     }
 
     @Override
@@ -77,90 +79,58 @@ public class WifiAssociationTest extends ConnectivityManagerTestBase {
     private void validateFrequencyBand() {
         if (mFrequencyBand != null) {
             int currentFreq = mWifiManager.getFrequencyBand();
-            Log.v(TAG, "read frequency band: " + currentFreq);
+            logv("read frequency band: " + currentFreq);
             assertEquals("specified frequency band does not match operational band of WifiManager",
                     currentFreq, mBand);
          }
     }
 
-    private void log(String message) {
-        Log.v(TAG, message);
-    }
-
     @LargeTest
     public void testWifiAssociation() {
         assertNotNull("no test ssid", mSsid);
-        WifiConfiguration config = new WifiConfiguration();
-        config.SSID = mSsid;
+        WifiConfiguration config = null;
         SECURITY_TYPE security = SECURITY_TYPE.valueOf(mSecurityType);
-        log("Security type is " + security.toString());
+        logv("Security type is " + security.toString());
         switch (security) {
             // set network configurations
             case OPEN:
-                config.allowedKeyManagement.set(KeyMgmt.NONE);
+                config = WifiConfigurationHelper.createOpenConfig(mSsid);
                 break;
             case WEP64:
                 assertNotNull("password is empty", mPassword);
-                config.allowedKeyManagement.set(KeyMgmt.NONE);
-                config.allowedAuthAlgorithms.set(AuthAlgorithm.OPEN);
-                config.allowedAuthAlgorithms.set(AuthAlgorithm.SHARED);
+                // always use hex pair for WEP-40
+                assertTrue(WifiConfigurationHelper.isHex(mPassword, 10));
+                config = WifiConfigurationHelper.createWepConfig(mSsid, mPassword);
                 config.allowedGroupCiphers.set(GroupCipher.WEP40);
-                if (mPassword != null) {
-                    // always use hex pair for WEP-40
-                    if (isHex(mPassword, 10)) {
-                        config.wepKeys[0] = mPassword;
-                    } else {
-                        fail("password should be 10-character hex");
-                    }
-                }
                 break;
             case WEP128:
                 assertNotNull("password is empty", mPassword);
-                config.allowedKeyManagement.set(KeyMgmt.NONE);
-                config.allowedAuthAlgorithms.set(AuthAlgorithm.OPEN);
-                config.allowedAuthAlgorithms.set(AuthAlgorithm.SHARED);
+                // always use hex pair for WEP-104
+                assertTrue(WifiConfigurationHelper.isHex(mPassword, 26));
+                config = WifiConfigurationHelper.createWepConfig(mSsid, mPassword);
                 config.allowedGroupCiphers.set(GroupCipher.WEP104);
-                if (mPassword != null) {
-                    // always use hex pair for WEP-104
-                    if (isHex(mPassword, 26)) {
-                        config.wepKeys[0] = mPassword;
-                    } else {
-                        fail("password should be 26-character hex");
-                    }
-                }
                 break;
             case WPA_TKIP:
                 assertNotNull("password is empty", mPassword);
-                config.allowedKeyManagement.set(KeyMgmt.WPA_PSK);
+                config = WifiConfigurationHelper.createPskConfig(mSsid, mPassword);
                 config.allowedAuthAlgorithms.set(AuthAlgorithm.OPEN);
                 config.allowedProtocols.set(Protocol.WPA);
                 config.allowedPairwiseCiphers.set(PairwiseCipher.TKIP);
                 config.allowedGroupCiphers.set(GroupCipher.TKIP);
-                if (isHex(mPassword, 64)) {
-                    config.preSharedKey = mPassword;
-                } else {
-                    config.preSharedKey = '"' + mPassword + '"';
-                }
                 break;
             case WPA2_AES:
                 assertNotNull("password is empty", mPassword);
-                config.allowedKeyManagement.set(KeyMgmt.WPA_PSK);
+                config = WifiConfigurationHelper.createPskConfig(mSsid, mPassword);
                 config.allowedAuthAlgorithms.set(AuthAlgorithm.OPEN);
                 config.allowedProtocols.set(Protocol.RSN);
                 config.allowedPairwiseCiphers.set(PairwiseCipher.CCMP);
                 config.allowedGroupCiphers.set(GroupCipher.CCMP);
-                config.allowedProtocols.set(Protocol.RSN);
-                if (isHex(mPassword, 64)) {
-                    config.preSharedKey = mPassword;
-                } else {
-                    config.preSharedKey = '"' + mPassword + '"';
-                }
                 break;
             default:
                 fail("Not a valid security type: " + mSecurityType);
                 break;
         }
-        Log.v(TAG, "network config: " + config.toString());
+        logv("network config: %s", config.toString());
         connectToWifi(config);
         // verify that connection actually works
         assertTrue("no network connectivity at end of test", checkNetworkConnectivity());
