@@ -35,15 +35,9 @@ public class NotificationBackgroundView extends View {
     private Drawable mBackground;
     private int mClipTopAmount;
     private int mActualHeight;
-    private final int mTintedRippleColor;
-    private final int mNormalRippleColor;
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mTintedRippleColor = context.getResources().getColor(
-                R.color.notification_ripple_tinted_color);
-        mNormalRippleColor = context.getResources().getColor(
-                R.color.notification_ripple_untinted_color);
     }
 
     @Override
@@ -103,17 +97,10 @@ public class NotificationBackgroundView extends View {
     }
 
     public void setTint(int tintColor) {
-        int rippleColor;
         if (tintColor != 0) {
             mBackground.setColorFilter(tintColor, PorterDuff.Mode.SRC_ATOP);
-            rippleColor = mTintedRippleColor;
         } else {
             mBackground.clearColorFilter();
-            rippleColor = mNormalRippleColor;
-        }
-        if (mBackground instanceof RippleDrawable) {
-            RippleDrawable ripple = (RippleDrawable) mBackground;
-            ripple.setColor(ColorStateList.valueOf(rippleColor));
         }
         invalidate();
     }
@@ -137,5 +124,16 @@ public class NotificationBackgroundView extends View {
 
         // Prevents this view from creating a layer when alpha is animating.
         return false;
+    }
+
+    public void setState(int[] drawableState) {
+        mBackground.setState(drawableState);
+    }
+
+    public void setRippleColor(int color) {
+        if (mBackground instanceof RippleDrawable) {
+            RippleDrawable ripple = (RippleDrawable) mBackground;
+            ripple.setColor(ColorStateList.valueOf(color));
+        }
     }
 }

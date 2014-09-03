@@ -88,6 +88,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             = new PathInterpolator(0.6f, 0, 0.5f, 1);
     private static final Interpolator ACTIVATE_INVERSE_ALPHA_INTERPOLATOR
             = new PathInterpolator(0, 0, 0.5f, 1);
+    private final int mTintedRippleColor;
+    private final int mLowPriorityRippleColor;
+    private final int mNormalRippleColor;
 
     private boolean mDimmed;
     private boolean mDark;
@@ -153,6 +156,12 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mNormalColor = getResources().getColor(R.color.notification_material_background_color);
         mLowPriorityColor = getResources().getColor(
                 R.color.notification_material_background_low_priority_color);
+        mTintedRippleColor = context.getResources().getColor(
+                R.color.notification_ripple_tinted_color);
+        mLowPriorityRippleColor = context.getResources().getColor(
+                R.color.notification_ripple_color_low_priority);
+        mNormalRippleColor = context.getResources().getColor(
+                R.color.notification_ripple_untinted_color);
     }
 
     @Override
@@ -188,6 +197,16 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     public void drawableHotspotChanged(float x, float y) {
         if (!mDimmed){
             mBackgroundNormal.drawableHotspotChanged(x, y);
+        }
+    }
+
+    @Override
+    protected void drawableStateChanged() {
+        super.drawableStateChanged();
+        if (mDimmed) {
+            mBackgroundDimmed.setState(getDrawableState());
+        } else {
+            mBackgroundNormal.setState(getDrawableState());
         }
     }
 
@@ -372,12 +391,15 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private void updateBackgroundTint() {
         int color = getBackgroundColor();
+        int rippleColor = getRippleColor();
         if (color == mNormalColor) {
             // We don't need to tint a normal notification
             color = 0;
         }
         mBackgroundDimmed.setTint(color);
         mBackgroundNormal.setTint(color);
+        mBackgroundDimmed.setRippleColor(rippleColor);
+        mBackgroundNormal.setRippleColor(rippleColor);
     }
 
     private void fadeBackground() {
@@ -615,6 +637,18 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             return mLowPriorityColor;
         } else {
             return mNormalColor;
+        }
+    }
+
+    private int getRippleColor() {
+        if (mBgTint != 0) {
+            return mTintedRippleColor;
+        } else if (mShowingLegacyBackground) {
+            return mTintedRippleColor;
+        } else if (mIsBelowSpeedBump) {
+            return mLowPriorityRippleColor;
+        } else {
+            return mNormalRippleColor;
         }
     }
 
