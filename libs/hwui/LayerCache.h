@@ -87,6 +87,8 @@ public:
      */
     uint32_t getSize();
 
+    size_t getCount();
+
     /**
      * Prints out the content of the cache.
      */

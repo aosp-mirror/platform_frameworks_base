@@ -49,6 +49,10 @@ LayerCache::~LayerCache() {
 // Size management
 ///////////////////////////////////////////////////////////////////////////////
 
+size_t LayerCache::getCount() {
+    return mCache.size();
+}
+
 uint32_t LayerCache::getSize() {
     return mSize;
 }

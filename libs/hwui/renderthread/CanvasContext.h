@@ -66,7 +66,7 @@ public:
     void processLayerUpdate(DeferredLayerUpdater* layerUpdater);
     void prepareTree(TreeInfo& info);
     void draw();
-    void destroyCanvasAndSurface();
+    void destroy();
 
     // IFrameCallback, Chroreographer-driven frame callback entry point
     virtual void doFrame();

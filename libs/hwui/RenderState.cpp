@@ -32,10 +32,14 @@ void RenderState::onGLContextCreated() {
     // This is delayed because the first access of Caches makes GL calls
     mCaches = &Caches::getInstance();
     mCaches->init();
+    mCaches->setRenderState(this);
 }
 
 void RenderState::onGLContextDestroyed() {
-    LOG_ALWAYS_FATAL_IF(!mActiveLayers.empty(), "layers have survived gl context destruction");
+    if (CC_UNLIKELY(!mActiveLayers.empty())) {
+        mCaches->dumpMemoryUsage();
+        LOG_ALWAYS_FATAL("layers have survived gl context destruction");
+    }
 }
 
 void RenderState::setViewport(GLsizei width, GLsizei height) {
