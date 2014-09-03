@@ -46,13 +46,14 @@ public class BatteryMeterView extends View implements DemoMode,
 
     private static final int FULL = 96;
 
-    private static final float SUBPIXEL = 0.33f;  // inset rects for softer edges
     private static final float BOLT_LEVEL_THRESHOLD = 0.3f;  // opaque bolt below this fraction
 
     private final int[] mColors;
 
     boolean mShowPercent = true;
     private float mButtonHeightFraction;
+    private float mSubpixelSmoothingLeft;
+    private float mSubpixelSmoothingRight;
     private final Paint mFramePaint, mBatteryPaint, mWarningTextPaint, mTextPaint, mBoltPaint;
     private float mTextHeight, mWarningTextHeight;
 
@@ -208,6 +209,10 @@ public class BatteryMeterView extends View implements DemoMode,
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
         mButtonHeightFraction = context.getResources().getFraction(
                 R.fraction.battery_button_height_fraction, 1, 1);
+        mSubpixelSmoothingLeft = context.getResources().getFraction(
+                R.fraction.battery_subpixel_smoothing_left, 1, 1);
+        mSubpixelSmoothingRight = context.getResources().getFraction(
+                R.fraction.battery_subpixel_smoothing_right, 1, 1);
 
         mFramePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mFramePaint.setColor(frameColor);
@@ -314,21 +319,21 @@ public class BatteryMeterView extends View implements DemoMode,
 
         // button-frame: area above the battery body
         mButtonFrame.set(
-                mFrame.left + width * 0.25f,
+                mFrame.left + Math.round(width * 0.25f),
                 mFrame.top,
-                mFrame.right - width * 0.25f,
+                mFrame.right - Math.round(width * 0.25f),
                 mFrame.top + buttonHeight);
 
-        mButtonFrame.top += SUBPIXEL;
-        mButtonFrame.left += SUBPIXEL;
-        mButtonFrame.right -= SUBPIXEL;
+        mButtonFrame.top += mSubpixelSmoothingLeft;
+        mButtonFrame.left += mSubpixelSmoothingLeft;
+        mButtonFrame.right -= mSubpixelSmoothingRight;
 
         // frame: battery body area
         mFrame.top += buttonHeight;
-        mFrame.left += SUBPIXEL;
-        mFrame.top += SUBPIXEL;
-        mFrame.right -= SUBPIXEL;
-        mFrame.bottom -= SUBPIXEL;
+        mFrame.left += mSubpixelSmoothingLeft;
+        mFrame.top += mSubpixelSmoothingLeft;
+        mFrame.right -= mSubpixelSmoothingRight;
+        mFrame.bottom -= mSubpixelSmoothingRight;
 
         // set the battery charging color
         mBatteryPaint.setColor(tracker.plugged ? mChargeColor : getColorForLevel(level));
