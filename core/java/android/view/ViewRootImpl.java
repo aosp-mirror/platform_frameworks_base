@@ -6629,14 +6629,15 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId,
-                int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
+                Region interactiveRegion, int interactionId,
+                IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfoByAccessibilityIdClientThread(accessibilityNodeId,
-                            interactionId, callback, flags, interrogatingPid, interrogatingTid,
-                            spec);
+                            interactiveRegion, interactionId, callback, flags, interrogatingPid,
+                            interrogatingTid, spec);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -6669,15 +6670,15 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void findAccessibilityNodeInfosByViewId(long accessibilityNodeId,
-                String viewId, int interactionId,
+                String viewId, Region interactiveRegion, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfosByViewIdClientThread(accessibilityNodeId,
-                            viewId, interactionId, callback, flags, interrogatingPid,
-                            interrogatingTid, spec);
+                            viewId, interactiveRegion, interactionId, callback, flags,
+                            interrogatingPid, interrogatingTid, spec);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -6690,14 +6691,15 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text,
-                int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
+                Region interactiveRegion, int interactionId,
+                IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfosByTextClientThread(accessibilityNodeId, text,
-                            interactionId, callback, flags, interrogatingPid, interrogatingTid,
-                            spec);
+                            interactiveRegion, interactionId, callback, flags, interrogatingPid,
+                            interrogatingTid, spec);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -6709,14 +6711,15 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void findFocus(long accessibilityNodeId, int focusType, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback, int flags,
+        public void findFocus(long accessibilityNodeId, int focusType, Region interactiveRegion,
+                int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
-                    .findFocusClientThread(accessibilityNodeId, focusType, interactionId, callback,
-                            flags, interrogatingPid, interrogatingTid, spec);
+                    .findFocusClientThread(accessibilityNodeId, focusType, interactiveRegion,
+                            interactionId, callback, flags, interrogatingPid, interrogatingTid,
+                            spec);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -6728,14 +6731,15 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void focusSearch(long accessibilityNodeId, int direction, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback, int flags,
+        public void focusSearch(long accessibilityNodeId, int direction, Region interactiveRegion,
+                int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
                 int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
-                    .focusSearchClientThread(accessibilityNodeId, direction, interactionId,
-                            callback, flags, interrogatingPid, interrogatingTid, spec);
+                    .focusSearchClientThread(accessibilityNodeId, direction, interactiveRegion,
+                            interactionId, callback, flags, interrogatingPid, interrogatingTid,
+                            spec);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
