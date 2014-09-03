@@ -41,6 +41,8 @@ import com.android.internal.os.SomeArgs;
 public class ITvInputSessionWrapper extends ITvInputSession.Stub implements HandlerCaller.Callback {
     private static final String TAG = "TvInputSessionWrapper";
 
+    private static final int MESSAGE_HANDLING_DURATION_THRESHOLD_MILLIS = 50;
+
     private static final int DO_RELEASE = 1;
     private static final int DO_SET_MAIN = 2;
     private static final int DO_SET_SURFACE = 3;
@@ -77,6 +79,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             return;
         }
 
+        long startTime = System.currentTimeMillis();
         switch (msg.what) {
             case DO_RELEASE: {
                 mTvInputSessionImpl.release();
@@ -89,70 +92,75 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                     mChannel.dispose();
                     mChannel = null;
                 }
-                return;
+                break;
             }
             case DO_SET_MAIN: {
                 mTvInputSessionImpl.setMain((Boolean) msg.obj);
-                return;
+                break;
             }
             case DO_SET_SURFACE: {
                 mTvInputSessionImpl.setSurface((Surface) msg.obj);
-                return;
+                break;
             }
             case DO_DISPATCH_SURFACE_CHANGED: {
                 SomeArgs args = (SomeArgs) msg.obj;
                 mTvInputSessionImpl.dispatchSurfaceChanged(args.argi1, args.argi2, args.argi3);
                 args.recycle();
-                return;
+                break;
             }
             case DO_SET_STREAM_VOLUME: {
                 mTvInputSessionImpl.setStreamVolume((Float) msg.obj);
-                return;
+                break;
             }
             case DO_TUNE: {
                 SomeArgs args = (SomeArgs) msg.obj;
                 mTvInputSessionImpl.tune((Uri) args.arg1, (Bundle) args.arg2);
                 args.recycle();
-                return;
+                break;
             }
             case DO_SET_CAPTION_ENABLED: {
                 mTvInputSessionImpl.setCaptionEnabled((Boolean) msg.obj);
-                return;
+                break;
             }
             case DO_SELECT_TRACK: {
                 SomeArgs args = (SomeArgs) msg.obj;
                 mTvInputSessionImpl.selectTrack((Integer) args.arg1, (String) args.arg2);
                 args.recycle();
-                return;
+                break;
             }
             case DO_APP_PRIVATE_COMMAND: {
                 SomeArgs args = (SomeArgs) msg.obj;
                 mTvInputSessionImpl.appPrivateCommand((String) args.arg1, (Bundle) args.arg2);
                 args.recycle();
-                return;
+                break;
             }
             case DO_CREATE_OVERLAY_VIEW: {
                 SomeArgs args = (SomeArgs) msg.obj;
                 mTvInputSessionImpl.createOverlayView((IBinder) args.arg1, (Rect) args.arg2);
                 args.recycle();
-                return;
+                break;
             }
             case DO_RELAYOUT_OVERLAY_VIEW: {
                 mTvInputSessionImpl.relayoutOverlayView((Rect) msg.obj);
-                return;
+                break;
             }
             case DO_REMOVE_OVERLAY_VIEW: {
                 mTvInputSessionImpl.removeOverlayView(true);
-                return;
+                break;
             }
             case DO_REQUEST_UNBLOCK_CONTENT: {
                 mTvInputSessionImpl.unblockContent((String) msg.obj);
-                return;
+                break;
             }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
-                return;
+                break;
             }
+        }
+        long duration = System.currentTimeMillis() - startTime;
+        if (duration > MESSAGE_HANDLING_DURATION_THRESHOLD_MILLIS) {
+            Log.w(TAG, "Handling message (" + msg.what + ") took too long time (duration="
+                    + duration + "ms)");
         }
     }
 
