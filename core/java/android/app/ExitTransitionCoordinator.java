@@ -140,7 +140,8 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         if (getDecor() != null) {
             getDecor().suppressLayout(true);
         }
-        if (!mSharedElements.isEmpty() && getSharedElementTransition() != null) {
+        if (mExitSharedElementBundle != null && !mExitSharedElementBundle.isEmpty() &&
+                !mSharedElements.isEmpty() && getSharedElementTransition() != null) {
             startTransition(new Runnable() {
                 public void run() {
                     startSharedElementExit();
