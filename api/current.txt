@@ -28267,7 +28267,6 @@ package android.telecomm {
     method public final void setRequestingRingback(boolean);
     method public final void setRinging();
     method public final void setStatusHints(android.telecomm.StatusHints);
-    method public final void startActivityFromInCall(android.app.PendingIntent);
     method public static java.lang.String stateToString(int);
     field public static final int STATE_ACTIVE = 4; // 0x4
     field public static final int STATE_DIALING = 3; // 0x3
@@ -28452,7 +28451,6 @@ package android.telecomm {
     method public void onParentChanged(android.telecomm.RemoteConnection, android.telecomm.RemoteConnection);
     method public void onPostDialWait(android.telecomm.RemoteConnection, java.lang.String);
     method public void onRequestingRingback(android.telecomm.RemoteConnection, boolean);
-    method public void onStartActivityFromInCall(android.telecomm.RemoteConnection, android.app.PendingIntent);
     method public void onStateChanged(android.telecomm.RemoteConnection, int);
     method public void onStatusHintsChanged(android.telecomm.RemoteConnection, android.telecomm.StatusHints);
   }

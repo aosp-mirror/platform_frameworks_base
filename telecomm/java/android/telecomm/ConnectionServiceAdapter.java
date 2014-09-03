@@ -346,13 +346,4 @@ final class ConnectionServiceAdapter implements DeathRecipient {
             }
         }
     }
-
-    void startActivityFromInCall(String callId, PendingIntent intent) {
-        for (IConnectionServiceAdapter adapter : mAdapters) {
-            try {
-                adapter.startActivityFromInCall(callId, intent);
-            } catch (RemoteException e) {
-            }
-        }
-    }
 }
