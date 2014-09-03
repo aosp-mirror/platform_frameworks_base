@@ -625,14 +625,18 @@ public final class MediaController {
 
         /**
          * Request that the player start playback for a specific search query.
+         * An empty or null query should be treated as a request to play any
+         * music.
          *
          * @param query The search query.
-         * @param extras Optional extras that can include extra information about the query.
+         * @param extras Optional extras that can include extra information
+         *            about the query.
          */
         public void playFromSearch(String query, Bundle extras) {
-            if (TextUtils.isEmpty(query)) {
-                throw new IllegalArgumentException(
-                        "You must specify a non-empty search query for playFromSearch.");
+            if (query == null) {
+                // This is to remain compatible with
+                // INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH
+                query = "";
             }
             try {
                 mSessionBinder.playFromSearch(query, extras);
