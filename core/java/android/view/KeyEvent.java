@@ -660,8 +660,96 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: Voice Assist key.
      * Launches the global voice assist activity. Not delivered to applications. */
     public static final int KEYCODE_VOICE_ASSIST = 231;
+    /** Key code constant: Radio key.
+     * Toggles TV service / Radio service. */
+    public static final int KEYCODE_TV_RADIO_SERVICE = 232;
+    /** Key code constant: Teletext key.
+     * Displays Teletext service. */
+    public static final int KEYCODE_TV_TELETEXT = 233;
+    /** Key code constant: Number entry key.
+     * Initiates to enter multi-digit channel nubmber when each digit key is assigned
+     * for selecting separate channel. Corresponds to Number Entry Mode (0x1D) of CEC
+     * User Control Code. */
+    public static final int KEYCODE_TV_NUMBER_ENTRY = 234;
+    /** Key code constant: Analog Terrestrial key.
+     * Switches to analog terrestrial broadcast service. */
+    public static final int KEYCODE_TV_TERRESTRIAL_ANALOG = 235;
+    /** Key code constant: Digital Terrestrial key.
+     * Switches to digital terrestrial broadcast service. */
+    public static final int KEYCODE_TV_TERRESTRIAL_DIGITAL = 236;
+    /** Key code constant: Satellite key.
+     * Switches to digital satellite broadcast service. */
+    public static final int KEYCODE_TV_SATELLITE = 237;
+    /** Key code constant: BS key.
+     * Switches to BS digital satellite broadcasting service available in Japan. */
+    public static final int KEYCODE_TV_SATELLITE_BS = 238;
+    /** Key code constant: CS key.
+     * Switches to CS digital satellite broadcasting service available in Japan. */
+    public static final int KEYCODE_TV_SATELLITE_CS = 239;
+    /** Key code constant: BS/CS key.
+     * Toggles between BS and CS digital satellite services. */
+    public static final int KEYCODE_TV_SATELLITE_SERVICE = 240;
+    /** Key code constant: Toggle Network key.
+     * Toggles selecting broacast services. */
+    public static final int KEYCODE_TV_NETWORK = 241;
+    /** Key code constant: Antenna/Cable key.
+     * Toggles broadcast input source between antenna and cable. */
+    public static final int KEYCODE_TV_ANTENNA_CABLE = 242;
+    /** Key code constant: HDMI #1 key.
+     * Switches to HDMI input #1. */
+    public static final int KEYCODE_TV_INPUT_HDMI_1 = 243;
+    /** Key code constant: HDMI #2 key.
+     * Switches to HDMI input #2. */
+    public static final int KEYCODE_TV_INPUT_HDMI_2 = 244;
+    /** Key code constant: HDMI #3 key.
+     * Switches to HDMI input #3. */
+    public static final int KEYCODE_TV_INPUT_HDMI_3 = 245;
+    /** Key code constant: HDMI #4 key.
+     * Switches to HDMI input #4. */
+    public static final int KEYCODE_TV_INPUT_HDMI_4 = 246;
+    /** Key code constant: Composite #1 key.
+     * Switches to composite video input #1. */
+    public static final int KEYCODE_TV_INPUT_COMPOSITE_1 = 247;
+    /** Key code constant: Composite #2 key.
+     * Switches to composite video input #2. */
+    public static final int KEYCODE_TV_INPUT_COMPOSITE_2 = 248;
+    /** Key code constant: Component #1 key.
+     * Switches to component video input #1. */
+    public static final int KEYCODE_TV_INPUT_COMPONENT_1 = 249;
+    /** Key code constant: Component #2 key.
+     * Switches to component video input #2. */
+    public static final int KEYCODE_TV_INPUT_COMPONENT_2 = 250;
+    /** Key code constant: VGA #1 key.
+     * Switches to VGA (analog RGB) input #1. */
+    public static final int KEYCODE_TV_INPUT_VGA_1 = 251;
+    /** Key code constant: Audio description key.
+     * Toggles audio description off / on. */
+    public static final int KEYCODE_TV_AUDIO_DESCRIPTION = 252;
+    /** Key code constant: Audio description mixing volume up key.
+     * Louden audio description volume as compared with normal audio volume. */
+    public static final int KEYCODE_TV_AUDIO_DESCRIPTION_MIX_UP = 253;
+    /** Key code constant: Audio description mixing volume down key.
+     * Lessen audio description volume as compared with normal audio volume. */
+    public static final int KEYCODE_TV_AUDIO_DESCRIPTION_MIX_DOWN = 254;
+    /** Key code constant: Zoom mode key.
+     * Changes Zoom mode (Normal, Full, Zoom, Wide-zoom, etc.) */
+    public static final int KEYCODE_TV_ZOOM_MODE = 255;
+    /** Key code constant: Contents menu key.
+     * Goes to the title list. Corresponds to Contents Menu (0x0B) of CEC User Control
+     * Code */
+    public static final int KEYCODE_TV_CONTENTS_MENU = 256;
+    /** Key code constant: Media context menu key.
+     * Goes to the context menu of media contents. Corresponds to Media Context-sensitive
+     * Menu (0x11) of CEC User Control Code. */
+    public static final int KEYCODE_TV_MEDIA_CONTEXT_MENU = 257;
+    /** Key code constant: Timer programming key.
+     * Goes to the timer recording menu. Corresponds to Timer Programming (0x54) of
+     * CEC User Control Code. */
+    public static final int KEYCODE_TV_TIMER_PROGRAMMING = 258;
+    /** Key code constant: Help key. */
+    public static final int KEYCODE_HELP = 259;
 
-    private static final int LAST_KEYCODE = KEYCODE_VOICE_ASSIST;
+    private static final int LAST_KEYCODE = KEYCODE_HELP;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
