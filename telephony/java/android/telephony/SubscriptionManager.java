@@ -316,16 +316,16 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /**
-     * Get the count of activated SUB(s)
-     * @return activated SIM count
+     * Get the count of active SUB(s)
+     * @return active SIM count
      */
-    public static int getActivatedSubInfoCount() {
+    public static int getActiveSubInfoCount() {
         int result = 0;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getActivatedSubInfoCount();
+                result = iSub.getActiveSubInfoCount();
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -813,16 +813,16 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /**
-     * @return the list of subId's that are activated,
+     * @return the list of subId's that are active,
      *         is never null but the length maybe 0.
      */
-    public static long[] getActivatedSubIdList() {
+    public static long[] getActiveSubIdList() {
         long[] subId = null;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                subId = iSub.getActivatedSubIdList();
+                subId = iSub.getActiveSubIdList();
             }
         } catch (RemoteException ex) {
             // ignore it
