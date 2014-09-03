@@ -20,8 +20,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.os.PowerManager;
-import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -85,9 +83,9 @@ public class KeyguardAffordanceHelper {
         mContext = context;
         mCallback = callback;
         initIcons();
-        updateIcon(mLeftIcon, 0.0f, SWIPE_RESTING_ALPHA_AMOUNT, false);
-        updateIcon(mCenterIcon, 0.0f, SWIPE_RESTING_ALPHA_AMOUNT, false);
-        updateIcon(mRightIcon, 0.0f, SWIPE_RESTING_ALPHA_AMOUNT, false);
+        updateIcon(mLeftIcon, 0.0f, SWIPE_RESTING_ALPHA_AMOUNT, false, false);
+        updateIcon(mCenterIcon, 0.0f, SWIPE_RESTING_ALPHA_AMOUNT, false, false);
+        updateIcon(mRightIcon, 0.0f, SWIPE_RESTING_ALPHA_AMOUNT, false, false);
         initDimens();
     }
 
@@ -295,14 +293,18 @@ public class KeyguardAffordanceHelper {
         float vel = getCurrentVelocity();
 
         // We snap back if the current translation is not far enough
-        boolean snapBack = Math.abs(mTranslation) < Math.abs(mTranslationOnDown)
-                + mMinTranslationAmount;
+        boolean snapBack = isBelowFalsingThreshold();
 
         // or if the velocity is in the opposite direction.
         boolean velIsInWrongDirection = vel * mTranslation < 0;
         snapBack |= Math.abs(vel) > mMinFlingVelocity && velIsInWrongDirection;
         vel = snapBack ^ velIsInWrongDirection ? 0 : vel;
         fling(vel, snapBack || forceSnapBack);
+    }
+
+    private boolean isBelowFalsingThreshold() {
+        return Math.abs(mTranslation) < Math.abs(mTranslationOnDown)
+                + mMinTranslationAmount;
     }
 
     private void fling(float vel, final boolean snapBack) {
@@ -355,13 +357,14 @@ public class KeyguardAffordanceHelper {
 
             boolean animateIcons = isReset && animateReset;
             float radius = getRadiusFromTranslation(absTranslation);
+            boolean slowAnimation = isReset && isBelowFalsingThreshold();
             if (!isReset) {
-                updateIcon(targetView, radius, alpha, false);
+                updateIcon(targetView, radius, alpha, false, false);
             } else {
-                updateIcon(targetView, 0.0f, fadeOutAlpha, animateIcons);
+                updateIcon(targetView, 0.0f, fadeOutAlpha, animateIcons, slowAnimation);
             }
-            updateIcon(otherView, 0.0f, fadeOutAlpha, animateIcons);
-            updateIcon(mCenterIcon, 0.0f, fadeOutAlpha, animateIcons);
+            updateIcon(otherView, 0.0f, fadeOutAlpha, animateIcons, slowAnimation);
+            updateIcon(mCenterIcon, 0.0f, fadeOutAlpha, animateIcons, slowAnimation);
 
             mTranslation = translation;
         }
@@ -392,16 +395,16 @@ public class KeyguardAffordanceHelper {
     }
 
     public void animateHideLeftRightIcon() {
-        updateIcon(mRightIcon, 0f, 0f, true);
-        updateIcon(mLeftIcon, 0f, 0f, true);
+        updateIcon(mRightIcon, 0f, 0f, true, false);
+        updateIcon(mLeftIcon, 0f, 0f, true, false);
     }
 
     private void updateIcon(KeyguardAffordanceView view, float circleRadius, float alpha,
-            boolean animate) {
+            boolean animate, boolean slowRadiusAnimation) {
         if (view.getVisibility() != View.VISIBLE) {
             return;
         }
-        view.setCircleRadius(circleRadius);
+        view.setCircleRadius(circleRadius, slowRadiusAnimation);
         updateIconAlpha(view, alpha, animate);
     }
 
