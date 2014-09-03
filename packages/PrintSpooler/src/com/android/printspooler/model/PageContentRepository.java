@@ -451,6 +451,8 @@ public final class PageContentRepository {
         @GuardedBy("mLock")
         private IPdfRenderer mRenderer;
 
+        private boolean mBoundToService;
+
         public AsyncRenderer(Context context, OnMalformedPdfFileListener malformedPdfFileListener) {
             mContext = context;
             mOnMalformedPdfFileListener = malformedPdfFileListener;
@@ -463,6 +465,7 @@ public final class PageContentRepository {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            mBoundToService = true;
             synchronized (mLock) {
                 mRenderer = IPdfRenderer.Stub.asInterface(service);
                 mLock.notifyAll();
@@ -559,7 +562,10 @@ public final class PageContentRepository {
 
                 @Override
                 public void onPostExecute(Void result) {
-                    mContext.unbindService(AsyncRenderer.this);
+                    if (mBoundToService) {
+                        mBoundToService = false;
+                        mContext.unbindService(AsyncRenderer.this);
+                    }
                     mPageContentCache.invalidate();
                     mPageContentCache.clear();
                 }
