@@ -29,7 +29,8 @@ import android.content.Context;
  * JobScheduler with {@link #schedule(JobInfo)}. When the criteria declared are met, the
  * system will execute this job on your application's {@link android.app.job.JobService}.
  * You identify which JobService is meant to execute the logic for your job when you create the
- * JobInfo with {@link android.app.job.JobInfo.Builder#Builder(int, android.content.ComponentName)}.
+ * JobInfo with
+ * {@link android.app.job.JobInfo.Builder#JobInfo.Builder(int,android.content.ComponentName)}.
  * </p>
  * <p>
  * The framework will be intelligent about when you receive your callbacks, and attempt to batch
