@@ -5410,6 +5410,7 @@ public class Activity extends ContextThemeWrapper
             mTranslucentCallback = callback;
             mChangeCanvasToTranslucent =
                     ActivityManagerNative.getDefault().convertToTranslucent(mToken, options);
+            WindowManagerGlobal.getInstance().changeCanvasOpacity(mToken, false);
             drawComplete = true;
         } catch (RemoteException e) {
             // Make callback return as though it timed out.
