@@ -401,19 +401,4 @@ public class TelephonyIntents {
      */
     public static final String ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED
             = "android.intent.action.ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED";
-
-    /**
-     * To notify the capability switch procedure start
-     */
-    // FIXME maybe these should be removed - sprout only
-    public static final String ACTION_CAPABILITY_SWITCH_START
-            = "com.android.phone.ACTION_CAPABILITY_SWITCH_START";
-
-    /**
-     * To notify the capability switch procedure end
-     */
-    // FIXME maybe these should be removed - sprout only
-    public static final String ACTION_CAPABILITY_SWITCH_DONE
-            = "com.android.phone.ACTION_CAPABILITY_SWITCH_DONE";
-
 }

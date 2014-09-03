@@ -56,7 +56,7 @@ interface ISub {
      * @param context Context provided by caller
      * @return Array list of currently inserted SubInfoRecord(s)
      */
-    List<SubInfoRecord> getActivatedSubInfoList();
+    List<SubInfoRecord> getActiveSubInfoList();
 
     /**
      * Get the SUB count of all SUB(s) in subinfo database
