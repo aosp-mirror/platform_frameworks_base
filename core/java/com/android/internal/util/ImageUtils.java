@@ -17,6 +17,10 @@
 package com.android.internal.util;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
 
 /**
  * Utility class for image analysis and processing.
@@ -31,17 +35,49 @@ public class ImageUtils {
     // Alpha amount for which values below are considered transparent.
     private static final int ALPHA_TOLERANCE = 50;
 
+    // Size of the smaller bitmap we're actually going to scan.
+    private static final int COMPACT_BITMAP_SIZE = 64; // pixels
+
     private int[] mTempBuffer;
+    private Bitmap mTempCompactBitmap;
+    private Canvas mTempCompactBitmapCanvas;
+    private Paint mTempCompactBitmapPaint;
+    private final Matrix mTempMatrix = new Matrix();
 
     /**
      * Checks whether a bitmap is grayscale. Grayscale here means "very close to a perfect
      * gray".
+     *
+     * Instead of scanning every pixel in the bitmap, we first resize the bitmap to no more than
+     * COMPACT_BITMAP_SIZE^2 pixels using filtering. The hope is that any non-gray color elements
+     * will survive the squeezing process, contaminating the result with color.
      */
     public boolean isGrayscale(Bitmap bitmap) {
-        final int height = bitmap.getHeight();
-        final int width = bitmap.getWidth();
-        int size = height*width;
+        int height = bitmap.getHeight();
+        int width = bitmap.getWidth();
 
+        // shrink to a more manageable (yet hopefully no more or less colorful) size
+        if (height > COMPACT_BITMAP_SIZE || width > COMPACT_BITMAP_SIZE) {
+            if (mTempCompactBitmap == null) {
+                mTempCompactBitmap = Bitmap.createBitmap(
+                        COMPACT_BITMAP_SIZE, COMPACT_BITMAP_SIZE, Bitmap.Config.ARGB_8888
+                );
+                mTempCompactBitmapCanvas = new Canvas(mTempCompactBitmap);
+                mTempCompactBitmapPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                mTempCompactBitmapPaint.setFilterBitmap(true);
+            }
+            mTempMatrix.reset();
+            mTempMatrix.setScale(
+                    (float) COMPACT_BITMAP_SIZE / width,
+                    (float) COMPACT_BITMAP_SIZE / height,
+                    0, 0);
+            mTempCompactBitmapCanvas.drawColor(0, PorterDuff.Mode.SRC); // select all, erase
+            mTempCompactBitmapCanvas.drawBitmap(bitmap, mTempMatrix, mTempCompactBitmapPaint);
+            bitmap = mTempCompactBitmap;
+            width = height = COMPACT_BITMAP_SIZE;
+        }
+
+        final int size = height*width;
         ensureBufferSize(size);
         bitmap.getPixels(mTempBuffer, 0, width, 0, 0, width, height);
         for (int i = 0; i < size; i++) {
