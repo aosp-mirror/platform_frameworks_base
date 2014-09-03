@@ -25,9 +25,10 @@
     -->
     <integer name="config_mobile_mtu">1440</integer>
 
-    <!-- Values for GPS configuration -->
+    <!-- Values for GPS configuration (T-Mobile) -->
     <string-array translatable="false" name="config_gpsParameters">
-        <item>"SUPL_PORT=7279"</item>
+        <item>CAPABILITEIS=0x33</item>
         <item>GPS_LOCK=1</item>
+        <item>LPP_PROFILE=2</item>
     </string-array>
 </resources>
