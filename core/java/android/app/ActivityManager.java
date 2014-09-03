@@ -18,12 +18,14 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.os.BatteryStats;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
@@ -2464,7 +2466,11 @@ public class ActivityManager {
         }
     }
 
-    /** @hide */
+    /**
+     * Gets the userId of the current foreground user. Requires system permissions.
+     * @hide
+     */
+    @SystemApi
     public static int getCurrentUser() {
         UserInfo ui;
         try {
