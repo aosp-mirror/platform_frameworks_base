@@ -2146,7 +2146,7 @@
   <public type="attr" name="windowExitTransition" />
   <public type="attr" name="windowSharedElementEnterTransition" />
   <public type="attr" name="windowSharedElementExitTransition" />
-  <public type="attr" name="windowAllowExitTransitionOverlap" />
+  <public type="attr" name="windowAllowReturnTransitionOverlap" />
   <public type="attr" name="windowAllowEnterTransitionOverlap" />
   <public type="attr" name="sessionService" />
   <public type="attr" name="stackViewStyle" />
@@ -2282,6 +2282,14 @@
   <public type="attr" name="spotShadowAlpha" />
   <public type="attr" name="navigationIcon" />
   <public type="attr" name="navigationContentDescription" />
+  <public type="attr" name="fragmentExitTransition" />
+  <public type="attr" name="fragmentEnterTransition" />
+  <public type="attr" name="fragmentSharedElementEnterTransition" />
+  <public type="attr" name="fragmentReturnTransition" />
+  <public type="attr" name="fragmentSharedElementReturnTransition" />
+  <public type="attr" name="fragmentReenterTransition" />
+  <public type="attr" name="fragmentAllowEnterTransitionOverlap" />
+  <public type="attr" name="fragmentAllowReturnTransitionOverlap" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
