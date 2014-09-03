@@ -1904,6 +1904,13 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected boolean shouldInterrupt(StatusBarNotification sbn) {
+        if (mNotificationData.shouldFilterOut(sbn)) {
+            if (DEBUG) {
+                Log.d(TAG, "Skipping HUN check for " + sbn.getKey() + " since it's filtered out.");
+            }
+            return false;
+        }
+
         Notification notification = sbn.getNotification();
         // some predicates to make the boolean logic legible
         boolean isNoisy = (notification.defaults & Notification.DEFAULT_SOUND) != 0

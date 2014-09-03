@@ -221,7 +221,7 @@ public class NotificationData {
         return mGroupsWithSummaries.contains(groupKey);
     }
 
-    private boolean shouldFilterOut(StatusBarNotification sbn) {
+    boolean shouldFilterOut(StatusBarNotification sbn) {
         if (!(mEnvironment.isDeviceProvisioned() ||
                 showNotificationEvenIfUnprovisioned(sbn))) {
             return true;
