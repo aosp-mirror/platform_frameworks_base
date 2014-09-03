@@ -8408,6 +8408,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             TaskRecord tr = recentTaskForIdLocked(taskId);
             if (tr != null) {
+                if (tr == mStackSupervisor.mLockTaskModeTask) {
+                    mStackSupervisor.showLockTaskToast();
+                    return;
+                }
                 if (DEBUG_STACK) Slog.d(TAG, "moveTaskToBack: moving task=" + tr);
                 ActivityStack stack = tr.stack;
                 if (stack.mResumedActivity != null && stack.mResumedActivity.task == tr) {
@@ -8440,11 +8444,19 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceNotIsolatedCaller("moveActivityTaskToBack");
         synchronized(this) {
             final long origId = Binder.clearCallingIdentity();
-            int taskId = ActivityRecord.getTaskForActivityLocked(token, !nonRoot);
-            if (taskId >= 0) {
-                return ActivityRecord.getStackLocked(token).moveTaskToBackLocked(taskId, null);
+            try {
+                int taskId = ActivityRecord.getTaskForActivityLocked(token, !nonRoot);
+                if (taskId >= 0) {
+                    if ((mStackSupervisor.mLockTaskModeTask != null)
+                            && (mStackSupervisor.mLockTaskModeTask.taskId == taskId)) {
+                        mStackSupervisor.showLockTaskToast();
+                        return false;
+                    }
+                    return ActivityRecord.getStackLocked(token).moveTaskToBackLocked(taskId, null);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
-            Binder.restoreCallingIdentity(origId);
         }
         return false;
     }
