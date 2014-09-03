@@ -234,6 +234,7 @@ public final class UserHandle implements Parcelable {
      * @return user id of the current process
      * @hide
      */
+    @SystemApi
     public static final int myUserId() {
         return getUserId(Process.myUid());
     }
@@ -253,7 +254,11 @@ public final class UserHandle implements Parcelable {
         mHandle = h;
     }
 
-    /** @hide */
+    /**
+     * Returns the userId stored in this UserHandle.
+     * @hide
+     */
+    @SystemApi
     public int getIdentifier() {
         return mHandle;
     }
