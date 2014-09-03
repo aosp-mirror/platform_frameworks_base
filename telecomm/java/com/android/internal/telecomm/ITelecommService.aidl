@@ -37,7 +37,7 @@ interface ITelecommService {
     /**
      * @see TelecommServiceImpl#getDefaultOutgoingPhoneAccount
      */
-    PhoneAccountHandle getDefaultOutgoingPhoneAccount();
+    PhoneAccountHandle getDefaultOutgoingPhoneAccount(in String uriScheme);
 
     /**
      * @see TelecommServiceImpl#setDefaultOutgoingPhoneAccount
@@ -50,7 +50,12 @@ interface ITelecommService {
     List<PhoneAccountHandle> getOutgoingPhoneAccounts();
 
     /**
-     * @see TelecommServiceImpl#getPhoneAccount
+     * @see TelecommManager#getPhoneAccountsSupportingScheme
+     */
+    List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(in String uriScheme);
+
+    /**
+     * @see TelecommManager#getPhoneAccount
      */
     PhoneAccount getPhoneAccount(in PhoneAccountHandle account);
 
