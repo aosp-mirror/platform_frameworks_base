@@ -50,23 +50,36 @@ public class NotificationColorUtil {
     private final WeakHashMap<Bitmap, Pair<Boolean, Integer>> mGrayscaleBitmapCache =
             new WeakHashMap<Bitmap, Pair<Boolean, Integer>>();
 
-    public static NotificationColorUtil getInstance() {
+    private final int mGrayscaleIconMaxSize; // @dimen/notification_large_icon_width (64dp)
+
+    public static NotificationColorUtil getInstance(Context context) {
         synchronized (sLock) {
             if (sInstance == null) {
-                sInstance = new NotificationColorUtil();
+                sInstance = new NotificationColorUtil(context);
             }
             return sInstance;
         }
     }
 
+    private NotificationColorUtil(Context context) {
+        mGrayscaleIconMaxSize = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_large_icon_width);
+    }
+
     /**
-     * Checks whether a bitmap is grayscale. Grayscale here means "very close to a perfect
-     * gray".
+     * Checks whether a Bitmap is a small grayscale icon.
+     * Grayscale here means "very close to a perfect gray"; icon means "no larger than 64dp".
      *
      * @param bitmap The bitmap to test.
-     * @return Whether the bitmap is grayscale.
+     * @return True if the bitmap is grayscale; false if it is color or too large to examine.
      */
-    public boolean isGrayscale(Bitmap bitmap) {
+    public boolean isGrayscaleIcon(Bitmap bitmap) {
+        // quick test: reject large bitmaps
+        if (bitmap.getWidth() > mGrayscaleIconMaxSize
+                || bitmap.getHeight() > mGrayscaleIconMaxSize) {
+            return false;
+        }
+
         synchronized (sLock) {
             Pair<Boolean, Integer> cached = mGrayscaleBitmapCache.get(bitmap);
             if (cached != null) {
@@ -92,22 +105,22 @@ public class NotificationColorUtil {
     }
 
     /**
-     * Checks whether a drawable is grayscale. Grayscale here means "very close to a perfect
-     * gray".
+     * Checks whether a Drawable is a small grayscale icon.
+     * Grayscale here means "very close to a perfect gray"; icon means "no larger than 64dp".
      *
      * @param d The drawable to test.
-     * @return Whether the drawable is grayscale.
+     * @return True if the bitmap is grayscale; false if it is color or too large to examine.
      */
-    public boolean isGrayscale(Drawable d) {
+    public boolean isGrayscaleIcon(Drawable d) {
         if (d == null) {
             return false;
         } else if (d instanceof BitmapDrawable) {
             BitmapDrawable bd = (BitmapDrawable) d;
-            return bd.getBitmap() != null && isGrayscale(bd.getBitmap());
+            return bd.getBitmap() != null && isGrayscaleIcon(bd.getBitmap());
         } else if (d instanceof AnimationDrawable) {
             AnimationDrawable ad = (AnimationDrawable) d;
             int count = ad.getNumberOfFrames();
-            return count > 0 && isGrayscale(ad.getFrame(0));
+            return count > 0 && isGrayscaleIcon(ad.getFrame(0));
         } else if (d instanceof VectorDrawable) {
             // We just assume you're doing the right thing if using vectors
             return true;
@@ -117,16 +130,16 @@ public class NotificationColorUtil {
     }
 
     /**
-     * Checks whether a drawable with a resoure id is grayscale. Grayscale here means "very close
-     * to a perfect gray".
+     * Checks whether a drawable with a resoure id is a small grayscale icon.
+     * Grayscale here means "very close to a perfect gray"; icon means "no larger than 64dp".
      *
      * @param context The context to load the drawable from.
-     * @return Whether the drawable is grayscale.
+     * @return True if the bitmap is grayscale; false if it is color or too large to examine.
      */
-    public boolean isGrayscale(Context context, int drawableResId) {
+    public boolean isGrayscaleIcon(Context context, int drawableResId) {
         if (drawableResId != 0) {
             try {
-                return isGrayscale(context.getDrawable(drawableResId));
+                return isGrayscaleIcon(context.getDrawable(drawableResId));
             } catch (Resources.NotFoundException ex) {
                 Log.e(TAG, "Drawable not found: " + drawableResId);
                 return false;

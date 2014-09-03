@@ -1917,7 +1917,7 @@ public class Notification implements Parcelable
             mPeople = new ArrayList<String>();
 
             mColorUtil = context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.L ?
-                    NotificationColorUtil.getInstance() : null;
+                    NotificationColorUtil.getInstance(mContext) : null;
         }
 
         /**
@@ -2890,7 +2890,7 @@ public class Notification implements Parcelable
         }
 
         private void processLegacyAction(Action action, RemoteViews button) {
-            if (!isLegacy() || mColorUtil.isGrayscale(mContext, action.icon)) {
+            if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, action.icon)) {
                 button.setTextViewCompoundDrawablesRelativeColorFilter(R.id.action0, 0,
                         mContext.getResources().getColor(R.color.notification_action_color_filter),
                         PorterDuff.Mode.MULTIPLY);
@@ -2909,7 +2909,7 @@ public class Notification implements Parcelable
          * Apply any necessary background to smallIcons being used in the largeIcon spot.
          */
         private void processSmallIconAsLarge(int largeIconId, RemoteViews contentView) {
-            if (!isLegacy() || mColorUtil.isGrayscale(mContext, largeIconId)) {
+            if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, largeIconId)) {
                 applyLargeIconBackground(contentView);
             }
         }
@@ -2920,7 +2920,7 @@ public class Notification implements Parcelable
          */
         // TODO: also check bounds, transparency, that sort of thing.
         private void processLargeLegacyIcon(Bitmap largeIcon, RemoteViews contentView) {
-            if (isLegacy() && mColorUtil.isGrayscale(largeIcon)) {
+            if (isLegacy() && mColorUtil.isGrayscaleIcon(largeIcon)) {
                 applyLargeIconBackground(contentView);
             } else {
                 removeLargeIconBackground(contentView);
@@ -2956,7 +2956,7 @@ public class Notification implements Parcelable
          */
         private void processSmallRightIcon(int smallIconDrawableId,
                 RemoteViews contentView) {
-            if (!isLegacy() || mColorUtil.isGrayscale(mContext, smallIconDrawableId)) {
+            if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, smallIconDrawableId)) {
                 contentView.setDrawableParameters(R.id.right_icon, false, -1,
                         0xFFFFFFFF,
                         PorterDuff.Mode.SRC_ATOP, -1);
