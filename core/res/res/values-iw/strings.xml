@@ -1588,7 +1588,7 @@
     <string name="media_route_status_in_use" msgid="4533786031090198063">"בשימוש"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"מסך מובנה"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"‏מסך HDMI"</string>
-    <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"שכבת על #<xliff:g id="ID">%1$d</xliff:g>"</string>
+    <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"שכבת-על #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"‏<xliff:g id="NAME">%1$s</xliff:g>: ‎<xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>‎, ‏<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", מאובטח"</string>
     <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"העברת מסך מתבצעת"</string>

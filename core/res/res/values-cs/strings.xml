@@ -1228,9 +1228,9 @@
     <string name="smv_application" msgid="3307209192155442829">"Aplikace <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) porušila své vlastní vynucené zásady StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> porušil své vlastní vynucené zásady StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android se upgraduje..."</string>
-    <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimalizace aplikace <xliff:g id="NUMBER_0">%1$d</xliff:g> z <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimalizování aplikace <xliff:g id="NUMBER_0">%1$d</xliff:g> z <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Spouštění aplikací."</string>
-    <string name="android_upgrading_complete" msgid="1405954754112999229">"Probíhá dokončování spouštění."</string>
+    <string name="android_upgrading_complete" msgid="1405954754112999229">"Dokončování inicializace."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Běží aplikace <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="heavy_weight_notification_detail" msgid="1721681741617898865">"Dotykem přepnete aplikaci"</string>
     <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Přepnout aplikace?"</string>
