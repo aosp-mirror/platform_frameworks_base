@@ -66,11 +66,11 @@ interface ISub {
     int getAllSubInfoCount();
 
     /**
-     * Get the count of activated SUB(s)
+     * Get the count of active SUB(s)
      * @param context Context provided by caller
-     * @return activated SIM count
+     * @return active SIM count
      */
-    int getActivatedSubInfoCount();
+    int getActiveSubInfoCount();
 
     /**
      * Add a new SubInfoRecord to subinfo database if needed
@@ -164,5 +164,5 @@ interface ISub {
 
     void clearDefaultsForInactiveSubIds();
 
-    long[] getActivatedSubIdList();
+    long[] getActiveSubIdList();
 }
