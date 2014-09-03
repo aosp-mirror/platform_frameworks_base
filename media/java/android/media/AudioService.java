@@ -745,9 +745,6 @@ public class AudioService extends IAudioService.Stub {
         // Broadcast vibrate settings
         broadcastVibrateSetting(AudioManager.VIBRATE_TYPE_RINGER);
         broadcastVibrateSetting(AudioManager.VIBRATE_TYPE_NOTIFICATION);
-
-        // Restore the default media button receiver from the system settings
-        mMediaFocusControl.restoreMediaButtonReceiver();
     }
 
     private int rescaleIndex(int index, int srcStream, int dstStream) {
