@@ -258,8 +258,8 @@ public class TelecommManager {
 
     /**
      * Return the {@link PhoneAccount} which is the user-chosen default for making outgoing phone
-     * calls. This {@code PhoneAccount} will always be a member of the list which is returned from
-     * calling {@link #getEnabledPhoneAccounts()}.
+     * calls with a specified URI scheme. This {@code PhoneAccount} will always be a member of the
+     * list which is returned from calling {@link #getEnabledPhoneAccounts()}.
      * <p>
      * Apps must be prepared for this method to return {@code null}, indicating that there currently
      * exists no user-chosen default {@code PhoneAccount}. In this case, apps wishing to initiate a
@@ -272,11 +272,13 @@ public class TelecommManager {
      * {@code Intent} with no {@link TelecommManager#EXTRA_PHONE_ACCOUNT_HANDLE} is valid, and
      * subsequent steps in the phone call flow are responsible for presenting the user with an
      * affordance, if necessary, to choose a {@code PhoneAccount}.
+     *
+     * @param uriScheme The URI scheme.
      */
-    public PhoneAccountHandle getDefaultOutgoingPhoneAccount() {
+    public PhoneAccountHandle getDefaultOutgoingPhoneAccount(String uriScheme) {
         try {
             if (isServiceConnected()) {
-                return getTelecommService().getDefaultOutgoingPhoneAccount();
+                return getTelecommService().getDefaultOutgoingPhoneAccount(uriScheme);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecommService#getDefaultOutgoingPhoneAccount", e);
@@ -361,6 +363,29 @@ public class TelecommManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecommService#getSimCallManagers");
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Returns a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
+     * calls which support the specified URI scheme.
+     * <P>
+     * For example, invoking with {@code "tel"} will find all {@link PhoneAccountHandle}s which
+     * support telephone calls (e.g. URIs such as {@code tel:555-555-1212}).  Invoking with
+     * {@code "sip"} will find all {@link PhoneAccountHandle}s which support SIP calls (e.g. URIs
+     * such as {@code sip:example@sipexample.com}).
+     *
+     * @param uriScheme The URI scheme.
+     * @return A list of {@code PhoneAccountHandle} objects supporting the URI scheme.
+     */
+    public List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(String uriScheme) {
+        try {
+            if (isServiceConnected()) {
+                return getTelecommService().getPhoneAccountsSupportingScheme(uriScheme);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#getPhoneAccountsSupportingScheme", e);
         }
         return new ArrayList<>();
     }
