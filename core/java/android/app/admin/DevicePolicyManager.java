@@ -119,13 +119,14 @@ public class DevicePolicyManager {
         = "android.app.action.ACTION_PROVISION_MANAGED_PROFILE";
 
     /**
-     * A {@link Parcelable} extra of type {@link PersistableBundle} that allows a mobile device
-     * management application that starts managed profile provisioning to pass data to itself on the
-     * managed profile when provisioning completes. The mobile device management application sends
-     * this extra in an intent with the action {@link #ACTION_PROVISION_MANAGED_PROFILE} and
-     * receives it in {@link DeviceAdminReceiver#onProfileProvisioningComplete} via an intent with
-     * the action {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE}. The bundle is
-     * not changed during the managed profile provisioning.
+     * A {@link android.os.Parcelable} extra of type {@link android.os.PersistableBundle} that allows
+     * a mobile device management application that starts managed profile provisioning to pass data
+     * to itself on the managed profile when provisioning completes. The mobile device management
+     * application sends this extra in an intent with the action
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE} and receives it in
+     * {@link DeviceAdminReceiver#onProfileProvisioningComplete} via an intent with the action
+     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE}. The bundle is not changed
+     * during the managed profile provisioning.
      */
     public static final String EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE =
             "android.app.extra.ADMIN_EXTRA_BUNDLE";
