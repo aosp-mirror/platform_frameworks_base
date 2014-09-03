@@ -524,6 +524,7 @@ class WindowStateAnimator {
         private boolean mShown = false;
         private int mLayerStack;
         private boolean mIsOpaque;
+        private float mDsdx, mDtdx, mDsdy, mDtdy;
         private final String mName;
 
         public SurfaceTrace(SurfaceSession s,
@@ -619,6 +620,19 @@ class WindowStateAnimator {
         }
 
         @Override
+        public void setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
+            if (dsdx != mDsdx || dtdx != mDtdx || dsdy != mDsdy || dtdy != mDtdy) {
+                Slog.v(SURFACE_TAG, "setMatrix(" + dsdx + "," + dtdx + "," + dsdy + "," + dtdy +
+                        "): OLD:" + this + ". Called by " + Debug.getCallers(3));
+                mDsdx = dsdx;
+                mDtdx = dtdx;
+                mDsdy = dsdy;
+                mDtdy = dtdy;
+            }
+            super.setMatrix(dsdx, dtdx, dsdy, dtdy);
+        }
+
+        @Override
         public void hide() {
             if (mShown) {
                 Slog.v(SURFACE_TAG, "hide: OLD:" + this + ". Called by " + Debug.getCallers(3));
@@ -665,7 +679,8 @@ class WindowStateAnimator {
                     + " alpha=" + mSurfaceTraceAlpha + " " + mPosition.x + "," + mPosition.y
                     + " " + mSize.x + "x" + mSize.y
                     + " crop=" + mWindowCrop.toShortString()
-                    + " opaque=" + mIsOpaque;
+                    + " opaque=" + mIsOpaque
+                    + " (" + mDsdx + "," + mDtdx + "," + mDsdy + "," + mDtdy + ")";
         }
     }
 
@@ -1068,6 +1083,14 @@ class WindowStateAnimator {
                     mShownAlpha *= appTransformation.getAlpha();
                     if (appTransformation.hasClipRect()) {
                         mClipRect.set(appTransformation.getClipRect());
+                        if (mWin.mHScale > 0) {
+                            mClipRect.left /= mWin.mHScale;
+                            mClipRect.right /= mWin.mHScale;
+                        }
+                        if (mWin.mVScale > 0) {
+                            mClipRect.top /= mWin.mVScale;
+                            mClipRect.bottom /= mWin.mVScale;
+                        }
                         mHasClipRect = true;
                     }
                 }
@@ -1418,10 +1441,10 @@ class WindowStateAnimator {
             w.mLastVScale = w.mVScale;
             if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
                     "alpha=" + mShownAlpha + " layer=" + mAnimLayer
-                    + " matrix=[" + (mDsDx*w.mHScale)
-                    + "," + (mDtDx*w.mVScale)
-                    + "][" + (mDsDy*w.mHScale)
-                    + "," + (mDtDy*w.mVScale) + "]", null);
+                    + " matrix=[" + mDsDx + "*" + w.mHScale
+                    + "," + mDtDx + "*" + w.mVScale
+                    + "][" + mDsDy + "*" + w.mHScale
+                    + "," + mDtDy + "*" + w.mVScale + "]", null);
             if (mSurfaceControl != null) {
                 try {
                     mSurfaceAlpha = mShownAlpha;
