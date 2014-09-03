@@ -581,6 +581,8 @@ public class KeyguardViewMediator extends SystemUI {
             final boolean lockImmediately =
                 mLockPatternUtils.getPowerButtonInstantlyLocks() || !mLockPatternUtils.isSecure();
 
+            notifyScreenOffLocked();
+
             if (mExitSecureCallback != null) {
                 if (DEBUG) Log.d(TAG, "pending exit secure callback cancelled");
                 try {
@@ -593,7 +595,6 @@ public class KeyguardViewMediator extends SystemUI {
                     hideLocked();
                 }
             } else if (mShowing) {
-                notifyScreenOffLocked();
                 resetStateLocked();
             } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT
                    || (why == WindowManagerPolicy.OFF_BECAUSE_OF_USER && !lockImmediately)) {
