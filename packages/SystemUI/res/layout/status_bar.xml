@@ -43,8 +43,8 @@
     <LinearLayout android:id="@+id/status_bar_contents"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="6dip"
-        android:paddingEnd="6dip"
+        android:paddingStart="6dp"
+        android:paddingEnd="8dp"
         android:orientation="horizontal"
         >
 
@@ -91,7 +91,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:singleLine="true"
-                android:paddingStart="6dip"
+                android:paddingStart="7dp"
                 android:gravity="center_vertical|start"
                 />
         </com.android.systemui.statusbar.AlphaOptimizedLinearLayout>
