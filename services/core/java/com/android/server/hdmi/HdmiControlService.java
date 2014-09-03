@@ -825,8 +825,11 @@ public final class HdmiControlService extends SystemService {
                 device.onDeviceRemoved();
                 // There is no explicit event for device removal unlike capability register event
                 // used for device addition . Hence we remove the device on hotplug event.
-                invokeDeviceEventListeners(device.getInfo(), DEVICE_EVENT_REMOVE_DEVICE);
-                updateSafeMhlInput();
+                HdmiDeviceInfo deviceInfo = device.getInfo();
+                if (deviceInfo != null) {
+                    invokeDeviceEventListeners(deviceInfo, DEVICE_EVENT_REMOVE_DEVICE);
+                    updateSafeMhlInput();
+                }
             } else {
                 Slog.w(TAG, "No device to remove:[portId=" + portId);
             }
@@ -1051,7 +1054,7 @@ public final class HdmiControlService extends SystemService {
                         // the connected mobile device, start routing control to switch ports.
                         // callback is handled by MHL action.
                         device.turnOn(callback);
-                        tv.doManualPortSwitching(device.getInfo().getPortId(), null);
+                        tv.doManualPortSwitching(device.getPortId(), null);
                         return;
                     }
                     tv.deviceSelect(deviceId, callback);
