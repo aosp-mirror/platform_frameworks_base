@@ -11398,7 +11398,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 final WindowList windows = getDefaultWindowListLocked();
                 for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                     final WindowState win = windows.get(winNdx);
-                    if (win.mHasSurface && win.mAppToken != null) {
+                    if (win.mHasSurface
+                            && (win.mAppToken != null || mPolicy.isForceHiding(win.mAttrs))) {
                         win.mWinAnimator.mDrawState = WindowStateAnimator.DRAW_PENDING;
                         // Force add to mResizingWindows.
                         win.mLastContentInsets.set(-1, -1, -1, -1);

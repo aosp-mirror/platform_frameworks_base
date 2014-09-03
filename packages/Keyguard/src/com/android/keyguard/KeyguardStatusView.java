@@ -128,16 +128,19 @@ public class KeyguardStatusView extends GridLayout {
                 getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
     }
 
-    protected void refresh() {
-        AlarmManager.AlarmClockInfo nextAlarm = mLockPatternUtils.getNextAlarm();
-        Patterns.update(mContext, nextAlarm != null);
-
+    public void refreshTime() {
         mDateView.setFormat24Hour(Patterns.dateView);
         mDateView.setFormat12Hour(Patterns.dateView);
 
         mClockView.setFormat12Hour(Patterns.clockView12);
         mClockView.setFormat24Hour(Patterns.clockView24);
+    }
 
+    private void refresh() {
+        AlarmManager.AlarmClockInfo nextAlarm = mLockPatternUtils.getNextAlarm();
+        Patterns.update(mContext, nextAlarm != null);
+
+        refreshTime();
         refreshAlarmStatus(nextAlarm);
     }
 
