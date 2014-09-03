@@ -391,4 +391,14 @@ public class TelephonyIntents {
      */
     public static final String ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED
             = "android.intent.action.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED";
+
+    /**
+     * Broadcast Action: The default sms subscription has changed.  This has the following
+     * extra values:</p>
+     * <ul>
+     *   <li><em>subscription</em> - A int, the current sms default subscription.</li>
+     * </ul>
+     */
+    public static final String ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED
+            = "android.intent.action.ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED";
 }
