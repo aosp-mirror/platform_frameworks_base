@@ -355,13 +355,9 @@
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"‏مدیریت این دستگاه توسط:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nمدیریت نمایه‌تان توسط:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nسرپرستتان می‌تواند فعالیت شبکه‌تان را کنترل کند از جمله ایمیل‌ها، برنامه‌ها و وب‌سایت‌های ایمن. برای کسب اطلاعات بیشتر، با سرپرستتان تماس بگیرید.\n\nهمچنین، به «<xliff:g id="APPLICATION">%3$s</xliff:g>» اجازه دادید اتصال VPN را تنظیم کند. این برنامه می‌تواند فعالیت شبکه‌ را نیز کنترل کند."</string>
     <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"‏مدیریت این دستگاه توسط:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nمدیریت نمایه‌تان توسط:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nسرپرستتان می‌تواند فعالیت شبکه‌تان را کنترل کند از جمله ایمیل‌ها، برنامه‌ها و وب‌سایت‌های ایمن. برای کسب اطلاعات بیشتر، با سرپرستتان تماس بگیرید.\n\nهمچنین، به VPN ‏(«<xliff:g id="APPLICATION">%3$s</xliff:g>») وصل هستید. ارائه‌دهنده سرویس VPN شما می‌تواند فعالیت شبکه را نیز کنترل کند."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"دستگاه قفل باقی می‌ماند تا زمانی که قفل آن را به صورت دستی باز کنید"</string>
-    <!-- no translation found for hidden_notifications_title (7139628534207443290) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_text (2326409389088668981) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_cancel (3690709735122344913) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_setup (41079514801976810) -->
-    <skip />
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"دریافت سریع‌تر اعلان‌ها"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"قبل از باز کردن قفل آنها را مشاهده کنید"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"خیر، سپاسگزارم"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"راه‌اندازی"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> آن را بی‌صدا کرد"</string>
 </resources>
