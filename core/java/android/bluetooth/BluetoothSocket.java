@@ -375,6 +375,14 @@ public final class BluetoothSocket implements Closeable {
             } // else ASSERT(mPort == channel)
             ret = 0;
         } catch (IOException e) {
+            if (mPfd != null) {
+                try {
+                    mPfd.close();
+                } catch (IOException e1) {
+                    Log.e(TAG, "bindListen, close mPfd: " + e1);
+                }
+                mPfd = null;
+            }
             Log.e(TAG, "bindListen, fail to get port number, exception: " + e);
             return -1;
         }
