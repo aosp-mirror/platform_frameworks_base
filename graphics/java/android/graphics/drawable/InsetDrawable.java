@@ -86,6 +86,8 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
             throws XmlPullParserException, IOException {
         final TypedArray a = r.obtainAttributes(attrs, R.styleable.InsetDrawable);
         super.inflateWithAttributes(r, parser, a, R.styleable.InsetDrawable_visible);
+
+        mInsetState.mDrawable = null;
         updateStateFromTypedArray(a);
 
         // Load inner XML elements.
