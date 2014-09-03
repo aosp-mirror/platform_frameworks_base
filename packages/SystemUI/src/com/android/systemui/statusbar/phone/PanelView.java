@@ -479,7 +479,7 @@ public abstract class PanelView extends FrameLayout {
      * @return whether a fling should expands the panel; contracts otherwise
      */
     protected boolean flingExpands(float vel, float vectorVel) {
-        if (!mTouchAboveFalsingThreshold && mStatusBar.isFalsingThresholdNeeded()) {
+        if (isBelowFalsingThreshold()) {
             return true;
         }
         if (Math.abs(vectorVel) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
@@ -487,6 +487,10 @@ public abstract class PanelView extends FrameLayout {
         } else {
             return vel > 0;
         }
+    }
+
+    private boolean isBelowFalsingThreshold() {
+        return !mTouchAboveFalsingThreshold && mStatusBar.isFalsingThresholdNeeded();
     }
 
     protected void fling(float vel, boolean expand) {
@@ -509,7 +513,14 @@ public abstract class PanelView extends FrameLayout {
         mOverExpandedBeforeFling = getOverExpansionAmount() > 0f;
         ValueAnimator animator = createHeightAnimator(target);
         if (expand) {
+            boolean belowFalsingThreshold = isBelowFalsingThreshold();
+            if (belowFalsingThreshold) {
+                vel = 0;
+            }
             mFlingAnimationUtils.apply(animator, mExpandedHeight, target, vel, getHeight());
+            if (belowFalsingThreshold) {
+                animator.setDuration(350);
+            }
         } else {
             mFlingAnimationUtils.applyDismissing(animator, mExpandedHeight, target, vel,
                     getHeight());
