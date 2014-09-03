@@ -1281,7 +1281,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             // Add a basic notification template
             publicViewLocal = LayoutInflater.from(mContext).inflate(
                     com.android.internal.R.layout.notification_template_material_base,
-                    expandedPublic, true);
+                    expandedPublic, false);
+            publicViewLocal.setIsRootNamespace(true);
+            expandedPublic.setContractedChild(publicViewLocal);
 
             final TextView title = (TextView) publicViewLocal.findViewById(com.android.internal.R.id.title);
             try {

@@ -88,6 +88,14 @@ public class NotificationContentView extends FrameLayout {
         mContractedVisible = true;
     }
 
+    public View getContractedChild() {
+        return mContractedChild;
+    }
+
+    public View getExpandedChild() {
+        return mExpandedChild;
+    }
+
     public void setContractedChild(View child) {
         if (mContractedChild != null) {
             mContractedChild.animate().cancel();
