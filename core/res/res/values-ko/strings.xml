@@ -581,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"커널 MTP 드라이버에 액세스하여 MTP USB 프로토콜을 구현할 수 있도록 허용합니다."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"하드웨어 테스트"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"앱이 하드웨어를 테스트할 목적으로 다양한 주변기기를 제어할 수 있도록 허용합니다."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"FM 라디오 액세스"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"앱에서 FM 라디오에 액세스할 수 있도록 허용하여 프로그램을 청취합니다."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"전화번호 자동 연결"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"앱이 사용자의 조작 없이 전화번호로 전화를 걸 수 있도록 허용합니다. 이 경우 예상치 못한 통화 요금이 부과될 수 있습니다. 앱이 비상 전화를 걸도록 하는 권한은 주어지지 않습니다. 악성 앱이 사용자의 확인 없이 전화를 걸어 요금이 부과될 수 있습니다."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"모든 전화번호 자동 연결"</string>
@@ -1294,10 +1296,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"허용"</string>
     <string name="sms_control_no" msgid="625438561395534982">"거부"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;(으)로 메시지를 보내시겠습니까?"</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"모바일 계정에 "<b>"요금이 부과될 수 있습니다"</b>"."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"모바일 계정에 요금이 부과됩니다."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"전송"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"취소"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"내 선택사항 기억"</string>

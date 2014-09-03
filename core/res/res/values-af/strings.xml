@@ -581,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Laat toegang tot die kern-MTP-drywer toe om die MTP-USB-protokol te implementeer."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"toets hardeware"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Laat die program toe om verskeie randapparatuur te beheer vir hardewaretoetse."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"verkry toegang tot FM-radio"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Laat die program toe om toegang te verkry tot FM-radio om na programme te luister."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"skakel foonnommers direk"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Laat die program toe om telefoonnommers sonder jou tussentrede te bel. Dit kan tot onverwagte heffings of oproepe lei. Let daarop dat dit nie die program toelaat om noodnommers te bel nie. Kwaadwillige programme kan jou geld kos deur oproepe sonder jou bevestiging te maak."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"skakel enige foonnommers direk"</string>
@@ -1294,10 +1296,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Laat toe"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Weier"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wil \'n boodskap na &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; stuur."</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"Dit "<b>"kan heffings veroorsaak"</b>" op jou selfoonrekening."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Dit sal heffings op jou selfoonrekening veroorsaak."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Stuur"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Kanselleer"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Onthou my keuse"</string>

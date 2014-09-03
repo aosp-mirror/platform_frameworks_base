@@ -581,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Povoľuje prístup k ovládaču kernel MTP na implementáciu protokolu MTP USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testovanie hardvéru"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Umožňuje aplikácii ovládať rôzne periférie na účely testovania hardvéru."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"prístup k rádiu FM"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Povoliť aplikácii prístup k rádiu FM, aby bolo možné počúvať programy."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"priamo volať na telefónne čísla"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Umožňuje aplikácii volať telefónne čísla bez vášho zásahu. V dôsledku toho sa môžu účtovať neočakávané poplatky alebo sa môžu uskutočniť neočakávané hovory. Toto povolenie neumožňuje aplikácii volať na čísla tiesňového volania."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"priamo volať na ľubovoľné telefónne čísla"</string>
@@ -1294,10 +1296,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Povoliť"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Odmietnuť"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; chce odoslať správu na adresu &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"Táto akcia "<b>"môže viesť k zaúčtovaniu poplatkov"</b>" na váš účet u mobilného operátora."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Táto akcia povedie k zaúčtovaniu poplatku na váš účet u mobilného operátora."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Odoslať"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Zrušiť"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Zapamätať si voľbu"</string>

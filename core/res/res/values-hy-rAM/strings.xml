@@ -581,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Մուտքի հնարավորություն է տալիս միջուկի MTP սարքավարին MTP USB պրոտոկոլը կիրառելու համար:"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"փորձարկել սարքը"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Թույլ է տալիս հավելվածին կառավարել տարբեր արտաքին սարքավորումեր` սարքաշարի փորձարկման նպատակով:"</string>
+    <string name="permlab_fm" msgid="8749504526866832">"մուտք FM ռադիո"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Ծրագրին թույլ է տալիս մուտք գործել FM ռադիո և լսել հաղորդումները:"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ուղղակիորեն զանգել հեռախոսահամարներին"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Թույլ է տալիս հավելվածին զանգել հեռախոսահամարներին առանց ձեր միջամտության: Սա կարող է հանգեցնել անկանխատեսելի գանձումների կամ զանգերի: Նկատի ունեցեք, որ սա թույլ չի տալիս հավելվածին զանգել արտակարգ իրավիճակների համարներին: Վնասարար հավելվածները կարող են ձեր հաշվից զանգեր կատարել` առանց ձեր հաստատման:"</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"ուղղակիորեն զանգահարել որևէ հեռախոսահամարի"</string>
@@ -1294,10 +1296,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Թույլատրել"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Ժխտել"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>-ը&lt;/b&gt; ուզում է հաղորդագրություն ուղարկել &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>-ին&lt;/b&gt;:"</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"Սա "<b>"կարող է հանգեցնել գանձումների"</b>"՝ ձեր բջջային հաշվից:"</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Սա կհանգեցնի գանձումների՝ ձեր բջջային հաշվից:"</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Ուղարկել"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Չեղարկել"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Հիշել իմ ընտրությունը"</string>

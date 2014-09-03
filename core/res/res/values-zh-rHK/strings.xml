@@ -581,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"允許存取核心 MTP 驅動程式，以執行 MTP USB 通訊協定。"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"測試硬件"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"允許應用程式基於測試硬件的目的而控制各種周邊裝置。"</string>
+    <string name="permlab_fm" msgid="8749504526866832">"存取 FM 收音機"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"允許應用程式存取 FM 收音機以收聽節目。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接撥打電話號碼"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"允許應用程式繞過您自行撥打電話號碼，但可能會產生未預期的費用或撥打未預期的電話。注意：這項權限不允許應用程式撥打緊急電話。惡意應用程式可能未經您確認擅自撥打電話，增加您的支出。"</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"直接撥打任何電話號碼"</string>
@@ -1294,10 +1296,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"允許"</string>
     <string name="sms_control_no" msgid="625438561395534982">"拒絕"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; 要求將訊息傳送至 &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;。"</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"您的流動服務帳戶"<b>"可能因此繳付費用"</b>"。"</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"您的流動服務帳戶將因此繳付費用。"</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"發送"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"取消"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"記住我的選擇"</string>

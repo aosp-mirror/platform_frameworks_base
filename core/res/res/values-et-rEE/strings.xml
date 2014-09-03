@@ -581,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Lubab juurdepääsu tuuma MTP-draiverile MTP USB-protokolli rakendamiseks."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testi riistvara"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Võimaldab rakendusel juhtida erinevaid välisseadmeid riistvara testimise eesmärgil."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"juurdepääs FM-raadiole"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Võimaldab programmide kuulamiseks hankida rakendusel juurdepääsu FM-raadiole."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"helista otse telefoninumbritele"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Võimaldab rakendusel teie sekkumiseta telefoninumbritele helistada. See võib põhjustada ootamatuid tasusid või telefonikõnesid. Pange tähele, et see ei luba rakendusel helistada hädaabinumbritele. Pahatahtlikud rakendused võivad teile kulusid tekitada, tehes telefonikõnesid teie kinnituseta."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"helista otse mis tahes telefoninumbritele"</string>
@@ -1294,10 +1296,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Luba"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Keela"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; soovib saata sõnumi aadressile &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"Sellega võivad teie mobiilikontol "<b>"kaasneda kulud"</b>"."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Sellega kaasnevad teie mobiilikontol kulud."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Saada"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Tühista"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Jäta minu valik meelde"</string>

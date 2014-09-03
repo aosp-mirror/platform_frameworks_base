@@ -581,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Дозволяє доступ до драйвера ядра MTP для впровадження протоколу MTP (USB)."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"тест-ти обладн."</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Дозволяє програмі контролювати різні периферійні пристрої для тестування апаратного забезпечення."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"доступ до FM-радіо"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Додаток може отримувати доступ до FM-радіо, щоб слухати передачі."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"прямо набирати номери тел."</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Дозволяє програмі набирати номери телефону без вашого відома. Це може спричинити неочікуване стягнення плати чи здійснення дзвінків. Зауважте, що це не дозволяє програмі набирати екстрені номери. Шкідливі програми можуть здійснювати дзвінки без вашого підтвердження, за що з вас стягуватимуться кошти."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"прямо набирати будь-які ном. тел."</string>
@@ -1294,10 +1296,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Дозволити"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Відмовити"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; хоче надіслати повідомлення на таку адресу: &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400"><b>"Можуть стягуватися кошти"</b>" з вашого мобільного рахунку."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Буде стягнено кошти з вашого мобільного рахунку."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Надіслати"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Скасувати"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Запам’ятати мій вибір"</string>

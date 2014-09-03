@@ -581,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Permite acesso ao driver MTP do núcleo para implementar o protocolo USB MTP."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testar hardware"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Permite que o aplicativo controle diversos periféricos para teste do hardware."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"acessar rádio FM"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Permite que o aplicativo acesse a rádio FM para ouvir programas."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ligar diretamente para números de telefone"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite que o aplicativo ligue para números de telefone sem sua intervenção. Isso pode resultar em cobranças ou chamadas inesperadas. Esta opção não permite que o aplicativo ligue para números de emergência. Aplicativos maliciosos podem gerar custos com chamadas feitas sem sua confirmação."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"ligar diretamente para quaisquer números de telefone"</string>
@@ -1294,10 +1296,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Permitir"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Negar"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; deseja enviar uma mensagem para &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"Isso "<b>"pode resultar em cobranças"</b>" na conta de seu dispositivo móvel."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Isso resultará em cobranças na conta de seu dispositivo móvel."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Enviar"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Cancelar"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Lembrar minha escolha"</string>
@@ -1776,6 +1776,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pedir PIN antes de liberar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pedir padrão de desbloqueio antes de liberar"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pedir senha antes de liberar"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Para ajudar a melhorar a vida útil da bateria, a economia de bateria reduz o desempenho do dispositivo e restringe a vibração e a maioria dos dados em segundo plano. É possível que apps de e-mail, mensagens, entre outros, que dependem de sincronização não sejam atualizados a menos que sejam abertos.\n\nA economia de bateria é desativada automaticamente quando o dispositivo estiver carregando."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Para ajudar a melhorar a vida útil da bateria, a economia de bateria reduz o desempenho do dispositivo e restringe a vibração e a maioria dos dados em segundo plano. É possível que apps de e-mail, mensagens, entre outros que dependem de sincronização não sejam atualizados a menos que sejam abertos.\n\nA economia de bateria é desativada automaticamente quando o dispositivo estiver carregando."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Até o período de inatividade terminar às <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>

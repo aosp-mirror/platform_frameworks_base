@@ -581,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"MTP USB protokolünü uygulamak için çekirdekteki MTP sürücüsüne erişim izni ver."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"donanımı test et"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Uygulamaya, donanım testi için çeşitli çevre birimlerini denetleme izni verir."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"FM radyoya erişme"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Uygulamanın, programları dinlemek için FM radyoya erişmesine izin verir."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefon numaralarına doğrudan çağrı yap"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Uygulamaya sizin müdahaleniz olmadan telefon numaralarına çağrı yapma izni verir. Bu durum beklenmeyen ödemelere veya çağrılara neden olabilir. Ancak bu iznin, uygulamanın acil numaralara çağrı yapmasına olanak sağlamadığını unutmayın. Kötü amaçlı uygulamalar onayınız olmadan çağrılar yaparak sizi zarara sokabilir."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"herhangi bir telefon numarasına doğrudan çağrı yap"</string>
@@ -1294,10 +1296,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"İzin ver"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Reddet"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; adresine bir mesaj göndermek istiyor."</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"Bu işlem, mobil hesabınızdan "<b>"ödeme alınmasına neden olabilir"</b>"."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Bu işlem, mobil hesabınızdan ödeme alınmasına neden olacak."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Gönder"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"İptal"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Seçimimi hatırla"</string>
