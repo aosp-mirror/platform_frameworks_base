@@ -128,6 +128,10 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"Хоёр багана."</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"Гурван баганатай."</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"Дохио дүүрэн."</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Идэвхижсэн."</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"Унтраах"</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"Холбогдсон."</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Холбож байна."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -351,5 +355,9 @@
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"Энэ төхөөрөмжийг \n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\n удирдаж байна. Таны профайлыг \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\nудирдаж байна\nТаны админ таны сүлжээний идэвхжилт, имэйл, апп-ууд, аюулгүй вэбсайтуудыг хянах боломжтой. Дэлгэрэнгүй мэдээллийг админаасаа авна уу.\n\nМөн та \"<xliff:g id="APPLICATION">%3$s</xliff:g>\"-д VPN холболт үүсгэх зөвшөөрөл өгсөн. Энэ апп нь таны сүлжээний идэвхжилтийг хянах боломжтой."</string>
     <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"Энэ төхөөрөмжийг \n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\n удирддаг. Таны профайлыг \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n удирддаг\nТаны админ таны төхөөрөмж, сүлжээний идэвхжилт, имэйл, апп-ууд болон аюулгүй вебсайтуудыг хянах боломжтой.Дэлгэрэнгүй мэдээллийг админаасаа авна уу.\n\nМөн та VPN (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\")-д холбогдсон байна. Таны VPN үйлчилгээ үзүүлэгч таны сүлжээний идэвхжилтийг хянах боломжтой."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Таныг гараар онгойлгох хүртэл төхөөрөмж түгжээтэй байх болно"</string>
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"Мэдэгдлийг хурдан авах"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"Түгжээг тайлахын өмнө үзнэ үү"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Үгүй"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"Тохируулах"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>-с хаасан"</string>
 </resources>

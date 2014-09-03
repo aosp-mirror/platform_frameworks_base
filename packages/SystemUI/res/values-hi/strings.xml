@@ -128,6 +128,10 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"दो बार."</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"तीन बार."</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"पूर्ण सिग्नल."</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"चालू."</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"बंद."</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"कनेक्ट है."</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"कनेक्ट हो रहा है."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -282,8 +286,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"खोजें"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए ऊपर स्‍लाइड करें."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए बाएं स्‍लाइड करें."</string>
-    <!-- no translation found for zen_no_interruptions_with_warning (4396898053735625287) -->
-    <skip />
+    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"कोई बाधा नहीं. यहां तक कि अलार्म भी नहीं."</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"कोई अवरोध नहीं"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"केवल प्राथमिक अवरोध"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"आपका अगला अलार्म <xliff:g id="ALARM_TIME">%s</xliff:g> पर है"</string>
@@ -333,12 +336,10 @@
     <string name="media_projection_action_text" msgid="8470872969457985954">"अब प्रारंभ करें"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"कोई सूचना नहीं"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"उपकरण को मॉनीटर किया जा सकता है"</string>
-    <!-- no translation found for profile_owned_footer (8021888108553696069) -->
-    <skip />
+    <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफ़ाइल को मॉनीटर किया जा सकता है"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"नेटवर्क को मॉनीटर किया जा सकता है"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"उपकरण को मॉनीटर करना"</string>
-    <!-- no translation found for monitoring_title_profile_owned (6790109874733501487) -->
-    <skip />
+    <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"प्रोफ़ाइल को मॉनीटर करना"</string>
     <string name="monitoring_title" msgid="169206259253048106">"नेटवर्क को मॉनीटर करना"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN अक्षम करें"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN डिस्‍कनेक्‍ट करें"</string>
@@ -347,18 +348,16 @@
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"आप VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\") से कनेक्‍ट हैं.\n\nआपका VPN सेवा प्रदाता ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपके उपकरण और नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"यह उपकरण इसके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर कर सकता है. अधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें.\n\nसाथ ही, आपने VPN कनेक्‍शन सेट करने के लिए \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" अनुमति भी दी है. यह ऐप्‍स नेटवर्क गतिविधि को भी मॉनीटर कर सकता है."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"यह उपकरण इसके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक, ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर कर सकता है. अधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें.\n\nसाथ ही, आप VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") से कनेक्‍ट हैं. आपका VPN सेवा प्रदाता नेटवर्क गतिविधि को भी मॉनीटर कर सकता है."</string>
-    <!-- no translation found for monitoring_description_profile_owned (2370062794285691713) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (8685301493845456293) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (847491346263295767) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_profile_owned (4095516964132237051) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (9193588924767232909) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_device_and_profile_owned (6935475023447698473) -->
-    <skip />
+    <string name="monitoring_description_profile_owned" msgid="2370062794285691713">"यह प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्यवस्थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी उपकरण और नेटवर्क गतिविधि को मॉनीटर कर सकता है.\n\nअधिक जानकारी के लिए, अपने व्‍यवस्‍थापक से संपर्क करें."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="8685301493845456293">"यह उपकरण इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nआपकी प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nआपका व्यवस्थापक ईमेल, ऐप्स और सुरक्षित वेबसाइटों सहित आपकी उपकरण और नेटवर्क गतिविधि को मॉनीटर कर सकता है.\n\nअधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="847491346263295767">"यह प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्‍यवस्‍थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर करने में सक्षम है. अधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें.\n\nसाथ ही, आपने \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" को VPN कनेक्शन सेट करने की अनुमति दी है. यह ऐप्स नेटवर्क गतिविधि भी मॉनीटर कर सकता है."</string>
+    <string name="monitoring_description_legacy_vpn_profile_owned" msgid="4095516964132237051">"यह प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nआपका व्यवस्थापक ईमेल, ऐप्स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर करने में सक्षम है. अधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें.\n\nसाथ ही, आप VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") से भी कनेक्ट हैं. आपका VPN सेवा प्रदाता नेटवर्क गतिविधि भी मॉनीटर कर सकता है."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"उपकरण इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nप्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nव्यवस्थापक ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित नेटवर्क गतिविधि मॉनीटर कर सकते हैं. अधिक जानकारी हेतु, व्‍यवस्‍थापक से संपर्क करें.\n\nसाथ ही, आपने \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" को VPN कनेक्शन सेट करने की अनुमति दी है. यह ऐप्स नेटवर्क गतिविधि भी मॉनीटर कर सकता है."</string>
+    <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"यह उपकरण इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nआपकी प्रोफ़ाइल इनके द्वारा प्रबंधित है:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nआपका व्यवस्थापक ईमेल, ऐप्स और सुरक्षित वेबसाइटों सहित आपकी नेटवर्क गतिविधि को मॉनीटर करने में सक्षम है. अधिक जानकारी के लिए, अपने व्यवस्थापक से संपर्क करें.\n\nसाथ ही, आप VPN (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\") से भी कनेक्ट हैं. आपका VPN सेवा प्रदाता नेटवर्क गतिविधि भी मॉनीटर कर सकता है."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"जब तक कि आप मैन्‍युअल रूप से अनलॉक नहीं करते तब तक उपकरण लॉक रहेगा"</string>
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"सूचनाएं अधिक तेज़ी से प्राप्त करें"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"आपके द्वारा उन्हें अनलॉक किए जाने से पहले देखें"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"नहीं धन्यवाद"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"सेट करें"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> द्वारा म्यूट किया गया"</string>
 </resources>
