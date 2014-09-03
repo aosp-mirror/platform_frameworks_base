@@ -188,7 +188,7 @@ public class UserSwitcherController {
                     }
                 }
 
-                if (canCreateUser) {
+                if (!mSimpleUserSwitcher && canCreateUser) {
                     records.add(new UserRecord(null /* info */, null /* picture */,
                             false /* isGuest */, false /* isCurrent */, true /* isAddUser */,
                             createIsRestricted));
