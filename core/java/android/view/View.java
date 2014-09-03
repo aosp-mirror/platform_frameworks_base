@@ -4908,33 +4908,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             onFocusChanged(true, direction, previouslyFocusedRect);
-            manageFocusHotspot(true, oldFocus);
             refreshDrawableState();
         }
-    }
-
-    /**
-     * Forwards focus information to the background drawable, if necessary. When
-     * the view is gaining focus, <code>v</code> is the previous focus holder.
-     * When the view is losing focus, <code>v</code> is the next focus holder.
-     *
-     * @param focused whether this view is focused
-     * @param v previous or the next focus holder, or null if none
-     */
-    private void manageFocusHotspot(boolean focused, View v) {
-        final Rect r = new Rect();
-        if (v != null && mAttachInfo != null) {
-            v.getHotspotBounds(r);
-            final int[] location = mAttachInfo.mTmpLocation;
-            getLocationOnScreen(location);
-            r.offset(-location[0], -location[1]);
-        } else {
-            r.set(0, 0, mRight - mLeft, mBottom - mTop);
-        }
-
-        final float x = r.exactCenterX();
-        final float y = r.exactCenterY();
-        drawableHotspotChanged(x, y);
     }
 
     /**
@@ -5060,8 +5035,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             onFocusChanged(false, 0, null);
-
-            manageFocusHotspot(false, focused);
             refreshDrawableState();
 
             if (propagate && (!refocus || !rootViewRequestFocus())) {
