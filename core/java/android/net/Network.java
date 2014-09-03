@@ -35,6 +35,7 @@ import java.net.URLStreamHandler;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.net.SocketFactory;
 
+import com.android.okhttp.ConnectionPool;
 import com.android.okhttp.HostResolver;
 import com.android.okhttp.OkHttpClient;
 
@@ -59,6 +60,17 @@ public class Network implements Parcelable {
     private volatile NetworkBoundSocketFactory mNetworkBoundSocketFactory = null;
     private volatile OkHttpClient mOkHttpClient = null;
     private Object mLock = new Object();
+
+    // Default connection pool values. These are evaluated at startup, just
+    // like the OkHttp code. Also like the OkHttp code, we will throw parse
+    // exceptions at class loading time if the properties are set but are not
+    // valid integers.
+    private static final boolean httpKeepAlive =
+            Boolean.parseBoolean(System.getProperty("http.keepAlive", "true"));
+    private static final int httpMaxConnections =
+            httpKeepAlive ? Integer.parseInt(System.getProperty("http.maxConnections", "5")) : 0;
+    private static final long httpKeepAliveDurationMs =
+            Long.parseLong(System.getProperty("http.keepAliveDuration", "300000"));  // 5 minutes.
 
     /**
      * @hide
@@ -183,6 +195,20 @@ public class Network implements Parcelable {
         return mNetworkBoundSocketFactory;
     }
 
+    // TODO: This creates an OkHttpClient with its own connection pool for
+    // every Network object, instead of one for every NetId. This is
+    // suboptimal, because an app could potentially have more than one
+    // Network object for the same NetId, causing increased memory footprint
+    // and performance penalties due to lack of connection reuse (connection
+    // setup time, congestion window growth time, etc.).
+    //
+    // Instead, investigate only having one OkHttpClient for every NetId,
+    // perhaps by using a static HashMap of NetIds to OkHttpClient objects. The
+    // tricky part is deciding when to remove an OkHttpClient; a WeakHashMap
+    // shouldn't be used because whether a Network is referenced doesn't
+    // correlate with whether a new Network will be instantiated in the near
+    // future with the same NetID. A good solution would involve purging empty
+    // (or when all connections are timed out) ConnectionPools.
     private void maybeInitHttpClient() {
         if (mOkHttpClient == null) {
             synchronized (mLock) {
@@ -193,9 +219,12 @@ public class Network implements Parcelable {
                             return Network.this.getAllByName(host);
                         }
                     };
+                    ConnectionPool pool = new ConnectionPool(httpMaxConnections,
+                                                             httpKeepAliveDurationMs);
                     mOkHttpClient = new OkHttpClient()
                             .setSocketFactory(getSocketFactory())
-                            .setHostResolver(hostResolver);
+                            .setHostResolver(hostResolver)
+                            .setConnectionPool(pool);
                 }
             }
         }
