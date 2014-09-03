@@ -17,24 +17,31 @@
 package com.android.printspooler.model;
 
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
-import android.content.res.Configuration;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.pdf.PdfRenderer;
 import android.os.AsyncTask;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
-import android.print.PrintAttributes.MediaSize;
-import android.print.PrintAttributes.Margins;
+import android.os.RemoteException;
+import android.print.PrintAttributes;
 import android.print.PrintDocumentInfo;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.View;
+import com.android.internal.annotations.GuardedBy;
+import com.android.printspooler.renderer.IPdfRenderer;
+import com.android.printspooler.renderer.PdfRendererService;
 import dalvik.system.CloseGuard;
+import libcore.io.IoUtils;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -54,9 +61,6 @@ public final class PageContentRepository {
     private static final int BYTES_PER_PIXEL = 4;
 
     private static final int BYTES_PER_MEGABYTE = 1048576;
-
-    private static final int MILS_PER_INCH = 1000;
-    private static final int POINTS_IN_INCH = 72;
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
@@ -115,7 +119,6 @@ public final class PageContentRepository {
         if (DEBUG) {
             Log.i(LOG_TAG, "STATE_DESTROYED");
         }
-        throwIfNotClosed();
         doDestroy();
     }
 
@@ -351,15 +354,13 @@ public final class PageContentRepository {
     public static final class RenderSpec {
         final int bitmapWidth;
         final int bitmapHeight;
-        final MediaSize mediaSize;
-        final Margins minMargins;
+        final PrintAttributes printAttributes;
 
         public RenderSpec(int bitmapWidth, int bitmapHeight,
-                MediaSize mediaSize, Margins minMargins) {
+                PrintAttributes printAttributes) {
             this.bitmapWidth = bitmapWidth;
             this.bitmapHeight = bitmapHeight;
-            this.mediaSize = mediaSize;
-            this.minMargins = minMargins;
+            this.printAttributes = printAttributes;
         }
 
         @Override
@@ -380,18 +381,11 @@ public final class PageContentRepository {
             if (bitmapWidth != other.bitmapWidth) {
                 return false;
             }
-            if (mediaSize != null) {
-                if (!mediaSize.equals(other.mediaSize)) {
+            if (printAttributes != null) {
+                if (!printAttributes.equals(other.printAttributes)) {
                     return false;
                 }
-            } else if (other.mediaSize != null) {
-                return false;
-            }
-            if (minMargins != null) {
-                if (!minMargins.equals(other.minMargins)) {
-                    return false;
-                }
-            } else if (other.minMargins != null) {
+            } else if (other.printAttributes != null) {
                 return false;
             }
             return true;
@@ -407,8 +401,7 @@ public final class PageContentRepository {
         public int hashCode() {
             int result = bitmapWidth;
             result = 31 * result + bitmapHeight;
-            result = 31 * result + (mediaSize != null ? mediaSize.hashCode() : 0);
-            result = 31 * result + (minMargins != null ? minMargins.hashCode() : 0);
+            result = 31 * result + (printAttributes != null ? printAttributes.hashCode() : 0);
             return result;
         }
     }
@@ -440,12 +433,10 @@ public final class PageContentRepository {
         }
     }
 
-    private static int pointsFromMils(int mils) {
-        return (int) (((float) mils / MILS_PER_INCH) * POINTS_IN_INCH);
-    }
-
-    private static class AsyncRenderer {
+    private static final class AsyncRenderer implements ServiceConnection {
         private static final int MALFORMED_PDF_FILE_ERROR = -2;
+
+        private final Object mLock = new Object();
 
         private final Context mContext;
 
@@ -457,8 +448,8 @@ public final class PageContentRepository {
 
         private int mPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
 
-        // Accessed only by the executor thread.
-        private PdfRenderer mRenderer;
+        @GuardedBy("mLock")
+        private IPdfRenderer mRenderer;
 
         public AsyncRenderer(Context context, OnMalformedPdfFileListener malformedPdfFileListener) {
             mContext = context;
@@ -470,6 +461,21 @@ public final class PageContentRepository {
             mPageContentCache = new PageContentLruCache(cacheSizeInBytes);
         }
 
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            synchronized (mLock) {
+                mRenderer = IPdfRenderer.Stub.asInterface(service);
+                mLock.notifyAll();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            synchronized (mLock) {
+                mRenderer = null;
+            }
+        }
+
         public void open(final ParcelFileDescriptor source, final Runnable callback) {
             // Opening a new document invalidates the cache as it has pages
             // from the last document. We keep the cache even when the document
@@ -479,13 +485,27 @@ public final class PageContentRepository {
 
             new AsyncTask<Void, Void, Integer>() {
                 @Override
+                protected void onPreExecute() {
+                    Intent intent = new Intent(mContext, PdfRendererService.class);
+                    mContext.bindService(intent, AsyncRenderer.this, Context.BIND_AUTO_CREATE);
+                }
+
+                @Override
                 protected Integer doInBackground(Void... params) {
-                    try {
-                        mRenderer = new PdfRenderer(source);
-                        return mRenderer.getPageCount();
-                    } catch (IOException ioe) {
-                        Log.e(LOG_TAG, "Cannot open PDF document");
-                        return MALFORMED_PDF_FILE_ERROR;
+                    synchronized (mLock) {
+                        while (mRenderer == null) {
+                            try {
+                                mLock.wait();
+                            } catch (InterruptedException ie) {
+                                /* ignore */
+                            }
+                        }
+                        try {
+                            return mRenderer.openDocument(source);
+                        } catch (RemoteException re) {
+                            Log.e(LOG_TAG, "Cannot open PDF document");
+                            return MALFORMED_PDF_FILE_ERROR;
+                        }
                     }
                 }
 
@@ -510,7 +530,13 @@ public final class PageContentRepository {
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
-                    mRenderer.close();
+                    synchronized (mLock) {
+                        try {
+                            mRenderer.closeDocument();
+                        } catch (RemoteException re) {
+                            /* ignore */
+                        }
+                    }
                     return null;
                 }
 
@@ -525,8 +551,19 @@ public final class PageContentRepository {
         }
 
         public void destroy() {
-            mPageContentCache.invalidate();
-            mPageContentCache.clear();
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    return null;
+                }
+
+                @Override
+                public void onPostExecute(Void result) {
+                    mContext.unbindService(AsyncRenderer.this);
+                    mPageContentCache.invalidate();
+                    mPageContentCache.clear();
+                }
+            }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
         }
 
         public void startPreload(int firstShownPage, int lastShownPage, RenderSpec renderSpec) {
@@ -752,62 +789,30 @@ public final class PageContentRepository {
                     return mRenderedPage;
                 }
 
-                PdfRenderer.Page page = mRenderer.openPage(mPageIndex);
-
-                if (isCancelled()) {
-                    page.close();
-                    return mRenderedPage;
-                }
-
                 Bitmap bitmap = mRenderedPage.content.getBitmap();
 
-                final int srcWidthPts = page.getWidth();
-                final int srcHeightPts = page.getHeight();
+                ParcelFileDescriptor[] pipe = null;
+                try {
+                    pipe = ParcelFileDescriptor.createPipe();
+                    ParcelFileDescriptor source = pipe[0];
+                    ParcelFileDescriptor destination = pipe[1];
 
-                final int dstWidthPts = pointsFromMils(mRenderSpec.mediaSize.getWidthMils());
-                final int dstHeightPts = pointsFromMils(mRenderSpec.mediaSize.getHeightMils());
+                    mRenderer.renderPage(mPageIndex, bitmap.getWidth(), bitmap.getHeight(),
+                            mRenderSpec.printAttributes, destination);
 
-                final boolean scaleContent = mRenderer.shouldScaleForPrinting();
-                final boolean contentLandscape = !mRenderSpec.mediaSize.isPortrait();
+                    // We passed the file descriptor to the other side which took
+                    // ownership, so close our copy for the write to complete.
+                    destination.close();
 
-                final float displayScale;
-                Matrix matrix = new Matrix();
-
-                if (scaleContent) {
-                    displayScale = Math.min((float) bitmap.getWidth() / srcWidthPts,
-                            (float) bitmap.getHeight() / srcHeightPts);
-                } else {
-                    if (contentLandscape) {
-                        displayScale = (float) bitmap.getHeight() / dstHeightPts;
-                    } else {
-                        displayScale = (float) bitmap.getWidth() / dstWidthPts;
-                    }
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inBitmap = bitmap;
+                    BitmapFactory.decodeFileDescriptor(source.getFileDescriptor(), null, options);
+                } catch (IOException|RemoteException e) {
+                    Log.e(LOG_TAG, "Error rendering page:" + mPageIndex, e);
+                } finally {
+                    IoUtils.closeQuietly(pipe[0]);
+                    IoUtils.closeQuietly(pipe[1]);
                 }
-                matrix.postScale(displayScale, displayScale);
-
-                Configuration configuration = mContext.getResources().getConfiguration();
-                if (configuration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
-                    matrix.postTranslate(bitmap.getWidth() - srcWidthPts * displayScale, 0);
-                }
-
-                final int paddingLeftPts = pointsFromMils(mRenderSpec.minMargins.getLeftMils());
-                final int paddingTopPts = pointsFromMils(mRenderSpec.minMargins.getTopMils());
-                final int paddingRightPts = pointsFromMils(mRenderSpec.minMargins.getRightMils());
-                final int paddingBottomPts = pointsFromMils(mRenderSpec.minMargins.getBottomMils());
-
-                Rect clip = new Rect();
-                clip.left = (int) (paddingLeftPts * displayScale);
-                clip.top = (int) (paddingTopPts * displayScale);
-                clip.right = (int) (bitmap.getWidth() - paddingRightPts * displayScale);
-                clip.bottom = (int) (bitmap.getHeight() - paddingBottomPts * displayScale);
-
-                if (DEBUG) {
-                    Log.i(LOG_TAG, "Rendering page:" + mPageIndex + " of " + mPageCount);
-                }
-
-                page.render(bitmap, clip, matrix, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-
-                page.close();
 
                 return mRenderedPage;
             }
