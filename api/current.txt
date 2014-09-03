@@ -28241,7 +28241,6 @@ package android.telecomm {
     method public final void setRequestingRingback(boolean);
     method public final void setRinging();
     method public final void setStatusHints(android.telecomm.StatusHints);
-    method public final void startActivityFromInCall(android.app.PendingIntent);
     method public static java.lang.String stateToString(int);
     field public static final int STATE_ACTIVE = 4; // 0x4
     field public static final int STATE_DIALING = 3; // 0x3
@@ -28419,7 +28418,6 @@ package android.telecomm {
     method public void onParentChanged(android.telecomm.RemoteConnection, android.telecomm.RemoteConnection);
     method public void onPostDialWait(android.telecomm.RemoteConnection, java.lang.String);
     method public void onRequestingRingback(android.telecomm.RemoteConnection, boolean);
-    method public void onStartActivityFromInCall(android.telecomm.RemoteConnection, android.app.PendingIntent);
     method public void onStateChanged(android.telecomm.RemoteConnection, int);
     method public void onStatusHintsChanged(android.telecomm.RemoteConnection, android.telecomm.StatusHints);
   }
@@ -28850,6 +28848,8 @@ package android.telephony {
     method public void updateMmsSendStatus(int, boolean);
     method public void updateSmsSendStatus(int, boolean);
     method public boolean updateStoredMessageStatus(android.net.Uri, android.content.ContentValues);
+    field public static final java.lang.String MESSAGE_STATUS_READ = "read";
+    field public static final java.lang.String MESSAGE_STATUS_SEEN = "seen";
     field public static final java.lang.String MMS_CONFIG_ALIAS_ENABLED = "aliasEnabled";
     field public static final java.lang.String MMS_CONFIG_ALIAS_MAX_CHARS = "aliasMaxChars";
     field public static final java.lang.String MMS_CONFIG_ALIAS_MIN_CHARS = "aliasMinChars";
@@ -28878,8 +28878,6 @@ package android.telephony {
     field public static final java.lang.String MMS_CONFIG_UA_PROF_TAG_NAME = "uaProfTagName";
     field public static final java.lang.String MMS_CONFIG_UA_PROF_URL = "uaProfUrl";
     field public static final java.lang.String MMS_CONFIG_USER_AGENT = "userAgent";
-    field public static final java.lang.String MESSAGE_STATUS_READ = "read";
-    field public static final java.lang.String MESSAGE_STATUS_SEEN = "seen";
     field public static final int MMS_ERROR_HTTP_FAILURE = 4; // 0x4
     field public static final int MMS_ERROR_INVALID_APN = 2; // 0x2
     field public static final int MMS_ERROR_UNABLE_CONNECT_MMS = 3; // 0x3

@@ -463,12 +463,6 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onStartActivityFromInCall(Connection c, PendingIntent intent) {
-            String id = mIdByConnection.get(c);
-            mAdapter.startActivityFromInCall(id, intent);
-        }
-
-        @Override
         public void onConferenceableConnectionsChanged(
                 Connection connection, List<Connection> conferenceableConnections) {
             mAdapter.setConferenceableConnections(

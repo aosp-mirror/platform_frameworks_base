@@ -57,8 +57,7 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_SET_STATUS_HINTS = 17;
     private static final int MSG_SET_HANDLE = 18;
     private static final int MSG_SET_CALLER_DISPLAY_NAME = 19;
-    private static final int MSG_START_ACTIVITY_FROM_IN_CALL = 20;
-    private static final int MSG_SET_CONFERENCEABLE_CONNECTIONS = 21;
+    private static final int MSG_SET_CONFERENCEABLE_CONNECTIONS = 20;
 
     private final IConnectionServiceAdapter mDelegate;
 
@@ -187,16 +186,6 @@ final class ConnectionServiceAdapterServant {
                     try {
                         mDelegate.setCallerDisplayName(
                                 (String) args.arg1, (String) args.arg2, args.argi1);
-                    } finally {
-                        args.recycle();
-                    }
-                    break;
-                }
-                case MSG_START_ACTIVITY_FROM_IN_CALL: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    try {
-                        mDelegate.startActivityFromInCall(
-                                (String) args.arg1, (PendingIntent) args.arg2);
                     } finally {
                         args.recycle();
                     }
@@ -349,14 +338,6 @@ final class ConnectionServiceAdapterServant {
             args.arg2 = callerDisplayName;
             args.argi1 = presentation;
             mHandler.obtainMessage(MSG_SET_CALLER_DISPLAY_NAME, args).sendToTarget();
-        }
-
-        @Override
-        public final void startActivityFromInCall(String connectionId, PendingIntent intent) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = connectionId;
-            args.arg2 = intent;
-            mHandler.obtainMessage(MSG_START_ACTIVITY_FROM_IN_CALL, args).sendToTarget();
         }
 
         @Override

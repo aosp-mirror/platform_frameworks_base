@@ -81,7 +81,6 @@ public abstract class Connection {
                 Connection c, VideoProvider videoProvider) {}
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
         public void onStatusHintsChanged(Connection c, StatusHints statusHints) {}
-        public void onStartActivityFromInCall(Connection c, PendingIntent intent) {}
         public void onConferenceableConnectionsChanged(
                 Connection c, List<Connection> conferenceableConnections) {}
         public void onConferenceChanged(Connection c, Conference conference) {}
@@ -938,20 +937,6 @@ public abstract class Connection {
             Log.d(this, "Conference reset");
             mConference = null;
             fireConferenceChanged();
-        }
-    }
-
-    /**
-     * Launches an activity for this connection on top of the in-call UI.
-     *
-     * @param intent The intent to use to start the activity.
-     */
-    public final void startActivityFromInCall(PendingIntent intent) {
-        if (!intent.isActivity()) {
-            throw new IllegalArgumentException("Activity intent required.");
-        }
-        for (Listener l : mListeners) {
-            l.onStartActivityFromInCall(this, intent);
         }
     }
 
