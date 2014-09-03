@@ -66,7 +66,6 @@ public class CheckBoxPreference extends TwoStatePreference {
         View checkboxView = view.findViewById(com.android.internal.R.id.checkbox);
         if (checkboxView != null && checkboxView instanceof Checkable) {
             ((Checkable) checkboxView).setChecked(mChecked);
-            sendAccessibilityEvent(checkboxView);
         }
 
         syncSummaryView(view);
