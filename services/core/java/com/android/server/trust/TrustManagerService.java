@@ -116,7 +116,7 @@ public class TrustManagerService extends SystemService {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY && !isSafeMode()) {
             mPackageMonitor.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
             mReceiver.register(mContext);
-            refreshAgentList();
+            refreshAgentList(UserHandle.USER_ALL);
         }
     }
 
@@ -157,11 +157,17 @@ public class TrustManagerService extends SystemService {
         dispatchOnTrustChanged(aggregateIsTrusted(userId), userId, initiatedByUser);
     }
 
-    void refreshAgentList() {
+    void refreshAgentList(int userId) {
         if (DEBUG) Slog.d(TAG, "refreshAgentList()");
         PackageManager pm = mContext.getPackageManager();
 
-        List<UserInfo> userInfos = mUserManager.getUsers(true /* excludeDying */);
+        List<UserInfo> userInfos;
+        if (userId == UserHandle.USER_ALL) {
+            userInfos = mUserManager.getUsers(true /* excludeDying */);
+        } else {
+            userInfos = new ArrayList<>();
+            userInfos.add(mUserManager.getUserInfo(userId));
+        }
         LockPatternUtils lockPatternUtils = new LockPatternUtils(mContext);
 
         ArraySet<AgentInfo> obsoleteAgents = new ArraySet<>();
@@ -170,6 +176,7 @@ public class TrustManagerService extends SystemService {
         for (UserInfo userInfo : userInfos) {
             if (lockPatternUtils.getKeyguardStoredPasswordQuality(userInfo.id)
                     == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) continue;
+            if (!mUserHasAuthenticatedSinceBoot.get(userInfo.id)) continue;
             DevicePolicyManager dpm = lockPatternUtils.getDevicePolicyManager();
             int disabledFeatures = dpm.getKeyguardDisabledFeatures(null, userInfo.id);
             final boolean disableTrustAgents =
@@ -233,7 +240,7 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    void updateDevicePolicyFeatures(int userId) {
+    void updateDevicePolicyFeatures() {
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo info = mActiveAgents.valueAt(i);
             if (info.agent.isConnected()) {
@@ -276,7 +283,7 @@ public class TrustManagerService extends SystemService {
         if (trustMayHaveChanged) {
             updateTrust(userId, false);
         }
-        refreshAgentList();
+        refreshAgentList(userId);
     }
 
     private ComponentName getSettingsComponentName(PackageManager pm, ResolveInfo resolveInfo) {
@@ -383,7 +390,7 @@ public class TrustManagerService extends SystemService {
     private void updateUserHasAuthenticated(int userId) {
         if (!mUserHasAuthenticatedSinceBoot.get(userId)) {
             mUserHasAuthenticatedSinceBoot.put(userId, true);
-            updateTrust(userId, false);
+            refreshAgentList(userId);
         }
     }
 
@@ -391,10 +398,10 @@ public class TrustManagerService extends SystemService {
     private void requireCredentialEntry(int userId) {
         if (userId == UserHandle.USER_ALL) {
             mUserHasAuthenticatedSinceBoot.clear();
-            updateTrustAll();
+            refreshAgentList(UserHandle.USER_ALL);
         } else {
             mUserHasAuthenticatedSinceBoot.put(userId, false);
-            updateTrust(userId, false);
+            refreshAgentList(userId);
         }
     }
 
@@ -578,7 +585,7 @@ public class TrustManagerService extends SystemService {
                     dispatchUnlockAttempt(msg.arg1 != 0, msg.arg2);
                     break;
                 case MSG_ENABLED_AGENTS_CHANGED:
-                    refreshAgentList();
+                    refreshAgentList(UserHandle.USER_ALL);
                     break;
                 case MSG_REQUIRE_CREDENTIAL_ENTRY:
                     requireCredentialEntry(msg.arg1);
@@ -590,7 +597,7 @@ public class TrustManagerService extends SystemService {
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override
         public void onSomePackagesChanged() {
-            refreshAgentList();
+            refreshAgentList(UserHandle.USER_ALL);
         }
 
         @Override
@@ -611,8 +618,8 @@ public class TrustManagerService extends SystemService {
         public void onReceive(Context context, Intent intent) {
             if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(
                     intent.getAction())) {
-                refreshAgentList();
-                updateDevicePolicyFeatures(getSendingUserId());
+                refreshAgentList(getSendingUserId());
+                updateDevicePolicyFeatures();
             } else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
                 updateUserHasAuthenticated(getSendingUserId());
             }
