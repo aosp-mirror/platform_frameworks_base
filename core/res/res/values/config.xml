@@ -374,7 +374,7 @@
     <bool name="config_useAttentionLight">false</bool>
 
     <!-- If this is true, the screen will fade off. -->
-    <bool name="config_animateScreenLights">true</bool>
+    <bool name="config_animateScreenLights">false</bool>
 
     <!-- If this is true, key chords can be used to take a screenshot on the device. -->
     <bool name="config_enableScreenshotChord">true</bool>
