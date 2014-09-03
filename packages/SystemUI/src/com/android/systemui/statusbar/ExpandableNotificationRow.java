@@ -17,10 +17,15 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 
+import android.widget.ImageView;
 import com.android.systemui.R;
 
 public class ExpandableNotificationRow extends ActivatableNotificationView {
@@ -61,6 +66,51 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private String mLoggingKey;
     private boolean mWasReset;
     private NotificationGuts mGuts;
+
+    public void setIconAnimationRunning(boolean running) {
+        setIconAnimationRunning(running, mPublicLayout);
+        setIconAnimationRunning(running, mPrivateLayout);
+    }
+
+    private void setIconAnimationRunning(boolean running, NotificationContentView layout) {
+        if (layout != null) {
+            View contractedChild = layout.getContractedChild();
+            View expandedChild = layout.getExpandedChild();
+            setIconAnimationRunningForChild(running, contractedChild);
+            setIconAnimationRunningForChild(running, expandedChild);
+        }
+    }
+
+    private void setIconAnimationRunningForChild(boolean running, View child) {
+        if (child != null) {
+            ImageView icon = (ImageView) child.findViewById(com.android.internal.R.id.icon);
+            setIconRunning(icon, running);
+            ImageView rightIcon = (ImageView) child.findViewById(
+                    com.android.internal.R.id.right_icon);
+            setIconRunning(rightIcon, running);
+        }
+    }
+
+    private void setIconRunning(ImageView imageView, boolean running) {
+        if (imageView != null) {
+            Drawable drawable = imageView.getDrawable();
+            if (drawable instanceof AnimationDrawable) {
+                AnimationDrawable animationDrawable = (AnimationDrawable) drawable;
+                if (running) {
+                    animationDrawable.start();
+                } else {
+                    animationDrawable.stop();
+                }
+            } else if (drawable instanceof AnimatedVectorDrawable) {
+                AnimatedVectorDrawable animationDrawable = (AnimatedVectorDrawable) drawable;
+                if (running) {
+                    animationDrawable.start();
+                } else {
+                    animationDrawable.stop();
+                }
+            }
+        }
+    }
 
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);

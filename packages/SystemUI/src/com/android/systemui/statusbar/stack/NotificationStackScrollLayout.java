@@ -1467,6 +1467,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             // drawn when removed
             getOverlay().add(child);
         }
+        updateAnimationState(false, child);
 
         // Make sure the clipRect we might have set is removed
         child.setClipBounds(null);
@@ -1545,10 +1546,28 @@ public class NotificationStackScrollLayout extends ViewGroup
         mStackScrollAlgorithm.notifyChildrenChanged(this);
         ((ExpandableView) child).setOnHeightChangedListener(this);
         generateAddAnimation(child, false /* fromMoreCard */);
+        updateAnimationState(mAnimationsEnabled && mIsExpanded, child);
     }
 
     public void setAnimationsEnabled(boolean animationsEnabled) {
         mAnimationsEnabled = animationsEnabled;
+        updateNotificationAnimationStates();
+    }
+
+    private void updateNotificationAnimationStates() {
+        boolean running = mIsExpanded && mAnimationsEnabled;
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            updateAnimationState(running, child);
+        }
+    }
+
+    private void updateAnimationState(boolean running, View child) {
+        if (child instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            row.setIconAnimationRunning(running);
+        }
     }
 
     public boolean isAddOrRemoveAnimationPending() {
@@ -1918,8 +1937,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void setIsExpanded(boolean isExpanded) {
+        boolean changed = isExpanded != mIsExpanded;
         mIsExpanded = isExpanded;
         mStackScrollAlgorithm.setIsExpanded(isExpanded);
+        if (changed) {
+            updateNotificationAnimationStates();
+        }
     }
 
     @Override
