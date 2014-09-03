@@ -53,6 +53,11 @@
             android:permission="android.permission.BIND_PRINT_SPOOLER_SERVICE">
         </service>
 
+        <service
+            android:name=".renderer.PdfRendererService"
+            android:isolatedProcess="true">
+        </service>
+
         <activity
             android:name=".ui.PrintActivity"
             android:configChanges="orientation|screenSize"
