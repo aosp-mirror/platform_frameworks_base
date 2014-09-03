@@ -34,6 +34,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -96,6 +97,7 @@ import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
@@ -717,11 +719,23 @@ public abstract class BaseStatusBar extends SystemUI implements
                entry.expandedBig.findViewById(com.android.internal.R.id.media_actions) != null;
     }
 
+    // The gear button in the guts that links to the app's own notification settings
+    private void startAppOwnNotificationSettingsActivity(Intent intent,
+            final int notificationId, final String notificationTag, final int appUid) {
+        intent.putExtra("notification_id", notificationId);
+        intent.putExtra("notification_tag", notificationTag);
+        startNotificationGutsIntent(intent, appUid);
+    }
+
+    // The (i) button in the guts that links to the system notification settings for that app
     private void startAppNotificationSettingsActivity(String packageName, final int appUid) {
         final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName);
         intent.putExtra(Settings.EXTRA_APP_UID, appUid);
+        startNotificationGutsIntent(intent, appUid);
+    }
 
+    private void startNotificationGutsIntent(final Intent intent, final int appUid) {
         final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
         dismissKeyguardThenExecute(new OnDismissAction() {
             @Override
@@ -1128,7 +1142,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 entry.notification.getUser().getIdentifier());
 
         int maxHeight = mRowMaxHeight;
-        StatusBarNotification sbn = entry.notification;
+        final StatusBarNotification sbn = entry.notification;
         RemoteViews contentView = sbn.getNotification().contentView;
         RemoteViews bigContentView = sbn.getNotification().bigContentView;
 
@@ -1197,6 +1211,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         ((DateTimeView) row.findViewById(R.id.timestamp)).setTime(entry.notification.getPostTime());
         ((TextView) row.findViewById(R.id.pkgname)).setText(appname);
         final View settingsButton = guts.findViewById(R.id.notification_inspect_item);
+        final View appSettingsButton
+                = guts.findViewById(R.id.notification_inspect_app_provided_settings);
         if (appUid >= 0) {
             final int appUidF = appUid;
             settingsButton.setOnClickListener(new View.OnClickListener() {
@@ -1204,8 +1220,33 @@ public abstract class BaseStatusBar extends SystemUI implements
                     startAppNotificationSettingsActivity(pkg, appUidF);
                 }
             });
+
+            final Intent appSettingsQueryIntent
+                    = new Intent(Intent.ACTION_MAIN)
+                        .addCategory(Notification.INTENT_CATEGORY_NOTIFICATION_PREFERENCES)
+                        .setPackage(pkg);
+            List<ResolveInfo> infos = pmUser.queryIntentActivities(appSettingsQueryIntent, 0);
+            if (infos.size() > 0) {
+                appSettingsButton.setVisibility(View.VISIBLE);
+                appSettingsButton.setContentDescription(
+                        mContext.getResources().getString(
+                                R.string.status_bar_notification_app_settings_title,
+                                appname
+                        ));
+                final Intent appSettingsLaunchIntent = new Intent(appSettingsQueryIntent)
+                        .setClassName(pkg, infos.get(0).activityInfo.name);
+                appSettingsButton.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        startAppOwnNotificationSettingsActivity(appSettingsLaunchIntent,
+                                sbn.getId(),
+                                sbn.getTag(),
+                                appUidF);
+                    }
+                });
+            }
         } else {
             settingsButton.setVisibility(View.GONE);
+            appSettingsButton.setVisibility(View.GONE);
         }
 
         workAroundBadLayerDrawableOpacity(row);
