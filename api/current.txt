@@ -36795,7 +36795,6 @@ package android.webkit {
     method public deprecated void onGlobalFocusChanged(android.view.View, android.view.View);
     method public void onPause();
     method public void onResume();
-    method public static void optOutDataReductionProxy();
     method public boolean overlayHorizontalScrollbar();
     method public boolean overlayVerticalScrollbar();
     method public boolean pageDown(boolean);
