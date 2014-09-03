@@ -47,8 +47,9 @@ import java.util.List;
  * receive updates from the session, such as metadata and play state changes.
  * <p>
  * A MediaController can be created through {@link MediaSessionManager} if you
- * hold the "android.permission.MEDIA_CONTENT_CONTROL" permission or directly if
- * you have a {@link MediaSession.Token} from the session owner.
+ * hold the "android.permission.MEDIA_CONTENT_CONTROL" permission or are an
+ * enabled notification listener or by getting a {@link MediaSession.Token}
+ * directly from the session owner.
  * <p>
  * MediaController objects are thread-safe.
  */

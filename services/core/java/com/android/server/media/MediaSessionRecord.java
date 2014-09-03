@@ -231,7 +231,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * @param direction The direction to adjust volume in.
      */
     public void adjustVolume(int direction, int flags, String packageName, int uid) {
-        if (isPlaybackActive(false)) {
+        if (isPlaybackActive(false) || hasFlag(MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY)) {
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
         }
         if (direction > 1) {
