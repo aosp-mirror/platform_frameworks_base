@@ -1526,7 +1526,7 @@ public final class InputMethodManager {
      * Return true if the current input method wants to watch the location
      * of the input editor's cursor in its window.
      *
-     * @deprecated Use {@link InputConnection#requestUpdateCursorAnchorInfo(int)} instead.
+     * @deprecated Use {@link InputConnection#requestCursorUpdates(int)} instead.
      */
     @Deprecated
     public boolean isWatchingCursor(View view) {
@@ -1542,9 +1542,9 @@ public final class InputMethodManager {
     public boolean isCursorAnchorInfoEnabled() {
         synchronized (mH) {
             final boolean isImmediate = (mRequestUpdateCursorAnchorInfoMonitorMode &
-                    InputConnection.REQUEST_UPDATE_CURSOR_ANCHOR_INFO_IMMEDIATE) != 0;
+                    InputConnection.CURSOR_UPDATE_IMMEDIATE) != 0;
             final boolean isMonitoring = (mRequestUpdateCursorAnchorInfoMonitorMode &
-                    InputConnection.REQUEST_UPDATE_CURSOR_ANCHOR_INFO_MONITOR) != 0;
+                    InputConnection.CURSOR_UPDATE_MONITOR) != 0;
             return isImmediate || isMonitoring;
         }
     }
@@ -1608,7 +1608,7 @@ public final class InputMethodManager {
             // If immediate bit is set, we will call updateCursorAnchorInfo() even when the data has
             // not been changed from the previous call.
             final boolean isImmediate = (mRequestUpdateCursorAnchorInfoMonitorMode &
-                    InputConnection.REQUEST_UPDATE_CURSOR_ANCHOR_INFO_IMMEDIATE) != 0;
+                    InputConnection.CURSOR_UPDATE_IMMEDIATE) != 0;
             if (!isImmediate && Objects.equals(mCursorAnchorInfo, cursorAnchorInfo)) {
                 // TODO: Consider always emitting this message once we have addressed redundant
                 // calls of this method from android.widget.Editor.
@@ -1624,7 +1624,7 @@ public final class InputMethodManager {
                 mCursorAnchorInfo = cursorAnchorInfo;
                 // Clear immediate bit (if any).
                 mRequestUpdateCursorAnchorInfoMonitorMode &=
-                        ~InputConnection.REQUEST_UPDATE_CURSOR_ANCHOR_INFO_IMMEDIATE;
+                        ~InputConnection.CURSOR_UPDATE_IMMEDIATE;
             } catch (RemoteException e) {
                 Log.w(TAG, "IME died: " + mCurId, e);
             }
