@@ -5427,7 +5427,7 @@ package android.app.admin {
     method public boolean getCrossProfileCallerIdDisabled(android.content.ComponentName);
     method public java.util.List<java.lang.String> getCrossProfileWidgetProviders(android.content.ComponentName);
     method public int getCurrentFailedPasswordAttempts();
-    method public java.util.List<byte[]> getInstalledCaCerts();
+    method public java.util.List<byte[]> getInstalledCaCerts(android.content.ComponentName);
     method public int getKeyguardDisabledFeatures(android.content.ComponentName);
     method public int getMaximumFailedPasswordsForWipe(android.content.ComponentName);
     method public long getMaximumTimeToLock(android.content.ComponentName);
@@ -5448,7 +5448,7 @@ package android.app.admin {
     method public boolean getScreenCaptureDisabled(android.content.ComponentName);
     method public boolean getStorageEncryption(android.content.ComponentName);
     method public int getStorageEncryptionStatus();
-    method public boolean hasCaCertInstalled(byte[]);
+    method public boolean hasCaCertInstalled(android.content.ComponentName, byte[]);
     method public boolean hasGrantedPolicy(android.content.ComponentName, int);
     method public boolean installCaCert(android.content.ComponentName, byte[]);
     method public void installKeyPair(android.content.ComponentName, java.security.PrivateKey, java.security.cert.Certificate, java.lang.String);
