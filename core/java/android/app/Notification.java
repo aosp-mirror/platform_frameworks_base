@@ -1423,6 +1423,7 @@ public class Notification implements Parcelable
             extras.remove(Notification.EXTRA_LARGE_ICON);
             extras.remove(Notification.EXTRA_LARGE_ICON_BIG);
             extras.remove(Notification.EXTRA_PICTURE);
+            extras.remove(Notification.EXTRA_BIG_TEXT);
             // Prevent light notifications from being rebuilt.
             extras.remove(Builder.EXTRA_NEEDS_REBUILD);
         }
