@@ -685,6 +685,23 @@ public class ConnectivityManager {
     }
 
     /**
+     * Returns the {@link Network} object currently serving a given type, or
+     * null if the given type is not connected.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     *
+     * @hide
+     */
+    public Network getNetworkForType(int networkType) {
+        try {
+            return mService.getNetworkForType(networkType);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Returns an array of all {@link Network} currently tracked by the
      * framework.
      *

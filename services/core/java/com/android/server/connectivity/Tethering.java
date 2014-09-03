@@ -31,6 +31,7 @@ import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
@@ -56,6 +57,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -742,7 +744,7 @@ public class Tethering extends BaseNetworkObserver {
         static final int CMD_IP_FORWARDING_ENABLE_ERROR  =  7;
         // notification from the master SM that it had trouble disabling IP Forwarding
         static final int CMD_IP_FORWARDING_DISABLE_ERROR =  8;
-        // notification from the master SM that it had trouble staring tethering
+        // notification from the master SM that it had trouble starting tethering
         static final int CMD_START_TETHERING_ERROR       =  9;
         // notification from the master SM that it had trouble stopping tethering
         static final int CMD_STOP_TETHERING_ERROR        = 10;
@@ -1235,12 +1237,6 @@ public class Tethering extends BaseNetworkObserver {
                         return false;
                     }
                 }
-                try {
-                    mNMService.setDnsForwarders(mDefaultDnsServers);
-                } catch (Exception e) {
-                    transitionTo(mSetDnsForwardersErrorState);
-                    return false;
-                }
                 return true;
             }
             protected boolean turnOffMasterTetherSettings() {
@@ -1348,8 +1344,17 @@ public class Tethering extends BaseNetworkObserver {
                             }
                         }
                         try {
-                            mNMService.setDnsForwarders(dnsServers);
+                            Network network = getConnectivityManager().getNetworkForType(upType);
+                            if (network == null) {
+                                Log.e(TAG, "No Network for upstream type " + upType + "!");
+                            }
+                            if (VDBG) {
+                                Log.d(TAG, "Setting DNS forwarders: Network=" + network +
+                                       ", dnsServers=" + Arrays.toString(dnsServers));
+                            }
+                            mNMService.setDnsForwarders(network, dnsServers);
                         } catch (Exception e) {
+                            Log.e(TAG, "Setting DNS forwarders failed!");
                             transitionTo(mSetDnsForwardersErrorState);
                         }
                     }

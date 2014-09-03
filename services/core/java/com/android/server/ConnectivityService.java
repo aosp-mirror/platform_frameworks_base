@@ -967,6 +967,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     @Override
+    public Network getNetworkForType(int networkType) {
+        enforceAccessPermission();
+        final int uid = Binder.getCallingUid();
+        if (isNetworkBlocked(networkType, uid)) {
+            return null;
+        }
+        NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
+        return (nai == null) ? null : nai.network;
+    }
+
+    @Override
     public Network[] getAllNetworks() {
         enforceAccessPermission();
         final ArrayList<Network> result = new ArrayList();
@@ -1724,7 +1735,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         pw.println();
 
         synchronized (this) {
-            pw.println("NetworkTranstionWakeLock is currently " +
+            pw.println("NetworkTransitionWakeLock is currently " +
                     (mNetTransitionWakeLock.isHeld() ? "" : "not ") + "held.");
             pw.println("It was last requested for "+mNetTransitionWakeLockCausedBy);
         }
