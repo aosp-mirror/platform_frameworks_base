@@ -24,13 +24,14 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.print.PrintAttributes;
+import android.print.PrintAttributes.MediaSize;
+import android.print.PrintAttributes.Margins;
 import android.print.PrintDocumentInfo;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -41,7 +42,6 @@ import com.android.printspooler.renderer.PdfRendererService;
 import dalvik.system.CloseGuard;
 import libcore.io.IoUtils;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -354,13 +354,14 @@ public final class PageContentRepository {
     public static final class RenderSpec {
         final int bitmapWidth;
         final int bitmapHeight;
-        final PrintAttributes printAttributes;
+        final PrintAttributes printAttributes = new PrintAttributes.Builder().build();
 
         public RenderSpec(int bitmapWidth, int bitmapHeight,
-                PrintAttributes printAttributes) {
+                MediaSize mediaSize, Margins minMargins) {
             this.bitmapWidth = bitmapWidth;
             this.bitmapHeight = bitmapHeight;
-            this.printAttributes = printAttributes;
+            printAttributes.setMediaSize(mediaSize);
+            printAttributes.setMinMargins(minMargins);
         }
 
         @Override
@@ -508,6 +509,10 @@ public final class PageContentRepository {
                         } catch (RemoteException re) {
                             Log.e(LOG_TAG, "Cannot open PDF document");
                             return MALFORMED_PDF_FILE_ERROR;
+                        } finally {
+                            // Close the fd as we passed it to another process
+                            // which took ownership.
+                            IoUtils.closeQuietly(source);
                         }
                     }
                 }

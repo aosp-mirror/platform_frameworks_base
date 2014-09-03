@@ -20,6 +20,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.pdf.PdfRenderer;
@@ -171,11 +172,13 @@ public final class PdfRendererService extends Service {
         private Bitmap getBitmapForSize(int width, int height) {
             if (mBitmap != null) {
                 if (mBitmap.getWidth() == width && mBitmap.getHeight() == height) {
+                    mBitmap.eraseColor(Color.WHITE);
                     return mBitmap;
                 }
                 mBitmap.recycle();
             }
             mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            mBitmap.eraseColor(Color.WHITE);
             return mBitmap;
         }
 
