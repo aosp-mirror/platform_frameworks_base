@@ -98,6 +98,8 @@ public:
 
     ANDROID_API virtual void callOnFinished(BaseRenderNodeAnimator* animator, AnimationListener* listener);
 
+    ANDROID_API virtual void destroy();
+
 private:
     friend class AnimationHandle;
     void addAnimationHandle(AnimationHandle* handle);

@@ -166,12 +166,7 @@ public:
     // Runs any animations still left in mCurrentFrameAnimations
     virtual void runRemainingAnimations(TreeInfo& info) {
         AnimationContext::runRemainingAnimations(info);
-        // post all the finished stuff
-        if (mOnFinishedEvents.size()) {
-            sp<InvokeAnimationListeners> message
-                    = new InvokeAnimationListeners(mOnFinishedEvents);
-            mRootNode->sendMessage(message);
-        }
+        postOnFinishedEvents();
     }
 
     virtual void callOnFinished(BaseRenderNodeAnimator* animator, AnimationListener* listener) {
@@ -179,9 +174,22 @@ public:
         mOnFinishedEvents.push_back(event);
     }
 
+    virtual void destroy() {
+        AnimationContext::destroy();
+        postOnFinishedEvents();
+    }
+
 private:
     sp<RootRenderNode> mRootNode;
     std::vector<OnFinishedEvent> mOnFinishedEvents;
+
+    void postOnFinishedEvents() {
+        if (mOnFinishedEvents.size()) {
+            sp<InvokeAnimationListeners> message
+                    = new InvokeAnimationListeners(mOnFinishedEvents);
+            mRootNode->sendMessage(message);
+        }
+    }
 };
 
 class ContextFactoryImpl : public IContextFactory {
