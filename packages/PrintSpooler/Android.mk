@@ -26,3 +26,5 @@ LOCAL_PACKAGE_NAME := PrintSpooler
 LOCAL_STATIC_JAVA_LIBRARIES := android-support-v4 android-support-v7-recyclerview
 
 include $(BUILD_PACKAGE)
+
+include $(call all-makefiles-under, $(LOCAL_PATH))
