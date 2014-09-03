@@ -248,15 +248,14 @@ public class RippleDrawable extends LayerDrawable {
         boolean pressed = false;
         boolean focused = false;
 
-        final int N = stateSet.length;
-        for (int i = 0; i < N; i++) {
-            if (stateSet[i] == R.attr.state_enabled) {
+        for (int state : stateSet) {
+            if (state == R.attr.state_enabled) {
                 enabled = true;
             }
-            if (stateSet[i] == R.attr.state_focused) {
+            if (state == R.attr.state_focused) {
                 focused = true;
             }
-            if (stateSet[i] == R.attr.state_pressed) {
+            if (state == R.attr.state_pressed) {
                 pressed = true;
             }
         }
@@ -478,10 +477,6 @@ public class RippleDrawable extends LayerDrawable {
         if (mRipple != null) {
             mRipple.move(x, y);
         }
-
-        if (mBackground != null) {
-            mBackground.move(x, y);
-        }
     }
 
     /**
@@ -489,17 +484,7 @@ public class RippleDrawable extends LayerDrawable {
      */
     private void tryBackgroundEnter() {
         if (mBackground == null) {
-            final float x;
-            final float y;
-            if (mHasPending) {
-                mHasPending = false;
-                x = mPendingX;
-                y = mPendingY;
-            } else {
-                x = mHotspotBounds.exactCenterX();
-                y = mHotspotBounds.exactCenterY();
-            }
-            mBackground = new RippleBackground(this, mHotspotBounds, x, y);
+            mBackground = new RippleBackground(this, mHotspotBounds);
         }
 
         final int color = mState.mColor.getColorForState(getState(), Color.TRANSPARENT);
