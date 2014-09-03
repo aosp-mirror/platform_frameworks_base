@@ -1262,7 +1262,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (err == ActivityManager.START_SUCCESS) {
             final int userId = aInfo != null ? UserHandle.getUserId(aInfo.applicationInfo.uid) : 0;
             Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true, true, false)
-                    + "} from pid " + (callerApp != null ? callerApp.pid : callingPid)
+                    + "} from uid " + callingUid
                     + " on display " + (container == null ? (mFocusedStack == null ?
                             Display.DEFAULT_DISPLAY : mFocusedStack.mDisplayId) :
                             (container.mActivityDisplay == null ? Display.DEFAULT_DISPLAY :
@@ -2075,6 +2075,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
             targetStack = inTask.stack;
             targetStack.moveTaskToFrontLocked(inTask, r, options);
+            targetStack.moveToFront();
             mWindowManager.moveTaskToTop(inTask.taskId);
 
             // Check whether we should actually launch the new activity in to the task,
