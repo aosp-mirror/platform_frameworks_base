@@ -69,6 +69,7 @@ import android.service.notification.Condition;
 import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
+import android.service.notification.IStatusBarNotificationHolder;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.StatusBarNotification;
@@ -2811,8 +2812,9 @@ public class NotificationManagerService extends SystemService {
         private void notifyPosted(final ManagedServiceInfo info,
                 final StatusBarNotification sbn, NotificationRankingUpdate rankingUpdate) {
             final INotificationListener listener = (INotificationListener)info.service;
+            StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(sbn);
             try {
-                listener.onNotificationPosted(sbn, rankingUpdate);
+                listener.onNotificationPosted(sbnHolder, rankingUpdate);
             } catch (RemoteException ex) {
                 Log.e(TAG, "unable to notify listener (posted): " + listener, ex);
             }
@@ -2824,8 +2826,9 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
             final INotificationListener listener = (INotificationListener) info.service;
+            StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(sbn);
             try {
-                listener.onNotificationRemoved(sbn, rankingUpdate);
+                listener.onNotificationRemoved(sbnHolder, rankingUpdate);
             } catch (RemoteException ex) {
                 Log.e(TAG, "unable to notify listener (removed): " + listener, ex);
             }
@@ -2911,6 +2914,24 @@ public class NotificationManagerService extends SystemService {
         @Override
         public String toString() {
             return zen ? "zen" : ('\'' + pkgFilter + '\'');
+        }
+    }
+
+    /**
+     * Wrapper for a StatusBarNotification object that allows transfer across a oneway
+     * binder without sending large amounts of data over a oneway transaction.
+     */
+    private static final class StatusBarNotificationHolder
+            extends IStatusBarNotificationHolder.Stub {
+        private final StatusBarNotification mValue;
+
+        public StatusBarNotificationHolder(StatusBarNotification value) {
+            mValue = value;
+        }
+
+        @Override
+        public StatusBarNotification get() {
+            return mValue;
         }
     }
 }
