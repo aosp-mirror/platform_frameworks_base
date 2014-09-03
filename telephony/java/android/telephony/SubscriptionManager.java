@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2011-2014 MediaTek Inc.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package android.telephony;
 
@@ -30,7 +30,10 @@ import com.android.internal.telephony.PhoneConstants;
 import java.util.List;
 
 /**
- *@hide
+ * SubscriptionManager is the application interface to SubscriptionController
+ * and provides information about the current Telephony Subscriptions.
+ *
+ * @hide
  */
 public class SubscriptionManager implements BaseColumns {
     private static final String LOG_TAG = "SUB";
@@ -38,123 +41,167 @@ public class SubscriptionManager implements BaseColumns {
     private static final boolean VDBG = false;
 
     // An invalid phone identifier
+    /** @hide */
     public static final int INVALID_PHONE_ID = -1000;
 
     // Indicates the caller wants the default phone id.
+    /** @hide */
     public static final int DEFAULT_PHONE_ID = Integer.MAX_VALUE;
 
     // An invalid slot identifier
+    /** @hide */
     public static final int INVALID_SLOT_ID = -1000;
 
     // Indicates the caller wants the default slot id.
+    /** @hide */
     public static final int DEFAULT_SLOT_ID = Integer.MAX_VALUE;
 
     // An invalid subscription identifier
+    /** @hide */
     public static final long INVALID_SUB_ID = -1000;
 
     // Indicates the user should be asked which sub to use.
+    /** @hide */
     public static final long ASK_USER_SUB_ID = -1001;
 
     // Indicates the caller wants the default sub id.
+    /** @hide */
     public static final long DEFAULT_SUB_ID = Long.MAX_VALUE;
 
+    /** @hide */
     public static final Uri CONTENT_URI = Uri.parse("content://telephony/siminfo");
 
+    /** @hide */
     public static final int DEFAULT_INT_VALUE = -100;
 
+    /** @hide */
     public static final String DEFAULT_STRING_VALUE = "N/A";
 
+    /** @hide */
     public static final int EXTRA_VALUE_NEW_SIM = 1;
+
+    /** @hide */
     public static final int EXTRA_VALUE_REMOVE_SIM = 2;
+    /** @hide */
     public static final int EXTRA_VALUE_REPOSITION_SIM = 3;
+    /** @hide */
     public static final int EXTRA_VALUE_NOCHANGE = 4;
 
+    /** @hide */
     public static final String INTENT_KEY_DETECT_STATUS = "simDetectStatus";
+    /** @hide */
     public static final String INTENT_KEY_SIM_COUNT = "simCount";
+    /** @hide */
     public static final String INTENT_KEY_NEW_SIM_SLOT = "newSIMSlot";
+    /** @hide */
     public static final String INTENT_KEY_NEW_SIM_STATUS = "newSIMStatus";
 
     /**
      * The ICC ID of a SIM.
      * <P>Type: TEXT (String)</P>
      */
+    /** @hide */
     public static final String ICC_ID = "icc_id";
 
     /**
      * <P>Type: INTEGER (int)</P>
      */
+    /** @hide */
     public static final String SIM_ID = "sim_id";
-
+    /** @hide */
     public static final int SIM_NOT_INSERTED = -1;
 
     /**
      * The display name of a SIM.
      * <P>Type: TEXT (String)</P>
      */
+    /** @hide */
     public static final String DISPLAY_NAME = "display_name";
 
+    /** @hide */
     public static final int DEFAULT_NAME_RES = com.android.internal.R.string.unknownName;
 
     /**
      * The display name source of a SIM.
      * <P>Type: INT (int)</P>
      */
+    /** @hide */
     public static final String NAME_SOURCE = "name_source";
 
+    /** @hide */
     public static final int NAME_SOURCE_UNDEFINDED = -1;
 
+    /** @hide */
     public static final int NAME_SOURCE_DEFAULT_SOURCE = 0;
 
+    /** @hide */
     public static final int NAME_SOURCE_SIM_SOURCE = 1;
 
+    /** @hide */
     public static final int NAME_SOURCE_USER_INPUT = 2;
 
     /**
      * The color of a SIM.
      * <P>Type: INTEGER (int)</P>
      */
+    /** @hide */
     public static final String COLOR = "color";
 
+    /** @hide */
     public static final int COLOR_1 = 0;
 
+    /** @hide */
     public static final int COLOR_2 = 1;
 
+    /** @hide */
     public static final int COLOR_3 = 2;
 
+    /** @hide */
     public static final int COLOR_4 = 3;
 
+    /** @hide */
     public static final int COLOR_DEFAULT = COLOR_1;
 
     /**
      * The phone number of a SIM.
      * <P>Type: TEXT (String)</P>
      */
+    /** @hide */
     public static final String NUMBER = "number";
 
     /**
      * The number display format of a SIM.
      * <P>Type: INTEGER (int)</P>
      */
+    /** @hide */
     public static final String DISPLAY_NUMBER_FORMAT = "display_number_format";
 
+    /** @hide */
     public static final int DISPLAY_NUMBER_NONE = 0;
 
+    /** @hide */
     public static final int DISPLAY_NUMBER_FIRST = 1;
 
+    /** @hide */
     public static final int DISPLAY_NUMBER_LAST = 2;
 
+    /** @hide */
     public static final int DISLPAY_NUMBER_DEFAULT = DISPLAY_NUMBER_FIRST;
 
     /**
      * Permission for data roaming of a SIM.
      * <P>Type: INTEGER (int)</P>
      */
+    /** @hide */
     public static final String DATA_ROAMING = "data_roaming";
 
+    /** @hide */
     public static final int DATA_ROAMING_ENABLE = 1;
 
+    /** @hide */
     public static final int DATA_ROAMING_DISABLE = 0;
 
+    /** @hide */
     public static final int DATA_ROAMING_DEFAULT = DATA_ROAMING_DISABLE;
 
     private static final int RES_TYPE_BACKGROUND_DARK = 0;
@@ -166,12 +213,13 @@ public class SubscriptionManager implements BaseColumns {
     /**
      * Broadcast Action: The user has changed one of the default subs related to
      * data, phone calls, or sms</p>
-     *
+     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String SUB_DEFAULT_CHANGED_ACTION =
         "android.intent.action.SUB_DEFAULT_CHANGED";
 
+    /** @hide */
     public SubscriptionManager() {
         if (DBG) logd("SubscriptionManager created");
     }
@@ -180,6 +228,7 @@ public class SubscriptionManager implements BaseColumns {
      * Get the SubInfoRecord according to an index
      * @param subId The unique SubInfoRecord index in database
      * @return SubInfoRecord, maybe null
+     * @hide
      */
     public static SubInfoRecord getSubInfoUsingSubId(long subId) {
         if (!isValidSubId(subId)) {
@@ -206,6 +255,7 @@ public class SubscriptionManager implements BaseColumns {
      * Get the SubInfoRecord according to an IccId
      * @param iccId the IccId of SIM card
      * @return SubInfoRecord, maybe null
+     * @hide
      */
     public static List<SubInfoRecord> getSubInfoUsingIccId(String iccId) {
         if (VDBG) logd("[getSubInfoUsingIccId]+ iccId=" + iccId);
@@ -232,6 +282,7 @@ public class SubscriptionManager implements BaseColumns {
      * Get the SubInfoRecord according to slotId
      * @param slotId the slot which the SIM is inserted
      * @return SubInfoRecord, maybe null
+     * @hide
      */
     public static List<SubInfoRecord> getSubInfoUsingSlotId(int slotId) {
         // FIXME: Consider never returning null
@@ -257,6 +308,7 @@ public class SubscriptionManager implements BaseColumns {
     /**
      * Get all the SubInfoRecord(s) in subinfo database
      * @return Array list of all SubInfoRecords in database, include thsoe that were inserted before
+     * @hide
      */
     public static List<SubInfoRecord> getAllSubInfoList() {
         if (VDBG) logd("[getAllSubInfoList]+");
@@ -278,6 +330,7 @@ public class SubscriptionManager implements BaseColumns {
     /**
      * Get the SubInfoRecord(s) of the currently inserted SIM(s)
      * @return Array list of currently inserted SubInfoRecord(s)
+     * @hide
      */
     public static List<SubInfoRecord> getActiveSubInfoList() {
         List<SubInfoRecord> result = null;
@@ -297,6 +350,7 @@ public class SubscriptionManager implements BaseColumns {
     /**
      * Get the SUB count of all SUB(s) in subinfo database
      * @return all SIM count in database, include what was inserted before
+     * @hide
      */
     public static int getAllSubInfoCount() {
         if (VDBG) logd("[getAllSubInfoCount]+");
@@ -318,6 +372,7 @@ public class SubscriptionManager implements BaseColumns {
     /**
      * Get the count of active SUB(s)
      * @return active SIM count
+     * @hide
      */
     public static int getActiveSubInfoCount() {
         int result = 0;
@@ -339,6 +394,7 @@ public class SubscriptionManager implements BaseColumns {
      * @param iccId the IccId of the SIM card
      * @param slotId the slot which the SIM is inserted
      * @return the URL of the newly created row or the updated row
+     * @hide
      */
     public static Uri addSubInfoRecord(String iccId, int slotId) {
         if (VDBG) logd("[addSubInfoRecord]+ iccId:" + iccId + " slotId:" + slotId);
@@ -369,6 +425,7 @@ public class SubscriptionManager implements BaseColumns {
      * @param color the color of the SIM
      * @param subId the unique SubInfoRecord index in database
      * @return the number of records updated
+     * @hide
      */
     public static int setColor(int color, long subId) {
         if (VDBG) logd("[setColor]+ color:" + color + " subId:" + subId);
@@ -398,6 +455,7 @@ public class SubscriptionManager implements BaseColumns {
      * @param displayName the display name of SIM card
      * @param subId the unique SubInfoRecord index in database
      * @return the number of records updated
+     * @hide
      */
     public static int setDisplayName(String displayName, long subId) {
         return setDisplayName(displayName, subId, NAME_SOURCE_UNDEFINDED);
@@ -410,6 +468,7 @@ public class SubscriptionManager implements BaseColumns {
      * @param nameSource 0: NAME_SOURCE_DEFAULT_SOURCE, 1: NAME_SOURCE_SIM_SOURCE,
      *                   2: NAME_SOURCE_USER_INPUT, -1 NAME_SOURCE_UNDEFINED
      * @return the number of records updated or -1 if invalid subId
+     * @hide
      */
     public static int setDisplayName(String displayName, long subId, long nameSource) {
         if (VDBG) {
@@ -441,6 +500,7 @@ public class SubscriptionManager implements BaseColumns {
      * @param number the phone number of the SIM
      * @param subId the unique SubInfoRecord index in database
      * @return the number of records updated
+     * @hide
      */
     public static int setDisplayNumber(String number, long subId) {
         if (number == null || !isValidSubId(subId)) {
@@ -468,6 +528,7 @@ public class SubscriptionManager implements BaseColumns {
      * @param format the display format of phone number
      * @param subId the unique SubInfoRecord index in database
      * @return the number of records updated
+     * @hide
      */
     public static int setDisplayNumberFormat(int format, long subId) {
         if (VDBG) logd("[setDisplayNumberFormat]+ format:" + format + " subId:" + subId);
@@ -496,6 +557,7 @@ public class SubscriptionManager implements BaseColumns {
      * @param roaming 0:Don't allow data when roaming, 1:Allow data when roaming
      * @param subId the unique SubInfoRecord index in database
      * @return the number of records updated
+     * @hide
      */
     public static int setDataRoaming(int roaming, long subId) {
         if (VDBG) logd("[setDataRoaming]+ roaming:" + roaming + " subId:" + subId);
@@ -518,6 +580,7 @@ public class SubscriptionManager implements BaseColumns {
         return result;
     }
 
+    /** @hide */
     public static int getSlotId(long subId) {
         if (!isValidSubId(subId)) {
             logd("[getSlotId]- fail");
@@ -538,6 +601,7 @@ public class SubscriptionManager implements BaseColumns {
 
     }
 
+    /** @hide */
     public static long[] getSubId(int slotId) {
         if (!isValidSlotId(slotId)) {
             logd("[getSubId]- fail");
@@ -558,6 +622,7 @@ public class SubscriptionManager implements BaseColumns {
         return subId;
     }
 
+    /** @hide */
     public static int getPhoneId(long subId) {
         if (!isValidSubId(subId)) {
             logd("[getPhoneId]- fail");
@@ -613,6 +678,7 @@ public class SubscriptionManager implements BaseColumns {
      * @return the "system" defaultSubId on a voice capable device this
      * will be getDefaultVoiceSubId() and on a data only device it will be
      * getDefaultDataSubId().
+     * @hide
      */
     public static long getDefaultSubId() {
         long subId = INVALID_SUB_ID;
@@ -630,6 +696,7 @@ public class SubscriptionManager implements BaseColumns {
         return subId;
     }
 
+    /** @hide */
     public static long getDefaultVoiceSubId() {
         long subId = INVALID_SUB_ID;
 
@@ -646,6 +713,7 @@ public class SubscriptionManager implements BaseColumns {
         return subId;
     }
 
+    /** @hide */
     public static void setDefaultVoiceSubId(long subId) {
         if (VDBG) logd("setDefaultVoiceSubId sub id = " + subId);
         try {
@@ -658,14 +726,17 @@ public class SubscriptionManager implements BaseColumns {
         }
     }
 
+    /** @hide */
     public static SubInfoRecord getDefaultVoiceSubInfo() {
         return getSubInfoUsingSubId(getDefaultVoiceSubId());
     }
 
+    /** @hide */
     public static int getDefaultVoicePhoneId() {
         return getPhoneId(getDefaultVoiceSubId());
     }
 
+    /** @hide */
     public static long getDefaultSmsSubId() {
         long subId = INVALID_SUB_ID;
 
@@ -682,6 +753,7 @@ public class SubscriptionManager implements BaseColumns {
         return subId;
     }
 
+    /** @hide */
     public static void setDefaultSmsSubId(long subId) {
         if (VDBG) logd("setDefaultSmsSubId sub id = " + subId);
         try {
@@ -694,14 +766,17 @@ public class SubscriptionManager implements BaseColumns {
         }
     }
 
+    /** @hide */
     public static SubInfoRecord getDefaultSmsSubInfo() {
         return getSubInfoUsingSubId(getDefaultSmsSubId());
     }
 
+    /** @hide */
     public static int getDefaultSmsPhoneId() {
         return getPhoneId(getDefaultSmsSubId());
     }
 
+    /** @hide */
     public static long getDefaultDataSubId() {
         long subId = INVALID_SUB_ID;
 
@@ -718,6 +793,7 @@ public class SubscriptionManager implements BaseColumns {
         return subId;
     }
 
+    /** @hide */
     public static void setDefaultDataSubId(long subId) {
         if (VDBG) logd("setDataSubscription sub id = " + subId);
         try {
@@ -730,14 +806,17 @@ public class SubscriptionManager implements BaseColumns {
         }
     }
 
+    /** @hide */
     public static SubInfoRecord getDefaultDataSubInfo() {
         return getSubInfoUsingSubId(getDefaultDataSubId());
     }
 
+    /** @hide */
     public static int getDefaultDataPhoneId() {
         return getPhoneId(getDefaultDataSubId());
     }
 
+    /** @hide */
     public static void clearSubInfo() {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -752,6 +831,7 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     //FIXME this is vulnerable to race conditions
+    /** @hide */
     public static boolean allDefaultsSelected() {
         if (getDefaultDataSubId() == INVALID_SUB_ID) {
             return false;
@@ -768,6 +848,7 @@ public class SubscriptionManager implements BaseColumns {
     /**
      * If a default is set to subscription which is not active, this will reset that default back to
      * INVALID_SUB_ID.
+     * @hide
      */
     public static void clearDefaultsForInactiveSubIds() {
         if (VDBG) logd("clearDefaultsForInactiveSubIds");
@@ -781,19 +862,23 @@ public class SubscriptionManager implements BaseColumns {
         }
     }
 
+    /** @hide */
     public static boolean isValidSubId(long subId) {
         return subId > INVALID_SUB_ID ;
     }
 
+    /** @hide */
     public static boolean isValidSlotId(int slotId) {
         return slotId > INVALID_SLOT_ID && slotId < TelephonyManager.getDefault().getSimCount();
     }
 
+    /** @hide */
     public static boolean isValidPhoneId(int phoneId) {
         return phoneId > INVALID_PHONE_ID
                 && phoneId < TelephonyManager.getDefault().getPhoneCount();
     }
 
+    /** @hide */
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId) {
         long[] subIds = SubscriptionManager.getSubId(phoneId);
         if (subIds != null && subIds.length > 0) {
@@ -803,6 +888,7 @@ public class SubscriptionManager implements BaseColumns {
         }
     }
 
+    /** @hide */
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId, long subId) {
         if (VDBG) logd("putPhoneIdAndSubIdExtra: phoneId=" + phoneId + " subId=" + subId);
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
@@ -815,6 +901,7 @@ public class SubscriptionManager implements BaseColumns {
     /**
      * @return the list of subId's that are active,
      *         is never null but the length maybe 0.
+     * @hide
      */
     public static long[] getActiveSubIdList() {
         long[] subId = null;
