@@ -613,12 +613,20 @@ package android {
     field public static final int format12Hour = 16843722; // 0x10103ca
     field public static final int format24Hour = 16843723; // 0x10103cb
     field public static final int fragment = 16843491; // 0x10102e3
+    field public static final int fragmentAllowEnterTransitionOverlap = 16843977; // 0x10104c9
+    field public static final int fragmentAllowReturnTransitionOverlap = 16843978; // 0x10104ca
     field public static final int fragmentCloseEnterAnimation = 16843495; // 0x10102e7
     field public static final int fragmentCloseExitAnimation = 16843496; // 0x10102e8
+    field public static final int fragmentEnterTransition = 16843972; // 0x10104c4
+    field public static final int fragmentExitTransition = 16843971; // 0x10104c3
     field public static final int fragmentFadeEnterAnimation = 16843497; // 0x10102e9
     field public static final int fragmentFadeExitAnimation = 16843498; // 0x10102ea
     field public static final int fragmentOpenEnterAnimation = 16843493; // 0x10102e5
     field public static final int fragmentOpenExitAnimation = 16843494; // 0x10102e6
+    field public static final int fragmentReenterTransition = 16843976; // 0x10104c8
+    field public static final int fragmentReturnTransition = 16843974; // 0x10104c6
+    field public static final int fragmentSharedElementEnterTransition = 16843973; // 0x10104c5
+    field public static final int fragmentSharedElementReturnTransition = 16843975; // 0x10104c7
     field public static final int freezesText = 16843116; // 0x101016c
     field public static final int fromAlpha = 16843210; // 0x10101ca
     field public static final int fromDegrees = 16843187; // 0x10101b3
@@ -1419,7 +1427,7 @@ package android {
     field public static final int windowActionBarOverlay = 16843492; // 0x10102e4
     field public static final int windowActionModeOverlay = 16843485; // 0x10102dd
     field public static final int windowAllowEnterTransitionOverlap = 16843836; // 0x101043c
-    field public static final int windowAllowExitTransitionOverlap = 16843835; // 0x101043b
+    field public static final int windowAllowReturnTransitionOverlap = 16843835; // 0x101043b
     field public static final int windowAnimationStyle = 16842926; // 0x10100ae
     field public static final int windowBackground = 16842836; // 0x1010054
     field public static final int windowClipToOutline = 16843948; // 0x10104ac
@@ -4245,14 +4253,22 @@ package android.app {
     method public void dump(java.lang.String, java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
     method public final boolean equals(java.lang.Object);
     method public final android.app.Activity getActivity();
+    method public boolean getAllowEnterTransitionOverlap();
+    method public boolean getAllowReturnTransitionOverlap();
     method public final android.os.Bundle getArguments();
     method public final android.app.FragmentManager getChildFragmentManager();
+    method public android.transition.Transition getEnterTransition();
+    method public android.transition.Transition getExitTransition();
     method public final android.app.FragmentManager getFragmentManager();
     method public final int getId();
     method public android.app.LoaderManager getLoaderManager();
     method public final android.app.Fragment getParentFragment();
+    method public android.transition.Transition getReenterTransition();
     method public final android.content.res.Resources getResources();
     method public final boolean getRetainInstance();
+    method public android.transition.Transition getReturnTransition();
+    method public android.transition.Transition getSharedElementEnterTransition();
+    method public android.transition.Transition getSharedElementReturnTransition();
     method public final java.lang.String getString(int);
     method public final java.lang.String getString(int, java.lang.Object...);
     method public final java.lang.String getTag();
@@ -4301,11 +4317,21 @@ package android.app {
     method public void onViewCreated(android.view.View, android.os.Bundle);
     method public void onViewStateRestored(android.os.Bundle);
     method public void registerForContextMenu(android.view.View);
+    method public void setAllowEnterTransitionOverlap(boolean);
+    method public void setAllowReturnTransitionOverlap(boolean);
     method public void setArguments(android.os.Bundle);
+    method public void setEnterSharedElementTransitionListener(android.app.SharedElementListener);
+    method public void setEnterTransition(android.transition.Transition);
+    method public void setExitSharedElementTransitionListener(android.app.SharedElementListener);
+    method public void setExitTransition(android.transition.Transition);
     method public void setHasOptionsMenu(boolean);
     method public void setInitialSavedState(android.app.Fragment.SavedState);
     method public void setMenuVisibility(boolean);
+    method public void setReenterTransition(android.transition.Transition);
     method public void setRetainInstance(boolean);
+    method public void setReturnTransition(android.transition.Transition);
+    method public void setSharedElementEnterTransition(android.transition.Transition);
+    method public void setSharedElementReturnTransition(android.transition.Transition);
     method public void setTargetFragment(android.app.Fragment, int);
     method public void setUserVisibleHint(boolean);
     method public void startActivity(android.content.Intent);
@@ -4405,7 +4431,6 @@ package android.app {
     method public abstract android.app.FragmentTransaction setBreadCrumbTitle(java.lang.CharSequence);
     method public abstract android.app.FragmentTransaction setCustomAnimations(int, int);
     method public abstract android.app.FragmentTransaction setCustomAnimations(int, int, int, int);
-    method public abstract android.app.FragmentTransaction setCustomTransition(int, int);
     method public abstract android.app.FragmentTransaction setTransition(int);
     method public abstract android.app.FragmentTransaction setTransitionStyle(int);
     method public abstract android.app.FragmentTransaction show(android.app.Fragment);
@@ -34977,7 +35002,7 @@ package android.view {
     method public abstract void closePanel(int);
     method public android.view.View findViewById(int);
     method public boolean getAllowEnterTransitionOverlap();
-    method public boolean getAllowExitTransitionOverlap();
+    method public boolean getAllowReturnTransitionOverlap();
     method public final android.view.WindowManager.LayoutParams getAttributes();
     method public final android.view.Window.Callback getCallback();
     method public final android.view.Window getContainer();
@@ -35026,7 +35051,7 @@ package android.view {
     method public abstract void restoreHierarchyState(android.os.Bundle);
     method public abstract android.os.Bundle saveHierarchyState();
     method public void setAllowEnterTransitionOverlap(boolean);
-    method public void setAllowExitTransitionOverlap(boolean);
+    method public void setAllowReturnTransitionOverlap(boolean);
     method public void setAttributes(android.view.WindowManager.LayoutParams);
     method public abstract void setBackgroundDrawable(android.graphics.drawable.Drawable);
     method public void setBackgroundDrawableResource(int);
