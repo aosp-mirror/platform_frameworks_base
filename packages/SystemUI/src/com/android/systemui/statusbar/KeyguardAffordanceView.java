@@ -251,15 +251,19 @@ public class KeyguardAffordanceView extends ImageView {
     }
 
     public void setCircleRadius(float circleRadius) {
-        setCircleRadius(circleRadius, false);
+        setCircleRadius(circleRadius, false, false);
+    }
+
+    public void setCircleRadius(float circleRadius, boolean slowAnimation) {
+        setCircleRadius(circleRadius, slowAnimation, false);
     }
 
     public void setCircleRadiusWithoutAnimation(float circleRadius) {
         cancelAnimator(mCircleAnimator);
-        setCircleRadius(circleRadius, true);
+        setCircleRadius(circleRadius, false ,true);
     }
 
-    private void setCircleRadius(float circleRadius, boolean noAnimation) {
+    private void setCircleRadius(float circleRadius, boolean slowAnimation, boolean noAnimation) {
 
         // Check if we need a new animation
         boolean radiusHidden = (mCircleAnimator != null && mCircleWillBeHidden)
@@ -292,10 +296,13 @@ public class KeyguardAffordanceView extends ImageView {
                     ? mDisappearInterpolator
                     : mAppearInterpolator;
             animator.setInterpolator(interpolator);
-            float durationFactor = Math.abs(mCircleRadius - circleRadius)
-                    / (float) mMinBackgroundRadius;
-            long duration = (long) (CIRCLE_APPEAR_DURATION * durationFactor);
-            duration = Math.min(duration, CIRCLE_DISAPPEAR_MAX_DURATION);
+            long duration = 250;
+            if (!slowAnimation) {
+                float durationFactor = Math.abs(mCircleRadius - circleRadius)
+                        / (float) mMinBackgroundRadius;
+                duration = (long) (CIRCLE_APPEAR_DURATION * durationFactor);
+                duration = Math.min(duration, CIRCLE_DISAPPEAR_MAX_DURATION);
+            }
             animator.setDuration(duration);
             animator.start();
             if (mPreviewView != null && mPreviewView.getVisibility() == View.VISIBLE) {
