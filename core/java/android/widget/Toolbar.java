@@ -248,11 +248,12 @@ public class Toolbar extends ViewGroup {
         final Drawable navIcon = a.getDrawable(R.styleable.Toolbar_navigationIcon);
         if (navIcon != null) {
             setNavigationIcon(navIcon);
-            final CharSequence navDesc = a.getText(
-                    R.styleable.Toolbar_navigationContentDescription);
-            if (!TextUtils.isEmpty(navDesc)) {
-                setNavigationContentDescription(navDesc);
-            }
+        }
+
+        final CharSequence navDesc = a.getText(
+                R.styleable.Toolbar_navigationContentDescription);
+        if (!TextUtils.isEmpty(navDesc)) {
+            setNavigationContentDescription(navDesc);
         }
         a.recycle();
     }
