@@ -291,10 +291,10 @@ static int android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject c
     return proxy->syncAndDrawFrame(frameTimeNanos, recordDuration, density);
 }
 
-static void android_view_ThreadedRenderer_destroyCanvasAndSurface(JNIEnv* env, jobject clazz,
+static void android_view_ThreadedRenderer_destroy(JNIEnv* env, jobject clazz,
         jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->destroyCanvasAndSurface();
+    proxy->destroy();
 }
 
 static void android_view_ThreadedRenderer_registerAnimatingRenderNode(JNIEnv* env, jobject clazz,
@@ -430,7 +430,7 @@ static JNINativeMethod gMethods[] = {
     { "nSetup", "(JIIFFFFII)V", (void*) android_view_ThreadedRenderer_setup },
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },
     { "nSyncAndDrawFrame", "(JJJF)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
-    { "nDestroyCanvasAndSurface", "(J)V", (void*) android_view_ThreadedRenderer_destroyCanvasAndSurface },
+    { "nDestroy", "(J)V", (void*) android_view_ThreadedRenderer_destroy },
     { "nRegisterAnimatingRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_registerAnimatingRenderNode },
     { "nInvokeFunctor", "(JZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
     { "nCreateDisplayListLayer", "(JII)J", (void*) android_view_ThreadedRenderer_createDisplayListLayer },
