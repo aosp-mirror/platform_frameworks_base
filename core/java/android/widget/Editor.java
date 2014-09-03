@@ -3089,13 +3089,12 @@ public class Editor {
                     final boolean isLeadingEdgeTopVisible = isPositionVisible(leadingEdgeX, top);
                     final boolean isTrailingEdgeBottomVisible =
                             isPositionVisible(trailingEdgeX, bottom);
-                    final int characterRectFlags;
-                    if (isLeadingEdgeTopVisible && isTrailingEdgeBottomVisible) {
-                        characterRectFlags = CursorAnchorInfo.CHARACTER_RECT_TYPE_FULLY_VISIBLE;
-                    } else if (isLeadingEdgeTopVisible || isTrailingEdgeBottomVisible) {
-                        characterRectFlags = CursorAnchorInfo.CHARACTER_RECT_TYPE_PARTIALLY_VISIBLE;
-                    } else {
-                        characterRectFlags = CursorAnchorInfo.CHARACTER_RECT_TYPE_INVISIBLE;
+                    int characterRectFlags = 0;
+                    if (isLeadingEdgeTopVisible || isTrailingEdgeBottomVisible) {
+                        characterRectFlags |= CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
+                    }
+                    if (!isLeadingEdgeTopVisible || !isTrailingEdgeBottomVisible) {
+                        characterRectFlags |= CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
                     }
                     // Here offset is the index in Java chars.
                     // TODO: We must have a well-defined specification. For example, how
@@ -3117,11 +3116,19 @@ public class Editor {
                         + viewportToContentVerticalOffset;
                 final float insertionMarkerBottom = layout.getLineBottom(line)
                         + viewportToContentVerticalOffset;
-                // Take TextView's padding and scroll into account.
-                final boolean isClipped = !isPositionVisible(insertionMarkerX, insertionMarkerTop)
-                        || !isPositionVisible(insertionMarkerX, insertionMarkerBottom);
+                final boolean isTopVisible =
+                        isPositionVisible(insertionMarkerX, insertionMarkerTop);
+                final boolean isBottomVisible =
+                        isPositionVisible(insertionMarkerX, insertionMarkerBottom);
+                int insertionMarkerFlags = 0;
+                if (isTopVisible || isBottomVisible) {
+                    insertionMarkerFlags |= CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
+                }
+                if (!isTopVisible || !isBottomVisible) {
+                    insertionMarkerFlags |= CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
+                }
                 builder.setInsertionMarkerLocation(insertionMarkerX, insertionMarkerTop,
-                        insertionMarkerBaseline, insertionMarkerBottom, isClipped);
+                        insertionMarkerBaseline, insertionMarkerBottom, insertionMarkerFlags);
             }
 
             imm.updateCursorAnchorInfo(mTextView, builder.build());
