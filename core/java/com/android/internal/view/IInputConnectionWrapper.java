@@ -437,7 +437,7 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
                         return;
                     }
                     args.callback.setRequestUpdateCursorAnchorInfoResult(
-                            ic.requestUpdateCursorAnchorInfo(msg.arg1), args.seq);
+                            ic.requestCursorUpdates(msg.arg1), args.seq);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Got RemoteException calling requestCursorAnchorInfo", e);
                 }
