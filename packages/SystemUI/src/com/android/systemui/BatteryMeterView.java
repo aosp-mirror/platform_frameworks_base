@@ -46,12 +46,13 @@ public class BatteryMeterView extends View implements DemoMode,
 
     private static final int FULL = 96;
 
-    private static final float SUBPIXEL = 0.4f;  // inset rects for softer edges
+    private static final float SUBPIXEL = 0.33f;  // inset rects for softer edges
     private static final float BOLT_LEVEL_THRESHOLD = 0.3f;  // opaque bolt below this fraction
 
     private final int[] mColors;
 
     boolean mShowPercent = true;
+    private float mButtonHeightFraction;
     private final Paint mFramePaint, mBatteryPaint, mWarningTextPaint, mTextPaint, mBoltPaint;
     private float mTextHeight, mWarningTextHeight;
 
@@ -205,6 +206,8 @@ public class BatteryMeterView extends View implements DemoMode,
         mWarningString = context.getString(R.string.battery_meter_very_low_overlay_symbol);
         mCriticalLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
+        mButtonHeightFraction = context.getResources().getFraction(
+                R.fraction.battery_button_height_fraction, 1, 1);
 
         mFramePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mFramePaint.setColor(frameColor);
@@ -304,7 +307,7 @@ public class BatteryMeterView extends View implements DemoMode,
         final int height = mHeight - pt - pb;
         final int width = mWidth - pl - pr;
 
-        final int buttonHeight = (int) (height * 0.12f);
+        final int buttonHeight = (int) (height * mButtonHeightFraction);
 
         mFrame.set(0, 0, width, height);
         mFrame.offset(pl, pt);

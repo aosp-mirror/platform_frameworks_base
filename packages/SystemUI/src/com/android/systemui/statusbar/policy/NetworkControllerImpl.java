@@ -63,7 +63,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     static final boolean DEBUG = false;
     static final boolean CHATTY = false; // additional diagnostics, but not logspew
 
-    private static final int FLIGHT_MODE_ICON = R.drawable.stat_sys_signal_flightmode;
+    private static final int FLIGHT_MODE_ICON = R.drawable.stat_sys_airplane_mode;
     private static final int ROAMING_ICON = R.drawable.stat_sys_data_fully_connected_roam;
 
     // telephony
@@ -833,7 +833,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     visible = false;
                 }
             } else {
-                iconId = R.drawable.stat_sys_no_sim;
+                iconId = 0;
                 mNoSim = true;
                 visible = false; // no SIM? no data
             }
