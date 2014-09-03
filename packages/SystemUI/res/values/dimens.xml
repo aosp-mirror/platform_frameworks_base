@@ -289,13 +289,13 @@
     <dimen name="speed_bump_height">16dp</dimen>
 
     <!-- Lockscreen unlocking falsing threshold. -->
-    <dimen name="unlock_falsing_threshold">100dp</dimen>
+    <dimen name="unlock_falsing_threshold">80dp</dimen>
 
     <!-- Lockscreen falsing threshold for quick settings. -->
-    <dimen name="qs_falsing_threshold">60dp</dimen>
+    <dimen name="qs_falsing_threshold">80dp</dimen>
 
     <!-- Falsing threshold used when dismissing notifications from the lockscreen. -->
-    <dimen name="swipe_helper_falsing_threshold">100dp</dimen>
+    <dimen name="swipe_helper_falsing_threshold">70dp</dimen>
 
     <dimen name="notifications_top_padding">8dp</dimen>
     
@@ -315,7 +315,7 @@
     <dimen name="heads_up_window_height">250dp</dimen>
 
     <!-- The minimum amount the user needs to swipe to go to the camera / phone. -->
-    <dimen name="keyguard_min_swipe_amount">85dp</dimen>
+    <dimen name="keyguard_min_swipe_amount">90dp</dimen>
 
     <!-- The minimum background radius when swiping to a side for the camera / phone affordances. -->
     <dimen name="keyguard_affordance_min_background_radius">30dp</dimen>
