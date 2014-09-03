@@ -51,13 +51,14 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
 }
 
 CanvasContext::~CanvasContext() {
-    destroyCanvasAndSurface();
-    mRenderThread.removeFrameCallback(this);
+    destroy();
     delete mAnimationContext;
-    freePrefetechedLayers();
 }
 
-void CanvasContext::destroyCanvasAndSurface() {
+void CanvasContext::destroy() {
+    stopDrawing();
+    freePrefetechedLayers();
+    destroyHardwareResources();
     if (mCanvas) {
         delete mCanvas;
         mCanvas = 0;

@@ -59,6 +59,7 @@ public:
 
 private:
     friend class renderthread::RenderThread;
+    friend class Caches;
 
     void interruptForFunctorInvoke();
     void resumeFromFunctorInvoke();

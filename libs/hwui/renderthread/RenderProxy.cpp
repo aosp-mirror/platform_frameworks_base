@@ -194,13 +194,13 @@ int RenderProxy::syncAndDrawFrame(nsecs_t frameTimeNanos, nsecs_t recordDuration
     return mDrawFrameTask.drawFrame(frameTimeNanos, recordDurationNanos);
 }
 
-CREATE_BRIDGE1(destroyCanvasAndSurface, CanvasContext* context) {
-    args->context->destroyCanvasAndSurface();
+CREATE_BRIDGE1(destroy, CanvasContext* context) {
+    args->context->destroy();
     return NULL;
 }
 
-void RenderProxy::destroyCanvasAndSurface() {
-    SETUP_TASK(destroyCanvasAndSurface);
+void RenderProxy::destroy() {
+    SETUP_TASK(destroy);
     args->context = mContext;
     // destroyCanvasAndSurface() needs a fence as when it returns the
     // underlying BufferQueue is going to be released from under
