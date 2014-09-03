@@ -40,8 +40,10 @@
         <item>315</item>
         <item>316</item>
     </string-array>
-    <!-- Values for GPS configuration -->
+    <!-- Values for GPS configuration (AT&T) -->
     <string-array translatable="false" name="config_gpsParameters">
-        <item>"SUPL_HOST=supl.google.com"</item>
+        <item>CAPABILITIES=0x33</item>
+        <item>GPS_LOCK=1</item>
+        <item>LPP_PROFILE=3</item>
     </string-array>
 </resources>
