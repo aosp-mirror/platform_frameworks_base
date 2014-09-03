@@ -28297,8 +28297,6 @@ package android.telecomm {
     method public final java.util.Collection<android.telecomm.Connection> getAllConnections();
     method public final android.os.IBinder onBind(android.content.Intent);
     method public void onConference(android.telecomm.Connection, android.telecomm.Connection);
-    method public void onConnectionAdded(android.telecomm.Connection);
-    method public void onConnectionRemoved(android.telecomm.Connection);
     method public android.telecomm.Connection onCreateIncomingConnection(android.telecomm.PhoneAccountHandle, android.telecomm.ConnectionRequest);
     method public android.telecomm.Connection onCreateOutgoingConnection(android.telecomm.PhoneAccountHandle, android.telecomm.ConnectionRequest);
     method public void onRemoteConferenceAdded(android.telecomm.RemoteConference);
