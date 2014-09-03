@@ -165,11 +165,13 @@ public abstract class InCallService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Phone oldPhone = mPhone;
-        mPhone = null;
+        if (mPhone != null) {
+            Phone oldPhone = mPhone;
+            mPhone = null;
 
-        oldPhone.destroy();
-        onPhoneDestroyed(oldPhone);
+            oldPhone.destroy();
+            onPhoneDestroyed(oldPhone);
+        }
         return false;
     }
 
