@@ -261,12 +261,6 @@ final class RemoteConnectionService {
         }
 
         @Override
-        public void startActivityFromInCall(String callId, PendingIntent intent) {
-            findConnectionForAction(callId, "startActivityFromInCall")
-                    .startActivityFromInCall(intent);
-        }
-
-        @Override
         public IBinder asBinder() {
             throw new UnsupportedOperationException();
         }
