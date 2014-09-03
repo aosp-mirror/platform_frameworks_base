@@ -1726,6 +1726,34 @@
         <enum name="KEYCODE_LAST_CHANNEL" value="229" />
         <enum name="KEYCODE_TV_DATA_SERVICE" value="230" />
         <enum name="KEYCODE_VOICE_ASSIST" value="231" />
+        <enum name="KEYCODE_TV_RADIO_SERVICE" value="232" />
+        <enum name="KEYCODE_TV_TELETEXT" value="233" />
+        <enum name="KEYCODE_TV_NUMBER_ENTRY" value="234" />
+        <enum name="KEYCODE_TV_TERRESTRIAL_ANALOG" value="235" />
+        <enum name="KEYCODE_TV_TERRESTRIAL_DIGITAL" value="236" />
+        <enum name="KEYCODE_TV_SATELLITE" value="237" />
+        <enum name="KEYCODE_TV_SATELLITE_BS" value="238" />
+        <enum name="KEYCODE_TV_SATELLITE_CS" value="239" />
+        <enum name="KEYCODE_TV_SATELLITE_SERVICE" value="240" />
+        <enum name="KEYCODE_TV_NETWORK" value="241" />
+        <enum name="KEYCODE_TV_ANTENNA_CABLE" value="242" />
+        <enum name="KEYCODE_TV_INPUT_HDMI_1" value="243" />
+        <enum name="KEYCODE_TV_INPUT_HDMI_2" value="244" />
+        <enum name="KEYCODE_TV_INPUT_HDMI_3" value="245" />
+        <enum name="KEYCODE_TV_INPUT_HDMI_4" value="246" />
+        <enum name="KEYCODE_TV_INPUT_COMPOSITE_1" value="247" />
+        <enum name="KEYCODE_TV_INPUT_COMPOSITE_2" value="248" />
+        <enum name="KEYCODE_TV_INPUT_COMPONENT_1" value="249" />
+        <enum name="KEYCODE_TV_INPUT_COMPONENT_2" value="250" />
+        <enum name="KEYCODE_TV_INPUT_VGA_1" value="251" />
+        <enum name="KEYCODE_TV_AUDIO_DESCRIPTION" value="252" />
+        <enum name="KEYCODE_TV_AUDIO_DESCRIPTION_MIX_UP" value="253" />
+        <enum name="KEYCODE_TV_AUDIO_DESCRIPTION_MIX_DOWN" value="254" />
+        <enum name="KEYCODE_TV_ZOOM_MODE" value="255" />
+        <enum name="KEYCODE_TV_CONTENTS_MENU" value="256" />
+        <enum name="KEYCODE_TV_MEDIA_CONTEXT_MENU" value="257" />
+        <enum name="KEYCODE_TV_TIMER_PROGRAMMING" value="258" />
+        <enum name="KEYCODE_HELP" value="259" />
     </attr>
 
     <!-- ***************************************************************** -->
