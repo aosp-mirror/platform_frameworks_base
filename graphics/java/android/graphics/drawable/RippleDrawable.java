@@ -628,11 +628,10 @@ public class RippleDrawable extends LayerDrawable {
 
     @Override
     public void draw(@NonNull Canvas canvas) {
-        final boolean isProjected = isProjected();
         final boolean hasMask = mMask != null;
         final boolean drawNonMaskContent = mLayerState.mNum > (hasMask ? 1 : 0);
         final boolean drawMask = hasMask && mMask.getOpacity() != PixelFormat.OPAQUE;
-        final Rect bounds = isProjected ? getDirtyBounds() : getBounds();
+        final Rect bounds = getDirtyBounds();
 
         // If we have content, draw it into a layer first.
         final int contentLayer = drawNonMaskContent ?
@@ -681,13 +680,6 @@ public class RippleDrawable extends LayerDrawable {
             ripples[count - 1] = null;
             mExitingRipplesCount--;
 
-            invalidateSelf();
-        }
-    }
-
-    void removeBackground(RippleBackground background) {
-        if (mBackground == background) {
-            mBackground = null;
             invalidateSelf();
         }
     }
