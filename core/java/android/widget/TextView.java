@@ -1861,6 +1861,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return getCompoundPaddingTop();
         }
 
+        if (mLayout == null) {
+            assumeLayout();
+        }
+
         if (mLayout.getLineCount() <= mMaximum) {
             return getCompoundPaddingTop();
         }
@@ -1892,6 +1896,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public int getExtendedPaddingBottom() {
         if (mMaxMode != LINES) {
             return getCompoundPaddingBottom();
+        }
+
+        if (mLayout == null) {
+            assumeLayout();
         }
 
         if (mLayout.getLineCount() <= mMaximum) {
