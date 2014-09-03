@@ -8395,10 +8395,15 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
         Slog.i(TAG, "Auto restore => " + doAutoRestore);
 
-        synchronized (this) {
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.BACKUP_AUTO_RESTORE, doAutoRestore ? 1 : 0);
-            mAutoRestore = doAutoRestore;
+        final long oldId = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                Settings.Secure.putInt(mContext.getContentResolver(),
+                        Settings.Secure.BACKUP_AUTO_RESTORE, doAutoRestore ? 1 : 0);
+                mAutoRestore = doAutoRestore;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
         }
     }
 
@@ -8467,10 +8472,15 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         synchronized (mTransports) {
             String prevTransport = null;
             if (mTransports.get(transport) != null) {
-                prevTransport = mCurrentTransport;
-                mCurrentTransport = transport;
-                Settings.Secure.putString(mContext.getContentResolver(),
-                        Settings.Secure.BACKUP_TRANSPORT, transport);
+                final long oldId = Binder.clearCallingIdentity();
+                try {
+                    prevTransport = mCurrentTransport;
+                    mCurrentTransport = transport;
+                    Settings.Secure.putString(mContext.getContentResolver(),
+                            Settings.Secure.BACKUP_TRANSPORT, transport);
+                } finally {
+                    Binder.restoreCallingIdentity(oldId);
+                }
                 Slog.v(TAG, "selectBackupTransport() set " + mCurrentTransport
                         + " returning " + prevTransport);
             } else {
