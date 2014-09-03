@@ -50,6 +50,10 @@ package android.view {
 
 package android.view.inputmethod {
 
+  public class BaseInputConnection implements android.view.inputmethod.InputConnection {
+    method public final boolean requestUpdateCursorAnchorInfo(int);
+  }
+
   public final class CursorAnchorInfo implements android.os.Parcelable {
     method public boolean isInsertionMarkerClipped();
     field public static final int CHARACTER_RECT_TYPE_FULLY_VISIBLE = 1; // 0x1
@@ -62,6 +66,16 @@ package android.view.inputmethod {
 
   public static final class CursorAnchorInfo.Builder {
     method public android.view.inputmethod.CursorAnchorInfo.Builder setInsertionMarkerLocation(float, float, float, float, boolean);
+  }
+
+  public abstract interface InputConnection {
+    method public abstract boolean requestUpdateCursorAnchorInfo(int);
+    field public static final int REQUEST_UPDATE_CURSOR_ANCHOR_INFO_MONITOR = 2; // 0x2
+    field public static final int REQUEST_UPDATE_CURSOR_UPDATE_IMMEDIATE = 1; // 0x1
+  }
+
+  public class InputConnectionWrapper implements android.view.inputmethod.InputConnection {
+    method public final boolean requestUpdateCursorAnchorInfo(int);
   }
 
 }
