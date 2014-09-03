@@ -125,7 +125,8 @@ public class UserManagerTest extends AndroidTestCase {
                 UserInfo.FLAG_MANAGED_PROFILE, UserHandle.USER_OWNER);
         assertNotNull(userInfo1);
         assertNull(userInfo2);
-
+        // Verify that current user is not a managed profile
+        assertFalse(mUserManager.isManagedProfile());
         // Cleanup
         removeUser(userInfo1.id);
     }

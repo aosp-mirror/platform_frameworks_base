@@ -15,6 +15,7 @@
  */
 package android.os;
 
+import android.annotation.SystemApi;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.content.Context;
@@ -421,6 +422,19 @@ public class UserManager {
     public boolean isGuestUser() {
         UserInfo user = getUserInfo(UserHandle.myUserId());
         return user != null ? user.isGuest() : false;
+    }
+
+    /**
+     * Checks if the calling app is running in a managed profile.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * @return whether the caller is in a managed profile.
+     * @hide
+     */
+    @SystemApi
+    public boolean isManagedProfile() {
+        UserInfo user = getUserInfo(UserHandle.myUserId());
+        return user != null ? user.isManagedProfile() : false;
     }
 
     /**
