@@ -975,6 +975,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes at least one form of audio
+     * output, such as speakers, audio jack or streaming over bluetooth
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_AUDIO_OUTPUT = "android.hardware.audio.output";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device is capable of communicating with
      * other devices via Bluetooth.
      */
