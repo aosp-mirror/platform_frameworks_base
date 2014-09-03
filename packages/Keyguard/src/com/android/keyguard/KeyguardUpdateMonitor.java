@@ -648,7 +648,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                         @Override
                         public void onUserSwitchComplete(int newUserId) throws RemoteException {
                             mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCH_COMPLETE,
-                                    newUserId));
+                                    newUserId, 0));
                             mSwitchingUser = false;
                         }
                     });
