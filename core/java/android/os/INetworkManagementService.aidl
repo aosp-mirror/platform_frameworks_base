@@ -19,6 +19,7 @@ package android.os;
 
 import android.net.InterfaceConfiguration;
 import android.net.INetworkManagementEventObserver;
+import android.net.Network;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
 import android.net.UidRange;
@@ -164,10 +165,10 @@ interface INetworkManagementService
     /**
      * Sets the list of DNS forwarders (in order of priority)
      */
-    void setDnsForwarders(in String[] dns);
+    void setDnsForwarders(in Network network, in String[] dns);
 
     /**
-     * Returns the list of DNS fowarders (in order of priority)
+     * Returns the list of DNS forwarders (in order of priority)
      */
     String[] getDnsForwarders();
 
