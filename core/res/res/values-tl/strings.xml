@@ -1298,10 +1298,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Payagan"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Tanggihan"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"Gustong magpadala ng mensahe ng &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sa &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"Ito ay "<b>"maaaring magsanhi ng mga singilin"</b>" sa iyong mobile account."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Magsasanhi ito ng mga singilin sa iyong mobile account."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Ipadala"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Kanselahin"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Tandaan ang aking pinili"</string>

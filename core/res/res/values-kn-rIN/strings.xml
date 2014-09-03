@@ -1298,10 +1298,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"ಅನುಮತಿಸು"</string>
     <string name="sms_control_no" msgid="625438561395534982">"ನಿರಾಕರಿಸು"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ಗೆ ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಬಯಸುತ್ತದೆ."</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"ಇದು ನಿಮ್ಮ ಮೊಬೈಲ್ ಖಾತೆಯಲ್ಲಿ "<b>"ಶುಲ್ಕಗಳನ್ನು ವಿಧಿಸುವುದಕ್ಕೆ ಕಾರಣವಾಗಬಹುದು"</b>"."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"ಇದು ನಿಮ್ಮ ಮೊಬೈಲ್ ಖಾತೆಯಲ್ಲಿ ಶುಲ್ಕಗಳನ್ನು ವಿಧಿಸುವುದಕ್ಕೆ ಕಾರಣವಾಗುತ್ತದೆ."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"ಕಳುಹಿಸು"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"ರದ್ದುಮಾಡು"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"ನನ್ನ ಆಯ್ಕೆಯನ್ನು ನೆನಪಿಡು"</string>
