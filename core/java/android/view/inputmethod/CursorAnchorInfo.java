@@ -45,9 +45,9 @@ public final class CursorAnchorInfo implements Parcelable {
     private final CharSequence mComposingText;
 
     /**
-     * {@code True} if the insertion marker is partially or entirely clipped by other UI elements.
+     * Flags of the insertion marker. See {@link #FLAG_HAS_VISIBLE_REGION} for example.
      */
-    private final boolean mInsertionMarkerClipped;
+    private final int mInsertionMarkerFlags;
     /**
      * Horizontal position of the insertion marker, in the local coordinates that will be
      * transformed with the transformation matrix when rendered on the screen. This should be
@@ -90,27 +90,47 @@ public final class CursorAnchorInfo implements Parcelable {
      */
     private final Matrix mMatrix;
 
+    /**
+     * Flag for {@link #getInsertionMarkerFlags()} and {@link #getCharacterRectFlags(int)}: the
+     * insertion marker or character bounds have at least one visible region.
+     */
+    public static final int FLAG_HAS_VISIBLE_REGION = 0x01;
+
+    /**
+     * Flag for {@link #getInsertionMarkerFlags()} and {@link #getCharacterRectFlags(int)}: the
+     * insertion marker or character bounds have at least one invisible (clipped) region.
+     */
+    public static final int FLAG_HAS_INVISIBLE_REGION = 0x02;
+
+    /**
+     * @removed
+     */
     public static final int CHARACTER_RECT_TYPE_MASK = 0x0f;
     /**
      * Type for {@link #CHARACTER_RECT_TYPE_MASK}: the editor did not specify any type of this
      * character. Editor authors should not use this flag.
+     * @removed
      */
     public static final int CHARACTER_RECT_TYPE_UNSPECIFIED = 0;
     /**
      * Type for {@link #CHARACTER_RECT_TYPE_MASK}: the character is entirely visible.
+     * @removed
      */
     public static final int CHARACTER_RECT_TYPE_FULLY_VISIBLE = 1;
     /**
      * Type for {@link #CHARACTER_RECT_TYPE_MASK}: some area of the character is invisible.
+     * @removed
      */
     public static final int CHARACTER_RECT_TYPE_PARTIALLY_VISIBLE = 2;
     /**
      * Type for {@link #CHARACTER_RECT_TYPE_MASK}: the character is entirely invisible.
+     * @removed
      */
     public static final int CHARACTER_RECT_TYPE_INVISIBLE = 3;
     /**
      * Type for {@link #CHARACTER_RECT_TYPE_MASK}: the editor gave up to calculate the rectangle
      * for this character. Input method authors should ignore the returned rectangle.
+     * @removed
      */
     public static final int CHARACTER_RECT_TYPE_NOT_FEASIBLE = 4;
 
@@ -119,7 +139,7 @@ public final class CursorAnchorInfo implements Parcelable {
         mSelectionEnd = source.readInt();
         mComposingTextStart = source.readInt();
         mComposingText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
-        mInsertionMarkerClipped = (source.readInt() != 0);
+        mInsertionMarkerFlags = source.readInt();
         mInsertionMarkerHorizontal = source.readFloat();
         mInsertionMarkerTop = source.readFloat();
         mInsertionMarkerBaseline = source.readFloat();
@@ -141,7 +161,7 @@ public final class CursorAnchorInfo implements Parcelable {
         dest.writeInt(mSelectionEnd);
         dest.writeInt(mComposingTextStart);
         TextUtils.writeToParcel(mComposingText, dest, flags);
-        dest.writeInt(mInsertionMarkerClipped ? 1 : 0);
+        dest.writeInt(mInsertionMarkerFlags);
         dest.writeFloat(mInsertionMarkerHorizontal);
         dest.writeFloat(mInsertionMarkerTop);
         dest.writeFloat(mInsertionMarkerBaseline);
@@ -159,7 +179,7 @@ public final class CursorAnchorInfo implements Parcelable {
                 + mInsertionMarkerBaseline + mInsertionMarkerBottom;
         int hash = floatHash > 0 ? (int) floatHash : (int)(-floatHash);
         hash *= 31;
-        hash += (mInsertionMarkerClipped ? 2 : 1);
+        hash += mInsertionMarkerFlags;
         hash *= 31;
         hash += mSelectionStart + mSelectionEnd + mComposingTextStart;
         hash *= 31;
@@ -204,7 +224,7 @@ public final class CursorAnchorInfo implements Parcelable {
                 || !Objects.equals(mComposingText, that.mComposingText)) {
             return false;
         }
-        if (mInsertionMarkerClipped != that.mInsertionMarkerClipped
+        if (mInsertionMarkerFlags != that.mInsertionMarkerFlags
                 || !areSameFloatImpl(mInsertionMarkerHorizontal, that.mInsertionMarkerHorizontal)
                 || !areSameFloatImpl(mInsertionMarkerTop, that.mInsertionMarkerTop)
                 || !areSameFloatImpl(mInsertionMarkerBaseline, that.mInsertionMarkerBaseline)
@@ -225,7 +245,7 @@ public final class CursorAnchorInfo implements Parcelable {
         return "SelectionInfo{mSelection=" + mSelectionStart + "," + mSelectionEnd
                 + " mComposingTextStart=" + mComposingTextStart
                 + " mComposingText=" + Objects.toString(mComposingText)
-                + " mInsertionMarkerClipped=" + mInsertionMarkerClipped
+                + " mInsertionMarkerFlags=" + mInsertionMarkerFlags
                 + " mInsertionMarkerHorizontal=" + mInsertionMarkerHorizontal
                 + " mInsertionMarkerTop=" + mInsertionMarkerTop
                 + " mInsertionMarkerBaseline=" + mInsertionMarkerBaseline
@@ -272,6 +292,20 @@ public final class CursorAnchorInfo implements Parcelable {
         private CharSequence mComposingText = null;
 
         /**
+         * @removed
+         */
+        public Builder setInsertionMarkerLocation(final float horizontalPosition,
+                final float lineTop, final float lineBaseline, final float lineBottom,
+                final boolean clipped){
+            mInsertionMarkerHorizontal = horizontalPosition;
+            mInsertionMarkerTop = lineTop;
+            mInsertionMarkerBaseline = lineBaseline;
+            mInsertionMarkerBottom = lineBottom;
+            mInsertionMarkerFlags = clipped ? FLAG_HAS_INVISIBLE_REGION : 0;
+            return this;
+        }
+
+        /**
          * Sets the location of the text insertion point (zero width cursor) as a rectangle in
          * local coordinates. Calling this can be skipped when there is no text insertion point;
          * however if there is an insertion point, editors must call this method.
@@ -288,24 +322,24 @@ public final class CursorAnchorInfo implements Parcelable {
          * @param lineBottom vertical position of the insertion marker, in the local coordinates
          * that will be transformed with the transformation matrix when rendered on the screen. This
          * should be calculated or compatible with {@link Layout#getLineBottom(int)}.
-         * @param clipped {@code true} is the insertion marker is partially or entierly clipped by
-         * other UI elements.
+         * @param flags flags of the insertion marker. See {@link #FLAG_HAS_VISIBLE_REGION} for
+         * example.
          */
         public Builder setInsertionMarkerLocation(final float horizontalPosition,
                 final float lineTop, final float lineBaseline, final float lineBottom,
-                final boolean clipped){
+                final int flags){
             mInsertionMarkerHorizontal = horizontalPosition;
             mInsertionMarkerTop = lineTop;
             mInsertionMarkerBaseline = lineBaseline;
             mInsertionMarkerBottom = lineBottom;
-            mInsertionMarkerClipped = clipped;
+            mInsertionMarkerFlags = flags;
             return this;
         }
         private float mInsertionMarkerHorizontal = Float.NaN;
         private float mInsertionMarkerTop = Float.NaN;
         private float mInsertionMarkerBaseline = Float.NaN;
         private float mInsertionMarkerBottom = Float.NaN;
-        private boolean mInsertionMarkerClipped = false;
+        private int mInsertionMarkerFlags = 0;
 
         /**
          * Adds the bounding box of the character specified with the index.
@@ -320,8 +354,8 @@ public final class CursorAnchorInfo implements Parcelable {
          * coordinates, that is, right edge for LTR text and left edge for RTL text.
          * @param trailingEdgeY y coordinate of the trailing edge of the character in local
          * coordinates.
-         * @param flags type and flags for this character. See
-         * {@link #CHARACTER_RECT_TYPE_FULLY_VISIBLE} for example.
+         * @param flags flags for this character rect. See {@link #FLAG_HAS_VISIBLE_REGION} for
+         * example.
          * @throws IllegalArgumentException If the index is a negative value, or not greater than
          * all of the previously called indices.
          */
@@ -330,11 +364,6 @@ public final class CursorAnchorInfo implements Parcelable {
                 final int flags) {
             if (index < 0) {
                 throw new IllegalArgumentException("index must not be a negative integer.");
-            }
-            final int type = flags & CHARACTER_RECT_TYPE_MASK;
-            if (type == CHARACTER_RECT_TYPE_UNSPECIFIED) {
-                throw new IllegalArgumentException("Type except for "
-                        + "CHARACTER_RECT_TYPE_UNSPECIFIED must be specified.");
             }
             if (mCharacterRectBuilder == null) {
                 mCharacterRectBuilder = new SparseRectFArrayBuilder();
@@ -388,7 +417,7 @@ public final class CursorAnchorInfo implements Parcelable {
             mSelectionEnd = -1;
             mComposingTextStart = -1;
             mComposingText = null;
-            mInsertionMarkerClipped = false;
+            mInsertionMarkerFlags = 0;
             mInsertionMarkerHorizontal = Float.NaN;
             mInsertionMarkerTop = Float.NaN;
             mInsertionMarkerBaseline = Float.NaN;
@@ -406,7 +435,7 @@ public final class CursorAnchorInfo implements Parcelable {
         mSelectionEnd = builder.mSelectionEnd;
         mComposingTextStart = builder.mComposingTextStart;
         mComposingText = builder.mComposingText;
-        mInsertionMarkerClipped = builder.mInsertionMarkerClipped;
+        mInsertionMarkerFlags = builder.mInsertionMarkerFlags;
         mInsertionMarkerHorizontal = builder.mInsertionMarkerHorizontal;
         mInsertionMarkerTop = builder.mInsertionMarkerTop;
         mInsertionMarkerBaseline = builder.mInsertionMarkerBaseline;
@@ -449,11 +478,20 @@ public final class CursorAnchorInfo implements Parcelable {
     }
 
     /**
+     * Returns the flag of the insertion marker.
+     * @return the flag of the insertion marker. {@code 0} if no flag is specified.
+     */
+    public int getInsertionMarkerFlags() {
+        return mInsertionMarkerFlags;
+    }
+
+    /**
      * Returns the visibility of the insertion marker.
      * @return {@code true} if the insertion marker is partially or entirely clipped.
+     * @removed
      */
     public boolean isInsertionMarkerClipped() {
-        return mInsertionMarkerClipped;
+        return (mInsertionMarkerFlags & FLAG_HAS_VISIBLE_REGION) != 0;
     }
 
     /**
@@ -522,17 +560,17 @@ public final class CursorAnchorInfo implements Parcelable {
     }
 
     /**
-     * Returns the flags associated with the character specified with the index.
+     * Returns the flags associated with the character rect specified with the index.
      * @param index index of the character in a Java chars.
-     * @return {@link #CHARACTER_RECT_TYPE_UNSPECIFIED} if no flag is specified.
+     * @return {@code 0} if no flag is specified.
      */
     // TODO: Prepare a document about the expected behavior for surrogate pairs, combining
     // characters, and non-graphical chars.
     public int getCharacterRectFlags(final int index) {
         if (mCharacterRects == null) {
-            return CHARACTER_RECT_TYPE_UNSPECIFIED;
+            return 0;
         }
-        return mCharacterRects.getFlags(index, CHARACTER_RECT_TYPE_UNSPECIFIED);
+        return mCharacterRects.getFlags(index, 0);
     }
 
     /**
