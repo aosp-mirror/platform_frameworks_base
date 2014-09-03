@@ -163,16 +163,6 @@ public final class RemoteConnection {
         public void onVideoStateChanged(RemoteConnection connection, int videoState) {}
 
         /**
-         * Indicates that this {@code RemoteConnection} is requesting that the in-call UI
-         * launch the specified activity.
-         *
-         * @param connection The {@code RemoteConnection} invoking this method.
-         * @param intent A {@link PendingIntent} that the {@code RemoteConnection} wishes to
-         *         have launched on its behalf.
-         */
-        public void onStartActivityFromInCall(RemoteConnection connection, PendingIntent intent) {}
-
-        /**
          * Indicates that this {@code RemoteConnection} has been destroyed. No further requests
          * should be made to the {@code RemoteConnection}, and references to it should be cleared.
          *
@@ -725,13 +715,6 @@ public final class RemoteConnection {
         mCallerDisplayNamePresentation = presentation;
         for (Listener l : mListeners) {
             l.onCallerDisplayNameChanged(this, callerDisplayName, presentation);
-        }
-    }
-
-    /** @hide */
-    void startActivityFromInCall(PendingIntent intent) {
-        for (Listener l : mListeners) {
-            l.onStartActivityFromInCall(this, intent);
         }
     }
 
