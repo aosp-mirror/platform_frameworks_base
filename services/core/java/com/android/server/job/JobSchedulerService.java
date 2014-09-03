@@ -199,9 +199,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             List<JobStatus> jobsForUser = mJobs.getJobsByUser(userHandle);
             for (int i=0; i<jobsForUser.size(); i++) {
                 JobStatus toRemove = jobsForUser.get(i);
-                if (DEBUG) {
-                    Slog.d(TAG, "Cancelling: " + toRemove);
-                }
                 cancelJobLocked(toRemove);
             }
         }
@@ -219,9 +216,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             List<JobStatus> jobsForUid = mJobs.getJobsByUid(uid);
             for (int i=0; i<jobsForUid.size(); i++) {
                 JobStatus toRemove = jobsForUid.get(i);
-                if (DEBUG) {
-                    Slog.d(TAG, "Cancelling: " + toRemove);
-                }
                 cancelJobLocked(toRemove);
             }
         }
@@ -547,12 +541,26 @@ public class JobSchedulerService extends com.android.server.SystemService
         private void queueReadyJobsForExecutionH() {
             synchronized (mJobs) {
                 ArraySet<JobStatus> jobs = mJobs.getJobs();
+                if (DEBUG) {
+                    Slog.d(TAG, "queuing all ready jobs for execution:");
+                }
                 for (int i=0; i<jobs.size(); i++) {
                     JobStatus job = jobs.valueAt(i);
                     if (isReadyToBeExecutedLocked(job)) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "    queued " + job.toShortString());
+                        }
                         mPendingJobs.add(job);
                     } else if (isReadyToBeCancelledLocked(job)) {
                         stopJobOnServiceContextLocked(job);
+                    }
+                }
+                if (DEBUG) {
+                    final int queuedJobs = mPendingJobs.size();
+                    if (queuedJobs == 0) {
+                        Slog.d(TAG, "No jobs pending.");
+                    } else {
+                        Slog.d(TAG, queuedJobs + " jobs queued.");
                     }
                 }
             }
@@ -657,6 +665,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         private void maybeRunPendingJobsH() {
             synchronized (mJobs) {
                 Iterator<JobStatus> it = mPendingJobs.iterator();
+                if (DEBUG) {
+                    Slog.d(TAG, "pending queue: " + mPendingJobs.size() + " jobs.");
+                }
                 while (it.hasNext()) {
                     JobStatus nextPending = it.next();
                     JobServiceContext availableContext = null;
