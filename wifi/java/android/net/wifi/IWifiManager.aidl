@@ -18,7 +18,6 @@ package android.net.wifi;
 
 import android.net.wifi.BatchedScanResult;
 import android.net.wifi.BatchedScanSettings;
-import android.net.wifi.WifiAdapter;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.ScanSettings;
@@ -40,9 +39,9 @@ import android.os.WorkSource;
  */
 interface IWifiManager
 {
-    List<WifiAdapter> getAdaptors();
+    int getSupportedFeatures();
 
-    WifiActivityEnergyInfo reportActivityInfo(in WifiAdapter adapter);
+    WifiActivityEnergyInfo reportActivityInfo();
 
     List<WifiConfiguration> getConfiguredNetworks();
 

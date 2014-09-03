@@ -18194,23 +18194,6 @@ package android.net.wifi {
     enum_constant public static final android.net.wifi.SupplicantState UNINITIALIZED;
   }
 
-  public class WifiAdapter implements android.os.Parcelable {
-    method public int describeContents();
-    method public java.lang.String getName();
-    method public boolean is5GHzBandSupported();
-    method public boolean isDeviceToApRttSupported();
-    method public boolean isDeviceToDeviceRttSupported();
-    method public boolean isEnhancedPowerReportingSupported();
-    method public boolean isOffChannelTdlsSupported();
-    method public boolean isP2pSupported();
-    method public boolean isPasspointSupported();
-    method public boolean isPortableHotspotSupported();
-    method public boolean isPreferredNetworkOffloadSupported();
-    method public boolean isTdlsSupported();
-    method public boolean isWifiScannerSupported();
-    method public void writeToParcel(android.os.Parcel, int);
-  }
-
   public class WifiConfiguration implements android.os.Parcelable {
     ctor public WifiConfiguration();
     method public int describeContents();
@@ -18344,7 +18327,7 @@ package android.net.wifi {
   public class WifiManager {
     method public int addNetwork(android.net.wifi.WifiConfiguration);
     method public static int calculateSignalLevel(int, int);
-    method public void cancelWps(android.net.wifi.WifiManager.ActionListener);
+    method public void cancelWps(android.net.wifi.WifiManager.WpsCallback);
     method public static int compareSignalLevel(int, int);
     method public android.net.wifi.WifiManager.MulticastLock createMulticastLock(java.lang.String);
     method public android.net.wifi.WifiManager.WifiLock createWifiLock(int, java.lang.String);
@@ -18352,13 +18335,18 @@ package android.net.wifi {
     method public boolean disableNetwork(int);
     method public boolean disconnect();
     method public boolean enableNetwork(int, boolean);
-    method public java.util.List<android.net.wifi.WifiAdapter> getAdapters();
     method public java.util.List<android.net.wifi.WifiConfiguration> getConfiguredNetworks();
     method public android.net.wifi.WifiInfo getConnectionInfo();
     method public android.net.DhcpInfo getDhcpInfo();
     method public java.util.List<android.net.wifi.ScanResult> getScanResults();
     method public int getWifiState();
+    method public boolean is5GHzBandSupported();
+    method public boolean isDeviceToApRttSupported();
+    method public boolean isEnhancedPowerReportingSupported();
+    method public boolean isP2pSupported();
+    method public boolean isPreferredNetworkOffloadSupported();
     method public boolean isScanAlwaysAvailable();
+    method public boolean isTdlsSupported();
     method public boolean isWifiEnabled();
     method public boolean pingSupplicant();
     method public boolean reassociate();
@@ -18369,12 +18357,10 @@ package android.net.wifi {
     method public void setTdlsEnabledWithMacAddress(java.lang.String, boolean);
     method public boolean setWifiEnabled(boolean);
     method public boolean startScan();
-    method public void startWps(android.net.wifi.WpsInfo, android.net.wifi.WifiManager.WpsListener);
+    method public void startWps(android.net.wifi.WpsInfo, android.net.wifi.WifiManager.WpsCallback);
     method public int updateNetwork(android.net.wifi.WifiConfiguration);
     field public static final java.lang.String ACTION_PICK_WIFI_NETWORK = "android.net.wifi.PICK_WIFI_NETWORK";
     field public static final java.lang.String ACTION_REQUEST_SCAN_ALWAYS_AVAILABLE = "android.net.wifi.action.REQUEST_SCAN_ALWAYS_AVAILABLE";
-    field public static final int BUSY = 2; // 0x2
-    field public static final int ERROR = 0; // 0x0
     field public static final int ERROR_AUTHENTICATING = 1; // 0x1
     field public static final java.lang.String EXTRA_BSSID = "bssid";
     field public static final java.lang.String EXTRA_NETWORK_INFO = "networkInfo";
@@ -18385,8 +18371,6 @@ package android.net.wifi {
     field public static final java.lang.String EXTRA_SUPPLICANT_ERROR = "supplicantError";
     field public static final java.lang.String EXTRA_WIFI_INFO = "wifiInfo";
     field public static final java.lang.String EXTRA_WIFI_STATE = "wifi_state";
-    field public static final int INVALID_ARGS = 8; // 0x8
-    field public static final int IN_PROGRESS = 1; // 0x1
     field public static final java.lang.String NETWORK_IDS_CHANGED_ACTION = "android.net.wifi.NETWORK_IDS_CHANGED";
     field public static final java.lang.String NETWORK_STATE_CHANGED_ACTION = "android.net.wifi.STATE_CHANGE";
     field public static final java.lang.String RSSI_CHANGED_ACTION = "android.net.wifi.RSSI_CHANGED";
@@ -18409,11 +18393,6 @@ package android.net.wifi {
     field public static final int WPS_WEP_PROHIBITED = 4; // 0x4
   }
 
-  public static abstract interface WifiManager.ActionListener {
-    method public abstract void onFailure(int);
-    method public abstract void onSuccess();
-  }
-
   public class WifiManager.MulticastLock {
     method public void acquire();
     method public boolean isHeld();
@@ -18429,10 +18408,11 @@ package android.net.wifi {
     method public void setWorkSource(android.os.WorkSource);
   }
 
-  public static abstract interface WifiManager.WpsListener {
-    method public abstract void onCompletion();
-    method public abstract void onFailure(int);
-    method public abstract void onStartSuccess(java.lang.String);
+  public static abstract class WifiManager.WpsCallback {
+    ctor public WifiManager.WpsCallback();
+    method public abstract void onFailed(int);
+    method public abstract void onStarted(java.lang.String);
+    method public abstract void onSucceeded();
   }
 
   public class WpsInfo implements android.os.Parcelable {
