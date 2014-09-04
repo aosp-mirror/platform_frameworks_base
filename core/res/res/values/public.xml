@@ -2235,7 +2235,7 @@
   <public type="attr" name="launchTaskBehindTargetAnimation" />
   <public type="attr" name="launchTaskBehindSourceAnimation" />
   <public type="attr" name="restrictionType" />
-  <public type="attr" name="dayOfWeekBackgroundColor" />
+  <public type="attr" name="dayOfWeekBackground" />
   <public type="attr" name="dayOfWeekTextAppearance" />
   <public type="attr" name="headerMonthTextAppearance" />
   <public type="attr" name="headerDayOfMonthTextAppearance" />
@@ -2248,7 +2248,7 @@
   <public type="attr" name="timePickerDialogTheme" />
   <public type="attr" name="headerTimeTextAppearance" />
   <public type="attr" name="headerAmPmTextAppearance" />
-  <public type="attr" name="headerBackgroundColor" />
+  <public type="attr" name="__removed2" />
   <public type="attr" name="numbersTextColor" />
   <public type="attr" name="numbersBackgroundColor" />
   <public type="attr" name="numbersSelectorColor" />
