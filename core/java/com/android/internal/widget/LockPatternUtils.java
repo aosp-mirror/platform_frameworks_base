@@ -1449,7 +1449,7 @@ public class LockPatternUtils {
         }
 
         int textId;
-        if (getTelecommManager().isInCall()) {
+        if (isInCall()) {
             // show "return to call" text and show phone icon
             textId = R.string.lockscreen_return_to_call;
             int phoneCallIcon = showIcon ? R.drawable.stat_sys_phone_call : 0;
@@ -1468,6 +1468,13 @@ public class LockPatternUtils {
      */
     public void resumeCall() {
         getTelecommManager().showInCallScreen(false);
+    }
+
+    /**
+     * @return {@code true} if there is a call currently in progress, {@code false} otherwise.
+     */
+    public boolean isInCall() {
+        return getTelecommManager().isInCall();
     }
 
     private TelecommManager getTelecommManager() {
