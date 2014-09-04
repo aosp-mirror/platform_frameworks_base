@@ -5034,6 +5034,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * Tells the ViewGroup whether to draw its children in the order defined by the method
      * {@link #getChildDrawingOrder(int, int)}.
+     * <p>
+     * Note that {@link View#getZ() Z} reordering, done by {@link #dispatchDraw(Canvas)},
+     * will override custom child ordering done via this method.
      *
      * @param enabled true if the order of the children when drawing is determined by
      *        {@link #getChildDrawingOrder(int, int)}, false otherwise
