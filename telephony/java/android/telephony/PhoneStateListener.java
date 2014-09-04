@@ -223,18 +223,39 @@ public class PhoneStateListener {
 
     private final Handler mHandler;
 
+    /**
+     * Create a PhoneStateListener for the Phone with the default subscription.
+     * This class requires Looper.myLooper() not return null. To supply your
+     * own non-null looper use PhoneStateListener(Looper looper) below.
+     */
     public PhoneStateListener() {
         this(SubscriptionManager.getDefaultSubId(), Looper.myLooper());
     }
 
     /**
+     * Create a PhoneStateListener for the Phone with the default subscription
+     * using a particular non-null Looper.
+     * @hide
+     */
+    public PhoneStateListener(Looper looper) {
+        this(SubscriptionManager.DEFAULT_SUB_ID, looper);
+    }
+
+    /**
+     * Create a PhoneStateListener for the Phone using the specified subscription.
+     * This class requires Looper.myLooper() not return null. To supply your
+     * own non-null Looper use PhoneStateListener(long subId, Looper looper) below.
      * @hide
      */
     public PhoneStateListener(long subId) {
         this(subId, Looper.myLooper());
     }
 
-    /** @hide */
+    /**
+     * Create a PhoneStateListener for the Phone using the specified subscription
+     * and non-null Looper.
+     * @hide
+     */
     public PhoneStateListener(long subId, Looper looper) {
         if (DBG) log("ctor: subId=" + subId + " looper=" + looper);
         mSubId = subId;
