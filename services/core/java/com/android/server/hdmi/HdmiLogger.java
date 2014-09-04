@@ -26,12 +26,24 @@ import java.util.HashMap;
 /**
  * A logger that prevents spammy log. For the same log message, it logs once every 20seconds.
  * This class is not thread-safe.
+ * <p>
+ * For convenience, use single character prefix for all messages.
+ * Here are common acronyms
+ * <ul>
+ *   <li>[T]: Timout
+ *   <li>[R]: Received message
+ *   <li>[S]: Sent message
+ *   <li>[P]: Device polling result
+ * </ul>
  */
 final class HdmiLogger {
+    private static final String TAG = "HDMI";
     // Logging duration for same error message.
     private static final long ERROR_LOG_DURATTION_MILLIS = 20 * 1000;  // 20s
 
     private static final boolean DEBUG = false;
+
+    private static final ThreadLocal<HdmiLogger> sLogger = new ThreadLocal<>();
 
     // Key (String): log message.
     // Value (Pair(Long, Integer)): a pair of last log time millis and the number of logMessage.
@@ -39,31 +51,58 @@ final class HdmiLogger {
     private final HashMap<String, Pair<Long, Integer>> mWarningTimingCache = new HashMap<>();
     // Cache for error.
     private final HashMap<String, Pair<Long, Integer>> mErrorTimingCache = new HashMap<>();
-    private final String mTag;
 
-    HdmiLogger(String tag) {
-        mTag = "HDMI:" + tag;
+    private HdmiLogger() {
     }
 
-    void warning(String logMessage) {
+    static final void warning(String logMessage, Object... objs) {
+        getLogger().warningInternal(toLogString(logMessage, objs));
+    }
+
+    private void warningInternal(String logMessage) {
         String log = updateLog(mWarningTimingCache, logMessage);
         if (!log.isEmpty()) {
-            Slog.w(mTag, log);
+            Slog.w(TAG, log);
         }
     }
 
-    void error(String logMessage) {
+    static final void error(String logMessage, Object... objs) {
+        getLogger().errorInternal(toLogString(logMessage, objs));
+    }
+
+    private void errorInternal(String logMessage) {
         String log = updateLog(mErrorTimingCache, logMessage);
         if (!log.isEmpty()) {
-            Slog.e(mTag, log);
+            Slog.e(TAG, log);
         }
     }
 
-    void debug(String logMessage) {
+    static final void debug(String logMessage, Object... objs) {
+        getLogger().debugInternal(toLogString(logMessage, objs));
+    }
+
+    private void debugInternal(String logMessage) {
         if (!DEBUG) {
             return;
         }
-        Slog.d(mTag, logMessage);
+        Slog.d(TAG, logMessage);
+    }
+
+    private static final String toLogString(String logMessage, Object[] objs) {
+        if (objs.length > 0) {
+            return String.format(logMessage, objs);
+        } else {
+            return logMessage;
+        }
+    }
+
+    private static HdmiLogger getLogger() {
+        HdmiLogger logger = sLogger.get();
+        if (logger == null) {
+            logger = new HdmiLogger();
+            sLogger.set(logger);
+        }
+        return logger;
     }
 
     private static String updateLog(HashMap<String, Pair<Long, Integer>> cache, String logMessage) {
