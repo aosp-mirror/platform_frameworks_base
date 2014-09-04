@@ -251,9 +251,11 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
      */
     protected void setEpicenter() {
         View epicenter = null;
-        if (!mAllSharedElementNames.isEmpty() && !mSharedElementNames.isEmpty() &&
-                mAllSharedElementNames.get(0).equals(mSharedElementNames.get(0))) {
-            epicenter = mSharedElements.get(0);
+        if (!mAllSharedElementNames.isEmpty() && !mSharedElementNames.isEmpty()) {
+            int index = mSharedElementNames.indexOf(mAllSharedElementNames.get(0));
+            if (index >= 0) {
+                epicenter = mSharedElements.get(index);
+            }
         }
         setEpicenter(epicenter);
     }
