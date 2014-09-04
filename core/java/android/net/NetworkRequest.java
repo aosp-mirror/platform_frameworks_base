@@ -52,6 +52,9 @@ public class NetworkRequest implements Parcelable {
      * @hide
      */
     public NetworkRequest(NetworkCapabilities nc, int legacyType, int rId) {
+        if (nc == null) {
+            throw new NullPointerException();
+        }
         requestId = rId;
         networkCapabilities = nc;
         this.legacyType = legacyType;
