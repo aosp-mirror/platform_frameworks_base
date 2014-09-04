@@ -761,7 +761,8 @@ public interface WindowManagerPolicy {
     public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags);
 
     /**
-     * Called from the input reader thread before a motion is enqueued when the screen is off.
+     * Called from the input reader thread before a motion is enqueued when the device is in a
+     * non-interactive state.
      *
      * <p>There are some actions that need to be handled here because they
      * affect the power state of the device, for example, waking on motions.
@@ -771,7 +772,7 @@ public interface WindowManagerPolicy {
      *
      * @return Actions flags: may be {@link #ACTION_PASS_TO_USER}.
      */
-    public int interceptWakeMotionBeforeQueueing(long whenNanos, int policyFlags);
+    public int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags);
 
     /**
      * Called from the input dispatcher thread before a key is dispatched to a window.

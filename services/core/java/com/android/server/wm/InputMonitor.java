@@ -359,12 +359,13 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         return mService.mPolicy.interceptKeyBeforeQueueing(event, policyFlags);
     }
 
-    /* Provides an opportunity for the window manager policy to intercept early
-     * motion event processing when the screen is off since these events are normally
+    /* Provides an opportunity for the window manager policy to intercept early motion event
+     * processing when the device is in a non-interactive state since these events are normally
      * dropped. */
     @Override
-    public int interceptWakeMotionBeforeQueueing(long whenNanos, int policyFlags) {
-        return mService.mPolicy.interceptWakeMotionBeforeQueueing(whenNanos, policyFlags);
+    public int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags) {
+        return mService.mPolicy.interceptMotionBeforeQueueingNonInteractive(
+                whenNanos, policyFlags);
     }
 
     /* Provides an opportunity for the window manager policy to process a key before
