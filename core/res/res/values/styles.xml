@@ -62,6 +62,7 @@ please see styles_device_defaults.xml.
         <item name="centerMedium">@drawable/popup_center_medium</item>
         <item name="progressLayout">@layout/progress_dialog</item>
         <item name="horizontalProgressLayout">@layout/alert_dialog_progress</item>
+        <item name="needsDefaultBackgrounds">false</item>
     </style>
 
     <style name="Widget.PreferenceFrameLayout">
