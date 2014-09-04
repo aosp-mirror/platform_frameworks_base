@@ -21,7 +21,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -40,7 +39,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.R;
 
-import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
@@ -71,6 +69,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
 
     private static final int HOURS_IN_HALF_DAY = 12;
 
+    private View mHeaderView;
     private TextView mHourView;
     private TextView mMinuteView;
     private TextView mAmPmTextView;
@@ -156,11 +155,8 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
             mAmPmTextView.setTextAppearance(context, headerAmPmTextAppearance);
         }
 
-        final int headerBackgroundColor = a.getColor(
-                R.styleable.TimePicker_headerBackgroundColor, Color.TRANSPARENT);
-        if (headerBackgroundColor != Color.TRANSPARENT) {
-            mainView.findViewById(R.id.time_header).setBackgroundColor(headerBackgroundColor);
-        }
+        mHeaderView = mainView.findViewById(R.id.time_header);
+        mHeaderView.setBackground(a.getDrawable(R.styleable.TimePicker_headerBackground));
 
         a.recycle();
 
@@ -194,14 +190,11 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
     }
 
     private void setupListeners() {
-        KeyboardListener keyboardListener = new KeyboardListener();
-        mDelegator.setOnKeyListener(keyboardListener);
+        mHeaderView.setOnKeyListener(mKeyListener);
+        mHeaderView.setOnFocusChangeListener(mFocusListener);
+        mHeaderView.setFocusable(true);
 
-        mHourView.setOnKeyListener(keyboardListener);
-        mMinuteView.setOnKeyListener(keyboardListener);
-        mAmPmTextView.setOnKeyListener(keyboardListener);
         mRadialTimePickerView.setOnValueSelectedListener(this);
-        mRadialTimePickerView.setOnKeyListener(keyboardListener);
 
         mHourView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -641,7 +634,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
             if (!isTypedTimeFullyLegal()) {
                 mTypedTimes.clear();
             }
-            finishKbMode(true);
+            finishKbMode();
         }
     }
 
@@ -776,27 +769,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
      * @return true if the key was successfully processed, false otherwise.
      */
     private boolean processKeyUp(int keyCode) {
-        if (keyCode == KeyEvent.KEYCODE_ESCAPE || keyCode == KeyEvent.KEYCODE_TAB) {
-            if(mInKbMode) {
-                if (isTypedTimeFullyLegal()) {
-                    finishKbMode(true);
-                }
-                return true;
-            }
-        } else if (keyCode == KeyEvent.KEYCODE_ENTER) {
-            if (mInKbMode) {
-                if (!isTypedTimeFullyLegal()) {
-                    return true;
-                }
-                finishKbMode(false);
-            }
-            if (mOnTimeChangedListener != null) {
-                mOnTimeChangedListener.onTimeChanged(mDelegator,
-                        mRadialTimePickerView.getCurrentHour(),
-                        mRadialTimePickerView.getCurrentMinute());
-            }
-            return true;
-        } else if (keyCode == KeyEvent.KEYCODE_DEL) {
+        if (keyCode == KeyEvent.KEYCODE_DEL) {
             if (mInKbMode) {
                 if (!mTypedTimes.isEmpty()) {
                     int deleted = deleteLastTypedKey();
@@ -925,9 +898,8 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
 
     /**
      * Get out of keyboard mode. If there is nothing in typedTimes, revert to TimePicker's time.
-     * @param updateDisplays If true, update the displays with the relevant time.
      */
-    private void finishKbMode(boolean updateDisplays) {
+    private void finishKbMode() {
         mInKbMode = false;
         if (!mTypedTimes.isEmpty()) {
             int values[] = getEnteredTime(null);
@@ -938,10 +910,8 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
             }
             mTypedTimes.clear();
         }
-        if (updateDisplays) {
-            updateDisplay(false);
-            mRadialTimePickerView.setInputEnabled(true);
-        }
+        updateDisplay(false);
+        mRadialTimePickerView.setInputEnabled(true);
     }
 
     /**
@@ -1261,7 +1231,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
         }
     }
 
-    private class KeyboardListener implements View.OnKeyListener {
+    private final View.OnKeyListener mKeyListener = new View.OnKeyListener() {
         @Override
         public boolean onKey(View v, int keyCode, KeyEvent event) {
             if (event.getAction() == KeyEvent.ACTION_UP) {
@@ -1269,5 +1239,20 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
             }
             return false;
         }
-    }
+    };
+
+    private final View.OnFocusChangeListener mFocusListener = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (!hasFocus && mInKbMode && isTypedTimeFullyLegal()) {
+                finishKbMode();
+
+                if (mOnTimeChangedListener != null) {
+                    mOnTimeChangedListener.onTimeChanged(mDelegator,
+                            mRadialTimePickerView.getCurrentHour(),
+                            mRadialTimePickerView.getCurrentMinute());
+                }
+            }
+        }
+    };
 }

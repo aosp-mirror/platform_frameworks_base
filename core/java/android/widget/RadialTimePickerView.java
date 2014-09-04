@@ -458,6 +458,7 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         a.recycle();
 
         setOnTouchListener(this);
+        setClickable(true);
 
         // Initial values
         final Calendar calendar = Calendar.getInstance(Locale.getDefault());
@@ -612,9 +613,9 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
             mMinutesTexts[i] = String.format("%02d", MINUTES_NUMBERS[i]);
         }
 
-        String[] amPmTexts = new DateFormatSymbols().getAmPmStrings();
-        mAmPmText[AM] = amPmTexts[0];
-        mAmPmText[PM] = amPmTexts[1];
+        String[] amPmStrings = TimePickerClockDelegate.getAmPmStrings(mContext);
+        mAmPmText[AM] = amPmStrings[0];
+        mAmPmText[PM] = amPmStrings[1];
     }
 
     private void initData() {

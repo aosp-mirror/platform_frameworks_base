@@ -21,7 +21,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.format.DateFormat;
@@ -149,16 +149,12 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
             mDayOfWeekView.setTextAppearance(context, dayOfWeekTextAppearanceResId);
         }
 
-        final int dayOfWeekBackgroundColor = a.getColor(
-                R.styleable.DatePicker_dayOfWeekBackgroundColor, Color.TRANSPARENT);
-        mDayOfWeekView.setBackgroundColor(dayOfWeekBackgroundColor);
+        mDayOfWeekView.setBackground(a.getDrawable(R.styleable.DatePicker_dayOfWeekBackground));
+
+        dateLayout.setBackground(a.getDrawable(R.styleable.DatePicker_headerBackground));
 
         final int headerSelectedTextColor = a.getColor(
                 R.styleable.DatePicker_headerSelectedTextColor, defaultHighlightColor);
-        final int headerBackgroundColor = a.getColor(R.styleable.DatePicker_headerBackgroundColor,
-                Color.TRANSPARENT);
-        dateLayout.setBackgroundColor(headerBackgroundColor);
-
         final int monthTextAppearanceResId = a.getResourceId(
                 R.styleable.DatePicker_headerMonthTextAppearance, -1);
         if (monthTextAppearanceResId != -1) {
