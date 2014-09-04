@@ -1142,7 +1142,6 @@ public class KeyguardViewMediator extends SystemUI {
         }
 
         handleHide();
-        sendUserPresentBroadcast();
     }
 
     private void sendUserPresentBroadcast() {
@@ -1313,6 +1312,7 @@ public class KeyguardViewMediator extends SystemUI {
             mHideAnimationRun = false;
             updateActivityLockScreenState();
             adjustStatusBarLocked();
+            sendUserPresentBroadcast();
         }
     }
 
