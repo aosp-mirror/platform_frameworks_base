@@ -122,7 +122,10 @@ public class LegacyRequestMapper {
                         activeArray, zoomData, aeRegions, maxNumMeteringAreas,
                         /*regionName*/"AE");
 
-                params.setMeteringAreas(meteringAreaList);
+                // WAR: for b/17252693, some devices can't handle params.setFocusAreas(null).
+                if (maxNumMeteringAreas > 0) {
+                    params.setMeteringAreas(meteringAreaList);
+                }
             }
 
             // afRegions
@@ -133,7 +136,10 @@ public class LegacyRequestMapper {
                         activeArray, zoomData, afRegions, maxNumFocusAreas,
                         /*regionName*/"AF");
 
-                params.setFocusAreas(focusAreaList);
+                // WAR: for b/17252693, some devices can't handle params.setFocusAreas(null).
+                if (maxNumFocusAreas > 0) {
+                    params.setFocusAreas(focusAreaList);
+                }
             }
         }
 
