@@ -456,7 +456,7 @@ final class ActivityStack {
         final ActivityRecord r = ActivityRecord.forToken(token);
         if (r != null) {
             final TaskRecord task = r.task;
-            if (task.mActivities.contains(r) && mTaskHistory.contains(task)) {
+            if (task != null && task.mActivities.contains(r) && mTaskHistory.contains(task)) {
                 if (task.stack != this) Slog.w(TAG,
                     "Illegal state! task does not point to stack it is in.");
                 return r;
