@@ -419,18 +419,22 @@ class Ripple {
     private void endSoftwareAnimations() {
         if (mAnimRadius != null) {
             mAnimRadius.end();
+            mAnimRadius = null;
         }
 
         if (mAnimOpacity != null) {
             mAnimOpacity.end();
+            mAnimOpacity = null;
         }
 
         if (mAnimX != null) {
             mAnimX.end();
+            mAnimX = null;
         }
 
         if (mAnimY != null) {
             mAnimY.end();
+            mAnimY = null;
         }
     }
 
@@ -506,18 +510,22 @@ class Ripple {
     private void cancelSoftwareAnimations() {
         if (mAnimRadius != null) {
             mAnimRadius.cancel();
+            mAnimRadius = null;
         }
 
         if (mAnimOpacity != null) {
             mAnimOpacity.cancel();
+            mAnimOpacity = null;
         }
 
         if (mAnimX != null) {
             mAnimX.cancel();
+            mAnimX = null;
         }
 
         if (mAnimY != null) {
             mAnimY.cancel();
+            mAnimY = null;
         }
     }
 

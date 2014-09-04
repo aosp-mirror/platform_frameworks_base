@@ -326,6 +326,7 @@ class RippleBackground {
     private void endSoftwareAnimations() {
         if (mAnimOuterOpacity != null) {
             mAnimOuterOpacity.end();
+            mAnimOuterOpacity = null;
         }
     }
 
@@ -413,6 +414,7 @@ class RippleBackground {
     private void cancelSoftwareAnimations() {
         if (mAnimOuterOpacity != null) {
             mAnimOuterOpacity.cancel();
+            mAnimOuterOpacity = null;
         }
     }
 
