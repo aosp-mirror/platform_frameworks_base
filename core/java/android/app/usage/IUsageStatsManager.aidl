@@ -27,5 +27,7 @@ import android.content.pm.ParceledListSlice;
 interface IUsageStatsManager {
     ParceledListSlice queryUsageStats(int bucketType, long beginTime, long endTime,
             String callingPackage);
+    ParceledListSlice queryConfigurationStats(int bucketType, long beginTime, long endTime,
+            String callingPackage);
     UsageEvents queryEvents(long beginTime, long endTime, String callingPackage);
 }

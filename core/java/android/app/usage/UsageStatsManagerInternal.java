@@ -17,6 +17,7 @@
 package android.app.usage;
 
 import android.content.ComponentName;
+import android.content.res.Configuration;
 
 /**
  * UsageStatsManager local system service interface.
@@ -28,14 +29,19 @@ public abstract class UsageStatsManagerInternal {
     /**
      * Reports an event to the UsageStatsManager.
      *
-     * @param component The component for which this event ocurred.
+     * @param component The component for which this event occurred.
      * @param userId The user id to which the component belongs to.
-     * @param timeStamp The time at which this event ocurred.
-     * @param eventType The event that occured. Valid values can be found at
+     * @param eventType The event that occurred. Valid values can be found at
      * {@link UsageEvents}
      */
-    public abstract void reportEvent(ComponentName component, int userId,
-            long timeStamp, int eventType);
+    public abstract void reportEvent(ComponentName component, int userId, int eventType);
+
+    /**
+     * Reports a configuration change to the UsageStatsManager.
+     *
+     * @param config The new device configuration.
+     */
+    public abstract void reportConfigurationChange(Configuration config, int userId);
 
     /**
      * Prepares the UsageStatsService for shutdown.

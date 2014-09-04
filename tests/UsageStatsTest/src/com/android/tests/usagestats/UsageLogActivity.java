@@ -21,6 +21,7 @@ import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.util.CircularArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,11 +36,14 @@ public class UsageLogActivity extends ListActivity implements Runnable {
     private UsageStatsManager mUsageStatsManager;
     private Adapter mAdapter;
     private Handler mHandler = new Handler();
+    private long mLastTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mUsageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+        mLastTime = System.currentTimeMillis() - USAGE_STATS_PERIOD;
+
         mAdapter = new Adapter();
         setListAdapter(mAdapter);
     }
@@ -59,24 +63,31 @@ public class UsageLogActivity extends ListActivity implements Runnable {
     @Override
     public void run() {
         long now = System.currentTimeMillis();
-        long beginTime = now - USAGE_STATS_PERIOD;
-        UsageEvents events = mUsageStatsManager.queryEvents(beginTime, now);
-        mAdapter.update(events);
+        UsageEvents events = mUsageStatsManager.queryEvents(mLastTime, now);
+        long lastEventTime = mAdapter.update(events);
+        if (lastEventTime >= 0) {
+            mLastTime = lastEventTime + 1;
+        }
         mHandler.postDelayed(this, 1000 * 5);
     }
 
     private class Adapter extends BaseAdapter {
+        private static final int MAX_EVENTS = 50;
+        private final CircularArray<UsageEvents.Event> mEvents = new CircularArray<>(MAX_EVENTS);
 
-        private final ArrayList<UsageEvents.Event> mEvents = new ArrayList<>();
-
-        public void update(UsageEvents results) {
-            mEvents.clear();
+        public long update(UsageEvents results) {
+            long lastTimeStamp = -1;
             while (results.hasNextEvent()) {
                 UsageEvents.Event event = new UsageEvents.Event();
                 results.getNextEvent(event);
-                mEvents.add(event);
+                lastTimeStamp = event.getTimeStamp();
+                if (mEvents.size() == MAX_EVENTS) {
+                    mEvents.popLast();
+                }
+                mEvents.addFirst(event);
             }
             notifyDataSetChanged();
+            return lastTimeStamp;
         }
 
         @Override
@@ -85,7 +96,7 @@ public class UsageLogActivity extends ListActivity implements Runnable {
         }
 
         @Override
-        public Object getItem(int position) {
+        public UsageEvents.Event getItem(int position) {
             return mEvents.get(position);
         }
 
@@ -95,41 +106,72 @@ public class UsageLogActivity extends ListActivity implements Runnable {
         }
 
         @Override
+        public int getItemViewType(int position) {
+            final int eventType = getItem(position).getEventType();
+            if (eventType == UsageEvents.Event.CONFIGURATION_CHANGE) {
+                return 1;
+            }
+            return 0;
+        }
+
+        @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+            final UsageEvents.Event event = getItem(position);
+
             final ViewHolder holder;
             if (convertView == null) {
-                convertView = LayoutInflater.from(UsageLogActivity.this)
-                        .inflate(R.layout.row_item, parent, false);
                 holder = new ViewHolder();
-                holder.packageName = (TextView) convertView.findViewById(android.R.id.text1);
-                holder.state = (TextView) convertView.findViewById(android.R.id.text2);
+
+                if (event.getEventType() == UsageEvents.Event.CONFIGURATION_CHANGE) {
+                    convertView = LayoutInflater.from(UsageLogActivity.this)
+                            .inflate(R.layout.config_row_item, parent, false);
+                    holder.config = (TextView) convertView.findViewById(android.R.id.text1);
+                } else {
+                    convertView = LayoutInflater.from(UsageLogActivity.this)
+                            .inflate(R.layout.row_item, parent, false);
+                    holder.packageName = (TextView) convertView.findViewById(android.R.id.text1);
+                    holder.state = (TextView) convertView.findViewById(android.R.id.text2);
+                }
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
 
-            holder.packageName.setText(mEvents.get(position).getPackageName());
-            String state;
-            switch (mEvents.get(position).getEventType()) {
+            if (holder.packageName != null) {
+                holder.packageName.setText(event.getPackageName());
+            }
+
+            if (holder.state != null) {
+                holder.state.setText(eventToString(event.getEventType()));
+            }
+
+            if (holder.config != null &&
+                    event.getEventType() == UsageEvents.Event.CONFIGURATION_CHANGE) {
+                holder.config.setText(event.getConfiguration().toString());
+            }
+            return convertView;
+        }
+
+        private String eventToString(int eventType) {
+            switch (eventType) {
                 case UsageEvents.Event.MOVE_TO_FOREGROUND:
-                    state = "Foreground";
-                    break;
+                    return "Foreground";
 
                 case UsageEvents.Event.MOVE_TO_BACKGROUND:
-                    state = "Background";
-                    break;
+                    return "Background";
+
+                case UsageEvents.Event.CONFIGURATION_CHANGE:
+                    return "Config change";
 
                 default:
-                    state = "Unknown: " + mEvents.get(position).getEventType();
-                    break;
+                    return "Unknown: " + eventType;
             }
-            holder.state.setText(state);
-            return convertView;
         }
     }
 
     static class ViewHolder {
         public TextView packageName;
         public TextView state;
+        public TextView config;
     }
 }
