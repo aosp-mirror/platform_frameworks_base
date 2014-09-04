@@ -19,6 +19,7 @@ package android.media;
 import android.Manifest;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
@@ -2998,6 +2999,21 @@ public class AudioManager {
         } catch (RemoteException e) {
             Log.w(TAG, "Error setting system audio mode", e);
             return AudioSystem.DEVICE_NONE;
+        }
+    }
+
+    /**
+     * Returns true if Hdmi Cec system audio mode is supported.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isHdmiSystemAudioSupported() {
+        try {
+            return getService().isHdmiSystemAudioSupported();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error querying system audio mode", e);
+            return false;
         }
     }
 
