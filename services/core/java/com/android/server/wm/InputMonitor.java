@@ -352,6 +352,12 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         mService.mPolicy.notifyLidSwitchChanged(whenNanos, lidOpen);
     }
 
+    /* Notifies that the camera lens cover state has changed. */
+    @Override
+    public void notifyCameraLensCoverSwitchChanged(long whenNanos, boolean lensCovered) {
+        mService.mPolicy.notifyCameraLensCoverSwitchChanged(whenNanos, lensCovered);
+    }
+
     /* Provides an opportunity for the window manager policy to intercept early key
      * processing as soon as the key has been read from the device. */
     @Override

@@ -379,6 +379,10 @@ public interface WindowManagerPolicy {
         public static final int LID_CLOSED = 0;
         public static final int LID_OPEN = 1;
 
+        public static final int CAMERA_LENS_COVER_ABSENT = -1;
+        public static final int CAMERA_LENS_UNCOVERED = 0;
+        public static final int CAMERA_LENS_COVERED = 1;
+
         /**
          * Ask the window manager to re-evaluate the system UI flags.
          */
@@ -397,6 +401,11 @@ public interface WindowManagerPolicy {
          * Returns a code that describes the current state of the lid switch.
          */
         public int getLidState();
+
+        /**
+         * Returns a code that descripbes whether the camera lens is covered or not.
+         */
+        public int getCameraLensCoverState();
 
         /**
          * Switch the keyboard layout for the given device.
@@ -951,7 +960,14 @@ public interface WindowManagerPolicy {
      * @param lidOpen True if the lid is now open.
      */
     public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen);
-    
+
+    /**
+     * Tell the policy that the camera lens has been covered or uncovered.
+     * @param whenNanos The time when the change occurred in uptime nanoseconds.
+     * @param lensCovered True if the lens is covered.
+     */
+    public void notifyCameraLensCoverSwitchChanged(long whenNanos, boolean lensCovered);
+
     /**
      * Tell the policy if anyone is requesting that keyguard not come on.
      *
