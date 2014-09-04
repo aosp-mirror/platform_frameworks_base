@@ -1878,9 +1878,6 @@ public class NumberPicker extends LinearLayout {
         if (mOnValueChangeListener != null) {
             mOnValueChangeListener.onValueChange(this, previous, mValue);
         }
-
-        mAccessibilityNodeProvider.sendAccessibilityEventForVirtualText(
-                AccessibilityEvent.TYPE_VIEW_FOCUSED);
     }
 
     /**
@@ -2559,7 +2556,6 @@ public class NumberPicker extends LinearLayout {
             getLocationOnScreen(locationOnScreen);
             boundsInScreen.offset(locationOnScreen[0], locationOnScreen[1]);
             info.setBoundsInScreen(boundsInScreen);
-            info.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE);
             return info;
         }
 
