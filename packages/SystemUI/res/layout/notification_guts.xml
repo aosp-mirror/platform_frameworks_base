@@ -77,13 +77,23 @@
         </LinearLayout>
 
         <ImageButton style="@android:style/Widget.Material.Light.Button.Borderless.Small"
+                 android:id="@+id/notification_inspect_app_provided_settings"
+                 android:layout_width="52dp"
+                 android:layout_height="match_parent"
+                 android:layout_weight="0"
+                 android:gravity="center"
+                 android:src="@drawable/ic_settings"
+                 android:visibility="gone"
+                />
+
+        <ImageButton style="@android:style/Widget.Material.Light.Button.Borderless.Small"
                 android:id="@+id/notification_inspect_item"
                 android:layout_width="52dp"
                 android:layout_height="match_parent"
                 android:layout_weight="0"
                 android:gravity="center"
                 android:contentDescription="@string/status_bar_notification_inspect_item_title"
-                android:src="@drawable/ic_settings"
+                android:src="@drawable/ic_info"
                 />
     </LinearLayout>
 </com.android.systemui.statusbar.NotificationGuts>

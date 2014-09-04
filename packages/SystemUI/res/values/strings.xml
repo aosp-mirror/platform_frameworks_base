@@ -522,9 +522,13 @@
     <!-- Content description of the clear button in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_clear_all">Clear all notifications.</string>
 
-    <!-- Title shown in notification popup for inspecting the responsible
-         application [CHAR LIMIT=30] -->
-    <string name="status_bar_notification_inspect_item_title">Settings</string>
+    <!-- Content description of button in notification inspector for system settings relating to
+         notifications from this application [CHAR LIMIT=NONE] -->
+    <string name="status_bar_notification_inspect_item_title">Notification settings</string>
+
+    <!-- Content description of button in notification inspetor for application-provided settings
+         for its own notifications [CHAR LIMIT=NONE] -->
+    <string name="status_bar_notification_app_settings_title"><xliff:g id="app_name" example="Calendar">%s</xliff:g> settings</string>
 
     <!-- Description of the button in the phone-style notification panel that controls auto-rotation, when auto-rotation is on. [CHAR LIMIT=NONE] -->
     <string name="accessibility_rotation_lock_off">Screen will rotate automatically.</string>
