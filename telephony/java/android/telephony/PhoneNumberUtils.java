@@ -164,14 +164,6 @@ public class PhoneNumberUtils
             return uri.getSchemeSpecificPart();
         }
 
-        // TODO: We don't check for SecurityException here (requires
-        // CALL_PRIVILEGED permission).
-        if (scheme.equals("voicemail")) {
-            long subId = intent.getLongExtra(SUBSCRIPTION_KEY,
-                    SubscriptionManager.getDefaultVoiceSubId());
-            return TelephonyManager.getDefault().getCompleteVoiceMailNumber(subId);
-        }
-
         if (context == null) {
             return null;
         }
