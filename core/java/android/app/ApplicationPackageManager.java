@@ -1640,7 +1640,10 @@ final class ApplicationPackageManager extends PackageManager {
         if (itemInfo.showUserIcon != UserHandle.USER_NULL) {
             return new BitmapDrawable(getUserManager().getUserIcon(itemInfo.showUserIcon));
         }
-        Drawable dr = getDrawable(itemInfo.packageName, itemInfo.icon, appInfo);
+        Drawable dr = null;
+        if (itemInfo.packageName != null) {
+            dr = getDrawable(itemInfo.packageName, itemInfo.icon, appInfo);
+        }
         if (dr == null) {
             dr = itemInfo.loadDefaultIcon(this);
         }
