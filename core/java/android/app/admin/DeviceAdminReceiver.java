@@ -178,7 +178,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LOCK_TASK_ENTERING
-            = "android.app.action.ACTION_LOCK_TASK_ENTERING";
+            = "android.app.action.LOCK_TASK_ENTERING";
 
     /**
      * Action sent to a device administrator to notify that the device is exiting
@@ -191,7 +191,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LOCK_TASK_EXITING
-            = "android.app.action.ACTION_LOCK_TASK_EXITING";
+            = "android.app.action.LOCK_TASK_EXITING";
 
     /**
      * A boolean describing whether the device is currently entering or exiting
