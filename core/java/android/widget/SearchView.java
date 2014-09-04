@@ -334,6 +334,10 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             setInputType(inputType);
         }
 
+        boolean focusable = true;
+        focusable = a.getBoolean(R.styleable.SearchView_focusable, focusable);
+        setFocusable(focusable);
+
         a.recycle();
 
         // Save voice intent for later queries/launching
