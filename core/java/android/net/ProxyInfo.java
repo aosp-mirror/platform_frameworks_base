@@ -334,10 +334,6 @@ public class ProxyInfo implements Parcelable {
         dest.writeStringArray(mParsedExclusionList);
     }
 
-    /**
-     * Implement the Parcelable interface.
-     * @hide
-     */
     public static final Creator<ProxyInfo> CREATOR =
         new Creator<ProxyInfo>() {
             public ProxyInfo createFromParcel(Parcel in) {
