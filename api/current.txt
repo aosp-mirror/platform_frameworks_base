@@ -3455,7 +3455,7 @@ package android.app {
     method public boolean navigateUpToFromChild(android.app.Activity, android.content.Intent);
     method public void onActionModeFinished(android.view.ActionMode);
     method public void onActionModeStarted(android.view.ActionMode);
-    method protected void onActivityReenter(int, android.content.Intent);
+    method public void onActivityReenter(int, android.content.Intent);
     method protected void onActivityResult(int, int, android.content.Intent);
     method public void onAttachFragment(android.app.Fragment);
     method public void onAttachedToWindow();
@@ -3466,7 +3466,7 @@ package android.app {
     method public boolean onContextItemSelected(android.view.MenuItem);
     method public void onContextMenuClosed(android.view.Menu);
     method protected void onCreate(android.os.Bundle);
-    method protected void onCreate(android.os.Bundle, android.os.PersistableBundle);
+    method public void onCreate(android.os.Bundle, android.os.PersistableBundle);
     method public void onCreateContextMenu(android.view.ContextMenu, android.view.View, android.view.ContextMenu.ContextMenuInfo);
     method public java.lang.CharSequence onCreateDescription();
     method protected deprecated android.app.Dialog onCreateDialog(int);
@@ -3498,7 +3498,7 @@ package android.app {
     method public void onPanelClosed(int, android.view.Menu);
     method protected void onPause();
     method protected void onPostCreate(android.os.Bundle);
-    method protected void onPostCreate(android.os.Bundle, android.os.PersistableBundle);
+    method public void onPostCreate(android.os.Bundle, android.os.PersistableBundle);
     method protected void onPostResume();
     method protected deprecated void onPrepareDialog(int, android.app.Dialog);
     method protected deprecated void onPrepareDialog(int, android.app.Dialog, android.os.Bundle);
@@ -3508,11 +3508,11 @@ package android.app {
     method public void onProvideAssistData(android.os.Bundle);
     method protected void onRestart();
     method protected void onRestoreInstanceState(android.os.Bundle);
-    method protected void onRestoreInstanceState(android.os.Bundle, android.os.PersistableBundle);
+    method public void onRestoreInstanceState(android.os.Bundle, android.os.PersistableBundle);
     method protected void onResume();
     method public deprecated java.lang.Object onRetainNonConfigurationInstance();
     method protected void onSaveInstanceState(android.os.Bundle);
-    method protected void onSaveInstanceState(android.os.Bundle, android.os.PersistableBundle);
+    method public void onSaveInstanceState(android.os.Bundle, android.os.PersistableBundle);
     method public boolean onSearchRequested();
     method protected void onStart();
     method protected void onStop();
@@ -34350,7 +34350,7 @@ package android.view {
   }
 
   public final class ViewAnimationUtils {
-    method public static final android.animation.Animator createCircularReveal(android.view.View, int, int, float, float);
+    method public static android.animation.Animator createCircularReveal(android.view.View, int, int, float, float);
   }
 
   public class ViewConfiguration {
