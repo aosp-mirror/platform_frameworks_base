@@ -838,7 +838,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.ActionButton.CloseMode">
-        <item name="background">@drawable/btn_cab_done_material</item>
+        <item name="background">?attr/selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="Widget.Material.ActionButton.Overflow">
@@ -901,6 +901,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.ActionMode" parent="Widget.ActionMode">
         <item name="titleTextStyle">@style/TextAppearance.Material.Widget.ActionMode.Title</item>
         <item name="subtitleTextStyle">@style/TextAppearance.Material.Widget.ActionMode.Subtitle</item>
+        <item name="closeItemLayout">@layout/action_mode_close_item_material</item>
     </style>
 
     <style name="Widget.Material.FastScroll" parent="Widget.FastScroll">
