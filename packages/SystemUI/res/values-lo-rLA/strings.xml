@@ -355,13 +355,9 @@
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"ອຸ​ປະ​ກອນ​ນີ້​ແມ່ນ​ຈັດ​ການ​ໂດຍ:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nໂປຣ​ໄຟລ໌​ຂອງ​ທ່ານ​ແມ່ນ​ຖືກ​ຈັດ​ການ​ໂດຍ:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nຜູ່​ເບິ່ງ​ແຍງ​ຂອງ​ທ່ານ​ມີ​ຄວາມ​ສາ​ມາດ​ໃນ​ການ​ຕິດ​ຕາມ​ການ​ເຄື່ອນ​ໄຫວ​ໃນ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ​ໄດ້ ຮວມ​ເຖິງ: ​ອີ​ເມວ, ແອັບຯ ແລະ​ເວັບ​ໄຊ​​ທີ່​ເຂົ້າ​ລະ​ຫັດ. ສຳ​ລັບ​ຂໍ້​ມູນ​ເພີ່ມ​ເຕີມ, ໃຫ້​ຕິດ​ຕໍ່​ຜູ່​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານ.\n\nນອກ​ຈາກ​ນັ້ນ, ທ່ານ​ໄດ້​ອະ​ນຸ​ຍາດ​ໃຫ້ \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" ​ສາ​ມາດ​ຕັ້ງ​ຄ່າ​ການ​ເຊື່ອມ​ຕໍ່ VPN ໄດ້. ແອັບຯ​ນີ້​​ສາ​ມາດ​ຕິດ​ຕາມ​ການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ​ໄດ້​ເຊັ່ນ​ກັນ."</string>
     <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"ອຸ​ປະ​ກອນ​ນີ້​ແມ່ນ​ຈັດ​ການ​ໂດຍ:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nໂປຣ​ໄຟລ໌​ຂອງ​ທ່ານ​ແມ່ນ​ຖືກ​ຈັດ​ການ​ໂດຍ:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nຜູ່​ເບິ່ງ​ແຍງ​ຂອງ​ທ່ານ​ມີ​ຄວາມ​ສາ​ມາດ​ໃນ​ການ​ຕິດ​ຕາມ​ການ​ເຄື່ອນ​ໄຫວ​ໃນ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ​ໄດ້ ຮວມ​ເຖິງ: ​ອີ​ເມວ, ແອັບຯ ແລະ​ເວັບ​ໄຊ​​ທີ່​ເຂົ້າ​ລະ​ຫັດ. ສຳ​ລັບ​ຂໍ້​ມູນ​ເພີ່ມ​ເຕີມ, ໃຫ້​ຕິດ​ຕໍ່​ຜູ່​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານ.\n\nນອກ​ຈາກ​ນັ້ນ, ທ່ານ​ໄ​ດ້​ເຊື່ອມ​ຕໍ່​ຫາ VPN (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\"). ຜູ່​ໃຫ້​ບໍ​ລິ​ການ VPN ​ຂອງ​ທ່ານ​ສາ​ມາດ​ຕິດ​ຕາມ​ການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ໄດ້​ເຊັ່ນ​ກັນ."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Device will stay locked until you manually unlock"</string>
-    <!-- no translation found for hidden_notifications_title (7139628534207443290) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_text (2326409389088668981) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_cancel (3690709735122344913) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_setup (41079514801976810) -->
-    <skip />
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"ຮັບເອົາການ​ແຈ້ງເຕືອນ​ໄວຂຶ້ນ"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"ເບິ່ງພວກ​ມັນກ່ອນ​ທ່ານຈະ​ປົດລັອກ"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"ບໍ່, ຂອບໃຈ"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"ຕັ້ງຄ່າ"</string>
     <string name="muted_by" msgid="6147073845094180001">"ຖືກ​ປິດ​ສຽງ​ໂດຍ <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>
