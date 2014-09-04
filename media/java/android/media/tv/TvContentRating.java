@@ -44,45 +44,47 @@ import java.util.Objects;
  * {@literal
  * <rating-system-definitions xmlns:android="http://schemas.android.com/apk/res/android"
  *     android:versionCode="1">
- *     <!-- TV content rating system for US TV -->
  *     <rating-system-definition android:name="US_TV"
- *         android:title="US-TV"
- *         android:description="@string/description_ustv"
- *         android:country="US">
+ *         android:country="US"
+ *         android:description="@string/description_us_tv">
  *         <sub-rating-definition android:name="US_TV_D"
  *             android:title="D"
- *             android:description="@string/description_ustv_d" />
+ *             android:description="@string/description_us_tv_d" />
  *         <sub-rating-definition android:name="US_TV_L"
  *             android:title="L"
- *             android:description="@string/description_ustv_l" />
+ *             android:description="@string/description_us_tv_l" />
  *         <sub-rating-definition android:name="US_TV_S"
  *             android:title="S"
- *             android:description="@string/description_ustv_s" />
+ *             android:description="@string/description_us_tv_s" />
  *         <sub-rating-definition android:name="US_TV_V"
  *             android:title="V"
- *             android:description="@string/description_ustv_v" />
+ *             android:description="@string/description_us_tv_v" />
  *         <sub-rating-definition android:name="US_TV_FV"
  *             android:title="FV"
- *             android:description="@string/description_ustv_fv" />
+ *             android:description="@string/description_us_tv_fv" />
  *
  *         <rating-definition android:name="US_TV_Y"
  *             android:title="TV-Y"
- *             android:description="@string/description_ustv_y"
- *             android:ageHint="0" />
+ *             android:description="@string/description_us_tv_y"
+ *             android:icon="@drawable/icon_us_tv_y"
+ *             android:contentAgeHint="0" />
  *         <rating-definition android:name="US_TV_Y7"
  *             android:title="TV-Y7"
- *             android:description="@string/description_ustv_y7"
- *             android:ageHint="7">
+ *             android:description="@string/description_us_tv_y7"
+ *             android:icon="@drawable/icon_us_tv_y7"
+ *             android:contentAgeHint="7">
  *             <sub-rating android:name="US_TV_FV" />
  *         </rating-definition>
  *         <rating-definition android:name="US_TV_G"
  *             android:title="TV-G"
- *             android:description="@string/description_ustv_g"
- *             android:ageHint="0" />
+ *             android:description="@string/description_us_tv_g"
+ *             android:icon="@drawable/icon_us_tv_g"
+ *             android:contentAgeHint="0" />
  *         <rating-definition android:name="US_TV_PG"
  *             android:title="TV-PG"
- *             android:description="@string/description_ustv_pg"
- *             android:ageHint="14">
+ *             android:description="@string/description_us_tv_pg"
+ *             android:icon="@drawable/icon_us_tv_pg"
+ *             android:contentAgeHint="14">
  *             <sub-rating android:name="US_TV_D" />
  *             <sub-rating android:name="US_TV_L" />
  *             <sub-rating android:name="US_TV_S" />
@@ -90,8 +92,9 @@ import java.util.Objects;
  *         </rating-definition>
  *         <rating-definition android:name="US_TV_14"
  *             android:title="TV-14"
- *             android:description="@string/description_ustv_14"
- *             android:ageHint="14">
+ *             android:description="@string/description_us_tv_14"
+ *             android:icon="@drawable/icon_us_tv_14"
+ *             android:contentAgeHint="14">
  *             <sub-rating android:name="US_TV_D" />
  *             <sub-rating android:name="US_TV_L" />
  *             <sub-rating android:name="US_TV_S" />
@@ -99,8 +102,9 @@ import java.util.Objects;
  *         </rating-definition>
  *         <rating-definition android:name="US_TV_MA"
  *             android:title="TV-MA"
- *             android:description="@string/description_ustv_ma"
- *             android:ageHint="17">
+ *             android:description="@string/description_us_tv_ma"
+ *             android:icon="@drawable/icon_us_tv_ma"
+ *             android:contentAgeHint="17">
  *             <sub-rating android:name="US_TV_L" />
  *             <sub-rating android:name="US_TV_S" />
  *             <sub-rating android:name="US_TV_V" />
@@ -175,8 +179,12 @@ import java.util.Objects;
  *         <td>TV content rating system for Brazil</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV</td>
- *         <td>TV content rating system for Canada</td>
+ *         <td>CA_TV_CA</td>
+ *         <td>TV content rating system for Canada (Canadian)</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_QC</td>
+ *         <td>TV content rating system for Canada (Quebec)</td>
  *     </tr>
  *     <tr>
  *         <td>CH_TV</td>
@@ -503,42 +511,67 @@ import java.util.Objects;
  *         <td>Content suitable for viewers over the age of 18</td>
  *     </tr>
  *     <tr>
- *         <td valign="top" rowspan="7">CA_TV</td>
- *         <td>CA_TV_EXEMPT</td>
- *         <td>Shows which are exempt from ratings (such as news and sports programming) will not
- *         display an on-screen rating at all</td>
+ *         <td valign="top" rowspan="7">CA_TV_CA</td>
+ *         <td>CA_TV_CA_EXEMPT</td>
+ *         <td>Exempt from ratings and won't display an on-screen rating</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_C</td>
- *         <td>Programming suitable for children ages of 2-7 years. No profanity or sexual content
- *         of any level allowed. Contains little violence</td>
+ *         <td>CA_TV_CA_C</td>
+ *         <td>Suitable for children ages 2-7. May contain mild violence</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_C8</td>
- *         <td>Suitable for children ages 8+. Low level violence and fantasy horror is allowed. No
- *         foul language is allowed, but occasional "socially offensive and discriminatory" language
- *         is allowed if in the context of the story. No sexual content of any level allowed</td>
+ *         <td>CA_TV_CA_C8</td>
+ *         <td>Suitable for children ages 8 and older. May contain mild violence, fantasy horror,
+ *         and socially offensive language</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_G</td>
- *         <td>Suitable for general audiences. Programming suitable for the entire family with mild
- *         violence, and mild profanity and/or censored language</td>
+ *         <td>CA_TV_CA_G</td>
+ *         <td>Suitable for the entire family and may contain mild violence, profanity, and censored
+ *         language</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_PG</td>
- *         <td>Parental guidance. Moderate violence and moderate profanity is allowed, as is brief
- *         nudity and sexual references if important to the context of the story</td>
+ *         <td>CA_TV_CA_PG</td>
+ *         <td>May contain moderate violence, profanity, nudity, and sexual references</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_14</td>
- *         <td>Programming intended for viewers ages 14 and older. May contain strong violence and
- *         strong profanity, and depictions of sexual activity as long as they are within the
- *         context of a story</td>
+ *         <td>CA_TV_CA_14</td>
+ *         <td>Intended for viewers ages 14 and older. May contain strong violence and profanity,
+ *         and depictions of sexual activity</td>
  *     </tr>
  *     <tr>
- *         <td>CA_TV_18</td>
- *         <td>Programming intended for viewers ages 18 and older. May contain explicit violence and
- *         sexual activity</td>
+ *         <td>CA_TV_CA_18</td>
+ *         <td>Intended for viewers ages 18 and older. May contain explicit violence and sexual
+ *         activity</td>
+ *     </tr>
+ *     <tr>
+ *         <td valign="top" rowspan="6">CA_TV_QC</td>
+ *         <td>CA_TV_QC_E</td>
+ *         <td>Exempt from ratings and won't display an on-screen rating</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_QC_G</td>
+ *         <td>Appropriate for all ages and must contain little or no violence and little to no
+ *         sexual content</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_QC_8</td>
+ *         <td>Appropriate for children 8 and may contain with little violence, language, and little
+ *         to no sexual situations</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_QC_13</td>
+ *         <td>Suitable for children 13 and may contain with moderate violence, language, and some
+ *         sexual situations</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_QC_16</td>
+ *         <td>Recommended for children over the age of 16 and may contain with strong violence,
+ *         strong language, and strong sexual content</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_QC_18</td>
+ *         <td>Only to be viewed by adults and may contain extreme violence and graphic sexual
+ *         content. It is mostly used for 18+ movies and pornography</td>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="2">CH_TV</td>
