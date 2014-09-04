@@ -17,66 +17,35 @@
 package com.android.server.hdmi;
 
 import static com.android.server.hdmi.Constants.IRT_MS;
+import static com.android.server.hdmi.Constants.MESSAGE_FEATURE_ABORT;
+import static com.android.server.hdmi.Constants.MESSAGE_REPORT_AUDIO_STATUS;
+import static com.android.server.hdmi.Constants.MESSAGE_USER_CONTROL_PRESSED;
 
-import com.android.internal.util.Preconditions;
+import android.media.AudioManager;
 
 /**
  * Feature action that transmits volume change to Audio Receiver.
  * <p>
- * This action is created when a user pressed volume up/down. However, Since Android only provides a
- * listener for delta of some volume change, we will set a target volume, and check reported volume
- * from Audio Receiver(AVR). If TV receives no &lt;Report Audio Status&gt; from AVR, this action
- * will be finished in {@link #IRT_MS} * {@link #VOLUME_CHANGE_TIMEOUT_MAX_COUNT} (ms).
+ * This action is created when a user pressed volume up/down. However, Android only provides a
+ * listener for delta of some volume change instead of individual key event. Also it's hard to know
+ * Audio Receiver's number of volume steps for a single volume control key. Because of this, it
+ * sends key-down event until IRT timeout happens, and it will send key-up event if no additional
+ * volume change happens; otherwise, it will send again key-down as press and hold feature does.
  */
 final class VolumeControlAction extends HdmiCecFeatureAction {
     private static final String TAG = "VolumeControlAction";
 
-    private static final int VOLUME_MUTE = 101;
-    private static final int VOLUME_RESTORE = 102;
+    // State that wait for next volume press.
+    private static final int STATE_WAIT_FOR_NEXT_VOLUME_PRESS = 1;
     private static final int MAX_VOLUME = 100;
-    private static final int MIN_VOLUME = 0;
 
-    // State where to wait for <Report Audio Status>
-    private static final int STATE_WAIT_FOR_REPORT_VOLUME_STATUS = 1;
-
-    // Maximum count of time out used to finish volume action.
-    private static final int VOLUME_CHANGE_TIMEOUT_MAX_COUNT = 2;
+    private static final int UNKNOWN_AVR_VOLUME = -1;
 
     private final int mAvrAddress;
-    private final int mTargetVolume;
-    private final boolean mIsVolumeUp;
-    private int mTimeoutCount;
-
-    /**
-     * Create a {@link VolumeControlAction} for mute/restore change
-     *
-     * @param source source device sending volume change
-     * @param avrAddress address of audio receiver
-     * @param mute whether to mute sound or not. {@code true} for mute on; {@code false} for mute
-     *            off, i.e restore volume
-     * @return newly created {@link VolumeControlAction}
-     */
-    public static VolumeControlAction ofMute(HdmiCecLocalDevice source, int avrAddress,
-            boolean mute) {
-        return new VolumeControlAction(source, avrAddress, mute ? VOLUME_MUTE : VOLUME_RESTORE,
-                false);
-    }
-
-    /**
-     * Create a {@link VolumeControlAction} for volume up/down change
-     *
-     * @param source source device sending volume change
-     * @param avrAddress address of audio receiver
-     * @param targetVolume target volume to be set to AVR. It should be in range of [0-100]
-     * @param isVolumeUp whether to volume up or not. {@code true} for volume up; {@code false} for
-     *            volume down
-     * @return newly created {@link VolumeControlAction}
-     */
-    public static VolumeControlAction ofVolumeChange(HdmiCecLocalDevice source, int avrAddress,
-            int targetVolume, boolean isVolumeUp) {
-        Preconditions.checkArgumentInRange(targetVolume, MIN_VOLUME, MAX_VOLUME, "volume");
-        return new VolumeControlAction(source, avrAddress, targetVolume, isVolumeUp);
-    }
+    private boolean mIsVolumeUp;
+    private long mLastKeyUpdateTime;
+    private int mLastAvrVolume;
+    private boolean mSentKeyPressed;
 
     /**
      * Scale a custom volume value to cec volume scale.
@@ -94,123 +63,141 @@ final class VolumeControlAction extends HdmiCecFeatureAction {
      *
      * @param cecVolume volume value in cec volume scale. It should be in a range of [0-100]
      * @param scale scale of custom volume (max volume)
-     * @return a volume value scaled to custom volume range
+     * @return a volume scaled to custom volume range
      */
     public static int scaleToCustomVolume(int cecVolume, int scale) {
         return (cecVolume * scale) / MAX_VOLUME;
     }
 
-    private VolumeControlAction(HdmiCecLocalDevice source, int avrAddress, int targetVolume,
-            boolean isVolumeUp) {
+    VolumeControlAction(HdmiCecLocalDevice source, int avrAddress, boolean isVolumeUp) {
         super(source);
-
         mAvrAddress = avrAddress;
-        mTargetVolume = targetVolume;
         mIsVolumeUp = isVolumeUp;
+        mLastAvrVolume = UNKNOWN_AVR_VOLUME;
+        mSentKeyPressed = false;
+
+        updateLastKeyUpdateTime();
+    }
+
+    private void updateLastKeyUpdateTime() {
+        mLastKeyUpdateTime = System.currentTimeMillis();
     }
 
     @Override
     boolean start() {
-        if (isForMute()) {
-            sendMuteChange(mTargetVolume == VOLUME_MUTE);
-            finish();
-            return true;
-        }
-
-        startVolumeChange();
+        mState = STATE_WAIT_FOR_NEXT_VOLUME_PRESS;
+        sendVolumeKeyPressed();
+        resetTimer();
         return true;
     }
 
-
-    private boolean isForMute() {
-        return mTargetVolume == VOLUME_MUTE || mTargetVolume == VOLUME_RESTORE;
-    }
-
-    private void startVolumeChange() {
-        mTimeoutCount = 0;
-        sendVolumeChange(mIsVolumeUp);
-        mState = STATE_WAIT_FOR_REPORT_VOLUME_STATUS;
-        addTimer(mState, IRT_MS);
-    }
-
-    private void sendVolumeChange(boolean up) {
+    private void sendVolumeKeyPressed() {
         sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(getSourceAddress(), mAvrAddress,
-                up ? HdmiCecKeycode.CEC_KEYCODE_VOLUME_UP
+                mIsVolumeUp ? HdmiCecKeycode.CEC_KEYCODE_VOLUME_UP
                         : HdmiCecKeycode.CEC_KEYCODE_VOLUME_DOWN));
+        mSentKeyPressed = true;
     }
 
-    private void sendMuteChange(boolean mute) {
-        sendUserControlPressedAndReleased(mAvrAddress,
-                mute ? HdmiCecKeycode.CEC_KEYCODE_MUTE_FUNCTION :
-                        HdmiCecKeycode.CEC_KEYCODE_RESTORE_VOLUME_FUNCTION);
+    private void resetTimer() {
+        mActionTimer.clearTimerMessage();
+        addTimer(STATE_WAIT_FOR_NEXT_VOLUME_PRESS, IRT_MS);
+    }
+
+    void handleVolumeChange(boolean isVolumeUp) {
+        if (mIsVolumeUp != isVolumeUp) {
+            HdmiLogger.debug("Volume Key Status Changed[old:%b new:%b]", mIsVolumeUp, isVolumeUp);
+            sendVolumeKeyReleased();
+            mIsVolumeUp = isVolumeUp;
+        }
+        updateLastKeyUpdateTime();
+    }
+
+    private void sendVolumeKeyReleased() {
+        sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(
+                getSourceAddress(), mAvrAddress));
+        mSentKeyPressed = false;
     }
 
     @Override
     boolean processCommand(HdmiCecMessage cmd) {
-        if (mState != STATE_WAIT_FOR_REPORT_VOLUME_STATUS) {
+        if (mState != STATE_WAIT_FOR_NEXT_VOLUME_PRESS || cmd.getSource() != mAvrAddress) {
             return false;
         }
 
         switch (cmd.getOpcode()) {
-            case Constants.MESSAGE_REPORT_AUDIO_STATUS:
-                handleReportAudioStatus(cmd);
-                return true;
-            case Constants.MESSAGE_FEATURE_ABORT:
-                int originalOpcode = cmd.getParams()[0] & 0xFF;
-                if (originalOpcode == Constants.MESSAGE_USER_CONTROL_PRESSED
-                        || originalOpcode == Constants.MESSAGE_USER_CONTROL_RELEASED) {
-                    // TODO: handle feature abort.
-                    finish();
-                    return true;
-                }
-            default:  // fall through
+            case MESSAGE_REPORT_AUDIO_STATUS:
+                return handleReportAudioStatus(cmd);
+            case MESSAGE_FEATURE_ABORT:
+                return handleFeatureAbort(cmd);
+            default:
                 return false;
         }
     }
 
-    private void handleReportAudioStatus(HdmiCecMessage cmd) {
-        byte[] params = cmd.getParams();
+    private boolean handleReportAudioStatus(HdmiCecMessage cmd) {
+        byte params[] = cmd.getParams();
+        boolean mute = (params[0] & 0x80) == 0x80;
         int volume = params[0] & 0x7F;
-        // Update volume with new value.
-        // Note that it will affect system volume change.
-        tv().setAudioStatus(false, volume);
-        if (mIsVolumeUp) {
-            if (mTargetVolume <= volume) {
-                finishWithVolumeChangeRelease();
-                return;
-            }
-        } else {
-            if (mTargetVolume >= volume) {
-                finishWithVolumeChangeRelease();
-                return;
-            }
+        mLastAvrVolume = volume;
+        if (shouldUpdateAudioVolume(mute)) {
+            HdmiLogger.debug("Force volume change[mute:%b, volume=%d]", mute, volume);
+            tv().setAudioStatus(mute, volume);
         }
-
-        // Clear action status and send another volume change command.
-        clear();
-        startVolumeChange();
+        return true;
     }
 
-    private void finishWithVolumeChangeRelease() {
-        sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(
-                getSourceAddress(), mAvrAddress));
-        finish();
+    private boolean shouldUpdateAudioVolume(boolean mute) {
+        // Do nothing if in mute.
+        if (mute) {
+            return true;
+        }
+
+        // Update audio status if current volume position is edge of volume bar,
+        // i.e max or min volume.
+        AudioManager audioManager = tv().getService().getAudioManager();
+        int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        if (mIsVolumeUp) {
+            int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+            return currentVolume == maxVolume;
+        } else {
+            return currentVolume == 0;
+        }
+    }
+
+    private boolean handleFeatureAbort(HdmiCecMessage cmd) {
+        int originalOpcode = cmd.getParams()[0] & 0xFF;
+        // Since it sends <User Control Released> only when it finishes this action,
+        // it takes care of <User Control Pressed> only here.
+        if (originalOpcode == MESSAGE_USER_CONTROL_PRESSED) {
+            finish();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    protected void clear() {
+        super.clear();
+        if (mSentKeyPressed) {
+            sendVolumeKeyReleased();
+        }
+        if (mLastAvrVolume != UNKNOWN_AVR_VOLUME) {
+            tv().setAudioStatus(false, mLastAvrVolume);
+            mLastAvrVolume = UNKNOWN_AVR_VOLUME;
+        }
     }
 
     @Override
     void handleTimerEvent(int state) {
-        if (mState != STATE_WAIT_FOR_REPORT_VOLUME_STATUS) {
+        if (state != STATE_WAIT_FOR_NEXT_VOLUME_PRESS) {
             return;
         }
 
-        // If no report volume action after IRT * VOLUME_CHANGE_TIMEOUT_MAX_COUNT just stop volume
-        // action.
-        if (++mTimeoutCount == VOLUME_CHANGE_TIMEOUT_MAX_COUNT) {
-            finishWithVolumeChangeRelease();
-            return;
+        if (System.currentTimeMillis() - mLastKeyUpdateTime >= IRT_MS) {
+            finish();
+        } else {
+            sendVolumeKeyPressed();
+            resetTimer();
         }
-
-        sendVolumeChange(mIsVolumeUp);
-        addTimer(mState, IRT_MS);
     }
 }

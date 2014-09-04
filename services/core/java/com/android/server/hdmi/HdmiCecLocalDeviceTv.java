@@ -120,8 +120,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // other CEC devices since they might not have logical address.
     private final ArraySet<Integer> mCecSwitches = new ArraySet<Integer>();
 
-    private final HdmiLogger mSafeLogger = new HdmiLogger(TAG);
-
     HdmiCecLocalDeviceTv(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_TV);
         mPrevPortId = Constants.INVALID_PORT_ID;
@@ -700,8 +698,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     // # Seq 25
     void setSystemAudioMode(boolean on, boolean updateSetting) {
-        mSafeLogger.debug(String.format("System Audio Mode change[old:%b new:%b]",
-                mSystemAudioActivated, on));
+        HdmiLogger.debug("System Audio Mode change[old:%b new:%b]", mSystemAudioActivated, on);
 
         if (updateSetting) {
             mService.writeBooleanSetting(Global.HDMI_SYSTEM_AUDIO_ENABLED, on);
@@ -832,6 +829,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                     AudioManager.STREAM_MUSIC);
             mService.setAudioStatus(mute,
                     VolumeControlAction.scaleToCustomVolume(volume, maxVolume));
+            displayOsd(HdmiControlManager.OSD_MESSAGE_AVR_VOLUME_CHANGED,
+                    mute ? HdmiControlManager.AVR_VOLUME_MUTED : volume);
         }
     }
 
@@ -855,12 +854,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             }
         }
 
-        // Remove existing volume action.
-        removeAction(VolumeControlAction.class);
-
-        HdmiDeviceInfo avr = getAvrDeviceInfo();
-        addAndStartAction(VolumeControlAction.ofVolumeChange(this, avr.getLogicalAddress(),
-                cecVolume, delta > 0));
+        List<VolumeControlAction> actions = getActions(VolumeControlAction.class);
+        if (actions.isEmpty()) {
+            addAndStartAction(new VolumeControlAction(this,
+                    getAvrDeviceInfo().getLogicalAddress(), delta > 0));
+        } else {
+            actions.get(0).handleVolumeChange(delta > 0);
+        }
     }
 
     @ServiceThreadOnly
@@ -872,8 +872,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
         // Remove existing volume action.
         removeAction(VolumeControlAction.class);
-        HdmiDeviceInfo avr = getAvrDeviceInfo();
-        addAndStartAction(VolumeControlAction.ofMute(this, avr.getLogicalAddress(), mute));
+        sendUserControlPressedAndReleased(getAvrDeviceInfo().getLogicalAddress(),
+                mute ? HdmiCecKeycode.CEC_KEYCODE_MUTE_FUNCTION :
+                        HdmiCecKeycode.CEC_KEYCODE_RESTORE_VOLUME_FUNCTION);
     }
 
     @Override
@@ -935,7 +936,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected boolean handleSetSystemAudioMode(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (!isMessageForSystemAudio(message)) {
-            mSafeLogger.warning("Invalid <Set System Audio Mode> message:" + message);
+            HdmiLogger.warning("Invalid <Set System Audio Mode> message:" + message);
             return false;
         }
         SystemAudioActionFromAvr action = new SystemAudioActionFromAvr(this,
@@ -949,7 +950,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected boolean handleSystemAudioModeStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (!isMessageForSystemAudio(message)) {
-            mSafeLogger.warning("Invalid <System Audio Mode Status> message:" + message);
+            HdmiLogger.warning("Invalid <System Audio Mode Status> message:" + message);
             return false;
         }
         setSystemAudioMode(HdmiUtils.parseCommandParamSystemAudioStatus(message), true);
@@ -1443,6 +1444,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void displayOsd(int messageId) {
         assertRunOnServiceThread();
         mService.displayOsd(messageId);
+    }
+
+    @ServiceThreadOnly
+    void displayOsd(int messageId, int extra) {
+        assertRunOnServiceThread();
+        mService.displayOsd(messageId, extra);
     }
 
     // Seq #54 and #55
