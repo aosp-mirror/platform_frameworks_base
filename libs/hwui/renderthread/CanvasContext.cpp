@@ -59,6 +59,7 @@ void CanvasContext::destroy() {
     stopDrawing();
     freePrefetechedLayers();
     destroyHardwareResources();
+    mAnimationContext->destroy();
     if (mCanvas) {
         delete mCanvas;
         mCanvas = 0;
