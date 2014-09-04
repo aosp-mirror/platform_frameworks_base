@@ -24,6 +24,8 @@
           Creating a Project</a></li>
       <li><a href="<?cs var:toroot ?>sdk/installing/studio-tips.html">
           Tips and Tricks</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/installing/studio-androidview.html">
+          Using the Android Project View</a></li>
       <li><a href="<?cs var:toroot ?>sdk/installing/studio-layout.html">
           Using the Layout Editor</a></li>
       <li><a href="<?cs var:toroot ?>sdk/installing/studio-build.html">
