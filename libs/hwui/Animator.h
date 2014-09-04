@@ -68,6 +68,8 @@ public:
 
     ANDROID_API virtual uint32_t dirtyMask() = 0;
 
+    void forceEndNow(AnimationContext& context);
+
 protected:
     BaseRenderNodeAnimator(float finalValue);
     virtual ~BaseRenderNodeAnimator();

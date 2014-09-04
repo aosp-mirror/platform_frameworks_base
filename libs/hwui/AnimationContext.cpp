@@ -31,11 +31,14 @@ AnimationContext::AnimationContext(renderthread::TimeLord& clock)
 }
 
 AnimationContext::~AnimationContext() {
+}
+
+void AnimationContext::destroy() {
     startFrame();
     while (mCurrentFrameAnimations.mNextHandle) {
         AnimationHandle* current = mCurrentFrameAnimations.mNextHandle;
         AnimatorManager& animators = current->mRenderNode->animators();
-        animators.endAllAnimators();
+        animators.endAllActiveAnimators();
         LOG_ALWAYS_FATAL_IF(mCurrentFrameAnimations.mNextHandle == current,
                 "endAllAnimators failed to remove from current frame list!");
     }
