@@ -1540,6 +1540,7 @@
         <item>com.android.server.notification.ValidateNotificationPeople</item>
         <item>com.android.server.notification.PackagePriorityExtractor</item>
         <item>com.android.server.notification.NotificationIntrusivenessExtractor</item>
+        <item>com.android.server.notification.PackageVisibilityExtractor</item>
     </string-array>
 
     <!-- Flag indicating that this device does not rotate and will always remain in its default

@@ -65,6 +65,7 @@ public final class NotificationRecord {
 
     private int mAuthoritativeRank;
     private String mGlobalSortKey;
+    private int mPackageVisibility;
 
     @VisibleForTesting
     public NotificationRecord(StatusBarNotification sbn, int score)
@@ -79,6 +80,7 @@ public final class NotificationRecord {
         mContactAffinity = previous.mContactAffinity;
         mRecentlyIntrusive = previous.mRecentlyIntrusive;
         mPackagePriority = previous.mPackagePriority;
+        mPackageVisibility = previous.mPackageVisibility;
         mIntercept = previous.mIntercept;
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
         // Don't copy mGlobalSortKey, recompute it.
@@ -155,6 +157,7 @@ public final class NotificationRecord {
         pw.println(prefix + "  mContactAffinity=" + mContactAffinity);
         pw.println(prefix + "  mRecentlyIntrusive=" + mRecentlyIntrusive);
         pw.println(prefix + "  mPackagePriority=" + mPackagePriority);
+        pw.println(prefix + "  mPackageVisibility=" + mPackageVisibility);
         pw.println(prefix + "  mIntercept=" + mIntercept);
         pw.println(prefix + "  mGlobalSortKey=" + mGlobalSortKey);
         pw.println(prefix + "  mRankingTimeMs=" + mRankingTimeMs);
@@ -214,6 +217,14 @@ public final class NotificationRecord {
 
     public int getPackagePriority() {
         return mPackagePriority;
+    }
+
+    public void setPackageVisibilityOverride(int packageVisibility) {
+        mPackageVisibility = packageVisibility;
+    }
+
+    public int getPackageVisibilityOverride() {
+        return mPackageVisibility;
     }
 
     public boolean setIntercepted(boolean intercept) {
