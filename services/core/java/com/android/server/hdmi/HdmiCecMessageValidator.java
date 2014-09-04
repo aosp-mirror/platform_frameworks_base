@@ -51,7 +51,6 @@ public final class HdmiCecMessageValidator {
     }
 
     final SparseArray<ValidationInfo> mValidationInfo = new SparseArray<>();
-    private final HdmiLogger mSpamSafeLogger = new HdmiLogger(TAG);
 
     public HdmiCecMessageValidator(HdmiControlService service) {
         mService = service;
@@ -183,32 +182,32 @@ public final class HdmiCecMessageValidator {
         int opcode = message.getOpcode();
         ValidationInfo info = mValidationInfo.get(opcode);
         if (info == null) {
-            mSpamSafeLogger.warning("No validation information for the message: " + message);
+            HdmiLogger.warning("No validation information for the message: " + message);
             return true;
         }
 
         // Check the source field.
         if (message.getSource() == Constants.ADDR_UNREGISTERED &&
                 (info.addressType & SRC_UNREGISTERED) == 0) {
-            mSpamSafeLogger.warning("Unexpected source: " + message);
+            HdmiLogger.warning("Unexpected source: " + message);
             return false;
         }
         // Check the destination field.
         if (message.getDestination() == Constants.ADDR_BROADCAST) {
             if ((info.addressType & DEST_BROADCAST) == 0) {
-                mSpamSafeLogger.warning("Unexpected broadcast message: " + message);
+                HdmiLogger.warning("Unexpected broadcast message: " + message);
                 return false;
             }
         } else {  // Direct addressing.
             if ((info.addressType & DEST_DIRECT) == 0) {
-                mSpamSafeLogger.warning("Unexpected direct message: " + message);
+                HdmiLogger.warning("Unexpected direct message: " + message);
                 return false;
             }
         }
 
         // Check the parameter type.
         if (!info.parameterValidator.isValid(message.getParams())) {
-            mSpamSafeLogger.warning("Unexpected parameters: " + message);
+            HdmiLogger.warning("Unexpected parameters: " + message);
             return false;
         }
         return true;
