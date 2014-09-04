@@ -49,7 +49,6 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
@@ -79,7 +78,6 @@ public class SystemServicesProxy {
     AppWidgetManager mAwm;
     PackageManager mPm;
     IPackageManager mIpm;
-    UserManager mUm;
     SearchManager mSm;
     WindowManager mWm;
     Display mDisplay;
@@ -103,7 +101,6 @@ public class SystemServicesProxy {
         mIam = ActivityManagerNative.getDefault();
         mAwm = AppWidgetManager.getInstance(context);
         mPm = context.getPackageManager();
-        mUm = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mIpm = AppGlobals.getPackageManager();
         mSm = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -343,7 +340,7 @@ public class SystemServicesProxy {
      * necessary.
      */
     public Drawable getActivityIcon(ActivityInfo info, int userId) {
-        if (mPm == null || mUm == null) return null;
+        if (mPm == null) return null;
 
         // If we are mocking, then return a mock label
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
@@ -359,7 +356,7 @@ public class SystemServicesProxy {
      */
     public Drawable getBadgedIcon(Drawable icon, int userId) {
         if (userId != UserHandle.myUserId()) {
-            icon = mUm.getBadgedDrawableForUser(icon, new UserHandle(userId));
+            icon = mPm.getUserBadgedDrawableForDensity(icon, new UserHandle(userId), null, 0);
         }
         return icon;
     }

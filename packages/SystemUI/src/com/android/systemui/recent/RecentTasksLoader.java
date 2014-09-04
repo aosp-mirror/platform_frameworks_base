@@ -34,14 +34,12 @@ import android.os.Handler;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.util.ArrayList;
@@ -205,8 +203,8 @@ public class RecentTasksLoader implements View.OnTouchListener {
         Drawable icon = getFullResIcon(td.resolveInfo, pm);
         if (td.userId != UserHandle.myUserId()) {
             // Need to badge the icon
-            final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            icon = um.getBadgedDrawableForUser(icon, new UserHandle(td.userId));
+            icon = mContext.getPackageManager().getUserBadgedDrawableForDensity(icon,
+                    new UserHandle(td.userId), null, 0);
         }
         if (DEBUG) Log.v(TAG, "Loaded bitmap for task "
                 + td + ": " + thumbnail);
