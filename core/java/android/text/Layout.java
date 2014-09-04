@@ -727,10 +727,9 @@ public abstract class Layout {
         int[] runs = dirs.mDirections;
         int lineStart = getLineStart(line);
         for (int i = 0; i < runs.length; i += 2) {
-            int start = lineStart + (runs[i] & RUN_LENGTH_MASK);
-            // No need to test the end as an offset after the last run should return the value
-            // corresponding of the last run
-            if (offset >= start) {
+            int start = lineStart + runs[i];
+            int limit = start + (runs[i+1] & RUN_LENGTH_MASK);
+            if (offset >= start && offset < limit) {
                 int level = (runs[i+1] >>> RUN_LEVEL_SHIFT) & RUN_LEVEL_MASK;
                 return ((level & 1) != 0);
             }
