@@ -114,14 +114,15 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private static final int DEST_ADAPTER_ITEM_ID_SAVE_AS_PDF = Integer.MAX_VALUE;
     private static final int DEST_ADAPTER_ITEM_ID_ALL_PRINTERS = Integer.MAX_VALUE - 1;
 
-    private static final int STATE_CONFIGURING = 0;
-    private static final int STATE_PRINT_CONFIRMED = 1;
-    private static final int STATE_PRINT_CANCELED = 2;
-    private static final int STATE_UPDATE_FAILED = 3;
-    private static final int STATE_CREATE_FILE_FAILED = 4;
-    private static final int STATE_PRINTER_UNAVAILABLE = 5;
-    private static final int STATE_UPDATE_SLOW = 6;
-    private static final int STATE_PRINT_COMPLETED = 7;
+    private static final int STATE_INITIALIZING = 0;
+    private static final int STATE_CONFIGURING = 1;
+    private static final int STATE_PRINT_CONFIRMED = 2;
+    private static final int STATE_PRINT_CANCELED = 3;
+    private static final int STATE_UPDATE_FAILED = 4;
+    private static final int STATE_CREATE_FILE_FAILED = 5;
+    private static final int STATE_PRINTER_UNAVAILABLE = 6;
+    private static final int STATE_UPDATE_SLOW = 7;
+    private static final int STATE_PRINT_COMPLETED = 8;
 
     private static final int UI_STATE_PREVIEW = 0;
     private static final int UI_STATE_ERROR = 1;
@@ -196,7 +197,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private int mCurrentPageCount;
 
-    private int mState;
+    private int mState = STATE_INITIALIZING;
 
     private int mUiState = UI_STATE_PREVIEW;
 
@@ -290,10 +291,17 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         mPrintedDocument.start();
 
         ensurePreviewUiShown();
+
+        setState(STATE_CONFIGURING);
     }
 
     @Override
     public void onPause() {
+        if (mState == STATE_INITIALIZING) {
+            super.onPause();
+            return;
+        }
+
         if (isFinishing()) {
             PrintSpoolerService spooler = mSpoolerProvider.getSpooler();
             spooler.updatePrintJobUserConfigurableOptionsNoPersistence(mPrintJob);
@@ -341,9 +349,13 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (mState == STATE_INITIALIZING) {
+            return super.onKeyUp(keyCode, event);
+        }
+
         if (keyCode == KeyEvent.KEYCODE_BACK
                 && event.isTracking() && !event.isCanceled()) {
-            if (mPrintPreviewController != null&&mPrintPreviewController.isOptionsOpened()
+            if (mPrintPreviewController != null && mPrintPreviewController.isOptionsOpened()
                     && !hasErrors()) {
                 mPrintPreviewController.closeOptions();
             } else {
@@ -900,7 +912,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         final boolean willUpdate = mPrintedDocument.update(mPrintJob.getAttributes(),
                 pages, preview);
 
-        if (willUpdate) {
+        if (willUpdate && !mPrintedDocument.hasLaidOutPages()) {
             // When the update is done we update the print preview.
             mProgressMessageController.post();
             return true;
