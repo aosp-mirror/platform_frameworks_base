@@ -21,6 +21,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -814,13 +815,6 @@ public class Notification implements Parcelable
      * as supplied to (e.g.) {@link MediaStyle#setShowActionsInCompactView(int...)}.
      */
     public static final String EXTRA_COMPACT_ACTIONS = "android.compactActions";
-
-    /**
-     * {@link #extras} key: the user that built the notification.
-     *
-     * @hide
-     */
-    public static final String EXTRA_ORIGINATING_USERID = "android.originatingUserId";
 
     /**
      * Value for {@link #EXTRA_AS_HEADS_UP} that indicates this notification should not be
@@ -1801,10 +1795,12 @@ public class Notification implements Parcelable
                 = "android.rebuild.hudViewActionCount";
 
         /**
-         * The package name of the context used to create the notification via a Builder.
+         * The ApplicationInfo of the package that created the notification, used to create
+         * a context to rebuild the notification via a Builder.
+         * @hide
          */
-        private static final String EXTRA_REBUILD_CONTEXT_PACKAGE =
-                "android.rebuild.contextPackage";
+        private static final String EXTRA_REBUILD_CONTEXT_APPLICATION_INFO =
+                "android.rebuild.applicationInfo";
 
         // Whether to enable stripping (at post time) & rebuilding (at listener receive time) of
         // memory intensive resources.
@@ -1853,11 +1849,6 @@ public class Notification implements Parcelable
         private final NotificationColorUtil mColorUtil;
         private ArrayList<String> mPeople;
         private int mColor = COLOR_DEFAULT;
-
-        /**
-         * The user that built the notification originally.
-         */
-        private int mOriginatingUserId;
 
         /**
          * Contains extras related to rebuilding during the build phase.
@@ -2579,7 +2570,7 @@ public class Notification implements Parcelable
             // Note: This assumes that the current user can read the profile badge of the
             // originating user.
             UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            return userManager.getBadgeForUser(new UserHandle(mOriginatingUserId), 0);
+            return userManager.getBadgeForUser(new UserHandle(mContext.getUserId()), 0);
         }
 
         private Bitmap getProfileBadge() {
@@ -2658,8 +2649,7 @@ public class Notification implements Parcelable
          * @param hasProgress whether the progress bar should be shown and set
          */
         private RemoteViews applyStandardTemplate(int resId, boolean hasProgress) {
-            RemoteViews contentView = new BuilderRemoteViews(mContext.getPackageName(),
-                    mOriginatingUserId, resId);
+            RemoteViews contentView = new BuilderRemoteViews(mContext.getApplicationInfo(), resId);
 
             resetStandardTemplate(contentView);
 
@@ -3051,8 +3041,8 @@ public class Notification implements Parcelable
          */
         public void populateExtras(Bundle extras) {
             // Store original information used in the construction of this object
-            extras.putInt(EXTRA_ORIGINATING_USERID, mOriginatingUserId);
-            extras.putString(EXTRA_REBUILD_CONTEXT_PACKAGE, mContext.getPackageName());
+            extras.putParcelable(EXTRA_REBUILD_CONTEXT_APPLICATION_INFO,
+                    mContext.getApplicationInfo());
             extras.putCharSequence(EXTRA_TITLE, mContentTitle);
             extras.putCharSequence(EXTRA_TEXT, mContentText);
             extras.putCharSequence(EXTRA_SUB_TEXT, mSubText);
@@ -3140,13 +3130,14 @@ public class Notification implements Parcelable
             extras.remove(EXTRA_NEEDS_REBUILD);
 
             // Re-create notification context so we can access app resources.
-            String packageName = extras.getString(EXTRA_REBUILD_CONTEXT_PACKAGE);
+            ApplicationInfo applicationInfo = extras.getParcelable(
+                    EXTRA_REBUILD_CONTEXT_APPLICATION_INFO);
             Context builderContext;
             try {
-                builderContext = context.createPackageContext(packageName,
+                builderContext = context.createApplicationContext(applicationInfo,
                         Context.CONTEXT_RESTRICTED);
             } catch (NameNotFoundException e) {
-                Log.e(TAG, "Package name " + packageName + " not found");
+                Log.e(TAG, "ApplicationInfo " + applicationInfo + " not found");
                 builderContext = context;  // try with our context
             }
 
@@ -3281,7 +3272,6 @@ public class Notification implements Parcelable
 
             // Extras.
             Bundle extras = n.extras;
-            mOriginatingUserId = extras.getInt(EXTRA_ORIGINATING_USERID);
             mContentTitle = extras.getCharSequence(EXTRA_TITLE);
             mContentText = extras.getCharSequence(EXTRA_TEXT);
             mSubText = extras.getCharSequence(EXTRA_SUB_TEXT);
@@ -3314,7 +3304,6 @@ public class Notification implements Parcelable
          * object.
          */
         public Notification build() {
-            mOriginatingUserId = mContext.getUserId();
             mHasThreeLines = hasThreeLines();
 
             Notification n = buildUnstyled();
@@ -4814,8 +4803,8 @@ public class Notification implements Parcelable
             super(parcel);
         }
 
-        public BuilderRemoteViews(String packageName, int userId, int layoutId) {
-            super(packageName, userId, layoutId);
+        public BuilderRemoteViews(ApplicationInfo appInfo, int layoutId) {
+            super(appInfo, layoutId);
         }
 
         @Override
