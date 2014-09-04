@@ -61,12 +61,6 @@ public interface WebViewFactoryProvider {
 
         /**
          * Implements the API method:
-         * {@link android.webkit.WebView#optOutDataReductionProxy() }
-         */
-        void optOutDataReductionProxy();
-
-        /**
-         * Implements the API method:
          * {@link android.webkit.WebView#setSlowWholeDocumentDrawEnabled(boolean) }
          */
         void enableSlowWholeDocumentDraw();
