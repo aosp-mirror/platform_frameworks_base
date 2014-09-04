@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.app.Notification;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
@@ -173,6 +174,14 @@ public class NotificationData {
         return false;
     }
 
+    public int getVisibilityOverride(String key) {
+        if (mRankingMap != null) {
+            mRankingMap.getRanking(key, mTmpRanking);
+            return mTmpRanking.getVisibilityOverride();
+        }
+        return NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE;
+    }
+
     private void updateRankingAndSort(RankingMap ranking) {
         if (ranking != null) {
             mRankingMap = ranking;
@@ -300,7 +309,7 @@ public class NotificationData {
      * Provides access to keyguard state and user settings dependent data.
      */
     public interface Environment {
-        public boolean shouldHideSensitiveContents(int userId);
+        public boolean shouldHideSensitiveContents(int userid);
         public boolean isDeviceProvisioned();
         public boolean isNotificationForCurrentProfiles(StatusBarNotification sbn);
         public String getCurrentMediaNotificationKey();

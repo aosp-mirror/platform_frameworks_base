@@ -71,6 +71,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
@@ -1414,11 +1415,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             // Display public version of the notification if we need to redact.
             final boolean hideSensitive =
                     !userAllowsPrivateNotificationsInPublic(ent.notification.getUserId());
-            boolean sensitive = vis == Notification.VISIBILITY_PRIVATE;
-            boolean showingPublic = sensitive && hideSensitive && isLockscreenPublicMode();
-            ent.row.setSensitive(sensitive && hideSensitive);
+            boolean sensitiveNote = vis == Notification.VISIBILITY_PRIVATE;
+            boolean sensitivePackage = packageHasVisibilityOverride(ent.notification.getKey());
+            boolean sensitive = (sensitiveNote && hideSensitive) || sensitivePackage;
+            boolean showingPublic = sensitive && isLockscreenPublicMode();
+            ent.row.setSensitive(sensitive);
             if (ent.autoRedacted && ent.legacy) {
-
                 // TODO: Also fade this? Or, maybe easier (and better), provide a dark redacted form
                 // for legacy auto redacted notifications.
                 if (showingPublic) {
@@ -1477,6 +1479,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         mNotificationPanel.setQsExpansionEnabled(isDeviceProvisioned());
         mShadeUpdates.check();
+    }
+
+    private boolean packageHasVisibilityOverride(String key) {
+        return mNotificationData.getVisibilityOverride(key)
+                != NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE;
     }
 
     private void updateClearAll() {
