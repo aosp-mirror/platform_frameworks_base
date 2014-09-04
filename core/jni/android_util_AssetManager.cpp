@@ -1888,6 +1888,37 @@ static jintArray android_content_AssetManager_getArrayIntResource(JNIEnv* env, j
     return array;
 }
 
+static jintArray android_content_AssetManager_getStyleAttributes(JNIEnv* env, jobject clazz,
+                                                                 jint styleId)
+{
+    AssetManager* am = assetManagerForJavaObject(env, clazz);
+    if (am == NULL) {
+        return NULL;
+    }
+    const ResTable& res(am->getResources());
+
+    const ResTable::bag_entry* startOfBag;
+    const ssize_t N = res.lockBag(styleId, &startOfBag);
+    if (N < 0) {
+        return NULL;
+    }
+
+    jintArray array = env->NewIntArray(N);
+    if (array == NULL) {
+        res.unlockBag(startOfBag);
+        return NULL;
+    }
+
+    Res_value value;
+    const ResTable::bag_entry* bag = startOfBag;
+    for (size_t i=0; ((ssize_t)i)<N; i++, bag++) {
+        int resourceId = bag->map.name.ident;
+        env->SetIntArrayRegion(array, i, 1, &resourceId);
+    }
+    res.unlockBag(startOfBag);
+    return array;
+}
+
 static void android_content_AssetManager_init(JNIEnv* env, jobject clazz, jboolean isSystem)
 {
     if (isSystem) {
@@ -2038,6 +2069,8 @@ static JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_getArrayStringInfo },
     { "getArrayIntResource","(I)[I",
         (void*) android_content_AssetManager_getArrayIntResource },
+    { "getStyleAttributes","(I)[I",
+        (void*) android_content_AssetManager_getStyleAttributes },
 
     // Bookkeeping.
     { "init",           "(Z)V",

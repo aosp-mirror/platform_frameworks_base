@@ -773,6 +773,7 @@ public final class AssetManager implements AutoCloseable {
     private native final String[] getArrayStringResource(int arrayRes);
     private native final int[] getArrayStringInfo(int arrayRes);
     /*package*/ native final int[] getArrayIntResource(int arrayRes);
+    /*package*/ native final int[] getStyleAttributes(int themeRes);
 
     private native final void init(boolean isSystem);
     private native final void destroy();
