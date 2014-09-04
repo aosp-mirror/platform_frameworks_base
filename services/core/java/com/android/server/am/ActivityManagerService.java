@@ -196,6 +196,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import dalvik.system.VMRuntime;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -3124,6 +3125,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 requiredAbi = Build.SUPPORTED_ABIS[0];
             }
 
+            String instructionSet = null;
+            if (app.info.primaryCpuAbi != null) {
+                instructionSet = VMRuntime.getInstructionSet(app.info.primaryCpuAbi);
+            }
+
             // Start the process.  It will either succeed and return a result containing
             // the PID of the new process, or else throw a RuntimeException.
             boolean isActivityProcess = (entryPoint == null);
@@ -3131,7 +3137,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             checkTime(startTime, "startProcess: asking zygote to start proc");
             Process.ProcessStartResult startResult = Process.start(entryPoint,
                     app.processName, uid, uid, gids, debugFlags, mountExternal,
-                    app.info.targetSdkVersion, app.info.seinfo, requiredAbi, entryPointArgs);
+                    app.info.targetSdkVersion, app.info.seinfo, requiredAbi, instructionSet,
+                    entryPointArgs);
             checkTime(startTime, "startProcess: returned from zygote!");
 
             if (app.isolated) {
