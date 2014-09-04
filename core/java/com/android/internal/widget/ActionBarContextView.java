@@ -59,6 +59,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
     private int mSubtitleStyleRes;
     private Drawable mSplitBackground;
     private boolean mTitleOptional;
+    private int mCloseItemLayout;
 
     private Animator mCurrentAnimation;
     private boolean mAnimateInOnLayout;
@@ -99,6 +100,10 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         mSplitBackground = a.getDrawable(
                 com.android.internal.R.styleable.ActionMode_backgroundSplit);
 
+        mCloseItemLayout = a.getResourceId(
+                com.android.internal.R.styleable.ActionMode_closeItemLayout,
+                R.layout.action_mode_close_item);
+
         a.recycle();
     }
 
@@ -120,7 +125,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
                         LayoutParams.MATCH_PARENT);
                 if (!split) {
                     mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
-                    mMenuView.setBackgroundDrawable(null);
+                    mMenuView.setBackground(null);
                     final ViewGroup oldParent = (ViewGroup) mMenuView.getParent();
                     if (oldParent != null) oldParent.removeView(mMenuView);
                     addView(mMenuView, layoutParams);
@@ -134,7 +139,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
                     layoutParams.width = LayoutParams.MATCH_PARENT;
                     layoutParams.height = mContentHeight;
                     mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
-                    mMenuView.setBackgroundDrawable(mSplitBackground);
+                    mMenuView.setBackground(mSplitBackground);
                     final ViewGroup oldParent = (ViewGroup) mMenuView.getParent();
                     if (oldParent != null) oldParent.removeView(mMenuView);
                     mSplitView.addView(mMenuView, layoutParams);
@@ -211,7 +216,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
     public void initForMode(final ActionMode mode) {
         if (mClose == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            mClose = inflater.inflate(R.layout.action_mode_close_item, this, false);
+            mClose = inflater.inflate(mCloseItemLayout, this, false);
             addView(mClose);
         } else if (mClose.getParent() == null) {
             addView(mClose);
