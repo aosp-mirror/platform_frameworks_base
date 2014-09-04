@@ -36,6 +36,8 @@ public class SubInfoRecord implements Parcelable {
     public int mDisplayNumberFormat;
     public int mDataRoaming;
     public int[] mSimIconRes;
+    public int mMcc;
+    public int mMnc;
 
     public SubInfoRecord() {
         this.mSubId = SubscriptionManager.INVALID_SUB_ID;
@@ -48,38 +50,45 @@ public class SubInfoRecord implements Parcelable {
         this.mDisplayNumberFormat = 0;
         this.mDataRoaming = 0;
         this.mSimIconRes = new int[2];
+        this.mMcc = 0;
+        this.mMnc = 0;
     }
 
-    public SubInfoRecord(long subId, String iccId, int slotId, String displayName,
-            int nameSource, int mColor, String mNumber, int displayFormat, int roaming, int[] iconRes) {
+    public SubInfoRecord(long subId, String iccId, int slotId, String displayName, int nameSource,
+            int color, String number, int displayFormat, int roaming, int[] iconRes,
+            int mcc, int mnc) {
         this.mSubId = subId;
         this.mIccId = iccId;
         this.mSlotId = slotId;
         this.mDisplayName = displayName;
         this.mNameSource = nameSource;
-        this.mColor = mColor;
-        this.mNumber = mNumber;
+        this.mColor = color;
+        this.mNumber = number;
         this.mDisplayNumberFormat = displayFormat;
         this.mDataRoaming = roaming;
         this.mSimIconRes = iconRes;
+        this.mMcc = mcc;
+        this.mMnc = mnc;
     }
 
     public static final Parcelable.Creator<SubInfoRecord> CREATOR = new Parcelable.Creator<SubInfoRecord>() {
         public SubInfoRecord createFromParcel(Parcel source) {
-            long mSubId = source.readLong();
-            String mIccId = source.readString();
-            int mSlotId = source.readInt();
-            String mDisplayName = source.readString();
-            int mNameSource = source.readInt();
-            int mColor = source.readInt();
-            String mNumber = source.readString();
-            int mDisplayNumberFormat = source.readInt();
-            int mDataRoaming = source.readInt();
+            long subId = source.readLong();
+            String iccId = source.readString();
+            int slotId = source.readInt();
+            String displayName = source.readString();
+            int nameSource = source.readInt();
+            int color = source.readInt();
+            String number = source.readString();
+            int displayNumberFormat = source.readInt();
+            int dataRoaming = source.readInt();
             int[] iconRes = new int[2];
             source.readIntArray(iconRes);
+            int mcc = source.readInt();
+            int mnc = source.readInt();
 
-            return new SubInfoRecord(mSubId, mIccId, mSlotId, mDisplayName, mNameSource, mColor, mNumber,
-                mDisplayNumberFormat, mDataRoaming, iconRes);
+            return new SubInfoRecord(subId, iccId, slotId, displayName, nameSource, color, number,
+                displayNumberFormat, dataRoaming, iconRes, mcc, mnc);
         }
 
         public SubInfoRecord[] newArray(int size) {
@@ -98,6 +107,8 @@ public class SubInfoRecord implements Parcelable {
         dest.writeInt(mDisplayNumberFormat);
         dest.writeInt(mDataRoaming);
         dest.writeIntArray(mSimIconRes);
+        dest.writeInt(mMcc);
+        dest.writeInt(mMnc);
     }
 
     public int describeContents() {
@@ -109,6 +120,6 @@ public class SubInfoRecord implements Parcelable {
                 + " mDisplayName=" + mDisplayName + " mNameSource=" + mNameSource
                 + " mColor=" + mColor + " mNumber=" + mNumber
                 + " mDisplayNumberFormat=" + mDisplayNumberFormat + " mDataRoaming=" + mDataRoaming
-                + " mSimIconRes=" + mSimIconRes + "}";
+                + " mSimIconRes=" + mSimIconRes + " mMcc " + mMcc + " mMnc " + mMnc + "}";
     }
 }
