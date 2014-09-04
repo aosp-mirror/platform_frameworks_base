@@ -198,13 +198,13 @@ void StatefulBaseRenderer::setClippingOutline(LinearAllocator& allocator, const 
         clipRect(bounds.left, bounds.top, bounds.right, bounds.bottom, SkRegion::kIntersect_Op);
     }
     if (outlineIsRounded) {
-        setClippingRoundRect(allocator, bounds, radius);
+        setClippingRoundRect(allocator, bounds, radius, false);
     }
 }
 
 void StatefulBaseRenderer::setClippingRoundRect(LinearAllocator& allocator,
-        const Rect& rect, float radius) {
-    mSnapshot->setClippingRoundRect(allocator, rect, radius);
+        const Rect& rect, float radius, bool highPriority) {
+    mSnapshot->setClippingRoundRect(allocator, rect, radius, highPriority);
 }
 
 

@@ -405,7 +405,7 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
         handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
     }
 
-    // TODO: support both reveal clip and outline clip simultaneously
+    // TODO: support nesting round rect clips
     if (mProperties.getRevealClip().willClip()) {
         Rect bounds;
         mProperties.getRevealClip().getBounds(&bounds);
@@ -413,7 +413,6 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
     } else if (mProperties.getOutline().willClip()) {
         renderer.setClippingOutline(handler.allocator(), &(mProperties.getOutline()));
     }
-
 }
 
 /**

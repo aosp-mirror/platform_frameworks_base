@@ -444,16 +444,19 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <a name="Drawing"></a>
  * <h3>Drawing</h3>
  * <p>
- * Drawing is handled by walking the tree and rendering each view that
- * intersects the invalid region. Because the tree is traversed in-order,
- * this means that parents will draw before (i.e., behind) their children, with
- * siblings drawn in the order they appear in the tree.
- * If you set a background drawable for a View, then the View will draw it for you
- * before calling back to its <code>onDraw()</code> method.
+ * Drawing is handled by walking the tree and recording the drawing commands of
+ * any View that needs to update. After this, the drawing commands of the
+ * entire tree are issued to screen, clipped to the newly damaged area.
  * </p>
  *
  * <p>
- * Note that the framework will not draw views that are not in the invalid region.
+ * The tree is largely recorded and drawn in order, with parents drawn before
+ * (i.e., behind) their children, with siblings drawn in the order they appear
+ * in the tree. If you set a background drawable for a View, then the View will
+ * draw it before calling back to its <code>onDraw()</code> method. The child
+ * drawing order can be overridden with
+ * {@link ViewGroup#setChildrenDrawingOrderEnabled(boolean) custom child drawing order}
+ * in a ViewGroup, and with {@link #setZ(float)} custom Z values} set on Views.
  * </p>
  *
  * <p>
@@ -10851,6 +10854,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Sets whether the View's Outline should be used to clip the contents of the View.
+     * <p>
+     * Only a single non-rectangular clip can be applied on a View at any time.
+     * Circular clips from a {@link ViewAnimationUtils#createCircularReveal(View, int, int, float, float)
+     * circular reveal} animation take priority over Outline clipping, and
+     * child Outline clipping takes priority over Outline clipping done by a
+     * parent.
      * <p>
      * Note that this flag will only be respected if the View's Outline returns true from
      * {@link Outline#canClip()}.
