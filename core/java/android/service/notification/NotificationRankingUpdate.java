@@ -15,6 +15,7 @@
  */
 package android.service.notification;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -26,18 +27,21 @@ public class NotificationRankingUpdate implements Parcelable {
     private final String[] mKeys;
     private final String[] mInterceptedKeys;
     private final int mFirstAmbientIndex;
+    private final Bundle mVisibilityOverrides;
 
     public NotificationRankingUpdate(String[] keys, String[] interceptedKeys,
-                                     int firstAmbientIndex) {
+            Bundle visibilityOverrides, int firstAmbientIndex) {
         mKeys = keys;
         mFirstAmbientIndex = firstAmbientIndex;
         mInterceptedKeys = interceptedKeys;
+        mVisibilityOverrides = visibilityOverrides;
     }
 
     public NotificationRankingUpdate(Parcel in) {
         mKeys = in.readStringArray();
         mFirstAmbientIndex = in.readInt();
         mInterceptedKeys = in.readStringArray();
+        mVisibilityOverrides = in.readBundle();
     }
 
     @Override
@@ -50,6 +54,7 @@ public class NotificationRankingUpdate implements Parcelable {
         out.writeStringArray(mKeys);
         out.writeInt(mFirstAmbientIndex);
         out.writeStringArray(mInterceptedKeys);
+        out.writeBundle(mVisibilityOverrides);
     }
 
     public static final Parcelable.Creator<NotificationRankingUpdate> CREATOR
@@ -73,5 +78,9 @@ public class NotificationRankingUpdate implements Parcelable {
 
     public String[] getInterceptedKeys() {
         return mInterceptedKeys;
+    }
+
+    public Bundle getVisibilityOverrides() {
+        return mVisibilityOverrides;
     }
 }

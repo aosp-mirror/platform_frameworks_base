@@ -19,4 +19,8 @@ public interface RankingConfig {
     int getPackagePriority(String packageName, int uid);
 
     void setPackagePriority(String packageName, int uid, int priority);
+
+    int getPackageVisibilityOverride(String packageName, int uid);
+
+    void setPackageVisibilityOverride(String packageName, int uid, int visibility);
 }
