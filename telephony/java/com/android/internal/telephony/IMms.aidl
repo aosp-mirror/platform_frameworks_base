@@ -40,7 +40,7 @@ interface IMms {
      *  broadcast when the message is successfully sent, or failed
      */
     void sendMessage(long subId, String callingPkg, in Uri contentUri,
-            String locationUrl, in ContentValues configOverrides, in PendingIntent sentIntent);
+            String locationUrl, in Bundle configOverrides, in PendingIntent sentIntent);
 
     /**
      * Download an MMS message using known location and transaction id
@@ -57,7 +57,7 @@ interface IMms {
      *  broadcast when the message is downloaded, or the download is failed
      */
     void downloadMessage(long subId, String callingPkg, String locationUrl,
-            in Uri contentUri, in ContentValues configOverrides,
+            in Uri contentUri, in Bundle configOverrides,
             in PendingIntent downloadedIntent);
 
     /**
@@ -192,7 +192,7 @@ interface IMms {
      *  broadcast when the message is successfully sent, or failed
      */
     void sendStoredMessage(long subId, String callingPkg, in Uri messageUri,
-            in ContentValues configOverrides, in PendingIntent sentIntent);
+            in Bundle configOverrides, in PendingIntent sentIntent);
 
     /**
      * Turns on/off the flag to automatically write sent/received SMS/MMS messages into system
