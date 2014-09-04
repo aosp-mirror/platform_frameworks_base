@@ -16,6 +16,7 @@
 package android.app.usage;
 
 import android.content.ComponentName;
+import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -63,6 +64,11 @@ public final class UsageEvents implements Parcelable {
         public static final int CONTINUE_PREVIOUS_DAY = 4;
 
         /**
+         * An event type denoting that the device configuration has changed.
+         */
+        public static final int CONFIGURATION_CHANGE = 5;
+
+        /**
          * {@hide}
          */
         public String mPackage;
@@ -81,6 +87,12 @@ public final class UsageEvents implements Parcelable {
          * {@hide}
          */
         public int mEventType;
+
+        /**
+         * Only present for {@link #CONFIGURATION_CHANGE} event types.
+         * {@hide}
+         */
+        public Configuration mConfiguration;
 
         /**
          * TODO(adamlesinski): Removed before release.
@@ -122,6 +134,14 @@ public final class UsageEvents implements Parcelable {
          */
         public int getEventType() {
             return mEventType;
+        }
+
+        /**
+         * Returns a {@link Configuration} for this event if the event is of type
+         * {@link #CONFIGURATION_CHANGE}, otherwise it returns null.
+         */
+        public Configuration getConfiguration() {
+            return mConfiguration;
         }
     }
 
@@ -201,23 +221,9 @@ public final class UsageEvents implements Parcelable {
             return false;
         }
 
-        final int packageIndex = mParcel.readInt();
-        if (packageIndex >= 0) {
-            eventOut.mPackage = mStringPool[packageIndex];
-        } else {
-            eventOut.mPackage = null;
-        }
+        readEventFromParcel(mParcel, eventOut);
 
-        final int classIndex = mParcel.readInt();
-        if (classIndex >= 0) {
-            eventOut.mClass = mStringPool[classIndex];
-        } else {
-            eventOut.mClass = null;
-        }
-        eventOut.mEventType = mParcel.readInt();
-        eventOut.mTimeStamp = mParcel.readLong();
         mIndex++;
-
         if (mIndex >= mEventCount) {
             mParcel.recycle();
             mParcel = null;
@@ -235,17 +241,72 @@ public final class UsageEvents implements Parcelable {
         }
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
     private int findStringIndex(String str) {
         final int index = Arrays.binarySearch(mStringPool, str);
         if (index < 0) {
             throw new IllegalStateException("String '" + str + "' is not in the string pool");
         }
         return index;
+    }
+
+    /**
+     * Writes a single event to the parcel. Modify this when updating {@link Event}.
+     */
+    private void writeEventToParcel(Event event, Parcel p, int flags) {
+        final int packageIndex;
+        if (event.mPackage != null) {
+            packageIndex = findStringIndex(event.mPackage);
+        } else {
+            packageIndex = -1;
+        }
+
+        final int classIndex;
+        if (event.mClass != null) {
+            classIndex = findStringIndex(event.mClass);
+        } else {
+            classIndex = -1;
+        }
+        p.writeInt(packageIndex);
+        p.writeInt(classIndex);
+        p.writeInt(event.mEventType);
+        p.writeLong(event.mTimeStamp);
+
+        if (event.mEventType == Event.CONFIGURATION_CHANGE) {
+            event.mConfiguration.writeToParcel(p, flags);
+        }
+    }
+
+    /**
+     * Reads a single event from the parcel. Modify this when updating {@link Event}.
+     */
+    private void readEventFromParcel(Parcel p, Event eventOut) {
+        final int packageIndex = p.readInt();
+        if (packageIndex >= 0) {
+            eventOut.mPackage = mStringPool[packageIndex];
+        } else {
+            eventOut.mPackage = null;
+        }
+
+        final int classIndex = p.readInt();
+        if (classIndex >= 0) {
+            eventOut.mClass = mStringPool[classIndex];
+        } else {
+            eventOut.mClass = null;
+        }
+        eventOut.mEventType = p.readInt();
+        eventOut.mTimeStamp = p.readLong();
+
+        // Extract the configuration for configuration change events.
+        if (eventOut.mEventType == Event.CONFIGURATION_CHANGE) {
+            eventOut.mConfiguration = Configuration.CREATOR.createFromParcel(p);
+        } else {
+            eventOut.mConfiguration = null;
+        }
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override
@@ -262,25 +323,9 @@ public final class UsageEvents implements Parcelable {
                     p.setDataPosition(0);
                     for (int i = 0; i < mEventCount; i++) {
                         final Event event = mEventsToWrite.get(i);
-
-                        final int packageIndex;
-                        if (event.mPackage != null) {
-                            packageIndex = findStringIndex(event.mPackage);
-                        } else {
-                            packageIndex = -1;
-                        }
-
-                        final int classIndex;
-                        if (event.mClass != null) {
-                            classIndex = findStringIndex(event.mClass);
-                        } else {
-                            classIndex = -1;
-                        }
-                        p.writeInt(packageIndex);
-                        p.writeInt(classIndex);
-                        p.writeInt(event.getEventType());
-                        p.writeLong(event.getTimeStamp());
+                        writeEventToParcel(event, p, flags);
                     }
+
                     final int listByteLength = p.dataPosition();
 
                     // Write the total length of the data.
