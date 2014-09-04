@@ -8,7 +8,7 @@
     <option name="MAIN_CLASS_NAME" value="" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="package" />
-    <option name="VM_PARAMETERS" value="-ea -Dplatform.dir=&quot;$ANDROID_BUILD_TOP$/out/host/linux-x86/sdk/sdk/android-sdk_eng.deepanshu_linux-x86/platforms/android-L&quot; -Dtest_res.dir=&quot;$PROJECT_DIR$/bridge/tests/res&quot;" />
+    <option name="VM_PARAMETERS" value="-ea -Dtest_res.dir=&quot;$PROJECT_DIR$/bridge/tests/res&quot;" />
     <option name="PARAMETERS" value="" />
     <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
     <option name="ENV_VARIABLES" />
