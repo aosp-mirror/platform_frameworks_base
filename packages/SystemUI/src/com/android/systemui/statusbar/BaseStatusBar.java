@@ -39,9 +39,6 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -179,7 +176,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     // public mode, private notifications, etc
     private boolean mLockscreenPublicMode = false;
     private final SparseBooleanArray mUsersAllowingPrivateNotifications = new SparseBooleanArray();
-    private NotificationColorUtil mNotificationColorUtil = NotificationColorUtil.getInstance();
+    private NotificationColorUtil mNotificationColorUtil;
 
     private UserManager mUserManager;
 
@@ -436,6 +433,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         mDisplay = mWindowManager.getDefaultDisplay();
         mDevicePolicyManager = (DevicePolicyManager)mContext.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
+
+        mNotificationColorUtil = NotificationColorUtil.getInstance(mContext);
 
         mNotificationData = new NotificationData(this);
 
@@ -1348,7 +1347,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             Drawable iconDrawable = StatusBarIconView.getIcon(mContext, ic);
             icon.setImageDrawable(iconDrawable);
-            if (mNotificationColorUtil.isGrayscale(iconDrawable)) {
+            if (mNotificationColorUtil.isGrayscaleIcon(iconDrawable)) {
                 icon.setBackgroundResource(
                         com.android.internal.R.drawable.notification_icon_legacy_bg);
                 int padding = mContext.getResources().getDimensionPixelSize(
