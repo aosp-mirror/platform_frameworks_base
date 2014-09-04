@@ -287,16 +287,38 @@ public class TelecommManager {
     }
 
     /**
+     * Return the {@link PhoneAccount} which is the user-chosen default for making outgoing phone
+     * calls. This {@code PhoneAccount} will always be a member of the list which is returned from
+     * calling {@link #getEnabledPhoneAccounts()}
+     *
+     * Apps must be prepared for this method to return {@code null}, indicating that there currently
+     * exists no user-chosen default {@code PhoneAccount}.
+     *
+     * @return The user outgoing phone account selected by the user.
+     * @hide
+     */
+    public PhoneAccountHandle getUserSelectedOutgoingPhoneAccount() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecommService().getUserSelectedOutgoingPhoneAccount();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#getUserSelectedOutgoingPhoneAccount", e);
+        }
+        return null;
+    }
+
+    /**
      * Sets the default account for making outgoing phone calls.
      * @hide
      */
-    public void setDefaultOutgoingPhoneAccount(PhoneAccountHandle accountHandle) {
+    public void setUserSelectedOutgoingPhoneAccount(PhoneAccountHandle accountHandle) {
         try {
             if (isServiceConnected()) {
-                getTelecommService().setDefaultOutgoingPhoneAccount(accountHandle);
+                getTelecommService().setUserSelectedOutgoingPhoneAccount(accountHandle);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecommService#setDefaultOutgoingPhoneAccount");
+            Log.e(TAG, "Error calling ITelecommService#setUserSelectedOutgoingPhoneAccount");
         }
     }
 
