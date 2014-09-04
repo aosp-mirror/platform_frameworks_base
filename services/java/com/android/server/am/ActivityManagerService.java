@@ -170,6 +170,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import dalvik.system.VMRuntime;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -2786,11 +2787,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                 requiredAbi = Build.SUPPORTED_ABIS[0];
             }
 
+            String instructionSet = null;
+            if (app.info.cpuAbi != null) {
+                instructionSet = VMRuntime.getInstructionSet(app.info.cpuAbi);
+            }
+
             // Start the process.  It will either succeed and return a result containing
             // the PID of the new process, or else throw a RuntimeException.
             Process.ProcessStartResult startResult = Process.start("android.app.ActivityThread",
                     app.processName, uid, uid, gids, debugFlags, mountExternal,
-                    app.info.targetSdkVersion, app.info.seinfo, requiredAbi, null);
+                    app.info.targetSdkVersion, app.info.seinfo, requiredAbi, instructionSet, null);
 
             BatteryStatsImpl bs = mBatteryStatsService.getActiveStatistics();
             synchronized (bs) {
