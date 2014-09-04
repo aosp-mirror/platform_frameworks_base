@@ -2131,7 +2131,7 @@ public class MediaRouter {
             if (mVolume != volume) {
                 mVolume = volume;
                 if (mSvp != null) {
-                    mSvp.notifyVolumeChanged();
+                    mSvp.setCurrentVolume(mVolume);
                 }
                 dispatchRouteVolumeChanged(this);
                 if (mGroup != null) {
@@ -2217,7 +2217,7 @@ public class MediaRouter {
                 // Only register a new listener if necessary
                 if (mSvp == null || mSvp.getVolumeControl() != volumeControl
                         || mSvp.getMaxVolume() != mVolumeMax) {
-                    mSvp = new SessionVolumeProvider(volumeControl, mVolumeMax);
+                    mSvp = new SessionVolumeProvider(volumeControl, mVolumeMax, mVolume);
                     session.setPlaybackToRemote(mSvp);
                 }
             } else {
@@ -2231,13 +2231,8 @@ public class MediaRouter {
 
         class SessionVolumeProvider extends VolumeProvider {
 
-            public SessionVolumeProvider(int volumeControl, int maxVolume) {
-                super(volumeControl, maxVolume);
-            }
-
-            @Override
-            public int onGetCurrentVolume() {
-                return mVcb == null ? 0 : mVcb.route.mVolume;
+            public SessionVolumeProvider(int volumeControl, int maxVolume, int currentVolume) {
+                super(volumeControl, maxVolume, currentVolume);
             }
 
             @Override

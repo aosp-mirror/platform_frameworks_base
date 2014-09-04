@@ -15920,13 +15920,13 @@ package android.media {
   }
 
   public abstract class VolumeProvider {
-    ctor public VolumeProvider(int, int);
+    ctor public VolumeProvider(int, int, int);
+    method public final int getCurrentVolume();
     method public final int getMaxVolume();
     method public final int getVolumeControl();
-    method public final void notifyVolumeChanged();
     method public void onAdjustVolume(int);
-    method public abstract int onGetCurrentVolume();
     method public void onSetVolumeTo(int);
+    method public final void setCurrentVolume(int);
     field public static final int VOLUME_CONTROL_ABSOLUTE = 2; // 0x2
     field public static final int VOLUME_CONTROL_FIXED = 0; // 0x0
     field public static final int VOLUME_CONTROL_RELATIVE = 1; // 0x1

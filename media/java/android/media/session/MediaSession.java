@@ -300,7 +300,7 @@ public final class MediaSession {
         try {
             mBinder.setPlaybackToRemote(volumeProvider.getVolumeControl(),
                     volumeProvider.getMaxVolume());
-            mBinder.setCurrentVolume(volumeProvider.onGetCurrentVolume());
+            mBinder.setCurrentVolume(volumeProvider.getCurrentVolume());
         } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setPlaybackToRemote.", e);
         }
@@ -478,7 +478,7 @@ public final class MediaSession {
             return;
         }
         try {
-            mBinder.setCurrentVolume(provider.onGetCurrentVolume());
+            mBinder.setCurrentVolume(provider.getCurrentVolume());
         } catch (RemoteException e) {
             Log.e(TAG, "Error in notifyVolumeChanged", e);
         }
