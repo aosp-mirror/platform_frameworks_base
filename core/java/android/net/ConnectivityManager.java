@@ -1298,7 +1298,7 @@ public class ConnectivityManager {
     }
 
     /**
-     * Callback for use with {@link ConnectivityManager#registerDefaultNetworkActiveListener}
+     * Callback for use with {@link ConnectivityManager#addDefaultNetworkActiveListener}
      * to find out when the system default network has gone in to a high power state.
      */
     public interface OnNetworkActiveListener {
@@ -1340,7 +1340,7 @@ public class ConnectivityManager {
      *
      * @param l The listener to be told when the network is active.
      */
-    public void registerDefaultNetworkActiveListener(final OnNetworkActiveListener l) {
+    public void addDefaultNetworkActiveListener(final OnNetworkActiveListener l) {
         INetworkActivityListener rl = new INetworkActivityListener.Stub() {
             @Override
             public void onNetworkActive() throws RemoteException {
@@ -1357,11 +1357,11 @@ public class ConnectivityManager {
 
     /**
      * Remove network active listener previously registered with
-     * {@link #registerDefaultNetworkActiveListener}.
+     * {@link #addDefaultNetworkActiveListener}.
      *
      * @param l Previously registered listener.
      */
-    public void unregisterDefaultNetworkActiveListener(OnNetworkActiveListener l) {
+    public void removeDefaultNetworkActiveListener(OnNetworkActiveListener l) {
         INetworkActivityListener rl = mNetworkActivityListeners.get(l);
         if (rl == null) {
             throw new IllegalArgumentException("Listener not registered: " + l);

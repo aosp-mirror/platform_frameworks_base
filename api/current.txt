@@ -17014,6 +17014,7 @@ package android.mtp {
 package android.net {
 
   public class ConnectivityManager {
+    method public void addDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     method public android.net.NetworkInfo getActiveNetworkInfo();
     method public android.net.NetworkInfo[] getAllNetworkInfo();
     method public android.net.Network[] getAllNetworks();
@@ -17027,8 +17028,8 @@ package android.net {
     method public boolean isActiveNetworkMetered();
     method public boolean isDefaultNetworkActive();
     method public static boolean isNetworkTypeValid(int);
-    method public void registerDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     method public void registerNetworkCallback(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback);
+    method public void removeDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     method public void reportBadNetwork(android.net.Network);
     method public void requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback);
     method public deprecated boolean requestRouteToHost(int, int);
@@ -17036,7 +17037,6 @@ package android.net {
     method public static boolean setProcessDefaultNetwork(android.net.Network);
     method public deprecated int startUsingNetworkFeature(int, java.lang.String);
     method public deprecated int stopUsingNetworkFeature(int, java.lang.String);
-    method public void unregisterDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     method public void unregisterNetworkCallback(android.net.ConnectivityManager.NetworkCallback);
     field public static final deprecated java.lang.String ACTION_BACKGROUND_DATA_SETTING_CHANGED = "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
     field public static final java.lang.String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
@@ -17110,6 +17110,7 @@ package android.net {
     method public int getPrefixLength();
     method public int getScope();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public final class LinkProperties implements android.os.Parcelable {
@@ -34333,7 +34334,7 @@ package android.view {
   }
 
   public final class ViewAnimationUtils {
-    method public static final android.animation.Animator createCircularReveal(android.view.View, int, int, float, float);
+    method public static android.animation.Animator createCircularReveal(android.view.View, int, int, float, float);
   }
 
   public class ViewConfiguration {
