@@ -306,7 +306,7 @@ please see themes_device_defaults.xml.
         <item name="actionOverflowMenuStyle">@style/Widget.Material.PopupMenu.Overflow</item>
         <item name="actionModeBackground">@drawable/cab_background_top_material</item>
         <item name="actionModeSplitBackground">@drawable/cab_background_bottom_material</item>
-        <item name="actionModeCloseDrawable">@drawable/ic_cab_done_material</item>
+        <item name="actionModeCloseDrawable">@drawable/ic_ab_back_material</item>
         <item name="actionBarTabStyle">@style/Widget.Material.ActionBar.TabView</item>
         <item name="actionBarTabBarStyle">@style/Widget.Material.ActionBar.TabBar</item>
         <item name="actionBarTabTextStyle">@style/Widget.Material.ActionBar.TabText</item>
@@ -652,7 +652,7 @@ please see themes_device_defaults.xml.
         <item name="actionOverflowMenuStyle">@style/Widget.Material.Light.PopupMenu.Overflow</item>
         <item name="actionModeBackground">@drawable/cab_background_top_material</item>
         <item name="actionModeSplitBackground">@drawable/cab_background_bottom_material</item>
-        <item name="actionModeCloseDrawable">@drawable/ic_cab_done_material</item>
+        <item name="actionModeCloseDrawable">@drawable/ic_ab_back_material</item>
         <item name="actionBarTabStyle">@style/Widget.Material.Light.ActionBar.TabView</item>
         <item name="actionBarTabBarStyle">@style/Widget.Material.Light.ActionBar.TabBar</item>
         <item name="actionBarTabTextStyle">@style/Widget.Material.Light.ActionBar.TabText</item>
