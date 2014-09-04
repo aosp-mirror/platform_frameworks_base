@@ -581,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"ចូល​ដំណើរការ​កម្មវិធី​បញ្ជា kernel MTP ដើម្បី​អនុវត្ត​ពិធីការ​យូអេសប៊ី MTP ។"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"សាកល្បង​ផ្នែក​រឹង"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"ឲ្យ​កម្មវិធី​ពិនិត្យ​គ្រឿង​ផ្សេងៗ​​សម្រាប់​សាកល្បង​ផ្នែក​រឹង។"</string>
+    <string name="permlab_fm" msgid="8749504526866832">"ចូល​ដំណើរការ​វិទ្យុ FM"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​វិទ្យុ FM ដើម្បី​ស្ដាប់​កម្មវិធី។"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ហៅ​លេខ​ទូរស័ព្ទ​ដោយ​ផ្ទាល់"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ឲ្យ​កម្មវិធី​ហៅ​លេខ​ទូរស័ព្ទ​ដោយ​គ្មាន​សកម្មភាព​របស់​អ្នក។​ វា​អាច​កាត់​លុយ​ ឬ​ហៅ​ដោយ​មិន​រំពឹង​ទុក។ ចំណាំ​ថា​ វា​មិន​អនុញ្ញាត​ឲ្យ​កម្មវិធី​ហៅ​លេខ​ពេល​អាសន្ន​ទេ។ កម្មវិធី​ព្យាបាទ​អាច​កាត់​លុយ​របស់​អ្នក​ ដោយ​ធ្វើការ​ហៅ​ដោយ​គ្មាន​ការ​បញ្ជាក់​របស់​អ្នក។"</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"ហៅ​លេខ​ទូរស័ព្ទ​ណាមួយ​ដោយ​ផ្ទាល់"</string>
@@ -1296,10 +1298,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"អនុញ្ញាត"</string>
     <string name="sms_control_no" msgid="625438561395534982">"បដិសេធ"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចង់​ផ្ញើ​សារ​ទៅ &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ។"</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"វា "<b>"អាច​គិត​លុយ"</b>" លើ​គណនី​ចល័ត​របស់​អ្នក។"</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"វា​នឹង​គិតលុយ​គណនី​ចល័ត​របស់​អ្នក។"</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"ផ្ញើ"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"បោះ​បង់​"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"ចងចាំ​ជម្រើស​របស់​ខ្ញុំ"</string>

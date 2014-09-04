@@ -581,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"MTP USB प्रोटोकॉल लागू करने के लिए कर्नेल MTP ड्राइवर में पहुंच की अनुमति देता है."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"परीक्षण हार्डवेयर"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"ऐप्स को हार्डवेयर परीक्षण के लिए विविध सहायक उपकरणों को नियंत्रित करने देता है."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"FM रेडियो एक्सेस करें"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"कार्यक्रमों को सुनने के लिए ऐप्स को FM रेडियो एक्सेस करने देती है."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"फ़ोन नंबर पर सीधे कॉल करें"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ऐप्स  को आपके हस्‍तक्षेप के बिना फ़ोन नंबर पर कॉल करने देता है. इसके परिणाम अप्रत्‍याशित शुल्‍क या कॉल हो सकते हैं. ध्यान दें कि यह ऐप्स  को आपातकालीन नंबर पर कॉल नहीं करने देता. दुर्भावनापूर्ण ऐप्स  आपकी पुष्टि के बिना कॉल करके आपका धन व्‍यय कर सकते हैं."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"किसी भी फ़ोन नंबर पर सीधे कॉल करें"</string>
@@ -1294,10 +1296,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"अनुमति दें"</string>
     <string name="sms_control_no" msgid="625438561395534982">"अस्वीकार करें"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; पर संदेश भेजना चाहता है."</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"इससे आपके मोबाइल खाते पर "<b>"शुल्क लग सकता है"</b>"."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"इससे आपके मोबाइल खाते पर शुल्क लगेगा."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"भेजें"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"रद्द करें"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"मेरी पसंद को याद रखें"</string>

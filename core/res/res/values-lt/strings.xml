@@ -581,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Leidžiama prieiga prie pagrindinės MTP tvarkyklės taikyti MTP USB protokolą."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"bandyti aparatinę įrangą"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Leidžiama programai valdyti įvairius periferinius įrenginius aparatinės įrangos bandymo tikslais."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"pasiekti FM radiją"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Programai leidžiama pasiekti FM radiją ir klausytis programų."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"skambinti tiesiogiai telefono numeriais"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Leidžiama programai skambinti telefonų numeriais be jūsų įsikišimo. Dėl to gali atsirasti nenumatytų apmokestinimų ar skambučių. Atminkite, kad programai neleidžiama skambinti pagalbos telefonų numeriais. Kenkėjiškos programos gali skambinti be jūsų patvirtinimo, o dėl to jums gali būti taikomi mokesčiai."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"skambinti tiesiogiai telefonų numeriais"</string>
@@ -1294,10 +1296,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Leisti"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Uždrausti"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; norėtų išsiųsti pranešimą šiuo adresu: &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"Taip "<b>"galite būti apmokestinti"</b>" mobiliojo ryšio operatoriaus."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Taip būsite apmokestinti mobiliojo ryšio operatoriaus."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Siųsti"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Atšaukti"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Atsiminti mano pasirinkimą"</string>

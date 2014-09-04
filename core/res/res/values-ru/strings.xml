@@ -581,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Разрешает доступ к драйверу основного устройства MTP для реализации протокола MTP USB"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"Проверка аппаратного обеспечения"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Приложение сможет управлять различными периферийными устройствами для проверки аппаратного обеспечения."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"Доступ к FM-радио"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Приложение сможет получать доступ к радиостанциям в FM-диапазоне."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"Осуществление телефонных вызовов"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Приложение сможет без вашего участия звонить на любой номер телефона. Это не относится к номерам экстренных служб. Вредоносные программы смогут совершать вызовы без вашего разрешения, что может привести к непредвиденным расходам."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"Осуществление телефонных вызовов"</string>
@@ -1294,10 +1296,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Разрешить"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Запретить"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"Приложение &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; собирается отправить сообщение на адрес &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"С вашего мобильного счета "<b>"могут быть списаны средства"</b>"."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"С вашего мобильного счета будут списаны средства."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Отправить"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Отмена"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Запомнить выбранный телефон"</string>

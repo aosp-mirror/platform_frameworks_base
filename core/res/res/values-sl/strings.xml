@@ -581,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Omogoča dostop do gonilnika jedra MTP za uveljavitev protokola MTP USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"preskušanje strojne opreme"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Programu omogoča nadzor različnih zunanjih naprav za preskušanje strojne opreme."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"dostop do radia FM"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Aplikaciji dovoli dostop do radia FM za poslušanje programov."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"neposredno klicanje telefonskih številk"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Aplikaciji omogoča klicanje telefonskih številk brez vašega posredovanja. Zaradi tega lahko pride do nepričakovanih stroškov ali klicev. Aplikaciji to ne dovoljuje opravljanja klicev v sili. Zlonamerne aplikacije lahko kličejo brez vaše potrditve, kar vas lahko drago stane."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"neposredno klicanje poljubnih telefonskih številk"</string>
@@ -1294,10 +1296,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Dovoli"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Zavrni"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; želi poslati sporočilo na &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"S tem "<b>"bo morda bremenjen račun"</b>" za vašo mobilno napravo."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"S tem bo bremenjen vaš račun za mobilno napravo."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Pošlji"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Prekliči"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Zapomni si mojo izbiro"</string>
