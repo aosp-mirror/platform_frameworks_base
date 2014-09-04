@@ -3484,11 +3484,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         private void notifyWindowsChanged() {
-            // Let the client know the windows changed.
-            AccessibilityEvent event = AccessibilityEvent.obtain(
-                    AccessibilityEvent.TYPE_WINDOWS_CHANGED);
-            event.setEventTime(SystemClock.uptimeMillis());
-            sendAccessibilityEvent(event, mCurrentUserId);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                // Let the client know the windows changed.
+                AccessibilityEvent event = AccessibilityEvent.obtain(
+                        AccessibilityEvent.TYPE_WINDOWS_CHANGED);
+                event.setEventTime(SystemClock.uptimeMillis());
+                sendAccessibilityEvent(event, mCurrentUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         public boolean canGetAccessibilityNodeInfoLocked(Service service, int windowId) {
