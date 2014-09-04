@@ -619,7 +619,7 @@ please see styles_device_defaults.xml.
         <item name="headerTimeTextAppearance">@style/TextAppearance.Material.TimePicker.TimeLabel</item>
         <item name="headerAmPmTextAppearance">@style/TextAppearance.Material.TimePicker.AmPmLabel</item>
         <item name="headerSelectedTextColor">?attr/textColorPrimaryInverse</item>
-        <item name="headerBackgroundColor">?attr/colorAccent</item>
+        <item name="headerBackground">@drawable/time_picker_header_material</item>
         <item name="numbersTextColor">?attr/textColorSecondary</item>
         <item name="numbersBackgroundColor">#10ffffff</item>
         <item name="amPmTextColor">?attr/textColorSecondary</item>
@@ -634,13 +634,13 @@ please see styles_device_defaults.xml.
         <!-- Attributes for new-style DatePicker. -->
         <item name="internalLayout">@layout/date_picker_holo</item>
         <item name="calendarViewShown">true</item>
-        <item name="dayOfWeekBackgroundColor">#10000000</item>
+        <item name="dayOfWeekBackground">#10000000</item>
         <item name="dayOfWeekTextAppearance">@style/TextAppearance.Material.DatePicker.DayOfWeekLabel</item>
         <item name="headerMonthTextAppearance">@style/TextAppearance.Material.DatePicker.MonthLabel</item>
         <item name="headerDayOfMonthTextAppearance">@style/TextAppearance.Material.DatePicker.DayOfMonthLabel</item>
         <item name="headerYearTextAppearance">@style/TextAppearance.Material.DatePicker.YearLabel</item>
         <item name="headerSelectedTextColor">?attr/textColorPrimaryInverse</item>
-        <item name="headerBackgroundColor">?attr/colorAccent</item>
+        <item name="headerBackground">?attr/colorAccent</item>
         <item name="yearListItemTextAppearance">@style/TextAppearance.Material.DatePicker.List.YearLabel</item>
         <item name="yearListSelectorColor">?attr/colorControlActivated</item>
         <item name="calendarTextColor">?attr/textColorSecondary</item>

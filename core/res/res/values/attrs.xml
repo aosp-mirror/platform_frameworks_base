@@ -4344,7 +4344,7 @@
         <!-- @hide The layout of the legacy DatePicker. -->
         <attr name="legacyLayout" />
         <!-- The background color for the date selector 's day of week. -->
-        <attr name="dayOfWeekBackgroundColor" format="color" />
+        <attr name="dayOfWeekBackground" format="color|reference" />
         <!-- The text color for the date selector's day of week. -->
         <attr name="dayOfWeekTextAppearance" format="reference" />
         <!-- The month's text appearance in the date selector. -->
@@ -4353,8 +4353,8 @@
         <attr name="headerDayOfMonthTextAppearance" format="reference" />
         <!-- The year's text appearance in the date selector. -->
         <attr name="headerYearTextAppearance" format="reference" />
-        <!-- The background color for the date selector. -->
-        <attr name="headerBackgroundColor" />
+        <!-- The background for the date selector. -->
+        <attr name="headerBackground" />
         <!-- @hide The selected text color for the date selector. Used as a
              backup if the text appearance does not explicitly have a color
              set for the selected state. -->
@@ -4651,29 +4651,29 @@
         <attr name="legacyLayout" format="reference" />
         <!-- @hide The layout of the time picker. -->
         <attr name="internalLayout" />
-        <!-- The text appearance for the AM/PM header of the TimePicker. -->
+        <!-- The text appearance for the AM/PM header. -->
         <attr name="headerAmPmTextAppearance" format="reference" />
-        <!-- The text appearance for the time header of the TimePicker. -->
+        <!-- The text appearance for the time header. -->
         <attr name="headerTimeTextAppearance" format="reference" />
         <!-- @hide The text color for selected time header of the TimePicker.
              This will override the value from the text appearance if it does
              not explicitly have a color set for the selected state. -->
         <attr name="headerSelectedTextColor" format="color" />
-        <!-- The background color for the header of the TimePicker. -->
-        <attr name="headerBackgroundColor" format="color" />
-        <!-- The color for the hours/minutes numbers of the TimePicker. -->
+        <!-- The background for the header containing the currently selected time. -->
+        <attr name="headerBackground" />
+        <!-- The color for the hours/minutes numbers. -->
         <attr name="numbersTextColor" format="color" />
-        <!-- The background color for the hours/minutes numbers of the TimePicker. -->
+        <!-- The background color for the hours/minutes numbers. -->
         <attr name="numbersBackgroundColor" format="color" />
-        <!-- The color for the AM/PM selectors of the TimePicker. -->
+        <!-- The color for the AM/PM selectors. -->
         <attr name="amPmTextColor" format="color" />
-        <!-- The background color state list for the AM/PM selectors of the TimePicker. -->
+        <!-- The background color state list for the AM/PM selectors. -->
         <attr name="amPmBackgroundColor" format="color" />
         <!-- @hide The background color for the AM/PM selectors of the
              TimePicker when selected. Used if the background color does not
              explicitly have a color set for the selected state. -->
         <attr name="amPmSelectedBackgroundColor" format="color" />
-        <!-- The color for the hours/minutes selector of the TimePicker. -->
+        <!-- The color for the hours/minutes selector. -->
         <attr name="numbersSelectorColor" format="color" />
         <!-- Defines the look of the widget. Prior to the L release, the only choice was
              spinner. As of L, with the Material theme selected, the default layout is clock,
@@ -7429,6 +7429,9 @@
 
     <!-- @removed -->
     <attr name="__removed1" format="reference" />
+
+    <!-- TODO: Spacer to be removed from here and public.xml -->
+    <attr name="__removed2" format="reference" />
 
     <!-- Attributes that can be used with <code>rating-system-definition</code> tags inside of the
          XML resource that describes TV content rating of a {@link android.media.tv.TvInputService},

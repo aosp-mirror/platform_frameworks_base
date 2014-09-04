@@ -21,7 +21,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:focusable="true"
     android:layout_marginLeft="@dimen/timepicker_minimum_margin_sides"
     android:layout_marginRight="@dimen/timepicker_minimum_margin_sides"
     android:layout_marginTop="@dimen/timepicker_minimum_margin_top_bottom"
@@ -42,7 +41,5 @@
         android:id="@+id/radial_picker"
         android:layout_width="@dimen/timepicker_radial_picker_dimen"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:focusable="true"
-        android:focusableInTouchMode="true" />
+        android:layout_gravity="center" />
 </LinearLayout>
