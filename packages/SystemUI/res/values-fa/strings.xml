@@ -128,6 +128,10 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"دو میله."</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"سه میله."</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"سیگنال کامل."</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"روشن."</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"خاموش."</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"متصل."</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"در حال مرتبط‌ شدن."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -351,5 +355,9 @@
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"‏مدیریت این دستگاه توسط:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nمدیریت نمایه‌تان توسط:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nسرپرستتان می‌تواند فعالیت شبکه‌تان را کنترل کند از جمله ایمیل‌ها، برنامه‌ها و وب‌سایت‌های ایمن. برای کسب اطلاعات بیشتر، با سرپرستتان تماس بگیرید.\n\nهمچنین، به «<xliff:g id="APPLICATION">%3$s</xliff:g>» اجازه دادید اتصال VPN را تنظیم کند. این برنامه می‌تواند فعالیت شبکه‌ را نیز کنترل کند."</string>
     <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"‏مدیریت این دستگاه توسط:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nمدیریت نمایه‌تان توسط:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nسرپرستتان می‌تواند فعالیت شبکه‌تان را کنترل کند از جمله ایمیل‌ها، برنامه‌ها و وب‌سایت‌های ایمن. برای کسب اطلاعات بیشتر، با سرپرستتان تماس بگیرید.\n\nهمچنین، به VPN ‏(«<xliff:g id="APPLICATION">%3$s</xliff:g>») وصل هستید. ارائه‌دهنده سرویس VPN شما می‌تواند فعالیت شبکه را نیز کنترل کند."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"دستگاه قفل باقی می‌ماند تا زمانی که قفل آن را به صورت دستی باز کنید"</string>
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"دریافت سریع‌تر اعلان‌ها"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"قبل از باز کردن قفل آنها را مشاهده کنید"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"خیر، سپاسگزارم"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"راه‌اندازی"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> آن را بی‌صدا کرد"</string>
 </resources>

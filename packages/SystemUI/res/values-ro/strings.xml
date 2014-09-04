@@ -128,6 +128,10 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"Două bare."</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"Trei bare."</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"Semnal complet."</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Activat."</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"Dezactivat."</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"Conectat."</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Se conectează."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -352,5 +356,9 @@
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"Disp. este gestionat de:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nProfilul este gestionat de:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nAdm. poate monitoriza activitatea în rețea (e-mailurile, aplicațiile și site-urile securizate). Pt. mai multe informații, contactați adm.\n\nÎn plus, ați permis aplicației „<xliff:g id="APPLICATION">%3$s</xliff:g>” să config. o conexiune VPN. Și aceasta poate monitoriza activitatea în rețea."</string>
     <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"Dispozitivul este gestionat de:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nProfilul este gestionat de:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nAdm. poate monitoriza activitatea în rețea (e-mailurile, aplicațiile și site-urile securizate). Pt. mai multe informații, contactați adm.\n\nSunteți conectat(ă) și la VPN („<xliff:g id="APPLICATION">%3$s</xliff:g>”). Și furnizorul de servicii VPN poate monitoriza activitatea în rețea."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Dispozitivul va rămâne blocat până când îl deblocați manual"</string>
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"Obțineți notificări mai rapid"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"Doresc să se afișeze înainte de deblocare"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nu, mulț."</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"Config."</string>
     <string name="muted_by" msgid="6147073845094180001">"Dezactivate de <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

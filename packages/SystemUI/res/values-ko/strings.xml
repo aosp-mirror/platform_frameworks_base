@@ -130,6 +130,10 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"신호 막대가 두 개입니다."</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"신호 막대가 세 개입니다."</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"신호가 강합니다."</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"사용"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"사용 안함"</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"연결됨"</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"연결 중..."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -284,8 +288,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"검색"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 위로 슬라이드"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 왼쪽으로 슬라이드"</string>
-    <!-- no translation found for zen_no_interruptions_with_warning (4396898053735625287) -->
-    <skip />
+    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"어떤 방해도 받지 않습니다. 알람도 울리지 않습니다."</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"모든 알림 차단"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"최우선 알림만 수신"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"다음 알람 시각: <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
@@ -335,12 +338,10 @@
     <string name="media_projection_action_text" msgid="8470872969457985954">"시작하기"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"알림 없음"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"기기가 모니터링될 수 있음"</string>
-    <!-- no translation found for profile_owned_footer (8021888108553696069) -->
-    <skip />
+    <string name="profile_owned_footer" msgid="8021888108553696069">"프로필이 모니터링될 수 있음"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"네트워크가 모니터링될 수 있음"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"기기 모니터링"</string>
-    <!-- no translation found for monitoring_title_profile_owned (6790109874733501487) -->
-    <skip />
+    <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"프로필 모니터링"</string>
     <string name="monitoring_title" msgid="169206259253048106">"네트워크 모니터링"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN 사용 중지"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN 연결 해제"</string>
@@ -349,18 +350,16 @@
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"VPN(\'<xliff:g id="APPLICATION">%1$s</xliff:g>\')에 연결되었습니다.\n\nVPN 서비스 제공업체에서 내 기기와 이메일, 앱, 보안 웹사이트 등의 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"이 기기는 \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다.\n\n관리자가 이메일, 앱, 보안 웹사이트 등의 네트워크 활동을 모니터링할 수 있습니다. 자세한 정보는 관리자에게 문의하세요.\n\n또한 \'<xliff:g id="APPLICATION">%2$s</xliff:g>\'에 VPN 연결을 설정할 수 있는 권한을 부여했습니다. 이 앱에서도 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"이 기기는 \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다.\n\n관리자가 이메일, 앱, 보안 웹사이트 등의 네트워크 활동을 모니터링할 수 있습니다. 자세한 정보는 관리자에게 문의하세요.\n\n또한 VPN에도 연결되었습니다(\'<xliff:g id="APPLICATION">%2$s</xliff:g>\'). VPN 서비스 제공업체에서도 네트워크 활동을 모니터링할 수 있습니다."</string>
-    <!-- no translation found for monitoring_description_profile_owned (2370062794285691713) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (8685301493845456293) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (847491346263295767) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_profile_owned (4095516964132237051) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (9193588924767232909) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_device_and_profile_owned (6935475023447698473) -->
-    <skip />
+    <string name="monitoring_description_profile_owned" msgid="2370062794285691713">"프로필 관리자:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n관리자는 이메일, 앱, 보안 웹사이트를 비롯한 네트워크 활동과 내 기기를 모니터링할 수 있습니다.\n\n자세한 정보는 관리자에게 문의하세요."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="8685301493845456293">"기기 관리자:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\n프로필 관리자:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\n관리자는 이메일, 앱, 보안 웹사이트를 비롯한 네트워크 활동과 내 기기를 모니터링할 수 있습니다.\n\n자세한 정보는 관리자에게 문의하세요."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="847491346263295767">"프로필 관리자:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n관리자는 이메일, 앱, 보안 웹사이트를 비롯한 내 네트워크 활동을 모니터링할 수 있습니다. 자세한 정보는 관리자에게 문의하세요.\n\n또한 \'<xliff:g id="APPLICATION">%2$s</xliff:g>\'에 VPN 연결을 설정할 수 있는 권한을 부여했습니다. 이 앱에서도 네트워크 활동을 모니터링할 수 있습니다."</string>
+    <string name="monitoring_description_legacy_vpn_profile_owned" msgid="4095516964132237051">"프로필 관리자:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n관리자는 이메일, 앱, 보안 웹사이트를 비롯한 내 네트워크 활동을 모니터링할 수 있습니다. 자세한 정보는 관리자에게 문의하세요.\n\n또한 현재 VPN(\'<xliff:g id="APPLICATION">%2$s</xliff:g>\')에 연결되어 있습니다. VPN 서비스 제공업체에서도 네트워크 활동을 모니터링할 수 있습니다."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"기기 관리자:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\n프로필 관리자:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\n관리자는 이메일, 앱, 보안 웹사이트를 비롯한 내 네트워크 활동을 모니터링할 수 있습니다. 자세한 정보는 관리자에게 문의하세요.\n\n또한 \'<xliff:g id="APPLICATION">%3$s</xliff:g>\'에 VPN 연결을 설정할 수 있는 권한을 부여했습니다. 이 앱에서도 네트워크 활동을 모니터링할 수 있습니다."</string>
+    <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"기기 관리자:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\n프로필 관리자:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\n관리자는 이메일, 앱, 보안 웹사이트를 비롯한 내 네트워크 활동을 모니터링할 수 있습니다. 자세한 정보는 관리자에게 문의하세요.\n\n또한 현재 VPN(\'<xliff:g id="APPLICATION">%3$s</xliff:g>\')에 연결되어 있습니다. VPN 서비스 제공업체에서도 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"수동으로 잠금 해제할 때까지 기기가 잠금 상태로 유지됩니다."</string>
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"알림을 더욱 빠르게 받기"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"잠금 해제하기 전에 알림을 봅니다."</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"사용 안함"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"설정"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>에서 알림음 음소거"</string>
 </resources>

@@ -128,6 +128,10 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"Zwei Balken"</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"Drei Balken"</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"Volle Signalstärke"</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"An"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"Aus"</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"Verbunden"</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Verbindung wird hergestellt."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -284,8 +288,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"Suche"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Zum <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach oben schieben"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Zum <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach links schieben"</string>
-    <!-- no translation found for zen_no_interruptions_with_warning (4396898053735625287) -->
-    <skip />
+    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Keine Unterbrechungen. Auch keine Weckrufe."</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Keine Unterbrechungen"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"Nur wichtige Unterbrechungen"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"Nächster Weckruf: <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
@@ -335,12 +338,10 @@
     <string name="media_projection_action_text" msgid="8470872969457985954">"Jetzt starten"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Keine Benachrichtigungen"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"Das Gerät wird möglicherweise überwacht."</string>
-    <!-- no translation found for profile_owned_footer (8021888108553696069) -->
-    <skip />
+    <string name="profile_owned_footer" msgid="8021888108553696069">"Profil wird möglicherweise überwacht."</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Das Netzwerk wird möglicherweise überwacht."</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Geräteüberwachung"</string>
-    <!-- no translation found for monitoring_title_profile_owned (6790109874733501487) -->
-    <skip />
+    <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Profilüberwachung"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Netzwerküberwachung"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN deaktivieren"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN-Verbindung trennen"</string>
@@ -349,18 +350,16 @@
     <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Sie sind mit einem VPN verbunden: <xliff:g id="APPLICATION">%1$s</xliff:g>.\n\nIhr VPN-Anbieter kann Ihr Gerät und Ihre Netzwerkaktivität überwachen, einschließlich E-Mails, Apps und sicherer Websites."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Dieses Gerät wird verwaltet von:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nIhr Administrator kann Ihre Netzwerkaktivitäten überwachen, darunter E-Mails, Apps und sichere Websites. Mehr erfahren Sie von Ihrem Administrator.\n\nSie haben zudem \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" gestattet, eine VPN-Verbindung herzustellen. Diese App kann auch Ihre Netzwerkaktivitäten überwachen."</string>
     <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Dieses Gerät wird verwaltet von:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nIhr Administrator kann Ihre Netzwerkaktivitäten überwachen, einschließlich E-Mails, Apps und sicherer Websites. Mehr erfahren Sie von Ihrem Administrator.\n\nSie sind zudem mit einem VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") verbunden. Ihr VPN-Anbieter kann ebenfalls Ihre Netzwerkaktivitäten überwachen."</string>
-    <!-- no translation found for monitoring_description_profile_owned (2370062794285691713) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (8685301493845456293) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (847491346263295767) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_profile_owned (4095516964132237051) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (9193588924767232909) -->
-    <skip />
-    <!-- no translation found for monitoring_description_legacy_vpn_device_and_profile_owned (6935475023447698473) -->
-    <skip />
+    <string name="monitoring_description_profile_owned" msgid="2370062794285691713">"Dieses Profil wird verwaltet von:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nIhr Administrator kann Ihr Gerät und Ihre Netzwerkaktivität überwachen, einschließlich E-Mails, Apps und sicherer Websites.\n\nWeitere Informationen erhalten Sie von Ihrem Administrator."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="8685301493845456293">"Dieses Gerät wird verwaltet von:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nIhr Profil wird verwaltet von:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nIhr Administrator kann Ihr Gerät und Ihre Netzwerkaktivität überwachen, einschließlich E-Mails, Apps und sicherer Websites.\n\nWeitere Informationen erhalten Sie von Ihrem Administrator."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="847491346263295767">"Dieses Profil wird verwaltet von:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nIhr Administrator kann Ihre Netzwerkaktivität überwachen, darunter E-Mails, Apps und sichere Websites. Mehr erfahren Sie von Ihrem Administrator.\n\nSie haben zudem \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" gestattet, eine VPN-Verbindung herzustellen. Diese App kann Ihre Netzwerkaktivität auch überwachen."</string>
+    <string name="monitoring_description_legacy_vpn_profile_owned" msgid="4095516964132237051">"Dieses Profil wird verwaltet von:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nIhr Administrator kann Ihre Netzwerkaktivitäten überwachen, einschließlich E-Mails, Apps und sicherer Websites. Mehr erfahren Sie von Ihrem Administrator.\n\nSie sind zudem mit einem VPN verbunden (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). Ihr VPN-Anbieter kann die Netzwerkaktivität ebenfalls überwachen."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"Dieses Gerät wird verwaltet von:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nIhr Profil wird verwaltet von:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nIhr Administrator kann Ihre Netzwerkaktivität überwachen, einschließlich E-Mails, Apps und sicherer Websites. Weitere Informationen erhalten Sie von Ihrem Administrator.\n\nSie haben zudem \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" das Herstellen einer VPN-Verbindung gestattet. Diese App kann die Netzwerkaktivität auch überwachen."</string>
+    <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"Dieses Gerät wird verwaltet von:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nIhr Profil wird verwaltet von:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nIhr Administrator kann Ihre Netzwerkaktivität überwachen, einschließlich E-Mails, Apps und sicherer Websites. Weitere Informationen erhalten Sie von Ihrem Administrator.\n\nSie sind zudem mit einem VPN verbunden (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\"). Ihr VPN-Anbieter kann die Netzwerkaktivität ebenfalls überwachen."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Das Gerät bleibt gesperrt, bis Sie es manuell entsperren."</string>
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"Benachrichtigungen schneller erhalten"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"Vor dem Entsperren anzeigen"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nein danke"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"Einrichten"</string>
     <string name="muted_by" msgid="6147073845094180001">"Stummgeschaltet durch <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

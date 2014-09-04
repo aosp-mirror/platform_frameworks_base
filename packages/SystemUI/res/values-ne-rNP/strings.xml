@@ -128,6 +128,10 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"दुई पट्टिहरू।"</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"तिनवटा पट्टिहरू"</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"सङ्केत पूर्ण छ।"</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"चालु।"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"बन्द गर्नुहोस्।"</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"जडान गरिएको।"</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"जडान हुँदै।"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -351,5 +355,9 @@
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"यस उपकरण र तपाईँको प्रोफाइल \n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\n र \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\n ले व्यवस्थित गरिएको छ। तपाईँको प्रशासकले सञ्जाल गतिविधि निगरानी गर्न सक्षम छन् जस्तै इमेल, अनुप्रयोग र सुरक्षित वेबसाइट। थप जान्न प्रशासकलाई सम्पर्क गर्नुहोला।\n\nसाथै, तपाईँले VPN जडान स्थापित गर्न \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" अनुमति दिनुभयो। यो अनुप्रयोगले संजालको निगरानी पनि गर्न सक्छ।"</string>
     <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"यो उपकरणको व्यवस्थित \n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\n ले गरेको छ। तपाईँको प्रोफाइल \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\n ले व्यवस्थित गरिएको छ। तपाईँको प्रशासकले सञ्जाल गतिविधि निगरानी गर्न सक्षम छन् जसमा इमेल, अनुप्रयोग र सुरक्षित वेबसाइट छ। थप जान्न प्रशासकलाई सम्पर्क गर्नुहोला।\n\nसाथै, तपाईँ VPN (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\") मा जडित हुनुहुन्छ। जुन सेवा प्रदायकले निगरानी गर्न सक्ने छन्।"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"तपाईँले नखोले सम्म उपकरण बन्द रहनेछ"</string>
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"छिटो सूचनाहरू प्राप्त गर्नुहोस्"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"तपाईँले अनलक गर्नअघि तिनीहरूलाई हेर्नुहोस्"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"धन्यवाद पर्दैन"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"सेटअप गर्नुहोस्"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> द्वारा मौन गरिएको"</string>
 </resources>
