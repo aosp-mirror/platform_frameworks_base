@@ -16722,10 +16722,10 @@ package android.media.tv {
   }
 
   public final class TvInputInfo implements android.os.Parcelable {
+    method public android.content.Intent createSettingsIntent();
+    method public android.content.Intent createSetupIntent();
     method public int describeContents();
     method public java.lang.String getId();
-    method public android.content.Intent getIntentForSettingsActivity();
-    method public android.content.Intent getIntentForSetupActivity();
     method public java.lang.String getParentId();
     method public android.content.pm.ServiceInfo getServiceInfo();
     method public int getType();
@@ -16733,7 +16733,8 @@ package android.media.tv {
     method public android.graphics.drawable.Drawable loadIcon(android.content.Context);
     method public java.lang.CharSequence loadLabel(android.content.Context);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final java.lang.String EXTRA_INPUT_ID = "inputId";
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final java.lang.String EXTRA_INPUT_ID = "android.media.tv.extra.INPUT_ID";
     field public static final int TYPE_COMPONENT = 1004; // 0x3ec
     field public static final int TYPE_COMPOSITE = 1001; // 0x3e9
     field public static final int TYPE_DISPLAY_PORT = 1008; // 0x3f0
@@ -16752,23 +16753,23 @@ package android.media.tv {
     method public java.util.List<android.media.tv.TvInputInfo> getTvInputList();
     method public boolean isParentalControlsEnabled();
     method public boolean isRatingBlocked(android.media.tv.TvContentRating);
-    method public void registerListener(android.media.tv.TvInputManager.TvInputListener, android.os.Handler);
-    method public void unregisterListener(android.media.tv.TvInputManager.TvInputListener);
-    field public static final java.lang.String ACTION_BLOCKED_RATINGS_CHANGED = "android.media.tv.TvInputManager.ACTION_BLOCKED_RATINGS_CHANGED";
-    field public static final java.lang.String ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED = "android.media.tv.TvInputManager.ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED";
-    field public static final java.lang.String ACTION_QUERY_CONTENT_RATING_SYSTEMS = "android.media.tv.TvInputManager.ACTION_QUERY_CONTENT_RATING_SYSTEMS";
+    method public void registerCallback(android.media.tv.TvInputManager.TvInputCallback, android.os.Handler);
+    method public void unregisterCallback(android.media.tv.TvInputManager.TvInputCallback);
+    field public static final java.lang.String ACTION_BLOCKED_RATINGS_CHANGED = "android.media.tv.action.BLOCKED_RATINGS_CHANGED";
+    field public static final java.lang.String ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED = "android.media.tv.action.PARENTAL_CONTROLS_ENABLED_CHANGED";
+    field public static final java.lang.String ACTION_QUERY_CONTENT_RATING_SYSTEMS = "android.media.tv.action.QUERY_CONTENT_RATING_SYSTEMS";
     field public static final int INPUT_STATE_CONNECTED = 0; // 0x0
     field public static final int INPUT_STATE_CONNECTED_STANDBY = 1; // 0x1
     field public static final int INPUT_STATE_DISCONNECTED = 2; // 0x2
-    field public static final java.lang.String META_DATA_CONTENT_RATING_SYSTEMS = "android.media.tv.TvInputManager.META_DATA_CONTENT_RATING_SYSTEMS";
+    field public static final java.lang.String META_DATA_CONTENT_RATING_SYSTEMS = "android.media.tv.metadata.CONTENT_RATING_SYSTEMS";
     field public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = 3; // 0x3
     field public static final int VIDEO_UNAVAILABLE_REASON_TUNING = 1; // 0x1
     field public static final int VIDEO_UNAVAILABLE_REASON_UNKNOWN = 0; // 0x0
     field public static final int VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL = 2; // 0x2
   }
 
-  public static abstract class TvInputManager.TvInputListener {
-    ctor public TvInputManager.TvInputListener();
+  public static abstract class TvInputManager.TvInputCallback {
+    ctor public TvInputManager.TvInputCallback();
     method public void onInputAdded(java.lang.String);
     method public void onInputRemoved(java.lang.String);
     method public void onInputStateChanged(java.lang.String, int);
@@ -16859,10 +16860,10 @@ package android.media.tv {
     method public boolean onUnhandledInputEvent(android.view.InputEvent);
     method public void reset();
     method public void selectTrack(int, java.lang.String);
+    method public void setCallback(android.media.tv.TvView.TvInputCallback);
     method public void setCaptionEnabled(boolean);
     method public void setOnUnhandledInputEventListener(android.media.tv.TvView.OnUnhandledInputEventListener);
     method public void setStreamVolume(float);
-    method public void setTvInputListener(android.media.tv.TvView.TvInputListener);
     method public void tune(java.lang.String, android.net.Uri);
   }
 
@@ -16870,8 +16871,8 @@ package android.media.tv {
     method public abstract boolean onUnhandledInputEvent(android.view.InputEvent);
   }
 
-  public static abstract class TvView.TvInputListener {
-    ctor public TvView.TvInputListener();
+  public static abstract class TvView.TvInputCallback {
+    ctor public TvView.TvInputCallback();
     method public void onChannelRetuned(java.lang.String, android.net.Uri);
     method public void onConnectionFailed(java.lang.String);
     method public void onContentAllowed(java.lang.String);

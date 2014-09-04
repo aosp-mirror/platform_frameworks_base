@@ -102,7 +102,7 @@ public final class TvInputInfo implements Parcelable {
     /**
      * The ID of the TV input to provide to the setup activity and settings activity.
      */
-    public static final String EXTRA_INPUT_ID = "inputId";
+    public static final String EXTRA_INPUT_ID = "android.media.tv.extra.INPUT_ID";
 
     private static SparseIntArray sHardwareTypeToTvInputType = new SparseIntArray();
 
@@ -319,9 +319,9 @@ public final class TvInputInfo implements Parcelable {
     }
 
     /**
-     * Returns an intent to start the setup activity for this TV input service.
+     * Returns an intent to start the setup activity for this TV input.
      */
-    public Intent getIntentForSetupActivity() {
+    public Intent createSetupIntent() {
         if (!TextUtils.isEmpty(mSetupActivity)) {
             Intent intent = new Intent(Intent.ACTION_MAIN);
             intent.setClassName(mService.serviceInfo.packageName, mSetupActivity);
@@ -332,9 +332,9 @@ public final class TvInputInfo implements Parcelable {
     }
 
     /**
-     * Returns an intent to start the settings activity for this TV input service.
+     * Returns an intent to start the settings activity for this TV input.
      */
-    public Intent getIntentForSettingsActivity() {
+    public Intent createSettingsIntent() {
         if (!TextUtils.isEmpty(mSettingsActivity)) {
             Intent intent = new Intent(Intent.ACTION_MAIN);
             intent.setClassName(mService.serviceInfo.packageName, mSettingsActivity);
@@ -532,10 +532,6 @@ public final class TvInputInfo implements Parcelable {
                 DELIMITER_INFO_IN_ID, PREFIX_HARDWARE_DEVICE, hardwareInfo.getDeviceId());
     }
 
-    /**
-     * Used to make this class parcelable.
-     * @hide
-     */
     public static final Parcelable.Creator<TvInputInfo> CREATOR =
             new Parcelable.Creator<TvInputInfo>() {
         @Override
