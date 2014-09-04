@@ -125,6 +125,7 @@ public class DatePicker extends FrameLayout {
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DatePicker,
                 defStyleAttr, defStyleRes);
         final int mode = a.getInt(R.styleable.DatePicker_datePickerMode, MODE_SPINNER);
+        final int firstDayOfWeek = a.getInt(R.styleable.DatePicker_firstDayOfWeek, 0);
         a.recycle();
 
         switch (mode) {
@@ -135,6 +136,10 @@ public class DatePicker extends FrameLayout {
             default:
                 mDelegate = createSpinnerUIDelegate(context, attrs, defStyleAttr, defStyleRes);
                 break;
+        }
+
+        if (firstDayOfWeek != 0) {
+            setFirstDayOfWeek(firstDayOfWeek);
         }
     }
 
@@ -300,6 +305,47 @@ public class DatePicker extends FrameLayout {
     }
 
     /**
+     * Sets the first day of week.
+     *
+     * @param firstDayOfWeek The first day of the week conforming to the
+     *            {@link CalendarView} APIs.
+     * @see Calendar#SUNDAY
+     * @see Calendar#MONDAY
+     * @see Calendar#TUESDAY
+     * @see Calendar#WEDNESDAY
+     * @see Calendar#THURSDAY
+     * @see Calendar#FRIDAY
+     * @see Calendar#SATURDAY
+     *
+     * @attr ref android.R.styleable#DatePicker_firstDayOfWeek
+     */
+    public void setFirstDayOfWeek(int firstDayOfWeek) {
+        if (firstDayOfWeek < Calendar.SUNDAY || firstDayOfWeek > Calendar.SATURDAY) {
+            throw new IllegalArgumentException("firstDayOfWeek must be between 1 and 7");
+        }
+        mDelegate.setFirstDayOfWeek(firstDayOfWeek);
+    }
+
+    /**
+     * Gets the first day of week.
+     *
+     * @return The first day of the week conforming to the {@link CalendarView}
+     *         APIs.
+     * @see Calendar#SUNDAY
+     * @see Calendar#MONDAY
+     * @see Calendar#TUESDAY
+     * @see Calendar#WEDNESDAY
+     * @see Calendar#THURSDAY
+     * @see Calendar#FRIDAY
+     * @see Calendar#SATURDAY
+     *
+     * @attr ref android.R.styleable#DatePicker_firstDayOfWeek
+     */
+    public int getFirstDayOfWeek() {
+        return mDelegate.getFirstDayOfWeek();
+    }
+
+    /**
      * Gets whether the {@link CalendarView} is shown.
      *
      * @return True if the calendar view is shown.
@@ -315,7 +361,7 @@ public class DatePicker extends FrameLayout {
      * @return The calendar view.
      * @see #getCalendarViewShown()
      */
-    public CalendarView getCalendarView () {
+    public CalendarView getCalendarView() {
         return mDelegate.getCalendarView();
     }
 
@@ -381,6 +427,9 @@ public class DatePicker extends FrameLayout {
         int getYear();
         int getMonth();
         int getDayOfMonth();
+
+        void setFirstDayOfWeek(int firstDayOfWeek);
+        int getFirstDayOfWeek();
 
         void setMinDate(long minDate);
         Calendar getMinDate();
@@ -696,6 +745,16 @@ public class DatePicker extends FrameLayout {
         @Override
         public int getDayOfMonth() {
             return mCurrentDate.get(Calendar.DAY_OF_MONTH);
+        }
+
+        @Override
+        public void setFirstDayOfWeek(int firstDayOfWeek) {
+            mCalendarView.setFirstDayOfWeek(firstDayOfWeek);
+        }
+
+        @Override
+        public int getFirstDayOfWeek() {
+            return mCalendarView.getFirstDayOfWeek();
         }
 
         @Override
