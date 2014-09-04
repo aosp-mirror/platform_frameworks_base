@@ -17,7 +17,6 @@
 package com.android.server.usage;
 
 import android.app.usage.TimeSparseArray;
-import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -133,9 +132,30 @@ class UsageStatsDatabase {
     }
 
     /**
-     * Find all {@link UsageStats} for the given range and interval type.
+     * Figures out what to extract from the given IntervalStats object.
      */
-    public List<UsageStats> queryUsageStats(int intervalType, long beginTime, long endTime) {
+    interface StatCombiner<T> {
+
+        /**
+         * Implementations should extract interesting from <code>stats</code> and add it
+         * to the <code>accumulatedResult</code> list.
+         *
+         * If the <code>stats</code> object is mutable, <code>mutable</code> will be true,
+         * which means you should make a copy of the data before adding it to the
+         * <code>accumulatedResult</code> list.
+         *
+         * @param stats The {@link IntervalStats} object selected.
+         * @param mutable Whether or not the data inside the stats object is mutable.
+         * @param accumulatedResult The list to which to add extracted data.
+         */
+        void combine(IntervalStats stats, boolean mutable, List<T> accumulatedResult);
+    }
+
+    /**
+     * Find all {@link IntervalStats} for the given range and interval type.
+     */
+    public <T> List<T> queryUsageStats(int intervalType, long beginTime, long endTime,
+            StatCombiner<T> combiner) {
         synchronized (mLock) {
             if (intervalType < 0 || intervalType >= mIntervalDirs.length) {
                 throw new IllegalArgumentException("Bad interval type " + intervalType);
@@ -157,7 +177,7 @@ class UsageStatsDatabase {
 
             try {
                 IntervalStats stats = new IntervalStats();
-                ArrayList<UsageStats> results = new ArrayList<>();
+                ArrayList<T> results = new ArrayList<>();
                 for (int i = startIndex; i <= endIndex; i++) {
                     final AtomicFile f = mSortedStatFiles[intervalType].valueAt(i);
 
@@ -167,7 +187,7 @@ class UsageStatsDatabase {
 
                     UsageStatsXml.read(f, stats);
                     if (beginTime < stats.endTime) {
-                        results.addAll(stats.stats.values());
+                        combiner.combine(stats, false, results);
                     }
                 }
                 return results;
@@ -209,6 +229,10 @@ class UsageStatsDatabase {
     public void prune() {
         synchronized (mLock) {
             long timeNow = System.currentTimeMillis();
+            mCal.setTimeInMillis(timeNow);
+            mCal.add(Calendar.YEAR, -3);
+            pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_YEARLY],
+                    mCal.getTimeInMillis());
 
             mCal.setTimeInMillis(timeNow);
             mCal.add(Calendar.MONTH, -6);

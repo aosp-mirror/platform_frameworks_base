@@ -5711,6 +5711,19 @@ package android.app.job {
 
 package android.app.usage {
 
+  public final class ConfigurationStats implements android.os.Parcelable {
+    ctor public ConfigurationStats(android.app.usage.ConfigurationStats);
+    method public int describeContents();
+    method public int getActivationCount();
+    method public android.content.res.Configuration getConfiguration();
+    method public long getFirstTimeStamp();
+    method public long getLastTimeActive();
+    method public long getLastTimeStamp();
+    method public long getTotalTimeActive();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
   public final class UsageEvents implements android.os.Parcelable {
     method public int describeContents();
     method public boolean getNextEvent(android.app.usage.UsageEvents.Event);
@@ -5723,9 +5736,11 @@ package android.app.usage {
   public static final class UsageEvents.Event {
     ctor public UsageEvents.Event();
     method public java.lang.String getClassName();
+    method public android.content.res.Configuration getConfiguration();
     method public int getEventType();
     method public java.lang.String getPackageName();
     method public long getTimeStamp();
+    field public static final int CONFIGURATION_CHANGE = 5; // 0x5
     field public static final int MOVE_TO_BACKGROUND = 2; // 0x2
     field public static final int MOVE_TO_FOREGROUND = 1; // 0x1
     field public static final int NONE = 0; // 0x0
@@ -5746,6 +5761,7 @@ package android.app.usage {
 
   public final class UsageStatsManager {
     method public java.util.Map<java.lang.String, android.app.usage.UsageStats> queryAndAggregateUsageStats(long, long);
+    method public java.util.List<android.app.usage.ConfigurationStats> queryConfigurations(int, long, long);
     method public android.app.usage.UsageEvents queryEvents(long, long);
     method public java.util.List<android.app.usage.UsageStats> queryUsageStats(int, long, long);
     field public static final int INTERVAL_BEST = 4; // 0x4

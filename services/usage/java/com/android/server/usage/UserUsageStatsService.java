@@ -16,12 +16,16 @@
 
 package com.android.server.usage;
 
+import android.app.usage.ConfigurationStats;
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
+import android.content.res.Configuration;
 import android.util.ArraySet;
 import android.util.Slog;
+
+import com.android.server.usage.UsageStatsDatabase.StatCombiner;
 
 import java.io.File;
 import java.io.IOException;
@@ -108,35 +112,91 @@ class UserUsageStatsService {
                     notifyStatsChanged();
                 }
             }
+
+            stat.updateConfigurationStats(null, stat.lastTimeSaved);
         }
     }
 
     void reportEvent(UsageEvents.Event event) {
         if (DEBUG) {
             Slog.d(TAG, mLogPrefix + "Got usage event for " + event.mPackage
-                    + "[" + event.getTimeStamp() + "]: "
-                    + eventToString(event.getEventType()));
+                    + "[" + event.mTimeStamp + "]: "
+                    + eventToString(event.mEventType));
         }
 
-        if (event.getTimeStamp() >= mDailyExpiryDate.getTimeInMillis()) {
+        if (event.mTimeStamp >= mDailyExpiryDate.getTimeInMillis()) {
             // Need to rollover
             rolloverStats();
         }
 
-        if (mCurrentStats[UsageStatsManager.INTERVAL_DAILY].events == null) {
-            mCurrentStats[UsageStatsManager.INTERVAL_DAILY].events = new TimeSparseArray<>();
+        final IntervalStats currentDailyStats = mCurrentStats[UsageStatsManager.INTERVAL_DAILY];
+
+        final Configuration newFullConfig = event.mConfiguration;
+        if (event.mEventType == UsageEvents.Event.CONFIGURATION_CHANGE &&
+                currentDailyStats.activeConfiguration != null) {
+            // Make the event configuration a delta.
+            event.mConfiguration = Configuration.generateDelta(
+                    currentDailyStats.activeConfiguration, newFullConfig);
         }
-        mCurrentStats[UsageStatsManager.INTERVAL_DAILY].events.put(event.getTimeStamp(), event);
+
+        // Add the event to the daily list.
+        if (currentDailyStats.events == null) {
+            currentDailyStats.events = new TimeSparseArray<>();
+        }
+        currentDailyStats.events.put(event.mTimeStamp, event);
 
         for (IntervalStats stats : mCurrentStats) {
-            stats.update(event.mPackage, event.getTimeStamp(),
-                    event.getEventType());
+            if (event.mEventType == UsageEvents.Event.CONFIGURATION_CHANGE) {
+                stats.updateConfigurationStats(newFullConfig, event.mTimeStamp);
+            } else {
+                stats.update(event.mPackage, event.mTimeStamp, event.mEventType);
+            }
         }
 
         notifyStatsChanged();
     }
 
-    List<UsageStats> queryUsageStats(int bucketType, long beginTime, long endTime) {
+    private static final StatCombiner<UsageStats> sUsageStatsCombiner =
+            new StatCombiner<UsageStats>() {
+                @Override
+                public void combine(IntervalStats stats, boolean mutable,
+                        List<UsageStats> accResult) {
+                    if (!mutable) {
+                        accResult.addAll(stats.stats.values());
+                        return;
+                    }
+
+                    final int statCount = stats.stats.size();
+                    for (int i = 0; i < statCount; i++) {
+                        accResult.add(new UsageStats(stats.stats.valueAt(i)));
+                    }
+                }
+            };
+
+    private static final StatCombiner<ConfigurationStats> sConfigStatsCombiner =
+            new StatCombiner<ConfigurationStats>() {
+                @Override
+                public void combine(IntervalStats stats, boolean mutable,
+                        List<ConfigurationStats> accResult) {
+                    if (!mutable) {
+                        accResult.addAll(stats.configurations.values());
+                        return;
+                    }
+
+                    final int configCount = stats.configurations.size();
+                    for (int i = 0; i < configCount; i++) {
+                        accResult.add(new ConfigurationStats(stats.configurations.valueAt(i)));
+                    }
+                }
+            };
+
+    /**
+     * Generic query method that selects the appropriate IntervalStats for the specified time range
+     * and bucket, then calls the {@link com.android.server.usage.UsageStatsDatabase.StatCombiner}
+     * provided to select the stats to use from the IntervalStats object.
+     */
+    private <T> List<T> queryStats(int bucketType, long beginTime, long endTime,
+            StatCombiner<T> combiner) {
         if (bucketType == UsageStatsManager.INTERVAL_BEST) {
             bucketType = mDatabase.findBestFitBucket(beginTime, endTime);
         }
@@ -161,11 +221,8 @@ class UserUsageStatsService {
                 Slog.d(TAG, mLogPrefix + "Returning in-memory stats for bucket " + bucketType);
             }
             // Fast path for retrieving in-memory state.
-            ArrayList<UsageStats> results = new ArrayList<>();
-            final int packageCount = mCurrentStats[bucketType].stats.size();
-            for (int i = 0; i < packageCount; i++) {
-                results.add(new UsageStats(mCurrentStats[bucketType].stats.valueAt(i)));
-            }
+            ArrayList<T> results = new ArrayList<>();
+            combiner.combine(mCurrentStats[bucketType], true, results);
             return results;
         }
 
@@ -178,11 +235,19 @@ class UserUsageStatsService {
                     + beginTime + " AND endTime < " + endTime);
         }
 
-        final List<UsageStats> results = mDatabase.queryUsageStats(bucketType, beginTime, endTime);
+        final List<T> results = mDatabase.queryUsageStats(bucketType, beginTime, endTime, combiner);
         if (DEBUG) {
             Slog.d(TAG, mLogPrefix + "Results: " + (results == null ? 0 : results.size()));
         }
         return results;
+    }
+
+    List<UsageStats> queryUsageStats(int bucketType, long beginTime, long endTime) {
+        return queryStats(bucketType, beginTime, endTime, sUsageStatsCombiner);
+    }
+
+    List<ConfigurationStats> queryConfigurationStats(int bucketType, long beginTime, long endTime) {
+        return queryStats(bucketType, beginTime, endTime, sConfigStatsCombiner);
     }
 
     UsageEvents queryEvents(long beginTime, long endTime) {
@@ -245,6 +310,8 @@ class UserUsageStatsService {
 
         // Finish any ongoing events with an END_OF_DAY event. Make a note of which components
         // need a new CONTINUE_PREVIOUS_DAY entry.
+        final Configuration previousConfig =
+                mCurrentStats[UsageStatsManager.INTERVAL_DAILY].activeConfiguration;
         ArraySet<String> continuePreviousDay = new ArraySet<>();
         for (IntervalStats stat : mCurrentStats) {
             final int pkgCount = stat.stats.size();
@@ -253,11 +320,13 @@ class UserUsageStatsService {
                 if (pkgStats.mLastEvent == UsageEvents.Event.MOVE_TO_FOREGROUND ||
                         pkgStats.mLastEvent == UsageEvents.Event.CONTINUE_PREVIOUS_DAY) {
                     continuePreviousDay.add(pkgStats.mPackageName);
-                    stat.update(pkgStats.mPackageName,
-                            mDailyExpiryDate.getTimeInMillis() - 1, UsageEvents.Event.END_OF_DAY);
+                    stat.update(pkgStats.mPackageName, mDailyExpiryDate.getTimeInMillis() - 1,
+                            UsageEvents.Event.END_OF_DAY);
                     mStatsChanged = true;
                 }
             }
+
+            stat.updateConfigurationStats(null, mDailyExpiryDate.getTimeInMillis() - 1);
         }
 
         persistActiveStats();
@@ -267,9 +336,10 @@ class UserUsageStatsService {
         final int continueCount = continuePreviousDay.size();
         for (int i = 0; i < continueCount; i++) {
             String name = continuePreviousDay.valueAt(i);
+            final long beginTime = mCurrentStats[UsageStatsManager.INTERVAL_DAILY].beginTime;
             for (IntervalStats stat : mCurrentStats) {
-                stat.update(name, mCurrentStats[UsageStatsManager.INTERVAL_DAILY].beginTime,
-                        UsageEvents.Event.CONTINUE_PREVIOUS_DAY);
+                stat.update(name, beginTime, UsageEvents.Event.CONTINUE_PREVIOUS_DAY);
+                stat.updateConfigurationStats(previousConfig, beginTime);
                 mStatsChanged = true;
             }
         }
@@ -353,6 +423,8 @@ class UserUsageStatsService {
                 return "END_OF_DAY";
             case UsageEvents.Event.CONTINUE_PREVIOUS_DAY:
                 return "CONTINUE_PREVIOUS_DAY";
+            case UsageEvents.Event.CONFIGURATION_CHANGE:
+                return "CONFIGURATION_CHANGE";
             default:
                 return "UNKNOWN";
         }
