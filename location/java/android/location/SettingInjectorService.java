@@ -196,10 +196,7 @@ public abstract class SettingInjectorService extends Service {
      * @deprecated not called any more
      */
     @Deprecated
-    protected String onGetSummary() {
-        // Do not delete until no callers have @Override annotations for this method
-        return null;
-    }
+    protected abstract String onGetSummary();
 
     /**
      * Returns the {@link android.preference.Preference#isEnabled()} value. Should not perform
