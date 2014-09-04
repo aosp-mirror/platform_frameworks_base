@@ -47,10 +47,7 @@ class AudioPortEventHandler {
         mListeners = new ArrayList<AudioManager.OnAudioPortUpdateListener>();
 
         // find the looper for our new event handler
-        Looper looper = Looper.myLooper();
-        if (looper == null) {
-            looper = Looper.getMainLooper();
-        }
+        Looper looper = Looper.getMainLooper();
 
         if (looper != null) {
             mHandler = new Handler(looper) {
