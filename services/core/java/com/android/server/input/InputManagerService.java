@@ -241,6 +241,9 @@ public class InputManagerService extends IInputManager.Stub
     /** Switch code: Headphone/Microphone Jack.  When set, something is inserted. */
     public static final int SW_JACK_PHYSICAL_INSERT = 0x07;
 
+    /** Switch code: Camera lens cover. When set the lens is covered. */
+    public static final int SW_CAMERA_LENS_COVER = 0x09;
+
     public static final int SW_LID_BIT = 1 << SW_LID;
     public static final int SW_KEYPAD_SLIDE_BIT = 1 << SW_KEYPAD_SLIDE;
     public static final int SW_HEADPHONE_INSERT_BIT = 1 << SW_HEADPHONE_INSERT;
@@ -249,6 +252,7 @@ public class InputManagerService extends IInputManager.Stub
     public static final int SW_JACK_PHYSICAL_INSERT_BIT = 1 << SW_JACK_PHYSICAL_INSERT;
     public static final int SW_JACK_BITS =
             SW_HEADPHONE_INSERT_BIT | SW_MICROPHONE_INSERT_BIT | SW_JACK_PHYSICAL_INSERT_BIT | SW_LINEOUT_INSERT_BIT;
+    public static final int SW_CAMERA_LENS_COVER_BIT = 1 << SW_CAMERA_LENS_COVER;
 
     /** Whether to use the dev/input/event or uevent subsystem for the audio jack. */
     final boolean mUseDevInputEventForAudioJack;
@@ -1380,6 +1384,11 @@ public class InputManagerService extends IInputManager.Stub
             mWindowManagerCallbacks.notifyLidSwitchChanged(whenNanos, lidOpen);
         }
 
+        if ((switchMask & SW_CAMERA_LENS_COVER_BIT) != 0) {
+            final boolean lensCovered = ((switchValues & SW_CAMERA_LENS_COVER_BIT) == 0);
+            mWindowManagerCallbacks.notifyCameraLensCoverSwitchChanged(whenNanos, lensCovered);
+        }
+
         if (mUseDevInputEventForAudioJack && (switchMask & SW_JACK_BITS) != 0) {
             mWiredAccessoryCallbacks.notifyWiredAccessoryChanged(whenNanos, switchValues,
                     switchMask);
@@ -1574,6 +1583,8 @@ public class InputManagerService extends IInputManager.Stub
         public void notifyConfigurationChanged();
 
         public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen);
+
+        public void notifyCameraLensCoverSwitchChanged(long whenNanos, boolean lensCovered);
 
         public void notifyInputChannelBroken(InputWindowHandle inputWindowHandle);
 
