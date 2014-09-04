@@ -216,13 +216,21 @@ void Snapshot::resetTransform(float x, float y, float z) {
 // Clipping round rect
 ///////////////////////////////////////////////////////////////////////////////
 
-void Snapshot::setClippingRoundRect(LinearAllocator& allocator, const Rect& bounds, float radius) {
+void Snapshot::setClippingRoundRect(LinearAllocator& allocator, const Rect& bounds,
+        float radius, bool highPriority) {
     if (bounds.isEmpty()) {
         clipRect->setEmpty();
         return;
     }
 
+    if (roundRectClipState && roundRectClipState->highPriority) {
+        // ignore, don't replace, already have a high priority clip
+        return;
+    }
+
     RoundRectClipState* state = new (allocator) RoundRectClipState;
+
+    state->highPriority = highPriority;
 
     // store the inverse drawing matrix
     Matrix4 roundRectDrawingMatrix;
