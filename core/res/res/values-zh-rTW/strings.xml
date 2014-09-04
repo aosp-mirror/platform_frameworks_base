@@ -376,7 +376,7 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"允許應用程式啟動完整備份確認使用者介面 (不建議任何應用程式使用)。"</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"顯示未授權視窗"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"允許應用程式為內部系統使用者介面建立視窗 (不建議一般應用程式使用)。"</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"在其他應用程式之上顯示内容"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"在其他應用程式之上顯示內容"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"允許應用程式在其他應用程式頂層或使用者介面的特定部分繪圖。這可能會干擾您在所有應用程式中的介面使用行為，或是使您在其他應用程式中預期看到的內容發生變化。"</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"編輯全域動畫速度"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"允許應用程式隨時變更全域的動畫速度 (更快或更慢)。"</string>

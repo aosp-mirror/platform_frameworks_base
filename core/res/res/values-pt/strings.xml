@@ -1774,6 +1774,6 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pedir PIN antes de liberar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pedir padrão de desbloqueio antes de liberar"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pedir senha antes de liberar"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Para ajudar a melhorar a vida útil da bateria, a economia de bateria reduz o desempenho do dispositivo e restringe a vibração e a maioria dos dados em segundo plano. É possível que apps de e-mail, mensagens, entre outros, que dependem de sincronização não sejam atualizados a menos que sejam abertos.\n\nA economia de bateria é desativada automaticamente quando o dispositivo estiver carregando."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Para ajudar a melhorar a vida útil da bateria, a economia de bateria reduz o desempenho do dispositivo e restringe a vibração e a maioria dos dados em segundo plano. É possível que apps de e-mail, mensagens, entre outros que dependem de sincronização não sejam atualizados a menos que sejam abertos.\n\nA economia de bateria é desativada automaticamente quando o dispositivo estiver carregando."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Até o período de inatividade terminar às <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
 </resources>
