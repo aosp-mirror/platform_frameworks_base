@@ -99,8 +99,7 @@ public class EmergencyButton extends Button {
         // TODO: implement a shorter timeout once new PowerManager API is ready.
         // should be the equivalent to the old userActivity(EMERGENCY_CALL_TIMEOUT)
         mPowerManager.userActivity(SystemClock.uptimeMillis(), true);
-        if (TelephonyManager.getDefault().getCallState()
-                == TelephonyManager.CALL_STATE_OFFHOOK) {
+        if (mLockPatternUtils.isInCall()) {
             mLockPatternUtils.resumeCall();
         } else {
             final boolean bypassHandler = true;
@@ -115,7 +114,7 @@ public class EmergencyButton extends Button {
 
     private void updateEmergencyCallButton(State simState, int phoneState) {
         boolean enabled = false;
-        if (phoneState == TelephonyManager.CALL_STATE_OFFHOOK) {
+        if (mLockPatternUtils.isInCall()) {
             enabled = true; // always show "return to call" if phone is off-hook
         } else if (mLockPatternUtils.isEmergencyCallCapable()) {
             boolean simLocked = KeyguardUpdateMonitor.getInstance(mContext).isSimLocked();
