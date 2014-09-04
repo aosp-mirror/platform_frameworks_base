@@ -83,7 +83,7 @@
     <string name="accessibility_recent" msgid="1606470783629913980">"சமீபத்திய திரைகள்"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"தேடு"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"கேமரா"</string>
-    <string name="accessibility_phone_button" msgid="6738112589538563574">"மொபைல்"</string>
+    <string name="accessibility_phone_button" msgid="6738112589538563574">"ஃபோன்"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"திற"</string>
     <string name="unlock_label" msgid="8779712358041029439">"திற"</string>
     <string name="phone_label" msgid="2320074140205331708">"ஃபோனைத் திற"</string>
@@ -143,7 +143,7 @@
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"ரோமிங்"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"வைஃபை"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM இல்லை."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"சிம் இல்லை."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"புளூடூத் இணைப்பு முறை."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"விமானப் பயன்முறை."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"பேட்டரி சக்தி <xliff:g id="NUMBER">%d</xliff:g> சதவிகிதம் உள்ளது."</string>

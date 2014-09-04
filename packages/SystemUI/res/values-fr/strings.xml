@@ -357,13 +357,9 @@
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"Appareil géré par :\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nProfil géré par :\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nVotre administrateur peut contrôler votre activité réseau (e-mails, applications et sites sécurisés). Pour en savoir plus, contactez votre admin.\n\nVous avez donné à l\'appli \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" l\'autorisation de configurer une connexion VPN. Cette appli peut contrôler votre activité réseau."</string>
     <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"Appareil géré par :\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nProfil géré par :\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nVotre administrateur peut contrôler votre activité réseau (e-mails, applications et sites sécurisés). Pour en savoir plus, contactez votre administrateur.\n\nVous êtes aussi connecté à un VPN (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\"). Votre fournisseur de services VPN peut également contrôler l\'activité réseau."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"L\'appareil restera verrouillé jusqu\'à ce que vous le déverrouilliez manuellement."</string>
-    <!-- no translation found for hidden_notifications_title (7139628534207443290) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_text (2326409389088668981) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_cancel (3690709735122344913) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_setup (41079514801976810) -->
-    <skip />
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"Recevoir les notifications plus vite"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"Afficher les notifications avant de déverrouiller l\'appareil"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Non, merci"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"Configurer"</string>
     <string name="muted_by" msgid="6147073845094180001">"Son coupé par : <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

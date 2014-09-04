@@ -338,7 +338,7 @@
     <string name="media_projection_action_text" msgid="8470872969457985954">"Commencer maintenant"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Aucune notification"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"Il est possible que cet appareil soit surveillé."</string>
-    <string name="profile_owned_footer" msgid="8021888108553696069">"Ce profil peut être contrôlé"</string>
+    <string name="profile_owned_footer" msgid="8021888108553696069">"le profil peut être contrôlé"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Le réseau peut être surveillé"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Surveillance d\'appareils"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Contrôle de profil"</string>
@@ -357,13 +357,9 @@
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"Appareil géré par : \n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nProfil géré par : \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nVotre administrateur peut surveiller votre activité réseau (courriels, applications et sites sécurisés). Communiquez avec votre administrateur.\n\nEn outre, vous avez autorisé <xliff:g id="APPLICATION">%3$s</xliff:g> à créer une connexion RPV. Cette application peut aussi surveiller l\'activité réseau."</string>
     <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"Appareil géré par : \n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nProfil géré par : \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nVotre administrateur peut surveiller l\'act. de votre appareil et votre act. réseau (courriels, applications et sites sécurisés). Communiquez avec votre administrateur.\n\nVous êtes aussi connecté à un RPV (<xliff:g id="APPLICATION">%3$s</xliff:g>). Votre admin RPV peut lui aussi surveiller votre act. réseau."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"L\'appareil restera verrouillé jusqu\'à ce que vous le déverrouilliez manuellement"</string>
-    <!-- no translation found for hidden_notifications_title (7139628534207443290) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_text (2326409389088668981) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_cancel (3690709735122344913) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_setup (41079514801976810) -->
-    <skip />
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"Voir les notifications plus rapidement"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"Afficher les notifications avant de déverrouiller l\'appareil"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Non, merci"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"Configurer"</string>
     <string name="muted_by" msgid="6147073845094180001">"Mis en sourdine par <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

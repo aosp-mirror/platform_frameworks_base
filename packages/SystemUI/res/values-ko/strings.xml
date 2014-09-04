@@ -357,13 +357,9 @@
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"기기 관리자:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\n프로필 관리자:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\n관리자는 이메일, 앱, 보안 웹사이트를 비롯한 내 네트워크 활동을 모니터링할 수 있습니다. 자세한 정보는 관리자에게 문의하세요.\n\n또한 \'<xliff:g id="APPLICATION">%3$s</xliff:g>\'에 VPN 연결을 설정할 수 있는 권한을 부여했습니다. 이 앱에서도 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"기기 관리자:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\n프로필 관리자:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\n관리자는 이메일, 앱, 보안 웹사이트를 비롯한 내 네트워크 활동을 모니터링할 수 있습니다. 자세한 정보는 관리자에게 문의하세요.\n\n또한 현재 VPN(\'<xliff:g id="APPLICATION">%3$s</xliff:g>\')에 연결되어 있습니다. VPN 서비스 제공업체에서도 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"수동으로 잠금 해제할 때까지 기기가 잠금 상태로 유지됩니다."</string>
-    <!-- no translation found for hidden_notifications_title (7139628534207443290) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_text (2326409389088668981) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_cancel (3690709735122344913) -->
-    <skip />
-    <!-- no translation found for hidden_notifications_setup (41079514801976810) -->
-    <skip />
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"알림을 더욱 빠르게 받기"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"잠금 해제하기 전에 알림을 봅니다."</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"사용 안함"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"설정"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>에서 알림음 음소거"</string>
 </resources>
