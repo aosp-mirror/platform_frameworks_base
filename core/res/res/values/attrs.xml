@@ -7151,6 +7151,7 @@
         <attr name="queryBackground" format="reference" />
         <!-- Background for the section containing the action (e.g. voice search) -->
         <attr name="submitBackground" format="reference" />
+        <attr name="focusable" />
     </declare-styleable>
 
     <declare-styleable name="Switch">
