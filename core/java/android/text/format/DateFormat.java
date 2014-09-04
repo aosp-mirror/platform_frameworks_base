@@ -17,7 +17,6 @@
 package android.text.format;
 
 import android.content.Context;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -129,14 +128,8 @@ public class DateFormat {
      * @return true if 24 hour time format is selected, false otherwise.
      */
     public static boolean is24HourFormat(Context context) {
-        // This method is called by View classes that can be used by RemoteViews
-        // and rendered in another user. The context therefore may reference
-        // a user that would require interact accross users to access. So
-        // use the user id we are running as.
-        // This is the case when we have widgets from a user profile added
-        // to the homescreen.
-        String value = Settings.System.getStringForUser(context.getContentResolver(),
-                Settings.System.TIME_12_24, UserHandle.myUserId());
+        String value = Settings.System.getString(context.getContentResolver(),
+                Settings.System.TIME_12_24);
 
         if (value == null) {
             Locale locale = context.getResources().getConfiguration().locale;
@@ -234,14 +227,8 @@ public class DateFormat {
      * @return the {@link java.text.DateFormat} object that properly formats the date.
      */
     public static java.text.DateFormat getDateFormat(Context context) {
-        // This method is called by View classes that can be used by RemoteViews
-        // and rendered in another user. The context therefore may reference
-        // a user that would require interact accross users to access. So
-        // use the user id we are running as.
-        // This is the case when we have widgets from a user profile added
-        // to the homescreen.
-        String value = Settings.System.getStringForUser(context.getContentResolver(),
-                Settings.System.DATE_FORMAT, UserHandle.myUserId());
+        String value = Settings.System.getString(context.getContentResolver(),
+                Settings.System.DATE_FORMAT);
 
         return getDateFormatForSetting(context, value);
     }
