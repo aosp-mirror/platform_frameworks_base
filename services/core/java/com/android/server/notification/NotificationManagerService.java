@@ -1470,7 +1470,14 @@ public class NotificationManagerService extends SystemService {
         @Override
         public boolean matchesCallFilter(Bundle extras) {
             enforceSystemOrSystemUI("INotificationManager.matchesCallFilter");
-            return mZenModeHelper.matchesCallFilter(extras,
+            return matchesCallFilterAsUser(extras, Binder.getCallingUid());
+        }
+
+        @Override
+        public boolean matchesCallFilterAsUser(Bundle extras, int userId) {
+            enforceSystemOrSystemUI("INotificationManager.matchesCallFilter");
+            UserHandle userHandle = new UserHandle(userId);
+            return mZenModeHelper.matchesCallFilter(userHandle, extras,
                     mRankingHelper.findExtractor(ValidateNotificationPeople.class));
         }
     };
