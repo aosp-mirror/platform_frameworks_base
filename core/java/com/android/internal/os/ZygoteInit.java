@@ -770,7 +770,7 @@ public class ZygoteInit {
             } else if (index == 0) {
                 ZygoteConnection newPeer = acceptCommandPeer(abiList);
                 peers.add(newPeer);
-                fds.add(newPeer.getFileDesciptor());
+                fds.add(newPeer.getFileDescriptor());
             } else {
                 boolean done;
                 done = peers.get(index).runOnce();
