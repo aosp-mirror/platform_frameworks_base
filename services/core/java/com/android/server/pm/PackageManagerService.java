@@ -13018,6 +13018,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
         while (psit.hasNext()) {
             PackageSetting ps = psit.next();
+            if (ps.pkg == null) {
+                continue;
+            }
             final String packageName = ps.pkg.packageName;
             // Skip over if system app
             if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0) {
