@@ -46,4 +46,9 @@
         <item>GPS_LOCK=1</item>
         <item>LPP_PROFILE=3</item>
     </string-array>
+    <!-- Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD -->
+    <string-array name="config_twoDigitNumberPattern">
+        <item>"0"</item>
+        <item>"00"</item>
+    </string-array>
 </resources>
