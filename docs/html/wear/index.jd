@@ -229,8 +229,7 @@ page.type=about
               <img src="/wear/images/partners/samsung.png" alt="Samsung">
             </div>
             <div class="col-4">
-              <img src="/wear/images/partners/sony.png" alt="Sony"
-                   style="margin-left:57px;margin-top:17px;">
+              <img src="/wear/images/partners/sony.png" alt="Sony">
             </div>
           </div>
         </div> <!-- end .wrap -->
