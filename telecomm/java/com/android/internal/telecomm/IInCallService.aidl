@@ -43,6 +43,4 @@ oneway interface IInCallService {
     void onAudioStateChanged(in AudioState audioState);
 
     void bringToForeground(boolean showDialpad);
-
-    void startActivity(String callId, in PendingIntent intent);
 }

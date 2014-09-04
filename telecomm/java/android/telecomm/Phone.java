@@ -150,14 +150,6 @@ public final class Phone {
         fireBringToForeground(showDialpad);
     }
 
-    /** {@hide} */
-    final void internalStartActivity(String telecommId, PendingIntent intent) {
-        Call call = mCallByTelecommCallId.get(telecommId);
-        if (call != null) {
-            call.internalStartActivity(intent);
-        }
-    }
-
     /**
      * Called to destroy the phone and cleanup any lingering calls.
      * @hide
