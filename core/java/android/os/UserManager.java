@@ -660,6 +660,7 @@ public class UserManager {
             try {
                 Bundle guestRestrictions = mService.getDefaultGuestRestrictions();
                 guestRestrictions.putBoolean(DISALLOW_SMS, true);
+                guestRestrictions.putBoolean(DISALLOW_INSTALL_UNKNOWN_SOURCES, true);
                 mService.setUserRestrictions(guestRestrictions, guest.id);
             } catch (RemoteException re) {
                 Log.w(TAG, "Could not update guest restrictions");
