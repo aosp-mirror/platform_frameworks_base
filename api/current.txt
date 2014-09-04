@@ -28502,6 +28502,7 @@ package android.telecomm {
     method public void registerPhoneAccount(android.telecomm.PhoneAccount);
     method public void showInCallScreen(boolean);
     method public void unregisterPhoneAccount(android.telecomm.PhoneAccountHandle);
+    field public static final java.lang.String ACTION_CHANGE_PHONE_ACCOUNTS = "android.telecomm.intent.action.CHANGE_PHONE_ACCOUNTS";
     field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.intent.action.CONNECTION_SERVICE_CONFIGURE";
     field public static final java.lang.String ACTION_SHOW_CALL_SETTINGS = "android.telecomm.intent.action.SHOW_CALL_SETTINGS";
     field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
