@@ -1863,7 +1863,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     private void deleteProviderLocked(Provider provider) {
         int N = provider.widgets.size();
-        for (int i = 0; i < N; i++) {
+        for (int i = N - 1; i >= 0; i--) {
             Widget widget = provider.widgets.remove(i);
             // Call back with empty RemoteViews
             updateAppWidgetInstanceLocked(widget, null, false);
