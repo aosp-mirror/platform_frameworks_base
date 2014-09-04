@@ -440,12 +440,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Permission Denial: can't dump from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-        }
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP,
+                                                "Permission Denial: can't dump from from pid="
+                                                + Binder.getCallingPid()
+                                                + ", uid=" + Binder.getCallingUid());
 
         synchronized (mLock) {
             int N = mProviders.size();
