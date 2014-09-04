@@ -1774,6 +1774,15 @@ public class AudioService extends IAudioService.Stub {
             return;
         }
 
+        if ( (mode == AudioSystem.MODE_IN_CALL) &&
+                (mContext.checkCallingOrSelfPermission(
+                        android.Manifest.permission.MODIFY_PHONE_STATE)
+                            != PackageManager.PERMISSION_GRANTED)) {
+            Log.w(TAG, "MODIFY_PHONE_STATE Permission Denial: setMode(MODE_IN_CALL) from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
+            return;
+        }
+
         if (mode < AudioSystem.MODE_CURRENT || mode >= AudioSystem.NUM_MODES) {
             return;
         }
@@ -1795,7 +1804,7 @@ public class AudioService extends IAudioService.Stub {
     // must be called synchronized on mSetModeDeathHandlers
     // setModeInt() returns a valid PID if the audio mode was successfully set to
     // any mode other than NORMAL.
-    int setModeInt(int mode, IBinder cb, int pid) {
+    private int setModeInt(int mode, IBinder cb, int pid) {
         if (DEBUG_MODE) { Log.v(TAG, "setModeInt(mode=" + mode + ", pid=" + pid + ")"); }
         int newModeOwnerPid = 0;
         if (cb == null) {
@@ -3055,7 +3064,7 @@ public class AudioService extends IAudioService.Stub {
     }
 
     boolean checkAudioSettingsPermission(String method) {
-        if (mContext.checkCallingOrSelfPermission("android.permission.MODIFY_AUDIO_SETTINGS")
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS)
                 == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
