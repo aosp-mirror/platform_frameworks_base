@@ -274,6 +274,12 @@ abstract class HdmiCecLocalDevice {
                 return handleRecordTvScreen(message);
             case Constants.MESSAGE_TIMER_CLEARED_STATUS:
                 return handleTimerClearedStatus(message);
+            case Constants.MESSAGE_REPORT_POWER_STATUS:
+                return handleReportPowerStatus(message);
+            case Constants.MESSAGE_TIMER_STATUS:
+                return handleTimerStatus(message);
+            case Constants.MESSAGE_RECORD_STATUS:
+                return handleRecordStatus(message);
             default:
                 return false;
         }
@@ -538,6 +544,18 @@ abstract class HdmiCecLocalDevice {
     }
 
     protected boolean handleTimerClearedStatus(HdmiCecMessage message) {
+        return false;
+    }
+
+    protected boolean handleReportPowerStatus(HdmiCecMessage message) {
+        return false;
+    }
+
+    protected boolean handleTimerStatus(HdmiCecMessage message) {
+        return false;
+    }
+
+    protected boolean handleRecordStatus(HdmiCecMessage message) {
         return false;
     }
 
