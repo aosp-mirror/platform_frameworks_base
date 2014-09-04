@@ -50,8 +50,12 @@ public:
 
     void animateNoDamage(TreeInfo& info);
 
-    // Hard-ends all animators. Used for cleanup if the root is being destroyed.
-    ANDROID_API void endAllAnimators();
+    // Hard-ends all animators. May only be called on the UI thread.
+    ANDROID_API void endAllStagingAnimators();
+
+    // Hard-ends all animators that have been pushed. Used for cleanup if
+    // the ActivityContext is being destroyed
+    void endAllActiveAnimators();
 
     bool hasAnimators() { return mAnimators.size(); }
 

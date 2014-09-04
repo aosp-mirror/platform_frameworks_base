@@ -161,6 +161,13 @@ bool BaseRenderNodeAnimator::animate(AnimationContext& context) {
     return false;
 }
 
+void BaseRenderNodeAnimator::forceEndNow(AnimationContext& context) {
+    if (mPlayState < FINISHED) {
+        mPlayState = FINISHED;
+        callOnFinishedListener(context);
+    }
+}
+
 void BaseRenderNodeAnimator::callOnFinishedListener(AnimationContext& context) {
     if (mListener.get()) {
         context.callOnFinished(this, mListener.get());
