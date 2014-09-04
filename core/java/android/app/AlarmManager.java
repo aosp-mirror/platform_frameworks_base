@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -385,6 +386,7 @@ public class AlarmManager
     }
 
     /** @hide */
+    @SystemApi
     public void set(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
             PendingIntent operation, WorkSource workSource) {
         setImpl(type, triggerAtMillis, windowMillis, intervalMillis, operation, workSource, null);
