@@ -15091,10 +15091,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             bounds.set(0, 0, mRight - mLeft, mBottom - mTop);
         }
 
+        canvas.save();
         canvas.translate(mScrollX, mScrollY);
+        canvas.clipRect(bounds, Region.Op.REPLACE);
         drawable.setBounds(bounds);
         drawable.draw(canvas);
-        canvas.translate(-mScrollX, -mScrollY);
+        canvas.restore();
     }
 
     /**
