@@ -389,7 +389,7 @@ should be the actual smallest dimension <em>required by your layout</em> (usuall
             <ul>
               <li>240x320 ldpi (QVGA handset)</li>
               <li>320x480 mdpi (handset)</li>
-              <li>480x800 hdpi (high density handset)</li>
+              <li>480x800 hdpi (high-density handset)</li>
             </ul>
           </li>
           <li>480, for screens such as 480x800 mdpi (tablet/handset).</li>
@@ -483,20 +483,20 @@ Multiple Screens</a> developer guide.</p>
         <ul class="nolist">
         <li>{@code small}: Screens that are of similar size to a
         low-density QVGA screen. The minimum layout size for a small screen
-        is approximately 320x426 dp units.  Examples are QVGA low density and VGA high
+        is approximately 320x426 dp units.  Examples are QVGA low-density and VGA high
         density.</li>
         <li>{@code normal}: Screens that are of similar size to a
         medium-density HVGA screen. The minimum
         layout size for a normal screen is approximately 320x470 dp units.  Examples
-        of such screens a WQVGA low density, HVGA medium density, WVGA
-        high density.</li>
+        of such screens a WQVGA low-density, HVGA medium-density, WVGA
+        high-density.</li>
         <li>{@code large}: Screens that are of similar size to a
         medium-density VGA screen.
         The minimum layout size for a large screen is approximately 480x640 dp units.
-        Examples are VGA and WVGA medium density screens.</li>
+        Examples are VGA and WVGA medium-density screens.</li>
         <li>{@code xlarge}: Screens that are considerably larger than the traditional
         medium-density HVGA screen. The minimum layout size for an xlarge screen
-        is approximately 720x960 dp units.  In most cases, devices with extra large
+        is approximately 720x960 dp units.  In most cases, devices with extra-large
         screens would be too large to carry in a pocket and would most likely
         be tablet-style devices. <em>Added in API level 9.</em></li>
         </ul>
@@ -613,6 +613,8 @@ application during runtime.</p>
         <code>mdpi</code><br/>
         <code>hdpi</code><br/>
         <code>xhdpi</code><br/>
+        <code>xxhdpi</code><br/>
+        <code>xxxhdpi</code><br/>
         <code>nodpi</code><br/>
         <code>tvdpi</code>
       </td>
@@ -622,8 +624,14 @@ application during runtime.</p>
           <li>{@code mdpi}: Medium-density (on traditional HVGA) screens; approximately
 160dpi.</li>
           <li>{@code hdpi}: High-density screens; approximately 240dpi.</li>
-          <li>{@code xhdpi}: Extra high-density screens; approximately 320dpi. <em>Added in API
+          <li>{@code xhdpi}: Extra-high-density screens; approximately 320dpi. <em>Added in API
 Level 8</em></li>
+          <li>{@code xxhdpi}: Extra-extra-high-density screens; approximately 480dpi. <em>Added in API
+Level 16</em></li>
+          <li>{@code xxxhdpi}: Extra-extra-extra-high-density uses (launcher icon only, see the 
+            <a href="{@docRoot}guide/practices/screens_support.html#xxxhdpi-note">note</a> 
+            in <em>Supporting Multiple Screens</em>); approximately 640dpi. <em>Added in API
+Level 18</em></li>
           <li>{@code nodpi}: This can be used for bitmap resources that you do not want to be scaled
 to match the device density.</li>
           <li>{@code tvdpi}: Screens somewhere between mdpi and hdpi; approximately 213dpi. This is
@@ -631,8 +639,9 @@ not considered a "primary" density group. It is mostly intended for televisions 
 apps shouldn't need it&mdash;providing mdpi and hdpi resources is sufficient for most apps and
 the system will scale them as appropriate. This qualifier was introduced with API level 13.</li>
         </ul>
-        <p>There is a 3:4:6:8 scaling ratio between the four primary densities (ignoring the
-tvdpi density). So, a 9x9 bitmap in ldpi is 12x12 in mdpi, 18x18 in hdpi and 24x24 in xhdpi.</p>
+        <p>There is a 3:4:6:8:12:16 scaling ratio between the six primary densities (ignoring the
+tvdpi density). So, a 9x9 bitmap in ldpi is 12x12 in mdpi, 18x18 in hdpi, 24x24 in xhdpi and so on.
+</p>
         <p>If you decide that your image resources don't look good enough on a television or
 other certain devices and want to try tvdpi resources, the scaling factor is 1.33*mdpi. For
 example, a 100px x 100px image for mdpi screens should be 133px x 133px for tvdpi.</p>
