@@ -41,6 +41,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.BoringLayout;
 import android.text.DynamicLayout;
@@ -8337,8 +8338,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * to speak passwords.
      */
     private boolean shouldSpeakPasswordsForAccessibility() {
-        return (Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0) == 1);
+        // OK, this is gross but needed. This class is supported by the
+        // remote views mechanism and as a part of that the remote views
+        // can be inflated by a context for another user without the app
+        // having interact users permission - just for loading resources.
+        // For example, when adding widgets from a user profile to the
+        // home screen. Therefore, we access settings as user the app is
+        // running as not the one the context is for.
+        return (Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0, UserHandle.myUserId()) == 1);
     }
 
     @Override
