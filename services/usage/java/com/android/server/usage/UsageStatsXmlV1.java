@@ -20,68 +20,69 @@ import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
+import android.app.usage.ConfigurationStats;
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.content.ComponentName;
+import android.content.res.Configuration;
 
 import java.io.IOException;
 import java.net.ProtocolException;
+import java.util.Locale;
 
 /**
  * UsageStats reader/writer for version 1 of the XML format.
  */
 final class UsageStatsXmlV1 {
+    private static final String PACKAGE_TAG = "package";
+    private static final String CONFIGURATION_TAG = "config";
+    private static final String EVENT_LOG_TAG = "event-log";
+
     private static final String BEGIN_TIME_ATTR = "beginTime";
     private static final String END_TIME_ATTR = "endTime";
-    private static final String PACKAGE_TAG = "package";
     private static final String NAME_ATTR = "name";
     private static final String PACKAGE_ATTR = "package";
     private static final String CLASS_ATTR = "class";
     private static final String TOTAL_TIME_ACTIVE_ATTR = "totalTimeActive";
     private static final String LAST_TIME_ACTIVE_ATTR = "lastTimeActive";
+    private static final String COUNT_ATTR = "count";
+    private static final String ACTIVE_ATTR = "active";
     private static final String LAST_EVENT_ATTR = "lastEvent";
-    private static final String EVENT_LOG_TAG = "event-log";
     private static final String TYPE_ATTR = "type";
     private static final String TIME_ATTR = "time";
 
-    private static UsageStats readNextUsageStats(XmlPullParser parser)
+    private static void loadUsageStats(XmlPullParser parser, IntervalStats statsOut)
             throws XmlPullParserException, IOException {
-        if (parser.getEventType() != XmlPullParser.START_TAG) {
-            XmlUtils.nextElement(parser);
-        }
-
-        if (parser.getEventType() != XmlPullParser.START_TAG ||
-                !parser.getName().equals(PACKAGE_TAG)) {
-            return null;
-        }
-
         final String name = parser.getAttributeValue(null, NAME_ATTR);
         if (name == null) {
             throw new ProtocolException("no " + NAME_ATTR + " attribute present");
         }
 
-        UsageStats stats = new UsageStats();
-        stats.mPackageName = name;
+        UsageStats stats = statsOut.getOrCreateUsageStats(name);
         stats.mTotalTimeInForeground = XmlUtils.readLongAttribute(parser, TOTAL_TIME_ACTIVE_ATTR);
         stats.mLastTimeUsed = XmlUtils.readLongAttribute(parser, LAST_TIME_ACTIVE_ATTR);
         stats.mLastEvent = XmlUtils.readIntAttribute(parser, LAST_EVENT_ATTR);
-        XmlUtils.skipCurrentTag(parser);
-        return stats;
     }
 
-    private static UsageEvents.Event readNextEvent(XmlPullParser parser, IntervalStats statsOut)
+    private static void loadConfigStats(XmlPullParser parser, IntervalStats statsOut)
             throws XmlPullParserException, IOException {
-        if (parser.getEventType() != XmlPullParser.START_TAG) {
-            XmlUtils.nextElement(parser);
-        }
+        final Configuration config = new Configuration();
+        Configuration.readXmlAttrs(parser, config);
 
-        if (parser.getEventType() != XmlPullParser.START_TAG ||
-                !parser.getName().equals(EVENT_LOG_TAG)) {
-            return null;
+        ConfigurationStats configStats = statsOut.getOrCreateConfigurationStats(config);
+        configStats.mLastTimeActive = XmlUtils.readLongAttribute(parser, LAST_TIME_ACTIVE_ATTR);
+        configStats.mTotalTimeActive = XmlUtils.readLongAttribute(parser, TOTAL_TIME_ACTIVE_ATTR);
+        configStats.mActivationCount = XmlUtils.readIntAttribute(parser, COUNT_ATTR);
+        if (XmlUtils.readBooleanAttribute(parser, ACTIVE_ATTR)) {
+            statsOut.activeConfiguration = configStats.mConfiguration;
         }
+    }
 
+    private static void loadEvent(XmlPullParser parser, IntervalStats statsOut)
+            throws XmlPullParserException, IOException {
         String packageName = XmlUtils.readStringAttribute(parser, PACKAGE_ATTR);
         String className;
         if (packageName == null) {
@@ -105,31 +106,60 @@ final class UsageStatsXmlV1 {
         UsageEvents.Event event = statsOut.buildEvent(packageName, className);
         event.mEventType = XmlUtils.readIntAttribute(parser, TYPE_ATTR);
         event.mTimeStamp = XmlUtils.readLongAttribute(parser, TIME_ATTR);
-        XmlUtils.skipCurrentTag(parser);
-        return event;
-    }
 
-    private static void writeUsageStats(FastXmlSerializer serializer, UsageStats stats)
-            throws IOException {
-        serializer.startTag(null, PACKAGE_TAG);
-        serializer.attribute(null, NAME_ATTR, stats.mPackageName);
-        serializer.attribute(null, TOTAL_TIME_ACTIVE_ATTR,
-                Long.toString(stats.mTotalTimeInForeground));
-        serializer.attribute(null, LAST_TIME_ACTIVE_ATTR, Long.toString(stats.mLastTimeUsed));
-        serializer.attribute(null, LAST_EVENT_ATTR, Integer.toString(stats.mLastEvent));
-        serializer.endTag(null, PACKAGE_TAG);
-    }
-
-    private static void writeEvent(FastXmlSerializer serializer, UsageEvents.Event event)
-            throws IOException {
-        serializer.startTag(null, EVENT_LOG_TAG);
-        serializer.attribute(null, PACKAGE_ATTR, event.mPackage);
-        if (event.mClass != null) {
-            serializer.attribute(null, CLASS_ATTR, event.mClass);
+        if (event.mEventType == UsageEvents.Event.CONFIGURATION_CHANGE) {
+            event.mConfiguration = new Configuration();
+            Configuration.readXmlAttrs(parser, event.mConfiguration);
         }
-        serializer.attribute(null, TYPE_ATTR, Integer.toString(event.getEventType()));
-        serializer.attribute(null, TIME_ATTR, Long.toString(event.getTimeStamp()));
-        serializer.endTag(null, EVENT_LOG_TAG);
+
+        if (statsOut.events == null) {
+            statsOut.events = new TimeSparseArray<>();
+        }
+        statsOut.events.put(event.mTimeStamp, event);
+    }
+
+    private static void writeUsageStats(XmlSerializer xml, final UsageStats stats)
+            throws IOException {
+        xml.startTag(null, PACKAGE_TAG);
+        XmlUtils.writeStringAttribute(xml, NAME_ATTR, stats.mPackageName);
+        XmlUtils.writeLongAttribute(xml, TOTAL_TIME_ACTIVE_ATTR, stats.mTotalTimeInForeground);
+        XmlUtils.writeLongAttribute(xml, LAST_TIME_ACTIVE_ATTR, stats.mLastTimeUsed);
+        XmlUtils.writeIntAttribute(xml, LAST_EVENT_ATTR, stats.mLastEvent);
+        xml.endTag(null, PACKAGE_TAG);
+    }
+
+    private static void writeConfigStats(XmlSerializer xml, final ConfigurationStats stats,
+            boolean isActive) throws IOException {
+        xml.startTag(null, CONFIGURATION_TAG);
+        XmlUtils.writeLongAttribute(xml, LAST_TIME_ACTIVE_ATTR, stats.mLastTimeActive);
+        XmlUtils.writeLongAttribute(xml, TOTAL_TIME_ACTIVE_ATTR, stats.mTotalTimeActive);
+        XmlUtils.writeIntAttribute(xml, COUNT_ATTR, stats.mActivationCount);
+        if (isActive) {
+            XmlUtils.writeBooleanAttribute(xml, ACTIVE_ATTR, true);
+        }
+
+        // Now write the attributes representing the configuration object.
+        Configuration.writeXmlAttrs(xml, stats.mConfiguration);
+
+        xml.endTag(null, CONFIGURATION_TAG);
+    }
+
+    private static void writeEvent(XmlSerializer xml, final UsageEvents.Event event)
+            throws IOException {
+        xml.startTag(null, EVENT_LOG_TAG);
+        XmlUtils.writeStringAttribute(xml, PACKAGE_ATTR, event.mPackage);
+        if (event.mClass != null) {
+            XmlUtils.writeStringAttribute(xml, CLASS_ATTR, event.mClass);
+        }
+        XmlUtils.writeIntAttribute(xml, TYPE_ATTR, event.mEventType);
+        XmlUtils.writeLongAttribute(xml, TIME_ATTR, event.mTimeStamp);
+
+        if (event.mEventType == UsageEvents.Event.CONFIGURATION_CHANGE
+                && event.mConfiguration != null) {
+            Configuration.writeXmlAttrs(xml, event.mConfiguration);
+        }
+
+        xml.endTag(null, EVENT_LOG_TAG);
     }
 
     /**
@@ -142,6 +172,8 @@ final class UsageStatsXmlV1 {
     public static void read(XmlPullParser parser, IntervalStats statsOut)
             throws XmlPullParserException, IOException {
         statsOut.stats.clear();
+        statsOut.configurations.clear();
+        statsOut.activeConfiguration = null;
 
         if (statsOut.events != null) {
             statsOut.events.clear();
@@ -149,21 +181,29 @@ final class UsageStatsXmlV1 {
 
         statsOut.beginTime = XmlUtils.readLongAttribute(parser, BEGIN_TIME_ATTR);
         statsOut.endTime = XmlUtils.readLongAttribute(parser, END_TIME_ATTR);
-        XmlUtils.nextElement(parser);
 
-        UsageStats pkgStats;
-        while ((pkgStats = readNextUsageStats(parser)) != null) {
-            pkgStats.mBeginTimeStamp = statsOut.beginTime;
-            pkgStats.mEndTimeStamp = statsOut.endTime;
-            statsOut.stats.put(pkgStats.mPackageName, pkgStats);
-        }
-
-        UsageEvents.Event event;
-        while ((event = readNextEvent(parser, statsOut)) != null) {
-            if (statsOut.events == null) {
-                statsOut.events = new TimeSparseArray<>();
+        int eventCode;
+        int outerDepth = parser.getDepth();
+        while ((eventCode = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (eventCode != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (eventCode != XmlPullParser.START_TAG) {
+                continue;
             }
-            statsOut.events.put(event.getTimeStamp(), event);
+
+            final String tag = parser.getName();
+            switch (tag) {
+                case PACKAGE_TAG:
+                    loadUsageStats(parser, statsOut);
+                    break;
+
+                case CONFIGURATION_TAG:
+                    loadConfigStats(parser, statsOut);
+                    break;
+
+                case EVENT_LOG_TAG:
+                    loadEvent(parser, statsOut);
+                    break;
+            }
         }
     }
 
@@ -184,11 +224,15 @@ final class UsageStatsXmlV1 {
             writeUsageStats(serializer, stats.stats.valueAt(i));
         }
 
-        if (stats.events != null) {
-            final int eventCount = stats.events.size();
-            for (int i = 0; i < eventCount; i++) {
-                writeEvent(serializer, stats.events.valueAt(i));
-            }
+        final int configCount = stats.configurations.size();
+        for (int i = 0; i < configCount; i++) {
+            boolean active = stats.activeConfiguration.equals(stats.configurations.keyAt(i));
+            writeConfigStats(serializer, stats.configurations.valueAt(i), active);
+        }
+
+        final int eventCount = stats.events != null ? stats.events.size() : 0;
+        for (int i = 0; i < eventCount; i++) {
+            writeEvent(serializer, stats.events.valueAt(i));
         }
     }
 

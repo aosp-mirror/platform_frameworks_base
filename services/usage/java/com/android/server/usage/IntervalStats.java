@@ -15,17 +15,23 @@
  */
 package com.android.server.usage;
 
+import android.app.usage.ConfigurationStats;
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
+import android.content.res.Configuration;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+
+import java.util.ArrayList;
 
 class IntervalStats {
     public long beginTime;
     public long endTime;
     public long lastTimeSaved;
     public final ArrayMap<String, UsageStats> stats = new ArrayMap<>();
+    public final ArrayMap<Configuration, ConfigurationStats> configurations = new ArrayMap<>();
+    public Configuration activeConfiguration;
     public TimeSparseArray<UsageEvents.Event> events;
 
     // A string cache. This is important as when we're parsing XML files, we don't want to
@@ -34,16 +40,47 @@ class IntervalStats {
     // strings that had identical copies in the cache.
     private final ArraySet<String> mStringCache = new ArraySet<>();
 
+    /**
+     * Gets the UsageStats object for the given package, or creates one and adds it internally.
+     */
     UsageStats getOrCreateUsageStats(String packageName) {
         UsageStats usageStats = stats.get(packageName);
         if (usageStats == null) {
             usageStats = new UsageStats();
-            usageStats.mPackageName = packageName;
+            usageStats.mPackageName = getCachedStringRef(packageName);
             usageStats.mBeginTimeStamp = beginTime;
             usageStats.mEndTimeStamp = endTime;
-            stats.put(packageName, usageStats);
+            stats.put(usageStats.mPackageName, usageStats);
         }
         return usageStats;
+    }
+
+    /**
+     * Gets the ConfigurationStats object for the given configuration, or creates one and adds it
+     * internally.
+     */
+    ConfigurationStats getOrCreateConfigurationStats(Configuration config) {
+        ConfigurationStats configStats = configurations.get(config);
+        if (configStats == null) {
+            configStats = new ConfigurationStats();
+            configStats.mBeginTimeStamp = beginTime;
+            configStats.mEndTimeStamp = endTime;
+            configStats.mConfiguration = config;
+            configurations.put(config, configStats);
+        }
+        return configStats;
+    }
+
+    /**
+     * Builds a UsageEvents.Event, but does not add it internally.
+     */
+    UsageEvents.Event buildEvent(String packageName, String className) {
+        UsageEvents.Event event = new UsageEvents.Event();
+        event.mPackage = getCachedStringRef(packageName);
+        if (className != null) {
+            event.mClass = getCachedStringRef(className);
+        }
+        return event;
     }
 
     void update(String packageName, long timeStamp, int eventType) {
@@ -61,6 +98,28 @@ class IntervalStats {
         usageStats.mLastEvent = eventType;
         usageStats.mLastTimeUsed = timeStamp;
         usageStats.mEndTimeStamp = timeStamp;
+
+        if (eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+            usageStats.mLaunchCount += 1;
+        }
+
+        endTime = timeStamp;
+    }
+
+    void updateConfigurationStats(Configuration config, long timeStamp) {
+        if (activeConfiguration != null) {
+            ConfigurationStats activeStats = configurations.get(activeConfiguration);
+            activeStats.mTotalTimeActive += timeStamp - activeStats.mLastTimeActive;
+            activeStats.mLastTimeActive = timeStamp - 1;
+        }
+
+        if (config != null) {
+            ConfigurationStats configStats = getOrCreateConfigurationStats(config);
+            configStats.mLastTimeActive = timeStamp;
+            configStats.mActivationCount += 1;
+            activeConfiguration = configStats.mConfiguration;
+        }
+
         endTime = timeStamp;
     }
 
@@ -71,14 +130,5 @@ class IntervalStats {
             return str;
         }
         return mStringCache.valueAt(index);
-    }
-
-    UsageEvents.Event buildEvent(String packageName, String className) {
-        UsageEvents.Event event = new UsageEvents.Event();
-        event.mPackage = getCachedStringRef(packageName);
-        if (className != null) {
-            event.mClass = getCachedStringRef(className);
-        }
-        return event;
     }
 }

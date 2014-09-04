@@ -125,9 +125,9 @@ public final class UsageStatsManager {
      * @see #INTERVAL_YEARLY
      * @see #INTERVAL_BEST
      */
-    @SuppressWarnings("unchecked")
     public List<UsageStats> queryUsageStats(int intervalType, long beginTime, long endTime) {
         try {
+            @SuppressWarnings("unchecked")
             ParceledListSlice<UsageStats> slice = mService.queryUsageStats(intervalType, beginTime,
                     endTime, mContext.getOpPackageName());
             if (slice != null) {
@@ -136,7 +136,32 @@ public final class UsageStatsManager {
         } catch (RemoteException e) {
             // fallthrough and return null.
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
+    }
+
+    /**
+     * Gets the hardware configurations the device was in for the given time range, aggregated by
+     * the specified interval. The results are ordered as in
+     * {@link #queryUsageStats(int, long, long)}.
+     *
+     * @param intervalType The time interval by which the stats are aggregated.
+     * @param beginTime The inclusive beginning of the range of stats to include in the results.
+     * @param endTime The exclusive end of the range of stats to include in the results.
+     * @return A list of {@link ConfigurationStats} or null if none are available.
+     */
+    public List<ConfigurationStats> queryConfigurations(int intervalType, long beginTime,
+            long endTime) {
+        try {
+            @SuppressWarnings("unchecked")
+            ParceledListSlice<ConfigurationStats> slice = mService.queryConfigurationStats(
+                    intervalType, beginTime, endTime, mContext.getOpPackageName());
+            if (slice != null) {
+                return slice.getList();
+            }
+        } catch (RemoteException e) {
+            // fallthrough and return the empty list.
+        }
+        return Collections.emptyList();
     }
 
     /**
