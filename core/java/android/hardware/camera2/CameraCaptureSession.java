@@ -32,18 +32,18 @@ import java.util.List;
  * sending images to the desired targets. Therefore the setup is done asynchronously, and
  * {@link CameraDevice#createCaptureSession createCaptureSession} will send the ready-to-use
  * CameraCaptureSession to the provided listener's
- * {@link CameraCaptureSession.StateListener#onConfigured onConfigured} callback. If configuration
+ * {@link CameraCaptureSession.StateCallback#onConfigured onConfigured} callback. If configuration
  * cannot be completed, then the
- * {@link CameraCaptureSession.StateListener#onConfigureFailed onConfigureFailed} is called, and the
+ * {@link CameraCaptureSession.StateCallback#onConfigureFailed onConfigureFailed} is called, and the
  * session will not become active.</p>
  *<!--
  * <p>Any capture requests (repeating or non-repeating) submitted before the session is ready will
  * be queued up and will begin capture once the session becomes ready. In case the session cannot be
- * configured and {@link StateListener#onConfigureFailed onConfigureFailed} is called, all queued
+ * configured and {@link StateCallback#onConfigureFailed onConfigureFailed} is called, all queued
  * capture requests are discarded.</p>
  *-->
  * <p>If a new session is created by the camera device, then the previous session is closed, and its
- * associated {@link StateListener#onClosed onClosed} callback will be invoked.  All
+ * associated {@link StateCallback#onClosed onClosed} callback will be invoked.  All
  * of the session methods will throw an IllegalStateException if called once the session is
  * closed.</p>
  *
@@ -86,7 +86,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * looper}.
      *
      * @return int A unique capture sequence ID used by
-     *             {@link CaptureListener#onCaptureSequenceCompleted}.
+     *             {@link CaptureCallback#onCaptureSequenceCompleted}.
      *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
@@ -103,7 +103,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see #setRepeatingBurst
      * @see #abortCaptures
      */
-    public abstract int capture(CaptureRequest request, CaptureListener listener, Handler handler)
+    public abstract int capture(CaptureRequest request, CaptureCallback listener, Handler handler)
             throws CameraAccessException;
 
     /**
@@ -131,7 +131,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * looper}.
      *
      * @return int A unique capture sequence ID used by
-     *             {@link CaptureListener#onCaptureSequenceCompleted}.
+     *             {@link CaptureCallback#onCaptureSequenceCompleted}.
      *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
@@ -147,7 +147,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see #setRepeatingBurst
      * @see #abortCaptures
      */
-    public abstract int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
+    public abstract int captureBurst(List<CaptureRequest> requests, CaptureCallback listener,
             Handler handler) throws CameraAccessException;
 
     /**
@@ -185,7 +185,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * looper}.
      *
      * @return int A unique capture sequence ID used by
-     *             {@link CaptureListener#onCaptureSequenceCompleted}.
+     *             {@link CaptureCallback#onCaptureSequenceCompleted}.
      *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
@@ -203,7 +203,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see #stopRepeating
      * @see #abortCaptures
      */
-    public abstract int setRepeatingRequest(CaptureRequest request, CaptureListener listener,
+    public abstract int setRepeatingRequest(CaptureRequest request, CaptureCallback listener,
             Handler handler) throws CameraAccessException;
 
     /**
@@ -245,7 +245,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * looper}.
      *
      * @return int A unique capture sequence ID used by
-     *             {@link CaptureListener#onCaptureSequenceCompleted}.
+     *             {@link CaptureCallback#onCaptureSequenceCompleted}.
      *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
@@ -263,7 +263,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see #stopRepeating
      * @see #abortCaptures
      */
-    public abstract int setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
+    public abstract int setRepeatingBurst(List<CaptureRequest> requests, CaptureCallback listener,
             Handler handler) throws CameraAccessException;
 
     /**
@@ -274,7 +274,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * <p>Any currently in-flight captures will still complete, as will any burst that is
      * mid-capture. To ensure that the device has finished processing all of its capture requests
-     * and is in ready state, wait for the {@link StateListener#onReady} callback after
+     * and is in ready state, wait for the {@link StateCallback#onReady} callback after
      * calling this method.</p>
      *
      * @throws CameraAccessException if the camera device is no longer connected or has
@@ -285,7 +285,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
-     * @see StateListener#onIdle
+     * @see StateCallback#onIdle
      */
     public abstract void stopRepeating() throws CameraAccessException;
 
@@ -293,15 +293,15 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * Discard all captures currently pending and in-progress as fast as possible.
      *
      * <p>The camera device will discard all of its current work as fast as possible. Some in-flight
-     * captures may complete successfully and call {@link CaptureListener#onCaptureCompleted}, while
-     * others will trigger their {@link CaptureListener#onCaptureFailed} callbacks. If a repeating
+     * captures may complete successfully and call {@link CaptureCallback#onCaptureCompleted}, while
+     * others will trigger their {@link CaptureCallback#onCaptureFailed} callbacks. If a repeating
      * request or a repeating burst is set, it will be cleared.</p>
      *
      * <p>This method is the fastest way to switch the camera device to a new session with
      * {@link CameraDevice#createCaptureSession}, at the cost of discarding in-progress work. It
      * must be called before the new session is created. Once all pending requests are either
-     * completed or thrown away, the {@link StateListener#onReady} callback will be called,
-     * if the session has not been closed. Otherwise, the {@link StateListener#onClosed}
+     * completed or thrown away, the {@link StateCallback#onReady} callback will be called,
+     * if the session has not been closed. Otherwise, the {@link StateCallback#onClosed}
      * callback will be fired when a new session is created by the camera device.</p>
      *
      * <p>Cancelling will introduce at least a brief pause in the stream of data from the camera
@@ -332,7 +332,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * <p>Note that creating a new capture session with {@link CameraDevice#createCaptureSession}
      * will close any existing capture session automatically, and call the older session listener's
-     * {@link StateListener#onClosed} callback. Using {@link CameraDevice#createCaptureSession}
+     * {@link StateCallback#onClosed} callback. Using {@link CameraDevice#createCaptureSession}
      * directly without closing is the recommended approach for quickly switching to a new session,
      * since unchanged target outputs can be reused more efficiently.</p>
      *
@@ -340,7 +340,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * repeating requests or bursts are stopped (as if {@link #stopRepeating()} was called).
      * However, any in-progress capture requests submitted to the session will be completed as
      * normal; once all captures have completed and the session has been torn down,
-     * {@link StateListener#onClosed} will be called.</p>
+     * {@link StateCallback#onClosed} will be called.</p>
      *
      * <p>Closing a session is idempotent; closing more than once has no effect.</p>
      */
@@ -348,10 +348,10 @@ public abstract class CameraCaptureSession implements AutoCloseable {
     public abstract void close();
 
     /**
-     * A listener for tracking the state of a camera capture session.
+     * A callback object for receiving updates about the state of a camera capture session.
      *
      */
-    public static abstract class StateListener {
+    public static abstract class StateCallback {
 
         /**
          * This method is called when the camera device has finished configuring itself, and the
@@ -439,10 +439,17 @@ public abstract class CameraCaptureSession implements AutoCloseable {
     }
 
     /**
-     * <p>A listener for tracking the progress of a {@link CaptureRequest}
-     * submitted to the camera device.</p>
+     * Temporary for migrating to Callback naming
+     * @hide
+     */
+    public static abstract class StateListener extends StateCallback {
+    }
+
+    /**
+     * <p>A callback object for tracking the progress of a {@link CaptureRequest} submitted to the
+     * camera device.</p>
      *
-     * <p>This listener is called when a request triggers a capture to start,
+     * <p>This callback is invoked when a request triggers a capture to start,
      * and when the capture is complete. In case on an error capturing an image,
      * the error method is triggered instead of the completion method.</p>
      *
@@ -451,7 +458,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
      */
-    public static abstract class CaptureListener {
+    public static abstract class CaptureCallback {
 
         /**
          * This constant is used to indicate that no images were captured for
@@ -625,7 +632,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
         }
 
         /**
-         * This method is called independently of the others in CaptureListener,
+         * This method is called independently of the others in CaptureCallback,
          * when a capture sequence finishes and all {@link CaptureResult}
          * or {@link CaptureFailure} for it have been returned via this listener.
          *
@@ -655,7 +662,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
         }
 
         /**
-         * This method is called independently of the others in CaptureListener,
+         * This method is called independently of the others in CaptureCallback,
          * when a capture sequence aborts before any {@link CaptureResult}
          * or {@link CaptureFailure} for it have been returned via this listener.
          *
@@ -682,6 +689,13 @@ public abstract class CameraCaptureSession implements AutoCloseable {
                 int sequenceId) {
             // default empty implementation
         }
+    }
+
+    /**
+     * Temporary for migrating to Callback naming
+     * @hide
+     */
+    public static abstract class CaptureListener extends CaptureCallback {
     }
 
 }

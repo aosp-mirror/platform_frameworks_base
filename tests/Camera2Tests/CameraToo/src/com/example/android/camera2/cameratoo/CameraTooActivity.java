@@ -290,14 +290,14 @@ public class CameraTooActivity extends Activity {
 
                 // Open the camera device
                 try {
-                    mCameraManager.openCamera(mCameraId, mCameraStateListener,
+                    mCameraManager.openCamera(mCameraId, mCameraStateCallback,
                             mBackgroundHandler);
                 } catch (CameraAccessException ex) {
                     Log.e(TAG, "Failed to configure output surface", ex);
                 }
                 mGotSecondCallback = true;
 
-                // Control flow continues in mCameraStateListener.onOpened()
+                // Control flow continues in mCameraStateCallback.onOpened()
             }
         }};
 
@@ -305,8 +305,8 @@ public class CameraTooActivity extends Activity {
      * Calledbacks invoked upon state changes in our {@code CameraDevice}. <p>These are run on
      * {@code mBackgroundThread}.</p>
      */
-    final CameraDevice.StateListener mCameraStateListener =
-            new CameraDevice.StateListener() {
+    final CameraDevice.StateCallback mCameraStateCallback =
+            new CameraDevice.StateCallback() {
         @Override
         public void onOpened(CameraDevice camera) {
             Log.i(TAG, "Successfully opened camera");
@@ -337,8 +337,8 @@ public class CameraTooActivity extends Activity {
      * Callbacks invoked upon state changes in our {@code CameraCaptureSession}. <p>These are run on
      * {@code mBackgroundThread}.</p>
      */
-    final CameraCaptureSession.StateListener mCaptureSessionListener =
-            new CameraCaptureSession.StateListener() {
+    final CameraCaptureSession.StateCallback mCaptureSessionListener =
+            new CameraCaptureSession.StateCallback() {
         @Override
         public void onConfigured(CameraCaptureSession session) {
             Log.i(TAG, "Finished configuring camera outputs");

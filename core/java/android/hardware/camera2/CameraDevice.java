@@ -199,8 +199,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * <p>It can take several hundred milliseconds for the session's configuration to complete,
      * since camera hardware may need to be powered on or reconfigured. Once the configuration is
      * complete and the session is ready to actually capture data, the provided
-     * {@link CameraCaptureSession.StateListener}'s
-     * {@link CameraCaptureSession.StateListener#onConfigured} callback will be called.</p>
+     * {@link CameraCaptureSession.StateCallback}'s
+     * {@link CameraCaptureSession.StateCallback#onConfigured} callback will be called.</p>
      *
      * <p>If a prior CameraCaptureSession already exists when a new one is created, the previous
      * session is closed. Any in-progress capture requests made on the prior session will be
@@ -218,12 +218,12 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * @param outputs The new set of Surfaces that should be made available as
      *                targets for captured image data.
-     * @param listener The listener to notify about the status of the new capture session.
-     * @param handler The handler on which the listener should be invoked, or {@code null} to use
+     * @param callback The callback to notify about the status of the new capture session.
+     * @param handler The handler on which the callback should be invoked, or {@code null} to use
      *                the current thread's {@link android.os.Looper looper}.
      *
      * @throws IllegalArgumentException if the set of output Surfaces do not meet the requirements,
-     *                                  the listener is null, or the handler is null but the current
+     *                                  the callback is null, or the handler is null but the current
      *                                  thread has no looper.
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
@@ -235,7 +235,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see StreamConfigurationMap#getOutputSizes(Class)
      */
     public abstract void createCaptureSession(List<Surface> outputs,
-            CameraCaptureSession.StateListener listener, Handler handler)
+            CameraCaptureSession.StateCallback callback, Handler handler)
             throws CameraAccessException;
 
     /**
@@ -271,10 +271,10 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * <p>Immediately after this call, all calls to the camera device or active session interface
      * will throw a {@link IllegalStateException}, except for calls to close(). Once the device has
-     * fully shut down, the {@link StateListener#onClosed} callback will be called, and the camera
+     * fully shut down, the {@link StateCallback#onClosed} callback will be called, and the camera
      * is free to be re-opened.</p>
      *
-     * <p>Immediately after this call, besides the final {@link StateListener#onClosed} calls, no
+     * <p>Immediately after this call, besides the final {@link StateCallback#onClosed} calls, no
      * further callbacks from the device or the active session will occur, and any remaining
      * submitted capture requests will be discarded, as if
      * {@link CameraCaptureSession#abortCaptures} had been called, except that no success or failure
@@ -285,24 +285,24 @@ public abstract class CameraDevice implements AutoCloseable {
     public abstract void close();
 
     /**
-     * A listener for notifications about the state of a camera
-     * device.
+     * A callback objects for receiving updates about the state of a camera device.
      *
-     * <p>A listener must be provided to the {@link CameraManager#openCamera}
-     * method to open a camera device.</p>
+     * <p>A callback instance must be provided to the {@link CameraManager#openCamera} method to
+     * open a camera device.</p>
      *
-     * <p>These events include notifications about the device completing startup (
+     * <p>These state updates include notifications about the device completing startup (
      * allowing for {@link #createCaptureSession} to be called), about device
      * disconnection or closure, and about unexpected device errors.</p>
      *
      * <p>Events about the progress of specific {@link CaptureRequest CaptureRequests} are provided
-     * through a {@link CameraCaptureSession.CaptureListener} given to the
+     * through a {@link CameraCaptureSession.CaptureCallback} given to the
      * {@link CameraCaptureSession#capture}, {@link CameraCaptureSession#captureBurst},
-     * {@link CameraCaptureSession#setRepeatingRequest}, or {@link CameraCaptureSession#setRepeatingBurst} methods.
+     * {@link CameraCaptureSession#setRepeatingRequest}, or
+     * {@link CameraCaptureSession#setRepeatingBurst} methods.
      *
      * @see CameraManager#openCamera
      */
-    public static abstract class StateListener {
+    public static abstract class StateCallback {
        /**
          * An error code that can be reported by {@link #onError}
          * indicating that the camera device is in use already.
@@ -408,7 +408,7 @@ public abstract class CameraDevice implements AutoCloseable {
          * of a removable camera device; or the camera being needed for a
          * higher-priority use case.</p>
          *
-         * <p>There may still be capture listener callbacks that are called
+         * <p>There may still be capture callbacks that are invoked
          * after this method is called, or new image buffers that are delivered
          * to active outputs.</p>
          *
@@ -417,7 +417,7 @@ public abstract class CameraDevice implements AutoCloseable {
          *
          * <p>You should clean up the camera with {@link CameraDevice#close} after
          * this happens, as it is not recoverable until opening the camera again
-         * after it becomes {@link CameraManager.AvailabilityListener#onCameraAvailable available}.
+         * after it becomes {@link CameraManager.AvailabilityCallback#onCameraAvailable available}.
          * </p>
          *
          * @param camera the device that has been disconnected
@@ -436,7 +436,7 @@ public abstract class CameraDevice implements AutoCloseable {
          * {@link CameraAccessException#CAMERA_ERROR CAMERA_ERROR} reason.
          * </p>
          *
-         * <p>There may still be capture completion or camera stream listeners
+         * <p>There may still be capture completion or camera stream callbacks
          * that will be called after this error is received.</p>
          *
          * <p>You should clean up the camera with {@link CameraDevice#close} after
@@ -444,7 +444,7 @@ public abstract class CameraDevice implements AutoCloseable {
          *
          * @param camera The device reporting the error
          * @param error The error code, one of the
-         *     {@code StateListener.ERROR_*} values.
+         *     {@code StateCallback.ERROR_*} values.
          *
          * @see #ERROR_CAMERA_DEVICE
          * @see #ERROR_CAMERA_SERVICE
@@ -452,6 +452,13 @@ public abstract class CameraDevice implements AutoCloseable {
          * @see #ERROR_CAMERA_IN_USE
          */
         public abstract void onError(CameraDevice camera, int error); // Must implement
+    }
+
+    /**
+     * Temporary for migrating to Callback naming
+     * @hide
+     */
+    public static abstract class StateListener extends StateCallback {
     }
 
     /**
