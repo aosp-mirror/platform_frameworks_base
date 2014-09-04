@@ -33,8 +33,7 @@ import android.print.PrintAttributes.Margins;
 import android.util.Log;
 import android.view.View;
 import libcore.io.IoUtils;
-
-import java.io.FileOutputStream;
+import com.android.printspooler.util.BitmapSerializeUtils;
 import java.io.IOException;
 
 /**
@@ -77,7 +76,6 @@ public final class PdfRendererService extends Service {
         @Override
         public void renderPage(int pageIndex, int bitmapWidth, int bitmapHeight,
                 PrintAttributes attributes, ParcelFileDescriptor destination) {
-            FileOutputStream out = null;
             synchronized (mLock) {
                 try {
                     throwIfNotOpened();
@@ -137,10 +135,8 @@ public final class PdfRendererService extends Service {
 
                     page.close();
 
-                    out = new FileOutputStream(destination.getFileDescriptor());
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 0, out);
+                    BitmapSerializeUtils.writeBitmapPixels(bitmap, destination);
                 } finally {
-                    IoUtils.closeQuietly(out);
                     IoUtils.closeQuietly(destination);
                 }
             }
