@@ -10346,8 +10346,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final boolean translucentChanged = r.changeWindowTranslucency(false);
                 if (translucentChanged) {
                     r.task.stack.convertToTranslucent(r);
-                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
                 }
+                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
                 mWindowManager.setAppFullscreen(token, false);
                 return translucentChanged;
             }

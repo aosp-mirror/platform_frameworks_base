@@ -2890,7 +2890,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             invalidate();
 
             int opacity = PixelFormat.OPAQUE;
-
             // Note: if there is no background, we will assume opaque. The
             // common case seems to be that an application sets there to be
             // no background so it can draw everything itself. For that,
