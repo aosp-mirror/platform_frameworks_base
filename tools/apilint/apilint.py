@@ -66,6 +66,8 @@ class Field():
         else:
             self.value = None
 
+        self.ident = self.raw.replace(" deprecated ", " ")
+
     def __repr__(self):
         return self.raw
 
@@ -94,6 +96,15 @@ class Method():
             if r == "throws": break
             self.args.append(r)
 
+        # identity for compat purposes
+        ident = self.raw
+        ident = ident.replace(" deprecated ", " ")
+        ident = ident.replace(" synchronized ", " ")
+        ident = re.sub("<.+?>", "", ident)
+        if " throws " in ident:
+            ident = ident[:ident.index(" throws ")]
+        self.ident = ident
+
     def __repr__(self):
         return self.raw
 
@@ -113,10 +124,16 @@ class Class():
             self.fullname = raw[raw.index("class")+1]
         elif "interface" in raw:
             self.fullname = raw[raw.index("interface")+1]
+        else:
+            raise ValueError("Funky class type %s" % (self.raw))
+
+        if "extends" in raw:
+            self.extends = raw[raw.index("extends")+1]
+        else:
+            self.extends = None
 
         self.fullname = self.pkg.name + "." + self.fullname
         self.name = self.fullname[self.fullname.rindex(".")+1:]
-
 
     def __repr__(self):
         return self.raw
@@ -188,10 +205,10 @@ def _fail(clazz, detail, msg):
     failures[sig] = res
 
 def warn(clazz, detail, msg):
-    _fail(clazz, detail, "%sWarning:%s %s" % (format(fg=YELLOW, bg=BLACK), format(reset=True), msg))
+    _fail(clazz, detail, "%sWarning:%s %s" % (format(fg=YELLOW, bg=BLACK, bold=True), format(reset=True), msg))
 
 def error(clazz, detail, msg):
-    _fail(clazz, detail, "%sError:%s %s" % (format(fg=RED, bg=BLACK), format(reset=True), msg))
+    _fail(clazz, detail, "%sError:%s %s" % (format(fg=RED, bg=BLACK, bold=True), format(reset=True), msg))
 
 
 def verify_constants(clazz):
@@ -656,7 +673,8 @@ def verify_flags(clazz):
             known[scope] |= val
 
 
-def verify_all(api):
+def verify_style(api):
+    """Find all style issues in the given API level."""
     global failures
 
     failures = {}
@@ -697,19 +715,83 @@ def verify_all(api):
     return failures
 
 
+def verify_compat(cur, prev):
+    """Find any incompatible API changes between two levels."""
+    global failures
+
+    def class_exists(api, test):
+        return test.fullname in api
+
+    def ctor_exists(api, clazz, test):
+        for m in clazz.ctors:
+            if m.ident == test.ident: return True
+        return False
+
+    def all_methods(api, clazz):
+        methods = list(clazz.methods)
+        if clazz.extends is not None:
+            methods.extend(all_methods(api, api[clazz.extends]))
+        return methods
+
+    def method_exists(api, clazz, test):
+        methods = all_methods(api, clazz)
+        for m in methods:
+            if m.ident == test.ident: return True
+        return False
+
+    def field_exists(api, clazz, test):
+        for f in clazz.fields:
+            if f.ident == test.ident: return True
+        return False
+
+    failures = {}
+    for key in sorted(prev.keys()):
+        prev_clazz = prev[key]
+
+        if not class_exists(cur, prev_clazz):
+            error(prev_clazz, None, "Class removed or incompatible change")
+            continue
+
+        cur_clazz = cur[key]
+
+        for test in prev_clazz.ctors:
+            if not ctor_exists(cur, cur_clazz, test):
+                error(prev_clazz, prev_ctor, "Constructor removed or incompatible change")
+
+        methods = all_methods(prev, prev_clazz)
+        for test in methods:
+            if not method_exists(cur, cur_clazz, test):
+                error(prev_clazz, test, "Method removed or incompatible change")
+
+        for test in prev_clazz.fields:
+            if not field_exists(cur, cur_clazz, test):
+                error(prev_clazz, test, "Field removed or incompatible change")
+
+    return failures
+
+
 cur = parse_api(sys.argv[1])
-cur_fail = verify_all(cur)
+cur_fail = verify_style(cur)
 
 if len(sys.argv) > 2:
     prev = parse_api(sys.argv[2])
-    prev_fail = verify_all(prev)
+    prev_fail = verify_style(prev)
 
     # ignore errors from previous API level
     for p in prev_fail:
         if p in cur_fail:
             del cur_fail[p]
 
+    # look for compatibility issues
+    compat_fail = verify_compat(cur, prev)
 
+    print "%s API compatibility issues %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))
+    for f in sorted(compat_fail):
+        print compat_fail[f]
+        print
+
+
+print "%s API style issues %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))
 for f in sorted(cur_fail):
     print cur_fail[f]
     print
