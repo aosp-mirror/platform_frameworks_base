@@ -66,6 +66,7 @@ import android.os.SystemProperties;
 import android.os.UEventObserver;
 import android.os.UserHandle;
 import android.os.Vibrator;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.service.dreams.DreamService;
@@ -127,6 +128,9 @@ import static android.view.WindowManager.LayoutParams.*;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 
 /**
  * WindowManagerPolicy implementation for the Android phone UI.  This
@@ -315,6 +319,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mLanguageSwitchKeyPressed;
 
     int mLidState = LID_ABSENT;
+    int mCameraLensCoverState = CAMERA_LENS_COVER_ABSENT;
     boolean mHaveBuiltInKeyboard;
 
     boolean mSystemReady;
@@ -1523,6 +1528,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     void readLidState() {
         mLidState = mWindowManagerFuncs.getLidState();
+    }
+
+    private void readCameraLensCoverState() {
+        mCameraLensCoverState = mWindowManagerFuncs.getCameraLensCoverState();
     }
 
     private boolean isHidden(int accessibilityMode) {
@@ -4055,6 +4064,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    @Override
+    public void notifyCameraLensCoverSwitchChanged(long whenNanos, boolean lensCovered) {
+        int lensCoverState = lensCovered ? CAMERA_LENS_COVERED : CAMERA_LENS_UNCOVERED;
+        if (mCameraLensCoverState == lensCoverState) {
+            return;
+        }
+        if (mCameraLensCoverState == CAMERA_LENS_COVERED &&
+                lensCoverState == CAMERA_LENS_UNCOVERED) {
+            Intent intent;
+            final boolean keyguardActive = mKeyguardDelegate == null ? false :
+                    mKeyguardDelegate.isShowing();
+            if (keyguardActive) {
+                intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE);
+            } else {
+                intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
+            }
+            mContext.startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
+        }
+        mCameraLensCoverState = lensCoverState;
+    }
+
     void setHdmiPlugged(boolean plugged) {
         if (mHdmiPlugged != plugged) {
             mHdmiPlugged = plugged;
@@ -5132,6 +5162,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mKeyguardDelegate = new KeyguardServiceDelegate(mContext, null);
         mKeyguardDelegate.onSystemReady();
 
+        readCameraLensCoverState();
         updateUiMode();
         synchronized (mLock) {
             updateOrientationListenerLp();
@@ -5783,6 +5814,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(" mSystemBooted="); pw.println(mSystemBooted);
         pw.print(prefix); pw.print("mLidState="); pw.print(mLidState);
                 pw.print(" mLidOpenRotation="); pw.print(mLidOpenRotation);
+                pw.print(" mCameraLensCoverState="); pw.print(mCameraLensCoverState);
                 pw.print(" mHdmiPlugged="); pw.println(mHdmiPlugged);
         if (mLastSystemUiFlags != 0 || mResettingSystemUiFlags != 0
                 || mForceClearedSystemUiFlags != 0) {

@@ -5432,6 +5432,23 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    // Called by window manager policy. Not exposed externally.
+    @Override
+    public int getCameraLensCoverState() {
+        int sw = mInputManager.getSwitchState(-1, InputDevice.SOURCE_ANY,
+                InputManagerService.SW_CAMERA_LENS_COVER);
+        if (sw > 0) {
+            // Switch state: AKEY_STATE_DOWN or AKEY_STATE_VIRTUAL.
+            return CAMERA_LENS_COVERED;
+        } else if (sw == 0) {
+            // Switch state: AKEY_STATE_UP.
+            return CAMERA_LENS_UNCOVERED;
+        } else {
+            // Switch state: AKEY_STATE_UNKNOWN.
+            return CAMERA_LENS_COVER_ABSENT;
+        }
+    }
+
     // Called by window manager policy.  Not exposed externally.
     @Override
     public void switchKeyboardLayout(int deviceId, int direction) {
