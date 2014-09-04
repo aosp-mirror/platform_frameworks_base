@@ -6679,16 +6679,36 @@ public final class ViewRootImpl implements ViewParent,
         public void performAccessibilityAction(long accessibilityNodeId, int action,
                 Bundle arguments, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interogatingPid, long interrogatingTid) {
+                int interrogatingPid, long interrogatingTid) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .performAccessibilityActionClientThread(accessibilityNodeId, action, arguments,
-                            interactionId, callback, flags, interogatingPid, interrogatingTid);
+                            interactionId, callback, flags, interrogatingPid, interrogatingTid);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
                     callback.setPerformAccessibilityActionResult(false, interactionId);
+                } catch (RemoteException re) {
+                    /* best effort - ignore */
+                }
+            }
+        }
+
+        @Override
+        public void computeClickPointInScreen(long accessibilityNodeId, Region interactiveRegion,
+                int interactionId, IAccessibilityInteractionConnectionCallback callback,
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
+            ViewRootImpl viewRootImpl = mViewRootImpl.get();
+            if (viewRootImpl != null && viewRootImpl.mView != null) {
+                viewRootImpl.getAccessibilityInteractionController()
+                        .computeClickPointInScreenClientThread(accessibilityNodeId,
+                                interactiveRegion, interactionId, callback, interrogatingPid,
+                                interrogatingTid, spec);
+            } else {
+                // We cannot make the call and notify the caller so it does not wait.
+                try {
+                    callback.setComputeClickPointInScreenActionResult(null, interactionId);
                 } catch (RemoteException re) {
                     /* best effort - ignore */
                 }
