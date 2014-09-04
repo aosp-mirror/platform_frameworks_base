@@ -97,7 +97,7 @@ public:
      */
     void setClippingOutline(LinearAllocator& allocator, const Outline* outline);
     void setClippingRoundRect(LinearAllocator& allocator,
-            const Rect& rect, float radius);
+            const Rect& rect, float radius, bool highPriority = true);
 
     inline const mat4* currentTransform() const {
         return mSnapshot->transform;
