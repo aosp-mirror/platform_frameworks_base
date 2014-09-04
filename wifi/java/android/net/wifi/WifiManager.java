@@ -1022,6 +1022,7 @@ public class WifiManager {
     }
 
     /** @hide */
+    @SystemApi
     public boolean startScan(WorkSource workSource) {
         try {
             mService.startScan(null, workSource);
@@ -1095,6 +1096,7 @@ public class WifiManager {
      * @return false if not supported.
      * @hide
      */
+    @SystemApi
     public boolean isBatchedScanSupported() {
         try {
             return mService.isBatchedScanSupported();
@@ -1121,6 +1123,7 @@ public class WifiManager {
      * {@link BATCHED_SCAN_RESULTS_AVAILABLE_ACTION} is received.
      * @hide
      */
+    @SystemApi
     public List<BatchedScanResult> getBatchedScanResults() {
         try {
             return mService.getBatchedScanResults(mContext.getOpPackageName());

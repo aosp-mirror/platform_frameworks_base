@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -771,6 +772,7 @@ public class Location implements Parcelable {
      * @see #makeComplete
      * @hide
      */
+    @SystemApi
     public boolean isComplete() {
         if (mProvider == null) return false;
         if (!mHasAccuracy) return false;
@@ -788,6 +790,7 @@ public class Location implements Parcelable {
      * @see #isComplete
      * @hide
      */
+    @SystemApi
     public void makeComplete() {
         if (mProvider == null) mProvider = "?";
         if (!mHasAccuracy) {
@@ -957,6 +960,7 @@ public class Location implements Parcelable {
      * @param isFromMockProvider true if this Location came from a mock provider, false otherwise
      * @hide
      */
+    @SystemApi
     public void setIsFromMockProvider(boolean isFromMockProvider) {
         mIsFromMockProvider = isFromMockProvider;
     }
