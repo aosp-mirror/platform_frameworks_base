@@ -789,8 +789,12 @@ import java.util.List;
     void startListeningToSessions() {
         final ComponentName listenerComponent = new ComponentName(mContext,
                 mOnClientUpdateListener.getClass());
+        Handler handler = null;
+        if (Looper.myLooper() == null) {
+            handler = new Handler(Looper.getMainLooper());
+        }
         mSessionManager.addOnActiveSessionsChangedListener(mSessionListener, listenerComponent,
-                UserHandle.myUserId(), null);
+                UserHandle.myUserId(), handler);
         mSessionListener.onActiveSessionsChanged(mSessionManager
                 .getActiveSessions(listenerComponent));
         if (DEBUG) {
