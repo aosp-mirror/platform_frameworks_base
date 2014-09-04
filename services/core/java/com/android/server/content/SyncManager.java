@@ -46,6 +46,7 @@ import android.content.SyncStatusInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ProviderInfo;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.RegisteredServicesCacheListener;
@@ -3098,26 +3099,28 @@ public class SyncManager {
                 return;
             }
 
+            UserHandle user = new UserHandle(userId);
             final PendingIntent pendingIntent = PendingIntent
                     .getActivityAsUser(mContext, 0, clickIntent,
-                            PendingIntent.FLAG_CANCEL_CURRENT, null, new UserHandle(userId));
+                            PendingIntent.FLAG_CANCEL_CURRENT, null, user);
 
             CharSequence tooManyDeletesDescFormat = mContext.getResources().getText(
                     R.string.contentServiceTooManyDeletesNotificationDesc);
 
+            Context contextForUser = getContextForUser(user);
             Notification notification =
                 new Notification(R.drawable.stat_notify_sync_error,
                         mContext.getString(R.string.contentServiceSync),
                         System.currentTimeMillis());
-            notification.color = mContext.getResources().getColor(
+            notification.color = contextForUser.getResources().getColor(
                     com.android.internal.R.color.system_notification_accent_color);
-            notification.setLatestEventInfo(mContext,
-                    mContext.getString(R.string.contentServiceSyncNotificationTitle),
+            notification.setLatestEventInfo(contextForUser,
+                    contextForUser.getString(R.string.contentServiceSyncNotificationTitle),
                     String.format(tooManyDeletesDescFormat.toString(), authorityName),
                     pendingIntent);
             notification.flags |= Notification.FLAG_ONGOING_EVENT;
             mNotificationMgr.notifyAsUser(null, account.hashCode() ^ authority.hashCode(),
-                    notification, new UserHandle(userId));
+                    notification, user);
         }
 
         /**
@@ -3303,6 +3306,15 @@ public class SyncManager {
 
         public int getNumRows() {
             return mTable.size();
+        }
+    }
+
+    private Context getContextForUser(UserHandle user) {
+        try {
+            return mContext.createPackageContextAsUser(mContext.getPackageName(), 0, user);
+        } catch (NameNotFoundException e) {
+            // Default to mContext, not finding the package system is running as is unlikely.
+            return mContext;
         }
     }
 }

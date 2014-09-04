@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
@@ -730,7 +731,14 @@ public final class PrintManagerService extends SystemService {
                     PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_CANCEL_CURRENT, null,
                     userHandle);
 
-            Notification.Builder builder = new Notification.Builder(mContext)
+            Context builderContext = mContext;
+            try {
+                builderContext = mContext.createPackageContextAsUser(mContext.getPackageName(), 0,
+                        userHandle);
+            } catch (NameNotFoundException e) {
+                // Ignore can't find the package the system is running as.
+            }
+            Notification.Builder builder = new Notification.Builder(builderContext)
                     .setSmallIcon(R.drawable.ic_print)
                     .setContentTitle(mContext.getString(R.string.print_service_installed_title,
                             label))
