@@ -26,7 +26,6 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiManager;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -35,10 +34,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.regex.Pattern;
 
 
 /**
@@ -52,8 +49,6 @@ import java.util.regex.Pattern;
  */
 public class ConnectivityManagerTestBase extends InstrumentationTestCase {
 
-    private static final String LOG_TAG = "ConnectivityManagerTestBase";
-    private static final String ACCESS_POINT_FILE = "accesspoints.xml";
     private static final String PING_IP_ADDR = "8.8.8.8";
 
     protected static final int WAIT_FOR_SCAN_RESULT = 10 * 1000; //10 seconds
@@ -69,9 +64,10 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
     protected static final int FAILURE = 1;
     protected static final int INIT = -1;
 
+    protected final String mLogTag;
+
     private ConnectivityReceiver mConnectivityReceiver = null;
     private WifiReceiver mWifiReceiver = null;
-    private AccessPointParserHelper mParseHelper = null;
 
     private long mLastConnectivityChangeTime = -1;
     protected ConnectivityManager mCm;
@@ -81,6 +77,11 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
 
     /* Control Wifi States */
     public WifiManager mWifiManager;
+
+    public ConnectivityManagerTestBase(String logTag) {
+        super();
+        mLogTag = logTag;
+    }
 
     protected long getLastConnectivityChangeTime() {
         return mLastConnectivityChangeTime;
@@ -94,7 +95,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         @Override
         public void onReceive(Context context, Intent intent) {
             mLastConnectivityChangeTime = SystemClock.uptimeMillis();
-            log("ConnectivityReceiver: " + intent);
+            logv("ConnectivityReceiver: " + intent);
             String action = intent.getAction();
             if (!action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 Log.v("ConnectivityReceiver", "onReceive() called with " + intent);
@@ -108,7 +109,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
             String action = intent.getAction();
             Log.v("WifiReceiver", "onReceive() is calleld with " + intent);
             if (action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
-                log("scan results are available");
+                logv("scan results are available");
                 synchronized (mWifiScanResultLock) {
                     mLastScanResult = mWifiManager.getScanResults();
                     mWifiScanResultLock.notifyAll();
@@ -130,7 +131,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         if (mWifiManager.isWifiApEnabled()) {
             // if soft AP is enabled, disable it
             mWifiManager.setWifiApEnabled(null, false);
-            log("Disable soft ap");
+            logv("Disable soft ap");
         }
 
         // register a connectivity receiver for CONNECTIVITY_ACTION;
@@ -148,15 +149,9 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         mIntentFilter.addAction(ConnectivityManager.ACTION_TETHER_STATE_CHANGED);
         mContext.registerReceiver(mWifiReceiver, mIntentFilter);
 
-        log("Clear Wifi before we start the test.");
+        logv("Clear Wifi before we start the test.");
         removeConfiguredNetworksAndDisableWifi();
      }
-
-    protected List<WifiConfiguration> loadNetworkConfigurations() throws Exception {
-        InputStream in = mContext.getAssets().open(ACCESS_POINT_FILE);
-        mParseHelper = new AccessPointParserHelper(in);
-        return mParseHelper.getNetworkConfigurations();
-    }
 
     // wait for network connectivity state: CONNECTING, CONNECTED, SUSPENDED, DISCONNECTING,
     //                                      DISCONNECTED, UNKNOWN
@@ -164,16 +159,15 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         long startTime = SystemClock.uptimeMillis();
         while (true) {
             NetworkInfo ni = mCm.getNetworkInfo(networkType);
-            String niString = ni == null ? "null" : ni.toString();
             if (ni != null && expectedState.equals(ni.getState())) {
-                log("waitForNetworkState success: " + niString);
+                logv("waitForNetworkState success: %s", ni);
                 return true;
             }
             if ((SystemClock.uptimeMillis() - startTime) > timeout) {
-                log("waitForNetworkState timeout: " + niString);
+                logv("waitForNetworkState timeout: %s", ni);
                 return false;
             }
-            log("waitForNetworkState interim: " + niString);
+            logv("waitForNetworkState interim: %s", ni);
             SystemClock.sleep(SHORT_TIMEOUT);
         }
     }
@@ -185,16 +179,14 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         while (true) {
             int state = mWifiManager.getWifiState();
             if (state == expectedState) {
-                log("waitForWifiState success: state=" + state);
+                logv("waitForWifiState success: state=" + state);
                 return true;
             }
             if ((SystemClock.uptimeMillis() - startTime) > timeout) {
-                log(String.format("waitForWifiState timeout: expected=%d, actual=%d",
-                        expectedState, state));
+                logv("waitForWifiState timeout: expected=%d, actual=%d", expectedState, state);
                 return false;
             }
-            log(String.format("waitForWifiState interim: expected=%d, actual=%d",
-                    expectedState, state));
+            logv("waitForWifiState interim: expected=%d, actual=%d", expectedState, state);
             SystemClock.sleep(SHORT_TIMEOUT);
         }
     }
@@ -206,15 +198,15 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         while (true) {
             int state = mWifiManager.getWifiApState();
             if (state == expectedState) {
-                log("waitForWifiAPState success: state=" + state);
+                logv("waitForWifiAPState success: state=" + state);
                 return true;
             }
             if ((SystemClock.uptimeMillis() - startTime) > timeout) {
-                log(String.format("waitForWifiAPState timeout: expected=%d, actual=%d",
+                logv(String.format("waitForWifiAPState timeout: expected=%d, actual=%d",
                         expectedState, state));
                 return false;
             }
-            log(String.format("waitForWifiAPState interim: expected=%d, actual=%d",
+            logv(String.format("waitForWifiAPState interim: expected=%d, actual=%d",
                     expectedState, state));
             SystemClock.sleep(SHORT_TIMEOUT);
         }
@@ -269,7 +261,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
 
     // Turn screen off
     protected void turnScreenOff() {
-        log("Turn screen off");
+        logv("Turn screen off");
         PowerManager pm =
             (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         pm.goToSleep(SystemClock.uptimeMillis());
@@ -277,7 +269,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
 
     // Turn screen on
     protected void turnScreenOn() {
-        log("Turn screen on");
+        logv("Turn screen on");
         PowerManager pm =
                 (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         pm.wakeUp(SystemClock.uptimeMillis());
@@ -305,7 +297,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
                 // assume the chance that all servers are down is very small
                 for (int i = 0; i < hostList.length; i++ ) {
                     String host = hostList[i];
-                    log("Start ping test, ping " + host);
+                    logv("Start ping test, ping " + host);
                     Process p = Runtime.getRuntime().exec("ping -c 10 -w 100 " + host);
                     int status = p.waitFor();
                     if (status == 0) {
@@ -314,11 +306,11 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
                     }
                 }
             } catch (UnknownHostException e) {
-                log("Ping test Fail: Unknown Host");
+                logv("Ping test Fail: Unknown Host");
             } catch (IOException e) {
-                log("Ping test Fail:  IOException");
+                logv("Ping test Fail:  IOException");
             } catch (InterruptedException e) {
-                log("Ping test Fail: InterruptedException");
+                logv("Ping test Fail: InterruptedException");
             }
         }
         // ping test timeout
@@ -331,29 +323,22 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
      * We don't verify whether the connection is successful or not, leave this to the test
      */
     protected boolean connectToWifi(String knownSSID) {
-        WifiConfiguration config = new WifiConfiguration();
-        config.SSID = knownSSID;
-        config.allowedKeyManagement.set(KeyMgmt.NONE);
+        WifiConfiguration config = WifiConfigurationHelper.createOpenConfig(knownSSID);
         return connectToWifiWithConfiguration(config);
     }
 
     /**
      * Connect to Wi-Fi with the given configuration. Note the SSID in the configuration
      * is pure string, we need to convert it to quoted string.
-     * @param config
-     * @return
      */
     protected boolean connectToWifiWithConfiguration(WifiConfiguration config) {
-        String ssid = config.SSID;
-        config.SSID = convertToQuotedString(ssid);
-
         // If Wifi is not enabled, enable it
         if (!mWifiManager.isWifiEnabled()) {
-            log("Wifi is not enabled, enable it");
+            logv("Wifi is not enabled, enable it");
             mWifiManager.setWifiEnabled(true);
             // wait for the wifi state change before start scanning.
             if (!waitForWifiState(WifiManager.WIFI_STATE_ENABLED, LONG_TIMEOUT)) {
-                log("wait for WIFI_STATE_ENABLED failed");
+                logv("wait for WIFI_STATE_ENABLED failed");
                 return false;
             }
         }
@@ -361,10 +346,13 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         // Save network configuration and connect to network without scanning
         mWifiManager.connect(config,
             new WifiManager.ActionListener() {
+                @Override
                 public void onSuccess() {
                 }
+
+                @Override
                 public void onFailure(int reason) {
-                    log("connect failure " + reason);
+                    logv("connect failure " + reason);
                 }
             });
         return true;
@@ -376,25 +364,28 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
     protected boolean disconnectAP() {
         // remove saved networks
         if (!mWifiManager.isWifiEnabled()) {
-            log("Enabled wifi before remove configured networks");
+            logv("Enabled wifi before remove configured networks");
             mWifiManager.setWifiEnabled(true);
             SystemClock.sleep(SHORT_TIMEOUT);
         }
 
         List<WifiConfiguration> wifiConfigList = mWifiManager.getConfiguredNetworks();
         if (wifiConfigList == null) {
-            log("no configuration list is null");
+            logv("no configuration list is null");
             return true;
         }
-        log("size of wifiConfigList: " + wifiConfigList.size());
+        logv("size of wifiConfigList: " + wifiConfigList.size());
         for (WifiConfiguration wifiConfig: wifiConfigList) {
-            log("remove wifi configuration: " + wifiConfig.networkId);
+            logv("remove wifi configuration: " + wifiConfig.networkId);
             int netId = wifiConfig.networkId;
             mWifiManager.forget(netId, new WifiManager.ActionListener() {
+                    @Override
                     public void onSuccess() {
                     }
+
+                    @Override
                     public void onFailure(int reason) {
-                        log("Failed to forget " + reason);
+                        logv("Failed to forget " + reason);
                     }
                 });
         }
@@ -431,15 +422,14 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         long startTime = SystemClock.uptimeMillis();
         while (true) {
             NetworkInfo ni = mCm.getActiveNetworkInfo();
-            String niString = ni == null ? "null" : ni.toString();
             if (ni != null && ni.isConnected()) {
                 return true;
             }
             if ((SystemClock.uptimeMillis() - startTime) > timeout) {
-                log("waitForActiveNetworkConnection timeout: " + niString);
+                logv("waitForActiveNetworkConnection timeout: %s", ni);
                 return false;
             }
-            log("waitForActiveNetworkConnection interim: " + niString);
+            logv("waitForActiveNetworkConnection interim: %s", ni);
             SystemClock.sleep(SHORT_TIMEOUT);
         }
     }
@@ -451,12 +441,11 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
             if (ni == null) {
                 return true;
             }
-            String niString = ni.toString();
             if ((SystemClock.uptimeMillis() - startTime) > timeout) {
-                log("waitForActiveNetworkConnection timeout: " + niString);
+                logv("waitForActiveNetworkConnection timeout: %s", ni);
                 return false;
             }
-            log("waitForActiveNetworkConnection interim: " + niString);
+            logv("waitForActiveNetworkConnection interim: %s", ni);
             SystemClock.sleep(SHORT_TIMEOUT);
         }
     }
@@ -467,12 +456,9 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         try {
             Process proc = Runtime.getRuntime().exec(new String[]{
                     "/system/bin/ping", "-W", "30", "-c", "1", PING_IP_ADDR});
-            int exitCode = proc.waitFor();
-            return exitCode == 0;
-        } catch (InterruptedException ie) {
-            Log.e(LOG_TAG, "InterruptedException while waiting for ping");
-        } catch (IOException ioe) {
-            Log.e(LOG_TAG, "IOException during ping", ioe);
+            return proc.waitFor() == 0;
+        } catch (InterruptedException | IOException e) {
+            Log.e(mLogTag, "Ping failed", e);
         }
         return false;
     }
@@ -489,8 +475,8 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         super.tearDown();
     }
 
-    private void log(String message) {
-        Log.v(LOG_TAG, message);
+    protected void logv(String format, Object... args) {
+        Log.v(mLogTag, String.format(format, args));
     }
 
     /**
@@ -506,22 +492,10 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         // step 2: verify Wifi state and network state;
         assertTrue("wifi state not connected with " + config.SSID,
                 waitForNetworkState(ConnectivityManager.TYPE_WIFI,
-                State.CONNECTED, LONG_TIMEOUT));
+                State.CONNECTED, WIFI_CONNECTION_TIMEOUT));
 
         // step 3: verify the current connected network is the given SSID
         assertNotNull("no active wifi info", mWifiManager.getConnectionInfo());
         assertEquals("SSID mismatch", config.SSID, mWifiManager.getConnectionInfo().getSSID());
-    }
-
-    /**
-     * checks if the input is a hexadecimal string of given length
-     *
-     * @param input string to be checked
-     * @param length required length of the string
-     * @return
-     */
-    protected static boolean isHex(String input, int length) {
-        Pattern p = Pattern.compile(String.format("[0-9A-Fa-f]{%d}", length));
-        return p.matcher(input).matches();
     }
 }
