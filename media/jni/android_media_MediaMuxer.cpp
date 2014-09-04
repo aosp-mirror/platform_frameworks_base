@@ -164,7 +164,7 @@ static void android_media_MediaMuxer_setOrientationHint(
 }
 
 static void android_media_MediaMuxer_setLocation(
-        JNIEnv *env, jclass clazz, jint nativeObject, jint latitude, jint longitude) {
+        JNIEnv *env, jclass clazz, jlong nativeObject, jint latitude, jint longitude) {
     MediaMuxer* muxer = reinterpret_cast<MediaMuxer *>(nativeObject);
 
     status_t res = muxer->setLocation(latitude, longitude);
