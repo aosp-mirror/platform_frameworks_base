@@ -1949,6 +1949,8 @@
         <attr name="listItemLayout" format="reference" />
         <attr name="progressLayout" format="reference" />
         <attr name="horizontalProgressLayout" format="reference" />
+        <!-- @hide Whether fullDark, etc. should use default values if null. -->
+        <attr name="needsDefaultBackgrounds" format="boolean" />
     </declare-styleable>
 
     <!-- Fragment animation class attributes. -->
