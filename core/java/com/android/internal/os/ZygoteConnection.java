@@ -222,7 +222,7 @@ class ZygoteConnection {
 
             pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, parsedArgs.gids,
                     parsedArgs.debugFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
-                    parsedArgs.niceName, fdsToClose);
+                    parsedArgs.niceName, fdsToClose, parsedArgs.instructionSet);
         } catch (IOException ex) {
             logAndPrintError(newStderr, "Exception creating pipe", ex);
         } catch (ErrnoException ex) {
@@ -311,6 +311,7 @@ class ZygoteConnection {
      *      [--] &lt;args for RuntimeInit &gt;
      *   <li> If <code>--runtime-init</code> is absent:
      *      [--] &lt;classname&gt; [args...]
+     *   <li> --instruction-set=<i>instruction-set-string</i> which instruction set to use/emulate.
      * </ul>
      */
     static class Arguments {
@@ -372,6 +373,11 @@ class ZygoteConnection {
          * Whether the current arguments constitute an ABI list query.
          */
         boolean abiListQuery;
+
+        /**
+         * The instruction set to use, or null when not important.
+         */
+        String instructionSet;
 
         /**
          * Constructs instance and parses args
@@ -528,6 +534,8 @@ class ZygoteConnection {
                     mountExternal = Zygote.MOUNT_EXTERNAL_MULTIUSER_ALL;
                 } else if (arg.equals("--query-abi-list")) {
                     abiListQuery = true;
+                } else if (arg.startsWith("--instruction-set=")) {
+                    instructionSet = arg.substring(arg.indexOf('=') + 1);
                 } else {
                     break;
                 }
