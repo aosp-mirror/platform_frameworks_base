@@ -151,18 +151,12 @@ public class DevicePolicyManager {
         = "android.app.extra.DEFAULT_MANAGED_PROFILE_NAME";
 
     /**
-     * A String extra that, holds the email address of the account which a managed profile is
-     * created for. Used with {@link #ACTION_PROVISION_MANAGED_PROFILE} and
-     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE}.
-     *
-     * <p> If the {@link #ACTION_PROVISION_MANAGED_PROFILE} intent that starts managed provisioning
-     * contains this extra, it is forwarded in the
-     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} intent to the mobile
-     * device management application that was set as the profile owner during provisioning.
-     * It is usually used to avoid that the user has to enter their email address twice.
+     * A bundle key, used in the bundle extra {@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}. The
+     * corresponding value holds the email address of the account which the managed profile is
+     * created for.
      */
-    public static final String EXTRA_PROVISIONING_EMAIL_ADDRESS
-        = "android.app.extra.ManagedProfileEmailAddress";
+    public static final String KEY_PROVISIONING_EMAIL_ADDRESS
+        = "android.app.key.ManagedProfileEmailAddress";
 
     /**
      * A String extra holding the time zone {@link android.app.AlarmManager} that the device
