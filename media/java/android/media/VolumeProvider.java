@@ -19,7 +19,9 @@ import android.media.session.MediaSession;
 
 /**
  * Handles requests to adjust or set the volume on a session. This is also used
- * to push volume updates back to the session after a request has been handled.
+ * to push volume updates back to the session. The provider must call
+ * {@link #setCurrentVolume(int)} each time the volume being provided changes.
+ * <p>
  * You can set a volume provider on a session by calling
  * {@link MediaSession#setPlaybackToRemote}.
  */
@@ -46,27 +48,24 @@ public abstract class VolumeProvider {
 
     private final int mControlType;
     private final int mMaxVolume;
+    private int mCurrentVolume;
     private Callback mCallback;
 
     /**
      * Create a new volume provider for handling volume events. You must specify
-     * the type of volume control and the maximum volume that can be used.
+     * the type of volume control, the maximum volume that can be used, and the
+     * current volume on the output.
      *
      * @param volumeControl The method for controlling volume that is used by
      *            this provider.
      * @param maxVolume The maximum allowed volume.
+     * @param currentVolume The current volume on the output.
      */
-    public VolumeProvider(int volumeControl, int maxVolume) {
+    public VolumeProvider(int volumeControl, int maxVolume, int currentVolume) {
         mControlType = volumeControl;
         mMaxVolume = maxVolume;
+        mCurrentVolume = currentVolume;
     }
-
-    /**
-     * Get the current volume of the remote playback.
-     *
-     * @return The current volume.
-     */
-    public abstract int onGetCurrentVolume();
 
     /**
      * Get the volume control type that this volume provider uses.
@@ -87,9 +86,23 @@ public abstract class VolumeProvider {
     }
 
     /**
-     * Notify the system that the volume has been changed.
+     * Gets the current volume. This will be the last value set by
+     * {@link #setCurrentVolume(int)}.
+     *
+     * @return The current volume.
      */
-    public final void notifyVolumeChanged() {
+    public final int getCurrentVolume() {
+        return mCurrentVolume;
+    }
+
+    /**
+     * Notify the system that the current volume has been changed. This must be
+     * called every time the volume changes to ensure it is displayed properly.
+     *
+     * @param currentVolume The current volume on the output.
+     */
+    public final void setCurrentVolume(int currentVolume) {
+        mCurrentVolume = currentVolume;
         if (mCallback != null) {
             mCallback.onVolumeChanged(this);
         }
@@ -97,6 +110,8 @@ public abstract class VolumeProvider {
 
     /**
      * Override to handle requests to set the volume of the current output.
+     * After the volume has been modified {@link #setCurrentVolume} must be
+     * called to notify the system.
      *
      * @param volume The volume to set the output to.
      */
@@ -107,7 +122,9 @@ public abstract class VolumeProvider {
      * Override to handle requests to adjust the volume of the current output.
      * Direction will be one of {@link AudioManager#ADJUST_LOWER},
      * {@link AudioManager#ADJUST_RAISE}, {@link AudioManager#ADJUST_SAME}.
-     * 
+     * After the volume has been modified {@link #setCurrentVolume} must be
+     * called to notify the system.
+     *
      * @param direction The direction to change the volume in.
      */
     public void onAdjustVolume(int direction) {
