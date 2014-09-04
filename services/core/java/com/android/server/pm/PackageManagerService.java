@@ -4523,8 +4523,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         return VMRuntime.getInstructionSet(info.primaryCpuAbi);
     }
 
-    public boolean performDexOpt(String packageName, String instructionSet, boolean updateUsage) {
-        if (!mLazyDexOpt) {
+    public boolean performDexOpt(String packageName, String instructionSet, boolean backgroundDexopt) {
+        boolean dexopt = mLazyDexOpt || backgroundDexopt;
+        boolean updateUsage = !backgroundDexopt;  // Don't update usage if this is just a backgroundDexopt
+        if (!dexopt && !updateUsage) {
+            // We aren't going to dexopt or update usage, so bail early.
             return false;
         }
         PackageParser.Package p;
@@ -4538,6 +4541,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 p.mLastPackageUsageTimeInMills = System.currentTimeMillis();
             }
             mPackageUsage.write(false);
+            if (!dexopt) {
+                // We aren't going to dexopt, so bail early.
+                return false;
+            }
 
             targetInstructionSet = instructionSet != null ? instructionSet :
                     getPrimaryInstructionSet(p.applicationInfo);
