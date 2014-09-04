@@ -7115,6 +7115,8 @@
         <attr name="backgroundSplit" />
         <!-- Specifies a fixed height for the action mode bar. -->
         <attr name="height" />
+        <!-- Specifies a layout to use for the "close" item at the starting edge. -->
+        <attr name="closeItemLayout" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="SearchView">
