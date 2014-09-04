@@ -114,21 +114,24 @@ public class LegacyFocusStateMapper {
                 currentAfRun = mAfRun;
             }
 
-            mCamera.setAutoFocusMoveCallback(new Camera.AutoFocusMoveCallback() {
+            Camera.AutoFocusMoveCallback afMoveCallback = new Camera.AutoFocusMoveCallback() {
                 @Override
                 public void onAutoFocusMoving(boolean start, Camera camera) {
                     synchronized (mLock) {
                         int latestAfRun = mAfRun;
 
                         if (VERBOSE) {
-                            Log.v(TAG, "onAutoFocusMoving - start " + start + " latest AF run " +
-                                    latestAfRun + ", last AF run " + currentAfRun);
+                            Log.v(TAG,
+                                    "onAutoFocusMoving - start " + start + " latest AF run " +
+                                            latestAfRun + ", last AF run " + currentAfRun
+                            );
                         }
 
                         if (currentAfRun != latestAfRun) {
                             Log.d(TAG,
                                     "onAutoFocusMoving - ignoring move callbacks from old af run"
-                                            + currentAfRun);
+                                            + currentAfRun
+                            );
                             return;
                         }
 
@@ -151,8 +154,18 @@ public class LegacyFocusStateMapper {
                         mAfState = newAfState;
                     }
                 }
-            });
+            };
+
+            // Only set move callback if we can call autofocus.
+            switch (afMode) {
+                case Parameters.FOCUS_MODE_AUTO:
+                case Parameters.FOCUS_MODE_MACRO:
+                case Parameters.FOCUS_MODE_CONTINUOUS_PICTURE:
+                case Parameters.FOCUS_MODE_CONTINUOUS_VIDEO:
+                    mCamera.setAutoFocusMoveCallback(afMoveCallback);
+            }
         }
+
 
         // AF Locking
         switch (afTrigger) {
@@ -167,6 +180,7 @@ public class LegacyFocusStateMapper {
                     case Parameters.FOCUS_MODE_CONTINUOUS_PICTURE:
                     case Parameters.FOCUS_MODE_CONTINUOUS_VIDEO:
                         afStateAfterStart = CONTROL_AF_STATE_PASSIVE_SCAN;
+                        break;
                     default:
                         // EDOF, INFINITY
                         afStateAfterStart = CONTROL_AF_STATE_INACTIVE;
@@ -181,6 +195,11 @@ public class LegacyFocusStateMapper {
                 if (VERBOSE) {
                     Log.v(TAG, "processRequestTriggers - got AF_TRIGGER_START, " +
                             "new AF run is " + currentAfRun);
+                }
+
+                // Avoid calling autofocus unless we are in a state that supports calling this.
+                if (afStateAfterStart == CONTROL_AF_STATE_INACTIVE) {
+                    break;
                 }
 
                 mCamera.autoFocus(new Camera.AutoFocusCallback() {
