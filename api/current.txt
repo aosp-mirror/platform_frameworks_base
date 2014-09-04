@@ -17550,6 +17550,7 @@ package android.net {
     method public android.net.Uri getPacFileUrl();
     method public int getPort();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public abstract class PskKeyManager {
