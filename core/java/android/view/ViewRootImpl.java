@@ -6111,6 +6111,33 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
             } break;
+
+
+            case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED: {
+                if (mAccessibilityFocusedHost != null && mAccessibilityFocusedVirtualView != null) {
+                    // We care only for changes rooted in the focused host.
+                    final long eventSourceId = event.getSourceNodeId();
+                    final int hostViewId = AccessibilityNodeInfo.getAccessibilityViewId(
+                            eventSourceId);
+                    if (hostViewId != mAccessibilityFocusedHost.getAccessibilityViewId()) {
+                        break;
+                    }
+
+                    // We only care about changes that may change the virtual focused view bounds.
+                    final int changes = event.getContentChangeTypes();
+                    if ((changes & AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE) != 0
+                            || changes == AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED) {
+                        AccessibilityNodeProvider provider = mAccessibilityFocusedHost
+                                .getAccessibilityNodeProvider();
+                        if (provider != null) {
+                            final int virtualChildId = AccessibilityNodeInfo.getVirtualDescendantId(
+                                    mAccessibilityFocusedVirtualView.getSourceNodeId());
+                            mAccessibilityFocusedVirtualView = provider.createAccessibilityNodeInfo(
+                                    virtualChildId);
+                        }
+                    }
+                }
+            } break;
         }
         mAccessibilityManager.sendAccessibilityEvent(event);
         return true;
