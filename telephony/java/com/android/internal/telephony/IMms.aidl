@@ -30,7 +30,8 @@ interface IMms {
      *
      * @param subId the SIM id
      * @param callingPkg the package name of the calling app
-     * @param pdu the MMS message encoded in standard MMS PDU format
+     * @param contentUri the content uri from which to read MMS message encoded in standard MMS
+     *  PDU format
      * @param locationUrl the optional location url for where this message should be sent to
      * @param configOverrides the carrier-specific messaging configuration values to override for
      *  sending the message. See {@link android.telephony.MessagingConfigurationManager} for the
@@ -38,8 +39,8 @@ interface IMms {
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
      */
-    void sendMessage(long subId, String callingPkg, in byte[] pdu, String locationUrl,
-            in ContentValues configOverrides, in PendingIntent sentIntent);
+    void sendMessage(long subId, String callingPkg, in Uri contentUri,
+            String locationUrl, in ContentValues configOverrides, in PendingIntent sentIntent);
 
     /**
      * Download an MMS message using known location and transaction id
@@ -48,6 +49,7 @@ interface IMms {
      * @param callingPkg the package name of the calling app
      * @param locationUrl the location URL of the MMS message to be downloaded, usually obtained
      *  from the MMS WAP push notification
+     * @param contentUri a contentUri to which the downloaded MMS message will be written
      * @param configOverrides the carrier-specific messaging configuration values to override for
      *  downloading the message. See {@link android.telephony.MessagingConfigurationManager} for the
      *  value names and types.
@@ -55,7 +57,8 @@ interface IMms {
      *  broadcast when the message is downloaded, or the download is failed
      */
     void downloadMessage(long subId, String callingPkg, String locationUrl,
-            in ContentValues configOverrides, in PendingIntent downloadedIntent);
+            in Uri contentUri, in ContentValues configOverrides,
+            in PendingIntent downloadedIntent);
 
     /**
      * Update the status of a pending (send-by-IP) MMS message handled by the carrier app.
@@ -104,14 +107,14 @@ interface IMms {
       * Import a multimedia message into system's MMS store
       *
       * @param callingPkg the package name of the calling app
-      * @param pdu the PDU of the message to import
+      * @param contentUri the content uri from which to read PDU of the message to import
       * @param messageId the optional message id
       * @param timestampSecs the message timestamp in seconds
       * @param seen if the message is seen
       * @param read if the message is read
       * @return the message URI, null if failed
       */
-    Uri importMultimediaMessage(String callingPkg, in byte[] pdu, String messageId,
+    Uri importMultimediaMessage(String callingPkg, in Uri contentUri, String messageId,
             long timestampSecs, boolean seen, boolean read);
 
     /**
@@ -168,10 +171,10 @@ interface IMms {
      * Add a multimedia message draft to system MMS store
      *
      * @param callingPkg the package name of the calling app
-     * @param pdu the PDU data of the draft MMS
+     * @param contentUri the content Uri from which to read PDU data of the draft MMS
      * @return the URI of the stored draft message
      */
-    Uri addMultimediaMessageDraft(String callingPkg, in byte[] pdu);
+    Uri addMultimediaMessageDraft(String callingPkg, in Uri contentUri);
 
     /**
      * Send a system stored MMS message
