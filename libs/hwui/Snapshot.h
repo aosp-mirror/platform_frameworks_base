@@ -55,6 +55,7 @@ public:
                 || rect.intersects(dangerRects[3]);
     }
 
+    bool highPriority;
     Matrix4 matrix;
     Rect dangerRects[4];
     Rect innerRect;
@@ -166,8 +167,11 @@ public:
 
     /**
      * Sets (and replaces) the current clipping outline
+     *
+     * If the current round rect clip is high priority, the incoming clip is ignored.
      */
-    void setClippingRoundRect(LinearAllocator& allocator, const Rect& bounds, float radius);
+    void setClippingRoundRect(LinearAllocator& allocator, const Rect& bounds,
+            float radius, bool highPriority);
 
     /**
      * Indicates whether this snapshot should be ignored. A snapshot
