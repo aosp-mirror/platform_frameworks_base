@@ -49,6 +49,9 @@ void AnimatorManager::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
 void AnimatorManager::setAnimationHandle(AnimationHandle* handle) {
     LOG_ALWAYS_FATAL_IF(mAnimationHandle && handle, "Already have an AnimationHandle!");
     mAnimationHandle = handle;
+    LOG_ALWAYS_FATAL_IF(!mAnimationHandle && mAnimators.size(),
+            "Lost animation handle on %p (%s) with outstanding animators!",
+            &mParent, mParent.getName());
 }
 
 template<typename T>
@@ -62,6 +65,9 @@ static void move_all(T& source, T& dest) {
 
 void AnimatorManager::pushStaging() {
     if (mNewAnimators.size()) {
+        LOG_ALWAYS_FATAL_IF(!mAnimationHandle,
+                "Trying to start new animators on %p (%s) without an animation handle!",
+                &mParent, mParent.getName());
         // Since this is a straight move, we don't need to inc/dec the ref count
         move_all(mNewAnimators, mAnimators);
     }
@@ -128,22 +134,7 @@ uint32_t AnimatorManager::animateCommon(TreeInfo& info) {
     return functor.dirtyMask;
 }
 
-class EndAnimatorsFunctor {
-public:
-    EndAnimatorsFunctor(AnimationContext& context) : mContext(context) {}
-
-    void operator() (BaseRenderNodeAnimator* animator) {
-        animator->end();
-        animator->pushStaging(mContext);
-        animator->animate(mContext);
-        animator->decStrong(0);
-    }
-
-private:
-    AnimationContext& mContext;
-};
-
-static void endAnimatorsHard(BaseRenderNodeAnimator* animator) {
+static void endStagingAnimator(BaseRenderNodeAnimator* animator) {
     animator->end();
     if (animator->listener()) {
         animator->listener()->onAnimationFinished(animator);
@@ -151,24 +142,34 @@ static void endAnimatorsHard(BaseRenderNodeAnimator* animator) {
     animator->decStrong(0);
 }
 
-void AnimatorManager::endAllAnimators() {
-    if (mNewAnimators.size()) {
-        // Since this is a straight move, we don't need to inc/dec the ref count
-        move_all(mNewAnimators, mAnimators);
+void AnimatorManager::endAllStagingAnimators() {
+    ALOGD("endAllStagingAnimators on %p (%s)", &mParent, mParent.getName());
+    // This works because this state can only happen on the UI thread,
+    // which means we're already on the right thread to invoke listeners
+    for_each(mNewAnimators.begin(), mNewAnimators.end(), endStagingAnimator);
+    mNewAnimators.clear();
+}
+
+class EndActiveAnimatorsFunctor {
+public:
+    EndActiveAnimatorsFunctor(AnimationContext& context) : mContext(context) {}
+
+    void operator() (BaseRenderNodeAnimator* animator) {
+        animator->forceEndNow(mContext);
+        animator->decStrong(0);
     }
-    // First try gracefully ending them
-    if (mAnimationHandle) {
-        EndAnimatorsFunctor functor(mAnimationHandle->context());
-        for_each(mAnimators.begin(), mAnimators.end(), functor);
-        mAnimators.clear();
-        mAnimationHandle->release();
-    } else {
-        // We have no context, so bust out the sledgehammer
-        // This works because this state can only happen on the UI thread,
-        // which means we're already on the right thread to invoke listeners
-        for_each(mAnimators.begin(), mAnimators.end(), endAnimatorsHard);
-        mAnimators.clear();
-    }
+
+private:
+    AnimationContext& mContext;
+};
+
+void AnimatorManager::endAllActiveAnimators() {
+    ALOGD("endAllStagingAnimators on %p (%s) with handle %p",
+            &mParent, mParent.getName(), mAnimationHandle);
+    EndActiveAnimatorsFunctor functor(mAnimationHandle->context());
+    for_each(mAnimators.begin(), mAnimators.end(), functor);
+    mAnimators.clear();
+    mAnimationHandle->release();
 }
 
 } /* namespace uirenderer */
