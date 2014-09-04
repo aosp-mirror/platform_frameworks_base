@@ -28888,6 +28888,7 @@ package android.telephony {
     field public static final java.lang.String MMS_CONFIG_ALLOW_ATTACH_AUDIO = "allowAttachAudio";
     field public static final java.lang.String MMS_CONFIG_APPEND_TRANSACTION_ID = "enabledTransID";
     field public static final java.lang.String MMS_CONFIG_EMAIL_GATEWAY_NUMBER = "emailGatewayNumber";
+    field public static final java.lang.String MMS_CONFIG_GROUP_MMS_ENABLED = "enableGroupMms";
     field public static final java.lang.String MMS_CONFIG_HTTP_PARAMS = "httpParams";
     field public static final java.lang.String MMS_CONFIG_HTTP_SOCKET_TIMEOUT = "httpSocketTimeout";
     field public static final java.lang.String MMS_CONFIG_MAX_IMAGE_HEIGHT = "maxImageHeight";
