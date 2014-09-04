@@ -27,6 +27,7 @@ import android.os.RemoteException;
 
 import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.PhoneConstants;
+
 import java.util.List;
 
 /**
@@ -203,6 +204,19 @@ public class SubscriptionManager implements BaseColumns {
 
     /** @hide */
     public static final int DATA_ROAMING_DEFAULT = DATA_ROAMING_DISABLE;
+
+    /**
+     * The MCC associated with a SIM.
+     * <P>Type: INTEGER (int)</P>
+     */
+    public static final String MCC = "mcc";
+
+    /**
+     * The MNC associated with a SIM.
+     * <P>Type: INTEGER (int)</P>
+     */
+    public static final String MNC = "mnc";
+
 
     private static final int RES_TYPE_BACKGROUND_DARK = 0;
 
