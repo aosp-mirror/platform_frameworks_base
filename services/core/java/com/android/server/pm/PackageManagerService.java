@@ -10245,8 +10245,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (bp != null) {
                     // If the defining package is signed with our cert, it's okay.  This
                     // also includes the "updating the same package" case, of course.
-                    if (compareSignatures(bp.packageSetting.signatures.mSignatures,
-                            pkg.mSignatures) != PackageManager.SIGNATURE_MATCH) {
+                    // "updating same package" could also involve key-rotation.
+                    final boolean sigsOk;
+                    if (!bp.sourcePackage.equals(pkg.packageName)
+                            || !(bp.packageSetting instanceof PackageSetting)
+                            || !bp.packageSetting.keySetData.isUsingUpgradeKeySets()
+                            || ((PackageSetting) bp.packageSetting).sharedUser != null) {
+                        sigsOk = compareSignatures(bp.packageSetting.signatures.mSignatures,
+                                pkg.mSignatures) != PackageManager.SIGNATURE_MATCH;
+                    } else {
+                        sigsOk = checkUpgradeKeySetLP((PackageSetting) bp.packageSetting, pkg);
+                    }
+                    if (!sigsOk) {
                         // If the owning package is the system itself, we log but allow
                         // install to proceed; we fail the install on all other permission
                         // redefinitions.
