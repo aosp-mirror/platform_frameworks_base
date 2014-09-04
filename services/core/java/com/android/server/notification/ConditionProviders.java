@@ -545,8 +545,9 @@ public class ConditionProviders extends ManagedServices {
                 setZenModeCondition(condition, "downtime");
             }
             // exit downtime
-            if (!inDowntime && mode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-                    && mDowntime.isDowntimeCondition(mExitCondition)) {
+            if (!inDowntime && mDowntime.isDowntimeCondition(mExitCondition)
+                    && (mode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+                                || mode == Global.ZEN_MODE_NO_INTERRUPTIONS)) {
                 mZenModeHelper.setZenMode(Global.ZEN_MODE_OFF, "downtimeExit");
             }
         }
