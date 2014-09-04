@@ -312,6 +312,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     final PackageHandler mHandler;
 
+    /**
+     * Messages for {@link #mHandler} that need to wait for system ready before
+     * being dispatched.
+     */
+    private ArrayList<Message> mPostSystemReadyMessages;
+
     final int mSdkVersion = Build.VERSION.SDK_INT;
 
     final Context mContext;
@@ -446,9 +452,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** Token for keys in mPendingVerification. */
     private int mPendingVerificationToken = 0;
 
-    boolean mSystemReady;
-    boolean mSafeMode;
-    boolean mHasSystemUidErrors;
+    volatile boolean mSystemReady;
+    volatile boolean mSafeMode;
+    volatile boolean mHasSystemUidErrors;
 
     ApplicationInfo mAndroidApplication;
     final ActivityInfo mResolveActivity = new ActivityInfo();
@@ -7685,16 +7691,18 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     void schedulePackageCleaning(String packageName, int userId, boolean andCode) {
-        if (false) {
-            RuntimeException here = new RuntimeException("here");
-            here.fillInStackTrace();
-            Slog.d(TAG, "Schedule cleaning " + packageName + " user=" + userId
-                    + " andCode=" + andCode, here);
+        final Message msg = mHandler.obtainMessage(START_CLEANING_PACKAGE,
+                userId, andCode ? 1 : 0, packageName);
+        if (mSystemReady) {
+            msg.sendToTarget();
+        } else {
+            if (mPostSystemReadyMessages == null) {
+                mPostSystemReadyMessages = new ArrayList<>();
+            }
+            mPostSystemReadyMessages.add(msg);
         }
-        mHandler.sendMessage(mHandler.obtainMessage(START_CLEANING_PACKAGE,
-                userId, andCode ? 1 : 0, packageName));
     }
-    
+
     void startCleaningPackages() {
         // reader
         synchronized (mPackages) {
@@ -12038,6 +12046,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         sUserManager.systemReady();
+
+        // Kick off any messages waiting for system ready
+        if (mPostSystemReadyMessages != null) {
+            for (Message msg : mPostSystemReadyMessages) {
+                msg.sendToTarget();
+            }
+            mPostSystemReadyMessages = null;
+        }
     }
 
     @Override
