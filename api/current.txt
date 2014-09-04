@@ -260,6 +260,7 @@ package android {
 
   public static final class R.attr {
     ctor public R.attr();
+    field public static final int __removed2 = 16843937; // 0x10104a1
     field public static final int absListViewStyle = 16842858; // 0x101006a
     field public static final int accessibilityEventTypes = 16843648; // 0x1010380
     field public static final int accessibilityFeedbackType = 16843650; // 0x1010382
@@ -482,7 +483,7 @@ package android {
     field public static final int datePickerMode = 16843956; // 0x10104b4
     field public static final int datePickerStyle = 16843612; // 0x101035c
     field public static final int dateTextAppearance = 16843593; // 0x1010349
-    field public static final int dayOfWeekBackgroundColor = 16843924; // 0x1010494
+    field public static final int dayOfWeekBackground = 16843924; // 0x1010494
     field public static final int dayOfWeekTextAppearance = 16843925; // 0x1010495
     field public static final int debuggable = 16842767; // 0x101000f
     field public static final int defaultValue = 16843245; // 0x10101ed
@@ -663,7 +664,6 @@ package android {
     field public static final int hasCode = 16842764; // 0x101000c
     field public static final int headerAmPmTextAppearance = 16843936; // 0x10104a0
     field public static final int headerBackground = 16843055; // 0x101012f
-    field public static final int headerBackgroundColor = 16843937; // 0x10104a1
     field public static final int headerDayOfMonthTextAppearance = 16843927; // 0x1010497
     field public static final int headerDividersEnabled = 16843310; // 0x101022e
     field public static final int headerMonthTextAppearance = 16843926; // 0x1010496
