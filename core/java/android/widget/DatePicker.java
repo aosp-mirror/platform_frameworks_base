@@ -71,9 +71,9 @@ import libcore.icu.ICU;
  * @attr ref android.R.styleable#DatePicker_minDate
  * @attr ref android.R.styleable#DatePicker_spinnersShown
  * @attr ref android.R.styleable#DatePicker_calendarViewShown
- * @attr ref android.R.styleable#DatePicker_dayOfWeekBackgroundColor
+ * @attr ref android.R.styleable#DatePicker_dayOfWeekBackground
  * @attr ref android.R.styleable#DatePicker_dayOfWeekTextAppearance
- * @attr ref android.R.styleable#DatePicker_headerBackgroundColor
+ * @attr ref android.R.styleable#DatePicker_headerBackground
  * @attr ref android.R.styleable#DatePicker_headerMonthTextAppearance
  * @attr ref android.R.styleable#DatePicker_headerDayOfMonthTextAppearance
  * @attr ref android.R.styleable#DatePicker_headerYearTextAppearance
