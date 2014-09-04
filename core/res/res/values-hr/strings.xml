@@ -1298,10 +1298,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Dopusti"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Odbij"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; želi poslati poruku na &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <!-- no translation found for sms_short_code_details (5873295990846059400) -->
-    <skip />
-    <!-- no translation found for sms_premium_short_code_details (7869234868023975) -->
-    <skip />
+    <string name="sms_short_code_details" msgid="5873295990846059400">"To "<b>"će se možda naplatiti"</b>" putem vašeg mobilnog računa."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"To se naplaćuje putem vašeg mobilnog računa."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Pošalji"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Odustani"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Zapamti odabir"</string>
