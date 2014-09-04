@@ -3131,10 +3131,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
 
-        synchronized (this) {
-            DevicePolicyData policy = getUserData(userHandle);
-            long ident = Binder.clearCallingIdentity();
-            try {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            boolean wipeData = false;
+            int identifier = 0;
+            synchronized (this) {
+                DevicePolicyData policy = getUserData(userHandle);
                 policy.mFailedPasswordAttempts++;
                 saveSettingsLocked(userHandle);
                 if (mHasFeature) {
@@ -3146,15 +3148,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         // Wipe the user/profile associated with the policy that was violated. This
                         // is not necessarily calling user: if the policy that fired was from a
                         // managed profile rather than the main user profile, we wipe former only.
-                        wipeDeviceOrUserLocked(0, strictestAdmin.getUserHandle().getIdentifier());
+                        wipeData = true;
+                        identifier = strictestAdmin.getUserHandle().getIdentifier();
                     }
                     sendAdminCommandToSelfAndProfilesLocked(
                             DeviceAdminReceiver.ACTION_PASSWORD_FAILED,
                             DeviceAdminInfo.USES_POLICY_WATCH_LOGIN, userHandle);
                 }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
+            if (wipeData) {
+                // Call without holding lock.
+                wipeDeviceOrUserLocked(0, identifier);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
