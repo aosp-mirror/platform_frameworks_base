@@ -1700,9 +1700,10 @@ public class AccountManagerService
             subtitle = titleAndSubtitle.substring(index + 1);
         }
         UserHandle user = new UserHandle(userId);
-        n.color = mContext.getResources().getColor(
+        Context contextForUser = getContextForUser(user);
+        n.color = contextForUser.getResources().getColor(
                 com.android.internal.R.color.system_notification_accent_color);
-        n.setLatestEventInfo(mContext, title, subtitle,
+        n.setLatestEventInfo(contextForUser, title, subtitle,
                 PendingIntent.getActivityAsUser(mContext, 0, intent,
                         PendingIntent.FLAG_CANCEL_CURRENT, null, user));
         installNotification(getCredentialPermissionNotificationId(
@@ -2968,11 +2969,12 @@ public class AccountManagerService
                 Notification n = new Notification(android.R.drawable.stat_sys_warning, null,
                         0 /* when */);
                 UserHandle user = new UserHandle(userId);
+                Context contextForUser = getContextForUser(user);
                 final String notificationTitleFormat =
-                        mContext.getText(R.string.notification_title).toString();
-                n.color = mContext.getResources().getColor(
+                        contextForUser.getText(R.string.notification_title).toString();
+                n.color = contextForUser.getResources().getColor(
                         com.android.internal.R.color.system_notification_accent_color);
-                n.setLatestEventInfo(mContext,
+                n.setLatestEventInfo(contextForUser,
                         String.format(notificationTitleFormat, account.name),
                         message, PendingIntent.getActivityAsUser(
                         mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT,
@@ -3477,5 +3479,14 @@ public class AccountManagerService
             cursor.close();
         }
         return authTokensForAccount;
+    }
+
+    private Context getContextForUser(UserHandle user) {
+        try {
+            return mContext.createPackageContextAsUser(mContext.getPackageName(), 0, user);
+        } catch (NameNotFoundException e) {
+            // Default to mContext, not finding the package system is running as is unlikely.
+            return mContext;
+        }
     }
 }
