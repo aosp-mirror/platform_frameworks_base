@@ -541,7 +541,7 @@ public class Build {
          * Intent.</li>
          * </ul>
          */
-        public static final int L = CUR_DEVELOPMENT;
+        public static final int L = 21;
     }
     
     /** The type of build, like "user" or "eng". */
