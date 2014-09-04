@@ -166,11 +166,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private static final Set<String> SECURE_SETTINGS_WHITELIST;
+    private static final Set<String> SECURE_SETTINGS_DEVICEOWNER_WHITELIST;
     private static final Set<String> GLOBAL_SETTINGS_WHITELIST;
     static {
         SECURE_SETTINGS_WHITELIST = new HashSet();
         SECURE_SETTINGS_WHITELIST.add(Settings.Secure.DEFAULT_INPUT_METHOD);
         SECURE_SETTINGS_WHITELIST.add(Settings.Secure.SKIP_FIRST_USE_HINTS);
+
+        SECURE_SETTINGS_DEVICEOWNER_WHITELIST = new HashSet();
+        SECURE_SETTINGS_DEVICEOWNER_WHITELIST.addAll(SECURE_SETTINGS_WHITELIST);
+        SECURE_SETTINGS_DEVICEOWNER_WHITELIST.add(Settings.Secure.LOCATION_MODE);
 
         GLOBAL_SETTINGS_WHITELIST = new HashSet();
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.ADB_ENABLED);
@@ -5098,11 +5103,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (who == null) {
                 throw new NullPointerException("ComponentName is null");
             }
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            ActiveAdmin activeAdmin =
+                    getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
-            if (!SECURE_SETTINGS_WHITELIST.contains(setting)) {
+            if (isDeviceOwner(activeAdmin.info.getPackageName())) {
+                if (!SECURE_SETTINGS_DEVICEOWNER_WHITELIST.contains(setting)) {
+                    throw new SecurityException(String.format(
+                            "Permission denial: Device owners cannot update %1$s", setting));
+                }
+            } else if (!SECURE_SETTINGS_WHITELIST.contains(setting)) {
                 throw new SecurityException(String.format(
-                        "Permission denial: profile/device owners cannot update %1$s", setting));
+                        "Permission denial: Profile owners cannot update %1$s", setting));
             }
 
             long id = Binder.clearCallingIdentity();
