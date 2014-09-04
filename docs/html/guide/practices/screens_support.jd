@@ -111,15 +111,15 @@ screen-compatibility features.</p>
   <dd>Actual physical size, measured as the screen's diagonal.
 
   <p>For simplicity, Android groups all actual screen sizes into four generalized sizes: small,
-normal, large, and extra large.</p></dd>
+normal, large, and extra-large.</p></dd>
 
 <dt><em>Screen density</em></dt>
   <dd>The quantity of pixels within a physical area of the screen; usually referred to as dpi (dots
 per inch). For example, a "low" density screen has fewer pixels within a given physical area,
 compared to a "normal" or "high" density screen.</p>
 
-  <p>For simplicity, Android groups all actual screen densities into four generalized densities:
-low, medium, high, and extra high.</p></dd>
+  <p>For simplicity, Android groups all actual screen densities into six generalized densities:
+low, medium, high, extra-high, extra-extra-high, and extra-extra-extra-high.</p></dd>
 
 <dt><em>Orientation</em></dt>
   <dd>The orientation of the screen from the user's point of view. This is either landscape or
@@ -168,9 +168,15 @@ width. If you're developing for Android 3.2 and greater, see <a
 href="#DeclaringTabletLayouts">Declaring Tablet Layouts for Android 3.2</a> for more
 information.</p>
 </li>
-<li>A set of four generalized <strong>densities</strong>: <em>ldpi</em> (low), <em>mdpi</em>
-(medium),
-<em>hdpi</em> (high), and <em>xhdpi</em> (extra high)
+<li>A set of six generalized <strong>densities</strong>:
+  <ul>
+    <li><em>ldpi</em> (low) ~120dpi</li>
+    <li><em>mdpi</em> (medium) ~160dpi</li>
+    <li><em>hdpi</em> (high) ~240dpi</li>
+    <li><em>xhdpi</em> (extra-high) ~320dpi</li>
+    <li><em>xxhdpi</em> (extra-extra-high) ~480dpi</li>
+    <li><em>xxxhdpi</em> (extra-extra-extra-high) ~640dpi</li>
+  </ul>
 </li>
 </ul>
 
@@ -243,14 +249,14 @@ the user's point of view) of user interface elements when displayed on screens w
 densities.</p>
 
 <p>Maintaining density independence is important because, without it, a UI element (such as a
-button) appears physically larger on a low density screen and smaller on a high density screen. Such
+button) appears physically larger on a low-density screen and smaller on a high-density screen. Such
 density-related size changes can cause problems in your application layout and usability. Figures 2
 and 3 show the difference between an application when it does not provide density independence and
 when it does, respectively.</p>
 
 <img src="{@docRoot}images/screens_support/density-test-bad.png" alt=""  />
 <p class="img-caption"><strong>Figure 2.</strong> Example application without support for
-different densities, as shown on low, medium, and high density screens.</p>
+different densities, as shown on low, medium, and high-density screens.</p>
 
 <img src="{@docRoot}images/screens_support/density-test-good.png" alt="" />
 <p class="img-caption"><strong>Figure 3.</strong> Example application with good support for
@@ -266,8 +272,8 @@ density, if necessary</li>
 </ul>
 
 <p>In figure 2, the text view and bitmap drawable have dimensions specified in pixels ({@code px}
-units), so the views are physically larger on a low density screen and smaller on a high density
-screen. This is because although the actual screen sizes may be the same, the high density screen
+units), so the views are physically larger on a low-density screen and smaller on a high-density
+screen. This is because although the actual screen sizes may be the same, the high-density screen
 has more pixels per inch (the same amount of pixels fit in a smaller area). In figure 3, the layout
 dimensions are specified in density-independent pixels ({@code dp} units). Because the baseline for
 density-independent pixels is a medium-density screen, the device with a medium-density screen looks
@@ -311,7 +317,7 @@ href="{@docRoot}guide/practices/screen-compat-mode.html">screen compatibility mo
 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
 &lt;supports-screens&gt;}</a> element in your manifest file.</p>
   </li>
-  
+
   <li><strong>Provide different layouts for different screen sizes</strong>
     <p>By default, Android resizes your application layout to fit the current device screen. In most
 cases, this works fine. In other cases, your UI might not look as good and might need adjustments
@@ -320,7 +326,7 @@ and size of some elements to take advantage of the additional screen space, or o
 you might need to adjust sizes so that everything can fit on the screen.</p>
     <p>The configuration qualifiers you can use to provide size-specific resources are
 <code>small</code>, <code>normal</code>, <code>large</code>, and <code>xlarge</code>. For
-example, layouts for an extra large screen should go in {@code layout-xlarge/}.</p>
+example, layouts for an extra-large screen should go in {@code layout-xlarge/}.</p>
     <p>Beginning with Android 3.2 (API level 13), the above size groups are deprecated and you
 should instead use the {@code sw&lt;N&gt;dp} configuration qualifier to define the smallest
 available width required by your layout resources. For example, if your multi-pane tablet layout
@@ -328,7 +334,7 @@ requires at least 600dp of screen width, you should place it in {@code layout-sw
 new techniques for declaring layout resources is discussed further in the section about <a
 href="#DeclaringTabletLayouts">Declaring Tablet Layouts for Android 3.2</a>.</p>
   </li>
-  
+
   <li><strong>Provide different bitmap drawables for different screen densities</strong>
     <p>By default, Android scales your bitmap drawables ({@code .png}, {@code .jpg}, and {@code
 .gif} files) and Nine-Patch drawables ({@code .9.png} files) so that they render at the appropriate
@@ -337,10 +343,22 @@ the baseline, medium screen density (mdpi), then the system scales them up when 
 screen, and scales them down when on a low-density screen. This scaling can cause artifacts in the
 bitmaps. To ensure your bitmaps look their best, you should include alternative versions at
 different resolutions for different screen densities.</p>
-    <p>The configuration qualifiers you can use for density-specific resources are
-<code>ldpi</code> (low), <code>mdpi</code> (medium), <code>hdpi</code> (high), and
-<code>xhdpi</code> (extra high). For example, bitmaps for high-density screens should go in
-{@code drawable-hdpi/}.</p>
+    <p>The <a href="#qualifiers">configuration qualifiers</a> (described in detail below) that you
+can use for density-specific resources are <code>ldpi</code> (low), <code>mdpi</code> (medium),
+<code>hdpi</code> (high), <code>xhdpi</code> extra-high), <code>xxhdpi</code>
+(extra-extra-high), and <code>xxxhdpi</code> (extra-extra-extra-high). For example, bitmaps
+for high-density screens should go in {@code drawable-hdpi/}.</p>
+    <p class="note" id="xxxhdpi-note"><strong>Note:</strong>  the <code>drawable-xxxhdpi</code>
+qualifier is necessary only to provide a launcher icon that can appear larger than usual on an
+xxhdpi device. You do not need to provide xxxhdpi assets for all your app's images.</p>
+    <p>Some devices scale-up the launcher icon by as much as 25%. For example, if your highest
+density launcher icon image is already extra-extra-high-density, the scaling process will make it
+appear less crisp. So you should provide a higher density launcher icon in the
+<code>drawable-xxxhdpi</code> directory, which the system uses instead of scaling up a smaller
+version of the icon.</p>
+    <p>See <a href="{@docRoot}design/style/iconography.html#xxxhdpi-launcher">Provide an
+xxx-high-density launcher icon</a> for more information. You should not use the
+<code>xxxhdpi</code> qualifier for UI elements other than the launcher icon.</p>
   </li>
 </ul>
 
@@ -371,14 +389,14 @@ or down as needed to match the current screen size and density
   <p>The "default" resources are those that are not tagged with a configuration qualifier. For
 example, the resources in {@code drawable/} are the default drawable resources. The system
 assumes that default resources are designed for the baseline screen size and density, which is a
-normal screen size and a medium density. As such, the system scales default density
+normal screen size and a medium-density. As such, the system scales default density
 resources up for high-density screens and down for low-density screens, as appropriate.</p>
   <p>However, when the system is looking for a density-specific resource and does not find it in
 the density-specific directory, it won't always use the default resources. The system may
 instead use one of the other density-specific resources in order to provide better results
 when scaling. For example, when looking for a low-density resource and it is not available, the
 system prefers to scale-down the high-density version of the resource, because the
-system can easily scale a high-density resource down to low-density by a factor of 0.5, with 
+system can easily scale a high-density resource down to low-density by a factor of 0.5, with
 fewer artifacts, compared to scaling a medium-density resource by a factor of 0.75.</p>
 </li>
 </ol>
@@ -416,9 +434,9 @@ qualifier with a dash.</p>
 files must be named exactly the same as the default resource files.</li>
 </ol>
 
-<p>For example, {@code xlarge} is a configuration qualifier for extra large screens. When you append
+<p>For example, {@code xlarge} is a configuration qualifier for extra-large screens. When you append
 this string to a resource directory name (such as {@code layout-xlarge}), it indicates to the
-system that these resources are to be used on devices that have an extra large screen.</p>
+system that these resources are to be used on devices that have an extra-large screen.</p>
 
 <p class="table-caption"><strong>Table 1.</strong> Configuration qualifiers that allow you to
 provide special resources for different screen configurations.</p>
@@ -445,11 +463,11 @@ provide special resources for different screen configurations.</p>
 </tr>
 <tr>
 <td><code>xlarge</code></td>
-<td>Resources for <em>extra large</em> size screens.</td>
+<td>Resources for <em>extra-large</em> size screens.</td>
 </tr>
 
 <tr>
-<td rowspan="6">Density</td>
+<td rowspan="8">Density</td>
 <td><code>ldpi</code></td>
 <td>Resources for low-density (<em>ldpi</em>) screens (~120dpi).</td>
 </tr>
@@ -464,7 +482,14 @@ density.)</td>
 </tr>
 <tr>
 <td><code>xhdpi</code></td>
-<td>Resources for extra high-density (<em>xhdpi</em>) screens (~320dpi).</td>
+<td>Resources for extra-high-density (<em>xhdpi</em>) screens (~320dpi).</td>
+</tr>
+<td><code>xxhdpi</code></td>
+<td>Resources for extra-extra-high-density (<em>xxhdpi</em>) screens (~480dpi).</td>
+</tr>
+<td><code>xxxhdpi</code></td>
+<td>Resources for extra-extra-extra-high-density (<em>xxxhdpi</em>) uses (~640dpi). Use this for the
+  launcher icon only, see <a href="#xxxhdpi-note">note</a> above.</td>
 </tr>
 <tr>
 <td><code>nodpi</code></td>
@@ -515,18 +540,18 @@ document.</p>
 
 <p>For example, the following is a list of resource directories in an application that
 provides different layout designs for different screen sizes and different bitmap drawables
-for medium, high, and extra high density screens.</p>
+for medium, high, and extra-high-density screens.</p>
 
 <pre class="classic">
-res/layout/my_layout.xml             // layout for normal screen size ("default")
-res/layout-small/my_layout.xml       // layout for small screen size
-res/layout-large/my_layout.xml       // layout for large screen size
-res/layout-xlarge/my_layout.xml      // layout for extra large screen size
-res/layout-xlarge-land/my_layout.xml // layout for extra large in landscape orientation
+res/layout/my_layout.xml              // layout for normal screen size ("default")
+res/layout-large/my_layout.xml        // layout for large screen size
+res/layout-xlarge/my_layout.xml       // layout for extra-large screen size
+res/layout-xlarge-land/my_layout.xml  // layout for extra-large in landscape orientation
 
-res/drawable-mdpi/my_icon.png        // bitmap for medium density
-res/drawable-hdpi/my_icon.png        // bitmap for high density
-res/drawable-xhdpi/my_icon.png       // bitmap for extra high density
+res/drawable-mdpi/my_icon.png         // bitmap for medium-density
+res/drawable-hdpi/my_icon.png         // bitmap for high-density
+res/drawable-xhdpi/my_icon.png        // bitmap for extra-high-density
+res/drawable-xxhdpi/my_icon.png       // bitmap for extra-extra-high-density
 </pre>
 
 <p>For more information about how to use alternative resources and a complete list of
@@ -575,10 +600,10 @@ you test your application on different screen configurations. For example:</p>
 screen. For example, a row of buttons might not fit within the width of the screen on a small screen
 device. In this case you should provide an alternative layout for small screens that adjusts the
 size or position of the buttons.</li>
-  <li>When testing on an extra large screen, you might realize that your layout doesn't make
+  <li>When testing on an extra-large screen, you might realize that your layout doesn't make
 efficient use of the big screen and is obviously stretched to fill it.
-In this case, you should provide an alternative layout for extra large screens that provides a
-redesigned UI that is optimized for bigger screens such as tablets. 
+In this case, you should provide an alternative layout for extra-large screens that provides a
+redesigned UI that is optimized for bigger screens such as tablets.
     <p>Although your application should work fine without an alternative layout on big screens, it's
 quite important to users that your application looks as though it's designed specifically for their
 devices. If the UI is obviously stretched, users are more likely to be unsatisfied with the
@@ -598,7 +623,7 @@ should instead be on the right side of the screen in landscape orientation.</li>
 <p>If your UI uses bitmaps that need to fit the size of a view even after the system scales
 the layout (such as the background image for a button), you should use <a
 href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">Nine-Patch</a> bitmap files. A
-Nine-Patch file is basically a PNG file in which you specific two-dimensional regions that are
+Nine-Patch file is basically a PNG file in which you specify two-dimensional regions that are
 stretchable. When the system needs to scale the view in which the bitmap is used, the system
 stretches the Nine-Patch bitmap, but stretches only the specified regions. As such, you don't
 need to provide different drawables for different screen sizes, because the Nine-Patch bitmap can
@@ -621,21 +646,24 @@ as for menu icons or other graphics in your application), you should provide alt
 each one, for different densities.</p>
 
 <p class="note"><strong>Note:</strong> You only need to provide density-specific drawables for
-bitmap files ({@code .png}, {@code .jpg}, or {@code .gif}) and Nine-Path files ({@code
+bitmap files ({@code .png}, {@code .jpg}, or {@code .gif}) and Nine-Patch files ({@code
 .9.png}). If you use XML files to define shapes, colors, or other <a
 href="{@docRoot}guide/topics/resources/drawable-resource.html">drawable resources</a>, you should
 put one copy in the default drawable directory ({@code drawable/}).</p>
 
 <p>To create alternative bitmap drawables for different densities, you should follow the
-<b>3:4:6:8 scaling ratio</b> between the four generalized densities. For example, if you have
-a bitmap drawable that's 48x48 pixels for medium-density screen (the size for a launcher icon),
-all the different sizes should be:</p>
+<b>3:4:6:8:12:16 scaling ratio</b> between the six generalized densities. For example, if you have
+a bitmap drawable that's 48x48 pixels for medium-density screens, all the different sizes should be:
+</p>
 
 <ul>
-  <li>36x36 for low-density</li>
-  <li>48x48 for medium-density</li>
-  <li>72x72 for high-density</li>
-  <li>96x96 for extra high-density</li>
+  <li>36x36 (0.75x) for low-density</li>
+  <li>48x48 (1.0x baseline) for medium-density</li>
+  <li>72x72 (1.5x) for high-density</li>
+  <li>96x96 (2.0x) for extra-high-density</li>
+  <li>180x180 (3.0x) for extra-extra-high-density</li>
+  <li>192x192 (4.0x) for extra-extra-extra-high-density (launcher icon only; see
+    <a href="#xxxhdpi-note">note</a> above)</li>
 </ul>
 
 <p>For more information about designing icons, see the <a
@@ -715,7 +743,7 @@ the space available for your layout and you must account for it in your design.<
 screen area. Specifically, the device's smallestWidth is the shortest of the screen's available
 height and width (you may also think of it as the "smallest possible width" for the screen). You can
 use this qualifier to ensure that, regardless of the screen's current orientation, your
-application's has at least {@code &lt;N&gt;} dps of width available for it UI.</p>
+application's has at least {@code &lt;N&gt;} dps of width available for its UI.</p>
         <p>For example, if your layout requires that its smallest dimension of screen area be at
 least 600 dp at all times, then you can use this qualifer to create the layout resources, {@code
 res/layout-sw600dp/}. The system will use these resources only when the smallest dimension of
@@ -1011,8 +1039,8 @@ information from earlier in this document.</p>
 <p>If you need to control exactly how your application will look on various
 screen configurations, adjust your layouts and bitmap drawables in configuration-specific
 resource directories. For example, consider an icon that you want to display on
-medium and high density screens. Simply create your icon at two different sizes
-(for instance 100x100 for medium density and 150x150 for high density) and put
+medium and high-density screens. Simply create your icon at two different sizes
+(for instance 100x100 for medium-density and 150x150 for high-density) and put
 the two variations in the appropriate directories, using the proper
 qualifiers:</p>
 
@@ -1115,9 +1143,7 @@ pixels.</p>
 <div class="figure" style="width:300px">
 <img src="{@docRoot}images/screens_support/scale-test.png" alt="" />
 <p class="img-caption"><strong>Figure 5.</strong> Comparison of pre-scaled and auto-scaled
-bitmaps, from <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/DensityActivity.html">
-ApiDemos</a>.
+bitmaps.
 </p>
 </div>
 
@@ -1153,10 +1179,7 @@ less memory.</p>
 (120), medium (160) and high (240) density bitmaps on a high-density screen. The differences are
 subtle, because all of the bitmaps are being scaled to match the current screen density, however the
 scaled bitmaps have slightly different appearances depending on whether they are pre-scaled or
-auto-scaled at draw time. You can find the source code for this sample application, which
-demonstrates using pre-scaled and auto-scaled bitmaps, in <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/DensityActivity.html">
-ApiDemos</a>.</p>
+auto-scaled at draw time.</p>
 
 <p class="note"><strong>Note:</strong> In Android 3.0 and above, there should be no perceivable
 difference between pre-scaled and auto-scaled bitmaps, due to improvements in the graphics
@@ -1172,9 +1195,9 @@ framework.</p>
 pixels. Imagine an application in which a scroll or fling gesture is recognized after the user's
 finger has moved by at least 16 pixels. On a baseline screen, a user's must move by {@code 16 pixels
 / 160 dpi}, which equals 1/10th of an inch (or 2.5 mm) before the gesture is recognized. On a device
-with a high density display (240dpi), the user's must move by {@code 16 pixels / 240 dpi}, which
+with a high-density display (240dpi), the user's must move by {@code 16 pixels / 240 dpi}, which
 equals 1/15th of an inch (or 1.7 mm). The distance is much shorter and the application thus appears
-more sensitive to the user.</p> 
+more sensitive to the user.</p>
 
 <p>To fix this issue, the gesture threshold must be expressed in code in <code>dp</code> and then
 converted to actual pixels. For example:</p>
@@ -1194,7 +1217,7 @@ mGestureThreshold = (int) (GESTURE_THRESHOLD_DP * scale + 0.5f);</span>
 <p>The {@link android.util.DisplayMetrics#density DisplayMetrics.density} field specifies the scale
 factor you must use to convert {@code dp} units to pixels, according to the current screen density.
 On a medium-density screen, {@link android.util.DisplayMetrics#density DisplayMetrics.density}
-equals 1.0; on a high-density screen it equals 1.5; on an extra high-density screen, it equals 2.0;
+equals 1.0; on a high-density screen it equals 1.5; on an extra-high-density screen, it equals 2.0;
 and on a low-density screen, it equals 0.75. This figure is the factor by which you should multiply
 the {@code dp} units on order to get the actual pixel count for the current screen. (Then add {@code
 0.5f} to round the figure up to the nearest whole number, when converting to an integer.) For more
@@ -1277,7 +1300,7 @@ representative resolutions.</p>
         <nobr>High density (240), <em>hdpi</em><nobr>
       </th>
       <th>
-        <nobr>Extra high density (320), <em>xhdpi</em><nobr>
+        <nobr>Extra-high-density (320), <em>xhdpi</em><nobr>
       </th>
     </tr>
     <tr>
@@ -1315,7 +1338,7 @@ representative resolutions.</p>
     </tr>
     <tr>
       <th>
-        <em>Extra Large</em> screen
+        <em>Extra-Large</em> screen
       </th>
       <td>1024x600</td>
       <td><strong>WXGA (1280x800)</strong><sup>&dagger;</sup><br>
@@ -1369,4 +1392,4 @@ between 0.1 and 3 that represents the desired scaling factor.</p>
 
 <p>For more information about creating AVDs from the command line, see <a
 href="{@docRoot}tools/devices/managing-avds-cmdline.html">Managing AVDs from the
-Command Line</a></p>
+Command Line</a>.</p>
