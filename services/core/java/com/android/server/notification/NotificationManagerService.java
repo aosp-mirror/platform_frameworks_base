@@ -1126,6 +1126,19 @@ public class NotificationManagerService extends SystemService {
             return mRankingHelper.getPackagePriority(pkg, uid);
         }
 
+        @Override
+        public void setPackageVisibilityOverride(String pkg, int uid, int visibility) {
+            checkCallerIsSystem();
+            mRankingHelper.setPackageVisibilityOverride(pkg, uid, visibility);
+            savePolicyFile();
+        }
+
+        @Override
+        public int getPackageVisibilityOverride(String pkg, int uid) {
+            checkCallerIsSystem();
+            return mRankingHelper.getPackageVisibilityOverride(pkg, uid);
+        }
+
         /**
          * System-only API for getting a list of current (i.e. not cleared) notifications.
          *
@@ -2045,12 +2058,15 @@ public class NotificationManagerService extends SystemService {
             }
             int indexBefore = findNotificationRecordIndexLocked(record);
             boolean interceptBefore = record.isIntercepted();
+            int visibilityBefore = record.getPackageVisibilityOverride();
             recon.applyChangesLocked(record);
             applyZenModeLocked(record);
             mRankingHelper.sort(mNotificationList);
             int indexAfter = findNotificationRecordIndexLocked(record);
             boolean interceptAfter = record.isIntercepted();
-            changed = indexBefore != indexAfter || interceptBefore != interceptAfter;
+            int visibilityAfter = record.getPackageVisibilityOverride();
+            changed = indexBefore != indexAfter || interceptBefore != interceptAfter
+                    || visibilityBefore != visibilityAfter;
             if (interceptBefore && !interceptAfter) {
                 buzzBeepBlinkLocked(record);
             }
@@ -2064,14 +2080,18 @@ public class NotificationManagerService extends SystemService {
         synchronized (mNotificationList) {
             final int N = mNotificationList.size();
             ArrayList<String> orderBefore = new ArrayList<String>(N);
+            int[] visibilities = new int[N];
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
                 orderBefore.add(r.getKey());
+                visibilities[i] = r.getPackageVisibilityOverride();
                 mRankingHelper.extractSignals(r);
             }
-            mRankingHelper.sort(mNotificationList);
             for (int i = 0; i < N; i++) {
-                if (!orderBefore.get(i).equals(mNotificationList.get(i).getKey())) {
+                mRankingHelper.sort(mNotificationList);
+                final NotificationRecord r = mNotificationList.get(i);
+                if (!orderBefore.get(i).equals(r.getKey())
+                        || visibilities[i] != r.getPackageVisibilityOverride()) {
                     scheduleSendRankingUpdate();
                     return;
                 }
@@ -2601,6 +2621,7 @@ public class NotificationManagerService extends SystemService {
         final int N = mNotificationList.size();
         ArrayList<String> keys = new ArrayList<String>(N);
         ArrayList<String> interceptedKeys = new ArrayList<String>(N);
+        Bundle visibilityOverrides = new Bundle();
         for (int i = 0; i < N; i++) {
             NotificationRecord record = mNotificationList.get(i);
             if (!isVisibleToListener(record.sbn, info)) {
@@ -2610,6 +2631,11 @@ public class NotificationManagerService extends SystemService {
             if (record.isIntercepted()) {
                 interceptedKeys.add(record.sbn.getKey());
             }
+            if (record.getPackageVisibilityOverride()
+                    != NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE) {
+                visibilityOverrides.putInt(record.sbn.getKey(),
+                        record.getPackageVisibilityOverride());
+            }
             if (speedBumpIndex == -1 &&
                     record.sbn.getNotification().priority == Notification.PRIORITY_MIN) {
                 speedBumpIndex = keys.size() - 1;
@@ -2617,7 +2643,8 @@ public class NotificationManagerService extends SystemService {
         }
         String[] keysAr = keys.toArray(new String[keys.size()]);
         String[] interceptedKeysAr = interceptedKeys.toArray(new String[interceptedKeys.size()]);
-        return new NotificationRankingUpdate(keysAr, interceptedKeysAr, speedBumpIndex);
+        return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
+                speedBumpIndex);
     }
 
     private boolean isVisibleToListener(StatusBarNotification sbn, ManagedServiceInfo listener) {
