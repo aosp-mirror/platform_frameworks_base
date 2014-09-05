@@ -312,6 +312,32 @@ public class PackageInstaller {
         }
     }
 
+    /**
+     * Update the icon representing the app being installed in a specific
+     * session. This should be roughly
+     * {@link ActivityManager#getLauncherLargeIconSize()} in both dimensions.
+     */
+    public void updateSessionAppIcon(int sessionId, @Nullable Bitmap appIcon) {
+        try {
+            mInstaller.updateSessionAppIcon(sessionId, appIcon);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Update the label representing the app being installed in a specific
+     * session.
+     */
+    public void updateSessionAppLabel(int sessionId, @Nullable CharSequence appLabel) {
+        try {
+            final String val = (appLabel != null) ? appLabel.toString() : null;
+            mInstaller.updateSessionAppLabel(sessionId, val);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
     public void abandonSession(int sessionId) {
         try {
             mInstaller.abandonSession(sessionId);
@@ -321,8 +347,7 @@ public class PackageInstaller {
     }
 
     /**
-     * Return details for a specific session. To succeed, the caller must either
-     * own this session, or be the current home app.
+     * Return details for a specific session.
      */
     public @Nullable SessionInfo getSessionInfo(int sessionId) {
         try {
@@ -334,7 +359,6 @@ public class PackageInstaller {
 
     /**
      * Return list of all active install sessions, regardless of the installer.
-     * To succeed, the caller must be the current home app.
      */
     public @NonNull List<SessionInfo> getAllSessions() {
         final ApplicationInfo info = mContext.getApplicationInfo();
@@ -406,6 +430,12 @@ public class PackageInstaller {
         public abstract void onCreated(int sessionId);
 
         /**
+         * Badging details for an existing session has changed. For example, the
+         * app icon or label has been updated.
+         */
+        public abstract void onBadgingChanged(int sessionId);
+
+        /**
          * Session has been opened. A session is usually opened when the
          * installer is actively writing data.
          */
@@ -436,10 +466,11 @@ public class PackageInstaller {
     private static class SessionCallbackDelegate extends IPackageInstallerCallback.Stub implements
             Handler.Callback {
         private static final int MSG_SESSION_CREATED = 1;
-        private static final int MSG_SESSION_OPENED = 2;
-        private static final int MSG_SESSION_PROGRESS_CHANGED = 3;
-        private static final int MSG_SESSION_CLOSED = 4;
-        private static final int MSG_SESSION_FINISHED = 5;
+        private static final int MSG_SESSION_BADGING_CHANGED = 2;
+        private static final int MSG_SESSION_OPENED = 3;
+        private static final int MSG_SESSION_PROGRESS_CHANGED = 4;
+        private static final int MSG_SESSION_CLOSED = 5;
+        private static final int MSG_SESSION_FINISHED = 6;
 
         final SessionCallback mCallback;
         final Handler mHandler;
@@ -454,6 +485,9 @@ public class PackageInstaller {
             switch (msg.what) {
                 case MSG_SESSION_CREATED:
                     mCallback.onCreated(msg.arg1);
+                    return true;
+                case MSG_SESSION_BADGING_CHANGED:
+                    mCallback.onBadgingChanged(msg.arg1);
                     return true;
                 case MSG_SESSION_OPENED:
                     mCallback.onOpened(msg.arg1);
@@ -474,6 +508,11 @@ public class PackageInstaller {
         @Override
         public void onSessionCreated(int sessionId) {
             mHandler.obtainMessage(MSG_SESSION_CREATED, sessionId, 0).sendToTarget();
+        }
+
+        @Override
+        public void onSessionBadgingChanged(int sessionId) {
+            mHandler.obtainMessage(MSG_SESSION_BADGING_CHANGED, sessionId, 0).sendToTarget();
         }
 
         @Override
@@ -499,22 +538,32 @@ public class PackageInstaller {
         }
     }
 
-    /**
-     * Register to watch for session lifecycle events. To succeed, the caller
-     * must be the current home app.
-     */
+    /** {@hide} */
+    @Deprecated
     public void addSessionCallback(@NonNull SessionCallback callback) {
-        addSessionCallback(callback, new Handler());
+        registerSessionCallback(callback);
     }
 
     /**
-     * Register to watch for session lifecycle events. To succeed, the caller
-     * must be the current home app.
+     * Register to watch for session lifecycle events.
+     */
+    public void registerSessionCallback(@NonNull SessionCallback callback) {
+        registerSessionCallback(callback, new Handler());
+    }
+
+    /** {@hide} */
+    @Deprecated
+    public void addSessionCallback(@NonNull SessionCallback callback, @NonNull Handler handler) {
+        registerSessionCallback(callback, handler);
+    }
+
+    /**
+     * Register to watch for session lifecycle events.
      *
      * @param handler to dispatch callback events through, otherwise uses
      *            calling thread.
      */
-    public void addSessionCallback(@NonNull SessionCallback callback, @NonNull Handler handler) {
+    public void registerSessionCallback(@NonNull SessionCallback callback, @NonNull Handler handler) {
         // TODO: remove this temporary guard once we have new prebuilts
         final ApplicationInfo info = mContext.getApplicationInfo();
         if ("com.google.android.googlequicksearchbox".equals(info.packageName)
@@ -535,10 +584,16 @@ public class PackageInstaller {
         }
     }
 
+    /** {@hide} */
+    @Deprecated
+    public void removeSessionCallback(@NonNull SessionCallback callback) {
+        unregisterSessionCallback(callback);
+    }
+
     /**
      * Unregister an existing callback.
      */
-    public void removeSessionCallback(@NonNull SessionCallback callback) {
+    public void unregisterSessionCallback(@NonNull SessionCallback callback) {
         synchronized (mDelegates) {
             for (Iterator<SessionCallbackDelegate> i = mDelegates.iterator(); i.hasNext();) {
                 final SessionCallbackDelegate delegate = i.next();

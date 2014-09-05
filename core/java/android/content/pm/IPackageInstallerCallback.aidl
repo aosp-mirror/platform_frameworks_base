@@ -19,6 +19,7 @@ package android.content.pm;
 /** {@hide} */
 oneway interface IPackageInstallerCallback {
     void onSessionCreated(int sessionId);
+    void onSessionBadgingChanged(int sessionId);
     void onSessionOpened(int sessionId);
     void onSessionProgressChanged(int sessionId, float progress);
     void onSessionClosed(int sessionId);

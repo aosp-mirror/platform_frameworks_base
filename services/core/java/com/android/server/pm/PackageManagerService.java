@@ -11746,47 +11746,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                         preferred.activityInfo.name);
     }
 
-    /**
-     * Check if calling UID is the current home app. This handles both the case
-     * where the user has selected a specific home app, and where there is only
-     * one home app.
-     */
-    public boolean checkCallerIsHomeApp() {
-        final Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-
-        final int callingUid = Binder.getCallingUid();
-        final int callingUserId = UserHandle.getCallingUserId();
-        final List<ResolveInfo> allHomes = queryIntentActivities(intent, null, 0, callingUserId);
-        final ResolveInfo preferredHome = findPreferredActivity(intent, null, 0, allHomes, 0, true,
-                false, false, callingUserId);
-
-        if (preferredHome != null) {
-            if (callingUid == preferredHome.activityInfo.applicationInfo.uid) {
-                return true;
-            }
-        } else {
-            for (ResolveInfo info : allHomes) {
-                if (callingUid == info.activityInfo.applicationInfo.uid) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Enforce that calling UID is the current home app. This handles both the
-     * case where the user has selected a specific home app, and where there is
-     * only one home app.
-     */
-    public void enforceCallerIsHomeApp() {
-        if (!checkCallerIsHomeApp()) {
-            throw new SecurityException("Caller is not currently selected home app");
-        }
-    }
-
     @Override
     public void setApplicationEnabledSetting(String appPackageName,
             int newState, int flags, int userId, String callingPackage) {
