@@ -43,6 +43,7 @@
 #include <utils/String8.h>
 #include <selinux/android.h>
 #include <processgroup/processgroup.h>
+#include <inttypes.h>
 
 #include "android_runtime/AndroidRuntime.h"
 #include "JNIHelp.h"
@@ -398,6 +399,22 @@ void SetThreadName(const char* thread_name) {
   }
 }
 
+  // Temporary timing check.
+uint64_t MsTime() {
+  timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  return static_cast<uint64_t>(now.tv_sec) * UINT64_C(1000) + now.tv_nsec / UINT64_C(1000000);
+}
+
+
+void ckTime(uint64_t start, const char* where) {
+  uint64_t now = MsTime();
+  if ((now-start) > 1000) {
+    // If we are taking more than a second, log about it.
+    ALOGW("Slow operation: %"PRIu64" ms in %s", (uint64_t)(now-start), where);
+  }
+}
+
 // Utility routine to fork zygote and specialize the child process.
 static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGids,
                                      jint debug_flags, jobjectArray javaRlimits,
@@ -405,7 +422,9 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
                                      jint mount_external,
                                      jstring java_se_info, jstring java_se_name,
                                      bool is_system_server, jintArray fdsToClose) {
+  uint64_t start = MsTime();
   SetSigChldHandler();
+  ckTime(start, "ForkAndSpecializeCommon:SetSigChldHandler");
 
   pid_t pid = fork();
 
@@ -413,8 +432,11 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     // The child process.
     gMallocLeakZygoteChild = 1;
 
+
     // Clean up any descriptors which must be closed immediately
     DetachDescriptors(env, fdsToClose);
+
+    ckTime(start, "ForkAndSpecializeCommon:Fork and detach");
 
     // Keep capabilities across UID change, unless we're staying root.
     if (uid != 0) {
@@ -518,7 +540,10 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
     UnsetSigChldHandler();
 
+    ckTime(start, "ForkAndSpecializeCommon:child process setup");
+
     env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, debug_flags);
+    ckTime(start, "ForkAndSpecializeCommon:PostForkChildHooks returns");
     if (env->ExceptionCheck()) {
       ALOGE("Error calling post fork hooks.");
       RuntimeAbort(env);
