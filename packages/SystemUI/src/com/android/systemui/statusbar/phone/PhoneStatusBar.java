@@ -1559,8 +1559,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
 
-        for (View remove : toRemove) {
-            mNotificationIcons.removeView(remove);
+        final int toRemoveCount = toRemove.size();
+        for (int i = 0; i < toRemoveCount; i++) {
+            mNotificationIcons.removeView(toRemove.get(i));
         }
 
         for (int i=0; i<toShow.size(); i++) {
@@ -1568,6 +1569,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             if (v.getParent() == null) {
                 mNotificationIcons.addView(v, i, params);
             }
+        }
+
+        // Resort notification icons
+        final int childCount = mNotificationIcons.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View actual = mNotificationIcons.getChildAt(i);
+            StatusBarIconView expected = toShow.get(i);
+            if (actual == expected) {
+                continue;
+            }
+            mNotificationIcons.removeView(expected);
+            mNotificationIcons.addView(expected, i);
         }
     }
 
