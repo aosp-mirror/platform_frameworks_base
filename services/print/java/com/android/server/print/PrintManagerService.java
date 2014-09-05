@@ -627,26 +627,40 @@ public final class PrintManagerService extends SystemService {
             return userState;
         }
 
-        private void handleUserStarted(int userId) {
-            UserState userState;
-            synchronized (mLock) {
-                userState = getOrCreateUserStateLocked(userId);
-                userState.updateIfNeededLocked();
-            }
-            // This is the first time we switch to this user after boot, so
-            // now is the time to remove obsolete print jobs since they
-            // are from the last boot and no application would query them.
-            userState.removeObsoletePrintJobs();
+        private void handleUserStarted(final int userId) {
+            // This code will touch the remote print spooler which
+            // must be called off the main thread, so post the work.
+            BackgroundThread.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    UserState userState;
+                    synchronized (mLock) {
+                        userState = getOrCreateUserStateLocked(userId);
+                        userState.updateIfNeededLocked();
+                    }
+                    // This is the first time we switch to this user after boot, so
+                    // now is the time to remove obsolete print jobs since they
+                    // are from the last boot and no application would query them.
+                    userState.removeObsoletePrintJobs();
+                }
+            });
         }
 
-        private void handleUserStopped(int userId) {
-            synchronized (mLock) {
-                UserState userState = mUserStates.get(userId);
-                if (userState != null) {
-                    userState.destroyLocked();
-                    mUserStates.remove(userId);
+        private void handleUserStopped(final int userId) {
+            // This code will touch the remote print spooler which
+            // must be called off the main thread, so post the work.
+            BackgroundThread.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (mLock) {
+                        UserState userState = mUserStates.get(userId);
+                        if (userState != null) {
+                            userState.destroyLocked();
+                            mUserStates.remove(userId);
+                        }
+                    }
                 }
-            }
+            });
         }
 
         private int resolveCallingProfileParentLocked(int userId) {
