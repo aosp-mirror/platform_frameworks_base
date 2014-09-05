@@ -3783,21 +3783,25 @@ public class PackageManagerService extends IPackageManager.Stub {
         } else {
             pi = generatePackageInfoFromSettingsLPw(ps.name, flags, userId);
         }
-        if ((flags&PackageManager.GET_PERMISSIONS) == 0) {
-            if (numMatch == permissions.length) {
-                pi.requestedPermissions = permissions;
-            } else {
-                pi.requestedPermissions = new String[numMatch];
-                numMatch = 0;
-                for (int i=0; i<permissions.length; i++) {
-                    if (tmp[i]) {
-                        pi.requestedPermissions[numMatch] = permissions[i];
-                        numMatch++;
+        // The above might return null in cases of uninstalled apps or install-state
+        // skew across users/profiles.
+        if (pi != null) {
+            if ((flags&PackageManager.GET_PERMISSIONS) == 0) {
+                if (numMatch == permissions.length) {
+                    pi.requestedPermissions = permissions;
+                } else {
+                    pi.requestedPermissions = new String[numMatch];
+                    numMatch = 0;
+                    for (int i=0; i<permissions.length; i++) {
+                        if (tmp[i]) {
+                            pi.requestedPermissions[numMatch] = permissions[i];
+                            numMatch++;
+                        }
                     }
                 }
             }
+            list.add(pi);
         }
-        list.add(pi);
     }
 
     @Override
