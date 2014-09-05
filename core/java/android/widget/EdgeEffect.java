@@ -52,12 +52,15 @@ public class EdgeEffect {
     private static final String TAG = "EdgeEffect";
 
     // Time it will take the effect to fully recede in ms
-    private static final int RECEDE_TIME = 1000;
+    private static final int RECEDE_TIME = 600;
 
     // Time it will take before a pulled glow begins receding in ms
     private static final int PULL_TIME = 167;
 
-    private static final float MAX_ALPHA = 1.f;
+    // Time it will take in ms for a pulled glow to decay to partial strength before release
+    private static final int PULL_DECAY_TIME = 2000;
+
+    private static final float MAX_ALPHA = 0.5f;
 
     private static final float MAX_GLOW_SCALE = 2.f;
 
@@ -93,12 +96,9 @@ public class EdgeEffect {
     private static final int STATE_RECEDE = 3;
     private static final int STATE_PULL_DECAY = 4;
 
-    // How much dragging should effect the height of the glow image.
-    // Number determined by user testing.
-    private static final int PULL_DISTANCE_GLOW_FACTOR = 7;
-    private static final float PULL_DISTANCE_ALPHA_GLOW_FACTOR = 1.1f;
+    private static final float PULL_DISTANCE_ALPHA_GLOW_FACTOR = 0.8f;
 
-    private static final int VELOCITY_GLOW_FACTOR = 12;
+    private static final int VELOCITY_GLOW_FACTOR = 6;
 
     private int mState = STATE_IDLE;
 
@@ -107,7 +107,7 @@ public class EdgeEffect {
     private final Rect mBounds = new Rect();
     private final Paint mPaint = new Paint();
     private float mRadius;
-    private float mBaseGlowHeight;
+    private float mBaseGlowScale;
     private float mDisplacement = 0.5f;
     private float mTargetDisplacement = 0.5f;
 
@@ -138,8 +138,12 @@ public class EdgeEffect {
         final float r = width * 0.75f / SIN;
         final float y = COS * r;
         final float h = r - y;
+        final float or = height * 0.75f / SIN;
+        final float oy = COS * or;
+        final float oh = or - oy;
+
         mRadius = r;
-        mBaseGlowHeight = h;
+        mBaseGlowScale = h > 0 ? Math.min(oh / h, 1.f) : 1.f;
 
         mBounds.set(mBounds.left, mBounds.top, width, (int) Math.min(height, h));
     }
@@ -319,13 +323,14 @@ public class EdgeEffect {
         final float centerX = mBounds.centerX();
         final float centerY = mBounds.height() - mRadius;
 
-        canvas.scale(1.f, Math.min(mGlowScaleY, 1.f), centerX, 0);
+        canvas.scale(1.f, Math.min(mGlowScaleY, 1.f) * mBaseGlowScale, centerX, 0);
 
         final float displacement = Math.max(0, Math.min(mDisplacement, 1.f)) - 0.5f;
         float translateX = mBounds.width() * displacement / 2;
 
         canvas.clipRect(mBounds);
         canvas.translate(translateX, 0);
+        mPaint.setAlpha((int) (0xff * mGlowAlpha));
         canvas.drawCircle(centerX, centerY, mRadius, mPaint);
         canvas.restoreToCount(count);
 
@@ -372,7 +377,16 @@ public class EdgeEffect {
                     mGlowScaleYFinish = 0.f;
                     break;
                 case STATE_PULL:
-                    // Hold in this state until explicitly released.
+                    mState = STATE_PULL_DECAY;
+                    mStartTime = AnimationUtils.currentAnimationTimeMillis();
+                    mDuration = PULL_DECAY_TIME;
+
+                    mGlowAlphaStart = mGlowAlpha;
+                    mGlowScaleYStart = mGlowScaleY;
+
+                    // After pull, the glow should fade to nothing.
+                    mGlowAlphaFinish = 0.f;
+                    mGlowScaleYFinish = 0.f;
                     break;
                 case STATE_PULL_DECAY:
                     mState = STATE_RECEDE;
