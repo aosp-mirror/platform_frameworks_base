@@ -11444,8 +11444,6 @@ package android.graphics {
     ctor public PorterDuffColorFilter(int, android.graphics.PorterDuff.Mode);
     method public int getColor();
     method public android.graphics.PorterDuff.Mode getMode();
-    method public void setColor(int);
-    method public void setMode(android.graphics.PorterDuff.Mode);
   }
 
   public class PorterDuffXfermode extends android.graphics.Xfermode {
