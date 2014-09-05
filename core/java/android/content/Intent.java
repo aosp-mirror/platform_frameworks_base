@@ -3363,7 +3363,7 @@ public class Intent implements Parcelable, Cloneable {
      * profiles - {@link #ACTION_MANAGED_PROFILE_ADDED} and {@link #ACTION_MANAGED_PROFILE_REMOVED}.
      */
     public static final String EXTRA_USER =
-            "android.intent.extra.user";
+            "android.intent.extra.USER";
 
     /**
      * Extra used in the response from a BroadcastReceiver that handles
