@@ -904,6 +904,12 @@ public class AudioService extends IAudioService.Stub {
     /** @see AudioManager#adjustVolume(int, int) */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
             String callingPackage) {
+        adjustSuggestedStreamVolume(direction, suggestedStreamType, flags, callingPackage,
+                Binder.getCallingUid());
+    }
+
+    private void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
+            String callingPackage, int uid) {
         if (DEBUG_VOL) Log.d(TAG, "adjustSuggestedStreamVolume() stream="+suggestedStreamType
                 + ", flags=" + flags);
         int streamType;
@@ -928,7 +934,7 @@ public class AudioService extends IAudioService.Stub {
             if (DEBUG_VOL) Log.d(TAG, "Volume controller suppressed adjustment");
         }
 
-        adjustStreamVolume(streamType, direction, flags, callingPackage);
+        adjustStreamVolume(streamType, direction, flags, callingPackage, uid);
     }
 
     /** @see AudioManager#adjustStreamVolume(int, int, int) */
@@ -5348,6 +5354,15 @@ public class AudioService extends IAudioService.Stub {
      * LocalServices.
      */
     final class AudioServiceInternal extends AudioManagerInternal {
+
+        @Override
+        public void adjustSuggestedStreamVolumeForUid(int streamType, int direction, int flags,
+                String callingPackage, int uid) {
+            // direction and stream type swap here because the public
+            // adjustSuggested has a different order than the other methods.
+            adjustSuggestedStreamVolume(direction, streamType, flags, callingPackage, uid);
+        }
+
         @Override
         public void adjustStreamVolumeForUid(int streamType, int direction, int flags,
                 String callingPackage, int uid) {
