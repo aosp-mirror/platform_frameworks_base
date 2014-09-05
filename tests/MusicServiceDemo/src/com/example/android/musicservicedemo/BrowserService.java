@@ -134,8 +134,8 @@ public class BrowserService extends MediaBrowserService {
                         bob.setSubtitle("Summary " + i);
                         bob.setMediaId(Uri.withAppendedPath(BASE_URI,
                                 Integer.toString(i)).toString());
-                        list.add(new MediaBrowser.MediaItem(MediaBrowser.MediaItem.FLAG_BROWSABLE,
-                                bob.build()));
+                        list.add(new MediaBrowser.MediaItem(bob.build(),
+                                MediaBrowser.MediaItem.FLAG_BROWSABLE));
                     }
 
                     result.sendResult(list);
