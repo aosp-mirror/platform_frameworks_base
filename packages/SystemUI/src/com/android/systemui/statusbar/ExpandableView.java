@@ -255,8 +255,6 @@ public abstract class ExpandableView extends FrameLayout {
 
     public abstract void performAddAnimation(long delay, long duration);
 
-    public abstract void setScrimAmount(float scrimAmount);
-
     public void setBelowSpeedBump(boolean below) {
     }
 

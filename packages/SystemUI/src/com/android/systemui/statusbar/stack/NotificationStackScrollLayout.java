@@ -2094,13 +2094,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         return true;
     }
 
-    public void setScrimAlpha(float progress) {
-        if (progress != mAmbientState.getScrimAmount()) {
-            mAmbientState.setScrimAmount(progress);
-            requestChildrenUpdate();
-        }
-    }
-
     /**
      * See {@link AmbientState#setDark}.
      */
