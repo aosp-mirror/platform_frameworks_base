@@ -1759,7 +1759,7 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     private UserInfo getUserIfProfile(int userHandle) {
-        List<UserInfo> userProfiles = mUserManager.getProfiles(UserHandle.myUserId());
+        List<UserInfo> userProfiles = getUserManager().getProfiles(UserHandle.myUserId());
         for (UserInfo user : userProfiles) {
             if (user.id == userHandle) {
                 return user;
