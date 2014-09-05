@@ -46,34 +46,34 @@ public class TelecommManager {
      *
      * @hide
      */
-    public static final String ACTION_INCOMING_CALL = "android.intent.action.INCOMING_CALL";
+    public static final String ACTION_INCOMING_CALL = "android.telecomm.action.INCOMING_CALL";
 
     /**
      * The {@link android.content.Intent} action used to configure a
      * {@link android.telecomm.ConnectionService}.
      */
     public static final String ACTION_CONNECTION_SERVICE_CONFIGURE =
-            "android.intent.action.CONNECTION_SERVICE_CONFIGURE";
+            "android.telecomm.action.CONNECTION_SERVICE_CONFIGURE";
 
     /**
      * The {@link android.content.Intent} action used to show the call settings page.
      */
     public static final String ACTION_SHOW_CALL_SETTINGS =
-            "android.telecomm.intent.action.SHOW_CALL_SETTINGS";
+            "android.telecomm.action.SHOW_CALL_SETTINGS";
 
     /**
      * The {@link android.content.Intent} action used to show the settings page used to configure
      * {@link PhoneAccount} preferences.
      */
     public static final String ACTION_CHANGE_PHONE_ACCOUNTS =
-            "android.telecomm.intent.action.CHANGE_PHONE_ACCOUNTS";
+            "android.telecomm.action.CHANGE_PHONE_ACCOUNTS";
 
     /**
      * Optional extra for {@link android.content.Intent#ACTION_CALL} containing a boolean that
      * determines whether the speakerphone should be automatically turned on for an outgoing call.
      */
     public static final String EXTRA_START_CALL_WITH_SPEAKERPHONE =
-            "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
+            "android.telecomm.extra.START_CALL_WITH_SPEAKERPHONE";
 
     /**
      * Optional extra for {@link android.content.Intent#ACTION_CALL} containing an integer that
@@ -86,7 +86,7 @@ public class TelecommManager {
      * @hide
      */
     public static final String EXTRA_START_CALL_WITH_VIDEO_STATE =
-            "android.intent.extra.START_CALL_WITH_VIDEO_STATE";
+            "android.telecomm.extra.START_CALL_WITH_VIDEO_STATE";
 
     /**
      * The extra used with an {@link android.content.Intent#ACTION_CALL} and
@@ -96,7 +96,7 @@ public class TelecommManager {
      * Retrieve with {@link android.content.Intent#getParcelableExtra(String)}.
      */
     public static final String EXTRA_PHONE_ACCOUNT_HANDLE =
-            "android.intent.extra.PHONE_ACCOUNT_HANDLE";
+            "android.telecomm.extra.PHONE_ACCOUNT_HANDLE";
 
     /**
      * Optional extra for {@link #ACTION_INCOMING_CALL} containing a {@link Bundle} which contains
@@ -106,7 +106,7 @@ public class TelecommManager {
      * @hide
      */
     public static final String EXTRA_INCOMING_CALL_EXTRAS =
-            "android.intent.extra.INCOMING_CALL_EXTRAS";
+            "android.telecomm.extra.INCOMING_CALL_EXTRAS";
 
     /**
      * Optional extra for {@link android.content.Intent#ACTION_CALL} and
@@ -117,7 +117,7 @@ public class TelecommManager {
      * @hide
      */
     public static final String EXTRA_OUTGOING_CALL_EXTRAS =
-            "android.intent.extra.OUTGOING_CALL_EXTRAS";
+            "android.telecomm.extra.OUTGOING_CALL_EXTRAS";
 
     /**
      * Optional extra for {@link android.telephony.TelephonyManager#ACTION_PHONE_STATE_CHANGED}
@@ -203,7 +203,7 @@ public class TelecommManager {
      * @hide
      */
     public static final String ACTION_CURRENT_TTY_MODE_CHANGED =
-            "android.telecomm.intent.action.CURRENT_TTY_MODE_CHANGED";
+            "android.telecomm.action.CURRENT_TTY_MODE_CHANGED";
 
     /**
      * The lookup key for an int that indicates the current TTY mode.
@@ -226,7 +226,7 @@ public class TelecommManager {
      * @hide
      */
     public static final String ACTION_TTY_PREFERRED_MODE_CHANGED =
-            "android.telecomm.intent.action.TTY_PREFERRED_MODE_CHANGED";
+            "android.telecomm.action.TTY_PREFERRED_MODE_CHANGED";
 
     /**
      * The lookup key for an int that indicates preferred TTY mode. Valid modes are: -
