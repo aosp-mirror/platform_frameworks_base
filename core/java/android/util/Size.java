@@ -18,13 +18,10 @@ package android.util;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
  * Immutable class for describing width and height dimensions in pixels.
  */
-public final class Size implements Parcelable {
+public final class Size {
     /**
      * Create a new immutable Size instance.
      *
@@ -34,11 +31,6 @@ public final class Size implements Parcelable {
     public Size(int width, int height) {
         mWidth = width;
         mHeight = height;
-    }
-
-    private Size(Parcel in) {
-        mWidth = in.readInt();
-        mHeight = in.readInt();
     }
 
     /**
@@ -154,29 +146,6 @@ public final class Size implements Parcelable {
         // assuming most sizes are <2^16, doing a rotate will give us perfect hashing
         return mHeight ^ ((mWidth << (Integer.SIZE / 2)) | (mWidth >>> (Integer.SIZE / 2)));
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(mWidth);
-        out.writeInt(mHeight);
-    }
-
-    public static final Parcelable.Creator<Size> CREATOR = new Parcelable.Creator<Size>() {
-        @Override
-        public Size createFromParcel(Parcel in) {
-            return new Size(in);
-        }
-
-        @Override
-        public Size[] newArray(int size) {
-            return new Size[size];
-        }
-    };
 
     private final int mWidth;
     private final int mHeight;
