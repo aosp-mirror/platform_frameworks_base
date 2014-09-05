@@ -373,13 +373,14 @@ public class ZenModeHelper {
         return record.isCategory(Notification.CATEGORY_MESSAGE) || isDefaultMessagingApp(record);
     }
 
-    public boolean matchesCallFilter(Bundle extras, ValidateNotificationPeople validator) {
+    public boolean matchesCallFilter(UserHandle userHandle, Bundle extras,
+            ValidateNotificationPeople validator) {
         final int zen = mZenMode;
         if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) return false; // nothing gets through
         if (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
             if (!mConfig.allowCalls) return false; // no calls get through
             if (validator != null) {
-                final float contactAffinity = validator.getContactAffinity(extras);
+                final float contactAffinity = validator.getContactAffinity(userHandle, extras);
                 return audienceMatches(contactAffinity);
             }
         }
