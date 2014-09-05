@@ -29046,7 +29046,6 @@ package android.telephony {
     method public boolean isSmsCapable();
     method public void listen(android.telephony.PhoneStateListener, int);
     method public java.lang.String sendEnvelopeWithStatus(java.lang.String);
-    method public boolean setCdmaSubscription(int);
     method public void setLine1NumberForDisplay(java.lang.String, java.lang.String);
     method public void setLine1NumberForDisplay(long, java.lang.String, java.lang.String);
     method public boolean setOperatorBrandOverride(java.lang.String, java.lang.String);
