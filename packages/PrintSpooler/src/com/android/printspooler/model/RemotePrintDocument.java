@@ -317,6 +317,11 @@ public final class RemotePrintDocument {
         return mState == STATE_FAILED;
     }
 
+    public boolean hasLaidOutPages() {
+        return mDocumentInfo.info != null
+                && mDocumentInfo.info.getPageCount() > 0;
+    }
+
     public void clearUpdateError() {
         if (!hasUpdateError()) {
             throw new IllegalStateException("No update error to clear");

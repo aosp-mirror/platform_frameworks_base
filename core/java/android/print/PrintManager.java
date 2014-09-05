@@ -535,7 +535,7 @@ public final class PrintManager {
                 destroyed = isDestroyedLocked();
             }
 
-            if (destroyed) {
+            if (destroyed && observer != null) {
                 try {
                     observer.onDestroy();
                 } catch (RemoteException re) {
