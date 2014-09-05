@@ -17,6 +17,7 @@
 package com.android.test.hwui;
 
 import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -34,6 +35,7 @@ public class RevealActivity extends Activity implements OnClickListener {
     private static final int DURATION = 800;
 
     private boolean mShouldBlock;
+    private int mIteration = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +59,17 @@ public class RevealActivity extends Activity implements OnClickListener {
         Animator animator = ViewAnimationUtils.createCircularReveal(view,
                 view.getWidth() / 2, view.getHeight() / 2,
                 0, Math.max(view.getWidth(), view.getHeight()));
-        animator.setDuration(DURATION);
-        animator.setAllowRunningAsynchronously(true);
-        animator.start();
+        if (mIteration < 2) {
+            animator.setDuration(DURATION);
+            animator.start();
+        } else {
+            AnimatorSet set = new AnimatorSet();
+            set.playTogether(animator);
+            set.setDuration(DURATION);
+            set.start();
+        }
 
+        mIteration = (mIteration + 1) % 4;
         mShouldBlock = !mShouldBlock;
         if (mShouldBlock) {
             view.post(sBlockThread);

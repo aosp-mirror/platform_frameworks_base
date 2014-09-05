@@ -159,6 +159,11 @@ static void setInterpolator(JNIEnv* env, jobject clazz, jlong animatorPtr, jlong
     animator->setInterpolator(interpolator);
 }
 
+static void setAllowRunningAsync(JNIEnv* env, jobject clazz, jlong animatorPtr, jboolean mayRunAsync) {
+    BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
+    animator->setAllowRunningAsync(mayRunAsync);
+}
+
 static void start(JNIEnv* env, jobject clazz, jlong animatorPtr, jobject finishListener) {
     BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
     if (finishListener) {
@@ -191,6 +196,7 @@ static JNINativeMethod gMethods[] = {
     { "nGetDuration", "(J)J", (void*) getDuration },
     { "nSetStartDelay", "(JJ)V", (void*) setStartDelay },
     { "nSetInterpolator", "(JJ)V", (void*) setInterpolator },
+    { "nSetAllowRunningAsync", "(JZ)V", (void*) setAllowRunningAsync },
     { "nStart", "(JLandroid/view/RenderNodeAnimator;)V", (void*) start },
     { "nEnd", "(J)V", (void*) end },
 #endif
