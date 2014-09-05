@@ -275,7 +275,7 @@ public class SubtitleController {
                      mSelectedTrack.getFormat().getInteger(
                             MediaFormat.KEY_IS_FORCED_SUBTITLE, 0) != 0)) {
                     show();
-                } else {
+                } else if (mSelectedTrack != null && !mSelectedTrack.isTimedText()) {
                     hide();
                 }
                 mVisibilityIsExplicit = false;

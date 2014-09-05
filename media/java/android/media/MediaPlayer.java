@@ -1929,6 +1929,7 @@ public class MediaPlayer implements SubtitleController.Listener
         mSubtitleController.setAnchor(anchor);
     }
 
+    private final Object mInbandSubtitleLock = new Object();
     private SubtitleTrack[] mInbandSubtitleTracks;
     private int mSelectedSubtitleTrackIndex = -1;
     private Vector<SubtitleTrack> mOutOfBandSubtitleTracks;
@@ -2036,19 +2037,21 @@ public class MediaPlayer implements SubtitleController.Listener
         }
 
         TrackInfo[] tracks = getInbandTrackInfo();
-        SubtitleTrack[] inbandTracks = new SubtitleTrack[tracks.length];
-        for (int i=0; i < tracks.length; i++) {
-            if (tracks[i].getTrackType() == TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE) {
-                if (i < mInbandSubtitleTracks.length) {
-                    inbandTracks[i] = mInbandSubtitleTracks[i];
-                } else {
-                    SubtitleTrack track = mSubtitleController.addTrack(
-                            tracks[i].getFormat());
-                    inbandTracks[i] = track;
+        synchronized (mInbandSubtitleLock) {
+            SubtitleTrack[] inbandTracks = new SubtitleTrack[tracks.length];
+            for (int i=0; i < tracks.length; i++) {
+                if (tracks[i].getTrackType() == TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE) {
+                    if (i < mInbandSubtitleTracks.length) {
+                        inbandTracks[i] = mInbandSubtitleTracks[i];
+                    } else {
+                        SubtitleTrack track = mSubtitleController.addTrack(
+                                tracks[i].getFormat());
+                        inbandTracks[i] = track;
+                    }
                 }
             }
+            mInbandSubtitleTracks = inbandTracks;
         }
-        mInbandSubtitleTracks = inbandTracks;
         mSubtitleController.selectDefaultTrack();
     }
 
@@ -2224,9 +2227,9 @@ public class MediaPlayer implements SubtitleController.Listener
                 try {
                     Libcore.os.lseek(fd3, offset2, OsConstants.SEEK_SET);
                     byte[] buffer = new byte[4096];
-                    for (int total = 0; total < length2;) {
-                        int remain = (int)length2 - total;
-                        int bytes = IoBridge.read(fd3, buffer, 0, Math.min(buffer.length, remain));
+                    for (long total = 0; total < length2;) {
+                        int bytesToRead = (int) Math.min(buffer.length, length2 - total);
+                        int bytes = IoBridge.read(fd3, buffer, 0, bytesToRead);
                         if (bytes < 0) {
                             break;
                         } else {
@@ -2358,6 +2361,18 @@ public class MediaPlayer implements SubtitleController.Listener
             throws IllegalStateException {
         // handle subtitle track through subtitle controller
         SubtitleTrack track = null;
+        synchronized (mInbandSubtitleLock) {
+            if (mInbandSubtitleTracks.length == 0) {
+                TrackInfo[] tracks = getInbandTrackInfo();
+                mInbandSubtitleTracks = new SubtitleTrack[tracks.length];
+                for (int i=0; i < tracks.length; i++) {
+                    if (tracks[i].getTrackType() == TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE) {
+                        mInbandSubtitleTracks[i] = mSubtitleController.addTrack(tracks[i].getFormat());
+                    }
+                }
+            }
+        }
+
         if (index < mInbandSubtitleTracks.length) {
             track = mInbandSubtitleTracks[index];
         } else if (index < mInbandSubtitleTracks.length + mOutOfBandSubtitleTracks.size()) {
@@ -3256,9 +3271,7 @@ public class MediaPlayer implements SubtitleController.Listener
                 if (DEBUG) Log.d(TAG, "scheduleUpdate");
                 int i = registerListener(listener);
 
-                if (mStopped) {
-                    scheduleNotification(NOTIFY_STOP, 0 /* delay */);
-                } else {
+                if (!mStopped) {
                     mTimes[i] = 0;
                     scheduleNotification(NOTIFY_TIME, 0 /* delay */);
                 }
