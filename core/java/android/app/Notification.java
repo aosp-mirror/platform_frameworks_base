@@ -38,7 +38,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.MathUtils;
@@ -2581,8 +2580,8 @@ public class Notification implements Parcelable
         private Drawable getProfileBadgeDrawable() {
             // Note: This assumes that the current user can read the profile badge of the
             // originating user.
-            UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            return userManager.getBadgeForUser(new UserHandle(mContext.getUserId()), 0);
+            return mContext.getPackageManager().getUserBadgeForDensity(
+                    new UserHandle(mContext.getUserId()), 0);
         }
 
         private Bitmap getProfileBadge() {

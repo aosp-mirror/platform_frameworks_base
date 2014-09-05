@@ -22,10 +22,7 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Bitmap.Config;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.util.Log;
@@ -838,46 +835,10 @@ public class UserManager {
      * @param user The target user.
      * @return A drawable that combines the original icon and a badge as
      *         determined by the system.
+     * @removed
      */
     public Drawable getBadgedIconForUser(Drawable icon, UserHandle user) {
-        final int badgeResId = getBadgeResIdForUser(user.getIdentifier());
-        if (badgeResId == 0) {
-            return icon;
-        }
-        Drawable badgeIcon = mContext.getPackageManager()
-                .getDrawable("system", badgeResId, null);
-        return getBadgedDrawable(icon, badgeIcon, null, true);
-    }
-
-    /**
-     * If the target user is a managed profile of the calling user or the caller
-     * is itself a managed profile, then this returns a badged copy of the given
-     * icon to be able to distinguish it from the original icon.
-     * <p>
-     * If the original drawable is not a BitmapDrawable, then the original
-     * drawable is returned.
-     * </p>
-     *
-     * @param icon The icon to badge.
-     * @param user The target user.
-     * @return A drawable that combines the original icon and a badge as
-     *         determined by the system.
-     *
-     * @deprecation Use {@link #getBadgedIconForUser(
-     *     android.graphics.drawable.Drawable, UserHandle)}
-     *
-     * @hide
-     */
-    @Deprecated
-    public Drawable getBadgedDrawableForUser(Drawable icon, UserHandle user) {
-        int badgeResId = getBadgeResIdForUser(user.getIdentifier());
-        if (badgeResId == 0) {
-            return icon;
-        } else {
-            Drawable badgeIcon = mContext.getPackageManager()
-                    .getDrawable("system", badgeResId, null);
-            return getBadgedDrawable(icon, badgeIcon, null, false);
-        }
+        return mContext.getPackageManager().getUserBadgedIcon(icon, user);
     }
 
     /**
@@ -903,14 +864,12 @@ public class UserManager {
      *         the density of the display is used.
      * @return A drawable that combines the original drawable and a badge as
      *         determined by the system.
+     * @removed
      */
     public Drawable getBadgedDrawableForUser(Drawable badgedDrawable, UserHandle user,
             Rect badgeLocation, int badgeDensity) {
-        Drawable badgeDrawable = getBadgeForUser(user, badgeDensity);
-        if (badgeDrawable == null) {
-            return badgedDrawable;
-        }
-        return getBadgedDrawable(badgedDrawable, badgeDrawable, badgeLocation, true);
+        return mContext.getPackageManager().getUserBadgedDrawableForDensity(badgedDrawable, user,
+                badgeLocation, badgeDensity);
     }
 
     /**
@@ -923,114 +882,10 @@ public class UserManager {
      * @param user The target user.
      * @return A label that combines the original label and a badge as
      *         determined by the system.
+     * @removed
      */
     public CharSequence getBadgedLabelForUser(CharSequence label, UserHandle user) {
-        UserInfo userInfo = getUserIfProfile(user.getIdentifier());
-        if (userInfo != null && userInfo.isManagedProfile()) {
-            return Resources.getSystem().getString(
-                    R.string.managed_profile_label_badge, label);
-        }
-        return label;
-    }
-
-    /**
-     * If the target user is a managed profile of the calling user or the caller
-     * is itself a managed profile, then this returns a drawable to use as a small
-     * icon to include in a view to distinguish it from the original icon.
-     *
-     * @param user The target user.
-     * @param density The optional desired density for the badge as per
-     *         {@link android.util.DisplayMetrics#densityDpi}. If not provided
-     *         the density of the current display is used.
-     * @return the drawable or null if no drawable is required.
-     * @hide
-     */
-    public Drawable getBadgeForUser(UserHandle user, int density) {
-        UserInfo userInfo = getUserIfProfile(user.getIdentifier());
-        if (userInfo != null && userInfo.isManagedProfile()) {
-            if (density <= 0) {
-                density = mContext.getResources().getDisplayMetrics().densityDpi;
-            }
-            return Resources.getSystem().getDrawableForDensity(
-                    com.android.internal.R.drawable.ic_corp_badge, density);
-        }
-        return null;
-    }
-
-    private int getBadgeResIdForUser(int userHandle) {
-        // Return the framework-provided badge.
-        UserInfo userInfo = getUserIfProfile(userHandle);
-        if (userInfo != null && userInfo.isManagedProfile()) {
-            return com.android.internal.R.drawable.ic_corp_icon_badge;
-        }
-        return 0;
-    }
-
-    /**
-     * @return UserInfo for userHandle if it exists and is a profile of the current
-     *         user or null.
-     */
-    private UserInfo getUserIfProfile(int userHandle) {
-        List<UserInfo> userProfiles = getProfiles(getUserHandle());
-        for (UserInfo user : userProfiles) {
-            if (user.id == userHandle) {
-                return user;
-            }
-        }
-        return null;
-    }
-
-    private Drawable getBadgedDrawable(Drawable badgedDrawable, Drawable badgeDrawable,
-            Rect badgeLocation, boolean tryBadgeInPlace) {
-        final int badgedWidth = badgedDrawable.getIntrinsicWidth();
-        final int badgedHeight = badgedDrawable.getIntrinsicHeight();
-        final boolean canBadgeInPlace = tryBadgeInPlace
-                && (badgedDrawable instanceof BitmapDrawable)
-                && ((BitmapDrawable) badgedDrawable).getBitmap().isMutable();
-
-        final Bitmap bitmap;
-        if (canBadgeInPlace) {
-            bitmap = ((BitmapDrawable) badgedDrawable).getBitmap();
-        } else {
-            bitmap = Bitmap.createBitmap(badgedWidth, badgedHeight, Config.ARGB_8888);
-        }
-        Canvas canvas = new Canvas(bitmap);
-
-        if (!canBadgeInPlace) {
-            badgedDrawable.setBounds(0, 0, badgedWidth, badgedHeight);
-            badgedDrawable.draw(canvas);
-        }
-
-        if (badgeLocation != null) {
-            if (badgeLocation.left < 0 || badgeLocation.top < 0
-                    || badgeLocation.width() > badgedWidth || badgeLocation.height() > badgedHeight) {
-                throw new IllegalArgumentException("Badge location " + badgeLocation
-                        + " not in badged drawable bounds "
-                        + new Rect(0, 0, badgedWidth, badgedHeight));
-            }
-            badgeDrawable.setBounds(0, 0, badgeLocation.width(), badgeLocation.height());
-
-            canvas.save();
-            canvas.translate(badgeLocation.left, badgeLocation.top);
-            badgeDrawable.draw(canvas);
-            canvas.restore();
-        } else {
-            badgeDrawable.setBounds(0, 0, badgedWidth, badgedHeight);
-            badgeDrawable.draw(canvas);
-        }
-
-        if (!canBadgeInPlace) {
-            BitmapDrawable mergedDrawable = new BitmapDrawable(mContext.getResources(), bitmap);
-
-            if (badgedDrawable instanceof BitmapDrawable) {
-                BitmapDrawable bitmapDrawable = (BitmapDrawable) badgedDrawable;
-                mergedDrawable.setTargetDensity(bitmapDrawable.getBitmap().getDensity());
-            }
-
-            return mergedDrawable;
-        }
-
-        return badgedDrawable;
+        return mContext.getPackageManager().getUserBadgedLabel(label, user);
     }
 
     /**

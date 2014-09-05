@@ -18,16 +18,10 @@ package android.content.pm;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Bitmap.Config;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.DisplayMetrics;
@@ -39,11 +33,9 @@ import android.util.Log;
  * and badged icon for the activity.
  */
 public class LauncherActivityInfo {
-    private static final boolean DEBUG = false;
     private static final String TAG = "LauncherActivityInfo";
 
     private final PackageManager mPm;
-    private final UserManager mUm;
 
     private ActivityInfo mActivityInfo;
     private ComponentName mComponentName;
@@ -68,7 +60,6 @@ public class LauncherActivityInfo {
 
     LauncherActivityInfo(Context context) {
         mPm = context.getPackageManager();
-        mUm = UserManager.get(context);
     }
 
     /**
@@ -179,7 +170,7 @@ public class LauncherActivityInfo {
         }
 
         if (originalIcon instanceof BitmapDrawable) {
-            return mUm.getBadgedIconForUser(originalIcon, mUser);
+            return mPm.getUserBadgedIcon(originalIcon, mUser);
         } else {
             Log.e(TAG, "Unable to create badged icon for " + mActivityInfo);
         }
