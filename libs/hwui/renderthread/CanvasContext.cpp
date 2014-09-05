@@ -150,7 +150,7 @@ void CanvasContext::prepareTree(TreeInfo& info) {
     if (mPrefetechedLayers.size() && info.mode == TreeInfo::MODE_FULL) {
         info.canvasContext = this;
     }
-    mAnimationContext->startFrame();
+    mAnimationContext->startFrame(info.mode);
     mRootRenderNode->prepareTree(info);
     mAnimationContext->runRemainingAnimations(info);
 
