@@ -136,7 +136,7 @@ public final class MediaBrowser {
 
         mState = CONNECT_STATE_CONNECTING;
 
-        final Intent intent = new Intent(MediaBrowserService.SERVICE_ACTION);
+        final Intent intent = new Intent(MediaBrowserService.SERVICE_INTERFACE);
         intent.setComponent(mServiceComponent);
 
         final ServiceConnection thisConnection = mServiceConnection = new MediaServiceConnection();
