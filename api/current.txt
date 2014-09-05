@@ -21577,6 +21577,8 @@ package android.os {
     method public short getShort(java.lang.String);
     method public short getShort(java.lang.String, short);
     method public short[] getShortArray(java.lang.String);
+    method public android.util.Size getSize(java.lang.String);
+    method public android.util.SizeF getSizeF(java.lang.String);
     method public android.util.SparseArray<T> getSparseParcelableArray(java.lang.String);
     method public java.util.ArrayList<java.lang.String> getStringArrayList(java.lang.String);
     method public boolean hasFileDescriptors();
@@ -21601,6 +21603,8 @@ package android.os {
     method public void putSerializable(java.lang.String, java.io.Serializable);
     method public void putShort(java.lang.String, short);
     method public void putShortArray(java.lang.String, short[]);
+    method public void putSize(java.lang.String, android.util.Size);
+    method public void putSizeF(java.lang.String, android.util.SizeF);
     method public void putSparseParcelableArray(java.lang.String, android.util.SparseArray<? extends android.os.Parcelable>);
     method public void putStringArrayList(java.lang.String, java.util.ArrayList<java.lang.String>);
     method public void readFromParcel(android.os.Parcel);
@@ -22052,6 +22056,8 @@ package android.os {
     method public final android.os.PersistableBundle readPersistableBundle();
     method public final android.os.PersistableBundle readPersistableBundle(java.lang.ClassLoader);
     method public final java.io.Serializable readSerializable();
+    method public final android.util.Size readSize();
+    method public final android.util.SizeF readSizeF();
     method public final android.util.SparseArray readSparseArray(java.lang.ClassLoader);
     method public final android.util.SparseBooleanArray readSparseBooleanArray();
     method public final java.lang.String readString();
@@ -22093,6 +22099,8 @@ package android.os {
     method public final void writeParcelableArray(T[], int);
     method public final void writePersistableBundle(android.os.PersistableBundle);
     method public final void writeSerializable(java.io.Serializable);
+    method public final void writeSize(android.util.Size);
+    method public final void writeSizeF(android.util.SizeF);
     method public final void writeSparseArray(android.util.SparseArray<java.lang.Object>);
     method public final void writeSparseBooleanArray(android.util.SparseBooleanArray);
     method public final void writeString(java.lang.String);
@@ -32132,23 +32140,17 @@ package android.util {
     field public static final android.util.Rational ZERO;
   }
 
-  public final class Size implements android.os.Parcelable {
+  public final class Size {
     ctor public Size(int, int);
-    method public int describeContents();
     method public int getHeight();
     method public int getWidth();
     method public static android.util.Size parseSize(java.lang.String) throws java.lang.NumberFormatException;
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public final class SizeF implements android.os.Parcelable {
+  public final class SizeF {
     ctor public SizeF(float, float);
-    method public int describeContents();
     method public float getHeight();
     method public float getWidth();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public class SparseArray implements java.lang.Cloneable {

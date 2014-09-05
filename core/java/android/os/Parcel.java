@@ -19,6 +19,8 @@ package android.os;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Size;
+import android.util.SizeF;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
@@ -224,6 +226,8 @@ public final class Parcel {
     private static final int VAL_BOOLEANARRAY = 23;
     private static final int VAL_CHARSEQUENCEARRAY = 24;
     private static final int VAL_PERSISTABLEBUNDLE = 25;
+    private static final int VAL_SIZE = 26;
+    private static final int VAL_SIZEF = 27;
 
     // The initial int32 in a Binder call's reply Parcel header:
     private static final int EX_SECURITY = -1;
@@ -669,6 +673,24 @@ public final class Parcel {
         }
 
         val.writeToParcel(this, 0);
+    }
+
+    /**
+     * Flatten a Size into the parcel at the current dataPosition(),
+     * growing dataCapacity() if needed.
+     */
+    public final void writeSize(Size val) {
+        writeInt(val.getWidth());
+        writeInt(val.getHeight());
+    }
+
+    /**
+     * Flatten a SizeF into the parcel at the current dataPosition(),
+     * growing dataCapacity() if needed.
+     */
+    public final void writeSizeF(SizeF val) {
+        writeFloat(val.getWidth());
+        writeFloat(val.getHeight());
     }
 
     /**
@@ -1293,6 +1315,12 @@ public final class Parcel {
         } else if (v instanceof PersistableBundle) {
             writeInt(VAL_PERSISTABLEBUNDLE);
             writePersistableBundle((PersistableBundle) v);
+        } else if (v instanceof Size) {
+            writeInt(VAL_SIZE);
+            writeSize((Size) v);
+        } else if (v instanceof SizeF) {
+            writeInt(VAL_SIZEF);
+            writeSizeF((SizeF) v);
         } else {
             Class<?> clazz = v.getClass();
             if (clazz.isArray() && clazz.getComponentType() == Object.class) {
@@ -1696,6 +1724,24 @@ public final class Parcel {
             bundle.setClassLoader(loader);
         }
         return bundle;
+    }
+
+    /**
+     * Read a Size from the parcel at the current dataPosition().
+     */
+    public final Size readSize() {
+        final int width = readInt();
+        final int height = readInt();
+        return new Size(width, height);
+    }
+
+    /**
+     * Read a SizeF from the parcel at the current dataPosition().
+     */
+    public final SizeF readSizeF() {
+        final float width = readFloat();
+        final float height = readFloat();
+        return new SizeF(width, height);
     }
 
     /**
@@ -2159,6 +2205,12 @@ public final class Parcel {
 
         case VAL_PERSISTABLEBUNDLE:
             return readPersistableBundle(loader);
+
+        case VAL_SIZE:
+            return readSize();
+
+        case VAL_SIZEF:
+            return readSizeF();
 
         default:
             int off = dataPosition() - 4;
