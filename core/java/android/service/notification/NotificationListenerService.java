@@ -603,8 +603,15 @@ public abstract class NotificationListenerService extends Service {
 
     private class INotificationListenerWrapper extends INotificationListener.Stub {
         @Override
-        public void onNotificationPosted(StatusBarNotification sbn,
+        public void onNotificationPosted(IStatusBarNotificationHolder sbnHolder,
                 NotificationRankingUpdate update) {
+            StatusBarNotification sbn;
+            try {
+                sbn = sbnHolder.get();
+            } catch (RemoteException e) {
+                Log.w(TAG, "onNotificationPosted: Error receiving StatusBarNotification", e);
+                return;
+            }
             Notification.Builder.rebuild(getContext(), sbn.getNotification());
 
             // protect subclass from concurrent modifications of (@link mNotificationKeys}.
@@ -618,8 +625,15 @@ public abstract class NotificationListenerService extends Service {
             }
         }
         @Override
-        public void onNotificationRemoved(StatusBarNotification sbn,
+        public void onNotificationRemoved(IStatusBarNotificationHolder sbnHolder,
                 NotificationRankingUpdate update) {
+            StatusBarNotification sbn;
+            try {
+                sbn = sbnHolder.get();
+            } catch (RemoteException e) {
+                Log.w(TAG, "onNotificationRemoved: Error receiving StatusBarNotification", e);
+                return;
+            }
             // protect subclass from concurrent modifications of (@link mNotificationKeys}.
             synchronized (mWrapper) {
                 applyUpdate(update);
