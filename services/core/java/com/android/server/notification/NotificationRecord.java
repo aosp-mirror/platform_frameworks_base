@@ -21,6 +21,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.media.AudioAttributes;
+import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -88,8 +89,10 @@ public final class NotificationRecord {
 
     public Notification getNotification() { return sbn.getNotification(); }
     public int getFlags() { return sbn.getNotification().flags; }
-    public int getUserId() { return sbn.getUserId(); }
+    public UserHandle getUser() { return sbn.getUser(); }
     public String getKey() { return sbn.getKey(); }
+    /** @deprecated Use {@link #getUser()} instead. */
+    public int getUserId() { return sbn.getUserId(); }
 
     void dump(PrintWriter pw, String prefix, Context baseContext) {
         final Notification notification = sbn.getNotification();
