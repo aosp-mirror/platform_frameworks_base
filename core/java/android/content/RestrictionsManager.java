@@ -155,7 +155,7 @@ public class RestrictionsManager {
      * The intent must contain {@link #EXTRA_REQUEST_BUNDLE} as an extra and the bundle must
      * contain at least {@link #REQUEST_KEY_MESSAGE} for the activity to display.
      * <p>
-     * @see #getLocalApprovalIntent()
+     * @see #createLocalApprovalIntent()
      */
     public static final String ACTION_REQUEST_LOCAL_APPROVAL =
             "android.content.action.REQUEST_LOCAL_APPROVAL";
@@ -473,10 +473,10 @@ public class RestrictionsManager {
         }
     }
 
-    public Intent getLocalApprovalIntent() {
+    public Intent createLocalApprovalIntent() {
         try {
             if (mService != null) {
-                return mService.getLocalApprovalIntent();
+                return mService.createLocalApprovalIntent();
             }
         } catch (RemoteException re) {
             Log.w(TAG, "Couldn't reach service");

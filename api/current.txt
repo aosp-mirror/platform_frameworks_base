@@ -8168,8 +8168,8 @@ package android.content {
   }
 
   public class RestrictionsManager {
+    method public android.content.Intent createLocalApprovalIntent();
     method public android.os.Bundle getApplicationRestrictions();
-    method public android.content.Intent getLocalApprovalIntent();
     method public java.util.List<android.content.RestrictionEntry> getManifestRestrictions(java.lang.String);
     method public boolean hasRestrictionsProvider();
     method public void notifyPermissionResponse(java.lang.String, android.os.PersistableBundle);
