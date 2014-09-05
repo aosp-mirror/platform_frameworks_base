@@ -6600,12 +6600,12 @@
             <flag name="vertical" value="0x2" />
         </attr>
         <!-- Optional parameter which indicates where this widget can be shown,
-             ie. home screen, keyguard, recents or any combination thereof.
+             ie. home screen, keyguard, search bar or any combination thereof.
              Supports combined values using | operator. -->
         <attr name="widgetCategory" format="integer">
             <flag name="home_screen" value="0x1" />
             <flag name="keyguard" value="0x2" />
-            <flag name="recents" value="0x4" />
+            <flag name="searchbox" value="0x4" />
         </attr>
     </declare-styleable>
 

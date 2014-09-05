@@ -296,7 +296,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                         mSearchAppWidgetInfo);
                 Bundle opts = new Bundle();
                 opts.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-                        AppWidgetProviderInfo.WIDGET_CATEGORY_RECENTS);
+                        AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
                 mSearchAppWidgetHostView.updateAppWidgetOptions(opts);
                 // Set the padding to 0 for this search widget
                 mSearchAppWidgetHostView.setPadding(0, 0, 0, 0);
