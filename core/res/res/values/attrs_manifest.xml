@@ -939,7 +939,7 @@
          {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK
          Intent.FLAG_ACTIVITY_MULTIPLE_TASK}. If the value of
          documentLaunchModes is <code>never</code> then any use of
-.........{@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT
+         {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT
          Intent.FLAG_ACTIVITY_NEW_DOCUMENT} to launch this activity will be ignored. -->
     <attr name="documentLaunchMode">
         <!-- The default mode, which will create a new task only when
@@ -993,6 +993,15 @@
          is the default. This attribute set to true also permits activity's use of the
          TaskDescription to change labels, colors and icons in the recent task list. -->
     <attr name="relinquishTaskIdentity" format="boolean" />
+
+    <!-- Indicate that it is okay for this activity be resumed while the previous
+         activity is in the process of pausing, without waiting for the previous pause
+         to complete.  Use this with caution: your activity can not acquire any exclusive
+         resources (such as opening the camera or recording audio) when it launches, or it
+         may conflict with the previous activity and fail.
+
+         <p>The default value of this attribute is <code>false</code>. -->
+    <attr name="resumeWhilePausing" format="boolean" />
 
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
@@ -1678,6 +1687,7 @@
         <attr name="maxRecents" />
         <attr name="autoRemoveFromRecents" />
         <attr name="relinquishTaskIdentity" />
+        <attr name="resumeWhilePausing" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new
