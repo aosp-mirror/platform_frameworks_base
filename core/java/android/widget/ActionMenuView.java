@@ -29,6 +29,7 @@ import android.view.accessibility.AccessibilityEvent;
 import com.android.internal.view.menu.ActionMenuItemView;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuItemImpl;
+import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.MenuView;
 
 /**
@@ -53,6 +54,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
     private boolean mReserveOverflow;
     private ActionMenuPresenter mPresenter;
+    private MenuPresenter.Callback mActionMenuPresenterCallback;
     private boolean mFormatItems;
     private int mFormatItemsWidth;
     private int mMinCellSize;
@@ -608,12 +610,21 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             mMenu = new MenuBuilder(context);
             mMenu.setCallback(new MenuBuilderCallback());
             mPresenter = new ActionMenuPresenter(context);
-            mPresenter.setCallback(new ActionMenuPresenterCallback());
+            mPresenter.setCallback(mActionMenuPresenterCallback != null
+                    ? mActionMenuPresenterCallback : new ActionMenuPresenterCallback());
             mMenu.addMenuPresenter(mPresenter, mPopupContext);
             mPresenter.setMenuView(this);
         }
 
         return mMenu;
+    }
+
+    /**
+     * Must be called before the first call to getMenu()
+     * @hide
+     */
+    public void setActionMenuPresenterCallback(MenuPresenter.Callback cb) {
+        mActionMenuPresenterCallback = cb;
     }
 
     /**
