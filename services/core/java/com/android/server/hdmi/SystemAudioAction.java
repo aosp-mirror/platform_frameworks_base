@@ -98,7 +98,7 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
             @Override
             public void onSendCompleted(int error) {
                 if (error != Constants.SEND_RESULT_SUCCESS) {
-                    DLOGGER.debug("Failed to send <System Audio Mode Request>:" + error);
+                    HdmiLogger.debug("Failed to send <System Audio Mode Request>:" + error);
                     setSystemAudioMode(false);
                     finishWithCallback(HdmiControlManager.RESULT_COMMUNICATION_FAILED);
                 }
@@ -111,7 +111,7 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
     private void handleSendSystemAudioModeRequestTimeout() {
         if (!mTargetAudioStatus  // Don't retry for Off case.
                 || mSendRetryCount++ >= MAX_SEND_RETRY_COUNT) {
-            DLOGGER.debug("[T]:wait for <Set System Audio Mode>.");
+            HdmiLogger.debug("[T]:wait for <Set System Audio Mode>.");
             setSystemAudioMode(false);
             finishWithCallback(HdmiControlManager.RESULT_TIMEOUT);
             return;
@@ -130,7 +130,7 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
                 if (cmd.getOpcode() == Constants.MESSAGE_FEATURE_ABORT
                         && (cmd.getParams()[0] & 0xFF)
                                 == Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST) {
-                    DLOGGER.debug("Failed to start system audio mode request.");
+                    HdmiLogger.debug("Failed to start system audio mode request.");
                     setSystemAudioMode(false);
                     finishWithCallback(HdmiControlManager.RESULT_EXCEPTION);
                     return true;
@@ -145,7 +145,7 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
                     startAudioStatusAction();
                     return true;
                 } else {
-                    DLOGGER.debug("Unexpected system audio mode request:" + receivedStatus);
+                    HdmiLogger.debug("Unexpected system audio mode request:" + receivedStatus);
                     // Unexpected response, consider the request is newly initiated by AVR.
                     // To return 'false' will initiate new SystemAudioActionFromAvr by the control
                     // service.

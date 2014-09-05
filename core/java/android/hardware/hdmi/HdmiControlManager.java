@@ -55,10 +55,29 @@ public final class HdmiControlManager {
     public static final int OSD_MESSAGE_ARC_CONNECTED_INVALID_PORT = 1;
 
     /**
+     * Message used by TV to receive volume status from Audio Receiver. It should check volume value
+     * that is retrieved from extra value with the key {@link #EXTRA_MESSAGE_EXTRAM_PARAM1}. If the
+     * value is in range of [0,100], it is current volume of Audio Receiver. And there is another
+     * value, {@link #AVR_VOLUME_MUTED}, which is used to inform volume mute.
+     */
+    public static final int OSD_MESSAGE_AVR_VOLUME_CHANGED = 2;
+
+    /**
      * Used as an extra field in the intent {@link #ACTION_OSD_MESSAGE}. Contains the ID of
      * the message to display on screen.
      */
     public static final String EXTRA_MESSAGE_ID = "android.hardware.hdmi.extra.MESSAGE_ID";
+    /**
+     * Used as an extra field in the intent {@link #ACTION_OSD_MESSAGE}. Contains the extra value
+     * of the message.
+     */
+    public static final String EXTRA_MESSAGE_EXTRAM_PARAM1 =
+            "android.hardware.hdmi.extra.MESSAGE_EXTRA_PARAM1";
+
+    /**
+     * Volume value for mute state.
+     */
+    public static final int AVR_VOLUME_MUTED = 101;
 
     public static final int POWER_STATUS_UNKNOWN = -1;
     public static final int POWER_STATUS_ON = 0;
