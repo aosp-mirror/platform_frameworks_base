@@ -5686,12 +5686,12 @@
         <attr name="maximumAngle" format="float" />
     </declare-styleable>
 
-    <!-- Use <code>patternMotion</code> as the root tag of the XML resource that
-         describes a {@link android.transition.PatternMotion}. This must be used
+    <!-- Use <code>patternPathMotion</code> as the root tag of the XML resource that
+         describes a {@link android.transition.PatternPathMotion}. This must be used
          within a transition with which the PathMotion should be associated. -->
-    <declare-styleable name="PatternMotion">
-        <!-- The path string describing the pattern to use for the PathMotion. -->
-        <attr name="pathData" />
+    <declare-styleable name="PatternPathMotion">
+        <!-- The path string describing the pattern to use for the PathPathMotion. -->
+        <attr name="patternPathData" format="string" />
     </declare-styleable>
 
     <!-- ========================== -->
