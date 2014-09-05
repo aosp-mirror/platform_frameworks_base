@@ -4706,6 +4706,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // code will fire.
         for (int i = 0; i < nai.networkRequests.size(); i++) {
             NetworkRequest nr = nai.networkRequests.valueAt(i);
+            // Don't send listening requests to factories. b/17393458
+            if (mNetworkRequests.get(nr).isRequest == false) continue;
             sendUpdatedScoreToFactories(nr, score);
         }
     }
