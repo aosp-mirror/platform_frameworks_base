@@ -18,6 +18,7 @@ package android.hardware.camera2.legacy;
 import android.graphics.ImageFormat;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
+import android.hardware.camera2.CameraCharacteristics;
 import android.os.Environment;
 import android.opengl.EGL14;
 import android.opengl.EGLConfig;
@@ -80,7 +81,18 @@ public class SurfaceTextureRenderer {
     private static final int TRIANGLE_VERTICES_DATA_STRIDE_BYTES = 5 * FLOAT_SIZE_BYTES;
     private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
     private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
-    private final float[] mTriangleVerticesData = {
+
+    // Sampling is mirrored across the vertical axis to undo horizontal flip from the front camera
+    private static final float[] sFrontCameraTriangleVertices = {
+            // X, Y, Z, U, V
+            -1.0f, -1.0f, 0, 1.f, 0.f,
+            1.0f, -1.0f, 0, 0.f, 0.f,
+            -1.0f,  1.0f, 0, 1.f, 1.f,
+            1.0f,  1.0f, 0, 0.f, 1.f,
+    };
+
+    // Sampling is 1:1 for a straight copy for the back camera
+    private static final float[] sBackCameraTriangleVertices = {
             // X, Y, Z, U, V
             -1.0f, -1.0f, 0, 0.f, 0.f,
             1.0f, -1.0f, 0, 1.f, 0.f,
@@ -135,10 +147,16 @@ public class SurfaceTextureRenderer {
     private PerfMeasurement mPerfMeasurer = null;
     private static final String LEGACY_PERF_PROPERTY = "persist.camera.legacy_perf";
 
-    public SurfaceTextureRenderer() {
-        mTriangleVertices = ByteBuffer.allocateDirect(mTriangleVerticesData.length *
-                FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        mTriangleVertices.put(mTriangleVerticesData).position(0);
+    public SurfaceTextureRenderer(int facing) {
+        if (facing == CameraCharacteristics.LENS_FACING_BACK) {
+            mTriangleVertices = ByteBuffer.allocateDirect(sBackCameraTriangleVertices.length *
+                    FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
+            mTriangleVertices.put(sBackCameraTriangleVertices).position(0);
+        } else {
+            mTriangleVertices = ByteBuffer.allocateDirect(sFrontCameraTriangleVertices.length *
+                    FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
+            mTriangleVertices.put(sFrontCameraTriangleVertices).position(0);
+        }
         Matrix.setIdentityM(mSTMatrix, 0);
     }
 

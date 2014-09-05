@@ -399,7 +399,7 @@ public class RequestThreadManager {
 
         // TODO: Detect and optimize single-output paths here to skip stream teeing.
         if (mGLThreadManager == null) {
-            mGLThreadManager = new GLThreadManager(mCameraId);
+            mGLThreadManager = new GLThreadManager(mCameraId, facing);
             mGLThreadManager.start();
         }
         mGLThreadManager.waitUntilStarted();
