@@ -159,6 +159,8 @@ final class Constants {
     static final int TRUE = 1;
     static final int FALSE = 0;
 
+    // Internal abort error code. It's the same as success.
+    static final int ABORT_NO_ERROR = -1;
     // Constants related to operands of HDMI CEC commands.
     // Refer to CEC Table 29 in HDMI Spec v1.4b.
     // [Abort Reason]
