@@ -470,19 +470,6 @@ public abstract class Drawable {
     }
 
     /**
-     * Specifies a tint and blending mode for this drawable.
-     * <p>
-     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
-     * tint.
-     *
-     * @param tint Color state list to use for tinting this drawable, or null to
-     *            clear the tint
-     * @param tintMode A Porter-Duff blending mode
-     * @hide TODO: Was in L-preview, remove this API for release
-     */
-    public void setTint(ColorStateList tint, PorterDuff.Mode tintMode) {}
-
-    /**
      * Specifies a tint for this drawable.
      * <p>
      * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
