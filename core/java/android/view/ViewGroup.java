@@ -3301,6 +3301,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @return True if the group's children will be clipped to their bounds,
      * false otherwise.
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public boolean getClipChildren() {
         return ((mGroupFlags & FLAG_CLIP_CHILDREN) != 0);
     }
@@ -3349,6 +3350,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @attr ref android.R.styleable#ViewGroup_clipToPadding
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public boolean getClipToPadding() {
         return hasBooleanFlag(FLAG_CLIP_TO_PADDING);
     }
