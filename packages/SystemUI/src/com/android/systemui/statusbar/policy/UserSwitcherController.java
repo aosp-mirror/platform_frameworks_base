@@ -334,6 +334,14 @@ public class UserSwitcherController {
         }
     }
 
+    public String getCurrentUserName(Context context) {
+        if (mUsers.isEmpty()) return null;
+        UserRecord item = mUsers.get(0);
+        if (item == null || item.info == null) return null;
+        if (item.isGuest) return context.getString(R.string.guest_nickname);
+        return item.info.name;
+    }
+
     public static abstract class BaseUserAdapter extends BaseAdapter {
 
         final UserSwitcherController mController;
