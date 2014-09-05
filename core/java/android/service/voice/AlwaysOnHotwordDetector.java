@@ -450,7 +450,7 @@ public class AlwaysOnHotwordDetector {
      * This intent must be invoked using {@link Activity#startActivityForResult(Intent, int)}.
      * Starting re-enrollment is only valid if the keyphrase is un-enrolled,
      * i.e. {@link #STATE_KEYPHRASE_UNENROLLED},
-     * otherwise {@link #createIntentToReEnroll()} should be preferred.
+     * otherwise {@link #createReEnrollIntent()} should be preferred.
      *
      * @return An {@link Intent} to start enrollment for the given keyphrase.
      * @throws UnsupportedOperationException if managing they keyphrase isn't supported.
@@ -460,6 +460,19 @@ public class AlwaysOnHotwordDetector {
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    public Intent createEnrollIntent() {
+        if (DBG) Slog.d(TAG, "createEnrollIntent");
+        synchronized (mLock) {
+            return getManageIntentLocked(MANAGE_ACTION_ENROLL);
+        }
+    }
+
+    /**
+     * FIXME: Remove once the prebuilts are updated.
+     *
+     * @hide
+     */
+    @Deprecated
     public Intent createIntentToEnroll() {
         if (DBG) Slog.d(TAG, "createIntentToEnroll");
         synchronized (mLock) {
@@ -481,6 +494,19 @@ public class AlwaysOnHotwordDetector {
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    public Intent createUnEnrollIntent() {
+        if (DBG) Slog.d(TAG, "createUnEnrollIntent");
+        synchronized (mLock) {
+            return getManageIntentLocked(MANAGE_ACTION_UN_ENROLL);
+        }
+    }
+
+    /**
+     * FIXME: Remove once the prebuilts are updated.
+     *
+     * @hide
+     */
+    @Deprecated
     public Intent createIntentToUnEnroll() {
         if (DBG) Slog.d(TAG, "createIntentToUnEnroll");
         synchronized (mLock) {
@@ -502,6 +528,19 @@ public class AlwaysOnHotwordDetector {
      *         This may happen if another detector has been instantiated or the
      *         {@link VoiceInteractionService} hosting this detector has been shut down.
      */
+    public Intent createReEnrollIntent() {
+        if (DBG) Slog.d(TAG, "createReEnrollIntent");
+        synchronized (mLock) {
+            return getManageIntentLocked(MANAGE_ACTION_RE_ENROLL);
+        }
+    }
+
+    /**
+     * FIXME: Remove once the prebuilts are updated.
+     *
+     * @hide
+     */
+    @Deprecated
     public Intent createIntentToReEnroll() {
         if (DBG) Slog.d(TAG, "createIntentToReEnroll");
         synchronized (mLock) {
