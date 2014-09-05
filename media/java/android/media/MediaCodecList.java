@@ -116,6 +116,11 @@ final public class MediaCodecList {
 
     /* package private */ static native final int findCodecByName(String codec);
 
+    /** @hide */
+    public static MediaCodecInfo getInfoFor(String codec) {
+        return sAllCodecInfos[findCodecByName(codec)];
+    }
+
     private static native final void native_init();
 
     /**
