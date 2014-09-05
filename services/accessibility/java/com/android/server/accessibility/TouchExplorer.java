@@ -708,7 +708,6 @@ class TouchExplorer implements EventStreamTransformation {
                      // Send an event to the end of the drag gesture.
                      sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
                  }
-                 mCurrentState = STATE_TOUCH_EXPLORING;
             } break;
             case MotionEvent.ACTION_UP: {
                 mAms.onTouchInteractionEnd();
