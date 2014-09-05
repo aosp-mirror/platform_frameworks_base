@@ -188,7 +188,7 @@ public class AppWidgetManager {
      * this widget. Can have the value {@link
      * AppWidgetProviderInfo#WIDGET_CATEGORY_HOME_SCREEN} or {@link
      * AppWidgetProviderInfo#WIDGET_CATEGORY_KEYGUARD} or {@link
-     * AppWidgetProviderInfo#WIDGET_CATEGORY_RECENTS}.
+     * AppWidgetProviderInfo#WIDGET_CATEGORY_SEARCHBOX}.
      */
     public static final String OPTION_APPWIDGET_HOST_CATEGORY = "appWidgetCategory";
 
