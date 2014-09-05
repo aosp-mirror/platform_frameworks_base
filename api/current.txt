@@ -27422,9 +27422,9 @@ package android.service.textservice {
 package android.service.voice {
 
   public class AlwaysOnHotwordDetector {
-    method public android.content.Intent createIntentToEnroll();
-    method public android.content.Intent createIntentToReEnroll();
-    method public android.content.Intent createIntentToUnEnroll();
+    method public android.content.Intent createEnrollIntent();
+    method public android.content.Intent createReEnrollIntent();
+    method public android.content.Intent createUnEnrollIntent();
     method public int getSupportedRecognitionModes();
     method public boolean startRecognition(int);
     method public boolean stopRecognition();
