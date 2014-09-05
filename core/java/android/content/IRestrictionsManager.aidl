@@ -30,5 +30,5 @@ interface IRestrictionsManager {
     void requestPermission(in String packageName, in String requestType, in String requestId,
             in PersistableBundle requestData);
     void notifyPermissionResponse(in String packageName, in PersistableBundle response);
-    Intent getLocalApprovalIntent();
+    Intent createLocalApprovalIntent();
 }
