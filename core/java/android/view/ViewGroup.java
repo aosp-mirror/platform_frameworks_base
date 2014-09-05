@@ -5722,6 +5722,28 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
+    public void drawableHotspotChanged(float x, float y) {
+        super.drawableHotspotChanged(x, y);
+
+        if ((mGroupFlags & FLAG_NOTIFY_CHILDREN_ON_DRAWABLE_STATE_CHANGE) != 0) {
+            if ((mGroupFlags & FLAG_ADD_STATES_FROM_CHILDREN) != 0) {
+                throw new IllegalStateException("addStateFromChildren cannot be enabled if a"
+                        + " child has duplicateParentState set to true");
+            }
+
+            final View[] children = mChildren;
+            final int count = mChildrenCount;
+
+            for (int i = 0; i < count; i++) {
+                final View child = children[i];
+                if ((child.mViewFlags & DUPLICATE_PARENT_STATE) != 0) {
+                    child.drawableHotspotChanged(x, y);
+                }
+            }
+        }
+    }
+
+    @Override
     protected int[] onCreateDrawableState(int extraSpace) {
         if ((mGroupFlags & FLAG_ADD_STATES_FROM_CHILDREN) == 0) {
             return super.onCreateDrawableState(extraSpace);
