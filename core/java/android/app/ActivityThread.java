@@ -4283,6 +4283,8 @@ public final class ActivityThread {
             AsyncTask.setDefaultExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
 
+        Message.updateCheckRecycle(data.appInfo.targetSdkVersion);
+
         /*
          * Before spawning a new process, reset the time zone to be the system time zone.
          * This needs to be done because the system time zone could have changed after the
