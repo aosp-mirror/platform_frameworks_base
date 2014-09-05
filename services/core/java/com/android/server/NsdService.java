@@ -397,8 +397,7 @@ public class NsdService extends INsdManager.Stub {
                         break;
                     case NsdManager.NATIVE_DAEMON_EVENT:
                         NativeEvent event = (NativeEvent) msg.obj;
-                        if (!handleNativeEvent(event.code, event.raw,
-                                NativeDaemonEvent.unescapeArgs(event.raw))) {
+                        if (!handleNativeEvent(event.code, event.raw, event.cooked)) {
                             result = NOT_HANDLED;
                         }
                         break;
@@ -474,14 +473,22 @@ public class NsdService extends INsdManager.Stub {
                     case NativeResponseCode.SERVICE_RESOLVED:
                         /* NNN resolveId fullName hostName port txtlen txtdata */
                         if (DBG) Slog.d(TAG, "SERVICE_RESOLVED Raw: " + raw);
-                        int index = cooked[2].indexOf(".");
-                        if (index == -1) {
+                        int index = 0;
+                        while (index < cooked[2].length() && cooked[2].charAt(index) != '.') {
+                            if (cooked[2].charAt(index) == '\\') {
+                                ++index;
+                            }
+                            ++index;
+                        }
+                        if (index >= cooked[2].length()) {
                             Slog.e(TAG, "Invalid service found " + raw);
                             break;
                         }
                         String name = cooked[2].substring(0, index);
                         String rest = cooked[2].substring(index);
                         String type = rest.replace(".local.", "");
+
+                        name = unescape(name);
 
                         clientInfo.mResolvedService.setServiceName(name);
                         clientInfo.mResolvedService.setServiceType(type);
@@ -539,6 +546,30 @@ public class NsdService extends INsdManager.Stub {
                 return handled;
             }
        }
+    }
+
+    private String unescape(String s) {
+        StringBuilder sb = new StringBuilder(s.length());
+        for (int i = 0; i < s.length(); ++i) {
+            char c = s.charAt(i);
+            if (c == '\\') {
+                if (++i >= s.length()) {
+                    Slog.e(TAG, "Unexpected end of escape sequence in: " + s);
+                    break;
+                }
+                c = s.charAt(i);
+                if (c != '.' && c != '\\') {
+                    if (i + 2 >= s.length()) {
+                        Slog.e(TAG, "Unexpected end of escape sequence in: " + s);
+                        break;
+                    }
+                    c = (char) ((c-'0') * 100 + (s.charAt(i+1)-'0') * 10 + (s.charAt(i+2)-'0'));
+                    i += 2;
+                }
+            }
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
     private NativeDaemonConnector mNativeConnector;
@@ -625,10 +656,12 @@ public class NsdService extends INsdManager.Stub {
     private class NativeEvent {
         final int code;
         final String raw;
+        final String[] cooked;
 
-        NativeEvent(int code, String raw) {
+        NativeEvent(int code, String raw, String[] cooked) {
             this.code = code;
             this.raw = raw;
+            this.cooked = cooked;
         }
     }
 
@@ -644,7 +677,7 @@ public class NsdService extends INsdManager.Stub {
         public boolean onEvent(int code, String raw, String[] cooked) {
             // TODO: NDC translates a message to a callback, we could enhance NDC to
             // directly interact with a state machine through messages
-            NativeEvent event = new NativeEvent(code, raw);
+            NativeEvent event = new NativeEvent(code, raw, cooked);
             mNsdStateMachine.sendMessage(NsdManager.NATIVE_DAEMON_EVENT, event);
             return true;
         }
