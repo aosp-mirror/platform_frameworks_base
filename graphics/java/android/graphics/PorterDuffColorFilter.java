@@ -60,6 +60,8 @@ public class PorterDuffColorFilter extends ColorFilter {
      * @see Color
      * @see #getColor()
      * @see #getMode()
+     *
+     * @hide
      */
     public void setColor(int color) {
         mColor = color;
@@ -84,6 +86,8 @@ public class PorterDuffColorFilter extends ColorFilter {
      * @see PorterDuff
      * @see #getMode()
      * @see #getColor()
+     *
+     * @hide
      */
     public void setMode(PorterDuff.Mode mode) {
         mMode = mode;
