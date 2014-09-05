@@ -329,24 +329,24 @@ public final class MediaController {
     }
 
     /**
-     * Adds a callback to receive updates from the Session. Updates will be
+     * Registers a callback to receive updates from the Session. Updates will be
      * posted on the caller's thread.
      *
      * @param callback The callback object, must not be null.
      */
-    public void addCallback(@NonNull Callback callback) {
-        addCallback(callback, null);
+    public void registerCallback(@NonNull Callback callback) {
+        registerCallback(callback, null);
     }
 
     /**
-     * Adds a callback to receive updates from the session. Updates will be
+     * Registers a callback to receive updates from the session. Updates will be
      * posted on the specified handler's thread.
      *
      * @param callback The callback object, must not be null.
      * @param handler The handler to post updates on. If null the callers thread
      *            will be used.
      */
-    public void addCallback(@NonNull Callback callback, @Nullable Handler handler) {
+    public void registerCallback(@NonNull Callback callback, @Nullable Handler handler) {
         if (callback == null) {
             throw new IllegalArgumentException("callback must not be null");
         }
@@ -359,12 +359,12 @@ public final class MediaController {
     }
 
     /**
-     * Stop receiving updates on the specified callback. If an update has
-     * already been posted you may still receive it after calling this method.
+     * Unregisters the specified callback. If an update has already been posted
+     * you may still receive it after calling this method.
      *
      * @param callback The callback to remove.
      */
-    public void removeCallback(@NonNull Callback callback) {
+    public void unregisterCallback(@NonNull Callback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("callback must not be null");
         }
@@ -495,7 +495,7 @@ public final class MediaController {
 
     /**
      * Callback for receiving updates on from the session. A Callback can be
-     * registered using {@link #addCallback}
+     * registered using {@link #registerCallback}
      */
     public static abstract class Callback {
         /**
