@@ -1743,12 +1743,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     // something old was playing
                     Log.v(TAG, "DEBUG_MEDIA: Disconnecting from old controller: "
                             + mMediaController);
-                    mMediaController.removeCallback(mMediaListener);
+                    mMediaController.unregisterCallback(mMediaListener);
                 }
                 mMediaController = controller;
 
                 if (mMediaController != null) {
-                    mMediaController.addCallback(mMediaListener);
+                    mMediaController.registerCallback(mMediaListener);
                     mMediaMetadata = mMediaController.getMetadata();
                     if (DEBUG_MEDIA) {
                         Log.v(TAG, "DEBUG_MEDIA: insert listener, receive metadata: "
