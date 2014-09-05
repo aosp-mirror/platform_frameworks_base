@@ -10260,7 +10260,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             || !bp.packageSetting.keySetData.isUsingUpgradeKeySets()
                             || ((PackageSetting) bp.packageSetting).sharedUser != null) {
                         sigsOk = compareSignatures(bp.packageSetting.signatures.mSignatures,
-                                pkg.mSignatures) != PackageManager.SIGNATURE_MATCH;
+                                pkg.mSignatures) == PackageManager.SIGNATURE_MATCH;
                     } else {
                         sigsOk = checkUpgradeKeySetLP((PackageSetting) bp.packageSetting, pkg);
                     }
