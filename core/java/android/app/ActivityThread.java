@@ -1938,7 +1938,7 @@ public final class ActivityThread {
         if (dumpFullInfo) {
             printRow(pw, HEAP_FULL_COLUMN, "", "Pss", "Pss", "Shared", "Private",
                     "Shared", "Private", "Swapped", "Heap", "Heap", "Heap");
-            printRow(pw, HEAP_FULL_COLUMN, "", "Total", "Clean", "Dirty", "Dirty",
+            printRow(pw, HEAP_FULL_COLUMN, "", "Total", "Clean", "Dirty", "",
                     "Clean", "Clean", "Dirty", "Size", "Alloc", "Free");
             printRow(pw, HEAP_FULL_COLUMN, "", "------", "------", "------", "------",
                     "------", "------", "------", "------", "------", "------");
