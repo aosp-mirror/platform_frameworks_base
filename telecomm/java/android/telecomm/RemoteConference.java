@@ -32,7 +32,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public final class RemoteConference {
 
-    public abstract static class Listener {
+    public abstract static class Callback {
         public void onStateChanged(RemoteConference conference, int oldState, int newState) {}
         public void onDisconnected(RemoteConference conference, int cause, String message) {}
         public void onConnectionAdded(RemoteConference conference, RemoteConnection connection) {}
@@ -44,7 +44,7 @@ public final class RemoteConference {
     private final String mId;
     private final IConnectionService mConnectionService;
 
-    private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
+    private final Set<Callback> mCallbacks = new CopyOnWriteArraySet<>();
     private final List<RemoteConnection> mChildConnections = new CopyOnWriteArrayList<>();
     private final List<RemoteConnection> mUnmodifiableChildConnections =
             Collections.unmodifiableList(mChildConnections);
@@ -70,8 +70,8 @@ public final class RemoteConference {
         for (RemoteConnection connection : mChildConnections) {
             connection.setConference(null);
         }
-        for (Listener l : mListeners) {
-            l.onDestroyed(this);
+        for (Callback c : mCallbacks) {
+            c.onDestroyed(this);
         }
     }
 
@@ -88,8 +88,8 @@ public final class RemoteConference {
         if (mState != newState) {
             int oldState = mState;
             mState = newState;
-            for (Listener l : mListeners) {
-                l.onStateChanged(this, oldState, newState);
+            for (Callback c : mCallbacks) {
+                c.onStateChanged(this, oldState, newState);
             }
         }
     }
@@ -99,8 +99,8 @@ public final class RemoteConference {
         if (!mChildConnections.contains(connection)) {
             mChildConnections.add(connection);
             connection.setConference(this);
-            for (Listener l : mListeners) {
-                l.onConnectionAdded(this, connection);
+            for (Callback c : mCallbacks) {
+                c.onConnectionAdded(this, connection);
             }
         }
     }
@@ -110,8 +110,8 @@ public final class RemoteConference {
         if (mChildConnections.contains(connection)) {
             mChildConnections.remove(connection);
             connection.setConference(null);
-            for (Listener l : mListeners) {
-                l.onConnectionRemoved(this, connection);
+            for (Callback c : mCallbacks) {
+                c.onConnectionRemoved(this, connection);
             }
         }
     }
@@ -120,8 +120,8 @@ public final class RemoteConference {
     void setCallCapabilities(int capabilities) {
         if (mCallCapabilities != capabilities) {
             mCallCapabilities = capabilities;
-            for (Listener l : mListeners) {
-                l.onCapabilitiesChanged(this, mCallCapabilities);
+            for (Callback c : mCallbacks) {
+                c.onCapabilitiesChanged(this, mCallCapabilities);
             }
         }
     }
@@ -132,8 +132,8 @@ public final class RemoteConference {
             mDisconnectCause = cause;
             mDisconnectMessage = message;
             setState(Connection.STATE_DISCONNECTED);
-            for (Listener l : mListeners) {
-                l.onDisconnected(this, cause, message);
+            for (Callback c : mCallbacks) {
+                c.onDisconnected(this, cause, message);
             }
         }
     }
@@ -188,11 +188,11 @@ public final class RemoteConference {
         return mDisconnectMessage;
     }
 
-    public final void addListener(Listener listener) {
-        mListeners.add(listener);
+    public final void addCallback(Callback callback) {
+        mCallbacks.add(callback);
     }
 
-    public final void removeListener(Listener listener) {
-        mListeners.remove(listener);
+    public final void removeCallback(Callback callback) {
+        mCallbacks.remove(callback);
     }
 }
