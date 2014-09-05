@@ -5880,7 +5880,7 @@ package android.appwidget {
     field public static final int RESIZE_VERTICAL = 2; // 0x2
     field public static final int WIDGET_CATEGORY_HOME_SCREEN = 1; // 0x1
     field public static final int WIDGET_CATEGORY_KEYGUARD = 2; // 0x2
-    field public static final int WIDGET_CATEGORY_RECENTS = 4; // 0x4
+    field public static final int WIDGET_CATEGORY_SEARCHBOX = 4; // 0x4
     field public int autoAdvanceViewId;
     field public android.content.ComponentName configure;
     field public int icon;

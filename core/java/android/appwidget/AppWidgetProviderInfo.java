@@ -61,9 +61,9 @@ public class AppWidgetProviderInfo implements Parcelable {
     public static final int WIDGET_CATEGORY_KEYGUARD = 2;
 
     /**
-     * Indicates that the widget can be displayed within recents.
+     * Indicates that the widget can be displayed within a space reserved for the search box.
      */
-    public static final int WIDGET_CATEGORY_RECENTS = 4;
+    public static final int WIDGET_CATEGORY_SEARCHBOX = 4;
 
     /**
      * Identity of this AppWidget component.  This component should be a {@link

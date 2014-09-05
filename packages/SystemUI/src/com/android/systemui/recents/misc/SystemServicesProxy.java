@@ -392,7 +392,7 @@ public class SystemServicesProxy {
 
         // Find the first Recents widget from the same package as the global assist activity
         List<AppWidgetProviderInfo> widgets = mAwm.getInstalledProviders(
-                AppWidgetProviderInfo.WIDGET_CATEGORY_RECENTS);
+                AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
         for (AppWidgetProviderInfo info : widgets) {
             if (info.provider.getPackageName().equals(mAssistComponent.getPackageName())) {
                 return info;
@@ -418,7 +418,7 @@ public class SystemServicesProxy {
         int searchWidgetId = host.allocateAppWidgetId();
         Bundle opts = new Bundle();
         opts.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-                AppWidgetProviderInfo.WIDGET_CATEGORY_RECENTS);
+                AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
         if (!mAwm.bindAppWidgetIdIfAllowed(searchWidgetId, searchWidgetInfo.provider, opts)) {
             return null;
         }
