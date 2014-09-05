@@ -928,8 +928,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
             boolean wasConnected = mWifiConnected;
             mWifiConnected = networkInfo != null && networkInfo.isConnected();
-            // If we just connected, grab the inintial signal strength and ssid
-            if (mWifiConnected && !wasConnected) {
+            // If Connected grab the signal strength and ssid
+            if (mWifiConnected) {
                 // try getting it out of the intent first
                 WifiInfo info = (WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
                 if (info == null) {
