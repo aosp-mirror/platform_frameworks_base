@@ -558,6 +558,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             // disable lockscreen notifications until user acts on the banner.
             Settings.Secure.putInt(mContext.getContentResolver(),
                     Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 0);
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0);
 
             final String packageName = mContext.getPackageName();
             PendingIntent cancelIntent = PendingIntent.getBroadcast(mContext, 0,

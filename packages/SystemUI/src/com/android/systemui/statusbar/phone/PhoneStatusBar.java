@@ -3774,7 +3774,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             row = (ExpandableNotificationRow) expandView;
             row.setUserExpanded(true);
         }
-        if (isLockscreenPublicMode() && !userAllowsPrivateNotificationsInPublic(mCurrentUserId)) {
+        boolean fullShadeNeedsBouncer = !userAllowsPrivateNotificationsInPublic(mCurrentUserId)
+                || !mShowLockscreenNotifications;
+        if (isLockscreenPublicMode() && fullShadeNeedsBouncer) {
             mLeaveOpenOnKeyguardHide = true;
             showBouncer();
             mDraggedDownRow = row;

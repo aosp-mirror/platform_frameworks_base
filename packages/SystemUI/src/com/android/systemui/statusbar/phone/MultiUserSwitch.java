@@ -30,6 +30,7 @@ import android.widget.FrameLayout;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 /**
  * Container for image of the multi user switcher (tappable).
@@ -90,9 +91,21 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
 
         if (isClickable()) {
             final UserManager um = UserManager.get(getContext());
-            String text = mContext.getString(um.isUserSwitcherEnabled()
-                    ? R.string.accessibility_multi_user_switch_switcher
-                    : R.string.accessibility_multi_user_switch_quick_contact);
+            String text;
+            if (um.isUserSwitcherEnabled()) {
+                UserSwitcherController controller = mQsPanel.getHost()
+                        .getUserSwitcherController();
+                String currentUser = controller.getCurrentUserName(mContext);
+                if (TextUtils.isEmpty(currentUser)) {
+                    text = mContext.getString(R.string.accessibility_multi_user_switch_switcher);
+                } else {
+                    text = mContext.getString(
+                            R.string.accessibility_multi_user_switch_switcher_with_current,
+                            currentUser);
+                }
+            } else {
+                text = mContext.getString(R.string.accessibility_multi_user_switch_quick_contact);
+            }
             if (!TextUtils.isEmpty(text)) {
                 event.getText().add(text);
             }
