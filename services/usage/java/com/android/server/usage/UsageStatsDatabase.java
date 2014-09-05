@@ -35,7 +35,7 @@ import java.util.List;
  * Provides an interface to query for UsageStat data from an XML database.
  */
 class UsageStatsDatabase {
-    private static final int CURRENT_VERSION = 1;
+    private static final int CURRENT_VERSION = 2;
 
     private static final String TAG = "UsageStatsDatabase";
     private static final boolean DEBUG = UsageStatsService.DEBUG;
@@ -90,7 +90,8 @@ class UsageStatsDatabase {
                     }
 
                     for (File f : files) {
-                        mSortedStatFiles[i].put(Long.parseLong(f.getName()), new AtomicFile(f));
+                        final AtomicFile af = new AtomicFile(f);
+                        mSortedStatFiles[i].put(UsageStatsXml.parseBeginTime(af), af);
                     }
                 }
             }
@@ -107,7 +108,7 @@ class UsageStatsDatabase {
 
         if (version != CURRENT_VERSION) {
             Slog.i(TAG, "Upgrading from version " + version + " to " + CURRENT_VERSION);
-            doUpgradeLocked(version, CURRENT_VERSION);
+            doUpgradeLocked(version);
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(mVersionFile))) {
                 writer.write(Integer.toString(CURRENT_VERSION));
@@ -118,8 +119,8 @@ class UsageStatsDatabase {
         }
     }
 
-    private void doUpgradeLocked(int thisVersion, int nextVersion) {
-        if (thisVersion == 0) {
+    private void doUpgradeLocked(int thisVersion) {
+        if (thisVersion < 2) {
             // Delete all files if we are version 0. This is a pre-release version,
             // so this is fine.
             Slog.i(TAG, "Deleting all usage stats files");

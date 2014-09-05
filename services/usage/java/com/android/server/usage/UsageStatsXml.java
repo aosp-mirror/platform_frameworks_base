@@ -37,10 +37,15 @@ public class UsageStatsXml {
     private static final String USAGESTATS_TAG = "usagestats";
     private static final String VERSION_ATTR = "version";
 
+    public static long parseBeginTime(AtomicFile file) {
+        return Long.parseLong(file.getBaseFile().getName());
+    }
+
     public static void read(AtomicFile file, IntervalStats statsOut) throws IOException {
         try {
             FileInputStream in = file.openRead();
             try {
+                statsOut.beginTime = parseBeginTime(file);
                 read(in, statsOut);
                 statsOut.lastTimeSaved = file.getLastModifiedTime();
             } finally {
