@@ -195,6 +195,7 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
         if (mPageAdapter.isOpened()) {
             mPageAdapter.close(null);
         }
+        mRecyclerView.setAdapter(null);
         mPageAdapter.destroy();
     }
 

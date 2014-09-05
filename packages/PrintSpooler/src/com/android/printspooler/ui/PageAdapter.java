@@ -17,6 +17,9 @@
 package com.android.printspooler.ui;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.ParcelFileDescriptor;
 import android.print.PageRange;
 import android.print.PrintAttributes.MediaSize;
@@ -26,12 +29,12 @@ import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.View.MeasureSpec;
 import android.widget.TextView;
 import com.android.printspooler.R;
 import com.android.printspooler.model.PageContentRepository;
@@ -48,7 +51,7 @@ import java.util.List;
  * This class represents the adapter for the pages in the print preview list.
  */
 public final class PageAdapter extends Adapter implements
-        PageContentRepository.OnMalformedPdfFileListener{
+        PageContentRepository.OnMalformedPdfFileListener {
     private static final String LOG_TAG = "PageAdapter";
 
     private static final int MAX_PREVIEW_PAGES_BATCH = 50;
@@ -85,6 +88,8 @@ public final class PageAdapter extends Adapter implements
     private PageRange[] mWrittenPages;
     // Pages the user selected in the UI.
     private PageRange[] mSelectedPages;
+
+    private BitmapDrawable mEmptyState;
 
     private int mDocumentPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
     private int mSelectedPageCount;
@@ -257,7 +262,7 @@ public final class PageAdapter extends Adapter implements
         }
 
         if (updatePreviewAreaAndPageSize) {
-            updatePreviewAreaAndPageSize();
+            updatePreviewAreaPageSizeAndEmptyState();
         }
 
         if (documentChanged) {
@@ -318,12 +323,12 @@ public final class PageAdapter extends Adapter implements
             }
 
             // OK, there are bugs in recycler view which tries to bind views
-            // without recycling them which would give us a chane to clean up.
+            // without recycling them which would give us a chance to clean up.
             PageContentProvider boundProvider = mPageContentRepository
-                   .peekPageContentProvider(pageIndexInFile);
+                    .peekPageContentProvider(pageIndexInFile);
             if (boundProvider != null) {
                 PageContentView owner = (PageContentView) boundProvider.getOwner();
-                owner.init(null, mMediaSize, mMinMargins);
+                owner.init(null, mEmptyState, mMediaSize, mMinMargins);
                 mPageContentRepository.releasePageContentProvider(boundProvider);
             }
 
@@ -333,7 +338,7 @@ public final class PageAdapter extends Adapter implements
         } else {
             onSelectedPageNotInFile(pageInDocument);
         }
-        content.init(provider, mMediaSize, mMinMargins);
+        content.init(provider, mEmptyState, mMediaSize, mMinMargins);
 
         View pageSelector = page.findViewById(R.id.page_selector);
         pageSelector.setTag(myHolder);
@@ -384,7 +389,7 @@ public final class PageAdapter extends Adapter implements
             mSelectedPages = selectedPages;
             mSelectedPageCount = PageRangeUtils.getNormalizedPageCount(
                     mSelectedPages, mDocumentPageCount);
-            updatePreviewAreaAndPageSize();
+            updatePreviewAreaPageSizeAndEmptyState();
             notifyDataSetChanged();
         }
         return mSelectedPages;
@@ -392,12 +397,12 @@ public final class PageAdapter extends Adapter implements
 
     public void onPreviewAreaSizeChanged() {
         if (mMediaSize != null) {
-            updatePreviewAreaAndPageSize();
+            updatePreviewAreaPageSizeAndEmptyState();
             notifyDataSetChanged();
         }
     }
 
-    private void updatePreviewAreaAndPageSize() {
+    private void updatePreviewAreaPageSizeAndEmptyState() {
         final int availableWidth = mPreviewArea.getWidth();
         final int availableHeight = mPreviewArea.getHeight();
 
@@ -419,7 +424,7 @@ public final class PageAdapter extends Adapter implements
         final int pageContentDesiredHeight = (int) (((float) pageContentDesiredWidth
                 / pageAspectRatio) + 0.5f);
 
-        // If the page does not fit entirely in a vertial direction,
+        // If the page does not fit entirely in a vertical direction,
         // we shirk it but not less than the minimal page width.
         final int pageContentMinHeight = (int) (mPreviewPageMinWidth / pageAspectRatio + 0.5f);
         final int pageContentMaxHeight = Math.max(pageContentMinHeight,
@@ -448,6 +453,23 @@ public final class PageAdapter extends Adapter implements
 
         mPreviewArea.setPadding(horizontalPadding, verticalPadding,
                 horizontalPadding, verticalPadding);
+
+        // Now update the empty state drawable, as it depends on the page
+        // size and is reused for all views for better performance.
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        View content = inflater.inflate(R.layout.preview_page_loading, null, false);
+        content.measure(MeasureSpec.makeMeasureSpec(mPageContentWidth, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(mPageContentHeight, MeasureSpec.EXACTLY));
+        content.layout(0, 0, content.getMeasuredWidth(), content.getMeasuredHeight());
+
+        Bitmap bitmap = Bitmap.createBitmap(mPageContentWidth, mPageContentHeight,
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        content.draw(canvas);
+
+        // Do not recycle the old bitmap if such as it may be set as an empty
+        // state to any of the page views. Just let the GC take care of it.
+        mEmptyState = new BitmapDrawable(mContext.getResources(), bitmap);
     }
 
     private PageRange[] computeSelectedPages() {
@@ -718,7 +740,7 @@ public final class PageAdapter extends Adapter implements
     private void recyclePageView(PageContentView page, int pageIndexInAdapter) {
         PageContentProvider provider = page.getPageContentProvider();
         if (provider != null) {
-            page.init(null, null, null);
+            page.init(null, null, null, null);
             mPageContentRepository.releasePageContentProvider(provider);
             mBoundPagesInAdapter.remove(pageIndexInAdapter);
         }
