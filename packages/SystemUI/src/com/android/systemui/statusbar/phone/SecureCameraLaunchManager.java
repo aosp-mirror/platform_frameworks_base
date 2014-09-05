@@ -85,12 +85,12 @@ public class SecureCameraLaunchManager {
     private KeyguardBottomAreaView mKeyguardBottomArea;
 
     private CameraManager mCameraManager;
-    private CameraAvailabilityListener mCameraAvailabilityListener;
+    private CameraAvailabilityCallback mCameraAvailabilityCallback;
     private Map<String, Boolean> mCameraAvailabilityMap;
     private boolean mWaitingToLaunchSecureCamera;
     private Runnable mLaunchCameraRunnable;
 
-    private class CameraAvailabilityListener extends CameraManager.AvailabilityListener {
+    private class CameraAvailabilityCallback extends CameraManager.AvailabilityCallback {
         @Override
         public void onCameraUnavailable(String cameraId) {
             if (DEBUG) Log.d(TAG, "onCameraUnavailble(" + cameraId + ")");
@@ -123,10 +123,10 @@ public class SecureCameraLaunchManager {
         mKeyguardBottomArea = keyguardBottomArea;
 
         mCameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
-        mCameraAvailabilityListener = new CameraAvailabilityListener();
+        mCameraAvailabilityCallback = new CameraAvailabilityCallback();
 
         // An onCameraAvailable() or onCameraUnavailable() callback will be received for each camera
-        // when the availability listener is registered, thus initializing the map.
+        // when the availability callback is registered, thus initializing the map.
         //
         // Keeping track of the state of all cameras using the onCameraAvailable() and
         // onCameraUnavailable() callbacks can get messy when dealing with hot-pluggable cameras.
@@ -150,14 +150,14 @@ public class SecureCameraLaunchManager {
      * Initializes the SecureCameraManager and starts listening for camera availability.
      */
     public void create() {
-        mCameraManager.addAvailabilityListener(mCameraAvailabilityListener, mHandler);
+        mCameraManager.registerAvailabilityCallback(mCameraAvailabilityCallback, mHandler);
     }
 
     /**
      * Stops listening for camera availability and cleans up the SecureCameraManager.
      */
     public void destroy() {
-        mCameraManager.removeAvailabilityListener(mCameraAvailabilityListener);
+        mCameraManager.unregisterAvailabilityCallback(mCameraAvailabilityCallback);
     }
 
     /**

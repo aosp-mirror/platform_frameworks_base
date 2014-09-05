@@ -45,7 +45,7 @@ import java.util.List;
  *
  * <p>{@link TotalCaptureResult} objects are immutable.</p>
  *
- * @see CameraDevice.CaptureListener#onCaptureCompleted
+ * @see CameraDevice.CaptureCallback#onCaptureCompleted
  */
 public final class TotalCaptureResult extends CaptureResult {
 
@@ -88,7 +88,7 @@ public final class TotalCaptureResult extends CaptureResult {
      *
      * <p>The list size will be inclusive between {@code 0} and
      * {@link CameraCharacteristics#REQUEST_PARTIAL_RESULT_COUNT}, with elements in ascending order
-     * of when {@link CameraCaptureSession.CaptureListener#onCaptureProgressed} was invoked.</p>
+     * of when {@link CameraCaptureSession.CaptureCallback#onCaptureProgressed} was invoked.</p>
      *
      * @return unmodifiable list of partial results
      */
