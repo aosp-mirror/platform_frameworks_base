@@ -165,11 +165,12 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         });
         final ArrayList<View> sharedElementSnapshots = createSnapshots(mExitSharedElementBundle,
                 mSharedElementNames);
-        getDecor().getViewTreeObserver()
+        final View decorView = getDecor();
+        decorView.getViewTreeObserver()
                 .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                     @Override
                     public boolean onPreDraw() {
-                        getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
+                        decorView.getViewTreeObserver().removeOnPreDrawListener(this);
                         setSharedElementState(mExitSharedElementBundle, sharedElementSnapshots);
                         return true;
                     }
