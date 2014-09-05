@@ -92,7 +92,7 @@ public class MainInteractionService extends VoiceInteractionService {
                 break;
             case AlwaysOnHotwordDetector.STATE_KEYPHRASE_UNENROLLED:
                 Log.i(TAG, "STATE_KEYPHRASE_UNENROLLED");
-                Intent enroll = mHotwordDetector.createIntentToEnroll();
+                Intent enroll = mHotwordDetector.createEnrollIntent();
                 Log.i(TAG, "Need to enroll with " + enroll);
                 break;
             case AlwaysOnHotwordDetector.STATE_KEYPHRASE_ENROLLED:
