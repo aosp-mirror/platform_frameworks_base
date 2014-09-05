@@ -268,13 +268,13 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * Get the request associated with this result.
      *
      * <p>Whenever a request has been fully or partially captured, with
-     * {@link CameraCaptureSession.CaptureListener#onCaptureCompleted} or
-     * {@link CameraCaptureSession.CaptureListener#onCaptureProgressed}, the {@code result}'s
+     * {@link CameraCaptureSession.CaptureCallback#onCaptureCompleted} or
+     * {@link CameraCaptureSession.CaptureCallback#onCaptureProgressed}, the {@code result}'s
      * {@code getRequest()} will return that {@code request}.
      * </p>
      *
      * <p>For example,
-     * <code><pre>cameraDevice.capture(someRequest, new CaptureListener() {
+     * <code><pre>cameraDevice.capture(someRequest, new CaptureCallback() {
      *     {@literal @}Override
      *     void onCaptureCompleted(CaptureRequest myRequest, CaptureResult myResult) {
      *         assert(myResult.getRequest.equals(myRequest) == true);
@@ -314,8 +314,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @return int The ID for the sequence of requests that this capture result is a part of
      *
-     * @see CameraDevice.CaptureListener#onCaptureSequenceCompleted
-     * @see CameraDevice.CaptureListener#onCaptureSequenceAborted
+     * @see CameraDevice.CaptureCallback#onCaptureSequenceCompleted
+     * @see CameraDevice.CaptureCallback#onCaptureSequenceAborted
      */
     public int getSequenceId() {
         return mSequenceId;

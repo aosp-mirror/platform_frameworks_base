@@ -27,22 +27,22 @@ import android.hardware.camera2.dispatch.MethodNameInvoker;
 import static com.android.internal.util.Preconditions.*;
 
 /**
- * Proxy out invocations to the camera2 API listeners into a {@link Dispatchable}.
+ * Proxy out invocations to the camera2 API callbacks into a {@link Dispatchable}.
  *
  * <p>Since abstract classes do not support Java's dynamic {@code Proxy}, we have to
  * to use our own proxy mechanism.</p>
  */
-public class ListenerProxies {
+public class CallbackProxies {
 
     // TODO: replace with codegen
 
-    public static class DeviceStateListenerProxy extends CameraDeviceImpl.StateListenerKK {
-        private final MethodNameInvoker<CameraDeviceImpl.StateListenerKK> mProxy;
+    public static class DeviceStateCallbackProxy extends CameraDeviceImpl.StateCallbackKK {
+        private final MethodNameInvoker<CameraDeviceImpl.StateCallbackKK> mProxy;
 
-        public DeviceStateListenerProxy(
-                Dispatchable<CameraDeviceImpl.StateListenerKK> dispatchTarget) {
+        public DeviceStateCallbackProxy(
+                Dispatchable<CameraDeviceImpl.StateCallbackKK> dispatchTarget) {
             dispatchTarget = checkNotNull(dispatchTarget, "dispatchTarget must not be null");
-            mProxy = new MethodNameInvoker<>(dispatchTarget, CameraDeviceImpl.StateListenerKK.class);
+            mProxy = new MethodNameInvoker<>(dispatchTarget, CameraDeviceImpl.StateCallbackKK.class);
         }
 
         @Override
@@ -87,13 +87,13 @@ public class ListenerProxies {
     }
 
     @SuppressWarnings("deprecation")
-    public static class DeviceCaptureListenerProxy extends CameraDeviceImpl.CaptureListener {
-        private final MethodNameInvoker<CameraDeviceImpl.CaptureListener> mProxy;
+    public static class DeviceCaptureCallbackProxy extends CameraDeviceImpl.CaptureCallback {
+        private final MethodNameInvoker<CameraDeviceImpl.CaptureCallback> mProxy;
 
-        public DeviceCaptureListenerProxy(
-                Dispatchable<CameraDeviceImpl.CaptureListener> dispatchTarget) {
+        public DeviceCaptureCallbackProxy(
+                Dispatchable<CameraDeviceImpl.CaptureCallback> dispatchTarget) {
             dispatchTarget = checkNotNull(dispatchTarget, "dispatchTarget must not be null");
-            mProxy = new MethodNameInvoker<>(dispatchTarget, CameraDeviceImpl.CaptureListener.class);
+            mProxy = new MethodNameInvoker<>(dispatchTarget, CameraDeviceImpl.CaptureCallback.class);
         }
 
         @Override
@@ -139,15 +139,15 @@ public class ListenerProxies {
         }
     }
 
-    public static class SessionStateListenerProxy
-            extends CameraCaptureSession.StateListener {
-        private final MethodNameInvoker<CameraCaptureSession.StateListener> mProxy;
+    public static class SessionStateCallbackProxy
+            extends CameraCaptureSession.StateCallback {
+        private final MethodNameInvoker<CameraCaptureSession.StateCallback> mProxy;
 
-        public SessionStateListenerProxy(
-                Dispatchable<CameraCaptureSession.StateListener> dispatchTarget) {
+        public SessionStateCallbackProxy(
+                Dispatchable<CameraCaptureSession.StateCallback> dispatchTarget) {
             dispatchTarget = checkNotNull(dispatchTarget, "dispatchTarget must not be null");
             mProxy = new MethodNameInvoker<>(dispatchTarget,
-                    CameraCaptureSession.StateListener.class);
+                    CameraCaptureSession.StateCallback.class);
         }
 
         @Override
@@ -177,7 +177,7 @@ public class ListenerProxies {
         }
     }
 
-    private ListenerProxies() {
+    private CallbackProxies() {
         throw new AssertionError();
     }
 }
