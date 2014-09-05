@@ -205,6 +205,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     private boolean mIsStartingTransition;
     private ArrayList<GhostViewListeners> mGhostViewListeners =
             new ArrayList<GhostViewListeners>();
+    private ArrayMap<View, Float> mOriginalAlphas = new ArrayMap<View, Float>();
 
     public ActivityTransitionCoordinator(Window window,
             ArrayList<String> allSharedElementNames,
@@ -577,6 +578,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         mWindow = null;
         mSharedElements.clear();
         mTransitioningViews.clear();
+        mOriginalAlphas.clear();
         mResultReceiver = null;
         mPendingTransition = null;
         mListener = null;
@@ -586,10 +588,27 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         return getWindow().getTransitionBackgroundFadeDuration();
     }
 
-    protected static void setTransitionAlpha(ArrayList<View> views, float alpha) {
+    protected void hideViews(ArrayList<View> views) {
         int count = views.size();
         for (int i = 0; i < count; i++) {
-            views.get(i).setTransitionAlpha(alpha);
+            View view = views.get(i);
+            if (!mOriginalAlphas.containsKey(view)) {
+                mOriginalAlphas.put(view, view.getAlpha());
+            }
+            view.setAlpha(0f);
+            view.setTransitionAlpha(0f);
+        }
+    }
+
+    protected void showViews(ArrayList<View> views) {
+        int count = views.size();
+        for (int i = 0; i < count; i++) {
+            View view = views.get(i);
+            Float alpha = mOriginalAlphas.remove(view);
+            if (alpha != null) {
+                view.setAlpha(alpha);
+                view.setTransitionAlpha(1f);
+            }
         }
     }
 
