@@ -800,28 +800,6 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     @Override
-    public void drawPicture(Picture picture, Rect dst) {
-        save();
-        translate(dst.left, dst.top);
-        if (picture.getWidth() > 0 && picture.getHeight() > 0) {
-            scale(dst.width() / picture.getWidth(), dst.height() / picture.getHeight());
-        }
-        drawPicture(picture);
-        restore();
-    }
-
-    @Override
-    public void drawPicture(Picture picture, RectF dst) {
-        save();
-        translate(dst.left, dst.top);
-        if (picture.getWidth() > 0 && picture.getHeight() > 0) {
-            scale(dst.width() / picture.getWidth(), dst.height() / picture.getHeight());
-        }
-        drawPicture(picture);
-        restore();
-    }
-
-    @Override
     public void drawPoint(float x, float y, Paint paint) {
         float[] point = getPointStorage();
         point[0] = x;
