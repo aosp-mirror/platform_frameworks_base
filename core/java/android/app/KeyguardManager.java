@@ -56,13 +56,6 @@ public class KeyguardManager {
     public static final String EXTRA_DESCRIPTION = "android.app.extra.DESCRIPTION";
 
     /**
-     * @removed
-     */
-    public Intent getConfirmDeviceCredentialIntent(CharSequence title, CharSequence description) {
-        return createConfirmDeviceCredentialIntent(title, description);
-    }
-
-    /**
      * Get an intent to prompt the user to confirm credentials (pin, pattern or password)
      * for the current user of the device. The caller is expected to launch this activity using
      * {@link android.app.Activity#startActivityForResult(Intent, int)} and check for
