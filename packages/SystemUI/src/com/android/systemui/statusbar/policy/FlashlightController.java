@@ -81,7 +81,7 @@ public class FlashlightController {
 
         if (mCameraId != null) {
             ensureHandler();
-            mCameraManager.addAvailabilityListener(mAvailabilityListener, mHandler);
+            mCameraManager.registerAvailabilityCallback(mAvailabilityCallback, mHandler);
         }
     }
 
@@ -339,8 +339,8 @@ public class FlashlightController {
         }
     };
 
-    private final CameraManager.AvailabilityListener mAvailabilityListener =
-            new CameraManager.AvailabilityListener() {
+    private final CameraManager.AvailabilityCallback mAvailabilityCallback =
+            new CameraManager.AvailabilityCallback() {
         @Override
         public void onCameraAvailable(String cameraId) {
             if (DEBUG) Log.d(TAG, "onCameraAvailable(" + cameraId + ")");

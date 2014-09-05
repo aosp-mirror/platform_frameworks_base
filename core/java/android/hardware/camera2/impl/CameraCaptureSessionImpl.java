@@ -45,11 +45,11 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     /** User-specified set of surfaces used as the configuration outputs */
     private final List<Surface> mOutputs;
     /**
-     * User-specified state listener, used for outgoing events; calls to this object will be
+     * User-specified state callback, used for outgoing events; calls to this object will be
      * automatically {@link Handler#post(Runnable) posted} to {@code mStateHandler}.
      */
-    private final CameraCaptureSession.StateListener mStateListener;
-    /** User-specified state handler used for outgoing state listener events */
+    private final CameraCaptureSession.StateCallback mStateCallback;
+    /** User-specified state handler used for outgoing state callback events */
     private final Handler mStateHandler;
 
     /** Internal camera device; used to translate calls into existing deprecated API */
@@ -84,28 +84,28 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
      * (e.g. no pending captures, no repeating requests, no flush).</p>
      */
     CameraCaptureSessionImpl(List<Surface> outputs,
-            CameraCaptureSession.StateListener listener, Handler stateHandler,
+            CameraCaptureSession.StateCallback callback, Handler stateHandler,
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl,
             Handler deviceStateHandler, boolean configureSuccess) {
         if (outputs == null || outputs.isEmpty()) {
             throw new IllegalArgumentException("outputs must be a non-null, non-empty list");
-        } else if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
+        } else if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
         }
 
         // TODO: extra verification of outputs
         mOutputs = outputs;
         mStateHandler = checkHandler(stateHandler);
-        mStateListener = createUserStateListenerProxy(mStateHandler, listener);
+        mStateCallback = createUserStateCallbackProxy(mStateHandler, callback);
 
         mDeviceHandler = checkNotNull(deviceStateHandler, "deviceStateHandler must not be null");
         mDeviceImpl = checkNotNull(deviceImpl, "deviceImpl must not be null");
 
         /*
-         * Use the same handler as the device's StateListener for all the internal coming events
+         * Use the same handler as the device's StateCallback for all the internal coming events
          *
-         * This ensures total ordering between CameraDevice.StateListener and
-         * CameraDeviceImpl.CaptureListener events.
+         * This ensures total ordering between CameraDevice.StateCallback and
+         * CameraDeviceImpl.CaptureCallback events.
          */
         mSequenceDrainer = new TaskDrainer<>(mDeviceHandler, new SequenceDrainListener(),
                 /*name*/"seq");
@@ -119,11 +119,11 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         // CameraDevice should call configureOutputs and have it finish before constructing us
 
         if (configureSuccess) {
-            mStateListener.onConfigured(this);
+            mStateCallback.onConfigured(this);
             if (VERBOSE) Log.v(TAG, "ctor - Created session successfully");
             mConfigureSuccess = true;
         } else {
-            mStateListener.onConfigureFailed(this);
+            mStateCallback.onConfigureFailed(this);
             mClosed = true; // do not fire any other callbacks, do not allow any other work
             Log.e(TAG, "Failed to create capture session; configuration failed");
             mConfigureSuccess = false;
@@ -136,7 +136,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     }
 
     @Override
-    public synchronized int capture(CaptureRequest request, CaptureListener listener,
+    public synchronized int capture(CaptureRequest request, CaptureCallback callback,
             Handler handler) throws CameraAccessException {
         if (request == null) {
             throw new IllegalArgumentException("request must not be null");
@@ -145,19 +145,19 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         checkNotClosed();
         checkLegalToCapture();
 
-        handler = checkHandler(handler, listener);
+        handler = checkHandler(handler, callback);
 
         if (VERBOSE) {
-            Log.v(TAG, "capture - request " + request + ", listener " + listener + " handler" +
+            Log.v(TAG, "capture - request " + request + ", callback " + callback + " handler" +
                     " " + handler);
         }
 
         return addPendingSequence(mDeviceImpl.capture(request,
-                createCaptureListenerProxy(handler, listener), mDeviceHandler));
+                createCaptureCallbackProxy(handler, callback), mDeviceHandler));
     }
 
     @Override
-    public synchronized int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
+    public synchronized int captureBurst(List<CaptureRequest> requests, CaptureCallback callback,
             Handler handler) throws CameraAccessException {
         if (requests == null) {
             throw new IllegalArgumentException("requests must not be null");
@@ -168,20 +168,20 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         checkNotClosed();
         checkLegalToCapture();
 
-        handler = checkHandler(handler, listener);
+        handler = checkHandler(handler, callback);
 
         if (VERBOSE) {
             CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
-            Log.v(TAG, "captureBurst - requests " + Arrays.toString(requestArray) + ", listener " +
-                    listener + " handler" + "" + handler);
+            Log.v(TAG, "captureBurst - requests " + Arrays.toString(requestArray) + ", callback " +
+                    callback + " handler" + "" + handler);
         }
 
         return addPendingSequence(mDeviceImpl.captureBurst(requests,
-                createCaptureListenerProxy(handler, listener), mDeviceHandler));
+                createCaptureCallbackProxy(handler, callback), mDeviceHandler));
     }
 
     @Override
-    public synchronized int setRepeatingRequest(CaptureRequest request, CaptureListener listener,
+    public synchronized int setRepeatingRequest(CaptureRequest request, CaptureCallback callback,
             Handler handler) throws CameraAccessException {
         if (request == null) {
             throw new IllegalArgumentException("request must not be null");
@@ -190,20 +190,20 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         checkNotClosed();
         checkLegalToCapture();
 
-        handler = checkHandler(handler, listener);
+        handler = checkHandler(handler, callback);
 
         if (VERBOSE) {
-            Log.v(TAG, "setRepeatingRequest - request " + request + ", listener " + listener +
+            Log.v(TAG, "setRepeatingRequest - request " + request + ", callback " + callback +
                     " handler" + " " + handler);
         }
 
         return addPendingSequence(mDeviceImpl.setRepeatingRequest(request,
-                createCaptureListenerProxy(handler, listener), mDeviceHandler));
+                createCaptureCallbackProxy(handler, callback), mDeviceHandler));
     }
 
     @Override
     public synchronized int setRepeatingBurst(List<CaptureRequest> requests,
-            CaptureListener listener, Handler handler) throws CameraAccessException {
+            CaptureCallback callback, Handler handler) throws CameraAccessException {
         if (requests == null) {
             throw new IllegalArgumentException("requests must not be null");
         } else if (requests.isEmpty()) {
@@ -213,16 +213,16 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         checkNotClosed();
         checkLegalToCapture();
 
-        handler = checkHandler(handler, listener);
+        handler = checkHandler(handler, callback);
 
         if (VERBOSE) {
             CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
             Log.v(TAG, "setRepeatingBurst - requests " + Arrays.toString(requestArray) +
-                    ", listener " + listener + " handler" + "" + handler);
+                    ", callback " + callback + " handler" + "" + handler);
         }
 
         return addPendingSequence(mDeviceImpl.setRepeatingBurst(requests,
-                createCaptureListenerProxy(handler, listener), mDeviceHandler));
+                createCaptureCallbackProxy(handler, callback), mDeviceHandler));
     }
 
     @Override
@@ -331,8 +331,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
             // or just suppress the ISE only and rely onClosed.
             // Also skip any of the draining work if this is already closed.
 
-            // Short-circuit; queue listener immediately and return
-            mStateListener.onClosed(this);
+            // Short-circuit; queue callback immediately and return
+            mStateCallback.onClosed(this);
             return;
         } catch (CameraAccessException e) {
             // OK: close does not throw checked exceptions.
@@ -360,30 +360,30 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     }
 
     /**
-     * Post calls into a CameraCaptureSession.StateListener to the user-specified {@code handler}.
+     * Post calls into a CameraCaptureSession.StateCallback to the user-specified {@code handler}.
      */
-    private StateListener createUserStateListenerProxy(Handler handler, StateListener listener) {
-        InvokeDispatcher<StateListener> userListenerSink = new InvokeDispatcher<>(listener);
-        HandlerDispatcher<StateListener> handlerPassthrough =
-                new HandlerDispatcher<>(userListenerSink, handler);
+    private StateCallback createUserStateCallbackProxy(Handler handler, StateCallback callback) {
+        InvokeDispatcher<StateCallback> userCallbackSink = new InvokeDispatcher<>(callback);
+        HandlerDispatcher<StateCallback> handlerPassthrough =
+                new HandlerDispatcher<>(userCallbackSink, handler);
 
-        return new ListenerProxies.SessionStateListenerProxy(handlerPassthrough);
+        return new CallbackProxies.SessionStateCallbackProxy(handlerPassthrough);
     }
 
     /**
      * Forward callbacks from
-     * CameraDeviceImpl.CaptureListener to the CameraCaptureSession.CaptureListener.
+     * CameraDeviceImpl.CaptureCallback to the CameraCaptureSession.CaptureCallback.
      *
      * <p>In particular, all calls are automatically split to go both to our own
-     * internal listener, and to the user-specified listener (by transparently posting
+     * internal callback, and to the user-specified callback (by transparently posting
      * to the user-specified handler).</p>
      *
      * <p>When a capture sequence finishes, update the pending checked sequences set.</p>
      */
     @SuppressWarnings("deprecation")
-    private CameraDeviceImpl.CaptureListener createCaptureListenerProxy(
-            Handler handler, CaptureListener listener) {
-        CameraDeviceImpl.CaptureListener localListener = new CameraDeviceImpl.CaptureListener() {
+    private CameraDeviceImpl.CaptureCallback createCaptureCallbackProxy(
+            Handler handler, CaptureCallback callback) {
+        CameraDeviceImpl.CaptureCallback localCallback = new CameraDeviceImpl.CaptureCallback() {
             @Override
             public void onCaptureSequenceCompleted(CameraDevice camera,
                     int sequenceId, long frameNumber) {
@@ -398,43 +398,43 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         };
 
         /*
-         * Split the calls from the device listener into local listener and the following chain:
+         * Split the calls from the device callback into local callback and the following chain:
          * - replace the first CameraDevice arg with a CameraCaptureSession
-         * - duck type from device listener to session listener
+         * - duck type from device callback to session callback
          * - then forward the call to a handler
-         * - then finally invoke the destination method on the session listener object
+         * - then finally invoke the destination method on the session callback object
          */
-        if (listener == null) {
-            // OK: API allows the user to not specify a listener, and the handler may
+        if (callback == null) {
+            // OK: API allows the user to not specify a callback, and the handler may
             // also be null in that case. Collapse whole dispatch chain to only call the local
-            // listener
-            return localListener;
+            // callback
+            return localCallback;
         }
 
-        InvokeDispatcher<CameraDeviceImpl.CaptureListener> localSink =
-                new InvokeDispatcher<>(localListener);
+        InvokeDispatcher<CameraDeviceImpl.CaptureCallback> localSink =
+                new InvokeDispatcher<>(localCallback);
 
-        InvokeDispatcher<CaptureListener> userListenerSink =
-                new InvokeDispatcher<>(listener);
-        HandlerDispatcher<CaptureListener> handlerPassthrough =
-                new HandlerDispatcher<>(userListenerSink, handler);
-        DuckTypingDispatcher<CameraDeviceImpl.CaptureListener, CaptureListener> duckToSession
-                = new DuckTypingDispatcher<>(handlerPassthrough, CaptureListener.class);
-        ArgumentReplacingDispatcher<CameraDeviceImpl.CaptureListener, CameraCaptureSessionImpl>
+        InvokeDispatcher<CaptureCallback> userCallbackSink =
+                new InvokeDispatcher<>(callback);
+        HandlerDispatcher<CaptureCallback> handlerPassthrough =
+                new HandlerDispatcher<>(userCallbackSink, handler);
+        DuckTypingDispatcher<CameraDeviceImpl.CaptureCallback, CaptureCallback> duckToSession
+                = new DuckTypingDispatcher<>(handlerPassthrough, CaptureCallback.class);
+        ArgumentReplacingDispatcher<CameraDeviceImpl.CaptureCallback, CameraCaptureSessionImpl>
                 replaceDeviceWithSession = new ArgumentReplacingDispatcher<>(duckToSession,
                         /*argumentIndex*/0, this);
 
-        BroadcastDispatcher<CameraDeviceImpl.CaptureListener> broadcaster =
-                new BroadcastDispatcher<CameraDeviceImpl.CaptureListener>(
+        BroadcastDispatcher<CameraDeviceImpl.CaptureCallback> broadcaster =
+                new BroadcastDispatcher<CameraDeviceImpl.CaptureCallback>(
                     replaceDeviceWithSession,
                     localSink);
 
-        return new ListenerProxies.DeviceCaptureListenerProxy(broadcaster);
+        return new CallbackProxies.DeviceCaptureCallbackProxy(broadcaster);
     }
 
     /**
      *
-     * Create an internal state listener, to be invoked on the mDeviceHandler
+     * Create an internal state callback, to be invoked on the mDeviceHandler
      *
      * <p>It has a few behaviors:
      * <ul>
@@ -443,10 +443,10 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
      * </ul>
      * </p>
      * */
-    CameraDeviceImpl.StateListenerKK getDeviceStateListener() {
+    CameraDeviceImpl.StateCallbackKK getDeviceStateCallback() {
         final CameraCaptureSession session = this;
 
-        return new CameraDeviceImpl.StateListenerKK() {
+        return new CameraDeviceImpl.StateCallbackKK() {
             private boolean mBusy = false;
             private boolean mActive = false;
 
@@ -471,7 +471,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                 mIdleDrainer.taskStarted();
                 mActive = true;
 
-                mStateListener.onActive(session);
+                mStateCallback.onActive(session);
             }
 
             @Override
@@ -507,7 +507,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                 mBusy = false;
                 mActive = false;
 
-                mStateListener.onReady(session);
+                mStateCallback.onReady(session);
             }
 
             @Override
@@ -629,7 +629,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
                 // Fast path: A new capture session has replaced this one; don't unconfigure.
                 if (mSkipUnconfigure) {
-                    mStateListener.onClosed(CameraCaptureSessionImpl.this);
+                    mStateCallback.onClosed(CameraCaptureSessionImpl.this);
                     return;
                 }
 
@@ -655,7 +655,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         public void onDrained() {
             synchronized (CameraCaptureSessionImpl.this) {
                 // The device has finished unconfiguring. It's now fully closed.
-                mStateListener.onClosed(CameraCaptureSessionImpl.this);
+                mStateCallback.onClosed(CameraCaptureSessionImpl.this);
             }
         }
     }
