@@ -76,7 +76,6 @@
     <!-- Title for the print dialog announced to the user for accessibility. Not shown in the UI. [CHAR LIMIT=none] -->
     <string name="print_dialog">Print dialog</string>
 
-
     <!-- Template for the message that shows the current page out of the total number of pages -->
     <string name="current_page_template"><xliff:g id="current_page">%1$d</xliff:g>
         /<xliff:g id="page_count">%2$d</xliff:g></string>
