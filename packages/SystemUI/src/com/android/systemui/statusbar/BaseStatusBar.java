@@ -1623,10 +1623,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }
             }
             boolean showOnKeyguard = shouldShowOnKeyguard(entry.notification);
-            if (onKeyguard && (visibleNotifications >= maxKeyguardNotifications
-                    || !showOnKeyguard)) {
+            if ((isLockscreenPublicMode() && !showOnKeyguard) ||
+                    (onKeyguard && (visibleNotifications >= maxKeyguardNotifications
+                            || !showOnKeyguard))) {
                 entry.row.setVisibility(View.GONE);
-                if (showOnKeyguard) {
+                if (onKeyguard && showOnKeyguard) {
                     mKeyguardIconOverflowContainer.getIconsView().addNotification(entry);
                 }
             } else {
