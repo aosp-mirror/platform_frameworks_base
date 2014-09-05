@@ -8686,15 +8686,17 @@ package android.content.pm {
 
   public class PackageInstaller {
     method public void abandonSession(int);
-    method public void addSessionCallback(android.content.pm.PackageInstaller.SessionCallback);
-    method public void addSessionCallback(android.content.pm.PackageInstaller.SessionCallback, android.os.Handler);
     method public int createSession(android.content.pm.PackageInstaller.SessionParams) throws java.io.IOException;
     method public java.util.List<android.content.pm.PackageInstaller.SessionInfo> getAllSessions();
     method public java.util.List<android.content.pm.PackageInstaller.SessionInfo> getMySessions();
     method public android.content.pm.PackageInstaller.SessionInfo getSessionInfo(int);
     method public android.content.pm.PackageInstaller.Session openSession(int);
-    method public void removeSessionCallback(android.content.pm.PackageInstaller.SessionCallback);
+    method public void registerSessionCallback(android.content.pm.PackageInstaller.SessionCallback);
+    method public void registerSessionCallback(android.content.pm.PackageInstaller.SessionCallback, android.os.Handler);
     method public void uninstall(java.lang.String, android.content.IntentSender);
+    method public void unregisterSessionCallback(android.content.pm.PackageInstaller.SessionCallback);
+    method public void updateSessionAppIcon(int, android.graphics.Bitmap);
+    method public void updateSessionAppLabel(int, java.lang.CharSequence);
     field public static final java.lang.String ACTION_SESSION_DETAILS = "android.content.pm.action.SESSION_DETAILS";
     field public static final java.lang.String EXTRA_OTHER_PACKAGE_NAME = "android.content.pm.extra.OTHER_PACKAGE_NAME";
     field public static final java.lang.String EXTRA_PACKAGE_NAME = "android.content.pm.extra.PACKAGE_NAME";
@@ -8726,6 +8728,7 @@ package android.content.pm {
 
   public static abstract class PackageInstaller.SessionCallback {
     ctor public PackageInstaller.SessionCallback();
+    method public abstract void onBadgingChanged(int);
     method public abstract void onClosed(int);
     method public abstract void onCreated(int);
     method public abstract void onFinished(int, boolean);

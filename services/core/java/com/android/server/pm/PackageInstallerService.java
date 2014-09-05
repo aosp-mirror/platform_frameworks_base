@@ -47,12 +47,12 @@ import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.PackageInstaller;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Binder;
@@ -581,6 +581,30 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
+    public void updateSessionAppIcon(int sessionId, Bitmap appIcon) {
+        synchronized (mSessions) {
+            final PackageInstallerSession session = mSessions.get(sessionId);
+            if (session == null || !isCallingUidOwner(session)) {
+                throw new SecurityException("Caller has no access to session " + sessionId);
+            }
+            session.params.appIcon = appIcon;
+            mInternalCallback.onSessionBadgingChanged(session);
+        }
+    }
+
+    @Override
+    public void updateSessionAppLabel(int sessionId, String appLabel) {
+        synchronized (mSessions) {
+            final PackageInstallerSession session = mSessions.get(sessionId);
+            if (session == null || !isCallingUidOwner(session)) {
+                throw new SecurityException("Caller has no access to session " + sessionId);
+            }
+            session.params.appLabel = appLabel;
+            mInternalCallback.onSessionBadgingChanged(session);
+        }
+    }
+
+    @Override
     public void abandonSession(int sessionId) {
         synchronized (mSessions) {
             final PackageInstallerSession session = mSessions.get(sessionId);
@@ -681,9 +705,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     public SessionInfo getSessionInfo(int sessionId) {
         synchronized (mSessions) {
             final PackageInstallerSession session = mSessions.get(sessionId);
-            if (!isCallingUidOwner(session)) {
-                enforceCallerCanReadSessions();
-            }
             return session != null ? session.generateInfo() : null;
         }
     }
@@ -691,7 +712,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     @Override
     public List<SessionInfo> getAllSessions(int userId) {
         mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "getAllSessions");
-        enforceCallerCanReadSessions();
 
         final List<SessionInfo> result = new ArrayList<>();
         synchronized (mSessions) {
@@ -755,8 +775,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     @Override
     public void registerCallback(IPackageInstallerCallback callback, int userId) {
         mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "registerCallback");
-        enforceCallerCanReadSessions();
-
         mCallbacks.register(callback, userId);
     }
 
@@ -784,21 +802,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             return true;
         } else {
             return (session != null) && (callingUid == session.installerUid);
-        }
-    }
-
-    /**
-     * We allow those with permission, or the current home app.
-     */
-    private void enforceCallerCanReadSessions() {
-        final boolean hasPermission = (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.READ_INSTALL_SESSIONS)
-                == PackageManager.PERMISSION_GRANTED);
-        final boolean isHomeApp = mPm.checkCallerIsHomeApp();
-        if (hasPermission || isHomeApp) {
-            return;
-        } else {
-            throw new SecurityException("Caller must be current home app to read install sessions");
         }
     }
 
@@ -893,10 +896,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     private static class Callbacks extends Handler {
         private static final int MSG_SESSION_CREATED = 1;
-        private static final int MSG_SESSION_OPENED = 2;
-        private static final int MSG_SESSION_PROGRESS_CHANGED = 3;
-        private static final int MSG_SESSION_CLOSED = 4;
-        private static final int MSG_SESSION_FINISHED = 5;
+        private static final int MSG_SESSION_BADGING_CHANGED = 2;
+        private static final int MSG_SESSION_OPENED = 3;
+        private static final int MSG_SESSION_PROGRESS_CHANGED = 4;
+        private static final int MSG_SESSION_CLOSED = 5;
+        private static final int MSG_SESSION_FINISHED = 6;
 
         private final RemoteCallbackList<IPackageInstallerCallback>
                 mCallbacks = new RemoteCallbackList<>();
@@ -938,6 +942,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 case MSG_SESSION_CREATED:
                     callback.onSessionCreated(sessionId);
                     break;
+                case MSG_SESSION_BADGING_CHANGED:
+                    callback.onSessionBadgingChanged(sessionId);
+                    break;
                 case MSG_SESSION_OPENED:
                     callback.onSessionOpened(sessionId);
                     break;
@@ -955,6 +962,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
         private void notifySessionCreated(int sessionId, int userId) {
             obtainMessage(MSG_SESSION_CREATED, sessionId, userId).sendToTarget();
+        }
+
+        private void notifySessionBadgingChanged(int sessionId, int userId) {
+            obtainMessage(MSG_SESSION_BADGING_CHANGED, sessionId, userId).sendToTarget();
         }
 
         private void notifySessionOpened(int sessionId, int userId) {
@@ -1006,12 +1017,17 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     class InternalCallback {
-        public void onSessionProgressChanged(PackageInstallerSession session, float progress) {
-            mCallbacks.notifySessionProgressChanged(session.sessionId, session.userId, progress);
+        public void onSessionBadgingChanged(PackageInstallerSession session) {
+            mCallbacks.notifySessionBadgingChanged(session.sessionId, session.userId);
+            writeSessionsAsync();
         }
 
         public void onSessionOpened(PackageInstallerSession session) {
             mCallbacks.notifySessionOpened(session.sessionId, session.userId);
+        }
+
+        public void onSessionProgressChanged(PackageInstallerSession session, float progress) {
+            mCallbacks.notifySessionProgressChanged(session.sessionId, session.userId, progress);
         }
 
         public void onSessionClosed(PackageInstallerSession session) {
