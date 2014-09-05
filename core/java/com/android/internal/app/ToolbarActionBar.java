@@ -456,7 +456,7 @@ public class ToolbarActionBar extends ActionBar {
 
     void populateOptionsMenu() {
         if (!mMenuCallbackSet) {
-            mToolbar.setActionMenuPresenterCallback(new ActionMenuPresenterCallback());
+            mToolbar.setMenuCallbacks(new ActionMenuPresenterCallback(), new MenuBuilderCallback());
             mMenuCallbackSet = true;
         }
         final Menu menu = mToolbar.getMenu();
@@ -545,6 +545,26 @@ public class ToolbarActionBar extends ActionBar {
                 mWindowCallback.onPanelClosed(Window.FEATURE_ACTION_BAR, menu);
             }
             mClosingActionMenu = false;
+        }
+    }
+
+    private final class MenuBuilderCallback implements MenuBuilder.Callback {
+
+        @Override
+        public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
+            return false;
+        }
+
+        @Override
+        public void onMenuModeChange(MenuBuilder menu) {
+            if (mWindowCallback != null) {
+                if (mToolbar.isOverflowMenuShowing()) {
+                    mWindowCallback.onPanelClosed(Window.FEATURE_ACTION_BAR, menu);
+                } else if (mWindowCallback.onPreparePanel(Window.FEATURE_OPTIONS_PANEL,
+                        null, menu)) {
+                    mWindowCallback.onMenuOpened(Window.FEATURE_ACTION_BAR, menu);
+                }
+            }
         }
     }
 }
