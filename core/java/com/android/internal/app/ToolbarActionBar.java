@@ -35,6 +35,7 @@ import android.widget.SpinnerAdapter;
 import android.widget.Toolbar;
 import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
+import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.widget.DecorToolbar;
 import com.android.internal.widget.ToolbarWidgetWrapper;
 
@@ -45,6 +46,7 @@ public class ToolbarActionBar extends ActionBar {
     private DecorToolbar mDecorToolbar;
     private boolean mToolbarMenuPrepared;
     private Window.Callback mWindowCallback;
+    private boolean mMenuCallbackSet;
 
     private CharSequence mHomeDescription;
 
@@ -453,6 +455,10 @@ public class ToolbarActionBar extends ActionBar {
     }
 
     void populateOptionsMenu() {
+        if (!mMenuCallbackSet) {
+            mToolbar.setActionMenuPresenterCallback(new ActionMenuPresenterCallback());
+            mMenuCallbackSet = true;
+        }
         final Menu menu = mToolbar.getMenu();
         final MenuBuilder mb = menu instanceof MenuBuilder ? (MenuBuilder) menu : null;
         if (mb != null) {
@@ -512,6 +518,33 @@ public class ToolbarActionBar extends ActionBar {
                 mToolbarMenuPrepared = true;
             }
             return result;
+        }
+    }
+
+    private final class ActionMenuPresenterCallback implements MenuPresenter.Callback {
+        private boolean mClosingActionMenu;
+
+        @Override
+        public boolean onOpenSubMenu(MenuBuilder subMenu) {
+            if (mWindowCallback != null) {
+                mWindowCallback.onMenuOpened(Window.FEATURE_ACTION_BAR, subMenu);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
+            if (mClosingActionMenu) {
+                return;
+            }
+
+            mClosingActionMenu = true;
+            mToolbar.dismissPopupMenus();
+            if (mWindowCallback != null) {
+                mWindowCallback.onPanelClosed(Window.FEATURE_ACTION_BAR, menu);
+            }
+            mClosingActionMenu = false;
         }
     }
 }
