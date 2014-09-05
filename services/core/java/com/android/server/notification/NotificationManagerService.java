@@ -2636,7 +2636,10 @@ public class NotificationManagerService extends SystemService {
                 visibilityOverrides.putInt(record.sbn.getKey(),
                         record.getPackageVisibilityOverride());
             }
+            // Find first min-prio notification for speedbump placement.
             if (speedBumpIndex == -1 &&
+                    // Intrusiveness trumps priority, hence ignore intrusives.
+                    !record.isRecentlyIntrusive() &&
                     record.sbn.getNotification().priority == Notification.PRIORITY_MIN) {
                 speedBumpIndex = keys.size() - 1;
             }
