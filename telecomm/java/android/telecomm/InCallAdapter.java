@@ -241,6 +241,26 @@ public final class InCallAdapter {
     }
 
     /**
+     * Instructs Telecomm to merge child calls of the specified conference call.
+     */
+    public void mergeConference(String callId) {
+        try {
+            mAdapter.mergeConference(callId);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
+     * Instructs Telecomm to swap the child calls of the specified conference call.
+     */
+    public void swapConference(String callId) {
+        try {
+            mAdapter.swapConference(callId);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
      * Instructs Telecomm to turn the proximity sensor on.
      */
     public void turnProximitySensorOn() {

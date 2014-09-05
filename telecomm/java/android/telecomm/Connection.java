@@ -1068,10 +1068,10 @@ public abstract class Connection {
         if (mState != state) {
             Log.d(this, "setState: %s", stateToString(state));
             mState = state;
+            onSetState(state);
             for (Listener l : mListeners) {
                 l.onStateChanged(this, state);
             }
-            onSetState(state);
         }
     }
 
