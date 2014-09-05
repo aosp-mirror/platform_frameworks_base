@@ -4436,10 +4436,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             loge("Unknown NetworkAgentInfo in handleLingerComplete");
             return;
         }
-        if (DBG) log("handleLingerComplete for " + oldNetwork.name());
         if (DBG) {
-            if (oldNetwork.networkRequests.size() != 0) {
-                loge("Dead network still had " + oldNetwork.networkRequests.size() + " requests");
+            log("handleLingerComplete for " + oldNetwork.name());
+            for (int i = 0; i < oldNetwork.networkRequests.size(); i++) {
+                NetworkRequest nr = oldNetwork.networkRequests.valueAt(i);
+                // Ignore listening requests.
+                if (mNetworkRequests.get(nr).isRequest == false) continue;
+                loge("Dead network still had at least " + nr);
+                break;
             }
         }
         oldNetwork.asyncChannel.disconnect();
