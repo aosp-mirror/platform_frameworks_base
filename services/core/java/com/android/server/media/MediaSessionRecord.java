@@ -233,8 +233,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * {@link AudioManager#ADJUST_SAME}.
      *
      * @param direction The direction to adjust volume in.
+     * @param flags Any of the flags from {@link AudioManager}.
+     * @param packageName The package that made the original volume request.
+     * @param uid The uid that made the original volume request.
+     * @param useSuggested True to use adjustSuggestedStreamVolume instead of
+     *            adjustStreamVolume.
      */
-    public void adjustVolume(int direction, int flags, String packageName, int uid) {
+    public void adjustVolume(int direction, int flags, String packageName, int uid,
+            boolean useSuggested) {
         if (isPlaybackActive(false) || hasFlag(MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY)) {
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
         }
@@ -245,8 +251,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
         if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
             int stream = AudioAttributes.toLegacyStreamType(mAudioAttrs);
-            mAudioManagerInternal.adjustStreamVolumeForUid(stream, direction, flags, packageName,
-                    uid);
+            if (useSuggested) {
+                mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(stream, direction, flags,
+                        packageName, uid);
+            } else {
+                mAudioManagerInternal.adjustStreamVolumeForUid(stream, direction, flags,
+                        packageName, uid);
+            }
         } else {
             if (mVolumeControlType == VolumeProvider.VOLUME_CONTROL_FIXED) {
                 // Nothing to do, the volume cannot be changed
@@ -1030,7 +1041,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaSessionRecord.this.adjustVolume(direction, flags, packageName, uid);
+                MediaSessionRecord.this.adjustVolume(direction, flags, packageName, uid, false);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
