@@ -810,6 +810,13 @@ abstract class HdmiCecLocalDevice {
         Slog.w(TAG, "sendKeyEvent not implemented");
     }
 
+    void sendUserControlPressedAndReleased(int targetAddress, int cecKeycode) {
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildUserControlPressed(
+                mAddress, targetAddress, cecKeycode));
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildUserControlReleased(
+                mAddress, targetAddress));
+    }
+
     /**
      * Dump internal status of HdmiCecLocalDevice object.
      */

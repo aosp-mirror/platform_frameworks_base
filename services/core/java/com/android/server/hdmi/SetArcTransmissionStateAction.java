@@ -53,6 +53,18 @@ final class SetArcTransmissionStateAction extends HdmiCecFeatureAction {
     @Override
     boolean start() {
         if (mEnabled) {
+            // Enable ARC status immediately after sending <Report Arc Initiated>.
+            // If AVR responds with <Feature Abort>, disable ARC status again.
+            // This is different from spec that says that turns ARC status to
+            // "Enabled" if <Report ARC Initiated> is acknowledged and no
+            // <Feature Abort> is received.
+            // But implemented this way to save the time having to wait for
+            // <Feature Abort>.
+            setArcStatus(true);
+            // If succeeds to send <Report ARC Initiated>, wait general timeout
+            // to check whether there is no <Feature Abort> for <Report ARC Initiated>.
+            mState = STATE_WAITING_TIMEOUT;
+            addTimer(mState, HdmiConfig.TIMEOUT_MS);
             sendReportArcInitiated();
         } else {
             setArcStatus(false);
@@ -67,23 +79,11 @@ final class SetArcTransmissionStateAction extends HdmiCecFeatureAction {
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error == Constants.SEND_RESULT_SUCCESS) {
-                    // Enable ARC status immediately after sending <Report Arc Initiated>.
-                    // If AVR responds with <Feature Abort>, disable ARC status again.
-                    // This is different from spec that says that turns ARC status to
-                    // "Enabled" if <Report ARC Initiated> is acknowledged and no
-                    // <Feature Abort> is received.
-                    // But implemented this way to save the time having to wait for
-                    // <Feature Abort>.
-                    setArcStatus(true);
-                    // If succeeds to send <Report ARC Initiated>, wait general timeout
-                    // to check whether there is no <Feature Abort> for <Report ARC Initiated>.
-                    mState = STATE_WAITING_TIMEOUT;
-                    addTimer(mState, HdmiConfig.TIMEOUT_MS);
-                } else {
+                if (error != Constants.SEND_RESULT_SUCCESS) {
                     // If fails to send <Report ARC Initiated>, disable ARC and
                     // send <Report ARC Terminated> directly.
                     setArcStatus(false);
+                    HdmiLogger.debug("Failed to send <Report Arc Initiated>.");
                     finish();
                 }
             }
@@ -112,6 +112,7 @@ final class SetArcTransmissionStateAction extends HdmiCecFeatureAction {
         if (opcode == Constants.MESSAGE_FEATURE_ABORT) {
             int originalOpcode = cmd.getParams()[0] & 0xFF;
             if (originalOpcode == Constants.MESSAGE_REPORT_ARC_INITIATED) {
+                HdmiLogger.debug("Feature aborted for <Report Arc Initiated>");
                 setArcStatus(false);
                 finish();
                 return true;
