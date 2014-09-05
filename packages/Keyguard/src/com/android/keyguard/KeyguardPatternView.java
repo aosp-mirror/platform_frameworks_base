@@ -15,38 +15,27 @@
  */
 package com.android.keyguard;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
-import android.accounts.AccountManagerFuture;
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
-import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
 
-import java.io.IOException;
 import java.util.List;
 
 public class KeyguardPatternView extends LinearLayout implements KeyguardSecurityView,
@@ -70,9 +59,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     private CountDownTimer mCountdownTimer = null;
     private LockPatternUtils mLockPatternUtils;
     private LockPatternView mLockPatternView;
-    private Button mForgotPatternButton;
     private KeyguardSecurityCallback mCallback;
-    private boolean mEnableFallback;
 
     /**
      * Keeps track of the last time we poked the wake lock during dispatching of the touch event.
@@ -144,20 +131,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         // vibrate mode will be the same for the life of this screen
         mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
 
-        mForgotPatternButton = (Button) findViewById(R.id.forgot_password_button);
-        // note: some configurations don't have an emergency call area
-        if (mForgotPatternButton != null) {
-            mForgotPatternButton.setText(R.string.kg_forgot_pattern_button_text);
-            mForgotPatternButton.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-                    mCallback.showBackupSecurity();
-                }
-            });
-        }
-
         setFocusableInTouchMode(true);
 
-        maybeEnableFallback(mContext);
         mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
         View bouncerFrameView = findViewById(R.id.keyguard_bouncer_frame);
@@ -167,24 +142,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
         mKeyguardBouncerFrame = (ViewGroup) findViewById(R.id.keyguard_bouncer_frame);
         mHelpMessage = (KeyguardMessageArea) findViewById(R.id.keyguard_message_area);
-    }
-
-    private void updateFooter(FooterMode mode) {
-        if (mForgotPatternButton == null) return; // no ECA? no footer
-
-        switch (mode) {
-            case Normal:
-                if (DEBUG) Log.d(TAG, "mode normal");
-                mForgotPatternButton.setVisibility(View.GONE);
-                break;
-            case ForgotLockPattern:
-                if (DEBUG) Log.d(TAG, "mode ForgotLockPattern");
-                mForgotPatternButton.setVisibility(View.VISIBLE);
-                break;
-            case VerifyUnlocked:
-                if (DEBUG) Log.d(TAG, "mode VerifyUnlocked");
-                mForgotPatternButton.setVisibility(View.GONE);
-        }
     }
 
     @Override
@@ -217,18 +174,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         } else {
             displayDefaultSecurityMessage();
         }
-
-        // the footer depends on how many total attempts the user has failed
-        if (mCallback.isVerifyUnlockOnly()) {
-            updateFooter(FooterMode.VerifyUnlocked);
-        } else if (mEnableFallback &&
-                (mKeyguardUpdateMonitor.getFailedUnlockAttempts()
-                        >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
-            updateFooter(FooterMode.ForgotLockPattern);
-        } else {
-            updateFooter(FooterMode.Normal);
-        }
-
     }
 
     private void displayDefaultSecurityMessage() {
@@ -291,68 +236,10 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         }
     }
 
-    private void maybeEnableFallback(Context context) {
-        // Ask the account manager if we have an account that can be used as a
-        // fallback in case the user forgets his pattern.
-        AccountAnalyzer accountAnalyzer = new AccountAnalyzer(AccountManager.get(context));
-        accountAnalyzer.start();
-    }
-
-    private class AccountAnalyzer implements AccountManagerCallback<Bundle> {
-        private final AccountManager mAccountManager;
-        private final Account[] mAccounts;
-        private int mAccountIndex;
-
-        private AccountAnalyzer(AccountManager accountManager) {
-            mAccountManager = accountManager;
-            mAccounts = accountManager.getAccountsByTypeAsUser("com.google",
-                    new UserHandle(mLockPatternUtils.getCurrentUser()));
-        }
-
-        private void next() {
-            // if we are ready to enable the fallback or if we depleted the list of accounts
-            // then finish and get out
-            if (mEnableFallback || mAccountIndex >= mAccounts.length) {
-                return;
-            }
-
-            // lookup the confirmCredentials intent for the current account
-            mAccountManager.confirmCredentialsAsUser(mAccounts[mAccountIndex], null, null, this,
-                    null, new UserHandle(mLockPatternUtils.getCurrentUser()));
-        }
-
-        public void start() {
-            mEnableFallback = false;
-            mAccountIndex = 0;
-            next();
-        }
-
-        public void run(AccountManagerFuture<Bundle> future) {
-            try {
-                Bundle result = future.getResult();
-                if (result.getParcelable(AccountManager.KEY_INTENT) != null) {
-                    mEnableFallback = true;
-                }
-            } catch (OperationCanceledException e) {
-                // just skip the account if we are unable to query it
-            } catch (IOException e) {
-                // just skip the account if we are unable to query it
-            } catch (AuthenticatorException e) {
-                // just skip the account if we are unable to query it
-            } finally {
-                mAccountIndex++;
-                next();
-            }
-        }
-    }
-
     private void handleAttemptLockout(long elapsedRealtimeDeadline) {
         mLockPatternView.clearPattern();
         mLockPatternView.setEnabled(false);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
-        if (mEnableFallback) {
-            updateFooter(FooterMode.ForgotLockPattern);
-        }
 
         mCountdownTimer = new CountDownTimer(elapsedRealtimeDeadline - elapsedRealtime, 1000) {
 
@@ -367,12 +254,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             public void onFinish() {
                 mLockPatternView.setEnabled(true);
                 displayDefaultSecurityMessage();
-                // TODO mUnlockIcon.setVisibility(View.VISIBLE);
-                if (mEnableFallback) {
-                    updateFooter(FooterMode.ForgotLockPattern);
-                } else {
-                    updateFooter(FooterMode.Normal);
-                }
             }
 
         }.start();
@@ -489,13 +370,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             // Also animate the Emergency call
             mAppearAnimationUtils.createAnimation(mEcaView, delay, duration, startTranslationY,
             interpolator, null);
-
-            // And the forgot pattern button
-            if (mForgotPatternButton != null
-                    && mForgotPatternButton.getVisibility() == View.VISIBLE) {
-                mAppearAnimationUtils.createAnimation(mForgotPatternButton, delay, duration,
-                        startTranslationY, interpolator, null);
-            }
         }
         animator.start();
         mLockPatternView.invalidate();
