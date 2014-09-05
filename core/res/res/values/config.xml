@@ -1698,9 +1698,13 @@
          and adds page info " x/y". This config is used to set which carrier doesn't
          support EMS and whether page info should be added at the beginning or the end.
          We use tag 'prefix' for position beginning and 'suffix' for position end.
-         Examples: <item>311480;prefix</item> <item>310260;suffix</item>
+         And use gid to distinguish different carriers which using same mcc and mnc.
+         Examples: <item>simOperatorNumber;position;gid(optional)</item>>
     -->
-    <string-array translatable="false" name="no_ems_support_sim_operators" />
+    <string-array translatable="false" name="no_ems_support_sim_operators">
+        <!-- VZW -->
+        <item>20404;suffix;BAE0000000000000</item>
+    </string-array>
 
     <bool name="config_auto_attach_data_on_creation">true</bool>
 
