@@ -158,9 +158,11 @@ public:
 
     // Marks the start of a frame, which will update the frame time and move all
     // next frame animations into the current frame
-    virtual void startFrame() {
-        mRootNode->doAttachAnimatingNodes(this);
-        AnimationContext::startFrame();
+    virtual void startFrame(TreeInfo::TraversalMode mode) {
+        if (mode == TreeInfo::MODE_FULL) {
+            mRootNode->doAttachAnimatingNodes(this);
+        }
+        AnimationContext::startFrame(mode);
     }
 
     // Runs any animations still left in mCurrentFrameAnimations
