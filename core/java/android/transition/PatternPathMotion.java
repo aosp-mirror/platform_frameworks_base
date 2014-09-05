@@ -34,36 +34,35 @@ import android.util.PathParser;
  * <pre>
  * {@code
  * &lt;changeBounds>
- *     &lt;patternMotion android:pathData="M0 0 L0 100 L100 100"/>
- * &lt;/changeBounds>
- * }
+ *     &lt;patternPathMotion android:patternPathData="M0 0 L0 100 L100 100"/>
+ * &lt;/changeBounds>}
  * </pre>
  */
-public class PatternMotion extends PathMotion {
+public class PatternPathMotion extends PathMotion {
 
-    private Path mOriginalPattern;
+    private Path mOriginalPatternPath;
 
-    private final Path mPattern = new Path();
+    private final Path mPatternPath = new Path();
 
     private final Matrix mTempMatrix = new Matrix();
 
     /**
-     * Constructs a PatternMotion with a straight-line pattern.
+     * Constructs a PatternPathMotion with a straight-line pattern.
      */
-    public PatternMotion() {
-        mPattern.lineTo(1, 0);
-        mOriginalPattern = mPattern;
+    public PatternPathMotion() {
+        mPatternPath.lineTo(1, 0);
+        mOriginalPatternPath = mPatternPath;
     }
 
-    public PatternMotion(Context context, AttributeSet attrs) {
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PatternMotion);
+    public PatternPathMotion(Context context, AttributeSet attrs) {
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PatternPathMotion);
         try {
-            String pathData = a.getString(R.styleable.PatternMotion_pathData);
+            String pathData = a.getString(R.styleable.PatternPathMotion_patternPathData);
             if (pathData == null) {
-                throw new RuntimeException("pathData must be supplied for patternMotion");
+                throw new RuntimeException("pathData must be supplied for patternPathMotion");
             }
             Path pattern = PathParser.createPathFromPathData(pathData);
-            setPattern(pattern);
+            setPatternPath(pattern);
         } finally {
             a.recycle();
         }
@@ -71,14 +70,15 @@ public class PatternMotion extends PathMotion {
     }
 
     /**
-     * Creates a PatternMotion with the Path defining a pattern of motion between two coordinates.
-     * The pattern will be translated, rotated, and scaled to fit between the start and end points.
-     * The pattern must not be empty and must have the end point differ from the start point.
+     * Creates a PatternPathMotion with the Path defining a pattern of motion between two
+     * coordinates. The pattern will be translated, rotated, and scaled to fit between the start
+     * and end points. The pattern must not be empty and must have the end point differ from the
+     * start point.
      *
-     * @param pattern A Path to be used as a pattern for two-dimensional motion.
+     * @param patternPath A Path to be used as a pattern for two-dimensional motion.
      */
-    public PatternMotion(Path pattern) {
-        setPattern(pattern);
+    public PatternPathMotion(Path patternPath) {
+        setPatternPath(patternPath);
     }
 
     /**
@@ -87,10 +87,10 @@ public class PatternMotion extends PathMotion {
      * The pattern must not be empty and must have the end point differ from the start point.
      *
      * @return the Path defining a pattern of motion between two coordinates.
-     * @attr ref android.R.styleable#PatternMotion_pathData
+     * @attr ref android.R.styleable#PatternPathMotion_patternPathData
      */
-    public Path getPattern() {
-        return mOriginalPattern;
+    public Path getPatternPath() {
+        return mOriginalPatternPath;
     }
 
     /**
@@ -98,11 +98,11 @@ public class PatternMotion extends PathMotion {
      * The pattern will be translated, rotated, and scaled to fit between the start and end points.
      * The pattern must not be empty and must have the end point differ from the start point.
      *
-     * @param pattern A Path to be used as a pattern for two-dimensional motion.
-     * @attr ref android.R.styleable#PatternMotion_pathData
+     * @param patternPath A Path to be used as a pattern for two-dimensional motion.
+     * @attr ref android.R.styleable#PatternPathMotion_patternPathData
      */
-    public void setPattern(Path pattern) {
-        PathMeasure pathMeasure = new PathMeasure(pattern, false);
+    public void setPatternPath(Path patternPath) {
+        PathMeasure pathMeasure = new PathMeasure(patternPath, false);
         float length = pathMeasure.getLength();
         float[] pos = new float[2];
         pathMeasure.getPosTan(length, pos, null);
@@ -124,8 +124,8 @@ public class PatternMotion extends PathMotion {
         mTempMatrix.postScale(scale, scale);
         double angle = Math.atan2(dy, dx);
         mTempMatrix.postRotate((float) Math.toDegrees(-angle));
-        pattern.transform(mTempMatrix, mPattern);
-        mOriginalPattern = pattern;
+        patternPath.transform(mTempMatrix, mPatternPath);
+        mOriginalPatternPath = patternPath;
     }
 
     @Override
@@ -139,7 +139,7 @@ public class PatternMotion extends PathMotion {
         mTempMatrix.postRotate((float) Math.toDegrees(angle));
         mTempMatrix.postTranslate(startX, startY);
         Path path = new Path();
-        mPattern.transform(mTempMatrix, path);
+        mPatternPath.transform(mTempMatrix, path);
         return path;
     }
 

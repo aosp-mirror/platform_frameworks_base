@@ -1989,8 +1989,33 @@ public abstract class Transition implements Cloneable {
      *     by extending PathMotion and implementing
      *     {@link android.transition.PathMotion#getPath(float, float, float, float)}.
      * </p>
+     * <p>
+     *     When describing in XML, use a nested XML tag for the path motion. It can be one of
+     *     the built-in tags <code>arcMotion</code> or <code>patternPathMotion</code> or it can
+     *     be a custom PathMotion using <code>pathMotion</code> with the <code>class</code>
+     *     attributed with the fully-described class name. For example:</p>
+     * <pre>
+     * {@code
+     * &lt;changeBounds>
+     *     &lt;pathMotion class="my.app.transition.MyPathMotion"/>
+     * &lt;/changeBounds>
+     * }
+     * </pre>
+     * <p>or</p>
+     * <pre>
+     * {@code
+     * &lt;changeBounds>
+     *   &lt;arcMotion android:minimumHorizontalAngle="15"
+     *     android:minimumVerticalAngle="0" android:maximumAngle="90"/>
+     * &lt;/changeBounds>
+     * }
+     * </pre>
+     *
      * @param pathMotion Algorithm object to use for determining how to interpolate in two
      *                   dimensions. If null, a straight-path algorithm will be used.
+     * @see android.transition.ArcMotion
+     * @see PatternPathMotion
+     * @see android.transition.PathMotion
      */
     public void setPathMotion(PathMotion pathMotion) {
         if (pathMotion == null) {
@@ -2004,7 +2029,31 @@ public abstract class Transition implements Cloneable {
      * Returns the algorithm object used to interpolate along two dimensions. This is typically
      * used to determine the View motion between two points.
      *
+     * <p>
+     *     When describing in XML, use a nested XML tag for the path motion. It can be one of
+     *     the built-in tags <code>arcMotion</code> or <code>patternPathMotion</code> or it can
+     *     be a custom PathMotion using <code>pathMotion</code> with the <code>class</code>
+     *     attributed with the fully-described class name. For example:</p>
+     * <pre>
+     * {@code
+     * &lt;changeBounds>
+     *     &lt;pathMotion class="my.app.transition.MyPathMotion"/>
+     * &lt;/changeBounds>}
+     * </pre>
+     * <p>or</p>
+     * <pre>
+     * {@code
+     * &lt;changeBounds>
+     *   &lt;arcMotion android:minimumHorizontalAngle="15"
+     *              android:minimumVerticalAngle="0"
+     *              android:maximumAngle="90"/>
+     * &lt;/changeBounds>}
+     * </pre>
+     *
      * @return The algorithm object used to interpolate along two dimensions.
+     * @see android.transition.ArcMotion
+     * @see PatternPathMotion
+     * @see android.transition.PathMotion
      */
     public PathMotion getPathMotion() {
         return mPathMotion;
