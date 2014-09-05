@@ -21,24 +21,30 @@ import android.app.usage.UsageStatsManager;
 import android.util.AtomicFile;
 import android.util.Slog;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 /**
  * Provides an interface to query for UsageStat data from an XML database.
  */
 class UsageStatsDatabase {
+    private static final int CURRENT_VERSION = 1;
+
     private static final String TAG = "UsageStatsDatabase";
     private static final boolean DEBUG = UsageStatsService.DEBUG;
 
     private final Object mLock = new Object();
     private final File[] mIntervalDirs;
     private final TimeSparseArray<AtomicFile>[] mSortedStatFiles;
-    private final Calendar mCal;
+    private final UnixCalendar mCal;
+    private final File mVersionFile;
 
     public UsageStatsDatabase(File dir) {
         mIntervalDirs = new File[] {
@@ -47,8 +53,9 @@ class UsageStatsDatabase {
                 new File(dir, "monthly"),
                 new File(dir, "yearly"),
         };
+        mVersionFile = new File(dir, "version");
         mSortedStatFiles = new TimeSparseArray[mIntervalDirs.length];
-        mCal = Calendar.getInstance();
+        mCal = new UnixCalendar(0);
     }
 
     /**
@@ -63,6 +70,8 @@ class UsageStatsDatabase {
                             + f.getAbsolutePath());
                 }
             }
+
+            checkVersionLocked();
 
             final FilenameFilter backupFileFilter = new FilenameFilter() {
                 @Override
@@ -82,6 +91,43 @@ class UsageStatsDatabase {
 
                     for (File f : files) {
                         mSortedStatFiles[i].put(Long.parseLong(f.getName()), new AtomicFile(f));
+                    }
+                }
+            }
+        }
+    }
+
+    private void checkVersionLocked() {
+        int version;
+        try (BufferedReader reader = new BufferedReader(new FileReader(mVersionFile))) {
+            version = Integer.parseInt(reader.readLine());
+        } catch (NumberFormatException | IOException e) {
+            version = 0;
+        }
+
+        if (version != CURRENT_VERSION) {
+            Slog.i(TAG, "Upgrading from version " + version + " to " + CURRENT_VERSION);
+            doUpgradeLocked(version, CURRENT_VERSION);
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(mVersionFile))) {
+                writer.write(Integer.toString(CURRENT_VERSION));
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to write new version");
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void doUpgradeLocked(int thisVersion, int nextVersion) {
+        if (thisVersion == 0) {
+            // Delete all files if we are version 0. This is a pre-release version,
+            // so this is fine.
+            Slog.i(TAG, "Deleting all usage stats files");
+            for (int i = 0; i < mIntervalDirs.length; i++) {
+                File[] files = mIntervalDirs[i].listFiles();
+                if (files != null) {
+                    for (File f : files) {
+                        f.delete();
                     }
                 }
             }
@@ -161,25 +207,48 @@ class UsageStatsDatabase {
                 throw new IllegalArgumentException("Bad interval type " + intervalType);
             }
 
-            if (endTime < beginTime) {
+            final TimeSparseArray<AtomicFile> intervalStats = mSortedStatFiles[intervalType];
+
+            if (endTime <= beginTime) {
+                if (DEBUG) {
+                    Slog.d(TAG, "endTime(" + endTime + ") <= beginTime(" + beginTime + ")");
+                }
                 return null;
             }
 
-            final int startIndex = mSortedStatFiles[intervalType].closestIndexOnOrBefore(beginTime);
+            int startIndex = intervalStats.closestIndexOnOrBefore(beginTime);
             if (startIndex < 0) {
+                // All the stats available have timestamps after beginTime, which means they all
+                // match.
+                startIndex = 0;
+            }
+
+            int endIndex = intervalStats.closestIndexOnOrBefore(endTime);
+            if (endIndex < 0) {
+                // All the stats start after this range ends, so nothing matches.
+                if (DEBUG) {
+                    Slog.d(TAG, "No results for this range. All stats start after.");
+                }
                 return null;
             }
 
-            int endIndex = mSortedStatFiles[intervalType].closestIndexOnOrAfter(endTime);
-            if (endIndex < 0) {
-                endIndex = mSortedStatFiles[intervalType].size() - 1;
+            if (intervalStats.keyAt(endIndex) == endTime) {
+                // The endTime is exclusive, so if we matched exactly take the one before.
+                endIndex--;
+                if (endIndex < 0) {
+                    // All the stats start after this range ends, so nothing matches.
+                    if (DEBUG) {
+                        Slog.d(TAG, "No results for this range. All stats start after.");
+                    }
+                    return null;
+                }
             }
 
             try {
                 IntervalStats stats = new IntervalStats();
                 ArrayList<T> results = new ArrayList<>();
                 for (int i = startIndex; i <= endIndex; i++) {
-                    final AtomicFile f = mSortedStatFiles[intervalType].valueAt(i);
+                    final AtomicFile f = intervalStats.valueAt(i);
 
                     if (DEBUG) {
                         Slog.d(TAG, "Reading stat file " + f.getBaseFile().getAbsolutePath());
@@ -230,22 +299,22 @@ class UsageStatsDatabase {
         synchronized (mLock) {
             long timeNow = System.currentTimeMillis();
             mCal.setTimeInMillis(timeNow);
-            mCal.add(Calendar.YEAR, -3);
+            mCal.addYears(-3);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_YEARLY],
                     mCal.getTimeInMillis());
 
             mCal.setTimeInMillis(timeNow);
-            mCal.add(Calendar.MONTH, -6);
+            mCal.addMonths(-6);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_MONTHLY],
                     mCal.getTimeInMillis());
 
             mCal.setTimeInMillis(timeNow);
-            mCal.add(Calendar.WEEK_OF_YEAR, -4);
+            mCal.addWeeks(-4);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_WEEKLY],
                     mCal.getTimeInMillis());
 
             mCal.setTimeInMillis(timeNow);
-            mCal.add(Calendar.DAY_OF_YEAR, -7);
+            mCal.addDays(-7);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_DAILY],
                     mCal.getTimeInMillis());
         }
