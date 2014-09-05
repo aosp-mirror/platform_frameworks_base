@@ -4031,10 +4031,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void overridePendingAppTransitionAspectScaledThumb(Bitmap srcThumb, int startX,
-            int startY, IRemoteCallback startedCallback, boolean scaleUp) {
+            int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
+            boolean scaleUp) {
         synchronized(mWindowMap) {
             mAppTransition.overridePendingAppTransitionAspectScaledThumb(srcThumb, startX,
-                    startY, startedCallback, scaleUp);
+                    startY, targetWidth, targetHeight, startedCallback, scaleUp);
         }
     }
 
