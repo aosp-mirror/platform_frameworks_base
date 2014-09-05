@@ -28,7 +28,10 @@ public abstract class FrameStats {
      */
     public static final long UNDEFINED_TIME_NANO = -1;
 
+    /** @hide */
     protected long mRefreshPeriodNano;
+
+    /** @hide */
     protected long[] mFramesPresentedTimeNano;
 
     /**
