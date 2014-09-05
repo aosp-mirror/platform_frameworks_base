@@ -121,9 +121,10 @@ public class GLThreadManager {
      * Create a new GL thread and renderer.
      *
      * @param cameraId the camera id for this thread.
+     * @param facing direction the camera is facing.
      */
-    public GLThreadManager(int cameraId) {
-        mTextureRenderer = new SurfaceTextureRenderer();
+    public GLThreadManager(int cameraId, int facing) {
+        mTextureRenderer = new SurfaceTextureRenderer(facing);
         TAG = String.format("CameraDeviceGLThread-%d", cameraId);
         mGLHandlerThread = new RequestHandlerThread(TAG, mGLHandlerCb);
     }
