@@ -37,7 +37,7 @@ import android.util.Log;
 import android.view.View;
 import com.android.internal.annotations.GuardedBy;
 import com.android.printspooler.renderer.IPdfRenderer;
-import com.android.printspooler.renderer.PdfRendererService;
+import com.android.printspooler.renderer.PdfManipulationService;
 import com.android.printspooler.util.BitmapSerializeUtils;
 import dalvik.system.CloseGuard;
 import libcore.io.IoUtils;
@@ -490,7 +490,8 @@ public final class PageContentRepository {
             new AsyncTask<Void, Void, Integer>() {
                 @Override
                 protected void onPreExecute() {
-                    Intent intent = new Intent(mContext, PdfRendererService.class);
+                    Intent intent = new Intent(PdfManipulationService.ACTION_GET_RENDERER);
+                    intent.setClass(mContext, PdfManipulationService.class);
                     mContext.bindService(intent, AsyncRenderer.this, Context.BIND_AUTO_CREATE);
                 }
 
@@ -555,7 +556,7 @@ public final class PageContentRepository {
                         callback.run();
                     }
                 }
-            }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
         }
 
         public void destroy() {
