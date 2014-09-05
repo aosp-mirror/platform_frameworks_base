@@ -530,7 +530,6 @@ public final class AudioAttributes implements Parcelable {
         }
     }
 
-    /** @hide */
     public static final Parcelable.Creator<AudioAttributes> CREATOR
             = new Parcelable.Creator<AudioAttributes>() {
         /**
