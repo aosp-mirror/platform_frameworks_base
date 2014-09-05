@@ -1278,7 +1278,7 @@ public class NotificationPanelView extends PanelView implements
     private void updateNotificationTranslucency() {
         float alpha = (getNotificationsTopY() + mNotificationStackScroller.getItemHeight())
                 / (mQsMinExpansionHeight + mNotificationStackScroller.getBottomStackPeekSize()
-                        + mNotificationStackScroller.getCollapseSecondCardPadding());
+                        - mNotificationStackScroller.getCollapseSecondCardPadding());
         alpha = Math.max(0, Math.min(alpha, 1));
         alpha = (float) Math.pow(alpha, 0.75);
         if (alpha != 1f && mNotificationStackScroller.getLayerType() != LAYER_TYPE_HARDWARE) {
