@@ -227,7 +227,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     mResolvedBaseFile.getAbsolutePath() : null;
             info.progress = mProgress;
             info.sealed = mSealed;
-            info.open = mOpenCount.get() > 0;
+            info.active = mOpenCount.get() > 0;
 
             info.mode = params.mode;
             info.sizeBytes = params.sizeBytes;
@@ -833,14 +833,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     public void open() {
         if (mOpenCount.getAndIncrement() == 0) {
-            mCallback.onSessionOpened(this);
+            mCallback.onSessionActiveChanged(this, true);
         }
     }
 
     @Override
     public void close() {
         if (mOpenCount.decrementAndGet() == 0) {
-            mCallback.onSessionClosed(this);
+            mCallback.onSessionActiveChanged(this, false);
         }
     }
 
