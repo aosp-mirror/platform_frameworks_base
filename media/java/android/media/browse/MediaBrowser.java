@@ -544,12 +544,11 @@ public final class MediaBrowser {
 
         /**
          * Create a new MediaItem for use in browsing media.
-         *
-         * @param flags The flags for this item.
          * @param description The description of the media, which must include a
          *            media id.
+         * @param flags The flags for this item.
          */
-        public MediaItem(@Flags int flags, @NonNull MediaDescription description) {
+        public MediaItem(@NonNull MediaDescription description, @Flags int flags) {
             if (description == null) {
                 throw new IllegalArgumentException("description cannot be null");
             }
