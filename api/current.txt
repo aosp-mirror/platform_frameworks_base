@@ -28655,7 +28655,7 @@ package android.telecomm {
   }
 
   public final class RemoteConference {
-    method public final void addListener(android.telecomm.RemoteConference.Listener);
+    method public final void addCallback(android.telecomm.RemoteConference.Callback);
     method public void disconnect();
     method public final int getCallCapabilities();
     method public final java.util.List<android.telecomm.RemoteConnection> getConnections();
@@ -28663,13 +28663,13 @@ package android.telecomm {
     method public java.lang.String getDisconnectMessage();
     method public final int getState();
     method public void hold();
-    method public final void removeListener(android.telecomm.RemoteConference.Listener);
+    method public final void removeCallback(android.telecomm.RemoteConference.Callback);
     method public void separate(android.telecomm.RemoteConnection);
     method public void unhold();
   }
 
-  public static abstract class RemoteConference.Listener {
-    ctor public RemoteConference.Listener();
+  public static abstract class RemoteConference.Callback {
+    ctor public RemoteConference.Callback();
     method public void onCapabilitiesChanged(android.telecomm.RemoteConference, int);
     method public void onConnectionAdded(android.telecomm.RemoteConference, android.telecomm.RemoteConnection);
     method public void onConnectionRemoved(android.telecomm.RemoteConference, android.telecomm.RemoteConnection);
@@ -28760,17 +28760,17 @@ package android.telecomm {
     method public void registerPhoneAccount(android.telecomm.PhoneAccount);
     method public void showInCallScreen(boolean);
     method public void unregisterPhoneAccount(android.telecomm.PhoneAccountHandle);
-    field public static final java.lang.String ACTION_CHANGE_PHONE_ACCOUNTS = "android.telecomm.intent.action.CHANGE_PHONE_ACCOUNTS";
-    field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.intent.action.CONNECTION_SERVICE_CONFIGURE";
-    field public static final java.lang.String ACTION_SHOW_CALL_SETTINGS = "android.telecomm.intent.action.SHOW_CALL_SETTINGS";
+    field public static final java.lang.String ACTION_CHANGE_PHONE_ACCOUNTS = "android.telecomm.action.CHANGE_PHONE_ACCOUNTS";
+    field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.telecomm.action.CONNECTION_SERVICE_CONFIGURE";
+    field public static final java.lang.String ACTION_SHOW_CALL_SETTINGS = "android.telecomm.action.SHOW_CALL_SETTINGS";
     field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
     field public static final char DTMF_CHARACTER_WAIT = 59; // 0x003b ';'
     field public static final java.lang.String EXTRA_CALL_BACK_NUMBER = "android.telecomm.extra.CALL_BACK_NUMBER";
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_CAUSE = "android.telecomm.extra.CALL_DISCONNECT_CAUSE";
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecomm.extra.CALL_DISCONNECT_MESSAGE";
     field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecomm.extra.CONNECTION_SERVICE";
-    field public static final java.lang.String EXTRA_PHONE_ACCOUNT_HANDLE = "android.intent.extra.PHONE_ACCOUNT_HANDLE";
-    field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
+    field public static final java.lang.String EXTRA_PHONE_ACCOUNT_HANDLE = "android.telecomm.extra.PHONE_ACCOUNT_HANDLE";
+    field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.telecomm.extra.START_CALL_WITH_SPEAKERPHONE";
   }
 
 }

@@ -191,7 +191,7 @@ final class RemoteConnectionService {
             conference.setState(parcel.getState());
             conference.setCallCapabilities(parcel.getCapabilities());
             mConferenceById.put(callId, conference);
-            conference.addListener(new RemoteConference.Listener() {
+            conference.addCallback(new RemoteConference.Callback() {
                 @Override
                 public void onDestroyed(RemoteConference c) {
                     mConferenceById.remove(callId);
