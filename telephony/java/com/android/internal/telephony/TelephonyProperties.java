@@ -123,8 +123,8 @@ public interface TelephonyProperties
     /** Indicate the timer value for exiting emergency callback mode */
     static final String PROPERTY_ECM_EXIT_TIMER = "ro.cdma.ecmexittimer";
 
-    /** The international dialing prefix conversion string */
-    static final String PROPERTY_IDP_STRING = "ro.cdma.idpstring";
+    /** the international dialing prefix of current operator network */
+    static final String PROPERTY_OPERATOR_IDP_STRING = "telephony.operator.idpstring";
 
     /**
      * Defines the schema for the carrier specified OTASP number
