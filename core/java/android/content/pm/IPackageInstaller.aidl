@@ -22,14 +22,21 @@ import android.content.pm.IPackageInstallerSession;
 import android.content.pm.PackageInstaller;
 import android.content.IntentSender;
 
+import android.graphics.Bitmap;
+
 /** {@hide} */
 interface IPackageInstaller {
     int createSession(in PackageInstaller.SessionParams params, String installerPackageName, int userId);
+
+    void updateSessionAppIcon(int sessionId, in Bitmap appIcon);
+    void updateSessionAppLabel(int sessionId, String appLabel);
+
     void abandonSession(int sessionId);
 
     IPackageInstallerSession openSession(int sessionId);
 
     PackageInstaller.SessionInfo getSessionInfo(int sessionId);
+
     List<PackageInstaller.SessionInfo> getAllSessions(int userId);
     List<PackageInstaller.SessionInfo> getMySessions(String installerPackageName, int userId);
 
