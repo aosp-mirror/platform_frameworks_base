@@ -390,6 +390,17 @@ public class TelecommManager {
     }
 
     /**
+     * Returns the current connection manager. Apps must be prepared for this method to return
+     * {@code null}, indicating that there currently exists no user-chosen default
+     * {@code PhoneAccount}.
+     *
+     * @return The phone account handle of the current connection manager.
+     */
+    public PhoneAccountHandle getConnectionManager() {
+        return getSimCallManager();
+    }
+
+    /**
      * Returns a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
      * calls which support the specified URI scheme.
      * <P>
