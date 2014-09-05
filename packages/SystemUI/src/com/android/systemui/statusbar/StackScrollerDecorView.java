@@ -127,11 +127,6 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     }
 
     @Override
-    public void setScrimAmount(float scrimAmount) {
-        // We don't need to scrim the dismissView
-    }
-
-    @Override
     public boolean hasOverlappingRendering() {
         return false;
     }
