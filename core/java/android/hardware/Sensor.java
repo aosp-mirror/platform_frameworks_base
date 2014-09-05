@@ -737,12 +737,11 @@ public final class Sensor {
     }
 
     /**
-     * This value is defined only for continuous mode sensors. It is the delay between two
-     * sensor events corresponding to the lowest frequency that this sensor supports. When
-     * lower frequencies are requested through registerListener() the events will be generated
-     * at this frequency instead. It can be used to estimate when the batch FIFO may be full.
-     * Older devices may set this value to zero. Ignore this value in case it is negative
-     * or zero.
+     * This value is defined only for continuous and on-change sensors. It is the delay between two
+     * sensor events corresponding to the lowest frequency that this sensor supports. When lower
+     * frequencies are requested through registerListener() the events will be generated at this
+     * frequency instead. It can be used to estimate when the batch FIFO may be full. Older devices
+     * may set this value to zero. Ignore this value in case it is negative or zero.
      *
      * @return The max delay for this sensor in microseconds.
      */
