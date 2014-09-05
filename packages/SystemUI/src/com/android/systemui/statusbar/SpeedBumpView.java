@@ -126,9 +126,4 @@ public class SpeedBumpView extends ExpandableView {
         // TODO: Use duration
         performVisibilityAnimation(true, delay);
     }
-
-    @Override
-    public void setScrimAmount(float scrimAmount) {
-        // We don't need to scrim the speedbumps
-    }
 }

@@ -32,7 +32,6 @@ public class AmbientState {
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
     private int mSpeedBumpIndex = -1;
-    private float mScrimAmount;
     private boolean mDark;
     private boolean mHideSensitive;
 
@@ -103,14 +102,6 @@ public class AmbientState {
         } else {
             mOverScrollBottomAmount = amount;
         }
-    }
-
-    public void setScrimAmount(float scrimAmount) {
-        mScrimAmount = scrimAmount;
-    }
-
-    public float getScrimAmount() {
-        return mScrimAmount;
     }
 
     public float getOverScrollAmount(boolean top) {
