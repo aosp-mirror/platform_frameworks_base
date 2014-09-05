@@ -16287,7 +16287,7 @@ package android.media.browse {
   }
 
   public static class MediaBrowser.MediaItem implements android.os.Parcelable {
-    ctor public MediaBrowser.MediaItem(int, android.media.MediaDescription);
+    ctor public MediaBrowser.MediaItem(android.media.MediaDescription, int);
     method public int describeContents();
     method public android.media.MediaDescription getDescription();
     method public int getFlags();
