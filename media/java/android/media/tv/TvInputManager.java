@@ -75,7 +75,7 @@ public final class TvInputManager {
      * The TV input is connected.
      * <p>
      * State for {@link #getInputState} and {@link
-     * TvInputManager.TvInputListener#onInputStateChanged}.
+     * TvInputManager.TvInputCallback#onInputStateChanged}.
      * </p>
      */
     public static final int INPUT_STATE_CONNECTED = 0;
@@ -84,7 +84,7 @@ public final class TvInputManager {
      * fully ready.
      * <p>
      * State for {@link #getInputState} and {@link
-     * TvInputManager.TvInputListener#onInputStateChanged}.
+     * TvInputManager.TvInputCallback#onInputStateChanged}.
      * </p>
      */
     public static final int INPUT_STATE_CONNECTED_STANDBY = 1;
@@ -92,7 +92,7 @@ public final class TvInputManager {
      * The TV input is disconnected.
      * <p>
      * State for {@link #getInputState} and {@link
-     * TvInputManager.TvInputListener#onInputStateChanged}.
+     * TvInputManager.TvInputCallback#onInputStateChanged}.
      * </p>
      */
     public static final int INPUT_STATE_DISCONNECTED = 2;
@@ -102,14 +102,14 @@ public final class TvInputManager {
      * {@link #isRatingBlocked}.
      */
     public static final String ACTION_BLOCKED_RATINGS_CHANGED =
-            "android.media.tv.TvInputManager.ACTION_BLOCKED_RATINGS_CHANGED";
+            "android.media.tv.action.BLOCKED_RATINGS_CHANGED";
 
     /**
      * Broadcast intent action when the parental controls enabled state changes. For use with the
      * {@link #isParentalControlsEnabled}.
      */
     public static final String ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED =
-            "android.media.tv.TvInputManager.ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED";
+            "android.media.tv.action.PARENTAL_CONTROLS_ENABLED_CHANGED";
 
     /**
      * Broadcast intent action used to query available content rating systems.
@@ -143,7 +143,7 @@ public final class TvInputManager {
      * @see TvContentRating
      */
     public static final String ACTION_QUERY_CONTENT_RATING_SYSTEMS =
-            "android.media.tv.TvInputManager.ACTION_QUERY_CONTENT_RATING_SYSTEMS";
+            "android.media.tv.action.QUERY_CONTENT_RATING_SYSTEMS";
 
     /**
      * Content rating systems metadata associated with {@link #ACTION_QUERY_CONTENT_RATING_SYSTEMS}.
@@ -153,15 +153,15 @@ public final class TvInputManager {
      * </p>
      */
     public static final String META_DATA_CONTENT_RATING_SYSTEMS =
-            "android.media.tv.TvInputManager.META_DATA_CONTENT_RATING_SYSTEMS";
+            "android.media.tv.metadata.CONTENT_RATING_SYSTEMS";
 
     private final ITvInputManager mService;
 
     private final Object mLock = new Object();
 
     // @GuardedBy(mLock)
-    private final List<TvInputListenerRecord> mTvInputListenerRecordsList =
-            new LinkedList<TvInputListenerRecord>();
+    private final List<TvInputCallbackRecord> mCallbackRecords =
+            new LinkedList<TvInputCallbackRecord>();
 
     // A mapping from TV input ID to the state of corresponding input.
     // @GuardedBy(mLock)
@@ -177,7 +177,7 @@ public final class TvInputManager {
 
     private final ITvInputClient mClient;
 
-    private final ITvInputManagerCallback mCallback;
+    private final ITvInputManagerCallback mManagerCallback;
 
     private final int mUserId;
 
@@ -445,9 +445,9 @@ public final class TvInputManager {
     }
 
     /**
-     * Interface used to monitor status of the TV input.
+     * Callback used to monitor status of the TV input.
      */
-    public abstract static class TvInputListener {
+    public abstract static class TvInputCallback {
         /**
          * This is called when the state of a given TV input is changed.
          *
@@ -479,24 +479,24 @@ public final class TvInputManager {
         }
     }
 
-    private static final class TvInputListenerRecord {
-        private final TvInputListener mListener;
+    private static final class TvInputCallbackRecord {
+        private final TvInputCallback mCallback;
         private final Handler mHandler;
 
-        public TvInputListenerRecord(TvInputListener listener, Handler handler) {
-            mListener = listener;
+        public TvInputCallbackRecord(TvInputCallback callback, Handler handler) {
+            mCallback = callback;
             mHandler = handler;
         }
 
-        public TvInputListener getListener() {
-            return mListener;
+        public TvInputCallback getCallback() {
+            return mCallback;
         }
 
         public void postInputStateChanged(final String inputId, final int state) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mListener.onInputStateChanged(inputId, state);
+                    mCallback.onInputStateChanged(inputId, state);
                 }
             });
         }
@@ -505,7 +505,7 @@ public final class TvInputManager {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mListener.onInputAdded(inputId);
+                    mCallback.onInputAdded(inputId);
                 }
             });
         }
@@ -514,7 +514,7 @@ public final class TvInputManager {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mListener.onInputRemoved(inputId);
+                    mCallback.onInputRemoved(inputId);
                 }
             });
         }
@@ -677,12 +677,12 @@ public final class TvInputManager {
                 }
             }
         };
-        mCallback = new ITvInputManagerCallback.Stub() {
+        mManagerCallback = new ITvInputManagerCallback.Stub() {
             @Override
             public void onInputStateChanged(String inputId, int state) {
                 synchronized (mLock) {
                     mStateMap.put(inputId, state);
-                    for (TvInputListenerRecord record : mTvInputListenerRecordsList) {
+                    for (TvInputCallbackRecord record : mCallbackRecords) {
                         record.postInputStateChanged(inputId, state);
                     }
                 }
@@ -692,7 +692,7 @@ public final class TvInputManager {
             public void onInputAdded(String inputId) {
                 synchronized (mLock) {
                     mStateMap.put(inputId, INPUT_STATE_CONNECTED);
-                    for (TvInputListenerRecord record : mTvInputListenerRecordsList) {
+                    for (TvInputCallbackRecord record : mCallbackRecords) {
                         record.postInputAdded(inputId);
                     }
                 }
@@ -702,14 +702,14 @@ public final class TvInputManager {
             public void onInputRemoved(String inputId) {
                 synchronized (mLock) {
                     mStateMap.remove(inputId);
-                    for (TvInputListenerRecord record : mTvInputListenerRecordsList) {
+                    for (TvInputCallbackRecord record : mCallbackRecords) {
                         record.postInputRemoved(inputId);
                     }
                 }
             }
         };
         try {
-            mService.registerCallback(mCallback, mUserId);
+            mService.registerCallback(mManagerCallback, mUserId);
         } catch (RemoteException e) {
             Log.e(TAG, "mService.registerCallback failed: " + e);
         }
@@ -771,39 +771,39 @@ public final class TvInputManager {
     }
 
     /**
-     * Registers a {@link TvInputListener}.
+     * Registers a {@link TvInputCallback}.
      *
-     * @param listener A listener used to monitor status of the TV inputs.
+     * @param callback A callback used to monitor status of the TV inputs.
      * @param handler A {@link Handler} that the status change will be delivered to.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
-    public void registerListener(TvInputListener listener, Handler handler) {
-        if (listener == null) {
+    public void registerCallback(TvInputCallback callback, Handler handler) {
+        if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null");
         }
         if (handler == null) {
             throw new IllegalArgumentException("handler cannot be null");
         }
         synchronized (mLock) {
-            mTvInputListenerRecordsList.add(new TvInputListenerRecord(listener, handler));
+            mCallbackRecords.add(new TvInputCallbackRecord(callback, handler));
         }
     }
 
     /**
-     * Unregisters the existing {@link TvInputListener}.
+     * Unregisters the existing {@link TvInputCallback}.
      *
-     * @param listener The existing listener to remove.
+     * @param callback The existing callback to remove.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
-    public void unregisterListener(final TvInputListener listener) {
-        if (listener == null) {
+    public void unregisterCallback(final TvInputCallback callback) {
+        if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null");
         }
         synchronized (mLock) {
-            for (Iterator<TvInputListenerRecord> it = mTvInputListenerRecordsList.iterator();
+            for (Iterator<TvInputCallbackRecord> it = mCallbackRecords.iterator();
                     it.hasNext(); ) {
-                TvInputListenerRecord record = it.next();
-                if (record.getListener() == listener) {
+                TvInputCallbackRecord record = it.next();
+                if (record.getCallback() == callback) {
                     it.remove();
                     break;
                 }
