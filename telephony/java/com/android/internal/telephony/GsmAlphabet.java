@@ -609,16 +609,25 @@ public class GsmAlphabet {
                 }
             } else {
                 if (prevWasEscape) {
-                    char shiftChar = shiftTableToChar.charAt(c);
+                    char shiftChar =
+                            c < shiftTableToChar.length() ? shiftTableToChar.charAt(c) : ' ';
                     if (shiftChar == ' ') {
                         // display character from main table if not present in shift table
-                        ret.append(languageTableToChar.charAt(c));
+                        if (c < languageTableToChar.length()) {
+                            ret.append(languageTableToChar.charAt(c));
+                        } else {
+                            ret.append(' ');
+                        }
                     } else {
                         ret.append(shiftChar);
                     }
                 } else {
                     if (!isMbcs || c < 0x80 || i + 1 >= offset + length) {
-                        ret.append(languageTableToChar.charAt(c));
+                        if (c < languageTableToChar.length()) {
+                            ret.append(languageTableToChar.charAt(c));
+                        } else {
+                            ret.append(' ');
+                        }
                     } else {
                         // isMbcs must be true. So both mbcsBuffer and charset are initialized.
                         mbcsBuffer.clear();
