@@ -27313,7 +27313,7 @@ package android.service.media {
     method public abstract android.service.media.MediaBrowserService.BrowserRoot onGetRoot(java.lang.String, int, android.os.Bundle);
     method public abstract void onLoadChildren(java.lang.String, android.service.media.MediaBrowserService.Result<java.util.List<android.media.browse.MediaBrowser.MediaItem>>);
     method public void setSessionToken(android.media.session.MediaSession.Token);
-    field public static final java.lang.String SERVICE_ACTION = "android.media.browse.MediaBrowserService";
+    field public static final java.lang.String SERVICE_INTERFACE = "android.media.browse.MediaBrowserService";
   }
 
   public static final class MediaBrowserService.BrowserRoot {

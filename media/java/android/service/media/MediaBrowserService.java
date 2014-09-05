@@ -51,7 +51,7 @@ import java.util.List;
  * </p>
  *
  * To extend this class, you must declare the service in your manifest file with
- * an intent filter with the {@link #SERVICE_ACTION} action.
+ * an intent filter with the {@link #SERVICE_INTERFACE} action.
  *
  * For example:
  * </p><pre>
@@ -72,7 +72,7 @@ public abstract class MediaBrowserService extends Service {
      * The {@link Intent} that must be declared as handled by the service.
      */
     @SdkConstant(SdkConstantType.SERVICE_ACTION)
-    public static final String SERVICE_ACTION = "android.media.browse.MediaBrowserService";
+    public static final String SERVICE_INTERFACE = "android.media.browse.MediaBrowserService";
 
     private final ArrayMap<IBinder, ConnectionRecord> mConnections = new ArrayMap();
     private final Handler mHandler = new Handler();
@@ -270,7 +270,7 @@ public abstract class MediaBrowserService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        if (SERVICE_ACTION.equals(intent.getAction())) {
+        if (SERVICE_INTERFACE.equals(intent.getAction())) {
             return mBinder;
         }
         return null;
