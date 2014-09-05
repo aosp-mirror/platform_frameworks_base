@@ -265,7 +265,11 @@ public class AccountManagerService
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context1, Intent intent) {
-                purgeOldGrantsAll();
+                // Don't delete accounts when updating a authenticator's
+                // package.
+                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                    purgeOldGrantsAll();
+                }
             }
         }, intentFilter);
 
