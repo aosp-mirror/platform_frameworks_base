@@ -54,6 +54,7 @@ Layer::Layer(RenderState& renderState, const uint32_t layerWidth, const uint32_t
     convexMask = NULL;
     caches.resourceCache.incrementRefcount(this);
     rendererLightPosDirty = true;
+    wasBuildLayered = false;
     renderState.registerLayer(this);
 }
 
