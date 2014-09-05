@@ -17,7 +17,6 @@
 
 #include "Animator.h"
 #include "RenderNode.h"
-#include "TreeInfo.h"
 #include "renderthread/TimeLord.h"
 
 namespace android {
@@ -34,7 +33,7 @@ AnimationContext::~AnimationContext() {
 }
 
 void AnimationContext::destroy() {
-    startFrame();
+    startFrame(TreeInfo::MODE_RT_ONLY);
     while (mCurrentFrameAnimations.mNextHandle) {
         AnimationHandle* current = mCurrentFrameAnimations.mNextHandle;
         AnimatorManager& animators = current->mRenderNode->animators();
@@ -55,7 +54,7 @@ void AnimationContext::addAnimationHandle(AnimationHandle* handle) {
     handle->insertAfter(&mNextFrameAnimations);
 }
 
-void AnimationContext::startFrame() {
+void AnimationContext::startFrame(TreeInfo::TraversalMode mode) {
     LOG_ALWAYS_FATAL_IF(mCurrentFrameAnimations.mNextHandle,
             "Missed running animations last frame!");
     AnimationHandle* head = mNextFrameAnimations.mNextHandle;
