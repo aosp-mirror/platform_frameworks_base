@@ -27,6 +27,7 @@ import android.graphics.ColorFilter;
 import android.graphics.Outline;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -131,7 +132,9 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
 
     private static final boolean DBG_ANIMATION_VECTOR_DRAWABLE = false;
 
-    private final AnimatedVectorDrawableState mAnimatedVectorState;
+    private AnimatedVectorDrawableState mAnimatedVectorState;
+
+    private boolean mMutated;
 
     public AnimatedVectorDrawable() {
         mAnimatedVectorState = new AnimatedVectorDrawableState(
@@ -140,7 +143,6 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
 
     private AnimatedVectorDrawable(AnimatedVectorDrawableState state, Resources res,
             Theme theme) {
-        // TODO: Correctly handle the constant state for AVD.
         mAnimatedVectorState = new AnimatedVectorDrawableState(state);
         if (theme != null && canApplyTheme()) {
             applyTheme(theme);
@@ -148,8 +150,17 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     }
 
     @Override
+    public Drawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            mAnimatedVectorState = new AnimatedVectorDrawableState(mAnimatedVectorState);
+            mMutated = true;
+        }
+        return this;
+    }
+
+    @Override
     public ConstantState getConstantState() {
-        return null;
+        return mAnimatedVectorState;
     }
 
     @Override
@@ -311,14 +322,31 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
         int mChangingConfigurations;
         VectorDrawable mVectorDrawable;
         ArrayList<Animator> mAnimators;
+        ArrayMap<Animator, String> mTargetNameMap;
 
         public AnimatedVectorDrawableState(AnimatedVectorDrawableState copy) {
             if (copy != null) {
                 mChangingConfigurations = copy.mChangingConfigurations;
-                // TODO: Make sure the constant state are handled correctly.
-                mVectorDrawable = new VectorDrawable();
-                mVectorDrawable.setAllowCaching(false);
-                mAnimators = new ArrayList<Animator>();
+                if (copy.mVectorDrawable != null) {
+                    mVectorDrawable = (VectorDrawable) copy.mVectorDrawable.getConstantState().newDrawable();
+                    mVectorDrawable.mutate();
+                    mVectorDrawable.setAllowCaching(false);
+                    mVectorDrawable.setBounds(copy.mVectorDrawable.getBounds());
+                }
+                if (copy.mAnimators != null) {
+                    final int numAnimators = copy.mAnimators.size();
+                    mAnimators = new ArrayList<Animator>(numAnimators);
+                    mTargetNameMap = new ArrayMap<Animator, String>(numAnimators);
+                    for (int i = 0; i < numAnimators; ++i) {
+                        Animator anim = copy.mAnimators.get(i);
+                        Animator animClone = anim.clone();
+                        String targetName = copy.mTargetNameMap.get(anim);
+                        Object targetObject = mVectorDrawable.getTargetByName(targetName);
+                        animClone.setTarget(targetObject);
+                        mAnimators.add(animClone);
+                        mTargetNameMap.put(animClone, targetName);
+                    }
+                }
             }
         }
 
@@ -346,7 +374,12 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     private void setupAnimatorsForTarget(String name, Animator animator) {
         Object target = mAnimatedVectorState.mVectorDrawable.getTargetByName(name);
         animator.setTarget(target);
+        if (mAnimatedVectorState.mAnimators == null) {
+            mAnimatedVectorState.mAnimators = new ArrayList<Animator>();
+            mAnimatedVectorState.mTargetNameMap = new ArrayMap<Animator, String>();
+        }
         mAnimatedVectorState.mAnimators.add(animator);
+        mAnimatedVectorState.mTargetNameMap.put(animator, name);
         if (DBG_ANIMATION_VECTOR_DRAWABLE) {
             Log.v(LOGTAG, "add animator  for target " + name + " " + animator);
         }
