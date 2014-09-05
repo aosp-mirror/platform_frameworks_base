@@ -1939,16 +1939,14 @@ public class WebView extends AbsoluteLayout
      *
      * @param zoomFactor the zoom factor to apply. The zoom factor will be clamped to the Webview's
      * zoom limits. This value must be in the range 0.01 to 100.0 inclusive.
-     *
-     * @return false if no zoom changes, true otherwise.
      */
-    public boolean zoomBy(float zoomFactor) {
+    public void zoomBy(float zoomFactor) {
         checkThread();
         if (zoomFactor < 0.01)
             throw new IllegalArgumentException("zoomFactor must be greater than 0.01.");
         if (zoomFactor > 100.0)
             throw new IllegalArgumentException("zoomFactor must be less than 100.");
-        return mProvider.zoomBy(zoomFactor);
+        mProvider.zoomBy(zoomFactor);
     }
 
     /**
