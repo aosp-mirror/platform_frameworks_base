@@ -150,6 +150,7 @@ public:
     void cancelLayerUpdate(Layer* layer);
     void clearLayerUpdates();
     void flushLayerUpdates();
+    void markLayersAsBuildLayers();
 
     virtual int saveLayer(float left, float top, float right, float bottom,
             const SkPaint* paint, int flags) {

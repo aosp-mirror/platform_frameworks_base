@@ -15,6 +15,8 @@
  */
 #include "RenderState.h"
 
+#include "renderthread/CanvasContext.h"
+
 namespace android {
 namespace uirenderer {
 
@@ -38,6 +40,17 @@ void RenderState::onGLContextCreated() {
 void RenderState::onGLContextDestroyed() {
     if (CC_UNLIKELY(!mActiveLayers.empty())) {
         mCaches->dumpMemoryUsage();
+        for (std::set<renderthread::CanvasContext*>::iterator cit = mRegisteredContexts.begin();
+                cit != mRegisteredContexts.end(); cit++) {
+            renderthread::CanvasContext* context = *cit;
+            ALOGD("Context: %p (root = %p)", context, context->mRootRenderNode.get());
+            ALOGD("  Prefeteched layers: %zu", context->mPrefetechedLayers.size());
+            for (std::set<RenderNode*>::iterator pit = context->mPrefetechedLayers.begin();
+                    pit != context->mPrefetechedLayers.end(); pit++) {
+                (*pit)->debugDumpLayers("    ");
+            }
+            context->mRootRenderNode->debugDumpLayers("  ");
+        }
         LOG_ALWAYS_FATAL("layers have survived gl context destruction");
     }
 }
