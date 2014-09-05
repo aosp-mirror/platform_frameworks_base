@@ -55,6 +55,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     private boolean mReserveOverflow;
     private ActionMenuPresenter mPresenter;
     private MenuPresenter.Callback mActionMenuPresenterCallback;
+    private MenuBuilder.Callback mMenuBuilderCallback;
     private boolean mFormatItems;
     private int mFormatItemsWidth;
     private int mMinCellSize;
@@ -623,8 +624,9 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
      * Must be called before the first call to getMenu()
      * @hide
      */
-    public void setActionMenuPresenterCallback(MenuPresenter.Callback cb) {
-        mActionMenuPresenterCallback = cb;
+    public void setMenuCallbacks(MenuPresenter.Callback pcb, MenuBuilder.Callback mcb) {
+        mActionMenuPresenterCallback = pcb;
+        mMenuBuilderCallback = mcb;
     }
 
     /**
@@ -730,6 +732,9 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
         @Override
         public void onMenuModeChange(MenuBuilder menu) {
+            if (mMenuBuilderCallback != null) {
+                mMenuBuilderCallback.onMenuModeChange(menu);
+            }
         }
     }
 
