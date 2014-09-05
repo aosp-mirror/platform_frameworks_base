@@ -20,6 +20,7 @@
 #include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
 
+#include "TreeInfo.h"
 #include "renderthread/TimeLord.h"
 #include "utils/Macros.h"
 
@@ -30,7 +31,6 @@ class AnimationContext;
 class AnimationListener;
 class BaseRenderNodeAnimator;
 class RenderNode;
-class TreeInfo;
 
 /*
  * AnimationHandle is several classes merged into one.
@@ -90,7 +90,7 @@ public:
 
     // Marks the start of a frame, which will update the frame time and move all
     // next frame animations into the current frame
-    ANDROID_API virtual void startFrame();
+    ANDROID_API virtual void startFrame(TreeInfo::TraversalMode mode);
 
     // Runs any animations still left in mCurrentFrameAnimations that were not run
     // as part of the standard RenderNode:prepareTree pass.
