@@ -294,7 +294,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void computeProgressLocked() {
-        mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f);
+        if (mProgress <= 0.8f) {
+            mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f);
+        }
     }
 
     private void maybePublishProgress() {
@@ -485,7 +487,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         // TODO: surface more granular state from dexopt
-        mCallback.onSessionProgressChanged(this, 0.9f);
+        mProgress = 0.9f;
+        maybePublishProgress();
 
         // Unpack native libraries
         extractNativeLibraries(mResolvedStageDir, params.abiOverride);
