@@ -29,6 +29,7 @@ namespace android {
 namespace uirenderer {
 
 namespace renderthread {
+class CanvasContext;
 class RenderThread;
 }
 
@@ -57,6 +58,14 @@ public:
         mActiveLayers.erase(layer);
     }
 
+    void registerCanvasContext(renderthread::CanvasContext* context) {
+        mRegisteredContexts.insert(context);
+    }
+
+    void unregisterCanvasContext(renderthread::CanvasContext* context) {
+        mRegisteredContexts.erase(context);
+    }
+
 private:
     friend class renderthread::RenderThread;
     friend class Caches;
@@ -69,6 +78,7 @@ private:
 
     Caches* mCaches;
     std::set<const Layer*> mActiveLayers;
+    std::set<renderthread::CanvasContext*> mRegisteredContexts;
 
     GLsizei mViewportWidth;
     GLsizei mViewportHeight;

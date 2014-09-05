@@ -40,6 +40,7 @@ class RenderState;
 
 namespace renderthread {
 
+class CanvasContext;
 class DispatchFrameCallbacks;
 class EglManager;
 class RenderProxy;

@@ -605,6 +605,12 @@ void OpenGLRenderer::flushLayerUpdates() {
     AutoFence fence;
 }
 
+void OpenGLRenderer::markLayersAsBuildLayers() {
+    for (size_t i = 0; i < mLayerUpdates.size(); i++) {
+        mLayerUpdates[i]->wasBuildLayered = true;
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // State management
 ///////////////////////////////////////////////////////////////////////////////
