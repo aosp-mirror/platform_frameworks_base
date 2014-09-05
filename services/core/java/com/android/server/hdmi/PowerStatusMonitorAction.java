@@ -77,7 +77,7 @@ public class PowerStatusMonitorAction extends HdmiCecFeatureAction {
             // if no device exists for incoming message, hands it over to other actions.
             return false;
         }
-        int newStatus = cmd.getParams()[0];
+        int newStatus = cmd.getParams()[0] & 0xFF;
         updatePowerStatus(sourceAddress, newStatus, true);
         return true;
     }
