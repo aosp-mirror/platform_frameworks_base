@@ -306,6 +306,7 @@ public:
     Rect dirtyRect;
     bool debugDrawUpdate;
     bool hasDrawnSinceUpdate;
+    bool wasBuildLayered;
 
 private:
     void requireRenderer();

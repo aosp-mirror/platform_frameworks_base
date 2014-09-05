@@ -48,11 +48,13 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         , mHaveNewSurface(false)
         , mRootRenderNode(rootRenderNode) {
     mAnimationContext = contextFactory->createAnimationContext(mRenderThread.timeLord());
+    mRenderThread.renderState().registerCanvasContext(this);
 }
 
 CanvasContext::~CanvasContext() {
     destroy();
     delete mAnimationContext;
+    mRenderThread.renderState().unregisterCanvasContext(this);
 }
 
 void CanvasContext::destroy() {
@@ -299,6 +301,7 @@ void CanvasContext::buildLayer(RenderNode* node) {
     // purposes when the frame is actually drawn
     node->setPropertyFieldsDirty(RenderNode::GENERIC);
 
+    mCanvas->markLayersAsBuildLayers();
     mCanvas->flushLayerUpdates();
 
     node->incStrong(0);
