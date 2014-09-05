@@ -367,6 +367,10 @@ public class RenderNode {
         throw new IllegalArgumentException("Unrecognized outline?");
     }
 
+    public boolean hasShadow() {
+        return nHasShadow(mNativeRenderNode);
+    }
+
     /**
      * Enables or disables clipping to the outline.
      *
@@ -861,6 +865,7 @@ public class RenderNode {
             float alpha);
     private static native boolean nSetOutlineEmpty(long renderNode);
     private static native boolean nSetOutlineNone(long renderNode);
+    private static native boolean nHasShadow(long renderNode);
     private static native boolean nSetClipToOutline(long renderNode, boolean clipToOutline);
     private static native boolean nSetRevealClip(long renderNode,
             boolean shouldClip, float x, float y, float radius);

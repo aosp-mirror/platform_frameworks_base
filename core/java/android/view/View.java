@@ -10224,6 +10224,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return true if the content in this view might overlap, false otherwise.
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public boolean hasOverlappingRendering() {
         return true;
     }
@@ -10925,6 +10926,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         notifySubtreeAccessibilityStateChangedIfNeeded();
         invalidateViewProperty(false, false);
     }
+
+    /**
+     * HierarchyViewer only
+     *
+     * @hide
+     */
+    @ViewDebug.ExportedProperty(category = "drawing")
+    public boolean hasShadow() {
+        return mRenderNode.hasShadow();
+    }
+
 
     /** @hide */
     public void setRevealClip(boolean shouldClip, float x, float y, float radius) {
