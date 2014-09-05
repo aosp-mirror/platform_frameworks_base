@@ -27,7 +27,7 @@ public class IccOpenLogicalChannelResponse implements Parcelable {
     /**
      * Indicates an invalid channel.
      */
-    public static int INVALID_CHANNEL = -1;
+    public static final int INVALID_CHANNEL = -1;
 
     /**
      * Possible status values returned by open channel command.
@@ -37,10 +37,10 @@ public class IccOpenLogicalChannelResponse implements Parcelable {
      * STATUS_NO_SUCH_ELEMENT: AID not found on UICC.
      * STATUS_UNKNOWN_ERROR: Unknown error in open channel command.
      */
-    public static int STATUS_NO_ERROR = 1;
-    public static int STATUS_MISSING_RESOURCE = 2;
-    public static int STATUS_NO_SUCH_ELEMENT = 3;
-    public static int STATUS_UNKNOWN_ERROR = 4;
+    public static final int STATUS_NO_ERROR = 1;
+    public static final int STATUS_MISSING_RESOURCE = 2;
+    public static final int STATUS_NO_SUCH_ELEMENT = 3;
+    public static final int STATUS_UNKNOWN_ERROR = 4;
 
     private final int mChannel;
     private final int mStatus;
