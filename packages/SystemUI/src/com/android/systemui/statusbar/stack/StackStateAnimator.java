@@ -251,9 +251,6 @@ public class StackStateAnimator {
         child.setHideSensitive(viewState.hideSensitive, mAnimationFilter.animateHideSensitive &&
                 !wasAdded && !noAnimation, delay, duration);
 
-        // apply scrimming
-        child.setScrimAmount(viewState.scrimAmount);
-
         if (wasAdded) {
             child.performAddAnimation(delay, mCurrentLength);
         }

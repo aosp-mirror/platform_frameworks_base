@@ -165,9 +165,6 @@ public class StackScrollState {
                 // apply speed bump state
                 child.setBelowSpeedBump(state.belowSpeedBump);
 
-                // apply scrimming
-                child.setScrimAmount(state.scrimAmount);
-
                 // apply clipping
                 float oldClipTopAmount = child.getClipTopAmount();
                 if (oldClipTopAmount != state.clipTopAmount) {
@@ -250,12 +247,6 @@ public class StackScrollState {
         boolean dark;
         boolean hideSensitive;
         boolean belowSpeedBump;
-
-        /**
-         * A value between 0 and 1 indicating how much the view should be scrimmed.
-         * 1 means that the notifications will be darkened as much as possible.
-         */
-        float scrimAmount;
 
         /**
          * The amount which the view should be clipped from the top. This is calculated to

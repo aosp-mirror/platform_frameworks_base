@@ -1047,7 +1047,6 @@ public class NotificationPanelView extends PanelView implements
         int startDistance = mQsMinExpansionHeight + mNotificationScrimWaitDistance;
         float progress = (height - startDistance) / (mQsMaxExpansionHeight - startDistance);
         progress = Math.max(0.0f, Math.min(progress, 1.0f));
-        mNotificationStackScroller.setScrimAlpha(progress);
     }
 
     private float getHeaderExpansionFraction() {
