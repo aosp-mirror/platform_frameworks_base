@@ -107,7 +107,7 @@ public final class BluetoothLeAdvertiser {
             AdvertiseData advertiseData, AdvertiseData scanResponse,
             final AdvertiseCallback callback) {
         synchronized (mLeAdvertisers) {
-            checkAdapterState();
+            BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
             if (callback == null) {
                 throw new IllegalArgumentException("callback cannot be null");
             }
@@ -150,7 +150,7 @@ public final class BluetoothLeAdvertiser {
      */
     public void stopAdvertising(final AdvertiseCallback callback) {
         synchronized (mLeAdvertisers) {
-            checkAdapterState();
+            BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
             if (callback == null) {
                 throw new IllegalArgumentException("callback cannot be null");
             }
@@ -265,9 +265,18 @@ public final class BluetoothLeAdvertiser {
                 }
                 if (mClientIf > 0 && mIsAdvertising) {
                     mLeAdvertisers.put(mAdvertiseCallback, this);
-                } else {
+                } else if (mClientIf <= 0) {
+                    // Post internal error if registration failed.
                     postStartFailure(mAdvertiseCallback,
                             AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR);
+                } else {
+                    // Unregister application if it's already registered but advertise failed.
+                    try {
+                        mBluetoothGatt.unregisterClient(mClientIf);
+                        mClientIf = -1;
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "remote exception when unregistering", e);
+                    }
                 }
             }
         }
@@ -339,13 +348,6 @@ public final class BluetoothLeAdvertiser {
                 notifyAll();
             }
 
-        }
-    }
-
-    // TODO: move this api to a common util class.
-    private void checkAdapterState() {
-        if (mBluetoothAdapter.getState() != mBluetoothAdapter.STATE_ON) {
-            throw new IllegalStateException("BT Adapter is not turned ON");
         }
     }
 

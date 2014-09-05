@@ -16,6 +16,7 @@
 
 package android.bluetooth.le;
 
+import android.bluetooth.BluetoothAdapter;
 import android.util.SparseArray;
 
 import java.util.Arrays;
@@ -29,7 +30,7 @@ import java.util.Set;
  *
  * @hide
  */
-public class Utils {
+public class BluetoothLeUtils {
 
     /**
      * Returns a string composed from a {@link SparseArray}.
@@ -123,4 +124,17 @@ public class Utils {
         }
         return true;
     }
+
+    /**
+     * Ensure Bluetooth is turned on.
+     *
+     * @throws IllegalStateException If {@code adapter} is null or Bluetooth state is not
+     *             {@link BluetoothAdapter#STATE_ON}.
+     */
+    static void checkAdapterStateOn(BluetoothAdapter adapter) {
+        if (adapter == null || adapter.getState() != BluetoothAdapter.STATE_ON) {
+            throw new IllegalStateException("BT Adapter is not turned ON");
+        }
+    }
+
 }
