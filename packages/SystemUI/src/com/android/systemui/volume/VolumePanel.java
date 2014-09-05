@@ -1055,11 +1055,11 @@ public class VolumePanel extends Handler {
         if (sc != null) {
             if (streamType == STREAM_REMOTE_MUSIC && controller != sc.controller) {
                 if (sc.controller != null) {
-                    sc.controller.removeCallback(mMediaControllerCb);
+                    sc.controller.unregisterCallback(mMediaControllerCb);
                 }
                 sc.controller = controller;
                 if (controller != null) {
-                    sc.controller.addCallback(mMediaControllerCb);
+                    sc.controller.registerCallback(mMediaControllerCb);
                 }
             }
             if (sc.seekbarView.getMax() != max) {
@@ -1175,7 +1175,7 @@ public class VolumePanel extends Handler {
             StreamControl sc = mStreamControls.get(STREAM_REMOTE_MUSIC);
             if (sc != null) {
                 if (sc.controller != null) {
-                    sc.controller.removeCallback(mMediaControllerCb);
+                    sc.controller.unregisterCallback(mMediaControllerCb);
                     sc.controller = null;
                 }
             }
