@@ -72,6 +72,8 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_ON_PHONE_ACCOUNT_CLICKED = 15;
     private static final int MSG_REMOVE_CONNECTION_SERVICE_ADAPTER = 16;
     private static final int MSG_ANSWER_VIDEO = 17;
+    private static final int MSG_MERGE_CONFERENCE = 18;
+    private static final int MSG_SWAP_CONFERENCE = 19;
 
     private static Connection sNullConnection;
 
@@ -179,6 +181,16 @@ public abstract class ConnectionService extends Service {
         @Override
         public void splitFromConference(String callId) {
             mHandler.obtainMessage(MSG_SPLIT_FROM_CONFERENCE, callId).sendToTarget();
+        }
+
+        @Override
+        public void mergeConference(String callId) {
+            mHandler.obtainMessage(MSG_MERGE_CONFERENCE, callId).sendToTarget();
+        }
+
+        @Override
+        public void swapConference(String callId) {
+            mHandler.obtainMessage(MSG_SWAP_CONFERENCE, callId).sendToTarget();
         }
 
         @Override
@@ -297,6 +309,12 @@ public abstract class ConnectionService extends Service {
                 }
                 case MSG_SPLIT_FROM_CONFERENCE:
                     splitFromConference((String) msg.obj);
+                    break;
+                case MSG_MERGE_CONFERENCE:
+                    mergeConference((String) msg.obj);
+                    break;
+                case MSG_SWAP_CONFERENCE:
+                    swapConference((String) msg.obj);
                     break;
                 case MSG_ON_POST_DIAL_CONTINUE: {
                     SomeArgs args = (SomeArgs) msg.obj;
@@ -636,6 +654,22 @@ public abstract class ConnectionService extends Service {
         Conference conference = connection.getConference();
         if (conference != null) {
             conference.onSeparate(connection);
+        }
+    }
+
+    private void mergeConference(String callId) {
+        Log.d(this, "mergeConference(%s)", callId);
+        Conference conference = findConferenceForAction(callId, "mergeConference");
+        if (conference != null) {
+            conference.onMerge();
+        }
+    }
+
+    private void swapConference(String callId) {
+        Log.d(this, "swapConference(%s)", callId);
+        Conference conference = findConferenceForAction(callId, "swapConference");
+        if (conference != null) {
+            conference.onSwap();
         }
     }
 

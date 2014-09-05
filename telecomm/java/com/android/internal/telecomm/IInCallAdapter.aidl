@@ -54,6 +54,10 @@ oneway interface IInCallAdapter {
 
     void splitFromConference(String callId);
 
+    void mergeConference(String callId);
+
+    void swapConference(String callId);
+
     void turnOnProximitySensor();
 
     void turnOffProximitySensor(boolean screenOnImmediately);

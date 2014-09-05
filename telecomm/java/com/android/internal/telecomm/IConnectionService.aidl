@@ -65,6 +65,10 @@ oneway interface IConnectionService {
 
     void splitFromConference(String callId);
 
+    void mergeConference(String conferenceCallId);
+
+    void swapConference(String conferenceCallId);
+
     void onPostDialContinue(String callId, boolean proceed);
 
     void onPhoneAccountClicked(String callId);
