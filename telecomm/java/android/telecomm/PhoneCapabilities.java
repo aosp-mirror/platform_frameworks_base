@@ -27,11 +27,17 @@ public final class PhoneCapabilities {
     /** Call supports the hold feature. */
     public static final int SUPPORT_HOLD       = 0x00000002;
 
-    /** Call can currently be merged. */
-    public static final int MERGE_CALLS        = 0x00000004;
+    /**
+     * Calls within a conference can be merged. Some connection services create a conference call
+     * only after two calls have been merged.  However, a conference call can also be added the
+     * moment there are more than one call. CDMA calls are implemented in this way because the call
+     * actions are more limited when more than one call exists. This flag allows merge to be exposed
+     * as a capability on the conference call instead of individual calls.
+     */
+    public static final int MERGE_CONFERENCE   = 0x00000004;
 
-    /** Call can currently be swapped with another call. */
-    public static final int SWAP_CALLS         = 0x00000008;
+    /** Calls withing a conference can be swapped between foreground and background. */
+    public static final int SWAP_CONFERENCE    = 0x00000008;
 
     /** Call currently supports adding another call to this one. */
     public static final int ADD_CALL           = 0x00000010;
@@ -42,8 +48,11 @@ public final class PhoneCapabilities {
     /** Call can be muted. */
     public static final int MUTE               = 0x00000040;
 
-    /** Call supports generic conference mode. */
-    public static final int GENERIC_CONFERENCE = 0x00000080;
+    /**
+     * Call supports conference call management. This capability only applies to conference calls
+     * which can have other calls as children.
+     */
+    public static final int MANAGE_CONFERENCE = 0x00000080;
 
     /**
      * Local device supports video telephony.
@@ -69,8 +78,8 @@ public final class PhoneCapabilities {
      */
     public static final int VoWIFI = 0x00000800;
 
-    public static final int ALL = HOLD | SUPPORT_HOLD | MERGE_CALLS | SWAP_CALLS | ADD_CALL
-            | RESPOND_VIA_TEXT | MUTE | GENERIC_CONFERENCE;
+    public static final int ALL = HOLD | SUPPORT_HOLD | MERGE_CONFERENCE | SWAP_CONFERENCE | ADD_CALL
+            | RESPOND_VIA_TEXT | MUTE | MANAGE_CONFERENCE;
 
     public static String toString(int capabilities) {
         StringBuilder builder = new StringBuilder();
@@ -81,11 +90,11 @@ public final class PhoneCapabilities {
         if ((capabilities & SUPPORT_HOLD) != 0) {
             builder.append(" SUPPORT_HOLD");
         }
-        if ((capabilities & MERGE_CALLS) != 0) {
-            builder.append(" MERGE_CALLS");
+        if ((capabilities & MERGE_CONFERENCE) != 0) {
+            builder.append(" MERGE_CONFERENCE");
         }
-        if ((capabilities & SWAP_CALLS) != 0) {
-            builder.append(" SWAP_CALLS");
+        if ((capabilities & SWAP_CONFERENCE) != 0) {
+            builder.append(" SWAP_CONFERENCE");
         }
         if ((capabilities & ADD_CALL) != 0) {
             builder.append(" ADD_CALL");
@@ -96,8 +105,8 @@ public final class PhoneCapabilities {
         if ((capabilities & MUTE) != 0) {
             builder.append(" MUTE");
         }
-        if ((capabilities & GENERIC_CONFERENCE) != 0) {
-            builder.append(" GENERIC_CONFERENCE");
+        if ((capabilities & MANAGE_CONFERENCE) != 0) {
+            builder.append(" MANAGE_CONFERENCE");
         }
         if ((capabilities & SUPPORTS_VT_LOCAL) != 0) {
             builder.append(" SUPPORTS_VT_LOCAL");

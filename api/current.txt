@@ -28231,17 +28231,19 @@ package android.telecomm {
 
   public abstract class Conference {
     ctor public Conference(android.telecomm.PhoneAccountHandle);
-    method public boolean addConnection(android.telecomm.Connection);
-    method public void destroy();
+    method public final boolean addConnection(android.telecomm.Connection);
+    method public final void destroy();
     method public final int getCapabilities();
     method public final java.util.List<android.telecomm.Connection> getConnections();
     method public final android.telecomm.PhoneAccountHandle getPhoneAccount();
     method public final int getState();
     method public void onDisconnect();
     method public void onHold();
+    method public void onMerge();
     method public void onSeparate(android.telecomm.Connection);
+    method public void onSwap();
     method public void onUnhold();
-    method public void removeConnection(android.telecomm.Connection);
+    method public final void removeConnection(android.telecomm.Connection);
     method public final void setActive();
     method public final void setCapabilities(int);
     method public final void setDisconnected(int, java.lang.String);
@@ -28392,13 +28394,13 @@ package android.telecomm {
     method public static java.lang.String toString(int);
     field public static final int ADD_CALL = 16; // 0x10
     field public static final int ALL = 255; // 0xff
-    field public static final int GENERIC_CONFERENCE = 128; // 0x80
     field public static final int HOLD = 1; // 0x1
-    field public static final int MERGE_CALLS = 4; // 0x4
+    field public static final int MANAGE_CONFERENCE = 128; // 0x80
+    field public static final int MERGE_CONFERENCE = 4; // 0x4
     field public static final int MUTE = 64; // 0x40
     field public static final int RESPOND_VIA_TEXT = 32; // 0x20
     field public static final int SUPPORT_HOLD = 2; // 0x2
-    field public static final int SWAP_CALLS = 8; // 0x8
+    field public static final int SWAP_CONFERENCE = 8; // 0x8
   }
 
   public class PropertyPresentation {
