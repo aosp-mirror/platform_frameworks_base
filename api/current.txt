@@ -16624,8 +16624,6 @@ package android.media.session {
 
   public final class MediaController {
     ctor public MediaController(android.content.Context, android.media.session.MediaSession.Token);
-    method public void addCallback(android.media.session.MediaController.Callback);
-    method public void addCallback(android.media.session.MediaController.Callback, android.os.Handler);
     method public void adjustVolume(int, int);
     method public android.media.routing.MediaRouter.Delegate createMediaRouterDelegate();
     method public boolean dispatchMediaButtonEvent(android.view.KeyEvent);
@@ -16641,9 +16639,11 @@ package android.media.session {
     method public android.app.PendingIntent getSessionActivity();
     method public android.media.session.MediaSession.Token getSessionToken();
     method public android.media.session.MediaController.TransportControls getTransportControls();
-    method public void removeCallback(android.media.session.MediaController.Callback);
+    method public void registerCallback(android.media.session.MediaController.Callback);
+    method public void registerCallback(android.media.session.MediaController.Callback, android.os.Handler);
     method public void sendCommand(java.lang.String, android.os.Bundle, android.os.ResultReceiver);
     method public void setVolumeTo(int, int);
+    method public void unregisterCallback(android.media.session.MediaController.Callback);
   }
 
   public static abstract class MediaController.Callback {

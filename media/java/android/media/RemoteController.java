@@ -980,7 +980,7 @@ import java.util.List;
         synchronized (mInfoLock) {
             if (controller == null) {
                 if (mCurrentSession != null) {
-                    mCurrentSession.removeCallback(mSessionCb);
+                    mCurrentSession.unregisterCallback(mSessionCb);
                     mCurrentSession = null;
                     sendMsg(mEventHandler, MSG_CLIENT_CHANGE, SENDMSG_REPLACE,
                             0 /* genId */, 1 /* clearing */, null /* obj */, 0 /* delay */);
@@ -989,12 +989,12 @@ import java.util.List;
                     || !controller.getSessionToken()
                             .equals(mCurrentSession.getSessionToken())) {
                 if (mCurrentSession != null) {
-                    mCurrentSession.removeCallback(mSessionCb);
+                    mCurrentSession.unregisterCallback(mSessionCb);
                 }
                 sendMsg(mEventHandler, MSG_CLIENT_CHANGE, SENDMSG_REPLACE,
                         0 /* genId */, 0 /* clearing */, null /* obj */, 0 /* delay */);
                 mCurrentSession = controller;
-                mCurrentSession.addCallback(mSessionCb, mEventHandler);
+                mCurrentSession.registerCallback(mSessionCb, mEventHandler);
 
                 PlaybackState state = controller.getPlaybackState();
                 sendMsg(mEventHandler, MSG_NEW_PLAYBACK_STATE, SENDMSG_REPLACE,

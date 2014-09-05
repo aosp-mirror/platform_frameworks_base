@@ -76,7 +76,7 @@ public class NotificationHelper extends BroadcastReceiver {
      * destroyed before {@link #onStop} is called.
      */
     public void onStart() {
-        mController.addCallback(mCb);
+        mController.registerCallback(mCb);
         IntentFilter filter = new IntentFilter();
         filter.addAction(RequestUtils.ACTION_FFWD);
         filter.addAction(RequestUtils.ACTION_NEXT);
@@ -100,7 +100,7 @@ public class NotificationHelper extends BroadcastReceiver {
      */
     public void onStop() {
         mStarted = false;
-        mController.removeCallback(mCb);
+        mController.unregisterCallback(mCb);
         mService.unregisterReceiver(this);
         updateNotification();
     }
