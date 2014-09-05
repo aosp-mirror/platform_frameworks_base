@@ -19,6 +19,7 @@
 #include <set>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#include <utils/Mutex.h>
 
 #include <private/hwui/DrawGlInfo.h>
 
@@ -52,9 +53,11 @@ public:
     void debugOverdraw(bool enable, bool clear);
 
     void registerLayer(const Layer* layer) {
+        AutoMutex _lock(mLayerLock);
         mActiveLayers.insert(layer);
     }
     void unregisterLayer(const Layer* layer) {
+        AutoMutex _lock(mLayerLock);
         mActiveLayers.erase(layer);
     }
 
@@ -83,6 +86,7 @@ private:
     GLsizei mViewportWidth;
     GLsizei mViewportHeight;
     GLuint mFramebuffer;
+    Mutex mLayerLock;
 };
 
 } /* namespace uirenderer */

@@ -38,6 +38,7 @@ void RenderState::onGLContextCreated() {
 }
 
 void RenderState::onGLContextDestroyed() {
+    AutoMutex _lock(mLayerLock);
     if (CC_UNLIKELY(!mActiveLayers.empty())) {
         mCaches->dumpMemoryUsage();
         for (std::set<renderthread::CanvasContext*>::iterator cit = mRegisteredContexts.begin();
@@ -50,6 +51,13 @@ void RenderState::onGLContextDestroyed() {
                 (*pit)->debugDumpLayers("    ");
             }
             context->mRootRenderNode->debugDumpLayers("  ");
+        }
+
+        for (std::set<const Layer*>::iterator lit = mActiveLayers.begin();
+             lit != mActiveLayers.end(); lit++) {
+            const Layer* layer = *(lit);
+            ALOGD("Layer %p, fbo %d, buildlayered %d",
+                    layer, layer->getFbo(), layer->wasBuildLayered);
         }
         LOG_ALWAYS_FATAL("layers have survived gl context destruction");
     }
