@@ -28736,6 +28736,7 @@ package android.telecomm {
     method public void addNewIncomingCall(android.telecomm.PhoneAccountHandle, android.os.Bundle);
     method public void cancelMissedCallsNotification();
     method public void clearAccounts(java.lang.String);
+    method public android.telecomm.PhoneAccountHandle getConnectionManager();
     method public android.telecomm.PhoneAccountHandle getDefaultOutgoingPhoneAccount(java.lang.String);
     method public java.util.List<android.telecomm.PhoneAccountHandle> getEnabledPhoneAccounts();
     method public android.telecomm.PhoneAccount getPhoneAccount(android.telecomm.PhoneAccountHandle);
