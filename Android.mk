@@ -489,8 +489,11 @@ aidl_files := \
 	frameworks/base/location/java/android/location/FusedBatchOptions.aidl \
 	frameworks/base/location/java/com/android/internal/location/ProviderProperties.aidl \
 	frameworks/base/location/java/com/android/internal/location/ProviderRequest.aidl \
+	frameworks/base/media/java/android/media/AudioAttributes.aidl \
+	frameworks/base/media/java/android/media/MediaDescription.aidl \
 	frameworks/base/media/java/android/media/MediaMetadata.aidl \
 	frameworks/base/media/java/android/media/Rating.aidl \
+	frameworks/base/media/java/android/media/browse/MediaBrowser.aidl \
 	frameworks/base/media/java/android/media/session/MediaSession.aidl \
 	frameworks/base/media/java/android/media/session/PlaybackState.aidl \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
