@@ -31,6 +31,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -2880,6 +2881,79 @@ public abstract class PackageManager {
      */
     public abstract Drawable getApplicationLogo(String packageName)
             throws NameNotFoundException;
+
+    /**
+     * If the target user is a managed profile of the calling user or the caller
+     * is itself a managed profile, then this returns a badged copy of the given
+     * icon to be able to distinguish it from the original icon. For badging an
+     * arbitrary drawable use {@link #getUserBadgedDrawableForDensity(
+     * android.graphics.drawable.Drawable, UserHandle, android.graphics.Rect, int)}.
+     * <p>
+     * If the original drawable is a BitmapDrawable and the backing bitmap is
+     * mutable as per {@link android.graphics.Bitmap#isMutable()}, the badging
+     * is performed in place and the original drawable is returned.
+     * </p>
+     *
+     * @param icon The icon to badge.
+     * @param user The target user.
+     * @return A drawable that combines the original icon and a badge as
+     *         determined by the system.
+     */
+    public abstract Drawable getUserBadgedIcon(Drawable icon, UserHandle user);
+
+    /**
+     * If the target user is a managed profile of the calling user or the caller
+     * is itself a managed profile, then this returns a badged copy of the given
+     * drawable allowing the user to distinguish it from the original drawable.
+     * The caller can specify the location in the bounds of the drawable to be
+     * badged where the badge should be applied as well as the density of the
+     * badge to be used.
+     * <p>
+     * If the original drawable is a BitmapDrawable and the backing bitmap is
+     * mutable as per {@link android.graphics.Bitmap#isMutable()}, the bading
+     * is performed in place and the original drawable is returned.
+     * </p>
+     *
+     * @param drawable The drawable to badge.
+     * @param user The target user.
+     * @param badgeLocation Where in the bounds of the badged drawable to place
+     *         the badge. If not provided, the badge is applied on top of the entire
+     *         drawable being badged.
+     * @param badgeDensity The optional desired density for the badge as per
+     *         {@link android.util.DisplayMetrics#densityDpi}. If not provided,
+     *         the density of the display is used.
+     * @return A drawable that combines the original drawable and a badge as
+     *         determined by the system.
+     */
+    public abstract Drawable getUserBadgedDrawableForDensity(Drawable drawable,
+            UserHandle user, Rect badgeLocation, int badgeDensity);
+
+    /**
+     * If the target user is a managed profile of the calling user or the caller
+     * is itself a managed profile, then this returns a drawable to use as a small
+     * icon to include in a view to distinguish it from the original icon.
+     *
+     * @param user The target user.
+     * @param density The optional desired density for the badge as per
+     *         {@link android.util.DisplayMetrics#densityDpi}. If not provided
+     *         the density of the current display is used.
+     * @return the drawable or null if no drawable is required.
+     * @hide
+     */
+    public abstract Drawable getUserBadgeForDensity(UserHandle user, int density);
+
+    /**
+     * If the target user is a managed profile of the calling user or the caller
+     * is itself a managed profile, then this returns a copy of the label with
+     * badging for accessibility services like talkback. E.g. passing in "Email"
+     * and it might return "Work Email" for Email in the work profile.
+     *
+     * @param label The label to change.
+     * @param user The target user.
+     * @return A label that combines the original label and a badge as
+     *         determined by the system.
+     */
+    public abstract CharSequence getUserBadgedLabel(CharSequence label, UserHandle user);
 
     /**
      * Retrieve text from a package.  This is a low-level API used by

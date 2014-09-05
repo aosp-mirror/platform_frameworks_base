@@ -1358,8 +1358,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
 
             if (profileBadge != null) {
-                Drawable profileDrawable
-                        = mUserManager.getBadgeForUser(entry.notification.getUser(), 0);
+                Drawable profileDrawable = mContext.getPackageManager().getUserBadgeForDensity(
+                        entry.notification.getUser(), 0);
                 if (profileDrawable != null) {
                     profileBadge.setImageDrawable(profileDrawable);
                     profileBadge.setVisibility(View.VISIBLE);
