@@ -814,7 +814,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
             } else {
                 session.adjustVolume(direction, flags, getContext().getPackageName(),
-                        UserHandle.myUserId());
+                        UserHandle.myUserId(), true);
                 if (session.getPlaybackType() == PlaybackInfo.PLAYBACK_TYPE_REMOTE
                         && mRvc != null) {
                     try {
