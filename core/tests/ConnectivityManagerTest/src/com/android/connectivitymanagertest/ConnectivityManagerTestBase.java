@@ -54,7 +54,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
     protected static final int WAIT_FOR_SCAN_RESULT = 10 * 1000; //10 seconds
     protected static final int WIFI_SCAN_TIMEOUT = 50 * 1000; // 50 seconds
     protected static final int SHORT_TIMEOUT = 5 * 1000; // 5 seconds
-    protected static final long LONG_TIMEOUT = 50 * 1000;  // 50 seconds
+    protected static final long LONG_TIMEOUT = 2 * 60 * 1000;  // 2 minutes
     protected static final long WIFI_CONNECTION_TIMEOUT = 5 * 60 * 1000; // 5 minutes
     // 2 minutes timer between wifi stop and start
     protected static final long  WIFI_STOP_START_INTERVAL = 2 * 60 * 1000; // 2 minutes
