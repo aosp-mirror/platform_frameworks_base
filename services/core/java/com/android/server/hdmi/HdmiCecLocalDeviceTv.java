@@ -474,6 +474,25 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return true;
     }
 
+    @Override
+    protected boolean handleReportPowerStatus(HdmiCecMessage command) {
+        int newStatus = command.getParams()[0] & 0xFF;
+        updateDevicePowerStatus(command.getSource(), newStatus);
+        return true;
+    }
+
+    @Override
+    protected boolean handleTimerStatus(HdmiCecMessage message) {
+        // Do nothing.
+        return true;
+    }
+
+    @Override
+    protected boolean handleRecordStatus(HdmiCecMessage message) {
+        // Do nothing.
+        return true;
+    }
+
     boolean updateCecSwitchInfo(int address, int type, int path) {
         if (address == Constants.ADDR_UNREGISTERED
                 && type == HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH) {
@@ -937,7 +956,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         if (!isMessageForSystemAudio(message)) {
             HdmiLogger.warning("Invalid <Set System Audio Mode> message:" + message);
-            return false;
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
+            return true;
         }
         SystemAudioActionFromAvr action = new SystemAudioActionFromAvr(this,
                 message.getSource(), HdmiUtils.parseCommandParamSystemAudioStatus(message), null);
@@ -951,7 +971,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         if (!isMessageForSystemAudio(message)) {
             HdmiLogger.warning("Invalid <System Audio Mode Status> message:" + message);
-            return false;
+            // Ignore this message.
+            return true;
         }
         setSystemAudioMode(HdmiUtils.parseCommandParamSystemAudioStatus(message), true);
         return true;
@@ -974,7 +995,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
         int recorderAddress = message.getSource();
         byte[] recordSource = mService.invokeRecordRequestListener(recorderAddress);
-        startOneTouchRecord(recorderAddress, recordSource);
+        int reason = startOneTouchRecord(recorderAddress, recordSource);
+        if (reason != Constants.ABORT_NO_ERROR) {
+            mService.maySendFeatureAbortCommand(message, reason);
+        }
         return true;
     }
 
@@ -999,7 +1023,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     private boolean isMessageForSystemAudio(HdmiCecMessage message) {
-        return message.getSource() == Constants.ADDR_AUDIO_SYSTEM
+        return mService.isControlEnabled()
+                && message.getSource() == Constants.ADDR_AUDIO_SYSTEM
                 && (message.getDestination() == Constants.ADDR_TV
                         || message.getDestination() == Constants.ADDR_BROADCAST)
                 && getAvrDeviceInfo() != null;
@@ -1454,29 +1479,30 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     // Seq #54 and #55
     @ServiceThreadOnly
-    void startOneTouchRecord(int recorderAddress, byte[] recordSource) {
+    int startOneTouchRecord(int recorderAddress, byte[] recordSource) {
         assertRunOnServiceThread();
         if (!mService.isControlEnabled()) {
             Slog.w(TAG, "Can not start one touch record. CEC control is disabled.");
             announceOneTouchRecordResult(ONE_TOUCH_RECORD_CEC_DISABLED);
-            return;
+            return Constants.ABORT_NOT_IN_CORRECT_MODE;
         }
 
         if (!checkRecorder(recorderAddress)) {
             Slog.w(TAG, "Invalid recorder address:" + recorderAddress);
             announceOneTouchRecordResult(ONE_TOUCH_RECORD_CHECK_RECORDER_CONNECTION);
-            return;
+            return Constants.ABORT_NOT_IN_CORRECT_MODE;
         }
 
         if (!checkRecordSource(recordSource)) {
             Slog.w(TAG, "Invalid record source." + Arrays.toString(recordSource));
             announceOneTouchRecordResult(ONE_TOUCH_RECORD_FAIL_TO_RECORD_DISPLAYED_SCREEN);
-            return;
+            return Constants.ABORT_UNABLE_TO_DETERMINE;
         }
 
         addAndStartAction(new OneTouchRecordAction(this, recorderAddress, recordSource));
         Slog.i(TAG, "Start new [One Touch Record]-Target:" + recorderAddress + ", recordSource:"
                 + Arrays.toString(recordSource));
+        return Constants.ABORT_NO_ERROR;
     }
 
     @ServiceThreadOnly
