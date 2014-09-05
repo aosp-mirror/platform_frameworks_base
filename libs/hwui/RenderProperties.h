@@ -569,6 +569,10 @@ public:
         return getClipToBounds() && (getZ() <= 0 || getOutline().isEmpty());
     }
 
+    bool hasShadow() const {
+        return getZ() >= 0.0f && getOutline().getPath() != NULL;
+    }
+
 private:
     // Rendering properties
     struct PrimitiveFields {
