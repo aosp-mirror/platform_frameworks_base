@@ -955,7 +955,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onRestoreInstanceState
      * @see #onPostCreate
      */
-    protected void onCreate(@Nullable Bundle savedInstanceState,
+    public void onCreate(@Nullable Bundle savedInstanceState,
             @Nullable PersistableBundle persistentState) {
         onCreate(savedInstanceState);
     }
@@ -1040,7 +1040,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onResume
      * @see #onSaveInstanceState
      */
-    protected void onRestoreInstanceState(Bundle savedInstanceState,
+    public void onRestoreInstanceState(Bundle savedInstanceState,
             PersistableBundle persistentState) {
         if (savedInstanceState != null) {
             onRestoreInstanceState(savedInstanceState);
@@ -1130,7 +1130,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #onCreate
      */
-    protected void onPostCreate(@Nullable Bundle savedInstanceState,
+    public void onPostCreate(@Nullable Bundle savedInstanceState,
             @Nullable PersistableBundle persistentState) {
         onPostCreate(savedInstanceState);
     }
@@ -1380,7 +1380,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onRestoreInstanceState(Bundle, PersistableBundle)
      * @see #onPause
      */
-    protected void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
         onSaveInstanceState(outState);
     }
 
@@ -4769,7 +4769,7 @@ public class Activity extends ContextThemeWrapper
      * @param data An Intent, which can return result data to the caller
      *               (various data can be attached to Intent "extras").
      */
-    protected void onActivityReenter(int resultCode, Intent data) {
+    public void onActivityReenter(int resultCode, Intent data) {
     }
 
     /**
