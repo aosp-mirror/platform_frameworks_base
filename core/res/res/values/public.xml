@@ -2290,6 +2290,7 @@
   <public type="attr" name="fragmentReenterTransition" />
   <public type="attr" name="fragmentAllowEnterTransitionOverlap" />
   <public type="attr" name="fragmentAllowReturnTransitionOverlap" />
+  <public type="attr" name="patternPathData" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
