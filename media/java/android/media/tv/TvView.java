@@ -83,7 +83,7 @@ public class TvView extends ViewGroup {
     private Rect mOverlayViewFrame;
     private final TvInputManager mTvInputManager;
     private MySessionCallback mSessionCallback;
-    private TvInputListener mListener;
+    private TvInputCallback mCallback;
     private OnUnhandledInputEventListener mOnUnhandledInputEventListener;
     private boolean mHasStreamVolume;
     private float mStreamVolume;
@@ -170,13 +170,13 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Sets a listener for events in this TvView.
+     * Sets the callback to be invoked when an event is dispatched to this TvView.
      *
-     * @param listener The listener to be called with events. A value of {@code null} removes any
-     *         existing listener.
+     * @param callback The callback to receive events. A value of {@code null} removes any existing
+     *            callbacks.
      */
-    public void setTvInputListener(TvInputListener listener) {
-        mListener = listener;
+    public void setCallback(TvInputCallback callback) {
+        mCallback = callback;
     }
 
     /**
@@ -680,9 +680,9 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Interface used to receive various status updates on the {@link TvView}.
+     * Callback used to receive various status updates on the {@link TvView}.
      */
-    public abstract static class TvInputListener {
+    public abstract static class TvInputCallback {
 
         /**
          * This is invoked when an error occurred while establishing a connection to the underlying
@@ -863,8 +863,8 @@ public class TvView extends ViewGroup {
                 }
             } else {
                 mSessionCallback = null;
-                if (mListener != null) {
-                    mListener.onConnectionFailed(mInputId);
+                if (mCallback != null) {
+                    mCallback.onConnectionFailed(mInputId);
                 }
             }
         }
@@ -878,8 +878,8 @@ public class TvView extends ViewGroup {
             mOverlayViewFrame = null;
             mSessionCallback = null;
             mSession = null;
-            if (mListener != null) {
-                mListener.onDisconnected(mInputId);
+            if (mCallback != null) {
+                mCallback.onDisconnected(mInputId);
             }
         }
 
@@ -891,8 +891,8 @@ public class TvView extends ViewGroup {
             if (DEBUG) {
                 Log.d(TAG, "onChannelChangedByTvInput(" + channelUri + ")");
             }
-            if (mListener != null) {
-                mListener.onChannelRetuned(mInputId, channelUri);
+            if (mCallback != null) {
+                mCallback.onChannelRetuned(mInputId, channelUri);
             }
         }
 
@@ -904,8 +904,8 @@ public class TvView extends ViewGroup {
             if (DEBUG) {
                 Log.d(TAG, "onTracksChanged()");
             }
-            if (mListener != null) {
-                mListener.onTracksChanged(mInputId, tracks);
+            if (mCallback != null) {
+                mCallback.onTracksChanged(mInputId, tracks);
             }
         }
 
@@ -918,8 +918,8 @@ public class TvView extends ViewGroup {
                 Log.d(TAG, "onTrackSelected()");
             }
             // TODO: Update the video size when the type is TYPE_VIDEO.
-            if (mListener != null) {
-                mListener.onTrackSelected(mInputId, type, trackId);
+            if (mCallback != null) {
+                mCallback.onTrackSelected(mInputId, type, trackId);
             }
         }
 
@@ -931,8 +931,8 @@ public class TvView extends ViewGroup {
             if (DEBUG) {
                 Log.d(TAG, "onVideoAvailable()");
             }
-            if (mListener != null) {
-                mListener.onVideoAvailable(mInputId);
+            if (mCallback != null) {
+                mCallback.onVideoAvailable(mInputId);
             }
         }
 
@@ -944,8 +944,8 @@ public class TvView extends ViewGroup {
             if (DEBUG) {
                 Log.d(TAG, "onVideoUnavailable(" + reason + ")");
             }
-            if (mListener != null) {
-                mListener.onVideoUnavailable(mInputId, reason);
+            if (mCallback != null) {
+                mCallback.onVideoUnavailable(mInputId, reason);
             }
         }
 
@@ -957,8 +957,8 @@ public class TvView extends ViewGroup {
             if (DEBUG) {
                 Log.d(TAG, "onContentAllowed()");
             }
-            if (mListener != null) {
-                mListener.onContentAllowed(mInputId);
+            if (mCallback != null) {
+                mCallback.onContentAllowed(mInputId);
             }
         }
 
@@ -970,8 +970,8 @@ public class TvView extends ViewGroup {
             if (DEBUG) {
                 Log.d(TAG, "onContentBlocked()");
             }
-            if (mListener != null) {
-                mListener.onContentBlocked(mInputId, rating);
+            if (mCallback != null) {
+                mCallback.onContentBlocked(mInputId, rating);
             }
         }
 
@@ -1000,8 +1000,8 @@ public class TvView extends ViewGroup {
             if (DEBUG) {
                 Log.d(TAG, "onSessionEvent(" + eventType + ")");
             }
-            if (mListener != null) {
-                mListener.onEvent(mInputId, eventType, eventArgs);
+            if (mCallback != null) {
+                mCallback.onEvent(mInputId, eventType, eventArgs);
             }
         }
     }
