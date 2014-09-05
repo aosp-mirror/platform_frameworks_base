@@ -49,6 +49,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.AudioSystem;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
@@ -1945,14 +1946,19 @@ public class NotificationManagerService extends SystemService {
     }
 
     private static AudioAttributes audioAttributesForNotification(Notification n) {
-        if (n.audioAttributes != null
-                && !Notification.AUDIO_ATTRIBUTES_DEFAULT.equals(n.audioAttributes)) {
+        if (n.audioAttributes != null) {
             return n.audioAttributes;
+        } else if (n.audioStreamType >= 0 && n.audioStreamType < AudioSystem.getNumStreamTypes()) {
+            // the stream type is valid, use it
+            return new AudioAttributes.Builder()
+                    .setInternalLegacyStreamType(n.audioStreamType)
+                    .build();
+        } else if (n.audioStreamType == AudioSystem.STREAM_DEFAULT) {
+            return Notification.AUDIO_ATTRIBUTES_DEFAULT;
+        } else {
+            Log.w(TAG, String.format("Invalid stream type: %d", n.audioStreamType));
+            return Notification.AUDIO_ATTRIBUTES_DEFAULT;
         }
-        return new AudioAttributes.Builder()
-                .setLegacyStreamType(n.audioStreamType)
-                .setUsage(AudioAttributes.usageForLegacyStreamType(n.audioStreamType))
-                .build();
     }
 
     void showNextToastLocked() {
