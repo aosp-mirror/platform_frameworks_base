@@ -159,7 +159,7 @@ public class PlayerController {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             if (mController != null) {
-                mController.removeCallback(mControllerCb);
+                mController.unregisterCallback(mControllerCb);
             }
             mBinder = null;
             mController = null;
@@ -185,7 +185,7 @@ public class PlayerController {
             }
             mController = new MediaController(mContext, token);
             mContext.setMediaController(mController);
-            mController.addCallback(mControllerCb, mHandler);
+            mController.registerCallback(mControllerCb, mHandler);
             mTransportControls = mController.getTransportControls();
             if (mArt != null) {
                 setArt(mArt);
