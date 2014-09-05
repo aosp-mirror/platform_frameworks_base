@@ -42,6 +42,7 @@ class DeferredLayerUpdater;
 class OpenGLRenderer;
 class Rect;
 class Layer;
+class RenderState;
 
 namespace renderthread {
 
@@ -95,6 +96,9 @@ public:
 
 private:
     friend class RegisterFrameCallbackTask;
+    // TODO: Replace with something better for layer & other GL object
+    // lifecycle tracking
+    friend class android::uirenderer::RenderState;
 
     void setSurface(ANativeWindow* window);
     void swapBuffers();

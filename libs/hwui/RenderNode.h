@@ -102,6 +102,7 @@ public:
     };
 
     ANDROID_API static void outputLogBuffer(int fd);
+    void debugDumpLayers(const char* prefix);
 
     ANDROID_API void setStagingDisplayList(DisplayListData* newData);
 

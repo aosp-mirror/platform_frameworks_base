@@ -58,6 +58,19 @@ void RenderNode::outputLogBuffer(int fd) {
     fflush(file);
 }
 
+void RenderNode::debugDumpLayers(const char* prefix) {
+    if (mLayer) {
+        ALOGD("%sNode %p (%s) has layer %p (fbo = %u, wasBuildLayered = %s)",
+                prefix, this, getName(), mLayer, mLayer->getFbo(),
+                mLayer->wasBuildLayered ? "true" : "false");
+    }
+    if (mDisplayListData) {
+        for (size_t i = 0; i < mDisplayListData->children().size(); i++) {
+            mDisplayListData->children()[i]->mRenderNode->debugDumpLayers(prefix);
+        }
+    }
+}
+
 RenderNode::RenderNode()
         : mDirtyPropertyFields(0)
         , mNeedsDisplayListDataSync(false)
