@@ -17,6 +17,8 @@
 package android.os;
 
 import android.util.ArrayMap;
+import android.util.Size;
+import android.util.SizeF;
 import android.util.SparseArray;
 
 import java.io.Serializable;
@@ -332,6 +334,30 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         unparcel();
         mMap.put(key, value);
         mFdsKnown = false;
+    }
+
+    /**
+     * Inserts a Size value into the mapping of this Bundle, replacing
+     * any existing value for the given key.  Either key or value may be null.
+     *
+     * @param key a String, or null
+     * @param value a Size object, or null
+     */
+    public void putSize(String key, Size value) {
+        unparcel();
+        mMap.put(key, value);
+    }
+
+    /**
+     * Inserts a SizeF value into the mapping of this Bundle, replacing
+     * any existing value for the given key.  Either key or value may be null.
+     *
+     * @param key a String, or null
+     * @param value a SizeF object, or null
+     */
+    public void putSizeF(String key, SizeF value) {
+        unparcel();
+        mMap.put(key, value);
     }
 
     /**
@@ -704,6 +730,44 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     @Override
     public CharSequence getCharSequence(String key, CharSequence defaultValue) {
         return super.getCharSequence(key, defaultValue);
+    }
+
+    /**
+     * Returns the value associated with the given key, or null if
+     * no mapping of the desired type exists for the given key or a null
+     * value is explicitly associated with the key.
+     *
+     * @param key a String, or null
+     * @return a Size value, or null
+     */
+    public Size getSize(String key) {
+        unparcel();
+        final Object o = mMap.get(key);
+        try {
+            return (Size) o;
+        } catch (ClassCastException e) {
+            typeWarning(key, o, "Size", e);
+            return null;
+        }
+    }
+
+    /**
+     * Returns the value associated with the given key, or null if
+     * no mapping of the desired type exists for the given key or a null
+     * value is explicitly associated with the key.
+     *
+     * @param key a String, or null
+     * @return a Size value, or null
+     */
+    public SizeF getSizeF(String key) {
+        unparcel();
+        final Object o = mMap.get(key);
+        try {
+            return (SizeF) o;
+        } catch (ClassCastException e) {
+            typeWarning(key, o, "SizeF", e);
+            return null;
+        }
     }
 
     /**
