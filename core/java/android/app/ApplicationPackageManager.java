@@ -45,14 +45,17 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.UserInfo;
 import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -864,6 +867,49 @@ final class ApplicationPackageManager extends PackageManager {
         return getApplicationLogo(getApplicationInfo(packageName, 0));
     }
 
+    @Override
+    public Drawable getUserBadgedIcon(Drawable icon, UserHandle user) {
+        final int badgeResId = getBadgeResIdForUser(user.getIdentifier());
+        if (badgeResId == 0) {
+            return icon;
+        }
+        Drawable badgeIcon = getDrawable("system", badgeResId, null);
+        return getBadgedDrawable(icon, badgeIcon, null, true);
+    }
+
+    @Override
+    public Drawable getUserBadgedDrawableForDensity(Drawable drawable, UserHandle user,
+            Rect badgeLocation, int badgeDensity) {
+        Drawable badgeDrawable = getUserBadgeForDensity(user, badgeDensity);
+        if (badgeDrawable == null) {
+            return drawable;
+        }
+        return getBadgedDrawable(drawable, badgeDrawable, badgeLocation, true);
+    }
+
+    @Override
+    public Drawable getUserBadgeForDensity(UserHandle user, int density) {
+        UserInfo userInfo = getUserIfProfile(user.getIdentifier());
+        if (userInfo != null && userInfo.isManagedProfile()) {
+            if (density <= 0) {
+                density = mContext.getResources().getDisplayMetrics().densityDpi;
+            }
+            return Resources.getSystem().getDrawableForDensity(
+                    com.android.internal.R.drawable.ic_corp_badge, density);
+        }
+        return null;
+    }
+
+    @Override
+    public CharSequence getUserBadgedLabel(CharSequence label, UserHandle user) {
+        UserInfo userInfo = getUserIfProfile(user.getIdentifier());
+        if (userInfo != null && userInfo.isManagedProfile()) {
+            return Resources.getSystem().getString(
+                    com.android.internal.R.string.managed_profile_label_badge, label);
+        }
+        return label;
+    }
+
     @Override public Resources getResourcesForActivity(
         ComponentName activityName) throws NameNotFoundException {
         return getResourcesForApplication(
@@ -1647,8 +1693,79 @@ final class ApplicationPackageManager extends PackageManager {
         if (dr == null) {
             dr = itemInfo.loadDefaultIcon(this);
         }
-        return getUserManager().getBadgedDrawableForUser(dr,
-                new UserHandle(mContext.getUserId()));
+        return getUserBadgedDrawableForDensity(dr, new UserHandle(mContext.getUserId()), null, 0);
+    }
+
+    private Drawable getBadgedDrawable(Drawable drawable, Drawable badgeDrawable,
+            Rect badgeLocation, boolean tryBadgeInPlace) {
+        final int badgedWidth = drawable.getIntrinsicWidth();
+        final int badgedHeight = drawable.getIntrinsicHeight();
+        final boolean canBadgeInPlace = tryBadgeInPlace
+                && (drawable instanceof BitmapDrawable)
+                && ((BitmapDrawable) drawable).getBitmap().isMutable();
+
+        final Bitmap bitmap;
+        if (canBadgeInPlace) {
+            bitmap = ((BitmapDrawable) drawable).getBitmap();
+        } else {
+            bitmap = Bitmap.createBitmap(badgedWidth, badgedHeight, Bitmap.Config.ARGB_8888);
+        }
+        Canvas canvas = new Canvas(bitmap);
+
+        if (!canBadgeInPlace) {
+            drawable.setBounds(0, 0, badgedWidth, badgedHeight);
+            drawable.draw(canvas);
+        }
+
+        if (badgeLocation != null) {
+            if (badgeLocation.left < 0 || badgeLocation.top < 0
+                    || badgeLocation.width() > badgedWidth || badgeLocation.height() > badgedHeight) {
+                throw new IllegalArgumentException("Badge location " + badgeLocation
+                        + " not in badged drawable bounds "
+                        + new Rect(0, 0, badgedWidth, badgedHeight));
+            }
+            badgeDrawable.setBounds(0, 0, badgeLocation.width(), badgeLocation.height());
+
+            canvas.save();
+            canvas.translate(badgeLocation.left, badgeLocation.top);
+            badgeDrawable.draw(canvas);
+            canvas.restore();
+        } else {
+            badgeDrawable.setBounds(0, 0, badgedWidth, badgedHeight);
+            badgeDrawable.draw(canvas);
+        }
+
+        if (!canBadgeInPlace) {
+            BitmapDrawable mergedDrawable = new BitmapDrawable(mContext.getResources(), bitmap);
+
+            if (drawable instanceof BitmapDrawable) {
+                BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+                mergedDrawable.setTargetDensity(bitmapDrawable.getBitmap().getDensity());
+            }
+
+            return mergedDrawable;
+        }
+
+        return drawable;
+    }
+
+    private int getBadgeResIdForUser(int userHandle) {
+        // Return the framework-provided badge.
+        UserInfo userInfo = getUserIfProfile(userHandle);
+        if (userInfo != null && userInfo.isManagedProfile()) {
+            return com.android.internal.R.drawable.ic_corp_icon_badge;
+        }
+        return 0;
+    }
+
+    private UserInfo getUserIfProfile(int userHandle) {
+        List<UserInfo> userProfiles = mUserManager.getProfiles(UserHandle.myUserId());
+        for (UserInfo user : userProfiles) {
+            if (user.id == userHandle) {
+                return user;
+            }
+        }
+        return null;
     }
 
     private final ContextImpl mContext;

@@ -46,7 +46,7 @@ import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
-import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.UserHandle;
@@ -399,6 +399,29 @@ public class MockPackageManager extends PackageManager {
 
     @Override
     public Drawable getApplicationLogo(String packageName) throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Drawable getUserBadgedIcon(Drawable icon, UserHandle user) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Drawable getUserBadgedDrawableForDensity(Drawable drawable, UserHandle user,
+            Rect badgeLocation,
+            int badgeDensity) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public Drawable getUserBadgeForDensity(UserHandle user, int density) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public CharSequence getUserBadgedLabel(CharSequence label, UserHandle user) {
         throw new UnsupportedOperationException();
     }
 

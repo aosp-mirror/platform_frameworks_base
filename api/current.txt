@@ -8843,6 +8843,9 @@ package android.content.pm {
     method public abstract android.content.pm.FeatureInfo[] getSystemAvailableFeatures();
     method public abstract java.lang.String[] getSystemSharedLibraryNames();
     method public abstract java.lang.CharSequence getText(java.lang.String, int, android.content.pm.ApplicationInfo);
+    method public abstract android.graphics.drawable.Drawable getUserBadgedDrawableForDensity(android.graphics.drawable.Drawable, android.os.UserHandle, android.graphics.Rect, int);
+    method public abstract android.graphics.drawable.Drawable getUserBadgedIcon(android.graphics.drawable.Drawable, android.os.UserHandle);
+    method public abstract java.lang.CharSequence getUserBadgedLabel(java.lang.CharSequence, android.os.UserHandle);
     method public abstract android.content.res.XmlResourceParser getXml(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public abstract boolean hasSystemFeature(java.lang.String);
     method public abstract boolean isSafeMode();
@@ -22465,9 +22468,6 @@ package android.os {
 
   public class UserManager {
     method public android.os.Bundle getApplicationRestrictions(java.lang.String);
-    method public android.graphics.drawable.Drawable getBadgedDrawableForUser(android.graphics.drawable.Drawable, android.os.UserHandle, android.graphics.Rect, int);
-    method public android.graphics.drawable.Drawable getBadgedIconForUser(android.graphics.drawable.Drawable, android.os.UserHandle);
-    method public java.lang.CharSequence getBadgedLabelForUser(java.lang.CharSequence, android.os.UserHandle);
     method public long getSerialNumberForUser(android.os.UserHandle);
     method public int getUserCount();
     method public android.os.UserHandle getUserForSerialNumber(long);
@@ -29741,6 +29741,9 @@ package android.test.mock {
     method public android.content.pm.FeatureInfo[] getSystemAvailableFeatures();
     method public java.lang.String[] getSystemSharedLibraryNames();
     method public java.lang.CharSequence getText(java.lang.String, int, android.content.pm.ApplicationInfo);
+    method public android.graphics.drawable.Drawable getUserBadgedDrawableForDensity(android.graphics.drawable.Drawable, android.os.UserHandle, android.graphics.Rect, int);
+    method public android.graphics.drawable.Drawable getUserBadgedIcon(android.graphics.drawable.Drawable, android.os.UserHandle);
+    method public java.lang.CharSequence getUserBadgedLabel(java.lang.CharSequence, android.os.UserHandle);
     method public android.content.res.XmlResourceParser getXml(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public boolean hasSystemFeature(java.lang.String);
     method public boolean isSafeMode();
