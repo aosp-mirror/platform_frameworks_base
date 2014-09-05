@@ -152,8 +152,10 @@
     <integer name="recents_max_task_stack_view_dim">96</integer>
     <!-- The delay to enforce between each alt-tab key press. -->
     <integer name="recents_alt_tab_key_delay">200</integer>
-    <!-- Transposes the recents layout in landscape. -->
-    <bool name="recents_transpose_layout_with_orientation">true</bool>
+    <!-- Transposes the search bar layout in landscape. -->
+    <bool name="recents_has_transposed_search_bar">true</bool>
+    <!-- Transposes the nav bar in landscape (only used for purposes of layout). -->
+    <bool name="recents_has_transposed_nav_bar">true</bool>
 
     <!-- Whether to enable KeyguardService or not -->
     <bool name="config_enableKeyguardService">true</bool>
