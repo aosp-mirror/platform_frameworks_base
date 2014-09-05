@@ -22,7 +22,6 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Parcelable;
 import android.view.View;
 
@@ -31,28 +30,23 @@ import java.util.Map;
 
 /**
  * Listener provided in
- * {@link Activity#setEnterSharedElementListener(SharedElementListener)} and
- * {@link Activity#setExitSharedElementListener(SharedElementListener)}
- * to monitor the Activity transitions. The events can be used to customize Activity
- * Transition behavior.
+ * {@link Activity#setEnterSharedElementCallback(SharedElementCallback)} and
+ * {@link Activity#setExitSharedElementCallback(SharedElementCallback)} as well as
+ * {@link Fragment#setEnterSharedElementTransitionCallback(SharedElementCallback)} and
+ * {@link Fragment#setExitSharedElementTransitionCallback(SharedElementCallback)}
+ * to monitor the Shared element transitions. The events can be used to customize Activity
+ * and Fragment Transition behavior.
  */
-public abstract class SharedElementListener {
+public abstract class SharedElementCallback {
     private Matrix mTempMatrix;
 
-    static final SharedElementListener NULL_LISTENER = new SharedElementListener() {
+    static final SharedElementCallback NULL_CALLBACK = new SharedElementCallback() {
     };
 
     /**
-     * Called to allow the listener to customize the start state of the shared element when
-     * transferring in shared element state.
-     * <p>
-     *     The shared element will start at the size and position of the shared element
-     *     in the launching Activity or Fragment. It will also transfer ImageView scaleType
-     *     and imageMatrix if the shared elements in the calling and called Activities are
-     *     ImageViews. Some applications may want to make additional changes, such as
-     *     changing the clip bounds, scaling, or rotation if the shared element end state
-     *     does not map well to the start state.
-     * </p>
+     * Called immediately after the start state is set for the shared element.
+     * The shared element will start at the size and position of the shared element
+     * in the launching Activity or Fragment.
      *
      * @param sharedElementNames The names of the shared elements that were accepted into
      *                           the View hierarchy.
@@ -60,20 +54,21 @@ public abstract class SharedElementListener {
      * @param sharedElementSnapshots The Views containing snap shots of the shared element
      *                               from the launching Window. These elements will not
      *                               be part of the scene, but will be positioned relative
-     *                               to the Window decor View.
+     *                               to the Window decor View. This list is null for Fragment
+     *                               Transitions.
      */
-    public void setSharedElementStart(List<String> sharedElementNames,
+    public void onSharedElementStart(List<String> sharedElementNames,
             List<View> sharedElements, List<View> sharedElementSnapshots) {}
 
     /**
-     * Called to allow the listener to customize the end state of the shared element when
-     * transferring in shared element state.
+     * Called after the end state is set for the shared element, but before the end state
+     * is captured by the shared element transition.
      * <p>
      *     Any customization done in
-     *     {@link #setSharedElementStart(java.util.List, java.util.List, java.util.List)}
+     *     {@link #onSharedElementStart(java.util.List, java.util.List, java.util.List)}
      *     may need to be modified to the final state of the shared element if it is not
      *     automatically corrected by layout. For example, rotation or scale will not
-     *     be affected by layout and if changed in {@link #setSharedElementStart(java.util.List,
+     *     be affected by layout and if changed in {@link #onSharedElementStart(java.util.List,
      *     java.util.List, java.util.List)}, it will also have to be set here again to correct
      *     the end state.
      * </p>
@@ -84,24 +79,27 @@ public abstract class SharedElementListener {
      * @param sharedElementSnapshots The Views containing snap shots of the shared element
      *                               from the launching Window. These elements will not
      *                               be part of the scene, but will be positioned relative
-     *                               to the Window decor View.
+     *                               to the Window decor View. This list will be null for
+     *                               Fragment Transitions.
      */
-    public void setSharedElementEnd(List<String> sharedElementNames,
+    public void onSharedElementEnd(List<String> sharedElementNames,
             List<View> sharedElements, List<View> sharedElementSnapshots) {}
 
     /**
-     * Called after {@link #remapSharedElements(java.util.List, java.util.Map)} when
+     * Called after {@link #onMapSharedElements(java.util.List, java.util.Map)} when
      * transferring shared elements in. Any shared elements that have no mapping will be in
      * <var>rejectedSharedElements</var>. The elements remaining in
      * <var>rejectedSharedElements</var> will be transitioned out of the Scene. If a
      * View is removed from <var>rejectedSharedElements</var>, it must be handled by the
-     * <code>SharedElementListener</code>.
+     * <code>SharedElementCallback</code>.
      * <p>
      * Views in rejectedSharedElements will have their position and size set to the
      * position of the calling shared element, relative to the Window decor View and contain
      * snapshots of the View from the calling Activity or Fragment. This
      * view may be safely added to the decor View's overlay to remain in position.
      * </p>
+     * <p>This method is not called for Fragment Transitions. All rejected shared elements
+     * will be handled by the exit transition.</p>
      *
      * @param rejectedSharedElements Views containing visual information of shared elements
      *                               that are not part of the entering scene. These Views
@@ -109,25 +107,27 @@ public abstract class SharedElementListener {
      *                               View removed from this list will not be transitioned
      *                               automatically.
      */
-    public void handleRejectedSharedElements(List<View> rejectedSharedElements) {}
+    public void onRejectSharedElements(List<View> rejectedSharedElements) {}
 
     /**
-     * Lets the ActivityTransitionListener adjust the mapping of shared element names to
+     * Lets the SharedElementCallback adjust the mapping of shared element names to
      * Views.
      *
      * @param names The names of all shared elements transferred from the calling Activity
-     *              to the started Activity.
+     *              or Fragment in the order they were provided.
      * @param sharedElements The mapping of shared element names to Views. The best guess
      *                       will be filled into sharedElements based on the transitionNames.
      */
-    public void remapSharedElements(List<String> names, Map<String, View> sharedElements) {}
+    public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {}
 
     /**
      * Creates a snapshot of a shared element to be used by the remote Activity and reconstituted
-     * with {@link #createSnapshotView(android.content.Context, android.os.Parcelable)}. A
+     * with {@link #onCreateSnapshotView(android.content.Context, android.os.Parcelable)}. A
      * null return value will mean that the remote Activity will have a null snapshot View in
-     * {@link #setSharedElementStart(java.util.List, java.util.List, java.util.List)} and
-     * {@link #setSharedElementEnd(java.util.List, java.util.List, java.util.List)}.
+     * {@link #onSharedElementStart(java.util.List, java.util.List, java.util.List)} and
+     * {@link #onSharedElementEnd(java.util.List, java.util.List, java.util.List)}.
+     *
+     * <p>This is not called for Fragment Transitions.</p>
      *
      * @param sharedElement The shared element View to create a snapshot for.
      * @param viewToGlobalMatrix A matrix containing a transform from the view to the screen
@@ -135,11 +135,11 @@ public abstract class SharedElementListener {
      * @param screenBounds The bounds of shared element in screen coordinate space. This is
      *                     the bounds of the view with the viewToGlobalMatrix applied.
      * @return A snapshot to send to the remote Activity to be reconstituted with
-     * {@link #createSnapshotView(android.content.Context, android.os.Parcelable)} and passed
-     * into {@link #setSharedElementStart(java.util.List, java.util.List, java.util.List)} and
-     * {@link #setSharedElementEnd(java.util.List, java.util.List, java.util.List)}.
+     * {@link #onCreateSnapshotView(android.content.Context, android.os.Parcelable)} and passed
+     * into {@link #onSharedElementStart(java.util.List, java.util.List, java.util.List)} and
+     * {@link #onSharedElementEnd(java.util.List, java.util.List, java.util.List)}.
      */
-    public Parcelable captureSharedElementSnapshot(View sharedElement, Matrix viewToGlobalMatrix,
+    public Parcelable onCaptureSharedElementSnapshot(View sharedElement, Matrix viewToGlobalMatrix,
             RectF screenBounds) {
         int bitmapWidth = Math.round(screenBounds.width());
         int bitmapHeight = Math.round(screenBounds.height());
@@ -160,20 +160,22 @@ public abstract class SharedElementListener {
 
     /**
      * Reconstitutes a snapshot View from a Parcelable returned in
-     * {@link #captureSharedElementSnapshot(android.view.View, android.graphics.Matrix,
-     * android.graphics.RectF)} to be used in {@link #setSharedElementStart(java.util.List,
-     * java.util.List, java.util.List)} and {@link #setSharedElementEnd(java.util.List,
+     * {@link #onCaptureSharedElementSnapshot(android.view.View, android.graphics.Matrix,
+     * android.graphics.RectF)} to be used in {@link #onSharedElementStart(java.util.List,
+     * java.util.List, java.util.List)} and {@link #onSharedElementEnd(java.util.List,
      * java.util.List, java.util.List)}. The returned View will be sized and positioned after
      * this call so that it is ready to be added to the decor View's overlay.
      *
+     * <p>This is not called for Fragment Transitions.</p>
+     *
      * @param context The Context used to create the snapshot View.
-     * @param snapshot The Parcelable returned by {@link #captureSharedElementSnapshot(
+     * @param snapshot The Parcelable returned by {@link #onCaptureSharedElementSnapshot(
      * android.view.View, android.graphics.Matrix, android.graphics.RectF)}.
-     * @return A View to be sent in {@link #setSharedElementStart(java.util.List, java.util.List,
-     * java.util.List)} and {@link #setSharedElementEnd(java.util.List, java.util.List,
+     * @return A View to be sent in {@link #onSharedElementStart(java.util.List, java.util.List,
+     * java.util.List)} and {@link #onSharedElementEnd(java.util.List, java.util.List,
      * java.util.List)}. A null value will produce a null snapshot value for those two methods.
      */
-    public View createSnapshotView(Context context, Parcelable snapshot) {
+    public View onCreateSnapshotView(Context context, Parcelable snapshot) {
         View view = null;
         if (snapshot instanceof Bitmap) {
             Bitmap bitmap = (Bitmap) snapshot;
