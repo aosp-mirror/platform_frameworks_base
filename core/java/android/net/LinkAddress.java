@@ -274,7 +274,6 @@ public class LinkAddress implements Parcelable {
 
     /**
      * Implement the Parcelable interface.
-     * @hide
      */
     public int describeContents() {
         return 0;
@@ -282,7 +281,6 @@ public class LinkAddress implements Parcelable {
 
     /**
      * Implement the Parcelable interface.
-     * @hide
      */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByteArray(address.getAddress());
@@ -293,7 +291,6 @@ public class LinkAddress implements Parcelable {
 
     /**
      * Implement the Parcelable interface.
-     * @hide
      */
     public static final Creator<LinkAddress> CREATOR =
         new Creator<LinkAddress>() {
