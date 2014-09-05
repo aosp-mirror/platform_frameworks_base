@@ -71,7 +71,7 @@ static struct {
     jmethodID notifyANR;
     jmethodID filterInputEvent;
     jmethodID interceptKeyBeforeQueueing;
-    jmethodID interceptWakeMotionBeforeQueueing;
+    jmethodID interceptMotionBeforeQueueingNonInteractive;
     jmethodID interceptKeyBeforeDispatching;
     jmethodID dispatchUnhandledKey;
     jmethodID checkInjectEventsPermission;
@@ -854,7 +854,9 @@ void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
 
         handleInterceptActions(wmActions, when, /*byref*/ policyFlags);
     } else {
-        policyFlags |= POLICY_FLAG_PASS_TO_USER;
+        if (mInteractive) {
+            policyFlags |= POLICY_FLAG_PASS_TO_USER;
+        }
     }
 }
 
@@ -870,20 +872,22 @@ void NativeInputManager::interceptMotionBeforeQueueing(nsecs_t when, uint32_t& p
     if ((policyFlags & POLICY_FLAG_TRUSTED) && !(policyFlags & POLICY_FLAG_INJECTED)) {
         if (policyFlags & POLICY_FLAG_INTERACTIVE) {
             policyFlags |= POLICY_FLAG_PASS_TO_USER;
-        } else if (policyFlags & POLICY_FLAG_WAKE) {
+        } else {
             JNIEnv* env = jniEnv();
             jint wmActions = env->CallIntMethod(mServiceObj,
-                        gServiceClassInfo.interceptWakeMotionBeforeQueueing,
+                        gServiceClassInfo.interceptMotionBeforeQueueingNonInteractive,
                         when, policyFlags);
             if (checkAndClearExceptionFromCallback(env,
-                    "interceptWakeMotionBeforeQueueing")) {
+                    "interceptMotionBeforeQueueingNonInteractive")) {
                 wmActions = 0;
             }
 
             handleInterceptActions(wmActions, when, /*byref*/ policyFlags);
         }
     } else {
-        policyFlags |= POLICY_FLAG_PASS_TO_USER;
+        if (mInteractive) {
+            policyFlags |= POLICY_FLAG_PASS_TO_USER;
+        }
     }
 }
 
@@ -1441,8 +1445,8 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.interceptKeyBeforeQueueing, clazz,
             "interceptKeyBeforeQueueing", "(Landroid/view/KeyEvent;I)I");
 
-    GET_METHOD_ID(gServiceClassInfo.interceptWakeMotionBeforeQueueing, clazz,
-            "interceptWakeMotionBeforeQueueing", "(JI)I");
+    GET_METHOD_ID(gServiceClassInfo.interceptMotionBeforeQueueingNonInteractive, clazz,
+            "interceptMotionBeforeQueueingNonInteractive", "(JI)I");
 
     GET_METHOD_ID(gServiceClassInfo.interceptKeyBeforeDispatching, clazz,
             "interceptKeyBeforeDispatching",

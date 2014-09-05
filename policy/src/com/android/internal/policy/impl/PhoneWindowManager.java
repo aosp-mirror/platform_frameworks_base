@@ -4240,8 +4240,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int result;
         boolean isWakeKey = (policyFlags & WindowManagerPolicy.FLAG_WAKE) != 0
                 || event.isWakeKey();
-        if (interactive || (isInjected && !isWakeKey)) {
-            // When the screen is on or if the key is injected pass the key to the application.
+        if (interactive
+                || (isInjected && !isWakeKey)
+                || (!interactive && shouldDispatchInputWhenNonInteractive())) {
+            // When the device is interactive, the key is injected, or we're currently dozing in a
+            // non-interactive state with the screen on and the keyguard showing,  pass the key to
+            // the application.
             result = ACTION_PASS_TO_USER;
             isWakeKey = false;
         } else {
@@ -4548,12 +4552,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public int interceptWakeMotionBeforeQueueing(long whenNanos, int policyFlags) {
-        // We already know this is a wake motion so just wake up.
-        // Note that we would observe policyFlags containing
-        // FLAG_WAKE and FLAG_INTERACTIVE here.
-        mPowerManager.wakeUp(whenNanos / 1000000);
+    public int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags) {
+        if ((policyFlags & FLAG_WAKE) != 0) {
+            mPowerManager.wakeUp(whenNanos / 1000000);
+            return 0;
+        }
+        if (shouldDispatchInputWhenNonInteractive()) {
+            return ACTION_PASS_TO_USER;
+        }
         return 0;
+    }
+
+    private boolean shouldDispatchInputWhenNonInteractive() {
+        return keyguardIsShowingTq() && mDisplay != null &&
+                mDisplay.getState() != Display.STATE_OFF;
     }
 
     void dispatchMediaKeyWithWakeLock(KeyEvent event) {

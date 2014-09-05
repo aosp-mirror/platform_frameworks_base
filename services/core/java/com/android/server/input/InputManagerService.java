@@ -1429,8 +1429,8 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private int interceptWakeMotionBeforeQueueing(long whenNanos, int policyFlags) {
-        return mWindowManagerCallbacks.interceptWakeMotionBeforeQueueing(
+    private int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags) {
+        return mWindowManagerCallbacks.interceptMotionBeforeQueueingNonInteractive(
                 whenNanos, policyFlags);
     }
 
@@ -1593,7 +1593,7 @@ public class InputManagerService extends IInputManager.Stub
 
         public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags);
 
-        public int interceptWakeMotionBeforeQueueing(long whenNanos, int policyFlags);
+        public int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags);
 
         public long interceptKeyBeforeDispatching(InputWindowHandle focus,
                 KeyEvent event, int policyFlags);
