@@ -94,7 +94,7 @@ public class AppListFragment extends ListFragment {
 
             // Load the data
             final PackageManager pm = context.getPackageManager();
-            final Intent intent = new Intent(MediaBrowserService.SERVICE_ACTION);
+            final Intent intent = new Intent(MediaBrowserService.SERVICE_INTERFACE);
             final List<ResolveInfo> list = pm.queryIntentServices(intent, 0);
             final int N = list.size();
             mItems = new ArrayList(N);
