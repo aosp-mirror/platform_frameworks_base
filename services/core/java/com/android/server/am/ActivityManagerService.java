@@ -9945,7 +9945,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void updateEventDispatchingLocked() {
-        mWindowManager.setEventDispatching(mBooted && !mWentToSleep && !mShuttingDown);
+        mWindowManager.setEventDispatching(mBooted && !mShuttingDown);
     }
 
     public void setLockScreenShown(boolean shown) {
