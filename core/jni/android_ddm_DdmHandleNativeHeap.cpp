@@ -35,7 +35,15 @@ extern "C" void get_malloc_leak_info(uint8_t** info, size_t* overallSize,
 
 extern "C" void free_malloc_leak_info(uint8_t* info);
 
+#define DDMS_HEADER_SIGNATURE 0x812345dd
+#define DDMS_VERSION 2
+
 struct Header {
+#if defined(__LP64__)
+    uint32_t signature;
+    uint16_t version;
+    uint16_t pointerSize;
+#endif
     size_t mapSize;
     size_t allocSize;
     size_t allocInfoSize;
@@ -76,6 +84,12 @@ static jbyteArray DdmHandleNativeHeap_getLeakInfo(JNIEnv* env, jobject) {
 
     ALOGD("*** mapSize: %d allocSize: %d allocInfoSize: %d totalMemory: %d",
           header.mapSize, header.allocSize, header.allocInfoSize, header.totalMemory);
+
+#if defined(__LP64__)
+    header.signature = DDMS_HEADER_SIGNATURE;
+    header.version = DDMS_VERSION;
+    header.pointerSize = sizeof(void*);
+#endif
 
     jbyteArray array = env->NewByteArray(sizeof(Header) + header.mapSize + header.allocSize);
     if (array != NULL) {
