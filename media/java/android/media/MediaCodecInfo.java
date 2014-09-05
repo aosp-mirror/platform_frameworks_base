@@ -321,6 +321,9 @@ public final class MediaCodecInfo {
             // check feature support
             for (Feature feat: getValidFeatures()) {
                 Integer yesNo = (Integer)map.get(MediaFormat.KEY_FEATURE_ + feat.mName);
+                if (yesNo == null) {
+                    continue;
+                }
                 if ((yesNo == 1 && !isFeatureSupported(feat.mName)) ||
                         (yesNo == 0 && isFeatureRequired(feat.mName))) {
                     return false;
@@ -470,13 +473,12 @@ public final class MediaCodecInfo {
                 Integer yesNo = (Integer)map.get(key);
                 if (yesNo == null) {
                     continue;
-                } else if (yesNo > 0) {
-                    mFlagsRequired |= feat.mValue;
-                    mDefaultFormat.setInteger(key, 1);
-                } else {
-                    mFlagsSupported |= feat.mValue;
-                    mDefaultFormat.setInteger(key, 1);
                 }
+                if (yesNo > 0) {
+                    mFlagsRequired |= feat.mValue;
+                }
+                mFlagsSupported |= feat.mValue;
+                mDefaultFormat.setInteger(key, 1);
                 // TODO restrict features by mFlagsVerified once all codecs reliably verify them
             }
         }
