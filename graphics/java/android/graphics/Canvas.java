@@ -203,7 +203,7 @@ public class Canvas {
      */
     public void setBitmap(@Nullable Bitmap bitmap) {
         if (isHardwareAccelerated()) {
-            throw new RuntimeException("Can't set a bitmap device on a GL canvas");
+            throw new RuntimeException("Can't set a bitmap device on a HW accelerated canvas");
         }
 
         if (bitmap == null) {
