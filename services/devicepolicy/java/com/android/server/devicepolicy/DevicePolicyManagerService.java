@@ -3661,10 +3661,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
 
-        if (mUserManager.getUserInfo(userHandle) == null) {
+        UserInfo info = mUserManager.getUserInfo(userHandle);
+        if (info == null) {
             // User doesn't exist.
             throw new IllegalArgumentException(
                     "Attempted to set profile owner for invalid userId: " + userHandle);
+        }
+        if (info.isGuest()) {
+            throw new IllegalStateException("Cannot set a profile owner on a guest");
         }
 
         if (who == null
