@@ -32507,8 +32507,6 @@ package android.view {
     method public final long getRefreshPeriodNano();
     method public final long getStartTimeNano();
     field public static final long UNDEFINED_TIME_NANO = -1L; // 0xffffffffffffffffL
-    field protected long[] mFramesPresentedTimeNano;
-    field protected long mRefreshPeriodNano;
   }
 
   public class GestureDetector {
