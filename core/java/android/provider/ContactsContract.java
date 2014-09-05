@@ -1125,7 +1125,7 @@ public final class ContactsContract {
          * import android.provider.ContactsContract.Contacts;
          *
          * Uri uri = Contacts.CONTENT_URI.buildUpon()
-         *          .appendQueryParameter(Contacts.ADDRESS_BOOK_INDEX_EXTRAS, "true")
+         *          .appendQueryParameter(Contacts.EXTRA_ADDRESS_BOOK_INDEX, "true")
          *          .build();
          * Cursor cursor = getContentResolver().query(uri,
          *          new String[] {Contacts.DISPLAY_NAME},
@@ -1140,21 +1140,24 @@ public final class ContactsContract {
          * </pre>
          * </p>
          */
-        public static final String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
+        public static final String EXTRA_ADDRESS_BOOK_INDEX =
+                "android.provider.extra.ADDRESS_BOOK_INDEX";
 
         /**
          * The array of address book index titles, which are returned in the
          * same order as the data in the cursor.
          * <p>TYPE: String[]</p>
          */
-        public static final String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+        public static final String EXTRA_ADDRESS_BOOK_INDEX_TITLES =
+                "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
 
         /**
          * The array of group counts for the corresponding group.  Contains the same number
          * of elements as the EXTRA_ADDRESS_BOOK_INDEX_TITLES array.
          * <p>TYPE: int[]</p>
          */
-        public static final String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
+        public static final String EXTRA_ADDRESS_BOOK_INDEX_COUNTS =
+                "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
     }
 
     /**
@@ -8111,7 +8114,7 @@ public final class ContactsContract {
          * for the provided {@link Contacts} entry.
          */
         public static final String ACTION_QUICK_CONTACT =
-                "com.android.contacts.action.QUICK_CONTACT";
+                "android.provider.action.QUICK_CONTACT";
 
         /**
          * Extra used to specify pivot dialog location in screen coordinates.
