@@ -7883,7 +7883,7 @@ package android.content {
     field public static final java.lang.String EXTRA_TEXT = "android.intent.extra.TEXT";
     field public static final java.lang.String EXTRA_TITLE = "android.intent.extra.TITLE";
     field public static final java.lang.String EXTRA_UID = "android.intent.extra.UID";
-    field public static final java.lang.String EXTRA_USER = "android.intent.extra.user";
+    field public static final java.lang.String EXTRA_USER = "android.intent.extra.USER";
     field public static final int FILL_IN_ACTION = 1; // 0x1
     field public static final int FILL_IN_CATEGORIES = 4; // 0x4
     field public static final int FILL_IN_CLIP_DATA = 128; // 0x80
