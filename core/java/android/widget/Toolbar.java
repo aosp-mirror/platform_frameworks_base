@@ -155,6 +155,7 @@ public class Toolbar extends ViewGroup {
     private ActionMenuPresenter mOuterActionMenuPresenter;
     private ExpandedActionViewMenuPresenter mExpandedMenuPresenter;
     private MenuPresenter.Callback mActionMenuPresenterCallback;
+    private MenuBuilder.Callback mMenuBuilderCallback;
 
     private boolean mCollapsible;
 
@@ -827,7 +828,7 @@ public class Toolbar extends ViewGroup {
             mMenuView = new ActionMenuView(getContext());
             mMenuView.setPopupTheme(mPopupTheme);
             mMenuView.setOnMenuItemClickListener(mMenuViewItemClickListener);
-            mMenuView.setActionMenuPresenterCallback(mActionMenuPresenterCallback);
+            mMenuView.setMenuCallbacks(mActionMenuPresenterCallback, mMenuBuilderCallback);
             final LayoutParams lp = generateDefaultLayoutParams();
             lp.gravity = Gravity.END | (mButtonGravity & Gravity.VERTICAL_GRAVITY_MASK);
             mMenuView.setLayoutParams(lp);
@@ -1684,8 +1685,9 @@ public class Toolbar extends ViewGroup {
      * Must be called before the menu is accessed
      * @hide
      */
-    public void setActionMenuPresenterCallback(MenuPresenter.Callback cb) {
-        mActionMenuPresenterCallback = cb;
+    public void setMenuCallbacks(MenuPresenter.Callback pcb, MenuBuilder.Callback mcb) {
+        mActionMenuPresenterCallback = pcb;
+        mMenuBuilderCallback = mcb;
     }
 
     /**
