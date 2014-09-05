@@ -75,6 +75,11 @@ interface IBluetooth
     passkey);
     boolean setPairingConfirmation(in BluetoothDevice device, boolean accept);
 
+    int getPhonebookAccessPermission(in BluetoothDevice device);
+    boolean setPhonebookAccessPermission(in BluetoothDevice device, int value);
+    int getMessageAccessPermission(in BluetoothDevice device);
+    boolean setMessageAccessPermission(in BluetoothDevice device, int value);
+
     void sendConnectionStateChange(in BluetoothDevice device, int profile, int state, int prevState);
 
     void registerCallback(in IBluetoothCallback callback);
