@@ -304,9 +304,12 @@ public class PackageInstaller {
      * Open an existing session to actively perform work. To succeed, the caller
      * must be the owner of the install session.
      */
-    public @NonNull Session openSession(int sessionId) {
+    public @NonNull Session openSession(int sessionId) throws IOException {
         try {
             return new Session(mInstaller.openSession(sessionId));
+        } catch (RuntimeException e) {
+            ExceptionUtils.maybeUnwrapIOException(e);
+            throw e;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -363,7 +366,7 @@ public class PackageInstaller {
     public @NonNull List<SessionInfo> getAllSessions() {
         final ApplicationInfo info = mContext.getApplicationInfo();
         if ("com.google.android.googlequicksearchbox".equals(info.packageName)
-                && info.versionCode <= 300400070) {
+                && info.versionCode <= 300400110) {
             Log.d(TAG, "Ignoring callback request from old prebuilt");
             return Collections.EMPTY_LIST;
         }
@@ -436,25 +439,30 @@ public class PackageInstaller {
         public abstract void onBadgingChanged(int sessionId);
 
         /**
-         * Session has been opened. A session is usually opened when the
-         * installer is actively writing data.
+         * Active state for session has been changed.
+         * <p>
+         * A session is considered active whenever there is ongoing forward
+         * progress being made, such as the installer holding an open
+         * {@link Session} instance while streaming data into place, or the
+         * system optimizing code as the result of
+         * {@link Session#commit(IntentSender)}.
+         * <p>
+         * If the installer closes the {@link Session} without committing, the
+         * session is considered inactive until the installer opens the session
+         * again.
          */
-        public abstract void onOpened(int sessionId);
+        public abstract void onActiveChanged(int sessionId, boolean active);
 
         /**
          * Progress for given session has been updated.
          * <p>
          * Note that this progress may not directly correspond to the value
-         * reported by {@link PackageInstaller.Session#setProgress(float)}, as
-         * the system may carve out a portion of the overall progress to
-         * represent its own internal installation work.
+         * reported by
+         * {@link PackageInstaller.Session#setStagingProgress(float)}, as the
+         * system may carve out a portion of the overall progress to represent
+         * its own internal installation work.
          */
         public abstract void onProgressChanged(int sessionId, float progress);
-
-        /**
-         * Session has been closed.
-         */
-        public abstract void onClosed(int sessionId);
 
         /**
          * Session has completely finished, either with success or failure.
@@ -467,10 +475,9 @@ public class PackageInstaller {
             Handler.Callback {
         private static final int MSG_SESSION_CREATED = 1;
         private static final int MSG_SESSION_BADGING_CHANGED = 2;
-        private static final int MSG_SESSION_OPENED = 3;
+        private static final int MSG_SESSION_ACTIVE_CHANGED = 3;
         private static final int MSG_SESSION_PROGRESS_CHANGED = 4;
-        private static final int MSG_SESSION_CLOSED = 5;
-        private static final int MSG_SESSION_FINISHED = 6;
+        private static final int MSG_SESSION_FINISHED = 5;
 
         final SessionCallback mCallback;
         final Handler mHandler;
@@ -482,24 +489,23 @@ public class PackageInstaller {
 
         @Override
         public boolean handleMessage(Message msg) {
+            final int sessionId = msg.arg1;
             switch (msg.what) {
                 case MSG_SESSION_CREATED:
-                    mCallback.onCreated(msg.arg1);
+                    mCallback.onCreated(sessionId);
                     return true;
                 case MSG_SESSION_BADGING_CHANGED:
-                    mCallback.onBadgingChanged(msg.arg1);
+                    mCallback.onBadgingChanged(sessionId);
                     return true;
-                case MSG_SESSION_OPENED:
-                    mCallback.onOpened(msg.arg1);
+                case MSG_SESSION_ACTIVE_CHANGED:
+                    final boolean active = msg.arg2 != 0;
+                    mCallback.onActiveChanged(sessionId, active);
                     return true;
                 case MSG_SESSION_PROGRESS_CHANGED:
-                    mCallback.onProgressChanged(msg.arg1, (float) msg.obj);
-                    return true;
-                case MSG_SESSION_CLOSED:
-                    mCallback.onClosed(msg.arg1);
+                    mCallback.onProgressChanged(sessionId, (float) msg.obj);
                     return true;
                 case MSG_SESSION_FINISHED:
-                    mCallback.onFinished(msg.arg1, msg.arg2 != 0);
+                    mCallback.onFinished(sessionId, msg.arg2 != 0);
                     return true;
             }
             return false;
@@ -516,19 +522,15 @@ public class PackageInstaller {
         }
 
         @Override
-        public void onSessionOpened(int sessionId) {
-            mHandler.obtainMessage(MSG_SESSION_OPENED, sessionId, 0).sendToTarget();
+        public void onSessionActiveChanged(int sessionId, boolean active) {
+            mHandler.obtainMessage(MSG_SESSION_ACTIVE_CHANGED, sessionId, active ? 1 : 0)
+                    .sendToTarget();
         }
 
         @Override
         public void onSessionProgressChanged(int sessionId, float progress) {
             mHandler.obtainMessage(MSG_SESSION_PROGRESS_CHANGED, sessionId, 0, progress)
                     .sendToTarget();
-        }
-
-        @Override
-        public void onSessionClosed(int sessionId) {
-            mHandler.obtainMessage(MSG_SESSION_CLOSED, sessionId, 0).sendToTarget();
         }
 
         @Override
@@ -567,7 +569,7 @@ public class PackageInstaller {
         // TODO: remove this temporary guard once we have new prebuilts
         final ApplicationInfo info = mContext.getApplicationInfo();
         if ("com.google.android.googlequicksearchbox".equals(info.packageName)
-                && info.versionCode <= 300400070) {
+                && info.versionCode <= 300400110) {
             Log.d(TAG, "Ignoring callback request from old prebuilt");
             return;
         }
@@ -629,10 +631,22 @@ public class PackageInstaller {
             mSession = session;
         }
 
-        /**
-         * Set current progress. Valid values are anywhere between 0 and 1.
-         */
+        /** {@hide} */
+        @Deprecated
         public void setProgress(float progress) {
+            setStagingProgress(progress);
+        }
+
+        /**
+         * Set current progress of staging this session. Valid values are
+         * anywhere between 0 and 1.
+         * <p>
+         * Note that this progress may not directly correspond to the value
+         * reported by {@link SessionCallback#onProgressChanged(int, float)}, as
+         * the system may carve out a portion of the overall progress to
+         * represent its own internal installation work.
+         */
+        public void setStagingProgress(float progress) {
             try {
                 mSession.setClientProgress(progress);
             } catch (RemoteException e) {
@@ -986,7 +1000,7 @@ public class PackageInstaller {
         /** {@hide} */
         public boolean sealed;
         /** {@hide} */
-        public boolean open;
+        public boolean active;
 
         /** {@hide} */
         public int mode;
@@ -1010,7 +1024,7 @@ public class PackageInstaller {
             resolvedBaseCodePath = source.readString();
             progress = source.readFloat();
             sealed = source.readInt() != 0;
-            open = source.readInt() != 0;
+            active = source.readInt() != 0;
 
             mode = source.readInt();
             sizeBytes = source.readLong();
@@ -1036,20 +1050,37 @@ public class PackageInstaller {
         /**
          * Return current overall progress of this session, between 0 and 1.
          * <p>
-         * Note that this progress may not directly correspond to the value reported
-         * by {@link PackageInstaller.Session#setProgress(float)}, as the system may
-         * carve out a portion of the overall progress to represent its own internal
-         * installation work.
+         * Note that this progress may not directly correspond to the value
+         * reported by
+         * {@link PackageInstaller.Session#setStagingProgress(float)}, as the
+         * system may carve out a portion of the overall progress to represent
+         * its own internal installation work.
          */
         public float getProgress() {
             return progress;
         }
 
         /**
-         * Return if this session is currently open.
+         * Return if this session is currently active.
+         * <p>
+         * A session is considered active whenever there is ongoing forward
+         * progress being made, such as the installer holding an open
+         * {@link Session} instance while streaming data into place, or the
+         * system optimizing code as the result of
+         * {@link Session#commit(IntentSender)}.
+         * <p>
+         * If the installer closes the {@link Session} without committing, the
+         * session is considered inactive until the installer opens the session
+         * again.
          */
+        public boolean isActive() {
+            return active;
+        }
+
+        /** {@hide} */
+        @Deprecated
         public boolean isOpen() {
-            return open;
+            return isActive();
         }
 
         /**
@@ -1105,7 +1136,7 @@ public class PackageInstaller {
             dest.writeString(resolvedBaseCodePath);
             dest.writeFloat(progress);
             dest.writeInt(sealed ? 1 : 0);
-            dest.writeInt(open ? 1 : 0);
+            dest.writeInt(active ? 1 : 0);
 
             dest.writeInt(mode);
             dest.writeLong(sizeBytes);
