@@ -54,7 +54,7 @@ public abstract class Conference {
         mPhoneAccount = phoneAccount;
     }
 
-    public final PhoneAccountHandle getPhoneAccount() {
+    public final PhoneAccountHandle getPhoneAccountHandle() {
         return mPhoneAccount;
     }
 
@@ -171,7 +171,7 @@ public abstract class Conference {
     }
 
     /**
-     * Tears down the conference object and any of it's current connections.
+     * Tears down the conference object and any of its current connections.
      */
     public void destroy() {
         Log.d(this, "destroying conference : %s", this);
