@@ -23686,7 +23686,7 @@ package android.provider {
     field public static final java.lang.String DATE = "date";
     field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
     field public static final java.lang.String DURATION = "duration";
-    field public static final java.lang.String EXTRA_CALL_TYPE_FILTER = "android.provider.extra.call_type_filter";
+    field public static final java.lang.String EXTRA_CALL_TYPE_FILTER = "android.provider.extra.CALL_TYPE_FILTER";
     field public static final java.lang.String FEATURES = "features";
     field public static final int FEATURES_NONE = 0; // 0x0
     field public static final int FEATURES_VIDEO = 1; // 0x1
@@ -24050,11 +24050,11 @@ package android.provider {
 
   public static final class ContactsContract.CommonDataKinds.Callable implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
     ctor public ContactsContract.CommonDataKinds.Callable();
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final android.net.Uri CONTENT_FILTER_URI;
     field public static final android.net.Uri CONTENT_URI;
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
   }
 
   protected static abstract interface ContactsContract.CommonDataKinds.CommonColumns implements android.provider.ContactsContract.CommonDataKinds.BaseTypes {
@@ -24065,11 +24065,11 @@ package android.provider {
 
   public static final class ContactsContract.CommonDataKinds.Contactables implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
     ctor public ContactsContract.CommonDataKinds.Contactables();
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final android.net.Uri CONTENT_FILTER_URI;
     field public static final android.net.Uri CONTENT_URI;
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final java.lang.String VISIBLE_CONTACTS_ONLY = "visible_contacts_only";
   }
 
@@ -24077,15 +24077,15 @@ package android.provider {
     method public static final java.lang.CharSequence getTypeLabel(android.content.res.Resources, int, java.lang.CharSequence);
     method public static final int getTypeLabelResource(int);
     field public static final java.lang.String ADDRESS = "data1";
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final android.net.Uri CONTENT_FILTER_URI;
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/email_v2";
     field public static final android.net.Uri CONTENT_LOOKUP_URI;
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/email_v2";
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String DISPLAY_NAME = "data4";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final int TYPE_HOME = 1; // 0x1
     field public static final int TYPE_MOBILE = 4; // 0x4
     field public static final int TYPE_OTHER = 3; // 0x3
@@ -24095,10 +24095,10 @@ package android.provider {
   public static final class ContactsContract.CommonDataKinds.Event implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
     method public static final java.lang.CharSequence getTypeLabel(android.content.res.Resources, int, java.lang.CharSequence);
     method public static int getTypeResource(java.lang.Integer);
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_event";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final java.lang.String START_DATE = "data1";
     field public static final int TYPE_ANNIVERSARY = 1; // 0x1
     field public static final int TYPE_BIRTHDAY = 3; // 0x3
@@ -24106,19 +24106,19 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.GroupMembership implements android.provider.ContactsContract.DataColumnsWithJoins {
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/group_membership";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final java.lang.String GROUP_ROW_ID = "data1";
     field public static final java.lang.String GROUP_SOURCE_ID = "group_sourceid";
   }
 
   public static final class ContactsContract.CommonDataKinds.Identity implements android.provider.ContactsContract.DataColumnsWithJoins {
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/identity";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final java.lang.String IDENTITY = "data1";
     field public static final java.lang.String NAMESPACE = "data2";
   }
@@ -24128,11 +24128,11 @@ package android.provider {
     method public static final int getProtocolLabelResource(int);
     method public static final java.lang.CharSequence getTypeLabel(android.content.res.Resources, int, java.lang.CharSequence);
     method public static final int getTypeLabelResource(int);
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/im";
     field public static final java.lang.String CUSTOM_PROTOCOL = "data6";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final java.lang.String PROTOCOL = "data5";
     field public static final int PROTOCOL_AIM = 0; // 0x0
     field public static final int PROTOCOL_CUSTOM = -1; // 0xffffffff
@@ -24150,10 +24150,10 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Nickname implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/nickname";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final java.lang.String NAME = "data1";
     field public static final int TYPE_DEFAULT = 1; // 0x1
     field public static final int TYPE_INITIALS = 5; // 0x5
@@ -24164,22 +24164,22 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Note implements android.provider.ContactsContract.DataColumnsWithJoins {
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/note";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final java.lang.String NOTE = "data1";
   }
 
   public static final class ContactsContract.CommonDataKinds.Organization implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
     method public static final java.lang.CharSequence getTypeLabel(android.content.res.Resources, int, java.lang.CharSequence);
     method public static final int getTypeLabelResource(int);
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final java.lang.String COMPANY = "data1";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/organization";
     field public static final java.lang.String DEPARTMENT = "data5";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final java.lang.String JOB_DESCRIPTION = "data6";
     field public static final java.lang.String OFFICE_LOCATION = "data9";
     field public static final java.lang.String PHONETIC_NAME = "data8";
@@ -24192,13 +24192,13 @@ package android.provider {
   public static final class ContactsContract.CommonDataKinds.Phone implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
     method public static final java.lang.CharSequence getTypeLabel(android.content.res.Resources, int, java.lang.CharSequence);
     method public static final int getTypeLabelResource(int);
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final android.net.Uri CONTENT_FILTER_URI;
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/phone_v2";
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/phone_v2";
     field public static final android.net.Uri CONTENT_URI;
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final java.lang.String NORMALIZED_NUMBER = "data4";
     field public static final java.lang.String NUMBER = "data1";
     field public static final java.lang.String SEARCH_DISPLAY_NAME_KEY = "search_display_name";
@@ -24226,10 +24226,10 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Photo implements android.provider.ContactsContract.DataColumnsWithJoins {
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/photo";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final java.lang.String PHOTO = "data15";
     field public static final java.lang.String PHOTO_FILE_ID = "data14";
   }
@@ -24237,10 +24237,10 @@ package android.provider {
   public static final class ContactsContract.CommonDataKinds.Relation implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
     method public static final java.lang.CharSequence getTypeLabel(android.content.res.Resources, int, java.lang.CharSequence);
     method public static final int getTypeLabelResource(int);
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/relation";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final java.lang.String NAME = "data1";
     field public static final int TYPE_ASSISTANT = 1; // 0x1
     field public static final int TYPE_BROTHER = 2; // 0x2
@@ -24261,10 +24261,10 @@ package android.provider {
   public static final class ContactsContract.CommonDataKinds.SipAddress implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
     method public static final java.lang.CharSequence getTypeLabel(android.content.res.Resources, int, java.lang.CharSequence);
     method public static final int getTypeLabelResource(int);
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/sip_address";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final java.lang.String SIP_ADDRESS = "data1";
     field public static final int TYPE_HOME = 1; // 0x1
     field public static final int TYPE_OTHER = 3; // 0x3
@@ -24272,11 +24272,11 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.StructuredName implements android.provider.ContactsContract.DataColumnsWithJoins {
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/name";
     field public static final java.lang.String DISPLAY_NAME = "data1";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final java.lang.String FAMILY_NAME = "data3";
     field public static final java.lang.String FULL_NAME_STYLE = "data10";
     field public static final java.lang.String GIVEN_NAME = "data2";
@@ -24291,14 +24291,14 @@ package android.provider {
   public static final class ContactsContract.CommonDataKinds.StructuredPostal implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
     method public static final java.lang.CharSequence getTypeLabel(android.content.res.Resources, int, java.lang.CharSequence);
     method public static final int getTypeLabelResource(int);
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final java.lang.String CITY = "data7";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/postal-address_v2";
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/postal-address_v2";
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String COUNTRY = "data10";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final java.lang.String FORMATTED_ADDRESS = "data1";
     field public static final java.lang.String NEIGHBORHOOD = "data6";
     field public static final java.lang.String POBOX = "data5";
@@ -24311,10 +24311,10 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Website implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/website";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final int TYPE_BLOG = 2; // 0x2
     field public static final int TYPE_FTP = 6; // 0x6
     field public static final int TYPE_HOME = 4; // 0x4
@@ -24362,7 +24362,6 @@ package android.provider {
     method public static deprecated void markAsContacted(android.content.ContentResolver, long);
     method public static java.io.InputStream openContactPhotoInputStream(android.content.ContentResolver, android.net.Uri, boolean);
     method public static java.io.InputStream openContactPhotoInputStream(android.content.ContentResolver, android.net.Uri);
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final android.net.Uri CONTENT_FILTER_URI;
     field public static final android.net.Uri CONTENT_FREQUENT_URI;
     field public static final android.net.Uri CONTENT_GROUP_URI;
@@ -24375,8 +24374,9 @@ package android.provider {
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String CONTENT_VCARD_TYPE = "text/x-vcard";
     field public static final android.net.Uri CONTENT_VCARD_URI;
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
   }
 
   public static final class ContactsContract.Contacts.AggregationSuggestions implements android.provider.BaseColumns android.provider.ContactsContract.ContactOptionsColumns android.provider.ContactsContract.ContactStatusColumns android.provider.ContactsContract.ContactsColumns {
@@ -24421,11 +24421,11 @@ package android.provider {
 
   public static final class ContactsContract.Data implements android.provider.ContactsContract.DataColumnsWithJoins {
     method public static android.net.Uri getContactLookupUri(android.content.ContentResolver, android.net.Uri);
-    field public static final java.lang.String ADDRESS_BOOK_INDEX_EXTRAS = "address_book_index_extras";
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/data";
     field public static final android.net.Uri CONTENT_URI;
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "address_book_index_counts";
-    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "address_book_index_titles";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_COUNTS = "android.provider.extra.ADDRESS_BOOK_INDEX_COUNTS";
+    field public static final java.lang.String EXTRA_ADDRESS_BOOK_INDEX_TITLES = "android.provider.extra.ADDRESS_BOOK_INDEX_TITLES";
     field public static final java.lang.String VISIBLE_CONTACTS_ONLY = "visible_contacts_only";
   }
 
@@ -24669,7 +24669,7 @@ package android.provider {
     ctor public ContactsContract.QuickContact();
     method public static void showQuickContact(android.content.Context, android.view.View, android.net.Uri, int, java.lang.String[]);
     method public static void showQuickContact(android.content.Context, android.graphics.Rect, android.net.Uri, int, java.lang.String[]);
-    field public static final java.lang.String ACTION_QUICK_CONTACT = "com.android.contacts.action.QUICK_CONTACT";
+    field public static final java.lang.String ACTION_QUICK_CONTACT = "android.provider.action.QUICK_CONTACT";
     field public static final java.lang.String EXTRA_EXCLUDE_MIMES = "android.provider.extra.EXCLUDE_MIMES";
     field public static final int MODE_LARGE = 3; // 0x3
     field public static final int MODE_MEDIUM = 2; // 0x2
@@ -34333,7 +34333,7 @@ package android.view {
   }
 
   public final class ViewAnimationUtils {
-    method public static final android.animation.Animator createCircularReveal(android.view.View, int, int, float, float);
+    method public static android.animation.Animator createCircularReveal(android.view.View, int, int, float, float);
   }
 
   public class ViewConfiguration {
