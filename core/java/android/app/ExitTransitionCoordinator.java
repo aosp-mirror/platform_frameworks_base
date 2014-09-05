@@ -79,7 +79,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         mActivity = activity;
     }
 
-    private static SharedElementListener getListener(Activity activity, boolean isReturning) {
+    private static SharedElementCallback getListener(Activity activity, boolean isReturning) {
         return isReturning ? activity.mEnterTransitionListener : activity.mExitTransitionListener;
     }
 
@@ -176,7 +176,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 });
         setGhostVisibility(View.INVISIBLE);
         scheduleGhostVisibilityChange(View.INVISIBLE);
-        mListener.setSharedElementEnd(mSharedElementNames, mSharedElements, sharedElementSnapshots);
+        mListener.onSharedElementEnd(mSharedElementNames, mSharedElements, sharedElementSnapshots);
         TransitionManager.beginDelayedTransition(getDecor(), transition);
         scheduleGhostVisibilityChange(View.VISIBLE);
         setGhostVisibility(View.VISIBLE);

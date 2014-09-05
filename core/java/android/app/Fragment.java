@@ -495,8 +495,8 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     private Boolean mAllowReturnTransitionOverlap;
     private Boolean mAllowEnterTransitionOverlap;
 
-    SharedElementListener mEnterTransitionListener = SharedElementListener.NULL_LISTENER;
-    SharedElementListener mExitTransitionListener = SharedElementListener.NULL_LISTENER;
+    SharedElementCallback mEnterTransitionCallback = SharedElementCallback.NULL_CALLBACK;
+    SharedElementCallback mExitTransitionCallback = SharedElementCallback.NULL_CALLBACK;
 
     /**
      * State information that has been retrieved from a fragment instance
@@ -1621,31 +1621,31 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * When custom transitions are used with Fragments, the enter transition listener
+     * When custom transitions are used with Fragments, the enter transition callback
      * is called when this Fragment is attached or detached when not popping the back stack.
      *
-     * @param listener Used to manipulate the shared element transitions on this Fragment
+     * @param callback Used to manipulate the shared element transitions on this Fragment
      *                 when added not as a pop from the back stack.
      */
-    public void setEnterSharedElementTransitionListener(SharedElementListener listener) {
-        if (listener == null) {
-            listener = SharedElementListener.NULL_LISTENER;
+    public void setEnterSharedElementTransitionCallback(SharedElementCallback callback) {
+        if (callback == null) {
+            callback = SharedElementCallback.NULL_CALLBACK;
         }
-        mEnterTransitionListener = listener;
+        mEnterTransitionCallback = callback;
     }
 
     /**
-     * When custom transitions are used with Fragments, the exit transition listener
+     * When custom transitions are used with Fragments, the exit transition callback
      * is called when this Fragment is attached or detached when popping the back stack.
      *
-     * @param listener Used to manipulate the shared element transitions on this Fragment
+     * @param callback Used to manipulate the shared element transitions on this Fragment
      *                 when added as a pop from the back stack.
      */
-    public void setExitSharedElementTransitionListener(SharedElementListener listener) {
-        if (listener == null) {
-            listener = SharedElementListener.NULL_LISTENER;
+    public void setExitSharedElementTransitionCallback(SharedElementCallback callback) {
+        if (callback == null) {
+            callback = SharedElementCallback.NULL_CALLBACK;
         }
-        mExitTransitionListener = listener;
+        mExitTransitionCallback = callback;
     }
 
     /**

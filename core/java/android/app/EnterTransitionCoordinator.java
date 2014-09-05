@@ -21,8 +21,6 @@ import android.animation.ObjectAnimator;
 import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.os.ResultReceiver;
 import android.text.TextUtils;
 import android.transition.Transition;
@@ -209,7 +207,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
     }
 
-    private static SharedElementListener getListener(Activity activity, boolean isReturning) {
+    private static SharedElementCallback getListener(Activity activity, boolean isReturning) {
         return isReturning ? activity.mExitTransitionListener : activity.mEnterTransitionListener;
     }
 
@@ -294,7 +292,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         ArrayList<String> rejectedNames = new ArrayList<String>(mAllSharedElementNames);
         rejectedNames.removeAll(mSharedElementNames);
         ArrayList<View> rejectedSnapshots = createSnapshots(sharedElementState, rejectedNames);
-        mListener.handleRejectedSharedElements(rejectedSnapshots);
+        mListener.onRejectSharedElements(rejectedSnapshots);
         startRejectedAnimations(rejectedSnapshots);
 
         // Now start shared element transition
