@@ -415,7 +415,7 @@ public final class MediaCodecInfo {
          * profile} and {@code level}.  If the type, or profile-level combination
          * is not understood by the framework, it returns null.
          */
-        public static CodecCapabilities CreateFromProfileLevel(
+        public static CodecCapabilities createFromProfileLevel(
                 String mime, int profile, int level) {
             CodecProfileLevel pl = new CodecProfileLevel();
             pl.profile = profile;

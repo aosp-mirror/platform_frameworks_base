@@ -14715,7 +14715,7 @@ package android.media {
 
   public static final class MediaCodecInfo.CodecCapabilities {
     ctor public MediaCodecInfo.CodecCapabilities();
-    method public static android.media.MediaCodecInfo.CodecCapabilities CreateFromProfileLevel(java.lang.String, int, int);
+    method public static android.media.MediaCodecInfo.CodecCapabilities createFromProfileLevel(java.lang.String, int, int);
     method public android.media.MediaCodecInfo.AudioCapabilities getAudioCapabilities();
     method public android.media.MediaFormat getDefaultFormat();
     method public android.media.MediaCodecInfo.EncoderCapabilities getEncoderCapabilities();
