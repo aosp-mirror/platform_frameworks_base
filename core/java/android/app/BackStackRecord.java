@@ -1128,11 +1128,11 @@ final class BackStackRecord extends FragmentTransaction implements
         }
 
         if (isBack) {
-            outFragment.mEnterTransitionListener.remapSharedElements(
+            outFragment.mEnterTransitionCallback.onMapSharedElements(
                     mSharedElementTargetNames, namedViews);
             setBackNameOverrides(state, namedViews, false);
         } else {
-            outFragment.mExitTransitionListener.remapSharedElements(
+            outFragment.mExitTransitionCallback.onMapSharedElements(
                     mSharedElementTargetNames, namedViews);
             setNameOverrides(state, namedViews, false);
         }
@@ -1248,14 +1248,14 @@ final class BackStackRecord extends FragmentTransaction implements
             }
 
             // Notify the start of the transition.
-            SharedElementListener listener = isBack ?
-                    outFragment.mEnterTransitionListener :
-                    inFragment.mEnterTransitionListener;
+            SharedElementCallback callback = isBack ?
+                    outFragment.mEnterTransitionCallback :
+                    inFragment.mEnterTransitionCallback;
             tempNames.clear();
             tempNames.addAll(namedViews.keySet());
             tempViewList.clear();
             tempViewList.addAll(namedViews.values());
-            listener.setSharedElementStart(tempNames, tempViewList, null);
+            callback.onSharedElementStart(tempNames, tempViewList, null);
 
             // Set the epicenter of the exit transition
             if (mSharedElementTargetNames != null && exitTransition != null) {
@@ -1337,11 +1337,11 @@ final class BackStackRecord extends FragmentTransaction implements
                     tempViews2, isBack);
             // remap shared elements and set the name mapping used in the shared element transition.
             if (isBack) {
-                inFragment.mExitTransitionListener.remapSharedElements(
+                inFragment.mExitTransitionCallback.onMapSharedElements(
                         mSharedElementTargetNames, namedViews);
                 setBackNameOverrides(state, namedViews, true);
             } else {
-                inFragment.mEnterTransitionListener.remapSharedElements(
+                inFragment.mEnterTransitionCallback.onMapSharedElements(
                         mSharedElementTargetNames, namedViews);
                 setNameOverrides(state, namedViews, true);
             }
@@ -1355,14 +1355,14 @@ final class BackStackRecord extends FragmentTransaction implements
             }
 
             int containerId = inFragments.keyAt(i);
-            SharedElementListener sharedElementListener = isBack ?
-                    outFragments.get(containerId).mEnterTransitionListener :
-                    inFragment.mEnterTransitionListener;
+            SharedElementCallback sharedElementCallback = isBack ?
+                    outFragments.get(containerId).mEnterTransitionCallback :
+                    inFragment.mEnterTransitionCallback;
             tempNames.clear();
             tempNames.addAll(namedViews.keySet());
             tempViews.clear();
             tempViews.addAll(namedViews.values());
-            sharedElementListener.setSharedElementEnd(tempNames, tempViews, null);
+            sharedElementCallback.onSharedElementEnd(tempNames, tempViews, null);
         }
 
         // Don't include any newly-hidden fragments in the transition.

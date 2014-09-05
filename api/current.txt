@@ -3545,8 +3545,8 @@ package android.app {
     method public void setContentView(android.view.View);
     method public void setContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public final void setDefaultKeyMode(int);
-    method public void setEnterSharedElementListener(android.app.SharedElementListener);
-    method public void setExitSharedElementListener(android.app.SharedElementListener);
+    method public void setEnterSharedElementCallback(android.app.SharedElementCallback);
+    method public void setExitSharedElementCallback(android.app.SharedElementCallback);
     method public final void setFeatureDrawable(int, android.graphics.drawable.Drawable);
     method public final void setFeatureDrawableAlpha(int, int);
     method public final void setFeatureDrawableResource(int, int);
@@ -4320,9 +4320,9 @@ package android.app {
     method public void setAllowEnterTransitionOverlap(boolean);
     method public void setAllowReturnTransitionOverlap(boolean);
     method public void setArguments(android.os.Bundle);
-    method public void setEnterSharedElementTransitionListener(android.app.SharedElementListener);
+    method public void setEnterSharedElementTransitionCallback(android.app.SharedElementCallback);
     method public void setEnterTransition(android.transition.Transition);
-    method public void setExitSharedElementTransitionListener(android.app.SharedElementListener);
+    method public void setExitSharedElementTransitionCallback(android.app.SharedElementCallback);
     method public void setExitTransition(android.transition.Transition);
     method public void setHasOptionsMenu(boolean);
     method public void setInitialSavedState(android.app.Fragment.SavedState);
@@ -5193,14 +5193,14 @@ package android.app {
     field public static final int START_STICKY_COMPATIBILITY = 0; // 0x0
   }
 
-  public abstract class SharedElementListener {
-    ctor public SharedElementListener();
-    method public android.os.Parcelable captureSharedElementSnapshot(android.view.View, android.graphics.Matrix, android.graphics.RectF);
-    method public android.view.View createSnapshotView(android.content.Context, android.os.Parcelable);
-    method public void handleRejectedSharedElements(java.util.List<android.view.View>);
-    method public void remapSharedElements(java.util.List<java.lang.String>, java.util.Map<java.lang.String, android.view.View>);
-    method public void setSharedElementEnd(java.util.List<java.lang.String>, java.util.List<android.view.View>, java.util.List<android.view.View>);
-    method public void setSharedElementStart(java.util.List<java.lang.String>, java.util.List<android.view.View>, java.util.List<android.view.View>);
+  public abstract class SharedElementCallback {
+    ctor public SharedElementCallback();
+    method public android.os.Parcelable onCaptureSharedElementSnapshot(android.view.View, android.graphics.Matrix, android.graphics.RectF);
+    method public android.view.View onCreateSnapshotView(android.content.Context, android.os.Parcelable);
+    method public void onMapSharedElements(java.util.List<java.lang.String>, java.util.Map<java.lang.String, android.view.View>);
+    method public void onRejectSharedElements(java.util.List<android.view.View>);
+    method public void onSharedElementEnd(java.util.List<java.lang.String>, java.util.List<android.view.View>, java.util.List<android.view.View>);
+    method public void onSharedElementStart(java.util.List<java.lang.String>, java.util.List<android.view.View>, java.util.List<android.view.View>);
   }
 
   public deprecated class TabActivity extends android.app.ActivityGroup {

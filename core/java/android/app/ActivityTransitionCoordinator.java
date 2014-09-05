@@ -197,7 +197,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     final protected ArrayList<View> mSharedElements = new ArrayList<View>();
     final protected ArrayList<String> mSharedElementNames = new ArrayList<String>();
     final protected ArrayList<View> mTransitioningViews = new ArrayList<View>();
-    protected SharedElementListener mListener;
+    protected SharedElementCallback mListener;
     protected ResultReceiver mResultReceiver;
     final private FixedEpicenterCallback mEpicenterCallback = new FixedEpicenterCallback();
     final protected boolean mIsReturning;
@@ -208,7 +208,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
 
     public ActivityTransitionCoordinator(Window window,
             ArrayList<String> allSharedElementNames,
-            SharedElementListener listener, boolean isReturning) {
+            SharedElementCallback listener, boolean isReturning) {
         super(new Handler());
         mWindow = window;
         mListener = listener;
@@ -218,7 +218,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
 
     protected void viewsReady(ArrayMap<String, View> sharedElements) {
         sharedElements.retainAll(mAllSharedElementNames);
-        mListener.remapSharedElements(mAllSharedElementNames, sharedElements);
+        mListener.onMapSharedElements(mAllSharedElementNames, sharedElements);
         mSharedElementNames.addAll(sharedElements.keySet());
         mSharedElements.addAll(sharedElements.values());
         if (getViewsTransition() != null) {
@@ -458,12 +458,12 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                         tempMatrix, tempRect, null);
             }
         }
-        mListener.setSharedElementStart(mSharedElementNames, mSharedElements, snapshots);
+        mListener.onSharedElementStart(mSharedElementNames, mSharedElements, snapshots);
         return originalImageState;
     }
 
     protected void notifySharedElementEnd(ArrayList<View> snapshots) {
-        mListener.setSharedElementEnd(mSharedElementNames, mSharedElements, snapshots);
+        mListener.onSharedElementEnd(mSharedElementNames, mSharedElements, snapshots);
     }
 
     protected void scheduleSetSharedElementEnd(final ArrayList<View> snapshots) {
@@ -526,7 +526,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 Parcelable parcelable = sharedElementBundle.getParcelable(KEY_SNAPSHOT);
                 View snapshot = null;
                 if (parcelable != null) {
-                    snapshot = mListener.createSnapshotView(context, parcelable);
+                    snapshot = mListener.onCreateSnapshotView(context, parcelable);
                 }
                 if (snapshot != null) {
                     setSharedElementState(snapshot, name, state, null, null, decorLoc);
@@ -618,7 +618,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         sharedElementBundle.putFloat(KEY_TRANSLATION_Z, view.getTranslationZ());
         sharedElementBundle.putFloat(KEY_ELEVATION, view.getElevation());
 
-        Parcelable bitmap = mListener.captureSharedElementSnapshot(view, tempMatrix, tempBounds);
+        Parcelable bitmap = mListener.onCaptureSharedElementSnapshot(view, tempMatrix, tempBounds);
         if (bitmap != null) {
             sharedElementBundle.putParcelable(KEY_SNAPSHOT, bitmap);
         }
