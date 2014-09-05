@@ -69,12 +69,13 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         Bundle resultReceiverBundle = new Bundle();
         resultReceiverBundle.putParcelable(KEY_REMOTE_RECEIVER, this);
         mResultReceiver.send(MSG_SET_REMOTE_RECEIVER, resultReceiverBundle);
-        getDecor().getViewTreeObserver().addOnPreDrawListener(
+        final View decorView = getDecor();
+        decorView.getViewTreeObserver().addOnPreDrawListener(
                 new ViewTreeObserver.OnPreDrawListener() {
                     @Override
                     public boolean onPreDraw() {
                         if (mIsReadyForTransition) {
-                            getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
+                            decorView.getViewTreeObserver().removeOnPreDrawListener(this);
                         }
                         return mIsReadyForTransition;
                     }
@@ -187,11 +188,12 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             moveSharedElementsToOverlay();
             mResultReceiver.send(MSG_SHARED_ELEMENT_DESTINATION, state);
         } else {
-            getDecor().getViewTreeObserver()
+            final View decorView = getDecor();
+            decorView.getViewTreeObserver()
                     .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                         @Override
                         public boolean onPreDraw() {
-                            getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
+                            decorView.getViewTreeObserver().removeOnPreDrawListener(this);
                             if (mResultReceiver != null) {
                                 Bundle state = captureSharedElementState();
                                 setSharedElementMatrices();
@@ -342,11 +344,12 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
         final Bundle sharedElementState = mSharedElementsBundle;
         mSharedElementsBundle = null;
-        getDecor().getViewTreeObserver()
+        final View decorView = getDecor();
+        decorView.getViewTreeObserver()
                 .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                     @Override
                     public boolean onPreDraw() {
-                        getDecor().getViewTreeObserver().removeOnPreDrawListener(this);
+                        decorView.getViewTreeObserver().removeOnPreDrawListener(this);
                         startTransition(new Runnable() {
                             @Override
                             public void run() {
@@ -356,7 +359,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                         return false;
                     }
                 });
-        getDecor().invalidate();
+        decorView.invalidate();
     }
 
     private void requestLayoutForSharedElements() {
