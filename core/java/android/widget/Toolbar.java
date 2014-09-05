@@ -37,6 +37,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.R;
+import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuItemImpl;
 import com.android.internal.view.menu.MenuPresenter;
@@ -153,6 +154,7 @@ public class Toolbar extends ViewGroup {
     private ToolbarWidgetWrapper mWrapper;
     private ActionMenuPresenter mOuterActionMenuPresenter;
     private ExpandedActionViewMenuPresenter mExpandedMenuPresenter;
+    private MenuPresenter.Callback mActionMenuPresenterCallback;
 
     private boolean mCollapsible;
 
@@ -825,6 +827,7 @@ public class Toolbar extends ViewGroup {
             mMenuView = new ActionMenuView(getContext());
             mMenuView.setPopupTheme(mPopupTheme);
             mMenuView.setOnMenuItemClickListener(mMenuViewItemClickListener);
+            mMenuView.setActionMenuPresenterCallback(mActionMenuPresenterCallback);
             final LayoutParams lp = generateDefaultLayoutParams();
             lp.gravity = Gravity.END | (mButtonGravity & Gravity.VERTICAL_GRAVITY_MASK);
             mMenuView.setLayoutParams(lp);
@@ -1675,6 +1678,14 @@ public class Toolbar extends ViewGroup {
     public void setCollapsible(boolean collapsible) {
         mCollapsible = collapsible;
         requestLayout();
+    }
+
+    /**
+     * Must be called before the menu is accessed
+     * @hide
+     */
+    public void setActionMenuPresenterCallback(MenuPresenter.Callback cb) {
+        mActionMenuPresenterCallback = cb;
     }
 
     /**
