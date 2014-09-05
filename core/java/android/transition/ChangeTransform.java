@@ -99,6 +99,7 @@ public class ChangeTransform extends Transition {
      * @return <code>true</code> when a changed parent should execute the transition
      * inside the scene root's overlay or <code>false</code> if a parent change only
      * affects the transform of the transitioning view.
+     * @attr ref android.R.styleable#ChangeTransform_reparentWithOverlay
      */
     public boolean getReparentWithOverlay() {
         return mUseOverlay;
@@ -120,6 +121,7 @@ public class ChangeTransform extends Transition {
      * @return <code>true</code> when a changed parent should execute the transition
      * inside the scene root's overlay or <code>false</code> if a parent change only
      * affects the transform of the transitioning view.
+     * @attr ref android.R.styleable#ChangeTransform_reparentWithOverlay
      */
     public void setReparentWithOverlay(boolean reparentWithOverlay) {
         mUseOverlay = reparentWithOverlay;
@@ -132,6 +134,7 @@ public class ChangeTransform extends Transition {
      * view will be tracked. Default is true.
      *
      * @return whether parent changes will be tracked by the ChangeTransform.
+     * @attr ref android.R.styleable#ChangeTransform_reparent
      */
     public boolean getReparent() {
         return mReparent;
@@ -145,6 +148,7 @@ public class ChangeTransform extends Transition {
      *
      * @param reparent Set to true to track parent changes or false to only track changes
      *                 of the transitioning view without considering the parent change.
+     * @attr ref android.R.styleable#ChangeTransform_reparent
      */
     public void setReparent(boolean reparent) {
         mReparent = reparent;
