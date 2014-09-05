@@ -80,11 +80,10 @@ public final class BluetoothLeScanner {
      * @throws IllegalArgumentException If {@code callback} is null.
      */
     public void startScan(final ScanCallback callback) {
-        checkAdapterState();
         if (callback == null) {
             throw new IllegalArgumentException("callback is null");
         }
-        this.startScan(null, new ScanSettings.Builder().build(), callback);
+        startScan(null, new ScanSettings.Builder().build(), callback);
     }
 
     /**
@@ -104,7 +103,7 @@ public final class BluetoothLeScanner {
 
     private void startScan(List<ScanFilter> filters, ScanSettings settings,
             final ScanCallback callback, List<List<ResultStorageDescriptor>> resultStorages) {
-        checkAdapterState();
+        BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
         if (settings == null || callback == null) {
             throw new IllegalArgumentException("settings or callback is null");
         }
@@ -142,7 +141,7 @@ public final class BluetoothLeScanner {
      * @param callback
      */
     public void stopScan(ScanCallback callback) {
-        checkAdapterState();
+        BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
         synchronized (mLeScanClients) {
             BleScanCallbackWrapper wrapper = mLeScanClients.remove(callback);
             if (wrapper == null) {
@@ -162,7 +161,7 @@ public final class BluetoothLeScanner {
      *            used to start scan.
      */
     public void flushPendingScanResults(ScanCallback callback) {
-        checkAdapterState();
+        BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
         if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null!");
         }
@@ -370,13 +369,6 @@ public final class BluetoothLeScanner {
                     }
                 }
             });
-        }
-    }
-
-    // TODO: move this api to a common util class.
-    private void checkAdapterState() {
-        if (mBluetoothAdapter.getState() != mBluetoothAdapter.STATE_ON) {
-            throw new IllegalStateException("BT Adapter is not turned ON");
         }
     }
 
