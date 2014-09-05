@@ -65,12 +65,12 @@ public class CaptureFailure {
      * Get the request associated with this failed capture.
      *
      * <p>Whenever a request is unsuccessfully captured, with
-     * {@link CameraCaptureSession.CaptureListener#onCaptureFailed},
+     * {@link CameraCaptureSession.CaptureCallback#onCaptureFailed},
      * the {@code failed capture}'s {@code getRequest()} will return that {@code request}.
      * </p>
      *
      * <p>In particular,
-     * <code><pre>cameraDevice.capture(someRequest, new CaptureListener() {
+     * <code><pre>cameraDevice.capture(someRequest, new CaptureCallback() {
      *     {@literal @}Override
      *     void onCaptureFailed(CaptureRequest myRequest, CaptureFailure myFailure) {
      *         assert(myFailure.getRequest.equals(myRequest) == true);
@@ -135,7 +135,7 @@ public class CaptureFailure {
      *
      * @return int The ID for the sequence of requests that this capture failure is the result of
      *
-     * @see CameraDevice.CaptureListener#onCaptureSequenceCompleted
+     * @see CameraDevice.CaptureCallback#onCaptureSequenceCompleted
      */
     public int getSequenceId() {
         return mSequenceId;

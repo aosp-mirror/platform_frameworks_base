@@ -69,8 +69,8 @@ public final class CameraManager {
 
     private ArrayList<String> mDeviceIdList;
 
-    private final ArrayMap<AvailabilityListener, Handler> mListenerMap =
-            new ArrayMap<AvailabilityListener, Handler>();
+    private final ArrayMap<AvailabilityCallback, Handler> mCallbackMap =
+            new ArrayMap<AvailabilityCallback, Handler>();
 
     private final Context mContext;
     private final Object mLock = new Object();
@@ -108,19 +108,19 @@ public final class CameraManager {
     }
 
     /**
-     * Register a listener to be notified about camera device availability.
+     * Register a callback to be notified about camera device availability.
      *
-     * <p>Registering the same listener again will replace the handler with the
+     * <p>Registering the same callback again will replace the handler with the
      * new one provided.</p>
      *
-     * <p>The first time a listener is registered, it is immediately called
+     * <p>The first time a callback is registered, it is immediately called
      * with the availability status of all currently known camera devices.</p>
      *
-     * @param listener The new listener to send camera availability notices to
-     * @param handler The handler on which the listener should be invoked, or
+     * @param callback the new callback to send camera availability notices to
+     * @param handler The handler on which the callback should be invoked, or
      * {@code null} to use the current thread's {@link android.os.Looper looper}.
      */
-    public void addAvailabilityListener(AvailabilityListener listener, Handler handler) {
+    public void registerAvailabilityCallback(AvailabilityCallback callback, Handler handler) {
         if (handler == null) {
             Looper looper = Looper.myLooper();
             if (looper == null) {
@@ -131,25 +131,25 @@ public final class CameraManager {
         }
 
         synchronized (mLock) {
-            Handler oldHandler = mListenerMap.put(listener, handler);
-            // For new listeners, provide initial availability information
+            Handler oldHandler = mCallbackMap.put(callback, handler);
+            // For new callbacks, provide initial availability information
             if (oldHandler == null) {
-                mServiceListener.updateListenerLocked(listener, handler);
+                mServiceListener.updateCallbackLocked(callback, handler);
             }
         }
     }
 
     /**
-     * Remove a previously-added listener; the listener will no longer receive
-     * connection and disconnection callbacks.
+     * Remove a previously-added callback; the callback will no longer receive connection and
+     * disconnection callbacks.
      *
-     * <p>Removing a listener that isn't registered has no effect.</p>
+     * <p>Removing a callback that isn't registered has no effect.</p>
      *
-     * @param listener The listener to remove from the notification list
+     * @param callback The callback to remove from the notification list
      */
-    public void removeAvailabilityListener(AvailabilityListener listener) {
+    public void unregisterAvailabilityCallback(AvailabilityCallback callback) {
         synchronized (mLock) {
-            mListenerMap.remove(listener);
+            mCallbackMap.remove(callback);
         }
     }
 
@@ -228,8 +228,8 @@ public final class CameraManager {
      * Helper for openning a connection to a camera with the given ID.
      *
      * @param cameraId The unique identifier of the camera device to open
-     * @param listener The listener for the camera. Must not be null.
-     * @param handler  The handler to call the listener on. Must not be null.
+     * @param callback The callback for the camera. Must not be null.
+     * @param handler  The handler to invoke the callback on. Must not be null.
      *
      * @throws CameraAccessException if the camera is disabled by device policy,
      * or too many camera devices are already open, or the cameraId does not match
@@ -237,14 +237,14 @@ public final class CameraManager {
      *
      * @throws SecurityException if the application does not have permission to
      * access the camera
-     * @throws IllegalArgumentException if listener or handler is null.
+     * @throws IllegalArgumentException if callback or handler is null.
      * @return A handle to the newly-created camera device.
      *
      * @see #getCameraIdList
      * @see android.app.admin.DevicePolicyManager#setCameraDisabled
      */
     private CameraDevice openCameraDeviceUserAsync(String cameraId,
-            CameraDevice.StateListener listener, Handler handler)
+            CameraDevice.StateCallback callback, Handler handler)
             throws CameraAccessException {
         CameraCharacteristics characteristics = getCameraCharacteristics(cameraId);
         CameraDevice device = null;
@@ -257,7 +257,7 @@ public final class CameraManager {
                 android.hardware.camera2.impl.CameraDeviceImpl deviceImpl =
                         new android.hardware.camera2.impl.CameraDeviceImpl(
                                 cameraId,
-                                listener,
+                                callback,
                                 handler,
                                 characteristics);
 
@@ -313,7 +313,7 @@ public final class CameraManager {
                     throw ce.asChecked();
                 }
 
-                // TODO: factor out listener to be non-nested, then move setter to constructor
+                // TODO: factor out callback to be non-nested, then move setter to constructor
                 // For now, calling setRemoteDevice will fire initial
                 // onOpened/onUnconfigured callbacks.
                 deviceImpl.setRemoteDevice(cameraUser);
@@ -337,7 +337,7 @@ public final class CameraManager {
      * is disconnected between the calls to {@link #getCameraIdList} and
      * {@link #openCamera}.</p>
      *
-     * <p>Once the camera is successfully opened, {@link CameraDevice.StateListener#onOpened} will
+     * <p>Once the camera is successfully opened, {@link CameraDevice.StateCallback#onOpened} will
      * be invoked with the newly opened {@link CameraDevice}. The camera device can then be set up
      * for operation by calling {@link CameraDevice#createCaptureSession} and
      * {@link CameraDevice#createCaptureRequest}</p>
@@ -345,31 +345,31 @@ public final class CameraManager {
      * <!--
      * <p>Since the camera device will be opened asynchronously, any asynchronous operations done
      * on the returned CameraDevice instance will be queued up until the device startup has
-     * completed and the listener's {@link CameraDevice.StateListener#onOpened onOpened} method is
+     * completed and the callback's {@link CameraDevice.StateCallback#onOpened onOpened} method is
      * called. The pending operations are then processed in order.</p>
      * -->
      * <p>If the camera becomes disconnected during initialization
      * after this function call returns,
-     * {@link CameraDevice.StateListener#onDisconnected} with a
+     * {@link CameraDevice.StateCallback#onDisconnected} with a
      * {@link CameraDevice} in the disconnected state (and
-     * {@link CameraDevice.StateListener#onOpened} will be skipped).</p>
+     * {@link CameraDevice.StateCallback#onOpened} will be skipped).</p>
      *
-     * <p>If opening the camera device fails, then the device listener's
-     * {@link CameraDevice.StateListener#onError onError} method will be called, and subsequent
+     * <p>If opening the camera device fails, then the device callback's
+     * {@link CameraDevice.StateCallback#onError onError} method will be called, and subsequent
      * calls on the camera device will throw a {@link CameraAccessException}.</p>
      *
      * @param cameraId
      *             The unique identifier of the camera device to open
-     * @param listener
-     *             The listener which is invoked once the camera is opened
+     * @param callback
+     *             The callback which is invoked once the camera is opened
      * @param handler
-     *             The handler on which the listener should be invoked, or
+     *             The handler on which the callback should be invoked, or
      *             {@code null} to use the current thread's {@link android.os.Looper looper}.
      *
      * @throws CameraAccessException if the camera is disabled by device policy,
      * or the camera has become or was disconnected.
      *
-     * @throws IllegalArgumentException if cameraId or the listener was null,
+     * @throws IllegalArgumentException if cameraId or the callback was null,
      * or the cameraId does not match any currently or previously available
      * camera device.
      *
@@ -379,14 +379,14 @@ public final class CameraManager {
      * @see #getCameraIdList
      * @see android.app.admin.DevicePolicyManager#setCameraDisabled
      */
-    public void openCamera(String cameraId, final CameraDevice.StateListener listener,
+    public void openCamera(String cameraId, final CameraDevice.StateCallback callback,
             Handler handler)
             throws CameraAccessException {
 
         if (cameraId == null) {
             throw new IllegalArgumentException("cameraId was null");
-        } else if (listener == null) {
-            throw new IllegalArgumentException("listener was null");
+        } else if (callback == null) {
+            throw new IllegalArgumentException("callback was null");
         } else if (handler == null) {
             if (Looper.myLooper() != null) {
                 handler = new Handler();
@@ -396,11 +396,11 @@ public final class CameraManager {
             }
         }
 
-        openCameraDeviceUserAsync(cameraId, listener, handler);
+        openCameraDeviceUserAsync(cameraId, callback, handler);
     }
 
     /**
-     * A listener for camera devices becoming available or
+     * A callback for camera devices becoming available or
      * unavailable to open.
      *
      * <p>Cameras become available when they are no longer in use, or when a new
@@ -408,13 +408,13 @@ public final class CameraManager {
      * application or service starts using a camera, or when a removable camera
      * is disconnected.</p>
      *
-     * <p>Extend this listener and pass an instance of the subclass to
-     * {@link CameraManager#addAvailabilityListener} to be notified of such availability
+     * <p>Extend this callback and pass an instance of the subclass to
+     * {@link CameraManager#registerAvailabilityCallback} to be notified of such availability
      * changes.</p>
      *
-     * @see addAvailabilityListener
+     * @see registerAvailabilityCallback
      */
-    public static abstract class AvailabilityListener {
+    public static abstract class AvailabilityCallback {
 
         /**
          * A new camera has become available to use.
@@ -432,7 +432,7 @@ public final class CameraManager {
          *
          * <p>If an application had an active CameraDevice instance for the
          * now-disconnected camera, that application will receive a
-         * {@link CameraDevice.StateListener#onDisconnected disconnection error}.</p>
+         * {@link CameraDevice.StateCallback#onDisconnected disconnection error}.</p>
          *
          * <p>The default implementation of this method does nothing.</p>
          *
@@ -441,6 +441,13 @@ public final class CameraManager {
         public void onCameraUnavailable(String cameraId) {
             // default empty implementation
         }
+    }
+
+    /**
+     * Temporary for migrating to Callback naming
+     * @hide
+     */
+    public static abstract class AvailabilityListener extends AvailabilityCallback {
     }
 
     /**
@@ -707,14 +714,14 @@ public final class CameraManager {
             }
         }
 
-        private void postSingleUpdate(final AvailabilityListener listener, final Handler handler,
+        private void postSingleUpdate(final AvailabilityCallback callback, final Handler handler,
                 final String id, final int status) {
             if (isAvailable(status)) {
                 handler.post(
                     new Runnable() {
                         @Override
                         public void run() {
-                            listener.onCameraAvailable(id);
+                            callback.onCameraAvailable(id);
                         }
                     });
             } else {
@@ -722,7 +729,7 @@ public final class CameraManager {
                     new Runnable() {
                         @Override
                         public void run() {
-                            listener.onCameraUnavailable(id);
+                            callback.onCameraUnavailable(id);
                         }
                     });
             }
@@ -732,11 +739,11 @@ public final class CameraManager {
          * Send the state of all known cameras to the provided listener, to initialize
          * the listener's knowledge of camera state.
          */
-        public void updateListenerLocked(AvailabilityListener listener, Handler handler) {
+        public void updateCallbackLocked(AvailabilityCallback callback, Handler handler) {
             for (int i = 0; i < mDeviceStatus.size(); i++) {
                 String id = mDeviceStatus.keyAt(i);
                 Integer status = mDeviceStatus.valueAt(i);
-                postSingleUpdate(listener, handler, id, status);
+                postSingleUpdate(callback, handler, id, status);
             }
         }
 
@@ -795,12 +802,12 @@ public final class CameraManager {
                 return;
             }
 
-            final int listenerCount = mListenerMap.size();
-            for (int i = 0; i < listenerCount; i++) {
-                Handler handler = mListenerMap.valueAt(i);
-                final AvailabilityListener listener = mListenerMap.keyAt(i);
+            final int callbackCount = mCallbackMap.size();
+            for (int i = 0; i < callbackCount; i++) {
+                Handler handler = mCallbackMap.valueAt(i);
+                final AvailabilityCallback callback = mCallbackMap.keyAt(i);
 
-                postSingleUpdate(listener, handler, id, status);
+                postSingleUpdate(callback, handler, id, status);
             }
         } // onStatusChangedLocked
 

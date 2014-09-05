@@ -38,7 +38,7 @@ import android.util.Log;
 import android.view.Surface;
 import com.android.ex.camera2.blocking.BlockingCameraManager;
 import com.android.ex.camera2.blocking.BlockingCameraManager.BlockingOpenException;
-import com.android.ex.camera2.blocking.BlockingSessionListener;
+import com.android.ex.camera2.blocking.BlockingSessionCallback;
 import androidx.media.filterfw.Filter;
 import androidx.media.filterfw.Frame;
 import androidx.media.filterfw.FrameImage2D;
@@ -72,7 +72,7 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
 
     private static final long SESSION_TIMEOUT_MS = 2000;
 
-    class MyCameraListener extends CameraManager.AvailabilityListener {
+    class MyCameraListener extends CameraManager.AvailabilityCallback {
 
         @Override
         public void onCameraAvailable(String cameraId) {
@@ -88,7 +88,7 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
 
     }
 
-    class MyCaptureListener extends CameraCaptureSession.CaptureListener {
+    class MyCaptureCallback extends CameraCaptureSession.CaptureCallback {
 
         @Override
         public void onCaptureCompleted(CameraCaptureSession camera, CaptureRequest request,
@@ -189,7 +189,7 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
         surfaces.add(mSurface);
         CaptureRequest.Builder mCaptureRequest = null;
         try {
-            BlockingSessionListener blkSession = new BlockingSessionListener();
+            BlockingSessionCallback blkSession = new BlockingSessionCallback();
 
             mCamera.createCaptureSession(surfaces, blkSession, mHandler);
             mCaptureRequest = mCamera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
@@ -203,7 +203,7 @@ public class Camera2Source extends Filter implements Allocation.OnBufferAvailabl
         }
 
         try {
-            mCameraSession.setRepeatingRequest(mCaptureRequest.build(), new MyCaptureListener(),
+            mCameraSession.setRepeatingRequest(mCaptureRequest.build(), new MyCaptureCallback(),
                     mHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
