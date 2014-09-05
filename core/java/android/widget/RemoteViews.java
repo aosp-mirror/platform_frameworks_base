@@ -22,11 +22,13 @@ import android.app.Application;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetHostView;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
@@ -1653,8 +1655,10 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @param application The application whose content is shown by the views.
      * @param layoutId The id of the layout resource.
+     *
+     * @hide
      */
-    private RemoteViews(ApplicationInfo application, int layoutId) {
+    protected RemoteViews(ApplicationInfo application, int layoutId) {
         mApplication = application;
         mLayoutId = layoutId;
         mBitmapCache = new BitmapCache();
@@ -2515,15 +2519,29 @@ public class RemoteViews implements Parcelable, Filter {
         RemoteViews rvToApply = getRemoteViewsToApply(context);
 
         View result;
-
-        Context c = prepareContext(context);
+        // RemoteViews may be built by an application installed in another
+        // user. So build a context that loads resources from that user but
+        // still returns the current users userId so settings like data / time formats
+        // are loaded without requiring cross user persmissions.
+        final Context contextForResources = getContextForResources(context);
+        Context inflationContext = new ContextWrapper(context) {
+            @Override
+            public Resources getResources() {
+                return contextForResources.getResources();
+            }
+            @Override
+            public Resources.Theme getTheme() {
+                return contextForResources.getTheme();
+            }
+        };
 
         LayoutInflater inflater = (LayoutInflater)
-                c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        inflater = inflater.cloneInContext(c);
+        // Clone inflater so we load resources from correct context and
+        // we don't add a filter to the static version returned by getSystemService.
+        inflater = inflater.cloneInContext(inflationContext);
         inflater.setFilter(this);
-
         result = inflater.inflate(rvToApply.getLayoutId(), parent, false);
 
         rvToApply.performApply(result, parent, handler);
@@ -2557,7 +2575,6 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        prepareContext(context);
         rvToApply.performApply(v, (ViewGroup) v.getParent(), handler);
     }
 
@@ -2572,7 +2589,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private Context prepareContext(Context context) {
+    private Context getContextForResources(Context context) {
         if (mApplication != null) {
             if (context.getUserId() == UserHandle.getUserId(mApplication.uid)
                     && context.getPackageName().equals(mApplication.packageName)) {
