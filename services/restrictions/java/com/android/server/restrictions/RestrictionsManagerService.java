@@ -139,7 +139,7 @@ public final class RestrictionsManagerService extends SystemService {
         }
 
         @Override
-        public Intent getLocalApprovalIntent() throws RemoteException {
+        public Intent createLocalApprovalIntent() throws RemoteException {
             if (DEBUG) {
                 Log.i(LOG_TAG, "requestPermission");
             }
