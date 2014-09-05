@@ -100,13 +100,24 @@ public class NotificationData {
 
         @Override
         public int compare(Entry a, Entry b) {
-            String mediaNotification = mEnvironment.getCurrentMediaNotificationKey();
-
             // Upsort current media notification.
+            String mediaNotification = mEnvironment.getCurrentMediaNotificationKey();
             boolean aMedia = a.key.equals(mediaNotification);
             boolean bMedia = b.key.equals(mediaNotification);
             if (aMedia != bMedia) {
                 return aMedia ? -1 : 1;
+            }
+
+            final StatusBarNotification na = a.notification;
+            final StatusBarNotification nb = b.notification;
+
+            // Upsort PRIORITY_MAX system notifications
+            boolean aSystemMax = na.getNotification().priority >= Notification.PRIORITY_MAX &&
+                    isSystemNotification(na);
+            boolean bSystemMax = nb.getNotification().priority >= Notification.PRIORITY_MAX &&
+                    isSystemNotification(nb);
+            if (aSystemMax != bSystemMax) {
+                return aSystemMax ? -1 : 1;
             }
 
             // RankingMap as received from NoMan.
@@ -116,8 +127,6 @@ public class NotificationData {
                 return mRankingA.getRank() - mRankingB.getRank();
             }
 
-            final StatusBarNotification na = a.notification;
-            final StatusBarNotification nb = b.notification;
             int d = nb.getScore() - na.getScore();
             if (a.interruption != b.interruption) {
                 return a.interruption ? -1 : 1;
@@ -303,6 +312,11 @@ public class NotificationData {
         pw.println("      notification=" + n.getNotification());
         pw.print(indent);
         pw.println("      tickerText=\"" + n.getNotification().tickerText + "\"");
+    }
+
+    private static boolean isSystemNotification(StatusBarNotification sbn) {
+        String sbnPackage = sbn.getPackageName();
+        return "android".equals(sbnPackage) || "com.android.systemui".equals(sbnPackage);
     }
 
     /**
