@@ -243,7 +243,7 @@ public class AudioManager {
      * or unplugged.
      * An integer value of 1 indicates a plugged-in state, 0 is unplugged.
      */
-    public static final String EXTRA_AUDIO_PLUG_STATE = "android.media.extra.audio_plug_state";
+    public static final String EXTRA_AUDIO_PLUG_STATE = "android.media.extra.AUDIO_PLUG_STATE";
 
     /**
      * Extra used in {@link #ACTION_HDMI_AUDIO_PLUG} to define the maximum number of channels
@@ -251,7 +251,7 @@ public class AudioManager {
      * The corresponding integer value is only available when the device is plugged in (as expressed
      * by {@link #EXTRA_AUDIO_PLUG_STATE}).
      */
-    public static final String EXTRA_MAX_CHANNEL_COUNT = "android.media.extra.max_channel_count";
+    public static final String EXTRA_MAX_CHANNEL_COUNT = "android.media.extra.MAX_CHANNEL_COUNT";
 
     /**
      * Extra used in {@link #ACTION_HDMI_AUDIO_PLUG} to define the audio encodings supported by
@@ -261,7 +261,7 @@ public class AudioManager {
      * {@link AudioFormat} (for instance see {@link AudioFormat#ENCODING_PCM_16BIT}). Use
      * {@link android.content.Intent#getIntArrayExtra(String)} to retrieve the encoding values.
      */
-    public static final String EXTRA_ENCODINGS = "android.media.extra.encodings";
+    public static final String EXTRA_ENCODINGS = "android.media.extra.ENCODINGS";
 
     /**
      * Broadcast Action: An analog audio speaker/headset plugged in or unplugged.
