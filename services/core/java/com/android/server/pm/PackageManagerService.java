@@ -4512,7 +4512,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public boolean performDexOptIfNeeded(String packageName, String instructionSet) {
-        return performDexOpt(packageName, instructionSet, true);
+        return performDexOpt(packageName, instructionSet, false);
     }
 
     private static String getPrimaryInstructionSet(ApplicationInfo info) {
