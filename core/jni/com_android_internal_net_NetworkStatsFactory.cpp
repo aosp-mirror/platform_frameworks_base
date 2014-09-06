@@ -17,6 +17,7 @@
 #define LOG_TAG "NetworkStats"
 
 #include <errno.h>
+#include <inttypes.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -79,7 +80,7 @@ static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats,
     while (fgets(buffer, sizeof(buffer), fp) != NULL) {
         stats_line s;
         int64_t rawTag;
-        if (sscanf(buffer, "%d %31s 0x%llx %u %u %llu %llu %llu %llu", &s.idx,
+        if (sscanf(buffer, "%d %31s 0x%llx %u %u %" SCNu64 " %" SCNu64 " %" SCNu64 " %" SCNu64, &s.idx,
                 s.iface, &rawTag, &s.uid, &s.set, &s.rxBytes, &s.rxPackets,
                 &s.txBytes, &s.txPackets) == 9) {
             if (s.idx != lastIdx + 1) {
