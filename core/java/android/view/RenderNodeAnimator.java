@@ -453,6 +453,12 @@ public class RenderNodeAnimator extends Animator {
         throw new IllegalStateException("Cannot clone this animator");
     }
 
+    @Override
+    public void setAllowRunningAsynchronously(boolean mayRunAsync) {
+        checkMutable();
+        nSetAllowRunningAsync(mNativePtr.get(), mayRunAsync);
+    }
+
     private static native long nCreateAnimator(int property, float finalValue);
     private static native long nCreateCanvasPropertyFloatAnimator(
             long canvasProperty, float finalValue);
@@ -466,6 +472,7 @@ public class RenderNodeAnimator extends Animator {
     private static native long nGetDuration(long nativePtr);
     private static native void nSetStartDelay(long nativePtr, long startDelay);
     private static native void nSetInterpolator(long animPtr, long interpolatorPtr);
+    private static native void nSetAllowRunningAsync(long animPtr, boolean mayRunAsync);
 
     private static native void nStart(long animPtr, RenderNodeAnimator finishListener);
     private static native void nEnd(long animPtr);
