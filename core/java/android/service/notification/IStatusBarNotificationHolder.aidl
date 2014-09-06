@@ -20,5 +20,6 @@ import android.service.notification.StatusBarNotification;
 
 /** @hide */
 interface IStatusBarNotificationHolder {
+    /** Fetch the held StatusBarNotification. This method should only be called once per Holder */
     StatusBarNotification get();
 }

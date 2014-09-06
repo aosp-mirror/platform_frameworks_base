@@ -2960,15 +2960,18 @@ public class NotificationManagerService extends SystemService {
      */
     private static final class StatusBarNotificationHolder
             extends IStatusBarNotificationHolder.Stub {
-        private final StatusBarNotification mValue;
+        private StatusBarNotification mValue;
 
         public StatusBarNotificationHolder(StatusBarNotification value) {
             mValue = value;
         }
 
+        /** Get the held value and clear it. This function should only be called once per holder */
         @Override
         public StatusBarNotification get() {
-            return mValue;
+            StatusBarNotification value = mValue;
+            mValue = null;
+            return value;
         }
     }
 }
