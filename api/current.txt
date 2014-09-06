@@ -29254,7 +29254,6 @@ package android.telephony {
     method public void enableSimplifiedNetworkSettings(boolean);
     method public void enableSimplifiedNetworkSettings(long, boolean);
     method public java.util.List<android.telephony.CellInfo> getAllCellInfo();
-    method public int getCalculatedPreferredNetworkType();
     method public int getCallState();
     method public android.telephony.CellLocation getCellLocation();
     method public int getDataActivity();
@@ -29271,7 +29270,6 @@ package android.telephony {
     method public java.lang.String getNetworkOperatorName();
     method public int getNetworkType();
     method public int getPhoneType();
-    method public int getPreferredNetworkType();
     method public java.lang.String getSimCountryIso();
     method public java.lang.String getSimOperator();
     method public java.lang.String getSimOperatorName();
@@ -29293,10 +29291,10 @@ package android.telephony {
     method public boolean isSmsCapable();
     method public void listen(android.telephony.PhoneStateListener, int);
     method public java.lang.String sendEnvelopeWithStatus(java.lang.String);
+    method public boolean setGlobalPreferredNetworkType();
     method public void setLine1NumberForDisplay(java.lang.String, java.lang.String);
     method public void setLine1NumberForDisplay(long, java.lang.String, java.lang.String);
     method public boolean setOperatorBrandOverride(java.lang.String);
-    method public boolean setPreferredNetworkType(int);
     field public static final java.lang.String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
     field public static final java.lang.String ACTION_RESPOND_VIA_MESSAGE = "android.intent.action.RESPOND_VIA_MESSAGE";
     field public static final int CALL_STATE_IDLE = 0; // 0x0
