@@ -1546,6 +1546,15 @@ public abstract class PackageManager {
     public static final String FEATURE_HDMI_CEC = "android.hardware.hdmi.cec";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device has all of the inputs necessary to be considered a compatible game controller, or
+     * includes a compatible game controller in the box.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_GAMEPAD = "android.hardware.gamepad";
+
+
+    /**
      * Action to external storage service to clean out removed apps.
      * @hide
      */
