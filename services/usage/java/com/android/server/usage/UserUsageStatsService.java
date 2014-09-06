@@ -108,9 +108,9 @@ class UserUsageStatsService {
 
         // Now close off any events that were open at the time this was saved.
         for (IntervalStats stat : mCurrentStats) {
-            final int pkgCount = stat.stats.size();
+            final int pkgCount = stat.packageStats.size();
             for (int i = 0; i < pkgCount; i++) {
-                UsageStats pkgStats = stat.stats.valueAt(i);
+                UsageStats pkgStats = stat.packageStats.valueAt(i);
                 if (pkgStats.mLastEvent == UsageEvents.Event.MOVE_TO_FOREGROUND ||
                         pkgStats.mLastEvent == UsageEvents.Event.CONTINUE_PREVIOUS_DAY) {
                     stat.update(pkgStats.mPackageName, stat.lastTimeSaved,
@@ -168,13 +168,13 @@ class UserUsageStatsService {
                 public void combine(IntervalStats stats, boolean mutable,
                         List<UsageStats> accResult) {
                     if (!mutable) {
-                        accResult.addAll(stats.stats.values());
+                        accResult.addAll(stats.packageStats.values());
                         return;
                     }
 
-                    final int statCount = stats.stats.size();
+                    final int statCount = stats.packageStats.size();
                     for (int i = 0; i < statCount; i++) {
-                        accResult.add(new UsageStats(stats.stats.valueAt(i)));
+                        accResult.add(new UsageStats(stats.packageStats.valueAt(i)));
                     }
                 }
             };
@@ -340,9 +340,9 @@ class UserUsageStatsService {
                 mCurrentStats[UsageStatsManager.INTERVAL_DAILY].activeConfiguration;
         ArraySet<String> continuePreviousDay = new ArraySet<>();
         for (IntervalStats stat : mCurrentStats) {
-            final int pkgCount = stat.stats.size();
+            final int pkgCount = stat.packageStats.size();
             for (int i = 0; i < pkgCount; i++) {
-                UsageStats pkgStats = stat.stats.valueAt(i);
+                UsageStats pkgStats = stat.packageStats.valueAt(i);
                 if (pkgStats.mLastEvent == UsageEvents.Event.MOVE_TO_FOREGROUND ||
                         pkgStats.mLastEvent == UsageEvents.Event.CONTINUE_PREVIOUS_DAY) {
                     continuePreviousDay.add(pkgStats.mPackageName);
