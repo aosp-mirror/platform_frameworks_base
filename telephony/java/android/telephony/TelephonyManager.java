@@ -3023,9 +3023,9 @@ public class TelephonyManager {
     }
 
     /**
-     * Override the branding for the input ICCID.
+     * Override the branding for the current ICCID.
      *
-     * Once set, whenever the ICCID is inserted into the device, the service
+     * Once set, whenever the SIM is present in the device, the service
      * provider name (SPN) and the operator name will both be replaced by the
      * brand value input. To unset the value, the same function should be
      * called with a null brand value.
@@ -3034,14 +3034,12 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *  or has to be carrier app - see #hasCarrierPrivileges.
      *
-     * @param iccId The ICCID of that the branding applies to.
      * @param brand The brand name to display/set.
      * @return true if the operation was executed correctly.
      */
-    public boolean setOperatorBrandOverride(String iccId, String brand) {
-        // TODO: Validate ICCID format.
+    public boolean setOperatorBrandOverride(String brand) {
         try {
-            return getITelephony().setOperatorBrandOverride(iccId, brand);
+            return getITelephony().setOperatorBrandOverride(brand);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setOperatorBrandOverride RemoteException", ex);
         } catch (NullPointerException ex) {
