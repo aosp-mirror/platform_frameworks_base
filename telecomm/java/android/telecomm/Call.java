@@ -517,6 +517,20 @@ public final class Call {
     }
 
     /**
+     * Merges the calls within this conference. See {@link PhoneCapabilities#MERGE_CONFERENCE}.
+     */
+    public void mergeConference() {
+        mInCallAdapter.mergeConference(mTelecommCallId);
+    }
+
+    /**
+     * Swaps the calls within this conference. See {@link PhoneCapabilities#SWAP_CONFERENCE}.
+     */
+    public void swapConference() {
+        mInCallAdapter.swapConference(mTelecommCallId);
+    }
+
+    /**
      * Obtains the parent of this {@code Call} in a conference, if any.
      *
      * @return The parent {@code Call}, or {@code null} if this {@code Call} is not a
