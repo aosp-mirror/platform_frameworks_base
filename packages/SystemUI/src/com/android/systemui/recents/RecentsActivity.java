@@ -146,6 +146,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 ReferenceCountedTrigger t = new ReferenceCountedTrigger(context, null, null, null);
                 mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(t));
                 onEnterAnimationTriggered();
+                // Notify the fallback receiver that we have successfully got the broadcast
+                // See AlternateRecentsComponent.onAnimationStarted()
+                setResultCode(Activity.RESULT_OK);
             }
         }
     };

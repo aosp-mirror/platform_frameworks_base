@@ -16,10 +16,12 @@
 
 package com.android.systemui.recents;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -563,11 +565,34 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     public void onAnimationStarted() {
         // Notify recents to start the enter animation
         if (!mStartAnimationTriggered) {
+            // There can be a race condition between the start animation callback and
+            // the start of the new activity (where we register the receiver that listens
+            // to this broadcast, so we add our own receiver and if that gets called, then
+            // we know the activity has not yet started and we can retry sending the broadcast.
+            BroadcastReceiver fallbackReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (getResultCode() == Activity.RESULT_OK) {
+                        mStartAnimationTriggered = true;
+                        return;
+                    }
+
+                    // Schedule for the broadcast to be sent again after some time
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            onAnimationStarted();
+                        }
+                    }, 75);
+                }
+            };
+
+            // Send the broadcast to notify Recents that the animation has started
             Intent intent = new Intent(ACTION_START_ENTER_ANIMATION);
             intent.setPackage(mContext.getPackageName());
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
-            mStartAnimationTriggered = true;
+            mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT, null,
+                    fallbackReceiver, null, Activity.RESULT_CANCELED, null, null);
         }
     }
 }
