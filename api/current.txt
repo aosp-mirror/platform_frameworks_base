@@ -14055,6 +14055,7 @@ package android.media {
     field public static final int CONTENT_TYPE_SONIFICATION = 4; // 0x4
     field public static final int CONTENT_TYPE_SPEECH = 1; // 0x1
     field public static final int CONTENT_TYPE_UNKNOWN = 0; // 0x0
+    field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int FLAG_AUDIBILITY_ENFORCED = 1; // 0x1
     field public static final int USAGE_ALARM = 4; // 0x4
     field public static final int USAGE_ASSISTANCE_ACCESSIBILITY = 11; // 0xb
