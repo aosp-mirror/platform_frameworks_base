@@ -715,7 +715,7 @@ interface ITelephony {
      * @param subId for which the simplified UI should be enabled or disabled.
      * @param enable true means enabling the simplified UI.
      */
-    void enableSimplifiedNetworkSettings(long subId, boolean enable);
+    void enableSimplifiedNetworkSettingsForSubscriber(long subId, boolean enable);
 
     /**
      * Get whether a simplified Mobile Network Settings UI is enabled.
@@ -723,7 +723,7 @@ interface ITelephony {
      * @param subId for which the simplified UI should be enabled or disabled.
      * @return true if the simplified UI is enabled.
      */
-    boolean getSimplifiedNetworkSettingsEnabled(long subId);
+    boolean getSimplifiedNetworkSettingsEnabledForSubscriber(long subId);
 
     /**
      * Set the phone number string and its alphatag for line 1 for display
@@ -735,7 +735,7 @@ interface ITelephony {
      * @param alphaTag alpha-tagging of the dailing nubmer
      * @param number The dialing number
      */
-    void setLine1NumberForDisplay(long subId, String alphaTag, String number);
+    void setLine1NumberForDisplayForSubscriber(long subId, String alphaTag, String number);
 
     /**
      * Returns the displayed dialing number string if it was set previously via

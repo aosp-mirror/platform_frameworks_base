@@ -1704,7 +1704,7 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getLine1Number() {
-        return getLine1Number(getDefaultSubscription());
+        return getLine1NumberForSubscriber(getDefaultSubscription());
     }
 
     /**
@@ -1717,7 +1717,7 @@ public class TelephonyManager {
      * @param subId whose phone number for line 1 is returned
      */
     /** {@hide} */
-    public String getLine1Number(long subId) {
+    public String getLine1NumberForSubscriber(long subId) {
         String number = null;
         try {
             number = getITelephony().getLine1NumberForDisplay(subId);
@@ -1751,7 +1751,7 @@ public class TelephonyManager {
      * @param number The dialing number
      */
     public void setLine1NumberForDisplay(String alphaTag, String number) {
-        setLine1NumberForDisplay(getDefaultSubscription(), alphaTag, number);
+        setLine1NumberForDisplayForSubscriber(getDefaultSubscription(), alphaTag, number);
     }
 
     /**
@@ -1767,10 +1767,11 @@ public class TelephonyManager {
      * @param subId the subscriber that the alphatag and dialing number belongs to.
      * @param alphaTag alpha-tagging of the dailing nubmer
      * @param number The dialing number
+     * @hide
      */
-    public void setLine1NumberForDisplay(long subId, String alphaTag, String number) {
+    public void setLine1NumberForDisplayForSubscriber(long subId, String alphaTag, String number) {
         try {
-            getITelephony().setLine1NumberForDisplay(subId, alphaTag, number);
+            getITelephony().setLine1NumberForDisplayForSubscriber(subId, alphaTag, number);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -1786,7 +1787,7 @@ public class TelephonyManager {
      * nobody seems to call this.
      */
     public String getLine1AlphaTag() {
-        return getLine1AlphaTag(getDefaultSubscription());
+        return getLine1AlphaTagForSubscriber(getDefaultSubscription());
     }
 
     /**
@@ -1800,7 +1801,7 @@ public class TelephonyManager {
      * nobody seems to call this.
      */
     /** {@hide} */
-    public String getLine1AlphaTag(long subId) {
+    public String getLine1AlphaTagForSubscriber(long subId) {
         String alphaTag = null;
         try {
             alphaTag = getITelephony().getLine1AlphaTagForDisplay(subId);
@@ -3369,7 +3370,7 @@ public class TelephonyManager {
      * @hide
      */
     public void enableSimplifiedNetworkSettings(boolean enable) {
-        enableSimplifiedNetworkSettings(getDefaultSubscription(), enable);
+        enableSimplifiedNetworkSettingsForSubscriber(getDefaultSubscription(), enable);
     }
 
     /**
@@ -3384,9 +3385,9 @@ public class TelephonyManager {
      * @param enable true means enabling the simplified UI.
      * @hide
      */
-    public void enableSimplifiedNetworkSettings(long subId, boolean enable) {
+    public void enableSimplifiedNetworkSettingsForSubscriber(long subId, boolean enable) {
         try {
-            getITelephony().enableSimplifiedNetworkSettings(subId, enable);
+            getITelephony().enableSimplifiedNetworkSettingsForSubscriber(subId, enable);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -3402,7 +3403,7 @@ public class TelephonyManager {
      * @hide
      */
     public boolean getSimplifiedNetworkSettingsEnabled() {
-        return getSimplifiedNetworkSettingsEnabled(getDefaultSubscription());
+        return getSimplifiedNetworkSettingsEnabledForSubscriber(getDefaultSubscription());
     }
 
     /**
@@ -3415,9 +3416,9 @@ public class TelephonyManager {
      * @return true if the simplified UI is enabled.
      * @hide
      */
-    public boolean getSimplifiedNetworkSettingsEnabled(long subId) {
+    public boolean getSimplifiedNetworkSettingsEnabledForSubscriber(long subId) {
         try {
-            return getITelephony().getSimplifiedNetworkSettingsEnabled(subId);
+            return getITelephony().getSimplifiedNetworkSettingsEnabledForSubscriber(subId);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
