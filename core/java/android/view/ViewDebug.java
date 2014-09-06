@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -315,6 +316,7 @@ public class ViewDebug {
 
     private static final String REMOTE_COMMAND_CAPTURE = "CAPTURE";
     private static final String REMOTE_COMMAND_DUMP = "DUMP";
+    private static final String REMOTE_COMMAND_DUMP_THEME = "DUMP_THEME";
     private static final String REMOTE_COMMAND_INVALIDATE = "INVALIDATE";
     private static final String REMOTE_COMMAND_REQUEST_LAYOUT = "REQUEST_LAYOUT";
     private static final String REMOTE_PROFILE = "PROFILE";
@@ -430,6 +432,8 @@ public class ViewDebug {
 
         if (REMOTE_COMMAND_DUMP.equalsIgnoreCase(command)) {
             dump(view, false, true, clientStream);
+        } else if (REMOTE_COMMAND_DUMP_THEME.equalsIgnoreCase(command)) {
+            dumpTheme(view, clientStream);
         } else if (REMOTE_COMMAND_CAPTURE_LAYERS.equalsIgnoreCase(command)) {
             captureLayers(view, new DataOutputStream(clientStream));
         } else {
@@ -818,6 +822,64 @@ public class ViewDebug {
                 out.close();
             }
         }
+    }
+
+    /**
+     * Dumps the theme attributes from the given View.
+     * @hide
+     */
+    public static void dumpTheme(View view, OutputStream clientStream) throws IOException {
+        BufferedWriter out = null;
+        try {
+            out = new BufferedWriter(new OutputStreamWriter(clientStream, "utf-8"), 32 * 1024);
+            String[] attributes = getStyleAttributesDump(view.getContext().getResources(),
+                    view.getContext().getTheme());
+            if (attributes != null) {
+                for (int i = 0; i < attributes.length; i += 2) {
+                    if (attributes[i] != null) {
+                        out.write(attributes[i] + "\n");
+                        out.write(attributes[i + 1] + "\n");
+                    }
+                }
+            }
+            out.write("DONE.");
+            out.newLine();
+        } catch (Exception e) {
+            android.util.Log.w("View", "Problem dumping View Theme:", e);
+        } finally {
+            if (out != null) {
+                out.close();
+            }
+        }
+    }
+
+    /**
+     * Gets the style attributes from the {@link Resources.Theme}. For debugging only.
+     *
+     * @param resources Resources to resolve attributes from.
+     * @param theme Theme to dump.
+     * @return a String array containing pairs of adjacent Theme attribute data: name followed by
+     * its value.
+     *
+     * @hide
+     */
+    private static String[] getStyleAttributesDump(Resources resources, Resources.Theme theme) {
+        TypedValue outValue = new TypedValue();
+        String nullString = "null";
+        int i = 0;
+        int[] attributes = theme.getAllAttributes();
+        String[] data = new String[attributes.length * 2];
+        for (int attributeId : attributes) {
+            try {
+                data[i] = resources.getResourceName(attributeId);
+                data[i + 1] = theme.resolveAttribute(attributeId, outValue, true) ?
+                        outValue.coerceToString().toString() :  nullString;
+                i += 2;
+            } catch (Resources.NotFoundException e) {
+                // ignore resources we can't resolve
+            }
+        }
+        return data;
     }
 
     private static View findView(ViewGroup group, String className, int hashCode) {
