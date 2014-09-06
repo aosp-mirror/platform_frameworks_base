@@ -504,6 +504,10 @@ public final class AnimatorSet extends Animator {
         mStarted = true;
         mPaused = false;
 
+        for (Node node : mNodes) {
+            node.animation.setAllowRunningAsynchronously(false);
+        }
+
         if (mDuration >= 0) {
             // If the duration was set on this AnimatorSet, pass it along to all child animations
             for (Node node : mNodes) {
