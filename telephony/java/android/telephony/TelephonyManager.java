@@ -3411,6 +3411,7 @@ public class TelephonyManager {
      * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @param enable true means enabling the simplified UI.
+     * @hide
      */
     public void enableSimplifiedNetworkSettings(boolean enable) {
         enableSimplifiedNetworkSettings(getDefaultSubscription(), enable);
@@ -3426,6 +3427,7 @@ public class TelephonyManager {
      *
      * @param subId for which the simplified UI should be enabled or disabled.
      * @param enable true means enabling the simplified UI.
+     * @hide
      */
     public void enableSimplifiedNetworkSettings(long subId, boolean enable) {
         try {
@@ -3442,6 +3444,7 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      *
      * @return true if the simplified UI is enabled.
+     * @hide
      */
     public boolean getSimplifiedNetworkSettingsEnabled() {
         return getSimplifiedNetworkSettingsEnabled(getDefaultSubscription());
@@ -3455,6 +3458,7 @@ public class TelephonyManager {
      *
      * @param subId for which the simplified UI should be enabled or disabled.
      * @return true if the simplified UI is enabled.
+     * @hide
      */
     public boolean getSimplifiedNetworkSettingsEnabled(long subId) {
         try {
