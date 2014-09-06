@@ -62,9 +62,7 @@ public class UsageStatsService extends SystemService implements
     static final boolean DEBUG = false;
     private static final long TEN_SECONDS = 10 * 1000;
     private static final long TWENTY_MINUTES = 20 * 60 * 1000;
-    private static final long TWO_MINUTES = 2 * 60 * 1000;
     private static final long FLUSH_INTERVAL = DEBUG ? TEN_SECONDS : TWENTY_MINUTES;
-    private static final long END_TIME_DELAY = DEBUG ? 0 : TWO_MINUTES;
 
     // Handler message types.
     static final int MSG_REPORT_EVENT = 0;
@@ -178,7 +176,7 @@ public class UsageStatsService extends SystemService implements
     }
 
     /**
-     * Called by the Bunder stub
+     * Called by the Binder stub
      */
     void shutdown() {
         synchronized (mLock) {

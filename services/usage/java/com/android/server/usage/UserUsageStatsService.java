@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -47,7 +46,7 @@ class UserUsageStatsService {
     private final UsageStatsDatabase mDatabase;
     private final IntervalStats[] mCurrentStats;
     private boolean mStatsChanged = false;
-    private final Calendar mDailyExpiryDate;
+    private final UnixCalendar mDailyExpiryDate;
     private final StatsUpdatedListener mListener;
     private final String mLogPrefix;
 
@@ -56,7 +55,7 @@ class UserUsageStatsService {
     }
 
     UserUsageStatsService(int userId, File usageStatsDir, StatsUpdatedListener listener) {
-        mDailyExpiryDate = Calendar.getInstance();
+        mDailyExpiryDate = new UnixCalendar(0);
         mDatabase = new UsageStatsDatabase(usageStatsDir);
         mCurrentStats = new IntervalStats[UsageStatsManager.INTERVAL_COUNT];
         mListener = listener;
@@ -66,12 +65,18 @@ class UserUsageStatsService {
     void init() {
         mDatabase.init();
 
+        final long timeNow = System.currentTimeMillis();
         int nullCount = 0;
         for (int i = 0; i < mCurrentStats.length; i++) {
             mCurrentStats[i] = mDatabase.getLatestUsageStats(i);
             if (mCurrentStats[i] == null) {
                 // Find out how many intervals we don't have data for.
                 // Ideally it should be all or none.
+                nullCount++;
+            } else if (mCurrentStats[i].beginTime > timeNow) {
+                Slog.e(TAG, mLogPrefix + "Interval " + i + " has stat in the future " +
+                        mCurrentStats[i].beginTime);
+                mCurrentStats[i] = null;
                 nullCount++;
             }
         }
@@ -94,10 +99,11 @@ class UserUsageStatsService {
             // that is reported.
             mDailyExpiryDate.setTimeInMillis(
                     mCurrentStats[UsageStatsManager.INTERVAL_DAILY].beginTime);
-            mDailyExpiryDate.add(Calendar.DAY_OF_YEAR, 1);
-            UsageStatsUtils.truncateDateTo(UsageStatsManager.INTERVAL_DAILY, mDailyExpiryDate);
-            Slog.i(TAG, mLogPrefix + "Rollover scheduled for "
-                    + sDateFormat.format(mDailyExpiryDate.getTime()));
+            mDailyExpiryDate.addDays(1);
+            mDailyExpiryDate.truncateToDay();
+            Slog.i(TAG, mLogPrefix + "Rollover scheduled @ " +
+                    sDateFormat.format(mDailyExpiryDate.getTimeInMillis()) +
+                    "(" + mDailyExpiryDate.getTimeInMillis() + ")");
         }
 
         // Now close off any events that were open at the time this was saved.
@@ -195,49 +201,68 @@ class UserUsageStatsService {
      * and bucket, then calls the {@link com.android.server.usage.UsageStatsDatabase.StatCombiner}
      * provided to select the stats to use from the IntervalStats object.
      */
-    private <T> List<T> queryStats(int bucketType, long beginTime, long endTime,
+    private <T> List<T> queryStats(int intervalType, final long beginTime, final long endTime,
             StatCombiner<T> combiner) {
-        if (bucketType == UsageStatsManager.INTERVAL_BEST) {
-            bucketType = mDatabase.findBestFitBucket(beginTime, endTime);
+        if (intervalType == UsageStatsManager.INTERVAL_BEST) {
+            intervalType = mDatabase.findBestFitBucket(beginTime, endTime);
+            if (intervalType < 0) {
+                // Nothing saved to disk yet, so every stat is just as equal (no rollover has
+                // occurred.
+                intervalType = UsageStatsManager.INTERVAL_DAILY;
+            }
         }
 
-        if (bucketType < 0 || bucketType >= mCurrentStats.length) {
+        if (intervalType < 0 || intervalType >= mCurrentStats.length) {
             if (DEBUG) {
-                Slog.d(TAG, mLogPrefix + "Bad bucketType used " + bucketType);
+                Slog.d(TAG, mLogPrefix + "Bad intervalType used " + intervalType);
             }
             return null;
         }
 
-        if (beginTime >= mCurrentStats[bucketType].endTime) {
-            if (DEBUG) {
-                Slog.d(TAG, mLogPrefix + "Requesting stats after " + beginTime + " but latest is "
-                        + mCurrentStats[bucketType].endTime);
-            }
-            // Nothing newer available.
-            return null;
-
-        } else if (beginTime >= mCurrentStats[bucketType].beginTime) {
-            if (DEBUG) {
-                Slog.d(TAG, mLogPrefix + "Returning in-memory stats for bucket " + bucketType);
-            }
-            // Fast path for retrieving in-memory state.
-            ArrayList<T> results = new ArrayList<>();
-            combiner.combine(mCurrentStats[bucketType], true, results);
-            return results;
-        }
-
-        // Flush any changes that were made to disk before we do a disk query.
-        // If we're not grabbing the ongoing stats, no need to persist.
-        persistActiveStats();
+        final IntervalStats currentStats = mCurrentStats[intervalType];
 
         if (DEBUG) {
-            Slog.d(TAG, mLogPrefix + "SELECT * FROM " + bucketType + " WHERE beginTime >= "
+            Slog.d(TAG, mLogPrefix + "SELECT * FROM " + intervalType + " WHERE beginTime >= "
                     + beginTime + " AND endTime < " + endTime);
         }
 
-        final List<T> results = mDatabase.queryUsageStats(bucketType, beginTime, endTime, combiner);
+        if (beginTime >= currentStats.endTime) {
+            if (DEBUG) {
+                Slog.d(TAG, mLogPrefix + "Requesting stats after " + beginTime + " but latest is "
+                        + currentStats.endTime);
+            }
+            // Nothing newer available.
+            return null;
+        }
+
+        // Truncate the endTime to just before the in-memory stats. Then, we'll append the
+        // in-memory stats to the results (if necessary) so as to avoid writing to disk too
+        // often.
+        final long truncatedEndTime = Math.min(currentStats.beginTime, endTime);
+
+        // Get the stats from disk.
+        List<T> results = mDatabase.queryUsageStats(intervalType, beginTime,
+                truncatedEndTime, combiner);
         if (DEBUG) {
-            Slog.d(TAG, mLogPrefix + "Results: " + (results == null ? 0 : results.size()));
+            Slog.d(TAG, "Got " + (results != null ? results.size() : 0) + " results from disk");
+            Slog.d(TAG, "Current stats beginTime=" + currentStats.beginTime +
+                    " endTime=" + currentStats.endTime);
+        }
+
+        // Now check if the in-memory stats match the range and add them if they do.
+        if (beginTime < currentStats.endTime && endTime > currentStats.beginTime) {
+            if (DEBUG) {
+                Slog.d(TAG, mLogPrefix + "Returning in-memory stats");
+            }
+
+            if (results == null) {
+                results = new ArrayList<>();
+            }
+            combiner.combine(currentStats, true, results);
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG, mLogPrefix + "Results: " + (results != null ? results.size() : 0));
         }
         return results;
     }
@@ -250,44 +275,45 @@ class UserUsageStatsService {
         return queryStats(bucketType, beginTime, endTime, sConfigStatsCombiner);
     }
 
-    UsageEvents queryEvents(long beginTime, long endTime) {
-        if (endTime > mCurrentStats[UsageStatsManager.INTERVAL_DAILY].beginTime) {
-            if (beginTime > mCurrentStats[UsageStatsManager.INTERVAL_DAILY].endTime) {
-                return null;
-            }
+    UsageEvents queryEvents(final long beginTime, final long endTime) {
+        final ArraySet<String> names = new ArraySet<>();
+        List<UsageEvents.Event> results = queryStats(UsageStatsManager.INTERVAL_DAILY,
+                beginTime, endTime, new StatCombiner<UsageEvents.Event>() {
+                    @Override
+                    public void combine(IntervalStats stats, boolean mutable,
+                            List<UsageEvents.Event> accumulatedResult) {
+                        if (stats.events == null) {
+                            return;
+                        }
 
-            TimeSparseArray<UsageEvents.Event> events =
-                    mCurrentStats[UsageStatsManager.INTERVAL_DAILY].events;
-            if (events == null) {
-                return null;
-            }
+                        final int startIndex = stats.events.closestIndexOnOrAfter(beginTime);
+                        if (startIndex < 0) {
+                            return;
+                        }
 
-            final int startIndex = events.closestIndexOnOrAfter(beginTime);
-            if (startIndex < 0) {
-                return null;
-            }
+                        final int size = stats.events.size();
+                        for (int i = startIndex; i < size; i++) {
+                            if (stats.events.keyAt(i) >= endTime) {
+                                return;
+                            }
 
-            ArraySet<String> names = new ArraySet<>();
-            ArrayList<UsageEvents.Event> results = new ArrayList<>();
-            final int size = events.size();
-            for (int i = startIndex; i < size; i++) {
-                if (events.keyAt(i) >= endTime) {
-                    break;
-                }
-                final UsageEvents.Event event = events.valueAt(i);
-                names.add(event.mPackage);
-                if (event.mClass != null) {
-                    names.add(event.mClass);
-                }
-                results.add(event);
-            }
-            String[] table = names.toArray(new String[names.size()]);
-            Arrays.sort(table);
-            return new UsageEvents(results, table);
+                            final UsageEvents.Event event = stats.events.valueAt(i);
+                            names.add(event.mPackage);
+                            if (event.mClass != null) {
+                                names.add(event.mClass);
+                            }
+                            accumulatedResult.add(event);
+                        }
+                    }
+                });
+
+        if (results == null || results.isEmpty()) {
+            return null;
         }
 
-        // TODO(adamlesinski): Query the previous days.
-        return null;
+        String[] table = names.toArray(new String[names.size()]);
+        Arrays.sort(table);
+        return new UsageEvents(results, table);
     }
 
     void persistActiveStats() {
@@ -360,54 +386,53 @@ class UserUsageStatsService {
     private void loadActiveStats() {
         final long timeNow = System.currentTimeMillis();
 
-        Calendar tempCal = mDailyExpiryDate;
-        for (int bucketType = 0; bucketType < mCurrentStats.length; bucketType++) {
+        final UnixCalendar tempCal = mDailyExpiryDate;
+        for (int intervalType = 0; intervalType < mCurrentStats.length; intervalType++) {
             tempCal.setTimeInMillis(timeNow);
-            UsageStatsUtils.truncateDateTo(bucketType, tempCal);
+            UnixCalendar.truncateTo(tempCal, intervalType);
 
-            if (mCurrentStats[bucketType] != null &&
-                    mCurrentStats[bucketType].beginTime == tempCal.getTimeInMillis()) {
+            if (mCurrentStats[intervalType] != null &&
+                    mCurrentStats[intervalType].beginTime == tempCal.getTimeInMillis()) {
                 // These are the same, no need to load them (in memory stats are always newer
                 // than persisted stats).
                 continue;
             }
 
-            final long lastBeginTime = mDatabase.getLatestUsageStatsBeginTime(bucketType);
-            if (lastBeginTime >= tempCal.getTimeInMillis()) {
+            final long lastBeginTime = mDatabase.getLatestUsageStatsBeginTime(intervalType);
+            if (lastBeginTime > timeNow) {
+                Slog.e(TAG, mLogPrefix + "Latest usage stats for interval " +
+                        intervalType + " begins in the future");
+                mCurrentStats[intervalType] = null;
+            } else if (lastBeginTime >= tempCal.getTimeInMillis()) {
                 if (DEBUG) {
-                    Slog.d(TAG, mLogPrefix + "Loading existing stats (" + lastBeginTime +
-                            ") for bucket " + bucketType);
+                    Slog.d(TAG, mLogPrefix + "Loading existing stats @ " +
+                            sDateFormat.format(lastBeginTime) + "(" + lastBeginTime +
+                            ") for interval " + intervalType);
                 }
-                mCurrentStats[bucketType] = mDatabase.getLatestUsageStats(bucketType);
-                if (DEBUG) {
-                    if (mCurrentStats[bucketType] != null) {
-                        Slog.d(TAG, mLogPrefix + "Found " +
-                                (mCurrentStats[bucketType].events == null ?
-                                        0 : mCurrentStats[bucketType].events.size()) +
-                                " events");
-                    }
-                }
+                mCurrentStats[intervalType] = mDatabase.getLatestUsageStats(intervalType);
             } else {
-                mCurrentStats[bucketType] = null;
+                mCurrentStats[intervalType] = null;
             }
 
-            if (mCurrentStats[bucketType] == null) {
+            if (mCurrentStats[intervalType] == null) {
                 if (DEBUG) {
-                    Slog.d(TAG, "Creating new stats (" + tempCal.getTimeInMillis() +
-                            ") for bucket " + bucketType);
+                    Slog.d(TAG, "Creating new stats @ " +
+                            sDateFormat.format(tempCal.getTimeInMillis()) + "(" +
+                            tempCal.getTimeInMillis() + ") for interval " + intervalType);
 
                 }
-                mCurrentStats[bucketType] = new IntervalStats();
-                mCurrentStats[bucketType].beginTime = tempCal.getTimeInMillis();
-                mCurrentStats[bucketType].endTime = timeNow;
+                mCurrentStats[intervalType] = new IntervalStats();
+                mCurrentStats[intervalType].beginTime = tempCal.getTimeInMillis();
+                mCurrentStats[intervalType].endTime = timeNow;
             }
         }
         mStatsChanged = false;
         mDailyExpiryDate.setTimeInMillis(timeNow);
-        mDailyExpiryDate.add(Calendar.DAY_OF_YEAR, 1);
-        UsageStatsUtils.truncateDateTo(UsageStatsManager.INTERVAL_DAILY, mDailyExpiryDate);
-        Slog.i(TAG, mLogPrefix + "Rollover scheduled for "
-                + sDateFormat.format(mDailyExpiryDate.getTime()));
+        mDailyExpiryDate.addDays(1);
+        mDailyExpiryDate.truncateToDay();
+        Slog.i(TAG, mLogPrefix + "Rollover scheduled @ " +
+                sDateFormat.format(mDailyExpiryDate.getTimeInMillis()) + "(" +
+                tempCal.getTimeInMillis() + ")");
     }
 
 
