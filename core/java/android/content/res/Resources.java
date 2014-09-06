@@ -1572,6 +1572,16 @@ public class Resources {
         }
 
         /**
+         * Gets all of the attribute ids associated with this {@link Theme}. For debugging only.
+         *
+         * @return The int array containing attribute ids associated with this {@link Theme}.
+         * @hide
+         */
+        public int[] getAllAttributes() {
+            return mAssets.getStyleAttributes(getAppliedStyleResId());
+        }
+
+        /**
          * Returns the resources to which this theme belongs.
          *
          * @return Resources to which this theme belongs.
