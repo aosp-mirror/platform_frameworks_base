@@ -602,32 +602,34 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             f.delete();
         }
         final long ident = Binder.clearCallingIdentity();
-        RuntimeException e = null;
         try {
-            wallpaper.imageWallpaperPending = false;
-            if (userId != mCurrentUserId) return;
-            if (bindWallpaperComponentLocked(defaultFailed
-                    ? mImageWallpaper
-                    : null, true, false, wallpaper, reply)) {
-                return;
+            RuntimeException e = null;
+            try {
+                wallpaper.imageWallpaperPending = false;
+                if (userId != mCurrentUserId) return;
+                if (bindWallpaperComponentLocked(defaultFailed
+                        ? mImageWallpaper
+                                : null, true, false, wallpaper, reply)) {
+                    return;
+                }
+            } catch (IllegalArgumentException e1) {
+                e = e1;
             }
-        } catch (IllegalArgumentException e1) {
-            e = e1;
+
+            // This can happen if the default wallpaper component doesn't
+            // exist.  This should be a system configuration problem, but
+            // let's not let it crash the system and just live with no
+            // wallpaper.
+            Slog.e(TAG, "Default wallpaper component not found!", e);
+            clearWallpaperComponentLocked(wallpaper);
+            if (reply != null) {
+                try {
+                    reply.sendResult(null);
+                } catch (RemoteException e1) {
+                }
+            }
         } finally {
             Binder.restoreCallingIdentity(ident);
-        }
-        
-        // This can happen if the default wallpaper component doesn't
-        // exist.  This should be a system configuration problem, but
-        // let's not let it crash the system and just live with no
-        // wallpaper.
-        Slog.e(TAG, "Default wallpaper component not found!", e);
-        clearWallpaperComponentLocked(wallpaper);
-        if (reply != null) {
-            try {
-                reply.sendResult(null);
-            } catch (RemoteException e1) {
-            }
         }
     }
 
