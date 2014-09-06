@@ -897,10 +897,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private static class Callbacks extends Handler {
         private static final int MSG_SESSION_CREATED = 1;
         private static final int MSG_SESSION_BADGING_CHANGED = 2;
-        private static final int MSG_SESSION_OPENED = 3;
+        private static final int MSG_SESSION_ACTIVE_CHANGED = 3;
         private static final int MSG_SESSION_PROGRESS_CHANGED = 4;
-        private static final int MSG_SESSION_CLOSED = 5;
-        private static final int MSG_SESSION_FINISHED = 6;
+        private static final int MSG_SESSION_FINISHED = 5;
 
         private final RemoteCallbackList<IPackageInstallerCallback>
                 mCallbacks = new RemoteCallbackList<>();
@@ -945,14 +944,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 case MSG_SESSION_BADGING_CHANGED:
                     callback.onSessionBadgingChanged(sessionId);
                     break;
-                case MSG_SESSION_OPENED:
-                    callback.onSessionOpened(sessionId);
+                case MSG_SESSION_ACTIVE_CHANGED:
+                    callback.onSessionActiveChanged(sessionId, (boolean) msg.obj);
                     break;
                 case MSG_SESSION_PROGRESS_CHANGED:
                     callback.onSessionProgressChanged(sessionId, (float) msg.obj);
-                    break;
-                case MSG_SESSION_CLOSED:
-                    callback.onSessionClosed(sessionId);
                     break;
                 case MSG_SESSION_FINISHED:
                     callback.onSessionFinished(sessionId, (boolean) msg.obj);
@@ -968,16 +964,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             obtainMessage(MSG_SESSION_BADGING_CHANGED, sessionId, userId).sendToTarget();
         }
 
-        private void notifySessionOpened(int sessionId, int userId) {
-            obtainMessage(MSG_SESSION_OPENED, sessionId, userId).sendToTarget();
+        private void notifySessionActiveChanged(int sessionId, int userId, boolean active) {
+            obtainMessage(MSG_SESSION_ACTIVE_CHANGED, sessionId, userId, active).sendToTarget();
         }
 
         private void notifySessionProgressChanged(int sessionId, int userId, float progress) {
             obtainMessage(MSG_SESSION_PROGRESS_CHANGED, sessionId, userId, progress).sendToTarget();
-        }
-
-        private void notifySessionClosed(int sessionId, int userId) {
-            obtainMessage(MSG_SESSION_CLOSED, sessionId, userId).sendToTarget();
         }
 
         public void notifySessionFinished(int sessionId, int userId, boolean success) {
@@ -1022,16 +1014,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             writeSessionsAsync();
         }
 
-        public void onSessionOpened(PackageInstallerSession session) {
-            mCallbacks.notifySessionOpened(session.sessionId, session.userId);
+        public void onSessionActiveChanged(PackageInstallerSession session, boolean active) {
+            mCallbacks.notifySessionActiveChanged(session.sessionId, session.userId, active);
         }
 
         public void onSessionProgressChanged(PackageInstallerSession session, float progress) {
             mCallbacks.notifySessionProgressChanged(session.sessionId, session.userId, progress);
-        }
-
-        public void onSessionClosed(PackageInstallerSession session) {
-            mCallbacks.notifySessionClosed(session.sessionId, session.userId);
         }
 
         public void onSessionFinished(PackageInstallerSession session, boolean success) {
