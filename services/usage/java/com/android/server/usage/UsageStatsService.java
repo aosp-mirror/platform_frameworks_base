@@ -38,6 +38,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArraySet;
@@ -76,6 +77,8 @@ public class UsageStatsService extends SystemService implements
 
     private final SparseArray<UserUsageStatsService> mUserState = new SparseArray<>();
     private File mUsageStatsDir;
+    long mRealTimeSnapshot;
+    long mSystemTimeSnapshot;
 
     public UsageStatsService(Context context) {
         super(context);
@@ -101,6 +104,9 @@ public class UsageStatsService extends SystemService implements
         synchronized (mLock) {
             cleanUpRemovedUsersLocked();
         }
+
+        mRealTimeSnapshot = SystemClock.elapsedRealtime();
+        mSystemTimeSnapshot = System.currentTimeMillis();
 
         publishLocalService(UsageStatsManagerInternal.class, new LocalService());
         publishBinderService(Context.USAGE_STATS_SERVICE, new BinderService());
@@ -380,6 +386,14 @@ public class UsageStatsService extends SystemService implements
      */
     private class LocalService extends UsageStatsManagerInternal {
 
+        /**
+         * The system may have its time change, so at least make sure the events
+         * are monotonic in order.
+         */
+        private long computeMonotonicSystemTime(long realTime) {
+            return (realTime - mRealTimeSnapshot) + mSystemTimeSnapshot;
+        }
+
         @Override
         public void reportEvent(ComponentName component, int userId, int eventType) {
             if (component == null) {
@@ -390,7 +404,7 @@ public class UsageStatsService extends SystemService implements
             UsageEvents.Event event = new UsageEvents.Event();
             event.mPackage = component.getPackageName();
             event.mClass = component.getClassName();
-            event.mTimeStamp = System.currentTimeMillis();
+            event.mTimeStamp = computeMonotonicSystemTime(SystemClock.elapsedRealtime());
             event.mEventType = eventType;
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
         }
@@ -404,7 +418,7 @@ public class UsageStatsService extends SystemService implements
 
             UsageEvents.Event event = new UsageEvents.Event();
             event.mPackage = "android";
-            event.mTimeStamp = System.currentTimeMillis();
+            event.mTimeStamp = computeMonotonicSystemTime(SystemClock.elapsedRealtime());
             event.mEventType = UsageEvents.Event.CONFIGURATION_CHANGE;
             event.mConfiguration = new Configuration(config);
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
