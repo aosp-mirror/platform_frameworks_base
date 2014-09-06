@@ -1667,7 +1667,7 @@ public abstract class BatteryStats implements Parcelable {
      */
     public abstract long[] getChargeStepDurationsArray();
 
-    public abstract Map<String, ? extends LongCounter> getWakeupReasonStats();
+    public abstract Map<String, ? extends Timer> getWakeupReasonStats();
 
     public abstract Map<String, ? extends Timer> getKernelWakelockStats();
 
@@ -2045,11 +2045,15 @@ public abstract class BatteryStats implements Parcelable {
                             sb.toString());
                 }
             }
-            Map<String, ? extends LongCounter> wakeupReasons = getWakeupReasonStats();
+            Map<String, ? extends Timer> wakeupReasons = getWakeupReasonStats();
             if (wakeupReasons.size() > 0) {
-                for (Map.Entry<String, ? extends LongCounter> ent : wakeupReasons.entrySet()) {
+                for (Map.Entry<String, ? extends Timer> ent : wakeupReasons.entrySet()) {
+                    // Not doing the regular wake lock formatting to remain compatible
+                    // with the old checkin format.
+                    long totalTimeMicros = ent.getValue().getTotalTimeLocked(rawRealtime, which);
+                    int count = ent.getValue().getCountLocked(which);
                     dumpLine(pw, 0 /* uid */, category, WAKEUP_REASON_DATA,
-                            "\"" + ent.getKey() + "\"", ent.getValue().getCountLocked(which));
+                            "\"" + ent.getKey() + "\"", (totalTimeMicros + 500) / 1000, count);
                 }
             }
         }
@@ -2921,14 +2925,14 @@ public abstract class BatteryStats implements Parcelable {
                 pw.println();
             }
 
-            Map<String, ? extends LongCounter> wakeupReasons = getWakeupReasonStats();
+            Map<String, ? extends Timer> wakeupReasons = getWakeupReasonStats();
             if (wakeupReasons.size() > 0) {
                 pw.print(prefix); pw.println("  All wakeup reasons:");
                 final ArrayList<TimerEntry> reasons = new ArrayList<TimerEntry>();
-                for (Map.Entry<String, ? extends LongCounter> ent : wakeupReasons.entrySet()) {
-                    BatteryStats.LongCounter counter = ent.getValue();
-                    reasons.add(new TimerEntry(ent.getKey(), 0, null,
-                            ent.getValue().getCountLocked(which)));
+                for (Map.Entry<String, ? extends Timer> ent : wakeupReasons.entrySet()) {
+                    Timer timer = ent.getValue();
+                    reasons.add(new TimerEntry(ent.getKey(), 0, timer,
+                            timer.getCountLocked(which)));
                 }
                 Collections.sort(reasons, timerComparator);
                 for (int i=0; i<reasons.size(); i++) {
@@ -2938,9 +2942,8 @@ public abstract class BatteryStats implements Parcelable {
                     sb.append(prefix);
                     sb.append("  Wakeup reason ");
                     sb.append(timer.mName);
-                    sb.append(": ");
-                    formatTimeMs(sb, timer.mTime);
-                    sb.append("realtime");
+                    printWakeLock(sb, timer.mTimer, rawRealtime, null, which, ": ");
+                    sb.append(" realtime");
                     pw.println(sb.toString());
                 }
                 pw.println();
@@ -3138,7 +3141,7 @@ public abstract class BatteryStats implements Parcelable {
             }
 
             Map<String, ? extends Timer> jobs = u.getJobStats();
-            if (syncs.size() > 0) {
+            if (jobs.size() > 0) {
                 for (Map.Entry<String, ? extends Timer> ent : jobs.entrySet()) {
                     Timer timer = ent.getValue();
                     // Convert from microseconds to milliseconds with rounding
@@ -3952,7 +3955,7 @@ public abstract class BatteryStats implements Parcelable {
         prepareForDumpLocked();
 
         dumpLine(pw, 0 /* uid */, "i" /* category */, VERSION_DATA,
-                "10", getParcelVersion(), getStartPlatformVersion(), getEndPlatformVersion());
+                "11", getParcelVersion(), getStartPlatformVersion(), getEndPlatformVersion());
 
         long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
 
