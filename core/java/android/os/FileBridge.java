@@ -75,6 +75,13 @@ public class FileBridge extends Thread {
         return mClosed;
     }
 
+    public void forceClose() {
+        IoUtils.closeQuietly(mTarget);
+        IoUtils.closeQuietly(mServer);
+        IoUtils.closeQuietly(mClient);
+        mClosed = true;
+    }
+
     public void setTargetFile(FileDescriptor target) {
         mTarget = target;
     }
@@ -89,7 +96,6 @@ public class FileBridge extends Thread {
         try {
             while (IoBridge.read(mServer, temp, 0, MSG_LENGTH) == MSG_LENGTH) {
                 final int cmd = Memory.peekInt(temp, 0, ByteOrder.BIG_ENDIAN);
-
                 if (cmd == CMD_WRITE) {
                     // Shuttle data into local file
                     int len = Memory.peekInt(temp, 4, ByteOrder.BIG_ENDIAN);
@@ -118,15 +124,10 @@ public class FileBridge extends Thread {
                 }
             }
 
-        } catch (ErrnoException e) {
-            Log.wtf(TAG, "Failed during bridge", e);
-        } catch (IOException e) {
+        } catch (ErrnoException | IOException e) {
             Log.wtf(TAG, "Failed during bridge", e);
         } finally {
-            IoUtils.closeQuietly(mTarget);
-            IoUtils.closeQuietly(mServer);
-            IoUtils.closeQuietly(mClient);
-            mClosed = true;
+            forceClose();
         }
     }
 
@@ -151,6 +152,7 @@ public class FileBridge extends Thread {
                 writeCommandAndBlock(CMD_CLOSE, "close()");
             } finally {
                 IoBridge.closeAndSignalBlockedThreads(mClient);
+                IoUtils.closeQuietly(mClientPfd);
             }
         }
 
