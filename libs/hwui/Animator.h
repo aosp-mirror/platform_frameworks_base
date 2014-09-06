@@ -53,6 +53,10 @@ public:
         mListener = listener;
     }
     AnimationListener* listener() { return mListener.get(); }
+    ANDROID_API void setAllowRunningAsync(bool mayRunAsync) {
+        mMayRunAsync = mayRunAsync;
+    }
+    bool mayRunAsync() { return mMayRunAsync; }
     ANDROID_API void start() { mStagingPlayState = RUNNING; onStagingPlayStateChanged(); }
     ANDROID_API void end() { mStagingPlayState = FINISHED; onStagingPlayStateChanged(); }
 
@@ -101,6 +105,7 @@ protected:
     nsecs_t mStartTime;
     nsecs_t mDuration;
     nsecs_t mStartDelay;
+    bool mMayRunAsync;
 
     sp<AnimationListener> mListener;
 
