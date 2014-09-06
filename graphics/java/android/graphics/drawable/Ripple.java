@@ -22,6 +22,7 @@ import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
@@ -58,7 +59,7 @@ class Ripple {
     private final Rect mBounds;
 
     /** Full-opacity color for drawing this ripple. */
-    private int mColor;
+    private int mColorOpaque;
 
     /** Maximum ripple radius. */
     private float mOuterRadius;
@@ -120,7 +121,7 @@ class Ripple {
     }
 
     public void setup(int maxRadius, int color, float density) {
-        mColor = color | 0xFF000000;
+        mColorOpaque = color | 0xFF000000;
 
         if (maxRadius != RippleDrawable.RADIUS_AUTO) {
             mHasMaxRadius = true;
@@ -236,6 +237,9 @@ class Ripple {
         if (N > 0) {
             cancelHardwareAnimations(false);
 
+            // We canceled old animations, but we're about to run new ones.
+            mHardwareAnimating = true;
+
             for (int i = 0; i < N; i++) {
                 pendingAnimations.get(i).setTarget(c);
                 pendingAnimations.get(i).start();
@@ -253,9 +257,8 @@ class Ripple {
     private boolean drawSoftware(Canvas c, Paint p) {
         boolean hasContent = false;
 
-        // Cache the paint alpha so we can restore it later.
-        final int paintAlpha = p.getAlpha();
-        final int alpha = (int) (paintAlpha * mOpacity + 0.5f);
+        p.setColor(mColorOpaque);
+        final int alpha = (int) (255 * mOpacity + 0.5f);
         final float radius = MathUtils.lerp(0, mOuterRadius, mTweenRadius);
         if (alpha > 0 && radius > 0) {
             final float x = MathUtils.lerp(
@@ -267,8 +270,6 @@ class Ripple {
             c.drawCircle(x, y, radius, p);
             hasContent = true;
         }
-
-        p.setAlpha(paintAlpha);
 
         return hasContent;
     }
@@ -369,7 +370,7 @@ class Ripple {
         final float startRadius = MathUtils.lerp(0, mOuterRadius, mTweenRadius);
         final Paint paint = getTempPaint();
         paint.setAntiAlias(true);
-        paint.setColor(mColor);
+        paint.setColor(mColorOpaque);
         paint.setAlpha((int) (255 * mOpacity + 0.5f));
         paint.setStyle(Style.FILL);
         mPropPaint = CanvasProperty.createPaint(paint);
@@ -402,6 +403,12 @@ class Ripple {
 
         mHardwareAnimating = true;
 
+        // Set up the software values to match the hardware end values.
+        mOpacity = 0;
+        mTweenX = 1;
+        mTweenY = 1;
+        mTweenRadius = 1;
+
         invalidateSelf();
     }
 
@@ -412,7 +419,7 @@ class Ripple {
     public void jump() {
         mCanceled = true;
         endSoftwareAnimations();
-        endHardwareAnimations();
+        cancelHardwareAnimations(true);
         mCanceled = false;
     }
 
@@ -436,24 +443,6 @@ class Ripple {
             mAnimY.end();
             mAnimY = null;
         }
-    }
-
-    private void endHardwareAnimations() {
-        final ArrayList<RenderNodeAnimator> runningAnimations = mRunningAnimations;
-        final int N = runningAnimations.size();
-        for (int i = 0; i < N; i++) {
-            runningAnimations.get(i).end();
-        }
-        runningAnimations.clear();
-
-        // Abort any pending animations. Since we always have a completion
-        // listener on a pending animation, we also need to remove ourselves.
-        if (!mPendingAnimations.isEmpty()) {
-            mPendingAnimations.clear();
-            removeSelf();
-        }
-
-        mHardwareAnimating = false;
     }
 
     private Paint getTempPaint() {
