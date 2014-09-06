@@ -17,7 +17,6 @@ package android.security;
 
 import android.app.Activity;
 import android.app.PendingIntent;
-import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -26,10 +25,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.util.Log;
-
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.security.InvalidKeyException;
@@ -228,9 +224,6 @@ public final class KeyChain {
      * selected alias or null will be returned via the
      * KeyChainAliasCallback callback.
      *
-     * <p>The device or profile owner can intercept this before the activity
-     * is shown, to pick a specific private key alias.</p>
-     *
      * <p>{@code keyTypes} and {@code issuers} may be used to
      * highlight suggested choices to the user, although to cope with
      * sometimes erroneous values provided by servers, the user may be
@@ -260,51 +253,9 @@ public final class KeyChain {
      *     unavailable.
      */
     public static void choosePrivateKeyAlias(Activity activity, KeyChainAliasCallback response,
-            String[] keyTypes, Principal[] issuers, String host, int port, String alias) {
-        choosePrivateKeyAlias(activity, response, keyTypes, issuers, host, port, null, alias);
-    }
-
-    /**
-     * Launches an {@code Activity} for the user to select the alias
-     * for a private key and certificate pair for authentication. The
-     * selected alias or null will be returned via the
-     * KeyChainAliasCallback callback.
-     *
-     * <p>The device or profile owner can intercept this before the activity
-     * is shown, to pick a specific private key alias.</p>
-     *
-     * <p>{@code keyTypes} and {@code issuers} may be used to
-     * highlight suggested choices to the user, although to cope with
-     * sometimes erroneous values provided by servers, the user may be
-     * able to override these suggestions.
-     *
-     * <p>{@code host} and {@code port} may be used to give the user
-     * more context about the server requesting the credentials.
-     *
-     * <p>{@code alias} allows the chooser to preselect an existing
-     * alias which will still be subject to user confirmation.
-     *
-     * @param activity The {@link Activity} context to use for
-     *     launching the new sub-Activity to prompt the user to select
-     *     a private key; used only to call startActivity(); must not
-     *     be null.
-     * @param response Callback to invoke when the request completes;
-     *     must not be null
-     * @param keyTypes The acceptable types of asymmetric keys such as
-     *     "RSA" or "DSA", or a null array.
-     * @param issuers The acceptable certificate issuers for the
-     *     certificate matching the private key, or null.
-     * @param host The host name of the server requesting the
-     *     certificate, or null if unavailable.
-     * @param port The port number of the server requesting the
-     *     certificate, or -1 if unavailable.
-     * @param url The URL requesting the certificate, or null if unavailable.
-     * @param alias The alias to preselect if available, or null if
-     *     unavailable.
-     */
-    public static void choosePrivateKeyAlias(Activity activity, KeyChainAliasCallback response,
-                                             String[] keyTypes, Principal[] issuers, String host,
-                                             int port, String url, String alias) {
+                                             String[] keyTypes, Principal[] issuers,
+                                             String host, int port,
+                                             String alias) {
         /*
          * TODO currently keyTypes, issuers are unused. They are meant
          * to follow the semantics and purpose of X509KeyManager
@@ -327,37 +278,15 @@ public final class KeyChain {
         if (response == null) {
             throw new NullPointerException("response == null");
         }
-        // Give a profile or device owner the chance to intercept the request, if a private key
-        // access listener is registered with the DevicePolicyManagerService.
-        IBinder b = ServiceManager.getService(Context.DEVICE_POLICY_SERVICE);
-        IDevicePolicyManager devicePolicyManager = IDevicePolicyManager.Stub.asInterface(b);
-        try {
-            PendingIntent sender = PendingIntent.getActivity(activity, 0, new Intent(), 0);
-            devicePolicyManager.choosePrivateKeyAlias(sender, host, port, url, alias,
-                    new AliasResponse(response));
-        } catch (RemoteException e) {
-            throw new AssertionError("could not bind to DevicePolicyManagerService");
-        }
-    }
-
-    /**
-     * This method actually launches the {@code Activity} to select the alias for a private key and
-     * certificate pair for authentication. It is called from the DevicePolicyManagerService when
-     * no device or profile owner wants to intercept the call.
-     * @see #choosePrivateKeyAlias
-     * @hide
-     */
-    public static void openPrivateKeyAliasChooser(Context context, PendingIntent sender,
-            String host, int port, String alias, IBinder response) {
         Intent intent = new Intent(ACTION_CHOOSER);
         intent.setPackage(KEYCHAIN_PACKAGE);
-        intent.putExtra(EXTRA_RESPONSE, response);
+        intent.putExtra(EXTRA_RESPONSE, new AliasResponse(response));
         intent.putExtra(EXTRA_HOST, host);
         intent.putExtra(EXTRA_PORT, port);
         intent.putExtra(EXTRA_ALIAS, alias);
         // the PendingIntent is used to get calling package name
-        intent.putExtra(EXTRA_SENDER, sender);
-        context.startActivityAsUser(intent, sender.getCreatorUserHandle());
+        intent.putExtra(EXTRA_SENDER, PendingIntent.getActivity(activity, 0, new Intent(), 0));
+        activity.startActivity(intent);
     }
 
     private static class AliasResponse extends IKeyChainAliasCallback.Stub {

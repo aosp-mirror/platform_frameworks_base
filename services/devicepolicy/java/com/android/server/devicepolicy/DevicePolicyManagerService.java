@@ -44,14 +44,13 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
-import android.database.ContentObserver;
-import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
-import android.net.ProxyInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
+import android.database.ContentObserver;
+import android.hardware.usb.UsbManager;
+import android.net.ProxyInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -70,8 +69,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.security.Credentials;
-import android.security.IKeyChainAliasCallback;
-import android.security.IKeyChainService;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
 import android.util.Log;
@@ -113,7 +110,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -153,8 +149,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String ATTR_PERMISSION_PROVIDER = "permission-provider";
     private static final String ATTR_SETUP_COMPLETE = "setup-complete";
-
-    private static final String ATTR_PRIVATE_KEY_ACCESS_LISTENER = "private-key-access-listener";
 
     private static final Set<String> DEVICE_OWNER_USER_RESTRICTIONS;
     static {
@@ -257,8 +251,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final List<String> mLockTaskPackages = new ArrayList<String>();
 
         ComponentName mRestrictionsProvider;
-
-        ComponentName mPrivateKeyAccessListener;
 
         public DevicePolicyData(int userHandle) {
             mUserHandle = userHandle;
@@ -1261,11 +1253,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         Boolean.toString(true));
             }
 
-            if (policy.mPrivateKeyAccessListener != null) {
-                out.attribute(null, ATTR_PRIVATE_KEY_ACCESS_LISTENER,
-                        policy.mPrivateKeyAccessListener.flattenToString());
-            }
-
             final int N = policy.mAdminList.size();
             for (int i=0; i<N; i++) {
                 ActiveAdmin ap = policy.mAdminList.get(i);
@@ -1369,14 +1356,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             String userSetupComplete = parser.getAttributeValue(null, ATTR_SETUP_COMPLETE);
             if (userSetupComplete != null && Boolean.toString(true).equals(userSetupComplete)) {
                 policy.mUserSetupComplete = true;
-            }
-
-            // Extract the private key access listener component name if available
-            String privateKeyAccessListener =
-                    parser.getAttributeValue(null, ATTR_PRIVATE_KEY_ACCESS_LISTENER);
-            if (privateKeyAccessListener != null) {
-                policy.mPrivateKeyAccessListener =
-                        ComponentName.unflattenFromString(privateKeyAccessListener);
             }
 
             type = parser.next();
@@ -2843,120 +2822,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(id);
         }
-    }
-
-    public void installKeyPair(ComponentName who, byte[] privKey, byte[] cert, String alias) {
-        if (who == null) {
-            throw new NullPointerException("ComponentName is null");
-        }
-        synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-        }
-        final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
-        final long id = Binder.clearCallingIdentity();
-        try {
-          final KeyChainConnection keyChainConnection = KeyChain.bindAsUser(mContext, userHandle);
-          try {
-              IKeyChainService keyChain = keyChainConnection.getService();
-              keyChain.installKeyPair(privKey, cert, alias);
-          } catch (RemoteException e) {
-              Log.e(LOG_TAG, "Installing certificate", e);
-          } finally {
-              keyChainConnection.close();
-          }
-        } catch (InterruptedException e) {
-            Log.w(LOG_TAG, "Interrupted while installing certificate", e);
-            Thread.currentThread().interrupt();
-        } finally {
-            Binder.restoreCallingIdentity(id);
-        }
-    }
-
-    public void registerPrivateKeyAccessListener(ComponentName who, ComponentName listener) {
-        if (who == null) {
-            throw new NullPointerException("ComponentName is null");
-        }
-        synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-
-            int userHandle = UserHandle.getCallingUserId();
-            DevicePolicyData userData = getUserData(userHandle);
-            userData.mPrivateKeyAccessListener = listener;
-            saveSettingsLocked(userHandle);
-        }
-    }
-
-    public void choosePrivateKeyAlias(final PendingIntent sender, final String host, final int port,
-            final String url, final String alias, final IBinder response) {
-        if (!mHasFeature) {
-            KeyChain.openPrivateKeyAliasChooser(mContext, sender, host, port, alias, response);
-            return;
-        }
-
-        final int senderUid = Binder.getCallingUid();
-
-        Intent intent = new Intent(DeviceAdminReceiver.ACTION_CHOOSE_PRIVATE_KEY_ALIAS);
-        synchronized (this) {
-            DevicePolicyData userData = getUserData(UserHandle.getCallingUserId());
-            ComponentName privateKeyAccessListener = userData.mPrivateKeyAccessListener;
-            intent.setComponent(privateKeyAccessListener);
-        }
-        intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID, senderUid);
-        intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_HOST, host);
-        intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_PORT, port);
-        intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_URL, url);
-        intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_ALIAS, alias);
-        intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_RESPONSE, response);
-
-        UserHandle user = Binder.getCallingUserHandle();
-        mContext.sendOrderedBroadcastAsUser(intent, user, null, new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String chosenAlias = getResultData();
-                if (chosenAlias != null) {
-                    sendPrivateKeyAliasResponse(senderUid, chosenAlias, response);
-                    return;
-                }
-                KeyChain.openPrivateKeyAliasChooser(context, sender, host, port, alias, response);
-            }
-        }, null, Activity.RESULT_OK, null, null);
-    }
-
-    private void sendPrivateKeyAliasResponse(final int uid, final String alias,
-            final IBinder responseBinder) {
-        final IKeyChainAliasCallback keyChainAliasResponse =
-                IKeyChainAliasCallback.Stub.asInterface(responseBinder);
-        if (keyChainAliasResponse == null) {
-            return;
-        }
-
-        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
-            @Override protected Void doInBackground(Void... unused) {
-                try {
-                    if (alias != null) {
-                        UserHandle userHandle = new UserHandle(UserHandle.getUserId(uid));
-                        KeyChain.KeyChainConnection connection =
-                                KeyChain.bindAsUser(mContext, userHandle);
-                        try {
-                            connection.getService().setGrant(uid, alias, true);
-                        } finally {
-                            connection.close();
-                        }
-                    }
-                    keyChainAliasResponse.alias(alias);
-                } catch (InterruptedException e) {
-                    Log.w(LOG_TAG, "interrupted while granting access", e);
-                    Thread.currentThread().interrupt();
-                } catch (Exception e) {
-                    // don't just catch RemoteException, caller could
-                    // throw back a RuntimeException across processes
-                    // which we should protect against.
-                    Log.e(LOG_TAG, "error while granting access", e);
-                }
-                return null;
-            }
-        };
-        task.execute();
     }
 
     void wipeDataLocked(int flags) {
