@@ -93,6 +93,18 @@ public abstract class Conference {
     public void onUnhold() {}
 
     /**
+     * Invoked when the child calls should be merged. Only invoked if the conference contains the
+     * capability {@link PhoneCapabilities#MERGE_CONFERENCE}.
+     */
+    public void onMerge() {}
+
+    /**
+     * Invoked when the child calls should be swapped. Only invoked if the conference contains the
+     * capability {@link PhoneCapabilities#SWAP_CONFERENCE}.
+     */
+    public void onSwap() {}
+
+    /**
      * Sets state to be on hold.
      */
     public final void setOnHold() {
@@ -141,7 +153,7 @@ public abstract class Conference {
      * @param connection The connection to add.
      * @return True if the connection was successfully added.
      */
-    public boolean addConnection(Connection connection) {
+    public final boolean addConnection(Connection connection) {
         if (connection != null && !mChildConnections.contains(connection)) {
             if (connection.setConference(this)) {
                 mChildConnections.add(connection);
@@ -160,7 +172,7 @@ public abstract class Conference {
      * @param connection The connection to remove.
      * @return True if the connection was successfully removed.
      */
-    public void removeConnection(Connection connection) {
+    public final void removeConnection(Connection connection) {
         Log.d(this, "removing %s from %s", connection, mChildConnections);
         if (connection != null && mChildConnections.remove(connection)) {
             connection.resetConference();
@@ -173,7 +185,7 @@ public abstract class Conference {
     /**
      * Tears down the conference object and any of it's current connections.
      */
-    public void destroy() {
+    public final void destroy() {
         Log.d(this, "destroying conference : %s", this);
         // Tear down the children.
         for (Connection connection : mChildConnections) {
