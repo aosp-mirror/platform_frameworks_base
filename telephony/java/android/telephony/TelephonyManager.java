@@ -2967,28 +2967,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Set the CDMA subscription source.
-     * Used for device supporting both NV and RUIM for CDMA.
-     * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
-     *
-     * @param subscriptionType the subscription type, 0 for RUIM, 1 for NV.
-     * @return true on success; false on any failure.
-     */
-    public boolean setCdmaSubscription(int subscriptionType) {
-        try {
-            return getITelephony().setCdmaSubscription(subscriptionType);
-        } catch (RemoteException ex) {
-            Rlog.e(TAG, "setCdmaSubscription RemoteException", ex);
-        } catch (NullPointerException ex) {
-            Rlog.e(TAG, "setCdmaSubscription NPE", ex);
-        }
-        return false;
-    }
-
-    /**
      * Values used to return status for hasCarrierPrivileges call.
      */
     public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1;
