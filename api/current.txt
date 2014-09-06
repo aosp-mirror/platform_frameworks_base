@@ -29006,8 +29006,6 @@ package android.telephony {
   }
 
   public class TelephonyManager {
-    method public void enableSimplifiedNetworkSettings(boolean);
-    method public void enableSimplifiedNetworkSettings(long, boolean);
     method public java.util.List<android.telephony.CellInfo> getAllCellInfo();
     method public int getCallState();
     method public android.telephony.CellLocation getCellLocation();
@@ -29030,8 +29028,6 @@ package android.telephony {
     method public java.lang.String getSimOperatorName();
     method public java.lang.String getSimSerialNumber();
     method public int getSimState();
-    method public boolean getSimplifiedNetworkSettingsEnabled();
-    method public boolean getSimplifiedNetworkSettingsEnabled(long);
     method public java.lang.String getSubscriberId();
     method public java.lang.String getVoiceMailAlphaTag();
     method public java.lang.String getVoiceMailNumber();
