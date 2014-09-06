@@ -453,11 +453,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
         @Override public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
+            if (DEBUG) Log.d(TAG, "receive broadcast intent, action: " + action);
             if (action.equals(ALARM_WAKEUP)) {
-                if (DEBUG) Log.d(TAG, "ALARM_WAKEUP");
                 startNavigating(false);
             } else if (action.equals(ALARM_TIMEOUT)) {
-                if (DEBUG) Log.d(TAG, "ALARM_TIMEOUT");
                 hibernate();
             } else if (action.equals(Intents.DATA_SMS_RECEIVED_ACTION)) {
                 checkSmsSuplInit(intent);
@@ -691,7 +690,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
         intentFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-        intentFilter = new IntentFilter();
         intentFilter.addAction(SIM_STATE_CHANGED);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, mHandler);
     }
