@@ -2950,27 +2950,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Get the calculated preferred network type.
-     * Used for debugging incorrect network type.
-     * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     *
-     * @return the preferred network type, defined in RILConstants.java or -1 if
-     *         none available.
-     */
-    public int getCalculatedPreferredNetworkType() {
-        try {
-            return getITelephony().getCalculatedPreferredNetworkType();
-        } catch (RemoteException ex) {
-            Rlog.e(TAG, "getCalculatedPreferredNetworkType RemoteException", ex);
-        } catch (NullPointerException ex) {
-            Rlog.e(TAG, "getCalculatedPreferredNetworkType NPE", ex);
-        }
-        return -1;
-    }
-
-    /**
      * Get the preferred network type.
      * Used for device configuration by some CDMA operators.
      * <p>
@@ -2979,6 +2958,7 @@ public class TelephonyManager {
      * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
      * @return the preferred network type, defined in RILConstants.java.
+     * @hide
      */
     public int getPreferredNetworkType() {
         try {
@@ -3001,6 +2981,7 @@ public class TelephonyManager {
      *
      * @param networkType the preferred network type, defined in RILConstants.java.
      * @return true on success; false on any failure.
+     * @hide
      */
     public boolean setPreferredNetworkType(int networkType) {
         try {
@@ -3011,6 +2992,20 @@ public class TelephonyManager {
             Rlog.e(TAG, "setPreferredNetworkType NPE", ex);
         }
         return false;
+    }
+
+    /**
+     * Set the preferred network type to global mode which includes LTE, CDMA, EvDo and GSM/WCDMA.
+     *
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @return true on success; false on any failure.
+     */
+    public boolean setGlobalPreferredNetworkType() {
+        return setPreferredNetworkType(RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA);
     }
 
     /**
