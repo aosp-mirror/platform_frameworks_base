@@ -94,7 +94,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 113 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 114 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -385,10 +385,9 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     String mLastWakeupReason = null;
     long mLastWakeupUptimeMs = 0;
-    private final HashMap<String, LongSamplingCounter> mWakeupReasonStats =
-            new HashMap<String, LongSamplingCounter>();
+    private final HashMap<String, SamplingTimer> mWakeupReasonStats = new HashMap<>();
 
-    public Map<String, ? extends LongCounter> getWakeupReasonStats() {
+    public Map<String, ? extends Timer> getWakeupReasonStats() {
         return mWakeupReasonStats;
     }
 
@@ -1131,6 +1130,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             mCurrentReportedCount = count;
         }
 
+        public void addCurrentReportedCount(int delta) {
+            updateCurrentReportedCount(mCurrentReportedCount + delta);
+        }
+
         public void updateCurrentReportedTotalTime(long totalTime) {
             if (mTimeBaseRunning && mUnpluggedReportedTotalTime == 0) {
                 // Updating the reported value for the first time.
@@ -1139,6 +1142,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mTrackingReportedValues = true;
             }
             mCurrentReportedTotalTime = totalTime;
+        }
+
+        public void addCurrentReportedTotalTime(long delta) {
+            updateCurrentReportedTotalTime(mCurrentReportedTotalTime + delta);
         }
 
         public void onTimeStarted(long elapsedRealtime, long baseUptime, long baseRealtime) {
@@ -1688,13 +1695,13 @@ public final class BatteryStatsImpl extends BatteryStats {
      * Get the wakeup reason counter, and create a new one if one
      * doesn't already exist.
      */
-    public LongSamplingCounter getWakeupReasonCounterLocked(String name) {
-        LongSamplingCounter counter = mWakeupReasonStats.get(name);
-        if (counter == null) {
-            counter = new LongSamplingCounter(mOnBatteryScreenOffTimeBase);
-            mWakeupReasonStats.put(name, counter);
+    public SamplingTimer getWakeupReasonTimerLocked(String name) {
+        SamplingTimer timer = mWakeupReasonStats.get(name);
+        if (timer == null) {
+            timer = new SamplingTimer(mOnBatteryTimeBase, true);
+            mWakeupReasonStats.put(name, timer);
         }
-        return counter;
+        return timer;
     }
 
     private final Map<String, KernelWakelockStats> readKernelWakelockStats() {
@@ -2753,8 +2760,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     void aggregateLastWakeupUptimeLocked(long uptimeMs) {
         if (mLastWakeupReason != null) {
             long deltaUptime = uptimeMs - mLastWakeupUptimeMs;
-            LongSamplingCounter timer = getWakeupReasonCounterLocked(mLastWakeupReason);
-            timer.addCountLocked(deltaUptime);
+            SamplingTimer timer = getWakeupReasonTimerLocked(mLastWakeupReason);
+            timer.addCurrentReportedCount(1);
+            timer.addCurrentReportedTotalTime(deltaUptime * 1000); // time is in microseconds
             mLastWakeupReason = null;
         }
     }
@@ -2762,7 +2770,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void noteWakeupReasonLocked(String reason) {
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         final long uptime = SystemClock.uptimeMillis();
-        if (DEBUG_HISTORY) Slog.v(TAG, "Wakeup reason reason \"" + reason +"\": "
+        if (DEBUG_HISTORY) Slog.v(TAG, "Wakeup reason \"" + reason +"\": "
                 + Integer.toHexString(mHistoryCur.states));
         aggregateLastWakeupUptimeLocked(uptime);
         mHistoryCur.wakeReasonTag = mHistoryCur.localWakeReasonTag;
@@ -6193,7 +6201,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         public void noteStartJobLocked(String name, long elapsedRealtimeMs) {
-            StopwatchTimer t = mJobStats.stopObject(name);
+            StopwatchTimer t = mJobStats.startObject(name);
             if (t != null) {
                 t.startRunningLocked(elapsedRealtimeMs);
             }
@@ -6636,8 +6644,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         if (mWakeupReasonStats.size() > 0) {
-            for (LongSamplingCounter timer : mWakeupReasonStats.values()) {
-                mOnBatteryScreenOffTimeBase.remove(timer);
+            for (SamplingTimer timer : mWakeupReasonStats.values()) {
+                mOnBatteryTimeBase.remove(timer);
             }
             mWakeupReasonStats.clear();
         }
@@ -7848,7 +7856,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int iwr = 0; iwr < NWR; iwr++) {
             if (in.readInt() != 0) {
                 String reasonName = in.readString();
-                getWakeupReasonCounterLocked(reasonName).readSummaryFromParcelLocked(in);
+                getWakeupReasonTimerLocked(reasonName).readSummaryFromParcelLocked(in);
             }
         }
 
@@ -8122,12 +8130,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         out.writeInt(mWakeupReasonStats.size());
-        for (Map.Entry<String, LongSamplingCounter> ent : mWakeupReasonStats.entrySet()) {
-            LongSamplingCounter counter = ent.getValue();
-            if (counter != null) {
+        for (Map.Entry<String, SamplingTimer> ent : mWakeupReasonStats.entrySet()) {
+            SamplingTimer timer = ent.getValue();
+            if (timer != null) {
                 out.writeInt(1);
                 out.writeString(ent.getKey());
-                counter.writeSummaryFromParcelLocked(out);
+                timer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             } else {
                 out.writeInt(0);
             }
@@ -8438,7 +8446,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int ikw = 0; ikw < NKW; ikw++) {
             if (in.readInt() != 0) {
                 String wakelockName = in.readString();
-                SamplingTimer kwlt = new SamplingTimer(mOnBatteryTimeBase, in);
+                SamplingTimer kwlt = new SamplingTimer(mOnBatteryScreenOffTimeBase, in);
                 mKernelWakelockStats.put(wakelockName, kwlt);
             }
         }
@@ -8448,9 +8456,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int iwr = 0; iwr < NWR; iwr++) {
             if (in.readInt() != 0) {
                 String reasonName = in.readString();
-                LongSamplingCounter counter = new LongSamplingCounter(mOnBatteryScreenOffTimeBase,
-                        in);
-                mWakeupReasonStats.put(reasonName, counter);
+                SamplingTimer timer = new SamplingTimer(mOnBatteryTimeBase, in);
+                mWakeupReasonStats.put(reasonName, timer);
             }
         }
 
@@ -8585,12 +8592,12 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
             }
             out.writeInt(mWakeupReasonStats.size());
-            for (Map.Entry<String, LongSamplingCounter> ent : mWakeupReasonStats.entrySet()) {
-                LongSamplingCounter counter = ent.getValue();
-                if (counter != null) {
+            for (Map.Entry<String, SamplingTimer> ent : mWakeupReasonStats.entrySet()) {
+                SamplingTimer timer = ent.getValue();
+                if (timer != null) {
                     out.writeInt(1);
                     out.writeString(ent.getKey());
-                    counter.writeToParcel(out);
+                    timer.writeToParcel(out, uSecRealtime);
                 } else {
                     out.writeInt(0);
                 }
