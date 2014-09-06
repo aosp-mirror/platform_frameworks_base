@@ -85,6 +85,7 @@ import org.xmlpull.v1.XmlSerializer;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
+import com.android.internal.R;
 
 public class WallpaperManagerService extends IWallpaperManager.Stub {
     static final String TAG = "WallpaperManagerService";
@@ -99,12 +100,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     static final long MIN_WALLPAPER_CRASH_TIME = 10000;
     static final String WALLPAPER = "wallpaper";
     static final String WALLPAPER_INFO = "wallpaper_info.xml";
-    /**
-     * Name of the component used to display bitmap wallpapers from either the gallery or
-     * built-in wallpapers.
-     */
-    static final ComponentName IMAGE_WALLPAPER = new ComponentName("com.android.systemui",
-            "com.android.systemui.ImageWallpaper");
 
     /**
      * Observes the wallpaper for changes and notifies all IWallpaperServiceCallbacks
@@ -146,7 +141,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         if (event == CLOSE_WRITE) {
                             mWallpaper.imageWallpaperPending = false;
                         }
-                        bindWallpaperComponentLocked(IMAGE_WALLPAPER, true,
+                        bindWallpaperComponentLocked(mImageWallpaper, true,
                                 false, mWallpaper, null);
                         saveSettingsLocked(mWallpaper);
                     }
@@ -160,6 +155,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     final IPackageManager mIPackageManager;
     final MyPackageMonitor mMonitor;
     WallpaperData mLastWallpaper;
+
+    /**
+     * Name of the component used to display bitmap wallpapers from either the gallery or
+     * built-in wallpapers.
+     */
+    final ComponentName mImageWallpaper;
 
     SparseArray<WallpaperData> mWallpaperMap = new SparseArray<WallpaperData>();
 
@@ -447,6 +448,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     public WallpaperManagerService(Context context) {
         if (DEBUG) Slog.v(TAG, "WallpaperService startup");
         mContext = context;
+        mImageWallpaper = ComponentName.unflattenFromString(
+                context.getResources().getString(R.string.image_wallpaper_component));
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mIPackageManager = AppGlobals.getPackageManager();
@@ -604,7 +607,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             wallpaper.imageWallpaperPending = false;
             if (userId != mCurrentUserId) return;
             if (bindWallpaperComponentLocked(defaultFailed
-                    ? IMAGE_WALLPAPER
+                    ? mImageWallpaper
                     : null, true, false, wallpaper, reply)) {
                 return;
             }
@@ -848,7 +851,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 componentName = WallpaperManager.getDefaultWallpaperComponent(mContext);
                 if (componentName == null) {
                     // Fall back to static image wallpaper
-                    componentName = IMAGE_WALLPAPER;
+                    componentName = mImageWallpaper;
                     //clearWallpaperComponentLocked();
                     //return;
                     if (DEBUG) Slog.v(TAG, "Using image wallpaper");
@@ -876,7 +879,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             WallpaperInfo wi = null;
             
             Intent intent = new Intent(WallpaperService.SERVICE_INTERFACE);
-            if (componentName != null && !componentName.equals(IMAGE_WALLPAPER)) {
+            if (componentName != null && !componentName.equals(mImageWallpaper)) {
                 // Make sure the selected service is actually a wallpaper service.
                 List<ResolveInfo> ris =
                         mIPackageManager.queryIntentServices(intent,
@@ -1052,7 +1055,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             out.attribute(null, "height", Integer.toString(wallpaper.height));
             out.attribute(null, "name", wallpaper.name);
             if (wallpaper.wallpaperComponent != null
-                    && !wallpaper.wallpaperComponent.equals(IMAGE_WALLPAPER)) {
+                    && !wallpaper.wallpaperComponent.equals(mImageWallpaper)) {
                 out.attribute(null, "component",
                         wallpaper.wallpaperComponent.flattenToShortString());
             }
@@ -1124,7 +1127,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         if (wallpaper.nextWallpaperComponent == null
                                 || "android".equals(wallpaper.nextWallpaperComponent
                                         .getPackageName())) {
-                            wallpaper.nextWallpaperComponent = IMAGE_WALLPAPER;
+                            wallpaper.nextWallpaperComponent = mImageWallpaper;
                         }
                           
                         if (DEBUG) {
@@ -1196,7 +1199,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             loadSettingsLocked(0);
             wallpaper = mWallpaperMap.get(0);
             if (wallpaper.nextWallpaperComponent != null
-                    && !wallpaper.nextWallpaperComponent.equals(IMAGE_WALLPAPER)) {
+                    && !wallpaper.nextWallpaperComponent.equals(mImageWallpaper)) {
                 if (!bindWallpaperComponentLocked(wallpaper.nextWallpaperComponent, false, false,
                         wallpaper, null)) {
                     // No such live wallpaper or other failure; fall back to the default
