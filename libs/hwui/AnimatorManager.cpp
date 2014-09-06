@@ -90,6 +90,9 @@ public:
             if (animator->isRunning()) {
                 mInfo.out.hasAnimations = true;
             }
+            if (CC_UNLIKELY(!animator->mayRunAsync())) {
+                mInfo.out.requiresUiRedraw = true;
+            }
         }
         return remove;
     }
