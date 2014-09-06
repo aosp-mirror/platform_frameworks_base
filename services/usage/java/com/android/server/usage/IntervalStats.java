@@ -23,13 +23,11 @@ import android.content.res.Configuration;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import java.util.ArrayList;
-
 class IntervalStats {
     public long beginTime;
     public long endTime;
     public long lastTimeSaved;
-    public final ArrayMap<String, UsageStats> stats = new ArrayMap<>();
+    public final ArrayMap<String, UsageStats> packageStats = new ArrayMap<>();
     public final ArrayMap<Configuration, ConfigurationStats> configurations = new ArrayMap<>();
     public Configuration activeConfiguration;
     public TimeSparseArray<UsageEvents.Event> events;
@@ -44,13 +42,13 @@ class IntervalStats {
      * Gets the UsageStats object for the given package, or creates one and adds it internally.
      */
     UsageStats getOrCreateUsageStats(String packageName) {
-        UsageStats usageStats = stats.get(packageName);
+        UsageStats usageStats = packageStats.get(packageName);
         if (usageStats == null) {
             usageStats = new UsageStats();
             usageStats.mPackageName = getCachedStringRef(packageName);
             usageStats.mBeginTimeStamp = beginTime;
             usageStats.mEndTimeStamp = endTime;
-            stats.put(usageStats.mPackageName, usageStats);
+            packageStats.put(usageStats.mPackageName, usageStats);
         }
         return usageStats;
     }
