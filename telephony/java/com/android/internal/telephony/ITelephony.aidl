@@ -709,8 +709,8 @@ interface ITelephony {
     List<String> getCarrierPackageNamesForIntent(in Intent intent);
 
     /**
-     * Set whether Android should display a simplified Mobile Network Settings UI.
-     * The setting won't be persisted during power cycle.
+     * Set whether Android should display a simplified Mobile Network Settings UI
+     * for the current ICCID.
      *
      * @param subId for which the simplified UI should be enabled or disabled.
      * @param enable true means enabling the simplified UI.
@@ -718,7 +718,8 @@ interface ITelephony {
     void enableSimplifiedNetworkSettings(long subId, boolean enable);
 
     /**
-     * Get whether a simplified Mobile Network Settings UI is enabled.
+     * Get whether a simplified Mobile Network Settings UI is enabled for the
+     * current ICCID.
      *
      * @param subId for which the simplified UI should be enabled or disabled.
      * @return true if the simplified UI is enabled.
@@ -726,10 +727,10 @@ interface ITelephony {
     boolean getSimplifiedNetworkSettingsEnabled(long subId);
 
     /**
-     * Set the phone number string and its alphatag for line 1 for display
-     * purpose only, for example, displayed in Phone Status. It won't change
-     * the actual MSISDN/MDN. This setting won't be persisted during power cycle
-     * and it should be set again after reboot.
+     * Set the line 1 phone number string and its alphatag for the current ICCID
+     * for display purpose only, for example, displayed in Phone Status. It won't
+     * change the actual MSISDN/MDN. To unset alphatag or number, pass in a null
+     * value.
      *
      * @param subId the subscriber that the alphatag and dialing number belongs to.
      * @param alphaTag alpha-tagging of the dailing nubmer
