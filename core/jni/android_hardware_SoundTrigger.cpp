@@ -211,7 +211,7 @@ void JNISoundTriggerCallback::onRecognitionEvent(struct sound_trigger_recognitio
     }
 
     jobject jAudioFormat = NULL;
-    if (event->trigger_in_data) {
+    if (event->trigger_in_data || event->capture_available) {
         jAudioFormat = env->NewObject(gAudioFormatClass,
                                     gAudioFormatCstor,
                                     audioFormatFromNative(event->audio_config.format),
