@@ -78,7 +78,8 @@ public abstract class ApplicationThreadNative extends Binder
             boolean finished = data.readInt() != 0;
             boolean userLeaving = data.readInt() != 0;
             int configChanges = data.readInt();
-            schedulePauseActivity(b, finished, userLeaving, configChanges);
+            boolean dontReport = data.readInt() != 0;
+            schedulePauseActivity(b, finished, userLeaving, configChanges, dontReport);
             return true;
         }
 
@@ -689,13 +690,14 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
     
     public final void schedulePauseActivity(IBinder token, boolean finished,
-            boolean userLeaving, int configChanges) throws RemoteException {
+            boolean userLeaving, int configChanges, boolean dontReport) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
         data.writeInt(finished ? 1 : 0);
         data.writeInt(userLeaving ? 1 :0);
         data.writeInt(configChanges);
+        data.writeInt(dontReport ? 1 : 0);
         mRemote.transact(SCHEDULE_PAUSE_ACTIVITY_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();

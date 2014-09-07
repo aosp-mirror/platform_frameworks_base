@@ -284,7 +284,7 @@ final class ActivityStack {
                         if (r.app != null) {
                             mService.logAppTooSlow(r.app, r.pauseTime, "pausing " + r);
                         }
-                        activityPausedLocked(r.appToken, true, r.persistentState);
+                        activityPausedLocked(r.appToken, true);
                     }
                 } break;
                 case LAUNCH_TICK_MSG: {
@@ -712,7 +712,7 @@ final class ActivityStack {
             // Still have something resumed; can't sleep until it is paused.
             if (DEBUG_PAUSE) Slog.v(TAG, "Sleep needs to pause " + mResumedActivity);
             if (DEBUG_USER_LEAVING) Slog.v(TAG, "Sleep => pause with userLeaving=false");
-            startPausingLocked(false, true);
+            startPausingLocked(false, true, false, false);
             return true;
         }
         if (mPausingActivity != null) {
@@ -790,22 +790,38 @@ final class ActivityStack {
         return null;
     }
 
-    final void startPausingLocked(boolean userLeaving, boolean uiSleeping) {
+    /**
+     * Start pausing the currently resumed activity.  It is an error to call this if there
+     * is already an activity being paused or there is no resumed activity.
+     *
+     * @param userLeaving True if this should result in an onUserLeaving to the current activity.
+     * @param uiSleeping True if this is happening with the user interface going to sleep (the
+     * screen turning off).
+     * @param resuming True if this is being called as part of resuming the top activity, so
+     * we shouldn't try to instigate a resume here.
+     * @param dontWait True if the caller does not want to wait for the pause to complete.  If
+     * set to true, we will immediately complete the pause here before returning.
+     * @return Returns true if an activity now is in the PAUSING state, and we are waiting for
+     * it to tell us when it is done.
+     */
+    final boolean startPausingLocked(boolean userLeaving, boolean uiSleeping, boolean resuming,
+            boolean dontWait) {
         if (mPausingActivity != null) {
-            Slog.e(TAG, "Trying to pause when pause is already pending for "
-                  + mPausingActivity, new RuntimeException("here").fillInStackTrace());
+            Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity);
+            completePauseLocked(false);
         }
         ActivityRecord prev = mResumedActivity;
         if (prev == null) {
-            Slog.e(TAG, "Trying to pause when nothing is resumed",
-                    new RuntimeException("here").fillInStackTrace());
-            mStackSupervisor.resumeTopActivitiesLocked();
-            return;
+            if (!resuming) {
+                Slog.wtf(TAG, "Trying to pause when nothing is resumed");
+                mStackSupervisor.resumeTopActivitiesLocked();
+            }
+            return false;
         }
 
         if (mActivityContainer.mParentActivity == null) {
             // Top level stack, not a child. Look for child stacks.
-            mStackSupervisor.pauseChildStacks(prev, userLeaving, uiSleeping);
+            mStackSupervisor.pauseChildStacks(prev, userLeaving, uiSleeping, resuming, dontWait);
         }
 
         if (DEBUG_STATES) Slog.v(TAG, "Moving to PAUSING: " + prev);
@@ -834,7 +850,7 @@ final class ActivityStack {
                         prev.shortComponentName);
                 mService.updateUsageStats(prev, false);
                 prev.app.thread.schedulePauseActivity(prev.appToken, prev.finishing,
-                        userLeaving, prev.configChangeFlags);
+                        userLeaving, prev.configChangeFlags, dontWait);
             } catch (Exception e) {
                 // Ignore exception, if process died other code will cleanup.
                 Slog.w(TAG, "Exception thrown during pause", e);
@@ -865,39 +881,46 @@ final class ActivityStack {
                 if (DEBUG_PAUSE) Slog.v(TAG, "Key dispatch not paused for screen off");
             }
 
-            // Schedule a pause timeout in case the app doesn't respond.
-            // We don't give it much time because this directly impacts the
-            // responsiveness seen by the user.
-            Message msg = mHandler.obtainMessage(PAUSE_TIMEOUT_MSG);
-            msg.obj = prev;
-            prev.pauseTime = SystemClock.uptimeMillis();
-            mHandler.sendMessageDelayed(msg, PAUSE_TIMEOUT);
-            if (DEBUG_PAUSE) Slog.v(TAG, "Waiting for pause to complete...");
+            if (dontWait) {
+                // If the caller said they don't want to wait for the pause, then complete
+                // the pause now.
+                completePauseLocked(false);
+                return false;
+
+            } else {
+                // Schedule a pause timeout in case the app doesn't respond.
+                // We don't give it much time because this directly impacts the
+                // responsiveness seen by the user.
+                Message msg = mHandler.obtainMessage(PAUSE_TIMEOUT_MSG);
+                msg.obj = prev;
+                prev.pauseTime = SystemClock.uptimeMillis();
+                mHandler.sendMessageDelayed(msg, PAUSE_TIMEOUT);
+                if (DEBUG_PAUSE) Slog.v(TAG, "Waiting for pause to complete...");
+                return true;
+            }
+
         } else {
             // This activity failed to schedule the
             // pause, so just treat it as being paused now.
             if (DEBUG_PAUSE) Slog.v(TAG, "Activity not running, resuming next.");
-            mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
+            if (!resuming) {
+                mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
+            }
+            return false;
         }
     }
 
-    final void activityPausedLocked(IBinder token, boolean timeout,
-            PersistableBundle persistentState) {
+    final void activityPausedLocked(IBinder token, boolean timeout) {
         if (DEBUG_PAUSE) Slog.v(
             TAG, "Activity paused: token=" + token + ", timeout=" + timeout);
 
         final ActivityRecord r = isInStackLocked(token);
         if (r != null) {
             mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
-            if (persistentState != null) {
-                r.persistentState = persistentState;
-                mService.notifyTaskPersisterLocked(r.task, false);
-            }
             if (mPausingActivity == r) {
                 if (DEBUG_STATES) Slog.v(TAG, "Moving to PAUSED: " + r
                         + (timeout ? " (due to timeout)" : " (pause complete)"));
-                r.state = ActivityState.PAUSED;
-                completePauseLocked();
+                completePauseLocked(true);
             } else {
                 EventLog.writeEvent(EventLogTags.AM_FAILED_TO_PAUSE,
                         r.userId, System.identityHashCode(r), r.shortComponentName,
@@ -948,11 +971,12 @@ final class ActivityStack {
         }
     }
 
-    private void completePauseLocked() {
+    private void completePauseLocked(boolean resumeNext) {
         ActivityRecord prev = mPausingActivity;
         if (DEBUG_PAUSE) Slog.v(TAG, "Complete pause: " + prev);
 
         if (prev != null) {
+            prev.state = ActivityState.PAUSED;
             if (prev.finishing) {
                 if (DEBUG_PAUSE) Slog.v(TAG, "Executing finish of activity: " + prev);
                 prev = finishCurrentActivityLocked(prev, FINISH_AFTER_VISIBLE, false);
@@ -995,19 +1019,21 @@ final class ActivityStack {
             mPausingActivity = null;
         }
 
-        final ActivityStack topStack = mStackSupervisor.getFocusedStack();
-        if (!mService.isSleepingOrShuttingDown()) {
-            mStackSupervisor.resumeTopActivitiesLocked(topStack, prev, null);
-        } else {
-            mStackSupervisor.checkReadyForSleepLocked();
-            ActivityRecord top = topStack.topRunningActivityLocked(null);
-            if (top == null || (prev != null && top != prev)) {
-                // If there are no more activities available to run,
-                // do resume anyway to start something.  Also if the top
-                // activity on the stack is not the just paused activity,
-                // we need to go ahead and resume it to ensure we complete
-                // an in-flight app switch.
-                mStackSupervisor.resumeTopActivitiesLocked(topStack, null, null);
+        if (resumeNext) {
+            final ActivityStack topStack = mStackSupervisor.getFocusedStack();
+            if (!mService.isSleepingOrShuttingDown()) {
+                mStackSupervisor.resumeTopActivitiesLocked(topStack, prev, null);
+            } else {
+                mStackSupervisor.checkReadyForSleepLocked();
+                ActivityRecord top = topStack.topRunningActivityLocked(null);
+                if (top == null || (prev != null && top != prev)) {
+                    // If there are no more activities available to run,
+                    // do resume anyway to start something.  Also if the top
+                    // activity on the stack is not the just paused activity,
+                    // we need to go ahead and resume it to ensure we complete
+                    // an in-flight app switch.
+                    mStackSupervisor.resumeTopActivitiesLocked(topStack, null, null);
+                }
             }
         }
 
@@ -1607,10 +1633,10 @@ final class ActivityStack {
 
         // We need to start pausing the current activity so the top one
         // can be resumed...
-        boolean pausing = mStackSupervisor.pauseBackStacks(userLeaving);
+        boolean dontWaitForPause = (next.info.flags&ActivityInfo.FLAG_RESUME_WHILE_PAUSING) != 0;
+        boolean pausing = mStackSupervisor.pauseBackStacks(userLeaving, true, dontWaitForPause);
         if (mResumedActivity != null) {
-            pausing = true;
-            startPausingLocked(userLeaving, false);
+            pausing |= startPausingLocked(userLeaving, false, true, dontWaitForPause);
             if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: Pausing " + mResumedActivity);
         }
         if (pausing) {
@@ -2720,7 +2746,7 @@ final class ActivityStack {
             if (mPausingActivity == null) {
                 if (DEBUG_PAUSE) Slog.v(TAG, "Finish needs to pause: " + r);
                 if (DEBUG_USER_LEAVING) Slog.v(TAG, "finish() => pause with userLeaving=false");
-                startPausingLocked(false, false);
+                startPausingLocked(false, false, false, false);
             }
 
             if (endTask) {

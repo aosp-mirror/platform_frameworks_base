@@ -6278,12 +6278,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public final void activityPaused(IBinder token, PersistableBundle persistentState) {
+    public final void activityPaused(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         synchronized(this) {
             ActivityStack stack = ActivityRecord.getStackLocked(token);
             if (stack != null) {
-                stack.activityPausedLocked(token, false, persistentState);
+                stack.activityPausedLocked(token, false);
             }
         }
         Binder.restoreCallingIdentity(origId);
