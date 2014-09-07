@@ -84,13 +84,13 @@ public class ActivityOptions {
      * Initial width of the animation.
      * @hide
      */
-    public static final String KEY_ANIM_START_WIDTH = "android:animStartWidth";
+    public static final String KEY_ANIM_WIDTH = "android:animWidth";
 
     /**
      * Initial height of the animation.
      * @hide
      */
-    public static final String KEY_ANIM_START_HEIGHT = "android:animStartHeight";
+    public static final String KEY_ANIM_HEIGHT = "android:animHeight";
 
     /**
      * Callback for when animation is started.
@@ -140,8 +140,8 @@ public class ActivityOptions {
     private Bitmap mThumbnail;
     private int mStartX;
     private int mStartY;
-    private int mStartWidth;
-    private int mStartHeight;
+    private int mWidth;
+    private int mHeight;
     private IRemoteCallback mAnimationStartedListener;
     private ResultReceiver mTransitionReceiver;
     private boolean mIsReturning;
@@ -238,13 +238,13 @@ public class ActivityOptions {
      * defines the coordinate space for <var>startX</var> and <var>startY</var>.
      * @param startX The x starting location of the new activity, relative to <var>source</var>.
      * @param startY The y starting location of the activity, relative to <var>source</var>.
-     * @param startWidth The initial width of the new activity.
-     * @param startHeight The initial height of the new activity.
+     * @param width The initial width of the new activity.
+     * @param height The initial height of the new activity.
      * @return Returns a new ActivityOptions object that you can use to
      * supply these options as the options Bundle when starting an activity.
      */
     public static ActivityOptions makeScaleUpAnimation(View source,
-            int startX, int startY, int startWidth, int startHeight) {
+            int startX, int startY, int width, int height) {
         ActivityOptions opts = new ActivityOptions();
         opts.mPackageName = source.getContext().getPackageName();
         opts.mAnimationType = ANIM_SCALE_UP;
@@ -252,8 +252,8 @@ public class ActivityOptions {
         source.getLocationOnScreen(pts);
         opts.mStartX = pts[0] + startX;
         opts.mStartY = pts[1] + startY;
-        opts.mStartWidth = startWidth;
-        opts.mStartHeight = startHeight;
+        opts.mWidth = width;
+        opts.mHeight = height;
         return opts;
     }
 
@@ -359,9 +359,10 @@ public class ActivityOptions {
      * @hide
      */
     public static ActivityOptions makeThumbnailAspectScaleUpAnimation(View source,
-            Bitmap thumbnail, int startX, int startY, OnAnimationStartedListener listener) {
-        return makeAspectScaledThumbnailAnimation(source, thumbnail, startX, startY, listener,
-                true);
+            Bitmap thumbnail, int startX, int startY, int targetWidth, int targetHeight,
+            OnAnimationStartedListener listener) {
+        return makeAspectScaledThumbnailAnimation(source, thumbnail, startX, startY,
+                targetWidth, targetHeight, listener, true);
     }
 
     /**
@@ -382,13 +383,15 @@ public class ActivityOptions {
      * @hide
      */
     public static ActivityOptions makeThumbnailAspectScaleDownAnimation(View source,
-            Bitmap thumbnail, int startX, int startY, OnAnimationStartedListener listener) {
-        return makeAspectScaledThumbnailAnimation(source, thumbnail, startX, startY, listener,
-                false);
+            Bitmap thumbnail, int startX, int startY, int targetWidth, int targetHeight,
+            OnAnimationStartedListener listener) {
+        return makeAspectScaledThumbnailAnimation(source, thumbnail, startX, startY,
+                targetWidth, targetHeight, listener, false);
     }
 
     private static ActivityOptions makeAspectScaledThumbnailAnimation(View source, Bitmap thumbnail,
-            int startX, int startY, OnAnimationStartedListener listener, boolean scaleUp) {
+            int startX, int startY, int targetWidth, int targetHeight,
+            OnAnimationStartedListener listener, boolean scaleUp) {
         ActivityOptions opts = new ActivityOptions();
         opts.mPackageName = source.getContext().getPackageName();
         opts.mAnimationType = scaleUp ? ANIM_THUMBNAIL_ASPECT_SCALE_UP :
@@ -398,6 +401,8 @@ public class ActivityOptions {
         source.getLocationOnScreen(pts);
         opts.mStartX = pts[0] + startX;
         opts.mStartY = pts[1] + startY;
+        opts.mWidth = targetWidth;
+        opts.mHeight = targetHeight;
         opts.setOnAnimationStartedListener(source.getHandler(), listener);
         return opts;
     }
@@ -543,8 +548,8 @@ public class ActivityOptions {
             case ANIM_SCALE_UP:
                 mStartX = opts.getInt(KEY_ANIM_START_X, 0);
                 mStartY = opts.getInt(KEY_ANIM_START_Y, 0);
-                mStartWidth = opts.getInt(KEY_ANIM_START_WIDTH, 0);
-                mStartHeight = opts.getInt(KEY_ANIM_START_HEIGHT, 0);
+                mWidth = opts.getInt(KEY_ANIM_WIDTH, 0);
+                mHeight = opts.getInt(KEY_ANIM_HEIGHT, 0);
                 break;
 
             case ANIM_THUMBNAIL_SCALE_UP:
@@ -554,6 +559,8 @@ public class ActivityOptions {
                 mThumbnail = (Bitmap) opts.getParcelable(KEY_ANIM_THUMBNAIL);
                 mStartX = opts.getInt(KEY_ANIM_START_X, 0);
                 mStartY = opts.getInt(KEY_ANIM_START_Y, 0);
+                mWidth = opts.getInt(KEY_ANIM_WIDTH, 0);
+                mHeight = opts.getInt(KEY_ANIM_HEIGHT, 0);
                 mAnimationStartedListener = IRemoteCallback.Stub.asInterface(
                         opts.getBinder(KEY_ANIM_START_LISTENER));
                 break;
@@ -605,13 +612,13 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public int getStartWidth() {
-        return mStartWidth;
+    public int getWidth() {
+        return mWidth;
     }
 
     /** @hide */
-    public int getStartHeight() {
-        return mStartHeight;
+    public int getHeight() {
+        return mHeight;
     }
 
     /** @hide */
@@ -690,8 +697,8 @@ public class ActivityOptions {
             case ANIM_SCALE_UP:
                 mStartX = otherOptions.mStartX;
                 mStartY = otherOptions.mStartY;
-                mStartWidth = otherOptions.mStartWidth;
-                mStartHeight = otherOptions.mStartHeight;
+                mWidth = otherOptions.mWidth;
+                mHeight = otherOptions.mHeight;
                 if (mAnimationStartedListener != null) {
                     try {
                         mAnimationStartedListener.sendResult(null);
@@ -707,6 +714,8 @@ public class ActivityOptions {
                 mThumbnail = otherOptions.mThumbnail;
                 mStartX = otherOptions.mStartX;
                 mStartY = otherOptions.mStartY;
+                mWidth = otherOptions.mWidth;
+                mHeight = otherOptions.mHeight;
                 if (mAnimationStartedListener != null) {
                     try {
                         mAnimationStartedListener.sendResult(null);
@@ -755,8 +764,8 @@ public class ActivityOptions {
             case ANIM_SCALE_UP:
                 b.putInt(KEY_ANIM_START_X, mStartX);
                 b.putInt(KEY_ANIM_START_Y, mStartY);
-                b.putInt(KEY_ANIM_START_WIDTH, mStartWidth);
-                b.putInt(KEY_ANIM_START_HEIGHT, mStartHeight);
+                b.putInt(KEY_ANIM_WIDTH, mWidth);
+                b.putInt(KEY_ANIM_HEIGHT, mHeight);
                 break;
             case ANIM_THUMBNAIL_SCALE_UP:
             case ANIM_THUMBNAIL_SCALE_DOWN:
@@ -765,6 +774,8 @@ public class ActivityOptions {
                 b.putParcelable(KEY_ANIM_THUMBNAIL, mThumbnail);
                 b.putInt(KEY_ANIM_START_X, mStartX);
                 b.putInt(KEY_ANIM_START_Y, mStartY);
+                b.putInt(KEY_ANIM_WIDTH, mWidth);
+                b.putInt(KEY_ANIM_HEIGHT, mHeight);
                 b.putBinder(KEY_ANIM_START_LISTENER, mAnimationStartedListener
                         != null ? mAnimationStartedListener.asBinder() : null);
                 break;

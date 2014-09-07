@@ -698,12 +698,12 @@ final class ActivityRecord {
                 case ActivityOptions.ANIM_SCALE_UP:
                     service.mWindowManager.overridePendingAppTransitionScaleUp(
                             pendingOptions.getStartX(), pendingOptions.getStartY(),
-                            pendingOptions.getStartWidth(), pendingOptions.getStartHeight());
+                            pendingOptions.getWidth(), pendingOptions.getHeight());
                     if (intent.getSourceBounds() == null) {
                         intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
                                 pendingOptions.getStartY(),
-                                pendingOptions.getStartX()+pendingOptions.getStartWidth(),
-                                pendingOptions.getStartY()+pendingOptions.getStartHeight()));
+                                pendingOptions.getStartX()+pendingOptions.getWidth(),
+                                pendingOptions.getStartY()+pendingOptions.getHeight()));
                     }
                     break;
                 case ActivityOptions.ANIM_THUMBNAIL_SCALE_UP:
@@ -728,15 +728,14 @@ final class ActivityRecord {
                     service.mWindowManager.overridePendingAppTransitionAspectScaledThumb(
                             pendingOptions.getThumbnail(),
                             pendingOptions.getStartX(), pendingOptions.getStartY(),
+                            pendingOptions.getWidth(), pendingOptions.getHeight(),
                             pendingOptions.getOnAnimationStartListener(),
                             (animationType == ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_UP));
                     if (intent.getSourceBounds() == null) {
                         intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
                                 pendingOptions.getStartY(),
-                                pendingOptions.getStartX()
-                                        + pendingOptions.getThumbnail().getWidth(),
-                                pendingOptions.getStartY()
-                                        + pendingOptions.getThumbnail().getHeight()));
+                                pendingOptions.getStartX() + pendingOptions.getWidth(),
+                                pendingOptions.getStartY() + pendingOptions.getHeight()));
                     }
                     break;
                 default:

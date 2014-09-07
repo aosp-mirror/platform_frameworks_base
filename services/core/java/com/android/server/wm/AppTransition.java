@@ -569,9 +569,9 @@ public class AppTransition implements Dump {
             int appWidth, int appHeight, int orientation, int transit, Rect containingFrame,
             Rect contentInsets, boolean isFullScreen) {
         Animation a;
-        final int thumbWidthI = mNextAppTransitionThumbnail.getWidth();
+        final int thumbWidthI = mNextAppTransitionStartWidth;
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
-        final int thumbHeightI = mNextAppTransitionThumbnail.getHeight();
+        final int thumbHeightI = mNextAppTransitionStartHeight;
         final float thumbHeight = thumbHeightI > 0 ? thumbHeightI : 1;
 
         // Used for the ENTER_SCALE_UP and EXIT_SCALE_DOWN transitions
@@ -993,7 +993,7 @@ public class AppTransition implements Dump {
     }
 
     void overridePendingAppTransitionAspectScaledThumb(Bitmap srcThumb, int startX, int startY,
-            IRemoteCallback startedCallback, boolean scaleUp) {
+            int targetWidth, int targetHeight, IRemoteCallback startedCallback, boolean scaleUp) {
         if (isTransitionSet()) {
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP
                     : NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
@@ -1002,6 +1002,8 @@ public class AppTransition implements Dump {
             mNextAppTransitionScaleUp = scaleUp;
             mNextAppTransitionStartX = startX;
             mNextAppTransitionStartY = startY;
+            mNextAppTransitionStartWidth = targetWidth;
+            mNextAppTransitionStartHeight = targetHeight;
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
         } else {
@@ -1138,6 +1140,10 @@ public class AppTransition implements Dump {
                         pw.print(mNextAppTransitionStartX);
                         pw.print(" mNextAppTransitionStartY=");
                         pw.println(mNextAppTransitionStartY);
+                        pw.print(" mNextAppTransitionStartWidth=");
+                        pw.print(mNextAppTransitionStartWidth);
+                        pw.print(" mNextAppTransitionStartHeight=");
+                        pw.println(mNextAppTransitionStartHeight);
                 pw.print("  mNextAppTransitionScaleUp="); pw.println(mNextAppTransitionScaleUp);
                 break;
         }
