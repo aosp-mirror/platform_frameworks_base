@@ -4303,20 +4303,28 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void setAppFullscreen(IBinder token, boolean toOpaque) {
-        AppWindowToken atoken = findAppWindowToken(token);
-        if (atoken != null) {
-            atoken.appFullscreen = toOpaque;
-            setWindowOpaque(token, toOpaque);
-            requestTraversal();
+        synchronized (mWindowMap) {
+            AppWindowToken atoken = findAppWindowToken(token);
+            if (atoken != null) {
+                atoken.appFullscreen = toOpaque;
+                setWindowOpaqueLocked(token, toOpaque);
+                requestTraversalLocked();
+            }
         }
     }
 
     public void setWindowOpaque(IBinder token, boolean isOpaque) {
+        synchronized (mWindowMap) {
+            setWindowOpaqueLocked(token, isOpaque);
+        }
+    }
+
+    public void setWindowOpaqueLocked(IBinder token, boolean isOpaque) {
         AppWindowToken wtoken = findAppWindowToken(token);
         if (wtoken != null) {
             WindowState win = wtoken.findMainWindow();
             if (win != null) {
-                win.mWinAnimator.setOpaque(isOpaque);
+                win.mWinAnimator.setOpaqueLocked(isOpaque);
             }
         }
     }
