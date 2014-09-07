@@ -1693,7 +1693,7 @@ final class ApplicationPackageManager extends PackageManager {
         if (dr == null) {
             dr = itemInfo.loadDefaultIcon(this);
         }
-        return getUserBadgedDrawableForDensity(dr, new UserHandle(mContext.getUserId()), null, 0);
+        return getUserBadgedIcon(dr, new UserHandle(mContext.getUserId()));
     }
 
     private Drawable getBadgedDrawable(Drawable drawable, Drawable badgeDrawable,
