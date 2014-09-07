@@ -37807,6 +37807,7 @@ package android.widget {
     method public android.widget.CalendarView getCalendarView();
     method public boolean getCalendarViewShown();
     method public int getDayOfMonth();
+    method public int getFirstDayOfWeek();
     method public long getMaxDate();
     method public long getMinDate();
     method public int getMonth();
@@ -37814,6 +37815,7 @@ package android.widget {
     method public int getYear();
     method public void init(int, int, int, android.widget.DatePicker.OnDateChangedListener);
     method public void setCalendarViewShown(boolean);
+    method public void setFirstDayOfWeek(int);
     method public void setMaxDate(long);
     method public void setMinDate(long);
     method public void setSpinnersShown(boolean);
