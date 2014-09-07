@@ -1556,11 +1556,11 @@ class WindowStateAnimator {
         }
     }
 
-    void setOpaque(boolean isOpaque) {
+    void setOpaqueLocked(boolean isOpaque) {
         if (mSurfaceControl == null) {
             return;
         }
-        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setOpaque");
+        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setOpaqueLocked");
         SurfaceControl.openTransaction();
         try {
             if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin, "isOpaque=" + isOpaque,
@@ -1568,7 +1568,7 @@ class WindowStateAnimator {
             mSurfaceControl.setOpaque(isOpaque);
         } finally {
             SurfaceControl.closeTransaction();
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setOpaque");
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setOpaqueLocked");
         }
     }
 
