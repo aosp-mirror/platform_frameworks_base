@@ -3325,8 +3325,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
         if (dispatchNestedPreScroll(0, -rawDeltaY, mScrollConsumed, mScrollOffset)) {
             rawDeltaY += mScrollConsumed[1];
-            scrollOffsetCorrection -= mScrollOffset[1];
-            scrollConsumedCorrection -= mScrollConsumed[1];
+            scrollOffsetCorrection = -mScrollOffset[1];
+            scrollConsumedCorrection = mScrollConsumed[1];
             if (vtev != null) {
                 vtev.offsetLocation(0, mScrollOffset[1]);
             }
@@ -3437,7 +3437,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             }
                         }
                     }
-                    mMotionY = y + scrollOffsetCorrection;
+                    mMotionY = y + lastYCorrection + scrollOffsetCorrection;
                 }
                 mLastY = y + lastYCorrection + scrollOffsetCorrection;
             }
@@ -3505,10 +3505,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mMotionCorrection = 0;
                     View motionView = getChildAt(motionPosition - mFirstPosition);
                     mMotionViewOriginalTop = motionView != null ? motionView.getTop() : 0;
-                    mMotionY = y;
+                    mMotionY =  y + scrollOffsetCorrection;
                     mMotionPosition = motionPosition;
                 }
-                mLastY = y;
+                mLastY = y + lastYCorrection + scrollOffsetCorrection;
                 mDirection = newDirection;
             }
         }
@@ -3876,7 +3876,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         if (mPositionScroller != null) {
                             mPositionScroller.stop();
                         }
-                        if (flingVelocity) {
+                        if (flingVelocity && !dispatchNestedPreFling(0, -initialVelocity)) {
                             dispatchNestedFling(0, -initialVelocity, false);
                         }
                     }
@@ -4001,14 +4001,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * <p>Applications can use this method to manually initiate a fling as if the user
      * initiated it via touch interaction.</p>
      *
-     * @param velocityY Vertical velocity in pixels per second
+     * @param velocityY Vertical velocity in pixels per second. Note that this is velocity of
+     *                  content, not velocity of a touch that initiated the fling.
      */
     public void fling(int velocityY) {
         if (mFlingRunnable == null) {
             mFlingRunnable = new FlingRunnable();
         }
         reportScrollStateChange(OnScrollListener.SCROLL_STATE_FLING);
-        mFlingRunnable.start(-velocityY);
+        mFlingRunnable.start(velocityY);
     }
 
     @Override
