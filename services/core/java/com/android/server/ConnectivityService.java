@@ -1925,6 +1925,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                     break;
                 }
+                case NetworkAgent.EVENT_SET_EXPLICITLY_SELECTED: {
+                    NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
+                    if (nai == null) {
+                        loge("EVENT_SET_EXPLICITLY_SELECTED from unknown NetworkAgent");
+                        break;
+                    }
+                    nai.networkMisc.explicitlySelected = true;
+                    break;
+                }
                 case NetworkMonitor.EVENT_NETWORK_TESTED: {
                     NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
                     if (isLiveNetworkAgent(nai, "EVENT_NETWORK_VALIDATED")) {
@@ -4250,7 +4259,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(),
             new NetworkInfo(networkInfo), new LinkProperties(linkProperties),
             new NetworkCapabilities(networkCapabilities), currentScore, mContext, mTrackerHandler,
-            networkMisc);
+            new NetworkMisc(networkMisc));
         synchronized (this) {
             nai.networkMonitor.systemReady = mSystemReady;
         }
@@ -4552,8 +4561,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
             NetworkAgentInfo currentNetwork = mNetworkForRequestId.get(nri.request.requestId);
             if (newNetwork == currentNetwork) {
-                if (DBG) log("Network " + newNetwork.name() + " was already satisfying" +
-                              " request " + nri.request.requestId + ". No change.");
+                if (DBG) {
+                    log("Network " + newNetwork.name() + " was already satisfying" +
+                            " request " + nri.request.requestId + ". No change.");
+                }
                 keep = true;
                 continue;
             }

@@ -132,6 +132,13 @@ public abstract class NetworkAgent extends Handler {
     public static final int VALID_NETWORK = 1;
     public static final int INVALID_NETWORK = 2;
 
+     /**
+     * Sent by the NetworkAgent to ConnectivityService to indicate this network was
+     * explicitly selected.  This should be sent before the NetworkInfo is marked
+     * CONNECTED so it can be given special treatment at that time.
+     */
+    public static final int EVENT_SET_EXPLICITLY_SELECTED = BASE + 10;
+
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
         this(looper, context, logTag, ni, nc, lp, score, null);
@@ -278,6 +285,15 @@ public abstract class NetworkAgent extends Handler {
      */
     public void unblockAddressFamily(int family) {
         queueOrSendMessage(EVENT_UNBLOCK_ADDRESS_FAMILY, family);
+    }
+
+    /**
+     * Called by the bearer to indicate this network was manually selected by the user.
+     * This should be called before the NetworkInfo is marked CONNECTED so that this
+     * Network can be given special treatment at that time.
+     */
+    public void explicitlySelected() {
+        queueOrSendMessage(EVENT_SET_EXPLICITLY_SELECTED, 0);
     }
 
     /**
