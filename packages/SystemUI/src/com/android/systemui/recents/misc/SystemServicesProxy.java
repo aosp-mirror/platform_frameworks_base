@@ -356,7 +356,7 @@ public class SystemServicesProxy {
      */
     public Drawable getBadgedIcon(Drawable icon, int userId) {
         if (userId != UserHandle.myUserId()) {
-            icon = mPm.getUserBadgedDrawableForDensity(icon, new UserHandle(userId), null, 0);
+            icon = mPm.getUserBadgedIcon(icon, new UserHandle(userId));
         }
         return icon;
     }
