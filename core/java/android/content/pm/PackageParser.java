@@ -3110,6 +3110,12 @@ public class PackageParser {
                     false)) {
                 a.info.flags |= ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
             }
+
+            if (sa.getBoolean(
+                    com.android.internal.R.styleable.AndroidManifestActivity_resumeWhilePausing,
+                    false)) {
+                a.info.flags |= ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
+            }
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;

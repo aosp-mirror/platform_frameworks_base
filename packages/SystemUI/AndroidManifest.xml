@@ -176,6 +176,7 @@
                 android:theme="@style/RecentsStyle"
                 android:excludeFromRecents="true"
                 android:launchMode="singleInstance"
+                android:resumeWhilePausing="true"
                 android:exported="true">
           <intent-filter>
             <action android:name="com.android.systemui.TOGGLE_RECENTS" />
@@ -196,6 +197,8 @@
                   android:label="@string/accessibility_desc_recent_apps"
                   android:launchMode="singleInstance"
                   android:excludeFromRecents="true"
+                  android:stateNotNeeded="true"
+                  android:resumeWhilePausing="true"
                   android:theme="@style/RecentsTheme">
             <intent-filter>
                 <action android:name="com.android.systemui.recents.TOGGLE_RECENTS" />

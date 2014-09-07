@@ -30,7 +30,6 @@ import android.content.ContentProviderClient;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -388,6 +387,17 @@ public class ActivityTestMain extends Activity {
     protected void onStart() {
         super.onStart();
         buildUi();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i(TAG, "I'm such a slooow poor loser");
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+        }
+        Log.i(TAG, "See?");
     }
 
     @Override
