@@ -255,15 +255,21 @@ public class ActivityInfo extends ComponentInfo
      * Bit in {@link #flags}: If set, a task rooted at this activity will have its
      * baseIntent replaced by the activity immediately above this. Each activity may further
      * relinquish its identity to the activity above it using this flag. Set from the
-     * android.R.attr#relinquishTaskIdentity attribute.
+     * {@link android.R.attr#relinquishTaskIdentity} attribute.
      */
     public static final int FLAG_RELINQUISH_TASK_IDENTITY = 0x1000;
     /**
      * Bit in {@link #flags} indicating that tasks started with this activity are to be
      * removed from the recent list of tasks when the last activity in the task is finished.
-     * {@link android.R.attr#autoRemoveFromRecents}
+     * Corresponds to {@link android.R.attr#autoRemoveFromRecents}
      */
     public static final int FLAG_AUTO_REMOVE_FROM_RECENTS = 0x2000;
+    /**
+     * Bit in {@link #flags} indicating that this activity can start is creation/resume
+     * while the previous activity is still pausing.  Corresponds to
+     * {@link android.R.attr#resumeWhilePausing}
+     */
+    public static final int FLAG_RESUME_WHILE_PAUSING = 0x4000;
     /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the primary user.  Only works with broadcast receivers.  Set from the

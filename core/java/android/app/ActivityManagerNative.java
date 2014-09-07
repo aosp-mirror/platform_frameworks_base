@@ -509,8 +509,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case ACTIVITY_PAUSED_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
-            PersistableBundle persistentState = data.readPersistableBundle();
-            activityPaused(token, persistentState);
+            activityPaused(token);
             reply.writeNoException();
             return true;
         }
@@ -2829,13 +2828,12 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
-    public void activityPaused(IBinder token, PersistableBundle persistentState) throws RemoteException
+    public void activityPaused(IBinder token) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
-        data.writePersistableBundle(persistentState);
         mRemote.transact(ACTIVITY_PAUSED_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();

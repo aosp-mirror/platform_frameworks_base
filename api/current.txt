@@ -1063,6 +1063,7 @@ package android {
     field public static final deprecated int restoreNeedsApplication = 16843421; // 0x101029d
     field public static final int restrictedAccountType = 16843733; // 0x10103d5
     field public static final int restrictionType = 16843923; // 0x1010493
+    field public static final int resumeWhilePausing = 16843955; // 0x10104b3
     field public static final int reversible = 16843851; // 0x101044b
     field public static final int right = 16843183; // 0x10101af
     field public static final int ringtonePreferenceStyle = 16842899; // 0x1010093
@@ -8416,6 +8417,7 @@ package android.content.pm {
     field public static final int FLAG_MULTIPROCESS = 1; // 0x1
     field public static final int FLAG_NO_HISTORY = 128; // 0x80
     field public static final int FLAG_RELINQUISH_TASK_IDENTITY = 4096; // 0x1000
+    field public static final int FLAG_RESUME_WHILE_PAUSING = 16384; // 0x4000
     field public static final int FLAG_SINGLE_USER = 1073741824; // 0x40000000
     field public static final int FLAG_STATE_NOT_NEEDED = 16; // 0x10
     field public static final int LAUNCH_MULTIPLE = 0; // 0x0

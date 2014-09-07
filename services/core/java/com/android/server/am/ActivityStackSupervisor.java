@@ -592,7 +592,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
      * @param userLeaving Passed to pauseActivity() to indicate whether to call onUserLeaving().
      * @return true if any activity was paused as a result of this call.
      */
-    boolean pauseBackStacks(boolean userLeaving) {
+    boolean pauseBackStacks(boolean userLeaving, boolean resuming, boolean dontWait) {
         boolean someActivityPaused = false;
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
@@ -601,8 +601,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 if (!isFrontStack(stack) && stack.mResumedActivity != null) {
                     if (DEBUG_STATES) Slog.d(TAG, "pauseBackStacks: stack=" + stack +
                             " mResumedActivity=" + stack.mResumedActivity);
-                    stack.startPausingLocked(userLeaving, false);
-                    someActivityPaused = true;
+                    someActivityPaused |= stack.startPausingLocked(userLeaving, false, resuming,
+                            dontWait);
                 }
             }
         }
@@ -631,7 +631,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return pausing;
     }
 
-    void pauseChildStacks(ActivityRecord parent, boolean userLeaving, boolean uiSleeping) {
+    void pauseChildStacks(ActivityRecord parent, boolean userLeaving, boolean uiSleeping,
+            boolean resuming, boolean dontWait) {
         // TODO: Put all stacks in supervisor and iterate through them instead.
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
@@ -639,7 +640,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 final ActivityStack stack = stacks.get(stackNdx);
                 if (stack.mResumedActivity != null &&
                         stack.mActivityContainer.mParentActivity == parent) {
-                    stack.startPausingLocked(userLeaving, uiSleeping);
+                    stack.startPausingLocked(userLeaving, uiSleeping, resuming, dontWait);
                 }
             }
         }
@@ -1640,57 +1641,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
 
-        if (sourceRecord == null) {
-            // This activity is not being started from another...  in this
-            // case we -always- start a new task.
-            if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) == 0 && inTask == null) {
-                Slog.w(TAG, "startActivity called from non-Activity context; forcing " +
-                        "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
-                launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
-            }
-        } else if (sourceRecord.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
-            // The original activity who is starting us is running as a single
-            // instance...  this new activity it is starting must go on its
-            // own task.
-            launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
-        } else if (launchSingleInstance || launchSingleTask) {
-            // The activity being started is a single instance...  it always
-            // gets launched into its own task.
-            launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
-        }
-
-        ActivityInfo newTaskInfo = null;
-        Intent newTaskIntent = null;
-        ActivityStack sourceStack;
-        if (sourceRecord != null) {
-            if (sourceRecord.finishing) {
-                // If the source is finishing, we can't further count it as our source.  This
-                // is because the task it is associated with may now be empty and on its way out,
-                // so we don't want to blindly throw it in to that task.  Instead we will take
-                // the NEW_TASK flow and try to find a task for it. But save the task information
-                // so it can be used when creating the new task.
-                if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
-                    Slog.w(TAG, "startActivity called from finishing " + sourceRecord
-                            + "; forcing " + "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
-                    launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
-                    newTaskInfo = sourceRecord.info;
-                    newTaskIntent = sourceRecord.task.intent;
-                }
-                sourceRecord = null;
-                sourceStack = null;
-            } else {
-                sourceStack = sourceRecord.task.stack;
-            }
-        } else {
-            sourceStack = null;
-        }
-
         boolean addingToTask = false;
-        boolean movedHome = false;
         TaskRecord reuseTask = null;
-        ActivityStack targetStack;
-
-        intent.setFlags(launchFlags);
 
         // If the caller is not coming from another activity, but has given us an
         // explicit task into which they would like us to launch the new activity,
@@ -1745,6 +1697,58 @@ public final class ActivityStackSupervisor implements DisplayListener {
         } else {
             inTask = null;
         }
+
+        if (inTask == null) {
+            if (sourceRecord == null) {
+                // This activity is not being started from another...  in this
+                // case we -always- start a new task.
+                if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) == 0 && inTask == null) {
+                    Slog.w(TAG, "startActivity called from non-Activity context; forcing " +
+                            "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
+                    launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
+                }
+            } else if (sourceRecord.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
+                // The original activity who is starting us is running as a single
+                // instance...  this new activity it is starting must go on its
+                // own task.
+                launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
+            } else if (launchSingleInstance || launchSingleTask) {
+                // The activity being started is a single instance...  it always
+                // gets launched into its own task.
+                launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
+            }
+        }
+
+        ActivityInfo newTaskInfo = null;
+        Intent newTaskIntent = null;
+        ActivityStack sourceStack;
+        if (sourceRecord != null) {
+            if (sourceRecord.finishing) {
+                // If the source is finishing, we can't further count it as our source.  This
+                // is because the task it is associated with may now be empty and on its way out,
+                // so we don't want to blindly throw it in to that task.  Instead we will take
+                // the NEW_TASK flow and try to find a task for it. But save the task information
+                // so it can be used when creating the new task.
+                if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
+                    Slog.w(TAG, "startActivity called from finishing " + sourceRecord
+                            + "; forcing " + "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
+                    launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
+                    newTaskInfo = sourceRecord.info;
+                    newTaskIntent = sourceRecord.task.intent;
+                }
+                sourceRecord = null;
+                sourceStack = null;
+            } else {
+                sourceStack = sourceRecord.task.stack;
+            }
+        } else {
+            sourceStack = null;
+        }
+
+        boolean movedHome = false;
+        ActivityStack targetStack;
+
+        intent.setFlags(launchFlags);
 
         // We may want to try to place the new activity in to an existing task.  We always
         // do this if the target activity is singleTask or singleInstance; we will also do
@@ -3840,7 +3844,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 mContainerState = CONTAINER_STATE_NO_SURFACE;
                 ((VirtualActivityDisplay) mActivityDisplay).setSurface(null);
                 if (mStack.mPausingActivity == null && mStack.mResumedActivity != null) {
-                    mStack.startPausingLocked(false, true);
+                    mStack.startPausingLocked(false, true, false, false);
                 }
             }
 
