@@ -839,25 +839,28 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     @Override
      public void onClick(final View v) {
-        // We purposely post the handler delayed to allow for the touch feedback to draw
         final TaskView tv = this;
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (Constants.DebugFlags.App.EnableTaskFiltering && v == mHeaderView.mApplicationIcon) {
-                    mCb.onTaskViewAppIconClicked(tv);
-                } else if (v == mHeaderView.mDismissButton) {
-                    dismissTask();
-                } else {
-                    if (v == mActionButtonView) {
-                        // Reset the translation of the action button before we animate it out
-                        mActionButtonView.setTranslationZ(0f);
+        final boolean delayViewClick = (v != this);
+        if (delayViewClick) {
+            // We purposely post the handler delayed to allow for the touch feedback to draw
+            postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (Constants.DebugFlags.App.EnableTaskFiltering && v == mHeaderView.mApplicationIcon) {
+                        mCb.onTaskViewAppIconClicked(tv);
+                    } else if (v == mHeaderView.mDismissButton) {
+                        dismissTask();
                     }
-                    mCb.onTaskViewClicked(tv, tv.getTask(),
-                            (v == mFooterView || v == mActionButtonView));
                 }
+            }, 125);
+        } else {
+            if (v == mActionButtonView) {
+                // Reset the translation of the action button before we animate it out
+                mActionButtonView.setTranslationZ(0f);
             }
-        }, 125);
+            mCb.onTaskViewClicked(tv, tv.getTask(),
+                    (v == mFooterView || v == mActionButtonView));
+        }
     }
 
     /**** View.OnLongClickListener Implementation ****/
