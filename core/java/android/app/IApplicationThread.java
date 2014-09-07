@@ -49,7 +49,7 @@ import java.util.Map;
  */
 public interface IApplicationThread extends IInterface {
     void schedulePauseActivity(IBinder token, boolean finished, boolean userLeaving,
-            int configChanges) throws RemoteException;
+            int configChanges, boolean dontReport) throws RemoteException;
     void scheduleStopActivity(IBinder token, boolean showWindow,
             int configChanges) throws RemoteException;
     void scheduleWindowVisibility(IBinder token, boolean showWindow) throws RemoteException;
