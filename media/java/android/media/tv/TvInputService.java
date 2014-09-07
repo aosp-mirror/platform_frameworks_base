@@ -389,8 +389,11 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Informs the application that video is available and the playback of the TV stream has
-         * been started.
+         * Informs the application that the video is now available for watching. This is primarily
+         * used to signal the application to unblock the screen. The TV input service must call this
+         * method as soon as the content rendered onto its surface gets ready for viewing.
+         *
+         * @see #notifyVideoUnavailable
          */
         public void notifyVideoAvailable() {
             runOnMainThread(new Runnable() {
@@ -407,16 +410,18 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Informs the application that video is not available, so the TV input cannot continue
-         * playing the TV stream.
+         * Informs the application that the video became unavailable for some reason. This is
+         * primarily used to signal the application to block the screen not to show any intermittent
+         * video artifacts.
          *
-         * @param reason The reason that the TV input stopped the playback:
-         * <ul>
-         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_UNKNOWN}
-         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNING}
-         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL}
-         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
-         * </ul>
+         * @param reason The reason why the video became unavailable:
+         *            <ul>
+         *            <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_UNKNOWN}
+         *            <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNING}
+         *            <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL}
+         *            <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
+         *            </ul>
+         * @see #notifyVideoAvailable
          */
         public void notifyVideoUnavailable(final int reason) {
             if (reason < TvInputManager.VIDEO_UNAVAILABLE_REASON_START
