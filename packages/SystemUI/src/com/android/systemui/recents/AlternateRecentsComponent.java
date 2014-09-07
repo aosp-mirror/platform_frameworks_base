@@ -385,9 +385,9 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
                 toTask);
         if (toTransform != null && toTask.key != null) {
             Rect toTaskRect = toTransform.rect;
-
-            // XXX: Reduce the memory usage the to the task bar height
-            Bitmap thumbnail = Bitmap.createBitmap(toTaskRect.width(), toTaskRect.height(),
+            int toHeaderWidth = (int) (mHeaderBar.getMeasuredWidth() * toTransform.scale);
+            int toHeaderHeight = (int) (mHeaderBar.getMeasuredHeight() * toTransform.scale);
+            Bitmap thumbnail = Bitmap.createBitmap(toHeaderWidth, toHeaderHeight,
                     Bitmap.Config.ARGB_8888);
             if (Constants.DebugFlags.App.EnableTransitionThumbnailDebugMode) {
                 thumbnail.eraseColor(0xFFff0000);
@@ -401,7 +401,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
             mStartAnimationTriggered = false;
             return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mStatusBarView,
-                    thumbnail, toTaskRect.left, toTaskRect.top, this);
+                    thumbnail, toTaskRect.left, toTaskRect.top, toTaskRect.width(),
+                    toTaskRect.height(), this);
         }
 
         // If both the screenshot and thumbnail fails, then just fall back to the default transition

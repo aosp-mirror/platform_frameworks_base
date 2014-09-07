@@ -222,7 +222,8 @@ public class IWindowManagerImpl implements IWindowManager {
 
     @Override
     public void overridePendingAppTransitionAspectScaledThumb(Bitmap srcThumb, int startX,
-            int startY, IRemoteCallback startedCallback, boolean scaleUp) {
+            int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
+            boolean scaleUp) {
         // TODO Auto-generated method stub
     }
 

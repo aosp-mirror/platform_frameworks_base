@@ -413,10 +413,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         final SystemServicesProxy ssp =
                 RecentsTaskLoader.getInstance().getSystemServicesProxy();
         ActivityOptions opts = null;
-        int thumbnailWidth = transform.rect.width();
-        int thumbnailHeight = transform.rect.height();
-        if (task.thumbnail != null && thumbnailWidth > 0 && thumbnailHeight > 0 &&
-                task.thumbnail.getWidth() > 0 && task.thumbnail.getHeight() > 0) {
+        if (task.thumbnail != null && task.thumbnail.getWidth() > 0 &&
+                task.thumbnail.getHeight() > 0) {
             Bitmap b;
             if (tv != null) {
                 // Disable any focused state before we draw the header
@@ -424,7 +422,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     tv.unsetFocusedTask();
                 }
 
-                b = Bitmap.createBitmap(thumbnailWidth, thumbnailHeight, Bitmap.Config.ARGB_8888);
+                float scale = tv.getScaleX();
+                int fromHeaderWidth = (int) (tv.mHeaderView.getMeasuredWidth() * scale);
+                int fromHeaderHeight = (int) (tv.mHeaderView.getMeasuredHeight() * scale);
+                b = Bitmap.createBitmap(fromHeaderWidth, fromHeaderHeight,
+                        Bitmap.Config.ARGB_8888);
                 if (Constants.DebugFlags.App.EnableTransitionThumbnailDebugMode) {
                     b.eraseColor(0xFFff0000);
                 } else {
@@ -435,7 +437,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 }
             } else {
                 // Notify the system to skip the thumbnail layer by using an ALPHA_8 bitmap
-                b = Bitmap.createBitmap(thumbnailWidth, thumbnailHeight, Bitmap.Config.ALPHA_8);
+                b = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8);
             }
             ActivityOptions.OnAnimationStartedListener animStartedListener = null;
             if (lockToTask) {
@@ -456,7 +458,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 };
             }
             opts = ActivityOptions.makeThumbnailAspectScaleUpAnimation(sourceView,
-                    b, offsetX, offsetY, animStartedListener);
+                    b, offsetX, offsetY, transform.rect.width(), transform.rect.height(),
+                    animStartedListener);
         }
 
         final ActivityOptions launchOpts = opts;
