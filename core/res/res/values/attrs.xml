@@ -4341,6 +4341,8 @@
         <attr name="minDate" format="string" />
         <!-- The maximal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="maxDate" format="string" />
+        <!-- The first day of week according to {@link java.util.Calendar}. -->
+        <attr name="firstDayOfWeek" />
         <!-- @hide The layout of the date picker. -->
         <attr name="internalLayout" format="reference"  />
         <!-- @hide The layout of the legacy DatePicker. -->

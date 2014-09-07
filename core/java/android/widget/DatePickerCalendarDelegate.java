@@ -49,6 +49,7 @@ import java.util.Locale;
  */
 class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate implements
         View.OnClickListener, DatePickerController {
+    private static final int USE_LOCALE = 0;
 
     private static final int UNINITIALIZED = -1;
     private static final int MONTH_AND_DAY_VIEW = 0;
@@ -98,6 +99,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     private Calendar mTempDate;
     private Calendar mMinDate;
     private Calendar mMaxDate;
+
+    private int mFirstDayOfWeek = USE_LOCALE;
 
     private HashSet<OnDateChangedListener> mListeners = new HashSet<OnDateChangedListener>();
 
@@ -438,7 +441,15 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     }
 
     @Override
+    public void setFirstDayOfWeek(int firstDayOfWeek) {
+        mFirstDayOfWeek = firstDayOfWeek;
+    }
+
+    @Override
     public int getFirstDayOfWeek() {
+        if (mFirstDayOfWeek != USE_LOCALE) {
+            return mFirstDayOfWeek;
+        }
         return mCurrentDate.getFirstDayOfWeek();
     }
 
