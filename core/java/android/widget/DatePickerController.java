@@ -35,6 +35,7 @@ interface DatePickerController {
 
     Calendar getSelectedDay();
 
+    void setFirstDayOfWeek(int firstDayOfWeek);
     int getFirstDayOfWeek();
 
     int getMinYear();
