@@ -24,6 +24,7 @@ import android.gesture.GesturePoint;
 import android.gesture.GestureStore;
 import android.gesture.GestureStroke;
 import android.gesture.Prediction;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -170,6 +171,9 @@ class TouchExplorer implements EventStreamTransformation {
 
     // Temporary rectangle to avoid instantiation.
     private final Rect mTempRect = new Rect();
+
+    // Temporary point to avoid instantiation.
+    private final Point mTempPoint = new Point();
 
     // Context in which this explorer operates.
     private final Context mContext;
@@ -1157,18 +1161,18 @@ class TouchExplorer implements EventStreamTransformation {
                 mInjectedPointerTracker.getLastInjectedHoverEventForClick();
             if (lastExploreEvent == null) {
                 // No last touch explored event but there is accessibility focus in
-                // the active window. We click in the middle of the focus bounds.
-                Rect focusBounds = mTempRect;
-                if (mAms.getAccessibilityFocusBounds(focusBounds)) {
-                    clickLocationX = focusBounds.centerX();
-                    clickLocationY = focusBounds.centerY();
+                // the active window. We click in the focus bounds.
+                Point point = mTempPoint;
+                if (mAms.getAccessibilityFocusClickPointInScreen(point)) {
+                    clickLocationX = point.x;
+                    clickLocationY = point.y;
                 } else {
                     // Out of luck - do nothing.
                     return;
                 }
             } else {
                 // If the click is within the active window but not within the
-                // accessibility focus bounds we click in the focus center.
+                // accessibility focus bounds we click in the focus bounds.
                 final int lastExplorePointerIndex = lastExploreEvent.getActionIndex();
                 clickLocationX = (int) lastExploreEvent.getX(lastExplorePointerIndex);
                 clickLocationY = (int) lastExploreEvent.getY(lastExplorePointerIndex);
@@ -1176,12 +1180,10 @@ class TouchExplorer implements EventStreamTransformation {
                 if (mLastTouchedWindowId == mAms.getActiveWindowId()) {
                     mAms.getActiveWindowBounds(activeWindowBounds);
                     if (activeWindowBounds.contains(clickLocationX, clickLocationY)) {
-                        Rect focusBounds = mTempRect;
-                        if (mAms.getAccessibilityFocusBounds(focusBounds)) {
-                            if (!focusBounds.contains(clickLocationX, clickLocationY)) {
-                                clickLocationX = focusBounds.centerX();
-                                clickLocationY = focusBounds.centerY();
-                            }
+                        Point point = mTempPoint;
+                        if (mAms.getAccessibilityFocusClickPointInScreen(point)) {
+                            clickLocationX = point.x;
+                            clickLocationY = point.y;
                         }
                     }
                 }
@@ -1330,18 +1332,18 @@ class TouchExplorer implements EventStreamTransformation {
                 mInjectedPointerTracker.getLastInjectedHoverEventForClick();
             if (lastExploreEvent == null) {
                 // No last touch explored event but there is accessibility focus in
-                // the active window. We click in the middle of the focus bounds.
-                Rect focusBounds = mTempRect;
-                if (mAms.getAccessibilityFocusBounds(focusBounds)) {
-                    clickLocationX = focusBounds.centerX();
-                    clickLocationY = focusBounds.centerY();
+                // the active window. We click in the focus bounds.
+                Point point = mTempPoint;
+                if (mAms.getAccessibilityFocusClickPointInScreen(point)) {
+                    clickLocationX = point.x;
+                    clickLocationY = point.y;
                 } else {
                     // Out of luck - do nothing.
                     return;
                 }
             } else {
                 // If the click is within the active window but not within the
-                // accessibility focus bounds we click in the focus center.
+                // accessibility focus bounds we click in the focus bounds.
                 final int lastExplorePointerIndex = lastExploreEvent.getActionIndex();
                 clickLocationX = (int) lastExploreEvent.getX(lastExplorePointerIndex);
                 clickLocationY = (int) lastExploreEvent.getY(lastExplorePointerIndex);
@@ -1349,12 +1351,10 @@ class TouchExplorer implements EventStreamTransformation {
                 if (mLastTouchedWindowId == mAms.getActiveWindowId()) {
                     mAms.getActiveWindowBounds(activeWindowBounds);
                     if (activeWindowBounds.contains(clickLocationX, clickLocationY)) {
-                        Rect focusBounds = mTempRect;
-                        if (mAms.getAccessibilityFocusBounds(focusBounds)) {
-                            if (!focusBounds.contains(clickLocationX, clickLocationY)) {
-                                clickLocationX = focusBounds.centerX();
-                                clickLocationY = focusBounds.centerY();
-                            }
+                        Point point = mTempPoint;
+                        if (mAms.getAccessibilityFocusClickPointInScreen(point)) {
+                            clickLocationX = point.x;
+                            clickLocationY = point.y;
                         }
                     }
                 }
