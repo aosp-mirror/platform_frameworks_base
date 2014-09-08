@@ -139,7 +139,7 @@ public abstract class Connection {
          */
         public static final int SESSION_MODIFY_REQUEST_INVALID = 3;
 
-        private static final int MSG_SET_VIDEO_LISTENER = 1;
+        private static final int MSG_SET_VIDEO_CALLBACK = 1;
         private static final int MSG_SET_CAMERA = 2;
         private static final int MSG_SET_PREVIEW_SURFACE = 3;
         private static final int MSG_SET_DISPLAY_SURFACE = 4;
@@ -154,7 +154,7 @@ public abstract class Connection {
         private final VideoProvider.VideoProviderHandler
                 mMessageHandler = new VideoProvider.VideoProviderHandler();
         private final VideoProvider.VideoProviderBinder mBinder;
-        private IVideoCallback mVideoListener;
+        private IVideoCallback mVideoCallback;
 
         /**
          * Default handler used to consolidate binder method calls onto a single thread.
@@ -163,8 +163,8 @@ public abstract class Connection {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
-                    case MSG_SET_VIDEO_LISTENER:
-                        mVideoListener = IVideoCallback.Stub.asInterface((IBinder) msg.obj);
+                    case MSG_SET_VIDEO_CALLBACK:
+                        mVideoCallback = IVideoCallback.Stub.asInterface((IBinder) msg.obj);
                         break;
                     case MSG_SET_CAMERA:
                         onSetCamera((String) msg.obj);
@@ -206,9 +206,9 @@ public abstract class Connection {
          * IVideoProvider stub implementation.
          */
         private final class VideoProviderBinder extends IVideoProvider.Stub {
-            public void setVideoListener(IBinder videoListenerBinder) {
+            public void setVideoCallback(IBinder videoCallbackBinder) {
                 mMessageHandler.obtainMessage(
-                        MSG_SET_VIDEO_LISTENER, videoListenerBinder).sendToTarget();
+                        MSG_SET_VIDEO_CALLBACK, videoCallbackBinder).sendToTarget();
             }
 
             public void setCamera(String cameraId) {
@@ -350,9 +350,9 @@ public abstract class Connection {
          * @param videoProfile The requested video call profile.
          */
         public void receiveSessionModifyRequest(VideoProfile videoProfile) {
-            if (mVideoListener != null) {
+            if (mVideoCallback != null) {
                 try {
-                    mVideoListener.receiveSessionModifyRequest(videoProfile);
+                    mVideoCallback.receiveSessionModifyRequest(videoProfile);
                 } catch (RemoteException ignored) {
                 }
             }
@@ -370,9 +370,9 @@ public abstract class Connection {
          */
         public void receiveSessionModifyResponse(int status,
                 VideoProfile requestedProfile, VideoProfile responseProfile) {
-            if (mVideoListener != null) {
+            if (mVideoCallback != null) {
                 try {
-                    mVideoListener.receiveSessionModifyResponse(
+                    mVideoCallback.receiveSessionModifyResponse(
                             status, requestedProfile, responseProfile);
                 } catch (RemoteException ignored) {
                 }
@@ -390,9 +390,9 @@ public abstract class Connection {
          * @param event The event.
          */
         public void handleCallSessionEvent(int event) {
-            if (mVideoListener != null) {
+            if (mVideoCallback != null) {
                 try {
-                    mVideoListener.handleCallSessionEvent(event);
+                    mVideoCallback.handleCallSessionEvent(event);
                 } catch (RemoteException ignored) {
                 }
             }
@@ -405,9 +405,9 @@ public abstract class Connection {
          * @param height The updated peer video height.
          */
         public void changePeerDimensions(int width, int height) {
-            if (mVideoListener != null) {
+            if (mVideoCallback != null) {
                 try {
-                    mVideoListener.changePeerDimensions(width, height);
+                    mVideoCallback.changePeerDimensions(width, height);
                 } catch (RemoteException ignored) {
                 }
             }
@@ -419,9 +419,9 @@ public abstract class Connection {
          * @param dataUsage The updated data usage.
          */
         public void changeCallDataUsage(int dataUsage) {
-            if (mVideoListener != null) {
+            if (mVideoCallback != null) {
                 try {
-                    mVideoListener.changeCallDataUsage(dataUsage);
+                    mVideoCallback.changeCallDataUsage(dataUsage);
                 } catch (RemoteException ignored) {
                 }
             }
@@ -433,9 +433,9 @@ public abstract class Connection {
          * @param cameraCapabilities The changed camera capabilities.
          */
         public void changeCameraCapabilities(CameraCapabilities cameraCapabilities) {
-            if (mVideoListener != null) {
+            if (mVideoCallback != null) {
                 try {
-                    mVideoListener.changeCameraCapabilities(cameraCapabilities);
+                    mVideoCallback.changeCameraCapabilities(cameraCapabilities);
                 } catch (RemoteException ignored) {
                 }
             }
