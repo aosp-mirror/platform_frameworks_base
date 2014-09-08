@@ -74,8 +74,9 @@ public class RecentsConfiguration {
     public float taskStackOverscrollPct;
 
     /** Task view animation and styles */
-    public int taskViewEnterFromHomeDuration;
     public int taskViewEnterFromHomeDelay;
+    public int taskViewEnterFromHomeDuration;
+    public int taskViewEnterFromHomeStaggerDelay;
     public int taskViewExitToHomeDuration;
     public int taskViewRemoveAnimDuration;
     public int taskViewRemoveAnimTranslationXPx;
@@ -209,10 +210,12 @@ public class RecentsConfiguration {
         taskStackTopPaddingPx = res.getDimensionPixelSize(R.dimen.recents_stack_top_padding);
 
         // Task view animation and styles
-        taskViewEnterFromHomeDuration =
-                res.getInteger(R.integer.recents_animate_task_enter_from_home_duration);
         taskViewEnterFromHomeDelay =
                 res.getInteger(R.integer.recents_animate_task_enter_from_home_delay);
+        taskViewEnterFromHomeDuration =
+                res.getInteger(R.integer.recents_animate_task_enter_from_home_duration);
+        taskViewEnterFromHomeStaggerDelay =
+                res.getInteger(R.integer.recents_animate_task_enter_from_home_stagger_delay);
         taskViewExitToHomeDuration =
                 res.getInteger(R.integer.recents_animate_task_exit_to_home_duration);
         taskViewRemoveAnimDuration =
