@@ -98,8 +98,8 @@ public class PhoneAccount implements Parcelable {
     public static final String SCHEME_SIP = "sip";
 
     private final PhoneAccountHandle mAccountHandle;
-    private final Uri mHandle;
-    private final String mSubscriptionNumber;
+    private final Uri mAddress;
+    private final Uri mSubscriptionAddress;
     private final int mCapabilities;
     private final int mIconResId;
     private final CharSequence mLabel;
@@ -108,47 +108,40 @@ public class PhoneAccount implements Parcelable {
 
     public static class Builder {
         private PhoneAccountHandle mAccountHandle;
-        private Uri mHandle;
-        private String mSubscriptionNumber;
+        private Uri mAddress;
+        private Uri mSubscriptionAddress;
         private int mCapabilities;
         private int mIconResId;
         private CharSequence mLabel;
         private CharSequence mShortDescription;
         private List<String> mSupportedUriSchemes = new ArrayList<String>();
 
-        public Builder() {}
+        public Builder(PhoneAccountHandle accountHandle, CharSequence label) {
+            this.mAccountHandle = accountHandle;
+            this.mLabel = label;
+        }
 
-        public Builder withAccountHandle(PhoneAccountHandle value) {
-            this.mAccountHandle = value;
+        public Builder setAddress(Uri value) {
+            this.mAddress = value;
             return this;
         }
 
-        public Builder withHandle(Uri value) {
-            this.mHandle = value;
+        public Builder setSubscriptionAddress(Uri value) {
+            this.mSubscriptionAddress = value;
             return this;
         }
 
-        public Builder withSubscriptionNumber(String value) {
-            this.mSubscriptionNumber = value;
-            return this;
-        }
-
-        public Builder withCapabilities(int value) {
+        public Builder setCapabilities(int value) {
             this.mCapabilities = value;
             return this;
         }
 
-        public Builder withIconResId(int value) {
+        public Builder setIconResId(int value) {
             this.mIconResId = value;
             return this;
         }
 
-        public Builder withLabel(CharSequence value) {
-            this.mLabel = value;
-            return this;
-        }
-
-        public Builder withShortDescription(CharSequence value) {
+        public Builder setShortDescription(CharSequence value) {
             this.mShortDescription = value;
             return this;
         }
@@ -158,8 +151,9 @@ public class PhoneAccount implements Parcelable {
          *
          * @param uriScheme The URI scheme.
          * @return The Builder.
+         * @hide
          */
-        public Builder withSupportedUriScheme(String uriScheme) {
+        public Builder addSupportedUriScheme(String uriScheme) {
             if (!TextUtils.isEmpty(uriScheme) && !mSupportedUriSchemes.contains(uriScheme)) {
                 this.mSupportedUriSchemes.add(uriScheme);
             }
@@ -167,15 +161,17 @@ public class PhoneAccount implements Parcelable {
         }
 
         /**
-         * Specifies additional URI schemes supported by the {@link PhoneAccount}.
+         * Specifies the URI schemes supported by the {@link PhoneAccount}.
          *
          * @param uriSchemes The URI schemes.
          * @return The Builder.
          */
-        public Builder withSupportedUriSchemes(List<String> uriSchemes) {
+        public Builder setSupportedUriSchemes(List<String> uriSchemes) {
+            mSupportedUriSchemes.clear();
+
             if (uriSchemes != null && !uriSchemes.isEmpty()) {
                 for (String uriScheme : uriSchemes) {
-                    withSupportedUriScheme(uriScheme);
+                    addSupportedUriScheme(uriScheme);
                 }
             }
             return this;
@@ -184,13 +180,13 @@ public class PhoneAccount implements Parcelable {
         public PhoneAccount build() {
             // If no supported URI schemes were defined, assume "tel" is supported.
             if (mSupportedUriSchemes.isEmpty()) {
-                withSupportedUriScheme(SCHEME_TEL);
+                addSupportedUriScheme(SCHEME_TEL);
             }
 
             return new PhoneAccount(
                     mAccountHandle,
-                    mHandle,
-                    mSubscriptionNumber,
+                    mAddress,
+                    mSubscriptionAddress,
                     mCapabilities,
                     mIconResId,
                     mLabel,
@@ -201,16 +197,16 @@ public class PhoneAccount implements Parcelable {
 
     private PhoneAccount(
             PhoneAccountHandle account,
-            Uri handle,
-            String subscriptionNumber,
+            Uri address,
+            Uri subscriptionAddress,
             int capabilities,
             int iconResId,
             CharSequence label,
             CharSequence shortDescription,
             List<String> supportedUriSchemes) {
         mAccountHandle = account;
-        mHandle = handle;
-        mSubscriptionNumber = subscriptionNumber;
+        mAddress = address;
+        mSubscriptionAddress = subscriptionAddress;
         mCapabilities = capabilities;
         mIconResId = iconResId;
         mLabel = label;
@@ -218,7 +214,11 @@ public class PhoneAccount implements Parcelable {
         mSupportedUriSchemes = Collections.unmodifiableList(supportedUriSchemes);
     }
 
-    public static Builder builder() { return new Builder(); }
+    public static Builder builder(
+            PhoneAccountHandle accountHandle,
+            CharSequence label) {
+        return new Builder(accountHandle, label);
+    }
 
     /**
      * The unique identifier of this {@code PhoneAccount}.
@@ -230,32 +230,30 @@ public class PhoneAccount implements Parcelable {
     }
 
     /**
-     * The handle (e.g., a phone number) associated with this {@code PhoneAccount}. This
+     * The address (e.g., a phone number) associated with this {@code PhoneAccount}. This
      * represents the destination from which outgoing calls using this {@code PhoneAccount}
      * will appear to come, if applicable, and the destination to which incoming calls using this
      * {@code PhoneAccount} may be addressed.
      *
-     * @return A handle expressed as a {@code Uri}, for example, a phone number.
+     * @return A address expressed as a {@code Uri}, for example, a phone number.
      */
-    public Uri getHandle() {
-        return mHandle;
+    public Uri getAddress() {
+        return mAddress;
     }
 
     /**
      * The raw callback number used for this {@code PhoneAccount}, as distinct from
-     * {@link #getHandle()}. For the majority of {@code PhoneAccount}s this should be registered
+     * {@link #getAddress()}. For the majority of {@code PhoneAccount}s this should be registered
      * as {@code null}.  It is used by the system for SIM-based {@code PhoneAccount} registration
      * where {@link android.telephony.TelephonyManager#setLine1NumberForDisplay(String, String)}
      * or {@link android.telephony.TelephonyManager#setLine1NumberForDisplay(long, String, String)}
      * has been used to alter the callback number.
      * <p>
-     * TODO: Should this also be a URI, for consistency? Should it be called the
-     * "subscription handle"?
      *
      * @return The subscription number, suitable for display to the user.
      */
-    public String getSubscriptionNumber() {
-        return mSubscriptionNumber;
+    public Uri getSubscriptionAddress() {
+        return mSubscriptionAddress;
     }
 
     /**
@@ -295,11 +293,11 @@ public class PhoneAccount implements Parcelable {
     }
 
     /**
-     * Determines if the {@link PhoneAccount} supports calls to/from handles with a specified URI
+     * Determines if the {@link PhoneAccount} supports calls to/from addresses with a specified URI
      * scheme.
      *
      * @param uriScheme The URI scheme to check.
-     * @return {@code True} if the {@code PhoneAccount} supports calls to/from handles with the
+     * @return {@code True} if the {@code PhoneAccount} supports calls to/from addresses with the
      * specified URI scheme.
      */
     public boolean supportsUriScheme(String uriScheme) {
@@ -363,8 +361,8 @@ public class PhoneAccount implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(mAccountHandle, 0);
-        out.writeParcelable(mHandle, 0);
-        out.writeString(mSubscriptionNumber);
+        out.writeParcelable(mAddress, 0);
+        out.writeParcelable(mSubscriptionAddress, 0);
         out.writeInt(mCapabilities);
         out.writeInt(mIconResId);
         out.writeCharSequence(mLabel);
@@ -389,8 +387,8 @@ public class PhoneAccount implements Parcelable {
         ClassLoader classLoader = PhoneAccount.class.getClassLoader();
 
         mAccountHandle = in.readParcelable(getClass().getClassLoader());
-        mHandle = in.readParcelable(getClass().getClassLoader());
-        mSubscriptionNumber = in.readString();
+        mAddress = in.readParcelable(getClass().getClassLoader());
+        mSubscriptionAddress = in.readParcelable(getClass().getClassLoader());
         mCapabilities = in.readInt();
         mIconResId = in.readInt();
         mLabel = in.readCharSequence();
