@@ -149,6 +149,7 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.LocationControllerImpl;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.NextAlarmController;
+import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityControllerImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -2067,8 +2068,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void startActivity(Intent intent, boolean dismissShade, boolean afterKeyguardGone) {
-        startActivityDismissingKeyguard(intent, false, dismissShade, afterKeyguardGone);
+    public void startActivity(Intent intent, boolean dismissShade) {
+        startActivityDismissingKeyguard(intent, false, dismissShade);
     }
 
     public ScrimController getScrimController() {
@@ -2957,9 +2958,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
-            final boolean dismissShade, final boolean afterKeyguardGone) {
+            final boolean dismissShade) {
         if (onlyProvisioned && !isDeviceProvisioned()) return;
 
+        final boolean afterKeyguardGone = PreviewInflater.wouldLaunchResolverActivity(
+                mContext, intent, mCurrentUserId);
         final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
         dismissKeyguardThenExecute(new OnDismissAction() {
             @Override
@@ -3308,8 +3311,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void handleStartSettingsActivity(Intent intent, boolean onlyProvisioned) {
-        startActivityDismissingKeyguard(intent, onlyProvisioned, true /* dismissShade */,
-                false /* afterKeyguardGone */);
+        startActivityDismissingKeyguard(intent, onlyProvisioned, true /* dismissShade */);
     }
 
     private static class FastColorDrawable extends Drawable {
