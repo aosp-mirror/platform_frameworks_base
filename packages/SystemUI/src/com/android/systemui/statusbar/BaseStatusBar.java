@@ -39,6 +39,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -678,19 +679,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected void applyColorsAndBackgrounds(StatusBarNotification sbn,
             NotificationData.Entry entry) {
-        PackageManager pmUser = getPackageManagerForUser(
-                entry.notification.getUser().getIdentifier());
-        int version = 0;
-        try {
-            ApplicationInfo info = pmUser.getApplicationInfo(sbn.getPackageName(), 0);
-            version = info.targetSdkVersion;
-        } catch (NameNotFoundException ex) {
-            Log.e(TAG, "Failed looking up ApplicationInfo for " + sbn.getPackageName(), ex);
-        }
 
         if (entry.expanded.getId() != com.android.internal.R.id.status_bar_latest_event_content) {
             // Using custom RemoteViews
-            if (version >= Build.VERSION_CODES.GINGERBREAD && version < Build.VERSION_CODES.L) {
+            if (entry.targetSdk >= Build.VERSION_CODES.GINGERBREAD
+                    && entry.targetSdk < Build.VERSION_CODES.L) {
                 entry.row.setShowingLegacyBackground(true);
                 entry.legacy = true;
             }
@@ -706,7 +699,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         if (entry.icon != null) {
-            if (version >= Build.VERSION_CODES.L) {
+            if (entry.targetSdk >= Build.VERSION_CODES.L) {
                 entry.icon.setColorFilter(mContext.getResources().getColor(android.R.color.white));
             } else {
                 entry.icon.setColorFilter(null);
@@ -1319,6 +1312,14 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
 
+        // Extract target SDK version.
+        try {
+            ApplicationInfo info = pmUser.getApplicationInfo(sbn.getPackageName(), 0);
+            entry.targetSdk = info.targetSdkVersion;
+        } catch (NameNotFoundException ex) {
+            Log.e(TAG, "Failed looking up ApplicationInfo for " + sbn.getPackageName(), ex);
+        }
+
         if (publicViewLocal == null) {
             // Add a basic notification template
             publicViewLocal = LayoutInflater.from(mContext).inflate(
@@ -1349,12 +1350,17 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             Drawable iconDrawable = StatusBarIconView.getIcon(mContext, ic);
             icon.setImageDrawable(iconDrawable);
-            if (mNotificationColorUtil.isGrayscaleIcon(iconDrawable)) {
+            if (entry.targetSdk >= Build.VERSION_CODES.L
+                    || mNotificationColorUtil.isGrayscaleIcon(iconDrawable)) {
                 icon.setBackgroundResource(
                         com.android.internal.R.drawable.notification_icon_legacy_bg);
                 int padding = mContext.getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.notification_large_icon_circle_padding);
                 icon.setPadding(padding, padding, padding, padding);
+                if (sbn.getNotification().color != Notification.COLOR_DEFAULT) {
+                    icon.getBackground().setColorFilter(
+                            sbn.getNotification().color, PorterDuff.Mode.SRC_ATOP);
+                }
             }
 
             if (profileBadge != null) {
