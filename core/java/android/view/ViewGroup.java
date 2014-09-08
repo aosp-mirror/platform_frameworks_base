@@ -771,6 +771,112 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * Translates the given bounds and intersections from child coordinates to
+     * local coordinates. In case any interactive sibling of the calling child
+     * covers the latter, a new intersections is added to the intersection list.
+     * This method is for the exclusive use by the accessibility layer to compute
+     * a point where a sequence of down and up events would click on a view.
+     *
+     * @param child The child making the call.
+     * @param bounds The bounds to translate in child coordinates.
+     * @param intersections The intersections of interactive views covering the child.
+     * @return True if the bounds and intersections were computed, false otherwise.
+     */
+    boolean translateBoundsAndIntersectionsInWindowCoordinates(View child,
+            RectF bounds, List<RectF> intersections) {
+        // Not attached, done.
+        if (mAttachInfo == null) {
+            return false;
+        }
+
+        if (getAlpha() <= 0 || getTransitionAlpha() <= 0 ||
+                getVisibility() != VISIBLE) {
+            // Cannot click on a view with an invisible predecessor.
+            return false;
+        }
+
+        // Compensate for the child transformation.
+        if (!child.hasIdentityMatrix()) {
+            Matrix matrix = child.getMatrix();
+            matrix.mapRect(bounds);
+            final int intersectionCount = intersections.size();
+            for (int i = 0; i < intersectionCount; i++) {
+                RectF intersection = intersections.get(i);
+                matrix.mapRect(intersection);
+            }
+        }
+
+        // Translate the bounds from child to parent coordinates.
+        final int dx = child.mLeft - mScrollX;
+        final int dy = child.mTop - mScrollY;
+        bounds.offset(dx, dy);
+        offsetRects(intersections, dx, dy);
+
+        // If the bounds do not intersect our bounds, done.
+        if (!bounds.intersects(0, 0, getWidth(), getHeight())) {
+            return false;
+        }
+
+        // Check whether any clickable siblings cover the child
+        // view and if so keep track of the intersections. Also
+        // respect Z ordering when iterating over children.
+        ArrayList<View> orderedList = buildOrderedChildList();
+        final boolean useCustomOrder = orderedList == null
+                && isChildrenDrawingOrderEnabled();
+
+        final int childCount = mChildrenCount;
+        for (int i = childCount - 1; i >= 0; i--) {
+            final int childIndex = useCustomOrder
+                    ? getChildDrawingOrder(childCount, i) : i;
+            final View sibling = (orderedList == null)
+                    ? mChildren[childIndex] : orderedList.get(childIndex);
+
+            // We care only about siblings over the child.
+            if (sibling == child) {
+                break;
+            }
+
+            // If sibling is not interactive we do not care.
+            if (!sibling.isClickable() && !sibling.isLongClickable()) {
+                continue;
+            }
+
+            // Compute the sibling bounds in its coordinates.
+            RectF siblingBounds = mAttachInfo.mTmpTransformRect1;
+            siblingBounds.set(0, 0, sibling.getWidth(), sibling.getHeight());
+
+            // Take into account the sibling transformation matrix.
+            if (!sibling.hasIdentityMatrix()) {
+                sibling.getMatrix().mapRect(siblingBounds);
+            }
+
+            // Offset the sibling to our coordinates.
+            final int siblingDx = sibling.mLeft - mScrollX;
+            final int siblingDy = sibling.mTop - mScrollY;
+            siblingBounds.offset(siblingDx, siblingDy);
+
+            // Compute the intersection between the child and the sibling.
+            if (siblingBounds.intersect(bounds)) {
+                // If an interactive sibling completely covers the child, done.
+                if (siblingBounds.equals(bounds)) {
+                    return false;
+                }
+                // Keep track of the intersection rectangle.
+                RectF intersection = new RectF(siblingBounds);
+                intersections.add(intersection);
+            }
+        }
+
+        if (mParent instanceof ViewGroup) {
+            ViewGroup parentGroup = (ViewGroup) mParent;
+            return parentGroup.translateBoundsAndIntersectionsInWindowCoordinates(
+                    this, bounds, intersections);
+        }
+
+        return true;
+    }
+
+    /**
      * Called when a child view has changed whether or not it is tracking transient state.
      */
     public void childHasTransientStateChanged(View child, boolean childHasTransientState) {
