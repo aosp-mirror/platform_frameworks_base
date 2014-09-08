@@ -278,21 +278,21 @@ public class LauncherApps {
 
 
     /**
-     * Adds a callback for changes to packages in current and managed profiles.
+     * Registers a callback for changes to packages in current and managed profiles.
      *
-     * @param callback The callback to add.
+     * @param callback The callback to register.
      */
-    public void addCallback(Callback callback) {
-        addCallback(callback, null);
+    public void registerCallback(Callback callback) {
+        registerCallback(callback, null);
     }
 
     /**
-     * Adds a callback for changes to packages in current and managed profiles.
+     * Registers a callback for changes to packages in current and managed profiles.
      *
-     * @param callback The callback to add.
+     * @param callback The callback to register.
      * @param handler that should be used to post callbacks on, may be null.
      */
-    public void addCallback(Callback callback, Handler handler) {
+    public void registerCallback(Callback callback, Handler handler) {
         synchronized (this) {
             if (callback != null && !mCallbacks.contains(callback)) {
                 boolean addedFirstCallback = mCallbacks.size() == 0;
@@ -308,12 +308,12 @@ public class LauncherApps {
     }
 
     /**
-     * Removes a callback that was previously added.
+     * Unregisters a callback that was previously registered.
      *
-     * @param callback The callback to remove.
-     * @see #addCallback(Callback)
+     * @param callback The callback to unregister.
+     * @see #registerCallback(Callback)
      */
-    public void removeCallback(Callback callback) {
+    public void unregisterCallback(Callback callback) {
         synchronized (this) {
             removeCallbackLocked(callback);
             if (mCallbacks.size() == 0) {
@@ -500,44 +500,12 @@ public class LauncherApps {
         }
     }
 
-    /** Remove after unbundled apps have migrated STOP SHIP */
-    public static abstract class OnAppsChangedCallback extends Callback {
+    /** STOPSHIP remove when launcher 3 has been updated */
+    public void addCallback(Callback callback) {
+        registerCallback(callback);
     }
-
-    /** Remove after unbundled apps have migrated STOP SHIP */
-    public void addOnAppsChangedCallback(OnAppsChangedCallback callback) {
-        addCallback(callback, null);
-    }
-
-    /** Remove after unbundled apps have migrated STOP SHIP */
-    public void addOnAppsChangedCallback(OnAppsChangedCallback callback, Handler handler) {
-        addCallback(callback, handler);
-    }
-
-    /** Remove after unbundled apps have migrated STOP SHIP */
-    public void removeOnAppsChangedCallback(OnAppsChangedCallback callback) {
-        removeCallback(callback);
-    }
-
-    /** Remove after unbundled apps have migrated STOP SHIP */
-    public void startActivityForProfile(ComponentName component, UserHandle user, Rect sourceBounds,
-            Bundle opts) {
-        startMainActivity(component, user, sourceBounds, opts);
-    }
-
-    /** Remove after unbundled apps have migrated STOP SHIP */
-    public void showAppDetailsForProfile(ComponentName component, UserHandle user,
-            Rect sourceBounds, Bundle opts) {
-        startAppDetailsActivity(component, user, sourceBounds, opts);
-    }
-
-    /** Remove after unbundled apps have migrated STOP SHIP */
-    public boolean isPackageEnabledForProfile(String packageName, UserHandle user) {
-        return isPackageEnabled(packageName, user);
-    }
-
-    /** Remove after unbundled apps have migrated STOP SHIP */
-    public boolean isActivityEnabledForProfile(ComponentName component, UserHandle user) {
-        return isActivityEnabled(component, user);
+    /** STOPSHIP remove when launcher 3 has been updated */
+    public void removeCallback(Callback callback) {
+        unregisterCallback(callback);
     }
 }
