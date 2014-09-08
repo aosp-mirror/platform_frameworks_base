@@ -54,7 +54,12 @@ class DeferStateStruct;
  */
 class Layer {
 public:
-    Layer(RenderState& renderState, const uint32_t layerWidth, const uint32_t layerHeight);
+    enum Type {
+        kType_Texture,
+        kType_DisplayList,
+    };
+
+    Layer(Type type, RenderState& renderState, const uint32_t layerWidth, const uint32_t layerHeight);
     ~Layer();
 
     static uint32_t computeIdealWidth(uint32_t layerWidth);
@@ -219,11 +224,7 @@ public:
     }
 
     inline bool isTextureLayer() const {
-        return textureLayer;
-    }
-
-    inline void setTextureLayer(bool textureLayer) {
-        this->textureLayer = textureLayer;
+        return type == kType_Texture;
     }
 
     inline SkColorFilter* getColorFilter() const {
@@ -343,10 +344,9 @@ private:
     bool cacheable;
 
     /**
-     * When set to true, this layer must be treated as a texture
-     * layer.
+     * Denotes whether the layer is a DisplayList, or Texture layer.
      */
-    bool textureLayer;
+    const Type type;
 
     /**
      * When set to true, this layer is dirty and should be cleared
