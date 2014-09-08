@@ -325,8 +325,7 @@ final class RemoteConnectionService {
         final String id = UUID.randomUUID().toString();
         final ConnectionRequest newRequest = new ConnectionRequest(
                 request.getAccountHandle(),
-                request.getHandle(),
-                request.getHandlePresentation(),
+                request.getAddress(),
                 request.getExtras(),
                 request.getVideoState());
         try {

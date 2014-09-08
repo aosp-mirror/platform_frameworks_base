@@ -34,7 +34,7 @@ public final class AudioState implements Parcelable {
     /** Direct the audio stream through a wired headset. */
     public static final int ROUTE_WIRED_HEADSET = 0x00000004;
 
-    /** Direct the audio stream through the device's spakerphone. */
+    /** Direct the audio stream through the device's speakerphone. */
     public static final int ROUTE_SPEAKER       = 0x00000008;
 
     /**
@@ -43,7 +43,10 @@ public final class AudioState implements Parcelable {
      */
     public static final int ROUTE_WIRED_OR_EARPIECE = ROUTE_EARPIECE | ROUTE_WIRED_HEADSET;
 
-    /** Bit mask of all possible audio routes. */
+    /** Bit mask of all possible audio routes.
+     *
+     * @hide
+     */
     public static final int ROUTE_ALL = ROUTE_EARPIECE | ROUTE_BLUETOOTH | ROUTE_WIRED_HEADSET |
             ROUTE_SPEAKER;
 
