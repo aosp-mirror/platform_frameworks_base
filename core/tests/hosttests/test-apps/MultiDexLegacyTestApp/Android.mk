@@ -27,21 +27,33 @@ LOCAL_SDK_VERSION := current
 
 LOCAL_PACKAGE_NAME := MultiDexLegacyTestApp
 
+LOCAL_DEX_PREOPT := false
+
 mainDexList:= \
 	$(call intermediates-dir-for,APPS,$(LOCAL_PACKAGE_NAME),$(LOCAL_IS_HOST_MODULE),common)/maindex.list
 
 LOCAL_DX_FLAGS := --multi-dex --main-dex-list=$(mainDexList) --minimal-main-dex
+LOCAL_JACK_FLAGS := -D jack.dex.output.policy=minimal-multidex -D jack.preprocessor=true\
+    -D jack.preprocessor.file=$(LOCAL_PATH)/test.jpp -D jack.dex.output.multidex.legacy=true
 
-LOCAL_DEX_PREOPT := false
+#################################
+include $(BUILD_SYSTEM)/configure_local_jack.mk
+#################################
+
+ifdef LOCAL_JACK_ENABLED
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/test.jpp
+endif
 
 include $(BUILD_PACKAGE)
 
+ifndef LOCAL_JACK_ENABLED
 $(mainDexList): $(full_classes_proguard_jar) | $(HOST_OUT_EXECUTABLES)/mainDexClasses
+	$(hide) mkdir -p $(dir $@)
 	$(HOST_OUT_EXECUTABLES)/mainDexClasses $< 1>$@
 	echo "com/android/multidexlegacytestapp/Test.class" >> $@
 
 $(built_dex_intermediate): $(mainDexList)
-
+endif
 
 ## The application with a full main dex
 include $(CLEAR_VARS)
@@ -56,17 +68,30 @@ LOCAL_SDK_VERSION := current
 
 LOCAL_PACKAGE_NAME := MultiDexLegacyTestApp2
 
+LOCAL_DEX_PREOPT := false
+
 mainDexList2:= \
 	$(call intermediates-dir-for,APPS,$(LOCAL_PACKAGE_NAME),$(LOCAL_IS_HOST_MODULE),common)/maindex.list
 
 LOCAL_DX_FLAGS := --multi-dex --main-dex-list=$(mainDexList2)
+LOCAL_JACK_FLAGS := -D jack.dex.output.policy=multidex -D jack.preprocessor=true\
+    -D jack.preprocessor.file=$(LOCAL_PATH)/test.jpp -D jack.dex.output.multidex.legacy=true
 
-LOCAL_DEX_PREOPT := false
+#################################
+include $(BUILD_SYSTEM)/configure_local_jack.mk
+#################################
+
+ifdef LOCAL_JACK_ENABLED
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/test.jpp
+endif
 
 include $(BUILD_PACKAGE)
 
+ifndef LOCAL_JACK_ENABLED
 $(mainDexList2): $(full_classes_proguard_jar) | $(HOST_OUT_EXECUTABLES)/mainDexClasses
+	$(hide) mkdir -p $(dir $@)
 	$(HOST_OUT_EXECUTABLES)/mainDexClasses $< 1>$@
 	echo "com/android/multidexlegacytestapp/Test.class" >> $@
 
 $(built_dex_intermediate): $(mainDexList2)
+endif

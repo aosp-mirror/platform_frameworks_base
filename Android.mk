@@ -406,6 +406,7 @@ LOCAL_JAVA_LIBRARIES := core-libart conscrypt okhttp core-junit bouncycastle ext
 LOCAL_MODULE := framework
 
 LOCAL_DX_FLAGS := --core-library --multi-dex
+LOCAL_JACK_FLAGS := --multi-dex native
 
 LOCAL_RMTYPEDEFS := true
 
@@ -417,6 +418,7 @@ framework_module := $(LOCAL_INSTALLED_MODULE)
 framework_res_R_stamp := \
 	$(call intermediates-dir-for,APPS,framework-res,,COMMON)/src/R.stamp
 $(full_classes_compiled_jar): $(framework_res_R_stamp)
+$(built_dex_intermediate): $(framework_res_R_stamp)
 
 $(framework_module): | $(dir $(framework_module))framework-res.apk
 
