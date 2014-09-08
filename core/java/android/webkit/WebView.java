@@ -2021,7 +2021,7 @@ public class WebView extends AbsoluteLayout
     /**
      * In addition to the FindListener that the user may set via the WebView.setFindListener
      * API, FindActionModeCallback will register it's own FindListener. We keep them separate
-     * via this class so that that the two FindListeners can potentially exist at once.
+     * via this class so that the two FindListeners can potentially exist at once.
      */
     private class FindListenerDistributor implements FindListener {
         private FindListener mFindDialogFindListener;
