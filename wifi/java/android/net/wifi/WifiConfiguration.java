@@ -341,6 +341,12 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * last time we connected, this configuration had no internet access
+     */
+    public boolean noInternetAccess;
+
+    /**
+     * @hide
      * Uid of app creating the configuration
      */
     @SystemApi
@@ -673,6 +679,49 @@ public class WifiConfiguration implements Parcelable {
     @SystemApi
     public int numAssociation;
 
+    /**
+     * @hide
+     * Number of time user disabled WiFi while associated to this configuration with Low RSSI.
+     */
+    public int numUserTriggeredWifiDisableLowRSSI;
+
+    /**
+     * @hide
+     * Number of time user disabled WiFi while associated to this configuration with Bad RSSI.
+     */
+    public int numUserTriggeredWifiDisableBadRSSI;
+
+    /**
+     * @hide
+     * Number of time user disabled WiFi while associated to this configuration
+     * and RSSI was not HIGH.
+     */
+    public int numUserTriggeredWifiDisableNotHighRSSI;
+
+    /**
+     * @hide
+     * Number of ticks associated to this configuration with Low RSSI.
+     */
+    public int numTicksAtLowRSSI;
+
+    /**
+     * @hide
+     * Number of ticks associated to this configuration with Bad RSSI.
+     */
+    public int numTicksAtBadRSSI;
+
+    /**
+     * @hide
+     * Number of ticks associated to this configuration
+     * and RSSI was not HIGH.
+     */
+    public int numTicksAtNotHighRSSI;
+    /**
+     * @hide
+     * Number of time user (WifiManager) triggered association to this configuration.
+     * TODO: count this only for Wifi Settings uuid, so as to not count 3rd party apps
+     */
+    public int numUserTriggeredJoinAttempts;
 
     /**
      * @hide
@@ -725,6 +774,7 @@ public class WifiConfiguration implements Parcelable {
         selfAdded = false;
         didSelfAdd = false;
         ephemeral = false;
+        noInternetAccess = false;
         mIpConfiguration = new IpConfiguration();
     }
 
@@ -824,8 +874,10 @@ public class WifiConfiguration implements Parcelable {
             sbuf.append(" autoJoinStatus ").append(this.numConnectionFailures).append("\n");
         }
         if (this.didSelfAdd || this.selfAdded) {
-            if (this.didSelfAdd) sbuf.append(" didSelfAdd ");
-            if (this.selfAdded) sbuf.append(" selfAdded ");
+            if (this.didSelfAdd) sbuf.append(" didSelfAdd");
+            if (this.selfAdded) sbuf.append(" selfAdded");
+            if (this.noInternetAccess) sbuf.append(" noInternetAccess");
+
             sbuf.append("\n");
         }
         sbuf.append(" KeyMgmt:");
@@ -896,18 +948,44 @@ public class WifiConfiguration implements Parcelable {
 
         sbuf.append(mIpConfiguration.toString());
 
-        if (selfAdded)  sbuf.append("selfAdded");
-        if (creatorUid != 0)  sbuf.append("uid=" + Integer.toString(creatorUid));
+        if (this.creatorUid != 0)  sbuf.append("uid=" + Integer.toString(creatorUid));
 
-        if (blackListTimestamp != 0) {
+        if (this.blackListTimestamp != 0) {
             long now_ms = System.currentTimeMillis();
-            long diff = now_ms - blackListTimestamp;
+            long diff = now_ms - this.blackListTimestamp;
             if (diff <= 0) {
                 sbuf.append("blackListed since <incorrect>");
             } else {
                 sbuf.append("blackListed since ").append(Long.toString(diff/1000)).append( "sec");
             }
         }
+        sbuf.append('\n');
+        if (this.linkedConfigurations != null) {
+            for(String key : this.linkedConfigurations.keySet()) {
+                sbuf.append(" linked: ").append(key);
+                sbuf.append('\n');
+            }
+        }
+        if (this.connectChoices != null) {
+            for(String key : this.connectChoices.keySet()) {
+                Integer choice = this.connectChoices.get(key);
+                if (choice != null) {
+                    sbuf.append(" choice: ").append(key);
+                    sbuf.append(" = ").append(choice);
+                    sbuf.append('\n');
+                }
+            }
+        }
+        sbuf.append(" triggeredLow: ").append(numUserTriggeredWifiDisableLowRSSI);
+        sbuf.append(" triggeredBad: ").append(numUserTriggeredWifiDisableBadRSSI);
+        sbuf.append(" triggeredNotHigh: ").append(numUserTriggeredWifiDisableNotHighRSSI);
+        sbuf.append('\n');
+        sbuf.append(" ticksLow: ").append(numTicksAtLowRSSI);
+        sbuf.append(" ticksBad: ").append(numTicksAtBadRSSI);
+        sbuf.append(" ticksNotHigh: ").append(numTicksAtNotHighRSSI);
+        sbuf.append('\n');
+        sbuf.append(" triggeredJoin: ").append(numUserTriggeredJoinAttempts);
+        sbuf.append('\n');
 
         return sbuf.toString();
     }
@@ -1197,7 +1275,7 @@ public class WifiConfiguration implements Parcelable {
             mCachedConfigKey = null; //force null configKey
             autoJoinStatus = source.autoJoinStatus;
             selfAdded = source.selfAdded;
-
+            noInternetAccess = source.noInternetAccess;
             if (source.visibility != null) {
                 visibility = new Visibility(source.visibility);
             }
@@ -1217,6 +1295,13 @@ public class WifiConfiguration implements Parcelable {
             numScorerOverride = source.numScorerOverride;
             numScorerOverrideAndSwitchedNetwork = source.numScorerOverrideAndSwitchedNetwork;
             numAssociation = source.numAssociation;
+            numUserTriggeredWifiDisableLowRSSI = source.numUserTriggeredWifiDisableLowRSSI;
+            numUserTriggeredWifiDisableBadRSSI = source.numUserTriggeredWifiDisableBadRSSI;
+            numUserTriggeredWifiDisableNotHighRSSI = source.numUserTriggeredWifiDisableNotHighRSSI;
+            numTicksAtLowRSSI = source.numTicksAtLowRSSI;
+            numTicksAtBadRSSI = source.numTicksAtBadRSSI;
+            numTicksAtNotHighRSSI = source.numTicksAtNotHighRSSI;
+            numUserTriggeredJoinAttempts = source.numUserTriggeredJoinAttempts;
         }
     }
 
@@ -1259,6 +1344,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(autoJoinStatus);
         dest.writeInt(selfAdded ? 1 : 0);
         dest.writeInt(didSelfAdd ? 1 : 0);
+        dest.writeInt(noInternetAccess ? 1 : 0);
         dest.writeInt(creatorUid);
         dest.writeInt(lastConnectUid);
         dest.writeInt(lastUpdateUid);
@@ -1269,6 +1355,14 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(numScorerOverride);
         dest.writeInt(numScorerOverrideAndSwitchedNetwork);
         dest.writeInt(numAssociation);
+        dest.writeInt(numUserTriggeredWifiDisableLowRSSI);
+        dest.writeInt(numUserTriggeredWifiDisableBadRSSI);
+        dest.writeInt(numUserTriggeredWifiDisableNotHighRSSI);
+        dest.writeInt(numTicksAtLowRSSI);
+        dest.writeInt(numTicksAtBadRSSI);
+        dest.writeInt(numTicksAtNotHighRSSI);
+        dest.writeInt(numUserTriggeredJoinAttempts);
+
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -1307,6 +1401,7 @@ public class WifiConfiguration implements Parcelable {
                 config.autoJoinStatus = in.readInt();
                 config.selfAdded = in.readInt() != 0;
                 config.didSelfAdd = in.readInt() != 0;
+                config.noInternetAccess = in.readInt() != 0;
                 config.creatorUid = in.readInt();
                 config.lastConnectUid = in.readInt();
                 config.lastUpdateUid = in.readInt();
@@ -1317,6 +1412,13 @@ public class WifiConfiguration implements Parcelable {
                 config.numScorerOverride = in.readInt();
                 config.numScorerOverrideAndSwitchedNetwork = in.readInt();
                 config.numAssociation = in.readInt();
+                config.numUserTriggeredWifiDisableLowRSSI = in.readInt();
+                config.numUserTriggeredWifiDisableBadRSSI = in.readInt();
+                config.numUserTriggeredWifiDisableNotHighRSSI = in.readInt();
+                config.numTicksAtLowRSSI = in.readInt();
+                config.numTicksAtBadRSSI = in.readInt();
+                config.numTicksAtNotHighRSSI = in.readInt();
+                config.numUserTriggeredJoinAttempts = in.readInt();
                 return config;
             }
 
