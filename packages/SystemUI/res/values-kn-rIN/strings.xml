@@ -212,7 +212,10 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"ಸ್ಥಾನವನ್ನು GPS ಮೂಲಕ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"ಸ್ಥಾನ ವಿನಂತಿಗಳು ಸಕ್ರಿಯವಾಗಿವೆ"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೆರವುಗೊಳಿಸು."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
+    <skip />
+    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
+    <skip />
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ಪರದೆಯು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಿರುಗುತ್ತದೆ."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"ಪರದೆಯನ್ನು ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"ಪರದೆಯನ್ನು ಪೋಟ್ರೇಟ್ ಓರಿಯಂಟೇಶನ್‍ನಲ್ಲಿ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ."</string>
@@ -304,6 +307,7 @@
     <string name="interruption_level_all" msgid="1330581184930945764">"ಎಲ್ಲ"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ ( ಪೂರ್ತಿ ಆಗುವವರೆಗೆ <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ಬಳಕೆದಾರರನ್ನು ಬದಲಿಸಿ"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ಬಳಕೆದಾರರನ್ನು ಬದಲಿಸಿ, ಪ್ರಸ್ತುತ ಬಳಕೆದಾರ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"ಪ್ರೊಫೈಲ್‌ ತೋರಿಸು"</string>
     <string name="user_add_user" msgid="5110251524486079492">"ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿ"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"ಹೊಸ ಬಳಕೆದಾರರು"</string>
