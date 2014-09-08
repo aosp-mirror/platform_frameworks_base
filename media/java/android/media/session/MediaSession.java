@@ -191,11 +191,8 @@ public final class MediaSession {
                 return;
             }
             if (mCallback != null) {
-                if (mCallback.mCallback == callback) {
-                    Log.w(TAG, "Tried to set same callback, ignoring");
-                    return;
-                }
-                // We're changing callbacks, clear the session from the old one.
+                // We're updating the callback, clear the session from the old
+                // one.
                 mCallback.mCallback.mSession = null;
             }
             if (handler == null) {
