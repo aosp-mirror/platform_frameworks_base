@@ -162,7 +162,7 @@ public class Voice implements Parcelable {
     /**
      * @return Does the Voice require a network connection to work.
      */
-    public boolean getRequiresNetworkConnection() {
+    public boolean isNetworkConnectionRequired() {
         return mRequiresNetworkConnection;
     }
 
