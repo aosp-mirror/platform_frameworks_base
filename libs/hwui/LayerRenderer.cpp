@@ -272,9 +272,8 @@ bool LayerRenderer::resizeLayer(Layer* layer, uint32_t width, uint32_t height) {
 Layer* LayerRenderer::createTextureLayer(RenderState& renderState) {
     LAYER_RENDERER_LOGD("Creating new texture layer");
 
-    Layer* layer = new Layer(renderState, 0, 0);
+    Layer* layer = new Layer(Layer::kType_Texture, renderState, 0, 0);
     layer->setCacheable(false);
-    layer->setTextureLayer(true);
     layer->setEmpty(true);
     layer->setFbo(0);
     layer->setAlpha(255, SkXfermode::kSrcOver_Mode);

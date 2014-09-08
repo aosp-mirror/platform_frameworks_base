@@ -29,15 +29,15 @@
 namespace android {
 namespace uirenderer {
 
-Layer::Layer(RenderState& renderState, const uint32_t layerWidth, const uint32_t layerHeight)
+Layer::Layer(Type layerType, RenderState& renderState, const uint32_t layerWidth, const uint32_t layerHeight)
         : caches(Caches::getInstance())
         , renderState(renderState)
-        , texture(caches) {
+        , texture(caches)
+        , type(layerType) {
     mesh = NULL;
     meshElementCount = 0;
     cacheable = true;
     dirty = false;
-    textureLayer = false;
     renderTarget = GL_TEXTURE_2D;
     texture.width = layerWidth;
     texture.height = layerHeight;
@@ -55,11 +55,17 @@ Layer::Layer(RenderState& renderState, const uint32_t layerWidth, const uint32_t
     caches.resourceCache.incrementRefcount(this);
     rendererLightPosDirty = true;
     wasBuildLayered = false;
-    renderState.registerLayer(this);
+    if (!isTextureLayer()) {
+        // track only non-texture layer lifecycles in renderstate,
+        // because texture layers are destroyed via finalizer
+        renderState.registerLayer(this);
+    }
 }
 
 Layer::~Layer() {
-    renderState.unregisterLayer(this);
+    if (!isTextureLayer()) {
+        renderState.unregisterLayer(this);
+    }
     SkSafeUnref(colorFilter);
     removeFbo();
     deleteTexture();
