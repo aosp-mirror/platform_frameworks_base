@@ -284,7 +284,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 float scaledWindowInsetTop = (int) (taskScale * windowInsetTop);
                 float scaledTranslationY = taskRect.top + transform.translationY -
                         (scaledWindowInsetTop + scaledYOffset);
-                startDelay = mConfig.taskViewEnterFromHomeDelay;
+                startDelay = mConfig.taskViewEnterFromHomeStaggerDelay;
 
                 // Animate the top clip
                 mViewBounds.animateClipTop(windowInsetTop, duration,
@@ -410,8 +410,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         } else if (mConfig.launchedFromHome) {
             // Animate the tasks up
             int frontIndex = (ctx.currentStackViewCount - ctx.currentStackViewIndex - 1);
-            int delay = mConfig.taskBarEnterAnimDelay +
-                    frontIndex * mConfig.taskViewEnterFromHomeDelay;
+            int delay = mConfig.taskViewEnterFromHomeDelay +
+                    frontIndex * mConfig.taskViewEnterFromHomeStaggerDelay;
             if (Constants.DebugFlags.App.EnableShadows) {
                 animate().translationZ(transform.translationZ);
             }
