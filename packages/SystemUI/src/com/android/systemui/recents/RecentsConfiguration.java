@@ -347,8 +347,8 @@ public class RecentsConfiguration {
         Rect searchBarBounds = new Rect();
         getSearchBarBounds(windowWidth, windowHeight, topInset, searchBarBounds);
         if (isLandscape && hasTransposedSearchBar) {
-            // In landscape, the search bar appears on the left
-            taskStackBounds.set(searchBarBounds.right, topInset, windowWidth - rightInset, windowHeight);
+            // In landscape, the search bar appears on the left, but we overlay it on top
+            taskStackBounds.set(0, topInset, windowWidth - rightInset, windowHeight);
         } else {
             // In portrait, the search bar appears on the top (which already has the inset)
             taskStackBounds.set(0, searchBarBounds.bottom, windowWidth, windowHeight);

@@ -39,7 +39,7 @@
     <dimen name="status_bar_recents_app_icon_top_margin">8dp</dimen>
 
     <!-- The side padding for the task stack as a percentage of the width. -->
-    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.2229</item>
+    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.26</item>
 
     <!-- Standard notification width + gravity -->
     <dimen name="notification_panel_width">@dimen/standard_notification_panel_width</dimen>
