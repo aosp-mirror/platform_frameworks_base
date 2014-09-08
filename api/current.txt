@@ -28578,16 +28578,16 @@ package android.telecomm {
   }
 
   public class PhoneAccount implements android.os.Parcelable {
-    method public static android.telecomm.PhoneAccount.Builder builder();
+    method public static android.telecomm.PhoneAccount.Builder builder(android.telecomm.PhoneAccountHandle, java.lang.CharSequence);
     method public int describeContents();
     method public android.telecomm.PhoneAccountHandle getAccountHandle();
+    method public android.net.Uri getAddress();
     method public int getCapabilities();
-    method public android.net.Uri getHandle();
     method public android.graphics.drawable.Drawable getIcon(android.content.Context);
     method public int getIconResId();
     method public java.lang.CharSequence getLabel();
     method public java.lang.CharSequence getShortDescription();
-    method public java.lang.String getSubscriptionNumber();
+    method public android.net.Uri getSubscriptionAddress();
     method public java.util.List<java.lang.String> getSupportedUriSchemes();
     method public boolean supportsUriScheme(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
@@ -28600,17 +28600,14 @@ package android.telecomm {
   }
 
   public static class PhoneAccount.Builder {
-    ctor public PhoneAccount.Builder();
+    ctor public PhoneAccount.Builder(android.telecomm.PhoneAccountHandle, java.lang.CharSequence);
     method public android.telecomm.PhoneAccount build();
-    method public android.telecomm.PhoneAccount.Builder withAccountHandle(android.telecomm.PhoneAccountHandle);
-    method public android.telecomm.PhoneAccount.Builder withCapabilities(int);
-    method public android.telecomm.PhoneAccount.Builder withHandle(android.net.Uri);
-    method public android.telecomm.PhoneAccount.Builder withIconResId(int);
-    method public android.telecomm.PhoneAccount.Builder withLabel(java.lang.CharSequence);
-    method public android.telecomm.PhoneAccount.Builder withShortDescription(java.lang.CharSequence);
-    method public android.telecomm.PhoneAccount.Builder withSubscriptionNumber(java.lang.String);
-    method public android.telecomm.PhoneAccount.Builder withSupportedUriScheme(java.lang.String);
-    method public android.telecomm.PhoneAccount.Builder withSupportedUriSchemes(java.util.List<java.lang.String>);
+    method public android.telecomm.PhoneAccount.Builder setAddress(android.net.Uri);
+    method public android.telecomm.PhoneAccount.Builder setCapabilities(int);
+    method public android.telecomm.PhoneAccount.Builder setIconResId(int);
+    method public android.telecomm.PhoneAccount.Builder setShortDescription(java.lang.CharSequence);
+    method public android.telecomm.PhoneAccount.Builder setSubscriptionAddress(android.net.Uri);
+    method public android.telecomm.PhoneAccount.Builder setSupportedUriSchemes(java.util.List<java.lang.String>);
   }
 
   public class PhoneAccountHandle implements android.os.Parcelable {
