@@ -1243,7 +1243,7 @@
     <string name="new_app_description" msgid="1932143598371537340">"Interrompi la vecchia applicazione senza salvare."</string>
     <string name="sendText" msgid="5209874571959469142">"Scegli un\'azione per il testo"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volume suoneria"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Volume app. multimediali"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Volume contenuti multimediali"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Riproduzione tramite Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Suoneria silenziosa impostata"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volume chiamate"</string>
@@ -1766,7 +1766,7 @@
     <string name="lock_to_app_toast" msgid="1230563865743799321">"Per sbloccare questa schermata, tocca e tieni premuto contemporaneamente Indietro e Recenti."</string>
     <string name="lock_to_app_toast_accessible" msgid="3340628918851844044">"Per sbloccare questa schermata, tocca e tieni premuto Recenti."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"La schermata è bloccata. La tua organizzazione non ne consente lo sblocco."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Utilizzare blocco schermata?"</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Utilizzare il blocco su schermo?"</string>
     <string name="lock_to_app_description" msgid="9076084599283282800">"Il blocco schermata fissa la visualizzazione su una stessa immagine.\n\nPer uscire, tocca e tieni premuto contemporaneamente Indietro e Recenti."</string>
     <string name="lock_to_app_description_accessible" msgid="2132076937479670601">"Il blocco schermata fissa la visualizzazione su una stessa immagine.\n\nPer uscire, tocca e tieni premuto Recenti."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NO, GRAZIE"</string>
