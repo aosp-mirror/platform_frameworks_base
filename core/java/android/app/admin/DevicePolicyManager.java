@@ -441,13 +441,13 @@ public class DevicePolicyManager {
      * Flag used by {@link #addCrossProfileIntentFilter} to allow access of certain intents from a
      * managed profile to its parent.
      */
-    public static int FLAG_PARENT_CAN_ACCESS_MANAGED = 0x0001;
+    public static final int FLAG_PARENT_CAN_ACCESS_MANAGED = 0x0001;
 
     /**
      * Flag used by {@link #addCrossProfileIntentFilter} to allow access of certain intents from the
      * parent to its managed profile.
      */
-    public static int FLAG_MANAGED_CAN_ACCESS_PARENT = 0x0002;
+    public static final int FLAG_MANAGED_CAN_ACCESS_PARENT = 0x0002;
 
     /**
      * Return true if the given administrator component is currently

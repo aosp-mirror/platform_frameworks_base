@@ -5527,8 +5527,8 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_PROVISIONING_WIFI_PROXY_PORT = "android.app.extra.PROVISIONING_WIFI_PROXY_PORT";
     field public static final java.lang.String EXTRA_PROVISIONING_WIFI_SECURITY_TYPE = "android.app.extra.PROVISIONING_WIFI_SECURITY_TYPE";
     field public static final java.lang.String EXTRA_PROVISIONING_WIFI_SSID = "android.app.extra.PROVISIONING_WIFI_SSID";
-    field public static int FLAG_MANAGED_CAN_ACCESS_PARENT;
-    field public static int FLAG_PARENT_CAN_ACCESS_MANAGED;
+    field public static final int FLAG_MANAGED_CAN_ACCESS_PARENT = 2; // 0x2
+    field public static final int FLAG_PARENT_CAN_ACCESS_MANAGED = 1; // 0x1
     field public static final int KEYGUARD_DISABLE_FEATURES_ALL = 2147483647; // 0x7fffffff
     field public static final int KEYGUARD_DISABLE_FEATURES_NONE = 0; // 0x0
     field public static final int KEYGUARD_DISABLE_FINGERPRINT = 32; // 0x20
