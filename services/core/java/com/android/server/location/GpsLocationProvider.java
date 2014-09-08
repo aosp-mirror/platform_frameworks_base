@@ -331,6 +331,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private int mSuplServerPort;
     private String mC2KServerHost;
     private int mC2KServerPort;
+    private boolean mSuplEsEnabled = false;
 
     private final Context mContext;
     private final NtpTrustedTime mNtpTime;
@@ -493,6 +494,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     Log.d(TAG, "SIM STATE is ready, SIM MCC/MNC is " + mccMnc);
                     synchronized (mLock) {
                         reloadGpsProperties(context, mProperties);
+                        mNIHandler.setSuplEsEnablement(mSuplEsEnabled);
                     }
                 }
             }
@@ -570,6 +572,16 @@ public class GpsLocationProvider implements LocationProviderInterface {
         } catch (IOException ex) {
             Log.w(TAG, "failed to dump properties contents");
         }
+
+        // SUPL_ES configuration.
+        String suplESProperty = mProperties.getProperty("SUPL_ES");
+        if (suplESProperty != null) {
+            try {
+                mSuplEsEnabled = (Integer.parseInt(suplESProperty) == 1);
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "unable to parse SUPL_ES: " + suplESProperty);
+            }
+        }
     }
 
     private void loadPropertiesFromResource(Context context,
@@ -611,7 +623,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
         mContext = context;
         mNtpTime = NtpTrustedTime.getInstance(context);
         mILocationManager = ilocationManager;
-        mNIHandler = new GpsNetInitiatedHandler(context);
 
         mLocation.setExtras(mLocationExtras);
 
@@ -637,6 +648,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
         // Load GPS configuration.
         mProperties = new Properties();
         reloadGpsProperties(mContext, mProperties);
+
+        // Create a GPS net-initiated handler.
+        mNIHandler = new GpsNetInitiatedHandler(context,
+                                                mNetInitiatedListener,
+                                                mSuplEsEnabled);
 
         // construct handler, listen for events
         mHandler = new ProviderHandler(looper);
