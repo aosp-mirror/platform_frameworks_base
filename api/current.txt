@@ -27673,11 +27673,12 @@ package android.speech.tts {
     ctor public TextToSpeech(android.content.Context, android.speech.tts.TextToSpeech.OnInitListener);
     ctor public TextToSpeech(android.content.Context, android.speech.tts.TextToSpeech.OnInitListener, java.lang.String);
     method public int addEarcon(java.lang.String, java.lang.String, int);
-    method public int addEarcon(java.lang.String, java.lang.String);
+    method public deprecated int addEarcon(java.lang.String, java.lang.String);
+    method public int addEarcon(java.lang.String, java.io.File);
     method public int addSpeech(java.lang.String, java.lang.String, int);
     method public int addSpeech(java.lang.CharSequence, java.lang.String, int);
     method public int addSpeech(java.lang.String, java.lang.String);
-    method public int addSpeech(java.lang.CharSequence, java.lang.String);
+    method public int addSpeech(java.lang.CharSequence, java.io.File);
     method public deprecated boolean areDefaultsEnforced();
     method public java.util.Set<java.util.Locale> getAvailableLanguages();
     method public java.lang.String getDefaultEngine();
@@ -27691,7 +27692,7 @@ package android.speech.tts {
     method public java.util.Set<android.speech.tts.Voice> getVoices();
     method public int isLanguageAvailable(java.util.Locale);
     method public boolean isSpeaking();
-    method public int playEarcon(java.lang.String, int, java.util.HashMap<java.lang.String, java.lang.String>, java.lang.String);
+    method public int playEarcon(java.lang.String, int, android.os.Bundle, java.lang.String);
     method public deprecated int playEarcon(java.lang.String, int, java.util.HashMap<java.lang.String, java.lang.String>);
     method public int playSilence(long, int, java.util.HashMap<java.lang.String, java.lang.String>, java.lang.String);
     method public deprecated int playSilence(long, int, java.util.HashMap<java.lang.String, java.lang.String>);
@@ -27704,10 +27705,10 @@ package android.speech.tts {
     method public int setSpeechRate(float);
     method public int setVoice(android.speech.tts.Voice);
     method public void shutdown();
-    method public int speak(java.lang.CharSequence, int, java.util.HashMap<java.lang.String, java.lang.String>, java.lang.String);
+    method public int speak(java.lang.CharSequence, int, android.os.Bundle, java.lang.String);
     method public deprecated int speak(java.lang.String, int, java.util.HashMap<java.lang.String, java.lang.String>);
     method public int stop();
-    method public int synthesizeToFile(java.lang.CharSequence, java.util.HashMap<java.lang.String, java.lang.String>, java.lang.String, java.lang.String);
+    method public int synthesizeToFile(java.lang.CharSequence, android.os.Bundle, java.io.File, java.lang.String);
     method public deprecated int synthesizeToFile(java.lang.String, java.util.HashMap<java.lang.String, java.lang.String>, java.lang.String);
     field public static final java.lang.String ACTION_TTS_QUEUE_PROCESSING_COMPLETED = "android.speech.tts.TTS_QUEUE_PROCESSING_COMPLETED";
     field public static final int ERROR = -1; // 0xffffffff
@@ -27780,15 +27781,15 @@ package android.speech.tts {
 
   public abstract class TextToSpeechService extends android.app.Service {
     ctor public TextToSpeechService();
-    method protected int isValidVoiceName(java.lang.String);
     method public android.os.IBinder onBind(android.content.Intent);
     method protected java.lang.String onGetDefaultVoiceNameFor(java.lang.String, java.lang.String, java.lang.String);
     method protected java.util.Set<java.lang.String> onGetFeaturesForLanguage(java.lang.String, java.lang.String, java.lang.String);
     method protected abstract java.lang.String[] onGetLanguage();
-    method protected java.util.List<android.speech.tts.Voice> onGetVoices();
+    method public java.util.List<android.speech.tts.Voice> onGetVoices();
     method protected abstract int onIsLanguageAvailable(java.lang.String, java.lang.String, java.lang.String);
+    method public int onIsValidVoiceName(java.lang.String);
     method protected abstract int onLoadLanguage(java.lang.String, java.lang.String, java.lang.String);
-    method protected int onLoadVoice(java.lang.String);
+    method public int onLoadVoice(java.lang.String);
     method protected abstract void onStop();
     method protected abstract void onSynthesizeText(android.speech.tts.SynthesisRequest, android.speech.tts.SynthesisCallback);
   }
@@ -27809,7 +27810,7 @@ package android.speech.tts {
     method public java.util.Locale getLocale();
     method public java.lang.String getName();
     method public int getQuality();
-    method public boolean getRequiresNetworkConnection();
+    method public boolean isNetworkConnectionRequired();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int LATENCY_HIGH = 400; // 0x190
     field public static final int LATENCY_LOW = 200; // 0xc8
