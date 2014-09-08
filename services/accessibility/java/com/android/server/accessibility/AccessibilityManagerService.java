@@ -746,14 +746,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     /**
-     * Gets the bounds of the accessibility focus in the active window.
+     * Gets a point within the accessibility focused node where we can send down
+     * and up events to perform a click.
      *
-     * @param outBounds The output to which to write the focus bounds.
-     * @return Whether accessibility focus was found and the bounds are populated.
+     * @param outPoint The click point to populate.
+     * @return Whether accessibility a click point was found and set.
      */
     // TODO: (multi-display) Make sure this works for multiple displays.
-    boolean getAccessibilityFocusBounds(Rect outBounds) {
-        return getInteractionBridgeLocked().getAccessibilityFocusBoundsNotLocked(outBounds);
+    boolean getAccessibilityFocusClickPointInScreen(Point outPoint) {
+        return getInteractionBridgeLocked()
+                .getAccessibilityFocusClickPointInScreenNotLocked(outPoint);
     }
 
     /**
@@ -2196,8 +2198,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
                 connection.findAccessibilityNodeInfosByViewId(accessibilityNodeId, viewIdResName,
-                        partialInteractiveRegion, interactionId, callback, mFetchFlags, interrogatingPid,
-                        interrogatingTid, spec);
+                        partialInteractiveRegion, interactionId, callback, mFetchFlags,
+                        interrogatingPid, interrogatingTid, spec);
                 return true;
             } catch (RemoteException re) {
                 if (DEBUG) {
@@ -2248,8 +2250,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
                 connection.findAccessibilityNodeInfosByText(accessibilityNodeId, text,
-                        partialInteractiveRegion, interactionId, callback, mFetchFlags, interrogatingPid,
-                        interrogatingTid, spec);
+                        partialInteractiveRegion, interactionId, callback, mFetchFlags,
+                        interrogatingPid, interrogatingTid, spec);
                 return true;
             } catch (RemoteException re) {
                 if (DEBUG) {
@@ -2352,8 +2354,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final long identityToken = Binder.clearCallingIdentity();
             MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
-                connection.findFocus(accessibilityNodeId, focusType, partialInteractiveRegion, interactionId,
-                        callback, mFetchFlags, interrogatingPid, interrogatingTid, spec);
+                connection.findFocus(accessibilityNodeId, focusType, partialInteractiveRegion,
+                        interactionId, callback, mFetchFlags, interrogatingPid, interrogatingTid,
+                        spec);
                 return true;
             } catch (RemoteException re) {
                 if (DEBUG) {
@@ -2403,8 +2406,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final long identityToken = Binder.clearCallingIdentity();
             MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
             try {
-                connection.focusSearch(accessibilityNodeId, direction, partialInteractiveRegion, interactionId,
-                        callback, mFetchFlags, interrogatingPid, interrogatingTid, spec);
+                connection.focusSearch(accessibilityNodeId, direction, partialInteractiveRegion,
+                        interactionId, callback, mFetchFlags, interrogatingPid, interrogatingTid,
+                        spec);
                 return true;
             } catch (RemoteException re) {
                 if (DEBUG) {
@@ -2460,6 +2464,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             return true;
         }
 
+        @Override
         public boolean performGlobalAction(int action) {
             synchronized (mLock) {
                 // We treat calls from a profile as if made by its parent as profiles
@@ -2498,6 +2503,57 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+
+        @Override
+        public  boolean computeClickPointInScreen(int accessibilityWindowId,
+                long accessibilityNodeId, int interactionId,
+                IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
+                throws RemoteException {
+            final int resolvedWindowId;
+            IAccessibilityInteractionConnection connection = null;
+            Region partialInteractiveRegion = mTempRegion;
+            synchronized (mLock) {
+                // We treat calls from a profile as if made by its parent as profiles
+                // share the accessibility state of the parent. The call below
+                // performs the current profile parent resolution.
+                final int resolvedUserId = mSecurityPolicy
+                        .resolveCallingUserIdEnforcingPermissionsLocked(
+                                UserHandle.getCallingUserId());
+                if (resolvedUserId != mCurrentUserId) {
+                    return false;
+                }
+                resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
+                final boolean permissionGranted =
+                        mSecurityPolicy.canRetrieveWindowContentLocked(this);
+                if (!permissionGranted) {
+                    return false;
+                } else {
+                    connection = getConnectionLocked(resolvedWindowId);
+                    if (connection == null) {
+                        return false;
+                    }
+                }
+                if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
+                        resolvedWindowId, partialInteractiveRegion)) {
+                    partialInteractiveRegion = null;
+                }
+            }
+            final int interrogatingPid = Binder.getCallingPid();
+            final long identityToken = Binder.clearCallingIdentity();
+            MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
+            try {
+                connection.computeClickPointInScreen(accessibilityNodeId, partialInteractiveRegion,
+                        interactionId, callback, interrogatingPid, interrogatingTid, spec);
+                return true;
+            } catch (RemoteException re) {
+                if (DEBUG) {
+                    Slog.e(LOG_TAG, "Error computeClickPointInScreen().");
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identityToken);
+            }
+            return false;
         }
 
         @Override
@@ -3119,30 +3175,43 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
         }
 
-        public boolean getAccessibilityFocusBoundsNotLocked(Rect outBounds) {
+        public boolean getAccessibilityFocusClickPointInScreenNotLocked(Point outPoint) {
             AccessibilityNodeInfo focus = getAccessibilityFocusNotLocked();
             if (focus == null) {
                 return false;
             }
 
             synchronized (mLock) {
-                focus.getBoundsInScreen(outBounds);
+                Point point = mClient.computeClickPointInScreen(mConnectionId,
+                        focus.getWindowId(), focus.getSourceNodeId());
+
+                if (point == null) {
+                    return false;
+                }
 
                 MagnificationSpec spec = getCompatibleMagnificationSpecLocked(focus.getWindowId());
                 if (spec != null && !spec.isNop()) {
-                    outBounds.offset((int) -spec.offsetX, (int) -spec.offsetY);
-                    outBounds.scale(1 / spec.scale);
+                    point.offset((int) -spec.offsetX, (int) -spec.offsetY);
+                    point.x = (int) (point.x * (1 / spec.scale));
+                    point.y = (int) (point.y * (1 / spec.scale));
                 }
 
-                // Clip to the window rectangle.
+                // Make sure the point is within the window.
                 Rect windowBounds = mTempRect;
                 getActiveWindowBounds(windowBounds);
-                outBounds.intersect(windowBounds);
+                if (!windowBounds.contains(point.x, point.y)) {
+                    return false;
+                }
 
-                // Clip to the screen rectangle.
-                mDefaultDisplay.getRealSize(mTempPoint);
-                outBounds.intersect(0, 0, mTempPoint.x, mTempPoint.y);
+                // Make sure the point is within the screen.
+                Point screenSize = mTempPoint;
+                mDefaultDisplay.getRealSize(screenSize);
+                if (point.x < 0 || point.x > screenSize.x
+                        || point.y < 0 || point.y > screenSize.y) {
+                    return false;
+                }
 
+                outPoint.set(point.x, point.y);
                 return true;
             }
         }
