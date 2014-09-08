@@ -358,12 +358,16 @@ public abstract class Visibility extends Transition {
                     overlayView = startView;
                 } else if (startView.getParent() instanceof View) {
                     View startParent = (View) startView.getParent();
-                    if (!isValidTarget(startParent)) {
-                        if (startView.isAttachedToWindow()) {
-                            overlayView = copyViewImage(startView);
-                        } else {
-                            overlayView = startView;
-                        }
+                    VisibilityInfo parentVisibilityInfo = null;
+                    TransitionValues endParentValues = getMatchedTransitionValues(startParent,
+                            true);
+                    if (endParentValues != null) {
+                        TransitionValues startParentValues = getTransitionValues(startParent, true);
+                        parentVisibilityInfo =
+                                getVisibilityChangeInfo(startParentValues, endParentValues);
+                    }
+                    if (parentVisibilityInfo == null || !parentVisibilityInfo.visibilityChange) {
+                        overlayView = copyViewImage(startView);
                     } else if (startParent.getParent() == null) {
                         int id = startParent.getId();
                         if (id != View.NO_ID && sceneRoot.findViewById(id) != null
