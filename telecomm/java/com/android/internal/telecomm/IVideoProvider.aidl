@@ -25,7 +25,7 @@ import android.telecomm.VideoProfile;
  * @hide
  */
 oneway interface IVideoProvider {
-    void setVideoListener(IBinder videoListenerBinder);
+    void setVideoCallback(IBinder videoCallbackBinder);
 
     void setCamera(String cameraId);
 
