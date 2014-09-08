@@ -1772,7 +1772,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 if (intentActivity != null) {
                     if (isLockTaskModeViolation(intentActivity.task)) {
                         showLockTaskToast();
-                        Slog.e(TAG, "moveTaskToFront: Attempt to violate Lock Task Mode");
+                        Slog.e(TAG, "startActivityUnchecked: Attempt to violate Lock Task Mode");
                         return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
                     }
                     if (r.task == null) {
