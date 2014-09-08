@@ -140,8 +140,7 @@ public class VolumeUI extends SystemUI {
         @Override
         public void run() {
             getComponent(PhoneStatusBar.class).startActivityDismissingKeyguard(
-                    ZenModePanel.ZEN_SETTINGS, true /* onlyProvisioned */, true /* dismissShade */,
-                    false /* afterKeyguardGone */);
+                    ZenModePanel.ZEN_SETTINGS, true /* onlyProvisioned */, true /* dismissShade */);
             mPanel.postDismiss(mDismissDelay);
         }
     };
