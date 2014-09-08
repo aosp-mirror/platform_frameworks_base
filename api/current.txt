@@ -36144,8 +36144,8 @@ package android.view.inputmethod {
   public final class CursorAnchorInfo implements android.os.Parcelable {
     ctor public CursorAnchorInfo(android.os.Parcel);
     method public int describeContents();
-    method public android.graphics.RectF getCharacterRect(int);
-    method public int getCharacterRectFlags(int);
+    method public android.graphics.RectF getCharacterBounds(int);
+    method public int getCharacterBoundsFlags(int);
     method public java.lang.CharSequence getComposingText();
     method public int getComposingTextStart();
     method public float getInsertionMarkerBaseline();
@@ -36160,11 +36160,12 @@ package android.view.inputmethod {
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int FLAG_HAS_INVISIBLE_REGION = 2; // 0x2
     field public static final int FLAG_HAS_VISIBLE_REGION = 1; // 0x1
+    field public static final int FLAG_IS_RTL = 4; // 0x4
   }
 
   public static final class CursorAnchorInfo.Builder {
     ctor public CursorAnchorInfo.Builder();
-    method public android.view.inputmethod.CursorAnchorInfo.Builder addCharacterRect(int, float, float, float, float, int);
+    method public android.view.inputmethod.CursorAnchorInfo.Builder addCharacterBounds(int, float, float, float, float, int);
     method public android.view.inputmethod.CursorAnchorInfo build();
     method public void reset();
     method public android.view.inputmethod.CursorAnchorInfo.Builder setComposingText(int, java.lang.CharSequence);

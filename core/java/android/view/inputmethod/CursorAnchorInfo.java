@@ -35,9 +35,21 @@ import java.util.Objects;
  * actually inserted.</p>
  */
 public final class CursorAnchorInfo implements Parcelable {
+    /**
+     * The index of the first character of the selected text (inclusive). {@code -1} when there is
+     * no text selection.
+     */
     private final int mSelectionStart;
+    /**
+     * The index of the first character of the selected text (exclusive). {@code -1} when there is
+     * no text selection.
+     */
     private final int mSelectionEnd;
 
+    /**
+     * The index of the first character of the composing text (inclusive). {@code -1} when there is
+     * no composing text.
+     */
     private final int mComposingTextStart;
     /**
      * The text, tracked as a composing region.
@@ -82,7 +94,7 @@ public final class CursorAnchorInfo implements Parcelable {
      * Java chars, in the local coordinates that will be transformed with the transformation matrix
      * when rendered on the screen.
      */
-    private final SparseRectFArray mCharacterRects;
+    private final SparseRectFArray mCharacterBoundsArray;
 
     /**
      * Transformation matrix that is applied to any positional information of this class to
@@ -91,16 +103,22 @@ public final class CursorAnchorInfo implements Parcelable {
     private final Matrix mMatrix;
 
     /**
-     * Flag for {@link #getInsertionMarkerFlags()} and {@link #getCharacterRectFlags(int)}: the
+     * Flag for {@link #getInsertionMarkerFlags()} and {@link #getCharacterBoundsFlags(int)}: the
      * insertion marker or character bounds have at least one visible region.
      */
     public static final int FLAG_HAS_VISIBLE_REGION = 0x01;
 
     /**
-     * Flag for {@link #getInsertionMarkerFlags()} and {@link #getCharacterRectFlags(int)}: the
+     * Flag for {@link #getInsertionMarkerFlags()} and {@link #getCharacterBoundsFlags(int)}: the
      * insertion marker or character bounds have at least one invisible (clipped) region.
      */
     public static final int FLAG_HAS_INVISIBLE_REGION = 0x02;
+
+    /**
+     * Flag for {@link #getInsertionMarkerFlags()} and {@link #getCharacterBoundsFlags(int)}: the
+     * insertion marker or character bounds is placed at right-to-left (RTL) character.
+     */
+    public static final int FLAG_IS_RTL = 0x04;
 
     /**
      * @removed
@@ -144,7 +162,7 @@ public final class CursorAnchorInfo implements Parcelable {
         mInsertionMarkerTop = source.readFloat();
         mInsertionMarkerBaseline = source.readFloat();
         mInsertionMarkerBottom = source.readFloat();
-        mCharacterRects = source.readParcelable(SparseRectFArray.class.getClassLoader());
+        mCharacterBoundsArray = source.readParcelable(SparseRectFArray.class.getClassLoader());
         mMatrix = new Matrix();
         mMatrix.setValues(source.createFloatArray());
     }
@@ -166,7 +184,7 @@ public final class CursorAnchorInfo implements Parcelable {
         dest.writeFloat(mInsertionMarkerTop);
         dest.writeFloat(mInsertionMarkerBaseline);
         dest.writeFloat(mInsertionMarkerBottom);
-        dest.writeParcelable(mCharacterRects, flags);
+        dest.writeParcelable(mCharacterBoundsArray, flags);
         final float[] matrixArray = new float[9];
         mMatrix.getValues(matrixArray);
         dest.writeFloatArray(matrixArray);
@@ -174,7 +192,6 @@ public final class CursorAnchorInfo implements Parcelable {
 
     @Override
     public int hashCode(){
-        // TODO: Improve the hash function.
         final float floatHash = mInsertionMarkerHorizontal + mInsertionMarkerTop
                 + mInsertionMarkerBaseline + mInsertionMarkerBottom;
         int hash = floatHash > 0 ? (int) floatHash : (int)(-floatHash);
@@ -185,7 +202,7 @@ public final class CursorAnchorInfo implements Parcelable {
         hash *= 31;
         hash += Objects.hashCode(mComposingText);
         hash *= 31;
-        hash += Objects.hashCode(mCharacterRects);
+        hash += Objects.hashCode(mCharacterBoundsArray);
         hash *= 31;
         hash += Objects.hashCode(mMatrix);
         return hash;
@@ -231,7 +248,7 @@ public final class CursorAnchorInfo implements Parcelable {
                 || !areSameFloatImpl(mInsertionMarkerBottom, that.mInsertionMarkerBottom)) {
             return false;
         }
-        if (!Objects.equals(mCharacterRects, that.mCharacterRects)) {
+        if (!Objects.equals(mCharacterBoundsArray, that.mCharacterBoundsArray)) {
             return false;
         }
         if (!Objects.equals(mMatrix, that.mMatrix)) {
@@ -250,7 +267,7 @@ public final class CursorAnchorInfo implements Parcelable {
                 + " mInsertionMarkerTop=" + mInsertionMarkerTop
                 + " mInsertionMarkerBaseline=" + mInsertionMarkerBaseline
                 + " mInsertionMarkerBottom=" + mInsertionMarkerBottom
-                + " mCharacterRects=" + Objects.toString(mCharacterRects)
+                + " mCharacterBoundsArray=" + Objects.toString(mCharacterBoundsArray)
                 + " mMatrix=" + Objects.toString(mMatrix)
                 + "}";
     }
@@ -259,6 +276,19 @@ public final class CursorAnchorInfo implements Parcelable {
      * Builder for {@link CursorAnchorInfo}. This class is not designed to be thread-safe.
      */
     public static final class Builder {
+        private int mSelectionStart = -1;
+        private int mSelectionEnd = -1;
+        private int mComposingTextStart = -1;
+        private CharSequence mComposingText = null;
+        private float mInsertionMarkerHorizontal = Float.NaN;
+        private float mInsertionMarkerTop = Float.NaN;
+        private float mInsertionMarkerBaseline = Float.NaN;
+        private float mInsertionMarkerBottom = Float.NaN;
+        private int mInsertionMarkerFlags = 0;
+        private SparseRectFArrayBuilder mCharacterBoundsArrayBuilder = null;
+        private final Matrix mMatrix = new Matrix(Matrix.IDENTITY_MATRIX);
+        private boolean mMatrixInitialized = false;
+
         /**
          * Sets the text range of the selection. Calling this can be skipped if there is no
          * selection.
@@ -268,8 +298,6 @@ public final class CursorAnchorInfo implements Parcelable {
             mSelectionEnd = newEnd;
             return this;
         }
-        private int mSelectionStart = -1;
-        private int mSelectionEnd = -1;
 
         /**
          * Sets the text range of the composing text. Calling this can be skipped if there is
@@ -288,8 +316,6 @@ public final class CursorAnchorInfo implements Parcelable {
             }
             return this;
         }
-        private int mComposingTextStart = -1;
-        private CharSequence mComposingText = null;
 
         /**
          * @removed
@@ -335,11 +361,33 @@ public final class CursorAnchorInfo implements Parcelable {
             mInsertionMarkerFlags = flags;
             return this;
         }
-        private float mInsertionMarkerHorizontal = Float.NaN;
-        private float mInsertionMarkerTop = Float.NaN;
-        private float mInsertionMarkerBaseline = Float.NaN;
-        private float mInsertionMarkerBottom = Float.NaN;
-        private int mInsertionMarkerFlags = 0;
+
+        /**
+         * Adds the bounding box of the character specified with the index.
+         *
+         * @param index index of the character in Java chars units. Must be specified in
+         * ascending order across successive calls.
+         * @param left x coordinate of the left edge of the character in local coordinates.
+         * @param top y coordinate of the top edge of the character in local coordinates.
+         * @param right x coordinate of the right edge of the character in local coordinates.
+         * @param bottom y coordinate of the bottom edge of the character in local coordinates.
+         * @param flags flags for this character bounds. See {@link #FLAG_HAS_VISIBLE_REGION},
+         * {@link #FLAG_HAS_INVISIBLE_REGION} and {@link #FLAG_IS_RTL}. These flags must be
+         * specified when necessary.
+         * @throws IllegalArgumentException If the index is a negative value, or not greater than
+         * all of the previously called indices.
+         */
+        public Builder addCharacterBounds(final int index, final float left, final float top,
+                final float right, final float bottom, final int flags) {
+            if (index < 0) {
+                throw new IllegalArgumentException("index must not be a negative integer.");
+            }
+            if (mCharacterBoundsArrayBuilder == null) {
+                mCharacterBoundsArrayBuilder = new SparseRectFArrayBuilder();
+            }
+            mCharacterBoundsArrayBuilder.append(index, left, top, right, bottom, flags);
+            return this;
+        }
 
         /**
          * Adds the bounding box of the character specified with the index.
@@ -358,21 +406,25 @@ public final class CursorAnchorInfo implements Parcelable {
          * example.
          * @throws IllegalArgumentException If the index is a negative value, or not greater than
          * all of the previously called indices.
+         * @removed
          */
         public Builder addCharacterRect(final int index, final float leadingEdgeX,
                 final float leadingEdgeY, final float trailingEdgeX, final float trailingEdgeY,
                 final int flags) {
-            if (index < 0) {
-                throw new IllegalArgumentException("index must not be a negative integer.");
+            final int newFlags;
+            final float left;
+            final float right;
+            if (leadingEdgeX <= trailingEdgeX) {
+                newFlags = flags;
+                left = leadingEdgeX;
+                right = trailingEdgeX;
+            } else {
+                newFlags = flags | FLAG_IS_RTL;
+                left = trailingEdgeX;
+                right = leadingEdgeX;
             }
-            if (mCharacterRectBuilder == null) {
-                mCharacterRectBuilder = new SparseRectFArrayBuilder();
-            }
-            mCharacterRectBuilder.append(index, leadingEdgeX, leadingEdgeY, trailingEdgeX,
-                    trailingEdgeY, flags);
-            return this;
+            return addCharacterBounds(index, left, leadingEdgeY, right, trailingEdgeY, newFlags);
         }
-        private SparseRectFArrayBuilder mCharacterRectBuilder = null;
 
         /**
          * Sets the matrix that transforms local coordinates into screen coordinates.
@@ -384,8 +436,6 @@ public final class CursorAnchorInfo implements Parcelable {
             mMatrixInitialized = true;
             return this;
         }
-        private final Matrix mMatrix = new Matrix(Matrix.IDENTITY_MATRIX);
-        private boolean mMatrixInitialized = false;
 
         /**
          * @return {@link CursorAnchorInfo} using parameters in this {@link Builder}.
@@ -394,13 +444,15 @@ public final class CursorAnchorInfo implements Parcelable {
          */
         public CursorAnchorInfo build() {
             if (!mMatrixInitialized) {
-                // Coordinate transformation matrix is mandatory when positional parameters are
-                // specified.
-                if ((mCharacterRectBuilder != null && !mCharacterRectBuilder.isEmpty()) ||
-                        !Float.isNaN(mInsertionMarkerHorizontal) ||
-                        !Float.isNaN(mInsertionMarkerTop) ||
-                        !Float.isNaN(mInsertionMarkerBaseline) ||
-                        !Float.isNaN(mInsertionMarkerBottom)) {
+                // Coordinate transformation matrix is mandatory when at least one positional
+                // parameter is specified.
+                final boolean hasCharacterBounds = (mCharacterBoundsArrayBuilder != null
+                        && !mCharacterBoundsArrayBuilder.isEmpty());
+                if (hasCharacterBounds
+                        || !Float.isNaN(mInsertionMarkerHorizontal)
+                        || !Float.isNaN(mInsertionMarkerTop)
+                        || !Float.isNaN(mInsertionMarkerBaseline)
+                        || !Float.isNaN(mInsertionMarkerBottom)) {
                     throw new IllegalArgumentException("Coordinate transformation matrix is " +
                             "required when positional parameters are specified.");
                 }
@@ -424,8 +476,8 @@ public final class CursorAnchorInfo implements Parcelable {
             mInsertionMarkerBottom = Float.NaN;
             mMatrix.set(Matrix.IDENTITY_MATRIX);
             mMatrixInitialized = false;
-            if (mCharacterRectBuilder != null) {
-                mCharacterRectBuilder.reset();
+            if (mCharacterBoundsArrayBuilder != null) {
+                mCharacterBoundsArrayBuilder.reset();
             }
         }
     }
@@ -440,8 +492,8 @@ public final class CursorAnchorInfo implements Parcelable {
         mInsertionMarkerTop = builder.mInsertionMarkerTop;
         mInsertionMarkerBaseline = builder.mInsertionMarkerBaseline;
         mInsertionMarkerBottom = builder.mInsertionMarkerBottom;
-        mCharacterRects = builder.mCharacterRectBuilder != null ?
-                builder.mCharacterRectBuilder.build() : null;
+        mCharacterBoundsArray = builder.mCharacterBoundsArrayBuilder != null ?
+                builder.mCharacterBoundsArrayBuilder.build() : null;
         mMatrix = new Matrix(builder.mMatrix);
     }
 
@@ -539,6 +591,19 @@ public final class CursorAnchorInfo implements Parcelable {
     /**
      * Returns a new instance of {@link RectF} that indicates the location of the character
      * specified with the index.
+     * @param index index of the character in a Java chars.
+     * @return the character bounds in local coordinates as a new instance of {@link RectF}.
+     */
+    public RectF getCharacterBounds(final int index) {
+        if (mCharacterBoundsArray == null) {
+            return null;
+        }
+        return mCharacterBoundsArray.get(index);
+    }
+
+    /**
+     * Returns a new instance of {@link RectF} that indicates the location of the character
+     * specified with the index.
      * <p>
      * Note that coordinates are not necessarily contiguous or even monotonous, especially when
      * RTL text and LTR text are mixed.
@@ -549,28 +614,32 @@ public final class CursorAnchorInfo implements Parcelable {
      * the location. Note that the {@code left} field can be greater than the {@code right} field
      * if the character is in RTL text. Returns {@code null} if no location information is
      * available.
+     * @removed
      */
-    // TODO: Prepare a document about the expected behavior for surrogate pairs, combining
-    // characters, and non-graphical chars.
     public RectF getCharacterRect(final int index) {
-        if (mCharacterRects == null) {
-            return null;
+        return getCharacterBounds(index);
+    }
+
+    /**
+     * Returns the flags associated with the character bounds specified with the index.
+     * @param index index of the character in a Java chars.
+     * @return {@code 0} if no flag is specified.
+     */
+    public int getCharacterBoundsFlags(final int index) {
+        if (mCharacterBoundsArray == null) {
+            return 0;
         }
-        return mCharacterRects.get(index);
+        return mCharacterBoundsArray.getFlags(index, 0);
     }
 
     /**
      * Returns the flags associated with the character rect specified with the index.
      * @param index index of the character in a Java chars.
      * @return {@code 0} if no flag is specified.
+     * @removed
      */
-    // TODO: Prepare a document about the expected behavior for surrogate pairs, combining
-    // characters, and non-graphical chars.
     public int getCharacterRectFlags(final int index) {
-        if (mCharacterRects == null) {
-            return 0;
-        }
-        return mCharacterRects.getFlags(index, 0);
+        return getCharacterBoundsFlags(index);
     }
 
     /**
