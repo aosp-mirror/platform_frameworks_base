@@ -467,10 +467,7 @@ public class MediaSessionLegacyHelper {
                 mSessions.remove(mPi);
             } else if (mCb == null) {
                 mCb = new SessionCallback();
-                Handler handler = null;
-                if (Looper.myLooper() == null) {
-                    handler = new Handler(Looper.getMainLooper());
-                }
+                Handler handler = new Handler(Looper.getMainLooper());
                 mSession.setCallback(mCb, handler);
             }
         }
