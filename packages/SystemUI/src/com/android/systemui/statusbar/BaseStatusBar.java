@@ -1625,7 +1625,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }
             }
             boolean showOnKeyguard = shouldShowOnKeyguard(entry.notification);
-            if ((isLockscreenPublicMode() && !showOnKeyguard) ||
+            if ((isLockscreenPublicMode() && !mShowLockscreenNotifications) ||
                     (onKeyguard && (visibleNotifications >= maxKeyguardNotifications
                             || !showOnKeyguard))) {
                 entry.row.setVisibility(View.GONE);
