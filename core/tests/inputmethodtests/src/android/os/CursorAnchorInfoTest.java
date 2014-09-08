@@ -26,14 +26,12 @@ import android.view.inputmethod.CursorAnchorInfo.Builder;
 
 import java.util.Objects;
 
-import static android.view.inputmethod.CursorAnchorInfo.CHARACTER_RECT_TYPE_FULLY_VISIBLE;
-import static android.view.inputmethod.CursorAnchorInfo.CHARACTER_RECT_TYPE_INVISIBLE;
-import static android.view.inputmethod.CursorAnchorInfo.CHARACTER_RECT_TYPE_NOT_FEASIBLE;
-import static android.view.inputmethod.CursorAnchorInfo.CHARACTER_RECT_TYPE_PARTIALLY_VISIBLE;
-import static android.view.inputmethod.CursorAnchorInfo.CHARACTER_RECT_TYPE_UNSPECIFIED;
+import static android.view.inputmethod.CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
+import static android.view.inputmethod.CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
+import static android.view.inputmethod.CursorAnchorInfo.FLAG_IS_RTL;
 
 public class CursorAnchorInfoTest extends InstrumentationTestCase {
-    private static final RectF[] MANY_RECTS = new RectF[] {
+    private static final RectF[] MANY_BOUNDS = new RectF[] {
             new RectF(101.0f, 201.0f, 301.0f, 401.0f),
             new RectF(102.0f, 202.0f, 302.0f, 402.0f),
             new RectF(103.0f, 203.0f, 303.0f, 403.0f),
@@ -55,25 +53,25 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
             new RectF(119.0f, 219.0f, 319.0f, 419.0f),
     };
     private static final int[] MANY_FLAGS_ARRAY = new int[] {
-        CHARACTER_RECT_TYPE_FULLY_VISIBLE,
-        CHARACTER_RECT_TYPE_INVISIBLE,
-        CHARACTER_RECT_TYPE_PARTIALLY_VISIBLE,
-        CHARACTER_RECT_TYPE_FULLY_VISIBLE,
-        CHARACTER_RECT_TYPE_FULLY_VISIBLE,
-        CHARACTER_RECT_TYPE_FULLY_VISIBLE,
-        CHARACTER_RECT_TYPE_NOT_FEASIBLE,
-        CHARACTER_RECT_TYPE_FULLY_VISIBLE,
-        CHARACTER_RECT_TYPE_FULLY_VISIBLE,
-        CHARACTER_RECT_TYPE_FULLY_VISIBLE,
-        CHARACTER_RECT_TYPE_FULLY_VISIBLE,
-        CHARACTER_RECT_TYPE_FULLY_VISIBLE,
-        CHARACTER_RECT_TYPE_FULLY_VISIBLE,
-        CHARACTER_RECT_TYPE_FULLY_VISIBLE,
-        CHARACTER_RECT_TYPE_FULLY_VISIBLE,
-        CHARACTER_RECT_TYPE_FULLY_VISIBLE,
-        CHARACTER_RECT_TYPE_FULLY_VISIBLE,
-        CHARACTER_RECT_TYPE_NOT_FEASIBLE,
-        CHARACTER_RECT_TYPE_NOT_FEASIBLE,
+        FLAG_HAS_INVISIBLE_REGION,
+        FLAG_HAS_INVISIBLE_REGION | FLAG_HAS_VISIBLE_REGION,
+        FLAG_HAS_VISIBLE_REGION,
+        FLAG_HAS_VISIBLE_REGION,
+        FLAG_HAS_VISIBLE_REGION,
+        FLAG_HAS_VISIBLE_REGION,
+        FLAG_HAS_VISIBLE_REGION | FLAG_IS_RTL,
+        FLAG_HAS_INVISIBLE_REGION | FLAG_HAS_VISIBLE_REGION | FLAG_IS_RTL,
+        FLAG_HAS_INVISIBLE_REGION | FLAG_IS_RTL,
+        FLAG_HAS_VISIBLE_REGION | FLAG_IS_RTL,
+        FLAG_HAS_VISIBLE_REGION,
+        FLAG_HAS_VISIBLE_REGION | FLAG_IS_RTL,
+        FLAG_HAS_VISIBLE_REGION,
+        FLAG_HAS_VISIBLE_REGION | FLAG_IS_RTL,
+        FLAG_HAS_VISIBLE_REGION,
+        FLAG_HAS_VISIBLE_REGION | FLAG_IS_RTL,
+        FLAG_HAS_VISIBLE_REGION,
+        FLAG_HAS_INVISIBLE_REGION,
+        FLAG_HAS_INVISIBLE_REGION | FLAG_IS_RTL,
     };
 
     @SmallTest
@@ -82,11 +80,13 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         final int SELECTION_END = 40;
         final int COMPOSING_TEXT_START = 32;
         final String COMPOSING_TEXT = "test";
-        final boolean INSERTION_MARKER_CLIPPED = true;
+        final int INSERTION_MARKER_FLAGS =
+                FLAG_HAS_VISIBLE_REGION | FLAG_HAS_INVISIBLE_REGION | FLAG_IS_RTL;
         final float INSERTION_MARKER_HORIZONTAL = 10.5f;
         final float INSERTION_MARKER_TOP = 100.1f;
         final float INSERTION_MARKER_BASELINE = 110.4f;
         final float INSERTION_MARKER_BOTOM = 111.0f;
+
         Matrix TRANSFORM_MATRIX = new Matrix(Matrix.IDENTITY_MATRIX);
         TRANSFORM_MATRIX.setScale(10.0f, 20.0f);
 
@@ -94,13 +94,13 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         builder.setSelectionRange(SELECTION_START, SELECTION_END)
                 .setComposingText(COMPOSING_TEXT_START, COMPOSING_TEXT)
                 .setInsertionMarkerLocation(INSERTION_MARKER_HORIZONTAL, INSERTION_MARKER_TOP,
-                        INSERTION_MARKER_BASELINE, INSERTION_MARKER_BOTOM,
-                        INSERTION_MARKER_CLIPPED)
+                        INSERTION_MARKER_BASELINE, INSERTION_MARKER_BOTOM, INSERTION_MARKER_FLAGS)
                 .setMatrix(TRANSFORM_MATRIX);
-        for (int i = 0; i < MANY_RECTS.length; i++) {
-            final RectF rect = MANY_RECTS[i];
+        for (int i = 0; i < MANY_BOUNDS.length; i++) {
+            final RectF bounds = MANY_BOUNDS[i];
             final int flags = MANY_FLAGS_ARRAY[i];
-            builder.addCharacterRect(i, rect.left, rect.top, rect.right, rect.bottom, flags);
+            builder.addCharacterBounds(i, bounds.left, bounds.top, bounds.right, bounds.bottom,
+                    flags);
         }
 
         final CursorAnchorInfo info = builder.build();
@@ -108,26 +108,24 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(SELECTION_END, info.getSelectionEnd());
         assertEquals(COMPOSING_TEXT_START, info.getComposingTextStart());
         assertTrue(TextUtils.equals(COMPOSING_TEXT, info.getComposingText()));
-        assertTrue(info.isInsertionMarkerClipped());
+        assertEquals(INSERTION_MARKER_FLAGS, info.getInsertionMarkerFlags());
         assertEquals(INSERTION_MARKER_HORIZONTAL, info.getInsertionMarkerHorizontal());
         assertEquals(INSERTION_MARKER_TOP, info.getInsertionMarkerTop());
         assertEquals(INSERTION_MARKER_BASELINE, info.getInsertionMarkerBaseline());
         assertEquals(INSERTION_MARKER_BOTOM, info.getInsertionMarkerBottom());
         assertEquals(TRANSFORM_MATRIX, info.getMatrix());
-        for (int i = 0; i < MANY_RECTS.length; i++) {
-            final RectF expectedRect = MANY_RECTS[i];
-            assertEquals(expectedRect, info.getCharacterRect(i));
+        for (int i = 0; i < MANY_BOUNDS.length; i++) {
+            final RectF expectedBounds = MANY_BOUNDS[i];
+            assertEquals(expectedBounds, info.getCharacterRect(i));
         }
         assertNull(info.getCharacterRect(-1));
-        assertNull(info.getCharacterRect(MANY_RECTS.length + 1));
+        assertNull(info.getCharacterRect(MANY_BOUNDS.length + 1));
         for (int i = 0; i < MANY_FLAGS_ARRAY.length; i++) {
             final int expectedFlags = MANY_FLAGS_ARRAY[i];
             assertEquals(expectedFlags, info.getCharacterRectFlags(i));
         }
-        assertEquals(CHARACTER_RECT_TYPE_UNSPECIFIED,
-                info.getCharacterRectFlags(-1));
-        assertEquals(CHARACTER_RECT_TYPE_UNSPECIFIED,
-                info.getCharacterRectFlags(MANY_RECTS.length + 1));
+        assertEquals(0, info.getCharacterRectFlags(-1));
+        assertEquals(0, info.getCharacterRectFlags(MANY_BOUNDS.length + 1));
 
         // Make sure that the builder can reproduce the same object.
         final CursorAnchorInfo info2 = builder.build();
@@ -135,25 +133,24 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(SELECTION_END, info2.getSelectionEnd());
         assertEquals(COMPOSING_TEXT_START, info2.getComposingTextStart());
         assertTrue(TextUtils.equals(COMPOSING_TEXT, info2.getComposingText()));
-        assertTrue(info2.isInsertionMarkerClipped());
+        assertEquals(INSERTION_MARKER_FLAGS, info2.getInsertionMarkerFlags());
         assertEquals(INSERTION_MARKER_HORIZONTAL, info2.getInsertionMarkerHorizontal());
         assertEquals(INSERTION_MARKER_TOP, info2.getInsertionMarkerTop());
         assertEquals(INSERTION_MARKER_BASELINE, info2.getInsertionMarkerBaseline());
         assertEquals(INSERTION_MARKER_BOTOM, info2.getInsertionMarkerBottom());
         assertEquals(TRANSFORM_MATRIX, info2.getMatrix());
-        for (int i = 0; i < MANY_RECTS.length; i++) {
-            final RectF expectedRect = MANY_RECTS[i];
-            assertEquals(expectedRect, info2.getCharacterRect(i));
+        for (int i = 0; i < MANY_BOUNDS.length; i++) {
+            final RectF expectedBounds = MANY_BOUNDS[i];
+            assertEquals(expectedBounds, info2.getCharacterRect(i));
         }
         assertNull(info2.getCharacterRect(-1));
-        assertNull(info2.getCharacterRect(MANY_RECTS.length + 1));
+        assertNull(info2.getCharacterRect(MANY_BOUNDS.length + 1));
         for (int i = 0; i < MANY_FLAGS_ARRAY.length; i++) {
             final int expectedFlags = MANY_FLAGS_ARRAY[i];
             assertEquals(expectedFlags, info2.getCharacterRectFlags(i));
         }
-        assertEquals(CHARACTER_RECT_TYPE_UNSPECIFIED, info2.getCharacterRectFlags(-1));
-        assertEquals(CHARACTER_RECT_TYPE_UNSPECIFIED,
-                info2.getCharacterRectFlags(MANY_RECTS.length + 1));
+        assertEquals(0, info2.getCharacterRectFlags(-1));
+        assertEquals(0, info2.getCharacterRectFlags(MANY_BOUNDS.length + 1));
         assertEquals(info, info2);
         assertEquals(info.hashCode(), info2.hashCode());
 
@@ -163,25 +160,24 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(SELECTION_END, info3.getSelectionEnd());
         assertEquals(COMPOSING_TEXT_START, info3.getComposingTextStart());
         assertTrue(TextUtils.equals(COMPOSING_TEXT, info3.getComposingText()));
-        assertTrue(info3.isInsertionMarkerClipped());
+        assertEquals(INSERTION_MARKER_FLAGS, info3.getInsertionMarkerFlags());
         assertEquals(INSERTION_MARKER_HORIZONTAL, info3.getInsertionMarkerHorizontal());
         assertEquals(INSERTION_MARKER_TOP, info3.getInsertionMarkerTop());
         assertEquals(INSERTION_MARKER_BASELINE, info3.getInsertionMarkerBaseline());
         assertEquals(INSERTION_MARKER_BOTOM, info3.getInsertionMarkerBottom());
         assertEquals(TRANSFORM_MATRIX, info3.getMatrix());
-        for (int i = 0; i < MANY_RECTS.length; i++) {
-            final RectF expectedRect = MANY_RECTS[i];
-            assertEquals(expectedRect, info3.getCharacterRect(i));
+        for (int i = 0; i < MANY_BOUNDS.length; i++) {
+            final RectF expectedBounds = MANY_BOUNDS[i];
+            assertEquals(expectedBounds, info3.getCharacterRect(i));
         }
         assertNull(info3.getCharacterRect(-1));
-        assertNull(info3.getCharacterRect(MANY_RECTS.length + 1));
+        assertNull(info3.getCharacterRect(MANY_BOUNDS.length + 1));
         for (int i = 0; i < MANY_FLAGS_ARRAY.length; i++) {
             final int expectedFlags = MANY_FLAGS_ARRAY[i];
             assertEquals(expectedFlags, info3.getCharacterRectFlags(i));
         }
-        assertEquals(CHARACTER_RECT_TYPE_UNSPECIFIED, info3.getCharacterRectFlags(-1));
-        assertEquals(CHARACTER_RECT_TYPE_UNSPECIFIED,
-                info3.getCharacterRectFlags(MANY_RECTS.length + 1));
+        assertEquals(0, info3.getCharacterRectFlags(-1));
+        assertEquals(0, info3.getCharacterRectFlags(MANY_BOUNDS.length + 1));
         assertEquals(info.hashCode(), info3.hashCode());
 
         builder.reset();
@@ -190,7 +186,7 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(-1, uninitializedInfo.getSelectionEnd());
         assertEquals(-1, uninitializedInfo.getComposingTextStart());
         assertNull(uninitializedInfo.getComposingText());
-        assertFalse(uninitializedInfo.isInsertionMarkerClipped());
+        assertEquals(0, uninitializedInfo.getInsertionMarkerFlags());
         assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerHorizontal());
         assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerTop());
         assertEquals(Float.NaN, uninitializedInfo.getInsertionMarkerBaseline());
@@ -218,7 +214,7 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         final int SELECTION_END1 = 7;
         final String COMPOSING_TEXT1 = "0123456789";
         final int COMPOSING_TEXT_START1 = 0;
-        final boolean INSERTION_MARKER_CLIPPED1 = true;
+        final int INSERTION_MARKER_FLAGS1 = FLAG_HAS_VISIBLE_REGION;
         final float INSERTION_MARKER_HORIZONTAL1 = 10.5f;
         final float INSERTION_MARKER_TOP1 = 100.1f;
         final float INSERTION_MARKER_BASELINE1 = 110.4f;
@@ -227,7 +223,8 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         final int SELECTION_END2 = 8;
         final String COMPOSING_TEXT2 = "9876543210";
         final int COMPOSING_TEXT_START2 = 3;
-        final boolean INSERTION_MARKER_CLIPPED2 = false;
+        final int INSERTION_MARKER_FLAGS2 =
+                FLAG_HAS_VISIBLE_REGION | FLAG_HAS_INVISIBLE_REGION | FLAG_IS_RTL;
         final float INSERTION_MARKER_HORIZONTAL2 = 14.5f;
         final float INSERTION_MARKER_TOP2 = 200.1f;
         final float INSERTION_MARKER_BASELINE2 = 210.4f;
@@ -265,10 +262,10 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         Float.NaN, Float.NaN, Float.NaN, Float.NaN,
-                        INSERTION_MARKER_CLIPPED1).build(),
+                        INSERTION_MARKER_FLAGS1).build(),
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         Float.NaN, Float.NaN, Float.NaN, Float.NaN,
-                        INSERTION_MARKER_CLIPPED1).build());
+                        INSERTION_MARKER_FLAGS1).build());
 
         // Check Matrix.
         assertEquals(
@@ -290,74 +287,74 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
                         INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1,
-                        INSERTION_MARKER_CLIPPED1).build(),
+                        INSERTION_MARKER_FLAGS1).build(),
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
                         INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1,
-                        INSERTION_MARKER_CLIPPED1).build());
+                        INSERTION_MARKER_FLAGS1).build());
         assertNotEquals(
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         Float.NaN, INSERTION_MARKER_TOP1,
                         INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1,
-                        INSERTION_MARKER_CLIPPED1).build(),
+                        INSERTION_MARKER_FLAGS1).build(),
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
                         INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1,
-                        INSERTION_MARKER_CLIPPED1).build());
+                        INSERTION_MARKER_FLAGS1).build());
         assertNotEquals(
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
                         INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1,
-                        INSERTION_MARKER_CLIPPED1).build(),
+                        INSERTION_MARKER_FLAGS1).build(),
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         INSERTION_MARKER_HORIZONTAL2, INSERTION_MARKER_TOP1,
                         INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1,
-                        INSERTION_MARKER_CLIPPED1).build());
+                        INSERTION_MARKER_FLAGS1).build());
         assertNotEquals(
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
                         INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1,
-                        INSERTION_MARKER_CLIPPED1).build(),
+                        INSERTION_MARKER_FLAGS1).build(),
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP2,
                         INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1,
-                        INSERTION_MARKER_CLIPPED1).build());
+                        INSERTION_MARKER_FLAGS1).build());
         assertNotEquals(
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
                         INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1,
-                        INSERTION_MARKER_CLIPPED1).build(),
+                        INSERTION_MARKER_FLAGS1).build(),
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
                         INSERTION_MARKER_BASELINE2, INSERTION_MARKER_BOTOM1,
-                        INSERTION_MARKER_CLIPPED1).build());
+                        INSERTION_MARKER_FLAGS1).build());
         assertNotEquals(
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
                         INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1,
-                        INSERTION_MARKER_CLIPPED1).build(),
+                        INSERTION_MARKER_FLAGS1).build(),
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         INSERTION_MARKER_HORIZONTAL2, INSERTION_MARKER_TOP1,
                         INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1,
-                        INSERTION_MARKER_CLIPPED1).build());
+                        INSERTION_MARKER_FLAGS1).build());
         assertNotEquals(
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
                         INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1,
-                        INSERTION_MARKER_CLIPPED1).build(),
+                        INSERTION_MARKER_FLAGS1).build(),
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
                         INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM2,
-                        INSERTION_MARKER_CLIPPED1).build());
+                        INSERTION_MARKER_FLAGS1).build());
         assertNotEquals(
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
                         INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1,
-                        INSERTION_MARKER_CLIPPED1).build(),
+                        INSERTION_MARKER_FLAGS1).build(),
                 new Builder().setMatrix(MATRIX1).setInsertionMarkerLocation(
                         INSERTION_MARKER_HORIZONTAL1, INSERTION_MARKER_TOP1,
                         INSERTION_MARKER_BASELINE1, INSERTION_MARKER_BOTOM1,
-                        INSERTION_MARKER_CLIPPED2).build());
+                        INSERTION_MARKER_FLAGS2).build());
     }
 
     @SmallTest
@@ -394,7 +391,7 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         final int SELECTION_END = 40;
         final int COMPOSING_TEXT_START = 32;
         final String COMPOSING_TEXT = "test";
-        final boolean INSERTION_MARKER_CLIPPED = true;
+        final int INSERTION_MARKER_FLAGS = FLAG_HAS_VISIBLE_REGION;
         final float INSERTION_MARKER_HORIZONTAL = 10.5f;
         final float INSERTION_MARKER_TOP = 100.1f;
         final float INSERTION_MARKER_BASELINE = 110.4f;
@@ -416,7 +413,7 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
             }
 
             builder.setInsertionMarkerLocation(INSERTION_MARKER_HORIZONTAL, INSERTION_MARKER_TOP,
-                    INSERTION_MARKER_BASELINE, INSERTION_MARKER_BOTOM, INSERTION_MARKER_CLIPPED);
+                    INSERTION_MARKER_BASELINE, INSERTION_MARKER_BOTOM, INSERTION_MARKER_FLAGS);
             try {
                 // Coordinate transformation matrix is required if no positional information is
                 // specified.
@@ -438,19 +435,10 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
     }
 
     @SmallTest
-    public void testBuilderAddCharacterRect() throws Exception {
+    public void testBuilderAddCharacterBounds() throws Exception {
         // A negative index should be rejected.
         try {
-            new Builder().addCharacterRect(-1, 0.0f, 0.0f, 0.0f, 0.0f,
-                    CHARACTER_RECT_TYPE_FULLY_VISIBLE);
-            assertTrue(false);
-        } catch (IllegalArgumentException ex) {
-        }
-
-        // CHARACTER_RECT_TYPE_UNSPECIFIED is not allowed.
-        try {
-            new Builder().addCharacterRect(0, 0.0f, 0.0f, 0.0f, 0.0f,
-                    CHARACTER_RECT_TYPE_UNSPECIFIED);
+            new Builder().addCharacterBounds(-1, 0.0f, 0.0f, 0.0f, 0.0f, FLAG_HAS_VISIBLE_REGION);
             assertTrue(false);
         } catch (IllegalArgumentException ex) {
         }
