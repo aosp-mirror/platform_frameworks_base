@@ -329,7 +329,7 @@ user is entering query text. This is added to the
       <dt><code>android:suggestActionMsg</code></dt>
         <dd><em>String</em>. An action message to be sent if the action key is pressed while a
         suggestion is in focus. This is added to the
-        intent that that the system passes to your searchable activity (using the action
+        intent that the system passes to your searchable activity (using the action
 you've defined for the suggestion). To examine the string,
         use {@link android.content.Intent#getStringExtra 
         getStringExtra(SearchManager.ACTION_MSG)}. This should only be used if all your

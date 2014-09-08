@@ -164,7 +164,7 @@ Notifications</a>.</p>
 <img src="{@docRoot}wear/images/circle_voice_B.png" height="200" style="float:right;margin:0 0 20px 40px" />
 <img src="{@docRoot}wear/images/circle_voice_A.png" height="200" style="float:right;margin:0 0 20px 40px" />
 
-<p>Voice replies are primarily used by messaging applications to provide a hands-free way of dictating a short message. You can also provide a up to five suggested replies or “canned responses” that are useful in a wide range of cases. These canned responses can be tapped by the user, allowing for a fast method of sending simple replies in cases where speaking may not be desirable.</p>
+<p>Voice replies are primarily used by messaging applications to provide a hands-free way of dictating a short message. You can also provide up to five suggested replies or “canned responses” that are useful in a wide range of cases. These canned responses can be tapped by the user, allowing for a fast method of sending simple replies in cases where speaking may not be desirable.</p>
 
 <p>You should attempt to cover a range of simple, neutral replies in your choices. Longer voice replies may be automatically truncated in the Voice reply UI.</p>
 

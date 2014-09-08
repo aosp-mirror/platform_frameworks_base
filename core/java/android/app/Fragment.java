@@ -218,8 +218,8 @@ final class FragmentState implements Parcelable {
  * state of its view hierarchy has been restored.
  * <li> {@link #onStart} makes the fragment visible to the user (based on its
  * containing activity being started).
- * <li> {@link #onResume} makes the fragment interacting with the user (based on its
- * containing activity being resumed).
+ * <li> {@link #onResume} makes the fragment begin interacting with the user
+ * (based on its containing activity being resumed).
  * </ol>
  *
  * <p>As a fragment is no longer being used, it goes through a reverse
@@ -563,7 +563,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * and later retrieved by the Fragment with {@link #getArguments}.
      *
      * <p>Applications should generally not implement a constructor.  The
-     * first place application code an run where the fragment is ready to
+     * first place application code can run where the fragment is ready to
      * be used is in {@link #onAttach(Activity)}, the point where the fragment
      * is actually associated with its activity.  Some applications may also
      * want to implement {@link #onInflate} to retrieve attributes from a
@@ -719,8 +719,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * Return the arguments supplied when the fragment was instantiated,
-     * if any.
+     * Return the arguments supplied to {@link #setArguments}, if any.
      */
     final public Bundle getArguments() {
         return mArguments;
