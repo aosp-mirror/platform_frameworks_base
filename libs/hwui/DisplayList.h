@@ -105,10 +105,9 @@ class ReplayStateStruct : public PlaybackStateStruct {
 public:
     ReplayStateStruct(OpenGLRenderer& renderer, Rect& dirty, int replayFlags)
             : PlaybackStateStruct(renderer, replayFlags, &mReplayAllocator),
-            mDirty(dirty), mDrawGlStatus(DrawGlInfo::kStatusDone) {}
+            mDirty(dirty) {}
 
     Rect& mDirty;
-    status_t mDrawGlStatus;
     LinearAllocator mReplayAllocator;
 };
 

@@ -111,17 +111,17 @@ static void android_view_GLES20Canvas_insertReorderBarrier(JNIEnv* env, jobject 
     renderer->insertReorderBarrier(reorderEnable);
 }
 
-static int android_view_GLES20Canvas_prepare(JNIEnv* env, jobject clazz,
+static void android_view_GLES20Canvas_prepare(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jboolean opaque) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
-    return renderer->prepare(opaque);
+    renderer->prepare(opaque);
 }
 
-static int android_view_GLES20Canvas_prepareDirty(JNIEnv* env, jobject clazz,
+static void android_view_GLES20Canvas_prepareDirty(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jint left, jint top, jint right, jint bottom,
         jboolean opaque) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
-    return renderer->prepareDirty(left, top, right, bottom, opaque);
+    renderer->prepareDirty(left, top, right, bottom, opaque);
 }
 
 static void android_view_GLES20Canvas_finish(JNIEnv* env, jobject clazz,
@@ -152,12 +152,12 @@ static void android_view_GLES20Canvas_setProperty(JNIEnv* env,
 // Functor
 // ----------------------------------------------------------------------------
 
-static jint android_view_GLES20Canvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
+static void android_view_GLES20Canvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong functorPtr) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     Functor* functor = reinterpret_cast<Functor*>(functorPtr);
     android::uirenderer::Rect dirty;
-    return renderer->callDrawGLFunction(functor, dirty);
+    renderer->callDrawGLFunction(functor, dirty);
 }
 
 // ----------------------------------------------------------------------------
@@ -802,18 +802,13 @@ static jlong android_view_GLES20Canvas_createDisplayListRenderer(JNIEnv* env, jo
     return reinterpret_cast<jlong>(new DisplayListRenderer);
 }
 
-static jint android_view_GLES20Canvas_drawRenderNode(JNIEnv* env,
+static void android_view_GLES20Canvas_drawRenderNode(JNIEnv* env,
         jobject clazz, jlong rendererPtr, jlong renderNodePtr,
-        jobject dirty, jint flags) {
+        jint flags) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     android::uirenderer::Rect bounds;
-    status_t status = renderer->drawRenderNode(renderNode, bounds, flags);
-    if (status != DrawGlInfo::kStatusDone && dirty != NULL) {
-        env->CallVoidMethod(dirty, gRectClassInfo.set,
-                int(bounds.left), int(bounds.top), int(bounds.right), int(bounds.bottom));
-    }
-    return status;
+    renderer->drawRenderNode(renderNode, bounds, flags);
 }
 
 // ----------------------------------------------------------------------------
@@ -876,13 +871,13 @@ static JNINativeMethod gMethods[] = {
     { "nSetViewport",       "(JII)V",          (void*) android_view_GLES20Canvas_setViewport },
     { "nSetHighContrastText","(JZ)V",          (void*) android_view_GLES20Canvas_setHighContrastText },
     { "nInsertReorderBarrier","(JZ)V",         (void*) android_view_GLES20Canvas_insertReorderBarrier },
-    { "nPrepare",           "(JZ)I",           (void*) android_view_GLES20Canvas_prepare },
-    { "nPrepareDirty",      "(JIIIIZ)I",       (void*) android_view_GLES20Canvas_prepareDirty },
+    { "nPrepare",           "(JZ)V",           (void*) android_view_GLES20Canvas_prepare },
+    { "nPrepareDirty",      "(JIIIIZ)V",       (void*) android_view_GLES20Canvas_prepareDirty },
     { "nFinish",            "(J)V",            (void*) android_view_GLES20Canvas_finish },
     { "nSetProperty",           "(Ljava/lang/String;Ljava/lang/String;)V",
             (void*) android_view_GLES20Canvas_setProperty },
 
-    { "nCallDrawGLFunction", "(JJ)I",          (void*) android_view_GLES20Canvas_callDrawGLFunction },
+    { "nCallDrawGLFunction", "(JJ)V",          (void*) android_view_GLES20Canvas_callDrawGLFunction },
 
     { "nSave",              "(JI)I",           (void*) android_view_GLES20Canvas_save },
     { "nRestore",           "(J)V",            (void*) android_view_GLES20Canvas_restore },
@@ -942,14 +937,14 @@ static JNINativeMethod gMethods[] = {
     { "nDrawTextOnPath",    "(JLjava/lang/String;IIJFFIJJ)V",
             (void*) android_view_GLES20Canvas_drawTextOnPath },
 
-    { "nDrawTextRun",       "(J[CIIIIFFZJJ)V",  (void*) android_view_GLES20Canvas_drawTextRunArray },
+    { "nDrawTextRun",       "(J[CIIIIFFZJJ)V", (void*) android_view_GLES20Canvas_drawTextRunArray },
     { "nDrawTextRun",       "(JLjava/lang/String;IIIIFFZJJ)V",
             (void*) android_view_GLES20Canvas_drawTextRun },
 
     { "nGetClipBounds",     "(JLandroid/graphics/Rect;)Z", (void*) android_view_GLES20Canvas_getClipBounds },
 
-    { "nFinishRecording",   "(J)J",      (void*) android_view_GLES20Canvas_finishRecording },
-    { "nDrawRenderNode",    "(JJLandroid/graphics/Rect;I)I", (void*) android_view_GLES20Canvas_drawRenderNode },
+    { "nFinishRecording",   "(J)J",            (void*) android_view_GLES20Canvas_finishRecording },
+    { "nDrawRenderNode",    "(JJI)V",          (void*) android_view_GLES20Canvas_drawRenderNode },
 
     { "nCreateDisplayListRenderer", "()J",     (void*) android_view_GLES20Canvas_createDisplayListRenderer },
 

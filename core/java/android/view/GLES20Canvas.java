@@ -191,17 +191,17 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nInsertReorderBarrier(long renderer, boolean enableReorder);
 
     @Override
-    public int onPreDraw(Rect dirty) {
+    public void onPreDraw(Rect dirty) {
         if (dirty != null) {
-            return nPrepareDirty(mRenderer, dirty.left, dirty.top, dirty.right, dirty.bottom,
+            nPrepareDirty(mRenderer, dirty.left, dirty.top, dirty.right, dirty.bottom,
                     mOpaque);
         } else {
-            return nPrepare(mRenderer, mOpaque);
+            nPrepare(mRenderer, mOpaque);
         }
     }
 
-    private static native int nPrepare(long renderer, boolean opaque);
-    private static native int nPrepareDirty(long renderer, int left, int top, int right, int bottom,
+    private static native void nPrepare(long renderer, boolean opaque);
+    private static native void nPrepareDirty(long renderer, int left, int top, int right, int bottom,
             boolean opaque);
 
     @Override
@@ -216,11 +216,11 @@ class GLES20Canvas extends HardwareCanvas {
     ///////////////////////////////////////////////////////////////////////////
 
     @Override
-    public int callDrawGLFunction(long drawGLFunction) {
-        return nCallDrawGLFunction(mRenderer, drawGLFunction);
+    public void callDrawGLFunction(long drawGLFunction) {
+        nCallDrawGLFunction(mRenderer, drawGLFunction);
     }
 
-    private static native int nCallDrawGLFunction(long renderer, long drawGLFunction);
+    private static native void nCallDrawGLFunction(long renderer, long drawGLFunction);
 
     ///////////////////////////////////////////////////////////////////////////
     // Display list
@@ -229,12 +229,12 @@ class GLES20Canvas extends HardwareCanvas {
     protected static native long nFinishRecording(long renderer);
 
     @Override
-    public int drawRenderNode(RenderNode renderNode, Rect dirty, int flags) {
-        return nDrawRenderNode(mRenderer, renderNode.getNativeDisplayList(), dirty, flags);
+    public void drawRenderNode(RenderNode renderNode, int flags) {
+        nDrawRenderNode(mRenderer, renderNode.getNativeDisplayList(), flags);
     }
 
-    private static native int nDrawRenderNode(long renderer, long renderNode,
-            Rect dirty, int flags);
+    private static native void nDrawRenderNode(long renderer, long renderNode,
+            int flags);
 
     ///////////////////////////////////////////////////////////////////////////
     // Hardware layer

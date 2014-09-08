@@ -15202,7 +15202,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                 } else {
                     mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-                    ((HardwareCanvas) canvas).drawRenderNode(renderNode, null, flags);
+                    ((HardwareCanvas) canvas).drawRenderNode(renderNode, flags);
                 }
             }
         } else if (cache != null) {

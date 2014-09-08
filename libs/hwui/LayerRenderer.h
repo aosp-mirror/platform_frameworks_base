@@ -50,9 +50,9 @@ public:
     virtual ~LayerRenderer();
 
     virtual void onViewportInitialized() { /* do nothing */ }
-    virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
-    virtual status_t clear(float left, float top, float right, float bottom, bool opaque);
-    virtual void finish();
+    virtual void prepareDirty(float left, float top, float right, float bottom, bool opaque);
+    virtual void clear(float left, float top, float right, float bottom, bool opaque);
+    virtual bool finish();
 
     static Layer* createTextureLayer(RenderState& renderState);
     static Layer* createRenderLayer(RenderState& renderState, uint32_t width, uint32_t height);

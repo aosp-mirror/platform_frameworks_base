@@ -43,12 +43,10 @@ public abstract class HardwareCanvas extends Canvas {
      * Invoked before any drawing operation is performed in this canvas.
      *
      * @param dirty The dirty rectangle to update, can be null.
-     * @return {@link RenderNode#STATUS_DREW} if anything was drawn (such as a call to clear
-     *         the canvas).
      *
      * @hide
      */
-    public abstract int onPreDraw(Rect dirty);
+    public abstract void onPreDraw(Rect dirty);
 
     /**
      * Invoked after all drawing operation have been performed.
@@ -64,7 +62,7 @@ public abstract class HardwareCanvas extends Canvas {
      * @param renderNode The RenderNode to replay.
      */
     public void drawRenderNode(RenderNode renderNode) {
-        drawRenderNode(renderNode, null, RenderNode.FLAG_CLIP_CHILDREN);
+        drawRenderNode(renderNode, RenderNode.FLAG_CLIP_CHILDREN);
     }
 
     /**
@@ -75,12 +73,9 @@ public abstract class HardwareCanvas extends Canvas {
      * @param flags Optional flags about drawing, see {@link RenderNode} for
      *              the possible flags.
      *
-     * @return One of {@link RenderNode#STATUS_DONE} or {@link RenderNode#STATUS_DREW}
-     *         if anything was drawn.
-     *
      * @hide
      */
-    public abstract int drawRenderNode(RenderNode renderNode, Rect dirty, int flags);
+    public abstract void drawRenderNode(RenderNode renderNode, int flags);
 
     /**
      * Draws the specified layer onto this canvas.
@@ -101,13 +96,10 @@ public abstract class HardwareCanvas extends Canvas {
      *
      * @param drawGLFunction A native function pointer
      *
-     * @return {@link RenderNode#STATUS_DONE}
-     *
      * @hide
      */
-    public int callDrawGLFunction(long drawGLFunction) {
+    public void callDrawGLFunction(long drawGLFunction) {
         // Noop - this is done in the display list recorder subclass
-        return RenderNode.STATUS_DONE;
     }
 
     public abstract void drawCircle(CanvasProperty<Float> cx, CanvasProperty<Float> cy,

@@ -43,7 +43,7 @@ LayerRenderer::LayerRenderer(RenderState& renderState, Layer* layer)
 LayerRenderer::~LayerRenderer() {
 }
 
-status_t LayerRenderer::prepareDirty(float left, float top, float right, float bottom,
+void LayerRenderer::prepareDirty(float left, float top, float right, float bottom,
         bool opaque) {
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->getFbo());
 
@@ -64,25 +64,23 @@ status_t LayerRenderer::prepareDirty(float left, float top, float right, float b
     }
     mLayer->clipRect.set(dirty);
 
-    return OpenGLRenderer::prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, opaque);
+    OpenGLRenderer::prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, opaque);
 }
 
-status_t LayerRenderer::clear(float left, float top, float right, float bottom, bool opaque) {
+void LayerRenderer::clear(float left, float top, float right, float bottom, bool opaque) {
     if (mLayer->isDirty()) {
         getCaches().disableScissor();
         glClear(GL_COLOR_BUFFER_BIT);
 
         getCaches().resetScissor();
         mLayer->setDirty(false);
-
-        return DrawGlInfo::kStatusDone;
+    } else {
+        OpenGLRenderer::clear(left, top, right, bottom, opaque);
     }
-
-    return OpenGLRenderer::clear(left, top, right, bottom, opaque);
 }
 
-void LayerRenderer::finish() {
-    OpenGLRenderer::finish();
+bool LayerRenderer::finish() {
+    bool retval = OpenGLRenderer::finish();
 
     generateMesh();
 
@@ -90,6 +88,7 @@ void LayerRenderer::finish() {
 
     // No need to unbind our FBO, this will be taken care of by the caller
     // who will invoke OpenGLRenderer::resume()
+    return retval;
 }
 
 GLuint LayerRenderer::getTargetFbo() const {
