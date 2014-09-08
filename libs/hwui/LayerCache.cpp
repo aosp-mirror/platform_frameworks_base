@@ -112,7 +112,7 @@ Layer* LayerCache::get(RenderState& renderState, const uint32_t width, const uin
     } else {
         LAYER_LOGD("Creating new layer %dx%d", entry.mWidth, entry.mHeight);
 
-        layer = new Layer(renderState, entry.mWidth, entry.mHeight);
+        layer = new Layer(Layer::kType_DisplayList, renderState, entry.mWidth, entry.mHeight);
         layer->setBlend(true);
         layer->setEmpty(true);
         layer->setFbo(0);
