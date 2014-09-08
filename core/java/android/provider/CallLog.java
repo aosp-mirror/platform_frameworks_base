@@ -167,8 +167,6 @@ public class CallLog {
          */
         public static final String FEATURES = "features";
 
-        /** Call had no associated features (e.g. voice-only). */
-        public static final int FEATURES_NONE = 0x0;
         /** Call had video. */
         public static final int FEATURES_VIDEO = 0x1;
 
