@@ -18,7 +18,6 @@ package com.android.server.notification;
 
 import static android.media.AudioAttributes.USAGE_ALARM;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
-import static android.media.AudioAttributes.USAGE_UNKNOWN;
 
 import android.app.AppOpsManager;
 import android.app.Notification;
@@ -223,11 +222,6 @@ public class ZenModeHelper {
                 exceptionPackages);
         mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, USAGE_NOTIFICATION_RINGTONE,
                 muteCalls ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
-                exceptionPackages);
-
-        // restrict vibrations with no hints
-        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, USAGE_UNKNOWN,
-                zen ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
                 exceptionPackages);
 
         // alarm restrictions
