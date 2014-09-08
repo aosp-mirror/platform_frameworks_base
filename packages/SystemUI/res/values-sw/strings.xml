@@ -210,7 +210,10 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Mahali pamewekwa na GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Maombi ya eneo yanatumika"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Futa arifa zote."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"Mipangilio"</string>
+    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
+    <skip />
+    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
+    <skip />
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skrini itazunguka kiotomatiki."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Skrini imefungwa sasa katika uelekezo wa mandhari."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Skrini imefungwa katika uelekeo wa picha."</string>
@@ -302,6 +305,8 @@
     <string name="interruption_level_all" msgid="1330581184930945764">"Zote"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Inachaji (Imebakisha <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ijae)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Badili mtumiaji"</string>
+    <!-- no translation found for accessibility_multi_user_switch_switcher_with_current (8434880595284601601) -->
+    <skip />
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Onyesha wasifu"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Ongeza mtumiaji"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Mtumiaji mpya"</string>
@@ -355,7 +360,7 @@
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Kifaa kitaendelea kuwa katika hali ya kufungwa hadi utakapokifungua mwenyewe"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Pata arifa kwa haraka"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Zitazame kabla hujafungua"</string>
-    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"La, asante"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Hapana, asante"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Sanidi"</string>
     <string name="muted_by" msgid="6147073845094180001">"Sauti imezimwa na <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

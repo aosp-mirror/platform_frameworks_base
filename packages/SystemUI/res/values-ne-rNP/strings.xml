@@ -212,7 +212,10 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS द्वारा स्थान सेट गरिएको"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"स्थान अनुरोधहरू सक्रिय"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सबै सूचनाहरू हटाउनुहोस्।"</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"सेटिङ्हरू"</string>
+    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
+    <skip />
+    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
+    <skip />
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"स्क्रिन स्वतः घुम्ने छ।"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"स्क्रिनलाई ल्यान्डस्केप अवस्थामा बन्द गरिएको छ।"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"स्क्रिन पोर्टेट अभिमूखमा लक गरिएको छ।"</string>
@@ -304,6 +307,7 @@
     <string name="interruption_level_all" msgid="1330581184930945764">"सबै"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"चार्ज हुँदै (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> पूर्ण भएसम्म)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"प्रयोगकर्ता फेर्नुहोस्"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"प्रयोगकर्ता, हालको प्रयोगकर्ता <xliff:g id="CURRENT_USER_NAME">%s</xliff:g> मा स्विच गर्नुहोस्"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"प्रोफाइल देखाउनुहोस्"</string>
     <string name="user_add_user" msgid="5110251524486079492">"प्रयोगकर्ता थप्नुहोस्"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"नयाँ प्रयोगकर्ता"</string>
