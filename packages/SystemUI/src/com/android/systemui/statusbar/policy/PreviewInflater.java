@@ -20,14 +20,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.KeyguardActivityLauncher;
 import com.android.systemui.statusbar.phone.KeyguardPreviewContainer;
 
 import java.util.List;
@@ -107,20 +105,21 @@ public class PreviewInflater {
         return info;
     }
 
-    public boolean wouldLaunchResolverActivity(Intent intent) {
-        PackageManager packageManager = mContext.getPackageManager();
+    public static boolean wouldLaunchResolverActivity(Context ctx, Intent intent,
+            int currentUserId) {
+        PackageManager packageManager = ctx.getPackageManager();
         final List<ResolveInfo> appList = packageManager.queryIntentActivitiesAsUser(
-                intent, PackageManager.MATCH_DEFAULT_ONLY, mLockPatternUtils.getCurrentUser());
+                intent, PackageManager.MATCH_DEFAULT_ONLY, currentUserId);
         if (appList.size() == 0) {
             return false;
         }
         ResolveInfo resolved = packageManager.resolveActivityAsUser(intent,
-                PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_META_DATA,
-                mLockPatternUtils.getCurrentUser());
+                PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_META_DATA, currentUserId);
         return wouldLaunchResolverActivity(resolved, appList);
     }
 
-    private boolean wouldLaunchResolverActivity(ResolveInfo resolved, List<ResolveInfo> appList) {
+    private static boolean wouldLaunchResolverActivity(
+            ResolveInfo resolved, List<ResolveInfo> appList) {
         // If the list contains the above resolved activity, then it can't be
         // ResolverActivity itself.
         for (int i = 0; i < appList.size(); i++) {

@@ -91,6 +91,7 @@ import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
+import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
@@ -260,10 +261,12 @@ public abstract class BaseStatusBar extends SystemUI implements
             final boolean isActivity = pendingIntent.isActivity();
             if (isActivity) {
                 final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
+                final boolean afterKeyguardGone = PreviewInflater.wouldLaunchResolverActivity(
+                        mContext, pendingIntent.getIntent(), mCurrentUserId);
                 dismissKeyguardThenExecute(new OnDismissAction() {
                     @Override
                     public boolean onDismiss() {
-                        if (keyguardShowing) {
+                        if (keyguardShowing && !afterKeyguardGone) {
                             try {
                                 ActivityManagerNative.getDefault()
                                         .keyguardWaitingForActivityDrawn();
@@ -277,7 +280,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         }
 
                         boolean handled = superOnClickHandler(view, pendingIntent, fillInIntent);
-                        overrideActivityPendingAppTransition(keyguardShowing);
+                        overrideActivityPendingAppTransition(keyguardShowing && !afterKeyguardGone);
 
                         // close the shade if it was open
                         if (handled) {
@@ -287,7 +290,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         // Wait for activity start.
                         return handled;
                     }
-                }, false /* afterKeyguardGone */);
+                }, afterKeyguardGone);
                 return true;
             } else {
                 return super.onClickHandler(view, pendingIntent, fillInIntent);
@@ -1440,6 +1443,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         public void onClick(final View v) {
             final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
+            final boolean afterKeyguardGone = mIntent.isActivity()
+                    && PreviewInflater.wouldLaunchResolverActivity(mContext, mIntent.getIntent(),
+                            mCurrentUserId);
             dismissKeyguardThenExecute(new OnDismissAction() {
                 public boolean onDismiss() {
                     if (mIsHeadsUp) {
@@ -1448,7 +1454,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     AsyncTask.execute(new Runnable() {
                         @Override
                         public void run() {
-                            if (keyguardShowing) {
+                            if (keyguardShowing && !afterKeyguardGone) {
                                 try {
                                     ActivityManagerNative.getDefault()
                                             .keyguardWaitingForActivityDrawn();
@@ -1472,7 +1478,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                                     // TODO: Dismiss Keyguard.
                                 }
                                 if (mIntent.isActivity()) {
-                                    overrideActivityPendingAppTransition(keyguardShowing);
+                                    overrideActivityPendingAppTransition(keyguardShowing
+                                            && !afterKeyguardGone);
                                 }
                             }
 
@@ -1490,7 +1497,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
                     return mIntent != null && mIntent.isActivity();
                 }
-            }, false /* afterKeyguardGone */);
+            }, afterKeyguardGone);
         }
     }
 
