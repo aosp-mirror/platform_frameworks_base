@@ -239,6 +239,34 @@ import java.util.Map;
  * and {@link WebChromeClient#onHideCustomView()} are required,
  * {@link WebChromeClient#getVideoLoadingProgressView()} is optional.
  * </p>
+ *
+ * <h3>Layout size</h3>
+ * <p>
+ * It is recommended to set the WebView layout height to a fixed value or to
+ * {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT} instead of using
+ * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}.
+ * When using {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT}
+ * for the height none of the WebView's parents should use a
+ * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} layout height since that could result in
+ * incorrect sizing of the views.
+ * </p>
+ *
+ * <p>Setting the WebView's height to {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}
+ * enables the following behaviors:
+ * <ul>
+ * <li>The HTML body layout height is set to a fixed value. This means that elements with a height
+ * relative to the HTML body may not be sized correctly. </li>
+ * <li>For applications targetting {@link android.os.Build.VERSION_CODES#KITKAT} and earlier SDKs the
+ * HTML viewport meta tag will be ignored in order to preserve backwards compatibility. </li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * Using a layout width of {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} is not
+ * supported. If such a width is used the WebView will attempt to use the width of the parent
+ * instead.
+ * </p>
+ *
  */
 // Implementation notes.
 // The WebView is a thin API class that delegates its public API to a backend WebViewProvider
