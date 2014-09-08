@@ -126,8 +126,8 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     public void resetViews() {
-        setTransitionAlpha(mTransitioningViews, 1);
-        setTransitionAlpha(mSharedElements, 1);
+        showViews(mTransitioningViews);
+        showViews(mSharedElements);
         mIsHidden = true;
         if (!mIsReturning && getDecor() != null) {
             getDecor().suppressLayout(false);
@@ -187,7 +187,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     private void hideSharedElements() {
         moveSharedElementsFromOverlay();
         if (!mIsHidden) {
-            setTransitionAlpha(mSharedElements, 0);
+            hideViews(mSharedElements);
         }
         mSharedElementsHidden = true;
         finishIfNecessary();
@@ -296,7 +296,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                     transition.removeListener(this);
                     exitTransitionComplete();
                     if (mIsHidden) {
-                        setTransitionAlpha(mTransitioningViews, 1);
+                        showViews(mTransitioningViews);
                     }
                     if (mSharedElementBundle != null) {
                         delayCancel();
@@ -323,7 +323,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                     transition.removeListener(this);
                     sharedElementTransitionComplete();
                     if (mIsHidden) {
-                        setTransitionAlpha(mSharedElements, 1);
+                        showViews(mSharedElements);
                     }
                 }
             });
