@@ -1783,7 +1783,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 oldEntry.notification.getNotification().tickerText);
 
         final boolean shouldInterrupt = shouldInterrupt(notification);
-        final boolean alertAgain = alertAgain(oldEntry);
+        final boolean alertAgain = alertAgain(oldEntry, n);
         boolean updateSuccessful = false;
         if (contentsUnchanged && bigContentsUnchanged && headsUpContentsUnchanged
                 && publicUnchanged) {
@@ -1947,10 +1947,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    private boolean alertAgain(Entry entry) {
-        final StatusBarNotification sbn = entry.notification;
-        return entry == null || !entry.hasInterrupted()
-                || (sbn.getNotification().flags & Notification.FLAG_ONLY_ALERT_ONCE) == 0;
+    private boolean alertAgain(Entry oldEntry, Notification newNotification) {
+        return oldEntry == null || !oldEntry.hasInterrupted()
+                || (newNotification.flags & Notification.FLAG_ONLY_ALERT_ONCE) == 0;
     }
 
     protected boolean shouldInterrupt(StatusBarNotification sbn) {
