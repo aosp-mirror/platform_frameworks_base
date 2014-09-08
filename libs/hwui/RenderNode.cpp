@@ -872,6 +872,8 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
             handler(new (alloc) DrawLayerOp(mLayer, 0, 0),
                     renderer.getSaveCount() - 1, properties().getClipToBounds());
         } else {
+            const int saveCountOffset = renderer.getSaveCount() - 1;
+            const int projectionReceiveIndex = mDisplayListData->projectionReceiveIndex;
             DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
             for (size_t chunkIndex = 0; chunkIndex < mDisplayListData->getChunks().size(); chunkIndex++) {
                 const DisplayListData::Chunk& chunk = mDisplayListData->getChunks()[chunkIndex];
@@ -882,8 +884,6 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
                 issueOperationsOf3dChildren(kNegativeZChildren,
                         initialTransform, zTranslatedNodes, renderer, handler);
 
-                const int saveCountOffset = renderer.getSaveCount() - 1;
-                const int projectionReceiveIndex = mDisplayListData->projectionReceiveIndex;
 
                 for (int opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
                     DisplayListOp *op = mDisplayListData->displayListOps[opIndex];
