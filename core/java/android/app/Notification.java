@@ -3386,8 +3386,16 @@ public class Notification implements Parcelable
      */
     public static abstract class Style {
         private CharSequence mBigContentTitle;
-        private CharSequence mSummaryText = null;
-        private boolean mSummaryTextSet = false;
+
+        /**
+         * @hide
+         */
+        protected CharSequence mSummaryText = null;
+
+        /**
+         * @hide
+         */
+        protected boolean mSummaryTextSet = false;
 
         protected Builder mBuilder;
 
@@ -3679,6 +3687,11 @@ public class Notification implements Parcelable
      * @see Notification#bigContentView
      */
     public static class BigTextStyle extends Style {
+
+        private static final int MAX_LINES = 13;
+        private static final int LINES_CONSUMED_BY_ACTIONS = 3;
+        private static final int LINES_CONSUMED_BY_SUMMARY = 2;
+
         private CharSequence mBigText;
 
         public BigTextStyle() {
@@ -3745,6 +3758,7 @@ public class Notification implements Parcelable
 
             contentView.setTextViewText(R.id.big_text, mBuilder.processLegacyText(mBigText));
             contentView.setViewVisibility(R.id.big_text, View.VISIBLE);
+            contentView.setInt(R.id.big_text, "setMaxLines", calculateMaxLines());
             contentView.setViewVisibility(R.id.text2, View.GONE);
 
             applyTopPadding(contentView);
@@ -3754,6 +3768,24 @@ public class Notification implements Parcelable
             mBuilder.addProfileBadge(contentView, R.id.profile_badge_large_template);
 
             return contentView;
+        }
+
+        private int calculateMaxLines() {
+            int lineCount = MAX_LINES;
+            boolean hasActions = mBuilder.mActions.size() > 0;
+            boolean hasSummary = (mSummaryTextSet ? mSummaryText : mBuilder.mSubText) != null;
+            if (hasActions) {
+                lineCount -= LINES_CONSUMED_BY_ACTIONS;
+            }
+            if (hasSummary) {
+                lineCount -= LINES_CONSUMED_BY_SUMMARY;
+            }
+
+            // If we have less top padding at the top, we can fit less lines.
+            if (!mBuilder.mHasThreeLines) {
+                lineCount--;
+            }
+            return lineCount;
         }
 
         /**
