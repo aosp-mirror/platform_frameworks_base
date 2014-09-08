@@ -2,59 +2,59 @@ ndk=true
 page.template=sdk
 
 
-ndk.mac64_download=android-ndk32-r10-darwin-x86_64.tar.bz2
-ndk.mac64_bytes=411610468
-ndk.mac64_checksum=3ce1fa3dbe7a188f5d2640fd2f7ca944
+ndk.mac64_download=android-ndk32-r10b-darwin-x86_64.tar.bz2
+ndk.mac64_bytes=413652124
+ndk.mac64_checksum=7ca4a84e9c56c38acdafb007e7cd33c5
 
-ndk.mac32_download=android-ndk32-r10-darwin-x86.tar.bz2
-ndk.mac32_bytes=404768263
-ndk.mac32_checksum=1824eec1f6749b6cb7bb306a3b924c33
+ndk.mac32_download=android-ndk32-r10b-darwin-x86.tar.bz2
+ndk.mac32_bytes=406998070
+ndk.mac32_checksum=db3626b2c5f3245d90e2724f7bcf4c3e
 
-ndk.linux64_download=android-ndk32-r10-linux-x86_64.tar.bz2
-ndk.linux64_bytes=420671390
-ndk.linux64_checksum=e3ff629d212a8106a43415862fa39baf
+ndk.linux64_download=android-ndk32-r10b-linux-x86_64.tar.bz2
+ndk.linux64_bytes=422237011
+ndk.linux64_checksum=5c0f301aa789a1a747d5d2aeb8c69ef3
 
-ndk.linux32_download=android-ndk32-r10-linux-x86.tar.bz2
-ndk.linux32_bytes=420078216
-ndk.linux32_checksum=8d9a5faa6e77b43bfae0f169079b21c4
+ndk.linux32_download=android-ndk32-r10b-linux-x86.tar.bz2
+ndk.linux32_bytes=421052081
+ndk.linux32_checksum=e8f55daa5c9de7ab79aaaf5d7d751b69
 
-ndk.win64_download=android-ndk32-r10-windows-x86_64.zip
-ndk.win64_bytes=529850429
-ndk.win64_checksum=b11f9239344f7c377ed5b627f0fb236e
+ndk.win64_download=android-ndk32-r10b-windows-x86_64.zip
+ndk.win64_bytes=531912027
+ndk.win64_checksum=e4dd2e0c6f38e3ad936c366bdf6b1d4e
 
-ndk.win32_download=android-ndk32-r10-windows-x86.zip
-ndk.win32_bytes=500135685
-ndk.win32_checksum=0a3c01147abba945cc4ef5837519ec97
+ndk.win32_download=android-ndk32-r10b-windows-x86.zip
+ndk.win32_bytes=502720425
+ndk.win32_checksum=9fa4f19bca7edd6eefa63fe788737987
 
 
 
-ndk.mac64_64_download=android-ndk64-r10-darwin-x86_64.tar.bz2
-ndk.mac64_64_bytes=327740247
-ndk.mac64_64_checksum=72561b27acc6192a2e81b345ea128a20
+ndk.mac64_64_download=android-ndk64-r10b-darwin-x86_64.tar.bz2
+ndk.mac64_64_bytes=346423776
+ndk.mac64_64_checksum=5bae7feed20ebf0762c0baefe6b84b6d
 
-ndk.mac32_64_download=android-ndk64-r10-darwin-x86.tar.bz2
-ndk.mac32_64_bytes=323736411
-ndk.mac32_64_checksum=5bbaf9d8051ba5d2c0fff74cfd87c374
+ndk.mac32_64_download=android-ndk64-r10b-darwin-x86.tar.bz2
+ndk.mac32_64_bytes=344052876
+ndk.mac32_64_checksum=4447049ac2b5877176b9b6b1cf3bcdb2
 
-ndk.linux64_64_download=android-ndk64-r10-linux-x86_64.tar.bz2
-ndk.linux64_64_bytes=339708042
-ndk.linux64_64_checksum=737290195583268b7fbff4aa56465ab6
+ndk.linux64_64_download=android-ndk64-r10b-linux-x86_64.tar.bz2
+ndk.linux64_64_bytes=358835298
+ndk.linux64_64_checksum=2aa12a0d9a70bcab83e42d010a685136
 
-ndk.linux32_64_download=android-ndk64-r10-linux-x86.tar.bz2
-ndk.linux32_64_bytes=338544906
-ndk.linux32_64_checksum=bea5d027baeb948cbff6af840d26b80d
+ndk.linux32_64_download=android-ndk64-r10b-linux-x86.tar.bz2
+ndk.linux32_64_bytes=358060577
+ndk.linux32_64_checksum=b77eb583626d8c7f5c11e49181fd5eac
 
-ndk.win64_64_download=android-ndk64-r10-windows-x86_64.zip
-ndk.win64_64_bytes=417411195
-ndk.win64_64_checksum=91879ec85539b45313a21b9526b911a8
+ndk.win64_64_download=android-ndk64-r10b-windows-x86_64.zip
+ndk.win64_64_bytes=437152652
+ndk.win64_64_checksum=df39185e6c5a4d72eb9fca3f9aaabc46
 
-ndk.win32_64_download=android-ndk64-r10-windows-x86.zip
-ndk.win32_64_bytes=396751892
-ndk.win32_64_checksum=f79070ace2cde9ebf6a2e2be4a61ac7a
+ndk.win32_64_download=android-ndk64-r10b-windows-x86.zip
+ndk.win32_64_bytes=417290468
+ndk.win32_64_checksum=0f0324cb11f04e8b2641e5422ee39c81
 
-ndk.debug_info_download=android-ndk-r10-cxx-stl-libs-with-debug-info.zip
-ndk.debug_info_bytes=253198908
-ndk.debug_info_checksum=c2a90c43d17dbb5f0609cc8237491788
+ndk.debug_info_download=android-ndk-r10b-cxx-stl-libs-with-debug-info.zip
+ndk.debug_info_bytes=227302317
+ndk.debug_info_checksum=bed1bb855a41bdb572a804dbf6d45aa6
 
 
 page.title=Android NDK
@@ -357,15 +357,6 @@ injunctive remedies (or an equivalent type of urgent legal relief) in any jurisd
 </div>
 </div>
 
-
-
-
-
-
-
-
-
-
  <div id="qv-wrapper">
     <div id="qv">
       <h2>In this document</h2>
@@ -418,7 +409,7 @@ $('#Downloads').after($('#download-table'));
 
 
 <p>With NDK revision 9 and higher, the release packages have been split to reduce download size.
-  The first download for each platform contains the default NDK toolchain. The second download
+  The first download for each platform contains the default NDK toolchain. The additional download
   contains legacy NDK toolchains for that platform, which is only required if you are not using
   the current, recommended toolchain for your NDK builds.</p>
 
@@ -426,10 +417,91 @@ $('#Downloads').after($('#download-table'));
 
 <p>The following sections provide information about releases of the NDK.</p>
 
+
 <div class="toggle-content opened">
  <p>
    <a href="#" onclick="return toggleContent(this)"> <img
      src="/assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+   >Android NDK, Revision 10b</a> <em>(September 2014)</em>
+ </p>
+ <div class="toggle-content-toggleme">
+   <dl>
+
+        <dt>Important notes:</dt>
+     <dd>
+     <ul>
+      <li>Because of the 512MB size restriction on downloadable packages, the following 32-bit items are not in the 32-bit NDK download packages. Instead, they reside in the 64-bit ones:</li>
+      <ul>
+      <li>Android-L headers</li>
+      <li>GCC 4.9</li>
+      </ul>
+     <li>Currently, the only Renderscript support provided by the NDK is for 32-bit Renderscript with Android 4.4 (API level 19). You cannot build HelloComputeNDK (the only Renderscript sample) with any other combination of Renderscript (32- or 64-bit) and Android version.</li>
+     <li>To compile native-codec, you must use a 64-bit NDK package, which is where all the Android-L headers are located. </li>
+     </ul>
+     </dd>
+
+
+     <dt>Important bug fixes:</dt>
+     <dd>
+     <ul>
+     <li>Fixed gdb 7.6 in GCC 4.8/4.9. (Issues <a href="http://b.android.com/74112">74112</a> and <a href="http://b.android.com/74371">74371</a>.)</li>
+     <li>Fixed GCC 4.8/4.9 for x86, so that they no longer enable <code>-msse4.2</code> and <code>-mpopcnt</code> by default. (Issue <a href="http://b.android.com/73843">73843</a>.)</li>
+     </ul>
+     </dd>
+
+     <dt>Other bug fixes:</dt>
+     <dd>
+     <ul>
+     <li>Removed <code>stdio.h</code> from the <code>include-fixed/</code> directories of all versions of GCC. (Issue <a href="http://b.android.com/73728">73728</a>.)</li>
+     <li>Removed duplicate header files from the Windows packages in the <code>platforms/android-L/arch-*/usr/include/linux/netfilter*/</code> directories. (Issue <a href="https://code.google.com/p/android/issues/detail?id=73704">73704</a>.)</li>
+     <li>Fixed a problem that prevented Clang from building HelloComputeNDK.</li>
+     <li>Fixed atexit. (Issue <a href="http://b.android.com/66595">66595</a>.)</li>
+     <li>Made various fixes to the docs in <code>docs/</code> and <code>sources/third_party/googletest/README.NDK</code>. (Issue <a href="http://b.android.com/74069">74069</a>.)</li>
+     <li>Made the following fixes to the Android-L headers:</li>
+     <ol>
+     <li>Added the following functions to <code>ctype.h</code> and <code>wchar.h</code>: <code>dn_expand()</code>, <code>grantpt()</code>, <code> inet_nsap_addr()</code>, <code>inet_nsap_ntoa()</code>, <code>insque()</code>, <code>nsdispatch()</code>, <code>posix_openpt()</code>, <code>__pthread_cleanup_pop()</code>, <code>__pthread_cleanup_push()</code>, <code>remque()</code>, <code>setfsgid()</code>, <code>setfsuid()</code>, <code>splice()</code>, <code>tee()</code>, <code>twalk()</code> (Issue <a href = "http://b.android.com/73719">73719</a>), and 42 <code>*_l()</code> functions.</li>
+
+    <li>Renamed <code>cmsg_nxthdr</code> to <code>__cmsg_nxthdr</code>.</li>
+
+    <li>Removed <code>__libc_malloc_dispatch</code>.</li>
+
+    <li>Changed the <code>ptrace()</code> prototype to <code>long ptrace(int, ...);</code>.</li>
+
+    <li>Removed <code>sha1.h</code>.</li>
+
+    <li>Extended <code>android_dlextinfo</code> in <code>android/dlext.h</code>.</li>
+
+    <li>Annotated <code>__NDK_FPABI__</code> for functions receiving or returning float- or double-type values in <code>stdlib.h</code>, <code>time.h</code>, <code>wchar.h</code>, and <code>complex.h</code>.</li>
+    </ol>
+     </ul>
+     </dd>
+
+     <dt>Other changes:</dt>
+     <dd>
+     <ul>
+        <li>Updated <code>mipsel-linux-android-4.9</code> and <code>mips64el-linux-android-4.9</code>, implementing a new multilib directory layout, and providing support for gdb-7.7</li>
+        <li>Enhanced <code>cpu-features</code> to detect more arm64 features.  (Change list <a href="https://android-review.googlesource.com/#/c/100339">100339</a>.)</li>
+     </dd>
+     </ul>
+
+
+
+   </dl>
+ </div>
+</div>
+
+
+
+
+
+
+
+
+
+<div class="toggle-content closed">
+ <p>
+   <a href="#" onclick="return toggleContent(this)"> <img
+     src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
    >Android NDK, Revision 10</a> <em>(July 2014)</em>
  </p>
  <div class="toggle-content-toggleme">
@@ -442,7 +514,7 @@ $('#Downloads').after($('#download-table'));
            <li>GCC 4.9 is the default compiler for 64-bit ABIs. Clang is currently version 3.4.
 <code>NDK_TOOLCHAIN_VERSION=clang</code>
       may not work for arm64-v8a and mips64.</li>
-           <li>Android API level L is the first level with 64-bit support.  Note that this API
+           <li>Android-L is the first level with 64-bit support.  Note that this API
 level is a temporary one, and only for L-preview. An actual API level number will replace it at
 L-release.</li>
            <li>This release includes now includes <code>all32</code> and <code>all64</code>
@@ -479,7 +551,7 @@ GCC 4.6 is still the default.</li>
            <li>For ndk-build, enable 32-bit, GCC 4.9 building either by adding
 <code>NDK_TOOLCHAIN_VERSION=4.9</code> to <code>Application.mk</code>, or exporting it as an
 environment variable from the command line.</li>
-           <li>For a standalone toolchain, use the <code> --toolchain=</code> option in the
+           <li>For a standalone toolchain, use the <code>--toolchain=</code> option in the
 <code>make-standalone-toolchain.sh</code> script. For example: <code>--toolchain=arm-linux-androideabi-4.9.</code></li>
         </ul>
         <li>Upgraded GDB to version 7.6 in GCC 4.8/4.9 and x86*. Since GDB is still at version GDB-7.3.x in
