@@ -112,7 +112,7 @@ public class DevicePolicyManager {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_MANAGED_PROFILE
-        = "android.app.action.ACTION_PROVISION_MANAGED_PROFILE";
+        = "android.app.action.PROVISION_MANAGED_PROFILE";
 
     /**
      * A {@link android.os.Parcelable} extra of type {@link android.os.PersistableBundle} that allows
@@ -139,7 +139,7 @@ public class DevicePolicyManager {
      * message containing an Nfc record with MIME type {@link #MIME_TYPE_PROVISIONING_NFC}.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME
-        = "android.app.extra.deviceAdminPackageName";
+        = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME";
 
     /**
      * A String extra holding the default name of the profile that is created during managed profile
