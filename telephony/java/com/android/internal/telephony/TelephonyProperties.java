@@ -124,7 +124,7 @@ public interface TelephonyProperties
     static final String PROPERTY_ECM_EXIT_TIMER = "ro.cdma.ecmexittimer";
 
     /** the international dialing prefix of current operator network */
-    static final String PROPERTY_OPERATOR_IDP_STRING = "telephony.operator.idpstring";
+    static final String PROPERTY_OPERATOR_IDP_STRING = "gsm.operator.idpstring";
 
     /**
      * Defines the schema for the carrier specified OTASP number
