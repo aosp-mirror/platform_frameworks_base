@@ -2648,6 +2648,11 @@ public class NotificationManagerService extends SystemService {
             if (speedBumpIndex == -1 &&
                     // Intrusiveness trumps priority, hence ignore intrusives.
                     !record.isRecentlyIntrusive() &&
+                    // Currently, package priority is either PRIORITY_DEFAULT or PRIORITY_MAX, so
+                    // scanning for PRIORITY_MIN within the package bucket PRIORITY_DEFAULT
+                    // (or lower as a safeguard) is sufficient to find the speedbump index.
+                    // We'll have to revisit this when more package priority buckets are introduced.
+                    record.getPackagePriority() <= Notification.PRIORITY_DEFAULT &&
                     record.sbn.getNotification().priority == Notification.PRIORITY_MIN) {
                 speedBumpIndex = keys.size() - 1;
             }
