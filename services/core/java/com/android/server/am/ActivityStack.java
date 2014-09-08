@@ -425,13 +425,13 @@ final class ActivityStack {
     }
 
     final ActivityRecord topActivity() {
-        // Iterate to find the first non-empty task stack. Note that this code can
-        // be simplified once we stop storing tasks with empty mActivities lists.
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            final int topActivityNdx = activities.size() - 1;
-            if (topActivityNdx >= 0) {
-                return activities.get(topActivityNdx);
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                if (!r.finishing) {
+                    return r;
+                }
             }
         }
         return null;
