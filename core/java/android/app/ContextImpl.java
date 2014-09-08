@@ -2130,9 +2130,7 @@ class ContextImpl extends Context {
     public Context createPackageContextAsUser(String packageName, int flags, UserHandle user)
             throws NameNotFoundException {
         final boolean restricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
-        if ((packageName.equals("system") || packageName.equals("android"))
-                && user.getIdentifier() == UserHandle.getUserId(
-                        mPackageInfo.getApplicationInfo().uid)) {
+        if (packageName.equals("system") || packageName.equals("android")) {
             return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
                     user, restricted, mDisplay, mOverrideConfiguration);
         }
