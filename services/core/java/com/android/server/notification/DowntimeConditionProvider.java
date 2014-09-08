@@ -43,6 +43,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.TimeZone;
 
 /** Built-in zen condition provider for managing downtime */
 public class DowntimeConditionProvider extends ConditionProviderService {
@@ -275,6 +276,9 @@ public class DowntimeConditionProvider extends ConditionProviderService {
                 final long schTime = intent.getLongExtra(EXTRA_TIME, 0);
                 if (DEBUG) Slog.d(TAG, String.format("%s scheduled for %s, fired at %s, delta=%s",
                         action, ts(schTime), ts(now), now - schTime));
+            } else if (Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
+                if (DEBUG) Slog.d(TAG, "timezone changed to " + TimeZone.getDefault());
+                mCalendar.setTimeZone(TimeZone.getDefault());
             } else {
                 if (DEBUG) Slog.d(TAG, action + " fired at " + now);
             }
