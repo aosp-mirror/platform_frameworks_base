@@ -285,6 +285,9 @@ public class PackageInstaller {
      *
      * @throws IOException if parameters were unsatisfiable, such as lack of
      *             disk space or unavailable media.
+     * @throws SecurityException when installation services are unavailable,
+     *             such as when called from a restricted user.
+     * @throws IllegalArgumentException when {@link SessionParams} is invalid.
      * @return positive, non-zero unique ID that represents the created session.
      *         This ID remains consistent across device reboots until the
      *         session is finalized. IDs are not reused during a given boot.
@@ -303,6 +306,11 @@ public class PackageInstaller {
     /**
      * Open an existing session to actively perform work. To succeed, the caller
      * must be the owner of the install session.
+     *
+     * @throws IOException if parameters were unsatisfiable, such as lack of
+     *             disk space or unavailable media.
+     * @throws SecurityException when the caller does not own the session, or
+     *             the session is invalid.
      */
     public @NonNull Session openSession(int sessionId) throws IOException {
         try {
@@ -319,6 +327,9 @@ public class PackageInstaller {
      * Update the icon representing the app being installed in a specific
      * session. This should be roughly
      * {@link ActivityManager#getLauncherLargeIconSize()} in both dimensions.
+     *
+     * @throws SecurityException when the caller does not own the session, or
+     *             the session is invalid.
      */
     public void updateSessionAppIcon(int sessionId, @Nullable Bitmap appIcon) {
         try {
@@ -331,6 +342,9 @@ public class PackageInstaller {
     /**
      * Update the label representing the app being installed in a specific
      * session.
+     *
+     * @throws SecurityException when the caller does not own the session, or
+     *             the session is invalid.
      */
     public void updateSessionAppLabel(int sessionId, @Nullable CharSequence appLabel) {
         try {
@@ -341,6 +355,15 @@ public class PackageInstaller {
         }
     }
 
+    /**
+     * Completely abandon the given session, destroying all staged data and
+     * rendering it invalid. Abandoned sessions will be reported to
+     * {@link SessionCallback} listeners as failures. This is equivalent to
+     * opening the session and calling {@link Session#abandon()}.
+     *
+     * @throws SecurityException when the caller does not own the session, or
+     *             the session is invalid.
+     */
     public void abandonSession(int sessionId) {
         try {
             mInstaller.abandonSession(sessionId);
@@ -350,7 +373,11 @@ public class PackageInstaller {
     }
 
     /**
-     * Return details for a specific session.
+     * Return details for a specific session. No special permissions are
+     * required to retrieve these details.
+     *
+     * @return details for the requested session, or {@code null} if the session
+     *         does not exist.
      */
     public @Nullable SessionInfo getSessionInfo(int sessionId) {
         try {
@@ -361,7 +388,7 @@ public class PackageInstaller {
     }
 
     /**
-     * Return list of all active install sessions, regardless of the installer.
+     * Return list of all known install sessions, regardless of the installer.
      */
     public @NonNull List<SessionInfo> getAllSessions() {
         final ApplicationInfo info = mContext.getApplicationInfo();
@@ -379,7 +406,7 @@ public class PackageInstaller {
     }
 
     /**
-     * Return list of all install sessions owned by the calling app.
+     * Return list of all known install sessions owned by the calling app.
      */
     public @NonNull List<SessionInfo> getMySessions() {
         try {
@@ -547,7 +574,8 @@ public class PackageInstaller {
     }
 
     /**
-     * Register to watch for session lifecycle events.
+     * Register to watch for session lifecycle events. No special permissions
+     * are required to watch for these events.
      */
     public void registerSessionCallback(@NonNull SessionCallback callback) {
         registerSessionCallback(callback, new Handler());
@@ -560,7 +588,8 @@ public class PackageInstaller {
     }
 
     /**
-     * Register to watch for session lifecycle events.
+     * Register to watch for session lifecycle events. No special permissions
+     * are required to watch for these events.
      *
      * @param handler to dispatch callback events through, otherwise uses
      *            calling thread.
@@ -593,7 +622,7 @@ public class PackageInstaller {
     }
 
     /**
-     * Unregister an existing callback.
+     * Unregister a previously registered callback.
      */
     public void unregisterSessionCallback(@NonNull SessionCallback callback) {
         synchronized (mDelegates) {
@@ -686,6 +715,12 @@ public class PackageInstaller {
          *            start at the beginning of the file.
          * @param lengthBytes total size of the file being written, used to
          *            preallocate the underlying disk space, or -1 if unknown.
+         *            The system may clear various caches as needed to allocate
+         *            this space.
+         * @throws IOException if trouble opening the file for writing, such as
+         *             lack of disk space or unavailable media.
+         * @throws SecurityException if called after the session has been
+         *             committed or abandoned.
          */
         public @NonNull OutputStream openWrite(@NonNull String name, long offsetBytes,
                 long lengthBytes) throws IOException {
@@ -719,6 +754,9 @@ public class PackageInstaller {
          * <p>
          * This returns all names which have been previously written through
          * {@link #openWrite(String, long, long)} as part of this session.
+         *
+         * @throws SecurityException if called after the session has been
+         *             committed or abandoned.
          */
         public @NonNull String[] getNames() throws IOException {
             try {
@@ -738,6 +776,9 @@ public class PackageInstaller {
          * through {@link #openWrite(String, long, long)} as part of this
          * session. For example, this stream may be used to calculate a
          * {@link MessageDigest} of a written APK before committing.
+         *
+         * @throws SecurityException if called after the session has been
+         *             committed or abandoned.
          */
         public @NonNull InputStream openRead(@NonNull String name) throws IOException {
             try {
@@ -759,6 +800,9 @@ public class PackageInstaller {
          * Once this method is called, no additional mutations may be performed
          * on the session. If the device reboots before the session has been
          * finalized, you may commit the session again.
+         *
+         * @throws SecurityException if streams opened through
+         *             {@link #openWrite(String, long, long)} are still open.
          */
         public void commit(@NonNull IntentSender statusReceiver) {
             try {
@@ -783,7 +827,9 @@ public class PackageInstaller {
 
         /**
          * Completely abandon this session, destroying all staged data and
-         * rendering it invalid.
+         * rendering it invalid. Abandoned sessions will be reported to
+         * {@link SessionCallback} listeners as failures. This is equivalent to
+         * opening the session and calling {@link Session#abandon()}.
          */
         public void abandon() {
             try {
@@ -934,6 +980,18 @@ public class PackageInstaller {
          */
         public void setReferrerUri(@Nullable Uri referrerUri) {
             this.referrerUri = referrerUri;
+        }
+
+        /** {@hide} */
+        public void setInstallFlagsInternal() {
+            installFlags |= PackageManager.INSTALL_INTERNAL;
+            installFlags &= ~PackageManager.INSTALL_EXTERNAL;
+        }
+
+        /** {@hide} */
+        public void setInstallFlagsExternal() {
+            installFlags |= PackageManager.INSTALL_EXTERNAL;
+            installFlags &= ~PackageManager.INSTALL_INTERNAL;
         }
 
         /** {@hide} */
