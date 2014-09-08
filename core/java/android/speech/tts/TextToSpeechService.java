@@ -84,7 +84,7 @@ import java.util.Set;
  * the following methods:
  * <ul>
  * <li>{@link #onGetVoices()}</li>
- * <li>{@link #isValidVoiceName(String)}</li>
+ * <li>{@link #onIsValidVoiceName(String)}</li>
  * <li>{@link #onLoadVoice(String)}</li>
  * <li>{@link #onGetDefaultVoiceNameFor(String, String, String)}</li>
  * </ul>
@@ -278,7 +278,7 @@ public abstract class TextToSpeechService extends Service {
      *
      * @return A list of voices supported.
      */
-    protected List<Voice> onGetVoices() {
+    public List<Voice> onGetVoices() {
         // Enumerate all locales and check if they are available
         ArrayList<Voice> voices = new ArrayList<Voice>();
         for (Locale locale : Locale.getAvailableLocales()) {
@@ -335,7 +335,7 @@ public abstract class TextToSpeechService extends Service {
         }
         Locale properLocale = TtsEngines.normalizeTTSLocale(iso3Locale);
         String voiceName = properLocale.toLanguageTag();
-        if (isValidVoiceName(voiceName) == TextToSpeech.SUCCESS) {
+        if (onIsValidVoiceName(voiceName) == TextToSpeech.SUCCESS) {
             return voiceName;
         } else {
             return null;
@@ -357,7 +357,7 @@ public abstract class TextToSpeechService extends Service {
      * @param voiceName Name of the voice.
      * @return {@link TextToSpeech#ERROR} or {@link TextToSpeech#SUCCESS}.
      */
-    protected int onLoadVoice(String voiceName) {
+    public int onLoadVoice(String voiceName) {
         Locale locale = Locale.forLanguageTag(voiceName);
         if (locale == null) {
             return TextToSpeech.ERROR;
@@ -388,7 +388,7 @@ public abstract class TextToSpeechService extends Service {
      * @param voiceName Name of the voice.
      * @return {@link TextToSpeech#ERROR} or {@link TextToSpeech#SUCCESS}.
      */
-    protected int isValidVoiceName(String voiceName) {
+    public int onIsValidVoiceName(String voiceName) {
         Locale locale = Locale.forLanguageTag(voiceName);
         if (locale == null) {
             return TextToSpeech.ERROR;
@@ -1275,7 +1275,7 @@ public abstract class TextToSpeechService extends Service {
             if (!checkNonNull(voiceName)) {
                 return TextToSpeech.ERROR;
             }
-            int retVal = isValidVoiceName(voiceName);
+            int retVal = onIsValidVoiceName(voiceName);
 
             if (retVal == TextToSpeech.SUCCESS) {
                 SpeechItem item = new LoadVoiceItem(caller, Binder.getCallingUid(),

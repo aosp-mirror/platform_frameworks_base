@@ -578,7 +578,7 @@ public class TextToSpeech {
          *
          * @deprecated Starting from API level 20, to select network synthesis, call
          * ({@link TextToSpeech#getVoices()}, find a suitable network voice
-         * ({@link Voice#getRequiresNetworkConnection()}) and pass it
+         * ({@link Voice#isNetworkConnectionRequired()}) and pass it
          * to {@link TextToSpeech#setVoice(Voice)}).
          */
         @Deprecated
@@ -596,7 +596,7 @@ public class TextToSpeech {
 
          * @deprecated Starting from API level 20, to select embedded synthesis, call
          * ({@link TextToSpeech#getVoices()}, find a suitable embedded voice
-         * ({@link Voice#getRequiresNetworkConnection()}) and pass it
+         * ({@link Voice#isNetworkConnectionRequired()}) and pass it
          * to {@link TextToSpeech#setVoice(Voice)}).
          */
         @Deprecated
@@ -957,19 +957,17 @@ public class TextToSpeech {
      *
      * @param text
      *            The string of text. Example: <code>"south_south_east"</code>
-     * @param filename
-     *            The full path to the sound file (for example:
-     *            "/sdcard/mysounds/hello.wav")
+     * @param file
+     *            File object pointing to the sound file.
      *
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
-    public int addSpeech(CharSequence text, String filename) {
+    public int addSpeech(CharSequence text, File file) {
         synchronized (mStartLock) {
-            mUtterances.put(text, Uri.parse(filename));
+            mUtterances.put(text, Uri.fromFile(file));
             return SUCCESS;
         }
     }
-
 
     /**
      * Adds a mapping between a string of text and a sound resource in a
@@ -1017,10 +1015,35 @@ public class TextToSpeech {
      *            "/sdcard/mysounds/tick.wav")
      *
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     *
+     * @deprecated As of API level 20, replaced by
+     *         {@link #addEarcon(String, File)}.
      */
+    @Deprecated
     public int addEarcon(String earcon, String filename) {
         synchronized(mStartLock) {
             mEarcons.put(earcon, Uri.parse(filename));
+            return SUCCESS;
+        }
+    }
+
+    /**
+     * Adds a mapping between a string of text and a sound file.
+     * Use this to add custom earcons.
+     *
+     * @see #playEarcon(String, int, HashMap)
+     *
+     * @param earcon
+     *            The name of the earcon.
+     *            Example: <code>"[tick]"</code>
+     * @param file
+     *            File object pointing to the sound file.
+     *
+     * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     */
+    public int addEarcon(String earcon, File file) {
+        synchronized(mStartLock) {
+            mEarcons.put(earcon, Uri.fromFile(file));
             return SUCCESS;
         }
     }
@@ -1061,7 +1084,7 @@ public class TextToSpeech {
      */
     public int speak(final CharSequence text,
                      final int queueMode,
-                     final HashMap<String, String> params,
+                     final Bundle params,
                      final String utteranceId) {
         return runAction(new Action<Integer>() {
             @Override
@@ -1103,11 +1126,11 @@ public class TextToSpeech {
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the speak operation.
      * @deprecated As of API level 20, replaced by
-     *         {@link #speak(CharSequence, int, HashMap, String)}.
+     *         {@link #speak(CharSequence, int, Bundle, String)}.
      */
     @Deprecated
     public int speak(final String text, final int queueMode, final HashMap<String, String> params) {
-        return speak(text, queueMode, params,
+        return speak(text, queueMode, convertParamsHashMaptoBundle(params),
                      params == null ? null : params.get(Engine.KEY_PARAM_UTTERANCE_ID));
     }
 
@@ -1135,7 +1158,7 @@ public class TextToSpeech {
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playEarcon operation.
      */
     public int playEarcon(final String earcon, final int queueMode,
-            final HashMap<String, String> params, final String utteranceId) {
+            final Bundle params, final String utteranceId) {
         return runAction(new Action<Integer>() {
             @Override
             public Integer run(ITextToSpeechService service) throws RemoteException {
@@ -1173,12 +1196,12 @@ public class TextToSpeech {
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the playEarcon operation.
      * @deprecated As of API level 20, replaced by
-     *         {@link #playEarcon(String, int, HashMap, String)}.
+     *         {@link #playEarcon(String, int, Bundle, String)}.
      */
     @Deprecated
     public int playEarcon(final String earcon, final int queueMode,
             final HashMap<String, String> params) {
-        return playEarcon(earcon, queueMode, params,
+        return playEarcon(earcon, queueMode, convertParamsHashMaptoBundle(params),
                           params == null ? null : params.get(Engine.KEY_PARAM_UTTERANCE_ID));
     }
 
@@ -1757,22 +1780,20 @@ public class TextToSpeech {
      *            must be prefixed by the name of the engine they are intended for. For example
      *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the
      *            engine named "com.svox.pico" if it is being used.
-     * @param filename Absolute file filename to write the generated audio data to.It should be
-     *            something like "/sdcard/myappsounds/mysound.wav".
+     * @param file File to write the generated audio data to.
      * @param utteranceId An unique identifier for this request.
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the synthesizeToFile operation.
      */
-    public int synthesizeToFile(final CharSequence text, final HashMap<String, String> params,
-            final String filename, final String utteranceId) {
+    public int synthesizeToFile(final CharSequence text, final Bundle params,
+            final File file, final String utteranceId) {
         return runAction(new Action<Integer>() {
             @Override
             public Integer run(ITextToSpeechService service) throws RemoteException {
                 ParcelFileDescriptor fileDescriptor;
                 int returnValue;
                 try {
-                    File file = new File(filename);
                     if(file.exists() && !file.canWrite()) {
-                        Log.e(TAG, "Can't write to " + filename);
+                        Log.e(TAG, "Can't write to " + file);
                         return ERROR;
                     }
                     fileDescriptor = ParcelFileDescriptor.open(file,
@@ -1784,10 +1805,10 @@ public class TextToSpeech {
                     fileDescriptor.close();
                     return returnValue;
                 } catch (FileNotFoundException e) {
-                    Log.e(TAG, "Opening file " + filename + " failed", e);
+                    Log.e(TAG, "Opening file " + file + " failed", e);
                     return ERROR;
                 } catch (IOException e) {
-                    Log.e(TAG, "Closing file " + filename + " failed", e);
+                    Log.e(TAG, "Closing file " + file + " failed", e);
                     return ERROR;
                 }
             }
@@ -1817,16 +1838,18 @@ public class TextToSpeech {
      *
      * @return {@link #ERROR} or {@link #SUCCESS} of <b>queuing</b> the synthesizeToFile operation.
      * @deprecated As of API level 20, replaced by
-     *         {@link #synthesizeToFile(CharSequence, HashMap, String, String)}.
+     *         {@link #synthesizeToFile(CharSequence, Bundle, File, String)}.
      */
+    @Deprecated
     public int synthesizeToFile(final String text, final HashMap<String, String> params,
             final String filename) {
-        return synthesizeToFile(text, params, filename, params.get(Engine.KEY_PARAM_UTTERANCE_ID));
+        return synthesizeToFile(text, convertParamsHashMaptoBundle(params),
+                new File(filename), params.get(Engine.KEY_PARAM_UTTERANCE_ID));
     }
 
-    private Bundle getParams(HashMap<String, String> params) {
+    private Bundle convertParamsHashMaptoBundle(HashMap<String, String> params) {
         if (params != null && !params.isEmpty()) {
-            Bundle bundle = new Bundle(mParams);
+            Bundle bundle = new Bundle();
             copyIntParam(bundle, params, Engine.KEY_PARAM_STREAM);
             copyIntParam(bundle, params, Engine.KEY_PARAM_SESSION_ID);
             copyStringParam(bundle, params, Engine.KEY_PARAM_UTTERANCE_ID);
@@ -1852,9 +1875,83 @@ public class TextToSpeech {
             }
 
             return bundle;
+        }
+        return null;
+    }
+
+    private Bundle getParams(Bundle params) {
+        if (params != null && !params.isEmpty()) {
+            Bundle bundle = new Bundle(mParams);
+            bundle.putAll(params);
+
+            verifyIntegerBundleParam(bundle, Engine.KEY_PARAM_STREAM);
+            verifyIntegerBundleParam(bundle, Engine.KEY_PARAM_SESSION_ID);
+            verifyStringBundleParam(bundle, Engine.KEY_PARAM_UTTERANCE_ID);
+            verifyFloatBundleParam(bundle, Engine.KEY_PARAM_VOLUME);
+            verifyFloatBundleParam(bundle, Engine.KEY_PARAM_PAN);
+
+            // Copy feature strings defined by the framework.
+            verifyBooleanBundleParam(bundle, Engine.KEY_FEATURE_NETWORK_SYNTHESIS);
+            verifyBooleanBundleParam(bundle, Engine.KEY_FEATURE_EMBEDDED_SYNTHESIS);
+            verifyIntegerBundleParam(bundle, Engine.KEY_FEATURE_NETWORK_TIMEOUT_MS);
+            verifyIntegerBundleParam(bundle, Engine.KEY_FEATURE_NETWORK_RETRIES_COUNT);
+
+            return bundle;
         } else {
             return mParams;
         }
+    }
+
+    private static boolean verifyIntegerBundleParam(Bundle bundle, String key) {
+        if (bundle.containsKey(key)) {
+            if (!(bundle.get(key) instanceof Integer ||
+                    bundle.get(key) instanceof Long)) {
+                bundle.remove(key);
+                Log.w(TAG, "Synthesis request paramter " + key + " containst value "
+                        + " with invalid type. Should be an Integer or a Long");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean verifyStringBundleParam(Bundle bundle, String key) {
+        if (bundle.containsKey(key)) {
+            if (!(bundle.get(key) instanceof String)) {
+                bundle.remove(key);
+                Log.w(TAG, "Synthesis request paramter " + key + " containst value "
+                        + " with invalid type. Should be a String");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean verifyBooleanBundleParam(Bundle bundle, String key) {
+        if (bundle.containsKey(key)) {
+            if (!(bundle.get(key) instanceof Boolean ||
+                    bundle.get(key) instanceof String)) {
+                bundle.remove(key);
+                Log.w(TAG, "Synthesis request paramter " + key + " containst value "
+                        + " with invalid type. Should be a Boolean or String");
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    private static boolean verifyFloatBundleParam(Bundle bundle, String key) {
+        if (bundle.containsKey(key)) {
+            if (!(bundle.get(key) instanceof Float ||
+                    bundle.get(key) instanceof Double)) {
+                bundle.remove(key);
+                Log.w(TAG, "Synthesis request paramter " + key + " containst value "
+                        + " with invalid type. Should be a Float or a Double");
+                return false;
+            }
+        }
+        return true;
     }
 
     private void copyStringParam(Bundle bundle, HashMap<String, String> params, String key) {
