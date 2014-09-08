@@ -32,23 +32,24 @@ import java.util.Objects;
  */
 public final class StatusHints implements Parcelable {
 
-    private final ComponentName mComponentName;
+    private final ComponentName mPackageName;
     private final CharSequence mLabel;
     private final int mIconResId;
     private final Bundle mExtras;
 
-    public StatusHints(ComponentName componentName, CharSequence label, int iconResId, Bundle extras) {
-        mComponentName = componentName;
+    public StatusHints(ComponentName packageName, CharSequence label, int iconResId,
+            Bundle extras) {
+        mPackageName = packageName;
         mLabel = label;
         mIconResId = iconResId;
         mExtras = extras;
     }
 
     /**
-     * @return A component used to load the icon.
+     * @return A package used to load the icon.
      */
-    public ComponentName getComponentName() {
-        return mComponentName;
+    public ComponentName getPackageName() {
+        return mPackageName;
     }
 
     /**
@@ -88,7 +89,7 @@ public final class StatusHints implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeParcelable(mComponentName, flags);
+        out.writeParcelable(mPackageName, flags);
         out.writeCharSequence(mLabel);
         out.writeInt(mIconResId);
         out.writeParcelable(mExtras, 0);
@@ -106,7 +107,7 @@ public final class StatusHints implements Parcelable {
     };
 
     private StatusHints(Parcel in) {
-        mComponentName = in.readParcelable(getClass().getClassLoader());
+        mPackageName = in.readParcelable(getClass().getClassLoader());
         mLabel = in.readCharSequence();
         mIconResId = in.readInt();
         mExtras = in.readParcelable(getClass().getClassLoader());
@@ -115,16 +116,16 @@ public final class StatusHints implements Parcelable {
     private Drawable getIcon(Context context, int resId) {
         Context packageContext;
         try {
-            packageContext = context.createPackageContext(mComponentName.getPackageName(), 0);
+            packageContext = context.createPackageContext(mPackageName.getPackageName(), 0);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(this, e, "Cannot find package %s", mComponentName.getPackageName());
+            Log.e(this, e, "Cannot find package %s", mPackageName.getPackageName());
             return null;
         }
         try {
             return packageContext.getDrawable(resId);
         } catch (MissingResourceException e) {
             Log.e(this, e, "Cannot find icon %d in package %s",
-                    resId, mComponentName.getPackageName());
+                    resId, mPackageName.getPackageName());
             return null;
         }
     }
@@ -133,7 +134,7 @@ public final class StatusHints implements Parcelable {
     public boolean equals(Object other) {
         if (other != null && other instanceof StatusHints) {
             StatusHints otherHints = (StatusHints) other;
-            return Objects.equals(otherHints.getComponentName(), getComponentName()) &&
+            return Objects.equals(otherHints.getPackageName(), getPackageName()) &&
                     Objects.equals(otherHints.getLabel(), getLabel()) &&
                     otherHints.getIconResId() == getIconResId() &&
                     Objects.equals(otherHints.getExtras(), getExtras());
@@ -143,7 +144,7 @@ public final class StatusHints implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(mComponentName) + Objects.hashCode(mLabel) + mIconResId +
+        return Objects.hashCode(mPackageName) + Objects.hashCode(mLabel) + mIconResId +
                 Objects.hashCode(mExtras);
     }
 }
