@@ -1440,6 +1440,16 @@ public class XmlUtils {
         return Boolean.parseBoolean(value);
     }
 
+    public static boolean readBooleanAttribute(XmlPullParser in, String name,
+            boolean defaultValue) {
+        final String value = in.getAttributeValue(null, name);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return Boolean.parseBoolean(value);
+        }
+    }
+
     public static void writeBooleanAttribute(XmlSerializer out, String name, boolean value)
             throws IOException {
         out.attribute(null, name, Boolean.toString(value));
