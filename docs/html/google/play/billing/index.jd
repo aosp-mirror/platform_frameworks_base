@@ -2,7 +2,7 @@ page.title=Google Play In-app Billing
 page.metaDescription=In-app Billing lets you sell digital content as one-time purchases or subscriptions.
 page.image=/images/play_dev.jpg
 meta.tags="monetizing, inappbilling, subscriptions"
-page.tags="inapp, iap, subscriptions"
+page.tags="billing, inapp, iap"
 @jd:body
 
 <p>In-app Billing is a Google Play service that lets you sell digital content from inside
