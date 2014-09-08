@@ -772,6 +772,7 @@ public class TelephonyManager {
      *
      * {@hide}
      */
+    @SystemApi
     public int getCurrentPhoneType() {
         return getCurrentPhoneType(getDefaultSubscription());
     }
@@ -786,6 +787,7 @@ public class TelephonyManager {
      * @param subId for which phone type is returned
      */
     /** {@hide} */
+    @SystemApi
     public int getCurrentPhoneType(long subId) {
 
         try{
