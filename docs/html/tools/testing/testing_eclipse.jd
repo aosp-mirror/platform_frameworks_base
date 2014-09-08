@@ -218,7 +218,7 @@ from Eclipse</a>.
 <p>
     Another useful convention is to add the method <code>testPreconditions()</code> to your test
     class. Use this method to test that the application under test is initialized correctly. If this
-    test fails, you know that that the initial conditions were in error. When this happens, further
+    test fails, you know that the initial conditions were in error. When this happens, further
     test results are suspect, regardless of whether or not the tests succeeded.
 </p>
 <p>

@@ -355,7 +355,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Return documents that that match the given query under the requested
+     * Return documents that match the given query under the requested
      * root. The returned documents should be sorted by relevance in descending
      * order. How documents are matched against the query string is an
      * implementation detail left to each provider, but it's suggested that at

@@ -228,9 +228,9 @@ graphics such as those used in a game.</p>
 <p>The following code snippet demonstrates how to build an {@link android.widget.ImageView} that
   uses an image from drawable resources and add it to the layout.</p>
 <pre>
-  LinearLayout mLinearLayout;
+LinearLayout mLinearLayout;
 
-  protected void onCreate(Bundle savedInstanceState) {
+protected void onCreate(Bundle savedInstanceState) {
   super.onCreate(savedInstanceState);
 
   // Create a LinearLayout in which to add the ImageView
@@ -241,20 +241,20 @@ graphics such as those used in a game.</p>
   i.setImageResource(R.drawable.my_image);
   i.setAdjustViewBounds(true); // set the ImageView bounds to match the Drawable's dimensions
   i.setLayoutParams(new Gallery.LayoutParams(LayoutParams.WRAP_CONTENT,
-  LayoutParams.WRAP_CONTENT));
+      LayoutParams.WRAP_CONTENT));
 
   // Add the ImageView to the layout and set the layout as the content view
   mLinearLayout.addView(i);
   setContentView(mLinearLayout);
-  }
+}
 </pre>
 <p>In other cases, you may want to handle your image resource as a
   {@link android.graphics.drawable.Drawable} object.
   To do so, create a Drawable from the resource like so:
   <pre>
-    Resources res = mContext.getResources();
-    Drawable myImage = res.getDrawable(R.drawable.my_image);
-  </pre>
+Resources res = mContext.getResources();
+Drawable myImage = res.getDrawable(R.drawable.my_image);
+</pre>
 
   <p class="warning"><strong>Note:</strong> Each unique resource in your project can maintain only
 one state, no matter how many different objects you may instantiate for it. For example, if you
@@ -269,12 +269,12 @@ animation</a>.</p>
   <p>The XML snippet below shows how to add a resource Drawable to an
     {@link android.widget.ImageView} in the XML layout (with some red tint just for fun).
     <pre>
-      &lt;ImageView
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:tint="#55ff0000"
-      android:src="@drawable/my_image"/>
-  </pre>
+&lt;ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:tint="#55ff0000"
+        android:src="@drawable/my_image"/>
+</pre>
   <p>For more information on using project resources, read about
     <a href="{@docRoot}guide/topics/resources/index.html">Resources and Assets</a>.</p>
 
@@ -305,22 +305,22 @@ specific XML attributes that help define the object
     <h4 id="drawable-xml-example">Example</h4>
     <p>Here's some XML that defines a TransitionDrawable:</p>
     <pre>
-      &lt;transition xmlns:android="http://schemas.android.com/apk/res/android">
-      &lt;item android:drawable="&#64;drawable/image_expand">
-      &lt;item android:drawable="&#64;drawable/image_collapse">
-      &lt;/transition>
-    </pre>
+&lt;transition xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;item android:drawable="&#64;drawable/image_expand">
+    &lt;item android:drawable="&#64;drawable/image_collapse">
+&lt;/transition>
+</pre>
 
     <p>With this XML saved in the file <code>res/drawable/expand_collapse.xml</code>,
       the following code will instantiate the TransitionDrawable and set it as the content of an
       ImageView:</p>
     <pre>
-      Resources res = mContext.getResources();
-      TransitionDrawable transition = (TransitionDrawable)
-res.getDrawable(R.drawable.expand_collapse);
-      ImageView image = (ImageView) findViewById(R.id.toggle_image);
-      image.setImageDrawable(transition);
-    </pre>
+Resources res = mContext.getResources();
+TransitionDrawable transition = (TransitionDrawable)
+    res.getDrawable(R.drawable.expand_collapse);
+ImageView image = (ImageView) findViewById(R.id.toggle_image);
+image.setImageDrawable(transition);
+</pre>
     <p>Then this transition can be run forward (for 1 second) with:</p>
     <pre>transition.startTransition(1000);</pre>
 
@@ -337,7 +337,7 @@ supported by each.</p>
       primitive shapes and style them in any way imaginable.</p>
 
     <p>A ShapeDrawable is an extension of {@link android.graphics.drawable.Drawable}, so you can use
-one      where ever
+one wherever
       a Drawable is expected &mdash; perhaps for the background of a View, set with
       {@link android.view.View#setBackgroundDrawable(android.graphics.drawable.Drawable)
       setBackgroundDrawable()}.
@@ -349,27 +349,27 @@ View      that
       Here's a basic extension of the View class that does just this, to draw a ShapeDrawable as a
       View:</p>
     <pre>
-      public class CustomDrawableView extends View {
-      private ShapeDrawable mDrawable;
+public class CustomDrawableView extends View {
+  private ShapeDrawable mDrawable;
 
-      public CustomDrawableView(Context context) {
-      super(context);
+  public CustomDrawableView(Context context) {
+    super(context);
 
-      int x = 10;
-      int y = 10;
-      int width = 300;
-      int height = 50;
+    int x = 10;
+    int y = 10;
+    int width = 300;
+    int height = 50;
 
-      mDrawable = new ShapeDrawable(new OvalShape());
-      mDrawable.getPaint().setColor(0xff74AC23);
-      mDrawable.setBounds(x, y, x + width, y + height);
-      }
+    mDrawable = new ShapeDrawable(new OvalShape());
+    mDrawable.getPaint().setColor(0xff74AC23);
+    mDrawable.setBounds(x, y, x + width, y + height);
+  }
 
-      protected void onDraw(Canvas canvas) {
-      mDrawable.draw(canvas);
-      }
-      }
-    </pre>
+  protected void onDraw(Canvas canvas) {
+    mDrawable.draw(canvas);
+  }
+}
+</pre>
 
     <p>In the constructor, a ShapeDrawable is defines as an {@link
       android.graphics.drawable.shapes.OvalShape}.
@@ -379,15 +379,15 @@ then the
     <p>With the custom View defined, it can be drawn any way you like. With the sample above, we can
       draw the shape programmatically in an Activity:</p>
     <pre>
-      CustomDrawableView mCustomDrawableView;
+CustomDrawableView mCustomDrawableView;
 
-      protected void onCreate(Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState);
-      mCustomDrawableView = new CustomDrawableView(this);
+protected void onCreate(Bundle savedInstanceState) {
+  super.onCreate(savedInstanceState);
+  mCustomDrawableView = new CustomDrawableView(this);
 
-      setContentView(mCustomDrawableView);
-      }
-    </pre>
+  setContentView(mCustomDrawableView);
+}
+</pre>
 
     <p>If you'd like to draw this custom drawable from the XML layout instead of from the Activity,
       then the CustomDrawable class must override the {@link
@@ -396,11 +396,11 @@ then the
       instantiating a View via inflation from XML. Then add a CustomDrawable element to the XML,
       like so:</p>
     <pre>
-      &lt;com.example.shapedrawable.CustomDrawableView
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      />
-  </pre>
+&lt;com.example.shapedrawable.CustomDrawableView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        />
+</pre>
 
   <p>The ShapeDrawable class (like many other Drawable types in the {@link
 android.graphics.drawable}    package)

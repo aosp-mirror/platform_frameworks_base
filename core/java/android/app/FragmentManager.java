@@ -70,7 +70,7 @@ public abstract class FragmentManager {
      * with {@link FragmentTransaction#addToBackStack(String)
      * FragmentTransaction.addToBackStack()}.  Entries can later be
      * retrieved with {@link FragmentManager#getBackStackEntryAt(int)
-     * FragmentManager.getBackStackEntry()}.
+     * FragmentManager.getBackStackEntryAt()}.
      *
      * <p>Note that you should never hold on to a BackStackEntry object;
      * the identifier as returned by {@link #getId} is the only thing that
@@ -260,7 +260,7 @@ public abstract class FragmentManager {
 
     /**
      * Return the BackStackEntry at index <var>index</var> in the back stack;
-     * entries start index 0 being the bottom of the stack.
+     * where the item on the bottom of the stack has index 0.
      */
     public abstract BackStackEntry getBackStackEntryAt(int index);
 
