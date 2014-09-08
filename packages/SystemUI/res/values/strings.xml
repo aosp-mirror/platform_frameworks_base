@@ -736,9 +736,6 @@
     <!-- Shows when people have clicked at the right edge of the screen to explain how to open the phone. In right-to-left languages, this is the opposite direction. [CHAR LIMIT=60] -->
     <string name="camera_hint">Swipe left for camera</string>
 
-    <!-- Zen mode condition: no exit criteria. [CHAR LIMIT=NONE] -->
-    <string name="zen_mode_forever">Indefinitely</string>
-
     <!-- Interruption level: None. [CHAR LIMIT=20] -->
     <string name="interruption_level_none">None</string>
 
@@ -804,18 +801,6 @@
     <!-- Message for add user confirmation dialog - short version. [CHAR LIMIT=none] -->
     <string name="user_add_user_message_short" msgid="1511354412249044381">When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. </string>
 
-
-    <!-- Zen mode condition: time duration in minutes. [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_minutes">
-        <item quantity="one">For one minute</item>
-        <item quantity="other">For %d minutes</item>
-    </plurals>
-
-    <!-- Zen mode condition: time duration in hours. [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_hours">
-        <item quantity="one">For one hour</item>
-        <item quantity="other">For %d hours</item>
-    </plurals>
 
     <!-- Battery saver notification title. [CHAR LIMIT=60]-->
     <string name="battery_saver_notification_title">Battery saver is on</string>
