@@ -4240,14 +4240,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int result;
         boolean isWakeKey = (policyFlags & WindowManagerPolicy.FLAG_WAKE) != 0
                 || event.isWakeKey();
-        if (interactive
-                || (isInjected && !isWakeKey)
-                || (!interactive && shouldDispatchInputWhenNonInteractive())) {
-            // When the device is interactive, the key is injected, or we're currently dozing in a
-            // non-interactive state with the screen on and the keyguard showing,  pass the key to
-            // the application.
+        if (interactive || (isInjected && !isWakeKey)) {
+            // When the device is interactive or the key is injected pass the key to the
+            // application.
             result = ACTION_PASS_TO_USER;
             isWakeKey = false;
+        } else if (!interactive && shouldDispatchInputWhenNonInteractive()) {
+            // If we're currently dozing with the screen on and the keyguard showing, pass the key
+            // to the application but preserve its wake key status to make sure we still move
+            // from dozing to fully interactive if we would normally go from off to fully
+            // interactive.
+            result = ACTION_PASS_TO_USER;
         } else {
             // When the screen is off and the key is not injected, determine whether
             // to wake the device but don't pass the key to the application.
