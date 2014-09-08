@@ -492,7 +492,8 @@ public abstract class Connection {
     }
 
     /**
-     * @return The {@link PropertyPresentation} which controls how the handle is shown.
+     * @return The presentation requirements for the handle.
+     *         See {@link TelecommManager} for valid values.
      */
     public final int getHandlePresentation() {
         return mHandlePresentation;
@@ -506,8 +507,8 @@ public abstract class Connection {
     }
 
     /**
-     * @return The {@link PropertyPresentation} which controls how the caller display name is
-     *         shown.
+     * @return The presentation requirements for the handle.
+     *         See {@link TelecommManager} for valid values.
      */
     public final int getCallerDisplayNamePresentation() {
         return mCallerDisplayNamePresentation;
@@ -664,8 +665,8 @@ public abstract class Connection {
      * Sets the value of the {@link #getHandle()} property.
      *
      * @param handle The new handle.
-     * @param presentation The {@link PropertyPresentation} which controls how the handle is
-     *         shown.
+     * @param presentation The presentation requirements for the handle.
+     *        See {@link TelecommManager} for valid values.
      */
     public final void setHandle(Uri handle, int presentation) {
         Log.d(this, "setHandle %s", handle);
@@ -680,8 +681,8 @@ public abstract class Connection {
      * Sets the caller display name (CNAP).
      *
      * @param callerDisplayName The new display name.
-     * @param presentation The {@link PropertyPresentation} which controls how the name is
-     *         shown.
+     * @param presentation The presentation requirements for the handle.
+     *        See {@link TelecommManager} for valid values.
      */
     public final void setCallerDisplayName(String callerDisplayName, int presentation) {
         Log.d(this, "setCallerDisplayName %s", callerDisplayName);

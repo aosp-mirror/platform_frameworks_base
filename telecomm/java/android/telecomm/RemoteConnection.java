@@ -135,8 +135,8 @@ public final class RemoteConnection {
          *
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param handle The new handle of the {@code RemoteConnection}.
-         * @param presentation The {@link PropertyPresentation} which controls how the
-         *         handle is shown.
+         * @param presentation The presentation requirements for the handle.
+         *        See {@link TelecommManager} for valid values.
          */
         public void onHandleChanged(RemoteConnection connection, Uri handle, int presentation) {}
 
@@ -146,8 +146,8 @@ public final class RemoteConnection {
          *
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param callerDisplayName The new caller display name of the {@code RemoteConnection}.
-         * @param presentation The {@link PropertyPresentation} which controls how the
-         *         caller display name is shown.
+         * @param presentation The presentation requirements for the handle.
+         *        See {@link TelecommManager} for valid values.
          */
         public void onCallerDisplayNameChanged(
                 RemoteConnection connection, String callerDisplayName, int presentation) {}
@@ -349,7 +349,7 @@ public final class RemoteConnection {
 
     /**
      * @return The presentation requirements for the handle. See
-     * {@link PropertyPresentation} for valid values.
+     * {@link TelecommManager} for valid values.
      */
     public int getHandlePresentation() {
         return mHandlePresentation;
@@ -364,7 +364,7 @@ public final class RemoteConnection {
 
     /**
      * @return The presentation requirements for the caller display name. See
-     * {@link PropertyPresentation} for valid values.
+     * {@link TelecommManager} for valid values.
      */
     public int getCallerDisplayNamePresentation() {
         return mCallerDisplayNamePresentation;

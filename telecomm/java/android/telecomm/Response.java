@@ -17,10 +17,7 @@
 package android.telecomm;
 
 /**
- * <strong>OBSOLETE</strong> Used to inform a client of asynchronously returned results.
- * <p>
- * <strong>TODO:</strong> Remove onCreateConferenceConnection() async method
- * then delete this interface.
+ * @hide
  */
 public interface Response<IN, OUT> {
 
