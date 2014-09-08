@@ -315,15 +315,15 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public void launchCamera() {
         mFlashlightController.killFlashlight();
         Intent intent = getCameraIntent();
-        boolean wouldLaunchResolverActivity = mPreviewInflater.wouldLaunchResolverActivity(intent);
+        boolean wouldLaunchResolverActivity = PreviewInflater.wouldLaunchResolverActivity(
+                mContext, intent, mLockPatternUtils.getCurrentUser());
         if (intent == SECURE_CAMERA_INTENT && !wouldLaunchResolverActivity) {
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);
         } else {
 
             // We need to delay starting the activity because ResolverActivity finishes itself if
             // launched behind lockscreen.
-            mActivityStarter.startActivity(intent, false /* dismissShade */,
-                    wouldLaunchResolverActivity /* afterKeyguardGone */);
+            mActivityStarter.startActivity(intent, false /* dismissShade */);
         }
     }
 
@@ -337,8 +337,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 }
             });
         } else {
-            mActivityStarter.startActivity(PHONE_INTENT, false /* dismissShade */,
-                    mPreviewInflater.wouldLaunchResolverActivity(PHONE_INTENT));
+            mActivityStarter.startActivity(PHONE_INTENT, false /* dismissShade */);
         }
     }
 
