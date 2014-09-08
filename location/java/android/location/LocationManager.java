@@ -1109,9 +1109,9 @@ public class LocationManager {
      * {@link #requestLocationUpdates(String, long, float, LocationListener)}.
      *
      * <p>
-     * Before API version 20, this method would throw {@link SecurityException}
-     * if the location permissions were not sufficient to use the specified
-     * provider.
+     * Before API version {@link android.os.Build.VERSION_CODES#L}, this
+     * method would throw {@link SecurityException} if the location permissions
+     * were not sufficient to use the specified provider.
      *
      * @param provider the name of the provider
      * @return true if the provider exists and is enabled
@@ -1119,7 +1119,6 @@ public class LocationManager {
      * @throws IllegalArgumentException if provider is null
      */
     public boolean isProviderEnabled(String provider) {
-        // STOPSHIP: finalize API version number in javadoc
         checkProvider(provider);
 
         try {
