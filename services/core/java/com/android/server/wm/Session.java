@@ -415,6 +415,18 @@ final class Session extends IWindowSession.Stub
         mService.wallpaperOffsetsComplete(window);
     }
 
+    public void setWallpaperDisplayOffset(IBinder window, int x, int y) {
+        synchronized(mService.mWindowMap) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                mService.setWindowWallpaperDisplayOffsetLocked(
+                        mService.windowForClientLocked(this, window, true), x, y);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
     public Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
             int z, Bundle extras, boolean sync) {
         synchronized(mService.mWindowMap) {

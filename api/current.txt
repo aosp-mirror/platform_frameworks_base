@@ -27275,6 +27275,7 @@ package android.service.wallpaper {
     method public android.view.SurfaceHolder getSurfaceHolder();
     method public boolean isPreview();
     method public boolean isVisible();
+    method public void onApplyWindowInsets(android.view.WindowInsets);
     method public android.os.Bundle onCommand(java.lang.String, int, int, int, android.os.Bundle, boolean);
     method public void onCreate(android.view.SurfaceHolder);
     method public void onDesiredSizeChanged(int, int);
@@ -34989,12 +34990,18 @@ package android.view {
 
   public final class WindowInsets {
     ctor public WindowInsets(android.view.WindowInsets);
+    method public android.view.WindowInsets consumeStableInsets();
     method public android.view.WindowInsets consumeSystemWindowInsets();
+    method public int getStableInsetBottom();
+    method public int getStableInsetLeft();
+    method public int getStableInsetRight();
+    method public int getStableInsetTop();
     method public int getSystemWindowInsetBottom();
     method public int getSystemWindowInsetLeft();
     method public int getSystemWindowInsetRight();
     method public int getSystemWindowInsetTop();
     method public boolean hasInsets();
+    method public boolean hasStableInsets();
     method public boolean hasSystemWindowInsets();
     method public boolean isConsumed();
     method public boolean isRound();

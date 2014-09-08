@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -947,6 +948,48 @@ public class WallpaperManager {
             }
         } catch (RemoteException e) {
             // Ignore
+        }
+    }
+
+    /**
+     * Specify extra padding that the wallpaper should have outside of the display.
+     * That is, the given padding supplies additional pixels the wallpaper should extend
+     * outside of the display itself.
+     * @param padding The number of pixels the wallpaper should extend beyond the display,
+     * on its left, top, right, and bottom sides.
+     * @hide
+     */
+    @SystemApi
+    public void setDisplayPadding(Rect padding) {
+        try {
+            if (sGlobals.mService == null) {
+                Log.w(TAG, "WallpaperService not running");
+            } else {
+                sGlobals.mService.setDisplayPadding(padding);
+            }
+        } catch (RemoteException e) {
+            // Ignore
+        }
+    }
+
+    /**
+     * Apply a raw offset to the wallpaper window.  Should only be used in
+     * combination with {@link #setDisplayPadding(android.graphics.Rect)} when you
+     * have ensured that the wallpaper will extend outside of the display area so that
+     * it can be moved without leaving part of the display uncovered.
+     * @param x The offset, in pixels, to apply to the left edge.
+     * @param y The offset, in pixels, to apply to the top edge.
+     * @hide
+     */
+    @SystemApi
+    public void setDisplayOffset(IBinder windowToken, int x, int y) {
+        try {
+            //Log.v(TAG, "Sending new wallpaper display offsets from app...");
+            WindowManagerGlobal.getWindowSession().setWallpaperDisplayOffset(
+                    windowToken, x, y);
+            //Log.v(TAG, "...app returning after sending display offset!");
+        } catch (RemoteException e) {
+            // Ignore.
         }
     }
 

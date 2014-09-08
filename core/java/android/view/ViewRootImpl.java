@@ -121,7 +121,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final String PROPERTY_MEDIA_DISABLED = "config.disable_media";
 
     // property used by emulator to determine display shape
-    private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
+    public static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
 
     /**
      * Maximum time we allow the user to roll the trackball enough to generate
