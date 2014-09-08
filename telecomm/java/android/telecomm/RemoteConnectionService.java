@@ -74,7 +74,7 @@ final class RemoteConnectionService {
                     }
                 }
                 connection.setConferenceableConnections(conferenceable);
-                // TODO: Do we need to support video providers for remote connections?
+                connection.setVideoState(parcel.getVideoState());
                 if (connection.getState() == Connection.STATE_DISCONNECTED) {
                     // ... then, if it was created in a disconnected state, that indicates
                     // failure on the providing end, so immediately mark it destroyed
@@ -226,7 +226,8 @@ final class RemoteConnectionService {
 
         @Override
         public void setVideoProvider(String callId, IVideoProvider videoProvider) {
-            // not supported for remote connections.
+            findConnectionForAction(callId, "setVideoProvider")
+                    .setVideoProvider(new RemoteConnection.VideoProvider(videoProvider));
         }
 
         @Override

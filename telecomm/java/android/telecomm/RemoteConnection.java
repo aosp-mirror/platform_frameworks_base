@@ -17,15 +17,18 @@
 package android.telecomm;
 
 import com.android.internal.telecomm.IConnectionService;
+import com.android.internal.telecomm.IVideoCallback;
+import com.android.internal.telecomm.IVideoProvider;
 
 import android.app.PendingIntent;
 import android.net.Uri;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.telephony.DisconnectCause;
+import android.view.Surface;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -183,6 +186,18 @@ public final class RemoteConnection {
                 List<RemoteConnection> conferenceableConnections) {}
 
         /**
+         * Indicates that the {@code VideoProvider} associated with this {@code RemoteConnection}
+         * has changed.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param videoProvider The new {@code VideoProvider} associated with this
+         *         {@code RemoteConnection}.
+         * @hide
+         */
+        public void onVideoProviderChanged(
+                RemoteConnection connection, VideoProvider videoProvider) {}
+
+        /**
          * Indicates that the {@code RemoteConference} that this {@code RemoteConnection} is a part
          * of has changed.
          *
@@ -193,6 +208,185 @@ public final class RemoteConnection {
         public void onConferenceChanged(
                 RemoteConnection connection,
                 RemoteConference conference) {}
+    }
+
+    /** {@hide} */
+    public static class VideoProvider {
+
+        public abstract static class Listener {
+            public void onReceiveSessionModifyRequest(
+                    VideoProvider videoProvider,
+                    VideoProfile videoProfile) {}
+
+            public void onReceiveSessionModifyResponse(
+                    VideoProvider videoProvider,
+                    int status,
+                    VideoProfile requestedProfile,
+                    VideoProfile responseProfile) {}
+
+            public void onHandleCallSessionEvent(VideoProvider videoProvider, int event) {}
+
+            public void onPeerDimensionsChanged(VideoProvider videoProvider, int width, int height) {}
+
+            public void onCallDataUsageChanged(VideoProvider videoProvider, int dataUsage) {}
+
+            public void onCameraCapabilitiesChanged(
+                    VideoProvider videoProvider,
+                    CameraCapabilities cameraCapabilities) {}
+        }
+
+        private final IVideoCallback mVideoCallbackDelegate = new IVideoCallback() {
+            @Override
+            public void receiveSessionModifyRequest(VideoProfile videoProfile) {
+                for (Listener l : mListeners) {
+                    l.onReceiveSessionModifyRequest(VideoProvider.this, videoProfile);
+                }
+            }
+
+            @Override
+            public void receiveSessionModifyResponse(int status, VideoProfile requestedProfile,
+                    VideoProfile responseProfile) {
+                for (Listener l : mListeners) {
+                    l.onReceiveSessionModifyResponse(
+                            VideoProvider.this,
+                            status,
+                            requestedProfile,
+                            responseProfile);
+                }
+            }
+
+            @Override
+            public void handleCallSessionEvent(int event) {
+                for (Listener l : mListeners) {
+                    l.onHandleCallSessionEvent(VideoProvider.this, event);
+                }
+            }
+
+            @Override
+            public void changePeerDimensions(int width, int height) {
+                for (Listener l : mListeners) {
+                    l.onPeerDimensionsChanged(VideoProvider.this, width, height);
+                }
+            }
+
+            @Override
+            public void changeCallDataUsage(int dataUsage) {
+                for (Listener l : mListeners) {
+                    l.onCallDataUsageChanged(VideoProvider.this, dataUsage);
+                }
+            }
+
+            @Override
+            public void changeCameraCapabilities(CameraCapabilities cameraCapabilities) {
+                for (Listener l : mListeners) {
+                    l.onCameraCapabilitiesChanged(VideoProvider.this, cameraCapabilities);
+                }
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return null;
+            }
+        };
+
+        private final VideoCallbackServant mVideoCallbackServant =
+                new VideoCallbackServant(mVideoCallbackDelegate);
+
+        private final IVideoProvider mVideoProviderBinder;
+
+        /**
+         * ConcurrentHashMap constructor params: 8 is initial table size, 0.9f is
+         * load factor before resizing, 1 means we only expect a single thread to
+         * access the map so make only a single shard
+         */
+        private final Set<Listener> mListeners = Collections.newSetFromMap(
+                new ConcurrentHashMap<Listener, Boolean>(8, 0.9f, 1));
+
+        public VideoProvider(IVideoProvider videoProviderBinder) {
+            mVideoProviderBinder = videoProviderBinder;
+            try {
+                mVideoProviderBinder.setVideoCallback(mVideoCallbackServant.getStub().asBinder());
+            } catch (RemoteException e) {
+            }
+        }
+
+        public void addListener(Listener l) {
+            mListeners.add(l);
+        }
+
+        public void removeListener(Listener l) {
+            mListeners.remove(l);
+        }
+
+        public void setCamera(String cameraId) {
+            try {
+                mVideoProviderBinder.setCamera(cameraId);
+            } catch (RemoteException e) {
+            }
+        }
+
+        public void setPreviewSurface(Surface surface) {
+            try {
+                mVideoProviderBinder.setPreviewSurface(surface);
+            } catch (RemoteException e) {
+            }
+        }
+
+        public void setDisplaySurface(Surface surface) {
+            try {
+                mVideoProviderBinder.setDisplaySurface(surface);
+            } catch (RemoteException e) {
+            }
+        }
+
+        public void setDeviceOrientation(int rotation) {
+            try {
+                mVideoProviderBinder.setDeviceOrientation(rotation);
+            } catch (RemoteException e) {
+            }
+        }
+
+        public void setZoom(float value) {
+            try {
+                mVideoProviderBinder.setZoom(value);
+            } catch (RemoteException e) {
+            }
+        }
+
+        public void sendSessionModifyRequest(VideoProfile reqProfile) {
+            try {
+                mVideoProviderBinder.sendSessionModifyRequest(reqProfile);
+            } catch (RemoteException e) {
+            }
+        }
+
+        public void sendSessionModifyResponse(VideoProfile responseProfile) {
+            try {
+                mVideoProviderBinder.sendSessionModifyResponse(responseProfile);
+            } catch (RemoteException e) {
+            }
+        }
+
+        public void requestCameraCapabilities() {
+            try {
+                mVideoProviderBinder.requestCameraCapabilities();
+            } catch (RemoteException e) {
+            }
+        }
+
+        public void requestCallDataUsage() {
+            try {
+                mVideoProviderBinder.requestCallDataUsage();
+            } catch (RemoteException e) {
+            }
+        }
+
+        public void setPauseImage(String uri) {
+            try {
+                mVideoProviderBinder.setPauseImage(uri);
+            } catch (RemoteException e) {
+            }
+        }
     }
 
     private IConnectionService mConnectionService;
@@ -215,6 +409,7 @@ public final class RemoteConnection {
     private boolean mConnected;
     private int mCallCapabilities;
     private int mVideoState;
+    private VideoProvider mVideoProvider;
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
     private Uri mHandle;
@@ -377,6 +572,14 @@ public final class RemoteConnection {
      */
     public int getVideoState() {
         return mVideoState;
+    }
+
+    /**
+     * @return The video provider associated with this {@code RemoteConnection}.
+     * @hide
+     */
+    public final VideoProvider getVideoProvider() {
+        return mVideoProvider;
     }
 
     /**
@@ -681,6 +884,16 @@ public final class RemoteConnection {
         mVideoState = videoState;
         for (Listener l : mListeners) {
             l.onVideoStateChanged(this, videoState);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    void setVideoProvider(VideoProvider videoProvider) {
+        mVideoProvider = videoProvider;
+        for (Listener l : mListeners) {
+            l.onVideoProviderChanged(this, videoProvider);
         }
     }
 
