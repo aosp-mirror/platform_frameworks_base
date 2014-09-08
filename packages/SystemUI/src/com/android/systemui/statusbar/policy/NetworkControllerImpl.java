@@ -63,9 +63,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
     static final boolean DEBUG = false;
     static final boolean CHATTY = false; // additional diagnostics, but not logspew
 
-    private static final int FLIGHT_MODE_ICON = R.drawable.stat_sys_airplane_mode;
-    private static final int ROAMING_ICON = R.drawable.stat_sys_data_fully_connected_roam;
-
     // telephony
     boolean mHspaDataDistinguishable;
     final TelephonyManager mPhone;
@@ -165,7 +162,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
     public interface SignalCluster {
         void setWifiIndicators(boolean visible, int strengthIcon, String contentDescription);
         void setMobileDataIndicators(boolean visible, int strengthIcon, int typeIcon,
-                String contentDescription, String typeContentDescription, boolean roaming);
+                String contentDescription, String typeContentDescription, boolean roaming,
+                boolean isTypeIconWide);
         void setIsAirplaneMode(boolean is, int airplaneIcon);
     }
 
@@ -358,6 +356,16 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mMobileDataController.setMobileDataEnabled(enabled);
     }
 
+    private boolean isTypeIconWide(int iconId) {
+        return TelephonyIcons.ICON_LTE == iconId || TelephonyIcons.ICON_1X == iconId
+                || TelephonyIcons.ICON_3G == iconId || TelephonyIcons.ICON_4G == iconId;
+    }
+
+    private boolean isQsTypeIconWide(int iconId) {
+        return TelephonyIcons.QS_ICON_LTE == iconId || TelephonyIcons.QS_ICON_1X == iconId
+                || TelephonyIcons.QS_ICON_3G == iconId || TelephonyIcons.QS_ICON_4G == iconId;
+    }
+
     public void refreshSignalCluster(SignalCluster cluster) {
         if (mDemoMode) return;
         cluster.setWifiIndicators(
@@ -374,7 +382,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     mDataTypeIconId,
                     mContentDescriptionWimax,
                     mContentDescriptionDataType,
-                    mDataTypeIconId == ROAMING_ICON);
+                    mDataTypeIconId == TelephonyIcons.ROAMING_ICON,
+                    false /* isTypeIconWide */ );
         } else {
             // normal mobile data
             cluster.setMobileDataIndicators(
@@ -383,7 +392,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     mDataTypeIconId,
                     mContentDescriptionPhoneSignal,
                     mContentDescriptionDataType,
-                    mDataTypeIconId == ROAMING_ICON);
+                    mDataTypeIconId == TelephonyIcons.ROAMING_ICON,
+                    isTypeIconWide(mDataTypeIconId));
         }
         cluster.setIsAirplaneMode(mAirplaneMode, mAirplaneIconId);
     }
@@ -409,18 +419,20 @@ public class NetworkControllerImpl extends BroadcastReceiver
         if (isEmergencyOnly()) {
             cb.onMobileDataSignalChanged(false, mQSPhoneSignalIconId,
                     mContentDescriptionPhoneSignal, mQSDataTypeIconId, mobileIn, mobileOut,
-                    mContentDescriptionDataType, null, mNoSim);
+                    mContentDescriptionDataType, null, mNoSim, isQsTypeIconWide(mQSDataTypeIconId));
         } else {
             if (mIsWimaxEnabled && mWimaxConnected) {
                 // Wimax is special
                 cb.onMobileDataSignalChanged(true, mQSPhoneSignalIconId,
                         mContentDescriptionPhoneSignal, mQSDataTypeIconId, mobileIn, mobileOut,
-                        mContentDescriptionDataType, mNetworkName, mNoSim);
+                        mContentDescriptionDataType, mNetworkName, mNoSim,
+                        isQsTypeIconWide(mQSDataTypeIconId));
             } else {
                 // Normal mobile data
                 cb.onMobileDataSignalChanged(mHasMobileDataFeature, mQSPhoneSignalIconId,
                         mContentDescriptionPhoneSignal, mQSDataTypeIconId, mobileIn, mobileOut,
-                        mContentDescriptionDataType, mNetworkName, mNoSim);
+                        mContentDescriptionDataType, mNetworkName, mNoSim,
+                        isQsTypeIconWide(mQSDataTypeIconId));
             }
         }
         cb.onAirplaneModeChanged(mAirplaneMode);
@@ -754,7 +766,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                                 R.string.accessibility_data_connection_4g);
                     } else {
                         mDataIconList = TelephonyIcons.DATA_LTE[mInetCondition];
-                        mDataTypeIconId = R.drawable.stat_sys_data_fully_connected_lte;
+                        mDataTypeIconId = TelephonyIcons.ICON_LTE;
                         mQSDataTypeIconId = TelephonyIcons.QS_DATA_LTE[mInetCondition];
                         mContentDescriptionDataType = mContext.getString(
                                 R.string.accessibility_data_connection_lte);
@@ -780,11 +792,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         if (isCdma()) {
             if (isCdmaEri()) {
-                mDataTypeIconId = ROAMING_ICON;
+                mDataTypeIconId = TelephonyIcons.ROAMING_ICON;
                 mQSDataTypeIconId = TelephonyIcons.QS_DATA_R[mInetCondition];
             }
         } else if (mPhone.isNetworkRoaming()) {
-                mDataTypeIconId = ROAMING_ICON;
+                mDataTypeIconId = TelephonyIcons.ROAMING_ICON;
                 mQSDataTypeIconId = TelephonyIcons.QS_DATA_R[mInetCondition];
         }
     }
@@ -1164,7 +1176,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             // look again; your radios are now airplanes
             mContentDescriptionPhoneSignal = mContext.getString(
                     R.string.accessibility_airplane_mode);
-            mAirplaneIconId = FLIGHT_MODE_ICON;
+            mAirplaneIconId = TelephonyIcons.FLIGHT_MODE_ICON;
             mPhoneSignalIconId = mDataSignalIconId = mDataTypeIconId = mQSDataTypeIconId = 0;
             mQSPhoneSignalIconId = 0;
 
@@ -1198,11 +1210,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mQSDataTypeIconId = 0;
             if (isCdma()) {
                 if (isCdmaEri()) {
-                    mDataTypeIconId = ROAMING_ICON;
+                    mDataTypeIconId = TelephonyIcons.ROAMING_ICON;
                     mQSDataTypeIconId = TelephonyIcons.QS_DATA_R[mInetCondition];
                 }
             } else if (mPhone.isNetworkRoaming()) {
-                mDataTypeIconId = ROAMING_ICON;
+                mDataTypeIconId = TelephonyIcons.ROAMING_ICON;
                 mQSDataTypeIconId = TelephonyIcons.QS_DATA_R[mInetCondition];
             }
         }
@@ -1509,7 +1521,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             if (airplane != null) {
                 boolean show = airplane.equals("show");
                 for (SignalCluster cluster : mSignalClusters) {
-                    cluster.setIsAirplaneMode(show, FLIGHT_MODE_ICON);
+                    cluster.setIsAirplaneMode(show, TelephonyIcons.FLIGHT_MODE_ICON);
                 }
             }
             String fully = args.getString("fully");
@@ -1540,23 +1552,23 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 String datatype = args.getString("datatype");
                 if (datatype != null) {
                     mDemoDataTypeIconId =
-                            datatype.equals("1x") ? R.drawable.stat_sys_data_fully_connected_1x :
-                            datatype.equals("3g") ? R.drawable.stat_sys_data_fully_connected_3g :
-                            datatype.equals("4g") ? R.drawable.stat_sys_data_fully_connected_4g :
+                            datatype.equals("1x") ? TelephonyIcons.ICON_1X :
+                            datatype.equals("3g") ? TelephonyIcons.ICON_3G :
+                            datatype.equals("4g") ? TelephonyIcons.ICON_4G :
                             datatype.equals("e") ? R.drawable.stat_sys_data_fully_connected_e :
                             datatype.equals("g") ? R.drawable.stat_sys_data_fully_connected_g :
                             datatype.equals("h") ? R.drawable.stat_sys_data_fully_connected_h :
-                            datatype.equals("lte") ? R.drawable.stat_sys_data_fully_connected_lte :
-                            datatype.equals("roam") ? ROAMING_ICON :
+                            datatype.equals("lte") ? TelephonyIcons.ICON_LTE :
+                            datatype.equals("roam") ? TelephonyIcons.ROAMING_ICON :
                             0;
                     mDemoQSDataTypeIconId =
-                            datatype.equals("1x") ? R.drawable.ic_qs_signal_1x :
-                            datatype.equals("3g") ? R.drawable.ic_qs_signal_3g :
-                            datatype.equals("4g") ? R.drawable.ic_qs_signal_4g :
+                            datatype.equals("1x") ? TelephonyIcons.QS_ICON_1X :
+                            datatype.equals("3g") ? TelephonyIcons.QS_ICON_3G :
+                            datatype.equals("4g") ? TelephonyIcons.QS_ICON_4G :
                             datatype.equals("e") ? R.drawable.ic_qs_signal_e :
                             datatype.equals("g") ? R.drawable.ic_qs_signal_g :
                             datatype.equals("h") ? R.drawable.ic_qs_signal_h :
-                            datatype.equals("lte") ? R.drawable.ic_qs_signal_lte :
+                            datatype.equals("lte") ? TelephonyIcons.QS_ICON_LTE :
                             datatype.equals("roam") ? R.drawable.ic_qs_signal_r :
                             0;
                 }
@@ -1575,7 +1587,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             mDemoDataTypeIconId,
                             "Demo",
                             "Demo",
-                            mDemoDataTypeIconId == ROAMING_ICON);
+                            mDemoDataTypeIconId == TelephonyIcons.ROAMING_ICON,
+                            isTypeIconWide(mDemoDataTypeIconId));
                 }
                 refreshViews();
             }

@@ -373,6 +373,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         public boolean activityOut;
         public int overlayIconId;
         public boolean filter;
+        public boolean isOverlayIconWide;
 
         @Override
         public boolean copyTo(State other) {
@@ -380,13 +381,15 @@ public abstract class QSTile<TState extends State> implements Listenable {
             final boolean changed = o.enabled != enabled
                     || o.connected != connected || o.activityIn != activityIn
                     || o.activityOut != activityOut
-                    || o.overlayIconId != overlayIconId;
+                    || o.overlayIconId != overlayIconId
+                    || o.isOverlayIconWide != isOverlayIconWide;
             o.enabled = enabled;
             o.connected = connected;
             o.activityIn = activityIn;
             o.activityOut = activityOut;
             o.overlayIconId = overlayIconId;
             o.filter = filter;
+            o.isOverlayIconWide = isOverlayIconWide;
             return super.copyTo(other) || changed;
         }
 
@@ -399,6 +402,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
             rt.insert(rt.length() - 1, ",activityOut=" + activityOut);
             rt.insert(rt.length() - 1, ",overlayIconId=" + overlayIconId);
             rt.insert(rt.length() - 1, ",filter=" + filter);
+            rt.insert(rt.length() - 1, ",wideOverlayIcon=" + isOverlayIconWide);
             return rt;
         }
     }
