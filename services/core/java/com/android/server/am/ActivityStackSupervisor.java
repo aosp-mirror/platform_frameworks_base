@@ -2783,9 +2783,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         // A non-top activity is reporting a visibility change.
-        if ((visible && (top.fullscreen || top.state != ActivityState.RESUMED)) ||
-                top.app == null || top.app.thread == null) {
-            // Can't carry out this request.
+        if (visible && top.fullscreen) {
+            // Let the caller know that it can't be seen.
             if (DEBUG_VISIBLE_BEHIND) Slog.d(TAG, "requestVisibleBehind: returning top.fullscreen="
                     + top.fullscreen + " top.state=" + top.state + " top.app=" + top.app +
                     " top.app.thread=" + top.app.thread);
@@ -2807,9 +2806,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 mService.convertFromTranslucent(next.appToken);
             }
         }
-        try {
-            top.app.thread.scheduleBackgroundVisibleBehindChanged(top.appToken, visible);
-        } catch (RemoteException e) {
+        if (top.app != null && top.app.thread != null) {
+            // Notify the top app of the change.
+            try {
+                top.app.thread.scheduleBackgroundVisibleBehindChanged(top.appToken, visible);
+            } catch (RemoteException e) {
+            }
         }
         return true;
     }
