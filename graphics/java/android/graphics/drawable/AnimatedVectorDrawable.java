@@ -252,6 +252,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
             throws XmlPullParserException, IOException {
 
         int eventType = parser.getEventType();
+        float pathErrorScale = 1;
         while (eventType != XmlPullParser.END_DOCUMENT) {
             if (eventType == XmlPullParser.START_TAG) {
                 final String tagName = parser.getName();
@@ -261,9 +262,11 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
                     int drawableRes = a.getResourceId(
                             R.styleable.AnimatedVectorDrawable_drawable, 0);
                     if (drawableRes != 0) {
-                        mAnimatedVectorState.mVectorDrawable = (VectorDrawable) res.getDrawable(
+                        VectorDrawable vectorDrawable = (VectorDrawable) res.getDrawable(
                                 drawableRes, theme).mutate();
-                        mAnimatedVectorState.mVectorDrawable.setAllowCaching(false);
+                        vectorDrawable.setAllowCaching(false);
+                        pathErrorScale = vectorDrawable.getPixelSize();
+                        mAnimatedVectorState.mVectorDrawable = vectorDrawable;
                     }
                     a.recycle();
                 } else if (TARGET.equals(tagName)) {
@@ -275,7 +278,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
                     int id = a.getResourceId(
                             R.styleable.AnimatedVectorDrawableTarget_animation, 0);
                     if (id != 0) {
-                        Animator objectAnimator = AnimatorInflater.loadAnimator(res, theme, id);
+                        Animator objectAnimator = AnimatorInflater.loadAnimator(res, theme, id,
+                                pathErrorScale);
                         setupAnimatorsForTarget(target, objectAnimator);
                     }
                     a.recycle();
