@@ -1417,9 +1417,9 @@ public abstract class Transition implements Cloneable {
                     }
                     capturePropagationValues(values);
                     if (start) {
-                        addViewValues(mStartValues, view, values);
+                        addViewValues(mStartValues, view, values, true);
                     } else {
-                        addViewValues(mEndValues, view, values);
+                        addViewValues(mEndValues, view, values, true);
                     }
                 }
             }
@@ -1460,7 +1460,7 @@ public abstract class Transition implements Cloneable {
     }
 
     static void addViewValues(TransitionValuesMaps transitionValuesMaps,
-            View view, TransitionValues transitionValues) {
+            View view, TransitionValues transitionValues, boolean setTransientState) {
         transitionValuesMaps.viewValues.put(view, transitionValues);
         int id = view.getId();
         if (id >= 0) {
@@ -1489,11 +1489,15 @@ public abstract class Transition implements Cloneable {
                     // Duplicate item IDs: cannot match by item ID.
                     View alreadyMatched = transitionValuesMaps.itemIdValues.get(itemId);
                     if (alreadyMatched != null) {
-                        alreadyMatched.setHasTransientState(false);
+                        if (setTransientState) {
+                            alreadyMatched.setHasTransientState(false);
+                        }
                         transitionValuesMaps.itemIdValues.put(itemId, null);
                     }
                 } else {
-                    view.setHasTransientState(true);
+                    if (setTransientState) {
+                        view.setHasTransientState(true);
+                    }
                     transitionValuesMaps.itemIdValues.put(itemId, view);
                 }
             }
@@ -1560,9 +1564,9 @@ public abstract class Transition implements Cloneable {
             }
             capturePropagationValues(values);
             if (start) {
-                addViewValues(mStartValues, view, values);
+                addViewValues(mStartValues, view, values, true);
             } else {
-                addViewValues(mEndValues, view, values);
+                addViewValues(mEndValues, view, values, true);
             }
         }
         if (view instanceof ViewGroup) {

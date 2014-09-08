@@ -408,7 +408,7 @@ public class TransitionSet extends Transition {
         for (int i = 0; i < numValues; i++) {
             View view = values.viewValues.keyAt(i);
             if (isValidTarget(view)) {
-                addViewValues(included, view, values.viewValues.valueAt(i));
+                addViewValues(included, view, values.viewValues.valueAt(i), false);
             }
         }
         return included;
