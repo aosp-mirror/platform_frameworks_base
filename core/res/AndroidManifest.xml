@@ -1046,7 +1046,7 @@
     <!-- =========================================== -->
     <eat-comment />
 
-    <!-- Used for permissions that are associated with accessing and modifyign
+    <!-- Used for permissions that are associated with accessing and modifying
          telephony state: placing calls, intercepting outgoing calls, reading
          and modifying the phone state. -->
     <permission-group android:name="android.permission-group.PHONE_CALLS"

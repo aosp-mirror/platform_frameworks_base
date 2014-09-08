@@ -801,7 +801,7 @@ String syncConnPref = sharedPref.getString(SettingsActivity.KEY_PREF_SYNC_CONN, 
 
 <h3 id="Listening">Listening for preference changes</h3>
 
-<p>There are several reasons you might want to be notified as soon as the use changes one of the
+<p>There are several reasons you might want to be notified as soon as the user changes one of the
 preferences. In order to receive a callback when a change happens to any one of the preferences,
 implement the {@link android.content.SharedPreferences.OnSharedPreferenceChangeListener
 SharedPreference.OnSharedPreferenceChangeListener} interface and register the listener for the
