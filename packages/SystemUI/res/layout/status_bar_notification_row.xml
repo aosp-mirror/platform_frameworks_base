@@ -52,9 +52,10 @@
         android:paddingStart="8dp"
         />
 
-    <include
-        layout="@layout/notification_guts"
-        android:id="@+id/notification_guts"
+    <ViewStub
+        android:layout="@layout/notification_guts"
+        android:id="@+id/notification_guts_stub"
+        android:inflatedId="@+id/notification_guts"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
