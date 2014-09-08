@@ -29,31 +29,25 @@ public final class ConnectionRequest implements Parcelable {
 
     // TODO: Token to limit recursive invocations
     private final PhoneAccountHandle mAccountHandle;
-    private final Uri mHandle;
-    private final int mHandlePresentation;
+    private final Uri mAddress;
     private final Bundle mExtras;
     private final int mVideoState;
 
     /**
      * @param accountHandle The accountHandle which should be used to place the call.
      * @param handle The handle (e.g., phone number) to which the {@link Connection} is to connect.
-     * @param handlePresentation The {@link PropertyPresentation} which controls how the handle
-     *         is shown.
      * @param extras Application-specific extra data.
      */
     public ConnectionRequest(
             PhoneAccountHandle accountHandle,
             Uri handle,
-            int handlePresentation,
             Bundle extras) {
-        this(accountHandle, handle, handlePresentation, extras, VideoProfile.VideoState.AUDIO_ONLY);
+        this(accountHandle, handle, extras, VideoProfile.VideoState.AUDIO_ONLY);
     }
 
     /**
      * @param accountHandle The accountHandle which should be used to place the call.
      * @param handle The handle (e.g., phone number) to which the {@link Connection} is to connect.
-     * @param handlePresentation The {@link PropertyPresentation} which controls how the handle
-     *         is shown.
      * @param extras Application-specific extra data.
      * @param videoState Determines the video state for the connection.
      * @hide
@@ -61,20 +55,17 @@ public final class ConnectionRequest implements Parcelable {
     public ConnectionRequest(
             PhoneAccountHandle accountHandle,
             Uri handle,
-            int handlePresentation,
             Bundle extras,
             int videoState) {
         mAccountHandle = accountHandle;
-        mHandle = handle;
-        mHandlePresentation = handlePresentation;
+        mAddress = handle;
         mExtras = extras;
         mVideoState = videoState;
     }
 
     private ConnectionRequest(Parcel in) {
         mAccountHandle = in.readParcelable(getClass().getClassLoader());
-        mHandle = in.readParcelable(getClass().getClassLoader());
-        mHandlePresentation = in.readInt();
+        mAddress = in.readParcelable(getClass().getClassLoader());
         mExtras = in.readParcelable(getClass().getClassLoader());
         mVideoState = in.readInt();
     }
@@ -87,12 +78,7 @@ public final class ConnectionRequest implements Parcelable {
     /**
      * The handle (e.g., phone number) to which the {@link Connection} is to connect.
      */
-    public Uri getHandle() { return mHandle; }
-
-    /**
-     * The {@link PropertyPresentation} which controls how the handle is shown.
-     */
-    public int getHandlePresentation() { return mHandlePresentation; }
+    public Uri getAddress() { return mAddress; }
 
     /**
      * Application-specific extra data. Used for passing back information from an incoming
@@ -118,9 +104,9 @@ public final class ConnectionRequest implements Parcelable {
     @Override
     public String toString() {
         return String.format("ConnectionRequest %s %s",
-                mHandle == null
+                mAddress == null
                         ? Uri.EMPTY
-                        : Connection.toLogSafePhoneNumber(mHandle.toString()),
+                        : Connection.toLogSafePhoneNumber(mAddress.toString()),
                 mExtras == null ? "" : mExtras);
     }
 
@@ -147,8 +133,7 @@ public final class ConnectionRequest implements Parcelable {
     @Override
     public void writeToParcel(Parcel destination, int flags) {
         destination.writeParcelable(mAccountHandle, 0);
-        destination.writeParcelable(mHandle, 0);
-        destination.writeInt(mHandlePresentation);
+        destination.writeParcelable(mAddress, 0);
         destination.writeParcelable(mExtras, 0);
         destination.writeInt(mVideoState);
     }

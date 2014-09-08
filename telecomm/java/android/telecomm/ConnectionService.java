@@ -781,7 +781,7 @@ public abstract class ConnectionService extends Service {
                 }
             }
             ParcelableConference parcelableConference = new ParcelableConference(
-                    conference.getPhoneAccount(),
+                    conference.getPhoneAccountHandle(),
                     conference.getState(),
                     conference.getCapabilities(),
                     connectionIds);
