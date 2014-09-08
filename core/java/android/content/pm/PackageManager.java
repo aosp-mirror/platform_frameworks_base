@@ -1531,6 +1531,22 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports verified boot.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_VERIFIED_BOOT = "android.software.verified_boot";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports secure removal of users. When a user is deleted the data associated
+     * with that user is securely deleted and no longer available.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SECURELY_REMOVES_USERS
+            = "android.software.securely_removes_users";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device has a full implementation of the android.webkit.* APIs. Devices
      * lacking this feature will not have a functioning WebView implementation.
      */
