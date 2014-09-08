@@ -254,13 +254,13 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"သိုလှောင်မှုများ"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USBအားချိတ်ဆက်ရန်"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SDကတ်အားချိတ်ဆက်ရန်"</string>
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"လွယ်ကူစွာ ရရှိနိုင်မှု ပေးသော စွမ်းရည်"</string>
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"အများသုံးစွဲနိုင်မှု စွမ်းရည်"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"ကူညီပေးမှု နည်းပညာများမှ တောင်းဆိုနိုင်သော ထူးခြားချက်များ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ဝင်းဒိုးမှာပါရှိသည်များကို ထုတ်ယူခြင်း"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"သင် အပြန်အလှန်လုပ်နေသော ဝင်းဒိုးမှာပါရှိသည်များကို သေချာစွာ ကြည့်ရှုစစ်ဆေးပါ"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ထိတို့ခြင်းဖြင့် ရှာဖွေပေးနိုင်တာကို ဖွင့်လိုက်ပါ"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"ထိတွေ့လိုက်တဲ့ အရာများကို အသံနဲ့ ထုတ်ပြောမှာဖြစ်ပြီး ဖန်သားပြင်ပေါကနေ လက်နဲ့ ထပ်မံ ကြည့်ရှုနိုင်ပါတယ်"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ဝက်ဘ် လွယ်ကူစွာ အသုံးပြုနိုင်မှု စွမ်းရည် မြှင့်တင်ခြင်းကို ဖွင့်ရန်"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ပိုမိုကောင်းမွန်သော ဝက်ဘ်အများသုံးစွဲနိုင်မှုကို ဖွင့်ရန်"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"အပလီကေးရှင်းကို ပိုမိုပြည့်စုံစေရန် စကရစ်များကို သွင်းနိုင်ပါတယ်"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ရိုက်သောစာများကို သေချာစွာ စစ်ဆေးပါ"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"အရေးကြီးသော ကိုယ်ရေးအချက်အလက်များဖြစ်တဲ့ ခရက်ဒစ်ကဒ်နံပါတ်များနှင့် စကားဝှက်များ ပါဝင်ပါတယ်."</string>
@@ -1192,7 +1192,7 @@
     <string name="ok" msgid="5970060430562524910">"ကောင်းပြီ"</string>
     <string name="cancel" msgid="6442560571259935130">"ပယ်ဖျက်ရန်"</string>
     <string name="yes" msgid="5362982303337969312">"ကောင်းပြီ"</string>
-    <string name="no" msgid="5141531044935541497">"ပယ်ဖျက်သည်"</string>
+    <string name="no" msgid="5141531044935541497">"နေတော့"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"သတိပြုရန်"</string>
     <string name="loading" msgid="7933681260296021180">"တင်နေ…"</string>
     <string name="capital_on" msgid="1544682755514494298">"ဖွင့်ရန်"</string>
@@ -1301,7 +1301,7 @@
     <string name="sms_short_code_details" msgid="5873295990846059400"><b>"ဒါက သင့် မိုဘိုင်း အကောင့် အတွက် "</b>" ကုန်ကျမှု ရှိလာနိုင်သည်။"</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"ဒါက သင့် မိုဘိုင်း အကောင့် အတွက် ကုန်ကျမှု ရှိလာနိုင်သည်။"</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"ပို့ရန်"</string>
-    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"ပယ်ဖျက်သည်"</string>
+    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"နေတော့"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"ကျွန်ပ်၏ရွေးချယ်မှုကို မှတ်ထားရန်"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"နောင်တွင် ဆက်တင် &gt; အပလီကေးရှင်းများ မှပြောင်းနိုင်သည်"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"အမြဲခွင့်ပြုရန်"</string>
@@ -1414,7 +1414,7 @@
     <string name="ime_action_go" msgid="8320845651737369027">"သွားပါ"</string>
     <string name="ime_action_search" msgid="658110271822807811">"ရှာဖွေခြင်း"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"ပို့ခြင်း"</string>
-    <string name="ime_action_next" msgid="3138843904009813834">"အရှေ့သို့"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"ရှေ့သို့"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"ပြီးပါပြီ"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"အနောက်သို့"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"လုပ်ဆောင်ချက်"</string>
@@ -1529,7 +1529,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"ပိုမိုရွေးချယ်စရာများ"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s ၊ %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s ၊ %2$s ၊ %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"စက်အတွင်းသိမ်းဆည်းရန်နေရာ"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"စက်တွင်း သိုလှောင်ထားမှု"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD ကဒ်"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USBဖြင့် သိမ်းဆည်း"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ပြင်ဆင်ရန်"</string>
