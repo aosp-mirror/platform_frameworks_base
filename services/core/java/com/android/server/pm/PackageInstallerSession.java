@@ -17,15 +17,15 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_ABORTED;
-import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
-import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
+import static com.android.server.pm.PackageInstallerService.prepareExternalStageCid;
+import static com.android.server.pm.PackageInstallerService.prepareInternalStageDir;
 
 import android.content.Context;
 import android.content.Intent;
@@ -88,8 +88,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     // TODO: enforce INSTALL_ALLOW_TEST
     // TODO: enforce INSTALL_ALLOW_DOWNGRADE
 
-    // TODO: treat INHERIT_EXISTING as installExistingPackage()
-
     private final PackageInstallerService.InternalCallback mCallback;
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -108,17 +106,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /** Note that UID is not persisted; it's always derived at runtime. */
     final int installerUid;
 
-    private final AtomicInteger mOpenCount = new AtomicInteger();
+    private final AtomicInteger mActiveCount = new AtomicInteger();
 
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
     private float mClientProgress = 0;
     @GuardedBy("mLock")
+    private float mInternalProgress = 0;
+
+    @GuardedBy("mLock")
     private float mProgress = 0;
     @GuardedBy("mLock")
     private float mReportedProgress = -1;
 
+    @GuardedBy("mLock")
+    private boolean mPrepared = false;
     @GuardedBy("mLock")
     private boolean mSealed = false;
     @GuardedBy("mLock")
@@ -184,7 +187,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public PackageInstallerSession(PackageInstallerService.InternalCallback callback,
             Context context, PackageManagerService pm, Looper looper, int sessionId, int userId,
             String installerPackageName, SessionParams params, long createdMillis,
-            File stageDir, String stageCid, boolean sealed) {
+            File stageDir, String stageCid, boolean prepared, boolean sealed) {
         mCallback = callback;
         mContext = context;
         mPm = pm;
@@ -203,6 +206,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     "Exactly one of stageDir or stageCid stage must be set");
         }
 
+        mPrepared = prepared;
         mSealed = sealed;
 
         // Always derived at runtime
@@ -214,8 +218,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         } else {
             mPermissionsAccepted = false;
         }
-
-        computeProgressLocked();
     }
 
     public SessionInfo generateInfo() {
@@ -227,7 +229,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     mResolvedBaseFile.getAbsolutePath() : null;
             info.progress = mProgress;
             info.sealed = mSealed;
-            info.active = mOpenCount.get() > 0;
+            info.active = mActiveCount.get() > 0;
 
             info.mode = params.mode;
             info.sizeBytes = params.sizeBytes;
@@ -238,14 +240,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return info;
     }
 
+    public boolean isPrepared() {
+        synchronized (mLock) {
+            return mPrepared;
+        }
+    }
+
     public boolean isSealed() {
         synchronized (mLock) {
             return mSealed;
         }
     }
 
-    private void assertNotSealed(String cookie) {
+    private void assertPreparedAndNotSealed(String cookie) {
         synchronized (mLock) {
+            if (!mPrepared) {
+                throw new IllegalStateException(cookie + " before prepared");
+            }
             if (mSealed) {
                 throw new SecurityException(cookie + " not allowed after commit");
             }
@@ -278,30 +289,26 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Override
     public void setClientProgress(float progress) {
         synchronized (mLock) {
+            // Always publish first staging movement
+            final boolean forcePublish = (mClientProgress == 0);
             mClientProgress = progress;
-            computeProgressLocked();
+            computeProgressLocked(forcePublish);
         }
-        maybePublishProgress();
     }
 
     @Override
     public void addClientProgress(float progress) {
         synchronized (mLock) {
-            mClientProgress += progress;
-            computeProgressLocked();
-        }
-        maybePublishProgress();
-    }
-
-    private void computeProgressLocked() {
-        if (mProgress <= 0.8f) {
-            mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f);
+            setClientProgress(mClientProgress + progress);
         }
     }
 
-    private void maybePublishProgress() {
+    private void computeProgressLocked(boolean forcePublish) {
+        mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f)
+                + MathUtils.constrain(mInternalProgress * 0.2f, 0f, 0.2f);
+
         // Only publish when meaningful change
-        if (Math.abs(mProgress - mReportedProgress) > 0.01) {
+        if (forcePublish || Math.abs(mProgress - mReportedProgress) >= 0.01) {
             mReportedProgress = mProgress;
             mCallback.onSessionProgressChanged(this, mProgress);
         }
@@ -309,7 +316,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public String[] getNames() {
-        assertNotSealed("getNames");
+        assertPreparedAndNotSealed("getNames");
         try {
             return resolveStageDir().list();
         } catch (IOException e) {
@@ -333,7 +340,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // will block any attempted install transitions.
         final FileBridge bridge;
         synchronized (mLock) {
-            assertNotSealed("openWrite");
+            assertPreparedAndNotSealed("openWrite");
 
             bridge = new FileBridge();
             mBridges.add(bridge);
@@ -387,7 +394,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private ParcelFileDescriptor openReadInternal(String name) throws IOException {
-        assertNotSealed("openRead");
+        assertPreparedAndNotSealed("openRead");
 
         try {
             if (!FileUtils.isValidExtFilename(name)) {
@@ -407,6 +414,30 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public void commit(IntentSender statusReceiver) {
         Preconditions.checkNotNull(statusReceiver);
 
+        synchronized (mLock) {
+            if (!mSealed) {
+                // Verify that all writers are hands-off
+                for (FileBridge bridge : mBridges) {
+                    if (!bridge.isClosed()) {
+                        throw new SecurityException("Files still open");
+                    }
+                }
+
+                // Persist the fact that we've sealed ourselves to prevent
+                // mutations of any hard links we create.
+                mSealed = true;
+                mCallback.onSessionSealed(this);
+            }
+        }
+
+        // Client staging is fully done at this point
+        mClientProgress = 1f;
+        computeProgressLocked(true);
+
+        // This ongoing commit should keep session active, even though client
+        // will probably close their end.
+        mActiveCount.incrementAndGet();
+
         final PackageInstallObserverAdapter adapter = new PackageInstallObserverAdapter(mContext,
                 statusReceiver, sessionId);
         mHandler.obtainMessage(MSG_COMMIT, adapter.getBinder()).sendToTarget();
@@ -414,22 +445,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void commitLocked() throws PackageManagerException {
         if (mDestroyed) {
-            throw new PackageManagerException(INSTALL_FAILED_ALREADY_EXISTS, "Invalid session");
+            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR, "Session destroyed");
         }
-
-        // Verify that all writers are hands-off
         if (!mSealed) {
-            for (FileBridge bridge : mBridges) {
-                if (!bridge.isClosed()) {
-                    throw new PackageManagerException(INSTALL_FAILED_PACKAGE_CHANGED,
-                            "Files still open");
-                }
-            }
-            mSealed = true;
-
-            // Persist the fact that we've sealed ourselves to prevent mutations
-            // of any hard links we create below.
-            mCallback.onSessionSealed(this);
+            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR, "Session not sealed");
         }
 
         try {
@@ -458,6 +477,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mRemoteObserver.onUserActionRequired(intent);
             } catch (RemoteException ignored) {
             }
+
+            // Commit was keeping session marked as active until now; release
+            // that extra refcount so session appears idle.
+            close();
             return;
         }
 
@@ -487,8 +510,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         // TODO: surface more granular state from dexopt
-        mProgress = 0.9f;
-        maybePublishProgress();
+        mInternalProgress = 0.5f;
+        computeProgressLocked(true);
 
         // Unpack native libraries
         extractNativeLibraries(mResolvedStageDir, params.abiOverride);
@@ -831,15 +854,35 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    public void open() {
-        if (mOpenCount.getAndIncrement() == 0) {
+    public void open() throws IOException {
+        if (mActiveCount.getAndIncrement() == 0) {
             mCallback.onSessionActiveChanged(this, true);
+        }
+
+        synchronized (mLock) {
+            if (!mPrepared) {
+                if (stageDir != null) {
+                    prepareInternalStageDir(stageDir);
+                } else if (stageCid != null) {
+                    prepareExternalStageCid(stageCid, params.sizeBytes);
+
+                    // TODO: deliver more granular progress for ASEC allocation
+                    mInternalProgress = 0.25f;
+                    computeProgressLocked(true);
+                } else {
+                    throw new IllegalArgumentException(
+                            "Exactly one of stageDir or stageCid stage must be set");
+                }
+
+                mPrepared = true;
+                mCallback.onSessionPrepared(this);
+            }
         }
     }
 
     @Override
     public void close() {
-        if (mOpenCount.decrementAndGet() == 0) {
+        if (mActiveCount.decrementAndGet() == 0) {
             mCallback.onSessionActiveChanged(this, false);
         }
     }
@@ -869,6 +912,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             mSealed = true;
             mDestroyed = true;
+
+            // Force shut down all bridges
+            for (FileBridge bridge : mBridges) {
+                bridge.forceClose();
+            }
         }
         if (stageDir != null) {
             FileUtils.deleteContents(stageDir);

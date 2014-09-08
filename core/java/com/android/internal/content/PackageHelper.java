@@ -390,7 +390,10 @@ public class PackageHelper {
         if (!emulated && (checkBoth || prefer == RECOMMEND_INSTALL_EXTERNAL)) {
             final File target = new UserEnvironment(UserHandle.USER_OWNER)
                     .getExternalStorageDirectory();
-            fitsOnExternal = (sizeBytes <= storage.getStorageBytesUntilLow(target));
+            // External is only an option when size is known
+            if (sizeBytes > 0) {
+                fitsOnExternal = (sizeBytes <= storage.getStorageBytesUntilLow(target));
+            }
         }
 
         if (prefer == RECOMMEND_INSTALL_INTERNAL) {
