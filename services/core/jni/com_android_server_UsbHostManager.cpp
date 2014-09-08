@@ -21,7 +21,6 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
-#include "utils/Vector.h"
 
 #include <usbhost/usbhost.h>
 
@@ -68,8 +67,6 @@ static int usb_device_added(const char *devname, void* client_data) {
 
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     jobject thiz = (jobject)client_data;
-    Vector<int> interfaceValues;
-    Vector<int> endpointValues;
     const usb_device_descriptor* deviceDesc = usb_device_get_device_descriptor(device);
 
     char *manufacturer = usb_device_get_manufacturer_name(device);
