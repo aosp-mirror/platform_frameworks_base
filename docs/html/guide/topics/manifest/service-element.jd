@@ -138,7 +138,7 @@ There is no default.  The name must be specified.
 </p></dd>
 
 <dt><a name="prmsn"></a>{@code android:permission}</dt>
-<dd>The name of a permission that that an entity must have in order to 
+<dd>The name of a permission that an entity must have in order to 
 launch the service or bind to it.  If a caller of 
 <code>{@link android.content.Context#startService startService()}</code>,
 <code>{@link android.content.Context#bindService bindService()}</code>, or
@@ -156,7 +156,7 @@ not protected by a permission.
 
 <p>
 For more information on permissions, see the 
-<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#sectperm">Permissions</a> 
+<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#perms">Permissions</a> 
 section in the introduction and a separate document, 
 <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>.
 </p></dd>

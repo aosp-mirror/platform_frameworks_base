@@ -26,7 +26,7 @@ public abstract class FragmentTransaction {
     /**
      * Add a fragment to the activity state.  This fragment may optionally
      * also have its view (if {@link Fragment#onCreateView Fragment.onCreateView}
-     * returns non-null) into a container view of the activity.
+     * returns non-null) inserted into a container view of the activity.
      * 
      * @param containerViewId Optional identifier of the container this fragment is
      * to be placed in.  If 0, it will not be placed in a container.

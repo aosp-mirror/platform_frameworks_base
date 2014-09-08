@@ -94,7 +94,7 @@ excludeFromSuggestions=true
     Plugin, DDMS is integrated into your development environment. See <a
     href="{@docRoot}tools/debugging/ddms.html">Using DDMS</a> to learn more about the program.</dd>
 
-    <dt id="dialog">Dialog</dt> <dd> A floating window that that acts as a lightweight
+    <dt id="dialog">Dialog</dt> <dd> A floating window that acts as a lightweight
     form. A dialog can have button controls only and is intended to perform a
     simple action (such as button choice) and perhaps return a value. A dialog
     is not intended to persist in the history stack, contain complex layout,

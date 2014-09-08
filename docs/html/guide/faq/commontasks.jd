@@ -653,7 +653,7 @@ and the {@link android.os.Handler} documentation.</p>
 <p>You can highlight or style the formatting of strings or substrings of text in
     a TextView object. There are two ways to do this:</p>
 <ul>
-    <li>If you use a <a href="{@docRoot}guide/topics/resources/available-resources.html#stringresources">string resource</a>,
+    <li>If you use a <a href="{@docRoot}guide/topics/resources/string-resource.html">string resource</a>,
         you can add some simple styling, such as bold or italic using HTML notation.
         The currently supported tags are: <code>B</code> (bold),
         <code>I</code> (italic), <code>U</code> (underline),
@@ -661,8 +661,8 @@ and the {@link android.os.Handler} documentation.</p>
         <code>SUP</code> (superscript), <code>SUB</code> (subscript),
         and <code>STRIKE</code> (strikethrough).
         So, for example, in res/values/strings.xml you could declare this:<br />
-        <code>&lt;resource&gt;<br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&lt;string&nbsp;id=&quot;@+id/styled_welcome_message&quot;&gt;We
+        <code>&lt;resources&gt;<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&lt;string&nbsp;name=&quot;styled_welcome_message&quot;&gt;We
         are &lt;b&gt;&lt;i&gt;so&lt;/i&gt;&lt;/b&gt; glad to see you.&lt;/string&gt;<br />
         &lt;/resources&gt;</code></li>
     <li>To style text on the fly, or to add highlighting or more complex styling,
