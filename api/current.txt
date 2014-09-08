@@ -12691,7 +12691,7 @@ package android.hardware.camera2 {
     method public void onCaptureProgressed(android.hardware.camera2.CameraCaptureSession, android.hardware.camera2.CaptureRequest, android.hardware.camera2.CaptureResult);
     method public void onCaptureSequenceAborted(android.hardware.camera2.CameraCaptureSession, int);
     method public void onCaptureSequenceCompleted(android.hardware.camera2.CameraCaptureSession, int, long);
-    method public void onCaptureStarted(android.hardware.camera2.CameraCaptureSession, android.hardware.camera2.CaptureRequest, long);
+    method public void onCaptureStarted(android.hardware.camera2.CameraCaptureSession, android.hardware.camera2.CaptureRequest, long, long);
   }
 
   public static abstract class CameraCaptureSession.StateCallback {
