@@ -468,19 +468,6 @@ public class AlwaysOnHotwordDetector {
     }
 
     /**
-     * FIXME: Remove once the prebuilts are updated.
-     *
-     * @hide
-     */
-    @Deprecated
-    public Intent createIntentToEnroll() {
-        if (DBG) Slog.d(TAG, "createIntentToEnroll");
-        synchronized (mLock) {
-            return getManageIntentLocked(MANAGE_ACTION_ENROLL);
-        }
-    }
-
-    /**
      * Creates an intent to start the un-enrollment for the associated keyphrase.
      * This intent must be invoked using {@link Activity#startActivityForResult(Intent, int)}.
      * Starting re-enrollment is only valid if the keyphrase is already enrolled,
@@ -502,19 +489,6 @@ public class AlwaysOnHotwordDetector {
     }
 
     /**
-     * FIXME: Remove once the prebuilts are updated.
-     *
-     * @hide
-     */
-    @Deprecated
-    public Intent createIntentToUnEnroll() {
-        if (DBG) Slog.d(TAG, "createIntentToUnEnroll");
-        synchronized (mLock) {
-            return getManageIntentLocked(MANAGE_ACTION_UN_ENROLL);
-        }
-    }
-
-    /**
      * Creates an intent to start the re-enrollment for the associated keyphrase.
      * This intent must be invoked using {@link Activity#startActivityForResult(Intent, int)}.
      * Starting re-enrollment is only valid if the keyphrase is already enrolled,
@@ -530,19 +504,6 @@ public class AlwaysOnHotwordDetector {
      */
     public Intent createReEnrollIntent() {
         if (DBG) Slog.d(TAG, "createReEnrollIntent");
-        synchronized (mLock) {
-            return getManageIntentLocked(MANAGE_ACTION_RE_ENROLL);
-        }
-    }
-
-    /**
-     * FIXME: Remove once the prebuilts are updated.
-     *
-     * @hide
-     */
-    @Deprecated
-    public Intent createIntentToReEnroll() {
-        if (DBG) Slog.d(TAG, "createIntentToReEnroll");
         synchronized (mLock) {
             return getManageIntentLocked(MANAGE_ACTION_RE_ENROLL);
         }
