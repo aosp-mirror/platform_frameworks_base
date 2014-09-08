@@ -15,7 +15,7 @@ fi
 
 if [[ $rebuild == true ]]; then
   make -j4 FrameworksCoreInputMethodTests
-  TESTAPP=${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreInputMethodTests.apk
+  TESTAPP=${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreInputMethodTests/FrameworksCoreInputMethodTests.apk
   COMMAND="adb install -r $TESTAPP"
   echo $COMMAND
   $COMMAND
