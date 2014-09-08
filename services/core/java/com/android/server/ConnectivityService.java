@@ -425,8 +425,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     TelephonyManager mTelephonyManager;
 
-    // sequence number for Networks
-    private final static int MIN_NET_ID = 10; // some reserved marks
+    // sequence number for Networks; keep in sync with system/netd/NetworkController.cpp
+    private final static int MIN_NET_ID = 100; // some reserved marks
     private final static int MAX_NET_ID = 65535;
     private int mNextNetId = MIN_NET_ID;
 
