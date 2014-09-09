@@ -73,6 +73,7 @@ public class UserSwitcherController {
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     private Dialog mExitGuestDialog;
+    private Dialog mAddUserDialog;
     private int mLastNonGuestUser = UserHandle.USER_OWNER;
     private boolean mSimpleUserSwitcher;
     private boolean mAddUsersWhenLocked;
@@ -228,8 +229,8 @@ public class UserSwitcherController {
             // No guest user. Create one.
             id = mUserManager.createGuest(mContext, mContext.getString(R.string.guest_nickname)).id;
         } else if (record.isAddUser) {
-            id = mUserManager.createUser(
-                    mContext.getString(R.string.user_new_user_name), 0 /* flags */).id;
+            showAddUserDialog();
+            return;
         } else {
             id = record.info.id;
         }
@@ -258,6 +259,14 @@ public class UserSwitcherController {
         }
         mExitGuestDialog = new ExitGuestDialog(mContext, id);
         mExitGuestDialog.show();
+    }
+
+    private void showAddUserDialog() {
+        if (mAddUserDialog != null && mAddUserDialog.isShowing()) {
+            mAddUserDialog.cancel();
+        }
+        mAddUserDialog = new AddUserDialog(mContext);
+        mAddUserDialog.show();
     }
 
     private void exitGuest(int id) {
@@ -531,6 +540,32 @@ public class UserSwitcherController {
             } else {
                 dismiss();
                 exitGuest(mGuestId);
+            }
+        }
+    }
+
+    private final class AddUserDialog extends SystemUIDialog implements
+            DialogInterface.OnClickListener {
+
+        public AddUserDialog(Context context) {
+            super(context);
+            setTitle(R.string.user_add_user_title);
+            setMessage(context.getString(R.string.user_add_user_message_short));
+            setButton(DialogInterface.BUTTON_NEGATIVE,
+                    context.getString(android.R.string.cancel), this);
+            setButton(DialogInterface.BUTTON_POSITIVE,
+                    context.getString(android.R.string.ok), this);
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            if (which == BUTTON_NEGATIVE) {
+                cancel();
+            } else {
+                dismiss();
+                int id = mUserManager.createUser(
+                        mContext.getString(R.string.user_new_user_name), 0 /* flags */).id;
+                switchToUserId(id);
             }
         }
     }
