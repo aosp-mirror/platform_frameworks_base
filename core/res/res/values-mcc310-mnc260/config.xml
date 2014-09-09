@@ -29,11 +29,4 @@
          carrier provisioning. If false: hard disabled. If true: then depends on carrier
          provisioning, availability etc -->
     <bool name="config_carrier_volte_vt_available">true</bool>
-
-    <!-- Values for GPS configuration (T-Mobile) -->
-    <string-array translatable="false" name="config_gpsParameters">
-        <item>CAPABILITEIS=0x33</item>
-        <item>GPS_LOCK=1</item>
-        <item>LPP_PROFILE=2</item>
-    </string-array>
 </resources>

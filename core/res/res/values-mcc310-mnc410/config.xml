@@ -40,12 +40,6 @@
         <item>315</item>
         <item>316</item>
     </string-array>
-    <!-- Values for GPS configuration (AT&T) -->
-    <string-array translatable="false" name="config_gpsParameters">
-        <item>CAPABILITIES=0x33</item>
-        <item>GPS_LOCK=1</item>
-        <item>LPP_PROFILE=3</item>
-    </string-array>
     <!-- Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD -->
     <string-array name="config_twoDigitNumberPattern">
         <item>"0"</item>
