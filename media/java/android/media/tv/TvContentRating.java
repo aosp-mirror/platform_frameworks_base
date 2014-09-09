@@ -247,6 +247,10 @@ import java.util.Objects;
  *         <td>TV content rating system for Iceland</td>
  *     </tr>
  *     <tr>
+ *         <td>JP_TV</td>
+ *         <td>TV content rating system for Japan</td>
+ *     </tr>
+ *     <tr>
  *         <td>KR_TV</td>
  *         <td>TV content rating system for South Korea</td>
  *     </tr>
@@ -910,6 +914,23 @@ import java.util.Objects;
  *     <tr>
  *         <td>IS_TV_18</td>
  *         <td>Programs suitable for ages 18 and older</td>
+ *     </tr>
+ *     <tr>
+ *         <td valign="top" rowspan="4">JP_TV</td>
+ *         <td>JP_TV_G</td>
+ *         <td>General, suitable for all ages</td>
+ *     </tr>
+ *     <tr>
+ *         <td>JP_TV_PG12</td>
+ *         <td>Parental guidance requested for young people under 12 years</td>
+ *     </tr>
+ *     <tr>
+ *         <td>JP_TV_R15</td>
+ *         <td>For persons aged 15 and above only</td>
+ *     </tr>
+ *     <tr>
+ *         <td>JP_TV_R18</td>
+ *         <td>For persons aged 18 and above only</td>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="5">KR_TV</td>
