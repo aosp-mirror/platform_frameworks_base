@@ -3953,6 +3953,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return !mNotificationData.getActiveNotifications().isEmpty();
     }
 
+    public void wakeUpIfDozing(long time) {
+        if (mDozeServiceHost != null && mDozeServiceHost.isDozing()) {
+            PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+            pm.wakeUp(time);
+        }
+    }
+
     private final class ShadeUpdates {
         private final ArraySet<String> mVisibleNotifications = new ArraySet<String>();
         private final ArraySet<String> mNewVisibleNotifications = new ArraySet<String>();
@@ -3995,6 +4002,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         public String toString() {
             return "PSB.DozeServiceHost[mCallbacks=" + mCallbacks.size() + " mCurrentDozeService="
                     + mCurrentDozeService + "]";
+        }
+
+        public boolean isDozing() {
+            return mCurrentDozeService != null;
         }
 
         public void firePowerSaveChanged(boolean active) {
