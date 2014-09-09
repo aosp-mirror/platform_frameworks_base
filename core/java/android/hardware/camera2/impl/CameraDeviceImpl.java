@@ -803,7 +803,7 @@ public class CameraDeviceImpl extends CameraDevice {
          * @see android.media.MediaActionSound
          */
         public void onCaptureStarted(CameraDevice camera,
-                CaptureRequest request, long timestamp) {
+                CaptureRequest request, long timestamp, long frameNumber) {
             // default empty implementation
         }
 
@@ -1237,8 +1237,10 @@ public class CameraDeviceImpl extends CameraDevice {
         @Override
         public void onCaptureStarted(final CaptureResultExtras resultExtras, final long timestamp) {
             int requestId = resultExtras.getRequestId();
+            final long frameNumber = resultExtras.getFrameNumber();
+
             if (DEBUG) {
-                Log.d(TAG, "Capture started for id " + requestId);
+                Log.d(TAG, "Capture started for id " + requestId + " frame number " + frameNumber);
             }
             final CaptureCallbackHolder holder;
 
@@ -1263,7 +1265,7 @@ public class CameraDeviceImpl extends CameraDevice {
                                 holder.getCallback().onCaptureStarted(
                                     CameraDeviceImpl.this,
                                     holder.getRequest(resultExtras.getSubsequenceId()),
-                                    timestamp);
+                                    timestamp, frameNumber);
                             }
                         }
                     });
