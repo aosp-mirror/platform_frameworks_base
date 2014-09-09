@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.SpeedBumpView;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
@@ -645,7 +646,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public boolean isAntiFalsingNeeded() {
-        return mPhoneStatusBar.isFalsingThresholdNeeded();
+        return mPhoneStatusBar.getBarState() == StatusBarState.KEYGUARD;
     }
 
     private void setSwipingInProgress(boolean isSwiped) {
