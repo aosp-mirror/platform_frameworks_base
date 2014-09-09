@@ -47,6 +47,7 @@ public class NetworkAgentInfo {
     public final NetworkMonitor networkMonitor;
     public final NetworkMisc networkMisc;
     public boolean created;
+    public boolean validated;
 
     // The list of NetworkRequests being satisfied by this Network.
     public final SparseArray<NetworkRequest> networkRequests = new SparseArray<NetworkRequest>();
@@ -68,6 +69,7 @@ public class NetworkAgentInfo {
         networkMonitor = new NetworkMonitor(context, handler, this);
         networkMisc = misc;
         created = false;
+        validated = false;
     }
 
     public void addRequest(NetworkRequest networkRequest) {
