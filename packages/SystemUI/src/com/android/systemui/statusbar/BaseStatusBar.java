@@ -1929,9 +1929,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 : null;
 
         // Reapply the RemoteViews
-        if (entry.row != null) {
-            entry.row.resetHeight();
-        }
         contentView.reapply(mContext, entry.expanded, mOnClickHandler);
         if (bigContentView != null && entry.getBigContentView() != null) {
             bigContentView.reapply(mContext, entry.getBigContentView(),
@@ -1950,6 +1947,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             entry.row.setOnClickListener(null);
         }
         entry.row.notifyContentUpdated();
+        entry.row.resetHeight();
     }
 
     protected void notifyHeadsUpScreenOn(boolean screenOn) {
