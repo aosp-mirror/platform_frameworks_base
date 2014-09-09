@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.*;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import android.app.AppOpsManager;
 import android.os.Build;
+import android.os.SystemService;
 import android.util.ArraySet;
 import android.util.TimeUtils;
 import android.view.IWindowId;
@@ -272,6 +273,12 @@ public class WindowManagerService extends IWindowManager.Stub
     // Default input dispatching timeout in nanoseconds.
     static final long DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS = 5000 * 1000000L;
 
+    // Poll interval in milliseconds for watching boot animation finished.
+    private static final int BOOT_ANIMATION_POLL_INTERVAL = 200;
+
+    // The name of the boot animation service in init.rc.
+    private static final String BOOT_ANIMATION_SERVICE = "bootanim";
+
     /** Minimum value for attachStack and resizeStack weight value */
     public static final float STACK_WEIGHT_MIN = 0.2f;
 
@@ -458,6 +465,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mSystemBooted = false;
     boolean mForceDisplayEnabled = false;
     boolean mShowingBootMessages = false;
+    boolean mBootAnimationStopped = false;
 
     String mLastANRState;
 
@@ -5607,17 +5615,70 @@ public class WindowManagerService extends IWindowManager.Stub
         performEnableScreen();
     }
 
+    private boolean checkWaitingForWindowsLocked() {
+
+        boolean haveBootMsg = false;
+        boolean haveApp = false;
+        // if the wallpaper service is disabled on the device, we're never going to have
+        // wallpaper, don't bother waiting for it
+        boolean haveWallpaper = false;
+        boolean wallpaperEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableWallpaperService)
+                && !mOnlyCore;
+        boolean haveKeyguard = true;
+        // TODO(multidisplay): Expand to all displays?
+        final WindowList windows = getDefaultWindowListLocked();
+        final int N = windows.size();
+        for (int i=0; i<N; i++) {
+            WindowState w = windows.get(i);
+            if (w.isVisibleLw() && !w.mObscured && !w.isDrawnLw()) {
+                return true;
+            }
+            if (w.isDrawnLw()) {
+                if (w.mAttrs.type == TYPE_BOOT_PROGRESS) {
+                    haveBootMsg = true;
+                } else if (w.mAttrs.type == TYPE_APPLICATION) {
+                    haveApp = true;
+                } else if (w.mAttrs.type == TYPE_WALLPAPER) {
+                    haveWallpaper = true;
+                } else if (w.mAttrs.type == TYPE_STATUS_BAR) {
+                    haveKeyguard = mPolicy.isKeyguardDrawnLw();
+                }
+            }
+        }
+
+        if (DEBUG_SCREEN_ON || DEBUG_BOOT) {
+            Slog.i(TAG, "******** booted=" + mSystemBooted + " msg=" + mShowingBootMessages
+                    + " haveBoot=" + haveBootMsg + " haveApp=" + haveApp
+                    + " haveWall=" + haveWallpaper + " wallEnabled=" + wallpaperEnabled
+                    + " haveKeyguard=" + haveKeyguard);
+        }
+
+        // If we are turning on the screen to show the boot message,
+        // don't do it until the boot message is actually displayed.
+        if (!mSystemBooted && !haveBootMsg) {
+            return true;
+        }
+
+        // If we are turning on the screen after the boot is completed
+        // normally, don't do so until we have the application and
+        // wallpaper.
+        if (mSystemBooted && ((!haveApp && !haveKeyguard) ||
+                (wallpaperEnabled && !haveWallpaper))) {
+            return true;
+        }
+
+        return false;
+    }
+
     public void performEnableScreen() {
         synchronized(mWindowMap) {
-            if (DEBUG_BOOT) {
-                RuntimeException here = new RuntimeException("here");
-                here.fillInStackTrace();
-                Slog.i(TAG, "performEnableScreen: mDisplayEnabled=" + mDisplayEnabled
-                        + " mForceDisplayEnabled=" + mForceDisplayEnabled
-                        + " mShowingBootMessages=" + mShowingBootMessages
-                        + " mSystemBooted=" + mSystemBooted
-                        + " mOnlyCore=" + mOnlyCore, here);
-            }
+            if (DEBUG_BOOT) Slog.i(TAG, "performEnableScreen: mDisplayEnabled=" + mDisplayEnabled
+                    + " mForceDisplayEnabled=" + mForceDisplayEnabled
+                    + " mShowingBootMessages=" + mShowingBootMessages
+                    + " mSystemBooted=" + mSystemBooted
+                    + " mOnlyCore=" + mOnlyCore,
+                    new RuntimeException("here").fillInStackTrace());
             if (mDisplayEnabled) {
                 return;
             }
@@ -5625,92 +5686,62 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            if (!mForceDisplayEnabled) {
-                // Don't enable the screen until all existing windows
-                // have been drawn.
-                boolean haveBootMsg = false;
-                boolean haveApp = false;
-                // if the wallpaper service is disabled on the device, we're never going to have
-                // wallpaper, don't bother waiting for it
-                boolean haveWallpaper = false;
-                boolean wallpaperEnabled = mContext.getResources().getBoolean(
-                        com.android.internal.R.bool.config_enableWallpaperService)
-                        && !mOnlyCore;
-                boolean haveKeyguard = true;
-                // TODO(multidisplay): Expand to all displays?
-                final WindowList windows = getDefaultWindowListLocked();
-                final int N = windows.size();
-                for (int i=0; i<N; i++) {
-                    WindowState w = windows.get(i);
-                    if (w.isVisibleLw() && !w.mObscured && !w.isDrawnLw()) {
-                        return;
+            // Don't enable the screen until all existing windows have been drawn.
+            if (!mForceDisplayEnabled && checkWaitingForWindowsLocked()) {
+                return;
+            }
+
+            if (!mBootAnimationStopped) {
+                // Do this one time.
+                try {
+                    IBinder surfaceFlinger = ServiceManager.getService("SurfaceFlinger");
+                    if (surfaceFlinger != null) {
+                        //Slog.i(TAG, "******* TELLING SURFACE FLINGER WE ARE BOOTED!");
+                        Parcel data = Parcel.obtain();
+                        data.writeInterfaceToken("android.ui.ISurfaceComposer");
+                        surfaceFlinger.transact(IBinder.FIRST_CALL_TRANSACTION, // BOOT_FINISHED
+                                data, null, 0);
+                        data.recycle();
                     }
-                    if (w.isDrawnLw()) {
-                        if (w.mAttrs.type == TYPE_BOOT_PROGRESS) {
-                            haveBootMsg = true;
-                        } else if (w.mAttrs.type == TYPE_APPLICATION) {
-                            haveApp = true;
-                        } else if (w.mAttrs.type == TYPE_WALLPAPER) {
-                            haveWallpaper = true;
-                        } else if (w.mAttrs.type == TYPE_STATUS_BAR) {
-                            haveKeyguard = mPolicy.isKeyguardDrawnLw();
-                        }
-                    }
+                } catch (RemoteException ex) {
+                    Slog.e(TAG, "Boot completed: SurfaceFlinger is dead!");
                 }
+                mBootAnimationStopped = true;
+            }
 
-                if (DEBUG_SCREEN_ON || DEBUG_BOOT) {
-                    Slog.i(TAG, "******** booted=" + mSystemBooted + " msg=" + mShowingBootMessages
-                            + " haveBoot=" + haveBootMsg + " haveApp=" + haveApp
-                            + " haveWall=" + haveWallpaper + " wallEnabled=" + wallpaperEnabled
-                            + " haveKeyguard=" + haveKeyguard);
-                }
-
-                // If we are turning on the screen to show the boot message,
-                // don't do it until the boot message is actually displayed.
-                if (!mSystemBooted && !haveBootMsg) {
-                    return;
-                }
-
-                // If we are turning on the screen after the boot is completed
-                // normally, don't do so until we have the application and
-                // wallpaper.
-                if (mSystemBooted && ((!haveApp && !haveKeyguard) ||
-                        (wallpaperEnabled && !haveWallpaper))) {
-                    return;
-                }
+            if (!mForceDisplayEnabled && !checkBootAnimationCompleteLocked()) {
+                if (DEBUG_BOOT) Slog.i(TAG, "performEnableScreen: Waiting for anim complete");
+                return;
             }
 
             mDisplayEnabled = true;
             if (DEBUG_SCREEN_ON || DEBUG_BOOT) Slog.i(TAG, "******************** ENABLING SCREEN!");
-            if (false) {
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new FastPrintWriter(sw, false, 1024);
-                this.dump(null, pw, null);
-                pw.flush();
-                Slog.i(TAG, sw.toString());
-            }
-            try {
-                IBinder surfaceFlinger = ServiceManager.getService("SurfaceFlinger");
-                if (surfaceFlinger != null) {
-                    //Slog.i(TAG, "******* TELLING SURFACE FLINGER WE ARE BOOTED!");
-                    Parcel data = Parcel.obtain();
-                    data.writeInterfaceToken("android.ui.ISurfaceComposer");
-                    surfaceFlinger.transact(IBinder.FIRST_CALL_TRANSACTION, // BOOT_FINISHED
-                                            data, null, 0);
-                    data.recycle();
-                }
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "Boot completed: SurfaceFlinger is dead!");
-            }
 
             // Enable input dispatch.
             mInputMonitor.setEventDispatchingLw(mEventDispatchingEnabled);
+        }
+
+        try {
+            mActivityManager.bootAnimationComplete();
+        } catch (RemoteException e) {
         }
 
         mPolicy.enableScreenAfterBoot();
 
         // Make sure the last requested orientation has been applied.
         updateRotationUnchecked(false, false);
+    }
+
+    private boolean checkBootAnimationCompleteLocked() {
+        if (SystemService.isRunning(BOOT_ANIMATION_SERVICE)) {
+            mH.removeMessages(H.CHECK_IF_BOOT_ANIMATION_FINISHED);
+            mH.sendEmptyMessageDelayed(H.CHECK_IF_BOOT_ANIMATION_FINISHED,
+                    BOOT_ANIMATION_POLL_INTERVAL);
+            if (DEBUG_BOOT) Slog.i(TAG, "checkBootAnimationComplete: Waiting for anim complete");
+            return false;
+        }
+        if (DEBUG_BOOT) Slog.i(TAG, "checkBootAnimationComplete: Animation complete!");
+        return true;
     }
 
     public void showBootMessage(final CharSequence msg, final boolean always) {
@@ -7457,6 +7488,8 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int SHOW_CIRCULAR_DISPLAY_MASK = 35;
         public static final int SHOW_EMULATOR_DISPLAY_OVERLAY = 36;
 
+        public static final int CHECK_IF_BOOT_ANIMATION_FINISHED = 37;
+
         @Override
         public void handleMessage(Message msg) {
             if (DEBUG_WINDOW_TRACE) {
@@ -7938,6 +7971,17 @@ public class WindowManagerService extends IWindowManager.Stub
                             } catch (RemoteException e) {
                             }
                         }
+                    }
+                }
+                break;
+                case CHECK_IF_BOOT_ANIMATION_FINISHED: {
+                    final boolean bootAnimationComplete;
+                    synchronized (mWindowMap) {
+                        if (DEBUG_BOOT) Slog.i(TAG, "CHECK_IF_BOOT_ANIMATION_FINISHED:");
+                        bootAnimationComplete = checkBootAnimationCompleteLocked();
+                    }
+                    if (bootAnimationComplete) {
+                        performEnableScreen();
                     }
                 }
                 break;
