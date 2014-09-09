@@ -2502,7 +2502,7 @@
     <permission android:name="android.permission.PACKAGE_USAGE_STATS"
         android:label="@string/permlab_pkgUsageStats"
         android:description="@string/permdesc_pkgUsageStats"
-        android:protectionLevel="signature|system|development|appop" />
+        android:protectionLevel="signature|development|appop" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
     <!-- @SystemApi Allows an application to collect battery statistics -->
