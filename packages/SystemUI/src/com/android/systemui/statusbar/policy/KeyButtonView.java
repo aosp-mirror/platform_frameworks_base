@@ -18,10 +18,12 @@ package com.android.systemui.statusbar.policy;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.hardware.input.InputManager;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -57,6 +59,7 @@ public class KeyButtonView extends ImageView {
     private boolean mSupportsLongpress = true;
     private Animator mAnimateToQuiescent = new ObjectAnimator();
     private Drawable mBackground;
+    private AudioManager mAudioManager;
 
     private final Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -99,6 +102,7 @@ public class KeyButtonView extends ImageView {
 
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 
     @Override
@@ -250,6 +254,10 @@ public class KeyButtonView extends ImageView {
 
         return true;
     }
+
+    public void playSoundEffect(int soundConstant) {
+        mAudioManager.playSoundEffect(soundConstant, ActivityManager.getCurrentUser());
+    };
 
     public void sendEvent(int action, int flags) {
         sendEvent(action, flags, SystemClock.uptimeMillis());
