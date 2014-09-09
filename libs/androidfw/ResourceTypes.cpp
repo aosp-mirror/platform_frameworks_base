@@ -87,9 +87,9 @@ inline static T max(T a, T b) {
 // range checked; guaranteed to NUL-terminate within the stated number of available slots
 // NOTE: if this truncates the dst string due to running out of space, no attempt is
 // made to avoid splitting surrogate pairs.
-static void strcpy16_dtoh(uint16_t* dst, const uint16_t* src, size_t avail)
+static void strcpy16_dtoh(char16_t* dst, const char16_t* src, size_t avail)
 {
-    uint16_t* last = dst + avail - 1;
+    char16_t* last = dst + avail - 1;
     while (*src && (dst < last)) {
         char16_t s = dtohs(*src);
         *dst++ = s;
@@ -689,7 +689,7 @@ decodeLength(const uint8_t** str)
     return len;
 }
 
-const uint16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
+const char16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
 {
     if (mError == NO_ERROR && idx < mHeader->stringCount) {
         const bool isUTF8 = (mHeader->flags&ResStringPool_header::UTF8_FLAG) != 0;
@@ -1013,7 +1013,7 @@ int32_t ResXMLParser::getCommentID() const
     return mCurNode != NULL ? dtohl(mCurNode->comment.index) : -1;
 }
 
-const uint16_t* ResXMLParser::getComment(size_t* outLen) const
+const char16_t* ResXMLParser::getComment(size_t* outLen) const
 {
     int32_t id = getCommentID();
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
@@ -1032,7 +1032,7 @@ int32_t ResXMLParser::getTextID() const
     return -1;
 }
 
-const uint16_t* ResXMLParser::getText(size_t* outLen) const
+const char16_t* ResXMLParser::getText(size_t* outLen) const
 {
     int32_t id = getTextID();
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
@@ -1055,7 +1055,7 @@ int32_t ResXMLParser::getNamespacePrefixID() const
     return -1;
 }
 
-const uint16_t* ResXMLParser::getNamespacePrefix(size_t* outLen) const
+const char16_t* ResXMLParser::getNamespacePrefix(size_t* outLen) const
 {
     int32_t id = getNamespacePrefixID();
     //printf("prefix=%d  event=%p\n", id, mEventCode);
@@ -1070,7 +1070,7 @@ int32_t ResXMLParser::getNamespaceUriID() const
     return -1;
 }
 
-const uint16_t* ResXMLParser::getNamespaceUri(size_t* outLen) const
+const char16_t* ResXMLParser::getNamespaceUri(size_t* outLen) const
 {
     int32_t id = getNamespaceUriID();
     //printf("uri=%d  event=%p\n", id, mEventCode);
@@ -1088,7 +1088,7 @@ int32_t ResXMLParser::getElementNamespaceID() const
     return -1;
 }
 
-const uint16_t* ResXMLParser::getElementNamespace(size_t* outLen) const
+const char16_t* ResXMLParser::getElementNamespace(size_t* outLen) const
 {
     int32_t id = getElementNamespaceID();
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
@@ -1105,7 +1105,7 @@ int32_t ResXMLParser::getElementNameID() const
     return -1;
 }
 
-const uint16_t* ResXMLParser::getElementName(size_t* outLen) const
+const char16_t* ResXMLParser::getElementName(size_t* outLen) const
 {
     int32_t id = getElementNameID();
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
@@ -1134,7 +1134,7 @@ int32_t ResXMLParser::getAttributeNamespaceID(size_t idx) const
     return -2;
 }
 
-const uint16_t* ResXMLParser::getAttributeNamespace(size_t idx, size_t* outLen) const
+const char16_t* ResXMLParser::getAttributeNamespace(size_t idx, size_t* outLen) const
 {
     int32_t id = getAttributeNamespaceID(idx);
     //printf("attribute namespace=%d  idx=%d  event=%p\n", id, idx, mEventCode);
@@ -1165,7 +1165,7 @@ int32_t ResXMLParser::getAttributeNameID(size_t idx) const
     return -1;
 }
 
-const uint16_t* ResXMLParser::getAttributeName(size_t idx, size_t* outLen) const
+const char16_t* ResXMLParser::getAttributeName(size_t idx, size_t* outLen) const
 {
     int32_t id = getAttributeNameID(idx);
     //printf("attribute name=%d  idx=%d  event=%p\n", id, idx, mEventCode);
@@ -1205,7 +1205,7 @@ int32_t ResXMLParser::getAttributeValueStringID(size_t idx) const
     return -1;
 }
 
-const uint16_t* ResXMLParser::getAttributeStringValue(size_t idx, size_t* outLen) const
+const char16_t* ResXMLParser::getAttributeStringValue(size_t idx, size_t* outLen) const
 {
     int32_t id = getAttributeValueStringID(idx);
     //XML_NOISY(printf("getAttributeValue 0x%x=0x%x\n", idx, id));
@@ -4235,7 +4235,7 @@ nope:
     return 0;
 }
 
-bool ResTable::expandResourceRef(const uint16_t* refStr, size_t refLen,
+bool ResTable::expandResourceRef(const char16_t* refStr, size_t refLen,
                                  String16* outPackage,
                                  String16* outType,
                                  String16* outName,
