@@ -199,8 +199,7 @@ public class LauncherAppsService extends SystemService {
             mainIntent.setPackage(packageName);
             long ident = Binder.clearCallingIdentity();
             try {
-                List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(mainIntent,
-                        PackageManager.NO_CROSS_PROFILE, // We only want the apps for this user
+                List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(mainIntent, 0 /* flags */,
                         user.getIdentifier());
                 return apps;
             } finally {
@@ -288,8 +287,7 @@ public class LauncherAppsService extends SystemService {
                 // as calling startActivityAsUser ignores the category and just
                 // resolves based on the component if present.
                 List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(launchIntent,
-                        PackageManager.NO_CROSS_PROFILE, // We only want the apps for this user
-                        user.getIdentifier());
+                        0 /* flags */, user.getIdentifier());
                 final int size = apps.size();
                 for (int i = 0; i < size; ++i) {
                     ActivityInfo activityInfo = apps.get(i).activityInfo;
