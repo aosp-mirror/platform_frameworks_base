@@ -98,8 +98,8 @@ public class CallbackProxies {
 
         @Override
         public void onCaptureStarted(CameraDevice camera,
-                CaptureRequest request, long timestamp) {
-            mProxy.invoke("onCaptureStarted", camera, request, timestamp);
+                CaptureRequest request, long timestamp, long frameNumber) {
+            mProxy.invoke("onCaptureStarted", camera, request, timestamp, frameNumber);
         }
 
         @Override
