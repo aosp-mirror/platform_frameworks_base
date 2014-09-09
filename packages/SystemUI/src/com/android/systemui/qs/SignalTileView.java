@@ -37,11 +37,16 @@ public final class SignalTileView extends QSTileView {
     private ImageView mIn;
     private ImageView mOut;
 
+    private int mWideOverlayIconStartPadding;
+
     public SignalTileView(Context context) {
         super(context);
 
         mIn = addTrafficView(R.drawable.ic_qs_signal_in);
         mOut = addTrafficView(R.drawable.ic_qs_signal_out);
+
+        mWideOverlayIconStartPadding = context.getResources().getDimensionPixelSize(
+                R.dimen.wide_type_icon_start_padding_qs);
     }
 
     private ImageView addTrafficView(int icon) {
@@ -105,6 +110,11 @@ public final class SignalTileView extends QSTileView {
             mOverlay.setImageResource(s.overlayIconId);
         } else {
             mOverlay.setVisibility(GONE);
+        }
+        if (s.overlayIconId > 0 && s.isOverlayIconWide) {
+            mSignal.setPaddingRelative(mWideOverlayIconStartPadding, 0, 0, 0);
+        } else {
+            mSignal.setPaddingRelative(0, 0, 0, 0);
         }
         Drawable drawable = mSignal.getDrawable();
         if (state.autoMirrorDrawable && drawable != null) {

@@ -23,18 +23,14 @@ import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.android.systemui.R;
-import com.android.systemui.qs.DataUsageGraph;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTileView;
 import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.DataUsageInfo;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
-
-import java.text.DecimalFormat;
 
 /** Quick settings tile: Cellular **/
 public class CellularTile extends QSTile<QSTile.SignalState> {
@@ -95,6 +91,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
                 : !cb.enabled || cb.airplaneModeEnabled ? R.drawable.ic_qs_signal_disabled
                 : cb.mobileSignalIconId > 0 ? cb.mobileSignalIconId
                 : R.drawable.ic_qs_signal_no_signal;
+        state.isOverlayIconWide = cb.isDataTypeIconWide;
         state.autoMirrorDrawable = !cb.noSim;
         state.overlayIconId = cb.enabled && (cb.dataTypeIconId > 0) && !cb.wifiConnected
                 ? cb.dataTypeIconId
@@ -142,6 +139,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
         boolean activityOut;
         String enabledDesc;
         boolean noSim;
+        boolean isDataTypeIconWide;
     }
 
     private final NetworkSignalChangedCallback mCallback = new NetworkSignalChangedCallback() {
@@ -162,7 +160,8 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
                 int mobileSignalIconId,
                 String mobileSignalContentDescriptionId, int dataTypeIconId,
                 boolean activityIn, boolean activityOut,
-                String dataTypeContentDescriptionId, String description, boolean noSim) {
+                String dataTypeContentDescriptionId, String description, boolean noSim,
+                boolean isDataTypeIconWide) {
             final CallbackInfo info = new CallbackInfo();  // TODO pool?
             info.enabled = enabled;
             info.wifiEnabled = mWifiEnabled;
@@ -176,6 +175,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
             info.activityOut = activityOut;
             info.enabledDesc = description;
             info.noSim = noSim;
+            info.isDataTypeIconWide = isDataTypeIconWide;
             refreshState(info);
         }
 
