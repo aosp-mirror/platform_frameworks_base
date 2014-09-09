@@ -21,7 +21,7 @@
 
 #define NOISY(x) //x
 
-void strcpy16_htod(uint16_t* dst, const uint16_t* src)
+void strcpy16_htod(char16_t* dst, const char16_t* src)
 {
     while (*src) {
         char16_t s = htods(*src);
@@ -455,9 +455,9 @@ status_t StringPool::writeStringBlock(const sp<AaptFile>& pool)
 
             strncpy((char*)strings, encStr, encSize+1);
         } else {
-            uint16_t* strings = (uint16_t*)dat;
+            char16_t* strings = (char16_t*)dat;
 
-            ENCODE_LENGTH(strings, sizeof(uint16_t), strSize)
+            ENCODE_LENGTH(strings, sizeof(char16_t), strSize)
 
             strcpy16_htod(strings, ent.value);
         }

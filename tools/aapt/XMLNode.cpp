@@ -234,9 +234,9 @@ status_t parseStyledString(Bundle* bundle,
             const String8 element8(element16);
 
             size_t nslen;
-            const uint16_t* ns = inXml->getElementNamespace(&nslen);
+            const char16_t* ns = inXml->getElementNamespace(&nslen);
             if (ns == NULL) {
-                ns = (const uint16_t*)"\0\0";
+                ns = (const char16_t*)"\0\0";
                 nslen = 0;
             }
             const String8 nspace(String16(ns, nslen));
@@ -291,9 +291,9 @@ moveon:
 
         } else if (code == ResXMLTree::END_TAG) {
             size_t nslen;
-            const uint16_t* ns = inXml->getElementNamespace(&nslen);
+            const char16_t* ns = inXml->getElementNamespace(&nslen);
             if (ns == NULL) {
-                ns = (const uint16_t*)"\0\0";
+                ns = (const char16_t*)"\0\0";
                 nslen = 0;
             }
             const String8 nspace(String16(ns, nslen));
@@ -422,7 +422,7 @@ static String8 make_prefix(int depth)
 }
 
 static String8 build_namespace(const Vector<namespace_entry>& namespaces,
-        const uint16_t* ns)
+        const char16_t* ns)
 {
     String8 str;
     if (ns != NULL) {
@@ -453,9 +453,9 @@ void printXMLBlock(ResXMLTree* block)
         int i;
         if (code == ResXMLTree::START_TAG) {
             size_t len;
-            const uint16_t* ns16 = block->getElementNamespace(&len);
+            const char16_t* ns16 = block->getElementNamespace(&len);
             String8 elemNs = build_namespace(namespaces, ns16);
-            const uint16_t* com16 = block->getComment(&len);
+            const char16_t* com16 = block->getComment(&len);
             if (com16) {
                 printf("%s <!-- %s -->\n", prefix.string(), String8(com16).string());
             }
@@ -503,7 +503,7 @@ void printXMLBlock(ResXMLTree* block)
         } else if (code == ResXMLTree::START_NAMESPACE) {
             namespace_entry ns;
             size_t len;
-            const uint16_t* prefix16 = block->getNamespacePrefix(&len);
+            const char16_t* prefix16 = block->getNamespacePrefix(&len);
             if (prefix16) {
                 ns.prefix = String8(prefix16);
             } else {
@@ -518,7 +518,7 @@ void printXMLBlock(ResXMLTree* block)
             depth--;
             const namespace_entry& ns = namespaces.top();
             size_t len;
-            const uint16_t* prefix16 = block->getNamespacePrefix(&len);
+            const char16_t* prefix16 = block->getNamespacePrefix(&len);
             String8 pr;
             if (prefix16) {
                 pr = String8(prefix16);
