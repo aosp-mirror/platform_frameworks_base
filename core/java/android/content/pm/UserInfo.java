@@ -89,6 +89,7 @@ public class UserInfo implements Parcelable {
 
     /** User is only partially created. */
     public boolean partial;
+    public boolean guestToRemove;
 
     public UserInfo(int id, String name, int flags) {
         this(id, name, null, flags);
@@ -147,6 +148,7 @@ public class UserInfo implements Parcelable {
         lastLoggedInTime = orig.lastLoggedInTime;
         partial = orig.partial;
         profileGroupId = orig.profileGroupId;
+        guestToRemove = orig.guestToRemove;
     }
 
     public UserHandle getUserHandle() {
@@ -172,6 +174,7 @@ public class UserInfo implements Parcelable {
         dest.writeLong(lastLoggedInTime);
         dest.writeInt(partial ? 1 : 0);
         dest.writeInt(profileGroupId);
+        dest.writeInt(guestToRemove ? 1 : 0);
     }
 
     public static final Parcelable.Creator<UserInfo> CREATOR
@@ -194,5 +197,6 @@ public class UserInfo implements Parcelable {
         lastLoggedInTime = source.readLong();
         partial = source.readInt() != 0;
         profileGroupId = source.readInt();
+        guestToRemove = source.readInt() != 0;
     }
 }
