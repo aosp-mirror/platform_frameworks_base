@@ -162,16 +162,13 @@ public final class AudioAttributes implements Parcelable {
     public final static int FLAG_BEACON = 0x1 << 3;
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * Flag requesting the use of an output stream supporting hardware A/V synchronization.
      */
-    // TODO  add in FLAG_ALL_PUBLIC when in public API
     public final static int FLAG_HW_AV_SYNC = 0x1 << 4;
 
     private final static int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO |
             FLAG_BEACON | FLAG_HW_AV_SYNC;
-    private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED;
+    private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED | FLAG_HW_AV_SYNC;
 
     private int mUsage = USAGE_UNKNOWN;
     private int mContentType = CONTENT_TYPE_UNKNOWN;
