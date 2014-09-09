@@ -42,6 +42,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -206,6 +207,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         int width = -1;
         int height = -1;
 
+        final Rect padding = new Rect(0, 0, 0, 0);
+
         WallpaperData(int userId) {
             this.userId = userId;
             wallpaperFile = new File(getWallpaperDir(userId), WALLPAPER);
@@ -222,6 +225,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         IRemoteCallback mReply;
 
         boolean mDimensionsChanged = false;
+        boolean mPaddingChanged = false;
 
         public WallpaperConnection(WallpaperInfo info, WallpaperData wallpaper) {
             mInfo = info;
@@ -282,6 +286,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         Slog.w(TAG, "Failed to set wallpaper dimensions", e);
                     }
                     mDimensionsChanged = false;
+                }
+                if (mPaddingChanged) {
+                    try {
+                        mEngine.setDisplayPadding(mWallpaper.padding);
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Failed to set wallpaper padding", e);
+                    }
+                    mPaddingChanged = false;
                 }
             }
         }
@@ -719,6 +731,40 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
+    public void setDisplayPadding(Rect padding) {
+        checkPermission(android.Manifest.permission.SET_WALLPAPER_HINTS);
+        synchronized (mLock) {
+            int userId = UserHandle.getCallingUserId();
+            WallpaperData wallpaper = mWallpaperMap.get(userId);
+            if (wallpaper == null) {
+                throw new IllegalStateException("Wallpaper not yet initialized for user " + userId);
+            }
+            if (padding.left < 0 || padding.top < 0 || padding.right < 0 || padding.bottom < 0) {
+                throw new IllegalArgumentException("padding must be positive: " + padding);
+            }
+
+            if (!padding.equals(wallpaper.padding)) {
+                wallpaper.padding.set(padding);
+                saveSettingsLocked(wallpaper);
+                if (mCurrentUserId != userId) return; // Don't change the properties now
+                if (wallpaper.connection != null) {
+                    if (wallpaper.connection.mEngine != null) {
+                        try {
+                            wallpaper.connection.mEngine.setDisplayPadding(padding);
+                        } catch (RemoteException e) {
+                        }
+                        notifyCallbacksLocked(wallpaper);
+                    } else if (wallpaper.connection.mService != null) {
+                        // We've attached to the service but the engine hasn't attached back to us
+                        // yet. This means it will be created with the previous dimensions, so we
+                        // need to update it to the new dimensions once it attaches.
+                        wallpaper.connection.mPaddingChanged = true;
+                    }
+                }
+            }
+        }
+    }
+
     public ParcelFileDescriptor getWallpaper(IWallpaperManagerCallback cb,
             Bundle outParams) {
         synchronized (mLock) {
@@ -1006,7 +1052,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         try {
             conn.mService.attach(conn, conn.mToken,
                     WindowManager.LayoutParams.TYPE_WALLPAPER, false,
-                    wallpaper.width, wallpaper.height);
+                    wallpaper.width, wallpaper.height, wallpaper.padding);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed attaching wallpaper; clearing", e);
             if (!wallpaper.wallpaperUpdating) {
@@ -1055,6 +1101,18 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             out.startTag(null, "wp");
             out.attribute(null, "width", Integer.toString(wallpaper.width));
             out.attribute(null, "height", Integer.toString(wallpaper.height));
+            if (wallpaper.padding.left != 0) {
+                out.attribute(null, "paddingLeft", Integer.toString(wallpaper.padding.left));
+            }
+            if (wallpaper.padding.top != 0) {
+                out.attribute(null, "paddingTop", Integer.toString(wallpaper.padding.top));
+            }
+            if (wallpaper.padding.right != 0) {
+                out.attribute(null, "paddingRight", Integer.toString(wallpaper.padding.right));
+            }
+            if (wallpaper.padding.bottom != 0) {
+                out.attribute(null, "paddingBottom", Integer.toString(wallpaper.padding.bottom));
+            }
             out.attribute(null, "name", wallpaper.name);
             if (wallpaper.wallpaperComponent != null
                     && !wallpaper.wallpaperComponent.equals(mImageWallpaper)) {
@@ -1091,6 +1149,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
+    private int getAttributeInt(XmlPullParser parser, String name, int defValue) {
+        String value = parser.getAttributeValue(null, name);
+        if (value == null) {
+            return defValue;
+        }
+        return Integer.parseInt(value);
+    }
+
     private void loadSettingsLocked(int userId) {
         if (DEBUG) Slog.v(TAG, "loadSettingsLocked");
         
@@ -1121,6 +1187,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         wallpaper.width = Integer.parseInt(parser.getAttributeValue(null, "width"));
                         wallpaper.height = Integer.parseInt(parser
                                 .getAttributeValue(null, "height"));
+                        wallpaper.padding.left = getAttributeInt(parser, "paddingLeft", 0);
+                        wallpaper.padding.top = getAttributeInt(parser, "paddingTop", 0);
+                        wallpaper.padding.right = getAttributeInt(parser, "paddingRight", 0);
+                        wallpaper.padding.bottom = getAttributeInt(parser, "paddingBottom", 0);
                         wallpaper.name = parser.getAttributeValue(null, "name");
                         String comp = parser.getAttributeValue(null, "component");
                         wallpaper.nextWallpaperComponent = comp != null
@@ -1167,6 +1237,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         if (!success) {
             wallpaper.width = -1;
             wallpaper.height = -1;
+            wallpaper.padding.set(0, 0, 0, 0);
             wallpaper.name = "";
         }
 
@@ -1330,13 +1401,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 WallpaperData wallpaper = mWallpaperMap.valueAt(i);
                 pw.println(" User " + wallpaper.userId + ":");
                 pw.print("  mWidth=");
-                pw.print(wallpaper.width);
-                pw.print(" mHeight=");
-                pw.println(wallpaper.height);
-                pw.print("  mName=");
-                pw.println(wallpaper.name);
-                pw.print("  mWallpaperComponent=");
-                pw.println(wallpaper.wallpaperComponent);
+                    pw.print(wallpaper.width);
+                    pw.print(" mHeight=");
+                    pw.println(wallpaper.height);
+                pw.print("  mPadding="); pw.println(wallpaper.padding);
+                pw.print("  mName=");  pw.println(wallpaper.name);
+                pw.print("  mWallpaperComponent="); pw.println(wallpaper.wallpaperComponent);
                 if (wallpaper.connection != null) {
                     WallpaperConnection conn = wallpaper.connection;
                     pw.print("  Wallpaper connection ");
