@@ -197,14 +197,10 @@ int doList(Bundle* bundle)
         }
 
         const ResTable& res = assets.getResources(false);
-        if (&res == NULL) {
-            printf("\nNo resource table found.\n");
-        } else {
 #ifndef HAVE_ANDROID_OS
-            printf("\nResource table:\n");
-            res.print(false);
+        printf("\nResource table:\n");
+        res.print(false);
 #endif
-        }
 
         Asset* manifestAsset = assets.openNonAsset("AndroidManifest.xml",
                                                    Asset::ACCESS_BUFFER);
@@ -531,11 +527,6 @@ int doDump(Bundle* bundle)
     assets.setConfiguration(config);
 
     const ResTable& res = assets.getResources(false);
-    if (&res == NULL) {
-        fprintf(stderr, "ERROR: dump failed because no resource table was found\n");
-        goto bail;
-    }
-
     if (strcmp("resources", option) == 0) {
 #ifndef HAVE_ANDROID_OS
         res.print(bundle->getValues());
