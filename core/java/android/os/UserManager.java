@@ -43,190 +43,208 @@ public class UserManager {
     private final Context mContext;
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from adding and removing
-     * accounts.
+     * Specifies if a user is disallowed from adding and removing accounts.
      * The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_MODIFY_ACCOUNTS = "no_modify_accounts";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from changing Wi-Fi
+     * Specifies if a user is disallowed from changing Wi-Fi
      * access points. The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_WIFI = "no_config_wifi";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from installing applications.
+     * Specifies if a user is disallowed from installing applications.
      * The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_INSTALL_APPS = "no_install_apps";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from uninstalling applications.
+     * Specifies if a user is disallowed from uninstalling applications.
      * The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_UNINSTALL_APPS = "no_uninstall_apps";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from toggling location sharing.
+     * Specifies if a user is disallowed from toggling location sharing.
      * The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_SHARE_LOCATION = "no_share_location";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from enabling the
+     * Specifies if a user is disallowed from enabling the
      * "Unknown Sources" setting, that allows installation of apps from unknown sources.
      * The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from configuring bluetooth.
+     * Specifies if a user is disallowed from configuring bluetooth.
      * The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from transferring files over
+     * Specifies if a user is disallowed from transferring files over
      * USB. This can only be set by device owners. The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_USB_FILE_TRANSFER = "no_usb_file_transfer";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from configuring user
+     * Specifies if a user is disallowed from configuring user
      * credentials. The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from removing itself and other
+     * Specifies if a user is disallowed from removing itself and other
      * users. The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_REMOVE_USER = "no_remove_user";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from enabling or
+     * Specifies if a user is disallowed from enabling or
      * accessing debugging features. The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_DEBUGGING_FEATURES = "no_debugging_features";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from configuring VPN.
+     * Specifies if a user is disallowed from configuring VPN.
      * The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_VPN = "no_config_vpn";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from configuring Tethering
+     * Specifies if a user is disallowed from configuring Tethering
      * & portable hotspots. This can only be set by device owners. The default value is
      * <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_TETHERING = "no_config_tethering";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from factory resetting
+     * Specifies if a user is disallowed from factory resetting
      * from Settings. This can only be set by device owners. The default value is
      * <code>false</code>.
-     * <p>
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_FACTORY_RESET = "no_factory_reset";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from adding new users and
+     * Specifies if a user is disallowed from adding new users and
      * profiles. This can only be set by device owners. The default value is <code>false</code>.
-     * <p>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_ADD_USER = "no_add_user";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from disabling application
+     * Specifies if a user is disallowed from disabling application
      * verification. The default value is <code>false</code>.
-     * <p>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String ENSURE_VERIFY_APPS = "ensure_verify_apps";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from configuring cell
+     * Specifies if a user is disallowed from configuring cell
      * broadcasts. This can only be set by device owners. The default value is <code>false</code>.
-     * <p>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_CELL_BROADCASTS = "no_config_cell_broadcasts";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from configuring mobile
+     * Specifies if a user is disallowed from configuring mobile
      * networks. This can only be set by device owners. The default value is <code>false</code>.
-     * <p>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_MOBILE_NETWORKS = "no_config_mobile_networks";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from modifying
+     * Specifies if a user is disallowed from modifying
      * applications in Settings or launchers. The following actions will not be allowed when this
      * restriction is enabled:
      * <li>uninstalling apps</li>
@@ -237,69 +255,75 @@ public class UserManager {
      * <li>clearing app defaults</li>
      * <p>
      * The default value is <code>false</code>.
-     * <p>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_APPS_CONTROL = "no_control_apps";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from mounting
+     * Specifies if a user is disallowed from mounting
      * physical external media. This can only be set by device owners. The default value is
      * <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_MOUNT_PHYSICAL_MEDIA = "no_physical_media";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from adjusting microphone
+     * Specifies if a user is disallowed from adjusting microphone
      * volume. If set, the microphone will be muted. This can only be set by device owners.
      * The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_UNMUTE_MICROPHONE = "no_unmute_microphone";
 
     /**
-     * Key for user restrictions. Specifies if a user is disallowed from adjusting the master
+     * Specifies if a user is disallowed from adjusting the master
      * volume. If set, the master volume will be muted. This can only be set by device owners.
      * The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_ADJUST_VOLUME = "no_adjust_volume";
 
     /**
-     * Key for user restrictions. Specifies that the user is not allowed to make outgoing
+     * Specifies that the user is not allowed to make outgoing
      * phone calls. Emergency calls are still permitted.
      * The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_OUTGOING_CALLS = "no_outgoing_calls";
 
     /**
-     * Key for user restrictions. Specifies that the user is not allowed to send or receive
+     * Specifies that the user is not allowed to send or receive
      * SMS messages. This can only be set by device owners. The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_SMS = "no_sms";
 
     /**
-     * Key for user restrictions. Specifies that windows besides app windows should not be
+     * Specifies that windows besides app windows should not be
      * created. This will block the creation of the following types of windows.
      * <li>{@link LayoutParams#TYPE_TOAST}</li>
      * <li>{@link LayoutParams#TYPE_PHONE}</li>
@@ -309,24 +333,37 @@ public class UserManager {
      * <li>{@link LayoutParams#TYPE_SYSTEM_OVERLAY}</li>
      *
      * <p>This can only be set by device owners. The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CREATE_WINDOWS = "no_create_windows";
 
     /**
-     * Key for user restrictions. Specifies if what is copied in the clipboard of this profile can
+     * Specifies if what is copied in the clipboard of this profile can
      * be pasted in related profiles. Does not restrict if the clipboard of related profiles can be
      * pasted in this profile.
      * The default value is <code>false</code>.
-     * <p/>
-     * Type: Boolean
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CROSS_PROFILE_COPY_PASTE = "no_cross_profile_copy_paste";
+
+    /**
+     * Specifies if the user is not allowed to use NFC to beam out data from apps.
+     * The default value is <code>false</code>.
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_OUTGOING_BEAM = "no_outgoing_beam";
 
     /** @hide */
     public static final int PIN_VERIFICATION_FAILED_INCORRECT = -3;
