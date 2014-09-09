@@ -218,6 +218,7 @@ public class BackupManager {
      */
     @SystemApi
     public boolean isBackupEnabled() {
+        checkServiceBinder();
         if (sService != null) {
             try {
                 return sService.isBackupEnabled();
