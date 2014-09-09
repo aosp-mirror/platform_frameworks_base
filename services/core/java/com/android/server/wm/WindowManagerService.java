@@ -5931,7 +5931,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public Bitmap screenshotApplications(IBinder appToken, int displayId, int width,
             int height, boolean force565) {
-        if (!checkCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
+        if (!checkCallingPermission(Manifest.permission.READ_FRAME_BUFFER,
                 "screenshotApplications()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
@@ -5951,7 +5951,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return null;
         }
 
-        Bitmap rawss = null;
+        Bitmap bm = null;
 
         int maxLayer = 0;
         final Rect frame = new Rect();
@@ -6092,10 +6092,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // The screenshot API does not apply the current screen rotation.
                 rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
+
                 if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
-                    final int tmp = width;
-                    width = height;
-                    height = tmp;
                     rot = (rot == Surface.ROTATION_90) ? Surface.ROTATION_270 : Surface.ROTATION_90;
                 }
 
@@ -6121,9 +6119,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_SCREENSHOT && inRotation) Slog.v(TAG,
                         "Taking screenshot while rotating");
 
-                rawss = SurfaceControl.screenshot(crop, width, height, minLayer, maxLayer,
-                        inRotation);
-                if (rawss == null) {
+                bm = SurfaceControl.screenshot(crop, width, height, minLayer, maxLayer,
+                        inRotation, rot);
+                if (bm == null) {
                     Slog.w(TAG, "Screenshot failure taking screenshot for (" + dw + "x" + dh
                             + ") to layer " + maxLayer);
                     return null;
@@ -6132,17 +6130,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             break;
         }
-
-        Bitmap bm = Bitmap.createBitmap(width, height, force565 ?
-                Config.RGB_565 : rawss.getConfig());
-        if (DEBUG_SCREENSHOT) {
-            bm.eraseColor(0xFF000000);
-        }
-        Matrix matrix = new Matrix();
-        ScreenRotationAnimation.createRotationMatrix(rot, width, height, matrix);
-        Canvas canvas = new Canvas(bm);
-        canvas.drawBitmap(rawss, matrix, null);
-        canvas.setBitmap(null);
 
         if (DEBUG_SCREENSHOT) {
             // TEST IF IT's ALL BLACK
@@ -6164,9 +6151,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        rawss.recycle();
-
-        return bm;
+        // Copy the screenshot bitmap to another buffer so that the gralloc backed
+        // bitmap will not have a long lifetime. Gralloc memory can be pinned or
+        // duplicated and might have a higher cost than a skia backed buffer.
+        Bitmap ret = bm.copy(bm.getConfig(),true);
+        bm.recycle();
+        return ret;
     }
 
     /**

@@ -117,7 +117,8 @@ static void nativeDestroy(JNIEnv* env, jclass clazz, jlong nativeObject) {
 
 static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         jobject displayTokenObj, jobject sourceCropObj, jint width, jint height,
-        jint minLayer, jint maxLayer, bool allLayers, bool useIdentityTransform) {
+        jint minLayer, jint maxLayer, bool allLayers, bool useIdentityTransform,
+        int rotation) {
     sp<IBinder> displayToken = ibinderForJavaObject(env, displayTokenObj);
     if (displayToken == NULL) {
         return NULL;
@@ -131,17 +132,13 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
 
     SkAutoTDelete<ScreenshotClient> screenshot(new ScreenshotClient());
     status_t res;
-    if (width > 0 && height > 0) {
-        if (allLayers) {
-            res = screenshot->update(displayToken, sourceCrop, width, height,
-                    useIdentityTransform);
-        } else {
-            res = screenshot->update(displayToken, sourceCrop, width, height,
-                    minLayer, maxLayer, useIdentityTransform);
-        }
-    } else {
-        res = screenshot->update(displayToken, sourceCrop, useIdentityTransform);
+    if (allLayers) {
+        minLayer = 0;
+        maxLayer = -1UL;
     }
+
+    res = screenshot->update(displayToken, sourceCrop, width, height,
+        minLayer, maxLayer, useIdentityTransform, static_cast<uint32_t>(rotation));
     if (res != NO_ERROR) {
         return NULL;
     }
@@ -588,7 +585,7 @@ static JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeRelease },
     {"nativeDestroy", "(J)V",
             (void*)nativeDestroy },
-    {"nativeScreenshot", "(Landroid/os/IBinder;Landroid/graphics/Rect;IIIIZZ)Landroid/graphics/Bitmap;",
+    {"nativeScreenshot", "(Landroid/os/IBinder;Landroid/graphics/Rect;IIIIZZI)Landroid/graphics/Bitmap;",
             (void*)nativeScreenshotBitmap },
     {"nativeScreenshot", "(Landroid/os/IBinder;Landroid/view/Surface;Landroid/graphics/Rect;IIIIZZ)V",
             (void*)nativeScreenshot },
