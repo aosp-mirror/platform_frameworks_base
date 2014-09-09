@@ -2721,9 +2721,9 @@ public class Notification implements Parcelable
             } else {
                 contentView.setViewVisibility(R.id.text2, View.GONE);
                 if (hasProgress && (mProgressMax != 0 || mProgressIndeterminate)) {
+                    contentView.setViewVisibility(R.id.progress, View.VISIBLE);
                     contentView.setProgressBar(
                             R.id.progress, mProgressMax, mProgress, mProgressIndeterminate);
-                    contentView.setViewVisibility(R.id.progress, View.VISIBLE);
                     showLine2 = true;
                 } else {
                     contentView.setViewVisibility(R.id.progress, View.GONE);
