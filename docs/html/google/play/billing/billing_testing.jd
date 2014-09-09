@@ -1,6 +1,7 @@
 page.title=Testing In-app Billing
 parent.title=In-app Billing
 parent.link=index.html
+page.tags="inapp, billing, iap"
 @jd:body
 
 <div id="qv-wrapper">
