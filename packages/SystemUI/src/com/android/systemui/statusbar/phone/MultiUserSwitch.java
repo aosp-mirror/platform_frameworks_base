@@ -74,8 +74,10 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
                     mKeyguardUserSwitcher.show(true /* animate */);
                 }
             } else {
-                mQsPanel.showDetailAdapter(true,
-                        mQsPanel.getHost().getUserSwitcherController().userDetailAdapter);
+                if (mQsPanel != null) {
+                    mQsPanel.showDetailAdapter(true,
+                            mQsPanel.getHost().getUserSwitcherController().userDetailAdapter);
+                }
             }
         } else {
             Intent intent = ContactsContract.QuickContact.composeQuickContactsIntent(
@@ -93,9 +95,12 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
             final UserManager um = UserManager.get(getContext());
             String text;
             if (um.isUserSwitcherEnabled()) {
-                UserSwitcherController controller = mQsPanel.getHost()
-                        .getUserSwitcherController();
-                String currentUser = controller.getCurrentUserName(mContext);
+                String currentUser = null;
+                if (mQsPanel != null) {
+                    UserSwitcherController controller = mQsPanel.getHost()
+                            .getUserSwitcherController();
+                    currentUser = controller.getCurrentUserName(mContext);
+                }
                 if (TextUtils.isEmpty(currentUser)) {
                     text = mContext.getString(R.string.accessibility_multi_user_switch_switcher);
                 } else {
