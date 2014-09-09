@@ -476,4 +476,12 @@
     <fraction name="battery_subpixel_smoothing_right">0%</fraction>
 
     <dimen name="battery_margin_bottom">0dp</dimen>
+
+    <!-- Extra padding between the mobile data type icon and the strength indicator when the data
+         type icon is wide. -->
+    <dimen name="wide_type_icon_start_padding">2dp</dimen>
+
+    <!-- Extra padding between the mobile data type icon and the strength indicator when the data
+         type icon is wide for the tile in quick settings. -->
+    <dimen name="wide_type_icon_start_padding_qs">3dp</dimen>
 </resources>
