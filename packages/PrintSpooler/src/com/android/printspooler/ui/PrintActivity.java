@@ -23,6 +23,7 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -30,9 +31,12 @@ import android.content.res.Configuration;
 import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 import android.print.IPrintDocumentAdapter;
 import android.print.PageRange;
 import android.print.PrintAttributes;
@@ -74,6 +78,8 @@ import com.android.printspooler.model.PrintSpoolerProvider;
 import com.android.printspooler.model.PrintSpoolerService;
 import com.android.printspooler.model.RemotePrintDocument;
 import com.android.printspooler.model.RemotePrintDocument.RemotePrintDocumentInfo;
+import com.android.printspooler.renderer.IPdfEditor;
+import com.android.printspooler.renderer.PdfManipulationService;
 import com.android.printspooler.util.MediaSizeUtils;
 import com.android.printspooler.util.MediaSizeUtils.MediaSizeComparator;
 import com.android.printspooler.util.PageRangeUtils;
@@ -81,8 +87,15 @@ import com.android.printspooler.util.PrintOptionUtils;
 import com.android.printspooler.widget.PrintContentView;
 import com.android.printspooler.widget.PrintContentView.OptionsStateChangeListener;
 import com.android.printspooler.widget.PrintContentView.OptionsStateController;
+import libcore.io.IoUtils;
+import libcore.io.Streams;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -186,6 +199,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private ImageView mPrintButton;
 
     private ProgressMessageController mProgressMessageController;
+    private MutexFileProvider mFileProvider;
 
     private MediaSizeComparator mMediaSizeComparator;
 
@@ -257,9 +271,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         setTitle(R.string.print_dialog);
         setContentView(R.layout.print_activity);
 
-        final MutexFileProvider fileProvider;
         try {
-            fileProvider = new MutexFileProvider(
+            mFileProvider = new MutexFileProvider(
                     PrintSpoolerService.generateFileForPrintJob(
                             PrintActivity.this, mPrintJob.getId()));
         } catch (IOException ioe) {
@@ -268,12 +281,13 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
 
         mPrintPreviewController = new PrintPreviewController(PrintActivity.this,
-                fileProvider);
+                mFileProvider);
         mPrintedDocument = new RemotePrintDocument(PrintActivity.this,
                 IPrintDocumentAdapter.Stub.asInterface(documentAdapter),
-                fileProvider, new RemotePrintDocument.DocumentObserver() {
+                mFileProvider, new RemotePrintDocument.DocumentObserver() {
             @Override
             public void onDestroy() {
+                setState(STATE_PRINT_CANCELED);
                 finish();
             }
         }, PrintActivity.this);
@@ -369,7 +383,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     @Override
     public void onRequestContentUpdate() {
         if (canUpdateDocument()) {
-            updateDocument(true, false);
+            updateDocument(false);
         }
     }
 
@@ -386,7 +400,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     @Override
     public void onActionPerformed() {
         if (mState == STATE_UPDATE_FAILED
-                && canUpdateDocument() && updateDocument(true, true)) {
+                && canUpdateDocument() && updateDocument(true)) {
             ensurePreviewUiShown();
             setState(STATE_CONFIGURING);
             updateOptionsUi();
@@ -557,14 +571,13 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         if (resultCode == RESULT_OK && data != null) {
             setState(STATE_PRINT_COMPLETED);
             updateOptionsUi();
-            Uri uri = data.getData();
-            mPrintedDocument.writeContent(getContentResolver(), uri);
+            final Uri uri = data.getData();
             // Calling finish here does not invoke lifecycle callbacks but we
             // update the print job in onPause if finishing, hence post a message.
             mDestinationSpinner.post(new Runnable() {
                 @Override
                 public void run() {
-                    finish();
+                    shredPagesAndFinish(uri);
                 }
             });
         } else if (resultCode == RESULT_CANCELED) {
@@ -708,7 +721,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         // Update the content if needed.
         if (canUpdateDocument()) {
-            updateDocument(true, false);
+            updateDocument(false);
         }
     }
 
@@ -840,7 +853,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         if (mCurrentPrinter == mDestinationSpinnerAdapter.getPdfPrinter()) {
             startCreateDocumentActivity();
         } else {
-            finish();
+            shredPagesAndFinish(null);
         }
     }
 
@@ -893,7 +906,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         attributes.setMinMargins(defaults.getMinMargins());
     }
 
-    private boolean updateDocument(boolean preview, boolean clearLastError) {
+    private boolean updateDocument(boolean clearLastError) {
         if (!clearLastError && mPrintedDocument.hasUpdateError()) {
             return false;
         }
@@ -902,6 +915,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mPrintedDocument.clearUpdateError();
         }
 
+        final boolean preview = mState != STATE_PRINT_CONFIRMED;
         final PageRange[] pages;
         if (preview) {
             pages = mPrintPreviewController.getRequestedPages();
@@ -959,7 +973,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         mPrintPreviewController.closeOptions();
 
         if (canUpdateDocument()) {
-            updateDocument(false, false);
+            updateDocument(false);
         }
 
         if (!mPrintedDocument.isUpdating()) {
@@ -1433,7 +1447,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         if (mCurrentPrinter.equals(printer)) {
             setState(STATE_CONFIGURING);
             if (canUpdateDocument()) {
-                updateDocument(true, false);
+                updateDocument(false);
             }
             ensurePreviewUiShown();
             updateOptionsUi();
@@ -1490,6 +1504,18 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
 
         return true;
+    }
+
+    private void shredPagesAndFinish(final Uri writeToUri) {
+        new PageShredder(this, mPrintJob, mFileProvider, new Runnable() {
+            @Override
+            public void run() {
+                if (writeToUri != null) {
+                    mPrintedDocument.writeContent(getContentResolver(), writeToUri);
+                }
+                finish();
+            }
+        }).shred();
     }
 
     private final class SpinnerItem<T> {
@@ -1942,7 +1968,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     || (becameActive && hasCapab) || (isActive && gotCapab));
 
             if (updateNeeded && canUpdateDocument()) {
-                updateDocument(true, false);
+                updateDocument(false);
             }
 
             updateOptionsUi();
@@ -2033,7 +2059,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             }
 
             if (canUpdateDocument()) {
-                updateDocument(true, false);
+                updateDocument(false);
             }
 
             updateOptionsUi();
@@ -2158,7 +2184,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             updateOptionsUi();
 
             if (hadErrors && canUpdateDocument()) {
-                updateDocument(true, false);
+                updateDocument(false);
             }
         }
     }
@@ -2196,6 +2222,178 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             setState(STATE_UPDATE_SLOW);
             ensureProgressUiShown();
             updateOptionsUi();
+        }
+    }
+
+    private static final class PageShredder implements ServiceConnection {
+        private static final String TEMP_FILE_PREFIX = "print_job";
+        private static final String TEMP_FILE_EXTENSION = ".pdf";
+
+        private final Context mContext;
+
+        private final MutexFileProvider mFileProvider;
+
+        private final PrintJobInfo mPrintJob;
+
+        private final PageRange[] mPagesToShred;
+
+        private final Runnable mCallback;
+
+        public PageShredder(Context context, PrintJobInfo printJob,
+                MutexFileProvider fileProvider, Runnable callback) {
+            mContext = context;
+            mPrintJob = printJob;
+            mFileProvider = fileProvider;
+            mCallback = callback;
+            mPagesToShred = computePagesToShred(mPrintJob);
+        }
+
+        public void shred() {
+            // If we have only the pages we want, done.
+            if (mPagesToShred.length <= 0) {
+                mCallback.run();
+                return;
+            }
+
+            // Bind to the manipulation service and the work
+            // will be performed upon connection to the service.
+            Intent intent = new Intent(PdfManipulationService.ACTION_GET_EDITOR);
+            intent.setClass(mContext, PdfManipulationService.class);
+            mContext.bindService(intent, this, Context.BIND_AUTO_CREATE);
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            final IPdfEditor editor = IPdfEditor.Stub.asInterface(service);
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    try {
+                        // It's OK to access the data members as they are
+                        // final and this code is the last one to touch
+                        // them as shredding is the very last step, so the
+                        // UI is not interactive at this point.
+                        shredPages(editor);
+                        updatePrintJob();
+                    } finally {
+                        mContext.unbindService(PageShredder.this);
+                        mCallback.run();
+                    }
+                    return null;
+                }
+            }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            /* do nothing */
+        }
+
+        private void shredPages(IPdfEditor editor) {
+            File tempFile = null;
+            ParcelFileDescriptor src = null;
+            ParcelFileDescriptor dst = null;
+            InputStream in = null;
+            OutputStream out = null;
+            try {
+                File jobFile = mFileProvider.acquireFile(null);
+                src = ParcelFileDescriptor.open(jobFile, ParcelFileDescriptor.MODE_READ_WRITE);
+
+                // Open the document.
+                editor.openDocument(src);
+
+                // We passed the fd over IPC, close this one.
+                src.close();
+
+                // Drop the pages.
+                editor.removePages(mPagesToShred);
+
+                // Write the modified PDF to a temp file.
+                tempFile = File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_EXTENSION,
+                        mContext.getCacheDir());
+                dst = ParcelFileDescriptor.open(tempFile, ParcelFileDescriptor.MODE_READ_WRITE);
+                editor.write(dst);
+                dst.close();
+
+                // Close the document.
+                editor.closeDocument();
+
+                // Copy the temp file over the print job file.
+                jobFile.delete();
+                in = new FileInputStream(tempFile);
+                out = new FileOutputStream(jobFile);
+                Streams.copy(in, out);
+            } catch (IOException|RemoteException e) {
+                Log.e(LOG_TAG, "Error dropping pages", e);
+            } finally {
+                IoUtils.closeQuietly(src);
+                IoUtils.closeQuietly(dst);
+                IoUtils.closeQuietly(in);
+                IoUtils.closeQuietly(out);
+                if (tempFile != null) {
+                    tempFile.delete();
+                }
+            }
+        }
+
+        private void updatePrintJob() {
+            // Update the print job pages.
+            final int newPageCount = PageRangeUtils.getNormalizedPageCount(
+                    mPrintJob.getPages(), 0);
+            mPrintJob.setPages(new PageRange[]{PageRange.ALL_PAGES});
+
+            // Update the print job document info.
+            PrintDocumentInfo oldDocInfo = mPrintJob.getDocumentInfo();
+            PrintDocumentInfo newDocInfo = new PrintDocumentInfo
+                    .Builder(oldDocInfo.getName())
+                    .setContentType(oldDocInfo.getContentType())
+                    .setPageCount(newPageCount)
+                    .build();
+            mPrintJob.setDocumentInfo(newDocInfo);
+        }
+
+        private static PageRange[] computePagesToShred(PrintJobInfo printJob) {
+            List<PageRange> rangesToShred = new ArrayList<>();
+            PageRange previousRange = null;
+
+            final int pageCount = printJob.getDocumentInfo().getPageCount();
+
+            PageRange[] printedPages = printJob.getPages();
+            final int rangeCount = printedPages.length;
+            for (int i = 0; i < rangeCount; i++) {
+                PageRange range = PageRangeUtils.asAbsoluteRange(printedPages[i], pageCount);
+
+                if (previousRange == null) {
+                    final int startPageIdx = 0;
+                    final int endPageIdx = range.getStart() - 1;
+                    if (startPageIdx <= endPageIdx) {
+                        PageRange removedRange = new PageRange(startPageIdx, endPageIdx);
+                        rangesToShred.add(removedRange);
+                    }
+                } else {
+                    final int startPageIdx = previousRange.getEnd() + 1;
+                    final int endPageIdx = range.getStart() - 1;
+                    if (startPageIdx <= endPageIdx) {
+                        PageRange removedRange = new PageRange(startPageIdx, endPageIdx);
+                        rangesToShred.add(removedRange);
+                    }
+                }
+
+                if (i == rangeCount - 1) {
+                    final int startPageIdx = range.getEnd() + 1;
+                    final int endPageIdx = printJob.getDocumentInfo().getPageCount() - 1;
+                    if (startPageIdx <= endPageIdx) {
+                        PageRange removedRange = new PageRange(startPageIdx, endPageIdx);
+                        rangesToShred.add(removedRange);
+                    }
+                }
+
+                previousRange = range;
+            }
+
+            PageRange[] result = new PageRange[rangesToShred.size()];
+            rangesToShred.toArray(result);
+            return result;
         }
     }
 }

@@ -239,7 +239,7 @@ public final class PdfRenderer implements AutoCloseable {
     }
 
     private void throwIfPageNotInDocument(int pageIndex) {
-        if (pageIndex >= mPageCount) {
+        if (pageIndex < 0 || pageIndex >= mPageCount) {
             throw new IllegalArgumentException("Invalid page index");
         }
     }
