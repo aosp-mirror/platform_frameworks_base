@@ -2316,8 +2316,9 @@ public class PhoneNumberUtils
     /**
      * This function checks if the passed in string conforms to the NANP format
      * i.e. NXX-NXX-XXXX, N is any digit 2-9 and X is any digit 0-9
+     * @hide
      */
-    private static boolean isNanp (String dialStr) {
+    public static boolean isNanp (String dialStr) {
         boolean retVal = false;
         if (dialStr != null) {
             if (dialStr.length() == NANP_LENGTH) {
