@@ -26,7 +26,7 @@ using namespace android;
 
 #define PRINT_STRING_METRICS 0
 
-void strcpy16_htod(uint16_t* dst, const uint16_t* src);
+void strcpy16_htod(char16_t* dst, const char16_t* src);
 
 void printStringPool(const ResStringPool* pool);
 

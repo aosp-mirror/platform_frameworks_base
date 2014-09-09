@@ -499,7 +499,7 @@ void TextLayoutShaper::computeValues(const SkPaint* paint, const UChar* chars,
 #define HB_InvalidCodePoint ~0u
 
 hb_codepoint_t
-utf16_to_code_point(const uint16_t *chars, size_t len, ssize_t *iter) {
+utf16_to_code_point(const char16_t *chars, size_t len, ssize_t *iter) {
   const uint16_t v = chars[(*iter)++];
   if (HB_IsHighSurrogate(v)) {
     // surrogate pair
@@ -526,7 +526,7 @@ utf16_to_code_point(const uint16_t *chars, size_t len, ssize_t *iter) {
 }
 
 hb_codepoint_t
-utf16_to_code_point_prev(const uint16_t *chars, size_t len, ssize_t *iter) {
+utf16_to_code_point_prev(const char16_t *chars, size_t len, ssize_t *iter) {
   const uint16_t v = chars[(*iter)--];
   if (HB_IsLowSurrogate(v)) {
     // surrogate pair
@@ -567,7 +567,7 @@ hb_script_t code_point_to_script(hb_codepoint_t codepoint) {
 }
 
 bool
-hb_utf16_script_run_next(ScriptRun* run, const uint16_t *chars, size_t len, ssize_t *iter) {
+hb_utf16_script_run_next(ScriptRun* run, const char16_t *chars, size_t len, ssize_t *iter) {
   if (size_t(*iter) == len)
     return false;
 
@@ -610,7 +610,7 @@ hb_utf16_script_run_next(ScriptRun* run, const uint16_t *chars, size_t len, ssiz
 }
 
 bool
-hb_utf16_script_run_prev(ScriptRun* run, const uint16_t *chars, size_t len, ssize_t *iter) {
+hb_utf16_script_run_prev(ScriptRun* run, const char16_t *chars, size_t len, ssize_t *iter) {
   if (*iter == -1)
     return false;
 
