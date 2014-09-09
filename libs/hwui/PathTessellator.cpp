@@ -162,14 +162,21 @@ public:
     }
 
     /**
-     * Outset the bounds of point data (for line endpoints or points) to account for AA stroke
+     * Outset the bounds of point data (for line endpoints or points) to account for stroke
      * geometry.
+     *
+     * bounds are in pre-scaled space.
      */
     void expandBoundsForStroke(Rect* bounds) const {
-        float outset = halfStrokeWidth;
-        if (outset == 0) outset = 0.5f;
-        bounds->outset(outset * inverseScaleX + Vertex::GeometryFudgeFactor(),
-                outset * inverseScaleY + Vertex::GeometryFudgeFactor());
+        if (halfStrokeWidth == 0) {
+            // hairline, outset by (0.5f + fudge factor) in post-scaling space
+            bounds->outset(fabs(inverseScaleX) * (0.5f + Vertex::GeometryFudgeFactor()),
+                    fabs(inverseScaleY) * (0.5f + Vertex::GeometryFudgeFactor()));
+        } else {
+            // non hairline, outset by half stroke width pre-scaled, and fudge factor post scaled
+            bounds->outset(halfStrokeWidth + fabs(inverseScaleX) * Vertex::GeometryFudgeFactor(),
+                    halfStrokeWidth + fabs(inverseScaleY) * Vertex::GeometryFudgeFactor());
+        }
     }
 };
 
