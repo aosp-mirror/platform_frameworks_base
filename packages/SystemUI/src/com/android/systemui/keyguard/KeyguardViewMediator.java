@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -487,7 +488,7 @@ public class KeyguardViewMediator extends SystemUI {
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
 
         mLockPatternUtils = new LockPatternUtils(mContext);
-        mLockPatternUtils.setCurrentUser(UserHandle.USER_OWNER);
+        mLockPatternUtils.setCurrentUser(ActivityManager.getCurrentUser());
 
         // Assume keyguard is showing (unless it's disabled) until we know for sure...
         mShowing = (mUpdateMonitor.isDeviceProvisioned() || mLockPatternUtils.isSecure())
