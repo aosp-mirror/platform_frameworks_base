@@ -34,5 +34,8 @@ LOCAL_JAVA_LIBRARIES := layoutlib \
 
 include $(BUILD_HOST_JAVA_LIBRARY)
 
+# Copy the jar to DIST_DIR for sdk builds
+$(call dist-for-goals, sdk win_sdk, $(LOCAL_INSTALLED_MODULE))
+
 # Build all sub-directories
 include $(call all-makefiles-under,$(LOCAL_PATH))
