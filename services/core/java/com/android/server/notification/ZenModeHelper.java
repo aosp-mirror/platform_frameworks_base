@@ -301,8 +301,8 @@ public class ZenModeHelper {
             final int ringerMode = mAudioManager.getRingerMode();
             int newZen = -1;
             if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
-                if (mZenMode != Global.ZEN_MODE_NO_INTERRUPTIONS) {
-                    newZen = Global.ZEN_MODE_NO_INTERRUPTIONS;
+                if (mZenMode == Global.ZEN_MODE_OFF) {
+                    newZen = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
                 }
             } else if ((ringerMode == AudioManager.RINGER_MODE_NORMAL
                     || ringerMode == AudioManager.RINGER_MODE_VIBRATE)
