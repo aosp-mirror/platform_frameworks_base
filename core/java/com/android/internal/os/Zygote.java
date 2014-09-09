@@ -78,17 +78,20 @@ public final class Zygote {
      * file descriptor numbers that are to be closed by the child
      * (and replaced by /dev/null) after forking.  An integer value
      * of -1 in any entry in the array means "ignore this one".
+     * @param instructionSet null-ok the instruction set to use.
      *
      * @return 0 if this is the child, pid of the child
      * if this is the parent, or -1 on error.
      */
     public static int forkAndSpecialize(int uid, int gid, int[] gids, int debugFlags,
-          int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose) {
+          int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
+          String instructionSet) {
         long startTime = SystemClock.elapsedRealtime();
         VM_HOOKS.preFork();
         checkTime(startTime, "Zygote.preFork");
         int pid = nativeForkAndSpecialize(
-                  uid, gid, gids, debugFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose);
+                  uid, gid, gids, debugFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
+                  instructionSet);
         checkTime(startTime, "Zygote.nativeForkAndSpecialize");
         VM_HOOKS.postForkCommon();
         checkTime(startTime, "Zygote.postForkCommon");
@@ -96,7 +99,8 @@ public final class Zygote {
     }
 
     native private static int nativeForkAndSpecialize(int uid, int gid, int[] gids,int debugFlags,
-          int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose);
+          int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
+          String instructionSet);
 
     /**
      * Temporary hack: check time since start time and log if over a fixed threshold.
@@ -145,9 +149,9 @@ public final class Zygote {
     native private static int nativeForkSystemServer(int uid, int gid, int[] gids, int debugFlags,
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities);
 
-    private static void callPostForkChildHooks(int debugFlags) {
+    private static void callPostForkChildHooks(int debugFlags, String instructionSet) {
         long startTime = SystemClock.elapsedRealtime();
-        VM_HOOKS.postForkChild(debugFlags);
+        VM_HOOKS.postForkChild(debugFlags, instructionSet);
         checkTime(startTime, "Zygote.callPostForkChildHooks");
     }
 
