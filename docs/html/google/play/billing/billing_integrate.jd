@@ -1,6 +1,7 @@
-page.title=Implementing In-app Billing <span style="font-size:16px;">(IAB Version 3)</span>
+page.title=Implementing In-app Billing
 parent.title=In-app Billing
 parent.link=index.html
+page.tags="inapp, billing, iap"
 @jd:body
 
 <div id="qv-wrapper">
@@ -141,15 +142,17 @@ ServiceConnection mServiceConn = new ServiceConnection() {
 };
 </pre>
 
-<p>In your activity’s {@link android.app.Activity#onCreate onCreate} method, perform the binding by calling the {@link android.content.Context#bindService bindService} method. Pass the method an {@link android.content.Intent} that references the In-app Billing service and an instance of the {@link android.content.ServiceConnection} that you created.</p>
-<pre>
-&#64;Override
-public void onCreate(Bundle savedInstanceState) {    
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);        
-    bindService(new 
-        Intent("com.android.vending.billing.InAppBillingService.BIND"),
-                mServiceConn, Context.BIND_AUTO_CREATE);
+<p>In your activity’s {@link android.app.Activity#onCreate onCreate} method, perform the binding by calling the {@link android.content.Context#bindService bindService} method. Pass the method an {@link android.content.Intent} that references the In-app Billing service and an instance of the {@link android.content.ServiceConnection} that you created, and explicitly set the Intent's target package name to <code>com.android.vending</code> &mdash; the package name of Google Play app.</p>
+
+<p class="caution"><strong>Caution:</strong> To protect the security of billing transactions, always make sure to explicitly set the intent's target package name to <code>com.android.vending</code>, using {@link android.content.Intent#setPackage(java.lang.String) setPackage()} as shown in the example below. Setting the package name explicitly ensures that <em>only</em> the Google Play app can handle billing requests from your app, preventing other apps from intercepting those requests.</p>
+
+<pre>&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+  super.onCreate(savedInstanceState);
+  setContentView(R.layout.activity_main);
+  Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
+  serviceIntent.setPackage("com.android.vending");
+  bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
 </pre>
 <p>You can now use the mService reference to communicate with the Google Play service.</p>
 <p class="note"><strong>Important:</strong> Remember to unbind from the In-app Billing service when you are done with your {@link android.app.Activity}. If you don’t unbind, the open service connection could cause your device’s performance to degrade. This example shows how to perform the unbind operation on a service connection to In-app Billing called {@code mServiceConn} by overriding the activity’s {@link android.app.Activity#onDestroy onDestroy} method.</p>
@@ -269,7 +272,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
    }
 }
 </pre>
-<p class="note"><strong>Security Recommendation:</strong> When you send a purchase request, create a String token that uniquely identifies this purchase request and include this token in the {@code developerPayload}.You can use a randomly generated string as the token. When you receive the purchase response from Google Play, make sure to check the returned data signature, the {@code orderId}, and the {@code developerPayload} String. For added security, you should perform the checking on your own secure server. Make sure to verify that the {@code orderId} is a unique value that you have not previously processed, and the {@code developerPayload} String matches the token that you sent previously with the purchase request.</p>
+<p class="note"><strong>Security Recommendation:</strong>  When you send a purchase request, create a String token that uniquely identifies this purchase request and include this token in the {@code developerPayload}.You can use a randomly generated string as the token. When you receive the purchase response from Google Play, make sure to check the returned data signature, the {@code orderId}, and the {@code developerPayload} String. For added security, you should perform the checking on your own secure server. Make sure to verify that the {@code orderId} is a unique value that you have not previously processed, and the {@code developerPayload} String matches the token that you sent previously with the purchase request.</p>
 
 <h3 id="QueryPurchases">Querying for Purchased Items</h3>
 <p>To retrieve information about purchases made by a user from your app, call the {@code getPurchases} method on the In-app Billing Version 3 service. Pass in to the method the In-app Billing API version (“3”), the package name of your calling app, and the purchase type (“inapp” or "subs").</p>
