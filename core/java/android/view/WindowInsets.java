@@ -378,35 +378,75 @@ public final class WindowInsets {
     }
 
     /**
-     * @hide
+     * Returns the top stable inset in pixels.
+     *
+     * <p>The stable inset represents the area of a full-screen window that <b>may</b> be
+     * partially or fully obscured by the system UI elements.  This value does not change
+     * based on the visibility state of those elements; for example, if the status bar is
+     * normally shown, but temporarily hidden, the stable inset will still provide the inset
+     * associated with the status bar being shown.</p>
+     *
+     * @return The top stable inset
      */
     public int getStableInsetTop() {
         return mStableInsets.top;
     }
 
     /**
-     * @hide
+     * Returns the left stable inset in pixels.
+     *
+     * <p>The stable inset represents the area of a full-screen window that <b>may</b> be
+     * partially or fully obscured by the system UI elements.  This value does not change
+     * based on the visibility state of those elements; for example, if the status bar is
+     * normally shown, but temporarily hidden, the stable inset will still provide the inset
+     * associated with the status bar being shown.</p>
+     *
+     * @return The left stable inset
      */
     public int getStableInsetLeft() {
         return mStableInsets.left;
     }
 
     /**
-     * @hide
+     * Returns the right stable inset in pixels.
+     *
+     * <p>The stable inset represents the area of a full-screen window that <b>may</b> be
+     * partially or fully obscured by the system UI elements.  This value does not change
+     * based on the visibility state of those elements; for example, if the status bar is
+     * normally shown, but temporarily hidden, the stable inset will still provide the inset
+     * associated with the status bar being shown.</p>
+     *
+     * @return The right stable inset
      */
     public int getStableInsetRight() {
         return mStableInsets.right;
     }
 
     /**
-     * @hide
+     * Returns the bottom stable inset in pixels.
+     *
+     * <p>The stable inset represents the area of a full-screen window that <b>may</b> be
+     * partially or fully obscured by the system UI elements.  This value does not change
+     * based on the visibility state of those elements; for example, if the status bar is
+     * normally shown, but temporarily hidden, the stable inset will still provide the inset
+     * associated with the status bar being shown.</p>
+     *
+     * @return The bottom stable inset
      */
     public int getStableInsetBottom() {
         return mStableInsets.bottom;
     }
 
     /**
-     * @hide
+     * Returns true if this WindowInsets has nonzero stable insets.
+     *
+     * <p>The stable inset represents the area of a full-screen window that <b>may</b> be
+     * partially or fully obscured by the system UI elements.  This value does not change
+     * based on the visibility state of those elements; for example, if the status bar is
+     * normally shown, but temporarily hidden, the stable inset will still provide the inset
+     * associated with the status bar being shown.</p>
+     *
+     * @return true if any of the stable inset values are nonzero
      */
     public boolean hasStableInsets() {
         return mStableInsets.top != 0 || mStableInsets.left != 0 || mStableInsets.right != 0
@@ -414,7 +454,9 @@ public final class WindowInsets {
     }
 
     /**
-     * @hide
+     * Returns a copy of this WindowInsets with the stable insets fully consumed.
+     *
+     * @return A modified copy of this WindowInsets
      */
     public WindowInsets consumeStableInsets() {
         final WindowInsets result = new WindowInsets(this);

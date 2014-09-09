@@ -177,6 +177,11 @@ interface IWindowSession {
 
     void wallpaperOffsetsComplete(IBinder window);
 
+    /**
+     * Apply a raw offset to the wallpaper service when shown behind this window.
+     */
+    void setWallpaperDisplayOffset(IBinder windowToken, int x, int y);
+
     Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
             int z, in Bundle extras, boolean sync);
 
