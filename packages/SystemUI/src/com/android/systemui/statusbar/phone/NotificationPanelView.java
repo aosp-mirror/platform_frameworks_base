@@ -559,7 +559,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private boolean isBelowFalsingThreshold() {
-        return !mQsTouchAboveFalsingThreshold && mStatusBar.isFalsingThresholdNeeded();
+        return !mQsTouchAboveFalsingThreshold && mStatusBarState == StatusBarState.KEYGUARD;
     }
 
     private float getQsExpansionFraction() {
