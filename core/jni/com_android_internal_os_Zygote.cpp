@@ -421,7 +421,8 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
                                      jlong permittedCapabilities, jlong effectiveCapabilities,
                                      jint mount_external,
                                      jstring java_se_info, jstring java_se_name,
-                                     bool is_system_server, jintArray fdsToClose) {
+                                     bool is_system_server, jintArray fdsToClose,
+                                     jstring instructionSet) {
   uint64_t start = MsTime();
   SetSigChldHandler();
   ckTime(start, "ForkAndSpecializeCommon:SetSigChldHandler");
@@ -542,7 +543,8 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
     ckTime(start, "ForkAndSpecializeCommon:child process setup");
 
-    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, debug_flags);
+    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, debug_flags,
+                              is_system_server ? NULL : instructionSet);
     ckTime(start, "ForkAndSpecializeCommon:PostForkChildHooks returns");
     if (env->ExceptionCheck()) {
       ALOGE("Error calling post fork hooks.");
@@ -561,7 +563,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
         jint debug_flags, jobjectArray rlimits,
         jint mount_external, jstring se_info, jstring se_name,
-        jintArray fdsToClose) {
+        jintArray fdsToClose, jstring instructionSet) {
     // Grant CAP_WAKE_ALARM to the Bluetooth process.
     jlong capabilities = 0;
     if (uid == AID_BLUETOOTH) {
@@ -570,7 +572,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
 
     return ForkAndSpecializeCommon(env, uid, gid, gids, debug_flags,
             rlimits, capabilities, capabilities, mount_external, se_info,
-            se_name, false, fdsToClose);
+            se_name, false, fdsToClose, instructionSet);
 }
 
 static jint com_android_internal_os_Zygote_nativeForkSystemServer(
@@ -580,7 +582,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
   pid_t pid = ForkAndSpecializeCommon(env, uid, gid, gids,
                                       debug_flags, rlimits,
                                       permittedCapabilities, effectiveCapabilities,
-                                      MOUNT_EXTERNAL_NONE, NULL, NULL, true, NULL);
+                                      MOUNT_EXTERNAL_NONE, NULL, NULL, true, NULL, NULL);
   if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
       ALOGI("System server process %d has been created", pid);
@@ -598,7 +600,8 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
 }
 
 static JNINativeMethod gMethods[] = {
-    { "nativeForkAndSpecialize", "(II[II[[IILjava/lang/String;Ljava/lang/String;[I)I",
+    { "nativeForkAndSpecialize",
+      "(II[II[[IILjava/lang/String;Ljava/lang/String;[ILjava/lang/String;)I",
       (void *) com_android_internal_os_Zygote_nativeForkAndSpecialize },
     { "nativeForkSystemServer", "(II[II[[IJJ)I",
       (void *) com_android_internal_os_Zygote_nativeForkSystemServer }
@@ -609,7 +612,8 @@ int register_com_android_internal_os_Zygote(JNIEnv* env) {
   if (gZygoteClass == NULL) {
     RuntimeAbort(env);
   }
-  gCallPostForkChildHooks = env->GetStaticMethodID(gZygoteClass, "callPostForkChildHooks", "(I)V");
+  gCallPostForkChildHooks = env->GetStaticMethodID(gZygoteClass, "callPostForkChildHooks",
+                                                   "(ILjava/lang/String;)V");
 
   return AndroidRuntime::registerNativeMethods(env, "com/android/internal/os/Zygote",
       gMethods, NELEM(gMethods));
