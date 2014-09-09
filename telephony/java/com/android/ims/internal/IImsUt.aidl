@@ -82,6 +82,13 @@ interface IImsUt {
     int updateCallForward(int action, int condition, String number, int timeSeconds);
 
     /**
+     * Updates the configuration of the call forward unconditional timer.
+     */
+    int updateCallForwardUncondTimer(int startHour, int startMinute, int endHour,
+            int endMinute, int action, int condition, String number);
+
+
+    /**
      * Updates the configuration of the call waiting.
      */
     int updateCallWaiting(boolean enable);

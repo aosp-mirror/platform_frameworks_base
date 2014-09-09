@@ -35,6 +35,14 @@ public class ImsCallForwardInfo implements Parcelable {
     public String mNumber;
     // No reply timer for CF
     public int mTimeSeconds;
+    // CFU start hour
+    public int mStartHour;
+    //CFU start minute
+    public int mStartMinute;
+    // CFU end hour
+    public int mEndHour;
+    //CFU end minute
+    public int mEndMinute;
 
     public ImsCallForwardInfo() {
     }
@@ -55,6 +63,10 @@ public class ImsCallForwardInfo implements Parcelable {
         out.writeInt(mToA);
         out.writeString(mNumber);
         out.writeInt(mTimeSeconds);
+        out.writeInt(mStartHour);
+        out.writeInt(mStartMinute);
+        out.writeInt(mEndHour);
+        out.writeInt(mEndMinute);
     }
 
     @Override
@@ -62,7 +74,11 @@ public class ImsCallForwardInfo implements Parcelable {
         return super.toString() + ", Condition: " + mCondition
             + ", Status: " + ((mStatus == 0) ? "disabled" : "enabled")
             + ", ToA: " + mToA + ", Number=" + mNumber
-            + ", Time (seconds): " + mTimeSeconds;
+            + ", Time (seconds): " + mTimeSeconds
+            + ", StartHour : " + mStartHour
+            + ", StartMinute : " + mStartMinute
+            + ", EndHour : " + mEndMinute
+            + ", EndMinute : " + mEndMinute;
     }
 
     private void readFromParcel(Parcel in) {
@@ -71,6 +87,10 @@ public class ImsCallForwardInfo implements Parcelable {
         mToA = in.readInt();
         mNumber = in.readString();
         mTimeSeconds = in.readInt();
+        mStartHour = in.readInt();
+        mStartMinute = in.readInt();
+        mEndHour = in.readInt();
+        mEndMinute = in.readInt();
     }
 
     public static final Creator<ImsCallForwardInfo> CREATOR =
