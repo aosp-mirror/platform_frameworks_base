@@ -1526,8 +1526,9 @@ class WindowStateAnimator {
     }
 
     void setWallpaperOffset(RectF shownFrame) {
-        final int left = (int) shownFrame.left;
-        final int top = (int) shownFrame.top;
+        final LayoutParams attrs = mWin.getAttrs();
+        final int left = ((int) shownFrame.left) - attrs.surfaceInsets.left;
+        final int top = ((int) shownFrame.top) - attrs.surfaceInsets.top;
         if (mSurfaceX != left || mSurfaceY != top) {
             mSurfaceX = left;
             mSurfaceY = top;
