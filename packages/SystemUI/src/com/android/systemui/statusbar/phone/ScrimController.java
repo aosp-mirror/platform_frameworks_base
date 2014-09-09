@@ -38,11 +38,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private static final String TAG = "ScrimController";
     private static final boolean DEBUG = false;
 
+    public static final long ANIMATION_DURATION = 220;
+
     private static final float SCRIM_BEHIND_ALPHA = 0.62f;
     private static final float SCRIM_BEHIND_ALPHA_KEYGUARD = 0.55f;
     private static final float SCRIM_BEHIND_ALPHA_UNLOCKING = 0.2f;
     private static final float SCRIM_IN_FRONT_ALPHA = 0.75f;
-    private static final long ANIMATION_DURATION = 220;
     private static final int TAG_KEY_ANIM = R.id.scrim;
 
     private static final long PULSE_IN_ANIMATION_DURATION = 1000;
@@ -131,6 +132,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         mDozing = dozing;
         if (!mDozing) {
             cancelPulsing();
+            mAnimateChange = true;
         }
         scheduleUpdate();
     }
@@ -163,7 +165,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         if (mAnimateKeyguardFadingOut) {
             setScrimInFrontColor(0f);
             setScrimBehindColor(0f);
-        }else if (!mKeyguardShowing && !mBouncerShowing) {
+        } else if (!mKeyguardShowing && !mBouncerShowing) {
             updateScrimNormal();
             setScrimInFrontColor(0);
         } else {
@@ -217,8 +219,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
             mScrimInFront.setClickable(false);
         } else {
 
-            // Eat touch events.
-            mScrimInFront.setClickable(true);
+            // Eat touch events (unless dozing).
+            mScrimInFront.setClickable(!mDozing);
         }
     }
 
