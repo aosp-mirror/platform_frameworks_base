@@ -21,7 +21,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:maxWidth="@dimen/resolver_max_width"
-    android:maxCollapsedHeight="48dp"
+    android:maxCollapsedHeight="144dp"
     android:id="@id/contentPanel"
     >
 
@@ -35,26 +35,28 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:paddingStart="32dp"
-            android:paddingEnd="32dp"
+            android:layout_height="64dp"
             android:orientation="horizontal"
             >
 
+            <ImageView android:id="@+id/icon"
+                       android:layout_width="24dp"
+                       android:layout_height="24dp"
+                       android:layout_gravity="start|top"
+                       android:layout_marginStart="16dp"
+                       android:layout_marginEnd="16dp"
+                       android:layout_marginTop="20dp"
+                       android:scaleType="fitCenter"
+                       />
             <TextView android:id="@+id/title"
                       android:layout_width="0dp"
                       android:layout_weight="1"
                       android:layout_height="?android:attr/listPreferredItemHeight"
+                      android:layout_marginStart="16dp"
                       android:textAppearance="?android:attr/textAppearanceMedium"
                       android:gravity="start|center_vertical"
                       android:paddingEnd="16dp"
                       />
-            <ImageView android:id="@+id/icon"
-                       android:layout_width="56dp"
-                       android:layout_height="56dp"
-                       android:layout_gravity="center_vertical"
-                       android:scaleType="fitCenter"
-                       />
         </LinearLayout>
 
         <LinearLayout
@@ -64,13 +66,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alwaysShow="true"
-            android:gravity="end"
+            android:gravity="end|center_vertical"
             android:orientation="horizontal"
             android:layoutDirection="locale"
             android:measureWithLargestChild="true"
-            android:paddingBottom="16dp"
-            android:paddingStart="32dp"
-            android:paddingEnd="32dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
             android:background="@color/white"
             android:elevation="8dp">
             <Button android:id="@+id/button_once"
@@ -99,21 +102,16 @@
               android:background="?android:attr/dividerVertical" />
     </LinearLayout>
 
-    <GridView
+    <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/resolver_list"
-        android:numColumns="4"
-        android:columnWidth="128dp"
         android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"
-        android:paddingLeft="32dp"
-        android:paddingRight="32dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp"
         android:background="@color/white"
         android:elevation="8dp"
         android:nestedScrollingEnabled="true"
+        android:divider="@null"
         />
 
 </com.android.internal.widget.ResolverDrawerLayout>
