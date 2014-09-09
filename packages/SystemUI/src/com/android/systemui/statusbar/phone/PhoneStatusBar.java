@@ -1082,7 +1082,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     };
 
     private long mLastLockToAppLongPress;
-    private AccessibilityManager mAccessibilityManager;
     private View.OnLongClickListener mLongPressBackRecentsListener =
             new View.OnLongClickListener() {
         @Override
@@ -3874,10 +3873,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         try {
             boolean sendBackLongPress = false;
             IActivityManager activityManager = ActivityManagerNative.getDefault();
-            if (mAccessibilityManager == null) {
-                mAccessibilityManager = (AccessibilityManager)
-                        mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
-            }
             boolean isAccessiblityEnabled = mAccessibilityManager.isEnabled();
             if (activityManager.isInLockTaskMode() && !isAccessiblityEnabled) {
                 long time = System.currentTimeMillis();
