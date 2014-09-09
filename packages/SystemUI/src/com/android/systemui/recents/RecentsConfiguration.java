@@ -57,7 +57,8 @@ public class RecentsConfiguration {
 
     /** Layout */
     boolean isLandscape;
-    boolean transposeRecentsLayoutWithOrientation;
+    boolean hasTransposedSearchBar;
+    boolean hasTransposedNavBar;
 
     /** Loading */
     public int maxNumTasksToLoad;
@@ -174,8 +175,8 @@ public class RecentsConfiguration {
 
         // Layout
         isLandscape = res.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-        transposeRecentsLayoutWithOrientation =
-                res.getBoolean(R.bool.recents_transpose_layout_with_orientation);
+        hasTransposedSearchBar = res.getBoolean(R.bool.recents_has_transposed_search_bar);
+        hasTransposedNavBar = res.getBoolean(R.bool.recents_has_transposed_nav_bar);
 
         // Insets
         displayRect.set(0, 0, dm.widthPixels, dm.heightPixels);
@@ -329,13 +330,12 @@ public class RecentsConfiguration {
     /** Returns whether the nav bar scrim should be visible. */
     public boolean hasNavBarScrim() {
         // Only show the scrim if we have recent tasks, and if the nav bar is not transposed
-        return !launchedWithNoRecentTasks &&
-                (!transposeRecentsLayoutWithOrientation || !isLandscape);
+        return !launchedWithNoRecentTasks && (!hasTransposedNavBar || !isLandscape);
     }
 
     /** Returns whether the current layout is horizontal. */
     public boolean hasHorizontalLayout() {
-        return isLandscape && transposeRecentsLayoutWithOrientation;
+        return isLandscape && hasTransposedSearchBar;
     }
 
     /**
@@ -346,7 +346,7 @@ public class RecentsConfiguration {
                                    Rect taskStackBounds) {
         Rect searchBarBounds = new Rect();
         getSearchBarBounds(windowWidth, windowHeight, topInset, searchBarBounds);
-        if (isLandscape && transposeRecentsLayoutWithOrientation) {
+        if (isLandscape && hasTransposedSearchBar) {
             // In landscape, the search bar appears on the left
             taskStackBounds.set(searchBarBounds.right, topInset, windowWidth - rightInset, windowHeight);
         } else {
@@ -367,7 +367,7 @@ public class RecentsConfiguration {
             searchBarSize = 0;
         }
 
-        if (isLandscape && transposeRecentsLayoutWithOrientation) {
+        if (isLandscape && hasTransposedSearchBar) {
             // In landscape, the search bar appears on the left
             searchBarSpaceBounds.set(0, topInset, searchBarSize, windowHeight);
         } else {
