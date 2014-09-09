@@ -20,15 +20,15 @@ package com.android.internal.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.animation.AnimationUtils;
@@ -68,6 +68,7 @@ public class ResolverDrawerLayout extends ViewGroup {
 
     private boolean mIsDragging;
     private boolean mOpenOnClick;
+    private boolean mOpenOnLayout;
     private final int mTouchSlop;
     private final float mMinFlingVelocity;
     private final OverScroller mScroller;
@@ -202,6 +203,8 @@ public class ResolverDrawerLayout extends ViewGroup {
     public boolean onTouchEvent(MotionEvent ev) {
         final int action = ev.getActionMasked();
 
+        mVelocityTracker.addMovement(ev);
+
         boolean handled = false;
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
@@ -288,6 +291,10 @@ public class ResolverDrawerLayout extends ViewGroup {
             break;
 
             case MotionEvent.ACTION_CANCEL: {
+                if (mIsDragging) {
+                    smoothScrollTo(
+                            mCollapseOffset < mCollapsibleHeight / 2 ? 0 : mCollapsibleHeight, 0);
+                }
                 resetTouch();
                 return true;
             }
@@ -498,28 +505,39 @@ public class ResolverDrawerLayout extends ViewGroup {
     @Override
     public void onStopNestedScroll(View child) {
         super.onStopNestedScroll(child);
-        smoothScrollTo(mCollapseOffset < mCollapsibleHeight / 2 ? 0 : mCollapsibleHeight, 0);
+        if (mScroller.isFinished()) {
+            smoothScrollTo(mCollapseOffset < mCollapsibleHeight / 2 ? 0 : mCollapsibleHeight, 0);
+        }
     }
 
     @Override
     public void onNestedScroll(View target, int dxConsumed, int dyConsumed,
             int dxUnconsumed, int dyUnconsumed) {
-        if (dyUnconsumed > 0) {
+        if (dyUnconsumed < 0) {
             performDrag(-dyUnconsumed);
         }
     }
 
     @Override
     public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
-        if (dy < 0) {
-            consumed[1] = (int) performDrag(-dy);
+        if (dy > 0) {
+            consumed[1] = (int) -performDrag(-dy);
         }
+    }
+
+    @Override
+    public boolean onNestedPreFling(View target, float velocityX, float velocityY) {
+        if (velocityY > mMinFlingVelocity && mCollapseOffset != 0) {
+            smoothScrollTo(0, velocityY);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
         if (!consumed && Math.abs(velocityY) > mMinFlingVelocity) {
-            smoothScrollTo(velocityY < 0 ? 0 : mCollapsibleHeight, velocityY);
+            smoothScrollTo(velocityY > 0 ? 0 : mCollapsibleHeight, velocityY);
             return true;
         }
         return false;
@@ -571,8 +589,8 @@ public class ResolverDrawerLayout extends ViewGroup {
         if (isLaidOut()) {
             mCollapseOffset = Math.min(mCollapseOffset, mCollapsibleHeight);
         } else {
-            // Start out collapsed at first
-            mCollapseOffset = mCollapsibleHeight;
+            // Start out collapsed at first unless we restored state for otherwise
+            mCollapseOffset = mOpenOnLayout ? 0 : mCollapsibleHeight;
         }
 
         mTopOffset = Math.max(0, heightSize - heightUsed) + (int) mCollapseOffset;
@@ -634,6 +652,20 @@ public class ResolverDrawerLayout extends ViewGroup {
         return new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
     }
 
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        final SavedState ss = new SavedState(super.onSaveInstanceState());
+        ss.open = mCollapsibleHeight > 0 && mCollapseOffset == 0;
+        return ss;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        final SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+        mOpenOnLayout = ss.open;
+    }
+
     public static class LayoutParams extends MarginLayoutParams {
         public boolean alwaysShow;
         public boolean ignoreOffset;
@@ -669,5 +701,37 @@ public class ResolverDrawerLayout extends ViewGroup {
         public LayoutParams(ViewGroup.LayoutParams source) {
             super(source);
         }
+    }
+
+    static class SavedState extends BaseSavedState {
+        boolean open;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        private SavedState(Parcel in) {
+            super(in);
+            open = in.readInt() != 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeInt(open ? 1 : 0);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR =
+                new Parcelable.Creator<SavedState>() {
+            @Override
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
     }
 }
