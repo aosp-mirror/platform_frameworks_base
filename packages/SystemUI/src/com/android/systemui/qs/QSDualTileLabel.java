@@ -59,7 +59,7 @@ public class QSDualTileLabel extends FrameLayout {
                 .getDimensionPixelSize(R.dimen.qs_dual_tile_padding_horizontal);
 
         mFirstLine = initTextView();
-        mFirstLine.setPadding(mHorizontalPaddingPx, 0, 0, 0);
+        mFirstLine.setPadding(mHorizontalPaddingPx, 0, mHorizontalPaddingPx, 0);
         final LinearLayout firstLineLayout = new LinearLayout(mContext);
         firstLineLayout.setPadding(0, 0, 0, 0);
         firstLineLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -104,6 +104,7 @@ public class QSDualTileLabel extends FrameLayout {
             lp.topMargin = h * 4 / 5;
             mSecondLine.setLayoutParams(lp);
             mFirstLine.setMinHeight(h);
+            mFirstLine.setPadding(mHorizontalPaddingPx, 0, 0, 0);
         }
     }
 
