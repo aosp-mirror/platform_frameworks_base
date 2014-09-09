@@ -71,6 +71,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AnimationUtils;
 import android.widget.DateTimeView;
 import android.widget.ImageView;
@@ -161,6 +162,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     final protected SparseArray<UserInfo> mCurrentProfiles = new SparseArray<UserInfo>();
 
     protected int mLayoutDirection = -1; // invalid
+    protected AccessibilityManager mAccessibilityManager;
     private Locale mLocale;
     private float mFontScale;
 
@@ -441,6 +443,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         mNotificationColorUtil = NotificationColorUtil.getInstance(mContext);
 
         mNotificationData = new NotificationData(this);
+
+        mAccessibilityManager = (AccessibilityManager)
+                mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
 
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
@@ -1977,10 +1982,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         boolean hasTicker = mHeadsUpTicker && !TextUtils.isEmpty(notification.tickerText);
         boolean isAllowed = notification.extras.getInt(Notification.EXTRA_AS_HEADS_UP,
                 Notification.HEADS_UP_ALLOWED) != Notification.HEADS_UP_NEVER;
+        boolean accessibilityForcesLaunch = isFullscreen
+                && mAccessibilityManager.isTouchExplorationEnabled();
 
         final KeyguardTouchDelegate keyguard = KeyguardTouchDelegate.getInstance(mContext);
         boolean interrupt = (isFullscreen || (isHighPriority && (isNoisy || hasTicker)))
                 && isAllowed
+                && !accessibilityForcesLaunch
                 && mPowerManager.isScreenOn()
                 && !keyguard.isShowingAndNotOccluded()
                 && !keyguard.isInputRestricted();
