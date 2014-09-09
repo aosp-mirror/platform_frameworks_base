@@ -1611,6 +1611,10 @@
     <!-- default window ShowCircularMask property -->
     <bool name="config_windowShowCircularMask">false</bool>
 
+    <!-- default value for whether circular emulators (ro.emulator.circular)
+         should show a display overlay on the screen -->
+    <bool name="config_windowEnableCircularEmulatorDisplayOverlay">false</bool>
+
     <!-- Defines the default set of global actions. Actions may still be disabled or hidden based
          on the current state of the device.
          Each item must be one of the following strings:
