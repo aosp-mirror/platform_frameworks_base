@@ -27,12 +27,12 @@
             <package name="" withSubpackages="true" static="true" />
           </value>
         </option>
+        <option name="RIGHT_MARGIN" value="100" />
         <option name="WRAP_WHEN_TYPING_REACHES_RIGHT_MARGIN" value="true" />
         <option name="JD_ALIGN_PARAM_COMMENTS" value="false" />
         <option name="JD_ADD_BLANK_AFTER_PARM_COMMENTS" value="true" />
         <option name="JD_ADD_BLANK_AFTER_RETURN" value="true" />
         <option name="JD_DO_NOT_WRAP_ONE_LINE_COMMENTS" value="true" />
-        <option name="RIGHT_MARGIN" value="100" />
         <option name="WRAP_COMMENTS" value="true" />
         <XML>
           <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
