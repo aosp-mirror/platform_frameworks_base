@@ -25,7 +25,7 @@ interface ISub {
      * @param subId The unique SubInfoRecord index in database
      * @return SubInfoRecord, maybe null
      */
-    SubInfoRecord getSubInfoUsingSubId(long subId);
+    SubInfoRecord getSubInfoForSubscriber(long subId);
 
     /**
      * Get the SubInfoRecord according to an IccId
