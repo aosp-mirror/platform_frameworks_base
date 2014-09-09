@@ -3533,13 +3533,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     pf.bottom = df.bottom = of.bottom = cf.bottom = mOverscanScreenTop
                             + mOverscanScreenHeight;
                 } else if (attrs.type == TYPE_WALLPAPER) {
-                    // The wallpaper also has Real Ultimate Power.
-                    pf.left = df.left = of.left = cf.left = mUnrestrictedScreenLeft;
-                    pf.top = df.top = of.top = cf.top = mUnrestrictedScreenTop;
-                    pf.right = df.right = of.right = cf.right
-                            = mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
-                    pf.bottom = df.bottom = of.bottom = cf.bottom
-                            = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
+                    // The wallpaper also has Real Ultimate Power, but we want to tell
+                    // it about the overscan area.
+                    pf.left = df.left = mOverscanScreenLeft;
+                    pf.top = df.top = mOverscanScreenTop;
+                    pf.right = df.right = mOverscanScreenLeft + mOverscanScreenWidth;
+                    pf.bottom = df.bottom = mOverscanScreenTop + mOverscanScreenHeight;
+                    of.left = cf.left = mUnrestrictedScreenLeft;
+                    of.top = cf.top = mUnrestrictedScreenTop;
+                    of.right = cf.right = mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
+                    of.bottom = cf.bottom = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
                 } else if ((fl & FLAG_LAYOUT_IN_OVERSCAN) != 0
                         && attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
                         && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
@@ -3653,9 +3656,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // TYPE_SYSTEM_ERROR is above the NavigationBar so it can't be allowed to extend over it.
         if ((fl & FLAG_LAYOUT_NO_LIMITS) != 0 && attrs.type != TYPE_SYSTEM_ERROR) {
-            df.left = df.top = of.left = of.top = cf.left = cf.top = vf.left = vf.top = -10000;
-            df.right = df.bottom = of.right = of.bottom = cf.right = cf.bottom
-                    = vf.right = vf.bottom = 10000;
+            df.left = df.top = -10000;
+            df.right = df.bottom = 10000;
+            if (attrs.type != TYPE_WALLPAPER) {
+                of.left = of.top = cf.left = cf.top = vf.left = vf.top = -10000;
+                of.right = of.bottom = cf.right = cf.bottom = vf.right = vf.bottom = 10000;
+            }
         }
 
         if (DEBUG_LAYOUT) Slog.v(TAG, "Compute frame " + attrs.getTitle()
