@@ -29,15 +29,15 @@ enabled.
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAlignment="viewStart"
-        android:paddingStart="16dip"
-        android:paddingEnd="16dip"
-        android:paddingTop="16dip" />
+        android:paddingStart="@dimen/alert_dialog_padding_material"
+        android:paddingEnd="@dimen/alert_dialog_padding_material"
+        android:paddingTop="@dimen/alert_dialog_padding_top_material" />
     <FrameLayout
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:foreground="?android:attr/windowContentOverlay">
-        <FrameLayout android:id="@android:id/content"
+        android:foreground="?attr/windowContentOverlay">
+        <FrameLayout android:id="@id/content"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </FrameLayout>
