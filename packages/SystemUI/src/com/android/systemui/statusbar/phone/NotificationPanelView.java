@@ -23,6 +23,8 @@ import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.view.MotionEvent;
@@ -59,6 +61,10 @@ public class NotificationPanelView extends PanelView implements
 
     private static final float HEADER_RUBBERBAND_FACTOR = 2.05f;
     private static final float LOCK_ICON_ACTIVE_SCALE = 1.2f;
+
+    private static final int DOZE_BACKGROUND_COLOR = 0xff000000;
+    private static final int TAG_KEY_ANIM = R.id.scrim;
+    private static final long DOZE_BACKGROUND_ANIM_DURATION = ScrimController.ANIMATION_DURATION;
 
     private KeyguardAffordanceHelper mAfforanceHelper;
     private StatusBarHeaderView mHeader;
@@ -1724,11 +1730,56 @@ public class NotificationPanelView extends PanelView implements
         if (dozing == mDozing) return;
         mDozing = dozing;
         if (mDozing) {
-            setBackgroundColor(0xff000000);
+            setBackgroundColorAlpha(this, DOZE_BACKGROUND_COLOR, 0xff, false /*animate*/);
         } else {
-            setBackground(null);
+            setBackgroundColorAlpha(this, DOZE_BACKGROUND_COLOR, 0, true /*animate*/);
         }
         updateKeyguardStatusBarVisibility();
+    }
+
+    private static void setBackgroundColorAlpha(final View target, int rgb, int targetAlpha,
+            boolean animate) {
+        int currentAlpha = getBackgroundAlpha(target);
+        if (currentAlpha == targetAlpha) {
+            return;
+        }
+        final int r = Color.red(rgb);
+        final int g = Color.green(rgb);
+        final int b = Color.blue(rgb);
+        Object runningAnim = target.getTag(TAG_KEY_ANIM);
+        if (runningAnim instanceof ValueAnimator) {
+            ((ValueAnimator) runningAnim).cancel();
+        }
+        if (!animate) {
+            target.setBackgroundColor(Color.argb(targetAlpha, r, g, b));
+            return;
+        }
+        ValueAnimator anim = ValueAnimator.ofInt(currentAlpha, targetAlpha);
+        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                int value = (int) animation.getAnimatedValue();
+                target.setBackgroundColor(Color.argb(value, r, g, b));
+            }
+        });
+        anim.setDuration(DOZE_BACKGROUND_ANIM_DURATION);
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                target.setTag(TAG_KEY_ANIM, null);
+            }
+        });
+        anim.start();
+        target.setTag(TAG_KEY_ANIM, anim);
+    }
+
+    private static int getBackgroundAlpha(View view) {
+        if (view.getBackground() instanceof ColorDrawable) {
+            ColorDrawable drawable = (ColorDrawable) view.getBackground();
+            return Color.alpha(drawable.getColor());
+        } else {
+            return 0;
+        }
     }
 
     public void setShadeEmpty(boolean shadeEmpty) {
