@@ -17,27 +17,24 @@
 package com.android.server.wm;
 
 
-
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.util.Slog;
 import android.view.Display;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
-import android.util.Slog;
 
-class CircularDisplayMask {
-    private static final String TAG = "CircularDisplayMask";
+class EmulatorDisplayOverlay {
+    private static final String TAG = "EmulatorDisplayOverlay";
 
-    private static final int STROKE_WIDTH = 2;
-    // size of the chin
-    private int mScreenOffset = 0;
     // Display dimensions
     private Point mScreenSize;
 
@@ -46,29 +43,23 @@ class CircularDisplayMask {
     private int mLastDW;
     private int mLastDH;
     private boolean mDrawNeeded;
-    private Paint mPaint;
+    private Drawable mOverlay;
     private int mRotation;
     private boolean mVisible;
-    private boolean mDimensionsUnequal = false;
 
-    public CircularDisplayMask(Display display, SurfaceSession session, int zOrder,
-            int screenOffset) {
+    public EmulatorDisplayOverlay(Context context, Display display, SurfaceSession session,
+            int zOrder) {
         mScreenSize = new Point();
         display.getSize(mScreenSize);
-        if (mScreenSize.x != mScreenSize.y) {
-            Slog.w(TAG, "Screen dimensions of displayId = " + display.getDisplayId() +
-                    "are not equal, circularMask will not be drawn.");
-            mDimensionsUnequal = true;
-        }
 
         SurfaceControl ctrl = null;
         try {
             if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                ctrl = new WindowStateAnimator.SurfaceTrace(session, "CircularDisplayMask",
+                ctrl = new WindowStateAnimator.SurfaceTrace(session, "EmulatorDisplayOverlay",
                         mScreenSize.x, mScreenSize.y, PixelFormat.TRANSLUCENT,
                         SurfaceControl.HIDDEN);
             } else {
-                ctrl = new SurfaceControl(session, "CircularDisplayMask", mScreenSize.x,
+                ctrl = new SurfaceControl(session, "EmulatorDisplayOverlay", mScreenSize.x,
                         mScreenSize.y, PixelFormat.TRANSLUCENT, SurfaceControl.HIDDEN);
             }
             ctrl.setLayerStack(display.getLayerStack());
@@ -80,16 +71,12 @@ class CircularDisplayMask {
         }
         mSurfaceControl = ctrl;
         mDrawNeeded = true;
-        mPaint = new Paint();
-        mPaint.setAntiAlias(true);
-        mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setColor(Color.BLACK);
-        mPaint.setStrokeWidth(STROKE_WIDTH);
-        mScreenOffset = screenOffset;
+        mOverlay = context.getDrawable(
+                com.android.internal.R.drawable.emulator_circular_window_overlay);
     }
 
     private void drawIfNeeded() {
-        if (!mDrawNeeded || !mVisible || mDimensionsUnequal) {
+        if (!mDrawNeeded || !mVisible) {
             return;
         }
         mDrawNeeded = false;
@@ -99,30 +86,15 @@ class CircularDisplayMask {
         try {
             c = mSurface.lockCanvas(dirty);
         } catch (IllegalArgumentException e) {
-        } catch (Surface.OutOfResourcesException e) {
+        } catch (OutOfResourcesException e) {
         }
         if (c == null) {
             return;
         }
         c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.SRC);
-        switch (mRotation) {
-        case Surface.ROTATION_0:
-        case Surface.ROTATION_90:
-            // chin bottom or right
-            mSurfaceControl.setPosition(0, 0);
-            break;
-        case Surface.ROTATION_180:
-            // chin top
-            mSurfaceControl.setPosition(0, -mScreenOffset);
-            break;
-        case Surface.ROTATION_270:
-            // chin left
-            mSurfaceControl.setPosition(-mScreenOffset, 0);
-            break;
-        }
-
-        int circleRadius = mScreenSize.x / 2;
-        c.drawCircle(circleRadius, circleRadius, circleRadius, mPaint);
+        mSurfaceControl.setPosition(0, 0);
+        mOverlay.setBounds(0, 0, mScreenSize.x, mScreenSize.y);
+        mOverlay.draw(c);
         mSurface.unlockCanvasAndPost(c);
     }
 
