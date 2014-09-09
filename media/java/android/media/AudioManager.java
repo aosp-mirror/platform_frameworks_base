@@ -36,6 +36,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.ServiceManager;
@@ -1959,7 +1960,42 @@ public class AudioManager {
             return;
         }
 
-        if (!querySoundEffectsEnabled()) {
+        if (!querySoundEffectsEnabled(Process.myUserHandle().getIdentifier())) {
+            return;
+        }
+
+        IAudioService service = getService();
+        try {
+            service.playSoundEffect(effectType);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in playSoundEffect"+e);
+        }
+    }
+
+    /**
+     * Plays a sound effect (Key clicks, lid open/close...)
+     * @param effectType The type of sound effect. One of
+     *            {@link #FX_KEY_CLICK},
+     *            {@link #FX_FOCUS_NAVIGATION_UP},
+     *            {@link #FX_FOCUS_NAVIGATION_DOWN},
+     *            {@link #FX_FOCUS_NAVIGATION_LEFT},
+     *            {@link #FX_FOCUS_NAVIGATION_RIGHT},
+     *            {@link #FX_KEYPRESS_STANDARD},
+     *            {@link #FX_KEYPRESS_SPACEBAR},
+     *            {@link #FX_KEYPRESS_DELETE},
+     *            {@link #FX_KEYPRESS_RETURN},
+     *            {@link #FX_KEYPRESS_INVALID},
+     * @param userId The current user to pull sound settings from
+     * NOTE: This version uses the UI settings to determine
+     * whether sounds are heard or not.
+     * @hide
+     */
+    public void  playSoundEffect(int effectType, int userId) {
+        if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {
+            return;
+        }
+
+        if (!querySoundEffectsEnabled(userId)) {
             return;
         }
 
@@ -2006,8 +2042,9 @@ public class AudioManager {
     /**
      * Settings has an in memory cache, so this is fast.
      */
-    private boolean querySoundEffectsEnabled() {
-        return Settings.System.getInt(mContext.getContentResolver(), Settings.System.SOUND_EFFECTS_ENABLED, 0) != 0;
+    private boolean querySoundEffectsEnabled(int user) {
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.SOUND_EFFECTS_ENABLED, 0, user) != 0;
     }
 
 
