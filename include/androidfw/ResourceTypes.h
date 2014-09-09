@@ -669,25 +669,25 @@ public:
 
     // These are available for all nodes:
     int32_t getCommentID() const;
-    const uint16_t* getComment(size_t* outLen) const;
+    const char16_t* getComment(size_t* outLen) const;
     uint32_t getLineNumber() const;
     
     // This is available for TEXT:
     int32_t getTextID() const;
-    const uint16_t* getText(size_t* outLen) const;
+    const char16_t* getText(size_t* outLen) const;
     ssize_t getTextValue(Res_value* outValue) const;
     
     // These are available for START_NAMESPACE and END_NAMESPACE:
     int32_t getNamespacePrefixID() const;
-    const uint16_t* getNamespacePrefix(size_t* outLen) const;
+    const char16_t* getNamespacePrefix(size_t* outLen) const;
     int32_t getNamespaceUriID() const;
-    const uint16_t* getNamespaceUri(size_t* outLen) const;
+    const char16_t* getNamespaceUri(size_t* outLen) const;
     
     // These are available for START_TAG and END_TAG:
     int32_t getElementNamespaceID() const;
-    const uint16_t* getElementNamespace(size_t* outLen) const;
+    const char16_t* getElementNamespace(size_t* outLen) const;
     int32_t getElementNameID() const;
-    const uint16_t* getElementName(size_t* outLen) const;
+    const char16_t* getElementName(size_t* outLen) const;
     
     // Remaining methods are for retrieving information about attributes
     // associated with a START_TAG:
@@ -696,10 +696,10 @@ public:
     
     // Returns -1 if no namespace, -2 if idx out of range.
     int32_t getAttributeNamespaceID(size_t idx) const;
-    const uint16_t* getAttributeNamespace(size_t idx, size_t* outLen) const;
+    const char16_t* getAttributeNamespace(size_t idx, size_t* outLen) const;
 
     int32_t getAttributeNameID(size_t idx) const;
-    const uint16_t* getAttributeName(size_t idx, size_t* outLen) const;
+    const char16_t* getAttributeName(size_t idx, size_t* outLen) const;
     uint32_t getAttributeNameResID(size_t idx) const;
 
     // These will work only if the underlying string pool is UTF-8.
@@ -707,7 +707,7 @@ public:
     const char* getAttributeName8(size_t idx, size_t* outLen) const;
 
     int32_t getAttributeValueStringID(size_t idx) const;
-    const uint16_t* getAttributeStringValue(size_t idx, size_t* outLen) const;
+    const char16_t* getAttributeStringValue(size_t idx, size_t* outLen) const;
     
     int32_t getAttributeDataType(size_t idx) const;
     int32_t getAttributeData(size_t idx) const;
@@ -1566,7 +1566,7 @@ public:
                                size_t defPackageLen = 0,
                                uint32_t* outTypeSpecFlags = NULL) const;
 
-    static bool expandResourceRef(const uint16_t* refStr, size_t refLen,
+    static bool expandResourceRef(const char16_t* refStr, size_t refLen,
                                   String16* outPackage,
                                   String16* outType,
                                   String16* outName,
