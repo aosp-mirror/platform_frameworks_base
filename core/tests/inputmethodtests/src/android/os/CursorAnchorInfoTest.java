@@ -116,16 +116,16 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(TRANSFORM_MATRIX, info.getMatrix());
         for (int i = 0; i < MANY_BOUNDS.length; i++) {
             final RectF expectedBounds = MANY_BOUNDS[i];
-            assertEquals(expectedBounds, info.getCharacterRect(i));
+            assertEquals(expectedBounds, info.getCharacterBounds(i));
         }
-        assertNull(info.getCharacterRect(-1));
-        assertNull(info.getCharacterRect(MANY_BOUNDS.length + 1));
+        assertNull(info.getCharacterBounds(-1));
+        assertNull(info.getCharacterBounds(MANY_BOUNDS.length + 1));
         for (int i = 0; i < MANY_FLAGS_ARRAY.length; i++) {
             final int expectedFlags = MANY_FLAGS_ARRAY[i];
-            assertEquals(expectedFlags, info.getCharacterRectFlags(i));
+            assertEquals(expectedFlags, info.getCharacterBoundsFlags(i));
         }
-        assertEquals(0, info.getCharacterRectFlags(-1));
-        assertEquals(0, info.getCharacterRectFlags(MANY_BOUNDS.length + 1));
+        assertEquals(0, info.getCharacterBoundsFlags(-1));
+        assertEquals(0, info.getCharacterBoundsFlags(MANY_BOUNDS.length + 1));
 
         // Make sure that the builder can reproduce the same object.
         final CursorAnchorInfo info2 = builder.build();
@@ -141,16 +141,16 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(TRANSFORM_MATRIX, info2.getMatrix());
         for (int i = 0; i < MANY_BOUNDS.length; i++) {
             final RectF expectedBounds = MANY_BOUNDS[i];
-            assertEquals(expectedBounds, info2.getCharacterRect(i));
+            assertEquals(expectedBounds, info2.getCharacterBounds(i));
         }
-        assertNull(info2.getCharacterRect(-1));
-        assertNull(info2.getCharacterRect(MANY_BOUNDS.length + 1));
+        assertNull(info2.getCharacterBounds(-1));
+        assertNull(info2.getCharacterBounds(MANY_BOUNDS.length + 1));
         for (int i = 0; i < MANY_FLAGS_ARRAY.length; i++) {
             final int expectedFlags = MANY_FLAGS_ARRAY[i];
-            assertEquals(expectedFlags, info2.getCharacterRectFlags(i));
+            assertEquals(expectedFlags, info2.getCharacterBoundsFlags(i));
         }
-        assertEquals(0, info2.getCharacterRectFlags(-1));
-        assertEquals(0, info2.getCharacterRectFlags(MANY_BOUNDS.length + 1));
+        assertEquals(0, info2.getCharacterBoundsFlags(-1));
+        assertEquals(0, info2.getCharacterBoundsFlags(MANY_BOUNDS.length + 1));
         assertEquals(info, info2);
         assertEquals(info.hashCode(), info2.hashCode());
 
@@ -168,16 +168,16 @@ public class CursorAnchorInfoTest extends InstrumentationTestCase {
         assertEquals(TRANSFORM_MATRIX, info3.getMatrix());
         for (int i = 0; i < MANY_BOUNDS.length; i++) {
             final RectF expectedBounds = MANY_BOUNDS[i];
-            assertEquals(expectedBounds, info3.getCharacterRect(i));
+            assertEquals(expectedBounds, info3.getCharacterBounds(i));
         }
-        assertNull(info3.getCharacterRect(-1));
-        assertNull(info3.getCharacterRect(MANY_BOUNDS.length + 1));
+        assertNull(info3.getCharacterBounds(-1));
+        assertNull(info3.getCharacterBounds(MANY_BOUNDS.length + 1));
         for (int i = 0; i < MANY_FLAGS_ARRAY.length; i++) {
             final int expectedFlags = MANY_FLAGS_ARRAY[i];
-            assertEquals(expectedFlags, info3.getCharacterRectFlags(i));
+            assertEquals(expectedFlags, info3.getCharacterBoundsFlags(i));
         }
-        assertEquals(0, info3.getCharacterRectFlags(-1));
-        assertEquals(0, info3.getCharacterRectFlags(MANY_BOUNDS.length + 1));
+        assertEquals(0, info3.getCharacterBoundsFlags(-1));
+        assertEquals(0, info3.getCharacterBoundsFlags(MANY_BOUNDS.length + 1));
         assertEquals(info.hashCode(), info3.hashCode());
 
         builder.reset();
