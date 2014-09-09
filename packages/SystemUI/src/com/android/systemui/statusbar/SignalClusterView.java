@@ -50,10 +50,14 @@ public class SignalClusterView
     private int mAirplaneIconId = 0;
     private String mWifiDescription, mMobileDescription, mMobileTypeDescription;
     private boolean mRoaming;
+    private boolean mIsMobileTypeIconWide;
 
     ViewGroup mWifiGroup, mMobileGroup;
     ImageView mVpn, mWifi, mMobile, mMobileType, mAirplane;
     View mWifiAirplaneSpacer;
+    View mWifiSignalSpacer;
+
+    private int mWideTypeIconStartPadding;
 
     public SignalClusterView(Context context) {
         this(context, null);
@@ -80,6 +84,13 @@ public class SignalClusterView
     }
 
     @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mWideTypeIconStartPadding = getContext().getResources().getDimensionPixelSize(
+                R.dimen.wide_type_icon_start_padding);
+    }
+
+    @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
@@ -91,6 +102,7 @@ public class SignalClusterView
         mMobileType     = (ImageView) findViewById(R.id.mobile_type);
         mAirplane       = (ImageView) findViewById(R.id.airplane);
         mWifiAirplaneSpacer =         findViewById(R.id.wifi_airplane_spacer);
+        mWifiSignalSpacer =           findViewById(R.id.wifi_signal_spacer);
 
         apply();
     }
@@ -131,13 +143,15 @@ public class SignalClusterView
 
     @Override
     public void setMobileDataIndicators(boolean visible, int strengthIcon, int typeIcon,
-            String contentDescription, String typeContentDescription, boolean roaming) {
+            String contentDescription, String typeContentDescription, boolean roaming,
+            boolean isTypeIconWide) {
         mMobileVisible = visible;
         mMobileStrengthId = strengthIcon;
         mMobileTypeId = typeIcon;
         mMobileDescription = contentDescription;
         mMobileTypeDescription = typeContentDescription;
         mRoaming = roaming;
+        mIsMobileTypeIconWide = isTypeIconWide;
 
         apply();
     }
@@ -229,6 +243,14 @@ public class SignalClusterView
         } else {
             mWifiAirplaneSpacer.setVisibility(View.GONE);
         }
+
+        if (mRoaming && mMobileVisible && mWifiVisible) {
+            mWifiSignalSpacer.setVisibility(View.VISIBLE);
+        } else {
+            mWifiSignalSpacer.setVisibility(View.GONE);
+        }
+
+        mMobile.setPaddingRelative(mIsMobileTypeIconWide ? mWideTypeIconStartPadding : 0, 0, 0, 0);
 
         if (DEBUG) Log.d(TAG,
                 String.format("mobile: %s sig=%d typ=%d",
