@@ -50,22 +50,47 @@ public abstract class Conference {
     private int mCapabilities;
     private String mDisconnectMessage;
 
+    /**
+     * Constructs a new Conference with a mandatory {@link PhoneAccountHandle}
+     *
+     * @param phoneAccount The {@code PhoneAccountHandle} associated with the conference.
+     */
     public Conference(PhoneAccountHandle phoneAccount) {
         mPhoneAccount = phoneAccount;
     }
 
+    /**
+     * Returns the {@link PhoneAccountHandle} the conference call is being placed through.
+     *
+     * @return A {@code PhoneAccountHandle} object representing the PhoneAccount of the conference.
+     */
     public final PhoneAccountHandle getPhoneAccountHandle() {
         return mPhoneAccount;
     }
 
+    /**
+     * Returns the list of connections currently associated with the conference call.
+     *
+     * @return A list of {@code Connection} objects which represent the children of the conference.
+     */
     public final List<Connection> getConnections() {
         return mUnmodifiableChildConnections;
     }
 
+    /**
+     * Gets the state of the conference call. See {@link Connection} for valid values.
+     *
+     * @return A constant representing the state the conference call is currently in.
+     */
     public final int getState() {
         return mState;
     }
 
+    /**
+     * Returns the capabilities of a conference. See {@link PhoneCapabilities} for valid values.
+     *
+     * @return A bitmask of the {@code PhoneCapabilities} of the conference call.
+     */
     public final int getCapabilities() {
         return mCapabilities;
     }
@@ -135,7 +160,9 @@ public abstract class Conference {
     }
 
     /**
-     * Sets the capabilities of a conference.
+     * Sets the capabilities of a conference. See {@link PhoneCapabilities} for valid values.
+     *
+     * @param capabilities A bitmask of the {@code PhoneCapabilities} of the conference call.
      */
     public final void setCapabilities(int capabilities) {
         if (capabilities != mCapabilities) {
@@ -170,7 +197,6 @@ public abstract class Conference {
      * Removes the specified connection as a child of this conference.
      *
      * @param connection The connection to remove.
-     * @return True if the connection was successfully removed.
      */
     public final void removeConnection(Connection connection) {
         Log.d(this, "removing %s from %s", connection, mChildConnections);
