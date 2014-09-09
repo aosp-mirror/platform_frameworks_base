@@ -702,6 +702,33 @@ public final class NfcAdapter {
     }
 
     /**
+     * Pauses polling for a {@code timeoutInMs} millis. If polling must be resumed before timeout,
+     * use {@link #resumePolling()}.
+     * @hide
+     */
+    public void pausePolling(int timeoutInMs) {
+        try {
+            sService.pausePolling(timeoutInMs);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
+    }
+
+    /**
+     * Resumes default polling for the current device state if polling is paused. Calling
+     * this while polling is not paused is a no-op.
+     *
+     * @hide
+     */
+    public void resumePolling() {
+        try {
+            sService.resumePolling();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
+    }
+
+    /**
      * Set one or more {@link Uri}s to send using Android Beam (TM). Every
      * Uri you provide must have either scheme 'file' or scheme 'content'.
      *
