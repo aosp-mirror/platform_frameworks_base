@@ -1325,12 +1325,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (publicViewLocal == null) {
             // Add a basic notification template
             publicViewLocal = LayoutInflater.from(mContext).inflate(
-                    com.android.internal.R.layout.notification_template_material_base,
+                    R.layout.notification_public_default,
                     expandedPublic, false);
             publicViewLocal.setIsRootNamespace(true);
             expandedPublic.setContractedChild(publicViewLocal);
 
-            final TextView title = (TextView) publicViewLocal.findViewById(com.android.internal.R.id.title);
+            final TextView title = (TextView) publicViewLocal.findViewById(R.id.title);
             try {
                 title.setText(pmUser.getApplicationLabel(
                         pmUser.getApplicationInfo(entry.notification.getPackageName(), 0)));
@@ -1338,10 +1338,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 title.setText(entry.notification.getPackageName());
             }
 
-            final ImageView icon = (ImageView) publicViewLocal.findViewById(
-                    com.android.internal.R.id.icon);
+            final ImageView icon = (ImageView) publicViewLocal.findViewById(R.id.icon);
             final ImageView profileBadge = (ImageView) publicViewLocal.findViewById(
-                    com.android.internal.R.id.profile_badge_line3);
+                    R.id.profile_badge_line3);
 
             final StatusBarIcon ic = new StatusBarIcon(entry.notification.getPackageName(),
                     entry.notification.getUser(),
@@ -1372,16 +1371,13 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
 
             final View privateTime = contentViewLocal.findViewById(com.android.internal.R.id.time);
+            final DateTimeView time = (DateTimeView) publicViewLocal.findViewById(R.id.time);
             if (privateTime != null && privateTime.getVisibility() == View.VISIBLE) {
-                final View timeStub = publicViewLocal.findViewById(com.android.internal.R.id.time);
-                timeStub.setVisibility(View.VISIBLE);
-                final DateTimeView dateTimeView = (DateTimeView)
-                        publicViewLocal.findViewById(com.android.internal.R.id.time);
-                dateTimeView.setTime(entry.notification.getNotification().when);
+                time.setVisibility(View.VISIBLE);
+                time.setTime(entry.notification.getNotification().when);
             }
 
-            final TextView text = (TextView) publicViewLocal.findViewById(
-                com.android.internal.R.id.text);
+            final TextView text = (TextView) publicViewLocal.findViewById(R.id.text);
             if (text != null) {
                 text.setText(R.string.notification_hidden_text);
                 text.setTextAppearance(mContext,
