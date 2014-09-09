@@ -247,6 +247,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     float mWallpaperXStep = -1;
     float mWallpaperYStep = -1;
 
+    // If a window showing a wallpaper: a raw pixel offset to forcibly apply
+    // to its window; if a wallpaper window: not used.
+    int mWallpaperDisplayOffsetX = Integer.MIN_VALUE;
+    int mWallpaperDisplayOffsetY = Integer.MIN_VALUE;
+
     // Wallpaper windows: pixels offset based on above variables.
     int mXOffset;
     int mYOffset;
@@ -1583,6 +1588,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (mWallpaperXStep != -1 || mWallpaperYStep != -1) {
             pw.print(prefix); pw.print("mWallpaperXStep="); pw.print(mWallpaperXStep);
                     pw.print(" mWallpaperYStep="); pw.println(mWallpaperYStep);
+        }
+        if (mWallpaperDisplayOffsetX != Integer.MIN_VALUE
+                || mWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
+            pw.print(prefix); pw.print("mWallpaperDisplayOffsetX=");
+                    pw.print(mWallpaperDisplayOffsetX);
+                    pw.print(" mWallpaperDisplayOffsetY=");
+                    pw.println(mWallpaperDisplayOffsetY);
         }
     }
 

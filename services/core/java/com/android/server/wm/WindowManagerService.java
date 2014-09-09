@@ -572,6 +572,8 @@ public class WindowManagerService extends IWindowManager.Stub
     float mLastWallpaperY = -1;
     float mLastWallpaperXStep = -1;
     float mLastWallpaperYStep = -1;
+    int mLastWallpaperDisplayOffsetX = Integer.MIN_VALUE;
+    int mLastWallpaperDisplayOffsetY = Integer.MIN_VALUE;
     // This is set when we are waiting for a wallpaper to tell us it is done
     // changing its scroll position.
     WindowState mWaitingOnWallpaper;
@@ -1892,6 +1894,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 mLastWallpaperY = mWallpaperTarget.mWallpaperY;
                 mLastWallpaperYStep = mWallpaperTarget.mWallpaperYStep;
             }
+            if (mWallpaperTarget.mWallpaperDisplayOffsetX != Integer.MIN_VALUE) {
+                mLastWallpaperDisplayOffsetX = mWallpaperTarget.mWallpaperDisplayOffsetX;
+            }
+            if (mWallpaperTarget.mWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
+                mLastWallpaperDisplayOffsetY = mWallpaperTarget.mWallpaperDisplayOffsetY;
+            }
         }
 
         // Start stepping backwards from here, ensuring that our wallpaper windows
@@ -2030,6 +2038,9 @@ public class WindowManagerService extends IWindowManager.Stub
         float wpxs = mLastWallpaperXStep >= 0 ? mLastWallpaperXStep : -1.0f;
         int availw = wallpaperWin.mFrame.right-wallpaperWin.mFrame.left-dw;
         int offset = availw > 0 ? -(int)(availw*wpx+.5f) : 0;
+        if (mLastWallpaperDisplayOffsetX != Integer.MIN_VALUE) {
+            offset += mLastWallpaperDisplayOffsetX;
+        }
         changed = wallpaperWin.mXOffset != offset;
         if (changed) {
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Update wallpaper "
@@ -2046,6 +2057,9 @@ public class WindowManagerService extends IWindowManager.Stub
         float wpys = mLastWallpaperYStep >= 0 ? mLastWallpaperYStep : -1.0f;
         int availh = wallpaperWin.mFrame.bottom-wallpaperWin.mFrame.top-dh;
         offset = availh > 0 ? -(int)(availh*wpy+.5f) : 0;
+        if (mLastWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
+            offset += mLastWallpaperDisplayOffsetY;
+        }
         if (wallpaperWin.mYOffset != offset) {
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Update wallpaper "
                     + wallpaperWin + " y: " + offset);
@@ -2129,6 +2143,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 mLastWallpaperY = target.mWallpaperY;
             } else if (changingTarget.mWallpaperY >= 0) {
                 mLastWallpaperY = changingTarget.mWallpaperY;
+            }
+            if (target.mWallpaperDisplayOffsetX != Integer.MIN_VALUE) {
+                mLastWallpaperDisplayOffsetX = target.mWallpaperDisplayOffsetX;
+            } else if (changingTarget.mWallpaperDisplayOffsetX != Integer.MIN_VALUE) {
+                mLastWallpaperDisplayOffsetX = changingTarget.mWallpaperDisplayOffsetX;
+            }
+            if (target.mWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
+                mLastWallpaperDisplayOffsetY = target.mWallpaperDisplayOffsetY;
+            } else if (changingTarget.mWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
+                mLastWallpaperDisplayOffsetY = changingTarget.mWallpaperDisplayOffsetY;
             }
         }
 
@@ -2823,6 +2847,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 mWaitingOnWallpaper = null;
                 mWindowMap.notifyAll();
             }
+        }
+    }
+
+    public void setWindowWallpaperDisplayOffsetLocked(WindowState window, int x, int y) {
+        if (window.mWallpaperDisplayOffsetX != x || window.mWallpaperDisplayOffsetY != y)  {
+            window.mWallpaperDisplayOffsetX = x;
+            window.mWallpaperDisplayOffsetY = y;
+            updateWallpaperOffsetLocked(window, true);
         }
     }
 
@@ -10889,6 +10921,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             pw.print("  mLastWallpaperX="); pw.print(mLastWallpaperX);
                     pw.print(" mLastWallpaperY="); pw.println(mLastWallpaperY);
+            if (mLastWallpaperDisplayOffsetX != Integer.MIN_VALUE
+                    || mLastWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
+                pw.print("  mLastWallpaperDisplayOffsetX="); pw.print(mLastWallpaperDisplayOffsetX);
+                        pw.print(" mLastWallpaperDisplayOffsetY=");
+                        pw.println(mLastWallpaperDisplayOffsetY);
+            }
             if (mInputMethodAnimLayerAdjustment != 0 ||
                     mWallpaperAnimLayerAdjustment != 0) {
                 pw.print("  mInputMethodAnimLayerAdjustment=");
