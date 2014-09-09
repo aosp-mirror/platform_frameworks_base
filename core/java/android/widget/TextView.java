@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.R;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -1976,23 +1977,34 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets the Drawables (if any) to appear to the left of, above,
-     * to the right of, and below the text.  Use null if you do not
-     * want a Drawable there.  The Drawables must already have had
+     * Sets the Drawables (if any) to appear to the left of, above, to the
+     * right of, and below the text. Use {@code null} if you do not want a
+     * Drawable there. The Drawables must already have had
      * {@link Drawable#setBounds} called.
+     * <p>
+     * Calling this method will overwrite any Drawables previously set using
+     * {@link #setCompoundDrawablesRelative} or related methods.
      *
      * @attr ref android.R.styleable#TextView_drawableLeft
      * @attr ref android.R.styleable#TextView_drawableTop
      * @attr ref android.R.styleable#TextView_drawableRight
      * @attr ref android.R.styleable#TextView_drawableBottom
      */
-    public void setCompoundDrawables(Drawable left, Drawable top,
-                                     Drawable right, Drawable bottom) {
+    public void setCompoundDrawables(@Nullable Drawable left, @Nullable Drawable top,
+            @Nullable Drawable right, @Nullable Drawable bottom) {
         Drawables dr = mDrawables;
 
-        final boolean drawables = left != null || top != null
-                || right != null || bottom != null;
+        // We're switching to absolute, discard relative.
+        if (dr != null) {
+            if (dr.mDrawableStart != null) dr.mDrawableStart.setCallback(null);
+            dr.mDrawableStart = null;
+            if (dr.mDrawableEnd != null) dr.mDrawableEnd.setCallback(null);
+            dr.mDrawableEnd = null;
+            dr.mDrawableSizeStart = dr.mDrawableHeightStart = 0;
+            dr.mDrawableSizeEnd = dr.mDrawableHeightEnd = 0;
+        }
 
+        final boolean drawables = left != null || top != null || right != null || bottom != null;
         if (!drawables) {
             // Clearing drawables...  can we free the data structure?
             if (dr != null) {
@@ -2101,10 +2113,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets the Drawables (if any) to appear to the left of, above,
-     * to the right of, and below the text.  Use 0 if you do not
-     * want a Drawable there. The Drawables' bounds will be set to
-     * their intrinsic bounds.
+     * Sets the Drawables (if any) to appear to the left of, above, to the
+     * right of, and below the text. Use 0 if you do not want a Drawable there.
+     * The Drawables' bounds will be set to their intrinsic bounds.
+     * <p>
+     * Calling this method will overwrite any Drawables previously set using
+     * {@link #setCompoundDrawablesRelative} or related methods.
      *
      * @param left Resource identifier of the left Drawable.
      * @param top Resource identifier of the top Drawable.
@@ -2126,18 +2140,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets the Drawables (if any) to appear to the left of, above,
-     * to the right of, and below the text.  Use null if you do not
-     * want a Drawable there. The Drawables' bounds will be set to
-     * their intrinsic bounds.
+     * Sets the Drawables (if any) to appear to the left of, above, to the
+     * right of, and below the text. Use {@code null} if you do not want a
+     * Drawable there. The Drawables' bounds will be set to their intrinsic
+     * bounds.
+     * <p>
+     * Calling this method will overwrite any Drawables previously set using
+     * {@link #setCompoundDrawablesRelative} or related methods.
      *
      * @attr ref android.R.styleable#TextView_drawableLeft
      * @attr ref android.R.styleable#TextView_drawableTop
      * @attr ref android.R.styleable#TextView_drawableRight
      * @attr ref android.R.styleable#TextView_drawableBottom
      */
-    public void setCompoundDrawablesWithIntrinsicBounds(Drawable left, Drawable top,
-            Drawable right, Drawable bottom) {
+    public void setCompoundDrawablesWithIntrinsicBounds(@Nullable Drawable left,
+            @Nullable Drawable top, @Nullable Drawable right, @Nullable Drawable bottom) {
 
         if (left != null) {
             left.setBounds(0, 0, left.getIntrinsicWidth(), left.getIntrinsicHeight());
@@ -2155,19 +2172,32 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets the Drawables (if any) to appear to the start of, above,
-     * to the end of, and below the text.  Use null if you do not
-     * want a Drawable there.  The Drawables must already have had
-     * {@link Drawable#setBounds} called.
+     * Sets the Drawables (if any) to appear to the start of, above, to the end
+     * of, and below the text. Use {@code null} if you do not want a Drawable
+     * there. The Drawables must already have had {@link Drawable#setBounds}
+     * called.
+     * <p>
+     * Calling this method will overwrite any Drawables previously set using
+     * {@link #setCompoundDrawables} or related methods.
      *
      * @attr ref android.R.styleable#TextView_drawableStart
      * @attr ref android.R.styleable#TextView_drawableTop
      * @attr ref android.R.styleable#TextView_drawableEnd
      * @attr ref android.R.styleable#TextView_drawableBottom
      */
-    public void setCompoundDrawablesRelative(Drawable start, Drawable top,
-                                     Drawable end, Drawable bottom) {
+    public void setCompoundDrawablesRelative(@Nullable Drawable start, @Nullable Drawable top,
+            @Nullable Drawable end, @Nullable Drawable bottom) {
         Drawables dr = mDrawables;
+
+        // We're switching to relative, discard absolute.
+        if (dr != null) {
+            if (dr.mDrawableLeft != null) dr.mDrawableLeft.setCallback(null);
+            dr.mDrawableLeft = dr.mDrawableLeftInitial = null;
+            if (dr.mDrawableRight != null) dr.mDrawableRight.setCallback(null);
+            dr.mDrawableRight = dr.mDrawableRightInitial = null;
+            dr.mDrawableSizeLeft = dr.mDrawableHeightLeft = 0;
+            dr.mDrawableSizeRight = dr.mDrawableHeightRight = 0;
+        }
 
         final boolean drawables = start != null || top != null
                 || end != null || bottom != null;
@@ -2274,10 +2304,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets the Drawables (if any) to appear to the start of, above,
-     * to the end of, and below the text.  Use 0 if you do not
-     * want a Drawable there. The Drawables' bounds will be set to
-     * their intrinsic bounds.
+     * Sets the Drawables (if any) to appear to the start of, above, to the end
+     * of, and below the text. Use 0 if you do not want a Drawable there. The
+     * Drawables' bounds will be set to their intrinsic bounds.
+     * <p>
+     * Calling this method will overwrite any Drawables previously set using
+     * {@link #setCompoundDrawables} or related methods.
      *
      * @param start Resource identifier of the start Drawable.
      * @param top Resource identifier of the top Drawable.
@@ -2301,18 +2333,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Sets the Drawables (if any) to appear to the start of, above,
-     * to the end of, and below the text.  Use null if you do not
-     * want a Drawable there. The Drawables' bounds will be set to
-     * their intrinsic bounds.
+     * Sets the Drawables (if any) to appear to the start of, above, to the end
+     * of, and below the text. Use {@code null} if you do not want a Drawable
+     * there. The Drawables' bounds will be set to their intrinsic bounds.
+     * <p>
+     * Calling this method will overwrite any Drawables previously set using
+     * {@link #setCompoundDrawables} or related methods.
      *
      * @attr ref android.R.styleable#TextView_drawableStart
      * @attr ref android.R.styleable#TextView_drawableTop
      * @attr ref android.R.styleable#TextView_drawableEnd
      * @attr ref android.R.styleable#TextView_drawableBottom
      */
-    public void setCompoundDrawablesRelativeWithIntrinsicBounds(Drawable start, Drawable top,
-            Drawable end, Drawable bottom) {
+    public void setCompoundDrawablesRelativeWithIntrinsicBounds(@Nullable Drawable start,
+            @Nullable Drawable top, @Nullable Drawable end, @Nullable Drawable bottom) {
 
         if (start != null) {
             start.setBounds(0, 0, start.getIntrinsicWidth(), start.getIntrinsicHeight());
@@ -2337,6 +2371,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_drawableRight
      * @attr ref android.R.styleable#TextView_drawableBottom
      */
+    @NonNull
     public Drawable[] getCompoundDrawables() {
         final Drawables dr = mDrawables;
         if (dr != null) {
@@ -2356,6 +2391,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_drawableEnd
      * @attr ref android.R.styleable#TextView_drawableBottom
      */
+    @NonNull
     public Drawable[] getCompoundDrawablesRelative() {
         final Drawables dr = mDrawables;
         if (dr != null) {
