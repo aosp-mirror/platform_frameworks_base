@@ -196,7 +196,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if (VDBG) log("MSG_USER_SWITCHED userId=" + msg.arg1);
                     int numPhones = TelephonyManager.getDefault().getPhoneCount();
                     for (int sub = 0; sub < numPhones; sub++) {
-                        TelephonyRegistry.this.notifyCellLocationUsingSubId(sub,
+                        TelephonyRegistry.this.notifyCellLocationForSubscriber(sub,
                                 mCellLocation[sub]);
                     }
                     break;
@@ -326,7 +326,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void listenUsingSubId(long subId, String pkgForDebug, IPhoneStateListener callback,
+    public void listenForSubscriber(long subId, String pkgForDebug, IPhoneStateListener callback,
             int events, boolean notifyNow) {
         listen(pkgForDebug, callback, events, notifyNow, subId, false);
     }
@@ -542,12 +542,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         broadcastCallStateChanged(state, incomingNumber, mDefaultSubId);
     }
 
-    public void notifyCallStateUsingSubId(long subId, int state, String incomingNumber) {
+    public void notifyCallStateForSubscriber(long subId, int state, String incomingNumber) {
         if (!checkNotifyPermission("notifyCallState()")) {
             return;
         }
         if (VDBG) {
-            log("notifyCallStateUsingSubId: subId=" + subId
+            log("notifyCallStateForSubscriber: subId=" + subId
                 + " state=" + state + " incomingNumber=" + incomingNumber);
         }
         synchronized (mRecords) {
@@ -573,38 +573,38 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
      public void notifyServiceState(ServiceState state) {
-         notifyServiceStateUsingSubId(mDefaultSubId, state);
+         notifyServiceStateForSubscriber(mDefaultSubId, state);
      }
 
-    public void notifyServiceStateUsingSubId(long subId, ServiceState state) {
+    public void notifyServiceStateForSubscriber(long subId, ServiceState state) {
         if (!checkNotifyPermission("notifyServiceState()")){
             return;
         }
         if (subId == SubscriptionManager.DEFAULT_SUB_ID) {
             subId = mDefaultSubId;
-            if (VDBG) log("notifyServiceStateUsingSubId: using mDefaultSubId=" + mDefaultSubId);
+            if (VDBG) log("notifyServiceStateForSubscriber: using mDefaultSubId=" + mDefaultSubId);
         }
         synchronized (mRecords) {
             int phoneId = SubscriptionManager.getPhoneId(subId);
             if (VDBG) {
-                log("notifyServiceStateUsingSubId: subId=" + subId + " phoneId=" + phoneId
+                log("notifyServiceStateForSubscriber: subId=" + subId + " phoneId=" + phoneId
                     + " state=" + state);
             }
             if (validatePhoneId(phoneId)) {
                 mServiceState[phoneId] = state;
-                logServiceStateChanged("notifyServiceStateUsingSubId", subId, phoneId, state);
-                if (VDBG) toStringLogSSC("notifyServiceStateUsingSubId");
+                logServiceStateChanged("notifyServiceStateForSubscriber", subId, phoneId, state);
+                if (VDBG) toStringLogSSC("notifyServiceStateForSubscriber");
 
                 for (Record r : mRecords) {
                     if (VDBG) {
-                        log("notifyServiceStateUsingSubId: r=" + r + " subId=" + subId
+                        log("notifyServiceStateForSubscriber: r=" + r + " subId=" + subId
                                 + " phoneId=" + phoneId + " state=" + state);
                     }
                     if (((r.events & PhoneStateListener.LISTEN_SERVICE_STATE) != 0) &&
                         (r.phoneId == phoneId)) {
                         try {
                             if (DBG) {
-                                log("notifyServiceStateUsingSubId: callback.onSSC r=" + r
+                                log("notifyServiceStateForSubscriber: callback.onSSC r=" + r
                                         + " subId=" + subId + " phoneId=" + phoneId
                                         + " state=" + state);
                             }
@@ -615,7 +615,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                 }
             } else {
-                log("notifyServiceStateUsingSubId: INVALID phoneId=" + phoneId);
+                log("notifyServiceStateForSubscriber: INVALID phoneId=" + phoneId);
             }
             handleRemoveListLocked();
         }
@@ -623,33 +623,33 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifySignalStrength(SignalStrength signalStrength) {
-        notifySignalStrengthUsingSubId(mDefaultSubId, signalStrength);
+        notifySignalStrengthForSubscriber(mDefaultSubId, signalStrength);
     }
 
-    public void notifySignalStrengthUsingSubId(long subId, SignalStrength signalStrength) {
+    public void notifySignalStrengthForSubscriber(long subId, SignalStrength signalStrength) {
         if (!checkNotifyPermission("notifySignalStrength()")) {
             return;
         }
         if (VDBG) {
-            log("notifySignalStrengthUsingSubId: subId=" + subId
+            log("notifySignalStrengthForSubscriber: subId=" + subId
                 + " signalStrength=" + signalStrength);
-            toStringLogSSC("notifySignalStrengthUsingSubId");
+            toStringLogSSC("notifySignalStrengthForSubscriber");
         }
         synchronized (mRecords) {
             int phoneId = SubscriptionManager.getPhoneId(subId);
             if (validatePhoneId(phoneId)) {
-                if (VDBG) log("notifySignalStrengthUsingSubId: valid phoneId=" + phoneId);
+                if (VDBG) log("notifySignalStrengthForSubscriber: valid phoneId=" + phoneId);
                 mSignalStrength[phoneId] = signalStrength;
                 for (Record r : mRecords) {
                     if (VDBG) {
-                        log("notifySignalStrengthUsingSubId: r=" + r + " subId=" + subId
+                        log("notifySignalStrengthForSubscriber: r=" + r + " subId=" + subId
                                 + " phoneId=" + phoneId + " ss=" + signalStrength);
                     }
                     if (((r.events & PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) != 0) &&
                         (r.phoneId == phoneId)) {
                         try {
                             if (DBG) {
-                                log("notifySignalStrengthUsingSubId: callback.onSsS r=" + r
+                                log("notifySignalStrengthForSubscriber: callback.onSsS r=" + r
                                         + " subId=" + subId + " phoneId=" + phoneId
                                         + " ss=" + signalStrength);
                             }
@@ -664,7 +664,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             int gsmSignalStrength = signalStrength.getGsmSignalStrength();
                             int ss = (gsmSignalStrength == 99 ? -1 : gsmSignalStrength);
                             if (DBG) {
-                                log("notifySignalStrengthUsingSubId: callback.onSS r=" + r
+                                log("notifySignalStrengthForSubscriber: callback.onSS r=" + r
                                         + " subId=" + subId + " phoneId=" + phoneId
                                         + " gsmSS=" + gsmSignalStrength + " ss=" + ss);
                             }
@@ -675,7 +675,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                 }
             } else {
-                log("notifySignalStrengthUsingSubId: invalid phoneId=" + phoneId);
+                log("notifySignalStrengthForSubscriber: invalid phoneId=" + phoneId);
             }
             handleRemoveListLocked();
         }
@@ -683,15 +683,15 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyCellInfo(List<CellInfo> cellInfo) {
-         notifyCellInfoUsingSubId(mDefaultSubId, cellInfo);
+         notifyCellInfoForSubscriber(mDefaultSubId, cellInfo);
     }
 
-    public void notifyCellInfoUsingSubId(long subId, List<CellInfo> cellInfo) {
+    public void notifyCellInfoForSubscriber(long subId, List<CellInfo> cellInfo) {
         if (!checkNotifyPermission("notifyCellInfo()")) {
             return;
         }
         if (VDBG) {
-            log("notifyCellInfoUsingSubId: subId=" + subId
+            log("notifyCellInfoForSubscriber: subId=" + subId
                 + " cellInfo=" + cellInfo);
         }
 
@@ -743,15 +743,15 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyMessageWaitingChanged(boolean mwi) {
-        notifyMessageWaitingChangedUsingSubId(mDefaultSubId, mwi);
+        notifyMessageWaitingChangedForSubscriber(mDefaultSubId, mwi);
     }
 
-    public void notifyMessageWaitingChangedUsingSubId(long subId, boolean mwi) {
+    public void notifyMessageWaitingChangedForSubscriber(long subId, boolean mwi) {
         if (!checkNotifyPermission("notifyMessageWaitingChanged()")) {
             return;
         }
         if (VDBG) {
-            log("notifyMessageWaitingChangedUsingSubId: subId=" + subId
+            log("notifyMessageWaitingChangedForSubscriber: subId=" + subId
                 + " mwi=" + mwi);
         }
         synchronized (mRecords) {
@@ -774,15 +774,15 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyCallForwardingChanged(boolean cfi) {
-        notifyCallForwardingChangedUsingSubId(mDefaultSubId, cfi);
+        notifyCallForwardingChangedForSubscriber(mDefaultSubId, cfi);
     }
 
-    public void notifyCallForwardingChangedUsingSubId(long subId, boolean cfi) {
+    public void notifyCallForwardingChangedForSubscriber(long subId, boolean cfi) {
         if (!checkNotifyPermission("notifyCallForwardingChanged()")) {
             return;
         }
         if (VDBG) {
-            log("notifyCallForwardingChangedUsingSubId: subId=" + subId
+            log("notifyCallForwardingChangedForSubscriber: subId=" + subId
                 + " cfi=" + cfi);
         }
         synchronized (mRecords) {
@@ -805,10 +805,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyDataActivity(int state) {
-        notifyDataActivityUsingSubId(mDefaultSubId, state);
+        notifyDataActivityForSubscriber(mDefaultSubId, state);
     }
 
-    public void notifyDataActivityUsingSubId(long subId, int state) {
+    public void notifyDataActivityForSubscriber(long subId, int state) {
         if (!checkNotifyPermission("notifyDataActivity()" )) {
             return;
         }
@@ -831,12 +831,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     public void notifyDataConnection(int state, boolean isDataConnectivityPossible,
             String reason, String apn, String apnType, LinkProperties linkProperties,
             NetworkCapabilities networkCapabilities, int networkType, boolean roaming) {
-        notifyDataConnectionUsingSubId(mDefaultSubId, state, isDataConnectivityPossible,
+        notifyDataConnectionForSubscriber(mDefaultSubId, state, isDataConnectivityPossible,
             reason, apn, apnType, linkProperties,
             networkCapabilities, networkType, roaming);
     }
 
-    public void notifyDataConnectionUsingSubId(long subId, int state,
+    public void notifyDataConnectionForSubscriber(long subId, int state,
             boolean isDataConnectivityPossible, String reason, String apn, String apnType,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
             int networkType, boolean roaming) {
@@ -844,7 +844,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
         if (VDBG) {
-            log("notifyDataConnectionUsingSubId: subId=" + subId
+            log("notifyDataConnectionForSubscriber: subId=" + subId
                 + " state=" + state + " isDataConnectivityPossible=" + isDataConnectivityPossible
                 + " reason='" + reason
                 + "' apn='" + apn + "' apnType=" + apnType + " networkType=" + networkType
@@ -921,16 +921,16 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyDataConnectionFailed(String reason, String apnType) {
-         notifyDataConnectionFailedUsingSubId(mDefaultSubId, reason, apnType);
+         notifyDataConnectionFailedForSubscriber(mDefaultSubId, reason, apnType);
     }
 
-    public void notifyDataConnectionFailedUsingSubId(long subId,
+    public void notifyDataConnectionFailedForSubscriber(long subId,
             String reason, String apnType) {
         if (!checkNotifyPermission("notifyDataConnectionFailed()")) {
             return;
         }
         if (VDBG) {
-            log("notifyDataConnectionFailedUsingSubId: subId=" + subId
+            log("notifyDataConnectionFailedForSubscriber: subId=" + subId
                 + " reason=" + reason + " apnType=" + apnType);
         }
         synchronized (mRecords) {
@@ -954,17 +954,17 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyCellLocation(Bundle cellLocation) {
-         notifyCellLocationUsingSubId(mDefaultSubId, cellLocation);
+         notifyCellLocationForSubscriber(mDefaultSubId, cellLocation);
     }
 
-    public void notifyCellLocationUsingSubId(long subId, Bundle cellLocation) {
-        log("notifyCellLocationUsingSubId: subId=" + subId
+    public void notifyCellLocationForSubscriber(long subId, Bundle cellLocation) {
+        log("notifyCellLocationForSubscriber: subId=" + subId
                 + " cellLocation=" + cellLocation);
         if (!checkNotifyPermission("notifyCellLocation()")) {
             return;
         }
         if (VDBG) {
-            log("notifyCellLocationUsingSubId: subId=" + subId
+            log("notifyCellLocationForSubscriber: subId=" + subId
                 + " cellLocation=" + cellLocation);
         }
         synchronized (mRecords) {
