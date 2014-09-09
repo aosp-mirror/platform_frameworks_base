@@ -27,6 +27,7 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.net.TrafficStats;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -140,34 +141,28 @@ public class NetworkMonitor extends StateMachine {
     private static final int CMD_REEVALUATE = BASE + 6;
 
     /**
-     * Message to self indicating network evaluation is complete.
-     * arg1 = Token to ignore old messages.
-     * arg2 = HTTP response code of network evaluation.
-     */
-    private static final int EVENT_REEVALUATION_COMPLETE = BASE + 7;
-
-    /**
      * Inform NetworkMonitor that the network has disconnected.
      */
-    public static final int CMD_NETWORK_DISCONNECTED = BASE + 8;
+    public static final int CMD_NETWORK_DISCONNECTED = BASE + 7;
 
     /**
      * Force evaluation even if it has succeeded in the past.
+     * arg1 = UID responsible for requesting this reeval.  Will be billed for data.
      */
-    public static final int CMD_FORCE_REEVALUATION = BASE + 9;
+    public static final int CMD_FORCE_REEVALUATION = BASE + 8;
 
     /**
      * Message to self indicating captive portal login is complete.
      * arg1 = Token to ignore old messages.
      * arg2 = 1 if we should use this network, 0 otherwise.
      */
-    private static final int CMD_CAPTIVE_PORTAL_LOGGED_IN = BASE + 10;
+    private static final int CMD_CAPTIVE_PORTAL_LOGGED_IN = BASE + 9;
 
     /**
      * Message to self indicating user desires to log into captive portal.
      * arg1 = Token to ignore old messages.
      */
-    private static final int CMD_USER_WANTS_SIGN_IN = BASE + 11;
+    private static final int CMD_USER_WANTS_SIGN_IN = BASE + 10;
 
     /**
      * Request ConnectivityService display provisioning notification.
@@ -175,22 +170,22 @@ public class NetworkMonitor extends StateMachine {
      * arg2    = NetID.
      * obj     = Intent to be launched when notification selected by user, null if !arg1.
      */
-    public static final int EVENT_PROVISIONING_NOTIFICATION = BASE + 12;
+    public static final int EVENT_PROVISIONING_NOTIFICATION = BASE + 11;
 
     /**
      * Message to self indicating sign-in app bypassed captive portal.
      */
-    private static final int EVENT_APP_BYPASSED_CAPTIVE_PORTAL = BASE + 13;
+    private static final int EVENT_APP_BYPASSED_CAPTIVE_PORTAL = BASE + 12;
 
     /**
      * Message to self indicating no sign-in app responded.
      */
-    private static final int EVENT_NO_APP_RESPONSE = BASE + 14;
+    private static final int EVENT_NO_APP_RESPONSE = BASE + 13;
 
     /**
      * Message to self indicating sign-in app indicates sign-in is not possible.
      */
-    private static final int EVENT_APP_INDICATES_SIGN_IN_IMPOSSIBLE = BASE + 15;
+    private static final int EVENT_APP_INDICATES_SIGN_IN_IMPOSSIBLE = BASE + 14;
 
     private static final String LINGER_DELAY_PROPERTY = "persist.netmon.linger";
     // Default to 30s linger time-out.
@@ -205,6 +200,8 @@ public class NetworkMonitor extends StateMachine {
     private static final int MAX_RETRIES = 10;
     private final int mReevaluateDelayMs;
     private int mReevaluateToken = 0;
+    private static final int INVALID_UID = -1;
+    private int mUidResponsibleForReeval = INVALID_UID;
 
     private int mCaptivePortalLoggedInToken = 0;
     private int mUserPromptedToken = 0;
@@ -282,6 +279,7 @@ public class NetworkMonitor extends StateMachine {
                     return HANDLED;
                 case CMD_FORCE_REEVALUATION:
                     if (DBG) log("Forcing reevaluation");
+                    mUidResponsibleForReeval = message.arg1;
                     transitionTo(mEvaluatingState);
                     return HANDLED;
                 default:
@@ -322,20 +320,14 @@ public class NetworkMonitor extends StateMachine {
     private class EvaluatingState extends State {
         private int mRetries;
 
-        private class EvaluateInternetConnectivity extends Thread {
-            private int mToken;
-            EvaluateInternetConnectivity(int token) {
-                mToken = token;
-            }
-            public void run() {
-                sendMessage(EVENT_REEVALUATION_COMPLETE, mToken, isCaptivePortal());
-            }
-        }
-
         @Override
         public void enter() {
             mRetries = 0;
             sendMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
+            if (mUidResponsibleForReeval != INVALID_UID) {
+                TrafficStats.setThreadStatsUid(mUidResponsibleForReeval);
+                mUidResponsibleForReeval = INVALID_UID;
+            }
         }
 
         @Override
@@ -356,14 +348,7 @@ public class NetworkMonitor extends StateMachine {
                         transitionTo(mValidatedState);
                         return HANDLED;
                     }
-                    // Kick off a thread to perform internet connectivity evaluation.
-                    Thread thread = new EvaluateInternetConnectivity(mReevaluateToken);
-                    thread.run();
-                    return HANDLED;
-                case EVENT_REEVALUATION_COMPLETE:
-                    if (message.arg1 != mReevaluateToken)
-                        return HANDLED;
-                    int httpResponseCode = message.arg2;
+                    int httpResponseCode = isCaptivePortal();
                     if (httpResponseCode == 204) {
                         transitionTo(mValidatedState);
                     } else if (httpResponseCode >= 200 && httpResponseCode <= 399) {
@@ -375,9 +360,17 @@ public class NetworkMonitor extends StateMachine {
                         sendMessageDelayed(msg, mReevaluateDelayMs);
                     }
                     return HANDLED;
+                case CMD_FORCE_REEVALUATION:
+                    // Ignore duplicate requests.
+                    return HANDLED;
                 default:
                     return NOT_HANDLED;
             }
+        }
+
+        @Override
+        public void exit() {
+            TrafficStats.clearThreadStatsUid();
         }
     }
 
