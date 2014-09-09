@@ -2755,12 +2755,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         SYSTEM_UI_FLAG_FULLSCREEN, FLAG_TRANSLUCENT_STATUS,
                         mStatusBarColor, mLastTopInset, Gravity.TOP,
                         STATUS_BAR_BACKGROUND_TRANSITION_NAME,
-                        com.android.internal.R.id.statusBarBackground);
+                        com.android.internal.R.id.statusBarBackground,
+                        (getAttributes().flags & FLAG_FULLSCREEN) != 0);
                 mNavigationColorView = updateColorViewInt(mNavigationColorView,
                         SYSTEM_UI_FLAG_HIDE_NAVIGATION, FLAG_TRANSLUCENT_NAVIGATION,
                         mNavigationBarColor, mLastBottomInset, Gravity.BOTTOM,
                         NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME,
-                        com.android.internal.R.id.navigationBarBackground);
+                        com.android.internal.R.id.navigationBarBackground,
+                        false /* hiddenByWindowFlag */);
             }
             if (insets != null) {
                 insets = insets.consumeStableInsets();
@@ -2769,8 +2771,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         private View updateColorViewInt(View view, int systemUiHideFlag, int translucentFlag,
-                int color, int height, int verticalGravity, String transitionName, int id) {
+                int color, int height, int verticalGravity, String transitionName, int id,
+                boolean hiddenByWindowFlag) {
             boolean show = height > 0 && (mLastSystemUiVisibility & systemUiHideFlag) == 0
+                    && !hiddenByWindowFlag
                     && (getAttributes().flags & translucentFlag) == 0
                     && (color & Color.BLACK) != 0
                     && (getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
