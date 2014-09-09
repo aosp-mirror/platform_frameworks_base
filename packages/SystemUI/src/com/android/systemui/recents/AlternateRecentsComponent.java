@@ -243,8 +243,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         mConfig = RecentsConfiguration.reinitialize(mContext, mSystemServicesProxy);
         mConfig.updateOnConfigurationChange();
         mConfig.getTaskStackBounds(mWindowRect.width(), mWindowRect.height(), mStatusBarHeight,
-                mNavBarWidth, mTaskStackBounds);
-        if (mConfig.isLandscape && mConfig.transposeRecentsLayoutWithOrientation) {
+                (mConfig.hasTransposedNavBar ? mNavBarWidth : 0), mTaskStackBounds);
+        if (mConfig.isLandscape && mConfig.hasTransposedNavBar) {
             mSystemInsets.set(0, mStatusBarHeight, mNavBarWidth, 0);
         } else {
             mSystemInsets.set(0, mStatusBarHeight, 0, mNavBarHeight);
