@@ -20,6 +20,7 @@ import static android.view.WindowManager.LayoutParams.*;
 
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import android.app.AppOpsManager;
+import android.os.Build;
 import android.util.ArraySet;
 import android.util.TimeUtils;
 import android.view.IWindowId;
@@ -295,6 +296,8 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final int SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN =
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 
+    private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
+
     final private KeyguardDisableHandler mKeyguardDisableHandler;
 
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -441,6 +444,7 @@ public class WindowManagerService extends IWindowManager.Stub
     Watermark mWatermark;
     StrictModeFlash mStrictModeFlash;
     CircularDisplayMask mCircularDisplayMask;
+    EmulatorDisplayOverlay mEmulatorDisplayOverlay;
     FocusedStackFrame mFocusedStackFrame;
 
     int mFocusedStackLayer;
@@ -881,6 +885,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         showCircularDisplayMaskIfNeeded();
+        showEmulatorDisplayOverlayIfNeeded();
     }
 
     public InputMonitor getInputMonitor() {
@@ -5767,7 +5772,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_windowIsRound)
                 && mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_windowShowCircularMask)) {
-            mH.sendMessage(mH.obtainMessage(H.SHOW_DISPLAY_MASK));
+            mH.sendMessage(mH.obtainMessage(H.SHOW_CIRCULAR_DISPLAY_MASK));
+        }
+    }
+
+    public void showEmulatorDisplayOverlayIfNeeded() {
+        if (mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_windowEnableCircularEmulatorDisplayOverlay)
+                && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false)
+                && Build.HARDWARE.contains("goldfish")) {
+            mH.sendMessage(mH.obtainMessage(H.SHOW_EMULATOR_DISPLAY_OVERLAY));
         }
     }
 
@@ -5775,12 +5789,12 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
 
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                    ">>> OPEN TRANSACTION showDisplayMask");
+                    ">>> OPEN TRANSACTION showCircularMask");
             SurfaceControl.openTransaction();
             try {
                 // TODO(multi-display): support multiple displays
                 if (mCircularDisplayMask == null) {
-                    int screenOffset = (int) mContext.getResources().getDimensionPixelSize(
+                    int screenOffset = mContext.getResources().getDimensionPixelSize(
                             com.android.internal.R.dimen.circular_display_mask_offset);
 
                     mCircularDisplayMask = new CircularDisplayMask(
@@ -5794,7 +5808,32 @@ public class WindowManagerService extends IWindowManager.Stub
             } finally {
                 SurfaceControl.closeTransaction();
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                        "<<< CLOSE TRANSACTION showDisplayMask");
+                        "<<< CLOSE TRANSACTION showCircularMask");
+            }
+        }
+    }
+
+    public void showEmulatorDisplayOverlay() {
+        synchronized(mWindowMap) {
+
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                    ">>> OPEN TRANSACTION showEmulatorDisplayOverlay");
+            SurfaceControl.openTransaction();
+            try {
+                if (mEmulatorDisplayOverlay == null) {
+                    mEmulatorDisplayOverlay = new EmulatorDisplayOverlay(
+                            mContext,
+                            getDefaultDisplayContentLocked().getDisplay(),
+                            mFxSession,
+                            mPolicy.windowTypeToLayerLw(
+                                    WindowManager.LayoutParams.TYPE_POINTER)
+                                    * TYPE_LAYER_MULTIPLIER + 10);
+                }
+                mEmulatorDisplayOverlay.setVisibility(true);
+            } finally {
+                SurfaceControl.closeTransaction();
+                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
+                        "<<< CLOSE TRANSACTION showEmulatorDisplayOverlay");
             }
         }
     }
@@ -7425,7 +7464,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int NEW_ANIMATOR_SCALE = 34;
 
-        public static final int SHOW_DISPLAY_MASK = 35;
+        public static final int SHOW_CIRCULAR_DISPLAY_MASK = 35;
+        public static final int SHOW_EMULATOR_DISPLAY_OVERLAY = 36;
 
         @Override
         public void handleMessage(Message msg) {
@@ -7821,8 +7861,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     break;
                 }
 
-                case SHOW_DISPLAY_MASK: {
+                case SHOW_CIRCULAR_DISPLAY_MASK: {
                     showCircularMask();
+                    break;
+                }
+
+                case SHOW_EMULATOR_DISPLAY_OVERLAY: {
+                    showEmulatorDisplayOverlay();
                     break;
                 }
 
@@ -9394,6 +9439,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (mCircularDisplayMask != null) {
                 mCircularDisplayMask.positionSurface(defaultDw, defaultDh, mRotation);
+            }
+            if (mEmulatorDisplayOverlay != null) {
+                mEmulatorDisplayOverlay.positionSurface(defaultDw, defaultDh, mRotation);
             }
 
             boolean focusDisplayed = false;

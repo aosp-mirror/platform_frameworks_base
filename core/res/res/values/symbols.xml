@@ -293,6 +293,7 @@
   <java-symbol type="bool" name="config_windowIsRound" />
   <java-symbol type="bool" name="config_hasRecents" />
   <java-symbol type="bool" name="config_windowShowCircularMask" />
+  <java-symbol type="bool" name="config_windowEnableCircularEmulatorDisplayOverlay" />
 
   <java-symbol type="integer" name="config_bluetooth_max_advertisers" />
   <java-symbol type="integer" name="config_bluetooth_max_scan_filters" />
@@ -1155,6 +1156,7 @@
   <java-symbol type="drawable" name="ic_corp_badge" />
   <java-symbol type="drawable" name="ic_corp_icon_badge" />
   <java-symbol type="drawable" name="ic_corp_icon" />
+  <java-symbol type="drawable" name="emulator_circular_window_overlay" />
 
   <java-symbol type="drawable" name="sim_light_blue" />
   <java-symbol type="drawable" name="sim_light_green" />
