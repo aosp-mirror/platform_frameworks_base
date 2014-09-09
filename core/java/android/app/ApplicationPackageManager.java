@@ -1645,30 +1645,6 @@ final class ApplicationPackageManager extends PackageManager {
     /**
      * @hide
      */
-    public void addCrossProfileIntentsForPackage(String packageName,
-            int sourceUserId, int targetUserId) {
-        try {
-            mPM.addCrossProfileIntentsForPackage(packageName, sourceUserId, targetUserId);
-        } catch (RemoteException e) {
-            // Should never happen!
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void removeCrossProfileIntentsForPackage(String packageName,
-            int sourceUserId, int targetUserId) {
-        try {
-            mPM.removeCrossProfileIntentsForPackage(packageName, sourceUserId, targetUserId);
-        } catch (RemoteException e) {
-            // Should never happen!
-        }
-    }
-
-    /**
-     * @hide
-     */
     @Override
     public void clearCrossProfileIntentFilters(int sourceUserId) {
         try {
