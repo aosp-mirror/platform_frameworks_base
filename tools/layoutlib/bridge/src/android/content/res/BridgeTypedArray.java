@@ -809,11 +809,6 @@ public final class BridgeTypedArray extends TypedArray {
             return new CharSequence[] { value };
         }
 
-        Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
-                String.format(
-                    String.format("Unknown value for getTextArray(%d) => %s", //DEBUG
-                    index, mResourceData[index].getName())), null);
-
         return null;
     }
 
