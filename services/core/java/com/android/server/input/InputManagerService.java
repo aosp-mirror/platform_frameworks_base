@@ -697,7 +697,9 @@ public class InputManagerService extends IInputManager.Stub
             synchronized (mDataStore) {
                 for (int i = 0; i < numFullKeyboards; i++) {
                     final InputDevice inputDevice = mTempFullKeyboards.get(i);
-                    if (mDataStore.getCurrentKeyboardLayout(inputDevice.getDescriptor()) == null) {
+                    final String layout =
+                            getCurrentKeyboardLayoutForInputDevice(inputDevice.getIdentifier());
+                    if (layout == null) {
                         missingLayoutForExternalKeyboard = true;
                         if (i < numFullKeyboardsAdded) {
                             missingLayoutForExternalKeyboardAdded = true;
