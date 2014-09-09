@@ -40,8 +40,6 @@ public class StackScrollAlgorithm {
     private static final int MAX_ITEMS_IN_BOTTOM_STACK = 3;
     private static final int MAX_ITEMS_IN_TOP_STACK = 3;
 
-    /** When a child is activated, the other cards' alpha fade to this value. */
-    private static final float ACTIVATED_INVERSE_ALPHA = 0.9f;
     public static final float DIMMED_SCALE = 0.95f;
 
     private int mPaddingBetweenElements;
@@ -270,12 +268,8 @@ public class StackScrollAlgorithm {
             childViewState.scale = !mScaleDimmed || !dimmed || isActivatedChild
                     ? 1.0f
                     : DIMMED_SCALE;
-            if (dimmed && activatedChild != null) {
-                if (!isActivatedChild) {
-                    childViewState.alpha *= ACTIVATED_INVERSE_ALPHA;
-                } else {
-                    childViewState.zTranslation += 2.0f * mZDistanceBetweenElements;
-                }
+            if (dimmed && isActivatedChild) {
+                childViewState.zTranslation += 2.0f * mZDistanceBetweenElements;
             }
         }
     }
