@@ -175,17 +175,23 @@ static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats,
                 continue;
             }
         }
-        // Skip whitespace.
-        while (*pos == ' ') {
-            pos++;
-        }
-        // Next field is tag.
-        rawTag = strtoll(pos, &endPos, 16);
-        //ALOGI("Index #%d: %s", idx, buffer);
-        if (pos == endPos) {
-            ALOGE("bad tag: %s", pos);
-            fclose(fp);
-            return -1;
+
+        // Ignore whitespace
+        while (*pos == ' ') pos++;
+
+        // Find end of tag field
+        endPos = pos;
+        while (*endPos != ' ') endPos++;
+
+        // Three digit field is always 0x0, otherwise parse
+        if (endPos - pos == 3) {
+            rawTag = 0;
+        } else {
+            if (sscanf(pos, "%llx", &rawTag) != 1) {
+                ALOGE("bad tag: %s", pos);
+                fclose(fp);
+                return -1;
+            }
         }
         s.tag = rawTag >> 32;
         if (limitTag != -1 && s.tag != limitTag) {
@@ -193,10 +199,10 @@ static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats,
             continue;
         }
         pos = endPos;
-        // Skip whitespace.
-        while (*pos == ' ') {
-            pos++;
-        }
+
+        // Ignore whitespace
+        while (*pos == ' ') pos++;
+
         // Parse remaining fields.
         if (sscanf(pos, "%u %u %llu %llu %llu %llu",
                 &s.uid, &s.set, &s.rxBytes, &s.rxPackets,
