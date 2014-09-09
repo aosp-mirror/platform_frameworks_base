@@ -351,6 +351,9 @@
          point on the move. A value of 0 means no periodic scans will be used in the framework. -->
     <integer translatable="false" name="config_wifi_framework_scan_interval">300000</integer>
 
+    <!-- Integer indicating associated scan interval in milliseconds -->
+    <integer translatable="false" name="config_wifi_framework_associated_scan_interval">10000</integer>
+
     <!-- Wifi driver stop delay, in milliseconds.
          Default value is 2 minutes. -->
     <integer translatable="false" name="config_wifi_driver_stop_delay">120000</integer>
