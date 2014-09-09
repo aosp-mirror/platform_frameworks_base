@@ -8892,6 +8892,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_FAKETOUCH = "android.hardware.faketouch";
     field public static final java.lang.String FEATURE_FAKETOUCH_MULTITOUCH_DISTINCT = "android.hardware.faketouch.multitouch.distinct";
     field public static final java.lang.String FEATURE_FAKETOUCH_MULTITOUCH_JAZZHAND = "android.hardware.faketouch.multitouch.jazzhand";
+    field public static final java.lang.String FEATURE_GAMEPAD = "android.hardware.gamepad";
     field public static final java.lang.String FEATURE_HOME_SCREEN = "android.software.home_screen";
     field public static final java.lang.String FEATURE_INPUT_METHODS = "android.software.input_methods";
     field public static final java.lang.String FEATURE_LEANBACK = "android.software.leanback";
