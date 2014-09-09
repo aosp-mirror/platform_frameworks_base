@@ -1547,7 +1547,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mStackScrollAlgorithm.notifyChildrenChanged(this);
         ((ExpandableView) child).setOnHeightChangedListener(this);
         generateAddAnimation(child, false /* fromMoreCard */);
-        updateAnimationState(mAnimationsEnabled && mIsExpanded, child);
+        updateAnimationState(child);
     }
 
     public void setAnimationsEnabled(boolean animationsEnabled) {
@@ -1563,6 +1563,11 @@ public class NotificationStackScrollLayout extends ViewGroup
             updateAnimationState(running, child);
         }
     }
+
+    private void updateAnimationState(View child) {
+        updateAnimationState(mAnimationsEnabled && mIsExpanded, child);
+    }
+
 
     private void updateAnimationState(boolean running, View child) {
         if (child instanceof ExpandableNotificationRow) {
@@ -1961,6 +1966,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mRequestViewResizeAnimationOnLayout = true;
         }
         mStackScrollAlgorithm.onReset(view);
+        updateAnimationState(view);
     }
 
     private void updateScrollPositionOnExpandInBottom(ExpandableView view) {
