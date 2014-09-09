@@ -190,10 +190,14 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
                 Task.TaskKey toTaskKey;
                 if (showNextTask) {
                     toTaskKey = group.getNextTaskInGroup(task);
-                    // XXX: We will actually set the appropriate launch animations here
+                    launchOpts = ActivityOptions.makeCustomAnimation(mContext,
+                            R.anim.recents_launch_next_affiliated_task_target,
+                            R.anim.recents_launch_next_affiliated_task_source);
                 } else {
                     toTaskKey = group.getPrevTaskInGroup(task);
-                    // XXX: We will actually set the appropriate launch animations here
+                    launchOpts = ActivityOptions.makeCustomAnimation(mContext,
+                            R.anim.recents_launch_prev_affiliated_task_target,
+                            R.anim.recents_launch_prev_affiliated_task_source);
                 }
                 if (toTaskKey != null) {
                     toTask = stack.findTaskWithId(toTaskKey.id);
@@ -204,7 +208,11 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
         // Return early if there is no next task
         if (toTask == null) {
-            // XXX: We will actually show a bounce animation here
+            if (showNextTask) {
+                // XXX: Show the next-task bounce animation
+            } else {
+                // XXX: Show the prev-task bounce animation
+            }
             return;
         }
 
