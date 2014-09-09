@@ -132,7 +132,6 @@ public final class SignalTileView extends QSTileView {
             view.animate()
                 .setDuration(visible ? SHORT_DURATION : DEFAULT_DURATION)
                 .alpha(newAlpha)
-                .withLayer()
                 .start();
         } else {
             view.setAlpha(newAlpha);
