@@ -675,15 +675,13 @@ public class LegacyMetadataMapper {
          * request.availableRequestKeys
          */
         {
-            CaptureRequest.Key<?> availableKeys[] = new CaptureRequest.Key<?>[] {
+            CaptureRequest.Key<?> defaultAvailableKeys[] = new CaptureRequest.Key<?>[] {
                     CaptureRequest.CONTROL_AE_ANTIBANDING_MODE,
                     CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION,
                     CaptureRequest.CONTROL_AE_LOCK,
                     CaptureRequest.CONTROL_AE_MODE,
-                    CaptureRequest.CONTROL_AE_REGIONS,
                     CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
                     CaptureRequest.CONTROL_AF_MODE,
-                    CaptureRequest.CONTROL_AF_REGIONS,
                     CaptureRequest.CONTROL_AF_TRIGGER,
                     CaptureRequest.CONTROL_AWB_LOCK,
                     CaptureRequest.CONTROL_AWB_MODE,
@@ -704,21 +702,32 @@ public class LegacyMetadataMapper {
                     CaptureRequest.SCALER_CROP_REGION,
                     CaptureRequest.STATISTICS_FACE_DETECT_MODE,
             };
-            m.set(REQUEST_AVAILABLE_REQUEST_KEYS, getTagsForKeys(availableKeys));
+            ArrayList<CaptureRequest.Key<?>> availableKeys =
+                    new ArrayList<CaptureRequest.Key<?>>(Arrays.asList(defaultAvailableKeys));
+
+            if (p.getMaxNumMeteringAreas() > 0) {
+                availableKeys.add(CaptureRequest.CONTROL_AE_REGIONS);
+            }
+            if (p.getMaxNumFocusAreas() > 0) {
+                availableKeys.add(CaptureRequest.CONTROL_AF_REGIONS);
+            }
+
+            CaptureRequest.Key<?> availableRequestKeys[] =
+                    new CaptureRequest.Key<?>[availableKeys.size()];
+            availableKeys.toArray(availableRequestKeys);
+            m.set(REQUEST_AVAILABLE_REQUEST_KEYS, getTagsForKeys(availableRequestKeys));
         }
 
         /*
          * request.availableResultKeys
          */
         {
-            CaptureResult.Key<?> availableKeys[] = new CaptureResult.Key<?>[] {
+            CaptureResult.Key<?> defaultAvailableKeys[] = new CaptureResult.Key<?>[] {
                     CaptureResult.CONTROL_AE_ANTIBANDING_MODE                      ,
                     CaptureResult.CONTROL_AE_EXPOSURE_COMPENSATION                 ,
                     CaptureResult.CONTROL_AE_LOCK                                  ,
                     CaptureResult.CONTROL_AE_MODE                                  ,
-                    CaptureResult.CONTROL_AE_REGIONS                               ,
                     CaptureResult.CONTROL_AF_MODE                                  ,
-                    CaptureResult.CONTROL_AF_REGIONS                               ,
                     CaptureResult.CONTROL_AF_STATE                                 ,
                     CaptureResult.CONTROL_AWB_MODE                                 ,
                     CaptureResult.CONTROL_AWB_LOCK                                 ,
@@ -737,7 +746,20 @@ public class LegacyMetadataMapper {
                     CaptureResult.STATISTICS_FACE_DETECT_MODE                      ,
 //                    CaptureResult.STATISTICS_FACES                                 ,
             };
-            m.set(REQUEST_AVAILABLE_RESULT_KEYS, getTagsForKeys(availableKeys));
+            List<CaptureResult.Key<?>> availableKeys =
+                    new ArrayList<CaptureResult.Key<?>>(Arrays.asList(defaultAvailableKeys));
+
+            if (p.getMaxNumMeteringAreas() > 0) {
+                availableKeys.add(CaptureResult.CONTROL_AE_REGIONS);
+            }
+            if (p.getMaxNumFocusAreas() > 0) {
+                availableKeys.add(CaptureResult.CONTROL_AF_REGIONS);
+            }
+
+            CaptureResult.Key<?> availableResultKeys[] =
+                    new CaptureResult.Key<?>[availableKeys.size()];
+            availableKeys.toArray(availableResultKeys);
+            m.set(REQUEST_AVAILABLE_RESULT_KEYS, getTagsForKeys(availableResultKeys));
         }
 
         /*
