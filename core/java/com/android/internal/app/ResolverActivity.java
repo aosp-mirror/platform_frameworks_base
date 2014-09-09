@@ -90,7 +90,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     private boolean mSafeForwardingMode;
     private boolean mAlwaysUseOption;
     private boolean mShowExtended;
-    private GridView mGridView;
+    private ListView mListView;
     private Button mAlwaysButton;
     private Button mOnceButton;
     private int mIconDpi;
@@ -228,10 +228,13 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 mLaunchedFromUid, alwaysUseOption);
 
         final int layoutId;
+        final boolean useHeader;
         if (mAdapter.hasFilteredItem()) {
             layoutId = R.layout.resolver_list_with_default;
             alwaysUseOption = false;
+            useHeader = true;
         } else {
+            useHeader = false;
             layoutId = R.layout.resolver_list;
         }
         mAlwaysUseOption = alwaysUseOption;
@@ -243,16 +246,19 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             return;
         } else if (count > 1) {
             setContentView(layoutId);
-            mGridView = (GridView) findViewById(R.id.resolver_list);
-            mGridView.setAdapter(mAdapter);
-            mGridView.setOnItemClickListener(this);
-            mGridView.setOnItemLongClickListener(new ItemLongClickListener());
+            mListView = (ListView) findViewById(R.id.resolver_list);
+            mListView.setAdapter(mAdapter);
+            mListView.setOnItemClickListener(this);
+            mListView.setOnItemLongClickListener(new ItemLongClickListener());
 
             if (alwaysUseOption) {
-                mGridView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+                mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             }
 
-            resizeGrid();
+            if (useHeader) {
+                mListView.addHeaderView(LayoutInflater.from(this).inflate(
+                        R.layout.resolver_different_item_header, mListView, false));
+            }
         } else if (count == 1) {
             safelyStartActivity(mAdapter.intentForPosition(0, false));
             mPackageMonitor.unregister();
@@ -265,8 +271,8 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             final TextView empty = (TextView) findViewById(R.id.empty);
             empty.setVisibility(View.VISIBLE);
 
-            mGridView = (GridView) findViewById(R.id.resolver_list);
-            mGridView.setVisibility(View.GONE);
+            mListView = (ListView) findViewById(R.id.resolver_list);
+            mListView.setVisibility(View.GONE);
         }
 
         final ResolverDrawerLayout rdl = (ResolverDrawerLayout) findViewById(R.id.contentPanel);
@@ -338,11 +344,6 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             return named ? getString(title.namedTitleRes, mAdapter.getFilteredItem().displayLabel) :
                     getString(title.titleRes);
         }
-    }
-
-    void resizeGrid() {
-        final int itemCount = mAdapter.getCount();
-        mGridView.setNumColumns(Math.min(itemCount, mMaxColumns));
     }
 
     void dismiss() {
@@ -419,19 +420,24 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         if (mAlwaysUseOption) {
-            final int checkedPos = mGridView.getCheckedItemPosition();
+            final int checkedPos = mListView.getCheckedItemPosition();
             final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
             mLastSelected = checkedPos;
             setAlwaysButtonEnabled(hasValidSelection, checkedPos, true);
             mOnceButton.setEnabled(hasValidSelection);
             if (hasValidSelection) {
-                mGridView.setSelection(checkedPos);
+                mListView.setSelection(checkedPos);
             }
         }
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        position -= mListView.getHeaderViewsCount();
+        if (position < 0) {
+            // Header views don't count.
+            return;
+        }
         ResolveInfo resolveInfo = mAdapter.resolveInfoForPosition(position, true);
         if (mResolvingHome && hasManagedProfile()
                 && !supportsManagedProfiles(resolveInfo)) {
@@ -441,13 +447,13 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                     Toast.LENGTH_LONG).show();
             return;
         }
-        final int checkedPos = mGridView.getCheckedItemPosition();
+        final int checkedPos = mListView.getCheckedItemPosition();
         final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
         if (mAlwaysUseOption && (!hasValidSelection || mLastSelected != checkedPos)) {
             setAlwaysButtonEnabled(hasValidSelection, checkedPos, true);
             mOnceButton.setEnabled(hasValidSelection);
             if (hasValidSelection) {
-                mGridView.smoothScrollToPosition(checkedPos);
+                mListView.smoothScrollToPosition(checkedPos);
             }
             mLastSelected = checkedPos;
         } else {
@@ -504,7 +510,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     public void onButtonClick(View v) {
         final int id = v.getId();
         startSelected(mAlwaysUseOption ?
-                mGridView.getCheckedItemPosition() : mAdapter.getFilteredPosition(),
+                mListView.getCheckedItemPosition() : mAdapter.getFilteredPosition(),
                 id == R.id.button_always,
                 mAlwaysUseOption);
         dismiss();
@@ -714,8 +720,6 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             if (newItemCount == 0) {
                 // We no longer have any items...  just finish the activity.
                 finish();
-            } else if (newItemCount != oldItemCount) {
-                resizeGrid();
             }
         }
 
@@ -957,19 +961,13 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
 
         public View getView(int position, View convertView, ViewGroup parent) {
-            View view;
-            if (convertView == null) {
+            View view = convertView;
+            if (view == null) {
                 view = mInflater.inflate(
                         com.android.internal.R.layout.resolve_list_item, parent, false);
 
                 final ViewHolder holder = new ViewHolder(view);
                 view.setTag(holder);
-
-                // Fix the icon size even if we have different sized resources
-                ViewGroup.LayoutParams lp = holder.icon.getLayoutParams();
-                lp.width = lp.height = mIconSize;
-            } else {
-                view = convertView;
             }
             bindView(view, getItem(position));
             return view;
@@ -1007,6 +1005,11 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            position -= mListView.getHeaderViewsCount();
+            if (position < 0) {
+                // Header views don't count.
+                return false;
+            }
             ResolveInfo ri = mAdapter.resolveInfoForPosition(position, true);
             showAppDetails(ri);
             return true;
