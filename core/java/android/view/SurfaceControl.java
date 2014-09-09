@@ -39,7 +39,7 @@ public class SurfaceControl {
 
     private static native Bitmap nativeScreenshot(IBinder displayToken,
             Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
-            boolean allLayers, boolean useIdentityTransform);
+            boolean allLayers, boolean useIdentityTransform, int rotation);
     private static native void nativeScreenshot(IBinder displayToken, Surface consumer,
             Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
             boolean allLayers, boolean useIdentityTransform);
@@ -688,17 +688,23 @@ public class SurfaceControl {
      * @param useIdentityTransform Replace whatever transformation (rotation,
      * scaling, translation) the surface layers are currently using with the
      * identity transformation while taking the screenshot.
+     * @param rotation Apply a custom clockwise rotation to the screenshot, i.e.
+     * Surface.ROTATION_0,90,180,270. Surfaceflinger will always take
+     * screenshots in its native portrait orientation by default, so this is
+     * useful for returning screenshots that are independent of device
+     * orientation.
      * @return Returns a Bitmap containing the screen contents, or null
      * if an error occurs. Make sure to call Bitmap.recycle() as soon as
      * possible, once its content is not needed anymore.
      */
     public static Bitmap screenshot(Rect sourceCrop, int width, int height,
-            int minLayer, int maxLayer, boolean useIdentityTransform) {
+            int minLayer, int maxLayer, boolean useIdentityTransform,
+            int rotation) {
         // TODO: should take the display as a parameter
         IBinder displayToken = SurfaceControl.getBuiltInDisplay(
                 SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
         return nativeScreenshot(displayToken, sourceCrop, width, height,
-                minLayer, maxLayer, false, useIdentityTransform);
+                minLayer, maxLayer, false, useIdentityTransform, rotation);
     }
 
     /**
@@ -717,7 +723,8 @@ public class SurfaceControl {
         // TODO: should take the display as a parameter
         IBinder displayToken = SurfaceControl.getBuiltInDisplay(
                 SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
-        return nativeScreenshot(displayToken, new Rect(), width, height, 0, 0, true, false);
+        return nativeScreenshot(displayToken, new Rect(), width, height, 0, 0, true,
+                false, Surface.ROTATION_0);
     }
 
     private static void screenshot(IBinder display, Surface consumer, Rect sourceCrop,
