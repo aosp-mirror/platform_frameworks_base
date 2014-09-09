@@ -18,6 +18,7 @@ package android.net.wifi;
 
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -76,6 +77,9 @@ public class WifiScanner {
     /** Invalid request */
     public static final int REASON_INVALID_REQUEST = -3;
 
+    /** @hide */
+    public static final String GET_AVAILABLE_CHANNELS_EXTRA = "Channels";
+
     /**
      * Generic action callback invocation interface
      *  @hide
@@ -92,7 +96,12 @@ public class WifiScanner {
      * @hide
      */
     public List<Integer> getAvailableChannels(int band) {
-        return null;
+        try {
+            Bundle bundle =  mService.getAvailableChannels(band);
+            return bundle.getIntegerArrayList(GET_AVAILABLE_CHANNELS_EXTRA);
+        } catch (RemoteException e) {
+            return null;
+        }
     }
 
     /**
