@@ -515,11 +515,6 @@ public class ActivityOptions {
         return opts;
     }
 
-    @Deprecated
-    public static ActivityOptions makeLaunchTaskBehindAnimation() {
-        return makeTaskLaunchBehind();
-    }
-
     /** @hide */
     public boolean getLaunchTaskBehind() {
         return mAnimationType == ANIM_LAUNCH_TASK_BEHIND;
