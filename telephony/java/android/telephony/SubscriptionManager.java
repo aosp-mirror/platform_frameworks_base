@@ -265,9 +265,9 @@ public class SubscriptionManager implements BaseColumns {
      * @return SubInfoRecord, maybe null
      * @hide - to be unhidden
      */
-    public static SubInfoRecord getSubInfoUsingSubId(long subId) {
+    public static SubInfoRecord getSubInfoForSubscriber(long subId) {
         if (!isValidSubId(subId)) {
-            logd("[getSubInfoUsingSubIdx]- invalid subId");
+            logd("[getSubInfoForSubscriberx]- invalid subId");
             return null;
         }
 
@@ -276,7 +276,7 @@ public class SubscriptionManager implements BaseColumns {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                subInfo = iSub.getSubInfoUsingSubId(subId);
+                subInfo = iSub.getSubInfoForSubscriber(subId);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -783,7 +783,7 @@ public class SubscriptionManager implements BaseColumns {
 
     /** @hide */
     public static SubInfoRecord getDefaultVoiceSubInfo() {
-        return getSubInfoUsingSubId(getDefaultVoiceSubId());
+        return getSubInfoForSubscriber(getDefaultVoiceSubId());
     }
 
     /** @hide */
@@ -826,7 +826,7 @@ public class SubscriptionManager implements BaseColumns {
 
     /** @hide */
     public static SubInfoRecord getDefaultSmsSubInfo() {
-        return getSubInfoUsingSubId(getDefaultSmsSubId());
+        return getSubInfoForSubscriber(getDefaultSmsSubId());
     }
 
     /** @hide */
@@ -866,7 +866,7 @@ public class SubscriptionManager implements BaseColumns {
 
     /** @hide */
     public static SubInfoRecord getDefaultDataSubInfo() {
-        return getSubInfoUsingSubId(getDefaultDataSubId());
+        return getSubInfoForSubscriber(getDefaultDataSubId());
     }
 
     /** @hide */
