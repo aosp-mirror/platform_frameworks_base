@@ -62,24 +62,37 @@ interface IMms {
 
     /**
      * Update the status of a pending (send-by-IP) MMS message handled by the carrier app.
-     * If the carrier app fails to send this message, it would be resent via carrier network.
+     * If the carrier app fails to send this message, it may be resent via carrier network
+     * depending on the status code.
+     *
+     * The caller should have carrier privileges.
+     * @see android.telephony.TelephonyManager.hasCarrierPrivileges
      *
      * @param messageRef the reference number of the MMS message.
-     * @param success True if and only if the message was sent successfully. If its value is
-     *  false, this message should be resent via carrier network
+     * @param pdu non-empty (contains the SendConf PDU) if the message was sent successfully,
+     *   otherwise, this param should be null.
+     * @param status send status. It can be Activity.RESULT_OK or one of the MMS error codes.
+     *   If status is Activity.RESULT_OK, the MMS was sent successfully.
+     *   If status is MMS_ERROR_RETRY, this message would be resent via carrier
+     *   network. The message will not be resent for other MMS error statuses.
      */
-    void updateMmsSendStatus(int messageRef, boolean success);
+    void updateMmsSendStatus(int messageRef, in byte[] pdu, in int status);
 
     /**
      * Update the status of a pending (download-by-IP) MMS message handled by the carrier app.
-     * If the carrier app fails to download this message, it would be re-downloaded via carrier
-     * network.
+     * If the carrier app fails to download this message, it may be re-downloaded via carrier
+     * network depending on the status code.
+     *
+     * The caller should have carrier privileges.
+     * @see android.telephony.TelephonyManager.hasCarrierPrivileges
      *
      * @param messageRef the reference number of the MMS message.
-     * @param pdu non-empty if downloaded successfully, otherwise, it is empty and the message
-     *  will be downloaded via carrier network
+     * @param status download status.  It can be Activity.RESULT_OK or one of the MMS error codes.
+     *   If status is Activity.RESULT_OK, the MMS was downloaded successfully.
+     *   If status is MMS_ERROR_RETRY, this message would be re-downloaded via carrier
+     *   network. The message will not be re-downloaded for other MMS error statuses.
      */
-    void updateMmsDownloadStatus(int messageRef, in byte[] pdu);
+    void updateMmsDownloadStatus(int messageRef, in int status);
 
     /**
      * Get carrier-dependent configuration values.
