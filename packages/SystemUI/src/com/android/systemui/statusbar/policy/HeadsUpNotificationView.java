@@ -28,6 +28,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 
 import com.android.systemui.ExpandHelper;
@@ -111,6 +112,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
             mContentHolder.setVisibility(View.VISIBLE);
             mContentHolder.setAlpha(mMaxAlpha);
             mContentHolder.addView(mHeadsUp.row);
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
 
             mSwipeHelper.snapChild(mContentHolder, 1f);
             mStartTouchTime = System.currentTimeMillis() + mTouchSensitivityDelay;
@@ -124,6 +126,14 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
             mBar.resetHeadsUpDecayTimer();
         }
         return true;
+    }
+
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        if (changedView.getVisibility() == VISIBLE) {
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        }
     }
 
     public boolean isShowing(String key) {
