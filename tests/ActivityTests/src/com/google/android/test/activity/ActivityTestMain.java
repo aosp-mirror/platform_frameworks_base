@@ -73,7 +73,7 @@ public class ActivityTestMain extends Activity {
                     Intent intent = new Intent(ActivityTestMain.this, SpamActivity.class);
                     Bundle options = null;
                     if (fg) {
-                        ActivityOptions opts = ActivityOptions.makeLaunchTaskBehindAnimation();
+                        ActivityOptions opts = ActivityOptions.makeTaskLaunchBehind();
                         options = opts.toBundle();
                     }
                     startActivity(intent, options);
