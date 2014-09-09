@@ -840,7 +840,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     @Override
      public void onClick(final View v) {
         final TaskView tv = this;
-        final boolean delayViewClick = (v != this);
+        final boolean delayViewClick = (v != this) && (v != mActionButtonView);
         if (delayViewClick) {
             // We purposely post the handler delayed to allow for the touch feedback to draw
             postDelayed(new Runnable() {
