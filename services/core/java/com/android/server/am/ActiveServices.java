@@ -308,7 +308,14 @@ public final class ActiveServices {
             return new ComponentName("!", res.permission != null
                     ? res.permission : "private to package");
         }
+
         ServiceRecord r = res.record;
+
+        if (!mAm.getUserManagerLocked().exists(r.userId)) {
+            Slog.d(TAG, "Trying to start service with non-existent user! " + r.userId);
+            return null;
+        }
+
         NeededUriGrants neededGrants = mAm.checkGrantUriPermissionFromIntentLocked(
                 callingUid, r.packageName, service, service.getFlags(), null, r.userId);
         if (unscheduleServiceRestartLocked(r, callingUid, false)) {
