@@ -70,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 110;
+    private static final int DATABASE_VERSION = 111;
 
     private Context mContext;
     private int mUserHandle;
@@ -1768,6 +1768,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 if (stmt != null) stmt.close();
             }
             upgradeVersion = 110;
+        }
+
+        if (upgradeVersion < 111) {
+            // reset ringer mode, so it doesn't force zen mode to follow
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                SQLiteStatement stmt = null;
+                try {
+                    stmt = db.compileStatement("INSERT OR REPLACE INTO global(name,value)"
+                            + " VALUES(?,?);");
+                    loadSetting(stmt, Settings.Global.MODE_RINGER, AudioManager.RINGER_MODE_NORMAL);
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                    if (stmt != null) stmt.close();
+                }
+            }
+            upgradeVersion = 111;
         }
 
         // *** Remember to update DATABASE_VERSION above!
