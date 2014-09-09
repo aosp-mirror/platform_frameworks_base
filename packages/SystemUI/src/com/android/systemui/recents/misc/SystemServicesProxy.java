@@ -56,6 +56,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 import com.android.systemui.recents.Constants;
 
 import java.io.IOException;
@@ -73,6 +74,7 @@ public class SystemServicesProxy {
 
     final static BitmapFactory.Options sBitmapOptions;
 
+    AccessibilityManager mAccm;
     ActivityManager mAm;
     IActivityManager mIam;
     AppWidgetManager mAwm;
@@ -97,6 +99,7 @@ public class SystemServicesProxy {
 
     /** Private constructor */
     public SystemServicesProxy(Context context) {
+        mAccm = AccessibilityManager.getInstance(context);
         mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         mIam = ActivityManagerNative.getDefault();
         mAwm = AppWidgetManager.getInstance(context);
@@ -439,6 +442,15 @@ public class SystemServicesProxy {
 
         // Delete the app widget
         host.deleteAppWidgetId(appWidgetId);
+    }
+
+    /**
+     * Returns whether touch exploration is currently enabled.
+     */
+    public boolean isTouchExplorationEnabled() {
+        if (mAccm == null) return false;
+
+        return mAccm.isEnabled() && mAccm.isTouchExplorationEnabled();
     }
 
     /**
