@@ -639,12 +639,14 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @param authorities the semi-colon separated authorities of the ContentProvider.
      */
     protected final void setAuthorities(String authorities) {
-        if (authorities.indexOf(';') == -1) {
-            mAuthority = authorities;
-            mAuthorities = null;
-        } else {
-            mAuthority = null;
-            mAuthorities = authorities.split(";");
+        if (authorities != null) {
+            if (authorities.indexOf(';') == -1) {
+                mAuthority = authorities;
+                mAuthorities = null;
+            } else {
+                mAuthority = null;
+                mAuthorities = authorities.split(";");
+            }
         }
     }
 
@@ -653,9 +655,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         if (mAuthority != null) {
             return mAuthority.equals(authority);
         }
-        int length = mAuthorities.length;
-        for (int i = 0; i < length; i++) {
-            if (mAuthorities[i].equals(authority)) return true;
+        if (mAuthorities != null) {
+            int length = mAuthorities.length;
+            for (int i = 0; i < length; i++) {
+                if (mAuthorities[i].equals(authority)) return true;
+            }
         }
         return false;
     }
