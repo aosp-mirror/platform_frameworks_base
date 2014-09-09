@@ -230,7 +230,7 @@ public class QSTileView extends ViewGroup {
         final int w = MeasureSpec.getSize(widthMeasureSpec);
         final int h = MeasureSpec.getSize(heightMeasureSpec);
         final int iconSpec = exactly(mIconSizePx);
-        mIcon.measure(iconSpec, iconSpec);
+        mIcon.measure(MeasureSpec.makeMeasureSpec(w, MeasureSpec.AT_MOST), iconSpec);
         labelView().measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(h, MeasureSpec.AT_MOST));
         if (mDual) {
             mDivider.measure(widthMeasureSpec, exactly(mDivider.getLayoutParams().height));
