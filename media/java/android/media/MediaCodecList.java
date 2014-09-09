@@ -118,6 +118,7 @@ final public class MediaCodecList {
 
     /** @hide */
     public static MediaCodecInfo getInfoFor(String codec) {
+        initCodecList();
         return sAllCodecInfos[findCodecByName(codec)];
     }
 
