@@ -56,6 +56,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -1078,6 +1079,7 @@ public class VolumePanel extends Handler {
             if (mCallback != null) {
                 mCallback.onVisible(true);
             }
+            announceDialogShown();
         }
 
         // Do a little vibrate if applicable (only when going into vibrate mode)
@@ -1092,6 +1094,10 @@ public class VolumePanel extends Handler {
         if ((flags & AudioManager.FLAG_SHOW_SILENT_HINT) != 0) {
             showSilentHint();
         }
+    }
+
+    private void announceDialogShown() {
+        mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
     }
 
     private boolean isShowing() {
