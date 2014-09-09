@@ -4165,8 +4165,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             pp.collectCertificates(pkg, parseFlags);
             pp.collectManifestDigest(pkg);
         } catch (PackageParserException e) {
-            throw new PackageManagerException(e.error, "Failed to collect certificates for "
-                    + pkg.packageName + ": " + e.getMessage());
+            throw PackageManagerException.from(e);
         }
     }
 
@@ -4191,8 +4190,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         try {
             pkg = pp.parsePackage(scanFile, parseFlags);
         } catch (PackageParserException e) {
-            throw new PackageManagerException(e.error,
-                    "Failed to scan " + scanFile + ": " + e.getMessage());
+            throw PackageManagerException.from(e);
         }
 
         PackageSetting ps = null;
