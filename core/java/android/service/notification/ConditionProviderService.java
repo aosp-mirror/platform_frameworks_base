@@ -17,6 +17,7 @@
 package android.service.notification;
 
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.app.INotificationManager;
 import android.app.Service;
 import android.content.Context;
@@ -44,6 +45,7 @@ import android.util.Log;
  *
  * @hide
  */
+@SystemApi
 public abstract class ConditionProviderService extends Service {
     private final String TAG = ConditionProviderService.class.getSimpleName()
             + "[" + getClass().getSimpleName() + "]";

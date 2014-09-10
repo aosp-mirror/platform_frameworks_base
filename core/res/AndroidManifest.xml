@@ -2773,7 +2773,7 @@
         android:description="@string/permdesc_bindNotificationListenerService"
         android:protectionLevel="signature" />
 
-    <!-- Must be required by an {@link
+    <!-- @SystemApi Must be required by a {@link
          android.service.notification.ConditionProviderService},
          to ensure that only the system can bind to it.
          @hide -->
