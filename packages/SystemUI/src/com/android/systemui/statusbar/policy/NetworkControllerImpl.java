@@ -337,7 +337,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
     @Override
     public DataUsageInfo getDataUsageInfo() {
         final DataUsageInfo info =  mMobileDataController.getDataUsageInfo();
-        info.carrier = mNetworkName;
+        if (info != null) {
+            info.carrier = mNetworkName;
+        }
         return info;
     }
 
