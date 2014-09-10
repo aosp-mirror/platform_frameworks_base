@@ -246,7 +246,6 @@ public class PhoneAccount implements Parcelable {
      * {@link #getAddress()}. For the majority of {@code PhoneAccount}s this should be registered
      * as {@code null}.  It is used by the system for SIM-based {@code PhoneAccount} registration
      * where {@link android.telephony.TelephonyManager#setLine1NumberForDisplay(String, String)}
-     * or {@link android.telephony.TelephonyManager#setLine1NumberForDisplay(long, String, String)}
      * has been used to alter the callback number.
      * <p>
      *
