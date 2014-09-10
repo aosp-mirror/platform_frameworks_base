@@ -26,7 +26,9 @@
         android:layout_height="match_parent"
         android:baselineAligned="false"
         android:paddingStart="@dimen/alert_dialog_padding_material"
-        android:paddingEnd="@dimen/alert_dialog_padding_material">
+        android:paddingTop="@dimen/alert_dialog_padding_top_material"
+        android:paddingEnd="@dimen/alert_dialog_padding_material"
+        android:paddingBottom="@dimen/alert_dialog_padding_top_material">
 
         <ProgressBar
             android:id="@id/progress"
@@ -34,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:max="10000"
-            android:layout_marginEnd="16dp" />
+            android:layout_marginEnd="@dimen/alert_dialog_padding_material" />
 
         <TextView
             android:id="@+id/message"
