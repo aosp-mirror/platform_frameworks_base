@@ -145,6 +145,11 @@ public class PasswordTextView extends View {
         }
     }
 
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
     private Rect getCharBounds() {
         float textHeight = mTextHeightRaw * getResources().getDisplayMetrics().scaledDensity;
         mDrawPaint.setTextSize(textHeight);
