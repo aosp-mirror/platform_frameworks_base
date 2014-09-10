@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.pdf.PdfEditor;
 import android.graphics.pdf.PdfRenderer;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -32,15 +33,21 @@ import android.print.PrintAttributes;
 import android.print.PrintAttributes.Margins;
 import android.util.Log;
 import android.view.View;
+import com.android.printspooler.util.PageRangeUtils;
 import libcore.io.IoUtils;
 import com.android.printspooler.util.BitmapSerializeUtils;
 import java.io.IOException;
 
 /**
- * Service for rendering PDF documents in an isolated process.
+ * Service for manipulation of PDF documents in an isolated process.
  */
-public final class PdfRendererService extends Service {
-    private static final String LOG_TAG = "PdfRendererService";
+public final class PdfManipulationService extends Service {
+    public static final String ACTION_GET_RENDERER =
+            "com.android.printspooler.renderer.ACTION_GET_RENDERER";
+    public static final String ACTION_GET_EDITOR =
+            "com.android.printspooler.renderer.ACTION_GET_EDITOR";
+
+    private static final String LOG_TAG = "PdfManipulationService";
     private static final boolean DEBUG = false;
 
     private static final int MILS_PER_INCH = 1000;
@@ -48,7 +55,18 @@ public final class PdfRendererService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return new PdfRendererImpl();
+        String action = intent.getAction();
+        switch (action) {
+            case ACTION_GET_RENDERER: {
+                return new PdfRendererImpl();
+            }
+            case ACTION_GET_EDITOR: {
+                return new PdfEditorImpl();
+            }
+            default: {
+                throw new IllegalArgumentException("Invalid intent action:" + action);
+            }
+        }
     }
 
     private final class PdfRendererImpl extends IPdfRenderer.Stub {
@@ -60,15 +78,17 @@ public final class PdfRendererService extends Service {
         @Override
         public int openDocument(ParcelFileDescriptor source) throws RemoteException {
             synchronized (mLock) {
-                throwIfOpened();
-                if (DEBUG) {
-                    Log.i(LOG_TAG, "openDocument()");
-                }
                 try {
+                    throwIfOpened();
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "openDocument()");
+                    }
                     mRenderer = new PdfRenderer(source);
                     return mRenderer.getPageCount();
-                } catch (IOException ioe) {
-                    throw new RemoteException("Cannot open file");
+                } catch (IOException|IllegalStateException e) {
+                    IoUtils.closeQuietly(source);
+                    Log.e(LOG_TAG, "Cannot open file", e);
+                    throw new RemoteException(e.toString());
                 }
             }
         }
@@ -108,7 +128,7 @@ public final class PdfRendererService extends Service {
                     }
                     matrix.postScale(displayScale, displayScale);
 
-                    Configuration configuration = PdfRendererService.this.getResources()
+                    Configuration configuration = PdfManipulationService.this.getResources()
                             .getConfiguration();
                     if (configuration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
                         matrix.postTranslate(bitmapWidth - srcWidthPts * displayScale, 0);
@@ -147,21 +167,10 @@ public final class PdfRendererService extends Service {
             synchronized (mLock) {
                 throwIfNotOpened();
                 if (DEBUG) {
-                    Log.i(LOG_TAG, "openDocument()");
+                    Log.i(LOG_TAG, "closeDocument()");
                 }
                 mRenderer.close();
                 mRenderer = null;
-            }
-        }
-
-        @Override
-        public void writePages(PageRange[] pages) {
-            synchronized (mLock) {
-                throwIfNotOpened();
-                if (DEBUG) {
-                    Log.i(LOG_TAG, "writePages()");
-                }
-                // TODO: Implement dropping undesired pages.
             }
         }
 
@@ -186,6 +195,91 @@ public final class PdfRendererService extends Service {
 
         private void throwIfNotOpened() {
             if (mRenderer == null) {
+                throw new IllegalStateException("Not opened");
+            }
+        }
+    }
+
+    private final class PdfEditorImpl extends IPdfEditor.Stub {
+        private final Object mLock = new Object();
+
+        private PdfEditor mEditor;
+
+        @Override
+        public int openDocument(ParcelFileDescriptor source) throws RemoteException {
+            synchronized (mLock) {
+                try {
+                    throwIfOpened();
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "openDocument()");
+                    }
+                    mEditor = new PdfEditor(source);
+                    return mEditor.getPageCount();
+                } catch (IOException|IllegalStateException e) {
+                    IoUtils.closeQuietly(source);
+                    Log.e(LOG_TAG, "Cannot open file", e);
+                    throw new RemoteException(e.toString());
+                }
+            }
+        }
+
+        @Override
+        public void removePages(PageRange[] ranges) {
+            synchronized (mLock) {
+                throwIfNotOpened();
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "removePages()");
+                }
+
+                ranges = PageRangeUtils.normalize(ranges);
+
+                final int rangeCount = ranges.length;
+                for (int i = rangeCount - 1; i >= 0; i--) {
+                    PageRange range = ranges[i];
+                    for (int j = range.getEnd(); j >= range.getStart(); j--) {
+                        mEditor.removePage(j);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void write(ParcelFileDescriptor destination) throws RemoteException {
+            synchronized (mLock) {
+                try {
+                    throwIfNotOpened();
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "write()");
+                    }
+                    mEditor.write(destination);
+                } catch (IOException | IllegalStateException e) {
+                    IoUtils.closeQuietly(destination);
+                    Log.e(LOG_TAG, "Error writing PDF to file.", e);
+                    throw new RemoteException(e.toString());
+                }
+            }
+        }
+
+        @Override
+        public void closeDocument() {
+            synchronized (mLock) {
+                throwIfNotOpened();
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "closeDocument()");
+                }
+                mEditor.close();
+                mEditor = null;
+            }
+        }
+
+        private void throwIfOpened() {
+            if (mEditor != null) {
+                throw new IllegalStateException("Already opened");
+            }
+        }
+
+        private void throwIfNotOpened() {
+            if (mEditor == null) {
                 throw new IllegalStateException("Not opened");
             }
         }
