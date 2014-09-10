@@ -2574,8 +2574,12 @@ status_t ResourceTable::addSymbols(const sp<AaptSymbols>& outSymbols) {
                 continue;
             }
             const size_t N = t->getOrderedConfigs().size();
-            sp<AaptSymbols> typeSymbols;
-            typeSymbols = outSymbols->addNestedSymbol(String8(t->getName()), t->getPos());
+            sp<AaptSymbols> typeSymbols =
+                    outSymbols->addNestedSymbol(String8(t->getName()), t->getPos());
+            if (typeSymbols == NULL) {
+                return UNKNOWN_ERROR;
+            }
+
             for (size_t ci=0; ci<N; ci++) {
                 sp<ConfigList> c = t->getOrderedConfigs().itemAt(ci);
                 if (c == NULL) {
