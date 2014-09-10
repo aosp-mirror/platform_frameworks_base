@@ -367,9 +367,9 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
-     * Uid of app owning the BSSID
+     * Uid used by autoJoin
      */
-    public int bssidOwnerUid;
+    public String autoJoinBSSID;
 
     /**
      * @hide
@@ -467,8 +467,10 @@ public class WifiConfiguration implements Parcelable {
         public int rssi24;  // strongest 2.4GHz RSSI
         public int num5;    // number of BSSIDs on 5GHz
         public int num24;   // number of BSSIDs on 2.4GHz
-        public long age5;  // timestamp of the strongest 5GHz BSSID (last time it was seen)
-        public long age24;   // timestamp of the strongest 2.4GHz BSSID (last time it was seen)
+        public long age5;   // timestamp of the strongest 5GHz BSSID (last time it was seen)
+        public long age24;  // timestamp of the strongest 2.4GHz BSSID (last time it was seen)
+        public String BSSID24;
+        public String BSSID5;
 
         public Visibility() {
             rssi5 = INVALID_RSSI;
@@ -482,6 +484,8 @@ public class WifiConfiguration implements Parcelable {
             age5 = source.age5;
             num24 = source.num24;
             num5 = source.num5;
+            BSSID5 = source.BSSID5;
+            BSSID24 = source.BSSID24;
         }
 
         @Override
@@ -492,6 +496,7 @@ public class WifiConfiguration implements Parcelable {
                 sbuf.append(Integer.toString(rssi24));
                 sbuf.append(",");
                 sbuf.append(Integer.toString(num24));
+                if (BSSID24 != null) sbuf.append(",").append(BSSID24);
             } else {
                 sbuf.append("*");
             }
@@ -500,6 +505,7 @@ public class WifiConfiguration implements Parcelable {
                 sbuf.append(Integer.toString(rssi5));
                 sbuf.append(",");
                 sbuf.append(Integer.toString(num5));
+                if (BSSID5 != null) sbuf.append(",").append(BSSID5);
             }
             sbuf.append("]");
             return sbuf.toString();
@@ -549,11 +555,13 @@ public class WifiConfiguration implements Parcelable {
                 if (result.level > status.rssi5) {
                     status.rssi5 = result.level;
                     status.age5 = result.seen;
+                    status.BSSID5 = result.BSSID;
                 }
             } else if (result.is24GHz()) {
                 if (result.level > status.rssi24) {
                     status.rssi24 = result.level;
                     status.age24 = result.seen;
+                    status.BSSID24 = result.BSSID;
                 }
             }
         }
@@ -949,7 +957,7 @@ public class WifiConfiguration implements Parcelable {
         sbuf.append(mIpConfiguration.toString());
 
         if (this.creatorUid != 0)  sbuf.append("uid=" + Integer.toString(creatorUid));
-
+        if (this.autoJoinBSSID != null) sbuf.append("autoJoinBSSID=" + autoJoinBSSID);
         if (this.blackListTimestamp != 0) {
             long now_ms = System.currentTimeMillis();
             long diff = now_ms - this.blackListTimestamp;
@@ -1284,7 +1292,6 @@ public class WifiConfiguration implements Parcelable {
             didSelfAdd = source.didSelfAdd;
             lastConnectUid = source.lastConnectUid;
             lastUpdateUid = source.lastUpdateUid;
-            bssidOwnerUid = source.bssidOwnerUid;
             creatorUid = source.creatorUid;
             peerWifiConfiguration = source.peerWifiConfiguration;
             blackListTimestamp = source.blackListTimestamp;
@@ -1302,6 +1309,7 @@ public class WifiConfiguration implements Parcelable {
             numTicksAtBadRSSI = source.numTicksAtBadRSSI;
             numTicksAtNotHighRSSI = source.numTicksAtNotHighRSSI;
             numUserTriggeredJoinAttempts = source.numUserTriggeredJoinAttempts;
+            autoJoinBSSID = source.autoJoinBSSID;
         }
     }
 
@@ -1318,6 +1326,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(disableReason);
         dest.writeString(SSID);
         dest.writeString(BSSID);
+        dest.writeString(autoJoinBSSID);
         dest.writeString(FQDN);
         dest.writeString(naiRealm);
         dest.writeString(preSharedKey);
@@ -1348,7 +1357,6 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(creatorUid);
         dest.writeInt(lastConnectUid);
         dest.writeInt(lastUpdateUid);
-        dest.writeInt(bssidOwnerUid);
         dest.writeLong(blackListTimestamp);
         dest.writeLong(lastConnectionFailure);
         dest.writeInt(numConnectionFailures);
@@ -1375,6 +1383,7 @@ public class WifiConfiguration implements Parcelable {
                 config.disableReason = in.readInt();
                 config.SSID = in.readString();
                 config.BSSID = in.readString();
+                config.autoJoinBSSID = in.readString();
                 config.FQDN = in.readString();
                 config.naiRealm = in.readString();
                 config.preSharedKey = in.readString();
@@ -1405,7 +1414,6 @@ public class WifiConfiguration implements Parcelable {
                 config.creatorUid = in.readInt();
                 config.lastConnectUid = in.readInt();
                 config.lastUpdateUid = in.readInt();
-                config.bssidOwnerUid = in.readInt();
                 config.blackListTimestamp = in.readLong();
                 config.lastConnectionFailure = in.readLong();
                 config.numConnectionFailures = in.readInt();
