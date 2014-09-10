@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.printspooler.widget.PreviewPageFrame xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/preview_page"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -33,7 +33,8 @@
         android:layout_width="fill_parent"
         android:layout_height="@dimen/preview_page_footer_height"
         android:background="@color/material_grey_500"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:duplicateParentState="true">
 
         <TextView
             android:id="@+id/page_number"
@@ -51,9 +52,10 @@
             android:layout_marginRight="8dip"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:background="@drawable/page_selector_background">
+            android:background="@drawable/page_selector_background"
+            android:duplicateParentState="true">
         </ImageView>
 
     </RelativeLayout>
 
-</LinearLayout>
+</com.android.printspooler.widget.PreviewPageFrame>
