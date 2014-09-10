@@ -354,6 +354,12 @@
     <!-- Integer indicating associated scan interval in milliseconds -->
     <integer translatable="false" name="config_wifi_framework_associated_scan_interval">10000</integer>
 
+    <!-- Boolean indicating associated scan are allowed -->
+    <bool translatable="false" name="config_wifi_framework_enable_associated_autojoin_scan">true</bool>
+
+    <!-- Boolean indicating associated network selection is allowed -->
+    <bool translatable="false" name="config_wifi_framework_enable_associated_network_selection">true</bool>
+
     <!-- Wifi driver stop delay, in milliseconds.
          Default value is 2 minutes. -->
     <integer translatable="false" name="config_wifi_driver_stop_delay">120000</integer>
