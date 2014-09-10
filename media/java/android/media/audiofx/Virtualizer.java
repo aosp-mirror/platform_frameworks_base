@@ -16,11 +16,14 @@
 
 package android.media.audiofx;
 
+import android.annotation.IntDef;
 import android.media.AudioDevice;
 import android.media.AudioFormat;
 import android.media.audiofx.AudioEffect;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.StringTokenizer;
@@ -176,7 +179,6 @@ public class Virtualizer extends AudioEffect {
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
-     * FIXME: replace deviceType by virtualization mode
      */
     private boolean getAnglesInt(int inputChannelMask, int deviceType, int[] angles)
             throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
@@ -249,13 +251,114 @@ public class Virtualizer extends AudioEffect {
     }
 
     /**
-     * Checks if the combination of a channel mask and device type is supported by this virtualizer.
+     * A virtualization mode indicating virtualization processing is not active.
+     * See {@link #getVirtualizationMode()} as one of the possible return value.
+     */
+    public static final int VIRTUALIZATION_MODE_OFF = 0;
+
+    /**
+     * A virtualization mode used to indicate the virtualizer effect must stop forcing the
+     * processing to a particular mode in {@link #forceVirtualizationMode(int)}.
+     */
+    public static final int VIRTUALIZATION_MODE_AUTO = 1;
+    /**
+     * A virtualization mode typically used over headphones.
+     * Binaural virtualization describes an audio processing configuration for virtualization
+     * where the left and right channels are respectively reaching the left and right ear of the
+     * user, without also feeding the opposite ear (as is the case when listening over speakers).
+     * <p>Such a mode is therefore meant to be used when audio is playing over stereo wired
+     * headphones or headsets, but also stereo headphones through a wireless A2DP Bluetooth link.
+     * <p>See {@link #canVirtualize(int, int)} to verify this mode is supported by this Virtualizer.
+     */
+    public final static int VIRTUALIZATION_MODE_BINAURAL = 2;
+
+    /**
+     * A virtualization mode typically used over speakers.
+     * Transaural virtualization describes an audio processing configuration that differs from
+     * binaural (as described in {@link #VIRTUALIZATION_MODE_BINAURAL} in that cross-talk is
+     * present, i.e. audio played from the left channel also reaches the right ear of the user,
+     * and vice-versa.
+     * <p>When supported, such a mode is therefore meant to be used when audio is playing over the
+     * built-in stereo speakers of a device, if they are featured.
+     * <p>See {@link #canVirtualize(int, int)} to verify this mode is supported by this Virtualizer.
+     */
+    public final static int VIRTUALIZATION_MODE_TRANSAURAL = 3;
+
+    /** @hide */
+    @IntDef( {
+        VIRTUALIZATION_MODE_BINAURAL,
+        VIRTUALIZATION_MODE_TRANSAURAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VirtualizationMode {}
+
+    /** @hide */
+    @IntDef( {
+        VIRTUALIZATION_MODE_AUTO,
+        VIRTUALIZATION_MODE_BINAURAL,
+        VIRTUALIZATION_MODE_TRANSAURAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ForceVirtualizationMode {}
+
+    private static int getDeviceForModeQuery(@VirtualizationMode int virtualizationMode)
+            throws IllegalArgumentException {
+        switch (virtualizationMode) {
+            case VIRTUALIZATION_MODE_BINAURAL:
+                return AudioDevice.TYPE_WIRED_HEADPHONES;
+            case VIRTUALIZATION_MODE_TRANSAURAL:
+                return AudioDevice.TYPE_BUILTIN_SPEAKER;
+            default:
+                throw (new IllegalArgumentException(
+                        "Virtualizer: illegal virtualization mode " + virtualizationMode));
+        }
+    }
+
+    private static int getDeviceForModeForce(@ForceVirtualizationMode int virtualizationMode)
+            throws IllegalArgumentException {
+        if (virtualizationMode == VIRTUALIZATION_MODE_AUTO) {
+            return AudioDevice.TYPE_UNKNOWN;
+        } else {
+            return getDeviceForModeQuery(virtualizationMode);
+        }
+    }
+
+    private static int deviceToMode(int deviceType) {
+        switch (deviceType) {
+            case AudioDevice.TYPE_WIRED_HEADSET:
+            case AudioDevice.TYPE_WIRED_HEADPHONES:
+            case AudioDevice.TYPE_BLUETOOTH_SCO:
+            case AudioDevice.TYPE_BUILTIN_EARPIECE:
+                return VIRTUALIZATION_MODE_BINAURAL;
+            case AudioDevice.TYPE_BUILTIN_SPEAKER:
+            case AudioDevice.TYPE_LINE_ANALOG:
+            case AudioDevice.TYPE_LINE_DIGITAL:
+            case AudioDevice.TYPE_BLUETOOTH_A2DP:
+            case AudioDevice.TYPE_HDMI:
+            case AudioDevice.TYPE_HDMI_ARC:
+            case AudioDevice.TYPE_USB_DEVICE:
+            case AudioDevice.TYPE_USB_ACCESSORY:
+            case AudioDevice.TYPE_DOCK:
+            case AudioDevice.TYPE_FM:
+            case AudioDevice.TYPE_AUX_LINE:
+                return VIRTUALIZATION_MODE_TRANSAURAL;
+            case AudioDevice.TYPE_UNKNOWN:
+            default:
+                return VIRTUALIZATION_MODE_OFF;
+        }
+    }
+
+    /**
+     * Checks if the combination of a channel mask and virtualization mode is supported by this
+     * virtualizer.
      * Some virtualizer implementations may only support binaural processing (i.e. only support
-     * headphone output), some may support transaural processing (i.e. for speaker output) for the
+     * headphone output, see {@link #VIRTUALIZATION_MODE_BINAURAL}), some may support transaural
+     * processing (i.e. for speaker output, see {@link #VIRTUALIZATION_MODE_TRANSAURAL}) for the
      * built-in speakers. Use this method to query the virtualizer implementation capabilities.
      * @param inputChannelMask the channel mask of the content to virtualize.
-     * @param deviceType the device type for which virtualization processing is to be performed.
-     * @return true if the combination of channel mask and output device type is supported, false
+     * @param virtualizationMode the mode for which virtualization processing is to be performed,
+     *    one of {@link #VIRTUALIZATION_MODE_BINAURAL}, {@link #VIRTUALIZATION_MODE_TRANSAURAL}.
+     * @return true if the combination of channel mask and virtualization mode is supported, false
      *    otherwise.
      *    <br>An indication that a certain channel mask is not supported doesn't necessarily mean
      *    you cannot play content with that channel mask, it more likely implies the content will
@@ -267,23 +370,23 @@ public class Virtualizer extends AudioEffect {
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
-     * FIXME: replace deviceType by virtualization mode
      */
-    public boolean canVirtualize(int inputChannelMask, int deviceType)
+    public boolean canVirtualize(int inputChannelMask, @VirtualizationMode int virtualizationMode)
             throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
-        return getAnglesInt(inputChannelMask, deviceType, null);
+        return getAnglesInt(inputChannelMask, getDeviceForModeQuery(virtualizationMode), null);
     }
 
     /**
      * Queries the virtual speaker angles (azimuth and elevation) for a combination of a channel
-     * mask and device type.
-     * If the virtualization configuration (mask and device) is supported (see
+     * mask and virtualization mode.
+     * If the virtualization configuration (mask and mode) is supported (see
      * {@link #canVirtualize(int, int)}, the array angles will contain upon return the
      * definition of each virtual speaker and its azimuth and elevation angles relative to the
      * listener.
      * <br>Note that in some virtualizer implementations, the angles may be strength-dependent.
      * @param inputChannelMask the channel mask of the content to virtualize.
-     * @param deviceType the device type for which virtualization processing is to be performed.
+     * @param virtualizationMode the mode for which virtualization processing is to be performed,
+     *    one of {@link #VIRTUALIZATION_MODE_BINAURAL}, {@link #VIRTUALIZATION_MODE_TRANSAURAL}.
      * @param angles a non-null array whose length is 3 times the number of channels in the channel
      *    mask.
      *    If the method indicates the configuration is supported, the array will contain upon return
@@ -297,37 +400,39 @@ public class Virtualizer extends AudioEffect {
      *      <li>the element at index <code>3*i+2</code> contains its corresponding elevation angle
      *          where +90 is directly above the listener, 0 is the horizontal plane, and -90 is
      *          directly below the listener.</li>
-     * @return true if the combination of channel mask and output device type is supported, false
+     * @return true if the combination of channel mask and virtualization mode is supported, false
      *    otherwise.
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
-     * FIXME: replace deviceType by virtualization mode
      */
-    public boolean getSpeakerAngles(int inputChannelMask, int deviceType, int[] angles)
+    public boolean getSpeakerAngles(int inputChannelMask,
+            @VirtualizationMode int virtualizationMode, int[] angles)
             throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
         if (angles == null) {
             throw (new IllegalArgumentException(
                     "Virtualizer: illegal null channel / angle array"));
         }
 
-        return getAnglesInt(inputChannelMask, deviceType, angles);
+        return getAnglesInt(inputChannelMask, getDeviceForModeQuery(virtualizationMode), angles);
     }
 
     /**
-     * Forces the virtualizer effect to use the processing mode used for the given device type.
+     * Forces the virtualizer effect to use the given processing mode.
      * The effect must be enabled for the forced mode to be applied.
-     * @param deviceType one of the device types defined.
-     * @return true if the processing mode for the device type is supported, and it is successfully
-     *     set, or forcing was successfully disabled, false otherwise.
+     * @param virtualizationMode one of {@link #VIRTUALIZATION_MODE_BINAURAL},
+     *     {@link #VIRTUALIZATION_MODE_TRANSAURAL} to force a particular processing mode, or
+     *     {@value #VIRTUALIZATION_MODE_AUTO} to stop forcing a mode.
+     * @return true if the processing mode is supported, and it is successfully set, or
+     *     forcing was successfully disabled, false otherwise.
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
-     * FIXME: replace deviceType by virtualization mode
      */
-    public boolean forceVirtualizationMode(int deviceType)
+    public boolean forceVirtualizationMode(@ForceVirtualizationMode int virtualizationMode)
             throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
         // convert Java device type to internal representation
+        int deviceType = getDeviceForModeForce(virtualizationMode);
         int internalDevice = AudioDevice.convertDeviceTypeToInternalDevice(deviceType);
 
         int status = setParameter(PARAM_FORCE_VIRTUALIZATION_MODE, internalDevice);
@@ -335,8 +440,8 @@ public class Virtualizer extends AudioEffect {
         if (status >= 0) {
             return true;
         } else if (status == AudioEffect.ERROR_BAD_VALUE) {
-            // a BAD_VALUE return from setParameter indicates the mode can't be forced to that
-            // of this device, don't throw an exception, just return false
+            // a BAD_VALUE return from setParameter indicates the mode can't be forced
+            // don't throw an exception, just return false
             return false;
         } else {
             // something wrong may have happened
@@ -349,28 +454,25 @@ public class Virtualizer extends AudioEffect {
     }
 
     /**
-     * Return the device type which reflects the virtualization mode being used, if any.
-     * @return a device type which reflects the virtualization mode being used.
-     *     If virtualization is not active, the device type will be TBD
-     *     Virtualization may not be active either because
-     *     the effect is not enabled or because the current output device is not compatible with
-     *     this virtualization implementation.
-     *     <p>Note that the return value may differ from a device type successfully set with
-     *     {@link #forceVirtualizationMode(int)} as the implementation
-     *     may use a single mode for multiple devices.
+     * Return the virtualization mode being used, if any.
+     * @return the virtualization mode being used.
+     *     If virtualization is not active, the virtualization mode will be
+     *     {@link #VIRTUALIZATION_MODE_OFF}. Otherwise the value will be
+     *     {@link #VIRTUALIZATION_MODE_BINAURAL} or {@link #VIRTUALIZATION_MODE_TRANSAURAL}.
+     *     Virtualization may not be active either because the effect is not enabled or
+     *     because the current output device is not compatible with this virtualization
+     *     implementation.
      * @throws IllegalStateException
-     * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
-     * FIXME: replace deviceType by virtualization mode
      */
     public int getVirtualizationMode()
-            throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
+            throws IllegalStateException, UnsupportedOperationException {
         int[] value = new int[1];
         int status = getParameter(PARAM_VIRTUALIZATION_MODE, value);
         if (status >= 0) {
-            return AudioDevice.convertInternalDeviceToDeviceType(value[0]);
+            return deviceToMode(AudioDevice.convertInternalDeviceToDeviceType(value[0]));
         } else if (status == AudioEffect.ERROR_BAD_VALUE) {
-            return AudioDevice.TYPE_UNKNOWN;
+            return VIRTUALIZATION_MODE_OFF;
         } else {
             // something wrong may have happened
             checkStatus(status);
@@ -378,7 +480,7 @@ public class Virtualizer extends AudioEffect {
         // unexpected virtualizer behavior
         Log.e(TAG, "unexpected status code " + status
                 + " after getParameter(PARAM_VIRTUALIZATION_MODE)");
-        return AudioDevice.TYPE_UNKNOWN;
+        return VIRTUALIZATION_MODE_OFF;
     }
 
     /**
