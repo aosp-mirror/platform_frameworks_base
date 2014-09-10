@@ -21,7 +21,6 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
-import android.app.ActivityThread;
 import android.app.IStopUserCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -92,6 +91,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_SERIAL_NO = "serialNumber";
     private static final String ATTR_NEXT_SERIAL_NO = "nextSerialNumber";
     private static final String ATTR_PARTIAL = "partial";
+    private static final String ATTR_GUEST_TO_REMOVE = "guestToRemove";
     private static final String ATTR_USER_VERSION = "version";
     private static final String ATTR_PROFILE_GROUP_ID = "profileGroupId";
     private static final String TAG_GUEST_RESTRICTIONS = "guestRestrictions";
@@ -228,7 +228,7 @@ public class UserManagerService extends IUserManager.Stub {
                 ArrayList<UserInfo> partials = new ArrayList<UserInfo>();
                 for (int i = 0; i < mUsers.size(); i++) {
                     UserInfo ui = mUsers.valueAt(i);
-                    if (ui.partial && i != 0) {
+                    if ((ui.partial || ui.guestToRemove) && i != 0) {
                         partials.add(ui);
                     }
                 }
@@ -759,6 +759,9 @@ public class UserManagerService extends IUserManager.Stub {
             if (userInfo.partial) {
                 serializer.attribute(null, ATTR_PARTIAL, "true");
             }
+            if (userInfo.guestToRemove) {
+                serializer.attribute(null, ATTR_GUEST_TO_REMOVE, "true");
+            }
             if (userInfo.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID) {
                 serializer.attribute(null, ATTR_PROFILE_GROUP_ID,
                         Integer.toString(userInfo.profileGroupId));
@@ -806,7 +809,7 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.attribute(null, ATTR_NEXT_SERIAL_NO, Integer.toString(mNextSerialNumber));
             serializer.attribute(null, ATTR_USER_VERSION, Integer.toString(mUserVersion));
 
-            serializer.startTag(null,  TAG_GUEST_RESTRICTIONS);
+            serializer.startTag(null, TAG_GUEST_RESTRICTIONS);
             writeRestrictionsLocked(serializer, mGuestRestrictions);
             serializer.endTag(null, TAG_GUEST_RESTRICTIONS);
             for (int i = 0; i < mUsers.size(); i++) {
@@ -873,6 +876,7 @@ public class UserManagerService extends IUserManager.Stub {
         int profileGroupId = UserInfo.NO_PROFILE_GROUP_ID;
         long lastAttemptTime = 0L;
         boolean partial = false;
+        boolean guestToRemove = false;
         Bundle restrictions = new Bundle();
 
         FileInputStream fis = null;
@@ -920,6 +924,10 @@ public class UserManagerService extends IUserManager.Stub {
                 if ("true".equals(valueString)) {
                     partial = true;
                 }
+                valueString = parser.getAttributeValue(null, ATTR_GUEST_TO_REMOVE);
+                if ("true".equals(valueString)) {
+                    guestToRemove = true;
+                }
 
                 int outerDepth = parser.getDepth();
                 while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -944,6 +952,7 @@ public class UserManagerService extends IUserManager.Stub {
             userInfo.creationTime = creationTime;
             userInfo.lastLoggedInTime = lastLoggedInTime;
             userInfo.partial = partial;
+            userInfo.guestToRemove = guestToRemove;
             userInfo.profileGroupId = profileGroupId;
             mUserRestrictions.append(id, restrictions);
             if (salt != 0L) {
@@ -1123,7 +1132,7 @@ public class UserManagerService extends IUserManager.Stub {
                         return null;
                     }
                     // If we're adding a guest and there already exists one, bail.
-                    if (isGuest && numberOfUsersOfTypeLocked(UserInfo.FLAG_GUEST, true) > 0) {
+                    if (isGuest && findCurrentGuestUserLocked() != null) {
                         return null;
                     }
                     // Limit number of managed profiles that can be created
@@ -1184,6 +1193,23 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
+     * Find the current guest user. If the Guest user is partial,
+     * then do not include it in the results as it is about to die.
+     * This is different than {@link #numberOfUsersOfTypeLocked(int, boolean)} due to
+     * the special handling of Guests being removed.
+     */
+    private UserInfo findCurrentGuestUserLocked() {
+        final int size = mUsers.size();
+        for (int i = 0; i < size; i++) {
+            final UserInfo user = mUsers.valueAt(i);
+            if (user.isGuest() && !user.guestToRemove && !mRemovingUserIds.get(user.id)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Mark this guest user for deletion to allow us to create another guest
      * and switch to that user before actually removing this guest.
      * @param userHandle the userid of the current guest
@@ -1208,14 +1234,15 @@ public class UserManagerService extends IUserManager.Stub {
                 if (!user.isGuest()) {
                     return false;
                 }
-                // Set this to a partially created user, so that the user will be purged
-                // on next startup, in case the runtime stops now before stopping and
-                // removing the user completely.
-                user.partial = true;
+                // We set this to a guest user that is to be removed. This is a temporary state
+                // where we are allowed to add new Guest users, even if this one is still not
+                // removed. This user will still show up in getUserInfo() calls.
+                // If we don't get around to removing this Guest user, it will be purged on next
+                // startup.
+                user.guestToRemove = true;
                 // Mark it as disabled, so that it isn't returned any more when
                 // profiles are queried.
                 user.flags |= UserInfo.FLAG_DISABLED;
-                user.flags &= ~UserInfo.FLAG_GUEST;
                 writeUserLocked(user);
             }
         } finally {
