@@ -431,6 +431,9 @@ public class VolumePanel extends Handler {
 
     public void onConfigurationChanged(Configuration newConfig) {
         updateWidth();
+        if (mZenPanel != null) {
+            mZenPanel.updateLocale();
+        }
     }
 
     private void updateWidth() {
