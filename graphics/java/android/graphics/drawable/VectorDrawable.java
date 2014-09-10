@@ -368,6 +368,29 @@ public class VectorDrawable extends Drawable {
         }
     }
 
+    /**
+     * The size of a pixel when scaled from the intrinsic dimension to the viewport dimension.
+     * This is used to calculate the path animation accuracy.
+     *
+     * @hide
+     */
+    public float getPixelSize() {
+        if (mVectorState == null && mVectorState.mVPathRenderer == null ||
+                mVectorState.mVPathRenderer.mBaseWidth == 0 ||
+                mVectorState.mVPathRenderer.mBaseHeight == 0 ||
+                mVectorState.mVPathRenderer.mViewportHeight == 0 ||
+                mVectorState.mVPathRenderer.mViewportWidth == 0) {
+            return 1; // fall back to 1:1 pixel mapping.
+        }
+        float intrinsicWidth = mVectorState.mVPathRenderer.mBaseWidth;
+        float intrinsicHeight = mVectorState.mVPathRenderer.mBaseHeight;
+        float viewportWidth = mVectorState.mVPathRenderer.mViewportWidth;
+        float viewportHeight = mVectorState.mVPathRenderer.mViewportHeight;
+        float scaleX = viewportWidth / intrinsicWidth;
+        float scaleY = viewportHeight / intrinsicHeight;
+        return Math.min(scaleX, scaleY);
+    }
+
     /** @hide */
     public static VectorDrawable create(Resources resources, int rid) {
         try {

@@ -92,21 +92,27 @@ public class AnimatorInflater {
      */
     public static Animator loadAnimator(Resources resources, Theme theme, int id)
             throws NotFoundException {
+        return loadAnimator(resources, theme, id, 1);
+    }
+
+    /** @hide */
+    public static Animator loadAnimator(Resources resources, Theme theme, int id,
+            float pathErrorScale) throws NotFoundException {
 
         XmlResourceParser parser = null;
         try {
             parser = resources.getAnimation(id);
-            return createAnimatorFromXml(resources, theme, parser);
+            return createAnimatorFromXml(resources, theme, parser, pathErrorScale);
         } catch (XmlPullParserException ex) {
             Resources.NotFoundException rnf =
                     new Resources.NotFoundException("Can't load animation resource ID #0x" +
-                    Integer.toHexString(id));
+                            Integer.toHexString(id));
             rnf.initCause(ex);
             throw rnf;
         } catch (IOException ex) {
             Resources.NotFoundException rnf =
                     new Resources.NotFoundException("Can't load animation resource ID #0x" +
-                    Integer.toHexString(id));
+                            Integer.toHexString(id));
             rnf.initCause(ex);
             throw rnf;
         } finally {
@@ -177,7 +183,7 @@ public class AnimatorInflater {
                         }
                         if (animator == null) {
                             animator = createAnimatorFromXml(context.getResources(),
-                                    context.getTheme(), parser);
+                                    context.getTheme(), parser, 1f);
                         }
 
                         if (animator == null) {
@@ -248,9 +254,11 @@ public class AnimatorInflater {
      * @param arrayAnimator Incoming typed array for Animator's attributes.
      * @param arrayObjectAnimator Incoming typed array for Object Animator's
      *            attributes.
+     * @param pixelSize The relative pixel size, used to calculate the
+     *                  maximum error for path animations.
      */
     private static void parseAnimatorFromTypeArray(ValueAnimator anim,
-            TypedArray arrayAnimator, TypedArray arrayObjectAnimator) {
+            TypedArray arrayAnimator, TypedArray arrayObjectAnimator, float pixelSize) {
         long duration = arrayAnimator.getInt(R.styleable.Animator_duration, 300);
 
         long startDelay = arrayAnimator.getInt(R.styleable.Animator_startOffset, 0);
@@ -303,7 +311,7 @@ public class AnimatorInflater {
         }
 
         if (arrayObjectAnimator != null) {
-            setupObjectAnimator(anim, arrayObjectAnimator, getFloats);
+            setupObjectAnimator(anim, arrayObjectAnimator, getFloats, pixelSize);
         }
     }
 
@@ -351,9 +359,11 @@ public class AnimatorInflater {
      * @param anim The target Animator which will be updated.
      * @param arrayObjectAnimator TypedArray for the ObjectAnimator.
      * @param getFloats True if the value type is float.
+     * @param pixelSize The relative pixel size, used to calculate the
+     *                  maximum error for path animations.
      */
     private static void setupObjectAnimator(ValueAnimator anim, TypedArray arrayObjectAnimator,
-            boolean getFloats) {
+            boolean getFloats, float pixelSize) {
         ObjectAnimator oa = (ObjectAnimator) anim;
         String pathData = arrayObjectAnimator.getString(R.styleable.PropertyAnimator_pathData);
 
@@ -370,7 +380,8 @@ public class AnimatorInflater {
                         + " propertyXName or propertyYName is needed for PathData");
             } else {
                 Path path = PathParser.createPathFromPathData(pathData);
-                PathKeyframes keyframeSet = KeyframeSet.ofPath(path);
+                float error = 0.5f * pixelSize; // max half a pixel error
+                PathKeyframes keyframeSet = KeyframeSet.ofPath(path, error);
                 Keyframes xKeyframes;
                 Keyframes yKeyframes;
                 if (getFloats) {
@@ -487,13 +498,15 @@ public class AnimatorInflater {
         }
     }
 
-    private static Animator createAnimatorFromXml(Resources res, Theme theme, XmlPullParser parser)
+    private static Animator createAnimatorFromXml(Resources res, Theme theme, XmlPullParser parser,
+            float pixelSize)
             throws XmlPullParserException, IOException {
-        return createAnimatorFromXml(res, theme, parser, Xml.asAttributeSet(parser), null, 0);
+        return createAnimatorFromXml(res, theme, parser, Xml.asAttributeSet(parser), null, 0,
+                pixelSize);
     }
 
     private static Animator createAnimatorFromXml(Resources res, Theme theme, XmlPullParser parser,
-            AttributeSet attrs, AnimatorSet parent, int sequenceOrdering)
+            AttributeSet attrs, AnimatorSet parent, int sequenceOrdering, float pixelSize)
             throws XmlPullParserException, IOException {
 
         Animator anim = null;
@@ -513,9 +526,9 @@ public class AnimatorInflater {
             String name = parser.getName();
 
             if (name.equals("objectAnimator")) {
-                anim = loadObjectAnimator(res, theme, attrs);
+                anim = loadObjectAnimator(res, theme, attrs, pixelSize);
             } else if (name.equals("animator")) {
-                anim = loadAnimator(res, theme, attrs, null);
+                anim = loadAnimator(res, theme, attrs, null, pixelSize);
             } else if (name.equals("set")) {
                 anim = new AnimatorSet();
                 TypedArray a;
@@ -526,7 +539,8 @@ public class AnimatorInflater {
                 }
                 int ordering = a.getInt(R.styleable.AnimatorSet_ordering,
                         TOGETHER);
-                createAnimatorFromXml(res, theme, parser, attrs, (AnimatorSet) anim, ordering);
+                createAnimatorFromXml(res, theme, parser, attrs, (AnimatorSet) anim, ordering,
+                        pixelSize);
                 a.recycle();
             } else {
                 throw new RuntimeException("Unknown animator name: " + parser.getName());
@@ -556,11 +570,11 @@ public class AnimatorInflater {
 
     }
 
-    private static ObjectAnimator loadObjectAnimator(Resources res, Theme theme, AttributeSet attrs)
-            throws NotFoundException {
+    private static ObjectAnimator loadObjectAnimator(Resources res, Theme theme, AttributeSet attrs,
+            float pathErrorScale) throws NotFoundException {
         ObjectAnimator anim = new ObjectAnimator();
 
-        loadAnimator(res, theme, attrs, anim);
+        loadAnimator(res, theme, attrs, anim, pathErrorScale);
 
         return anim;
     }
@@ -575,7 +589,7 @@ public class AnimatorInflater {
      *            ObjectAnimator
      */
     private static ValueAnimator loadAnimator(Resources res, Theme theme,
-            AttributeSet attrs, ValueAnimator anim)
+            AttributeSet attrs, ValueAnimator anim, float pathErrorScale)
             throws NotFoundException {
 
         TypedArray arrayAnimator = null;
@@ -601,7 +615,7 @@ public class AnimatorInflater {
             anim = new ValueAnimator();
         }
 
-        parseAnimatorFromTypeArray(anim, arrayAnimator, arrayObjectAnimator);
+        parseAnimatorFromTypeArray(anim, arrayAnimator, arrayObjectAnimator, pathErrorScale);
 
         final int resID =
                 arrayAnimator.getResourceId(R.styleable.Animator_interpolator, 0);
