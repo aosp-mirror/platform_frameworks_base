@@ -37,11 +37,4 @@
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
     <string translatable="false" name="config_tether_apndata">Tether,broadband.cellular1.net,,,,,,,,,311,190,,DUN</string>
 
-    <!-- Values for GPS configuration (Sprint) -->
-    <string-array translatable="false" name="config_gpsParameters">
-        <item>CAPABILITIES=0x31</item>
-        <item>GPS_LOCK=3</item>
-        <item>LPP_PROFILE=2</item>
-    </string-array>
-
 </resources>
