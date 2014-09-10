@@ -7434,12 +7434,6 @@
         <attr name="settingsActivity" />
     </declare-styleable>
 
-    <!-- @removed -->
-    <attr name="__removed1" format="reference" />
-
-    <!-- TODO: Spacer to be removed from here and public.xml -->
-    <attr name="__removed2" format="reference" />
-
     <!-- Attributes that can be used with <code>rating-system-definition</code> tags inside of the
          XML resource that describes TV content rating of a {@link android.media.tv.TvInputService},
          which is referenced from its
