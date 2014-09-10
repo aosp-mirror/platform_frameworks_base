@@ -116,9 +116,6 @@ public class RootsCache {
      * Gather roots from storage providers belonging to given package name.
      */
     public void updatePackageAsync(String packageName) {
-        // Need at least first load, since we're going to be using previously
-        // cached values for non-matching packages.
-        waitForFirstLoad();
         new UpdateTask(packageName).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -182,6 +179,12 @@ public class RootsCache {
         @Override
         protected Void doInBackground(Void... params) {
             final long start = SystemClock.elapsedRealtime();
+
+            if (mFilterPackage != null) {
+                // Need at least first load, since we're going to be using
+                // previously cached values for non-matching packages.
+                waitForFirstLoad();
+            }
 
             mTaskRoots.put(mRecentsRoot.authority, mRecentsRoot);
 
