@@ -684,7 +684,7 @@ public abstract class PanelView extends FrameLayout {
                 removeCallbacks(mPeekRunnable);
                 mPeekRunnable.run();
             }
-        } else if (!isFullyCollapsed() && !mTracking) {
+        } else if (!isFullyCollapsed() && !mTracking && !mClosing) {
             if (mHeightAnimator != null) {
                 mHeightAnimator.cancel();
             }
