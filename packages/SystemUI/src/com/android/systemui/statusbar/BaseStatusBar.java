@@ -69,6 +69,7 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewStub;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
@@ -764,16 +765,94 @@ public abstract class BaseStatusBar extends SystemUI implements
         }, false /* afterKeyguardGone */);
     }
 
+    private void inflateGuts(ExpandableNotificationRow row) {
+        ViewStub stub = (ViewStub) row.findViewById(R.id.notification_guts_stub);
+        if (stub != null) {
+            stub.inflate();
+        }
+        final StatusBarNotification sbn = row.getStatusBarNotification();
+        PackageManager pmUser = getPackageManagerForUser(
+                sbn.getUser().getIdentifier());
+        row.setTag(sbn.getPackageName());
+        final View guts = row.findViewById(R.id.notification_guts);
+        final String pkg = sbn.getPackageName();
+        String appname = pkg;
+        Drawable pkgicon = null;
+        int appUid = -1;
+        try {
+            final ApplicationInfo info = pmUser.getApplicationInfo(pkg,
+                    PackageManager.GET_UNINSTALLED_PACKAGES
+                            | PackageManager.GET_DISABLED_COMPONENTS);
+            if (info != null) {
+                appname = String.valueOf(pmUser.getApplicationLabel(info));
+                pkgicon = pmUser.getApplicationIcon(info);
+                appUid = info.uid;
+            }
+        } catch (NameNotFoundException e) {
+            // app is gone, just show package name and generic icon
+            pkgicon = pmUser.getDefaultActivityIcon();
+        }
+        ((ImageView) row.findViewById(android.R.id.icon)).setImageDrawable(pkgicon);
+        ((DateTimeView) row.findViewById(R.id.timestamp)).setTime(sbn.getPostTime());
+        ((TextView) row.findViewById(R.id.pkgname)).setText(appname);
+        final View settingsButton = guts.findViewById(R.id.notification_inspect_item);
+        final View appSettingsButton
+                = guts.findViewById(R.id.notification_inspect_app_provided_settings);
+        if (appUid >= 0) {
+            final int appUidF = appUid;
+            settingsButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    startAppNotificationSettingsActivity(pkg, appUidF);
+                }
+            });
+
+            final Intent appSettingsQueryIntent
+                    = new Intent(Intent.ACTION_MAIN)
+                    .addCategory(Notification.INTENT_CATEGORY_NOTIFICATION_PREFERENCES)
+                    .setPackage(pkg);
+            List<ResolveInfo> infos = pmUser.queryIntentActivities(appSettingsQueryIntent, 0);
+            if (infos.size() > 0) {
+                appSettingsButton.setVisibility(View.VISIBLE);
+                appSettingsButton.setContentDescription(
+                        mContext.getResources().getString(
+                                R.string.status_bar_notification_app_settings_title,
+                                appname
+                        ));
+                final Intent appSettingsLaunchIntent = new Intent(appSettingsQueryIntent)
+                        .setClassName(pkg, infos.get(0).activityInfo.name);
+                appSettingsButton.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        startAppOwnNotificationSettingsActivity(appSettingsLaunchIntent,
+                                sbn.getId(),
+                                sbn.getTag(),
+                                appUidF);
+                    }
+                });
+            } else {
+                appSettingsButton.setVisibility(View.GONE);
+            }
+        } else {
+            settingsButton.setVisibility(View.GONE);
+            appSettingsButton.setVisibility(View.GONE);
+        }
+
+    }
+
     protected SwipeHelper.LongPressListener getNotificationLongClicker() {
         return new SwipeHelper.LongPressListener() {
             @Override
             public boolean onLongPress(View v, int x, int y) {
                 dismissPopups();
 
+                if (!(v instanceof ExpandableNotificationRow)) {
+                    return false;
+                }
                 if (v.getWindowToken() == null) {
                     Log.e(TAG, "Trying to show notification guts, but not attached to window");
                     return false;
                 }
+
+                inflateGuts((ExpandableNotificationRow) v);
 
                 // Assume we are a status_bar_notification_row
                 final NotificationGuts guts = (NotificationGuts) v.findViewById(
@@ -1190,67 +1269,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             row.setExpansionLogger(this, entry.notification.getKey());
         }
 
-        // the notification inspector (see SwipeHelper.setLongPressListener)
-        row.setTag(sbn.getPackageName());
-        final View guts = row.findViewById(R.id.notification_guts);
-        final String pkg = entry.notification.getPackageName();
-        String appname = pkg;
-        Drawable pkgicon = null;
-        int appUid = -1;
-        try {
-            final ApplicationInfo info = pmUser.getApplicationInfo(pkg,
-                PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_DISABLED_COMPONENTS);
-            if (info != null) {
-                appname = String.valueOf(pmUser.getApplicationLabel(info));
-                pkgicon = pmUser.getApplicationIcon(info);
-                appUid = info.uid;
-            }
-        } catch (NameNotFoundException e) {
-            // app is gone, just show package name and generic icon
-            pkgicon = pmUser.getDefaultActivityIcon();
-        }
-        ((ImageView) row.findViewById(android.R.id.icon)).setImageDrawable(pkgicon);
-        ((DateTimeView) row.findViewById(R.id.timestamp)).setTime(entry.notification.getPostTime());
-        ((TextView) row.findViewById(R.id.pkgname)).setText(appname);
-        final View settingsButton = guts.findViewById(R.id.notification_inspect_item);
-        final View appSettingsButton
-                = guts.findViewById(R.id.notification_inspect_app_provided_settings);
-        if (appUid >= 0) {
-            final int appUidF = appUid;
-            settingsButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    startAppNotificationSettingsActivity(pkg, appUidF);
-                }
-            });
-
-            final Intent appSettingsQueryIntent
-                    = new Intent(Intent.ACTION_MAIN)
-                        .addCategory(Notification.INTENT_CATEGORY_NOTIFICATION_PREFERENCES)
-                        .setPackage(pkg);
-            List<ResolveInfo> infos = pmUser.queryIntentActivities(appSettingsQueryIntent, 0);
-            if (infos.size() > 0) {
-                appSettingsButton.setVisibility(View.VISIBLE);
-                appSettingsButton.setContentDescription(
-                        mContext.getResources().getString(
-                                R.string.status_bar_notification_app_settings_title,
-                                appname
-                        ));
-                final Intent appSettingsLaunchIntent = new Intent(appSettingsQueryIntent)
-                        .setClassName(pkg, infos.get(0).activityInfo.name);
-                appSettingsButton.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        startAppOwnNotificationSettingsActivity(appSettingsLaunchIntent,
-                                sbn.getId(),
-                                sbn.getTag(),
-                                appUidF);
-                    }
-                });
-            }
-        } else {
-            settingsButton.setVisibility(View.GONE);
-            appSettingsButton.setVisibility(View.GONE);
-        }
-
         workAroundBadLayerDrawableOpacity(row);
         View vetoButton = updateNotificationVetoButton(row, sbn);
         vetoButton.setContentDescription(mContext.getString(
@@ -1432,7 +1450,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             row.setUserExpanded(userExpanded);
         }
         row.setUserLocked(userLocked);
-
+        row.setStatusBarNotification(entry.notification);
         return true;
     }
 
@@ -1946,6 +1964,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         } else {
             entry.row.setOnClickListener(null);
         }
+        entry.row.setStatusBarNotification(notification);
         entry.row.notifyContentUpdated();
         entry.row.resetHeight();
     }
