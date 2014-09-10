@@ -1099,8 +1099,11 @@ public class PackageParser {
                     }
                 }
             }
-        } catch (GeneralSecurityException | IOException | RuntimeException e) {
+        } catch (GeneralSecurityException e) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING,
+                    "Failed to collect certificates from " + apkPath, e);
+        } catch (IOException | RuntimeException e) {
+            throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                     "Failed to collect certificates from " + apkPath, e);
         } finally {
             closeQuietly(jarFile);
