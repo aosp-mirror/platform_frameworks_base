@@ -44,11 +44,4 @@
     <bool name="config_carrier_volte_vt_available">false</bool>
 
     <bool name="config_auto_attach_data_on_creation">false</bool>
-
-    <!-- Values for GPS configuration (Verizon) -->
-    <string-array translatable="false" name="config_gpsParameters">
-        <item>CAPABILITIES=0x31</item>
-        <item>GPS_LOCK=3</item>
-        <item>LPP_PROFILE=3</item>
-    </string-array>
 </resources>
