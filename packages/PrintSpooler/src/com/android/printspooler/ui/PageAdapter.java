@@ -442,7 +442,8 @@ public final class PageAdapter extends Adapter implements
                 * mPreviewPageMargin);
 
         final int verticalPadding;
-        if (mPageContentHeight + mFooterHeight + mPreviewListPadding > availableHeight) {
+        if (mPageContentHeight + mFooterHeight + mPreviewListPadding
+                + 2 * mPreviewPageMargin > availableHeight) {
             verticalPadding = Math.max(0,
                     (availableHeight - mPageContentHeight - mFooterHeight) / 2
                             - mPreviewPageMargin);
