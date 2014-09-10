@@ -20,9 +20,11 @@ import android.content.Context;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
 
 import android.widget.ImageView;
@@ -66,6 +68,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private String mLoggingKey;
     private boolean mWasReset;
     private NotificationGuts mGuts;
+
+    private StatusBarNotification mStatusBarNotification;
 
     public void setIconAnimationRunning(boolean running) {
         setIconAnimationRunning(running, mPublicLayout);
@@ -112,6 +116,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
+    public void setStatusBarNotification(StatusBarNotification statusBarNotification) {
+        mStatusBarNotification = statusBarNotification;
+    }
+
+    public StatusBarNotification getStatusBarNotification() {
+        return mStatusBarNotification;
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }
@@ -155,7 +167,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         super.onFinishInflate();
         mPublicLayout = (NotificationContentView) findViewById(R.id.expandedPublic);
         mPrivateLayout = (NotificationContentView) findViewById(R.id.expanded);
-        mGuts = (NotificationGuts) findViewById(R.id.notification_guts);
+        ViewStub gutsStub = (ViewStub) findViewById(R.id.notification_guts_stub);
+        gutsStub.setOnInflateListener(new ViewStub.OnInflateListener() {
+            @Override
+            public void onInflate(ViewStub stub, View inflated) {
+                mGuts = (NotificationGuts) inflated;
+                mGuts.setClipTopAmount(getClipTopAmount());
+                mGuts.setActualHeight(getActualHeight());
+            }
+        });
         mVetoButton = findViewById(R.id.veto);
     }
 
@@ -421,7 +441,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void setActualHeight(int height, boolean notifyListeners) {
         mPrivateLayout.setActualHeight(height);
         mPublicLayout.setActualHeight(height);
-        mGuts.setActualHeight(height);
+        if (mGuts != null) {
+            mGuts.setActualHeight(height);
+        }
         invalidate();
         super.setActualHeight(height, notifyListeners);
     }
@@ -443,7 +465,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         super.setClipTopAmount(clipTopAmount);
         mPrivateLayout.setClipTopAmount(clipTopAmount);
         mPublicLayout.setClipTopAmount(clipTopAmount);
-        mGuts.setClipTopAmount(clipTopAmount);
+        if (mGuts != null) {
+            mGuts.setClipTopAmount(clipTopAmount);
+        }
     }
 
     public void notifyContentUpdated() {
