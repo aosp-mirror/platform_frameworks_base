@@ -133,7 +133,7 @@ public:
         mIndexCount = MathUtils::min(newCount, mAllocatedIndexCount);
     }
     void updateVertexCount(unsigned int newCount)  {
-        newCount = MathUtils::min(newCount, mAllocatedVertexCount);
+        mVertexCount = MathUtils::min(newCount, mAllocatedVertexCount);
     }
     Mode getMode() const { return mMode; }
 
