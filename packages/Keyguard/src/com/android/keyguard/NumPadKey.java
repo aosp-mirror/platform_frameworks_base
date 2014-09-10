@@ -152,6 +152,11 @@ public class NumPadKey extends ViewGroup {
         mKlondikeText.layout(left, top, left + mKlondikeText.getMeasuredWidth(), bottom);
     }
 
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
     // Cause a VIRTUAL_KEY vibration
     public void doHapticKeyClick() {
         if (mEnableHaptics) {
