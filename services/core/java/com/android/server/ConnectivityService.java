@@ -4746,6 +4746,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void updateNetworkScore(NetworkAgentInfo nai, int score) {
         if (DBG) log("updateNetworkScore for " + nai.name() + " to " + score);
+        if (score < 0) {
+            loge("updateNetworkScore for " + nai.name() + " got a negative score (" + score +
+                    ").  Bumping score to min of 0");
+            score = 0;
+        }
 
         nai.currentScore = score;
 
