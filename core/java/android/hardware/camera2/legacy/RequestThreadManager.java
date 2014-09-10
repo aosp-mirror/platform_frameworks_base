@@ -374,6 +374,9 @@ public class RequestThreadManager {
             }
 
             mIntermediateBufferSize = bestPreviewDimen;
+            mParams.setPreviewSize(mIntermediateBufferSize.getWidth(),
+                    mIntermediateBufferSize.getHeight());
+
             if (DEBUG) {
                 Log.d(TAG, "Intermediate buffer selected with dimens: " +
                         bestPreviewDimen.toString());
