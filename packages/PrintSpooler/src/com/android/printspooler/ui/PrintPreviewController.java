@@ -185,8 +185,10 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
             public void run() {
                 // At this point the other end will write to the file, hence
                 // we have to close it and reopen after the write completes.
-                Message operation = mHandler.obtainMessage(MyHandler.MSG_CLOSE);
-                mHandler.enqueueOperation(operation);
+                if (mPageAdapter.isOpened()) {
+                    Message operation = mHandler.obtainMessage(MyHandler.MSG_CLOSE);
+                    mHandler.enqueueOperation(operation);
+                }
             }
         });
     }
