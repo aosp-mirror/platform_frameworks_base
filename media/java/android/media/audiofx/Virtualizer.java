@@ -176,6 +176,7 @@ public class Virtualizer extends AudioEffect {
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
+     * FIXME: replace deviceType by virtualization mode
      */
     private boolean getAnglesInt(int inputChannelMask, int deviceType, int[] angles)
             throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
@@ -254,7 +255,6 @@ public class Virtualizer extends AudioEffect {
      * built-in speakers. Use this method to query the virtualizer implementation capabilities.
      * @param inputChannelMask the channel mask of the content to virtualize.
      * @param deviceType the device type for which virtualization processing is to be performed.
-     *    Valid values are the device types defined in {@link AudioDevice}.
      * @return true if the combination of channel mask and output device type is supported, false
      *    otherwise.
      *    <br>An indication that a certain channel mask is not supported doesn't necessarily mean
@@ -267,6 +267,7 @@ public class Virtualizer extends AudioEffect {
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
+     * FIXME: replace deviceType by virtualization mode
      */
     public boolean canVirtualize(int inputChannelMask, int deviceType)
             throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
@@ -283,7 +284,6 @@ public class Virtualizer extends AudioEffect {
      * <br>Note that in some virtualizer implementations, the angles may be strength-dependent.
      * @param inputChannelMask the channel mask of the content to virtualize.
      * @param deviceType the device type for which virtualization processing is to be performed.
-     *    Valid values are the device types defined in {@link AudioDevice}.
      * @param angles a non-null array whose length is 3 times the number of channels in the channel
      *    mask.
      *    If the method indicates the configuration is supported, the array will contain upon return
@@ -302,6 +302,7 @@ public class Virtualizer extends AudioEffect {
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
+     * FIXME: replace deviceType by virtualization mode
      */
     public boolean getSpeakerAngles(int inputChannelMask, int deviceType, int[] angles)
             throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
@@ -316,14 +317,13 @@ public class Virtualizer extends AudioEffect {
     /**
      * Forces the virtualizer effect to use the processing mode used for the given device type.
      * The effect must be enabled for the forced mode to be applied.
-     * @param deviceType one of the device types defined in {@link AudioDevice}.
-     *     Use {@link AudioDevice#DEVICE_TYPE_UNKNOWN} to return to the non-forced mode.
+     * @param deviceType one of the device types defined.
      * @return true if the processing mode for the device type is supported, and it is successfully
-     *     set, or forcing was successfully disabled with {@link AudioDevice#DEVICE_TYPE_UNKNOWN},
-     *     false otherwise.
+     *     set, or forcing was successfully disabled, false otherwise.
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
+     * FIXME: replace deviceType by virtualization mode
      */
     public boolean forceVirtualizationMode(int deviceType)
             throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
@@ -350,21 +350,18 @@ public class Virtualizer extends AudioEffect {
 
     /**
      * Return the device type which reflects the virtualization mode being used, if any.
-     * @return a device type (as defined in {@link AudioDevice}) which reflects the virtualization
-     *     mode being used.
-     *     If virtualization is not active, the device type will be
-     *     {@link AudioDevice#DEVICE_TYPE_UNKNOWN}. Virtualization may not be active either because
+     * @return a device type which reflects the virtualization mode being used.
+     *     If virtualization is not active, the device type will be TBD
+     *     Virtualization may not be active either because
      *     the effect is not enabled or because the current output device is not compatible with
      *     this virtualization implementation.
      *     <p>Note that the return value may differ from a device type successfully set with
      *     {@link #forceVirtualizationMode(int)} as the implementation
-     *     may use a single mode for multiple devices. An example of this is with
-     *     {@link AudioDevice#DEVICE_TYPE_WIRED_HEADSET} that would typically be handled
-     *     like {@link AudioDevice#DEVICE_TYPE_WIRED_HEADPHONES} from a virtualization
-     *     standpoint.
+     *     may use a single mode for multiple devices.
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
+     * FIXME: replace deviceType by virtualization mode
      */
     public int getVirtualizationMode()
             throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
@@ -373,7 +370,7 @@ public class Virtualizer extends AudioEffect {
         if (status >= 0) {
             return AudioDevice.convertInternalDeviceToDeviceType(value[0]);
         } else if (status == AudioEffect.ERROR_BAD_VALUE) {
-            return AudioDevice.DEVICE_TYPE_UNKNOWN;
+            return AudioDevice.TYPE_UNKNOWN;
         } else {
             // something wrong may have happened
             checkStatus(status);
@@ -381,7 +378,7 @@ public class Virtualizer extends AudioEffect {
         // unexpected virtualizer behavior
         Log.e(TAG, "unexpected status code " + status
                 + " after getParameter(PARAM_VIRTUALIZATION_MODE)");
-        return AudioDevice.DEVICE_TYPE_UNKNOWN;
+        return AudioDevice.TYPE_UNKNOWN;
     }
 
     /**
