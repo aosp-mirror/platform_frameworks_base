@@ -223,6 +223,9 @@ public abstract class NetworkAgent extends Handler {
      * Called by the bearer code when it has a new score for this network.
      */
     public void sendNetworkScore(int score) {
+        if (score < 0) {
+            throw new IllegalArgumentException("Score must be >= 0");
+        }
         queueOrSendMessage(EVENT_NETWORK_SCORE_CHANGED, new Integer(score));
     }
 
