@@ -129,6 +129,7 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Xfermode.cpp \
 	android/graphics/YuvToJpegEncoder.cpp \
 	android/graphics/pdf/PdfDocument.cpp \
+	android/graphics/pdf/PdfEditor.cpp \
 	android/graphics/pdf/PdfRenderer.cpp \
 	android_media_AudioRecord.cpp \
 	android_media_AudioSystem.cpp \
