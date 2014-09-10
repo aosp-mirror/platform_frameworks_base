@@ -19,7 +19,9 @@
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:paddingStart="@dimen/alert_dialog_padding_material"
-    android:paddingEnd="@dimen/alert_dialog_padding_material">
+    android:paddingTop="@dimen/alert_dialog_padding_top_material"
+    android:paddingEnd="@dimen/alert_dialog_padding_material"
+    android:paddingBottom="@dimen/alert_dialog_padding_top_material">
     <ProgressBar
         android:id="@+id/progress"
         style="?attr/progressBarStyleHorizontal"
