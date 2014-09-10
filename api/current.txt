@@ -14420,6 +14420,7 @@ package android.media {
     field public static final int QUALITY_CIF = 3; // 0x3
     field public static final int QUALITY_HIGH = 1; // 0x1
     field public static final int QUALITY_HIGH_SPEED_1080P = 2004; // 0x7d4
+    field public static final int QUALITY_HIGH_SPEED_2160P = 2005; // 0x7d5
     field public static final int QUALITY_HIGH_SPEED_480P = 2002; // 0x7d2
     field public static final int QUALITY_HIGH_SPEED_720P = 2003; // 0x7d3
     field public static final int QUALITY_HIGH_SPEED_HIGH = 2001; // 0x7d1
