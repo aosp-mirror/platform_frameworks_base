@@ -17,6 +17,8 @@
 package android.webkit;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 
 /**
  * This is the main entry-point into the WebView back end implementations, which the WebView
@@ -64,6 +66,12 @@ public interface WebViewFactoryProvider {
          * {@link android.webkit.WebView#setSlowWholeDocumentDrawEnabled(boolean) }
          */
         void enableSlowWholeDocumentDraw();
+
+        /**
+         * Implement the API method
+         * {@link android.webkit.WebChromeClient.FileChooserParams#parseResult(int, Intent)}
+         */
+        Uri[] parseFileChooserResult(int resultCode, Intent intent);
     }
 
     Statics getStatics();
