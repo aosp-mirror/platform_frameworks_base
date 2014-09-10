@@ -16167,12 +16167,16 @@ package android.media.audiofx {
     method public short getRoundedStrength() throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
     method public boolean getSpeakerAngles(int, int, int[]) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
     method public boolean getStrengthSupported();
-    method public int getVirtualizationMode() throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
+    method public int getVirtualizationMode() throws java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
     method public void setParameterListener(android.media.audiofx.Virtualizer.OnParameterChangeListener);
     method public void setProperties(android.media.audiofx.Virtualizer.Settings) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
     method public void setStrength(short) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.UnsupportedOperationException;
     field public static final int PARAM_STRENGTH = 1; // 0x1
     field public static final int PARAM_STRENGTH_SUPPORTED = 0; // 0x0
+    field public static final int VIRTUALIZATION_MODE_AUTO = 1; // 0x1
+    field public static final int VIRTUALIZATION_MODE_BINAURAL = 2; // 0x2
+    field public static final int VIRTUALIZATION_MODE_OFF = 0; // 0x0
+    field public static final int VIRTUALIZATION_MODE_TRANSAURAL = 3; // 0x3
   }
 
   public static abstract interface Virtualizer.OnParameterChangeListener {
