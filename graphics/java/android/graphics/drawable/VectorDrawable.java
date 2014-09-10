@@ -629,6 +629,15 @@ public class VectorDrawable extends Drawable {
                 mThemeAttrs = copy.mThemeAttrs;
                 mChangingConfigurations = copy.mChangingConfigurations;
                 mVPathRenderer = new VPathRenderer(copy.mVPathRenderer);
+                if (copy.mVPathRenderer.mFillPaint != null) {
+                    mVPathRenderer.mFillPaint = new Paint(copy.mVPathRenderer.mFillPaint);
+                }
+                if (copy.mVPathRenderer.mStrokePaint != null) {
+                    mVPathRenderer.mStrokePaint = new Paint(copy.mVPathRenderer.mStrokePaint);
+                }
+                if (copy.mVPathRenderer.mColorFilter != null) {
+                    mVPathRenderer.mColorFilter = copy.mVPathRenderer.mColorFilter;
+                }
                 mTint = copy.mTint;
                 mTintMode = copy.mTintMode;
                 mAutoMirrored = copy.mAutoMirrored;
@@ -700,8 +709,8 @@ public class VectorDrawable extends Drawable {
          */
         // Variables that only used temporarily inside the draw() call, so there
         // is no need for deep copying.
-        private final Path mPath = new Path();
-        private final Path mRenderPath = new Path();
+        private final Path mPath;
+        private final Path mRenderPath;
         private static final Matrix IDENTITY_MATRIX = new Matrix();
         private final Matrix mFinalPathMatrix = new Matrix();
 
@@ -724,6 +733,8 @@ public class VectorDrawable extends Drawable {
 
         public VPathRenderer() {
             mRootGroup = new VGroup();
+            mPath = new Path();
+            mRenderPath = new Path();
         }
 
         public void setRootAlpha(int alpha) {
@@ -736,6 +747,8 @@ public class VectorDrawable extends Drawable {
 
         public VPathRenderer(VPathRenderer copy) {
             mRootGroup = new VGroup(copy.mRootGroup, mVGTargetsMap);
+            mPath = new Path(copy.mPath);
+            mRenderPath = new Path(copy.mRenderPath);
             mBaseWidth = copy.mBaseWidth;
             mBaseHeight = copy.mBaseHeight;
             mViewportWidth = copy.mViewportWidth;

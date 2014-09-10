@@ -636,6 +636,7 @@ public final class AnimatorSet extends Animator {
         anim.mNodes = new ArrayList<Node>();
         anim.mSortedNodes = new ArrayList<Node>();
         anim.mReversible = mReversible;
+        anim.mSetListener = null;
 
         // Walk through the old nodes list, cloning each node and adding it to the new nodemap.
         // One problem is that the old node dependencies point to nodes in the old AnimatorSet.
