@@ -322,8 +322,13 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
      * If the device is already associated with a WiFi, disconnect and forget it,
      * We don't verify whether the connection is successful or not, leave this to the test
      */
-    protected boolean connectToWifi(String knownSSID) {
-        WifiConfiguration config = WifiConfigurationHelper.createOpenConfig(knownSSID);
+    protected boolean connectToWifi(String ssid, String password) {
+        WifiConfiguration config;
+        if (password == null) {
+            config = WifiConfigurationHelper.createOpenConfig(ssid);
+        } else {
+            config = WifiConfigurationHelper.createPskConfig(ssid, password);
+        }
         return connectToWifiWithConfiguration(config);
     }
 
