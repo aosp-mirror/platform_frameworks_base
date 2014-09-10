@@ -2008,4 +2008,5 @@
   <java-symbol type="id" name="date_picker_month_day_year_layout" />
   <java-symbol type="attr" name="closeItemLayout" />
   <java-symbol type="layout" name="resolver_different_item_header" />
+  <java-symbol type="array" name="config_default_vm_number" />
 </resources>
