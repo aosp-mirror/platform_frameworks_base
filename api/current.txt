@@ -32147,6 +32147,7 @@ package android.util {
     ctor public SizeF(float, float);
     method public float getHeight();
     method public float getWidth();
+    method public static android.util.SizeF parseSizeF(java.lang.String) throws java.lang.NumberFormatException;
   }
 
   public class SparseArray implements java.lang.Cloneable {
