@@ -342,6 +342,7 @@ void Caches::clearGarbage() {
 
 void Caches::deleteLayerDeferred(Layer* layer) {
     Mutex::Autolock _l(mGarbageLock);
+    layer->state = Layer::kState_InGarbageList;
     mLayerGarbage.push(layer);
 }
 
