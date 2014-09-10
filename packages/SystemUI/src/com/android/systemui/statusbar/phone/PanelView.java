@@ -691,17 +691,19 @@ public abstract class PanelView extends FrameLayout {
             mClosing = true;
             notifyExpandingStarted();
             if (delayed) {
-                postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        fling(0, false /* expand */);
-                    }
-                }, 120);
+                postDelayed(mFlingCollapseRunnable, 120);
             } else {
                 fling(0, false /* expand */);
             }
         }
     }
+
+    private final Runnable mFlingCollapseRunnable = new Runnable() {
+        @Override
+        public void run() {
+            fling(0, false /* expand */);
+        }
+    };
 
     public void expand() {
         if (DEBUG) logf("expand: " + this);
@@ -728,7 +730,9 @@ public abstract class PanelView extends FrameLayout {
 
     public void instantExpand() {
         mInstantExpanding = true;
+        mUpdateFlingOnLayout = false;
         abortAnimations();
+        cancelPeek();
         if (mTracking) {
             onTrackingStopped(true /* expands */); // The panel is expanded after this call.
         }
@@ -761,6 +765,8 @@ public abstract class PanelView extends FrameLayout {
         if (mHeightAnimator != null) {
             mHeightAnimator.cancel();
         }
+        removeCallbacks(mPostCollapseRunnable);
+        removeCallbacks(mFlingCollapseRunnable);
     }
 
     protected void startUnlockHintAnimation() {
