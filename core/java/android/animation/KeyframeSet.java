@@ -154,6 +154,10 @@ class KeyframeSet implements Keyframes {
         return new PathKeyframes(path);
     }
 
+    public static PathKeyframes ofPath(Path path, float error) {
+        return new PathKeyframes(path, error);
+    }
+
     /**
      * Sets the TypeEvaluator to be used when calculating animated values. This object
      * is required only for KeyframeSets that are not either IntKeyframeSet or FloatKeyframeSet,
