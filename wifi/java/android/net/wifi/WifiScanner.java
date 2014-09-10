@@ -76,6 +76,8 @@ public class WifiScanner {
     public static final int REASON_INVALID_LISTENER = -2;
     /** Invalid request */
     public static final int REASON_INVALID_REQUEST = -3;
+    /** Invalid request */
+    public static final int REASON_NOT_AUTHORIZED = -4;
 
     /** @hide */
     public static final String GET_AVAILABLE_CHANNELS_EXTRA = "Channels";
