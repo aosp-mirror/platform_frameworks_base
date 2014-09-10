@@ -336,6 +336,9 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
             if (mOptionsStateChangeListener != null) {
                 mOptionsStateChangeListener.onOptionsOpened();
             }
+            mExpandCollapseHandle.setContentDescription(
+                    mContext.getString(R.string.collapse_handle));
+            announceForAccessibility(mContext.getString(R.string.print_options_expanded));
             mSummaryContent.setVisibility(View.GONE);
             mEmbeddedContentScrim.setOnClickListener(this);
             mExpandCollapseIcon.setBackgroundResource(R.drawable.ic_expand_less);
@@ -347,6 +350,9 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
             if (mOptionsStateChangeListener != null) {
                 mOptionsStateChangeListener.onOptionsClosed();
             }
+            mExpandCollapseHandle.setContentDescription(
+                    mContext.getString(R.string.expand_handle));
+            announceForAccessibility(mContext.getString(R.string.print_options_collapsed));
             if (mMoreOptionsButton.getVisibility() != View.GONE) {
                 mMoreOptionsButton.setVisibility(View.INVISIBLE);
             }

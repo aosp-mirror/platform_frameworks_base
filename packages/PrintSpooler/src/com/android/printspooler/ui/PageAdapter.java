@@ -41,6 +41,7 @@ import com.android.printspooler.model.PageContentRepository;
 import com.android.printspooler.model.PageContentRepository.PageContentProvider;
 import com.android.printspooler.util.PageRangeUtils;
 import com.android.printspooler.widget.PageContentView;
+import com.android.printspooler.widget.PreviewPageFrame;
 import dalvik.system.CloseGuard;
 
 import java.util.ArrayList;
@@ -94,12 +95,6 @@ public final class PageAdapter extends Adapter implements
     private int mDocumentPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
     private int mSelectedPageCount;
 
-    private float mSelectedPageElevation;
-    private float mSelectedPageAlpha;
-
-    private float mUnselectedPageElevation;
-    private float mUnselectedPageAlpha;
-
     private int mPreviewPageMargin;
     private int mPreviewPageMinWidth;
     private int mPreviewListPadding;
@@ -133,16 +128,6 @@ public final class PageAdapter extends Adapter implements
         mLayoutInflater = (LayoutInflater) context.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         mPageContentRepository = new PageContentRepository(context, this);
-
-        mSelectedPageElevation = mContext.getResources().getDimension(
-                R.dimen.selected_page_elevation);
-        mSelectedPageAlpha = mContext.getResources().getFraction(
-                R.fraction.page_selected_alpha, 1, 1);
-
-        mUnselectedPageElevation = mContext.getResources().getDimension(
-                R.dimen.unselected_page_elevation);
-        mUnselectedPageAlpha = mContext.getResources().getFraction(
-                R.fraction.page_unselected_alpha, 1, 1);
 
         mPreviewPageMargin = mContext.getResources().getDimensionPixelSize(
                 R.dimen.preview_page_margin);
@@ -296,7 +281,7 @@ public final class PageAdapter extends Adapter implements
 
         MyViewHolder myHolder = (MyViewHolder) holder;
 
-        View page = holder.itemView;
+        PreviewPageFrame page = (PreviewPageFrame) holder.itemView;
         page.setOnClickListener(mPageClickListener);
 
         page.setTag(holder);
@@ -340,19 +325,14 @@ public final class PageAdapter extends Adapter implements
         }
         content.init(provider, mEmptyState, mMediaSize, mMinMargins);
 
-        View pageSelector = page.findViewById(R.id.page_selector);
-        pageSelector.setTag(myHolder);
-        pageSelector.setOnClickListener(mPageClickListener);
-
         if (mConfirmedPagesInDocument.indexOfKey(pageInDocument) >= 0) {
-            pageSelector.setSelected(true);
-            page.setTranslationZ(mSelectedPageElevation);
-            page.setAlpha(mSelectedPageAlpha);
+            page.setSelected(true, false);
         } else {
-            pageSelector.setSelected(false);
-            page.setTranslationZ(mUnselectedPageElevation);
-            page.setAlpha(mUnselectedPageAlpha);
+            page.setSelected(false, false);
         }
+
+        page.setContentDescription(mContext.getString(R.string.page_description_template,
+                pageInDocument + 1, mDocumentPageCount));
 
         TextView pageNumberView = (TextView) page.findViewById(R.id.page_number);
         String text = mContext.getString(R.string.current_page_template,
@@ -792,24 +772,20 @@ public final class PageAdapter extends Adapter implements
 
     private final class PageClickListener implements OnClickListener {
         @Override
-        public void onClick(View page) {
+        public void onClick(View view) {
+            PreviewPageFrame page = (PreviewPageFrame) view;
             MyViewHolder holder = (MyViewHolder) page.getTag();
             final int pageInAdapter = holder.mPageInAdapter;
             final int pageInDocument = computePageIndexInDocument(pageInAdapter);
-            View pageSelector = page.findViewById(R.id.page_selector);
             if (mConfirmedPagesInDocument.indexOfKey(pageInDocument) < 0) {
                 mConfirmedPagesInDocument.put(pageInDocument, null);
-                pageSelector.setSelected(true);
-                page.animate().translationZ(mSelectedPageElevation)
-                        .alpha(mSelectedPageAlpha);
+                page.setSelected(true, true);
             } else {
                 if (mConfirmedPagesInDocument.size() <= 1) {
                     return;
                 }
                 mConfirmedPagesInDocument.remove(pageInDocument);
-                pageSelector.setSelected(false);
-                page.animate().translationZ(mUnselectedPageElevation)
-                        .alpha(mUnselectedPageAlpha);
+                page.setSelected(false, true);
             }
         }
     }
