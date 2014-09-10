@@ -579,8 +579,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             try {
                 apk = PackageParser.parseApkLite(file, PackageParser.PARSE_COLLECT_CERTIFICATES);
             } catch (PackageParserException e) {
-                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                        "Failed to parse " + file + ": " + e);
+                throw PackageManagerException.from(e);
             }
 
             if (!stagedSplits.add(apk.splitName)) {
@@ -646,8 +645,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 existingBase = PackageParser.parseApkLite(new File(app.getBaseCodePath()),
                         PackageParser.PARSE_COLLECT_CERTIFICATES);
             } catch (PackageParserException e) {
-                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                        "Failed to parse existing package " + app.getCodePath() + ": " + e);
+                throw PackageManagerException.from(e);
             }
 
             assertApkConsistent("Existing base", existingBase);
@@ -699,8 +697,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         try {
             baseApk = PackageParser.parseApkLite(mResolvedBaseFile, 0);
         } catch (PackageParserException e) {
-            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                    "Failed to parse base package " + mResolvedBaseFile + ": " + e);
+            throw PackageManagerException.from(e);
         }
 
         final List<String> splitPaths = new ArrayList<>();
