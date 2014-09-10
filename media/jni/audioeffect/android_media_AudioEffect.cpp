@@ -705,11 +705,12 @@ command_Exit:
 }
 
 static jobjectArray
-android_media_AudioEffect_native_queryEffects(JNIEnv *env, jclass clazz)
+android_media_AudioEffect_native_queryEffects(JNIEnv *env, jclass clazz __unused)
 {
     effect_descriptor_t desc;
     char str[EFFECT_STRING_LEN_MAX];
-    uint32_t numEffects = 0;
+    uint32_t totalEffectsCount = 0;
+    uint32_t returnedEffectsCount = 0;
     uint32_t i = 0;
     jstring jdescType;
     jstring jdescUuid;
@@ -717,19 +718,20 @@ android_media_AudioEffect_native_queryEffects(JNIEnv *env, jclass clazz)
     jstring jdescName;
     jstring jdescImplementor;
     jobject jdesc;
+    jobjectArray ret;
 
-    if (AudioEffect::queryNumberEffects(&numEffects) != NO_ERROR) {
+    if (AudioEffect::queryNumberEffects(&totalEffectsCount) != NO_ERROR) {
         return NULL;
     }
 
-    jobjectArray ret = env->NewObjectArray(numEffects, fields.clazzDesc, NULL);
-    if (ret == NULL) {
-        return ret;
+    jobjectArray temp = env->NewObjectArray(totalEffectsCount, fields.clazzDesc, NULL);
+    if (temp == NULL) {
+        return temp;
     }
 
-    ALOGV("queryEffects() numEffects: %d", numEffects);
+    ALOGV("queryEffects() totalEffectsCount: %d", totalEffectsCount);
 
-    for (i = 0; i < numEffects; i++) {
+    for (i = 0; i < totalEffectsCount; i++) {
         if (AudioEffect::queryEffect(i, &desc) != NO_ERROR) {
             goto queryEffects_failure;
         }
@@ -770,15 +772,26 @@ android_media_AudioEffect_native_queryEffects(JNIEnv *env, jclass clazz)
             goto queryEffects_failure;
         }
 
-        env->SetObjectArrayElement(ret, i, jdesc);
+        env->SetObjectArrayElement(temp, returnedEffectsCount++, jdesc);
    }
 
+    if (returnedEffectsCount == 0) {
+        goto queryEffects_failure;
+    }
+    ret = env->NewObjectArray(returnedEffectsCount, fields.clazzDesc, NULL);
+    if (ret == NULL) {
+        goto queryEffects_failure;
+    }
+    for (i = 0; i < returnedEffectsCount; i++) {
+        env->SetObjectArrayElement(ret, i, env->GetObjectArrayElement(temp, i));
+    }
+    env->DeleteLocalRef(temp);
     return ret;
 
 queryEffects_failure:
 
-    if (ret != NULL) {
-        env->DeleteLocalRef(ret);
+    if (temp != NULL) {
+        env->DeleteLocalRef(temp);
     }
     return NULL;
 
@@ -787,7 +800,8 @@ queryEffects_failure:
 
 
 static jobjectArray
-android_media_AudioEffect_native_queryPreProcessings(JNIEnv *env, jclass clazz, jint audioSession)
+android_media_AudioEffect_native_queryPreProcessings(JNIEnv *env, jclass clazz __unused,
+                                                     jint audioSession)
 {
     // kDefaultNumEffects is a "reasonable" value ensuring that only one query will be enough on
     // most devices to get all active audio pre processing on a given session.
@@ -895,7 +909,7 @@ int register_android_media_AudioEffect(JNIEnv *env)
     return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
-jint JNI_OnLoad(JavaVM* vm, void* reserved)
+jint JNI_OnLoad(JavaVM* vm, void* reserved __unused)
 {
 
     JNIEnv* env = NULL;
