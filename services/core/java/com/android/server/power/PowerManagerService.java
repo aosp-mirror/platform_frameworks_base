@@ -91,8 +91,6 @@ public final class PowerManagerService extends com.android.server.SystemService
     private static final int MSG_SANDMAN = 2;
     // Message: Sent when the screen on blocker is released.
     private static final int MSG_SCREEN_ON_BLOCKER_RELEASED = 3;
-    // Message: Sent to poll whether the boot animation has terminated.
-    private static final int MSG_CHECK_IF_BOOT_ANIMATION_FINISHED = 4;
 
     // Dirty bit: mWakeLocks changed
     private static final int DIRTY_WAKE_LOCKS = 1 << 0;
@@ -153,12 +151,6 @@ public final class PowerManagerService extends com.android.server.SystemService
     // Default timeout in milliseconds.  This is only used until the settings
     // provider populates the actual default value (R.integer.def_screen_off_timeout).
     private static final int DEFAULT_SCREEN_OFF_TIMEOUT = 15 * 1000;
-
-    // The name of the boot animation service in init.rc.
-    private static final String BOOT_ANIMATION_SERVICE = "bootanim";
-
-    // Poll interval in milliseconds for watching boot animation finished.
-    private static final int BOOT_ANIMATION_POLL_INTERVAL = 200;
 
     // Power hints defined in hardware/libhardware/include/hardware/power.h.
     private static final int POWER_HINT_INTERACTION = 2;
@@ -478,14 +470,15 @@ public final class PowerManagerService extends com.android.server.SystemService
 
     @Override
     public void onBootPhase(int phase) {
-        if (phase == PHASE_BOOT_COMPLETED) {
-            // This is our early signal that the system thinks it has finished booting.
-            // However, the boot animation may still be running for a few more seconds
-            // since it is ultimately in charge of when it terminates.
-            // Defer transitioning into the boot completed state until the animation exits.
-            // We do this so that the screen does not start to dim prematurely before
-            // the user has actually had a chance to interact with the device.
-            startWatchingForBootAnimationFinished();
+        synchronized (mLock) {
+            if (phase == PHASE_BOOT_COMPLETED) {
+                final long now = SystemClock.uptimeMillis();
+                mBootCompleted = true;
+                mDirty |= DIRTY_BOOT_COMPLETED;
+                userActivityNoUpdateLocked(
+                        now, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
+                updatePowerStateLocked();
+            }
         }
     }
 
@@ -2076,38 +2069,6 @@ public final class PowerManagerService extends com.android.server.SystemService
         updatePowerStateLocked();
     }
 
-    private void startWatchingForBootAnimationFinished() {
-        mHandler.sendEmptyMessage(MSG_CHECK_IF_BOOT_ANIMATION_FINISHED);
-    }
-
-    private void checkIfBootAnimationFinished() {
-        if (DEBUG) {
-            Slog.d(TAG, "Check if boot animation finished...");
-        }
-
-        if (SystemService.isRunning(BOOT_ANIMATION_SERVICE)) {
-            mHandler.sendEmptyMessageDelayed(MSG_CHECK_IF_BOOT_ANIMATION_FINISHED,
-                    BOOT_ANIMATION_POLL_INTERVAL);
-            return;
-        }
-
-        synchronized (mLock) {
-            if (!mBootCompleted) {
-                Slog.i(TAG, "Boot animation finished.");
-                handleBootCompletedLocked();
-            }
-        }
-    }
-
-    private void handleBootCompletedLocked() {
-        final long now = SystemClock.uptimeMillis();
-        mBootCompleted = true;
-        mDirty |= DIRTY_BOOT_COMPLETED;
-        userActivityNoUpdateLocked(
-                now, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
-        updatePowerStateLocked();
-    }
-
     private void shutdownOrRebootInternal(final boolean shutdown, final boolean confirm,
             final String reason, boolean wait) {
         if (mHandler == null || !mSystemReady) {
@@ -2527,9 +2488,6 @@ public final class PowerManagerService extends com.android.server.SystemService
                     break;
                 case MSG_SCREEN_ON_BLOCKER_RELEASED:
                     handleScreenOnBlockerReleased();
-                    break;
-                case MSG_CHECK_IF_BOOT_ANIMATION_FINISHED:
-                    checkIfBootAnimationFinished();
                     break;
             }
         }
