@@ -532,6 +532,12 @@ public class QSPanel extends ViewGroup {
     };
 
     private final AnimatorListenerAdapter mHideGridContentWhenDone = new AnimatorListenerAdapter() {
+        public void onAnimationCancel(Animator animation) {
+            // If we have been cancelled, remove the listener so that onAnimationEnd doesn't get
+            // called, this will avoid accidentally turning off the grid when we don't want to.
+            animation.removeListener(this);
+        };
+
         @Override
         public void onAnimationEnd(Animator animation) {
             setGridContentVisibility(false);
