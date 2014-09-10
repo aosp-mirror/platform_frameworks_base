@@ -139,7 +139,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
                 // Notify recents to hide itself
                 Intent intent = new Intent(ACTION_HIDE_RECENTS_ACTIVITY);
                 intent.setPackage(mContext.getPackageName());
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
+                        Intent.FLAG_RECEIVER_FOREGROUND);
                 intent.putExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, triggeredFromAltTab);
                 intent.putExtra(EXTRA_TRIGGERED_FROM_HOME_KEY, triggeredFromHomeKey);
                 mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
@@ -324,7 +325,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             // Notify recents to toggle itself
             Intent intent = new Intent(ACTION_TOGGLE_RECENTS_ACTIVITY);
             intent.setPackage(mContext.getPackageName());
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
+                    Intent.FLAG_RECEIVER_FOREGROUND);
             mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
             mLastToggleTime = System.currentTimeMillis();
             return;
@@ -598,7 +600,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             // Send the broadcast to notify Recents that the animation has started
             Intent intent = new Intent(ACTION_START_ENTER_ANIMATION);
             intent.setPackage(mContext.getPackageName());
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
+                    Intent.FLAG_RECEIVER_FOREGROUND);
             mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT, null,
                     fallbackReceiver, null, Activity.RESULT_CANCELED, null, null);
         }
