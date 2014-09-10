@@ -474,6 +474,13 @@ please see styles_device_defaults.xml.
         <item name="stateListAnimator">@anim/disabled_anim_material</item>
     </style>
 
+    <!-- Alert dialog button bar button -->
+    <style name="Widget.Material.Button.ButtonBar.AlertDialog" parent="Widget.Material.Button.Borderless.Colored">
+        <item name="minWidth">64dp</item>
+        <item name="maxLines">2</item>
+        <item name="minHeight">@dimen/alert_dialog_button_bar_height</item>
+    </style>
+
     <!-- Small borderless ink button -->
     <style name="Widget.Material.Button.Borderless.Small">
         <item name="minHeight">48dip</item>
@@ -496,7 +503,6 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.ButtonBar.AlertDialog">
         <item name="background">@null</item>
-        <item name="minHeight">@dimen/alert_dialog_button_bar_height</item>
     </style>
 
     <style name="Widget.Material.SearchView">
@@ -936,6 +942,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.Button.Small" parent="Widget.Material.Button.Small"/>
     <style name="Widget.Material.Light.Button.Borderless" parent="Widget.Material.Button.Borderless"/>
     <style name="Widget.Material.Light.Button.Borderless.Colored" parent="Widget.Material.Button.Borderless.Colored"/>
+    <style name="Widget.Material.Light.Button.ButtonBar.AlertDialog" parent="Widget.Material.Button.ButtonBar.AlertDialog" />
     <style name="Widget.Material.Light.Button.Borderless.Small" parent="Widget.Material.Button.Borderless.Small"/>
     <style name="Widget.Material.Light.Button.Inset" parent="Widget.Material.Button.Inset"/>
     <style name="Widget.Material.Light.Button.Toggle" parent="Widget.Material.Button.Toggle" />
