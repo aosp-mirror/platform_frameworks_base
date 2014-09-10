@@ -582,6 +582,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * <p>List of areas to use for
      * metering.</p>
+     * <p>Optional. Not available if {@link CameraCharacteristics#CONTROL_MAX_REGIONS_AE android.control.maxRegionsAe} is 0.
+     * Otherwise will always be present.</p>
      * <p>The coordinate system is based on the active pixel array,
      * with (0,0) being the top-left pixel in the active pixel array, and
      * ({@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.width - 1,
@@ -597,7 +599,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * outside the used {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} returned in capture result metadata,
      * the camera device will ignore the sections outside the region and output the
      * used sections in the result metadata.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
+     * @see CameraCharacteristics#CONTROL_MAX_REGIONS_AE
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
@@ -870,6 +874,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * <p>List of areas to use for focus
      * estimation.</p>
+     * <p>Optional. Not available if {@link CameraCharacteristics#CONTROL_MAX_REGIONS_AF android.control.maxRegionsAf} is 0.
+     * Otherwise will always be present.</p>
      * <p>The coordinate system is based on the active pixel array,
      * with (0,0) being the top-left pixel in the active pixel array, and
      * ({@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.width - 1,
@@ -885,7 +891,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * outside the used {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} returned in capture result metadata,
      * the camera device will ignore the sections outside the region and output the
      * used sections in the result metadata.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
+     * @see CameraCharacteristics#CONTROL_MAX_REGIONS_AF
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
@@ -1369,6 +1377,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * <p>List of areas to use for illuminant
      * estimation.</p>
+     * <p>Optional. Not available if {@link CameraCharacteristics#CONTROL_MAX_REGIONS_AWB android.control.maxRegionsAwb} is 0.
+     * Otherwise will always be present.</p>
      * <p>The coordinate system is based on the active pixel array,
      * with (0,0) being the top-left pixel in the active pixel array, and
      * ({@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.width - 1,
@@ -1384,7 +1394,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * outside the used {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} returned in capture result metadata,
      * the camera device will ignore the sections outside the region and output the
      * used sections in the result metadata.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
+     * @see CameraCharacteristics#CONTROL_MAX_REGIONS_AWB
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */

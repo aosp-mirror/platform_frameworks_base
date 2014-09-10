@@ -322,7 +322,7 @@ public class LegacyResultMapper {
         }
 
         // control.aeRegions
-        {
+        if (p.getMaxNumMeteringAreas() > 0) {
             if (VERBOSE) {
                 String meteringAreas = p.get("metering-areas");
                 Log.v(TAG, "mapAe - parameter dump; metering-areas: " + meteringAreas);
@@ -342,7 +342,7 @@ public class LegacyResultMapper {
         m.set(CaptureResult.CONTROL_AF_MODE, convertLegacyAfMode(p.getFocusMode()));
 
         // control.afRegions
-        {
+        if (p.getMaxNumFocusAreas() > 0) {
             if (VERBOSE) {
                 String focusAreas = p.get("focus-areas");
                 Log.v(TAG, "mapAe - parameter dump; focus-areas: " + focusAreas);
