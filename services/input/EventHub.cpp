@@ -1381,7 +1381,7 @@ void EventHub::releaseControllerNumberLocked(Device* device) {
 
 
 bool EventHub::hasKeycodeLocked(Device* device, int keycode) const {
-    if (!device->keyMap.haveKeyLayout() || !device->keyBitmask) {
+    if (!device->keyMap.haveKeyLayout()) {
         return false;
     }
     
