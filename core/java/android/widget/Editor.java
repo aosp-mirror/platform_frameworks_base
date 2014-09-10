@@ -1860,9 +1860,8 @@ public class Editor {
         }
 
         final int originalLength = mTextView.getText().length();
-        long minMax = mTextView.prepareSpacesAroundPaste(offset, offset, content);
-        int min = TextUtils.unpackRangeStartFromLong(minMax);
-        int max = TextUtils.unpackRangeEndFromLong(minMax);
+        int min = offset;
+        int max = offset;
 
         Selection.setSelection((Spannable) mTextView.getText(), max);
         mTextView.replaceText_internal(min, max, content);

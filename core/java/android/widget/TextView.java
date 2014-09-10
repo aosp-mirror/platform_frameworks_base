@@ -8727,57 +8727,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Prepare text so that there are not zero or two spaces at beginning and end of region defined
-     * by [min, max] when replacing this region by paste.
-     * Note that if there were two spaces (or more) at that position before, they are kept. We just
-     * make sure we do not add an extra one from the paste content.
-     */
-    long prepareSpacesAroundPaste(int min, int max, CharSequence paste) {
-        if (paste.length() > 0) {
-            if (min > 0) {
-                final char charBefore = mTransformed.charAt(min - 1);
-                final char charAfter = paste.charAt(0);
-
-                if (Character.isSpaceChar(charBefore) && Character.isSpaceChar(charAfter)) {
-                    // Two spaces at beginning of paste: remove one
-                    final int originalLength = mText.length();
-                    deleteText_internal(min - 1, min);
-                    // Due to filters, there is no guarantee that exactly one character was
-                    // removed: count instead.
-                    final int delta = mText.length() - originalLength;
-                    min += delta;
-                    max += delta;
-                } else if (!Character.isSpaceChar(charBefore) && charBefore != '\n' &&
-                        !Character.isSpaceChar(charAfter) && charAfter != '\n') {
-                    // No space at beginning of paste: add one
-                    final int originalLength = mText.length();
-                    replaceText_internal(min, min, " ");
-                    // Taking possible filters into account as above.
-                    final int delta = mText.length() - originalLength;
-                    min += delta;
-                    max += delta;
-                }
-            }
-
-            if (max < mText.length()) {
-                final char charBefore = paste.charAt(paste.length() - 1);
-                final char charAfter = mTransformed.charAt(max);
-
-                if (Character.isSpaceChar(charBefore) && Character.isSpaceChar(charAfter)) {
-                    // Two spaces at end of paste: remove one
-                    deleteText_internal(max, max + 1);
-                } else if (!Character.isSpaceChar(charBefore) && charBefore != '\n' &&
-                        !Character.isSpaceChar(charAfter) && charAfter != '\n') {
-                    // No space at end of paste: add one
-                    replaceText_internal(max, max, " ");
-                }
-            }
-        }
-
-        return TextUtils.packRangeInLong(min, max);
-    }
-
-    /**
      * Paste clipboard content between min and max positions.
      */
     private void paste(int min, int max) {
@@ -8790,9 +8739,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 CharSequence paste = clip.getItemAt(i).coerceToStyledText(getContext());
                 if (paste != null) {
                     if (!didFirst) {
-                        long minMax = prepareSpacesAroundPaste(min, max, paste);
-                        min = TextUtils.unpackRangeStartFromLong(minMax);
-                        max = TextUtils.unpackRangeEndFromLong(minMax);
                         Selection.setSelection((Spannable) mText, max);
                         ((Editable) mText).replace(min, max, paste);
                         didFirst = true;
