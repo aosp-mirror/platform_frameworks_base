@@ -36,7 +36,6 @@
 
     <FrameLayout
        android:id="@+id/keyguard_bouncer_frame"
-       android:background="@drawable/kg_bouncer_bg_white"
        android:layout_width="match_parent"
        android:layout_height="0dp"
        android:layout_weight="1"
