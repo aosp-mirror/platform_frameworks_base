@@ -312,7 +312,9 @@ public class TvView extends ViewGroup {
             // is newly assigned for every createSession request and compared with
             // MySessionCreateCallback.this.
             mSessionCallback = new MySessionCallback(inputId, channelUri, params);
-            mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
+            if (mTvInputManager != null) {
+                mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
+            }
         }
     }
 
