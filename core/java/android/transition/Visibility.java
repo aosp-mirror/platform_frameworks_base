@@ -277,6 +277,18 @@ public abstract class Visibility extends Transition {
         if ((mMode & MODE_IN) != MODE_IN || endValues == null) {
             return null;
         }
+        if (startValues == null) {
+            VisibilityInfo parentVisibilityInfo = null;
+            View endParent = (View) endValues.view.getParent();
+            TransitionValues startParentValues = getMatchedTransitionValues(endParent,
+                                                                            false);
+            TransitionValues endParentValues = getTransitionValues(endParent, false);
+            parentVisibilityInfo =
+                getVisibilityChangeInfo(startParentValues, endParentValues);
+            if (parentVisibilityInfo.visibilityChange) {
+                return null;
+            }
+        }
         return onAppear(sceneRoot, endValues.view, startValues, endValues);
     }
 
