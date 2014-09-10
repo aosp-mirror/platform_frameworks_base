@@ -875,6 +875,11 @@ public class ViewDebug {
                 data[i + 1] = theme.resolveAttribute(attributeId, outValue, true) ?
                         outValue.coerceToString().toString() :  nullString;
                 i += 2;
+
+                // attempt to replace reference data with its name
+                if (outValue.type == TypedValue.TYPE_REFERENCE) {
+                    data[i - 1] = resources.getResourceName(outValue.resourceId);
+                }
             } catch (Resources.NotFoundException e) {
                 // ignore resources we can't resolve
             }
