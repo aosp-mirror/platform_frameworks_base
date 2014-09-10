@@ -283,8 +283,13 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
         mDynamicContent.layout(left, dynContentTop, right, dynContentBottom);
 
         MarginLayoutParams params = (MarginLayoutParams) mPrintButton.getLayoutParams();
-        final int rightMargin = params.rightMargin;
-        final int printButtonLeft = right - mPrintButton.getMeasuredWidth() - rightMargin;
+
+        final int printButtonLeft;
+        if (getLayoutDirection() == View.LAYOUT_DIRECTION_LTR) {
+            printButtonLeft = right - mPrintButton.getMeasuredWidth() - params.getMarginStart();
+        } else {
+            printButtonLeft = left + params.getMarginStart();
+        }
         final int printButtonTop = dynContentBottom - mPrintButton.getMeasuredHeight() / 2;
         final int printButtonRight = printButtonLeft + mPrintButton.getMeasuredWidth();
         final int printButtonBottom = printButtonTop + mPrintButton.getMeasuredHeight();
