@@ -243,6 +243,14 @@ public class NotificationContentView extends FrameLayout {
         }
     }
 
+    @Override
+    public boolean hasOverlappingRendering() {
+
+        // This is not really true, but good enough when fading from the contracted to the expanded
+        // layout, and saves us some layers.
+        return false;
+    }
+
     private static Paint createInvertPaint() {
         final Paint p = new Paint();
         final float[] invert = {
