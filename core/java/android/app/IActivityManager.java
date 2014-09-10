@@ -327,6 +327,8 @@ public interface IActivityManager extends IInterface {
     public void notifyActivityDrawn(IBinder token) throws RemoteException;
     public ActivityOptions getActivityOptions(IBinder token) throws RemoteException;
 
+    public void bootAnimationComplete() throws RemoteException;
+
     public void setImmersive(IBinder token, boolean immersive) throws RemoteException;
     public boolean isImmersive(IBinder token) throws RemoteException;
     public boolean isTopActivityImmersive() throws RemoteException;
@@ -772,4 +774,5 @@ public interface IActivityManager extends IInterface {
     int GET_APP_TASK_THUMBNAIL_SIZE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+234;
     int RELEASE_ACTIVITY_INSTANCE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+235;
     int RELEASE_SOME_ACTIVITIES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+236;
+    int BOOT_ANIMATION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+237;
 }
