@@ -8423,6 +8423,33 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public boolean performAccessibilityAction(int action, Bundle arguments) {
         switch (action) {
+            case AccessibilityNodeInfo.ACTION_CLICK: {
+                boolean handled = false;
+
+                // Simulate View.onTouchEvent for an ACTION_UP event.
+                if (isClickable() || isLongClickable()) {
+                    if (isFocusable() && !isFocused()) {
+                        requestFocus();
+                    }
+
+                    performClick();
+                    handled = true;
+                }
+
+                // Simulate TextView.onTouchEvent for an ACTION_UP event.
+                if ((mMovement != null || onCheckIsTextEditor()) && isEnabled()
+                        && mText instanceof Spannable && mLayout != null
+                        && (isTextEditable() || isTextSelectable()) && isFocused()) {
+                    // Show the IME, except when selecting in read-only text.
+                    final InputMethodManager imm = InputMethodManager.peekInstance();
+                    viewClicked(imm);
+                    if (!isTextSelectable() && mEditor.mShowSoftInputOnFocus && imm != null) {
+                        handled |= imm.showSoftInput(this, 0);
+                    }
+                }
+
+                return handled;
+            }
             case AccessibilityNodeInfo.ACTION_COPY: {
                 if (isFocused() && canCopy()) {
                     if (onTextContextMenuItem(ID_COPY)) {
