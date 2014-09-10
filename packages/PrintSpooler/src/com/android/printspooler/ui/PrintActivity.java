@@ -219,8 +219,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setState(STATE_CONFIGURING);
-
         Bundle extras = getIntent().getExtras();
 
         mPrintJob = extras.getParcelable(PrintManager.EXTRA_PRINT_JOB);
@@ -311,13 +309,17 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     @Override
     public void onPause() {
+        PrintSpoolerService spooler = mSpoolerProvider.getSpooler();
+
         if (mState == STATE_INITIALIZING) {
+            if (isFinishing()) {
+                spooler.setPrintJobState(mPrintJob.getId(), PrintJobInfo.STATE_CANCELED, null);
+            }
             super.onPause();
             return;
         }
 
         if (isFinishing()) {
-            PrintSpoolerService spooler = mSpoolerProvider.getSpooler();
             spooler.updatePrintJobUserConfigurableOptionsNoPersistence(mPrintJob);
 
             switch (mState) {
@@ -343,6 +345,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mPrinterRegistry.setTrackedPrinter(null);
             mPrintPreviewController.destroy();
             mSpoolerProvider.destroy();
+
+            if (mPrintedDocument.isUpdating()) {
+                mPrintedDocument.cancel();
+            }
             mPrintedDocument.finish();
             mPrintedDocument.destroy();
         }
@@ -364,7 +370,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (mState == STATE_INITIALIZING) {
-            return super.onKeyUp(keyCode, event);
+            finish();
+            return true;
         }
 
         if (keyCode == KeyEvent.KEYCODE_BACK
