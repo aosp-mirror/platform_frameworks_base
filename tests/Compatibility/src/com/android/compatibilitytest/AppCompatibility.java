@@ -208,6 +208,12 @@ public class AppCompatibility extends InstrumentationTestCase {
                 Log.d(TAG, "Found process " + app.processName);
                 return true;
             }
+            for (String relatedPackage : app.pkgList) {
+                if (relatedPackage.equalsIgnoreCase(processName)) {
+                    Log.d(TAG, "Found process " + app.processName);
+                    return true;
+                }
+            }
         }
         Log.d(TAG, "Failed to find process " + processName + " with package name "
                 + packageName);
