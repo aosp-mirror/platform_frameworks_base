@@ -59,6 +59,17 @@ public:
         kType_DisplayList,
     };
 
+    // layer lifecycle, controlled from outside
+    enum State {
+        kState_Uncached = 0,
+        kState_InCache = 1,
+        kState_FailedToCache = 2,
+        kState_RemovedFromCache = 3,
+        kState_DeletedFromCache = 4,
+        kState_InGarbageList = 5,
+    };
+    State state; // public for logging/debugging purposes
+
     Layer(Type type, RenderState& renderState, const uint32_t layerWidth, const uint32_t layerHeight);
     ~Layer();
 

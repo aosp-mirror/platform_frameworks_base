@@ -39,13 +39,16 @@ void RenderState::onGLContextCreated() {
 
 void RenderState::onGLContextDestroyed() {
     AutoMutex _lock(mLayerLock);
-    if (CC_UNLIKELY(!mActiveLayers.empty())) {
+    size_t size = mActiveLayers.size();
+    if (CC_UNLIKELY(size != 0)) {
+        ALOGE("Crashing, have %d contexts and %d layers at context destruction. isempty %d",
+                mRegisteredContexts.size(), size, mActiveLayers.empty());
         mCaches->dumpMemoryUsage();
         for (std::set<renderthread::CanvasContext*>::iterator cit = mRegisteredContexts.begin();
                 cit != mRegisteredContexts.end(); cit++) {
             renderthread::CanvasContext* context = *cit;
-            ALOGD("Context: %p (root = %p)", context, context->mRootRenderNode.get());
-            ALOGD("  Prefeteched layers: %zu", context->mPrefetechedLayers.size());
+            ALOGE("Context: %p (root = %p)", context, context->mRootRenderNode.get());
+            ALOGE("  Prefeteched layers: %zu", context->mPrefetechedLayers.size());
             for (std::set<RenderNode*>::iterator pit = context->mPrefetechedLayers.begin();
                     pit != context->mPrefetechedLayers.end(); pit++) {
                 (*pit)->debugDumpLayers("    ");
@@ -53,13 +56,17 @@ void RenderState::onGLContextDestroyed() {
             context->mRootRenderNode->debugDumpLayers("  ");
         }
 
+
+        if (mActiveLayers.begin() == mActiveLayers.end()) {
+            ALOGE("set has become empty. wat.");
+        }
         for (std::set<const Layer*>::iterator lit = mActiveLayers.begin();
              lit != mActiveLayers.end(); lit++) {
             const Layer* layer = *(lit);
-            ALOGD("Layer %p, fbo %d, buildlayered %d",
-                    layer, layer->getFbo(), layer->wasBuildLayered);
+            ALOGE("Layer %p, state %d, texlayer %d, fbo %d, buildlayered %d",
+                    layer, layer->state, layer->isTextureLayer(), layer->getFbo(), layer->wasBuildLayered);
         }
-        LOG_ALWAYS_FATAL("layers have survived gl context destruction");
+        LOG_ALWAYS_FATAL("%d layers have survived gl context destruction", size);
     }
 }
 
