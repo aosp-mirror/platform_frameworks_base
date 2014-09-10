@@ -17,14 +17,10 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
-import android.os.SystemClock;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardViewBase;
@@ -33,7 +29,7 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
-import static com.android.keyguard.KeyguardSecurityModel.*;
+import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 
 /**
  * A class which manages the bouncer on the lockscreen.
@@ -62,6 +58,10 @@ public class KeyguardBouncer {
     public void show() {
         ensureView();
         if (mRoot.getVisibility() == View.VISIBLE) {
+
+            // show() updates the current security method. This is needed in case we are already
+            // showing and the current security method changed.
+            mKeyguardView.show();
             return;
         }
 
