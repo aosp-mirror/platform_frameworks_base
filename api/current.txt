@@ -36522,21 +36522,16 @@ package android.webkit {
 
   public static abstract class WebChromeClient.FileChooserParams {
     ctor public WebChromeClient.FileChooserParams();
+    method public abstract android.content.Intent createIntent();
     method public abstract java.lang.String[] getAcceptTypes();
     method public abstract java.lang.String getFilenameHint();
     method public abstract int getMode();
     method public abstract java.lang.CharSequence getTitle();
-    method public abstract android.webkit.WebChromeClient.UploadHelper getUploadHelper();
     method public abstract boolean isCaptureEnabled();
+    method public static android.net.Uri[] parseResult(int, android.content.Intent);
     field public static final int MODE_OPEN = 0; // 0x0
     field public static final int MODE_OPEN_MULTIPLE = 1; // 0x1
     field public static final int MODE_SAVE = 3; // 0x3
-  }
-
-  public static abstract class WebChromeClient.UploadHelper {
-    ctor public WebChromeClient.UploadHelper();
-    method public abstract android.content.Intent buildIntent();
-    method public abstract android.net.Uri[] parseResult(int, android.content.Intent);
   }
 
   public class WebHistoryItem implements java.lang.Cloneable {
