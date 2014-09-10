@@ -2650,6 +2650,8 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.line3, View.GONE);
             contentView.setViewVisibility(R.id.overflow_divider, View.GONE);
             contentView.setViewVisibility(R.id.progress, View.GONE);
+            contentView.setViewVisibility(R.id.chronometer, View.GONE);
+            contentView.setViewVisibility(R.id.time, View.GONE);
         }
 
         private RemoteViews applyStandardTemplate(int resId) {
@@ -2745,8 +2747,6 @@ public class Notification implements Parcelable
                     contentView.setViewVisibility(R.id.time, View.VISIBLE);
                     contentView.setLong(R.id.time, "setTime", mWhen);
                 }
-            } else {
-                contentView.setViewVisibility(R.id.time, View.GONE);
             }
 
             // Adjust padding depending on line count and font size.
