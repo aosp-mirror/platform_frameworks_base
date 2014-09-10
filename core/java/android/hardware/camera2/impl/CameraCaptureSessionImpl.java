@@ -143,7 +143,6 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         }
 
         checkNotClosed();
-        checkLegalToCapture();
 
         handler = checkHandler(handler, callback);
 
@@ -166,7 +165,6 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         }
 
         checkNotClosed();
-        checkLegalToCapture();
 
         handler = checkHandler(handler, callback);
 
@@ -188,7 +186,6 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         }
 
         checkNotClosed();
-        checkLegalToCapture();
 
         handler = checkHandler(handler, callback);
 
@@ -211,7 +208,6 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         }
 
         checkNotClosed();
-        checkLegalToCapture();
 
         handler = checkHandler(handler, callback);
 
@@ -539,13 +535,6 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
             close();
         } finally {
             super.finalize();
-        }
-    }
-
-    private void checkLegalToCapture() {
-        if (mAborting) {
-            throw new IllegalStateException(
-                    "Session is aborting captures; new captures are not permitted");
         }
     }
 
