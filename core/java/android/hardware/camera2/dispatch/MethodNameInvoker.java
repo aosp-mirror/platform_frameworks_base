@@ -48,7 +48,8 @@ public class MethodNameInvoker<T> {
     /**
      * Invoke a method by its name.
      *
-     * <p>If more than one method exists in {@code targetClass}, the first method will be used.</p>
+     * <p>If more than one method exists in {@code targetClass}, the first method with the right
+     * number of arguments will be used, and later calls will all use that method.</p>
      *
      * @param methodName
      *          The name of the method, which will be matched 1:1 to the destination method
@@ -68,8 +69,9 @@ public class MethodNameInvoker<T> {
         Method targetMethod = mMethods.get(methodName);
         if (targetMethod == null) {
             for (Method method : mTargetClass.getMethods()) {
-                // TODO future: match by # of params and types of params if possible
-                if (method.getName().equals(methodName)) {
+                // TODO future: match types of params if possible
+                if (method.getName().equals(methodName) &&
+                        (params.length == method.getParameterTypes().length) ) {
                     targetMethod = method;
                     mMethods.put(methodName, targetMethod);
                     break;
