@@ -35,8 +35,9 @@ import junit.framework.TestSuite;
  */
 
 public class ConnectivityManagerTestRunner extends InstrumentationTestRunner {
-    public boolean mWifiOnlyFlag = false;
-    public String mTestSsid = null;
+    public boolean mWifiOnly = false;
+    public String mSsid = null;
+    public String mPassword = null;
 
     @Override
     public TestSuite getAllTests() {
@@ -54,13 +55,29 @@ public class ConnectivityManagerTestRunner extends InstrumentationTestRunner {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        String testSSID = (String) icicle.get("ssid");
-        if (testSSID != null) {
-            mTestSsid = testSSID;
+        String ssid = icicle.getString("ssid");
+        if (ssid != null) {
+            mSsid = ssid;
+        }
+        String password = (String) icicle.get("password");
+        if (password != null) {
+            mPassword = password;
         }
         String wifiOnlyFlag = (String) icicle.get("wifi-only");
         if (wifiOnlyFlag != null) {
-            mWifiOnlyFlag = true;
+            mWifiOnly = true;
         }
+    }
+
+    public String getWifiSsid() {
+        return mSsid;
+    }
+
+    public String getWifiPassword() {
+        return mPassword;
+    }
+
+    public boolean isWifiOnly() {
+        return mWifiOnly;
     }
 }

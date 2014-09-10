@@ -33,7 +33,8 @@ public class ConnectivityManagerMobileTest extends  ConnectivityManagerTestBase 
         super(ConnectivityManagerMobileTest.class.getSimpleName());
     }
 
-    private String mTestAccessPoint;
+    private String mSsid;
+    private String mPassword;
     private boolean mWifiOnlyFlag;
 
     @Override
@@ -41,8 +42,9 @@ public class ConnectivityManagerMobileTest extends  ConnectivityManagerTestBase 
         super.setUp();
         ConnectivityManagerTestRunner mRunner =
                 (ConnectivityManagerTestRunner)getInstrumentation();
-        mTestAccessPoint = mRunner.mTestSsid;
-        mWifiOnlyFlag = mRunner.mWifiOnlyFlag;
+        mSsid = mRunner.getWifiSsid();
+        mPassword = mRunner.getWifiPassword();
+        mWifiOnlyFlag = mRunner.isWifiOnly();
 
         // Each test case will start with cellular connection
         if (Settings.Global.getInt(getInstrumentation().getContext().getContentResolver(),
@@ -120,11 +122,10 @@ public class ConnectivityManagerMobileTest extends  ConnectivityManagerTestBase 
     // Test case 2: test connection to a given AP
     @LargeTest
     public void testConnectToWifi() {
-        assertNotNull("SSID is null", mTestAccessPoint);
+        assertNotNull("SSID is null", mSsid);
 
         // assert that we are able to connect to the ap
-        assertTrue("failed to connect to " + mTestAccessPoint,
-                connectToWifi(mTestAccessPoint));
+        assertTrue("failed to connect to " + mSsid, connectToWifi(mSsid, mPassword));
         // assert that WifiManager reports correct state
         assertTrue("wifi not enabled", waitForWifiState(
                 WifiManager.WIFI_STATE_ENABLED, LONG_TIMEOUT));
@@ -144,14 +145,14 @@ public class ConnectivityManagerMobileTest extends  ConnectivityManagerTestBase 
     // Test case 3: connect & reconnect to Wifi with known AP
     @LargeTest
     public void testConnectToWifWithKnownAP() {
-        assertNotNull("SSID is null", mTestAccessPoint);
+        assertNotNull("SSID is null", mSsid);
         // enable WiFi
         assertTrue("failed to enable wifi", enableWifi());
         // wait for wifi enable
         assertTrue("wifi not enabled", waitForWifiState(
                 WifiManager.WIFI_STATE_ENABLED, LONG_TIMEOUT));
         // Connect to AP
-        assertTrue("failed to connect to " + mTestAccessPoint, connectToWifi(mTestAccessPoint));
+        assertTrue("failed to connect to " + mSsid, connectToWifi(mSsid, mPassword));
         // verify wifi connected as reported by ConnectivityManager
         assertTrue("wifi not connected", waitForNetworkState(
                 ConnectivityManager.TYPE_WIFI, State.CONNECTED, WIFI_CONNECTION_TIMEOUT));
@@ -191,7 +192,7 @@ public class ConnectivityManagerMobileTest extends  ConnectivityManagerTestBase 
     // Test case 4:  test disconnect and clear wifi settings
     @LargeTest
     public void testDisconnectWifi() {
-        assertNotNull("SSID is null", mTestAccessPoint);
+        assertNotNull("SSID is null", mSsid);
 
         // enable WiFi
         assertTrue("failed to enable wifi", enableWifi());
@@ -199,8 +200,7 @@ public class ConnectivityManagerMobileTest extends  ConnectivityManagerTestBase 
         assertTrue("wifi not enabled", waitForWifiState(
                 WifiManager.WIFI_STATE_ENABLED, LONG_TIMEOUT));
         // connect to Wifi
-        assertTrue("failed to connect to " + mTestAccessPoint,
-                connectToWifi(mTestAccessPoint));
+        assertTrue("failed to connect to " + mSsid, connectToWifi(mSsid, mPassword));
 
         assertTrue("wifi not connected", waitForNetworkState(
                 ConnectivityManager.TYPE_WIFI, State.CONNECTED, WIFI_CONNECTION_TIMEOUT));
@@ -257,7 +257,7 @@ public class ConnectivityManagerMobileTest extends  ConnectivityManagerTestBase 
     // Test case 6: test connectivity with airplane mode on but wifi enabled
     @LargeTest
     public void testDataConnectionOverAMWithWifi() {
-        assertNotNull("SSID is null", mTestAccessPoint);
+        assertNotNull("SSID is null", mSsid);
         // enable airplane mode
         mCm.setAirplaneMode(true);
         // assert there is active network connection after airplane mode disabled
@@ -265,8 +265,7 @@ public class ConnectivityManagerMobileTest extends  ConnectivityManagerTestBase 
                 waitUntilNoActiveNetworkConnection(LONG_TIMEOUT));
 
         // connect to Wifi
-        assertTrue("failed to connect to " + mTestAccessPoint,
-                connectToWifi(mTestAccessPoint));
+        assertTrue("failed to connect to " + mSsid, connectToWifi(mSsid, mPassword));
         assertTrue("wifi not connected", waitForNetworkState(
                 ConnectivityManager.TYPE_WIFI, State.CONNECTED, WIFI_CONNECTION_TIMEOUT));
         // verify that connection actually works
@@ -280,15 +279,14 @@ public class ConnectivityManagerMobileTest extends  ConnectivityManagerTestBase 
     @LargeTest
     public void testDataConnectionWithWifiToAMToWifi () {
         // connect to mTestAccessPoint
-        assertNotNull("SSID is null", mTestAccessPoint);
+        assertNotNull("SSID is null", mSsid);
         // enable WiFi
         assertTrue("failed to enable wifi", enableWifi());
         // wait for wifi enable
         assertTrue("wifi not enabled", waitForWifiState(
                 WifiManager.WIFI_STATE_ENABLED, LONG_TIMEOUT));
         // connect to Wifi
-        assertTrue("failed to connect to " + mTestAccessPoint,
-                connectToWifi(mTestAccessPoint));
+        assertTrue("failed to connect to " + mSsid, connectToWifi(mSsid, mPassword));
         assertTrue("wifi not connected", waitForNetworkState(
                 ConnectivityManager.TYPE_WIFI, State.CONNECTED, WIFI_CONNECTION_TIMEOUT));
 
@@ -313,15 +311,14 @@ public class ConnectivityManagerMobileTest extends  ConnectivityManagerTestBase 
     // Test case 8: test wifi state change while connecting/disconnecting to/from an AP
     @LargeTest
     public void testWifiStateChange () {
-        assertNotNull("SSID is null", mTestAccessPoint);
+        assertNotNull("SSID is null", mSsid);
         // enable WiFi
         assertTrue("failed to enable wifi", enableWifi());
         // wait for wifi enable
         assertTrue("wifi not enabled", waitForWifiState(
                 WifiManager.WIFI_STATE_ENABLED, LONG_TIMEOUT));
         // connect to Wifi
-        assertTrue("failed to connect to " + mTestAccessPoint,
-                connectToWifi(mTestAccessPoint));
+        assertTrue("failed to connect to " + mSsid, connectToWifi(mSsid, mPassword));
         assertTrue("wifi not connected", waitForNetworkState(
                 ConnectivityManager.TYPE_WIFI, State.CONNECTED, WIFI_CONNECTION_TIMEOUT));
         assertNotNull("not associated with any AP", mWifiManager.getConnectionInfo().getBSSID());
