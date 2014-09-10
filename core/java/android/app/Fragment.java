@@ -166,11 +166,12 @@ final class FragmentState implements Parcelable {
  * activity: if the activity is stopped, no fragments inside of it can be
  * started; when the activity is destroyed, all fragments will be destroyed.
  *
- * <p>All subclasses of Fragment must include a public empty constructor.
+ * <p>All subclasses of Fragment must include a public no-argument constructor.
  * The framework will often re-instantiate a fragment class when needed,
  * in particular during state restore, and needs to be able to find this
- * constructor to instantiate it.  If the empty constructor is not available,
- * a runtime exception will occur in some cases during state restore.
+ * constructor to instantiate it.  If the no-argument constructor is not
+ * available, a runtime exception will occur in some cases during state
+ * restore.
  *
  * <p>Topics covered here:
  * <ol>
