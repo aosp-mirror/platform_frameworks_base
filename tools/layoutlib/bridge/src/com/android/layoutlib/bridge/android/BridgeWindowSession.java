@@ -174,6 +174,11 @@ public final class BridgeWindowSession implements IWindowSession {
     }
 
     @Override
+    public void setWallpaperDisplayOffset(IBinder windowToken, int x, int y) {
+        // pass for now.
+    }
+
+    @Override
     public Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
             int z, Bundle extras, boolean sync) {
         // pass for now.
