@@ -60,13 +60,14 @@ final class RemoteConnectionService {
             if (connection != NULL_CONNECTION && mPendingConnections.contains(connection)) {
                 mPendingConnections.remove(connection);
                 // Unconditionally initialize the connection ...
-                connection.setState(parcel.getState());
                 connection.setCallCapabilities(parcel.getCapabilities());
                 connection.setHandle(
                         parcel.getHandle(), parcel.getHandlePresentation());
                 connection.setCallerDisplayName(
                         parcel.getCallerDisplayName(),
                         parcel.getCallerDisplayNamePresentation());
+                // Set state after handle so that the client can identify the connection.
+                connection.setState(parcel.getState());
                 List<RemoteConnection> conferenceable = new ArrayList<>();
                 for (String confId : parcel.getConferenceableConnectionIds()) {
                     if (mConnectionById.containsKey(confId)) {
