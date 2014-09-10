@@ -9665,14 +9665,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         long ident = 0;
         boolean clearedIdentity = false;
         userId = unsafeConvertIncomingUser(userId);
-        if (UserHandle.getUserId(callingUid) != userId) {
-            if (checkComponentPermission(INTERACT_ACROSS_USERS, callingPid,
-                    callingUid, -1, true) == PackageManager.PERMISSION_GRANTED
-                    || checkComponentPermission(INTERACT_ACROSS_USERS_FULL, callingPid,
-                    callingUid, -1, true) == PackageManager.PERMISSION_GRANTED) {
-                clearedIdentity = true;
-                ident = Binder.clearCallingIdentity();
-            }
+        if (canClearIdentity(callingPid, callingUid, userId)) {
+            clearedIdentity = true;
+            ident = Binder.clearCallingIdentity();
         }
         ContentProviderHolder holder = null;
         try {
@@ -9698,6 +9693,19 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         return null;
+    }
+
+    private boolean canClearIdentity(int callingPid, int callingUid, int userId) {
+        if (UserHandle.getUserId(callingUid) == userId) {
+            return true;
+        }
+        if (checkComponentPermission(INTERACT_ACROSS_USERS, callingPid,
+                callingUid, -1, true) == PackageManager.PERMISSION_GRANTED
+                || checkComponentPermission(INTERACT_ACROSS_USERS_FULL, callingPid,
+                callingUid, -1, true) == PackageManager.PERMISSION_GRANTED) {
+                return true;
+        }
+        return false;
     }
 
     // =========================================================
