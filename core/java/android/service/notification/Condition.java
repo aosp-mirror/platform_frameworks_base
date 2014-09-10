@@ -16,6 +16,7 @@
 
 package android.service.notification;
 
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Parcel;
@@ -28,6 +29,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 public class Condition implements Parcelable {
 
     public static final String SCHEME = "condition";
