@@ -97,8 +97,7 @@ public class DevicePolicyManager {
      * Provisioning adds a managed profile and sets the mdm as the profile owner who has full
      * control over the profile
      *
-     * <p>This intent must contain the extras {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}
-     * {@link #EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME} and {@link #EXTRA_DEVICE_ADMIN}.
+     * <p>This intent must contain the extra {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}.
      *
      * <p> When managed provisioning has completed, an intent of the type
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcasted to the
@@ -142,18 +141,15 @@ public class DevicePolicyManager {
         = "android.app.extra.deviceAdminPackageName";
 
     /**
-     * A String extra holding the default name of the profile that is created during managed profile
-     * provisioning.
+     * A String extra that, holds the email address of the account which a managed profile is
+     * created for. Used with {@link #ACTION_PROVISION_MANAGED_PROFILE} and
+     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE}.
      *
-     * <p>Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}
-     */
-    public static final String EXTRA_PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME
-        = "android.app.extra.PROVISIONING_DEFAULT_MANAGED_PROFILE_NAME";
-
-    /**
-     * A bundle key, used in the bundle extra {@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}. The
-     * corresponding value holds the email address of the account which the managed profile is
-     * created for.
+     * <p> If the {@link #ACTION_PROVISION_MANAGED_PROFILE} intent that starts managed provisioning
+     * contains this extra, it is forwarded in the
+     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} intent to the mobile
+     * device management application that was set as the profile owner during provisioning.
+     * It is usually used to avoid that the user has to enter their email address twice.
      */
     public static final String KEY_PROVISIONING_EMAIL_ADDRESS
         = "android.app.key.PROVISIONING_EMAIL_ADDRESS";
