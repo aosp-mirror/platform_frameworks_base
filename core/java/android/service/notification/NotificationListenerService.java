@@ -756,15 +756,6 @@ public abstract class NotificationListenerService extends Service {
             return mVisibilityOverride;
         }
 
-        /**
-         * Returns whether the notification meets the user's interruption
-         * filter.
-         *
-         * @removed
-         */
-        public boolean meetsInterruptionFilter() {
-            return mMatchesInterruptionFilter;
-        }
 
         /**
          * Returns whether the notification matches the user's interruption
