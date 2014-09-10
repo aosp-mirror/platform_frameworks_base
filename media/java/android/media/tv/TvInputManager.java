@@ -709,7 +709,9 @@ public final class TvInputManager {
             }
         };
         try {
-            mService.registerCallback(mManagerCallback, mUserId);
+            if (mService != null) {
+                mService.registerCallback(mManagerCallback, mUserId);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "mService.registerCallback failed: " + e);
         }
