@@ -457,6 +457,7 @@ public class Process {
      * @param seInfo null-ok SELinux information for the new process.
      * @param abi non-null the ABI this app should be started with.
      * @param instructionSet null-ok the instruction set to use.
+     * @param appDataDir null-ok the data directory of the app.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      * 
      * @return An object that describes the result of the attempt to start the process.
@@ -472,11 +473,12 @@ public class Process {
                                   String seInfo,
                                   String abi,
                                   String instructionSet,
+                                  String appDataDir,
                                   String[] zygoteArgs) {
         try {
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     debugFlags, mountExternal, targetSdkVersion, seInfo,
-                    abi, instructionSet, zygoteArgs);
+                    abi, instructionSet, appDataDir, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -580,6 +582,7 @@ public class Process {
      * @param seInfo null-ok SELinux information for the new process.
      * @param abi the ABI the process should use.
      * @param instructionSet null-ok the instruction set to use.
+     * @param appDataDir null-ok the data directory of the app.
      * @param extraArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
      * @throws ZygoteStartFailedEx if process start failed for any reason
@@ -593,6 +596,7 @@ public class Process {
                                   String seInfo,
                                   String abi,
                                   String instructionSet,
+                                  String appDataDir,
                                   String[] extraArgs)
                                   throws ZygoteStartFailedEx {
         synchronized(Process.class) {
@@ -654,6 +658,10 @@ public class Process {
 
             if (instructionSet != null) {
                 argsForZygote.add("--instruction-set=" + instructionSet);
+            }
+
+            if (appDataDir != null) {
+                argsForZygote.add("--app-data-dir=" + appDataDir);
             }
 
             argsForZygote.add(processClass);
