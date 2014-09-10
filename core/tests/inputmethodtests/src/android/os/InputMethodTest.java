@@ -35,6 +35,7 @@ public class InputMethodTest extends InstrumentationTestCase {
     private static final boolean IS_AUX = true;
     private static final boolean IS_DEFAULT = true;
     private static final boolean IS_AUTO = true;
+    private static final boolean IS_ASCII_CAPABLE = true;
     private static final ArrayList<InputMethodSubtype> NO_SUBTYPE = null;
 
     @SmallTest
@@ -45,7 +46,7 @@ public class InputMethodTest extends InstrumentationTestCase {
         imis.add(createNonDefaultAutoDummyVoiceIme0());
         imis.add(createNonDefaultAutoDummyVoiceIme1());
         imis.add(createNonDefaultDummyVoiceIme2());
-        imis.add(createDefaultDummyEnUSKeyboardIme());
+        imis.add(createDefaultDummyLatinKeyboardIme());
         imis.add(createNonDefaultDummyJaJPKeyboardIme());
         imis.add(createNonDefaultDummyJaJPKeyboardImeWithoutSubtypes());
         final ArrayList<InputMethodInfo> enabledImis = InputMethodUtils.getDefaultEnabledImes(
@@ -70,7 +71,7 @@ public class InputMethodTest extends InstrumentationTestCase {
         imis.add(createNonDefaultAutoDummyVoiceIme0());
         imis.add(createNonDefaultAutoDummyVoiceIme1());
         imis.add(createNonDefaultDummyVoiceIme2());
-        imis.add(createDefaultDummyEnUSKeyboardIme());
+        imis.add(createDefaultDummyLatinKeyboardIme());
         imis.add(createNonDefaultDummyJaJPKeyboardIme());
         imis.add(createNonDefaultDummyJaJPKeyboardImeWithoutSubtypes());
         final ArrayList<InputMethodInfo> enabledImis = InputMethodUtils.getDefaultEnabledImes(
@@ -96,7 +97,7 @@ public class InputMethodTest extends InstrumentationTestCase {
         originalList.add(createNonDefaultAutoDummyVoiceIme0());
         originalList.add(createNonDefaultAutoDummyVoiceIme1());
         originalList.add(createNonDefaultDummyVoiceIme2());
-        originalList.add(createDefaultDummyEnUSKeyboardIme());
+        originalList.add(createDefaultDummyLatinKeyboardIme());
         originalList.add(createNonDefaultDummyJaJPKeyboardIme());
         originalList.add(createNonDefaultDummyJaJPKeyboardImeWithoutSubtypes());
 
@@ -159,7 +160,8 @@ public class InputMethodTest extends InstrumentationTestCase {
     }
 
     private static InputMethodSubtype createDummyInputMethodSubtype(String locale, String mode,
-            boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype) {
+            boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype,
+            boolean isAsciiCapable) {
         return new InputMethodSubtypeBuilder()
                 .setSubtypeNameResId(0)
                 .setSubtypeIconResId(0)
@@ -168,50 +170,68 @@ public class InputMethodTest extends InstrumentationTestCase {
                 .setSubtypeExtraValue("")
                 .setIsAuxiliary(isAuxiliary)
                 .setOverridesImplicitlyEnabledSubtype(overridesImplicitlyEnabledSubtype)
+                .setIsAsciiCapable(isAsciiCapable)
                 .build();
     }
 
     private static InputMethodInfo createDefaultAutoDummyVoiceIme() {
         final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
-        subtypes.add(createDummyInputMethodSubtype("auto", "voice", IS_AUX, IS_AUTO));
-        subtypes.add(createDummyInputMethodSubtype("en_US", "voice", IS_AUX, !IS_AUTO));
+        subtypes.add(createDummyInputMethodSubtype("auto", "voice", IS_AUX, IS_AUTO,
+                !IS_ASCII_CAPABLE));
+        subtypes.add(createDummyInputMethodSubtype("en_US", "voice", IS_AUX, !IS_AUTO,
+                !IS_ASCII_CAPABLE));
         return createDummyInputMethodInfo("DummyDefaultAutoVoiceIme", "dummy.voice0",
                 "DummyVoice0", IS_AUX, IS_DEFAULT, subtypes);
     }
 
     private static InputMethodInfo createNonDefaultAutoDummyVoiceIme0() {
         final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
-        subtypes.add(createDummyInputMethodSubtype("auto", "voice", IS_AUX, IS_AUTO));
-        subtypes.add(createDummyInputMethodSubtype("en_US", "voice", IS_AUX, !IS_AUTO));
+        subtypes.add(createDummyInputMethodSubtype("auto", "voice", IS_AUX, IS_AUTO,
+                !IS_ASCII_CAPABLE));
+        subtypes.add(createDummyInputMethodSubtype("en_US", "voice", IS_AUX, !IS_AUTO,
+                !IS_ASCII_CAPABLE));
         return createDummyInputMethodInfo("DummyNonDefaultAutoVoiceIme0", "dummy.voice1",
                 "DummyVoice1", IS_AUX, !IS_DEFAULT, subtypes);
     }
 
     private static InputMethodInfo createNonDefaultAutoDummyVoiceIme1() {
         final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
-        subtypes.add(createDummyInputMethodSubtype("auto", "voice", IS_AUX, IS_AUTO));
-        subtypes.add(createDummyInputMethodSubtype("en_US", "voice", IS_AUX, !IS_AUTO));
+        subtypes.add(createDummyInputMethodSubtype("auto", "voice", IS_AUX, IS_AUTO,
+                !IS_ASCII_CAPABLE));
+        subtypes.add(createDummyInputMethodSubtype("en_US", "voice", IS_AUX, !IS_AUTO,
+                !IS_ASCII_CAPABLE));
         return createDummyInputMethodInfo("DummyNonDefaultAutoVoiceIme1", "dummy.voice2",
                 "DummyVoice2", IS_AUX, !IS_DEFAULT, subtypes);
     }
 
     private static InputMethodInfo createNonDefaultDummyVoiceIme2() {
         final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
-        subtypes.add(createDummyInputMethodSubtype("en_US", "voice", IS_AUX, !IS_AUTO));
+        subtypes.add(createDummyInputMethodSubtype("en_US", "voice", IS_AUX, !IS_AUTO,
+                !IS_ASCII_CAPABLE));
         return createDummyInputMethodInfo("DummyNonDefaultVoiceIme2", "dummy.voice3",
                 "DummyVoice3", IS_AUX, !IS_DEFAULT, subtypes);
     }
 
-    private static InputMethodInfo createDefaultDummyEnUSKeyboardIme() {
+    private static InputMethodInfo createDefaultDummyLatinKeyboardIme() {
         final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
-        subtypes.add(createDummyInputMethodSubtype("en_US", "keyboard", !IS_AUX, !IS_AUTO));
+        subtypes.add(createDummyInputMethodSubtype("en_US", "keyboard", !IS_AUX, !IS_AUTO,
+                IS_ASCII_CAPABLE));
+        subtypes.add(createDummyInputMethodSubtype("en_GB", "keyboard", !IS_AUX, !IS_AUTO,
+                IS_ASCII_CAPABLE));
+        subtypes.add(createDummyInputMethodSubtype("en_IN", "keyboard", !IS_AUX, !IS_AUTO,
+                IS_ASCII_CAPABLE));
+        subtypes.add(createDummyInputMethodSubtype("hi", "keyboard", !IS_AUX, !IS_AUTO,
+                !IS_ASCII_CAPABLE));  // not AsciiCapable!
+        subtypes.add(createDummyInputMethodSubtype("hi_ZZ", "keyboard", !IS_AUX, !IS_AUTO,
+                IS_ASCII_CAPABLE));
         return createDummyInputMethodInfo("DummyDefaultEnKeyboardIme", "dummy.keyboard0",
                 "DummyKeyboard0", !IS_AUX, IS_DEFAULT, subtypes);
     }
 
     private static InputMethodInfo createNonDefaultDummyJaJPKeyboardIme() {
         final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
-        subtypes.add(createDummyInputMethodSubtype("ja_JP", "keyboard", !IS_AUX, !IS_AUTO));
+        subtypes.add(createDummyInputMethodSubtype("ja_JP", "keyboard", !IS_AUX, !IS_AUTO,
+                IS_ASCII_CAPABLE));
         return createDummyInputMethodInfo("DummyNonDefaultJaJPKeyboardIme", "dummy.keyboard1",
                 "DummyKeyboard1", !IS_AUX, !IS_DEFAULT, subtypes);
     }
