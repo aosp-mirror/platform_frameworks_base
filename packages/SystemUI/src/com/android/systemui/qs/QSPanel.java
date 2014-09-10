@@ -89,6 +89,7 @@ public class QSPanel extends ViewGroup {
         mDetailContent = (ViewGroup) mDetail.findViewById(android.R.id.content);
         mDetailSettingsButton = (TextView) mDetail.findViewById(android.R.id.button2);
         mDetailDoneButton = (TextView) mDetail.findViewById(android.R.id.button1);
+        updateDetailText();
         mDetail.setVisibility(GONE);
         mDetail.setClickable(true);
         mBrightnessView = LayoutInflater.from(context).inflate(
@@ -110,6 +111,11 @@ public class QSPanel extends ViewGroup {
                 closeDetail();
             }
         });
+    }
+
+    private void updateDetailText() {
+        mDetailDoneButton.setText(R.string.quick_settings_done);
+        mDetailSettingsButton.setText(R.string.quick_settings_more_settings);
     }
 
     public void setBrightnessMirror(BrightnessMirrorController c) {
@@ -150,6 +156,7 @@ public class QSPanel extends ViewGroup {
         if (mListening) {
             refreshAllTiles();
         }
+        updateDetailText();
     }
 
     @Override
