@@ -188,17 +188,36 @@ public final class MediaDrm {
      */
     public static final class MediaDrmStateException extends java.lang.IllegalStateException {
         private final int mErrorCode;
+        private final String mDiagnosticInfo;
 
         public MediaDrmStateException(int errorCode, String detailMessage) {
             super(detailMessage);
             mErrorCode = errorCode;
+
+            // TODO get this from DRM session
+            final String sign = errorCode < 0 ? "neg_" : "";
+            mDiagnosticInfo =
+                "android.media.MediaDrm.error_" + sign + Math.abs(errorCode);
+
         }
 
         /**
          * Retrieve the associated error code
+         *
+         * @hide
          */
         public int getErrorCode() {
             return mErrorCode;
+        }
+
+        /**
+         * Retrieve a human readable diagnostic information string
+         * associated with the exception. DO NOT SHOW THIS TO END-USERS!
+         * This string will not be localized or generally comprehensible
+         * to end-users.
+         */
+        public String getDiagnosticInfo() {
+            return mDiagnosticInfo;
         }
     }
 
