@@ -419,11 +419,17 @@ public class TransitionSet extends Transition {
      */
     @Override
     protected void runAnimators() {
+        if (mTransitions.isEmpty()) {
+            start();
+            end();
+            return;
+        }
         setupStartEndListeners();
+        int numTransitions = mTransitions.size();
         if (!mPlayTogether) {
             // Setup sequence with listeners
             // TODO: Need to add listeners in such a way that we can remove them later if canceled
-            for (int i = 1; i < mTransitions.size(); ++i) {
+            for (int i = 1; i < numTransitions; ++i) {
                 Transition previousTransition = mTransitions.get(i - 1);
                 final Transition nextTransition = mTransitions.get(i);
                 previousTransition.addListener(new TransitionListenerAdapter() {
@@ -439,8 +445,8 @@ public class TransitionSet extends Transition {
                 firstTransition.runAnimators();
             }
         } else {
-            for (Transition childTransition : mTransitions) {
-                childTransition.runAnimators();
+            for (int i = 0; i < numTransitions; ++i) {
+                mTransitions.get(i).runAnimators();
             }
         }
     }
