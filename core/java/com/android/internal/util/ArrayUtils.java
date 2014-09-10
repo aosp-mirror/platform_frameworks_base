@@ -107,7 +107,7 @@ public class ArrayUtils
             return (T[]) EmptyArray.OBJECT;
         }
 
-        int bucket = ((System.identityHashCode(kind) / 8) & 0x7FFFFFFF) % CACHE_SIZE;
+        int bucket = (kind.hashCode() & 0x7FFFFFFF) % CACHE_SIZE;
         Object cache = sCache[bucket];
 
         if (cache == null || cache.getClass().getComponentType() != kind) {
