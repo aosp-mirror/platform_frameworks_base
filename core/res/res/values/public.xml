@@ -2307,16 +2307,14 @@
   <public type="style" name="Widget.Toolbar" />
   <public type="style" name="Widget.Toolbar.Button.Navigation" />
 
-  <public type="style" name="Widget.Holo.FastScroll" />
-  <public type="style" name="Widget.Holo.StackView" />
-
-  <public type="style" name="Widget.Holo.Light.Button.Borderless" />
-  <public type="style" name="Widget.Holo.Light.FastScroll" />
-  <public type="style" name="Widget.Holo.Light.StackView" />
+  <public type="style" name="__removed3" />
+  <public type="style" name="__removed4" />
+  <public type="style" name="__removed5" />
+  <public type="style" name="__removed6" />
+  <public type="style" name="__removed7" />
 
   <public type="style" name="Widget.DeviceDefault.FastScroll" />
   <public type="style" name="Widget.DeviceDefault.StackView" />
-
   <public type="style" name="Widget.DeviceDefault.Light.FastScroll" />
   <public type="style" name="Widget.DeviceDefault.Light.StackView" />
 
@@ -2540,7 +2538,7 @@
 
   <public type="style" name="Theme.Leanback.FormWizard"/>
 
-  <public type="style" name="__removed" />
+  <public type="style" name="__removed1" />
   <public type="style" name="TextAppearance.Material.Notification" />
   <public type="style" name="TextAppearance.Material.Notification.Title" />
   <public type="style" name="TextAppearance.Material.Notification.Line2" />
@@ -2558,6 +2556,9 @@
   <public type="style" name="Theme.Material.Dialog.Presentation" />
   <public type="style" name="Theme.Material.Light.Dialog.Alert" />
   <public type="style" name="Theme.Material.Light.Dialog.Presentation" />
+
+  <public type="style" name="Widget.Material.SearchView" />
+  <public type="style" name="Widget.Material.Light.SearchView" />
 
   <public-padding type="string" name="l_resource_pad" end="0x01040030" />
 
