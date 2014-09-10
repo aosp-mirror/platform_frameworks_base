@@ -842,6 +842,13 @@ public class Notification implements Parcelable
     public static final String EXTRA_COMPACT_ACTIONS = "android.compactActions";
 
     /**
+     * {@link #extras} key: the user that built the notification.
+     *
+     * @hide
+     */
+    public static final String EXTRA_ORIGINATING_USERID = "android.originatingUserId";
+
+    /**
      * Value for {@link #EXTRA_AS_HEADS_UP} that indicates this notification should not be
      * displayed in the heads up space.
      *
@@ -1880,6 +1887,11 @@ public class Notification implements Parcelable
         private int mColor = COLOR_DEFAULT;
 
         /**
+         * The user that built the notification originally.
+         */
+        private int mOriginatingUserId;
+
+        /**
          * Contains extras related to rebuilding during the build phase.
          */
         private Bundle mRebuildBundle = new Bundle();
@@ -2599,7 +2611,7 @@ public class Notification implements Parcelable
             // Note: This assumes that the current user can read the profile badge of the
             // originating user.
             return mContext.getPackageManager().getUserBadgeForDensity(
-                    new UserHandle(mContext.getUserId()), 0);
+                    new UserHandle(mOriginatingUserId), 0);
         }
 
         private Bitmap getProfileBadge() {
@@ -3070,6 +3082,7 @@ public class Notification implements Parcelable
          */
         public void populateExtras(Bundle extras) {
             // Store original information used in the construction of this object
+            extras.putInt(EXTRA_ORIGINATING_USERID, mOriginatingUserId);
             extras.putParcelable(EXTRA_REBUILD_CONTEXT_APPLICATION_INFO,
                     mContext.getApplicationInfo());
             extras.putCharSequence(EXTRA_TITLE, mContentTitle);
@@ -3301,6 +3314,7 @@ public class Notification implements Parcelable
 
             // Extras.
             Bundle extras = n.extras;
+            mOriginatingUserId = extras.getInt(EXTRA_ORIGINATING_USERID);
             mContentTitle = extras.getCharSequence(EXTRA_TITLE);
             mContentText = extras.getCharSequence(EXTRA_TEXT);
             mSubText = extras.getCharSequence(EXTRA_SUB_TEXT);
@@ -3333,6 +3347,7 @@ public class Notification implements Parcelable
          * object.
          */
         public Notification build() {
+            mOriginatingUserId = mContext.getUserId();
             mHasThreeLines = hasThreeLines();
 
             Notification n = buildUnstyled();
