@@ -672,6 +672,11 @@ final public class MediaCodec {
             super(detailMessage);
             mErrorCode = errorCode;
             mActionCode = actionCode;
+
+            // TODO get this from codec
+            final String sign = errorCode < 0 ? "neg_" : "";
+            mDiagnosticInfo =
+                "android.media.MediaCodec.error_" + sign + Math.abs(errorCode);
         }
 
         /**
@@ -696,15 +701,28 @@ final public class MediaCodec {
          * Retrieve the error code associated with a CodecException.
          * This is opaque diagnostic information and may depend on
          * hardware or API level.
+         *
+         * @hide
          */
         public int getErrorCode() {
             return mErrorCode;
+        }
+
+        /**
+         * Retrieve a human readable diagnostic information string
+         * associated with the exception. DO NOT SHOW THIS TO END-USERS!
+         * This string will not be localized or generally comprehensible
+         * to end-users.
+         */
+        public String getDiagnosticInfo() {
+            return mDiagnosticInfo;
         }
 
         /* Must be in sync with android_media_MediaCodec.cpp */
         private final static int ACTION_TRANSIENT = 1;
         private final static int ACTION_RECOVERABLE = 2;
 
+        private final String mDiagnosticInfo;
         private final int mErrorCode;
         private final int mActionCode;
     }
