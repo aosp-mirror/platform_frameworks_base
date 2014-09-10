@@ -106,6 +106,7 @@ import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
+import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -3455,9 +3456,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 parser.getAttributeValue(null, ATTR_IME_SUBTYPE_EXTRA_VALUE);
                         final boolean isAuxiliary = "1".equals(String.valueOf(
                                 parser.getAttributeValue(null, ATTR_IS_AUXILIARY)));
-                        final InputMethodSubtype subtype =
-                                new InputMethodSubtype(label, icon, imeSubtypeLocale,
-                                        imeSubtypeMode, imeSubtypeExtraValue, isAuxiliary);
+                        final InputMethodSubtype subtype = new InputMethodSubtypeBuilder()
+                                .setSubtypeNameResId(label)
+                                .setSubtypeIconResId(icon)
+                                .setSubtypeLocale(imeSubtypeLocale)
+                                .setSubtypeMode(imeSubtypeMode)
+                                .setSubtypeExtraValue(imeSubtypeExtraValue)
+                                .setIsAuxiliary(isAuxiliary)
+                                .build();
                         tempSubtypesArray.add(subtype);
                     }
                 }

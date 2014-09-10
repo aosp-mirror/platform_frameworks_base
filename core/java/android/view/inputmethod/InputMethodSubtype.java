@@ -211,18 +211,6 @@ public final class InputMethodSubtype implements Parcelable {
      }
 
     /**
-     * Constructor with no subtype ID specified, overridesImplicitlyEnabledSubtype not specified.
-     * Arguments for this constructor have the same meanings as
-     * {@link InputMethodSubtype#InputMethodSubtype(int, int, String, String, String, boolean,
-     * boolean, int)} except "id" and "overridesImplicitlyEnabledSubtype".
-     * @hide
-     */
-    public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
-            boolean isAuxiliary) {
-        this(nameId, iconId, locale, mode, extraValue, isAuxiliary, false);
-    }
-
-    /**
      * Constructor with no subtype ID specified.
      * @deprecated use {@link InputMethodSubtypeBuilder} instead.
      * Arguments for this constructor have the same meanings as

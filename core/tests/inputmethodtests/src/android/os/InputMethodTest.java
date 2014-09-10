@@ -26,6 +26,7 @@ import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
+import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -159,8 +160,15 @@ public class InputMethodTest extends InstrumentationTestCase {
 
     private static InputMethodSubtype createDummyInputMethodSubtype(String locale, String mode,
             boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype) {
-        return new InputMethodSubtype(0, 0, locale, mode, "", isAuxiliary,
-                overridesImplicitlyEnabledSubtype);
+        return new InputMethodSubtypeBuilder()
+                .setSubtypeNameResId(0)
+                .setSubtypeIconResId(0)
+                .setSubtypeLocale(locale)
+                .setSubtypeMode(mode)
+                .setSubtypeExtraValue("")
+                .setIsAuxiliary(isAuxiliary)
+                .setOverridesImplicitlyEnabledSubtype(overridesImplicitlyEnabledSubtype)
+                .build();
     }
 
     private static InputMethodInfo createDefaultAutoDummyVoiceIme() {
