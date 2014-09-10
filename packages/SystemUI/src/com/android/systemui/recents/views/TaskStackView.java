@@ -22,11 +22,15 @@ import android.graphics.Rect;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.DozeTrigger;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsPackageMonitor;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
@@ -67,6 +71,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     DebugOverlayView mDebugOverlay;
     Rect mTaskStackBounds = new Rect();
     int mFocusedTaskIndex = -1;
+    int mPrevAccessibilityFocusedIndex = -1;
 
     // Optimizations
     int mStackViewsAnimationDuration;
@@ -244,6 +249,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** Synchronizes the views with the model */
     boolean synchronizeStackViewsWithModel() {
         if (mStackViewsDirty) {
+            RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+            SystemServicesProxy ssp = loader.getSystemServicesProxy();
+
             // Get all the task transforms
             ArrayList<Task> tasks = mStack.getTasks();
             float stackScroll = mStackScroller.getStackScroll();
@@ -293,6 +301,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 // Animate the task into place
                 tv.updateViewPropertiesToTaskTransform(mCurrentTaskTransforms.get(taskIndex),
                         mStackViewsAnimationDuration);
+
+                // Request accessibility focus on the next view if we removed the task
+                // that previously held accessibility focus
+                childCount = getChildCount();
+                if (childCount > 0 && ssp.isTouchExplorationEnabled()) {
+                    TaskView atv = (TaskView) getChildAt(childCount - 1);
+                    int indexOfTask = mStack.indexOfTask(atv.getTask());
+                    if (mPrevAccessibilityFocusedIndex != indexOfTask) {
+                        tv.requestAccessibilityFocus();
+                        mPrevAccessibilityFocusedIndex = indexOfTask;
+                    }
+                }
             }
 
             // Reset the request-synchronize params
@@ -432,6 +452,22 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        int childCount = getChildCount();
+        if (childCount > 0) {
+            TaskView backMostTask = (TaskView) getChildAt(0);
+            TaskView frontMostTask = (TaskView) getChildAt(childCount - 1);
+            event.setFromIndex(mStack.indexOfTask(backMostTask.getTask()));
+            event.setToIndex(mStack.indexOfTask(frontMostTask.getTask()));
+            event.setContentDescription(frontMostTask.getTask().activityLabel);
+        }
+        event.setItemCount(mStack.getTaskCount());
+        event.setScrollY(mStackScroller.mScroller.getCurrY());
+        event.setMaxScrollY(mStackScroller.progressToScrollRange(mLayoutAlgorithm.mMaxScrollP));
+    }
+
+    @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         return mTouchHandler.onInterceptTouchEvent(ev);
     }
@@ -447,6 +483,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Synchronize the views
         synchronizeStackViewsWithModel();
         clipTaskViews();
+        // Notify accessibility
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SCROLLED);
     }
 
     /** Computes the stack and task rects */
@@ -623,6 +661,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     mStartEnterAnimationCompleted = true;
                     // Start dozing
                     mUIDozeTrigger.startDozing();
+                    // Focus the first view if accessibility is enabled
+                    RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+                    SystemServicesProxy ssp = loader.getSystemServicesProxy();
+                    int childCount = getChildCount();
+                    if (childCount > 0 && ssp.isTouchExplorationEnabled()) {
+                        TaskView tv = ((TaskView) getChildAt(childCount - 1));
+                        tv.requestAccessibilityFocus();
+                        mPrevAccessibilityFocusedIndex = mStack.indexOfTask(tv.getTask());
+                    }
                 }
             });
         }
@@ -811,6 +858,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     public void prepareViewToEnterPool(TaskView tv) {
         Task task = tv.getTask();
+
+        // Clear the accessibility focus for that view
+        if (tv.isAccessibilityFocused()) {
+            tv.clearAccessibilityFocus();
+        }
 
         // Report that this tasks's data is no longer being used
         RecentsTaskLoader.getInstance().unloadTaskData(task);
