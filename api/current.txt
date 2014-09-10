@@ -29035,7 +29035,6 @@ package android.telephony {
     method public java.lang.String sendEnvelopeWithStatus(java.lang.String);
     method public boolean setGlobalPreferredNetworkType();
     method public void setLine1NumberForDisplay(java.lang.String, java.lang.String);
-    method public void setLine1NumberForDisplay(long, java.lang.String, java.lang.String);
     method public boolean setOperatorBrandOverride(java.lang.String);
     field public static final java.lang.String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
     field public static final java.lang.String ACTION_RESPOND_VIA_MESSAGE = "android.intent.action.RESPOND_VIA_MESSAGE";
