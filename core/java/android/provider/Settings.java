@@ -3739,6 +3739,13 @@ public final class Settings {
                 "show_note_about_notification_hiding";
 
         /**
+         * Set to 1 by the system after trust agents have been initialized.
+         * @hide
+         */
+        public static final String TRUST_AGENTS_INITIALIZED =
+                "trust_agents_initialized";
+
+        /**
          * The Logging ID (a unique 64-bit value) as a hex string.
          * Used as a pseudonymous identifier for logging.
          * @deprecated This identifier is poorly initialized and has
