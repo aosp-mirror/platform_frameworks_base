@@ -67,7 +67,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     final ModuleProperties moduleProperties;
 
     /** The properties for the DSP module */
-    private final SoundTriggerModule mModule;
+    private SoundTriggerModule mModule;
     private final Object mLock = new Object();
     private final Context mContext;
     private final TelephonyManager mTelephonyManager;
@@ -105,7 +105,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         } else {
             // TODO: Figure out how to determine which module corresponds to the DSP hardware.
             moduleProperties = modules.get(0);
-            mModule = SoundTrigger.attachModule(moduleProperties.id, this, null);
         }
     }
 
@@ -155,9 +154,16 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 mIsPowerSaveMode = mPowerManager.isPowerSaveMode();
             }
 
-            if (moduleProperties == null || mModule == null) {
+            if (moduleProperties == null) {
                 Slog.w(TAG, "Attempting startRecognition without the capability");
                 return STATUS_ERROR;
+            }
+            if (mModule == null) {
+                mModule = SoundTrigger.attachModule(moduleProperties.id, this, null);
+                if (mModule == null) {
+                    Slog.w(TAG, "startRecognition cannot attach to sound trigger module");
+                    return STATUS_ERROR;
+                }
             }
 
             if (mCurrentSoundModelHandle != INVALID_VALUE
@@ -446,6 +452,10 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             Slog.w(TAG, "RemoteException in onError", e);
         } finally {
             internalClearStateLocked();
+            if (mModule != null) {
+                mModule.detach();
+                mModule = null;
+            }
         }
     }
 
