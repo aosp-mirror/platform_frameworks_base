@@ -17,6 +17,7 @@
 package android.service.notification;
 
 import android.content.ComponentName;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -54,6 +55,11 @@ public class ZenModeConfig implements Parcelable {
             Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY };
     public static final int[] WEEKNIGHT_DAYS = { Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY,
             Calendar.WEDNESDAY, Calendar.THURSDAY };
+
+    public static final int[] MINUTE_BUCKETS = new int[] { 15, 30, 45, 60, 120, 180, 240, 480 };
+    private static final int SECONDS_MS = 1000;
+    private static final int MINUTES_MS = 60 * SECONDS_MS;
+    private static final int ZERO_VALUE_MS = 20 * SECONDS_MS;
 
     private static final int XML_VERSION = 1;
     private static final String ZEN_TAG = "zen";
@@ -443,6 +449,23 @@ public class ZenModeConfig implements Parcelable {
         downtime.endHour = sleepEndHour;
         downtime.endMinute = sleepEndMinute;
         return downtime;
+    }
+
+    public static Condition toTimeCondition(int minutesFromNow) {
+        final long now = System.currentTimeMillis();
+        final long millis = minutesFromNow == 0 ? ZERO_VALUE_MS : minutesFromNow * MINUTES_MS;
+        return toTimeCondition(now + millis, minutesFromNow);
+    }
+
+    public static Condition toTimeCondition(long time, int minutes) {
+        final int num = minutes < 60 ? minutes : Math.round(minutes / 60f);
+        final int resId = minutes < 60
+                ? com.android.internal.R.plurals.zen_mode_duration_minutes
+                : com.android.internal.R.plurals.zen_mode_duration_hours;
+        final String caption = Resources.getSystem().getQuantityString(resId, num, num);
+        final Uri id = toCountdownConditionId(time);
+        return new Condition(id, caption, "", "", 0, Condition.STATE_TRUE,
+                Condition.FLAG_RELEVANT_NOW);
     }
 
     // For built-in conditions
