@@ -240,7 +240,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         if (!mIsCanceled) {
             mIsCanceled = true;
             if (getViewsTransition() == null || mIsViewsTransitionStarted) {
-                showViews(mSharedElements);
+                showViews(mSharedElements, true);
             } else {
                 mTransitioningViews.addAll(mSharedElements);
             }
@@ -300,7 +300,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         // Now start shared element transition
         ArrayList<View> sharedElementSnapshots = createSnapshots(sharedElementState,
                 mSharedElementNames);
-        showViews(mSharedElements);
+        showViews(mSharedElements, true);
         scheduleSetSharedElementEnd(sharedElementSnapshots);
         ArrayList<SharedElementOriginalState> originalImageViewState =
                 setSharedElementState(sharedElementState, sharedElementSnapshots);
@@ -411,7 +411,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                     @Override
                     public void onTransitionStart(Transition transition) {
                         mEnterViewsTransition = transition;
-                        showViews(mTransitioningViews);
+                        showViews(mTransitioningViews, false);
                         super.onTransitionStart(transition);
                     }
 

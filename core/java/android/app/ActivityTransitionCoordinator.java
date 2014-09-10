@@ -599,17 +599,18 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 mOriginalAlphas.put(view, view.getAlpha());
             }
             view.setAlpha(0f);
-            view.setTransitionAlpha(0f);
         }
     }
 
-    protected void showViews(ArrayList<View> views) {
+    protected void showViews(ArrayList<View> views, boolean setTransitionAlpha) {
         int count = views.size();
         for (int i = 0; i < count; i++) {
             View view = views.get(i);
             Float alpha = mOriginalAlphas.remove(view);
             if (alpha != null) {
                 view.setAlpha(alpha);
+            }
+            if (setTransitionAlpha) {
                 view.setTransitionAlpha(1f);
             }
         }
