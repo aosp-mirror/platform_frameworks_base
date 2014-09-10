@@ -177,9 +177,15 @@ public class CamcorderProfile
      */
     public static final int QUALITY_HIGH_SPEED_1080P = 2004;
 
+    /**
+     * High speed ( >= 100fps) quality level corresponding to the 2160p (3840 x 2160)
+     * resolution.
+     */
+    public static final int QUALITY_HIGH_SPEED_2160P = 2005;
+
     // Start and end of high speed quality list
     private static final int QUALITY_HIGH_SPEED_LIST_START = QUALITY_HIGH_SPEED_LOW;
-    private static final int QUALITY_HIGH_SPEED_LIST_END = QUALITY_HIGH_SPEED_1080P;
+    private static final int QUALITY_HIGH_SPEED_LIST_END = QUALITY_HIGH_SPEED_2160P;
 
     /**
      * Default recording duration in seconds before the session is terminated.
@@ -313,6 +319,7 @@ public class CamcorderProfile
      * @see #QUALITY_HIGH_SPEED_480P
      * @see #QUALITY_HIGH_SPEED_720P
      * @see #QUALITY_HIGH_SPEED_1080P
+     * @see #QUALITY_HIGH_SPEED_2160P
     */
     public static CamcorderProfile get(int cameraId, int quality) {
         if (!((quality >= QUALITY_LIST_START &&
