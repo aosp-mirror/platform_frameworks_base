@@ -156,6 +156,13 @@ public class RippleDrawable extends LayerDrawable {
     private boolean mOverrideBounds;
 
     /**
+     * Whether the next draw MUST draw something to canvas. Used to work around
+     * a bug in hardware invalidation following a render thread-accelerated
+     * animation.
+     */
+    private boolean mNeedsDraw;
+
+    /**
      * Constructor used for drawable inflation.
      */
     RippleDrawable() {
@@ -204,6 +211,8 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         cancelExitingRipples();
+
+        mNeedsDraw = true;
         invalidateSelf();
     }
 
@@ -548,6 +557,8 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         cancelExitingRipples();
+
+        mNeedsDraw = true;
         invalidateSelf();
     }
 
@@ -642,11 +653,12 @@ public class RippleDrawable extends LayerDrawable {
             canvas.restoreToCount(rippleLayer);
         }
 
-        // If we failed to draw anything, at least draw a color so that
-        // invalidation works correctly.
-        if (contentLayer < 0 && backgroundLayer < 0 && rippleLayer < 0) {
+        // If we failed to draw anything and we just canceled animations, at
+        // least draw a color so that hardware invalidation works correctly.
+        if (contentLayer < 0 && backgroundLayer < 0 && rippleLayer < 0 && mNeedsDraw) {
             canvas.drawColor(Color.TRANSPARENT);
         }
+        mNeedsDraw = false;
 
         canvas.restoreToCount(saveCount);
     }
