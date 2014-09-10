@@ -80,6 +80,20 @@ public class LegacyRequestMapper {
             }
         }
 
+        /*
+         * colorCorrection.*
+         */
+        // colorCorrection.aberrationMode
+        {
+            int aberrationMode = ParamsUtils.getOrDefault(request,
+                    COLOR_CORRECTION_ABERRATION_MODE,
+                    /*defaultValue*/COLOR_CORRECTION_ABERRATION_MODE_FAST);
+
+            if (aberrationMode != COLOR_CORRECTION_ABERRATION_MODE_FAST) {
+                Log.w(TAG, "convertRequestToMetadata - Ignoring unsupported " +
+                        "colorCorrection.aberrationMode = " + aberrationMode);
+            }
+        }
 
         /*
          * control.ae*
@@ -417,6 +431,21 @@ public class LegacyRequestMapper {
                 } else {
                     params.setJpegThumbnailSize(s.getWidth(), s.getHeight());
                 }
+            }
+        }
+
+        /*
+         * noiseReduction.*
+         */
+        // noiseReduction.mode
+        {
+            int mode = ParamsUtils.getOrDefault(request,
+                    NOISE_REDUCTION_MODE,
+                    /*defaultValue*/NOISE_REDUCTION_MODE_FAST);
+
+            if (mode != NOISE_REDUCTION_MODE_FAST) {
+                Log.w(TAG, "convertRequestToMetadata - Ignoring unsupported " +
+                        "noiseReduction.mode = " + mode);
             }
         }
     }
