@@ -98,7 +98,7 @@
         android:id="@+id/print_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dip"
+        android:layout_marginStart="16dip"
         android:elevation="@dimen/preview_controls_elevation"
         android:background="@drawable/print_button">
     </ImageButton>
