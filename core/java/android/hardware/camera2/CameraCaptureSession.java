@@ -483,7 +483,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * and in the buffers sent to each output Surface. These buffer
          * timestamps are accessible through, for example,
          * {@link android.media.Image#getTimestamp() Image.getTimestamp()} or
-         * {@link android.graphics.SurfaceTexture#getTimestamp()}.</p>
+         * {@link android.graphics.SurfaceTexture#getTimestamp()}.
+         * The frame number included is equal to the frame number that will be included in
+         * {@link CaptureResult#getFrameNumber}.</p>
          *
          * <p>For the simplest way to play a shutter sound camera shutter or a
          * video recording start/stop sound, see the
@@ -494,8 +496,19 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @param session the session returned by {@link CameraDevice#createCaptureSession}
          * @param request the request for the capture that just begun
          * @param timestamp the timestamp at start of capture, in nanoseconds.
+         * @param frameNumber the frame number for this capture
          *
          * @see android.media.MediaActionSound
+         */
+        public void onCaptureStarted(CameraCaptureSession session,
+                CaptureRequest request, long timestamp, long frameNumber) {
+            // Temporary trampoline for API change transition
+            onCaptureStarted(session, request, timestamp);
+        }
+
+        /**
+         * Temporary for API change transition
+         * @hide
          */
         public void onCaptureStarted(CameraCaptureSession session,
                 CaptureRequest request, long timestamp) {
