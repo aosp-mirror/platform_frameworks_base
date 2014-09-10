@@ -60,10 +60,10 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
         super.setUp();
         DownloadManagerTestRunner mRunner = (DownloadManagerTestRunner)getInstrumentation();
         externalDownloadUriValue = normalizeUri(mRunner.externalDownloadUriValue);
-        assertNotNull(externalDownloadUriValue);
+        assertNotNull("download url is null", externalDownloadUriValue);
 
         externalLargeDownloadUriValue = normalizeUri(mRunner.externalDownloadUriValue);
-        assertNotNull(externalLargeDownloadUriValue);
+        assertNotNull("large download url is null", externalLargeDownloadUriValue);
     }
 
     /**
@@ -140,7 +140,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
 
             dlRequest = mDownloadManager.enqueue(request);
             waitForDownloadToStart(dlRequest);
-            assertTrue(dlRequest != -1);
+            assertTrue("request id is -1 from download manager", dlRequest != -1);
 
             // Store ID of download for later retrieval
             outputFile = new DataOutputStream(fileOutput);
@@ -183,7 +183,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             mContext.deleteFile(DOWNLOAD_STARTED_FLAG);
         }
 
-        assertTrue(dlRequest != -1);
+        assertTrue("request id is -1 from download manager", dlRequest != -1);
         Cursor cursor = getCursor(dlRequest);
         ParcelFileDescriptor pfd = null;
         try {
@@ -193,7 +193,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             int status = cursor.getInt(columnIndex);
             int currentWaitTime = 0;
 
-            assertTrue(waitForDownload(dlRequest, 15 * 60 * 1000));
+            assertTrue("download not finished", waitForDownload(dlRequest, 15 * 60 * 1000));
 
             Log.i(LOG_TAG, "Verifying download information...");
             // Verify specific info about the file (size, name, etc)...
@@ -233,7 +233,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
         dlRequest = mDownloadManager.enqueue(request);
 
         // Rather large file, so wait up to 15 mins...
-        assertTrue(waitForDownload(dlRequest, 15 * 60 * 1000));
+        assertTrue("download not finished", waitForDownload(dlRequest, 15 * 60 * 1000));
 
         Cursor cursor = getCursor(dlRequest);
         ParcelFileDescriptor pfd = null;
@@ -317,7 +317,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             Log.i(LOG_TAG, "Turning on WiFi...");
             setWiFiStateOn(true);
             Log.i(LOG_TAG, "Waiting up to 10 minutes for download to complete...");
-            assertTrue(waitForDownload(dlRequest, 10 * 60 * 1000));
+            assertTrue("download not finished", waitForDownload(dlRequest, 10 * 60 * 1000));
             ParcelFileDescriptor pfd = mDownloadManager.openDownloadedFile(dlRequest);
             verifyFileSize(pfd, filesize);
         } finally {
@@ -385,7 +385,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             setWiFiStateOn(true);
 
             Log.i(LOG_TAG, "Waiting up to 10 minutes for download to complete...");
-            assertTrue(waitForDownload(dlRequest, 10 * 60 * 1000));
+            assertTrue("download not finished", waitForDownload(dlRequest, 10 * 60 * 1000));
             ParcelFileDescriptor pfd = mDownloadManager.openDownloadedFile(dlRequest);
             verifyFileSize(pfd, filesize);
         } finally {
@@ -456,7 +456,7 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
             setAirplaneModeOn(false);
 
             Log.i(LOG_TAG, "Waiting up to 10 minutes for donwload to complete...");
-            assertTrue(waitForDownload(dlRequest, 10 * 60 * 1000)); // wait up to 10 mins
+            assertTrue("download not finished", waitForDownload(dlRequest, 10 * 60 * 1000)); // wait up to 10 mins
             ParcelFileDescriptor pfd = mDownloadManager.openDownloadedFile(dlRequest);
             verifyFileSize(pfd, filesize);
         } finally {
@@ -489,11 +489,11 @@ public class DownloadManagerTestApp extends DownloadManagerBaseTest {
                 Request request = new Request(remoteUri);
                 request.setTitle(filename);
                 dlRequest = mDownloadManager.enqueue(request);
-                assertTrue(dlRequest != -1);
+                assertTrue("request id is -1 from download manager", dlRequest != -1);
                 downloadIds.add(dlRequest);
             }
 
-            assertTrue(waitForMultipleDownloads(downloadIds, 15 * 60 * 2000));  // wait 15 mins max
+            assertTrue("download not finished", waitForMultipleDownloads(downloadIds, 15 * 60 * 2000));  // wait 15 mins max
         } finally {
             removeAllCurrentDownloads();
         }
