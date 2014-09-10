@@ -16,6 +16,7 @@
 
 package com.android.server.content;
 
+import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
@@ -478,7 +479,7 @@ public class SyncManager {
             mContext.registerReceiverAsUser(mAccountsUpdatedReceiver,
                     UserHandle.ALL,
                     new IntentFilter(AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION),
-                    null, null);
+                    Manifest.permission.ACCOUNT_MANAGER, null);
         }
 
         // Pick a random second in a day to seed all periodic syncs
