@@ -888,6 +888,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean mProcessesReady = false;
     boolean mSystemReady = false;
     boolean mBooting = false;
+    boolean mCallFinishBooting = false;
+    boolean mBootAnimationComplete = false;
     boolean mWaitingUpdate = false;
     boolean mDidUpdate = false;
     boolean mOnBattery = false;
@@ -6195,6 +6197,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     final void finishBooting() {
+        synchronized (this) {
+            if (!mBootAnimationComplete) {
+                mCallFinishBooting = true;
+                return;
+            }
+            mCallFinishBooting = false;
+        }
+
         // Register receivers to handle package update events
         mPackageMonitor.register(mContext, Looper.getMainLooper(), false);
 
@@ -6250,6 +6260,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 scheduleStartProfilesLocked();
             }
+        }
+    }
+
+    @Override
+    public void bootAnimationComplete() {
+        final boolean callFinishBooting;
+        synchronized (this) {
+            callFinishBooting = mCallFinishBooting;
+            mBootAnimationComplete = true;
+        }
+        if (callFinishBooting) {
+            finishBooting();
         }
     }
 
