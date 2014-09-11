@@ -930,13 +930,20 @@ public class SubscriptionManager implements BaseColumns {
 
     /** @hide */
     public static boolean isValidSlotId(int slotId) {
-        return slotId > INVALID_SLOT_ID && slotId < TelephonyManager.getDefault().getSimCount();
+        // We are testing INVALID_SLOT_ID and slotId >= 0 independently because we should
+        // not assume that INVALID_SLOT_ID will always be a negative value.  Any negative
+        // value is invalid.
+        return slotId != INVALID_SLOT_ID && slotId >= 0 &&
+                slotId < TelephonyManager.getDefault().getSimCount();
     }
 
     /** @hide */
     public static boolean isValidPhoneId(int phoneId) {
-        return phoneId > INVALID_PHONE_ID
-                && phoneId < TelephonyManager.getDefault().getPhoneCount();
+        // We are testing INVALID_PHONE_ID and phoneId >= 0 independently because we should
+        // not assume that INVALID_PHONE_ID will always be a negative value.  Any negative
+        // value is invalid.
+        return phoneId != INVALID_PHONE_ID && phoneId >= 0 &&
+                phoneId < TelephonyManager.getDefault().getPhoneCount();
     }
 
     /** @hide */
