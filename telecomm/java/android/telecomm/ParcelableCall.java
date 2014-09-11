@@ -153,7 +153,9 @@ public final class ParcelableCall implements Parcelable {
         return mHandle;
     }
 
-    /** The {@link PropertyPresentation} which controls how the handle is shown. */
+    /**
+     * The presentation requirements for the handle. See {@link TelecommManager} for valid values.
+     */
     public int getHandlePresentation() {
         return mHandlePresentation;
     }
@@ -163,7 +165,10 @@ public final class ParcelableCall implements Parcelable {
         return mCallerDisplayName;
     }
 
-    /** The {@link PropertyPresentation} which controls how the caller display name is shown. */
+    /**
+     * The presentation requirements for the caller display name.
+     * See {@link TelecommManager} for valid values.
+     */
     public int getCallerDisplayNamePresentation() {
         return mCallerDisplayNamePresentation;
     }

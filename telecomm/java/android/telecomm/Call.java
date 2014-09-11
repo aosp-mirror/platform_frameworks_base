@@ -108,7 +108,7 @@ public final class Call {
 
         /**
          * @return The presentation requirements for the handle. See
-         * {@link PropertyPresentation} for valid values.
+         * {@link TelecommManager} for valid values.
          */
         public int getHandlePresentation() {
             return mHandlePresentation;
@@ -123,7 +123,7 @@ public final class Call {
 
         /**
          * @return The presentation requirements for the caller display name. See
-         * {@link PropertyPresentation} for valid values.
+         * {@link TelecommManager} for valid values.
          */
         public int getCallerDisplayNamePresentation() {
             return mCallerDisplayNamePresentation;

@@ -238,6 +238,23 @@ public class TelecommManager {
     public static final String EXTRA_TTY_PREFERRED_MODE =
             "android.telecomm.intent.extra.TTY_PREFERRED";
 
+    /**
+     * The following 4 constants define how properties such as phone numbers and names are
+     * displayed to the user.
+     */
+
+    /** Property is displayed normally. */
+    public static final int PRESENTATION_ALLOWED = 1;
+
+    /** Property was blocked. */
+    public static final int PRESENTATION_RESTRICTED = 2;
+
+    /** Presentation was not specified or is unknown. */
+    public static final int PRESENTATION_UNKNOWN = 3;
+
+    /** Property should be displayed as a pay phone. */
+    public static final int PRESENTATION_PAYPHONE = 4;
+
     private static final String TAG = "TelecommManager";
 
     private static final String TELECOMM_SERVICE_NAME = "telecomm";
