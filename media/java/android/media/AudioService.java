@@ -5105,6 +5105,11 @@ public class AudioService extends IAudioService.Stub {
         return device;
     }
 
+    @Override
+    public boolean isHdmiSystemAudioSupported() {
+        return mHdmiSystemAudioSupported;
+    }
+
     //==========================================================================================
     // Camera shutter sound policy.
     // config_camera_sound_forced configuration option in config.xml defines if the camera shutter
