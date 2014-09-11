@@ -24,6 +24,11 @@ package android.os {
 
 package android.view {
 
+  public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+    method protected void initializeFadingEdge(android.content.res.TypedArray);
+    method protected void initializeScrollbars(android.content.res.TypedArray);
+  }
+
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     field public static final int TYPE_KEYGUARD = 2004; // 0x7d4
   }
