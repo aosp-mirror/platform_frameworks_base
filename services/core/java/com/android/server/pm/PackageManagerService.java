@@ -138,6 +138,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
 import android.os.storage.StorageManager;
+import android.os.Debug;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1845,7 +1846,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public boolean isPackageAvailable(String packageName, int userId) {
         if (!sUserManager.exists(userId)) return false;
-        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, "is package available");
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "is package available");
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(packageName);
             if (p != null) {
@@ -1864,7 +1865,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public PackageInfo getPackageInfo(String packageName, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, "get package info");
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get package info");
         // reader
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(packageName);
@@ -1909,7 +1910,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public int getPackageUid(String packageName, int userId) {
         if (!sUserManager.exists(userId)) return -1;
-        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, "get package uid");
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get package uid");
         // reader
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(packageName);
@@ -2059,7 +2060,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ApplicationInfo getApplicationInfo(String packageName, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, "get application info");
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get application info");
         // writer
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(packageName);
@@ -2150,7 +2151,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ActivityInfo getActivityInfo(ComponentName component, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, "get activity info");
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get activity info");
         synchronized (mPackages) {
             PackageParser.Activity a = mActivities.mActivities.get(component);
 
@@ -2189,7 +2190,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ActivityInfo getReceiverInfo(ComponentName component, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, "get receiver info");
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get receiver info");
         synchronized (mPackages) {
             PackageParser.Activity a = mReceivers.mActivities.get(component);
             if (DEBUG_PACKAGE_INFO) Log.v(
@@ -2207,7 +2208,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ServiceInfo getServiceInfo(ComponentName component, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, "get service info");
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get service info");
         synchronized (mPackages) {
             PackageParser.Service s = mServices.mServices.get(component);
             if (DEBUG_PACKAGE_INFO) Log.v(
@@ -2225,7 +2226,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ProviderInfo getProviderInfo(ComponentName component, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, "get provider info");
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get provider info");
         synchronized (mPackages) {
             PackageParser.Provider p = mProviders.mProviders.get(component);
             if (DEBUG_PACKAGE_INFO) Log.v(
@@ -2329,12 +2330,16 @@ public class PackageManagerService extends IPackageManager.Stub {
     /**
      * Checks if the request is from the system or an app that has INTERACT_ACROSS_USERS
      * or INTERACT_ACROSS_USERS_FULL permissions, if the userid is not for the caller.
+     * @param checkShell TODO(yamasani):
      * @param message the message to log on security exception
      */
     void enforceCrossUserPermission(int callingUid, int userId, boolean requireFullPermission,
-            String message) {
+            boolean checkShell, String message) {
         if (userId < 0) {
             throw new IllegalArgumentException("Invalid userId " + userId);
+        }
+        if (checkShell) {
+            enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
         }
         if (userId == UserHandle.getUserId(callingUid)) return;
         if (callingUid != Process.SYSTEM_UID && callingUid != 0) {
@@ -2349,6 +2354,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                     mContext.enforceCallingOrSelfPermission(
                             android.Manifest.permission.INTERACT_ACROSS_USERS, message);
                 }
+            }
+        }
+    }
+
+    void enforceShellRestriction(String restriction, int callingUid, int userHandle) {
+        if (callingUid == Process.SHELL_UID) {
+            if (userHandle >= 0
+                    && sUserManager.hasUserRestriction(restriction, userHandle)) {
+                throw new SecurityException("Shell does not have permission to access user "
+                        + userHandle);
+            } else if (userHandle < 0) {
+                Slog.e(TAG, "Unable to check shell permission for user " + userHandle + "\n\t"
+                        + Debug.getCallers(3));
             }
         }
     }
@@ -2876,7 +2894,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public ResolveInfo resolveIntent(Intent intent, String resolvedType,
             int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, "resolve intent");
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "resolve intent");
         List<ResolveInfo> query = queryIntentActivities(intent, resolvedType, flags, userId);
         return chooseBestActivity(intent, resolvedType, flags, query, userId);
     }
@@ -3199,7 +3217,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public List<ResolveInfo> queryIntentActivities(Intent intent,
             String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, "query intent activities");
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "query intent activities");
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -3346,7 +3364,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false,
-                "query intent activity options");
+                false, "query intent activity options");
         final String resultsAction = intent.getAction();
 
         List<ResolveInfo> results = queryIntentActivities(intent, resolvedType, flags
@@ -3642,7 +3660,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public ParceledListSlice<PackageInfo> getInstalledPackages(int flags, int userId) {
         final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
 
-        enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "get installed packages");
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false, "get installed packages");
 
         // writer
         synchronized (mPackages) {
@@ -7660,7 +7678,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final File originFile = new File(originPath);
         final int uid = Binder.getCallingUid();
-        if (isUserRestricted(UserHandle.getUserId(uid), UserManager.DISALLOW_INSTALL_APPS)) {
+        if (isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
             try {
                 if (observer != null) {
                     observer.onPackageInstalled("", INSTALL_FAILED_USER_RESTRICTED, null, null);
@@ -7748,11 +7766,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
         PackageSetting pkgSetting;
         final int uid = Binder.getCallingUid();
-        if (UserHandle.getUserId(uid) != userId) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "setApplicationHiddenSetting for user " + userId);
-        }
+        enforceCrossUserPermission(uid, userId, true, true,
+                "setApplicationHiddenSetting for user " + userId);
 
         if (hidden && isPackageDeviceAdmin(packageName, userId)) {
             Slog.w(TAG, "Not hiding package " + packageName + ": has active device admin");
@@ -7811,7 +7826,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public boolean getApplicationHiddenSettingAsUser(String packageName, int userId) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true,
-                "getApplicationHidden for user " + userId);
+                false, "getApplicationHidden for user " + userId);
         PackageSetting pkgSetting;
         long callingId = Binder.clearCallingIdentity();
         try {
@@ -7837,7 +7852,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 null);
         PackageSetting pkgSetting;
         final int uid = Binder.getCallingUid();
-        enforceCrossUserPermission(uid, userId, true, "installExistingPackage for user " + userId);
+        enforceCrossUserPermission(uid, userId, true, true, "installExistingPackage for user "
+                + userId);
         if (isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
             return PackageManager.INSTALL_FAILED_USER_RESTRICTED;
         }
@@ -10961,7 +10977,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             final IPackageDataObserver observer, final int userId) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CLEAR_APP_USER_DATA, null);
-        enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "clear application data");
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false, "clear application data");
         // Queue up an async operation since the package deletion may take a little while.
         mHandler.post(new Runnable() {
             public void run() {
@@ -11261,7 +11277,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             String opname) {
         // writer
         int callingUid = Binder.getCallingUid();
-        enforceCrossUserPermission(callingUid, userId, true, "add preferred activity");
+        enforceCrossUserPermission(callingUid, userId, true, false, "add preferred activity");
         if (filter.countActions() == 0) {
             Slog.w(TAG, "Cannot set a preferred activity with no filter actions");
             return;
@@ -11306,7 +11322,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         final int callingUid = Binder.getCallingUid();
-        enforceCrossUserPermission(callingUid, userId, true, "replace preferred activity");
+        enforceCrossUserPermission(callingUid, userId, true, false, "replace preferred activity");
         synchronized (mPackages) {
             if (mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
@@ -11447,6 +11463,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public void resetPreferredActivities(int userId) {
+        /* TODO: Actually use userId. Why is it being passed in? */
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
         // writer
@@ -11561,6 +11578,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         int callingUid = Binder.getCallingUid();
         enforceOwnerRights(ownerPackage, ownerUserId, callingUid);
+        enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, sourceUserId);
         if (intentFilter.countActions() == 0) {
             Slog.w(TAG, "Cannot set a crossProfile intent filter with no filter actions");
             return;
@@ -11580,6 +11598,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         int callingUid = Binder.getCallingUid();
         enforceOwnerRights(ownerPackage, ownerUserId, callingUid);
+        enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, sourceUserId);
         int callingUserId = UserHandle.getUserId(callingUid);
         synchronized (mPackages) {
             CrossProfileIntentResolver resolver =
@@ -11674,7 +11693,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int uid = Binder.getCallingUid();
         final int permission = mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE);
-        enforceCrossUserPermission(uid, userId, false, "set enabled");
+        enforceCrossUserPermission(uid, userId, false, true, "set enabled");
         final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
         boolean sendNow = false;
         boolean isApp = (className == null);
@@ -11808,7 +11827,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int permission = mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE);
         final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
-        enforceCrossUserPermission(uid, userId, true, "stop package");
+        enforceCrossUserPermission(uid, userId, true, true, "stop package");
         // writer
         synchronized (mPackages) {
             if (mSettings.setPackageStoppedStateLPw(packageName, stopped, allowedByPermission,
@@ -11830,7 +11849,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public int getApplicationEnabledSetting(String packageName, int userId) {
         if (!sUserManager.exists(userId)) return COMPONENT_ENABLED_STATE_DISABLED;
         int uid = Binder.getCallingUid();
-        enforceCrossUserPermission(uid, userId, false, "get enabled");
+        enforceCrossUserPermission(uid, userId, false, false, "get enabled");
         // reader
         synchronized (mPackages) {
             return mSettings.getApplicationEnabledSettingLPr(packageName, userId);
@@ -11841,7 +11860,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public int getComponentEnabledSetting(ComponentName componentName, int userId) {
         if (!sUserManager.exists(userId)) return COMPONENT_ENABLED_STATE_DISABLED;
         int uid = Binder.getCallingUid();
-        enforceCrossUserPermission(uid, userId, false, "get component enabled");
+        enforceCrossUserPermission(uid, userId, false, false, "get component enabled");
         // reader
         synchronized (mPackages) {
             return mSettings.getComponentEnabledSettingLPr(componentName, userId);
