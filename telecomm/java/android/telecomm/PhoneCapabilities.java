@@ -78,8 +78,19 @@ public final class PhoneCapabilities {
      */
     public static final int VoWIFI = 0x00000800;
 
-    public static final int ALL = HOLD | SUPPORT_HOLD | MERGE_CONFERENCE | SWAP_CONFERENCE | ADD_CALL
-            | RESPOND_VIA_TEXT | MUTE | MANAGE_CONFERENCE;
+    /**
+     * Call is able to be separated from its parent {@code Conference}, if any.
+     */
+    public static final int SEPARATE_FROM_CONFERENCE = 0x00001000;
+
+    /**
+     * Call is able to be individually disconnected when in a {@code Conference}.
+     */
+    public static final int DISCONNECT_FROM_CONFERENCE = 0x00002000;
+
+    public static final int ALL = HOLD | SUPPORT_HOLD | MERGE_CONFERENCE | SWAP_CONFERENCE
+            | ADD_CALL | RESPOND_VIA_TEXT | MUTE | MANAGE_CONFERENCE | SEPARATE_FROM_CONFERENCE
+            | DISCONNECT_FROM_CONFERENCE;
 
     public static String toString(int capabilities) {
         StringBuilder builder = new StringBuilder();
