@@ -76,22 +76,19 @@ public abstract class Shader_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDestructor(long native_shader, long native_with_local_matrix) {
-        // TODO: check what's native_with_local_matrix
+    /*package*/ static void nativeDestructor(long native_shader) {
         sManager.removeJavaReferenceFor(native_shader);
     }
 
     @LayoutlibDelegate
-    /*package*/ static long nativeSetLocalMatrix(long native_shader,
-            long native_with_local_matrix, long matrix_instance) {
+    /*package*/ static void nativeSetLocalMatrix(long native_shader, long matrix_instance) {
         // get the delegate from the native int.
         Shader_Delegate shaderDelegate = sManager.getDelegate(native_shader);
         if (shaderDelegate == null) {
-            return 0;
+            return;
         }
 
         shaderDelegate.mLocalMatrix = Matrix_Delegate.getDelegate(matrix_instance);
-        return 0;
     }
 
     // ---- Private delegate/helper methods ----

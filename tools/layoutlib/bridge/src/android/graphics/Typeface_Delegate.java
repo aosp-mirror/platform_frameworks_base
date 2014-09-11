@@ -55,8 +55,9 @@ public final class Typeface_Delegate {
 
     @NonNull
     private final FontFamily_Delegate[] mFontFamilies;  // the reference to FontFamily_Delegate.
-    /** @see FontFamily_Delegate.FontInfo#mStyle */
+    /** @see Font#getStyle() */
     private final int mStyle;
+    private final int mWeight;
 
     private static long sDefaultTypeface;
 
@@ -84,11 +85,18 @@ public final class Typeface_Delegate {
     @NonNull
     public List<Font> getFonts(FontVariant variant) {
         assert variant != FontVariant.NONE;
+
+        // Calculate the required weight based on style and weight of this typeface.
+        int weight = mWeight + ((mStyle & Font.BOLD) == 0 ? 0 : FontFamily_Delegate.BOLD_FONT_WEIGHT_DELTA);
+        if (weight > 900) {
+            weight = 900;
+        }
+        final boolean isItalic = (mStyle & Font.ITALIC) != 0;
         List<Font> fonts = new ArrayList<Font>(mFontFamilies.length);
         for (int i = 0; i < mFontFamilies.length; i++) {
             FontFamily_Delegate ffd = mFontFamilies[i];
             if (ffd != null && ffd.isValid()) {
-                Font font = ffd.getFont(mStyle);
+                Font font = ffd.getFont(weight, isItalic);
                 if (font != null) {
                     FontVariant ffdVariant = ffd.getVariant();
                     if (ffdVariant == FontVariant.NONE) {
@@ -102,7 +110,7 @@ public final class Typeface_Delegate {
                     FontFamily_Delegate ffd2 = mFontFamilies[++i];
                     assert ffd2 != null;
                     FontVariant ffd2Variant = ffd2.getVariant();
-                    Font font2 = ffd2.getFont(mStyle);
+                    Font font2 = ffd2.getFont(weight, isItalic);
                     assert ffd2Variant != FontVariant.NONE && ffd2Variant != ffdVariant
                             && font2 != null;
                     // Add the font with the matching variant to the list.
@@ -135,7 +143,22 @@ public final class Typeface_Delegate {
             return 0;
         }
 
-        return sManager.addNewDelegate(new Typeface_Delegate(delegate.mFontFamilies, style));
+        return sManager.addNewDelegate(new Typeface_Delegate(delegate.mFontFamilies, style,
+                delegate.mWeight));
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static long nativeCreateWeightAlias(long native_instance, int weight) {
+        Typeface_Delegate delegate = sManager.getDelegate(native_instance);
+        if (delegate == null) {
+            delegate = sManager.getDelegate(sDefaultTypeface);
+        }
+        if (delegate == null) {
+            return 0;
+        }
+        Typeface_Delegate weightAlias =
+                new Typeface_Delegate(delegate.mFontFamilies, delegate.mStyle, weight);
+        return sManager.addNewDelegate(weightAlias);
     }
 
     @LayoutlibDelegate
@@ -176,7 +199,12 @@ public final class Typeface_Delegate {
     // ---- Private delegate/helper methods ----
 
     private Typeface_Delegate(@NonNull FontFamily_Delegate[] fontFamilies, int style) {
+        this(fontFamilies, style, FontFamily_Delegate.DEFAULT_FONT_WEIGHT);
+    }
+
+    public Typeface_Delegate(@NonNull FontFamily_Delegate[] fontFamilies, int style, int weight) {
         mFontFamilies = fontFamilies;
         mStyle = style;
+        mWeight = weight;
     }
 }
