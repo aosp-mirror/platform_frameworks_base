@@ -2396,7 +2396,6 @@ package android {
     field public static final int Widget_Holo_DropDownItem_Spinner = 16973995; // 0x10300ab
     field public static final int Widget_Holo_EditText = 16973971; // 0x1030093
     field public static final int Widget_Holo_ExpandableListView = 16973972; // 0x1030094
-    field public static final int Widget_Holo_FastScroll = 16974341; // 0x1030205
     field public static final int Widget_Holo_GridView = 16973973; // 0x1030095
     field public static final int Widget_Holo_HorizontalScrollView = 16973988; // 0x10300a4
     field public static final int Widget_Holo_ImageButton = 16973974; // 0x1030096
@@ -2417,7 +2416,6 @@ package android {
     field public static final int Widget_Holo_Light_ActionMode_Inverse = 16974119; // 0x1030127
     field public static final int Widget_Holo_Light_AutoCompleteTextView = 16974011; // 0x10300bb
     field public static final int Widget_Holo_Light_Button = 16974006; // 0x10300b6
-    field public static final int Widget_Holo_Light_Button_Borderless = 16974343; // 0x1030207
     field public static final int Widget_Holo_Light_Button_Borderless_Small = 16974107; // 0x103011b
     field public static final int Widget_Holo_Light_Button_Inset = 16974008; // 0x10300b8
     field public static final int Widget_Holo_Light_Button_Small = 16974007; // 0x10300b7
@@ -2431,7 +2429,6 @@ package android {
     field public static final int Widget_Holo_Light_DropDownItem_Spinner = 16974041; // 0x10300d9
     field public static final int Widget_Holo_Light_EditText = 16974014; // 0x10300be
     field public static final int Widget_Holo_Light_ExpandableListView = 16974015; // 0x10300bf
-    field public static final int Widget_Holo_Light_FastScroll = 16974344; // 0x1030208
     field public static final int Widget_Holo_Light_GridView = 16974016; // 0x10300c0
     field public static final int Widget_Holo_Light_HorizontalScrollView = 16974034; // 0x10300d2
     field public static final int Widget_Holo_Light_ImageButton = 16974017; // 0x10300c1
@@ -2455,7 +2452,6 @@ package android {
     field public static final int Widget_Holo_Light_ScrollView = 16974033; // 0x10300d1
     field public static final int Widget_Holo_Light_SeekBar = 16974028; // 0x10300cc
     field public static final int Widget_Holo_Light_Spinner = 16974035; // 0x10300d3
-    field public static final int Widget_Holo_Light_StackView = 16974345; // 0x1030209
     field public static final int Widget_Holo_Light_Tab = 16974052; // 0x10300e4
     field public static final int Widget_Holo_Light_TabWidget = 16974037; // 0x10300d5
     field public static final int Widget_Holo_Light_TextView = 16974010; // 0x10300ba
@@ -2479,7 +2475,6 @@ package android {
     field public static final int Widget_Holo_ScrollView = 16973987; // 0x10300a3
     field public static final int Widget_Holo_SeekBar = 16973982; // 0x103009e
     field public static final int Widget_Holo_Spinner = 16973989; // 0x10300a5
-    field public static final int Widget_Holo_StackView = 16974342; // 0x1030206
     field public static final int Widget_Holo_Tab = 16974051; // 0x10300e3
     field public static final int Widget_Holo_TabWidget = 16973991; // 0x10300a7
     field public static final int Widget_Holo_TextView = 16973967; // 0x103008f
@@ -2580,6 +2575,7 @@ package android {
     field public static final int Widget_Material_Light_RatingBar_Indicator = 16974531; // 0x10302c3
     field public static final int Widget_Material_Light_RatingBar_Small = 16974532; // 0x10302c4
     field public static final int Widget_Material_Light_ScrollView = 16974533; // 0x10302c5
+    field public static final int Widget_Material_Light_SearchView = 16974575; // 0x10302ef
     field public static final int Widget_Material_Light_SeekBar = 16974534; // 0x10302c6
     field public static final int Widget_Material_Light_SegmentedButton = 16974535; // 0x10302c7
     field public static final int Widget_Material_Light_Spinner = 16974537; // 0x10302c9
@@ -2607,6 +2603,7 @@ package android {
     field public static final int Widget_Material_RatingBar_Indicator = 16974468; // 0x1030284
     field public static final int Widget_Material_RatingBar_Small = 16974469; // 0x1030285
     field public static final int Widget_Material_ScrollView = 16974470; // 0x1030286
+    field public static final int Widget_Material_SearchView = 16974574; // 0x10302ee
     field public static final int Widget_Material_SeekBar = 16974471; // 0x1030287
     field public static final int Widget_Material_SegmentedButton = 16974472; // 0x1030288
     field public static final int Widget_Material_Spinner = 16974474; // 0x103028a
@@ -2642,7 +2639,12 @@ package android {
     field public static final int Widget_Toolbar = 16974339; // 0x1030203
     field public static final int Widget_Toolbar_Button_Navigation = 16974340; // 0x1030204
     field public static final int Widget_WebView = 16973875; // 0x1030033
-    field public static final int __removed = 16974559; // 0x10302df
+    field public static final int __removed1 = 16974559; // 0x10302df
+    field public static final int __removed3 = 16974341; // 0x1030205
+    field public static final int __removed4 = 16974342; // 0x1030206
+    field public static final int __removed5 = 16974343; // 0x1030207
+    field public static final int __removed6 = 16974344; // 0x1030208
+    field public static final int __removed7 = 16974345; // 0x1030209
     field public static final int l_resource_pad1 = 16974336; // 0x1030200
     field public static final int l_resource_pad10 = 16974327; // 0x10301f7
     field public static final int l_resource_pad11 = 16974326; // 0x10301f6
