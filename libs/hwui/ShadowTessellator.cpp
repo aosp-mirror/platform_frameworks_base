@@ -252,5 +252,29 @@ void ShadowTessellator::reverseVertexArray(Vertex* polygon, int len) {
     }
 }
 
+int ShadowTessellator::getExtraVertexNumber(const Vector2& vector1,
+        const Vector2& vector2, float divisor) {
+    // When there is no distance difference, there is no need for extra vertices.
+    if (vector1.lengthSquared() == 0 || vector2.lengthSquared() == 0) {
+        return 0;
+    }
+    // The formula is :
+    // extraNumber = floor(acos(dot(n1, n2)) / (M_PI / EXTRA_VERTEX_PER_PI))
+    // The value ranges for each step are:
+    // dot( ) --- [-1, 1]
+    // acos( )     --- [0, M_PI]
+    // floor(...)  --- [0, EXTRA_VERTEX_PER_PI]
+    float dotProduct = vector1.dot(vector2);
+    // TODO: Use look up table for the dotProduct to extraVerticesNumber
+    // computation, if needed.
+    float angle = acosf(dotProduct);
+    return (int) floor(angle / divisor);
+}
+
+void ShadowTessellator::checkOverflow(int used, int total, const char* bufferName) {
+    LOG_ALWAYS_FATAL_IF(used > total, "Error: %s overflow!!! used %d, total %d",
+            bufferName, used, total);
+}
+
 }; // namespace uirenderer
 }; // namespace android

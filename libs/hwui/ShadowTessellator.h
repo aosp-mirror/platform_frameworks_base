@@ -101,6 +101,10 @@ public:
      */
     static void reverseVertexArray(Vertex* polygon, int len);
 
+    static int getExtraVertexNumber(const Vector2& vector1, const Vector2& vector2,
+            float divisor);
+
+    static void checkOverflow(int used, int total, const char* bufferName);
 }; // ShadowTessellator
 
 }; // namespace uirenderer
