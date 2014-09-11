@@ -24,7 +24,7 @@
     >
     <TextView android:id="@+id/title"
         android:textAppearance="@style/TextAppearance.Material.Notification.Title"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:ellipsize="marquee"
