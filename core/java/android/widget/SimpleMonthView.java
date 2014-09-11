@@ -31,6 +31,7 @@ import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.AttributeSet;
+import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -300,7 +301,11 @@ class SimpleMonthView extends View {
     }
 
     private static boolean isValidDayOfWeek(int day) {
-        return (day >= Time.SUNDAY && day <= Time.SATURDAY);
+        return day >= Calendar.SUNDAY && day <= Calendar.SATURDAY;
+    }
+
+    private static boolean isValidMonth(int month) {
+        return month >= Calendar.JANUARY && month <= Calendar.DECEMBER;
     }
 
     /**
@@ -312,8 +317,8 @@ class SimpleMonthView extends View {
      * @param selectedDay the selected day of the month, or -1 for no selection.
      * @param month the month.
      * @param year the year.
-     * @param weekStart which day the week should start on. {@link Time#SUNDAY} through
-     *        {@link Time#SATURDAY}.
+     * @param weekStart which day the week should start on. {@link Calendar#SUNDAY} through
+     *        {@link Calendar#SATURDAY}.
      * @param enabledDayStart the first enabled day.
      * @param enabledDayEnd the last enabled day.
      */
@@ -325,7 +330,7 @@ class SimpleMonthView extends View {
 
         mSelectedDay = selectedDay;
 
-        if (month >= Calendar.JANUARY && month <= Calendar.DECEMBER) {
+        if (isValidMonth(month)) {
             mMonth = month;
         }
         mYear = year;
