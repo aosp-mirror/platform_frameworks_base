@@ -35,6 +35,7 @@ import com.android.printspooler.model.PageContentRepository.PageContentProvider;
  */
 public class PageContentView extends View
         implements PageContentRepository.OnPageContentAvailableCallback {
+
     private PageContentProvider mProvider;
 
     private MediaSize mMediaSize;

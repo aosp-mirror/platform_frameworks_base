@@ -76,9 +76,35 @@
     <!-- Title for the print dialog announced to the user for accessibility. Not shown in the UI. [CHAR LIMIT=none] -->
     <string name="print_dialog">Print dialog</string>
 
-    <!-- Template for the message that shows the current page out of the total number of pages -->
+    <!-- Template for the message that shows the current page out of the total number of pages [CHAR LIMIT=none] -->
     <string name="current_page_template"><xliff:g id="current_page">%1$d</xliff:g>
         /<xliff:g id="page_count">%2$d</xliff:g></string>
+
+    <!-- Description of the current page - spoken to the user [CHAR LIMIT=none] -->
+    <string name="page_description_template">Page <xliff:g id="current_page" example="1">%1$d</xliff:g>
+        of <xliff:g id="page_count" example="100">%2$d</xliff:g></string>
+
+    <!-- Template for the message to announce the print options summary - spoken to the user. [CHAR LIMIT=none] -->
+    <string name="summary_template">Summary, copies <xliff:g id="copies" example="1">%1$s</xliff:g>,
+        paper size <xliff:g id="paper_size" example="A4">%2$s</xliff:g></string>
+
+    <!-- Description for the handle to expand all print options - spoken to the user. [CHAR LIMIT=none] -->
+    <string name="expand_handle">Expand handle</string>
+
+    <!-- Description for the handle to collapse all print options - spoken to the user. [CHAR LIMIT=none] -->
+    <string name="collapse_handle">Collapse handle</string>
+
+    <!-- Description for the print button - spoken to the user. [CHAR LIMIT=none] -->
+    <string name="print_button">Print</string>
+
+    <!-- Description for the save to PDF button - spoken to the user. [CHAR LIMIT=none] -->
+    <string name="savetopdf_button">Save to PDF</string>
+
+    <!-- Message to announce print options are expanded - spoken to the user. [CHAR LIMIT=none] -->
+    <string name="print_options_expanded">Print options expanded</string>
+
+    <!-- Message to announce print options are collapsed - spoken to the user. [CHAR LIMIT=none] -->
+    <string name="print_options_collapsed">Print options collapsed</string>
 
     <!-- Select printer activity -->
 
