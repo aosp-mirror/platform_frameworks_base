@@ -855,7 +855,7 @@ public class Am extends BaseCommand {
     }
 
     private void sendBroadcast() throws Exception {
-        Intent intent = makeIntent(UserHandle.USER_ALL);
+        Intent intent = makeIntent(UserHandle.USER_CURRENT);
         IntentReceiver receiver = new IntentReceiver();
         System.out.println("Broadcasting: " + intent);
         mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, mReceiverPermission,
