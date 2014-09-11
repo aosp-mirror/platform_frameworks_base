@@ -25,6 +25,7 @@ import android.util.Log;
 import com.android.internal.telecomm.ITelecommService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -347,8 +348,8 @@ public class TelecommManager {
     }
 
     /**
-     * Return a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
-     * calls.
+     * Return a list of enabled {@link PhoneAccountHandle}s which can be used to make and receive
+     * phone calls.
      *
      * @see #EXTRA_PHONE_ACCOUNT_HANDLE
      * @return A list of {@code PhoneAccountHandle} objects.
@@ -356,10 +357,10 @@ public class TelecommManager {
     public List<PhoneAccountHandle> getEnabledPhoneAccounts() {
         try {
             if (isServiceConnected()) {
-                return getTelecommService().getOutgoingPhoneAccounts();
+                return getTelecommService().getEnabledPhoneAccounts();
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecommService#getOutgoingPhoneAccounts", e);
+            Log.e(TAG, "Error calling ITelecommService#getEnabledPhoneAccounts", e);
         }
         return new ArrayList<>();
     }
@@ -425,8 +426,8 @@ public class TelecommManager {
     }
 
     /**
-     * Returns a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
-     * calls which support the specified URI scheme.
+     * Returns a list of the enabled {@link PhoneAccountHandle}s which can be used to make and
+     * receive phone calls which support the specified URI scheme.
      * <P>
      * For example, invoking with {@code "tel"} will find all {@link PhoneAccountHandle}s which
      * support telephone calls (e.g. URIs such as {@code tel:555-555-1212}).  Invoking with
@@ -473,6 +474,78 @@ public class TelecommManager {
             Log.e(TAG, "Error calling ITelecommService#getPhoneAccount", e);
         }
         return null;
+    }
+
+    /**
+     * Returns a count of enabled and disabled {@link PhoneAccount}s.
+     *
+     * @return The count of enabled and disabled {@link PhoneAccount}s.
+     * @hide
+     */
+    @SystemApi
+    public int getAllPhoneAccountsCount() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecommService().getAllPhoneAccountsCount();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#getAllPhoneAccountsCount", e);
+        }
+        return 0;
+    }
+
+    /**
+     * Returns a list of all {@link PhoneAccount}s.
+     *
+     * @return All {@link PhoneAccount}s.
+     * @hide
+     */
+    @SystemApi
+    public List<PhoneAccount> getAllPhoneAccounts() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecommService().getAllPhoneAccounts();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#getAllPhoneAccounts", e);
+        }
+        return Collections.EMPTY_LIST;
+    }
+
+    /**
+     * Returns a list of all {@link PhoneAccountHandle}s.
+     *
+     * @return All {@link PhoneAccountHandle}s.
+     * @hide
+     */
+    @SystemApi
+    public List<PhoneAccountHandle> getAllPhoneAccountHandles() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecommService().getAllPhoneAccountHandles();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#getAllPhoneAccountHandles", e);
+        }
+        return Collections.EMPTY_LIST;
+    }
+
+    /**
+     * Enables or disables a {@link PhoneAccount}.
+     *
+     * @param account The {@link PhoneAccountHandle} to enable or disable.
+     * @param isEnabled {@code True} if the phone account should be enabled.
+     * @hide
+     */
+    @SystemApi
+    public void setPhoneAccountEnabled(PhoneAccountHandle account, boolean isEnabled) {
+        try {
+            if (isServiceConnected()) {
+                getTelecommService().setPhoneAccountEnabled(account, isEnabled);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecommService#setPhoneAccountEnabled", e);
+        }
     }
 
     /**
