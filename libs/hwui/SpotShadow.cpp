@@ -16,10 +16,34 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
-#define SHADOW_SHRINK_SCALE 0.1f
+// The highest z value can't be higher than (CASTER_Z_CAP_RATIO * light.z)
 #define CASTER_Z_CAP_RATIO 0.95f
-#define FAKE_UMBRA_SIZE_RATIO 0.01f
-#define OCLLUDED_UMBRA_SHRINK_FACTOR 0.95f
+
+// When there is no umbra, then just fake the umbra using
+// centroid * (1 - FAKE_UMBRA_SIZE_RATIO) + outline * FAKE_UMBRA_SIZE_RATIO
+#define FAKE_UMBRA_SIZE_RATIO 0.05f
+
+// When the polygon is about 90 vertices, the penumbra + umbra can reach 270 rays.
+// That is consider pretty fine tessllated polygon so far.
+// This is just to prevent using too much some memory when edge slicing is not
+// needed any more.
+#define FINE_TESSELLATED_POLYGON_RAY_NUMBER 270
+/**
+ * Extra vertices for the corner for smoother corner.
+ * Only for outer loop.
+ * Note that we use such extra memory to avoid an extra loop.
+ */
+// For half circle, we could add EXTRA_VERTEX_PER_PI vertices.
+// Set to 1 if we don't want to have any.
+#define SPOT_EXTRA_CORNER_VERTEX_PER_PI 18
+
+// For the whole polygon, the sum of all the deltas b/t normals is 2 * M_PI,
+// therefore, the maximum number of extra vertices will be twice bigger.
+#define SPOT_MAX_EXTRA_CORNER_VERTEX_NUMBER  (2 * SPOT_EXTRA_CORNER_VERTEX_PER_PI)
+
+// For each RADIANS_DIVISOR, we would allocate one more vertex b/t the normals.
+#define SPOT_CORNER_RADIANS_DIVISOR (M_PI / SPOT_EXTRA_CORNER_VERTEX_PER_PI)
+
 
 #include <math.h>
 #include <stdlib.h>
@@ -48,6 +72,24 @@ struct OutlineData {
     Vector2 position;
     Vector2 normal;
     float radius;
+};
+
+/**
+ * For each vertex, we need to keep track of its angle, whether it is penumbra or
+ * umbra, and its corresponding vertex index.
+ */
+struct SpotShadow::VertexAngleData {
+    // The angle to the vertex from the centroid.
+    float mAngle;
+    // True is the vertex comes from penumbra, otherwise it comes from umbra.
+    bool mIsPenumbra;
+    // The index of the vertex described by this data.
+    int mVertexIndex;
+    void set(float angle, bool isPenumbra, int index) {
+        mAngle = angle;
+        mIsPenumbra = isPenumbra;
+        mVertexIndex = index;
+    }
 };
 
 /**
@@ -407,8 +449,8 @@ bool SpotShadow::testPointInsidePolygon(const Vector2 testPoint,
         double endX = poly[i].x;
         double endY = poly[i].y;
 
-        if (((endY > testy) != (startY > testy)) &&
-            (testx < (startX - endX) * (testy - endY)
+        if (((endY > testy) != (startY > testy))
+            && (testx < (startX - endX) * (testy - endY)
              / (startY - endY) + endX)) {
             c = !c;
         }
@@ -508,138 +550,14 @@ void SpotShadow::computeLightPolygon(int points, const Vector3& lightCenter,
 }
 
 /**
-* Generate the shadow from a spot light.
-*
-* @param poly x,y,z vertexes of a convex polygon that occludes the light source
-* @param polyLength number of vertexes of the occluding polygon
-* @param lightCenter the center of the light
-* @param lightSize the radius of the light source
-* @param lightVertexCount the vertex counter for the light polygon
-* @param shadowTriangleStrip return an (x,y,alpha) triangle strip representing the shadow. Return
-*                            empty strip if error.
-*
-*/
-
-void SpotShadow::createSpotShadow_old(bool isCasterOpaque, const Vector3* poly,
-        int polyLength, const Vector3& lightCenter, float lightSize,
-        int lightVertexCount, VertexBuffer& retStrips) {
-    Vector3 light[lightVertexCount * 3];
-    computeLightPolygon(lightVertexCount, lightCenter, lightSize, light);
-    computeSpotShadow_old(isCasterOpaque, light, lightVertexCount, lightCenter, poly,
-            polyLength, retStrips);
-}
-
-/**
- * Generate the shadow spot light of shape lightPoly and a object poly
+ * From light center, project one vertex to the z=0 surface and get the outline.
  *
- * @param lightPoly x,y,z vertex of a convex polygon that is the light source
- * @param lightPolyLength number of vertexes of the light source polygon
- * @param poly x,y,z vertexes of a convex polygon that occludes the light source
- * @param polyLength number of vertexes of the occluding polygon
- * @param shadowTriangleStrip return an (x,y,alpha) triangle strip representing the shadow. Return
- *                            empty strip if error.
+ * @param outline The result which is the outline position.
+ * @param lightCenter The center of light.
+ * @param polyVertex The input polygon's vertex.
+ *
+ * @return float The ratio of (polygon.z / light.z - polygon.z)
  */
-void SpotShadow::computeSpotShadow_old(bool isCasterOpaque, const Vector3* lightPoly,
-        int lightPolyLength, const Vector3& lightCenter, const Vector3* poly, int polyLength,
-        VertexBuffer& shadowTriangleStrip) {
-    // Point clouds for all the shadowed vertices
-    Vector2 shadowRegion[lightPolyLength * polyLength];
-    // Shadow polygon from one point light.
-    Vector2 outline[polyLength];
-    Vector2 umbraMem[polyLength * lightPolyLength];
-    Vector2* umbra = umbraMem;
-
-    int umbraLength = 0;
-
-    // Validate input, receiver is always at z = 0 plane.
-    bool inputPolyPositionValid = true;
-    for (int i = 0; i < polyLength; i++) {
-        if (poly[i].z >= lightPoly[0].z) {
-            inputPolyPositionValid = false;
-            ALOGW("polygon above the light");
-            break;
-        }
-    }
-
-    // If the caster's position is invalid, don't draw anything.
-    if (!inputPolyPositionValid) {
-        return;
-    }
-
-    // Calculate the umbra polygon based on intersections of all outlines
-    int k = 0;
-    for (int j = 0; j < lightPolyLength; j++) {
-        int m = 0;
-        for (int i = 0; i < polyLength; i++) {
-            // After validating the input, deltaZ is guaranteed to be positive.
-            float deltaZ = lightPoly[j].z - poly[i].z;
-            float ratioZ = lightPoly[j].z / deltaZ;
-            float x = lightPoly[j].x - ratioZ * (lightPoly[j].x - poly[i].x);
-            float y = lightPoly[j].y - ratioZ * (lightPoly[j].y - poly[i].y);
-
-            Vector2 newPoint = {x, y};
-            shadowRegion[k] = newPoint;
-            outline[m] = newPoint;
-
-            k++;
-            m++;
-        }
-
-        // For the first light polygon's vertex, use the outline as the umbra.
-        // Later on, use the intersection of the outline and existing umbra.
-        if (umbraLength == 0) {
-            for (int i = 0; i < polyLength; i++) {
-                umbra[i] = outline[i];
-            }
-            umbraLength = polyLength;
-        } else {
-            int col = ((j * 255) / lightPolyLength);
-            umbraLength = intersection(outline, polyLength, umbra, umbraLength);
-            if (umbraLength == 0) {
-                break;
-            }
-        }
-    }
-
-    // Generate the penumbra area using the hull of all shadow regions.
-    int shadowRegionLength = k;
-    Vector2 penumbra[k];
-    int penumbraLength = hull(shadowRegion, shadowRegionLength, penumbra);
-
-    Vector2 fakeUmbra[polyLength];
-    if (umbraLength < 3) {
-        // If there is no real umbra, make a fake one.
-        for (int i = 0; i < polyLength; i++) {
-            float deltaZ = lightCenter.z - poly[i].z;
-            float ratioZ = lightCenter.z / deltaZ;
-            float x = lightCenter.x - ratioZ * (lightCenter.x - poly[i].x);
-            float y = lightCenter.y - ratioZ * (lightCenter.y - poly[i].y);
-
-            fakeUmbra[i].x = x;
-            fakeUmbra[i].y = y;
-        }
-
-        // Shrink the centroid's shadow by 10%.
-        // TODO: Study the magic number of 10%.
-        Vector2 shadowCentroid =
-                ShadowTessellator::centroid2d(fakeUmbra, polyLength);
-        for (int i = 0; i < polyLength; i++) {
-            fakeUmbra[i] = shadowCentroid * (1.0f - SHADOW_SHRINK_SCALE) +
-                    fakeUmbra[i] * SHADOW_SHRINK_SCALE;
-        }
-#if DEBUG_SHADOW
-        ALOGD("No real umbra make a fake one, centroid2d =  %f , %f",
-                shadowCentroid.x, shadowCentroid.y);
-#endif
-        // Set the fake umbra, whose size is the same as the original polygon.
-        umbra = fakeUmbra;
-        umbraLength = polyLength;
-    }
-
-    generateTriangleStrip(isCasterOpaque, 1.0, penumbra, penumbraLength, umbra,
-            umbraLength, poly, polyLength, shadowTriangleStrip);
-}
-
 float SpotShadow::projectCasterToOutline(Vector2& outline,
         const Vector3& lightCenter, const Vector3& polyVertex) {
     float lightToPolyZ = lightCenter.z - polyVertex.z;
@@ -671,6 +589,12 @@ void SpotShadow::createSpotShadow(bool isCasterOpaque, const Vector3& lightCente
         VertexBuffer& shadowTriangleStrip) {
     if (CC_UNLIKELY(lightCenter.z <= 0)) {
         ALOGW("Relative Light Z is not positive. No spot shadow!");
+        return;
+    }
+    if (CC_UNLIKELY(polyLength < 3)) {
+#if DEBUG_SHADOW
+        ALOGW("Invalid polygon length. No spot shadow!");
+#endif
         return;
     }
     OutlineData outlineData[polyLength];
@@ -713,16 +637,20 @@ void SpotShadow::createSpotShadow(bool isCasterOpaque, const Vector3& lightCente
     projectCasterToOutline(outlineCentroid, lightCenter, polyCentroid);
 
     int penumbraIndex = 0;
-    int penumbraLength = polyLength * 3;
-    Vector2 penumbra[penumbraLength];
+    // Then each polygon's vertex produce at minmal 2 penumbra vertices.
+    // Since the size can be dynamic here, we keep track of the size and update
+    // the real size at the end.
+    int allocatedPenumbraLength = 2 * polyLength + SPOT_MAX_EXTRA_CORNER_VERTEX_NUMBER;
+    Vector2 penumbra[allocatedPenumbraLength];
+    int totalExtraCornerSliceNumber = 0;
 
     Vector2 umbra[polyLength];
-    float distOutline = 0;
-    float ratioVI = 0;
 
+    // When centroid is covered by all circles from outline, then we consider
+    // the umbra is invalid, and we will tune down the shadow strength.
     bool hasValidUmbra = true;
-    // We need the maxRatioVI to decrease the spot shadow strength accordingly.
-    float maxRaitoVI = 1.0;
+    // We need the minimal of RaitoVI to decrease the spot shadow strength accordingly.
+    float minRaitoVI = FLT_MAX;
 
     for (int i = 0; i < polyLength; i++) {
         // Generate all the penumbra's vertices only using the (outline vertex + normal * radius)
@@ -748,21 +676,35 @@ void SpotShadow::createSpotShadow(bool isCasterOpaque, const Vector3& lightCente
         //           |                                 |
         //       (V3)-----------------------------------(V2)
         int preNormalIndex = (i + polyLength - 1) % polyLength;
-        penumbra[penumbraIndex++] = outlineData[i].position +
-            outlineData[preNormalIndex].normal * outlineData[i].radius;
 
-        int currentNormalIndex = i;
-        // (TODO) Depending on how roundness we want for each corner, we can subdivide
+        const Vector2& previousNormal = outlineData[preNormalIndex].normal;
+        const Vector2& currentNormal = outlineData[i].normal;
+
+        // Depending on how roundness we want for each corner, we can subdivide
         // further here and/or introduce some heuristic to decide how much the
         // subdivision should be.
-        Vector2 avgNormal =
-            (outlineData[preNormalIndex].normal + outlineData[currentNormalIndex].normal) / 2;
+        int currentExtraSliceNumber = ShadowTessellator::getExtraVertexNumber(
+                previousNormal, currentNormal, SPOT_CORNER_RADIANS_DIVISOR);
 
-        penumbra[penumbraIndex++] = outlineData[i].position +
-            avgNormal * outlineData[i].radius;
+        int currentCornerSliceNumber = 1 + currentExtraSliceNumber;
+        totalExtraCornerSliceNumber += currentExtraSliceNumber;
+#if DEBUG_SHADOW
+        ALOGD("currentExtraSliceNumber should be %d", currentExtraSliceNumber);
+        ALOGD("currentCornerSliceNumber should be %d", currentCornerSliceNumber);
+        ALOGD("totalCornerSliceNumber is %d", totalExtraCornerSliceNumber);
+#endif
+        if (CC_UNLIKELY(totalExtraCornerSliceNumber > SPOT_MAX_EXTRA_CORNER_VERTEX_NUMBER)) {
+            currentCornerSliceNumber = 1;
+        }
+        for (int k = 0; k <= currentCornerSliceNumber; k++) {
+            Vector2 avgNormal =
+                    (previousNormal * (currentCornerSliceNumber - k) + currentNormal * k) /
+                    currentCornerSliceNumber;
+            avgNormal.normalize();
+            penumbra[penumbraIndex++] = outlineData[i].position +
+                    avgNormal * outlineData[i].radius;
+        }
 
-        penumbra[penumbraIndex++] = outlineData[i].position +
-            outlineData[currentNormalIndex].normal * outlineData[i].radius;
 
         // Compute the umbra by the intersection from the outline's centroid!
         //
@@ -783,53 +725,70 @@ void SpotShadow::createSpotShadow(bool isCasterOpaque, const Vector3& lightCente
         // Now, ratioVI = VI / VC, ratioIC = IC / VC
         // Then the intersetion point can be computed as Ixy = Vxy * ratioIC + Cxy * ratioVI;
         //
-        // When one of the outline circle cover the the outline centroid, (like I is
+        // When all of the outline circles cover the the outline centroid, (like I is
         // on the other side of C), there is no real umbra any more, so we just fake
         // a small area around the centroid as the umbra, and tune down the spot
         // shadow's umbra strength to simulate the effect the whole shadow will
         // become lighter in this case.
         // The ratio can be simulated by using the inverse of maximum of ratioVI for
         // all (V).
-        distOutline = (outlineData[i].position - outlineCentroid).length();
+        float distOutline = (outlineData[i].position - outlineCentroid).length();
         if (CC_UNLIKELY(distOutline == 0)) {
             // If the outline has 0 area, then there is no spot shadow anyway.
             ALOGW("Outline has 0 area, no spot shadow!");
             return;
         }
-        ratioVI = outlineData[i].radius / distOutline;
-        if (ratioVI >= 1.0) {
-            maxRaitoVI = ratioVI;
-            hasValidUmbra = false;
+
+        float ratioVI = outlineData[i].radius / distOutline;
+        minRaitoVI = MathUtils::min(minRaitoVI, ratioVI);
+        if (ratioVI >= (1 - FAKE_UMBRA_SIZE_RATIO)) {
+            ratioVI = (1 - FAKE_UMBRA_SIZE_RATIO);
         }
         // When we know we don't have valid umbra, don't bother to compute the
         // values below. But we can't skip the loop yet since we want to know the
         // maximum ratio.
-        if (hasValidUmbra) {
-            float ratioIC = (distOutline - outlineData[i].radius) / distOutline;
-            umbra[i] = outlineData[i].position * ratioIC + outlineCentroid * ratioVI;
-        }
+        float ratioIC = 1 - ratioVI;
+        umbra[i] = outlineData[i].position * ratioIC + outlineCentroid * ratioVI;
     }
 
+    hasValidUmbra = (minRaitoVI <= 1.0);
     float shadowStrengthScale = 1.0;
     if (!hasValidUmbra) {
+#if DEBUG_SHADOW
         ALOGW("The object is too close to the light or too small, no real umbra!");
+#endif
         for (int i = 0; i < polyLength; i++) {
             umbra[i] = outlineData[i].position * FAKE_UMBRA_SIZE_RATIO +
-                outlineCentroid * (1 - FAKE_UMBRA_SIZE_RATIO);
+                    outlineCentroid * (1 - FAKE_UMBRA_SIZE_RATIO);
         }
-        shadowStrengthScale = 1.0 / maxRaitoVI;
+        shadowStrengthScale = 1.0 / minRaitoVI;
     }
 
+    int penumbraLength = penumbraIndex;
+    int umbraLength = polyLength;
+
 #if DEBUG_SHADOW
+    ALOGD("penumbraLength is %d , allocatedPenumbraLength %d", penumbraLength, allocatedPenumbraLength);
     dumpPolygon(poly, polyLength, "input poly");
-    dumpPolygon(outline, polyLength, "outline");
     dumpPolygon(penumbra, penumbraLength, "penumbra");
-    dumpPolygon(umbra, polyLength, "umbra");
+    dumpPolygon(umbra, umbraLength, "umbra");
     ALOGD("hasValidUmbra is %d and shadowStrengthScale is %f", hasValidUmbra, shadowStrengthScale);
 #endif
 
-    generateTriangleStrip(isCasterOpaque, shadowStrengthScale, penumbra,
-            penumbraLength, umbra, polyLength, poly, polyLength, shadowTriangleStrip);
+    // The penumbra and umbra needs to be in convex shape to keep consistency
+    // and quality.
+    // Since we are still shooting rays to penumbra, it needs to be convex.
+    // Umbra can be represented as a fan from the centroid, but visually umbra
+    // looks nicer when it is convex.
+    Vector2 finalUmbra[umbraLength];
+    Vector2 finalPenumbra[penumbraLength];
+    int finalUmbraLength = hull(umbra, umbraLength, finalUmbra);
+    int finalPenumbraLength = hull(penumbra, penumbraLength, finalPenumbra);
+
+    generateTriangleStrip(isCasterOpaque, shadowStrengthScale, finalPenumbra,
+            finalPenumbraLength, finalUmbra, finalUmbraLength, poly, polyLength,
+            shadowTriangleStrip, outlineCentroid);
+
 }
 
 /**
@@ -891,7 +850,7 @@ bool convertPolyToRayDist(const Vector2* poly, int polyLength, const Vector2& po
         lastVertex = &poly[polyIndex];
     }
 
-   return true;
+    return true;
 }
 
 int SpotShadow::calculateOccludedUmbra(const Vector2* umbra, int umbraLength,
@@ -907,100 +866,6 @@ int SpotShadow::calculateOccludedUmbra(const Vector2* umbra, int umbraLength,
     // intersection() directly.
     return intersection(umbra, umbraLength,
             occludedUmbra, polyLength);
-}
-
-/**
- * Generate a triangle strip given two convex polygons
- *
- * @param penumbra The outer polygon x,y vertexes
- * @param penumbraLength The number of vertexes in the outer polygon
- * @param umbra The inner outer polygon x,y vertexes
- * @param umbraLength The number of vertexes in the inner polygon
- * @param shadowTriangleStrip return an (x,y,alpha) triangle strip representing the shadow. Return
- *                            empty strip if error.
-**/
-void SpotShadow::generateTriangleStrip(bool isCasterOpaque, float shadowStrengthScale,
-        const Vector2* penumbra, int penumbraLength, const Vector2* umbra, int umbraLength,
-        const Vector3* poly, int polyLength, VertexBuffer& shadowTriangleStrip) {
-    const int rays = SHADOW_RAY_COUNT;
-    const int size = 2 * rays;
-    const float step = M_PI * 2 / rays;
-    // Centroid of the umbra.
-    Vector2 centroid = ShadowTessellator::centroid2d(umbra, umbraLength);
-#if DEBUG_SHADOW
-    ALOGD("centroid2d =  %f , %f", centroid.x, centroid.y);
-#endif
-    // Intersection to the penumbra.
-    float penumbraDistPerRay[rays];
-    // Intersection to the umbra.
-    float umbraDistPerRay[rays];
-    // Intersection to the occluded umbra area.
-    float occludedUmbraDistPerRay[rays];
-
-    // convert CW polygons to ray distance encoding, aborting on conversion failure
-    if (!convertPolyToRayDist(umbra, umbraLength, centroid, umbraDistPerRay)) return;
-    if (!convertPolyToRayDist(penumbra, penumbraLength, centroid, penumbraDistPerRay)) return;
-
-    bool hasOccludedUmbraArea = false;
-    if (isCasterOpaque) {
-        Vector2 occludedUmbra[polyLength + umbraLength];
-        int occludedUmbraLength = calculateOccludedUmbra(umbra, umbraLength, poly, polyLength,
-                occludedUmbra);
-        // Make sure the centroid is inside the umbra, otherwise, fall back to the
-        // approach as if there is no occluded umbra area.
-        if (testPointInsidePolygon(centroid, occludedUmbra, occludedUmbraLength)) {
-            hasOccludedUmbraArea = true;
-            // Shrink the occluded umbra area to avoid pixel level artifacts.
-            for (int i = 0; i < occludedUmbraLength; i ++) {
-                occludedUmbra[i] = centroid + (occludedUmbra[i] - centroid) *
-                        OCLLUDED_UMBRA_SHRINK_FACTOR;
-            }
-            if (!convertPolyToRayDist(occludedUmbra, occludedUmbraLength, centroid,
-                    occludedUmbraDistPerRay)) {
-                return;
-            }
-        }
-    }
-    AlphaVertex* shadowVertices =
-            shadowTriangleStrip.alloc<AlphaVertex>(SHADOW_VERTEX_COUNT);
-
-    // NOTE: Shadow alpha values are transformed when stored in alphavertices,
-    // so that they can be consumed directly by gFS_Main_ApplyVertexAlphaShadowInterp
-    float transformedMaxAlpha = M_PI * shadowStrengthScale;
-
-    // Calculate the vertices (x, y, alpha) in the shadow area.
-    AlphaVertex centroidXYA;
-    AlphaVertex::set(&centroidXYA, centroid.x, centroid.y, transformedMaxAlpha);
-    for (int rayIndex = 0; rayIndex < rays; rayIndex++) {
-        float dx = cosf(step * rayIndex);
-        float dy = sinf(step * rayIndex);
-
-        // penumbra ring
-        float penumbraDistance = penumbraDistPerRay[rayIndex];
-        AlphaVertex::set(&shadowVertices[rayIndex],
-                dx * penumbraDistance + centroid.x,
-                dy * penumbraDistance + centroid.y, 0.0f);
-
-        // umbra ring
-        float umbraDistance = umbraDistPerRay[rayIndex];
-        AlphaVertex::set(&shadowVertices[rays + rayIndex],
-                dx * umbraDistance + centroid.x,
-                dy * umbraDistance + centroid.y,
-                transformedMaxAlpha);
-
-        // occluded umbra ring
-        if (hasOccludedUmbraArea) {
-            float occludedUmbraDistance = occludedUmbraDistPerRay[rayIndex];
-            AlphaVertex::set(&shadowVertices[2 * rays + rayIndex],
-                    dx * occludedUmbraDistance + centroid.x,
-                    dy * occludedUmbraDistance + centroid.y, transformedMaxAlpha);
-        } else {
-            // Put all vertices of the occluded umbra ring at the centroid.
-            shadowVertices[2 * rays + rayIndex] = centroidXYA;
-        }
-    }
-    shadowTriangleStrip.setMode(VertexBuffer::kTwoPolyRingShadow);
-    shadowTriangleStrip.computeBounds<AlphaVertex>();
 }
 
 /**
@@ -1024,15 +889,656 @@ void SpotShadow::smoothPolygon(int level, int rays, float* rayDist) {
     }
 }
 
+/**
+ * Generate a array of the angleData for either umbra or penumbra vertices.
+ *
+ * This array will be merged and used to guide where to shoot the rays, in clockwise order.
+ *
+ * @param angleDataList The result array of angle data.
+ *
+ * @return int The maximum angle's index in the array.
+ */
+int SpotShadow::setupAngleList(VertexAngleData* angleDataList,
+        int polyLength, const Vector2* polygon, const Vector2& centroid,
+        bool isPenumbra, const char* name) {
+    float maxAngle = FLT_MIN;
+    int maxAngleIndex = 0;
+    for (int i = 0; i < polyLength; i++) {
+        float currentAngle = angle(polygon[i], centroid);
+        if (currentAngle > maxAngle) {
+            maxAngle = currentAngle;
+            maxAngleIndex = i;
+        }
+        angleDataList[i].set(currentAngle, isPenumbra, i);
+#if DEBUG_SHADOW
+        ALOGD("%s AngleList i %d %f", name, i, currentAngle);
+#endif
+    }
+    return maxAngleIndex;
+}
+
+/**
+ * Make sure the polygons are indeed in clockwise order.
+ *
+ * Possible reasons to return false: 1. The input polygon is not setup properly. 2. The hull
+ * algorithm is not able to generate it properly.
+ *
+ * Anyway, since the algorithm depends on the clockwise, when these kind of unexpected error
+ * situation is found, we need to detect it and early return without corrupting the memory.
+ *
+ * @return bool True if the angle list is actually from big to small.
+ */
+bool SpotShadow::checkClockwise(int indexOfMaxAngle, int listLength, VertexAngleData* angleList,
+        const char* name) {
+    int currentIndex = indexOfMaxAngle;
+#if DEBUG_SHADOW
+    ALOGD("max index %d", currentIndex);
+#endif
+    for (int i = 0; i < listLength - 1; i++) {
+        // TODO: Cache the last angle.
+        float currentAngle = angleList[currentIndex].mAngle;
+        float nextAngle = angleList[(currentIndex + 1) % listLength].mAngle;
+        if (currentAngle < nextAngle) {
+#if DEBUG_SHADOW
+            ALOGE("%s, is not CW, at index %d", name, currentIndex);
+#endif
+            return false;
+        }
+        currentIndex = (currentIndex + 1) % listLength;
+    }
+    return true;
+}
+
+/**
+ * Check the polygon is clockwise.
+ *
+ * @return bool True is the polygon is clockwise.
+ */
+bool SpotShadow::checkPolyClockwise(int polyAngleLength, int maxPolyAngleIndex,
+        const float* polyAngleList) {
+    bool isPolyCW = true;
+    // Starting from maxPolyAngleIndex , check around to make sure angle decrease.
+    for (int i = 0; i < polyAngleLength - 1; i++) {
+        float currentAngle = polyAngleList[(i + maxPolyAngleIndex) % polyAngleLength];
+        float nextAngle = polyAngleList[(i + maxPolyAngleIndex + 1) % polyAngleLength];
+        if (currentAngle < nextAngle) {
+            isPolyCW = false;
+        }
+    }
+    return isPolyCW;
+}
+
+/**
+ * Given the sorted array of all the vertices angle data, calculate for each
+ * vertices, the offset value to array element which represent the start edge
+ * of the polygon we need to shoot the ray at.
+ *
+ * TODO: Calculate this for umbra and penumbra in one loop using one single array.
+ *
+ * @param distances The result of the array distance counter.
+ */
+void SpotShadow::calculateDistanceCounter(bool needsOffsetToUmbra, int angleLength,
+        const VertexAngleData* allVerticesAngleData, int* distances) {
+
+    bool firstVertexIsPenumbra = allVerticesAngleData[0].mIsPenumbra;
+    // If we want distance to inner, then we just set to 0 when we see inner.
+    bool needsSearch = needsOffsetToUmbra ? firstVertexIsPenumbra : !firstVertexIsPenumbra;
+    int distanceCounter = 0;
+    if (needsSearch) {
+        int foundIndex = -1;
+        for (int i = (angleLength - 1); i >= 0; i--) {
+            bool currentIsOuter = allVerticesAngleData[i].mIsPenumbra;
+            // If we need distance to inner, then we need to find a inner vertex.
+            if (currentIsOuter != firstVertexIsPenumbra) {
+                foundIndex = i;
+                break;
+            }
+        }
+        LOG_ALWAYS_FATAL_IF(foundIndex == -1, "Wrong index found, means either"
+                " umbra or penumbra's length is 0");
+        distanceCounter = angleLength - foundIndex;
+    }
+#if DEBUG_SHADOW
+    ALOGD("distances[0] is %d", distanceCounter);
+#endif
+
+    distances[0] = distanceCounter; // means never see a target poly
+
+    for (int i = 1; i < angleLength; i++) {
+        bool firstVertexIsPenumbra = allVerticesAngleData[i].mIsPenumbra;
+        // When we needs for distance for each outer vertex to inner, then we
+        // increase the distance when seeing outer vertices. Otherwise, we clear
+        // to 0.
+        bool needsIncrement = needsOffsetToUmbra ? firstVertexIsPenumbra : !firstVertexIsPenumbra;
+        // If counter is not -1, that means we have seen an other polygon's vertex.
+        if (needsIncrement && distanceCounter != -1) {
+            distanceCounter++;
+        } else {
+            distanceCounter = 0;
+        }
+        distances[i] = distanceCounter;
+    }
+}
+
+/**
+ * Given umbra and penumbra angle data list, merge them by sorting the angle
+ * from the biggest to smallest.
+ *
+ * @param allVerticesAngleData The result array of merged angle data.
+ */
+void SpotShadow::mergeAngleList(int maxUmbraAngleIndex, int maxPenumbraAngleIndex,
+        const VertexAngleData* umbraAngleList, int umbraLength,
+        const VertexAngleData* penumbraAngleList, int penumbraLength,
+        VertexAngleData* allVerticesAngleData) {
+
+    int totalRayNumber = umbraLength + penumbraLength;
+    int umbraIndex = maxUmbraAngleIndex;
+    int penumbraIndex = maxPenumbraAngleIndex;
+
+    float currentUmbraAngle = umbraAngleList[umbraIndex].mAngle;
+    float currentPenumbraAngle = penumbraAngleList[penumbraIndex].mAngle;
+
+    // TODO: Clean this up using a while loop with 2 iterators.
+    for (int i = 0; i < totalRayNumber; i++) {
+        if (currentUmbraAngle > currentPenumbraAngle) {
+            allVerticesAngleData[i] = umbraAngleList[umbraIndex];
+            umbraIndex = (umbraIndex + 1) % umbraLength;
+
+            // If umbraIndex round back, that means we are running out of
+            // umbra vertices to merge, so just copy all the penumbra leftover.
+            // Otherwise, we update the currentUmbraAngle.
+            if (umbraIndex != maxUmbraAngleIndex) {
+                currentUmbraAngle = umbraAngleList[umbraIndex].mAngle;
+            } else {
+                for (int j = i + 1; j < totalRayNumber; j++) {
+                    allVerticesAngleData[j] = penumbraAngleList[penumbraIndex];
+                    penumbraIndex = (penumbraIndex + 1) % penumbraLength;
+                }
+                break;
+            }
+        } else {
+            allVerticesAngleData[i] = penumbraAngleList[penumbraIndex];
+            penumbraIndex = (penumbraIndex + 1) % penumbraLength;
+            // If penumbraIndex round back, that means we are running out of
+            // penumbra vertices to merge, so just copy all the umbra leftover.
+            // Otherwise, we update the currentPenumbraAngle.
+            if (penumbraIndex != maxPenumbraAngleIndex) {
+                currentPenumbraAngle = penumbraAngleList[penumbraIndex].mAngle;
+            } else {
+                for (int j = i + 1; j < totalRayNumber; j++) {
+                    allVerticesAngleData[j] = umbraAngleList[umbraIndex];
+                    umbraIndex = (umbraIndex + 1) % umbraLength;
+                }
+                break;
+            }
+        }
+    }
+}
+
+#if DEBUG_SHADOW
+/**
+ * DEBUG ONLY: Verify all the offset compuation is correctly done by examining
+ * each vertex and its neighbor.
+ */
+static void verifyDistanceCounter(const VertexAngleData* allVerticesAngleData,
+        const int* distances, int angleLength, const char* name) {
+    int currentDistance = distances[0];
+    for (int i = 1; i < angleLength; i++) {
+        if (distances[i] != INT_MIN) {
+            if (!((currentDistance + 1) == distances[i]
+                || distances[i] == 0)) {
+                ALOGE("Wrong distance found at i %d name %s", i, name);
+            }
+            currentDistance = distances[i];
+            if (currentDistance != 0) {
+                bool currentOuter = allVerticesAngleData[i].mIsPenumbra;
+                for (int j = 1; j <= (currentDistance - 1); j++) {
+                    bool neigborOuter =
+                            allVerticesAngleData[(i + angleLength - j) % angleLength].mIsPenumbra;
+                    if (neigborOuter != currentOuter) {
+                        ALOGE("Wrong distance found at i %d name %s", i, name);
+                    }
+                }
+                bool oppositeOuter =
+                    allVerticesAngleData[(i + angleLength - currentDistance) % angleLength].mIsPenumbra;
+                if (oppositeOuter == currentOuter) {
+                    ALOGE("Wrong distance found at i %d name %s", i, name);
+                }
+            }
+        }
+    }
+}
+
+/**
+ * DEBUG ONLY: Verify all the angle data compuated are  is correctly done
+ */
+static void verifyAngleData(int totalRayNumber, const VertexAngleData* allVerticesAngleData,
+        const int* distancesToInner, const int* distancesToOuter,
+        const VertexAngleData* umbraAngleList, int maxUmbraAngleIndex, int umbraLength,
+        const VertexAngleData* penumbraAngleList, int maxPenumbraAngleIndex,
+        int penumbraLength) {
+    for (int i = 0; i < totalRayNumber; i++) {
+        ALOGD("currentAngleList i %d, angle %f, isInner %d, index %d distancesToInner"
+              " %d distancesToOuter %d", i, allVerticesAngleData[i].mAngle,
+                !allVerticesAngleData[i].mIsPenumbra,
+                allVerticesAngleData[i].mVertexIndex, distancesToInner[i], distancesToOuter[i]);
+    }
+
+    verifyDistanceCounter(allVerticesAngleData, distancesToInner, totalRayNumber, "distancesToInner");
+    verifyDistanceCounter(allVerticesAngleData, distancesToOuter, totalRayNumber, "distancesToOuter");
+
+    for (int i = 0; i < totalRayNumber; i++) {
+        if ((distancesToInner[i] * distancesToOuter[i]) != 0) {
+            ALOGE("distancesToInner wrong at index %d distancesToInner[i] %d,"
+                    " distancesToOuter[i] %d", i, distancesToInner[i], distancesToOuter[i]);
+        }
+    }
+    int currentUmbraVertexIndex =
+            umbraAngleList[maxUmbraAngleIndex].mVertexIndex;
+    int currentPenumbraVertexIndex =
+            penumbraAngleList[maxPenumbraAngleIndex].mVertexIndex;
+    for (int i = 0; i < totalRayNumber; i++) {
+        if (allVerticesAngleData[i].mIsPenumbra == true) {
+            if (allVerticesAngleData[i].mVertexIndex != currentPenumbraVertexIndex) {
+                ALOGW("wrong penumbra indexing i %d allVerticesAngleData[i].mVertexIndex %d "
+                        "currentpenumbraVertexIndex %d", i,
+                        allVerticesAngleData[i].mVertexIndex, currentPenumbraVertexIndex);
+            }
+            currentPenumbraVertexIndex = (currentPenumbraVertexIndex + 1) % penumbraLength;
+        } else {
+            if (allVerticesAngleData[i].mVertexIndex != currentUmbraVertexIndex) {
+                ALOGW("wrong umbra indexing i %d allVerticesAngleData[i].mVertexIndex %d "
+                        "currentUmbraVertexIndex %d", i,
+                        allVerticesAngleData[i].mVertexIndex, currentUmbraVertexIndex);
+            }
+            currentUmbraVertexIndex = (currentUmbraVertexIndex + 1) % umbraLength;
+        }
+    }
+    for (int i = 0; i < totalRayNumber - 1; i++) {
+        float currentAngle = allVerticesAngleData[i].mAngle;
+        float nextAngle = allVerticesAngleData[(i + 1) % totalRayNumber].mAngle;
+        if (currentAngle < nextAngle) {
+            ALOGE("Unexpected angle values!, currentAngle nextAngle %f %f", currentAngle, nextAngle);
+        }
+    }
+}
+#endif
+
+/**
+ * In order to compute the occluded umbra, we need to setup the angle data list
+ * for the polygon data. Since we only store one poly vertex per polygon vertex,
+ * this array only needs to be a float array which are the angles for each vertex.
+ *
+ * @param polyAngleList The result list
+ *
+ * @return int The index for the maximum angle in this array.
+ */
+int SpotShadow::setupPolyAngleList(float* polyAngleList, int polyAngleLength,
+        const Vector2* poly2d, const Vector2& centroid) {
+    int maxPolyAngleIndex = -1;
+    float maxPolyAngle = -FLT_MAX;
+    for (int i = 0; i < polyAngleLength; i++) {
+        polyAngleList[i] = angle(poly2d[i], centroid);
+        if (polyAngleList[i] > maxPolyAngle) {
+            maxPolyAngle = polyAngleList[i];
+            maxPolyAngleIndex = i;
+        }
+    }
+    return maxPolyAngleIndex;
+}
+
+/**
+ * For umbra and penumbra, given the offset info and the current ray number,
+ * find the right edge index (the (starting vertex) for the ray to shoot at.
+ *
+ * @return int The index of the starting vertex of the edge.
+ */
+inline int SpotShadow::getEdgeStartIndex(const int* offsets, int rayIndex, int totalRayNumber,
+        const VertexAngleData* allVerticesAngleData) {
+    int tempOffset = offsets[rayIndex];
+    int targetRayIndex = (rayIndex - tempOffset + totalRayNumber) % totalRayNumber;
+    return allVerticesAngleData[targetRayIndex].mVertexIndex;
+}
+
+/**
+ * For the occluded umbra, given the array of angles, find the index of the
+ * starting vertex of the edge, for the ray to shoo at.
+ *
+ * TODO: Save the last result to shorten the search distance.
+ *
+ * @return int The index of the starting vertex of the edge.
+ */
+inline int SpotShadow::getPolyEdgeStartIndex(int maxPolyAngleIndex, int polyLength,
+        const float* polyAngleList, float rayAngle) {
+    int minPolyAngleIndex  = (maxPolyAngleIndex + polyLength - 1) % polyLength;
+    int resultIndex = -1;
+    if (rayAngle > polyAngleList[maxPolyAngleIndex]
+        || rayAngle <= polyAngleList[minPolyAngleIndex]) {
+        resultIndex = minPolyAngleIndex;
+    } else {
+        for (int i = 0; i < polyLength - 1; i++) {
+            int currentIndex = (maxPolyAngleIndex + i) % polyLength;
+            int nextIndex = (maxPolyAngleIndex + i + 1) % polyLength;
+            if (rayAngle <= polyAngleList[currentIndex]
+                && rayAngle > polyAngleList[nextIndex]) {
+                resultIndex = currentIndex;
+            }
+        }
+    }
+    if (CC_UNLIKELY(resultIndex == -1)) {
+        // TODO: Add more error handling here.
+        ALOGE("Wrong index found, means no edge can't be found for rayAngle %f", rayAngle);
+    }
+    return resultIndex;
+}
+
+/**
+ * Convert the incoming polygons into arrays of vertices, for each ray.
+ * Ray only shoots when there is one vertex either on penumbra on umbra.
+ *
+ * Finally, it will generate vertices per ray for umbra, penumbra and optionally
+ * occludedUmbra.
+ *
+ * Return true (success) when all vertices are generated
+ */
+int SpotShadow::convertPolysToVerticesPerRay(
+        bool hasOccludedUmbraArea, const Vector2* poly2d, int polyLength,
+        const Vector2* umbra, int umbraLength, const Vector2* penumbra,
+        int penumbraLength, const Vector2& centroid,
+        Vector2* umbraVerticesPerRay, Vector2* penumbraVerticesPerRay,
+        Vector2* occludedUmbraVerticesPerRay) {
+    int totalRayNumber = umbraLength + penumbraLength;
+
+    // For incoming umbra / penumbra polygons, we will build an intermediate data
+    // structure to help us sort all the vertices according to the vertices.
+    // Using this data structure, we can tell where (the angle) to shoot the ray,
+    // whether we shoot at penumbra edge or umbra edge, and which edge to shoot at.
+    //
+    // We first parse each vertices and generate a table of VertexAngleData.
+    // Based on that, we create 2 arrays telling us which edge to shoot at.
+    VertexAngleData allVerticesAngleData[totalRayNumber];
+    VertexAngleData umbraAngleList[umbraLength];
+    VertexAngleData penumbraAngleList[penumbraLength];
+
+    int polyAngleLength = hasOccludedUmbraArea ? polyLength : 0;
+    float polyAngleList[polyAngleLength];
+
+    const int maxUmbraAngleIndex =
+            setupAngleList(umbraAngleList, umbraLength, umbra, centroid, false, "umbra");
+    const int maxPenumbraAngleIndex =
+            setupAngleList(penumbraAngleList, penumbraLength, penumbra, centroid, true, "penumbra");
+    const int maxPolyAngleIndex = setupPolyAngleList(polyAngleList, polyAngleLength, poly2d, centroid);
+
+    // Check all the polygons here are CW.
+    bool isPolyCW = checkPolyClockwise(polyAngleLength, maxPolyAngleIndex, polyAngleList);
+    bool isUmbraCW = checkClockwise(maxUmbraAngleIndex, umbraLength,
+            umbraAngleList, "umbra");
+    bool isPenumbraCW = checkClockwise(maxPenumbraAngleIndex, penumbraLength,
+            penumbraAngleList, "penumbra");
+
+    if (!isUmbraCW || !isPenumbraCW || !isPolyCW) {
+#if DEBUG_SHADOW
+        ALOGE("One polygon is not CW isUmbraCW %d isPenumbraCW %d isPolyCW %d",
+                isUmbraCW, isPenumbraCW, isPolyCW);
+#endif
+        return false;
+    }
+
+    mergeAngleList(maxUmbraAngleIndex, maxPenumbraAngleIndex,
+            umbraAngleList, umbraLength, penumbraAngleList, penumbraLength,
+            allVerticesAngleData);
+
+    // Calculate the offset to the left most Inner vertex for each outerVertex.
+    // Then the offset to the left most Outer vertex for each innerVertex.
+    int offsetToInner[totalRayNumber];
+    int offsetToOuter[totalRayNumber];
+    calculateDistanceCounter(true, totalRayNumber, allVerticesAngleData, offsetToInner);
+    calculateDistanceCounter(false, totalRayNumber, allVerticesAngleData, offsetToOuter);
+
+    // Generate both umbraVerticesPerRay and penumbraVerticesPerRay
+    for (int i = 0; i < totalRayNumber; i++) {
+        float rayAngle = allVerticesAngleData[i].mAngle;
+        bool isUmbraVertex = !allVerticesAngleData[i].mIsPenumbra;
+
+        float dx = cosf(rayAngle);
+        float dy = sinf(rayAngle);
+        float distanceToIntersectUmbra = -1;
+
+        if (isUmbraVertex) {
+            // We can just copy umbra easily, and calculate the distance for the
+            // occluded umbra computation.
+            int startUmbraIndex = allVerticesAngleData[i].mVertexIndex;
+            umbraVerticesPerRay[i] = umbra[startUmbraIndex];
+            if (hasOccludedUmbraArea) {
+                distanceToIntersectUmbra = (umbraVerticesPerRay[i] - centroid).length();
+            }
+
+            //shoot ray to penumbra only
+            int startPenumbraIndex = getEdgeStartIndex(offsetToOuter, i, totalRayNumber,
+                    allVerticesAngleData);
+            float distanceToIntersectPenumbra = rayIntersectPoints(centroid, dx, dy,
+                    penumbra[startPenumbraIndex],
+                    penumbra[(startPenumbraIndex + 1) % penumbraLength]);
+            if (distanceToIntersectPenumbra < 0) {
+#if DEBUG_SHADOW
+                ALOGW("convertPolyToRayDist for penumbra failed rayAngle %f dx %f dy %f",
+                        rayAngle, dx, dy);
+#endif
+                distanceToIntersectPenumbra = 0;
+            }
+            penumbraVerticesPerRay[i].x = centroid.x + dx * distanceToIntersectPenumbra;
+            penumbraVerticesPerRay[i].y = centroid.y + dy * distanceToIntersectPenumbra;
+        } else {
+            // We can just copy the penumbra
+            int startPenumbraIndex = allVerticesAngleData[i].mVertexIndex;
+            penumbraVerticesPerRay[i] = penumbra[startPenumbraIndex];
+
+            // And shoot ray to umbra only
+            int startUmbraIndex = getEdgeStartIndex(offsetToInner, i, totalRayNumber,
+                    allVerticesAngleData);
+
+            distanceToIntersectUmbra = rayIntersectPoints(centroid, dx, dy,
+                    umbra[startUmbraIndex], umbra[(startUmbraIndex + 1) % umbraLength]);
+            if (distanceToIntersectUmbra < 0) {
+#if DEBUG_SHADOW
+                ALOGW("convertPolyToRayDist for umbra failed rayAngle %f dx %f dy %f",
+                        rayAngle, dx, dy);
+#endif
+                distanceToIntersectUmbra = 0;
+            }
+            umbraVerticesPerRay[i].x = centroid.x + dx * distanceToIntersectUmbra;
+            umbraVerticesPerRay[i].y = centroid.y + dy * distanceToIntersectUmbra;
+        }
+
+        if (hasOccludedUmbraArea) {
+            // Shoot the same ray to the poly2d, and get the distance.
+            int startPolyIndex = getPolyEdgeStartIndex(maxPolyAngleIndex, polyLength,
+                    polyAngleList, rayAngle);
+
+            float distanceToIntersectPoly = rayIntersectPoints(centroid, dx, dy,
+                    poly2d[startPolyIndex], poly2d[(startPolyIndex + 1) % polyLength]);
+            if (distanceToIntersectPoly < 0) {
+                distanceToIntersectPoly = 0;
+            }
+            distanceToIntersectPoly = MathUtils::min(distanceToIntersectUmbra, distanceToIntersectPoly);
+            occludedUmbraVerticesPerRay[i].x = centroid.x + dx * distanceToIntersectPoly;
+            occludedUmbraVerticesPerRay[i].y = centroid.y + dy * distanceToIntersectPoly;
+        }
+    }
+
+#if DEBUG_SHADOW
+    verifyAngleData(totalRayNumber, allVerticesAngleData, offsetToInner,
+            offsetToOuter,  umbraAngleList, maxUmbraAngleIndex,  umbraLength,
+            penumbraAngleList,  maxPenumbraAngleIndex, penumbraLength);
+#endif
+    return true; // success
+
+}
+
+/**
+ * Generate a triangle strip given two convex polygon
+**/
+void SpotShadow::generateTriangleStrip(bool isCasterOpaque, float shadowStrengthScale,
+        Vector2* penumbra, int penumbraLength, Vector2* umbra, int umbraLength,
+        const Vector3* poly, int polyLength, VertexBuffer& shadowTriangleStrip,
+        const Vector2& centroid) {
+
+    bool hasOccludedUmbraArea = false;
+    Vector2 poly2d[polyLength];
+
+    if (isCasterOpaque) {
+        for (int i = 0; i < polyLength; i++) {
+            poly2d[i].x = poly[i].x;
+            poly2d[i].y = poly[i].y;
+        }
+        // Make sure the centroid is inside the umbra, otherwise, fall back to the
+        // approach as if there is no occluded umbra area.
+        if (testPointInsidePolygon(centroid, poly2d, polyLength)) {
+            hasOccludedUmbraArea = true;
+        }
+    }
+
+    int totalRayNum = umbraLength + penumbraLength;
+    Vector2 umbraVertices[totalRayNum];
+    Vector2 penumbraVertices[totalRayNum];
+    Vector2 occludedUmbraVertices[totalRayNum];
+    bool convertSuccess = convertPolysToVerticesPerRay(hasOccludedUmbraArea, poly2d,
+            polyLength, umbra, umbraLength, penumbra, penumbraLength,
+            centroid, umbraVertices, penumbraVertices, occludedUmbraVertices);
+    if (!convertSuccess) {
+        return;
+    }
+
+    // Minimal value is 1, for each vertex show up once.
+    // The bigger this value is , the smoother the look is, but more memory
+    // is consumed.
+    // When the ray number is high, that means the polygon has been fine
+    // tessellated, we don't need this extra slice, just keep it as 1.
+    int sliceNumberPerEdge = (totalRayNum > FINE_TESSELLATED_POLYGON_RAY_NUMBER) ? 1 : 2;
+
+    // For each polygon, we at most add (totalRayNum * sliceNumberPerEdge) vertices.
+    int slicedVertexCountPerPolygon = totalRayNum * sliceNumberPerEdge;
+    int totalVertexCount = slicedVertexCountPerPolygon * 2 + totalRayNum;
+    int totalIndexCount = 2 * (slicedVertexCountPerPolygon * 2 + 2);
+    AlphaVertex* shadowVertices =
+            shadowTriangleStrip.alloc<AlphaVertex>(totalVertexCount);
+    uint16_t* indexBuffer =
+            shadowTriangleStrip.allocIndices<uint16_t>(totalIndexCount);
+
+    int indexBufferIndex = 0;
+    int vertexBufferIndex = 0;
+
+    uint16_t slicedUmbraVertexIndex[totalRayNum * sliceNumberPerEdge];
+    // Should be something like 0 0 0  1 1 1 2 3 3 3...
+    int rayNumberPerSlicedUmbra[totalRayNum * sliceNumberPerEdge];
+    int realUmbraVertexCount = 0;
+    for (int i = 0; i < totalRayNum; i++) {
+        Vector2 currentPenumbra = penumbraVertices[i];
+        Vector2 currentUmbra = umbraVertices[i];
+
+        Vector2 nextPenumbra = penumbraVertices[(i + 1) % totalRayNum];
+        Vector2 nextUmbra = umbraVertices[(i + 1) % totalRayNum];
+        // NextUmbra/Penumbra will be done in the next loop!!
+        for (int weight = 0; weight < sliceNumberPerEdge; weight++) {
+            const Vector2& slicedPenumbra = (currentPenumbra * (sliceNumberPerEdge - weight)
+                + nextPenumbra * weight) / sliceNumberPerEdge;
+
+            const Vector2& slicedUmbra = (currentUmbra * (sliceNumberPerEdge - weight)
+                + nextUmbra * weight) / sliceNumberPerEdge;
+
+            // In the vertex buffer, we fill the Penumbra first, then umbra.
+            indexBuffer[indexBufferIndex++] = vertexBufferIndex;
+            AlphaVertex::set(&shadowVertices[vertexBufferIndex++], slicedPenumbra.x,
+                    slicedPenumbra.y, 0.0f);
+
+            // When we add umbra vertex, we need to remember its current ray number.
+            // And its own vertexBufferIndex. This is for occluded umbra usage.
+            indexBuffer[indexBufferIndex++] = vertexBufferIndex;
+            rayNumberPerSlicedUmbra[realUmbraVertexCount] = i;
+            slicedUmbraVertexIndex[realUmbraVertexCount] = vertexBufferIndex;
+            realUmbraVertexCount++;
+            AlphaVertex::set(&shadowVertices[vertexBufferIndex++], slicedUmbra.x,
+                    slicedUmbra.y, M_PI);
+        }
+    }
+
+    indexBuffer[indexBufferIndex++] = 0;
+    //RealUmbraVertexIndex[0] must be 1, so we connect back well at the
+    //beginning of occluded area.
+    indexBuffer[indexBufferIndex++] = 1;
+
+    float occludedUmbraAlpha = M_PI;
+    if (hasOccludedUmbraArea) {
+        // Now the occludedUmbra area;
+        int currentRayNumber = -1;
+        int firstOccludedUmbraIndex = -1;
+        for (int i = 0; i < realUmbraVertexCount; i++) {
+            indexBuffer[indexBufferIndex++] = slicedUmbraVertexIndex[i];
+
+            // If the occludedUmbra vertex has not been added yet, then add it.
+            // Otherwise, just use the previously added occludedUmbra vertices.
+            if (rayNumberPerSlicedUmbra[i] != currentRayNumber) {
+                currentRayNumber++;
+                indexBuffer[indexBufferIndex++] = vertexBufferIndex;
+                // We need to remember the begining of the occludedUmbra vertices
+                // to close this loop.
+                if (currentRayNumber == 0) {
+                    firstOccludedUmbraIndex = vertexBufferIndex;
+                }
+                AlphaVertex::set(&shadowVertices[vertexBufferIndex++],
+                        occludedUmbraVertices[currentRayNumber].x,
+                        occludedUmbraVertices[currentRayNumber].y,
+                        occludedUmbraAlpha);
+            } else {
+                indexBuffer[indexBufferIndex++] = (vertexBufferIndex - 1);
+            }
+        }
+        // Close the loop here!
+        indexBuffer[indexBufferIndex++] = slicedUmbraVertexIndex[0];
+        indexBuffer[indexBufferIndex++] = firstOccludedUmbraIndex;
+    } else {
+        int lastCentroidIndex = vertexBufferIndex;
+        AlphaVertex::set(&shadowVertices[vertexBufferIndex++], centroid.x,
+                centroid.y, occludedUmbraAlpha);
+        for (int i = 0; i < realUmbraVertexCount; i++) {
+            indexBuffer[indexBufferIndex++] = slicedUmbraVertexIndex[i];
+            indexBuffer[indexBufferIndex++] = lastCentroidIndex;
+        }
+        // Close the loop here!
+        indexBuffer[indexBufferIndex++] = slicedUmbraVertexIndex[0];
+        indexBuffer[indexBufferIndex++] = lastCentroidIndex;
+    }
+
+#if DEBUG_SHADOW
+    ALOGD("allocated IB %d allocated VB is %d", totalIndexCount, totalVertexCount);
+    ALOGD("IB index %d VB index is %d", indexBufferIndex, vertexBufferIndex);
+    for (int i = 0; i < vertexBufferIndex; i++) {
+        ALOGD("vertexBuffer i %d, (%f, %f %f)", i, shadowVertices[i].x, shadowVertices[i].y,
+                shadowVertices[i].alpha);
+    }
+    for (int i = 0; i < indexBufferIndex; i++) {
+        ALOGD("indexBuffer i %d, indexBuffer[i] %d", i, indexBuffer[i]);
+    }
+#endif
+
+    // At the end, update the real index and vertex buffer size.
+    shadowTriangleStrip.updateVertexCount(vertexBufferIndex);
+    shadowTriangleStrip.updateIndexCount(indexBufferIndex);
+    ShadowTessellator::checkOverflow(vertexBufferIndex, totalVertexCount, "Spot Vertex Buffer");
+    ShadowTessellator::checkOverflow(indexBufferIndex, totalIndexCount, "Spot Index Buffer");
+
+    shadowTriangleStrip.setMode(VertexBuffer::kIndices);
+    shadowTriangleStrip.computeBounds<AlphaVertex>();
+}
+
 #if DEBUG_SHADOW
 
 #define TEST_POINT_NUMBER 128
-
 /**
  * Calculate the bounds for generating random test points.
  */
 void SpotShadow::updateBound(const Vector2 inVector, Vector2& lowerBound,
-        Vector2& upperBound ) {
+        Vector2& upperBound) {
     if (inVector.x < lowerBound.x) {
         lowerBound.x = inVector.x;
     }
@@ -1127,14 +1633,14 @@ void SpotShadow::testIntersection(const Vector2* poly1, int poly1Length,
             if (!testPointInsidePolygon(testPoint, poly1, poly1Length)) {
                 dumpPoly = true;
                 ALOGW("(Error Type 1): one point (%f, %f) in the intersection is"
-                      " not in the poly1",
+                        " not in the poly1",
                         testPoint.x, testPoint.y);
             }
 
             if (!testPointInsidePolygon(testPoint, poly2, poly2Length)) {
                 dumpPoly = true;
                 ALOGW("(Error Type 1): one point (%f, %f) in the intersection is"
-                      " not in the poly2",
+                        " not in the poly2",
                         testPoint.x, testPoint.y);
             }
         }
