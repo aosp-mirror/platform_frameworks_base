@@ -262,7 +262,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
                 attrs, R.styleable.SearchView, defStyleAttr, defStyleRes);
         final LayoutInflater inflater = (LayoutInflater) context.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        final int layoutResId = a.getResourceId(R.styleable.SearchView_layout, 0);
+        final int layoutResId = a.getResourceId(R.styleable.SearchView_layout, R.layout.search_view);
         inflater.inflate(layoutResId, this, true);
 
         mQueryTextView = (SearchAutoComplete) findViewById(R.id.search_src_text);
@@ -288,7 +288,8 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         mSearchHintIcon.setImageDrawable(a.getDrawable(R.styleable.SearchView_searchIcon));
 
         // Extract dropdown layout resource IDs for later use.
-        mSuggestionRowLayout = a.getResourceId(R.styleable.SearchView_suggestionRowLayout, 0);
+        mSuggestionRowLayout = a.getResourceId(R.styleable.SearchView_suggestionRowLayout,
+                R.layout.search_dropdown_item_icons_2line);
         mSuggestionCommitIconResId = a.getResourceId(R.styleable.SearchView_commitIcon, 0);
 
         mSearchButton.setOnClickListener(mOnClickListener);
