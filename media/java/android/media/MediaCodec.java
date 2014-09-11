@@ -1756,7 +1756,7 @@ final public class MediaCodec {
             if (cropRect != null) {
                 cropRect.offset(-xOffset, -yOffset);
             }
-            setCropRect(cropRect);
+            super.setCropRect(cropRect);
 
             // save offsets and info
             mXOffset = xOffset;
