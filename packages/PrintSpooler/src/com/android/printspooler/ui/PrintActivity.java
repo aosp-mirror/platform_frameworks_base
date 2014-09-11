@@ -284,11 +284,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 mFileProvider);
         mPrintedDocument = new RemotePrintDocument(PrintActivity.this,
                 IPrintDocumentAdapter.Stub.asInterface(documentAdapter),
-                mFileProvider, new RemotePrintDocument.DocumentObserver() {
+                mFileProvider, new RemotePrintDocument.RemoteAdapterDeathObserver() {
             @Override
-            public void onDestroy() {
+            public void onDied() {
+                if (isFinishing()) {
+                    return;
+                }
                 setState(STATE_PRINT_CANCELED);
-                finish();
+                doFinish();
             }
         }, PrintActivity.this);
         mProgressMessageController = new ProgressMessageController(
@@ -342,17 +345,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     spooler.setPrintJobState(mPrintJob.getId(), PrintJobInfo.STATE_CANCELED, null);
                 } break;
             }
-
-            mProgressMessageController.cancel();
-            mPrinterRegistry.setTrackedPrinter(null);
-            mPrintPreviewController.destroy();
-            mSpoolerProvider.destroy();
-
-            if (mPrintedDocument.isUpdating()) {
-                mPrintedDocument.cancel();
-            }
-            mPrintedDocument.finish();
-            mPrintedDocument.destroy();
         }
 
         mPrinterAvailabilityDetector.cancel();
@@ -372,7 +364,12 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (mState == STATE_INITIALIZING) {
-            finish();
+            doFinish();
+            return true;
+        }
+
+        if (mState == STATE_PRINT_CANCELED ||mState == STATE_PRINT_CONFIRMED
+                || mState == STATE_PRINT_COMPLETED) {
             return true;
         }
 
@@ -430,7 +427,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             } break;
 
             case STATE_PRINT_CANCELED: {
-                finish();
+                doFinish();
             } break;
         }
     }
@@ -467,7 +464,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             } break;
 
             case STATE_PRINT_CANCELED: {
-                finish();
+                doFinish();
             } break;
 
             default: {
@@ -600,7 +597,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mDestinationSpinner.post(new Runnable() {
                 @Override
                 public void run() {
-                    finish();
+                    doFinish();
                 }
             });
         }
@@ -962,7 +959,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         if (mPrintedDocument.isUpdating()) {
             mPrintedDocument.cancel();
         }
-        finish();
+        doFinish();
     }
 
     private void confirmPrint() {
@@ -1539,9 +1536,21 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (writeToUri != null) {
                     mPrintedDocument.writeContent(getContentResolver(), writeToUri);
                 }
-                finish();
+                doFinish();
             }
         }).shred();
+    }
+
+    private void doFinish() {
+        if (mState != STATE_INITIALIZING) {
+            mProgressMessageController.cancel();
+            mPrinterRegistry.setTrackedPrinter(null);
+            mPrintPreviewController.destroy();
+            mSpoolerProvider.destroy();
+            mPrintedDocument.finish();
+            mPrintedDocument.destroy();
+        }
+        finish();
     }
 
     private final class SpinnerItem<T> {
