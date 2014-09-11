@@ -2246,7 +2246,6 @@ class ContextImpl extends Context {
         mUser = user;
 
         mPackageInfo = packageInfo;
-        mContentResolver = new ApplicationContentResolver(this, mainThread, user);
         mResourcesManager = ResourcesManager.getInstance();
         mDisplay = display;
         mOverrideConfiguration = overrideConfiguration;
@@ -2293,6 +2292,8 @@ class ContextImpl extends Context {
                 mOpPackageName = mBasePackageName;
             }
         }
+
+        mContentResolver = new ApplicationContentResolver(this, mainThread, user);
     }
 
     void installSystemApplicationInfo(ApplicationInfo info, ClassLoader classLoader) {
