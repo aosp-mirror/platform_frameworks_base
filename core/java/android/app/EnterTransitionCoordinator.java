@@ -136,11 +136,12 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         if (sharedElements.isEmpty() || !sharedElements.valueAt(0).isLayoutRequested()) {
             viewsReady(sharedElements);
         } else {
-            sharedElements.valueAt(0).getViewTreeObserver()
+            final View sharedElement = sharedElements.valueAt(0);
+            sharedElement.getViewTreeObserver()
                     .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
-                    sharedElements.valueAt(0).getViewTreeObserver().removeOnPreDrawListener(this);
+                    sharedElement.getViewTreeObserver().removeOnPreDrawListener(this);
                     viewsReady(sharedElements);
                     return true;
                 }
