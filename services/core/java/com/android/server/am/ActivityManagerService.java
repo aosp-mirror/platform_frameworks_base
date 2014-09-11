@@ -7468,12 +7468,33 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Does the caller have this permission on the URI?
         if (!checkHoldingPermissionsLocked(pm, pi, grantUri, callingUid, modeFlags)) {
-            // Right now, if you are not the original owner of the permission,
-            // you are not allowed to revoke it.
-            //if (!checkUriPermissionLocked(uri, callingUid, modeFlags)) {
-                throw new SecurityException("Uid " + callingUid
-                        + " does not have permission to uri " + grantUri);
-            //}
+            // Have they don't have direct access to the URI, then revoke any URI
+            // permissions that have been granted to them.
+            final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.get(callingUid);
+            if (perms != null) {
+                boolean persistChanged = false;
+                for (Iterator<UriPermission> it = perms.values().iterator(); it.hasNext();) {
+                    final UriPermission perm = it.next();
+                    if (perm.uri.sourceUserId == grantUri.sourceUserId
+                            && perm.uri.uri.isPathPrefixMatch(grantUri.uri)) {
+                        if (DEBUG_URI_PERMISSION)
+                            Slog.v(TAG,
+                                    "Revoking " + perm.targetUid + " permission to " + perm.uri);
+                        persistChanged |= perm.revokeModes(
+                                modeFlags | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+                        if (perm.modeFlags == 0) {
+                            it.remove();
+                        }
+                    }
+                }
+                if (perms.isEmpty()) {
+                    mGrantedUriPermissions.remove(callingUid);
+                }
+                if (persistChanged) {
+                    schedulePersistUriGrants();
+                }
+            }
+            return;
         }
 
         boolean persistChanged = false;
