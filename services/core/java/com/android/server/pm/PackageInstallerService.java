@@ -446,7 +446,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private int createSessionInternal(SessionParams params, String installerPackageName, int userId)
             throws IOException {
         final int callingUid = Binder.getCallingUid();
-        mPm.enforceCrossUserPermission(callingUid, userId, true, "createSession");
+        mPm.enforceCrossUserPermission(callingUid, userId, true, false, "createSession");
 
         if (mPm.isUserRestricted(UserHandle.getUserId(callingUid),
                 UserManager.DISALLOW_INSTALL_APPS)) {
@@ -654,7 +654,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     @Override
     public List<SessionInfo> getAllSessions(int userId) {
-        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "getAllSessions");
+        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false, "getAllSessions");
 
         final List<SessionInfo> result = new ArrayList<>();
         synchronized (mSessions) {
@@ -670,7 +670,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     @Override
     public List<SessionInfo> getMySessions(String installerPackageName, int userId) {
-        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "getMySessions");
+        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false, "getMySessions");
         mAppOps.checkPackage(Binder.getCallingUid(), installerPackageName);
 
         final List<SessionInfo> result = new ArrayList<>();
@@ -688,7 +688,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     @Override
     public void uninstall(String packageName, int flags, IntentSender statusReceiver, int userId) {
-        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "uninstall");
+        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false, "uninstall");
 
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, packageName);
@@ -717,7 +717,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     @Override
     public void registerCallback(IPackageInstallerCallback callback, int userId) {
-        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, "registerCallback");
+        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false, "registerCallback");
         mCallbacks.register(callback, userId);
     }
 
