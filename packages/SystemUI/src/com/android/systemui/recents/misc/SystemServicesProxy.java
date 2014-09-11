@@ -492,17 +492,6 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Locks the current task.
-     */
-    public void lockCurrentTask() {
-        if (mIam == null) return;
-
-        try {
-            mIam.startLockTaskModeOnCurrent();
-        } catch (RemoteException e) {}
-    }
-
-    /**
      * Takes a screenshot of the current surface.
      */
     public Bitmap takeScreenshot() {
