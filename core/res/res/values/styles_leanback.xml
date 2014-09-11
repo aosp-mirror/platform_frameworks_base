@@ -36,24 +36,28 @@
     <!-- Setup and form wizard themes -->
     <style name="TextAppearance.Leanback.FormWizard" parent="@style/TextAppearance.Material">
         <item name="textSize">18sp</item>
+        <item name="lineSpacingExtra">24sp</item>
         <item name="fontFamily">sans-serif-light</item>
         <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Leanback.FormWizard.Small" parent="@style/TextAppearance.Material.Small">
-        <item name="textSize">18sp</item>
+        <item name="textSize">14sp</item>
+        <item name="lineSpacingExtra">24sp</item>
         <item name="fontFamily">sans-serif-light</item>
         <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Leanback.FormWizard.Medium" parent="@style/TextAppearance.Material.Medium">
         <item name="textSize">36sp</item>
+        <item name="lineSpacingExtra">40sp</item>
         <item name="fontFamily">sans-serif-thin</item>
         <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Leanback.FormWizard.Large" parent="@style/TextAppearance.Material.Large">
-        <item name="textSize">56sp</item>
+        <item name="textSize">42sp</item>
+        <item name="lineSpacingExtra">48sp</item>
         <item name="fontFamily">sans-serif-thin</item>
         <item name="textColor">?attr/textColorPrimary</item>
     </style>
