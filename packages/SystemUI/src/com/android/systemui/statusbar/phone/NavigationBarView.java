@@ -88,6 +88,7 @@ public class NavigationBarView extends LinearLayout {
 
     private OnVerticalChangedListener mOnVerticalChangedListener;
     private boolean mIsLayoutRtl;
+    private boolean mDelegateIntercepted;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -198,27 +199,45 @@ public class NavigationBarView extends LinearLayout {
 
     public void setOnVerticalChangedListener(OnVerticalChangedListener onVerticalChangedListener) {
         mOnVerticalChangedListener = onVerticalChangedListener;
+        notifyVerticalChangedListener(mVertical);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mTaskSwitchHelper.onTouchEvent(event)) {
+        initDownStates(event);
+        if (!mDelegateIntercepted && mTaskSwitchHelper.onTouchEvent(event)) {
             return true;
         }
         if (mDeadZone != null && event.getAction() == MotionEvent.ACTION_OUTSIDE) {
             mDeadZone.poke(event);
         }
-        if (mDelegateHelper != null) {
+        if (mDelegateHelper != null && mDelegateIntercepted) {
             boolean ret = mDelegateHelper.onInterceptTouchEvent(event);
             if (ret) return true;
         }
         return super.onTouchEvent(event);
     }
 
+    private void initDownStates(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            mDelegateIntercepted = false;
+        }
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        return mTaskSwitchHelper.onInterceptTouchEvent(event) ||
-                mDelegateHelper.onInterceptTouchEvent(event);
+        initDownStates(event);
+        boolean intercept = mTaskSwitchHelper.onInterceptTouchEvent(event);
+        if (!intercept) {
+            mDelegateIntercepted = mDelegateHelper.onInterceptTouchEvent(event);
+            intercept = mDelegateIntercepted;
+        } else {
+            MotionEvent cancelEvent = MotionEvent.obtain(event);
+            cancelEvent.setAction(MotionEvent.ACTION_CANCEL);
+            mDelegateHelper.onInterceptTouchEvent(cancelEvent);
+            cancelEvent.recycle();
+        }
+        return intercept;
     }
 
     private H mHandler = new H();
@@ -426,10 +445,14 @@ public class NavigationBarView extends LinearLayout {
         if (mDelegateHelper != null) {
             mDelegateHelper.setSwapXY(mVertical);
         }
-        boolean isRTL = (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL);
-        mTaskSwitchHelper.setBarState(mVertical, isRTL);
+        updateTaskSwitchHelper();
 
         setNavigationIconHints(mNavigationIconHints, true);
+    }
+
+    private void updateTaskSwitchHelper() {
+        boolean isRtl = (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL);
+        mTaskSwitchHelper.setBarState(mVertical, isRtl);
     }
 
     @Override
@@ -448,19 +471,24 @@ public class NavigationBarView extends LinearLayout {
             mVertical = newVertical;
             //Log.v(TAG, String.format("onSizeChanged: h=%d, w=%d, vert=%s", h, w, mVertical?"y":"n"));
             reorient();
-            if (mOnVerticalChangedListener != null) {
-                mOnVerticalChangedListener.onVerticalChanged(newVertical);
-            }
+            notifyVerticalChangedListener(newVertical);
         }
 
         postCheckForInvalidLayout("sizeChanged");
         super.onSizeChanged(w, h, oldw, oldh);
     }
 
+    private void notifyVerticalChangedListener(boolean newVertical) {
+        if (mOnVerticalChangedListener != null) {
+            mOnVerticalChangedListener.onVerticalChanged(newVertical);
+        }
+    }
+
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         updateRTLOrder();
+        updateTaskSwitchHelper();
     }
 
     /**
