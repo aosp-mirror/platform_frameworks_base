@@ -76,14 +76,21 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
     private boolean mTitleSet;
     private CharSequence mTitle;
     private CharSequence mSubtitle;
+    private CharSequence mHomeDescription;
 
     private Window.Callback mWindowCallback;
     private boolean mMenuPrepared;
     private ActionMenuPresenter mActionMenuPresenter;
 
     private int mNavigationMode = ActionBar.NAVIGATION_MODE_STANDARD;
+    private int mDefaultNavigationContentDescription = 0;
 
     public ToolbarWidgetWrapper(Toolbar toolbar, boolean style) {
+        this(toolbar, style, R.string.action_bar_up_description);
+    }
+
+    public ToolbarWidgetWrapper(Toolbar toolbar, boolean style,
+            int defaultNavigationContentDescription) {
         mToolbar = toolbar;
 
         mTitle = toolbar.getTitle();
@@ -166,10 +173,8 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
             mDisplayOpts = detectDisplayOptions();
         }
 
-        if (TextUtils.isEmpty(mToolbar.getNavigationContentDescription())) {
-            mToolbar.setNavigationContentDescription(
-                    getContext().getResources().getText(R.string.action_bar_up_description));
-        }
+        setDefaultNavigationContentDescription(defaultNavigationContentDescription);
+        mHomeDescription = mToolbar.getNavigationContentDescription();
 
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             final ActionMenuItem mNavItem = new ActionMenuItem(mToolbar.getContext(),
@@ -181,6 +186,17 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
                 }
             }
         });
+    }
+
+    @Override
+    public void setDefaultNavigationContentDescription(int defaultNavigationContentDescription) {
+        if (defaultNavigationContentDescription == mDefaultNavigationContentDescription) {
+            return;
+        }
+        mDefaultNavigationContentDescription = defaultNavigationContentDescription;
+        if (TextUtils.isEmpty(mToolbar.getNavigationContentDescription())) {
+            setNavigationContentDescription(mDefaultNavigationContentDescription);
+        }
     }
 
     private int detectDisplayOptions() {
@@ -395,6 +411,7 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
             if ((changed & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
                 if ((newOpts & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
                     mToolbar.setNavigationIcon(mNavIcon);
+                    updateHomeAccessibility();
                 } else {
                     mToolbar.setNavigationIcon(null);
                 }
@@ -602,12 +619,23 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
 
     @Override
     public void setNavigationContentDescription(CharSequence description) {
-        mToolbar.setNavigationContentDescription(description);
+        mHomeDescription = description;
+        updateHomeAccessibility();
     }
 
     @Override
     public void setNavigationContentDescription(int resId) {
-        mToolbar.setNavigationContentDescription(resId);
+        setNavigationContentDescription(resId == 0 ? null : getContext().getString(resId));
+    }
+
+    private void updateHomeAccessibility() {
+        if ((mDisplayOpts & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
+            if (TextUtils.isEmpty(mHomeDescription)) {
+                mToolbar.setNavigationContentDescription(mDefaultNavigationContentDescription);
+            } else {
+                mToolbar.setNavigationContentDescription(mHomeDescription);
+            }
+        }
     }
 
     @Override
