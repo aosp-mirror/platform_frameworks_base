@@ -26,22 +26,51 @@ namespace uirenderer {
 
 class SpotShadow {
 public:
-    static void createSpotShadow_old(bool isCasterOpaque, const Vector3* poly,
-            int polyLength, const Vector3& lightCenter, float lightSize,
-            int lightVertexCount, VertexBuffer& retStrips);
     static void createSpotShadow(bool isCasterOpaque, const Vector3& lightCenter,
             float lightSize, const Vector3* poly, int polyLength,
             const Vector3& polyCentroid, VertexBuffer& retstrips);
 
 private:
+    struct VertexAngleData;
+
     static float projectCasterToOutline(Vector2& outline,
             const Vector3& lightCenter, const Vector3& polyVertex);
     static int calculateOccludedUmbra(const Vector2* umbra, int umbraLength,
             const Vector3* poly, int polyLength, Vector2* occludedUmbra);
 
-    static void computeSpotShadow_old(bool isCasterOpaque, const Vector3* lightPoly,
-            int lightPolyLength, const Vector3& lightCenter, const Vector3* poly,
-            int polyLength, VertexBuffer& shadowTriangleStrip);
+    static int setupAngleList(VertexAngleData* angleDataList,
+            int polyLength, const Vector2* polygon, const Vector2& centroid,
+            bool isPenumbra, const char* name);
+
+    static int convertPolysToVerticesPerRay(
+            bool hasOccludedUmbraArea, const Vector2* poly2d, int polyLength,
+            const Vector2* umbra, int umbraLength, const Vector2* penumbra,
+            int penumbraLength, const Vector2& centroid,
+            Vector2* umbraVerticesPerRay, Vector2* penumbraVerticesPerRay,
+            Vector2* occludedUmbraVerticesPerRay);
+
+    static bool checkClockwise(int maxIndex, int listLength,
+            VertexAngleData* angleList, const char* name);
+
+    static void calculateDistanceCounter(bool needsOffsetToUmbra, int angleLength,
+            const VertexAngleData* allVerticesAngleData, int* distances);
+
+    static void mergeAngleList(int maxUmbraAngleIndex, int maxPenumbraAngleIndex,
+            const VertexAngleData* umbraAngleList, int umbraLength,
+            const VertexAngleData* penumbraAngleList, int penumbraLength,
+            VertexAngleData* allVerticesAngleData);
+
+    static int setupPolyAngleList(float* polyAngleList, int polyAngleLength,
+        const Vector2* poly2d, const Vector2& centroid);
+
+    static bool checkPolyClockwise(int polyAngleLength, int maxPolyAngleIndex,
+        const float* polyAngleList);
+
+    static int getEdgeStartIndex(const int* offsets, int rayIndex, int totalRayNumber,
+        const VertexAngleData* allVerticesAngleData);
+
+    static int getPolyEdgeStartIndex(int maxPolyAngleIndex, int polyLength,
+        const float* polyAngleList, float rayAngle);
 
     static void computeLightPolygon(int points, const Vector3& lightCenter,
             float size, Vector3* ret);
@@ -67,11 +96,10 @@ private:
             double x3, double y3, double x4, double y4, Vector2& ret);
 
     static void generateTriangleStrip(bool isCasterOpaque, float shadowStrengthScale,
-            const Vector2* penumbra, int penumbraLength, const Vector2* umbra, int umbraLength,
-            const Vector3* poly, int polyLength, VertexBuffer& retstrips);
+            Vector2* penumbra, int penumbraLength, Vector2* umbra, int umbraLength,
+            const Vector3* poly, int polyLength, VertexBuffer& retstrips, const Vector2& centroid);
 
 #if DEBUG_SHADOW
-    // Verification utility function.
     static bool testConvex(const Vector2* polygon, int polygonLength,
             const char* name);
     static void testIntersection(const Vector2* poly1, int poly1Length,
