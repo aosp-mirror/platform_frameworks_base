@@ -3183,24 +3183,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (matches.get(i).getTargetUserId() == targetUserId) return true;
             }
         }
-        ArrayList<String> packageNames = null;
-        SparseArray<ArrayList<String>> fromSource =
-                mSettings.mCrossProfilePackageInfo.get(sourceUserId);
-        if (fromSource != null) {
-            packageNames = fromSource.get(targetUserId);
-            if (packageNames != null) {
-                // We need the package name, so we try to resolve with the loosest flags possible
-                List<ResolveInfo> resolveInfos = mActivities.queryIntent(intent, resolvedType,
-                        PackageManager.GET_UNINSTALLED_PACKAGES, targetUserId);
-                int count = resolveInfos.size();
-                for (int i = 0; i < count; i++) {
-                    ResolveInfo resolveInfo = resolveInfos.get(i);
-                    if (packageNames.contains(resolveInfo.activityInfo.packageName)) {
-                        return true;
-                    }
-                }
-            }
-        }
         return false;
     }
 
@@ -3241,20 +3223,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             final String pkgName = intent.getPackage();
             if (pkgName == null) {
-                ResolveInfo resolveInfo = null;
-
-                // Check if the intent needs to be forwarded to another user for this package
-                ArrayList<ResolveInfo> crossProfileResult =
-                        queryIntentActivitiesCrossProfilePackage(
-                                intent, resolvedType, flags, userId);
-                if (!crossProfileResult.isEmpty()) {
-                    // Skip the current profile
-                    return crossProfileResult;
-                }
                 List<CrossProfileIntentFilter> matchingFilters =
                         getMatchingCrossProfileIntentFilters(intent, resolvedType, userId);
                 // Check for results that need to skip the current profile.
-                resolveInfo = querySkipCurrentProfileIntents(matchingFilters, intent,
+                ResolveInfo resolveInfo  = querySkipCurrentProfileIntents(matchingFilters, intent,
                         resolvedType, flags, userId);
                 if (resolveInfo != null) {
                     List<ResolveInfo> result = new ArrayList<ResolveInfo>(1);
@@ -3276,13 +3248,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             final PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
-                ArrayList<ResolveInfo> crossProfileResult =
-                        queryIntentActivitiesCrossProfilePackage(
-                                intent, resolvedType, flags, userId, pkg, pkgName);
-                if (!crossProfileResult.isEmpty()) {
-                    // Skip the current profile
-                    return crossProfileResult;
-                }
                 return mActivities.queryIntentForPackage(intent, resolvedType, flags,
                         pkg.activities, userId);
             }
@@ -3309,56 +3274,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         return null;
-    }
-
-    private ArrayList<ResolveInfo> queryIntentActivitiesCrossProfilePackage(
-            Intent intent, String resolvedType, int flags, int userId) {
-        ArrayList<ResolveInfo> matchingResolveInfos = new ArrayList<ResolveInfo>();
-        SparseArray<ArrayList<String>> sourceForwardingInfo =
-                mSettings.mCrossProfilePackageInfo.get(userId);
-        if (sourceForwardingInfo != null) {
-            int NI = sourceForwardingInfo.size();
-            for (int i = 0; i < NI; i++) {
-                int targetUserId = sourceForwardingInfo.keyAt(i);
-                ArrayList<String> packageNames = sourceForwardingInfo.valueAt(i);
-                List<ResolveInfo> resolveInfos = mActivities.queryIntent(
-                        intent, resolvedType, flags, targetUserId);
-                int NJ = resolveInfos.size();
-                for (int j = 0; j < NJ; j++) {
-                    ResolveInfo resolveInfo = resolveInfos.get(j);
-                    if (packageNames.contains(resolveInfo.activityInfo.packageName)) {
-                        matchingResolveInfos.add(createForwardingResolveInfo(
-                                resolveInfo.filter, userId, targetUserId));
-                    }
-                }
-            }
-        }
-        return matchingResolveInfos;
-    }
-
-    private ArrayList<ResolveInfo> queryIntentActivitiesCrossProfilePackage(
-            Intent intent, String resolvedType, int flags, int userId, PackageParser.Package pkg,
-            String packageName) {
-        ArrayList<ResolveInfo> matchingResolveInfos = new ArrayList<ResolveInfo>();
-        SparseArray<ArrayList<String>> sourceForwardingInfo =
-                mSettings.mCrossProfilePackageInfo.get(userId);
-        if (sourceForwardingInfo != null) {
-            int NI = sourceForwardingInfo.size();
-            for (int i = 0; i < NI; i++) {
-                int targetUserId = sourceForwardingInfo.keyAt(i);
-                if (sourceForwardingInfo.valueAt(i).contains(packageName)) {
-                    List<ResolveInfo> resolveInfos = mActivities.queryIntentForPackage(
-                            intent, resolvedType, flags, pkg.activities, targetUserId);
-                    int NJ = resolveInfos.size();
-                    for (int j = 0; j < NJ; j++) {
-                        ResolveInfo resolveInfo = resolveInfos.get(j);
-                        matchingResolveInfos.add(createForwardingResolveInfo(
-                                resolveInfo.filter, userId, targetUserId));
-                    }
-                }
-            }
-        }
-        return matchingResolveInfos;
     }
 
     // Return matching ResolveInfo if any for skip current profile intent filters.
@@ -11656,24 +11571,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             mSettings.editCrossProfileIntentResolverLPw(sourceUserId).addFilter(filter);
             mSettings.writePackageRestrictionsLPr(sourceUserId);
         }
-    }
-
-    @Override
-    public void addCrossProfileIntentsForPackage(String packageName,
-            int sourceUserId, int targetUserId) {
-        mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
-        mSettings.addCrossProfilePackage(packageName, sourceUserId, targetUserId);
-        mSettings.writePackageRestrictionsLPr(sourceUserId);
-    }
-
-    @Override
-    public void removeCrossProfileIntentsForPackage(String packageName,
-            int sourceUserId, int targetUserId) {
-        mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
-        mSettings.removeCrossProfilePackage(packageName, sourceUserId, targetUserId);
-        mSettings.writePackageRestrictionsLPr(sourceUserId);
     }
 
     @Override
