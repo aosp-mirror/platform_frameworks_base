@@ -477,6 +477,18 @@ public final class TvInputManager {
          */
         public void onInputRemoved(String inputId) {
         }
+
+        /**
+         * This is called when a TV input is updated. The update of TV input happens when it is
+         * reinstalled or the media on which the newer version of TV input exists is
+         * available/unavailable.
+         *
+         * @param inputId The id of the TV input.
+         * @hide
+         */
+        @SystemApi
+        public void onInputUpdated(String inputId) {
+        }
     }
 
     private static final class TvInputCallbackRecord {
@@ -515,6 +527,15 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mCallback.onInputRemoved(inputId);
+                }
+            });
+        }
+
+        public void postInputUpdated(final String inputId) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mListener.onInputUpdated(inputId);
                 }
             });
         }
@@ -704,6 +725,15 @@ public final class TvInputManager {
                     mStateMap.remove(inputId);
                     for (TvInputCallbackRecord record : mCallbackRecords) {
                         record.postInputRemoved(inputId);
+                    }
+                }
+            }
+
+            @Override
+            public void onInputUpdated(String inputId) {
+                synchronized (mLock) {
+                    for (TvInputListenerRecord record : mTvInputListenerRecordsList) {
+                        record.postInputUpdated(inputId);
                     }
                 }
             }

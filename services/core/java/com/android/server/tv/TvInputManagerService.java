@@ -85,6 +85,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -139,7 +140,7 @@ public final class TvInputManagerService extends SystemService {
             registerBroadcastReceivers();
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             synchronized (mLock) {
-                buildTvInputListLocked(mCurrentUserId);
+                buildTvInputListLocked(mCurrentUserId, null);
                 buildTvContentRatingSystemListLocked(mCurrentUserId);
             }
         }
@@ -148,19 +149,64 @@ public final class TvInputManagerService extends SystemService {
 
     private void registerBroadcastReceivers() {
         PackageMonitor monitor = new PackageMonitor() {
+            private void buildTvInputList(String[] packages) {
+                synchronized (mLock) {
+                    buildTvInputListLocked(getChangingUserId(), packages);
+                    buildTvContentRatingSystemListLocked(getChangingUserId());
+                }
+            }
+
+            @Override
+            public void onPackageUpdateFinished(String packageName, int uid) {
+                if (DEBUG) Slog.d(TAG, "onPackageUpdateFinished(packageName=" + packageName + ")");
+                // This callback is invoked when the TV input is reinstalled.
+                // In this case, isReplacing() always returns true.
+                buildTvInputList(new String[] { packageName });
+            }
+
+            @Override
+            public void onPackagesAvailable(String[] packages) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onPackagesAvailable(packages=" + Arrays.toString(packages) + ")");
+                }
+                // This callback is invoked when the media on which some packages exist become
+                // available.
+                if (isReplacing()) {
+                    buildTvInputList(packages);
+                }
+            }
+
+            @Override
+            public void onPackagesUnavailable(String[] packages) {
+                // This callback is invoked when the media on which some packages exist become
+                // unavailable.
+                if (DEBUG)  {
+                    Slog.d(TAG, "onPackagesUnavailable(packages=" + Arrays.toString(packages)
+                            + ")");
+                }
+                if (isReplacing()) {
+                    buildTvInputList(packages);
+                }
+            }
+
             @Override
             public void onSomePackagesChanged() {
+                // TODO: Use finer-grained methods(e.g. onPackageAdded, onPackageRemoved) to manage
+                // the TV inputs.
                 if (DEBUG) Slog.d(TAG, "onSomePackagesChanged()");
-                synchronized (mLock) {
-                    buildTvInputListLocked(mCurrentUserId);
-                    buildTvContentRatingSystemListLocked(mCurrentUserId);
+                if (isReplacing()) {
+                    if (DEBUG) Slog.d(TAG, "Skipped building TV input list due to replacing");
+                    // When the package is updated, buildTvInputListLocked is called in other
+                    // methods instead.
+                    return;
                 }
+                buildTvInputList(null);
             }
 
             @Override
             public void onPackageRemoved(String packageName, int uid) {
                 synchronized (mLock) {
-                    UserState userState = getUserStateLocked(mCurrentUserId);
+                    UserState userState = getUserStateLocked(getChangingUserId());
                     if (!userState.packageSet.contains(packageName)) {
                         // Not a TV input package.
                         return;
@@ -218,13 +264,11 @@ public final class TvInputManagerService extends SystemService {
                 component.getPackageName()) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void buildTvInputListLocked(int userId) {
+    private void buildTvInputListLocked(int userId, String[] updatedPackages) {
         UserState userState = getUserStateLocked(userId);
         userState.packageSet.clear();
 
-        if (DEBUG) {
-            Slog.d(TAG, "buildTvInputList");
-        }
+        if (DEBUG) Slog.d(TAG, "buildTvInputList");
         PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> services = pm.queryIntentServices(
                 new Intent(TvInputService.SERVICE_INTERFACE),
@@ -278,6 +322,15 @@ public final class TvInputManagerService extends SystemService {
         for (String inputId : inputMap.keySet()) {
             if (!userState.inputMap.containsKey(inputId)) {
                 notifyInputAddedLocked(userState, inputId);
+            } else if (updatedPackages != null) {
+                // Notify the package updates
+                TvInputState inputState = inputMap.get(inputId);
+                for (String updatedPackage : updatedPackages) {
+                    if (inputState.info.getComponent().getPackageName().equals(updatedPackage)) {
+                        notifyInputUpdatedLocked(userState, inputId);
+                        break;
+                    }
+                }
             }
         }
 
@@ -337,7 +390,7 @@ public final class TvInputManagerService extends SystemService {
                 userState = new UserState(mContext, userId);
             }
             mUserStates.put(userId, userState);
-            buildTvInputListLocked(userId);
+            buildTvInputListLocked(userId, null);
             buildTvContentRatingSystemListLocked(userId);
         }
     }
@@ -645,6 +698,19 @@ public final class TvInputManagerService extends SystemService {
                 callback.onInputRemoved(inputId);
             } catch (RemoteException e) {
                 Slog.e(TAG, "failed to report removed input to callback", e);
+            }
+        }
+    }
+
+    private void notifyInputUpdatedLocked(UserState userState, String inputId) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyInputUpdatedLocked(inputId=" + inputId + ")");
+        }
+        for (ITvInputManagerCallback callback : userState.callbackSet) {
+            try {
+                callback.onInputUpdated(inputId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "failed to report updated input to callback", e);
             }
         }
     }
@@ -1813,7 +1879,7 @@ public final class TvInputManagerService extends SystemService {
         private void addTvInputLocked(TvInputInfo inputInfo) {
             ServiceState serviceState = getServiceStateLocked(mComponent, mUserId);
             serviceState.inputList.add(inputInfo);
-            buildTvInputListLocked(mUserId);
+            buildTvInputListLocked(mUserId, null);
         }
 
         @Override
@@ -1851,7 +1917,7 @@ public final class TvInputManagerService extends SystemService {
                     }
                 }
                 if (removed) {
-                    buildTvInputListLocked(mUserId);
+                    buildTvInputListLocked(mUserId, null);
                     mTvInputHardwareManager.removeTvInput(inputId);
                 } else {
                     Slog.e(TAG, "failed to remove input " + inputId);
