@@ -64,7 +64,9 @@ public class ProcessCpuTracker {
 
     /** Stores user time and system time in 100ths of a second. */
     private final long[] mProcessStatsData = new long[4];
-    /** Stores user time and system time in 100ths of a second. */
+
+    /** Stores user time and system time in 100ths of a second.  Used for
+     * public API to retrieve CPU use for a process.  Must lock while in use. */
     private final long[] mSinglePidStatsData = new long[4];
 
     private static final int[] PROCESS_FULL_STATS_FORMAT = new int[] {
@@ -533,18 +535,20 @@ public class ProcessCpuTracker {
 
     /**
      * Returns the total time (in clock ticks, or 1/100 sec) spent executing in
-     * both user and system code.
+     * both user and system code.  Safe to call without lock held.
      */
     public long getCpuTimeForPid(int pid) {
-        final String statFile = "/proc/" + pid + "/stat";
-        final long[] statsData = mSinglePidStatsData;
-        if (Process.readProcFile(statFile, PROCESS_STATS_FORMAT,
-                null, statsData, null)) {
-            long time = statsData[PROCESS_STAT_UTIME]
-                    + statsData[PROCESS_STAT_STIME];
-            return time;
+        synchronized (mSinglePidStatsData) {
+            final String statFile = "/proc/" + pid + "/stat";
+            final long[] statsData = mSinglePidStatsData;
+            if (Process.readProcFile(statFile, PROCESS_STATS_FORMAT,
+                    null, statsData, null)) {
+                long time = statsData[PROCESS_STAT_UTIME]
+                        + statsData[PROCESS_STAT_STIME];
+                return time;
+            }
+            return 0;
         }
-        return 0;
     }
 
     /**
