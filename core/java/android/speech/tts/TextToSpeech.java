@@ -46,7 +46,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  *
@@ -1567,10 +1566,10 @@ public class TextToSpeech {
             @Override
             public Set<Locale> run(ITextToSpeechService service) throws RemoteException {
                 List<Voice> voices = service.getVoices();
-                if (voices != null) {
-                    return new TreeSet<Locale>();
+                if (voices == null) {
+                    return new HashSet<Locale>();
                 }
-                TreeSet<Locale> locales = new TreeSet<Locale>();
+                HashSet<Locale> locales = new HashSet<Locale>();
                 for (Voice voice : voices) {
                     locales.add(voice.getLocale());
                 }
@@ -1593,7 +1592,7 @@ public class TextToSpeech {
             @Override
             public Set<Voice> run(ITextToSpeechService service) throws RemoteException {
                 List<Voice> voices = service.getVoices();
-                return (voices != null)  ? new TreeSet<Voice>(voices) : new TreeSet<Voice>();
+                return (voices != null)  ? new HashSet<Voice>(voices) : new HashSet<Voice>();
             }
         }, null, "getVoices");
     }
