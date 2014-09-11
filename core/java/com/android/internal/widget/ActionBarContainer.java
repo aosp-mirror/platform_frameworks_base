@@ -22,6 +22,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Outline;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.ActionMode;
@@ -374,7 +375,23 @@ public class ActionBarContainer extends FrameLayout {
 
         @Override
         public int getOpacity() {
-            return 0;
+            if (mIsSplit) {
+                if (mSplitBackground != null
+                        && mSplitBackground.getOpacity() == PixelFormat.OPAQUE) {
+                    return PixelFormat.OPAQUE;
+                }
+            } else {
+                if (mIsStacked && (mStackedBackground == null
+                        || mStackedBackground.getOpacity() != PixelFormat.OPAQUE)) {
+                    return PixelFormat.UNKNOWN;
+                }
+                if (!isCollapsed(mActionBarView) && mBackground != null
+                        && mBackground.getOpacity() == PixelFormat.OPAQUE) {
+                    return PixelFormat.OPAQUE;
+                }
+            }
+
+            return PixelFormat.UNKNOWN;
         }
     }
 }

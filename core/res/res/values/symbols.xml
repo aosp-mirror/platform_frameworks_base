@@ -2042,4 +2042,5 @@
   <java-symbol type="layout" name="resolver_different_item_header" />
   <java-symbol type="array" name="config_default_vm_number" />
   <java-symbol type="integer" name="config_cdma_3waycall_flash_delay"/>
+  <java-symbol type="attr" name="windowBackgroundFallback" />
 </resources>
