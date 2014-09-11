@@ -33,6 +33,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
@@ -48,6 +49,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.service.trust.TrustAgentService;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -97,6 +99,7 @@ public class TrustManagerService extends SystemService {
     private final SparseBooleanArray mUserHasAuthenticatedSinceBoot = new SparseBooleanArray();
     /* package */ final TrustArchive mArchive = new TrustArchive();
     private final Context mContext;
+    private final LockPatternUtils mLockPatternUtils;
 
     private UserManager mUserManager;
 
@@ -104,6 +107,7 @@ public class TrustManagerService extends SystemService {
         super(context);
         mContext = context;
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mLockPatternUtils = new LockPatternUtils(context);
     }
 
     @Override
@@ -116,6 +120,7 @@ public class TrustManagerService extends SystemService {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY && !isSafeMode()) {
             mPackageMonitor.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
             mReceiver.register(mContext);
+            maybeEnableFactoryTrustAgents(mLockPatternUtils, UserHandle.USER_OWNER);
             refreshAgentList(UserHandle.USER_ALL);
         }
     }
@@ -168,12 +173,13 @@ public class TrustManagerService extends SystemService {
             userInfos = new ArrayList<>();
             userInfos.add(mUserManager.getUserInfo(userId));
         }
-        LockPatternUtils lockPatternUtils = new LockPatternUtils(mContext);
+        LockPatternUtils lockPatternUtils = mLockPatternUtils;
 
         ArraySet<AgentInfo> obsoleteAgents = new ArraySet<>();
         obsoleteAgents.addAll(mActiveAgents);
 
         for (UserInfo userInfo : userInfos) {
+            if (!userInfo.supportsSwitchTo()) continue;
             if (lockPatternUtils.getKeyguardStoredPasswordQuality(userInfo.id)
                     == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) continue;
             if (!mUserHasAuthenticatedSinceBoot.get(userInfo.id)) continue;
@@ -186,22 +192,11 @@ public class TrustManagerService extends SystemService {
             if (enabledAgents == null) {
                 continue;
             }
-            List<ResolveInfo> resolveInfos = pm.queryIntentServicesAsUser(TRUST_AGENT_INTENT,
-                    PackageManager.GET_META_DATA, userInfo.id);
+            List<ResolveInfo> resolveInfos = resolveAllowedTrustAgents(pm, userInfo.id);
             for (ResolveInfo resolveInfo : resolveInfos) {
-                if (resolveInfo.serviceInfo == null) continue;
-
-                String packageName = resolveInfo.serviceInfo.packageName;
-                if (pm.checkPermission(PERMISSION_PROVIDE_AGENT, packageName)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    Log.w(TAG, "Skipping agent because package " + packageName
-                            + " does not have permission " + PERMISSION_PROVIDE_AGENT + ".");
-                    continue;
-                }
-
                 ComponentName name = getComponentName(resolveInfo);
-                if (!enabledAgents.contains(name)) continue;
 
+                if (!enabledAgents.contains(name)) continue;
                 if (disableTrustAgents) {
                     List<String> features =
                             dpm.getTrustAgentFeaturesEnabled(null /* admin */, name);
@@ -342,6 +337,54 @@ public class TrustManagerService extends SystemService {
         return new ComponentName(resolveInfo.serviceInfo.packageName, resolveInfo.serviceInfo.name);
     }
 
+    private void maybeEnableFactoryTrustAgents(LockPatternUtils utils, int userId) {
+        if (0 != Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.TRUST_AGENTS_INITIALIZED, 0, userId)) {
+            return;
+        }
+        PackageManager pm = mContext.getPackageManager();
+        List<ResolveInfo> resolveInfos = resolveAllowedTrustAgents(pm, userId);
+        ArraySet<ComponentName> discoveredAgents = new ArraySet<>();
+        for (ResolveInfo resolveInfo : resolveInfos) {
+            ComponentName componentName = getComponentName(resolveInfo);
+            int applicationInfoFlags = resolveInfo.serviceInfo.applicationInfo.flags;
+            if ((applicationInfoFlags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                Log.i(TAG, "Leaving agent " + componentName + " disabled because package "
+                        + "is not a system package.");
+                continue;
+            }
+            discoveredAgents.add(componentName);
+        }
+
+        List<ComponentName> previouslyEnabledAgents = utils.getEnabledTrustAgents(userId);
+        if (previouslyEnabledAgents != null) {
+            discoveredAgents.addAll(previouslyEnabledAgents);
+        }
+        utils.setEnabledTrustAgents(discoveredAgents, userId);
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.TRUST_AGENTS_INITIALIZED, 1, userId);
+    }
+
+    private List<ResolveInfo> resolveAllowedTrustAgents(PackageManager pm, int userId) {
+        List<ResolveInfo> resolveInfos = pm.queryIntentServicesAsUser(TRUST_AGENT_INTENT,
+                0 /* flags */, userId);
+        ArrayList<ResolveInfo> allowedAgents = new ArrayList<>(resolveInfos.size());
+        for (ResolveInfo resolveInfo : resolveInfos) {
+            if (resolveInfo.serviceInfo == null) continue;
+            if (resolveInfo.serviceInfo.applicationInfo == null) continue;
+            String packageName = resolveInfo.serviceInfo.packageName;
+            if (pm.checkPermission(PERMISSION_PROVIDE_AGENT, packageName)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ComponentName name = getComponentName(resolveInfo);
+                Log.w(TAG, "Skipping agent " + name + " because package does not have"
+                        + " permission " + PERMISSION_PROVIDE_AGENT + ".");
+                continue;
+            }
+            allowedAgents.add(resolveInfo);
+        }
+        return allowedAgents;
+    }
+
     // Agent dispatch and aggregation
 
     private boolean aggregateIsTrusted(int userId) {
@@ -414,6 +457,7 @@ public class TrustManagerService extends SystemService {
             }
         }
         mTrustListeners.add(listener);
+        updateTrustAll();
     }
 
     private void removeListener(ITrustListener listener) {
@@ -616,12 +660,19 @@ public class TrustManagerService extends SystemService {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(
-                    intent.getAction())) {
+            String action = intent.getAction();
+            if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(action)) {
                 refreshAgentList(getSendingUserId());
                 updateDevicePolicyFeatures();
-            } else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
+            } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
                 updateUserHasAuthenticated(getSendingUserId());
+            } else if (Intent.ACTION_USER_ADDED.equals(action)) {
+                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -100);
+                if (userId > 0) {
+                    maybeEnableFactoryTrustAgents(mLockPatternUtils, userId);
+                } else {
+                    Log.wtf(TAG, "EXTRA_USER_HANDLE missing or invalid, value=" + userId);
+                }
             }
         }
 
@@ -629,6 +680,7 @@ public class TrustManagerService extends SystemService {
             IntentFilter filter = new IntentFilter();
             filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
             filter.addAction(Intent.ACTION_USER_PRESENT);
+            filter.addAction(Intent.ACTION_USER_ADDED);
             context.registerReceiverAsUser(this,
                     UserHandle.ALL,
                     filter,
