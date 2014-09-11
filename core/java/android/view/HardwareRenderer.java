@@ -339,7 +339,8 @@ public abstract class HardwareRenderer {
      * @param attachInfo AttachInfo tied to the specified view.
      * @param callbacks Callbacks invoked when drawing happens.
      */
-    abstract void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks);
+    abstract void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
+            boolean isStartingWindow);
 
     /**
      * Creates a new hardware layer. A hardware layer built by calling this
