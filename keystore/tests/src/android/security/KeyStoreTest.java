@@ -53,7 +53,8 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     private static final byte[] TEST_I18N_VALUE = TEST_I18N_KEY.getBytes(StandardCharsets.UTF_8);
 
     // Test vector data for signatures
-    private static final byte[] TEST_DATA =  new byte[256];
+    private static final int RSA_KEY_SIZE = 1024;
+    private static final byte[] TEST_DATA =  new byte[RSA_KEY_SIZE / 8];
     static {
         for (int i = 0; i < TEST_DATA.length; i++) {
             TEST_DATA[i] = (byte) i;
@@ -349,7 +350,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     public void testGenerate_NotInitialized_Fail() throws Exception {
         assertFalse("Should fail when keystore is not initialized",
                 mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
-                        1024, KeyStore.FLAG_ENCRYPTED, null));
+                        RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
     }
 
     public void testGenerate_Locked_Fail() throws Exception {
@@ -357,7 +358,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         mKeyStore.lock();
         assertFalse("Should fail when keystore is locked",
                 mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
-                        1024, KeyStore.FLAG_ENCRYPTED, null));
+                        RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
     }
 
     public void testGenerate_Success() throws Exception {
@@ -365,7 +366,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         assertTrue("Should be able to generate key when unlocked",
                 mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
-                        1024, KeyStore.FLAG_ENCRYPTED, null));
+                        RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
     }
@@ -375,7 +376,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         assertTrue("Should be able to generate key when unlocked",
                 mKeyStore.generate(TEST_KEYNAME, Process.WIFI_UID, NativeCrypto.EVP_PKEY_RSA,
-                        1024, KeyStore.FLAG_ENCRYPTED, null));
+                        RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
         assertTrue(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
     }
@@ -384,7 +385,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertTrue(mKeyStore.password(TEST_PASSWD));
 
         assertFalse(mKeyStore.generate(TEST_KEYNAME, Process.BLUETOOTH_UID,
-                    NativeCrypto.EVP_PKEY_RSA, 1024, KeyStore.FLAG_ENCRYPTED, null));
+                    NativeCrypto.EVP_PKEY_RSA, RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
@@ -431,7 +432,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         mKeyStore.password(TEST_PASSWD);
 
         assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
-                    1024, KeyStore.FLAG_ENCRYPTED, null));
+                    RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
         final byte[] signature = mKeyStore.sign(TEST_KEYNAME, TEST_DATA);
 
@@ -442,7 +443,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         mKeyStore.password(TEST_PASSWD);
 
         assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
-                    1024, KeyStore.FLAG_ENCRYPTED, null));
+                    RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
         final byte[] signature = mKeyStore.sign(TEST_KEYNAME, TEST_DATA);
 
@@ -470,7 +471,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         assertTrue("Should be able to generate key for testcase",
                 mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
-                        1024, KeyStore.FLAG_ENCRYPTED, null));
+                        RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue("Should be able to grant key to other user",
                 mKeyStore.grant(TEST_KEYNAME, 0));
@@ -504,7 +505,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         assertTrue("Should be able to generate key for testcase",
                 mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
-                        1024, KeyStore.FLAG_ENCRYPTED, null));
+                        RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue("Should be able to grant key to other user",
                 mKeyStore.grant(TEST_KEYNAME, 0));
@@ -538,7 +539,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         assertTrue("Should be able to generate key for testcase",
                 mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
-                        1024, KeyStore.FLAG_ENCRYPTED, null));
+                        RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertFalse("Should not be able to revoke not existent grant",
                 mKeyStore.ungrant(TEST_KEYNAME, 0));
@@ -550,7 +551,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         assertTrue("Should be able to generate key for testcase",
                 mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
-                        1024, KeyStore.FLAG_ENCRYPTED, null));
+                        RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue("Should be able to grant key to other user",
                 mKeyStore.grant(TEST_KEYNAME, 0));
@@ -568,7 +569,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         assertTrue("Should be able to generate key for testcase",
                 mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
-                        1024, KeyStore.FLAG_ENCRYPTED, null));
+                        RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue("Should be able to grant key to other user",
                 mKeyStore.grant(TEST_KEYNAME, 0));
@@ -589,7 +590,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
 
         assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
-                    1024, KeyStore.FLAG_ENCRYPTED, null));
+                    RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
@@ -628,7 +629,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
 
         assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
-                    1024, KeyStore.FLAG_ENCRYPTED, null));
+                    RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
