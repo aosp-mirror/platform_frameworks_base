@@ -599,7 +599,7 @@ public final class Parcel {
      * Flatten an ArrayMap into the parcel at the current dataPosition(),
      * growing dataCapacity() if needed.  The Map keys must be String objects.
      */
-    /* package */ void writeArrayMapInternal(ArrayMap<String,Object> val) {
+    /* package */ void writeArrayMapInternal(ArrayMap<String, Object> val) {
         if (val == null) {
             writeInt(-1);
             return;
@@ -614,13 +614,20 @@ public final class Parcel {
         int startPos;
         for (int i=0; i<N; i++) {
             if (DEBUG_ARRAY_MAP) startPos = dataPosition();
-            writeValue(val.keyAt(i));
+            writeString(val.keyAt(i));
             writeValue(val.valueAt(i));
             if (DEBUG_ARRAY_MAP) Log.d(TAG, "  Write #" + i + " "
                     + (dataPosition()-startPos) + " bytes: key=0x"
                     + Integer.toHexString(val.keyAt(i) != null ? val.keyAt(i).hashCode() : 0)
                     + " " + val.keyAt(i));
         }
+    }
+
+    /**
+     * @hide For testing only.
+     */
+    public void writeArrayMap(ArrayMap<String, Object> val) {
+        writeArrayMapInternal(val);
     }
 
     /**
@@ -2310,7 +2317,7 @@ public final class Parcel {
         int startPos;
         while (N > 0) {
             if (DEBUG_ARRAY_MAP) startPos = dataPosition();
-            Object key = readValue(loader);
+            String key = readString();
             Object value = readValue(loader);
             if (DEBUG_ARRAY_MAP) Log.d(TAG, "  Read #" + (N-1) + " "
                     + (dataPosition()-startPos) + " bytes: key=0x"
@@ -2318,6 +2325,7 @@ public final class Parcel {
             outVal.append(key, value);
             N--;
         }
+        outVal.validate();
     }
 
     /* package */ void readArrayMapSafelyInternal(ArrayMap outVal, int N,
@@ -2328,13 +2336,24 @@ public final class Parcel {
             Log.d(TAG, "Reading safely " + N + " ArrayMap entries", here);
         }
         while (N > 0) {
-            Object key = readValue(loader);
+            String key = readString();
             if (DEBUG_ARRAY_MAP) Log.d(TAG, "  Read safe #" + (N-1) + ": key=0x"
                     + (key != null ? key.hashCode() : 0) + " " + key);
             Object value = readValue(loader);
             outVal.put(key, value);
             N--;
         }
+    }
+
+    /**
+     * @hide For testing only.
+     */
+    public void readArrayMap(ArrayMap outVal, ClassLoader loader) {
+        final int N = readInt();
+        if (N < 0) {
+            return;
+        }
+        readArrayMapInternal(outVal, N, loader);
     }
 
     private void readListInternal(List outVal, int N,
