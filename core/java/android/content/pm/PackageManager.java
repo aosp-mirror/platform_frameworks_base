@@ -3893,22 +3893,6 @@ public abstract class PackageManager {
     public abstract void clearCrossProfileIntentFilters(int sourceUserId);
 
     /**
-     * Forwards all intents for {@link packageName} for user {@link sourceUserId} to user
-     * {@link targetUserId}.
-     * @hide
-     */
-    public abstract void addCrossProfileIntentsForPackage(String packageName,
-            int sourceUserId, int targetUserId);
-
-    /**
-     * Removes all intents for {@link packageName} for user {@link sourceUserId} to user
-     * {@link targetUserId}.
-     * @hide
-     */
-    public abstract void removeCrossProfileIntentsForPackage(String packageName,
-            int sourceUserId, int targetUserId);
-
-    /**
      * @hide
      */
     public abstract Drawable loadItemIcon(PackageItemInfo itemInfo, ApplicationInfo appInfo);
