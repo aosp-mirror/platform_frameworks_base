@@ -212,7 +212,10 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"‏مکان تنظیم شده توسط GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"درخواست‌های موقعیت مکانی فعال است"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"پاک کردن تمام اعلان‌ها"</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"تنظیمات"</string>
+    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
+    <skip />
+    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
+    <skip />
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"صفحه به صورت خودکار می‌چرخد."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"صفحه اکنون در جهت افقی قفل است."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"صفحه اکنون در جهت عمودی قفل است."</string>
@@ -304,6 +307,7 @@
     <string name="interruption_level_all" msgid="1330581184930945764">"همه"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"در حال شارژ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> تا شارژ کامل)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"تغییر کاربر"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"تعویض کاربر، کاربر کنونی <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"نمایش نمایه"</string>
     <string name="user_add_user" msgid="5110251524486079492">"افزودن کاربر"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"کاربر جدید"</string>
@@ -328,7 +332,7 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ذخیره کننده باتری روشن است."</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"عملکرد و اطلاعات پس‌زمینه را کاهش می‌دهد"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"خاموش کردن ذخیره‌کننده باتری"</string>
-    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>٪٪"</string>
+    <string name="battery_level_template" msgid="1609636980292580020">"<xliff:g id="LEVEL">%d</xliff:g>%%"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"محتواها پنهان هستند"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> شروع به ضبط هر چیزی می‌کند که در صفحه‌نمایش شما نمایش داده می‌شود."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"دوباره نشان داده نشود"</string>

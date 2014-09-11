@@ -214,7 +214,10 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Posizione stabilita dal GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Richieste di accesso alla posizione attive"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Cancella tutte le notifiche."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"Impostazioni"</string>
+    <!-- no translation found for status_bar_notification_inspect_item_title (5668348142410115323) -->
+    <skip />
+    <!-- no translation found for status_bar_notification_app_settings_title (5525260160341558869) -->
+    <skip />
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Lo schermo ruoterà automaticamente."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Lo schermo è bloccato in orientamento orizzontale."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Lo schermo è bloccato in orientamento verticale."</string>
@@ -268,7 +271,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notifiche"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Flashlight"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Torcia"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Rete dati"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Utilizzo dati"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Dati rimanenti"</string>
@@ -300,18 +303,19 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Scorri verso l\'alto per sbloccare"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Scorri verso destra per accedere al telefono"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Scorri verso sinistra per accedere alla fotocamera"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"In modo indefinito"</string>
-    <string name="interruption_level_none" msgid="3831278883136066646">"Nessuno"</string>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Sempre"</string>
+    <string name="interruption_level_none" msgid="3831278883136066646">"Nessuna"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"Priorità"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"Tutti"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"Tutte"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"In carica (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> al termine)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Cambio utente"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Cambia utente, utente corrente <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Mostra profilo"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Aggiungi utente"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Nuovo utente"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Ospite"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"Aggiungi ospite"</string>
-    <string name="guest_exit_guest" msgid="7187359342030096885">"Rimuovi invitato"</string>
+    <string name="guest_exit_guest" msgid="7187359342030096885">"Rimuovi ospite"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Rimuovere l\'ospite?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Tutte le app e i dati di questa sessione verranno eliminati."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Rimuovi"</string>
