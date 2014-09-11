@@ -8178,6 +8178,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Returns the TextView_textColor attribute from the TypedArray, if set, or
      * the TextAppearance_textColor from the TextView_textAppearance attribute,
      * if TextView_textColor was not set directly.
+     *
+     * @removed
      */
     public static ColorStateList getTextColors(Context context, TypedArray attrs) {
         // It's not safe to use this method from apps. The parameter 'attrs'
@@ -8205,6 +8207,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * AttributeSet, if set, or the default color from the
      * TextAppearance_textColor from the TextView_textAppearance attribute, if
      * TextView_textColor was not set directly.
+     *
+     * @removed
      */
     public static int getTextColor(Context context, TypedArray attrs, int def) {
         final ColorStateList colors = getTextColors(context, attrs);
