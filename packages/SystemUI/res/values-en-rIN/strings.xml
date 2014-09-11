@@ -212,7 +212,8 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Location set by GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Location requests active"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Clear all notifications."</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="5386295743469882227">"Settings"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Notification settings"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> settings"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Screen will rotate automatically."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Screen is locked in landscape orientation."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Screen is locked in portrait orientation."</string>
@@ -304,6 +305,7 @@
     <string name="interruption_level_all" msgid="1330581184930945764">"All"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Charging (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> until full)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Switch user"</string>
+    <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Switch user, current user <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"Show profile"</string>
     <string name="user_add_user" msgid="5110251524486079492">"Add user"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"New user"</string>
