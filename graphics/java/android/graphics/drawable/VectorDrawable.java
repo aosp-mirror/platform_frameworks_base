@@ -104,8 +104,6 @@ import java.util.Stack;
  * <dt><code>android:translateY</code></dt>
  * <dd>The amount of translation on the Y coordinate.
  * This is defined in the viewport space.</dd>
- * <dt><code>android:alpha</code></dt>
- * <dd>The amount of transparency.</dd>
  * </dl></dd>
  * </dl>
  *
@@ -124,6 +122,10 @@ import java.util.Stack;
  * <dd>Defines the color to draw the path outline (none if not present).</dd>
  * <dt><code>android:strokeWidth</code></dt>
  * <dd>The width a path stroke.</dd>
+ * <dt><code>android:strokeAlpha</code></dt>
+ * <dd>The opacity of a path stroke.</dd>
+ * <dt><code>android:fillAlpha</code></dt>
+ * <dd>The opacity to fill the path with.</dd>
  * <dt><code>android:trimPathStart</code></dt>
  * <dd>The fraction of the path to trim from the start, in the range from 0 to 1.</dd>
  * <dt><code>android:trimPathEnd</code></dt>
@@ -825,7 +827,7 @@ public class VectorDrawable extends Drawable {
         }
 
         private void drawGroupTree(VGroup currentGroup, Matrix currentMatrix,
-                float currentAlpha, Canvas canvas, int w, int h) {
+                Canvas canvas, int w, int h) {
             // Calculate current group's matrix by preConcat the parent's and
             // and the current one on the top of the stack.
             // Basically the Mfinal = Mviewport * M0 * M1 * M2;
@@ -834,30 +836,26 @@ public class VectorDrawable extends Drawable {
 
             currentGroup.mStackedMatrix.preConcat(currentGroup.mLocalMatrix);
 
-            float stackedAlpha = currentAlpha * currentGroup.mGroupAlpha;
-
             // Draw the group tree in the same order as the XML file.
             for (int i = 0; i < currentGroup.mChildren.size(); i++) {
                 Object child = currentGroup.mChildren.get(i);
                 if (child instanceof VGroup) {
                     VGroup childGroup = (VGroup) child;
                     drawGroupTree(childGroup, currentGroup.mStackedMatrix,
-                            stackedAlpha, canvas, w, h);
+                            canvas, w, h);
                 } else if (child instanceof VPath) {
                     VPath childPath = (VPath) child;
-                    drawPath(currentGroup, childPath, stackedAlpha, canvas, w, h);
+                    drawPath(currentGroup, childPath, canvas, w, h);
                 }
             }
         }
 
         public void draw(Canvas canvas, int w, int h) {
             // Travese the tree in pre-order to draw.
-            drawGroupTree(mRootGroup, IDENTITY_MATRIX, ((float) mRootAlpha) / 0xFF,
-                    canvas, w, h);
+            drawGroupTree(mRootGroup, IDENTITY_MATRIX, canvas, w, h);
         }
 
-        private void drawPath(VGroup vGroup, VPath vPath, float stackedAlpha,
-                Canvas canvas, int w, int h) {
+        private void drawPath(VGroup vGroup, VPath vPath, Canvas canvas, int w, int h) {
             final float scaleX =  w / mViewportWidth;
             final float scaleY = h / mViewportHeight;
             final float minScale = Math.min(scaleX, scaleY);
@@ -905,7 +903,8 @@ public class VectorDrawable extends Drawable {
                         mFillPaint.setStyle(Paint.Style.FILL);
                         mFillPaint.setAntiAlias(true);
                     }
-                    mFillPaint.setColor(applyAlpha(fullPath.mFillColor, stackedAlpha));
+                    mFillPaint.setColor(applyAlpha(fullPath.mFillColor,
+                            fullPath.mFillAlpha));
                     canvas.drawPath(mRenderPath, mFillPaint);
                 }
 
@@ -928,7 +927,8 @@ public class VectorDrawable extends Drawable {
 
                     strokePaint.setStrokeMiter(fullPath.mStrokeMiterlimit);
 
-                    strokePaint.setColor(applyAlpha(fullPath.mStrokeColor, stackedAlpha));
+                    strokePaint.setColor(applyAlpha(fullPath.mStrokeColor,
+                            fullPath.mStrokeAlpha));
                     strokePaint.setStrokeWidth(fullPath.mStrokeWidth * minScale);
                     canvas.drawPath(mRenderPath, strokePaint);
                 }
@@ -952,7 +952,6 @@ public class VectorDrawable extends Drawable {
         private float mScaleY = 1;
         private float mTranslateX = 0;
         private float mTranslateY = 0;
-        private float mGroupAlpha = 1;
 
         // mLocalMatrix is updated based on the update of transformation information,
         // either parsed from the XML or by animation.
@@ -969,7 +968,6 @@ public class VectorDrawable extends Drawable {
             mScaleY = copy.mScaleY;
             mTranslateX = copy.mTranslateX;
             mTranslateY = copy.mTranslateY;
-            mGroupAlpha = copy.mGroupAlpha;
             mThemeAttrs = copy.mThemeAttrs;
             mGroupName = copy.mGroupName;
             mChangingConfigurations = copy.mChangingConfigurations;
@@ -1038,7 +1036,6 @@ public class VectorDrawable extends Drawable {
             mScaleY = a.getFloat(R.styleable.VectorDrawableGroup_scaleY, mScaleY);
             mTranslateX = a.getFloat(R.styleable.VectorDrawableGroup_translateX, mTranslateX);
             mTranslateY = a.getFloat(R.styleable.VectorDrawableGroup_translateY, mTranslateY);
-            mGroupAlpha = a.getFloat(R.styleable.VectorDrawableGroup_alpha, mGroupAlpha);
 
             final String groupName = a.getString(R.styleable.VectorDrawableGroup_name);
             if (groupName != null) {
@@ -1160,18 +1157,6 @@ public class VectorDrawable extends Drawable {
                 updateLocalMatrix();
             }
         }
-
-        @SuppressWarnings("unused")
-        public float getAlpha() {
-            return mGroupAlpha;
-        }
-
-        @SuppressWarnings("unused")
-        public void setAlpha(float groupAlpha) {
-            if (groupAlpha != mGroupAlpha) {
-                mGroupAlpha = groupAlpha;
-            }
-        }
     }
 
     /**
@@ -1275,8 +1260,11 @@ public class VectorDrawable extends Drawable {
 
         int mStrokeColor = Color.TRANSPARENT;
         float mStrokeWidth = 0;
+
         int mFillColor = Color.TRANSPARENT;
+        float mStrokeAlpha = 1.0f;
         int mFillRule;
+        float mFillAlpha = 1.0f;
         float mTrimPathStart = 0;
         float mTrimPathEnd = 1;
         float mTrimPathOffset = 0;
@@ -1295,8 +1283,10 @@ public class VectorDrawable extends Drawable {
 
             mStrokeColor = copy.mStrokeColor;
             mStrokeWidth = copy.mStrokeWidth;
+            mStrokeAlpha = copy.mStrokeAlpha;
             mFillColor = copy.mFillColor;
             mFillRule = copy.mFillRule;
+            mFillAlpha = copy.mFillAlpha;
             mTrimPathStart = copy.mTrimPathStart;
             mTrimPathEnd = copy.mTrimPathEnd;
             mTrimPathOffset = copy.mTrimPathOffset;
@@ -1357,6 +1347,8 @@ public class VectorDrawable extends Drawable {
 
             mFillColor = a.getColor(R.styleable.VectorDrawablePath_fillColor,
                     mFillColor);
+            mFillAlpha = a.getFloat(R.styleable.VectorDrawablePath_fillAlpha,
+                    mFillAlpha);
             mStrokeLineCap = getStrokeLineCap(a.getInt(
                     R.styleable.VectorDrawablePath_strokeLineCap, -1), mStrokeLineCap);
             mStrokeLineJoin = getStrokeLineJoin(a.getInt(
@@ -1365,6 +1357,8 @@ public class VectorDrawable extends Drawable {
                     R.styleable.VectorDrawablePath_strokeMiterLimit, mStrokeMiterlimit);
             mStrokeColor = a.getColor(R.styleable.VectorDrawablePath_strokeColor,
                     mStrokeColor);
+            mStrokeAlpha = a.getFloat(R.styleable.VectorDrawablePath_strokeAlpha,
+                    mStrokeAlpha);
             mStrokeWidth = a.getFloat(R.styleable.VectorDrawablePath_strokeWidth,
                     mStrokeWidth);
             mTrimPathEnd = a.getFloat(R.styleable.VectorDrawablePath_trimPathEnd,
@@ -1409,6 +1403,16 @@ public class VectorDrawable extends Drawable {
         }
 
         @SuppressWarnings("unused")
+        float getstrokeAlpha() {
+            return mStrokeAlpha;
+        }
+
+        @SuppressWarnings("unused")
+        void setstrokeAlpha(float strokeAlpha) {
+            mStrokeAlpha = strokeAlpha;
+        }
+
+        @SuppressWarnings("unused")
         int getFill() {
             return mFillColor;
         }
@@ -1416,6 +1420,16 @@ public class VectorDrawable extends Drawable {
         @SuppressWarnings("unused")
         void setFill(int fillColor) {
             mFillColor = fillColor;
+        }
+
+        @SuppressWarnings("unused")
+        float getfillAlpha() {
+            return mFillAlpha;
+        }
+
+        @SuppressWarnings("unused")
+        void setfillAlpha(float fillAlpha) {
+            mFillAlpha = fillAlpha;
         }
 
         @SuppressWarnings("unused")
