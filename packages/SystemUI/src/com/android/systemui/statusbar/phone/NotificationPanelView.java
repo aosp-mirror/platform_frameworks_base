@@ -631,9 +631,10 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private boolean isInQsArea(float x, float y) {
-        return mStatusBarState != StatusBarState.SHADE
-                || y <= mNotificationStackScroller.getBottomMostNotificationBottom()
-                || y <= mQsContainer.getY() + mQsContainer.getHeight();
+        return mStatusBarState != StatusBarState.SHADE ||
+                (x >= mScrollView.getLeft() && x <= mScrollView.getRight()) &&
+                        (y <= mNotificationStackScroller.getBottomMostNotificationBottom()
+                                || y <= mQsContainer.getY() + mQsContainer.getHeight());
     }
 
     private void handleQsDown(MotionEvent event) {
