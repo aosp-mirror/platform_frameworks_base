@@ -1746,4 +1746,7 @@
          (3) If the config_default_vm_number array has gid special item but it doesn't match the
          current sim's gid, the last one without gid will be picked -->
     <string-array translatable="false" name="config_default_vm_number" />
+
+    <!-- Sprint need a 70 ms delay for 3way call -->
+    <integer name="config_cdma_3waycall_flash_delay">0</integer>
 </resources>
