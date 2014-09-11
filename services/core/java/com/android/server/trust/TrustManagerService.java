@@ -164,6 +164,11 @@ public class TrustManagerService extends SystemService {
 
     void refreshAgentList(int userId) {
         if (DEBUG) Slog.d(TAG, "refreshAgentList()");
+        if (userId != UserHandle.USER_ALL && userId < UserHandle.USER_OWNER) {
+            Log.e(TAG, "refreshAgentList(userId=" + userId + "): Invalid user handle,"
+                    + " must be USER_ALL or a specific user.", new Throwable("here"));
+            userId = UserHandle.USER_ALL;
+        }
         PackageManager pm = mContext.getPackageManager();
 
         List<UserInfo> userInfos;
@@ -223,11 +228,13 @@ public class TrustManagerService extends SystemService {
         boolean trustMayHaveChanged = false;
         for (int i = 0; i < obsoleteAgents.size(); i++) {
             AgentInfo info = obsoleteAgents.valueAt(i);
-            if (info.agent.isManagingTrust()) {
-                trustMayHaveChanged = true;
+            if (userId == UserHandle.USER_ALL || userId == info.userId) {
+                if (info.agent.isManagingTrust()) {
+                    trustMayHaveChanged = true;
+                }
+                info.agent.unbind();
+                mActiveAgents.remove(info);
             }
-            info.agent.unbind();
-            mActiveAgents.remove(info);
         }
 
         if (trustMayHaveChanged) {
