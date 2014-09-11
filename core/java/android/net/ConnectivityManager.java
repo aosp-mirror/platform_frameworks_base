@@ -48,6 +48,8 @@ import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.HashMap;
 
+import libcore.net.event.NetworkEventDispatcher;
+
 /**
  * Class that answers queries about the state of network connectivity. It also
  * notifies applications when network connectivity changes. Get an instance
@@ -2467,7 +2469,20 @@ public class ConnectivityManager {
      * @return {@code true} on success, {@code false} if the {@link Network} is no longer valid.
      */
     public static boolean setProcessDefaultNetwork(Network network) {
-        return NetworkUtils.bindProcessToNetwork(network == null ? NETID_UNSET : network.netId);
+        int netId = (network == null) ? NETID_UNSET : network.netId;
+        if (netId == NetworkUtils.getNetworkBoundToProcess()) {
+            return true;
+        }
+        if (NetworkUtils.bindProcessToNetwork(netId)) {
+            // Must flush DNS cache as new network may have different DNS resolutions.
+            InetAddress.clearDnsCache();
+            // Must flush socket pool as idle sockets will be bound to previous network and may
+            // cause subsequent fetches to be performed on old network.
+            NetworkEventDispatcher.getInstance().onNetworkConfigurationChanged();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
