@@ -1918,6 +1918,9 @@
   <java-symbol type="string" name="timepicker_transition_end_radius_multiplier" />
   <java-symbol type="string" name="battery_saver_description" />
   <java-symbol type="string" name="downtime_condition_summary" />
+  <java-symbol type="string" name="zen_mode_forever" />
+  <java-symbol type="plurals" name="zen_mode_duration_minutes" />
+  <java-symbol type="plurals" name="zen_mode_duration_hours" />
 
   <java-symbol type="string" name="item_is_selected" />
   <java-symbol type="string" name="day_of_week_label_typeface" />
