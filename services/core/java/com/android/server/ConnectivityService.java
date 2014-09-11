@@ -251,7 +251,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private Context mContext;
     private int mNetworkPreference;
-    private int mActiveDefaultNetwork = -1;
+    private int mActiveDefaultNetwork = TYPE_NONE;
     // 0 is full bad, 100 is full good
     private int mDefaultInetConditionPublished = 0;
 
@@ -884,15 +884,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
         return getNetworkInfo(mActiveDefaultNetwork, uid);
-    }
-
-    // only called when the default request is satisfied
-    private void updateActiveDefaultNetwork(NetworkAgentInfo nai) {
-        if (nai != null) {
-            mActiveDefaultNetwork = nai.networkInfo.getType();
-        } else {
-            mActiveDefaultNetwork = TYPE_NONE;
-        }
     }
 
     /**
@@ -1936,7 +1927,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 case NetworkMonitor.EVENT_NETWORK_VALIDATED: {
                     NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
                     if (isLiveNetworkAgent(nai, "EVENT_NETWORK_VALIDATED")) {
-                        handleConnectionValidated(nai);
+                        if (DBG) log("Validated " + nai.name());
+                        nai.validated = true;
+                        rematchNetworkAndRequests(nai);
                     }
                     break;
                 }
@@ -2057,7 +2050,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (nri.isRequest == false) continue;
                     NetworkAgentInfo nai = mNetworkForRequestId.get(nri.request.requestId);
                     ac.sendMessage(android.net.NetworkFactory.CMD_REQUEST_NETWORK,
-                            (nai != null ? nai.currentScore : 0), 0, nri.request);
+                            (nai != null ? nai.getCurrentScore() : 0), 0, nri.request);
                 }
             } else {
                 loge("Error connecting NetworkFactory");
@@ -2136,7 +2129,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 request.networkCapabilities.satisfiedByNetworkCapabilities(
                                 existing.networkCapabilities) &&
                                 (alternative == null ||
-                                 alternative.currentScore < existing.currentScore)) {
+                                 alternative.getCurrentScore() < existing.getCurrentScore())) {
                             alternative = existing;
                         }
                     }
@@ -2169,8 +2162,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         for (NetworkAgentInfo network : mNetworkAgentInfos.values()) {
             if (DBG) log("handleRegisterNetworkRequest checking " + network.name());
             if (newCap.satisfiedByNetworkCapabilities(network.networkCapabilities)) {
-                if (DBG) log("apparently satisfied.  currentScore=" + network.currentScore);
-                if ((bestNetwork == null) || bestNetwork.currentScore < network.currentScore) {
+                if (DBG) log("apparently satisfied.  currentScore=" + network.getCurrentScore());
+                if ((bestNetwork == null) ||
+                        bestNetwork.getCurrentScore() < network.getCurrentScore()) {
                     if (!nri.isRequest) {
                         // Not setting bestNetwork here as a listening NetworkRequest may be
                         // satisfied by multiple Networks.  Instead the request is added to
@@ -2194,7 +2188,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             bestNetwork.addRequest(nri.request);
             mNetworkForRequestId.put(nri.request.requestId, bestNetwork);
             notifyNetworkCallback(bestNetwork, nri);
-            score = bestNetwork.currentScore;
+            score = bestNetwork.getCurrentScore();
             if (nri.request.legacyType != TYPE_NONE) {
                 mLegacyTypeTracker.add(nri.request.legacyType, bestNetwork);
             }
@@ -4516,19 +4510,34 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         updateTcpBufferSizes(newNetwork);
     }
 
-    private void handleConnectionValidated(NetworkAgentInfo newNetwork) {
-        if (newNetwork == null) {
-            loge("Unknown NetworkAgentInfo in handleConnectionValidated");
-            return;
-        }
-        if (newNetwork.validated) return;
-        newNetwork.validated = true;
+    // Handles a network appearing or improving its score.
+    //
+    // - Evaluates all current NetworkRequests that can be
+    //   satisfied by newNetwork, and reassigns to newNetwork
+    //   any such requests for which newNetwork is the best.
+    //
+    // - Tears down any Networks that as a result are no longer
+    //   needed. A network is needed if it is the best network for
+    //   one or more NetworkRequests, or if it is a VPN.
+    //
+    // - Tears down newNetwork if it is validated but turns out to be
+    //   unneeded. Does not tear down newNetwork if it is
+    //   unvalidated, because future validation may improve
+    //   newNetwork's score enough that it is needed.
+    //
+    // NOTE: This function only adds NetworkRequests that "newNetwork" could satisfy,
+    // it does not remove NetworkRequests that other Networks could better satisfy.
+    // If you need to handle decreases in score, use {@link rematchAllNetworksAndRequests}.
+    // This function should be used when possible instead of {@code rematchAllNetworksAndRequests}
+    // as it performs better by a factor of the number of Networks.
+    private void rematchNetworkAndRequests(NetworkAgentInfo newNetwork) {
         boolean keep = newNetwork.isVPN();
         boolean isNewDefault = false;
-        if (DBG) log("handleConnectionValidated for "+newNetwork.name());
-        // check if any NetworkRequest wants this NetworkAgent
+        if (DBG) log("rematching " + newNetwork.name());
+        // Find and migrate to this Network any NetworkRequests for
+        // which this network is now the best.
         ArrayList<NetworkAgentInfo> affectedNetworks = new ArrayList<NetworkAgentInfo>();
-        if (VDBG) log(" new Network has: " + newNetwork.networkCapabilities);
+        if (VDBG) log(" network has: " + newNetwork.networkCapabilities);
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
             NetworkAgentInfo currentNetwork = mNetworkForRequestId.get(nri.request.requestId);
             if (newNetwork == currentNetwork) {
@@ -4543,18 +4552,21 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (nri.request.networkCapabilities.satisfiedByNetworkCapabilities(
                     newNetwork.networkCapabilities)) {
                 if (!nri.isRequest) {
+                    // This is not a request, it's a callback listener.
+                    // Add it to newNetwork regardless of score.
                     newNetwork.addRequest(nri.request);
                     continue;
                 }
+
                 // next check if it's better than any current network we're using for
                 // this request
                 if (VDBG) {
                     log("currentScore = " +
-                            (currentNetwork != null ? currentNetwork.currentScore : 0) +
-                            ", newScore = " + newNetwork.currentScore);
+                            (currentNetwork != null ? currentNetwork.getCurrentScore() : 0) +
+                            ", newScore = " + newNetwork.getCurrentScore());
                 }
                 if (currentNetwork == null ||
-                        currentNetwork.currentScore < newNetwork.currentScore) {
+                        currentNetwork.getCurrentScore() < newNetwork.getCurrentScore()) {
                     if (currentNetwork != null) {
                         if (DBG) log("   accepting network in place of " + currentNetwork.name());
                         currentNetwork.networkRequests.remove(nri.request.requestId);
@@ -4569,13 +4581,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         mLegacyTypeTracker.add(nri.request.legacyType, newNetwork);
                     }
                     keep = true;
+                    // Tell NetworkFactories about the new score, so they can stop
+                    // trying to connect if they know they cannot match it.
                     // TODO - this could get expensive if we have alot of requests for this
                     // network.  Think about if there is a way to reduce this.  Push
                     // netid->request mapping to each factory?
-                    sendUpdatedScoreToFactories(nri.request, newNetwork.currentScore);
+                    sendUpdatedScoreToFactories(nri.request, newNetwork.getCurrentScore());
                     if (mDefaultRequest.requestId == nri.request.requestId) {
                         isNewDefault = true;
-                        updateActiveDefaultNetwork(newNetwork);
+                        // TODO: Remove following line.  It's redundant with makeDefault call.
+                        mActiveDefaultNetwork = newNetwork.networkInfo.getType();
                         if (newNetwork.linkProperties != null) {
                             updateTcpBufferSizes(newNetwork);
                             setDefaultDnsSystemProperties(
@@ -4591,12 +4606,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             mLegacyTypeTracker.remove(currentNetwork.networkInfo.getType(),
                                                       currentNetwork);
                         }
-                        mDefaultInetConditionPublished = 100;
+                        mDefaultInetConditionPublished = newNetwork.validated ? 100 : 0;
                         mLegacyTypeTracker.add(newNetwork.networkInfo.getType(), newNetwork);
                     }
                 }
             }
         }
+        // Linger any networks that are no longer needed.
         for (NetworkAgentInfo nai : affectedNetworks) {
             boolean teardown = !nai.isVPN();
             for (int i = 0; i < nai.networkRequests.size() && teardown; i++) {
@@ -4624,6 +4640,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         if (keep) {
             if (isNewDefault) {
+                // Notify system services that this network is up.
                 makeDefault(newNetwork);
                 synchronized (ConnectivityService.this) {
                     // have a new default network, release the transition wakelock in
@@ -4640,6 +4657,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
             // Notify battery stats service about this network, both the normal
             // interface and any stacked links.
+            // TODO: Avoid redoing this; this must only be done once when a network comes online.
             try {
                 final IBatteryStats bs = BatteryStatsService.getService();
                 final int type = newNetwork.networkInfo.getType();
@@ -4655,7 +4673,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
 
             notifyNetworkCallbacks(newNetwork, ConnectivityManager.CALLBACK_AVAILABLE);
-        } else {
+        } else if (newNetwork.validated) {
+            // Only tear down validated networks here.  Leave unvalidated to either become
+            // validated (and get evaluated against peers, one losing here) or
+            // NetworkMonitor reports a bad network and we tear it down then.
+            // TODO: Could teardown unvalidated networks when their NetworkCapabilities
+            // satisfy no NetworkRequests.
             if (DBG && newNetwork.networkRequests.size() != 0) {
                 loge("tearing down network with live requests:");
                 for (int i=0; i < newNetwork.networkRequests.size(); i++) {
@@ -4667,6 +4690,31 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
+    // Attempt to rematch all Networks with NetworkRequests.  This may result in Networks
+    // being disconnected.
+    // If only one Network's score or capabilities have been modified since the last time
+    // this function was called, pass this Network in via the "changed" arugment, otherwise
+    // pass null.
+    // If only one Network has been changed but its NetworkCapabilities have not changed,
+    // pass in the Network's score (from getCurrentScore()) prior to the change via
+    // "oldScore", otherwise pass changed.getCurrentScore() or 0 if "changed" is null.
+    private void rematchAllNetworksAndRequests(NetworkAgentInfo changed, int oldScore) {
+        // TODO: This may get slow.  The "changed" parameter is provided for future optimization
+        // to avoid the slowness.  It is not simply enough to process just "changed", for
+        // example in the case where "changed"'s score decreases and another network should begin
+        // satifying a NetworkRequest that "changed" currently satisfies.
+
+        // Optimization: Only reprocess "changed" if its score improved.  This is safe because it
+        // can only add more NetworkRequests satisfied by "changed", and this is exactly what
+        // rematchNetworkAndRequests() handles.
+        if (changed != null && oldScore < changed.getCurrentScore()) {
+            rematchNetworkAndRequests(changed);
+        } else {
+            for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+                rematchNetworkAndRequests(nai);
+            }
+        }
+    }
 
     private void updateNetworkInfo(NetworkAgentInfo networkAgent, NetworkInfo newInfo) {
         NetworkInfo.State state = newInfo.getState();
@@ -4721,12 +4769,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
                 // TODO: support proxy per network.
             }
-            // Make default network if we have no default.  Any network is better than no network.
+            // Consider network even though it is not yet validated.
+            // TODO: All the if-statement conditions can be removed now that validation only confers
+            // a score increase.
             if (mNetworkForRequestId.get(mDefaultRequest.requestId) == null &&
                     networkAgent.isVPN() == false &&
                     mDefaultRequest.networkCapabilities.satisfiedByNetworkCapabilities(
                     networkAgent.networkCapabilities)) {
-                makeDefault(networkAgent);
+                rematchNetworkAndRequests(networkAgent);
             }
         } else if (state == NetworkInfo.State.DISCONNECTED ||
                 state == NetworkInfo.State.SUSPENDED) {
@@ -4752,23 +4802,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             score = 0;
         }
 
-        nai.currentScore = score;
+        final int oldScore = nai.getCurrentScore();
+        nai.setCurrentScore(score);
 
-        // TODO - This will not do the right thing if this network is lowering
-        // its score and has requests that can be served by other
-        // currently-active networks, or if the network is increasing its
-        // score and other networks have requests that can be better served
-        // by this network.
-        //
-        // Really we want to see if any of our requests migrate to other
-        // active/lingered networks and if any other requests migrate to us (depending
-        // on increasing/decreasing currentScore.  That's a bit of work and probably our
-        // score checking/network allocation code needs to be modularized so we can understand
-        // (see handleConnectionValided for an example).
-        //
-        // As a first order approx, lets just advertise the new score to factories.  If
-        // somebody can beat it they will nominate a network and our normal net replacement
-        // code will fire.
+        if (nai.created) rematchAllNetworksAndRequests(nai, oldScore);
+
         for (int i = 0; i < nai.networkRequests.size(); i++) {
             NetworkRequest nr = nai.networkRequests.valueAt(i);
             // Don't send listening requests to factories. b/17393458
