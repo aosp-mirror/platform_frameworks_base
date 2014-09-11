@@ -1075,13 +1075,16 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     /**
      * Runtime CPU use collection thread.  This object's lock is used to
-     * protect all related state.
+     * perform synchronization with the thread (notifying it to run).
      */
     final Thread mProcessCpuThread;
 
     /**
-     * Used to collect process stats when showing not responding dialog.
-     * Protected by mProcessCpuThread.
+     * Used to collect per-process CPU use for ANRs, battery stats, etc.
+     * Must acquire this object's lock when accessing it.
+     * NOTE: this lock will be held while doing long operations (trawling
+     * through all processes in /proc), so it should never be acquired by
+     * any critical paths such as when holding the main activity manager lock.
      */
     final ProcessCpuTracker mProcessCpuTracker = new ProcessCpuTracker(
             MONITOR_THREAD_CPU_USAGE);
@@ -1595,7 +1598,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             infoMap.put(mi.pid, mi);
                         }
                         updateCpuStatsNow();
-                        synchronized (mProcessCpuThread) {
+                        synchronized (mProcessCpuTracker) {
                             final int N = mProcessCpuTracker.countStats();
                             for (int i=0; i<N; i++) {
                                 ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
@@ -1894,7 +1897,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (memInfo != null) {
                     updateCpuStatsNow();
                     long nativeTotalPss = 0;
-                    synchronized (mProcessCpuThread) {
+                    synchronized (mProcessCpuTracker) {
                         final int N = mProcessCpuTracker.countStats();
                         for (int j=0; j<N; j++) {
                             ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(j);
@@ -1912,7 +1915,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                     memInfo.readMemInfo();
-                    synchronized (this) {
+                    synchronized (ActivityManagerService.this) {
                         if (DEBUG_PSS) Slog.d(TAG, "Collected native and kernel memory in "
                                 + (SystemClock.uptimeMillis()-start) + "ms");
                         mProcessStats.addSysMemUsageLocked(memInfo.getCachedSizeKb(),
@@ -2183,7 +2186,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
 
-            synchronized (mActivityManagerService.mProcessCpuThread) {
+            synchronized (mActivityManagerService.mProcessCpuTracker) {
                 pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentLoad());
                 pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentState(
                         SystemClock.uptimeMillis()));
@@ -2379,7 +2382,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void updateCpuStatsNow() {
-        synchronized (mProcessCpuThread) {
+        synchronized (mProcessCpuTracker) {
             mProcessCpuMutexFree.set(false);
             final long now = SystemClock.uptimeMillis();
             boolean haveNewCpuStats = false;
@@ -5074,7 +5077,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         String cpuInfo = null;
         if (MONITOR_CPU_USAGE) {
             updateCpuStatsNow();
-            synchronized (mProcessCpuThread) {
+            synchronized (mProcessCpuTracker) {
                 cpuInfo = mProcessCpuTracker.printCurrentState(anrTime);
             }
             info.append(processCpuTracker.printCurrentLoad());
@@ -13700,7 +13703,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     findPid = Integer.parseInt(args[opti]);
                 } catch (NumberFormatException e) {
                 }
-                synchronized (mProcessCpuThread) {
+                synchronized (mProcessCpuTracker) {
                     final int N = mProcessCpuTracker.countStats();
                     for (int i=0; i<N; i++) {
                         ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
@@ -13862,7 +13865,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // If we are showing aggregations, also look for native processes to
             // include so that our aggregations are more accurate.
             updateCpuStatsNow();
-            synchronized (mProcessCpuThread) {
+            synchronized (mProcessCpuTracker) {
                 final int N = mProcessCpuTracker.countStats();
                 for (int i=0; i<N; i++) {
                     ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
