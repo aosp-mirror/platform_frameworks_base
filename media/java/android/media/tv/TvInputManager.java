@@ -535,7 +535,7 @@ public final class TvInputManager {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mListener.onInputUpdated(inputId);
+                    mCallback.onInputUpdated(inputId);
                 }
             });
         }
@@ -732,7 +732,7 @@ public final class TvInputManager {
             @Override
             public void onInputUpdated(String inputId) {
                 synchronized (mLock) {
-                    for (TvInputListenerRecord record : mTvInputListenerRecordsList) {
+                    for (TvInputCallbackRecord record : mCallbackRecords) {
                         record.postInputUpdated(inputId);
                     }
                 }
