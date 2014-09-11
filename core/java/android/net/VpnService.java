@@ -62,7 +62,8 @@ import java.util.List;
  * conflict with each other. The system takes several actions to address
  * these issues. Here are some key points:
  * <ul>
- *   <li>User action is required to create a VPN connection.</li>
+ *   <li>User action is required the first time an application creates a VPN
+ *       connection.</li>
  *   <li>There can be only one VPN connection running at the same time. The
  *       existing interface is deactivated when a new one is created.</li>
  *   <li>A system-managed notification is shown during the lifetime of a
@@ -82,8 +83,8 @@ import java.util.List;
  * other methods in this class, and the right can be revoked at any time.
  * Here are the general steps to create a VPN connection:
  * <ol>
- *   <li>When the user press the button to connect, call {@link #prepare}
- *       and launch the returned intent.</li>
+ *   <li>When the user presses the button to connect, call {@link #prepare}
+ *       and launch the returned intent, if non-null.</li>
  *   <li>When the application becomes prepared, start the service.</li>
  *   <li>Create a tunnel to the remote server and negotiate the network
  *       parameters for the VPN connection.</li>
@@ -130,7 +131,8 @@ public class VpnService extends Service {
 
     /**
      * Prepare to establish a VPN connection. This method returns {@code null}
-     * if the VPN application is already prepared. Otherwise, it returns an
+     * if the VPN application is already prepared or if the user has previously
+     * consented to the VPN application. Otherwise, it returns an
      * {@link Intent} to a system activity. The application should launch the
      * activity using {@link Activity#startActivityForResult} to get itself
      * prepared. The activity may pop up a dialog to require user action, and
@@ -143,6 +145,10 @@ public class VpnService extends Service {
      * losing the right will be notified via its {@link #onRevoke}. Unless
      * it becomes prepared again, subsequent calls to other methods in this
      * class will fail.
+     *
+     * <p>The user may disable the VPN at any time while it is activated, in
+     * which case this method will return an intent the next time it is
+     * executed to obtain the user's consent again.
      *
      * @see #onRevoke
      */
