@@ -500,11 +500,18 @@ public class LauncherApps {
         }
     }
 
-    /** STOPSHIP remove when launcher 3 has been updated */
+    /**
+     * TODO Remove after 2014-09-22
+     * @hide
+     */
     public void addCallback(Callback callback) {
         registerCallback(callback);
     }
-    /** STOPSHIP remove when launcher 3 has been updated */
+
+    /**
+     * TODO Remove after 2014-09-22
+     * @hide
+     */
     public void removeCallback(Callback callback) {
         unregisterCallback(callback);
     }
