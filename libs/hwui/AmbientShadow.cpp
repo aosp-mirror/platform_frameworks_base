@@ -91,36 +91,13 @@ inline float getTransformedAlphaFromFactoredZ(float factoredZ) {
     return getTransformedAlphaFromAlpha(getAlphaFromFactoredZ(factoredZ));
 }
 
-inline int getExtraVertexNumber(const Vector2& vector1, const Vector2& vector2,
-        float divisor) {
-    // When there is no distance difference, there is no need for extra vertices.
-    if (vector1.lengthSquared() == 0 || vector2.lengthSquared() == 0) {
-        return 0;
-    }
-    // The formula is :
-    // extraNumber = floor(acos(dot(n1, n2)) / (M_PI / EXTRA_VERTEX_PER_PI))
-    // The value ranges for each step are:
-    // dot( ) --- [-1, 1]
-    // acos( )     --- [0, M_PI]
-    // floor(...)  --- [0, EXTRA_VERTEX_PER_PI]
-    float dotProduct = vector1.dot(vector2);
-    // TODO: Use look up table for the dotProduct to extraVerticesNumber
-    // computation, if needed.
-    float angle = acosf(dotProduct);
-    return (int) floor(angle / divisor);
-}
-
-inline void checkOverflow(int used, int total, const char* bufferName) {
-    LOG_ALWAYS_FATAL_IF(used > total, "Error: %s overflow!!! used %d, total %d",
-            bufferName, used, total);
-}
-
 inline int getEdgeExtraAndUpdateSpike(Vector2* currentSpike,
         const Vector3& secondVertex, const Vector3& centroid) {
     Vector2 secondSpike  = {secondVertex.x - centroid.x, secondVertex.y - centroid.y};
     secondSpike.normalize();
 
-    int result = getExtraVertexNumber(secondSpike, *currentSpike, EDGE_RADIANS_DIVISOR);
+    int result = ShadowTessellator::getExtraVertexNumber(secondSpike, *currentSpike,
+            EDGE_RADIANS_DIVISOR);
     *currentSpike = secondSpike;
     return result;
 }
@@ -231,8 +208,8 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
         Vector2 currentNormal = getNormalFromVertices(casterVertices, i,
                 (i + 1) % casterVertexCount);
 
-        int extraVerticesNumber = getExtraVertexNumber(currentNormal, previousNormal,
-                CORNER_RADIANS_DIVISOR);
+        int extraVerticesNumber = ShadowTessellator::getExtraVertexNumber(currentNormal,
+                previousNormal, CORNER_RADIANS_DIVISOR);
 
         float expansionDist = innerVertex.z * heightFactor * geomFactor;
         const int cornerSlicesNumber = extraVerticesNumber + 1; // Minimal as 1.
@@ -349,9 +326,9 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
     shadowVertexBuffer.updateVertexCount(vertexBufferIndex);
     shadowVertexBuffer.updateIndexCount(indexBufferIndex);
 
-    checkOverflow(vertexBufferIndex, totalVertexCount, "Vertex Buffer");
-    checkOverflow(indexBufferIndex, totalIndexCount, "Index Buffer");
-    checkOverflow(umbraIndex, totalUmbraCount, "Umbra Buffer");
+    ShadowTessellator::checkOverflow(vertexBufferIndex, totalVertexCount, "Vertex Buffer");
+    ShadowTessellator::checkOverflow(indexBufferIndex, totalIndexCount, "Index Buffer");
+    ShadowTessellator::checkOverflow(umbraIndex, totalUmbraCount, "Umbra Buffer");
 
 #if DEBUG_SHADOW
     for (int i = 0; i < vertexBufferIndex; i++) {
