@@ -1552,6 +1552,7 @@ public class GradientDrawable extends Drawable {
             mUseLevel = state.mUseLevel;
             mUseLevelForShape = state.mUseLevelForShape;
             mOpaqueOverBounds = state.mOpaqueOverBounds;
+            mOpaqueOverShape = state.mOpaqueOverShape;
             mThemeAttrs = state.mThemeAttrs;
             mAttrSize = state.mAttrSize;
             mAttrGradient = state.mAttrGradient;
