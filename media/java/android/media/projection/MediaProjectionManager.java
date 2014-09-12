@@ -75,7 +75,7 @@ public final class MediaProjectionManager {
      * the user whether to allow screen capture.  The result of this
      * activity should be passed to getMediaProjection.
      */
-    public Intent getScreenCaptureIntent() {
+    public Intent createScreenCaptureIntent() {
         Intent i = new Intent();
         i.setClassName("com.android.systemui",
                 "com.android.systemui.media.MediaProjectionPermissionActivity");

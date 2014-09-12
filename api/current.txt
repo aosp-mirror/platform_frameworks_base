@@ -16347,10 +16347,10 @@ package android.media.effect {
 package android.media.projection {
 
   public final class MediaProjection {
-    method public void addCallback(android.media.projection.MediaProjection.Callback, android.os.Handler);
     method public android.hardware.display.VirtualDisplay createVirtualDisplay(java.lang.String, int, int, int, int, android.view.Surface, android.hardware.display.VirtualDisplay.Callback, android.os.Handler);
-    method public void removeCallback(android.media.projection.MediaProjection.Callback);
+    method public void registerCallback(android.media.projection.MediaProjection.Callback, android.os.Handler);
     method public void stop();
+    method public void unregisterCallback(android.media.projection.MediaProjection.Callback);
   }
 
   public static abstract class MediaProjection.Callback {
@@ -16359,8 +16359,8 @@ package android.media.projection {
   }
 
   public final class MediaProjectionManager {
+    method public android.content.Intent createScreenCaptureIntent();
     method public android.media.projection.MediaProjection getMediaProjection(int, android.content.Intent);
-    method public android.content.Intent getScreenCaptureIntent();
   }
 
 }
