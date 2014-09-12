@@ -250,11 +250,6 @@ public class Canvas {
     public void insertInorderBarrier() {}
 
     /**
-     * @hide
-     */
-    public void initializeLight(float lightX, float lightY, float lightZ, float lightRadius) {}
-
-    /**
      * Return true if the device that the current layer draws into is opaque
      * (i.e. does not support per-pixel alpha).
      *
@@ -416,10 +411,10 @@ public class Canvas {
      * @return       value to pass to restoreToCount() to balance this save()
      */
     public int saveLayer(@Nullable RectF bounds, @Nullable Paint paint, @Saveflags int saveFlags) {
-        return native_saveLayer(mNativeCanvasWrapper,
-                bounds.left, bounds.top, bounds.right, bounds.bottom,
-                paint != null ? paint.mNativePaint : 0,
-                saveFlags);
+        if (bounds == null) {
+            bounds = new RectF(getClipBounds());
+        }
+        return saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, paint, saveFlags);
     }
 
     /**
@@ -462,17 +457,17 @@ public class Canvas {
      * @param saveFlags see _SAVE_FLAG constants
      * @return          value to pass to restoreToCount() to balance this call
      */
-    public int saveLayerAlpha(@NonNull RectF bounds, int alpha, @Saveflags int saveFlags) {
-        alpha = Math.min(255, Math.max(0, alpha));
-        return native_saveLayerAlpha(mNativeCanvasWrapper,
-                bounds.left, bounds.top, bounds.right, bounds.bottom,
-                alpha, saveFlags);
+    public int saveLayerAlpha(@Nullable RectF bounds, int alpha, @Saveflags int saveFlags) {
+        if (bounds == null) {
+            bounds = new RectF(getClipBounds());
+        }
+        return saveLayerAlpha(bounds.left, bounds.top, bounds.right, bounds.bottom, alpha, saveFlags);
     }
 
     /**
      * Convenience for saveLayerAlpha(bounds, alpha, {@link #ALL_SAVE_FLAG})
      */
-    public int saveLayerAlpha(@NonNull RectF bounds, int alpha) {
+    public int saveLayerAlpha(@Nullable RectF bounds, int alpha) {
         return saveLayerAlpha(bounds, alpha, ALL_SAVE_FLAG);
     }
 
@@ -481,6 +476,7 @@ public class Canvas {
      */
     public int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
             @Saveflags int saveFlags) {
+        alpha = Math.min(255, Math.max(0, alpha));
         return native_saveLayerAlpha(mNativeCanvasWrapper, left, top, right, bottom,
                                      alpha, saveFlags);
     }
