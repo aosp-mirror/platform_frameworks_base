@@ -16,6 +16,7 @@
 
 package android.telecomm;
 
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -33,14 +34,15 @@ import android.text.TextUtils;
 public class GatewayInfo implements Parcelable {
 
     private final String mGatewayProviderPackageName;
-    private final Uri mGatewayHandle;
-    private final Uri mOriginalHandle;
+    private final Uri mGatewayAddress;
+    private final Uri mOriginalAddress;
 
     /** @hide */
-    public GatewayInfo(String packageName, Uri gatewayUri, Uri originalHandle) {
+    @SystemApi
+    public GatewayInfo(String packageName, Uri gatewayUri, Uri originalAddress) {
         mGatewayProviderPackageName = packageName;
-        mGatewayHandle = gatewayUri;
-        mOriginalHandle = originalHandle;
+        mGatewayAddress = gatewayUri;
+        mOriginalAddress = originalAddress;
     }
 
     /**
@@ -51,21 +53,21 @@ public class GatewayInfo implements Parcelable {
     }
 
     /**
-     * Gateway provider handle to use when actually placing the call.
+     * Gateway provider address to use when actually placing the call.
      */
-    public Uri getGatewayHandle() {
-        return mGatewayHandle;
+    public Uri getGatewayAddress() {
+        return mGatewayAddress;
     }
 
     /**
-     * The actual call handle that the user is trying to connect to via the gateway.
+     * The actual call address that the user is trying to connect to via the gateway.
      */
-    public Uri getOriginalHandle() {
-        return mOriginalHandle;
+    public Uri getOriginalAddress() {
+        return mOriginalAddress;
     }
 
     public boolean isEmpty() {
-        return TextUtils.isEmpty(mGatewayProviderPackageName) || mGatewayHandle == null;
+        return TextUtils.isEmpty(mGatewayProviderPackageName) || mGatewayAddress == null;
     }
 
     /** Implement the Parcelable interface */
@@ -76,8 +78,8 @@ public class GatewayInfo implements Parcelable {
         public GatewayInfo createFromParcel(Parcel source) {
             String gatewayPackageName = source.readString();
             Uri gatewayUri = Uri.CREATOR.createFromParcel(source);
-            Uri originalHandle = Uri.CREATOR.createFromParcel(source);
-            return new GatewayInfo(gatewayPackageName, gatewayUri, originalHandle);
+            Uri originalAddress = Uri.CREATOR.createFromParcel(source);
+            return new GatewayInfo(gatewayPackageName, gatewayUri, originalAddress);
         }
 
         @Override
@@ -100,7 +102,7 @@ public class GatewayInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel destination, int flags) {
         destination.writeString(mGatewayProviderPackageName);
-        mGatewayHandle.writeToParcel(destination, 0);
-        mOriginalHandle.writeToParcel(destination, 0);
+        mGatewayAddress.writeToParcel(destination, 0);
+        mOriginalAddress.writeToParcel(destination, 0);
     }
 }
