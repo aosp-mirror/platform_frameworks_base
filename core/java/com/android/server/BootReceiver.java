@@ -123,8 +123,15 @@ public class BootReceiver extends BroadcastReceiver {
         }
 
         if (SystemProperties.getLong("ro.runtime.firstboot", 0) == 0) {
-            String now = Long.toString(System.currentTimeMillis());
-            SystemProperties.set("ro.runtime.firstboot", now);
+            if ("encrypted".equals(SystemProperties.get("ro.crypto.state"))
+                && "trigger_restart_min_framework".equals(SystemProperties.get("vold.decrypt"))){
+                // Encrypted, first boot to get PIN/pattern/password so data is tmpfs
+                // Don't set ro.runtime.firstboot so that we will do this again
+                // when data is properly mounted
+            } else {
+                String now = Long.toString(System.currentTimeMillis());
+                SystemProperties.set("ro.runtime.firstboot", now);
+            }
             if (db != null) db.addText("SYSTEM_BOOT", headers);
 
             // Negative sizes mean to take the *tail* of the file (see FileUtils.readTextFile())
