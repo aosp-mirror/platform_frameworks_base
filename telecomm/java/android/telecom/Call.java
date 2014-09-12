@@ -19,7 +19,6 @@ package android.telecom;
 import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Bundle;
-import android.telephony.DisconnectCause;
 
 import java.lang.String;
 import java.util.ArrayList;
@@ -89,8 +88,7 @@ public final class Call {
         private final PhoneAccountHandle mAccountHandle;
         private final int mCallCapabilities;
         private final int mCallProperties;
-        private final int mDisconnectCauseCode;
-        private final String mDisconnectCauseMessage;
+        private final DisconnectCause mDisconnectCause;
         private final long mConnectTimeMillis;
         private final GatewayInfo mGatewayInfo;
         private final int mVideoState;
@@ -154,18 +152,10 @@ public final class Call {
 
         /**
          * @return For a {@link #STATE_DISCONNECTED} {@code Call}, the disconnect cause expressed
-         * as a code chosen from among those declared in {@link DisconnectCause}.
+         * by {@link android.telecomm.DisconnectCause}.
          */
-        public int getDisconnectCauseCode() {
-            return mDisconnectCauseCode;
-        }
-
-        /**
-         * @return For a {@link #STATE_DISCONNECTED} {@code Call}, an optional reason for
-         * disconnection expressed as a free text message.
-         */
-        public String getDisconnectCauseMessage() {
-            return mDisconnectCauseMessage;
+        public DisconnectCause getDisconnectCause() {
+            return mDisconnectCause;
         }
 
         /**
@@ -219,8 +209,7 @@ public final class Call {
                         Objects.equals(mAccountHandle, d.mAccountHandle) &&
                         Objects.equals(mCallCapabilities, d.mCallCapabilities) &&
                         Objects.equals(mCallProperties, d.mCallProperties) &&
-                        Objects.equals(mDisconnectCauseCode, d.mDisconnectCauseCode) &&
-                        Objects.equals(mDisconnectCauseMessage, d.mDisconnectCauseMessage) &&
+                        Objects.equals(mDisconnectCause, d.mDisconnectCause) &&
                         Objects.equals(mConnectTimeMillis, d.mConnectTimeMillis) &&
                         Objects.equals(mGatewayInfo, d.mGatewayInfo) &&
                         Objects.equals(mVideoState, d.mVideoState) &&
@@ -240,8 +229,7 @@ public final class Call {
                     Objects.hashCode(mAccountHandle) +
                     Objects.hashCode(mCallCapabilities) +
                     Objects.hashCode(mCallProperties) +
-                    Objects.hashCode(mDisconnectCauseCode) +
-                    Objects.hashCode(mDisconnectCauseMessage) +
+                    Objects.hashCode(mDisconnectCause) +
                     Objects.hashCode(mConnectTimeMillis) +
                     Objects.hashCode(mGatewayInfo) +
                     Objects.hashCode(mVideoState) +
@@ -258,8 +246,7 @@ public final class Call {
                 PhoneAccountHandle accountHandle,
                 int capabilities,
                 int properties,
-                int disconnectCauseCode,
-                String disconnectCauseMessage,
+                DisconnectCause disconnectCause,
                 long connectTimeMillis,
                 GatewayInfo gatewayInfo,
                 int videoState,
@@ -272,8 +259,7 @@ public final class Call {
             mAccountHandle = accountHandle;
             mCallCapabilities = capabilities;
             mCallProperties = properties;
-            mDisconnectCauseCode = disconnectCauseCode;
-            mDisconnectCauseMessage = disconnectCauseMessage;
+            mDisconnectCause = disconnectCause;
             mConnectTimeMillis = connectTimeMillis;
             mGatewayInfo = gatewayInfo;
             mVideoState = videoState;
@@ -654,8 +640,7 @@ public final class Call {
                 parcelableCall.getAccountHandle(),
                 parcelableCall.getCapabilities(),
                 parcelableCall.getProperties(),
-                parcelableCall.getDisconnectCauseCode(),
-                parcelableCall.getDisconnectCauseMsg(),
+                parcelableCall.getDisconnectCause(),
                 parcelableCall.getConnectTimeMillis(),
                 parcelableCall.getGatewayInfo(),
                 parcelableCall.getVideoState(),
