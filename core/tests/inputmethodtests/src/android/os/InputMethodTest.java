@@ -16,8 +16,6 @@
 
 package android.os;
 
-import com.android.internal.inputmethod.InputMethodUtils;
-
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
@@ -28,15 +26,22 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
+import com.android.internal.inputmethod.InputMethodUtils;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 public class InputMethodTest extends InstrumentationTestCase {
     private static final boolean IS_AUX = true;
     private static final boolean IS_DEFAULT = true;
     private static final boolean IS_AUTO = true;
     private static final boolean IS_ASCII_CAPABLE = true;
+    private static final boolean IS_SYSTEM_READY = true;
     private static final ArrayList<InputMethodSubtype> NO_SUBTYPE = null;
+    private static final Locale LOCALE_EN_US = new Locale("en", "US");
 
     @SmallTest
     public void testDefaultEnabledImesWithDefaultVoiceIme() throws Exception {
@@ -49,19 +54,19 @@ public class InputMethodTest extends InstrumentationTestCase {
         imis.add(createDefaultDummyLatinKeyboardIme());
         imis.add(createNonDefaultDummyJaJPKeyboardIme());
         imis.add(createNonDefaultDummyJaJPKeyboardImeWithoutSubtypes());
-        final ArrayList<InputMethodInfo> enabledImis = InputMethodUtils.getDefaultEnabledImes(
-                context, true, imis);
-        assertEquals(2, enabledImis.size());
-        for (int i = 0; i < enabledImis.size(); ++i) {
-            final InputMethodInfo imi = enabledImis.get(0);
-            // "DummyDefaultAutoVoiceIme" and "DummyDefaultEnKeyboardIme"
-            if (imi.getPackageName().equals("DummyDefaultAutoVoiceIme")
-                    || imi.getPackageName().equals("DummyDefaultEnKeyboardIme")) {
-                continue;
-            } else {
-                fail("Invalid enabled subtype.");
-            }
-        }
+
+        final ArrayList<InputMethodInfo> enabledImisForSystemNotReady =
+                callGetDefaultEnabledImesUnderWithLocale(context, !IS_SYSTEM_READY, imis,
+                        LOCALE_EN_US);
+        assertEquals(toSet("DummyDefaultAutoVoiceIme", "DummyDefaultEnKeyboardIme",
+                "DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1"),
+                getPackageNames(enabledImisForSystemNotReady));
+
+        final ArrayList<InputMethodInfo> enabledImisForSystemReady =
+                callGetDefaultEnabledImesUnderWithLocale(context, IS_SYSTEM_READY, imis,
+                        LOCALE_EN_US);
+        assertEquals(toSet("DummyDefaultAutoVoiceIme", "DummyDefaultEnKeyboardIme"),
+                getPackageNames(enabledImisForSystemReady));
     }
 
     @SmallTest
@@ -74,21 +79,18 @@ public class InputMethodTest extends InstrumentationTestCase {
         imis.add(createDefaultDummyLatinKeyboardIme());
         imis.add(createNonDefaultDummyJaJPKeyboardIme());
         imis.add(createNonDefaultDummyJaJPKeyboardImeWithoutSubtypes());
-        final ArrayList<InputMethodInfo> enabledImis = InputMethodUtils.getDefaultEnabledImes(
-                context, true, imis);
-        assertEquals(3, enabledImis.size());
-        for (int i = 0; i < enabledImis.size(); ++i) {
-            final InputMethodInfo imi = enabledImis.get(0);
-            // "DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1" and
-            // "DummyDefaultEnKeyboardIme"
-            if (imi.getPackageName().equals("DummyNonDefaultAutoVoiceIme0")
-                    || imi.getPackageName().equals("DummyNonDefaultAutoVoiceIme1")
-                    || imi.getPackageName().equals("DummyDefaultEnKeyboardIme")) {
-                continue;
-            } else {
-                fail("Invalid enabled subtype.");
-            }
-        }
+
+        final ArrayList<InputMethodInfo> enabledImisForSystemNotReady =
+                callGetDefaultEnabledImesUnderWithLocale(context, !IS_SYSTEM_READY, imis,
+                        LOCALE_EN_US);
+        assertEquals(toSet("DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
+                "DummyDefaultEnKeyboardIme"), getPackageNames(enabledImisForSystemNotReady));
+
+        final ArrayList<InputMethodInfo> enabledImisForSystemReady =
+                callGetDefaultEnabledImesUnderWithLocale(context, IS_SYSTEM_READY, imis,
+                        LOCALE_EN_US);
+        assertEquals(toSet("DummyNonDefaultAutoVoiceIme0", "DummyNonDefaultAutoVoiceIme1",
+                "DummyDefaultEnKeyboardIme"), getPackageNames(enabledImisForSystemReady));
     }
 
     @SmallTest
@@ -127,6 +129,32 @@ public class InputMethodTest extends InstrumentationTestCase {
                 p.recycle();
             }
         }
+    }
+
+    private static ArrayList<InputMethodInfo> callGetDefaultEnabledImesUnderWithLocale(
+            final Context context, final boolean isSystemReady,
+            final ArrayList<InputMethodInfo> imis, final Locale locale) {
+        final Locale initialLocale = context.getResources().getConfiguration().locale;
+        try {
+            context.getResources().getConfiguration().setLocale(locale);
+            return InputMethodUtils.getDefaultEnabledImes(context, isSystemReady, imis);
+        } finally {
+            context.getResources().getConfiguration().setLocale(initialLocale);
+        }
+    }
+
+    @SafeVarargs
+    private static <T> HashSet<T> toSet(final T... xs) {
+        return new HashSet<T>(Arrays.asList(xs));
+    }
+
+    private HashSet<String> getPackageNames(final ArrayList<InputMethodInfo> imis) {
+        final HashSet<String> packageNames = new HashSet<>();
+        for (final InputMethodInfo imi : imis) {
+            final String actualPackageName = imi.getPackageName();
+            packageNames.add(actualPackageName);
+        }
+        return packageNames;
     }
 
     private static void verifyEquality(InputMethodInfo expected, InputMethodInfo actual) {
