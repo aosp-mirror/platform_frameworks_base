@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.policy;
 
 import android.app.ActivityManagerNative;
-import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,33 +25,21 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.hardware.display.DisplayManager;
 import android.os.AsyncTask;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract;
-import android.security.KeyChain;
 import android.util.Log;
 import android.util.Pair;
 
-import com.android.internal.view.RotationPolicy;
 import com.android.systemui.BitmapHelper;
 import com.android.systemui.R;
+import com.android.internal.util.UserIcons;
 
 import java.util.ArrayList;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class UserInfoController {
 
@@ -142,6 +129,7 @@ public final class UserInfoController {
             throw new RuntimeException(e);
         }
         final int userId = userInfo.id;
+        final boolean isGuest = userInfo.isGuest();
         final String userName = userInfo.name;
         final int avatarSize
                 = mContext.getResources().getDimensionPixelSize(R.dimen.max_avatar_size);
@@ -161,7 +149,8 @@ public final class UserInfoController {
                     avatar = new BitmapDrawable(mContext.getResources(),
                             BitmapHelper.createCircularClip(rawAvatar, avatarSize, avatarSize));
                 } else {
-                    avatar = mContext.getResources().getDrawable(R.drawable.ic_account_circle);
+                    avatar = UserIcons.getDefaultUserIcon(isGuest? UserHandle.USER_NULL : userId,
+                            /* light= */ true);
                     mUseDefaultAvatar = true;
                 }
 

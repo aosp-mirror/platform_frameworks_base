@@ -1171,6 +1171,18 @@
   <java-symbol type="drawable" name="sim_dark_orange" />
   <java-symbol type="drawable" name="sim_dark_purple" />
 
+  <java-symbol type="drawable" name="ic_account_circle" />
+  <java-symbol type="color" name="user_icon_1" />
+  <java-symbol type="color" name="user_icon_2" />
+  <java-symbol type="color" name="user_icon_3" />
+  <java-symbol type="color" name="user_icon_4" />
+  <java-symbol type="color" name="user_icon_5" />
+  <java-symbol type="color" name="user_icon_6" />
+  <java-symbol type="color" name="user_icon_7" />
+  <java-symbol type="color" name="user_icon_8" />
+  <java-symbol type="color" name="user_icon_default_gray" />
+  <java-symbol type="color" name="user_icon_default_white" />
+
   <java-symbol type="layout" name="action_bar_home" />
   <java-symbol type="layout" name="action_bar_title_item" />
   <java-symbol type="layout" name="action_menu_item_layout" />
