@@ -16,9 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.content.pm.PackageManager.INSTALL_ALL_USERS;
-import static android.content.pm.PackageManager.INSTALL_FROM_ADB;
-import static android.content.pm.PackageManager.INSTALL_REPLACE_EXISTING;
 import static com.android.internal.util.XmlUtils.readBitmapAttribute;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -105,7 +102,7 @@ import java.util.Random;
 
 public class PackageInstallerService extends IPackageInstaller.Stub {
     private static final String TAG = "PackageInstaller";
-    private static final boolean LOGD = true;
+    private static final boolean LOGD = false;
 
     // TODO: remove outstanding sessions when installer package goes away
     // TODO: notify listeners in other users when package has been installed there
@@ -117,6 +114,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private static final String ATTR_SESSION_ID = "sessionId";
     private static final String ATTR_USER_ID = "userId";
     private static final String ATTR_INSTALLER_PACKAGE_NAME = "installerPackageName";
+    private static final String ATTR_INSTALLER_UID = "installerUid";
     private static final String ATTR_CREATED_MILLIS = "createdMillis";
     private static final String ATTR_SESSION_STAGE_DIR = "sessionStageDir";
     private static final String ATTR_SESSION_STAGE_CID = "sessionStageCid";
@@ -336,6 +334,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         final int sessionId = readIntAttribute(in, ATTR_SESSION_ID);
         final int userId = readIntAttribute(in, ATTR_USER_ID);
         final String installerPackageName = readStringAttribute(in, ATTR_INSTALLER_PACKAGE_NAME);
+        final int installerUid = readIntAttribute(in, ATTR_INSTALLER_UID,
+                mPm.getPackageUid(installerPackageName, userId));
         final long createdMillis = readLongAttribute(in, ATTR_CREATED_MILLIS);
         final String stageDirRaw = readStringAttribute(in, ATTR_SESSION_STAGE_DIR);
         final File stageDir = (stageDirRaw != null) ? new File(stageDirRaw) : null;
@@ -357,8 +357,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         params.abiOverride = readStringAttribute(in, ATTR_ABI_OVERRIDE);
 
         return new PackageInstallerSession(mInternalCallback, mContext, mPm,
-                mInstallThread.getLooper(), sessionId, userId, installerPackageName, params,
-                createdMillis, stageDir, stageCid, prepared, sealed);
+                mInstallThread.getLooper(), sessionId, userId, installerPackageName, installerUid,
+                params, createdMillis, stageDir, stageCid, prepared, sealed);
     }
 
     private void writeSessionsLocked() {
@@ -398,6 +398,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         writeIntAttribute(out, ATTR_USER_ID, session.userId);
         writeStringAttribute(out, ATTR_INSTALLER_PACKAGE_NAME,
                 session.installerPackageName);
+        writeIntAttribute(out, ATTR_INSTALLER_UID, session.installerUid);
         writeLongAttribute(out, ATTR_CREATED_MILLIS, session.createdMillis);
         if (session.stageDir != null) {
             writeStringAttribute(out, ATTR_SESSION_STAGE_DIR,
@@ -446,26 +447,21 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private int createSessionInternal(SessionParams params, String installerPackageName, int userId)
             throws IOException {
         final int callingUid = Binder.getCallingUid();
-        mPm.enforceCrossUserPermission(callingUid, userId, true, false, "createSession");
+        mPm.enforceCrossUserPermission(callingUid, userId, true, true, "createSession");
 
-        if (mPm.isUserRestricted(UserHandle.getUserId(callingUid),
-                UserManager.DISALLOW_INSTALL_APPS)) {
+        if (mPm.isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
             throw new SecurityException("User restriction prevents installing");
         }
 
-        // TODO: double check all possible install flags
-
         if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)) {
-            installerPackageName = "com.android.shell";
-
-            params.installFlags |= INSTALL_FROM_ADB;
+            params.installFlags |= PackageManager.INSTALL_FROM_ADB;
 
         } else {
             mAppOps.checkPackage(callingUid, installerPackageName);
 
-            params.installFlags &= ~INSTALL_FROM_ADB;
-            params.installFlags &= ~INSTALL_ALL_USERS;
-            params.installFlags |= INSTALL_REPLACE_EXISTING;
+            params.installFlags &= ~PackageManager.INSTALL_FROM_ADB;
+            params.installFlags &= ~PackageManager.INSTALL_ALL_USERS;
+            params.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
         }
 
         // Defensively resize giant app icons
@@ -532,8 +528,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             }
 
             session = new PackageInstallerSession(mInternalCallback, mContext, mPm,
-                    mInstallThread.getLooper(), sessionId, userId, installerPackageName, params,
-                    createdMillis, stageDir, stageCid, false, false);
+                    mInstallThread.getLooper(), sessionId, userId, installerPackageName, callingUid,
+                    params, createdMillis, stageDir, stageCid, false, false);
             mSessions.put(sessionId, session);
         }
 
@@ -688,7 +684,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     @Override
     public void uninstall(String packageName, int flags, IntentSender statusReceiver, int userId) {
-        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false, "uninstall");
+        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, true, "uninstall");
 
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, packageName);
