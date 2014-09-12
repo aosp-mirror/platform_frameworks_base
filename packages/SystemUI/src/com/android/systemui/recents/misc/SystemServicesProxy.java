@@ -179,6 +179,12 @@ public class SystemServicesProxy {
                 ActivityManager.RECENT_IGNORE_UNAVAILABLE |
                 ActivityManager.RECENT_INCLUDE_PROFILES |
                 ActivityManager.RECENT_WITH_EXCLUDED, userId);
+
+        // Break early if we can't get a valid set of tasks
+        if (tasks == null) {
+            return new ArrayList<ActivityManager.RecentTaskInfo>();
+        }
+
         boolean isFirstValidTask = true;
         Iterator<ActivityManager.RecentTaskInfo> iter = tasks.iterator();
         while (iter.hasNext()) {
