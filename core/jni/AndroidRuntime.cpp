@@ -271,6 +271,7 @@ AndroidRuntime::~AndroidRuntime()
 }
 
 void AndroidRuntime::setArgv0(const char* argv0) {
+    memset(mArgBlockStart, 0, mArgBlockLength);
     strlcpy(mArgBlockStart, argv0, mArgBlockLength);
 }
 
@@ -343,28 +344,6 @@ static void runtime_vfprintf(FILE* fp, const char* format, va_list ap)
 static bool runtime_isSensitiveThread() {
     IPCThreadState* state = IPCThreadState::selfOrNull();
     return state && state->getStrictModePolicy() != 0;
-}
-
-
-/**
- * Add VM arguments to the to-be-executed VM
- * Stops at first non '-' argument (also stops at an argument of '--')
- * Returns the number of args consumed
- */
-int AndroidRuntime::addVmArguments(int argc, const char* const argv[])
-{
-    int i;
-
-    for (i = 0; i<argc; i++) {
-        if (argv[i][0] != '-') {
-            return i;
-        }
-        if (argv[i][1] == '-' && argv[i][2] == 0) {
-            return i+1;
-        }
-        addOption(argv[i]);
-    }
-    return i;
 }
 
 static int hasDir(const char* dir)
