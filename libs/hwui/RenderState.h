@@ -53,12 +53,16 @@ public:
     void debugOverdraw(bool enable, bool clear);
 
     void registerLayer(const Layer* layer) {
+        /*
         AutoMutex _lock(mLayerLock);
         mActiveLayers.insert(layer);
+        */
     }
     void unregisterLayer(const Layer* layer) {
+        /*
         AutoMutex _lock(mLayerLock);
         mActiveLayers.erase(layer);
+        */
     }
 
     void registerCanvasContext(renderthread::CanvasContext* context) {
