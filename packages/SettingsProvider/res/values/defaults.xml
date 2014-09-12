@@ -193,11 +193,11 @@
     <!-- Default for Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED, 1==on -->
     <integer name="def_heads_up_enabled">1</integer>
 
-    <!-- Default for Settings.Global.DEVICE_NAME $1=MODEL-->
-    <string name="def_device_name">%1$s</string>
-
     <!-- Default for Settings.Global.DEVICE_NAME $1=MANUFACTURER $2=MODEL-->
-    <string name="def_device_name_old">%1$s %2$s</string>
+    <string name="def_device_name">%1$s %2$s</string>
+
+    <!-- Default for Settings.Global.DEVICE_NAME $1=MODEL-->
+    <string name="def_device_name_simple">%1$s</string>
 
     <!-- Default for Settings.Secure.WAKE_GESTURE_ENABLED -->
     <bool name="def_wake_gesture_enabled">true</bool>
