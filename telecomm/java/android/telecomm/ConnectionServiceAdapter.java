@@ -168,10 +168,10 @@ final class ConnectionServiceAdapter implements DeathRecipient {
      * @param callId The unique ID of the call whose ringback is being changed.
      * @param ringback Whether Telecomm should start playing a ringback tone.
      */
-    void setRequestingRingback(String callId, boolean ringback) {
+    void setRingbackRequested(String callId, boolean ringback) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.setRequestingRingback(callId, ringback);
+                adapter.setRingbackRequested(callId, ringback);
             } catch (RemoteException e) {
             }
         }
@@ -280,10 +280,10 @@ final class ConnectionServiceAdapter implements DeathRecipient {
      * @param callId The unique ID of the call to set with the given call video provider.
      * @param isVoip True if the audio mode is VOIP.
      */
-    void setAudioModeIsVoip(String callId, boolean isVoip) {
+    void setIsVoipAudioMode(String callId, boolean isVoip) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.setAudioModeIsVoip(callId, isVoip);
+                adapter.setIsVoipAudioMode(callId, isVoip);
             } catch (RemoteException e) {
             }
         }
@@ -298,10 +298,10 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         }
     }
 
-    void setHandle(String callId, Uri handle, int presentation) {
+    void setAddress(String callId, Uri address, int presentation) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.setHandle(callId, handle, presentation);
+                adapter.setAddress(callId, address, presentation);
             } catch (RemoteException e) {
             }
         }

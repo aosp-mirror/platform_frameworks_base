@@ -44,7 +44,7 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_SET_DIALING = 4;
     private static final int MSG_SET_DISCONNECTED = 5;
     private static final int MSG_SET_ON_HOLD = 6;
-    private static final int MSG_SET_REQUESTING_RINGBACK = 7;
+    private static final int MSG_SET_RINGBACK_REQUESTED = 7;
     private static final int MSG_SET_CALL_CAPABILITIES = 8;
     private static final int MSG_SET_IS_CONFERENCED = 9;
     private static final int MSG_ADD_CONFERENCE_CALL = 10;
@@ -53,9 +53,9 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_QUERY_REMOTE_CALL_SERVICES = 13;
     private static final int MSG_SET_VIDEO_STATE = 14;
     private static final int MSG_SET_VIDEO_CALL_PROVIDER = 15;
-    private static final int MSG_SET_AUDIO_MODE_IS_VOIP = 16;
+    private static final int MSG_SET_IS_VOIP_AUDIO_MODE = 16;
     private static final int MSG_SET_STATUS_HINTS = 17;
-    private static final int MSG_SET_HANDLE = 18;
+    private static final int MSG_SET_ADDRESS = 18;
     private static final int MSG_SET_CALLER_DISPLAY_NAME = 19;
     private static final int MSG_SET_CONFERENCEABLE_CONNECTIONS = 20;
 
@@ -107,8 +107,8 @@ final class ConnectionServiceAdapterServant {
                 case MSG_SET_ON_HOLD:
                     mDelegate.setOnHold((String) msg.obj);
                     break;
-                case MSG_SET_REQUESTING_RINGBACK:
-                    mDelegate.setRequestingRingback((String) msg.obj, msg.arg1 == 1);
+                case MSG_SET_RINGBACK_REQUESTED:
+                    mDelegate.setRingbackRequested((String) msg.obj, msg.arg1 == 1);
                     break;
                 case MSG_SET_CALL_CAPABILITIES:
                     mDelegate.setCallCapabilities((String) msg.obj, msg.arg1);
@@ -160,8 +160,8 @@ final class ConnectionServiceAdapterServant {
                     }
                     break;
                 }
-                case MSG_SET_AUDIO_MODE_IS_VOIP:
-                    mDelegate.setAudioModeIsVoip((String) msg.obj, msg.arg1 == 1);
+                case MSG_SET_IS_VOIP_AUDIO_MODE:
+                    mDelegate.setIsVoipAudioMode((String) msg.obj, msg.arg1 == 1);
                     break;
                 case MSG_SET_STATUS_HINTS: {
                     SomeArgs args = (SomeArgs) msg.obj;
@@ -172,10 +172,10 @@ final class ConnectionServiceAdapterServant {
                     }
                     break;
                 }
-                case MSG_SET_HANDLE: {
+                case MSG_SET_ADDRESS: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
-                        mDelegate.setHandle((String) args.arg1, (Uri) args.arg2, args.argi1);
+                        mDelegate.setAddress((String) args.arg1, (Uri) args.arg2, args.argi1);
                     } finally {
                         args.recycle();
                     }
@@ -249,8 +249,8 @@ final class ConnectionServiceAdapterServant {
         }
 
         @Override
-        public void setRequestingRingback(String connectionId, boolean ringback) {
-            mHandler.obtainMessage(MSG_SET_REQUESTING_RINGBACK, ringback ? 1 : 0, 0, connectionId)
+        public void setRingbackRequested(String connectionId, boolean ringback) {
+            mHandler.obtainMessage(MSG_SET_RINGBACK_REQUESTED, ringback ? 1 : 0, 0, connectionId)
                     .sendToTarget();
         }
 
@@ -308,8 +308,8 @@ final class ConnectionServiceAdapterServant {
         }
 
         @Override
-        public final void setAudioModeIsVoip(String connectionId, boolean isVoip) {
-            mHandler.obtainMessage(MSG_SET_AUDIO_MODE_IS_VOIP, isVoip ? 1 : 0, 0,
+        public final void setIsVoipAudioMode(String connectionId, boolean isVoip) {
+            mHandler.obtainMessage(MSG_SET_IS_VOIP_AUDIO_MODE, isVoip ? 1 : 0, 0,
                     connectionId).sendToTarget();
         }
 
@@ -322,12 +322,12 @@ final class ConnectionServiceAdapterServant {
         }
 
         @Override
-        public final void setHandle(String connectionId, Uri handle, int presentation) {
+        public final void setAddress(String connectionId, Uri address, int presentation) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = connectionId;
-            args.arg2 = handle;
+            args.arg2 = address;
             args.argi1 = presentation;
-            mHandler.obtainMessage(MSG_SET_HANDLE, args).sendToTarget();
+            mHandler.obtainMessage(MSG_SET_ADDRESS, args).sendToTarget();
         }
 
         @Override

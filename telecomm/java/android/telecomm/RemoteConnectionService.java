@@ -61,7 +61,7 @@ final class RemoteConnectionService {
                 mPendingConnections.remove(connection);
                 // Unconditionally initialize the connection ...
                 connection.setCallCapabilities(parcel.getCapabilities());
-                connection.setHandle(
+                connection.setAddress(
                         parcel.getHandle(), parcel.getHandlePresentation());
                 connection.setCallerDisplayName(
                         parcel.getCallerDisplayName(),
@@ -131,9 +131,9 @@ final class RemoteConnectionService {
         }
 
         @Override
-        public void setRequestingRingback(String callId, boolean ringing) {
-            findConnectionForAction(callId, "setRequestingRingback")
-                    .setRequestingRingback(ringing);
+        public void setRingbackRequested(String callId, boolean ringing) {
+            findConnectionForAction(callId, "setRingbackRequested")
+                    .setRingbackRequested(ringing);
         }
 
         @Override
@@ -192,7 +192,7 @@ final class RemoteConnectionService {
             conference.setState(parcel.getState());
             conference.setCallCapabilities(parcel.getCapabilities());
             mConferenceById.put(callId, conference);
-            conference.addCallback(new RemoteConference.Callback() {
+            conference.registerCallback(new RemoteConference.Callback() {
                 @Override
                 public void onDestroyed(RemoteConference c) {
                     mConferenceById.remove(callId);
@@ -238,9 +238,9 @@ final class RemoteConnectionService {
         }
 
         @Override
-        public void setAudioModeIsVoip(String callId, boolean isVoip) {
-            findConnectionForAction(callId, "setAudioModeIsVoip")
-                    .setAudioModeIsVoip(isVoip);
+        public void setIsVoipAudioMode(String callId, boolean isVoip) {
+            findConnectionForAction(callId, "setIsVoipAudioMode")
+                    .setIsVoipAudioMode(isVoip);
         }
 
         @Override
@@ -250,9 +250,9 @@ final class RemoteConnectionService {
         }
 
         @Override
-        public void setHandle(String callId, Uri handle, int presentation) {
-            findConnectionForAction(callId, "setHandle")
-                    .setHandle(handle, presentation);
+        public void setAddress(String callId, Uri address, int presentation) {
+            findConnectionForAction(callId, "setAddress")
+                    .setAddress(address, presentation);
         }
 
         @Override
@@ -343,7 +343,7 @@ final class RemoteConnectionService {
                     id,
                     newRequest,
                     isIncoming);
-            connection.addListener(new RemoteConnection.Listener() {
+            connection.registerCallback(new RemoteConnection.Callback() {
                 @Override
                 public void onDestroyed(RemoteConnection connection) {
                     mConnectionById.remove(id);

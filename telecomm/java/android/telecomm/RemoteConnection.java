@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class RemoteConnection {
 
-    public static abstract class Listener {
+    public static abstract class Callback {
         /**
          * Invoked when the state of this {@code RemoteConnection} has changed. See
          * {@link #getState()}.
@@ -51,25 +51,6 @@ public final class RemoteConnection {
          * @param state The new state of the {@code RemoteConnection}.
          */
         public void onStateChanged(RemoteConnection connection, int state) {}
-
-        /**
-         * Invoked when the parent of this {@code RemoteConnection} has changed. See
-         * {@link #getParent()}.
-         *
-         * @param connection The {@code RemoteConnection} invoking this method.
-         * @param parent The new parent of the {@code RemoteConnection}.
-         */
-        public void onParentChanged(RemoteConnection connection, RemoteConnection parent) {}
-
-        /**
-         * Invoked when the children of this {@code RemoteConnection} have changed. See
-         * {@link #getChildren()}.
-         *
-         * @param connection The {@code RemoteConnection} invoking this method.
-         * @param children The new children of the {@code RemoteConnection}.
-         */
-        public void onChildrenChanged(
-                RemoteConnection connection, List<RemoteConnection> children) {}
 
         /**
          * Invoked when this {@code RemoteConnection} is disconnected.
@@ -87,12 +68,12 @@ public final class RemoteConnection {
 
         /**
          * Invoked when this {@code RemoteConnection} is requesting ringback. See
-         * {@link #isRequestingRingback()}.
+         * {@link #isRingbackRequested()}.
          *
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param ringback Whether the {@code RemoteConnection} is requesting ringback.
          */
-        public void onRequestingRingback(RemoteConnection connection, boolean ringback) {}
+        public void onRingbackRequested(RemoteConnection connection, boolean ringback) {}
 
         /**
          * Indicates that the call capabilities of this {@code RemoteConnection} have changed.
@@ -116,12 +97,12 @@ public final class RemoteConnection {
 
         /**
          * Indicates that the VOIP audio status of this {@code RemoteConnection} has changed.
-         * See {@link #getAudioModeIsVoip()}.
+         * See {@link #isVoipAudioMode()}.
          *
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param isVoip Whether the new audio state of the {@code RemoteConnection} is VOIP.
          */
-        public void onAudioModeIsVoipChanged(RemoteConnection connection, boolean isVoip) {}
+        public void onVoipAudioChanged(RemoteConnection connection, boolean isVoip) {}
 
         /**
          * Indicates that the status hints of this {@code RemoteConnection} have changed. See
@@ -133,15 +114,15 @@ public final class RemoteConnection {
         public void onStatusHintsChanged(RemoteConnection connection, StatusHints statusHints) {}
 
         /**
-         * Indicates that the handle (e.g., phone number) of this {@code RemoteConnection} has
-         * changed. See {@link #getHandle()} and {@link #getHandlePresentation()}.
+         * Indicates that the address (e.g., phone number) of this {@code RemoteConnection} has
+         * changed. See {@link #getAddress()} and {@link #getAddressPresentation()}.
          *
          * @param connection The {@code RemoteConnection} invoking this method.
-         * @param handle The new handle of the {@code RemoteConnection}.
-         * @param presentation The presentation requirements for the handle.
+         * @param address The new address of the {@code RemoteConnection}.
+         * @param presentation The presentation requirements for the address.
          *        See {@link TelecommManager} for valid values.
          */
-        public void onHandleChanged(RemoteConnection connection, Uri handle, int presentation) {}
+        public void onAddressChanged(RemoteConnection connection, Uri address, int presentation) {}
 
         /**
          * Indicates that the caller display name of this {@code RemoteConnection} has changed.
@@ -396,8 +377,8 @@ public final class RemoteConnection {
      * load factor before resizing, 1 means we only expect a single thread to
      * access the map so make only a single shard
      */
-    private final Set<Listener> mListeners = Collections.newSetFromMap(
-            new ConcurrentHashMap<Listener, Boolean>(8, 0.9f, 1));
+    private final Set<Callback> mCallbacks = Collections.newSetFromMap(
+            new ConcurrentHashMap<Callback, Boolean>(8, 0.9f, 1));
     private final List<RemoteConnection> mConferenceableConnections = new ArrayList<>();
     private final List<RemoteConnection> mUnmodifiableconferenceableConnections =
             Collections.unmodifiableList(mConferenceableConnections);
@@ -405,15 +386,15 @@ public final class RemoteConnection {
     private int mState = Connection.STATE_NEW;
     private int mDisconnectCauseCode = DisconnectCause.NOT_VALID;
     private String mDisconnectCauseMessage;
-    private boolean mRequestingRingback;
+    private boolean mRingbackRequested;
     private boolean mConnected;
     private int mCallCapabilities;
     private int mVideoState;
     private VideoProvider mVideoProvider;
-    private boolean mAudioModeIsVoip;
+    private boolean mIsVoipAudioMode;
     private StatusHints mStatusHints;
-    private Uri mHandle;
-    private int mHandlePresentation;
+    private Uri mAddress;
+    private int mAddressPresentation;
     private String mCallerDisplayName;
     private int mCallerDisplayNamePresentation;
     private int mFailureCode;
@@ -450,40 +431,24 @@ public final class RemoteConnection {
     }
 
     /**
-     * Adds a listener to this {@code RemoteConnection}.
+     * Adds a callback to this {@code RemoteConnection}.
      *
-     * @param listener A {@code Listener}.
+     * @param callback A {@code Callback}.
      */
-    public void addListener(Listener listener) {
-        mListeners.add(listener);
+    public void registerCallback(Callback callback) {
+        mCallbacks.add(callback);
     }
 
     /**
-     * Removes a listener from this {@code RemoteConnection}.
+     * Removes a callback from this {@code RemoteConnection}.
      *
-     * @param listener A {@code Listener}.
+     * @param callback A {@code Callback}.
      */
-    public void removeListener(Listener listener) {
-        if (listener != null) {
-            mListeners.remove(listener);
+    public void unregisterCallback(Callback callback) {
+        if (callback != null) {
+            mCallbacks.remove(callback);
         }
     }
-
-    /**
-     * Obtains the parent of this {@code RemoteConnection} in a conference, if any.
-     *
-     * @return The parent {@code RemoteConnection}, or {@code null} if this {@code RemoteConnection}
-     * is not a child of any conference {@code RemoteConnection}s.
-     */
-    public RemoteConnection getParent() { return null; }
-
-    /**
-     * Obtains the children of this conference {@code RemoteConnection}, if any.
-     *
-     * @return The children of this {@code RemoteConnection} if this {@code RemoteConnection} is
-     * a conference, or an empty {@code List} otherwise.
-     */
-    public List<RemoteConnection> getChildren() { return new ArrayList<>(); }
 
     /**
      * Obtains the state of this {@code RemoteConnection}.
@@ -522,8 +487,8 @@ public final class RemoteConnection {
     /**
      * @return {@code true} if the {@code RemoteConnection}'s current audio mode is VOIP.
      */
-    public boolean getAudioModeIsVoip() {
-        return mAudioModeIsVoip;
+    public boolean isVoipAudioMode() {
+        return mIsVoipAudioMode;
     }
 
     /**
@@ -535,25 +500,25 @@ public final class RemoteConnection {
     }
 
     /**
-     * @return The handle (e.g., phone number) to which the {@code RemoteConnection} is currently
+     * @return The address (e.g., phone number) to which the {@code RemoteConnection} is currently
      * connected.
      */
-    public Uri getHandle() {
-        return mHandle;
+    public Uri getAddress() {
+        return mAddress;
     }
 
     /**
-     * @return The presentation requirements for the handle. See
-     * {@link TelecommManager} for valid values.
+     * @return The presentation requirements for the address. See {@link TelecommManager} for valid
+     * values.
      */
-    public int getHandlePresentation() {
-        return mHandlePresentation;
+    public int getAddressPresentation() {
+        return mAddressPresentation;
     }
 
     /**
      * @return The display name for the caller.
      */
-    public String getCallerDisplayName() {
+    public CharSequence getCallerDisplayName() {
         return mCallerDisplayName;
     }
 
@@ -601,7 +566,7 @@ public final class RemoteConnection {
      * @return Whether the {@code RemoteConnection} is requesting that the framework play a
      * ringback tone on its behalf.
      */
-    public boolean isRequestingRingback() {
+    public boolean isRingbackRequested() {
         return false;
     }
 
@@ -738,8 +703,8 @@ public final class RemoteConnection {
      * of time.
      *
      * If the DTMF string contains a {@link TelecommManager#DTMF_CHARACTER_WAIT} symbol, this
-     * {@code RemoteConnection} will pause playing the tones and notify listeners via
-     * {@link Listener#onPostDialWait(RemoteConnection, String)}. At this point, the in-call app
+     * {@code RemoteConnection} will pause playing the tones and notify callbackss via
+     * {@link Callback#onPostDialWait(RemoteConnection, String)}. At this point, the in-call app
      * should display to the user an indication of this state and an affordance to continue
      * the postdial sequence. When the user decides to continue the postdial sequence, the in-call
      * app should invoke the {@link #postDialContinue(boolean)} method.
@@ -806,8 +771,8 @@ public final class RemoteConnection {
     void setState(int state) {
         if (mState != state) {
             mState = state;
-            for (Listener l: mListeners) {
-                l.onStateChanged(this, state);
+            for (Callback c: mCallbacks) {
+                c.onStateChanged(this, state);
             }
         }
     }
@@ -821,8 +786,8 @@ public final class RemoteConnection {
             mDisconnectCauseCode = cause;
             mDisconnectCauseMessage = message;
 
-            for (Listener l : mListeners) {
-                l.onDisconnected(this, cause, message);
+            for (Callback c : mCallbacks) {
+                c.onDisconnected(this, cause, message);
             }
         }
     }
@@ -830,11 +795,11 @@ public final class RemoteConnection {
     /**
      * @hide
      */
-    void setRequestingRingback(boolean ringback) {
-        if (mRequestingRingback != ringback) {
-            mRequestingRingback = ringback;
-            for (Listener l : mListeners) {
-                l.onRequestingRingback(this, ringback);
+    void setRingbackRequested(boolean ringback) {
+        if (mRingbackRequested != ringback) {
+            mRingbackRequested = ringback;
+            for (Callback c : mCallbacks) {
+                c.onRingbackRequested(this, ringback);
             }
         }
     }
@@ -844,8 +809,8 @@ public final class RemoteConnection {
      */
     void setCallCapabilities(int callCapabilities) {
         mCallCapabilities = callCapabilities;
-        for (Listener l : mListeners) {
-            l.onCallCapabilitiesChanged(this, callCapabilities);
+        for (Callback c : mCallbacks) {
+            c.onCallCapabilitiesChanged(this, callCapabilities);
         }
     }
 
@@ -853,16 +818,16 @@ public final class RemoteConnection {
      * @hide
      */
     void setDestroyed() {
-        if (!mListeners.isEmpty()) {
-            // Make sure that the listeners are notified that the call is destroyed first.
+        if (!mCallbacks.isEmpty()) {
+            // Make sure that the callbacks are notified that the call is destroyed first.
             if (mState != Connection.STATE_DISCONNECTED) {
                 setDisconnected(DisconnectCause.ERROR_UNSPECIFIED, "Connection destroyed.");
             }
 
-            for (Listener l : mListeners) {
-                l.onDestroyed(this);
+            for (Callback c : mCallbacks) {
+                c.onDestroyed(this);
             }
-            mListeners.clear();
+            mCallbacks.clear();
 
             mConnected = false;
         }
@@ -872,8 +837,8 @@ public final class RemoteConnection {
      * @hide
      */
     void setPostDialWait(String remainingDigits) {
-        for (Listener l : mListeners) {
-            l.onPostDialWait(this, remainingDigits);
+        for (Callback c : mCallbacks) {
+            c.onPostDialWait(this, remainingDigits);
         }
     }
 
@@ -882,8 +847,8 @@ public final class RemoteConnection {
      */
     void setVideoState(int videoState) {
         mVideoState = videoState;
-        for (Listener l : mListeners) {
-            l.onVideoStateChanged(this, videoState);
+        for (Callback c : mCallbacks) {
+            c.onVideoStateChanged(this, videoState);
         }
     }
 
@@ -892,33 +857,33 @@ public final class RemoteConnection {
      */
     void setVideoProvider(VideoProvider videoProvider) {
         mVideoProvider = videoProvider;
-        for (Listener l : mListeners) {
-            l.onVideoProviderChanged(this, videoProvider);
+        for (Callback c : mCallbacks) {
+            c.onVideoProviderChanged(this, videoProvider);
         }
     }
 
     /** @hide */
-    void setAudioModeIsVoip(boolean isVoip) {
-        mAudioModeIsVoip = isVoip;
-        for (Listener l : mListeners) {
-            l.onAudioModeIsVoipChanged(this, isVoip);
+    void setIsVoipAudioMode(boolean isVoip) {
+        mIsVoipAudioMode = isVoip;
+        for (Callback c : mCallbacks) {
+            c.onVoipAudioChanged(this, isVoip);
         }
     }
 
     /** @hide */
     void setStatusHints(StatusHints statusHints) {
         mStatusHints = statusHints;
-        for (Listener l : mListeners) {
-            l.onStatusHintsChanged(this, statusHints);
+        for (Callback c : mCallbacks) {
+            c.onStatusHintsChanged(this, statusHints);
         }
     }
 
     /** @hide */
-    void setHandle(Uri handle, int presentation) {
-        mHandle = handle;
-        mHandlePresentation = presentation;
-        for (Listener l : mListeners) {
-            l.onHandleChanged(this, handle, presentation);
+    void setAddress(Uri address, int presentation) {
+        mAddress = address;
+        mAddressPresentation = presentation;
+        for (Callback c : mCallbacks) {
+            c.onAddressChanged(this, address, presentation);
         }
     }
 
@@ -926,8 +891,8 @@ public final class RemoteConnection {
     void setCallerDisplayName(String callerDisplayName, int presentation) {
         mCallerDisplayName = callerDisplayName;
         mCallerDisplayNamePresentation = presentation;
-        for (Listener l : mListeners) {
-            l.onCallerDisplayNameChanged(this, callerDisplayName, presentation);
+        for (Callback c : mCallbacks) {
+            c.onCallerDisplayNameChanged(this, callerDisplayName, presentation);
         }
     }
 
@@ -935,8 +900,8 @@ public final class RemoteConnection {
     void setConferenceableConnections(List<RemoteConnection> conferenceableConnections) {
         mConferenceableConnections.clear();
         mConferenceableConnections.addAll(conferenceableConnections);
-        for (Listener l : mListeners) {
-            l.onConferenceableConnectionsChanged(this, mUnmodifiableconferenceableConnections);
+        for (Callback c : mCallbacks) {
+            c.onConferenceableConnectionsChanged(this, mUnmodifiableconferenceableConnections);
         }
     }
 
@@ -944,8 +909,8 @@ public final class RemoteConnection {
     void setConference(RemoteConference conference) {
         if (mConference != conference) {
             mConference = conference;
-            for (Listener l : mListeners) {
-                l.onConferenceChanged(this, conference);
+            for (Callback c : mCallbacks) {
+                c.onConferenceChanged(this, conference);
             }
         }
     }

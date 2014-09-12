@@ -68,13 +68,13 @@ public abstract class Connection {
     /** @hide */
     public abstract static class Listener {
         public void onStateChanged(Connection c, int state) {}
-        public void onHandleChanged(Connection c, Uri newHandle, int presentation) {}
+        public void onAddressChanged(Connection c, Uri newAddress, int presentation) {}
         public void onCallerDisplayNameChanged(
                 Connection c, String callerDisplayName, int presentation) {}
         public void onVideoStateChanged(Connection c, int videoState) {}
         public void onDisconnected(Connection c, int cause, String message) {}
         public void onPostDialWait(Connection c, String remaining) {}
-        public void onRequestingRingback(Connection c, boolean ringback) {}
+        public void onRingbackRequested(Connection c, boolean ringback) {}
         public void onDestroyed(Connection c) {}
         public void onCallCapabilitiesChanged(Connection c, int callCapabilities) {}
         public void onVideoProviderChanged(
@@ -464,11 +464,11 @@ public abstract class Connection {
 
     private int mState = STATE_NEW;
     private AudioState mAudioState;
-    private Uri mHandle;
-    private int mHandlePresentation;
+    private Uri mAddress;
+    private int mAddressPresentation;
     private String mCallerDisplayName;
     private int mCallerDisplayNamePresentation;
-    private boolean mRequestingRingback = false;
+    private boolean mRingbackRequested = false;
     private int mCallCapabilities;
     private VideoProvider mVideoProvider;
     private boolean mAudioModeIsVoip;
@@ -485,18 +485,18 @@ public abstract class Connection {
     public Connection() {}
 
     /**
-     * @return The handle (e.g., phone number) to which this Connection is currently communicating.
+     * @return The address (e.g., phone number) to which this Connection is currently communicating.
      */
-    public final Uri getHandle() {
-        return mHandle;
+    public final Uri getAddress() {
+        return mAddress;
     }
 
     /**
-     * @return The presentation requirements for the handle.
+     * @return The presentation requirements for the address.
      *         See {@link TelecommManager} for valid values.
      */
-    public final int getHandlePresentation() {
-        return mHandlePresentation;
+    public final int getAddressPresentation() {
+        return mAddressPresentation;
     }
 
     /**
@@ -556,8 +556,8 @@ public abstract class Connection {
      * Returns whether this connection is requesting that the system play a ringback tone
      * on its behalf.
      */
-    public final boolean isRequestingRingback() {
-        return mRequestingRingback;
+    public final boolean isRingbackRequested() {
+        return mRingbackRequested;
     }
 
     /**
@@ -662,18 +662,18 @@ public abstract class Connection {
     }
 
     /**
-     * Sets the value of the {@link #getHandle()} property.
+     * Sets the value of the {@link #getAddress()} property.
      *
-     * @param handle The new handle.
-     * @param presentation The presentation requirements for the handle.
+     * @param address The new address.
+     * @param presentation The presentation requirements for the address.
      *        See {@link TelecommManager} for valid values.
      */
-    public final void setHandle(Uri handle, int presentation) {
-        Log.d(this, "setHandle %s", handle);
-        mHandle = handle;
-        mHandlePresentation = presentation;
+    public final void setAddress(Uri address, int presentation) {
+        Log.d(this, "setAddress %s", address);
+        mAddress = address;
+        mAddressPresentation = presentation;
         for (Listener l : mListeners) {
-            l.onHandleChanged(this, handle, presentation);
+            l.onAddressChanged(this, address, presentation);
         }
     }
 
@@ -716,7 +716,7 @@ public abstract class Connection {
      * communicate).
      */
     public final void setActive() {
-        setRequestingRingback(false);
+        setRingbackRequested(false);
         setState(STATE_ACTIVE);
     }
 
@@ -804,11 +804,11 @@ public abstract class Connection {
      *
      * @param ringback Whether the ringback tone is to be played.
      */
-    public final void setRequestingRingback(boolean ringback) {
-        if (mRequestingRingback != ringback) {
-            mRequestingRingback = ringback;
+    public final void setRingbackRequested(boolean ringback) {
+        if (mRingbackRequested != ringback) {
+            mRingbackRequested = ringback;
             for (Listener l : mListeners) {
-                l.onRequestingRingback(this, ringback);
+                l.onRingbackRequested(this, ringback);
             }
         }
     }

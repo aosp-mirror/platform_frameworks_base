@@ -188,11 +188,11 @@ public final class RemoteConference {
         return mDisconnectMessage;
     }
 
-    public final void addCallback(Callback callback) {
+    public final void registerCallback(Callback callback) {
         mCallbacks.add(callback);
     }
 
-    public final void removeCallback(Callback callback) {
+    public final void unregisterCallback(Callback callback) {
         mCallbacks.remove(callback);
     }
 }

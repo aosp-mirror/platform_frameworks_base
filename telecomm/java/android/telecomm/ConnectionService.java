@@ -414,9 +414,9 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onHandleChanged(Connection c, Uri handle, int presentation) {
+        public void onAddressChanged(Connection c, Uri address, int presentation) {
             String id = mIdByConnection.get(c);
-            mAdapter.setHandle(id, handle, presentation);
+            mAdapter.setAddress(id, address, presentation);
         }
 
         @Override
@@ -439,10 +439,10 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onRequestingRingback(Connection c, boolean ringback) {
+        public void onRingbackRequested(Connection c, boolean ringback) {
             String id = mIdByConnection.get(c);
             Log.d(this, "Adapter onRingback %b", ringback);
-            mAdapter.setRequestingRingback(id, ringback);
+            mAdapter.setRingbackRequested(id, ringback);
         }
 
         @Override
@@ -462,7 +462,7 @@ public abstract class ConnectionService extends Service {
         @Override
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {
             String id = mIdByConnection.get(c);
-            mAdapter.setAudioModeIsVoip(id, isVoip);
+            mAdapter.setIsVoipAudioMode(id, isVoip);
         }
 
         @Override
@@ -523,8 +523,8 @@ public abstract class ConnectionService extends Service {
             addConnection(callId, connection);
         }
 
-        Uri handle = connection.getHandle();
-        String number = handle == null ? "null" : handle.getSchemeSpecificPart();
+        Uri address = connection.getAddress();
+        String number = address == null ? "null" : address.getSchemeSpecificPart();
         Log.v(this, "createConnection, number: %s, state: %s, capabilities: %s",
                 Connection.toLogSafePhoneNumber(number),
                 Connection.stateToString(connection.getState()),
@@ -538,14 +538,14 @@ public abstract class ConnectionService extends Service {
                         request.getAccountHandle(),
                         connection.getState(),
                         connection.getCallCapabilities(),
-                        connection.getHandle(),
-                        connection.getHandlePresentation(),
+                        connection.getAddress(),
+                        connection.getAddressPresentation(),
                         connection.getCallerDisplayName(),
                         connection.getCallerDisplayNamePresentation(),
                         connection.getVideoProvider() == null ?
                                 null : connection.getVideoProvider().getInterface(),
                         connection.getVideoState(),
-                        connection.isRequestingRingback(),
+                        connection.isRingbackRequested(),
                         connection.getAudioModeIsVoip(),
                         connection.getStatusHints(),
                         connection.getDisconnectCause(),
