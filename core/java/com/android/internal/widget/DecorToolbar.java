@@ -89,6 +89,7 @@ public interface DecorToolbar {
     void setNavigationIcon(int resId);
     void setNavigationContentDescription(CharSequence description);
     void setNavigationContentDescription(int resId);
+    void setDefaultNavigationContentDescription(int defaultNavigationContentDescription);
     void saveHierarchyState(SparseArray<Parcelable> toolbarStates);
     void restoreHierarchyState(SparseArray<Parcelable> toolbarStates);
 }
