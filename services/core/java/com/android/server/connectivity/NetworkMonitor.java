@@ -95,6 +95,18 @@ public class NetworkMonitor extends StateMachine {
             "android.net.netmon.captive_portal_logged_in";
     private static final String LOGGED_IN_RESULT = "result";
 
+    // After a network has been tested this result can be sent with EVENT_NETWORK_TESTED.
+    // The network should be used as a default internet connection.  It was found to be:
+    // 1. a functioning network providing internet access, or
+    // 2. a captive portal and the user decided to use it as is.
+    public static final int NETWORK_TEST_RESULT_VALID = 0;
+    // After a network has been tested this result can be sent with EVENT_NETWORK_TESTED.
+    // The network should not be used as a default internet connection.  It was found to be:
+    // 1. a captive portal and the user is prompted to sign-in, or
+    // 2. a captive portal and the user did not want to use it, or
+    // 3. a broken network (e.g. DNS failed, connect failed, HTTP request failed).
+    public static final int NETWORK_TEST_RESULT_INVALID = 1;
+
     private static final int BASE = Protocol.BASE_NETWORK_MONITOR;
 
     /**
@@ -104,10 +116,11 @@ public class NetworkMonitor extends StateMachine {
     public static final int CMD_NETWORK_CONNECTED = BASE + 1;
 
     /**
-     * Inform ConnectivityService that the network is validated.
+     * Inform ConnectivityService that the network has been tested.
      * obj = NetworkAgentInfo
+     * arg1 = One of the NETWORK_TESTED_RESULT_* constants.
      */
-    public static final int EVENT_NETWORK_VALIDATED = BASE + 2;
+    public static final int EVENT_NETWORK_TESTED = BASE + 2;
 
     /**
      * Inform NetworkMonitor to linger a network.  The Monitor should
@@ -216,6 +229,9 @@ public class NetworkMonitor extends StateMachine {
     private String mServer;
     private boolean mIsCaptivePortalCheckEnabled = false;
 
+    // Set if the user explicitly selected "Do not use this network" in captive portal sign-in app.
+    private boolean mUserDoesNotWant = false;
+
     public boolean systemReady = false;
 
     private State mDefaultState = new DefaultState();
@@ -290,9 +306,23 @@ public class NetworkMonitor extends StateMachine {
 
     private class OfflineState extends State {
         @Override
+        public void enter() {
+            mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
+                    NETWORK_TEST_RESULT_INVALID, 0, mNetworkAgentInfo));
+        }
+
+        @Override
         public boolean processMessage(Message message) {
             if (DBG) log(getName() + message.toString());
-            return NOT_HANDLED;
+                        switch (message.what) {
+                case CMD_FORCE_REEVALUATION:
+                    // If the user has indicated they explicitly do not want to use this network,
+                    // don't allow a reevaluation as this will be pointless and could result in
+                    // the user being annoyed with repeated unwanted notifications.
+                    return mUserDoesNotWant ? HANDLED : NOT_HANDLED;
+                default:
+                    return NOT_HANDLED;
+            }
         }
     }
 
@@ -300,8 +330,8 @@ public class NetworkMonitor extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log("Validated");
-            mConnectivityServiceHandler.sendMessage(
-                    obtainMessage(EVENT_NETWORK_VALIDATED, mNetworkAgentInfo));
+            mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
+                    NETWORK_TEST_RESULT_VALID, 0, mNetworkAgentInfo));
         }
 
         @Override
@@ -393,6 +423,8 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public void enter() {
+            mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
+                    NETWORK_TEST_RESULT_INVALID, 0, mNetworkAgentInfo));
             // Wait for user to select sign-in notifcation.
             mUserRespondedBroadcastReceiver = new UserRespondedBroadcastReceiver(
                     ++mUserPromptedToken);
@@ -477,6 +509,7 @@ public class NetworkMonitor extends StateMachine {
                     if (message.arg1 != mCaptivePortalLoggedInToken)
                         return HANDLED;
                     if (message.arg2 == 0) {
+                        mUserDoesNotWant = true;
                         // TODO: Should teardown network.
                         transitionTo(mOfflineState);
                     } else {
@@ -543,6 +576,12 @@ public class NetworkMonitor extends StateMachine {
                         return HANDLED;
                     mConnectivityServiceHandler.sendMessage(
                             obtainMessage(EVENT_NETWORK_LINGER_COMPLETE, mNetworkAgentInfo));
+                    return HANDLED;
+                case CMD_FORCE_REEVALUATION:
+                    // Ignore reevaluation attempts when lingering.  A reevaluation could result
+                    // in a transition to the validated state which would abort the linger
+                    // timeout.  Lingering is the result of score assessment; validity is
+                    // irrelevant.
                     return HANDLED;
                 default:
                     return NOT_HANDLED;
