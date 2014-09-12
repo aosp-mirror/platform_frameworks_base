@@ -163,7 +163,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
             return null;
         }
 
-        if (INFO) Slog.i(TAG, "Validating: " + key);
+        if (INFO) Slog.i(TAG, "Validating: " + key + " for " + context.getUserId());
         final LinkedList<String> pendingLookups = new LinkedList<String>();
         for (int personIdx = 0; personIdx < people.length && personIdx < MAX_PEOPLE; personIdx++) {
             final String handle = people[personIdx];
@@ -390,7 +390,10 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                         final String cacheKey = getCacheKey(mContext.getUserId(), handle);
                         mPeopleCache.put(cacheKey, lookupResult);
                     }
+                    if (DEBUG) Slog.d(TAG, "lookup contactAffinity is " + lookupResult.getAffinity());
                     mContactAffinity = Math.max(mContactAffinity, lookupResult.getAffinity());
+                } else {
+                    if (DEBUG) Slog.d(TAG, "lookupResult is null");
                 }
             }
         }
