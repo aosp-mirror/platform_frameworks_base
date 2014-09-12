@@ -32,12 +32,15 @@ public class JobParameters implements Parcelable {
     private final int jobId;
     private final PersistableBundle extras;
     private final IBinder callback;
+    private final boolean overrideDeadlineExpired;
 
     /** @hide */
-    public JobParameters(int jobId, PersistableBundle extras, IBinder callback) {
+    public JobParameters(IBinder callback, int jobId, PersistableBundle extras,
+                         boolean overrideDeadlineExpired) {
         this.jobId = jobId;
         this.extras = extras;
         this.callback = callback;
+        this.overrideDeadlineExpired = overrideDeadlineExpired;
     }
 
     /**
@@ -56,6 +59,16 @@ public class JobParameters implements Parcelable {
         return extras;
     }
 
+    /**
+     * For jobs with {@link android.app.job.JobInfo.Builder#setOverrideDeadline(long)} set, this
+     * provides an easy way to tell whether the job is being executed due to the deadline
+     * expiring. Note: If the job is running because its deadline expired, it implies that its
+     * constraints will not be met.
+     */
+    public boolean isOverrideDeadlineExpired() {
+        return overrideDeadlineExpired;
+    }
+
     /** @hide */
     public IJobCallback getCallback() {
         return IJobCallback.Stub.asInterface(callback);
@@ -65,6 +78,7 @@ public class JobParameters implements Parcelable {
         jobId = in.readInt();
         extras = in.readPersistableBundle();
         callback = in.readStrongBinder();
+        overrideDeadlineExpired = in.readInt() == 1;
     }
 
     @Override
@@ -77,6 +91,7 @@ public class JobParameters implements Parcelable {
         dest.writeInt(jobId);
         dest.writePersistableBundle(extras);
         dest.writeStrongBinder(callback);
+        dest.writeInt(overrideDeadlineExpired ? 1 : 0);
     }
 
     public static final Creator<JobParameters> CREATOR = new Creator<JobParameters>() {

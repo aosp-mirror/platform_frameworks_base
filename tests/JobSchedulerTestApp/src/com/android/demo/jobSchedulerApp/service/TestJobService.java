@@ -29,6 +29,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
+import android.widget.Toast;
 
 import com.android.demo.jobSchedulerApp.MainActivity;
 
@@ -84,11 +85,14 @@ public class TestJobService extends JobService {
         currentId++;
         jobParamsMap.put(currentId, params);
         final int currId = this.currentId;
-        Log.d(TAG, "putting :" + currId + " for " + params.toString());
-        Log.d(TAG, " pulled: " + jobParamsMap.get(currId));
         if (mActivity != null) {
             mActivity.onReceivedStartJob(params);
         }
+
+        Toast.makeText(
+                this, "On start job: '" + params.getJobId() + "' deadline exceeded: " +
+                        params.isOverrideDeadlineExpired(),
+                Toast.LENGTH_LONG).show();
 
         return true;
     }
@@ -100,7 +104,7 @@ public class TestJobService extends JobService {
         int ind = jobParamsMap.indexOfValue(params);
         jobParamsMap.remove(ind);
         mActivity.onReceivedStopJob();
-        return true;
+        return false; // no reschedule
     }
 
     static int currentId = 0;
@@ -129,6 +133,7 @@ public class TestJobService extends JobService {
             return false;
         } else {
             jobFinished(params, false);
+            jobParamsMap.removeAt(0);
             return true;
         }
     }

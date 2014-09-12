@@ -153,7 +153,8 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
             }
 
             mRunningJob = job;
-            mParams = new JobParameters(job.getJobId(), job.getExtras(), this);
+            mParams = new JobParameters(this, job.getJobId(), job.getExtras(),
+                    !job.isConstraintsSatisfied());
             mExecutionStartTimeElapsed = SystemClock.elapsedRealtime();
 
             mVerb = VERB_BINDING;

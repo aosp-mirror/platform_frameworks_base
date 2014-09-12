@@ -5684,6 +5684,7 @@ package android.app.job {
     method public int describeContents();
     method public android.os.PersistableBundle getExtras();
     method public int getJobId();
+    method public boolean isOverrideDeadlineExpired();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
