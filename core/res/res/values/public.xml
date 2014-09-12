@@ -2293,6 +2293,7 @@
   <public type="attr" name="patternPathData" />
   <public type="attr" name="strokeAlpha" />
   <public type="attr" name="fillAlpha" />
+  <public type="attr" name="windowActivityTransitions" />
 
   <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
 
