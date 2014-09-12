@@ -17,7 +17,6 @@ package android.animation;
 
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.util.MathUtils;
 
 import java.util.ArrayList;
 
@@ -64,11 +63,12 @@ class PathKeyframes implements Keyframes {
 
     @Override
     public Object getValue(float fraction) {
-        fraction = MathUtils.constrain(fraction, 0, 1);
-
         int numPoints = mKeyframeData.length / 3;
-
-        if (fraction == 0) {
+        if (fraction < 0) {
+            return interpolateInRange(fraction, 0, 1);
+        } else if (fraction > 1) {
+            return interpolateInRange(fraction, numPoints - 2, numPoints - 1);
+        } else if (fraction == 0) {
             return pointForIndex(0);
         } else if (fraction == 1) {
             return pointForIndex(numPoints - 1);
@@ -91,25 +91,29 @@ class PathKeyframes implements Keyframes {
             }
 
             // now high is below the fraction and low is above the fraction
-            int startBase = (high * NUM_COMPONENTS);
-            int endBase = (low * NUM_COMPONENTS);
-
-            float startFraction = mKeyframeData[startBase + FRACTION_OFFSET];
-            float endFraction = mKeyframeData[endBase + FRACTION_OFFSET];
-
-            float intervalFraction = (fraction - startFraction)/(endFraction - startFraction);
-
-            float startX = mKeyframeData[startBase + X_OFFSET];
-            float endX = mKeyframeData[endBase + X_OFFSET];
-            float startY = mKeyframeData[startBase + Y_OFFSET];
-            float endY = mKeyframeData[endBase + Y_OFFSET];
-
-            float x = interpolate(intervalFraction, startX, endX);
-            float y = interpolate(intervalFraction, startY, endY);
-
-            mTempPointF.set(x, y);
-            return mTempPointF;
+            return interpolateInRange(fraction, high, low);
         }
+    }
+
+    private PointF interpolateInRange(float fraction, int startIndex, int endIndex) {
+        int startBase = (startIndex * NUM_COMPONENTS);
+        int endBase = (endIndex * NUM_COMPONENTS);
+
+        float startFraction = mKeyframeData[startBase + FRACTION_OFFSET];
+        float endFraction = mKeyframeData[endBase + FRACTION_OFFSET];
+
+        float intervalFraction = (fraction - startFraction)/(endFraction - startFraction);
+
+        float startX = mKeyframeData[startBase + X_OFFSET];
+        float endX = mKeyframeData[endBase + X_OFFSET];
+        float startY = mKeyframeData[startBase + Y_OFFSET];
+        float endY = mKeyframeData[endBase + Y_OFFSET];
+
+        float x = interpolate(intervalFraction, startX, endX);
+        float y = interpolate(intervalFraction, startY, endY);
+
+        mTempPointF.set(x, y);
+        return mTempPointF;
     }
 
     @Override
