@@ -263,7 +263,9 @@ abstract class HdmiCecLocalDevice {
             case Constants.MESSAGE_GIVE_DEVICE_POWER_STATUS:
                 return handleGiveDevicePowerStatus(message);
             case Constants.MESSAGE_MENU_REQUEST:
-                return handleGiveDeviceMenuStatus(message);
+                return handleMenuRequest(message);
+            case Constants.MESSAGE_MENU_STATUS:
+                return handleMenuStatus(message);
             case Constants.MESSAGE_VENDOR_COMMAND:
                 return handleVendorCommand(message);
             case Constants.MESSAGE_VENDOR_COMMAND_WITH_ID:
@@ -503,11 +505,15 @@ abstract class HdmiCecLocalDevice {
         return true;
     }
 
-    protected boolean handleGiveDeviceMenuStatus(HdmiCecMessage message) {
+    protected boolean handleMenuRequest(HdmiCecMessage message) {
         // Always report menu active to receive Remote Control.
         mService.sendCecCommand(HdmiCecMessageBuilder.buildReportMenuStatus(
                 mAddress, message.getSource(), Constants.MENU_STATE_ACTIVATED));
         return true;
+    }
+
+    protected boolean handleMenuStatus(HdmiCecMessage message) {
+        return false;
     }
 
     protected boolean handleVendorCommand(HdmiCecMessage message) {

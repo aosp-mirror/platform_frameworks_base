@@ -1646,6 +1646,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @Override
+    protected boolean handleMenuStatus(HdmiCecMessage message) {
+        // Do nothing and just return true not to prevent from responding <Feature Abort>.
+        return true;
+    }
+
+    @Override
     protected void dump(final IndentingPrintWriter pw) {
         super.dump(pw);
         pw.println("mArcEstablished: " + mArcEstablished);
