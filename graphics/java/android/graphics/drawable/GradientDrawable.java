@@ -1637,6 +1637,11 @@ public class GradientDrawable extends Drawable {
                 }
             }
 
+            // An unfilled shape is not opaque over bounds or shape
+            if (mColors == null && mColorStateList == null) {
+                return;
+            }
+
             // Colors are opaque, so opaqueOverShape=true,
             mOpaqueOverShape = true;
             // and opaqueOverBounds=true if shape fills bounds
