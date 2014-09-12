@@ -433,14 +433,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // listen for configured wifi networks to be removed
         final IntentFilter wifiConfigFilter = new IntentFilter(CONFIGURED_NETWORKS_CHANGED_ACTION);
-        mContext.registerReceiver(
-                mWifiConfigReceiver, wifiConfigFilter, CONNECTIVITY_INTERNAL, mHandler);
+        mContext.registerReceiver(mWifiConfigReceiver, wifiConfigFilter, null, mHandler);
 
         // listen for wifi state changes to catch metered hint
         final IntentFilter wifiStateFilter = new IntentFilter(
                 WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        mContext.registerReceiver(
-                mWifiStateReceiver, wifiStateFilter, CONNECTIVITY_INTERNAL, mHandler);
+        mContext.registerReceiver(mWifiStateReceiver, wifiStateFilter, null, mHandler);
 
     }
 

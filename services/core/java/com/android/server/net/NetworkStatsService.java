@@ -318,7 +318,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // watch for tethering changes
         final IntentFilter tetherFilter = new IntentFilter(ACTION_TETHER_STATE_CHANGED);
-        mContext.registerReceiver(mTetherReceiver, tetherFilter, CONNECTIVITY_INTERNAL, mHandler);
+        mContext.registerReceiver(mTetherReceiver, tetherFilter, null, mHandler);
 
         // listen for periodic polling events
         final IntentFilter pollFilter = new IntentFilter(ACTION_NETWORK_STATS_POLL);
