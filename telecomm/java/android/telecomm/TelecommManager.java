@@ -70,6 +70,24 @@ public class TelecommManager {
             "android.telecomm.action.CHANGE_PHONE_ACCOUNTS";
 
     /**
+     * The {@link android.content.Intent} action used to inform a
+     * {@link android.telecomm.ConnectionService} that one of its {@link PhoneAccount}s has been
+     * enabled.  The {@link TelecommManager#EXTRA_PHONE_ACCOUNT_HANDLE} extra is used to indicate
+     * which {@link PhoneAccount} has been enabled.
+     */
+    public static final String ACTION_PHONE_ACCOUNT_ENABLED =
+            "android.telecom.action.PHONE_ACCOUNT_ENABLED";
+
+    /**
+     * The {@link android.content.Intent} action used to inform a
+     * {@link android.telecomm.ConnectionService} that one of its {@link PhoneAccount}s has been
+     * disabled.  The {@link TelecommManager#EXTRA_PHONE_ACCOUNT_HANDLE} extra is used to indicate
+     * which {@link PhoneAccount} has been disabled.
+     */
+    public static final String ACTION_PHONE_ACCOUNT_DISABLED =
+            "android.telecom.action.PHONE_ACCOUNT_DISABLED";
+
+    /**
      * Optional extra for {@link android.content.Intent#ACTION_CALL} containing a boolean that
      * determines whether the speakerphone should be automatically turned on for an outgoing call.
      */
