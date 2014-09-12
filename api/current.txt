@@ -33869,8 +33869,6 @@ package android.view {
     method public boolean hasTransientState();
     method public boolean hasWindowFocus();
     method public static android.view.View inflate(android.content.Context, int, android.view.ViewGroup);
-    method protected void initializeFadingEdge(android.content.res.TypedArray);
-    method protected void initializeScrollbars(android.content.res.TypedArray);
     method public void invalidate(android.graphics.Rect);
     method public void invalidate(int, int, int, int);
     method public void invalidate();
