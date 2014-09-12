@@ -170,6 +170,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 mRunningJob = null;
                 mParams = null;
                 mExecutionStartTimeElapsed = 0L;
+                removeOpTimeOut();
                 return false;
             }
             try {
@@ -299,7 +300,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
         public void handleMessage(Message message) {
             switch (message.what) {
                 case MSG_SERVICE_BOUND:
-                    removeMessages(MSG_TIMEOUT);
+                    removeOpTimeOut();
                     handleServiceBoundH();
                     break;
                 case MSG_CALLBACK:
@@ -307,7 +308,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                         Slog.d(TAG, "MSG_CALLBACK of : " + mRunningJob + " v:" +
                                 (mVerb >= 0 ? VERB_STRINGS[mVerb] : "[invalid]"));
                     }
-                    removeMessages(MSG_TIMEOUT);
+                    removeOpTimeOut();
 
                     if (mVerb == VERB_STARTING) {
                         final boolean workOngoing = message.arg2 == 1;
@@ -498,7 +499,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
          * VERB_STOPPING.
          */
         private void sendStopMessageH() {
-            mCallbackHandler.removeMessages(MSG_TIMEOUT);
+            removeOpTimeOut();
             if (mVerb != VERB_EXECUTING) {
                 Slog.e(TAG, "Sending onStopJob for a job that isn't started. " + mRunningJob);
                 closeAndCleanupJobH(false /* reschedule */);
@@ -540,7 +541,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 service = null;
                 mAvailable = true;
             }
-            removeMessages(MSG_TIMEOUT);
+            removeOpTimeOut();
             removeMessages(MSG_CALLBACK);
             removeMessages(MSG_SERVICE_BOUND);
             removeMessages(MSG_CANCEL);
@@ -555,7 +556,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
      * on with life.
      */
     private void scheduleOpTimeOut() {
-        mCallbackHandler.removeMessages(MSG_TIMEOUT);
+        removeOpTimeOut();
 
         final long timeoutMillis = (mVerb == VERB_EXECUTING) ?
                 EXECUTING_TIMESLICE_MILLIS : OP_TIMEOUT_MILLIS;
@@ -567,5 +568,10 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
         Message m = mCallbackHandler.obtainMessage(MSG_TIMEOUT);
         mCallbackHandler.sendMessageDelayed(m, timeoutMillis);
         mTimeoutElapsed = SystemClock.elapsedRealtime() + timeoutMillis;
+    }
+
+
+    private void removeOpTimeOut() {
+        mCallbackHandler.removeMessages(MSG_TIMEOUT);
     }
 }
