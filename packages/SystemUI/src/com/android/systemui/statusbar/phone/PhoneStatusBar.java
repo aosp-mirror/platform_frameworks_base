@@ -177,6 +177,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public static final boolean DEBUG_GESTURES = false;
     public static final boolean DEBUG_MEDIA = false;
     public static final boolean DEBUG_MEDIA_FAKE_ARTWORK = false;
+    public static final boolean DEBUG_EMPTY_KEYGUARD = true;
 
     public static final boolean DEBUG_WINDOW_STATE = false;
 
@@ -2238,6 +2239,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mStatusBarWindowManager.setStatusBarFocusable(false);
 
             mStatusBarWindow.cancelExpandHelper();
+            if (DEBUG_EMPTY_KEYGUARD) {
+                Log.i(TAG, "Collapsing panel from animateCollapsePanels:"
+                        + " force=" + force
+                        + " mState=" + mState);
+            }
             mStatusBarView.collapseAllPanels(true);
         }
     }
@@ -2325,6 +2331,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void animateCollapseQuickSettings() {
+        if (DEBUG_EMPTY_KEYGUARD) {
+            Log.i(TAG, "Collapsing panel from animateCollapseQuickSettings");
+        }
         mStatusBarView.collapseAllPanels(true);
     }
 
@@ -2337,6 +2346,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         // Ensure the panel is fully collapsed (just in case; bug 6765842, 7260868)
+        if (DEBUG_EMPTY_KEYGUARD) {
+            Log.i(TAG, "Collapsing panel from makeExpandedInvisible");
+        }
         mStatusBarView.collapseAllPanels(/*animate=*/ false);
 
         // reset things to their proper state
@@ -2430,6 +2442,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mStatusBarWindowState = state;
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Status bar " + windowStateToString(state));
             if (!showing) {
+                if (DEBUG_EMPTY_KEYGUARD) {
+                    Log.i(TAG, "Collapsing panel from setWindowState");
+                }
                 mStatusBarView.collapseAllPanels(false);
             }
         }
@@ -2987,6 +3002,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     }
                 });
                 if (dismissShade) {
+                    if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
+                        Log.i(TAG, "Collapsing panel startActivityDismissKeyguard after keyguard"
+                                + "dismiss");
+                    }
                     animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
                 }
                 return true;
@@ -3654,6 +3673,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public boolean onSpacePressed() {
         if (mScreenOn != null && mScreenOn
                 && (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)) {
+            if (PhoneStatusBar.DEBUG_EMPTY_KEYGUARD) {
+                Log.i(TAG, "Collapsing panel from onSpacePressed");
+            }
             animateCollapsePanels(0 /* flags */, true /* force */);
             return true;
         }
