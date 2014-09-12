@@ -3245,10 +3245,14 @@ public class DevicePolicyManager {
      * Called by profile or device owners to update {@link Settings.Secure} settings. Validation
      * that the value of the setting is in the correct form for the setting type should be performed
      * by the caller.
-     * <p>The settings that can be updated with this method are:
+     * <p>The settings that can be updated by a profile or device owner with this method are:
      * <ul>
      * <li>{@link Settings.Secure#DEFAULT_INPUT_METHOD}</li>
      * <li>{@link Settings.Secure#SKIP_FIRST_USE_HINTS}</li>
+     * </ul>
+     * <p>A device owner can additionally update the following settings:
+     * <ul>
+     * <li>{@link Settings.Secure#LOCATION_MODE}</li>
      * </ul>
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param setting The name of the setting to update.
