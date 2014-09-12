@@ -14,34 +14,20 @@
  * limitations under the License
  */
 
-package com.android.systemui.statusbar;
+package com.android.keyguard;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 /**
- * A linear layout which does not have overlapping renderings commands and therefore does not need a
+ * A frame layout which does not have overlapping renderings commands and therefore does not need a
  * layer when alpha is changed.
  */
-public class AlphaOptimizedLinearLayout extends LinearLayout
-{
-    public AlphaOptimizedLinearLayout(Context context) {
-        super(context);
-    }
+public class AlphaOptimizedRelativeLayout extends RelativeLayout {
 
-    public AlphaOptimizedLinearLayout(Context context, AttributeSet attrs) {
+    public AlphaOptimizedRelativeLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    public AlphaOptimizedLinearLayout(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
-    public AlphaOptimizedLinearLayout(Context context, AttributeSet attrs, int defStyleAttr,
-            int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     @Override
