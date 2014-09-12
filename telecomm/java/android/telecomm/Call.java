@@ -482,13 +482,6 @@ public final class Call {
     }
 
     /**
-     * Notifies this {@code Call} that the phone account user interface element was touched.
-     */
-    public void phoneAccountClicked() {
-        mInCallAdapter.phoneAccountClicked(mTelecommCallId);
-    }
-
-    /**
      * Notifies this {@code Call} that an account has been selected and to proceed with placing
      * an outgoing call.
      */

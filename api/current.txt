@@ -28497,16 +28497,15 @@ package android.telecomm {
     method public final boolean isRequestingRingback();
     method public void onAbort();
     method public void onAnswer();
+    method public void onAudioStateChanged(android.telecomm.AudioState);
     method public void onConferenceWith(android.telecomm.Connection);
     method public void onDisconnect();
     method public void onHold();
-    method public void onPhoneAccountClicked();
     method public void onPlayDtmfTone(char);
     method public void onPostDialContinue(boolean);
     method public void onReject();
     method public void onSeparate();
-    method public void onSetAudioState(android.telecomm.AudioState);
-    method public void onSetState(int);
+    method public void onStateChanged(int);
     method public void onStopDtmfTone();
     method public void onUnhold();
     method public final void setActive();
@@ -28739,8 +28738,8 @@ package android.telecomm {
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_CAUSE = "android.telecomm.extra.CALL_DISCONNECT_CAUSE";
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecomm.extra.CALL_DISCONNECT_MESSAGE";
     field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecomm.extra.CONNECTION_SERVICE";
-    field public static final java.lang.String EXTRA_PHONE_ACCOUNT_HANDLE = "android.intent.extra.PHONE_ACCOUNT_HANDLE";
-    field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.intent.extra.START_CALL_WITH_SPEAKERPHONE";
+    field public static final java.lang.String EXTRA_PHONE_ACCOUNT_HANDLE = "android.telecomm.extra.PHONE_ACCOUNT_HANDLE";
+    field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.telecomm.extra.START_CALL_WITH_SPEAKERPHONE";
     field public static final int PRESENTATION_ALLOWED = 1; // 0x1
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2

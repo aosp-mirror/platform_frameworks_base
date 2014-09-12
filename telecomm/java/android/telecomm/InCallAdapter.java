@@ -189,18 +189,6 @@ public final class InCallAdapter {
     }
 
     /**
-     * Instructs Telecomm that the phone account UI was clicked.
-     *
-     * @param callId The identifier of the call.
-     */
-    public void phoneAccountClicked(String callId) {
-        try {
-            mAdapter.phoneAccountClicked(callId);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
      * Instructs Telecomm to add a PhoneAccountHandle to the specified call
      *
      * @param callId The identifier of the call

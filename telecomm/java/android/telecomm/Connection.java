@@ -625,7 +625,7 @@ public abstract class Connection {
     final void setAudioState(AudioState state) {
         Log.d(this, "setAudioState %s", state);
         mAudioState = state;
-        onSetAudioState(state);
+        onAudioStateChanged(state);
     }
 
     /**
@@ -946,7 +946,7 @@ public abstract class Connection {
      *
      * @param state The new call audio state.
      */
-    public void onSetAudioState(AudioState state) {}
+    public void onAudioStateChanged(AudioState state) {}
 
     /**
      * Notifies this Connection of an internal state change. This method is called after the
@@ -954,7 +954,7 @@ public abstract class Connection {
      *
      * @param state The new state, one of the {@code STATE_*} constants.
      */
-    public void onSetState(int state) {}
+    public void onStateChanged(int state) {}
 
     /**
      * Notifies this Connection of a request to play a DTMF tone.
@@ -1022,11 +1022,6 @@ public abstract class Connection {
     public void onPostDialContinue(boolean proceed) {}
 
     /**
-     * Called when the phone account UI was clicked.
-     */
-    public void onPhoneAccountClicked() {}
-
-    /**
      * Merge this connection and the specified connection into a conference call.  Once the
      * connections are merged, the calls should be added to the an existing or new
      * {@code Conference} instance. For new {@code Conference} instances, use
@@ -1069,7 +1064,7 @@ public abstract class Connection {
         if (mState != state) {
             Log.d(this, "setState: %s", stateToString(state));
             mState = state;
-            onSetState(state);
+            onStateChanged(state);
             for (Listener l : mListeners) {
                 l.onStateChanged(this, state);
             }

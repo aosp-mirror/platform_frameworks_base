@@ -69,7 +69,6 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_CONFERENCE = 12;
     private static final int MSG_SPLIT_FROM_CONFERENCE = 13;
     private static final int MSG_ON_POST_DIAL_CONTINUE = 14;
-    private static final int MSG_ON_PHONE_ACCOUNT_CLICKED = 15;
     private static final int MSG_REMOVE_CONNECTION_SERVICE_ADAPTER = 16;
     private static final int MSG_ANSWER_VIDEO = 17;
     private static final int MSG_MERGE_CONFERENCE = 18;
@@ -200,11 +199,6 @@ public abstract class ConnectionService extends Service {
             args.argi1 = proceed ? 1 : 0;
             mHandler.obtainMessage(MSG_ON_POST_DIAL_CONTINUE, args).sendToTarget();
         }
-
-        @Override
-        public void onPhoneAccountClicked(String callId) {
-            mHandler.obtainMessage(MSG_ON_PHONE_ACCOUNT_CLICKED, callId).sendToTarget();
-        }
     };
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -327,9 +321,6 @@ public abstract class ConnectionService extends Service {
                     }
                     break;
                 }
-                case MSG_ON_PHONE_ACCOUNT_CLICKED:
-                    onPhoneAccountHandleClicked((String) msg.obj);
-                    break;
                 default:
                     break;
             }
@@ -676,11 +667,6 @@ public abstract class ConnectionService extends Service {
     private void onPostDialContinue(String callId, boolean proceed) {
         Log.d(this, "onPostDialContinue(%s)", callId);
         findConnectionForAction(callId, "stopDtmfTone").onPostDialContinue(proceed);
-    }
-
-    private void onPhoneAccountHandleClicked(String callId) {
-        Log.d(this, "onPhoneAccountClicked %s", callId);
-        findConnectionForAction(callId, "onPhoneAccountClicked").onPhoneAccountClicked();
     }
 
     private void onAdapterAttached() {
