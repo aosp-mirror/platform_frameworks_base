@@ -28717,7 +28717,7 @@ package android.telecomm {
   public class TelecommManager {
     method public void addNewIncomingCall(android.telecomm.PhoneAccountHandle, android.os.Bundle);
     method public void cancelMissedCallsNotification();
-    method public void clearAccounts(java.lang.String);
+    method public void clearAccounts();
     method public android.telecomm.PhoneAccountHandle getConnectionManager();
     method public android.telecomm.PhoneAccountHandle getDefaultOutgoingPhoneAccount(java.lang.String);
     method public java.util.List<android.telecomm.PhoneAccountHandle> getEnabledPhoneAccounts();
@@ -28740,6 +28740,8 @@ package android.telecomm {
     field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecomm.extra.CONNECTION_SERVICE";
     field public static final java.lang.String EXTRA_PHONE_ACCOUNT_HANDLE = "android.telecomm.extra.PHONE_ACCOUNT_HANDLE";
     field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.telecomm.extra.START_CALL_WITH_SPEAKERPHONE";
+    field public static final java.lang.String GATEWAY_ORIGINAL_ADDRESS = "android.telecomm.extra.GATEWAY_ORIGINAL_ADDRESS";
+    field public static final java.lang.String GATEWAY_PROVIDER_PACKAGE = "android.telecomm.extra.GATEWAY_PROVIDER_PACKAGE";
     field public static final int PRESENTATION_ALLOWED = 1; // 0x1
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
