@@ -2103,8 +2103,6 @@
      =============================================================== -->
   <eat-comment />
 
-  <public-padding type="attr" name="l_resource_pad" end="0x1010410" />
-
   <public type="attr" name="fastScrollStyle" />
   <public type="attr" name="windowContentTransitions" />
   <public type="attr" name="windowContentTransitionManager" />
@@ -2248,7 +2246,6 @@
   <public type="attr" name="timePickerDialogTheme" />
   <public type="attr" name="headerTimeTextAppearance" />
   <public type="attr" name="headerAmPmTextAppearance" />
-  <public type="attr" name="__removed2" />
   <public type="attr" name="numbersTextColor" />
   <public type="attr" name="numbersBackgroundColor" />
   <public type="attr" name="numbersSelectorColor" />
@@ -2295,26 +2292,14 @@
   <public type="attr" name="fillAlpha" />
   <public type="attr" name="windowActivityTransitions" />
 
-  <public-padding type="dimen" name="l_resource_pad" end="0x01050010" />
-
-  <public-padding type="id" name="l_resource_pad" end="0x01020040" />
-
   <public type="id" name="mask" />
   <public type="id" name="statusBarBackground" />
   <public type="id" name="navigationBarBackground" />
-
-  <public-padding type="style" name="l_resource_pad" end="0x01030200" />
 
   <public type="style" name="Widget.FastScroll" />
   <public type="style" name="Widget.StackView" />
   <public type="style" name="Widget.Toolbar" />
   <public type="style" name="Widget.Toolbar.Button.Navigation" />
-
-  <public type="style" name="__removed3" />
-  <public type="style" name="__removed4" />
-  <public type="style" name="__removed5" />
-  <public type="style" name="__removed6" />
-  <public type="style" name="__removed7" />
 
   <public type="style" name="Widget.DeviceDefault.FastScroll" />
   <public type="style" name="Widget.DeviceDefault.StackView" />
@@ -2322,16 +2307,34 @@
   <public type="style" name="Widget.DeviceDefault.Light.StackView" />
 
   <public type="style" name="TextAppearance.Material" />
+  <public type="style" name="TextAppearance.Material.Button" />
+  <public type="style" name="TextAppearance.Material.Body2" />
+  <public type="style" name="TextAppearance.Material.Body1" />
+  <public type="style" name="TextAppearance.Material.Caption" />
   <public type="style" name="TextAppearance.Material.DialogWindowTitle" />
+  <public type="style" name="TextAppearance.Material.Display4" />
+  <public type="style" name="TextAppearance.Material.Display3" />
+  <public type="style" name="TextAppearance.Material.Display2" />
+  <public type="style" name="TextAppearance.Material.Display1" />
+  <public type="style" name="TextAppearance.Material.Headline" />
   <public type="style" name="TextAppearance.Material.Inverse" />
   <public type="style" name="TextAppearance.Material.Large" />
   <public type="style" name="TextAppearance.Material.Large.Inverse" />
   <public type="style" name="TextAppearance.Material.Medium" />
   <public type="style" name="TextAppearance.Material.Medium.Inverse" />
+  <public type="style" name="TextAppearance.Material.Menu" />
+  <public type="style" name="TextAppearance.Material.Notification" />
+  <public type="style" name="TextAppearance.Material.Notification.Emphasis" />
+  <public type="style" name="TextAppearance.Material.Notification.Info" />
+  <public type="style" name="TextAppearance.Material.Notification.Line2" />
+  <public type="style" name="TextAppearance.Material.Notification.Time" />
+  <public type="style" name="TextAppearance.Material.Notification.Title" />
   <public type="style" name="TextAppearance.Material.SearchResult.Subtitle" />
   <public type="style" name="TextAppearance.Material.SearchResult.Title" />
   <public type="style" name="TextAppearance.Material.Small" />
   <public type="style" name="TextAppearance.Material.Small.Inverse" />
+  <public type="style" name="TextAppearance.Material.Subhead" />
+  <public type="style" name="TextAppearance.Material.Title" />
   <public type="style" name="TextAppearance.Material.WindowTitle" />
 
   <public type="style" name="TextAppearance.Material.Widget" />
@@ -2356,14 +2359,18 @@
   <public type="style" name="TextAppearance.Material.Widget.TextView" />
   <public type="style" name="TextAppearance.Material.Widget.TextView.PopupMenu" />
   <public type="style" name="TextAppearance.Material.Widget.TextView.SpinnerItem" />
+  <public type="style" name="TextAppearance.Material.Widget.Toolbar.Subtitle" />
+  <public type="style" name="TextAppearance.Material.Widget.Toolbar.Title" />
 
   <public type="style" name="Theme.DeviceDefault.Settings" />
 
   <public type="style" name="Theme.Material" />
   <public type="style" name="Theme.Material.Dialog" />
+  <public type="style" name="Theme.Material.Dialog.Alert" />
   <public type="style" name="Theme.Material.Dialog.MinWidth" />
   <public type="style" name="Theme.Material.Dialog.NoActionBar" />
   <public type="style" name="Theme.Material.Dialog.NoActionBar.MinWidth" />
+  <public type="style" name="Theme.Material.Dialog.Presentation" />
   <public type="style" name="Theme.Material.DialogWhenLarge" />
   <public type="style" name="Theme.Material.DialogWhenLarge.NoActionBar" />
   <public type="style" name="Theme.Material.InputMethod" />
@@ -2380,9 +2387,11 @@
   <public type="style" name="Theme.Material.Light" />
   <public type="style" name="Theme.Material.Light.DarkActionBar" />
   <public type="style" name="Theme.Material.Light.Dialog" />
+  <public type="style" name="Theme.Material.Light.Dialog.Alert" />
   <public type="style" name="Theme.Material.Light.Dialog.MinWidth" />
   <public type="style" name="Theme.Material.Light.Dialog.NoActionBar" />
   <public type="style" name="Theme.Material.Light.Dialog.NoActionBar.MinWidth" />
+  <public type="style" name="Theme.Material.Light.Dialog.Presentation" />
   <public type="style" name="Theme.Material.Light.DialogWhenLarge" />
   <public type="style" name="Theme.Material.Light.DialogWhenLarge.NoActionBar" />
   <public type="style" name="Theme.Material.Light.NoActionBar" />
@@ -2412,6 +2421,7 @@
   <public type="style" name="Widget.Material.AutoCompleteTextView" />
   <public type="style" name="Widget.Material.Button" />
   <public type="style" name="Widget.Material.Button.Borderless" />
+  <public type="style" name="Widget.Material.Button.Borderless.Colored" />
   <public type="style" name="Widget.Material.Button.Borderless.Small" />
   <public type="style" name="Widget.Material.Button.Inset" />
   <public type="style" name="Widget.Material.Button.Small" />
@@ -2448,14 +2458,17 @@
   <public type="style" name="Widget.Material.RatingBar.Indicator" />
   <public type="style" name="Widget.Material.RatingBar.Small" />
   <public type="style" name="Widget.Material.ScrollView" />
+  <public type="style" name="Widget.Material.SearchView" />
   <public type="style" name="Widget.Material.SeekBar" />
   <public type="style" name="Widget.Material.SegmentedButton" />
   <public type="style" name="Widget.Material.StackView" />
   <public type="style" name="Widget.Material.Spinner" />
+  <public type="style" name="Widget.Material.Spinner.Underlined" />
   <public type="style" name="Widget.Material.Tab" />
   <public type="style" name="Widget.Material.TabWidget" />
   <public type="style" name="Widget.Material.TextView" />
   <public type="style" name="Widget.Material.TextView.SpinnerItem" />
+  <public type="style" name="Widget.Material.TimePicker" />
   <public type="style" name="Widget.Material.Toolbar" />
   <public type="style" name="Widget.Material.Toolbar.Button.Navigation" />
   <public type="style" name="Widget.Material.WebTextView" />
@@ -2474,6 +2487,7 @@
   <public type="style" name="Widget.Material.Light.AutoCompleteTextView" />
   <public type="style" name="Widget.Material.Light.Button" />
   <public type="style" name="Widget.Material.Light.Button.Borderless" />
+  <public type="style" name="Widget.Material.Light.Button.Borderless.Colored" />
   <public type="style" name="Widget.Material.Light.Button.Borderless.Small" />
   <public type="style" name="Widget.Material.Light.Button.Inset" />
   <public type="style" name="Widget.Material.Light.Button.Small" />
@@ -2485,6 +2499,7 @@
   <public type="style" name="Widget.Material.Light.CompoundButton.CheckBox" />
   <public type="style" name="Widget.Material.Light.CompoundButton.RadioButton" />
   <public type="style" name="Widget.Material.Light.CompoundButton.Star" />
+  <public type="style" name="Widget.Material.Light.DatePicker" />
   <public type="style" name="Widget.Material.Light.DropDownItem" />
   <public type="style" name="Widget.Material.Light.DropDownItem.Spinner" />
   <public type="style" name="Widget.Material.Light.EditText" />
@@ -2512,69 +2527,26 @@
   <public type="style" name="Widget.Material.Light.RatingBar.Indicator" />
   <public type="style" name="Widget.Material.Light.RatingBar.Small" />
   <public type="style" name="Widget.Material.Light.ScrollView" />
+  <public type="style" name="Widget.Material.Light.SearchView" />
   <public type="style" name="Widget.Material.Light.SeekBar" />
   <public type="style" name="Widget.Material.Light.SegmentedButton" />
   <public type="style" name="Widget.Material.Light.StackView" />
   <public type="style" name="Widget.Material.Light.Spinner" />
+  <public type="style" name="Widget.Material.Light.Spinner.Underlined" />
   <public type="style" name="Widget.Material.Light.Tab" />
   <public type="style" name="Widget.Material.Light.TabWidget" />
   <public type="style" name="Widget.Material.Light.TextView" />
   <public type="style" name="Widget.Material.Light.TextView.SpinnerItem" />
+  <public type="style" name="Widget.Material.Light.TimePicker" />
   <public type="style" name="Widget.Material.Light.WebTextView" />
   <public type="style" name="Widget.Material.Light.WebView" />
 
-  <public type="style" name="TextAppearance.Material.Display4" />
-  <public type="style" name="TextAppearance.Material.Display3" />
-  <public type="style" name="TextAppearance.Material.Display2" />
-  <public type="style" name="TextAppearance.Material.Display1" />
-  <public type="style" name="TextAppearance.Material.Headline" />
-  <public type="style" name="TextAppearance.Material.Title" />
-  <public type="style" name="TextAppearance.Material.Subhead" />
-  <public type="style" name="TextAppearance.Material.Body2" />
-  <public type="style" name="TextAppearance.Material.Body1" />
-  <public type="style" name="TextAppearance.Material.Caption" />
-  <public type="style" name="TextAppearance.Material.Menu" />
-  <public type="style" name="TextAppearance.Material.Button" />
-
-  <public type="style" name="Widget.Material.Button.Borderless.Colored" />
-  <public type="style" name="Widget.Material.Light.Button.Borderless.Colored" />
-
+  <!-- @hide This really shouldn't be public; clients using it should use @* to ref it.  -->
   <public type="style" name="Theme.Leanback.FormWizard"/>
-
-  <public type="style" name="__removed1" />
-  <public type="style" name="TextAppearance.Material.Notification" />
-  <public type="style" name="TextAppearance.Material.Notification.Title" />
-  <public type="style" name="TextAppearance.Material.Notification.Line2" />
-  <public type="style" name="TextAppearance.Material.Notification.Info" />
-  <public type="style" name="TextAppearance.Material.Notification.Time" />
-  <public type="style" name="TextAppearance.Material.Notification.Emphasis" />
-
-  <public type="style" name="Widget.Material.Spinner.Underlined" />
-  <public type="style" name="Widget.Material.Light.Spinner.Underlined" />
-
-  <public type="style" name="TextAppearance.Material.Widget.Toolbar.Title" />
-  <public type="style" name="TextAppearance.Material.Widget.Toolbar.Subtitle" />
-
-  <public type="style" name="Theme.Material.Dialog.Alert" />
-  <public type="style" name="Theme.Material.Dialog.Presentation" />
-  <public type="style" name="Theme.Material.Light.Dialog.Alert" />
-  <public type="style" name="Theme.Material.Light.Dialog.Presentation" />
-
-  <public type="style" name="Widget.Material.SearchView" />
-  <public type="style" name="Widget.Material.Light.SearchView" />
-  <public type="style" name="Widget.Material.TimePicker" />
-  <public type="style" name="Widget.Material.Light.TimePicker" />
-  <public type="style" name="Widget.Material.Light.DatePicker" />
-
-  <public-padding type="string" name="l_resource_pad" end="0x01040030" />
 
   <public type="string" name="config_webSettingsDefaultTextEncoding" />
 
-  <public-padding type="array" name="l_resource_pad" end="0x01070020" />
-
   <public type="array" name="config_keySystemUuidMapping" />
-
-  <public-padding type="interpolator" name="l_resource_pad" end="0x010c0010" />
 
   <!-- An interpolator which accelerates fast but decelerates slowly. -->
   <public type="interpolator" name="fast_out_slow_in" />
