@@ -651,7 +651,7 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     void sendCecCommand(HdmiCecMessage command, @Nullable SendMessageCallback callback) {
         assertRunOnServiceThread();
-        if (mMessageValidator.isValid(command)) {
+        if (mMessageValidator.isValid(command) == HdmiCecMessageValidator.OK) {
             mCecController.sendCommand(command, callback);
         } else {
             HdmiLogger.error("Invalid message type:" + command);
@@ -682,8 +682,13 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     boolean handleCecCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        if (!mMessageValidator.isValid(message)) {
-            return false;
+        int errorCode = mMessageValidator.isValid(message);
+        if (errorCode != HdmiCecMessageValidator.OK) {
+            // We'll not response on the messages with the invalid source or destination.
+            if (errorCode == HdmiCecMessageValidator.ERROR_PARAMETER) {
+                maySendFeatureAbortCommand(message, Constants.ABORT_INVALID_OPERAND);
+            }
+            return true;
         }
         return dispatchMessageToLocalDevice(message);
     }

@@ -25,6 +25,11 @@ import android.util.SparseArray;
 public final class HdmiCecMessageValidator {
     private static final String TAG = "HdmiCecMessageValidator";
 
+    static final int OK = 0;
+    static final int ERROR_SOURCE = 1;
+    static final int ERROR_DESTINATION = 2;
+    static final int ERROR_PARAMETER = 3;
+
     private final HdmiControlService mService;
 
     interface ParameterValidator {
@@ -178,39 +183,39 @@ public final class HdmiCecMessageValidator {
         mValidationInfo.append(opcode, new ValidationInfo(validator, addrType));
     }
 
-    boolean isValid(HdmiCecMessage message) {
+    int isValid(HdmiCecMessage message) {
         int opcode = message.getOpcode();
         ValidationInfo info = mValidationInfo.get(opcode);
         if (info == null) {
             HdmiLogger.warning("No validation information for the message: " + message);
-            return true;
+            return OK;
         }
 
         // Check the source field.
         if (message.getSource() == Constants.ADDR_UNREGISTERED &&
                 (info.addressType & SRC_UNREGISTERED) == 0) {
             HdmiLogger.warning("Unexpected source: " + message);
-            return false;
+            return ERROR_SOURCE;
         }
         // Check the destination field.
         if (message.getDestination() == Constants.ADDR_BROADCAST) {
             if ((info.addressType & DEST_BROADCAST) == 0) {
                 HdmiLogger.warning("Unexpected broadcast message: " + message);
-                return false;
+                return ERROR_DESTINATION;
             }
         } else {  // Direct addressing.
             if ((info.addressType & DEST_DIRECT) == 0) {
                 HdmiLogger.warning("Unexpected direct message: " + message);
-                return false;
+                return ERROR_DESTINATION;
             }
         }
 
         // Check the parameter type.
         if (!info.parameterValidator.isValid(message.getParams())) {
             HdmiLogger.warning("Unexpected parameters: " + message);
-            return false;
+            return ERROR_PARAMETER;
         }
-        return true;
+        return OK;
     }
 
     private static class FixedLengthValidator implements ParameterValidator {
