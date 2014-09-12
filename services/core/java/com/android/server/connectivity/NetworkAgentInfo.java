@@ -43,11 +43,15 @@ public class NetworkAgentInfo {
     public Network network;
     public LinkProperties linkProperties;
     public NetworkCapabilities networkCapabilities;
-    public int currentScore;
     public final NetworkMonitor networkMonitor;
     public final NetworkMisc networkMisc;
     public boolean created;
     public boolean validated;
+
+    // This represents the last score received from the NetworkAgent.
+    private int currentScore;
+    // Penalty applied to scores of Networks that have not been validated.
+    private static final int UNVALIDATED_SCORE_PENALTY = 40;
 
     // The list of NetworkRequests being satisfied by this Network.
     public final SparseArray<NetworkRequest> networkRequests = new SparseArray<NetworkRequest>();
@@ -80,11 +84,33 @@ public class NetworkAgentInfo {
         return networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN);
     }
 
+    // Get the current score for this Network.  This may be modified from what the
+    // NetworkAgent sent, as it has modifiers applied to it.
+    public int getCurrentScore() {
+        // TODO: We may want to refactor this into a NetworkScore class that takes a base score from
+        // the NetworkAgent and signals from the NetworkAgent and uses those signals to modify the
+        // score.  The NetworkScore class would provide a nice place to centralize score constants
+        // so they are not scattered about the transports.
+
+        int score = currentScore;
+
+        if (!validated) score -= UNVALIDATED_SCORE_PENALTY;
+
+        if (score < 0) score = 0;
+
+        return score;
+    }
+
+    public void setCurrentScore(int newScore) {
+        currentScore = newScore;
+    }
+
     public String toString() {
         return "NetworkAgentInfo{ ni{" + networkInfo + "}  network{" +
                 network + "}  lp{" +
                 linkProperties + "}  nc{" +
-                networkCapabilities + "}  Score{" + currentScore + "} }";
+                networkCapabilities + "}  Score{" + getCurrentScore() + "} " +
+                "validated{" + validated + "} created{" + created + "} }";
     }
 
     public String name() {
