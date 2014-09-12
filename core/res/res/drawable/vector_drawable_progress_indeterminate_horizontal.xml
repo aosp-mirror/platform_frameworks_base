@@ -26,11 +26,11 @@
         android:translateY="5" >
         <group android:name="v21_pivot" >
             <group
-                android:name="rectangle_path_1_position"
-                android:alpha="0.1" >
+                android:name="rectangle_path_1_position">
                 <path
                     android:name="rectangle_path_1"
                     android:fillColor="?attr/colorControlActivated"
+                    android:fillAlpha="0.1"
                     android:pathData="M -180.0 -1.0 l 360 0 l 0 2 l -360 0 Z" />
             </group>
             <group
