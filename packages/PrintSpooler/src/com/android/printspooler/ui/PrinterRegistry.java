@@ -26,6 +26,7 @@ import android.os.Message;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
 import com.android.internal.os.SomeArgs;
+import com.android.printspooler.model.PrintSpoolerService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,23 +69,40 @@ public class PrinterRegistry {
     }
 
     public void addHistoricalPrinter(PrinterInfo printer) {
-        getPrinterProvider().addHistoricalPrinter(printer);
+        FusedPrintersProvider provider = getPrinterProvider();
+        if (provider != null) {
+            getPrinterProvider().addHistoricalPrinter(printer);
+        }
     }
 
     public void forgetFavoritePrinter(PrinterId printerId) {
-        getPrinterProvider().forgetFavoritePrinter(printerId);
+        FusedPrintersProvider provider = getPrinterProvider();
+        if (provider != null) {
+            provider.forgetFavoritePrinter(printerId);
+        }
     }
 
     public boolean isFavoritePrinter(PrinterId printerId) {
-        return getPrinterProvider().isFavoritePrinter(printerId);
+        FusedPrintersProvider provider = getPrinterProvider();
+        if (provider != null) {
+            return provider.isFavoritePrinter(printerId);
+        }
+        return false;
     }
 
     public void setTrackedPrinter(PrinterId printerId) {
-        getPrinterProvider().setTrackedPrinter(printerId);
+        FusedPrintersProvider provider = getPrinterProvider();
+        if (provider != null) {
+            provider.setTrackedPrinter(printerId);
+        }
     }
 
     public boolean areHistoricalPrintersLoaded() {
-        return getPrinterProvider().areHistoricalPrintersLoaded();
+        FusedPrintersProvider provider = getPrinterProvider();
+        if (provider != null) {
+            return getPrinterProvider().areHistoricalPrintersLoaded();
+        }
+        return false;
     }
 
     private FusedPrintersProvider getPrinterProvider() {
