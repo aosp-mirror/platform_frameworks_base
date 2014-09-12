@@ -1926,110 +1926,75 @@ static String16 getAttributeComment(const sp<AaptAssets>& assets,
     return String16();
 }
 
-static void writeResourceLoadedCallback(FILE* fp, int indent) {
-    IndentPrinter p(fp, 4);
-    p.indent(indent);
-    p.println("private static void rewriteIntArrayField(java.lang.reflect.Field field, int packageId) throws IllegalAccessException {");
-    {
-        p.indent();
-        p.println("int requiredModifiers = java.lang.reflect.Modifier.STATIC | java.lang.reflect.Modifier.PUBLIC;");
-        p.println("if ((field.getModifiers() & requiredModifiers) != requiredModifiers) {");
-        {
-            p.indent();
-            p.println("throw new IllegalArgumentException(\"Field \" + field.getName() + \" is not rewritable\");");
-            p.indent(-1);
-        }
-        p.println("}");
-        p.println("if (field.getType() != int[].class) {");
-        {
-            p.indent();
-            p.println("throw new IllegalArgumentException(\"Field \" + field.getName() + \" is not an int array\");");
-            p.indent(-1);
-        }
-        p.println("}");
-        p.println("int[] array = (int[]) field.get(null);");
-        p.println("for (int i = 0; i < array.length; i++) {");
-        {
-            p.indent();
-            p.println("array[i] = (array[i] & 0x00ffffff) | (packageId << 24);");
-            p.indent(-1);
-        }
-        p.println("}");
-        p.indent(-1);
+static status_t writeResourceLoadedCallbackForLayoutClasses(
+    FILE* fp, const sp<AaptAssets>& assets,
+    const sp<AaptSymbols>& symbols, int indent, bool includePrivate)
+{
+    String16 attr16("attr");
+    String16 package16(assets->getPackage());
+
+    const char* indentStr = getIndentSpace(indent);
+    bool hasErrors = false;
+
+    size_t i;
+    size_t N = symbols->getNestedSymbols().size();
+    for (i=0; i<N; i++) {
+        sp<AaptSymbols> nsymbols = symbols->getNestedSymbols().valueAt(i);
+        String8 realClassName(symbols->getNestedSymbols().keyAt(i));
+        String8 nclassName(flattenSymbol(realClassName));
+
+        fprintf(fp,
+                "%sfor(int i = 0; i < styleable.%s.length; ++i) {\n"
+                "%sstyleable.%s[i] = (styleable.%s[i] & 0x00ffffff) | (packageId << 24);\n"
+                "%s}\n",
+                indentStr, nclassName.string(),
+                getIndentSpace(indent+1), nclassName.string(), nclassName.string(),
+                indentStr);
     }
-    p.println("}");
-    p.println();
-    p.println("private static void rewriteIntField(java.lang.reflect.Field field, int packageId) throws IllegalAccessException {");
-    {
-        p.indent();
-        p.println("int requiredModifiers = java.lang.reflect.Modifier.STATIC | java.lang.reflect.Modifier.PUBLIC;");
-        p.println("int bannedModifiers = java.lang.reflect.Modifier.FINAL;");
-        p.println("int mod = field.getModifiers();");
-        p.println("if ((mod & requiredModifiers) != requiredModifiers || (mod & bannedModifiers) != 0) {");
-        {
-            p.indent();
-            p.println("throw new IllegalArgumentException(\"Field \" + field.getName() + \" is not rewritable\");");
-            p.indent(-1);
+
+    return hasErrors ? UNKNOWN_ERROR : NO_ERROR;
+}
+
+static status_t writeResourceLoadedCallback(
+    FILE* fp, const sp<AaptAssets>& assets, bool includePrivate,
+    const sp<AaptSymbols>& symbols, const String8& className, int indent)
+{
+    size_t i;
+    status_t err = NO_ERROR;
+
+    size_t N = symbols->getSymbols().size();
+    for (i=0; i<N; i++) {
+        const AaptSymbolEntry& sym = symbols->getSymbols().valueAt(i);
+        if (sym.typeCode == AaptSymbolEntry::TYPE_UNKNOWN) {
+            continue;
         }
-        p.println("}");
-        p.println("if (field.getType() != int.class && field.getType() != Integer.class) {");
-        {
-            p.indent();
-            p.println("throw new IllegalArgumentException(\"Field \" + field.getName() + \" is not an int\");");
-            p.indent(-1);
+        if (!assets->isJavaSymbol(sym, includePrivate)) {
+            continue;
         }
-        p.println("}");
-        p.println("int resId = field.getInt(null);");
-        p.println("field.setInt(null, (resId & 0x00ffffff) | (packageId << 24));");
-        p.indent(-1);
+        String8 flat_name(flattenSymbol(sym.name));
+        fprintf(fp,
+                "%s%s.%s = (%s.%s & 0x00ffffff) | (packageId << 24);\n",
+                getIndentSpace(indent), className.string(), flat_name.string(),
+                className.string(), flat_name.string());
     }
-    p.println("}");
-    p.println();
-    p.println("public static void onResourcesLoaded(int assignedPackageId) throws Exception {");
-    {
-        p.indent();
-        p.println("Class<?>[] declaredClasses = R.class.getDeclaredClasses();");
-        p.println("for (Class<?> clazz : declaredClasses) {");
-        {
-            p.indent();
-            p.println("if (clazz.getSimpleName().equals(\"styleable\")) {");
-            {
-                p.indent();
-                p.println("for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {");
-                {
-                    p.indent();
-                    p.println("if (field.getType() == int[].class) {");
-                    {
-                        p.indent();
-                        p.println("rewriteIntArrayField(field, assignedPackageId);");
-                        p.indent(-1);
-                    }
-                    p.println("}");
-                    p.indent(-1);
-                }
-                p.println("}");
-                p.indent(-1);
-            }
-            p.println("} else {");
-            {
-                p.indent();
-                p.println("for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {");
-                {
-                    p.indent();
-                    p.println("rewriteIntField(field, assignedPackageId);");
-                    p.indent(-1);
-                }
-                p.println("}");
-                p.indent(-1);
-            }
-            p.println("}");
-            p.indent(-1);
+
+    N = symbols->getNestedSymbols().size();
+    for (i=0; i<N; i++) {
+        sp<AaptSymbols> nsymbols = symbols->getNestedSymbols().valueAt(i);
+        String8 nclassName(symbols->getNestedSymbols().keyAt(i));
+        if (nclassName == "styleable") {
+            err = writeResourceLoadedCallbackForLayoutClasses(
+                    fp, assets, nsymbols, indent, includePrivate);
+        } else {
+            err = writeResourceLoadedCallback(fp, assets, includePrivate, nsymbols,
+                    nclassName, indent);
         }
-        p.println("}");
-        p.indent(-1);
+        if (err != NO_ERROR) {
+            return err;
+        }
     }
-    p.println("}");
-    p.println();
+
+    return NO_ERROR;
 }
 
 static status_t writeLayoutClasses(
@@ -2485,7 +2450,10 @@ static status_t writeSymbolClass(
     }
 
     if (emitCallback) {
-        writeResourceLoadedCallback(fp, indent);
+        fprintf(fp, "%spublic static void onResourcesLoaded(int packageId) {\n",
+                getIndentSpace(indent));
+        writeResourceLoadedCallback(fp, assets, includePrivate, symbols, className, indent + 1);
+        fprintf(fp, "%s}\n", getIndentSpace(indent));
     }
 
     indent--;

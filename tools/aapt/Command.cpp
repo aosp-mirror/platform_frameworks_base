@@ -2383,7 +2383,8 @@ int doPackage(Bundle* bundle)
             char* packageString = strtok(libs.lockBuffer(libs.length()), ":");
             while (packageString != NULL) {
                 // Write the R.java file out with the correct package name
-                err = writeResourceSymbols(bundle, assets, String8(packageString), true, false);
+                err = writeResourceSymbols(bundle, assets, String8(packageString), true,
+                        bundle->getBuildSharedLibrary());
                 if (err < 0) {
                     goto bail;
                 }
