@@ -435,19 +435,32 @@ public:
         std::vector<float> lengths;
         float errorSquared = acceptableError * acceptableError;
 
-        while ((verb = pathIter.next(points)) != SkPath::kDone_Verb) {
+        while ((verb = pathIter.next(points, false)) != SkPath::kDone_Verb) {
             createVerbSegments(verb, points, segmentPoints, lengths, errorSquared);
         }
 
         if (segmentPoints.empty()) {
-            return NULL;
+            int numVerbs = path->countVerbs();
+            if (numVerbs == 1) {
+                addMove(segmentPoints, lengths, path->getPoint(0));
+            } else {
+                // Invalid or empty path. Fall back to point(0,0)
+                addMove(segmentPoints, lengths, SkPoint());
+            }
+        }
+
+        float totalLength = lengths.back();
+        if (totalLength == 0) {
+            // Lone Move instructions should still be able to animate at the same value.
+            segmentPoints.push_back(segmentPoints.back());
+            lengths.push_back(1);
+            totalLength = 1;
         }
 
         size_t numPoints = segmentPoints.size();
         size_t approximationArraySize = numPoints * 3;
 
         float* approximation = new float[approximationArraySize];
-        float totalLength = lengths.back();
 
         int approximationIndex = 0;
         for (size_t i = 0; i < numPoints; i++) {
