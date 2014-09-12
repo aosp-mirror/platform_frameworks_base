@@ -212,6 +212,8 @@ public class VpnService extends Service {
      *
      * @return {@code true} on success.
      * @see Builder#addAddress
+     *
+     * @hide
      */
     public boolean addAddress(InetAddress address, int prefixLength) {
         check(address, prefixLength);
@@ -240,6 +242,8 @@ public class VpnService extends Service {
      * @param prefixLength The prefix length of the address.
      *
      * @return {@code true} on success.
+     *
+     * @hide
      */
     public boolean removeAddress(InetAddress address, int prefixLength) {
         check(address, prefixLength);
