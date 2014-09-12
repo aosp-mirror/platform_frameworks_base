@@ -37,6 +37,8 @@ import javax.net.SocketFactory;
 
 import com.android.okhttp.ConnectionPool;
 import com.android.okhttp.HostResolver;
+import com.android.okhttp.HttpHandler;
+import com.android.okhttp.HttpsHandler;
 import com.android.okhttp.OkHttpClient;
 
 /**
@@ -58,7 +60,10 @@ public class Network implements Parcelable {
     // Objects used to perform per-network operations such as getSocketFactory
     // and openConnection, and a lock to protect access to them.
     private volatile NetworkBoundSocketFactory mNetworkBoundSocketFactory = null;
-    private volatile OkHttpClient mOkHttpClient = null;
+    // mLock should be used to control write access to mConnectionPool and mHostResolver.
+    // maybeInitHttpClient() must be called prior to reading either variable.
+    private volatile ConnectionPool mConnectionPool = null;
+    private volatile HostResolver mHostResolver = null;
     private Object mLock = new Object();
 
     // Default connection pool values. These are evaluated at startup, just
@@ -195,37 +200,34 @@ public class Network implements Parcelable {
         return mNetworkBoundSocketFactory;
     }
 
-    // TODO: This creates an OkHttpClient with its own connection pool for
+    // TODO: This creates a connection pool and host resolver for
     // every Network object, instead of one for every NetId. This is
     // suboptimal, because an app could potentially have more than one
     // Network object for the same NetId, causing increased memory footprint
     // and performance penalties due to lack of connection reuse (connection
     // setup time, congestion window growth time, etc.).
     //
-    // Instead, investigate only having one OkHttpClient for every NetId,
-    // perhaps by using a static HashMap of NetIds to OkHttpClient objects. The
-    // tricky part is deciding when to remove an OkHttpClient; a WeakHashMap
-    // shouldn't be used because whether a Network is referenced doesn't
-    // correlate with whether a new Network will be instantiated in the near
-    // future with the same NetID. A good solution would involve purging empty
-    // (or when all connections are timed out) ConnectionPools.
+    // Instead, investigate only having one connection pool and host resolver
+    // for every NetId, perhaps by using a static HashMap of NetIds to
+    // connection pools and host resolvers. The tricky part is deciding when
+    // to remove a map entry; a WeakHashMap shouldn't be used because whether
+    // a Network is referenced doesn't correlate with whether a new Network
+    // will be instantiated in the near future with the same NetID. A good
+    // solution would involve purging empty (or when all connections are timed
+    // out) ConnectionPools.
     private void maybeInitHttpClient() {
-        if (mOkHttpClient == null) {
-            synchronized (mLock) {
-                if (mOkHttpClient == null) {
-                    HostResolver hostResolver = new HostResolver() {
-                        @Override
-                        public InetAddress[] getAllByName(String host) throws UnknownHostException {
-                            return Network.this.getAllByName(host);
-                        }
-                    };
-                    ConnectionPool pool = new ConnectionPool(httpMaxConnections,
-                                                             httpKeepAliveDurationMs);
-                    mOkHttpClient = new OkHttpClient()
-                            .setSocketFactory(getSocketFactory())
-                            .setHostResolver(hostResolver)
-                            .setConnectionPool(pool);
-                }
+        synchronized (mLock) {
+            if (mHostResolver == null) {
+                mHostResolver = new HostResolver() {
+                    @Override
+                    public InetAddress[] getAllByName(String host) throws UnknownHostException {
+                        return Network.this.getAllByName(host);
+                    }
+                };
+            }
+            if (mConnectionPool == null) {
+                mConnectionPool = new ConnectionPool(httpMaxConnections,
+                        httpKeepAliveDurationMs);
             }
         }
     }
@@ -242,13 +244,23 @@ public class Network implements Parcelable {
     public URLConnection openConnection(URL url) throws IOException {
         maybeInitHttpClient();
         String protocol = url.getProtocol();
-        URLStreamHandler handler = mOkHttpClient.createURLStreamHandler(protocol);
-        if (handler == null) {
+        OkHttpClient client;
+        // TODO: HttpHandler creates OkHttpClients that share the default ResponseCache.
+        // Could this cause unexpected behavior?
+        // TODO: Should the network's proxy be specified?
+        if (protocol.equals("http")) {
+            client = HttpHandler.createHttpOkHttpClient(null /* proxy */);
+        } else if (protocol.equals("https")) {
+            client = HttpsHandler.createHttpsOkHttpClient(null /* proxy */);
+        } else {
             // OkHttpClient only supports HTTP and HTTPS and returns a null URLStreamHandler if
             // passed another protocol.
             throw new MalformedURLException("Invalid URL or unrecognized protocol " + protocol);
         }
-        return new URL(url, "", handler).openConnection();
+        return client.setSocketFactory(getSocketFactory())
+                .setHostResolver(mHostResolver)
+                .setConnectionPool(mConnectionPool)
+                .open(url);
     }
 
     /**
