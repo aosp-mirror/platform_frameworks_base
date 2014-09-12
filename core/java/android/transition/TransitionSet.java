@@ -390,7 +390,20 @@ public class TransitionSet extends Transition {
             ArrayList<TransitionValues> endValuesList) {
         startValues = removeExcludes(startValues);
         endValues = removeExcludes(endValues);
-        for (Transition childTransition : mTransitions) {
+        long startDelay = getStartDelay();
+        int numTransitions = mTransitions.size();
+        for (int i = 0; i < numTransitions; i++) {
+            Transition childTransition = mTransitions.get(i);
+            // We only set the start delay on the first transition if we are playing
+            // the transitions sequentially.
+            if (startDelay > 0 && (mPlayTogether || i == 0)) {
+                long childStartDelay = childTransition.getStartDelay();
+                if (childStartDelay > 0) {
+                    childTransition.setStartDelay(startDelay + childStartDelay);
+                } else {
+                    childTransition.setStartDelay(startDelay);
+                }
+            }
             childTransition.createAnimators(sceneRoot, startValues, endValues, startValuesList,
                     endValuesList);
         }
