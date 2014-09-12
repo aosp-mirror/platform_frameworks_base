@@ -1,19 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!--
+Copyright (C) 2014 The Android Open Source Project
 
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
+   Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-          http://www.apache.org/licenses/LICENSE-2.0
+         http://www.apache.org/licenses/LICENSE-2.0
 
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 -->
-
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/ic_menu_share_mtrl_alpha"
-    android:tint="?attr/colorControlNormal" />
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="24.0"
+        android:viewportHeight="24.0"
+        android:tint="?attr/colorControlNormal">
+    <path
+        android:pathData="M18.000000,16.100000c-0.800000,0.000000 -1.500000,0.300000 -2.000000,0.800000l-7.100000,-4.200000C9.000000,12.500000 9.000000,12.200000 9.000000,12.000000s0.000000,-0.500000 -0.100000,-0.700000L16.000000,7.200000C16.500000,7.700000 17.200001,8.000000 18.000000,8.000000c1.700000,0.000000 3.000000,-1.300000 3.000000,-3.000000s-1.300000,-3.000000 -3.000000,-3.000000s-3.000000,1.300000 -3.000000,3.000000c0.000000,0.200000 0.000000,0.500000 0.100000,0.700000L8.000000,9.800000C7.500000,9.300000 6.800000,9.000000 6.000000,9.000000c-1.700000,0.000000 -2.900000,1.200000 -2.900000,2.900000s1.300000,3.000000 3.000000,3.000000c0.800000,0.000000 1.500000,-0.300000 2.000000,-0.800000l7.100000,4.200000c-0.100000,0.300000 -0.100000,0.500000 -0.100000,0.700000c0.000000,1.600000 1.300000,2.900000 2.900000,2.900000s2.900000,-1.300000 2.900000,-2.900000S19.600000,16.100000 18.000000,16.100000z"
+        android:fillColor="@color/white"/>
+</vector>

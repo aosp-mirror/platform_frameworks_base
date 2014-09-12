@@ -216,7 +216,7 @@ public class VectorDrawable extends Drawable {
         }
 
         mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
-        mVectorState.mVPathRenderer.setColorFilter(mTintFilter);
+        state.setColorFilter(mTintFilter);
     }
 
     @Override
@@ -302,7 +302,7 @@ public class VectorDrawable extends Drawable {
             colorFilter = mTintFilter;
         }
 
-        state.mVPathRenderer.setColorFilter(colorFilter);
+        state.setColorFilter(colorFilter);
         invalidateSelf();
     }
 
@@ -312,7 +312,7 @@ public class VectorDrawable extends Drawable {
         if (state.mTint != tint) {
             state.mTint = tint;
             mTintFilter = updateTintFilter(mTintFilter, tint, state.mTintMode);
-            state.mVPathRenderer.setColorFilter(mTintFilter);
+            state.setColorFilter(mTintFilter);
             invalidateSelf();
         }
     }
@@ -323,9 +323,15 @@ public class VectorDrawable extends Drawable {
         if (state.mTintMode != tintMode) {
             state.mTintMode = tintMode;
             mTintFilter = updateTintFilter(mTintFilter, state.mTint, tintMode);
-            state.mVPathRenderer.setColorFilter(mTintFilter);
+            state.setColorFilter(mTintFilter);
             invalidateSelf();
         }
+    }
+
+    @Override
+    public boolean isStateful() {
+        return super.isStateful() || (mVectorState != null && mVectorState.mTint != null
+                && mVectorState.mTint.isStateful());
     }
 
     @Override
@@ -333,7 +339,8 @@ public class VectorDrawable extends Drawable {
         final VectorDrawableState state = mVectorState;
         if (state.mTint != null && state.mTintMode != null) {
             mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
-            mVectorState.mVPathRenderer.setColorFilter(mTintFilter);
+            state.setColorFilter(mTintFilter);
+            invalidateSelf();
             return true;
         }
         return false;
@@ -364,6 +371,21 @@ public class VectorDrawable extends Drawable {
         super.applyTheme(t);
 
         final VectorDrawableState state = mVectorState;
+        if (state != null && state.mThemeAttrs != null) {
+            final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.VectorDrawable);
+            try {
+                state.mCacheDirty = true;
+                updateStateFromTypedArray(a);
+            } catch (XmlPullParserException e) {
+                throw new RuntimeException(e);
+            } finally {
+                a.recycle();
+            }
+
+            mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+            state.setColorFilter(mTintFilter);
+        }
+
         final VPathRenderer path = state.mVPathRenderer;
         if (path != null && path.canApplyTheme()) {
             path.applyTheme(t);
@@ -433,7 +455,7 @@ public class VectorDrawable extends Drawable {
         final VPathRenderer pathRenderer = new VPathRenderer();
         state.mVPathRenderer = pathRenderer;
 
-        TypedArray a = obtainAttributes(res, theme, attrs, R.styleable.VectorDrawable);
+        final TypedArray a = obtainAttributes(res, theme, attrs, R.styleable.VectorDrawable);
         updateStateFromTypedArray(a);
         a.recycle();
 
@@ -441,7 +463,7 @@ public class VectorDrawable extends Drawable {
         inflateInternal(res, parser, attrs, theme);
 
         mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
-        state.mVPathRenderer.setColorFilter(mTintFilter);
+        state.setColorFilter(mTintFilter);
     }
 
     private void updateStateFromTypedArray(TypedArray a) throws XmlPullParserException {
@@ -613,8 +635,8 @@ public class VectorDrawable extends Drawable {
         int[] mThemeAttrs;
         int mChangingConfigurations;
         VPathRenderer mVPathRenderer;
-        ColorStateList mTint;
-        Mode mTintMode;
+        ColorStateList mTint = null;
+        Mode mTintMode = DEFAULT_TINT_MODE;
         boolean mAutoMirrored;
 
         Bitmap mCachedBitmap;
@@ -669,6 +691,18 @@ public class VectorDrawable extends Drawable {
             mCachedRootAlpha = mVPathRenderer.getRootAlpha();
             mCachedAutoMirrored = mAutoMirrored;
             mCacheDirty = false;
+        }
+
+        @Override
+        public boolean canApplyTheme() {
+            return super.canApplyTheme() || mThemeAttrs != null
+                    || (mVPathRenderer != null && mVPathRenderer.canApplyTheme());
+        }
+
+        public void setColorFilter(ColorFilter colorFilter) {
+            if (mVPathRenderer != null && mVPathRenderer.setColorFilter(colorFilter)) {
+                mCacheDirty = true;
+            }
         }
 
         public VectorDrawableState() {
@@ -813,17 +847,21 @@ public class VectorDrawable extends Drawable {
             }
         }
 
-        public void setColorFilter(ColorFilter colorFilter) {
-            mColorFilter = colorFilter;
+        public boolean setColorFilter(ColorFilter colorFilter) {
+            if (colorFilter != mColorFilter
+                    || (colorFilter != null && !colorFilter.equals(mColorFilter))) {
+                mColorFilter = colorFilter;
 
-            if (mFillPaint != null) {
-                mFillPaint.setColorFilter(colorFilter);
+                if (mFillPaint != null) {
+                    mFillPaint.setColorFilter(colorFilter);
+                }
+
+                if (mStrokePaint != null) {
+                    mStrokePaint.setColorFilter(colorFilter);
+                }
+                return true;
             }
-
-            if (mStrokePaint != null) {
-                mStrokePaint.setColorFilter(colorFilter);
-            }
-
+            return false;
         }
 
         private void drawGroupTree(VGroup currentGroup, Matrix currentMatrix,
@@ -1011,10 +1049,6 @@ public class VectorDrawable extends Drawable {
             return mLocalMatrix;
         }
 
-        public boolean canApplyTheme() {
-            return mThemeAttrs != null;
-        }
-
         public void inflate(Resources res, AttributeSet attrs, Theme theme) {
             final TypedArray a = obtainAttributes(res, theme, attrs,
                     R.styleable.VectorDrawableGroup);
@@ -1045,13 +1079,16 @@ public class VectorDrawable extends Drawable {
             updateLocalMatrix();
         }
 
+        public boolean canApplyTheme() {
+            return mThemeAttrs != null;
+        }
+
         public void applyTheme(Theme t) {
             if (mThemeAttrs == null) {
                 return;
             }
 
-            final TypedArray a = t.resolveAttributes(mThemeAttrs,
-                    R.styleable.VectorDrawableGroup);
+            final TypedArray a = t.resolveAttributes(mThemeAttrs, R.styleable.VectorDrawableGroup);
             updateStateFromTypedArray(a);
             a.recycle();
         }
@@ -1375,8 +1412,7 @@ public class VectorDrawable extends Drawable {
                 return;
             }
 
-            final TypedArray a = t.resolveAttributes(mThemeAttrs,
-                    R.styleable.VectorDrawablePath);
+            final TypedArray a = t.resolveAttributes(mThemeAttrs, R.styleable.VectorDrawablePath);
             updateStateFromTypedArray(a);
             a.recycle();
         }

@@ -125,6 +125,8 @@ import java.util.Arrays;
 public abstract class Drawable {
     private static final Rect ZERO_BOUNDS_RECT = new Rect();
 
+    static final PorterDuff.Mode DEFAULT_TINT_MODE = PorterDuff.Mode.SRC_IN;
+
     private int[] mStateSet = StateSet.WILD_CARD;
     private int mLevel = 0;
     private int mChangingConfigurations = 0;
