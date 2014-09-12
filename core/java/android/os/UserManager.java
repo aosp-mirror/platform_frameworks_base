@@ -630,7 +630,13 @@ public class UserManager {
      * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
      */
     public boolean hasUserRestriction(String restrictionKey, UserHandle userHandle) {
-        return getUserRestrictions(userHandle).getBoolean(restrictionKey, false);
+        try {
+            return mService.hasUserRestriction(restrictionKey,
+                    userHandle.getIdentifier());
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not check user restrictions", re);
+            return false;
+        }
     }
 
     /**
