@@ -127,6 +127,7 @@ class AlarmManagerService extends SystemService {
     long mLastAlarmDeliveryTime;
     long mStartCurrentDelayTime;
     long mNextNonWakeupDeliveryTime;
+    int mNumTimeChanged;
 
     private final SparseArray<AlarmManager.AlarmClockInfo> mNextAlarmClockForUser =
             new SparseArray<>();
@@ -821,6 +822,7 @@ class AlarmManagerService extends SystemService {
                     pw.print(" = "); pw.println(sdf.format(new Date(nextNonWakeupRTC)));
             pw.print("Next wakeup: "); TimeUtils.formatDuration(mNextWakeup, nowELAPSED, pw);
                     pw.print(" = "); pw.println(sdf.format(new Date(nextWakeupRTC)));
+            pw.print("Num time change events: "); pw.println(mNumTimeChanged);
 
             if (mAlarmBatches.size() > 0) {
                 pw.println();
@@ -1619,6 +1621,9 @@ class AlarmManagerService extends SystemService {
                     removeImpl(mTimeTickSender);
                     rebatchAllAlarms();
                     mClockReceiver.scheduleTimeTickEvent();
+                    synchronized (mLock) {
+                        mNumTimeChanged++;
+                    }
                     Intent intent = new Intent(Intent.ACTION_TIME_CHANGED);
                     intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
                             | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
