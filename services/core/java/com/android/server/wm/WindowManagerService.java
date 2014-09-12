@@ -8509,7 +8509,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 layerChanged = true;
                 anyLayerChanged = true;
             }
-            if (layerChanged && w.getStack().isDimming(winAnimator)) {
+            final TaskStack stack = w.getStack();
+            if (layerChanged && stack != null && stack.isDimming(winAnimator)) {
                 // Force an animation pass just to update the mDimLayer layer.
                 scheduleAnimationLocked();
             }
@@ -9333,6 +9334,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 && !w.mExiting) {
             final WindowStateAnimator winAnimator = w.mWinAnimator;
             final TaskStack stack = w.getStack();
+            if (stack == null) {
+                return;
+            }
             stack.setDimmingTag();
             if (!stack.isDimming(winAnimator)) {
                 if (localLOGV) Slog.v(TAG, "Win " + w + " start dimming.");

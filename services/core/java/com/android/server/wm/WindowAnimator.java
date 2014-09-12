@@ -454,7 +454,10 @@ public class WindowAnimator {
                     }
                     final int color = winAnimator.mAnimation.getBackgroundColor();
                     if (color != 0) {
-                        win.getStack().setAnimationBackground(winAnimator, color);
+                        final TaskStack stack = win.getStack();
+                        if (stack != null) {
+                            stack.setAnimationBackground(winAnimator, color);
+                        }
                     }
                 }
                 mAnimating = true;
@@ -473,7 +476,10 @@ public class WindowAnimator {
 
                 final int color = appAnimator.animation.getBackgroundColor();
                 if (color != 0) {
-                    win.getStack().setAnimationBackground(winAnimator, color);
+                    final TaskStack stack = win.getStack();
+                    if (stack != null) {
+                        stack.setAnimationBackground(winAnimator, color);
+                    }
                 }
             }
         } // end forall windows
