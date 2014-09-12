@@ -347,6 +347,10 @@ public class TaskPersister {
     private static void removeObsoleteFiles(ArraySet<Integer> persistentTaskIds, File[] files) {
         if (DEBUG) Slog.d(TAG, "removeObsoleteFile: persistentTaskIds=" + persistentTaskIds +
                 " files=" + files);
+        if (files == null) {
+            Slog.e(TAG, "File error accessing recents directory (too many files open?).");
+            return;
+        }
         for (int fileNdx = 0; fileNdx < files.length; ++fileNdx) {
             File file = files[fileNdx];
             String filename = file.getName();
