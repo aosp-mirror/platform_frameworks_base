@@ -166,7 +166,7 @@ public class StackStateAnimator {
         boolean hasDelays = mAnimationFilter.hasDelays;
         boolean isDelayRelevant = yTranslationChanging || zTranslationChanging || scaleChanging ||
                 alphaChanging || heightChanging || topInsetChanging;
-        boolean noAnimation = wasAdded && !mAnimationFilter.hasGoToFullShadeEvent;
+        boolean noAnimation = wasAdded;
         long delay = 0;
         long duration = mCurrentLength;
         if (hasDelays && isDelayRelevant || wasAdded) {
@@ -184,7 +184,7 @@ public class StackStateAnimator {
 
         // start translationY animation
         if (yTranslationChanging) {
-            if (noAnimation) {
+            if (noAnimation && !mAnimationFilter.hasGoToFullShadeEvent) {
                 child.setTranslationY(viewState.yTranslation);
             } else {
                 startYTranslationAnimation(child, viewState, duration, delay);
