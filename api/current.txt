@@ -6392,7 +6392,6 @@ package android.bluetooth {
     method public void onCharacteristicChanged(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic);
     method public void onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int);
     method public void onCharacteristicWrite(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int);
-    method public void onConnectionCongested(android.bluetooth.BluetoothGatt, boolean);
     method public void onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int);
     method public void onDescriptorRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattDescriptor, int);
     method public void onDescriptorWrite(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattDescriptor, int);
@@ -6492,7 +6491,6 @@ package android.bluetooth {
     ctor public BluetoothGattServerCallback();
     method public void onCharacteristicReadRequest(android.bluetooth.BluetoothDevice, int, int, android.bluetooth.BluetoothGattCharacteristic);
     method public void onCharacteristicWriteRequest(android.bluetooth.BluetoothDevice, int, android.bluetooth.BluetoothGattCharacteristic, boolean, boolean, int, byte[]);
-    method public void onConnectionCongested(android.bluetooth.BluetoothDevice, boolean);
     method public void onConnectionStateChange(android.bluetooth.BluetoothDevice, int, int);
     method public void onDescriptorReadRequest(android.bluetooth.BluetoothDevice, int, int, android.bluetooth.BluetoothGattDescriptor);
     method public void onDescriptorWriteRequest(android.bluetooth.BluetoothDevice, int, android.bluetooth.BluetoothGattDescriptor, boolean, boolean, int, byte[]);
