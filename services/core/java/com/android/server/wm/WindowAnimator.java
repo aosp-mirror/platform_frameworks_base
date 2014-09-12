@@ -568,6 +568,15 @@ public class WindowAnimator {
                         mBulkUpdateParams |= SET_UPDATE_ROTATION;
                         screenRotationAnimation.kill();
                         displayAnimator.mScreenRotationAnimation = null;
+
+                        //TODO (multidisplay): Accessibility supported only for the default display.
+                        if (mService.mAccessibilityController != null
+                                && displayId == Display.DEFAULT_DISPLAY) {
+                            // We just finished rotation animation which means we did not
+                            // anounce the rotation and waited for it to end, announce now.
+                            mService.mAccessibilityController.onRotationChangedLocked(
+                                    mService.getDefaultDisplayContentLocked(), mService.mRotation);
+                        }
                     }
                 }
 

@@ -6442,9 +6442,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         //TODO (multidisplay): Magnification is supported only for the default display.
-        if (mAccessibilityController != null
+        // Announce rotation only if we will not animate as we already have the
+        // windows in final state. Otherwise, we make this call at the rotation end.
+        if (screenRotationAnimation == null && mAccessibilityController != null
                 && displayContent.getDisplayId() == Display.DEFAULT_DISPLAY) {
-            mAccessibilityController.onRotationChangedLocked(getDefaultDisplayContentLocked(), rotation);
+            mAccessibilityController.onRotationChangedLocked(getDefaultDisplayContentLocked(),
+                    rotation);
         }
 
         return true;
