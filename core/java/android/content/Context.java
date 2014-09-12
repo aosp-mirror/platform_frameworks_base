@@ -3062,6 +3062,14 @@ public abstract class Context {
      * "content://foo".  It will not remove any prefix grants that exist at a
      * higher level.
      *
+     * <p>Prior to {@link android.os.Build.VERSION_CODES#L}, if you did not have
+     * regular permission access to a Uri, but had received access to it through
+     * a specific Uri permission grant, you could not revoke that grant with this
+     * function and a {@link SecurityException} would be thrown.  As of
+     * {@link android.os.Build.VERSION_CODES#L}, this function will not throw a security exception,
+     * but will remove whatever permission grants to the Uri had been given to the app
+     * (or none).</p>
+     *
      * @param uri The Uri you would like to revoke access to.
      * @param modeFlags The desired access modes.  Any combination of
      * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION
