@@ -9,7 +9,6 @@ page.title=Making Recommendations
     <li><a href="#service">Create a Recommendations Service</a></li>
     <li><a href="#build">Build Recommendations</a></li>
     <li><a href="#run-service">Run Recommendations Service</a></li>
-    <li><a href="#DesignLandscapeLayouts">Design Landscape Layouts</a></li>
   </ol>
 
 </div>
