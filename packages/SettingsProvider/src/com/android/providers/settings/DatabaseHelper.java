@@ -70,7 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 111;
+    private static final int DATABASE_VERSION = 112;
 
     private Context mContext;
     private int mUserHandle;
@@ -1788,6 +1788,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 111;
         }
 
+        if (upgradeVersion < 112) {
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                // When device name was added, we went with Manufacturer + Model, device name should
+                // actually be Model only.
+                // Update device name to Model if it wasn't modified by user.
+                db.beginTransaction();
+                SQLiteStatement stmt = null;
+                try {
+                    stmt = db.compileStatement("UPDATE global SET value = ? "
+                        + " WHERE name = ? AND value = ?");
+                    stmt.bindString(1, getDefaultDeviceName()); // new default device name
+                    stmt.bindString(2, Settings.Global.DEVICE_NAME);
+                    stmt.bindString(3, getOldDefaultDeviceName()); // old default device name
+                    stmt.execute();
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                    if (stmt != null) stmt.close();
+                }
+            }
+            upgradeVersion = 112;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -2585,8 +2608,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return defaultValue;
     }
 
+    private String getOldDefaultDeviceName() {
+        return mContext.getResources().getString(R.string.def_device_name_old,
+                Build.MANUFACTURER, Build.MODEL);
+    }
+
     private String getDefaultDeviceName() {
-        return mContext.getResources().getString(R.string.def_device_name, Build.MANUFACTURER,
-                Build.MODEL);
+        return mContext.getResources().getString(R.string.def_device_name, Build.MODEL);
     }
 }
