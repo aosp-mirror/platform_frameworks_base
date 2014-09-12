@@ -54,10 +54,6 @@
 namespace android {
 namespace uirenderer {
 
-///////////////////////////////////////////////////////////////////////////////
-// Defines
-///////////////////////////////////////////////////////////////////////////////
-
 static GLenum getFilter(const SkPaint* paint) {
     if (!paint || paint->getFilterLevel() != SkPaint::kNone_FilterLevel) {
         return GL_LINEAR;
@@ -3044,21 +3040,35 @@ void OpenGLRenderer::resetPaintFilter() {
 }
 
 void OpenGLRenderer::setupPaintFilter(int clearBits, int setBits) {
+    // TODO: don't bother with boolean, it's redundant with clear/set bits
     mDrawModifiers.mHasDrawFilter = true;
     mDrawModifiers.mPaintFilterClearBits = clearBits & SkPaint::kAllFlags;
     mDrawModifiers.mPaintFilterSetBits = setBits & SkPaint::kAllFlags;
 }
 
 const SkPaint* OpenGLRenderer::filterPaint(const SkPaint* paint) {
+    // TODO: use CompatFlagsDrawFilter here, and combine logic with android/graphics/DrawFilter.cpp
+    // to avoid clobbering 0x02 paint flag
+
+    // Equivalent to the Java Paint's FILTER_BITMAP_FLAG.
+    static const uint32_t sFilterBitmapFlag = 0x02;
+
     if (CC_LIKELY(!mDrawModifiers.mHasDrawFilter || !paint)) {
         return paint;
     }
 
-    uint32_t flags = paint->getFlags();
+    const uint32_t clearBits = mDrawModifiers.mPaintFilterClearBits;
+    const uint32_t setBits = mDrawModifiers.mPaintFilterSetBits;
 
+    const uint32_t flags = (paint->getFlags() & ~clearBits) | setBits;
     mFilteredPaint = *paint;
-    mFilteredPaint.setFlags((flags & ~mDrawModifiers.mPaintFilterClearBits) |
-            mDrawModifiers.mPaintFilterSetBits);
+    mFilteredPaint.setFlags(flags);
+
+    // check if paint filter trying to override bitmap filter
+    if ((clearBits | setBits) & sFilterBitmapFlag) {
+        mFilteredPaint.setFilterLevel(flags & sFilterBitmapFlag
+                ? SkPaint::kLow_FilterLevel : SkPaint::kNone_FilterLevel);
+    }
 
     return &mFilteredPaint;
 }
