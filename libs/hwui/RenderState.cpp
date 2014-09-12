@@ -38,6 +38,7 @@ void RenderState::onGLContextCreated() {
 }
 
 void RenderState::onGLContextDestroyed() {
+/*
     AutoMutex _lock(mLayerLock);
     size_t size = mActiveLayers.size();
     if (CC_UNLIKELY(size != 0)) {
@@ -68,6 +69,7 @@ void RenderState::onGLContextDestroyed() {
         }
         LOG_ALWAYS_FATAL("%d layers have survived gl context destruction", size);
     }
+*/
 }
 
 void RenderState::setViewport(GLsizei width, GLsizei height) {
