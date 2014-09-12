@@ -1744,10 +1744,13 @@ void OpenGLRenderer::setupDrawProgram() {
         glUniform4f(mCaches.currentProgram->getUniform("roundRectInnerRectLTRB"),
                 innerRect.left, innerRect.top,
                 innerRect.right, innerRect.bottom);
-        glUniform1f(mCaches.currentProgram->getUniform("roundRectRadius"),
-                state->radius);
         glUniformMatrix4fv(mCaches.currentProgram->getUniform("roundRectInvTransform"),
                 1, GL_FALSE, &state->matrix.data[0]);
+
+        // add half pixel to round out integer rect space to cover pixel centers
+        float roundedOutRadius = state->radius + 0.5f;
+        glUniform1f(mCaches.currentProgram->getUniform("roundRectRadius"),
+                roundedOutRadius);
     }
 }
 
