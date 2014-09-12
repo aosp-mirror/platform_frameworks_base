@@ -690,11 +690,18 @@ public abstract class Transition implements Cloneable {
         for (int i = 0; i < startValuesListCount; ++i) {
             TransitionValues start = startValuesList.get(i);
             TransitionValues end = endValuesList.get(i);
-            // Only bother trying to animate with valid values that differ between start/end
-            boolean isInvalidStart = start != null && !isValidTarget(start.view);
-            boolean isInvalidEnd = end != null && !isValidTarget(end.view);
-            boolean isChanged = start != end && (start == null || !start.equals(end));
-            if (isChanged && !isInvalidStart && !isInvalidEnd) {
+            if (start != null && !start.targetedTransitions.contains(this)) {
+                start = null;
+            }
+            if (end != null && !end.targetedTransitions.contains(this)) {
+                end = null;
+            }
+            if (start == null && end == null) {
+                continue;
+            }
+            // Only bother trying to animate with values that differ between start/end
+            boolean isChanged = start == null || end == null || areValuesChanged(start, end);
+            if (isChanged) {
                 if (DBG) {
                     View view = (end != null) ? end.view : start.view;
                     Log.d(LOG_TAG, "  differing start/end values for view " + view);
@@ -1415,11 +1422,12 @@ public abstract class Transition implements Cloneable {
                     } else {
                         captureEndValues(values);
                     }
+                    values.targetedTransitions.add(this);
                     capturePropagationValues(values);
                     if (start) {
-                        addViewValues(mStartValues, view, values, true);
+                        addViewValues(mStartValues, view, values);
                     } else {
-                        addViewValues(mEndValues, view, values, true);
+                        addViewValues(mEndValues, view, values);
                     }
                 }
             }
@@ -1432,6 +1440,7 @@ public abstract class Transition implements Cloneable {
                 } else {
                     captureEndValues(values);
                 }
+                values.targetedTransitions.add(this);
                 capturePropagationValues(values);
                 if (start) {
                     mStartValues.viewValues.put(view, values);
@@ -1460,7 +1469,7 @@ public abstract class Transition implements Cloneable {
     }
 
     static void addViewValues(TransitionValuesMaps transitionValuesMaps,
-            View view, TransitionValues transitionValues, boolean setTransientState) {
+            View view, TransitionValues transitionValues) {
         transitionValuesMaps.viewValues.put(view, transitionValues);
         int id = view.getId();
         if (id >= 0) {
@@ -1489,15 +1498,11 @@ public abstract class Transition implements Cloneable {
                     // Duplicate item IDs: cannot match by item ID.
                     View alreadyMatched = transitionValuesMaps.itemIdValues.get(itemId);
                     if (alreadyMatched != null) {
-                        if (setTransientState) {
-                            alreadyMatched.setHasTransientState(false);
-                        }
+                        alreadyMatched.setHasTransientState(false);
                         transitionValuesMaps.itemIdValues.put(itemId, null);
                     }
                 } else {
-                    if (setTransientState) {
-                        view.setHasTransientState(true);
-                    }
+                    view.setHasTransientState(true);
                     transitionValuesMaps.itemIdValues.put(itemId, view);
                 }
             }
@@ -1562,11 +1567,12 @@ public abstract class Transition implements Cloneable {
             } else {
                 captureEndValues(values);
             }
+            values.targetedTransitions.add(this);
             capturePropagationValues(values);
             if (start) {
-                addViewValues(mStartValues, view, values, true);
+                addViewValues(mStartValues, view, values);
             } else {
-                addViewValues(mEndValues, view, values, true);
+                addViewValues(mEndValues, view, values);
             }
         }
         if (view instanceof ViewGroup) {
@@ -1731,8 +1737,10 @@ public abstract class Transition implements Cloneable {
                 if (oldInfo != null && oldInfo.view != null && oldInfo.windowId == windowId) {
                     TransitionValues oldValues = oldInfo.values;
                     View oldView = oldInfo.view;
-                    TransitionValues newValues = getMatchedTransitionValues(oldView, true);
-                    boolean cancel = oldInfo.transition.areValuesChanged(oldValues, newValues);
+                    TransitionValues startValues = getTransitionValues(oldView, true);
+                    TransitionValues endValues = getMatchedTransitionValues(oldView, true);
+                    boolean cancel = (startValues != null || endValues != null) &&
+                            oldInfo.transition.areValuesChanged(oldValues, endValues);
                     if (cancel) {
                         if (anim.isRunning() || anim.isStarted()) {
                             if (DBG) {
@@ -1784,7 +1792,17 @@ public abstract class Transition implements Cloneable {
             String key) {
         Object oldValue = oldValues.values.get(key);
         Object newValue = newValues.values.get(key);
-        boolean changed = (oldValue != null && newValue != null && !oldValue.equals(newValue));
+        boolean changed;
+        if (oldValue == null && newValue == null) {
+            // both are null
+            changed = false;
+        } else if (oldValue == null || newValue == null) {
+            // one is null
+            changed = true;
+        } else {
+            // neither is null
+            changed = !oldValue.equals(newValue);
+        }
         if (DBG && changed) {
             Log.d(LOG_TAG, "Transition.playTransition: " +
                     "oldValue != newValue for " + key +
