@@ -843,7 +843,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             }
             File file = new File(dir, WALLPAPER);
             ParcelFileDescriptor fd = ParcelFileDescriptor.open(file,
-                    MODE_CREATE|MODE_READ_WRITE);
+                    MODE_CREATE|MODE_READ_WRITE|MODE_TRUNCATE);
             if (!SELinux.restorecon(file)) {
                 return null;
             }
