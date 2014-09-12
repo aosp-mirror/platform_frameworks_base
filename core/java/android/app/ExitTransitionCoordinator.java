@@ -129,22 +129,25 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         showViews(mTransitioningViews, true);
         showViews(mSharedElements, true);
         mIsHidden = true;
-        if (!mIsReturning && getDecor() != null) {
-            getDecor().suppressLayout(false);
+        ViewGroup decorView = getDecor();
+        if (!mIsReturning && decorView != null) {
+            decorView.suppressLayout(false);
         }
         moveSharedElementsFromOverlay();
         clearState();
     }
 
     private void sharedElementExitBack() {
-        if (getDecor() != null) {
-            getDecor().suppressLayout(true);
+        final ViewGroup decorView = getDecor();
+        if (decorView != null) {
+            decorView.suppressLayout(true);
         }
-        if (mExitSharedElementBundle != null && !mExitSharedElementBundle.isEmpty() &&
+        if (decorView != null && mExitSharedElementBundle != null &&
+                !mExitSharedElementBundle.isEmpty() &&
                 !mSharedElements.isEmpty() && getSharedElementTransition() != null) {
             startTransition(new Runnable() {
                 public void run() {
-                    startSharedElementExit();
+                    startSharedElementExit(decorView);
                 }
             });
         } else {
@@ -152,7 +155,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         }
     }
 
-    private void startSharedElementExit() {
+    private void startSharedElementExit(final ViewGroup decorView) {
         Transition transition = getSharedElementExitTransition();
         transition.addListener(new Transition.TransitionListenerAdapter() {
             @Override
@@ -165,7 +168,6 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         });
         final ArrayList<View> sharedElementSnapshots = createSnapshots(mExitSharedElementBundle,
                 mSharedElementNames);
-        final View decorView = getDecor();
         decorView.getViewTreeObserver()
                 .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                     @Override
@@ -178,10 +180,10 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         setGhostVisibility(View.INVISIBLE);
         scheduleGhostVisibilityChange(View.INVISIBLE);
         mListener.onSharedElementEnd(mSharedElementNames, mSharedElements, sharedElementSnapshots);
-        TransitionManager.beginDelayedTransition(getDecor(), transition);
+        TransitionManager.beginDelayedTransition(decorView, transition);
         scheduleGhostVisibilityChange(View.VISIBLE);
         setGhostVisibility(View.VISIBLE);
-        getDecor().invalidate();
+        decorView.invalidate();
     }
 
     private void hideSharedElements() {
@@ -196,8 +198,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     public void startExit() {
         if (!mIsExitStarted) {
             mIsExitStarted = true;
-            if (getDecor() != null) {
-                getDecor().suppressLayout(true);
+            ViewGroup decorView = getDecor();
+            if (decorView != null) {
+                decorView.suppressLayout(true);
             }
             moveSharedElementsToOverlay();
             startTransition(new Runnable() {
@@ -212,8 +215,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     public void startExit(int resultCode, Intent data) {
         if (!mIsExitStarted) {
             mIsExitStarted = true;
-            if (getDecor() != null) {
-                getDecor().suppressLayout(true);
+            ViewGroup decorView = getDecor();
+            if (decorView != null) {
+                decorView.suppressLayout(true);
             }
             mHandler = new Handler() {
                 @Override
@@ -224,7 +228,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             };
             delayCancel();
             moveSharedElementsToOverlay();
-            if (getDecor().getBackground() == null) {
+            if (decorView != null && decorView.getBackground() == null) {
                 getWindow().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
             }
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(mActivity, this,
@@ -248,8 +252,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private void startExitTransition() {
         Transition transition = getExitTransition();
-        if (transition != null) {
-            TransitionManager.beginDelayedTransition(getDecor(), transition);
+        ViewGroup decorView = getDecor();
+        if (transition != null && decorView != null) {
+            TransitionManager.beginDelayedTransition(decorView, transition);
             mTransitioningViews.get(0).invalidate();
         } else {
             transitionStarted();
@@ -337,13 +342,14 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         Transition viewsTransition = getExitTransition();
 
         Transition transition = mergeTransitions(sharedElementTransition, viewsTransition);
-        if (transition != null) {
+        ViewGroup decorView = getDecor();
+        if (transition != null && decorView != null) {
             setGhostVisibility(View.INVISIBLE);
             scheduleGhostVisibilityChange(View.INVISIBLE);
-            TransitionManager.beginDelayedTransition(getDecor(), transition);
+            TransitionManager.beginDelayedTransition(decorView, transition);
             scheduleGhostVisibilityChange(View.VISIBLE);
             setGhostVisibility(View.VISIBLE);
-            getDecor().invalidate();
+            decorView.invalidate();
         } else {
             transitionStarted();
         }
@@ -392,8 +398,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 mExitNotified = true;
                 mResultReceiver.send(MSG_EXIT_TRANSITION_COMPLETE, null);
                 mResultReceiver = null; // done talking
-                if (!mIsReturning && getDecor() != null) {
-                    getDecor().suppressLayout(false);
+                ViewGroup decorView = getDecor();
+                if (!mIsReturning && decorView != null) {
+                    decorView.suppressLayout(false);
                 }
                 finishIfNecessary();
             }
