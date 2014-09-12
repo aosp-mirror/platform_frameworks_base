@@ -19,5 +19,9 @@
     <dimen name="text_size_title_material_toolbar">@dimen/text_size_title_material</dimen>
     <!-- Use the default subtitle sizes on tablets. -->
     <dimen name="text_size_subtitle_material_toolbar">@dimen/text_size_subhead_material</dimen>
+    <!-- Default height of an action bar. -->
+    <dimen name="action_bar_default_height_material">64dp</dimen>
+    <!-- Default padding of an action bar. -->
+    <dimen name="action_bar_default_padding_material">4dp</dimen>
 
 </resources>
