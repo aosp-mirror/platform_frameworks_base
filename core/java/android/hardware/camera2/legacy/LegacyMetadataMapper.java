@@ -165,6 +165,12 @@ public class LegacyMetadataMapper {
 
     private static void mapCharacteristicsFromParameters(CameraMetadataNative m,
             Camera.Parameters p) {
+
+        /*
+         * colorCorrection.*
+         */
+        m.set(COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES,
+                new int[] { COLOR_CORRECTION_ABERRATION_MODE_FAST });
         /*
          * control.ae*
          */
@@ -194,6 +200,12 @@ public class LegacyMetadataMapper {
          * jpeg.*
          */
         mapJpeg(m, p);
+
+        /*
+         * noiseReduction.*
+         */
+        m.set(NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES,
+                new int[] { NOISE_REDUCTION_MODE_FAST });
 
         /*
          * scaler.*
@@ -626,6 +638,7 @@ public class LegacyMetadataMapper {
             // Note: We only list public keys. Native HALs should list ALL keys regardless of visibility.
 
             Key<?> availableKeys[] = new Key<?>[] {
+                    CameraCharacteristics.COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES     ,
                     CameraCharacteristics.CONTROL_AE_AVAILABLE_ANTIBANDING_MODES          ,
                     CameraCharacteristics.CONTROL_AE_AVAILABLE_MODES                      ,
                     CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES          ,
@@ -642,6 +655,7 @@ public class LegacyMetadataMapper {
                     CameraCharacteristics.JPEG_AVAILABLE_THUMBNAIL_SIZES                  ,
                     CameraCharacteristics.LENS_FACING                                     ,
                     CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS               ,
+                    CameraCharacteristics.NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES ,
                     CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES                  ,
                     CameraCharacteristics.REQUEST_MAX_NUM_OUTPUT_STREAMS                  ,
                     CameraCharacteristics.REQUEST_PARTIAL_RESULT_COUNT                    ,
@@ -653,6 +667,7 @@ public class LegacyMetadataMapper {
                     CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE                   ,
                     CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE                       ,
                     CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE                    ,
+                    CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE                    ,
                     CameraCharacteristics.SENSOR_ORIENTATION                              ,
                     CameraCharacteristics.STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES     ,
                     CameraCharacteristics.STATISTICS_INFO_MAX_FACE_COUNT                  ,
@@ -676,6 +691,7 @@ public class LegacyMetadataMapper {
          */
         {
             CaptureRequest.Key<?> defaultAvailableKeys[] = new CaptureRequest.Key<?>[] {
+                    CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE,
                     CaptureRequest.CONTROL_AE_ANTIBANDING_MODE,
                     CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION,
                     CaptureRequest.CONTROL_AE_LOCK,
@@ -699,6 +715,7 @@ public class LegacyMetadataMapper {
                     CaptureRequest.JPEG_THUMBNAIL_QUALITY,
                     CaptureRequest.JPEG_THUMBNAIL_SIZE,
                     CaptureRequest.LENS_FOCAL_LENGTH,
+                    CaptureRequest.NOISE_REDUCTION_MODE,
                     CaptureRequest.SCALER_CROP_REGION,
                     CaptureRequest.STATISTICS_FACE_DETECT_MODE,
             };
@@ -723,6 +740,7 @@ public class LegacyMetadataMapper {
          */
         {
             CaptureResult.Key<?> defaultAvailableKeys[] = new CaptureResult.Key<?>[] {
+                    CaptureResult.COLOR_CORRECTION_ABERRATION_MODE                 ,
                     CaptureResult.CONTROL_AE_ANTIBANDING_MODE                      ,
                     CaptureResult.CONTROL_AE_EXPOSURE_COMPENSATION                 ,
                     CaptureResult.CONTROL_AE_LOCK                                  ,
@@ -740,6 +758,7 @@ public class LegacyMetadataMapper {
                     CaptureResult.JPEG_QUALITY                                     ,
                     CaptureResult.JPEG_THUMBNAIL_QUALITY                           ,
                     CaptureResult.LENS_FOCAL_LENGTH                                ,
+                    CaptureResult.NOISE_REDUCTION_MODE                             ,
                     CaptureResult.REQUEST_PIPELINE_DEPTH                           ,
                     CaptureResult.SCALER_CROP_REGION                               ,
                     CaptureResult.SENSOR_TIMESTAMP                                 ,
@@ -843,6 +862,13 @@ public class LegacyMetadataMapper {
             float width = (float)Math.abs(2 * focalLength * Math.tan(angleHor / 2));
 
             m.set(SENSOR_INFO_PHYSICAL_SIZE, new SizeF(width, height)); // in mm
+        }
+
+        /*
+         * sensor.info.timestampSource
+         */
+        {
+            m.set(SENSOR_INFO_TIMESTAMP_SOURCE, SENSOR_INFO_TIMESTAMP_SOURCE_UNKNOWN);
         }
     }
 
