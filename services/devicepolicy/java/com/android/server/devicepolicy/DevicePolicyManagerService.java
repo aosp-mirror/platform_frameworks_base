@@ -3716,7 +3716,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             // Only SYSTEM_UID can override the userSetupComplete
             if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID
-                    && isUserSetupComplete(userHandle)) {
+                    && hasUserSetupCompleted(userHandle)) {
                 throw new IllegalStateException(
                         "Trying to set profile owner but user is already set-up.");
             }
@@ -3773,10 +3773,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean hasUserSetupCompleted() {
+        return hasUserSetupCompleted(UserHandle.getCallingUserId());
+    }
+
+    private boolean hasUserSetupCompleted(int userHandle) {
         if (!mHasFeature) {
             return true;
         }
-        DevicePolicyData policy = getUserData(UserHandle.getCallingUserId());
+        DevicePolicyData policy = getUserData(userHandle);
         // If policy is null, return true, else check if the setup has completed.
         return policy == null || policy.mUserSetupComplete;
     }
@@ -3888,14 +3892,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (callingId == Process.SHELL_UID || callingId == Process.ROOT_UID) {
             return AccountManager.get(mContext).getAccounts().length == 0;
         } else {
-            return Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.DEVICE_PROVISIONED, 0) == 0;
+            return !hasUserSetupCompleted(UserHandle.USER_OWNER);
         }
-    }
-
-    private boolean isUserSetupComplete(int userId) {
-        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.USER_SETUP_COMPLETE, 0, userId) > 0;
     }
 
     private void enforceCrossUserPermission(int userHandle) {
