@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -26,7 +27,9 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.util.Slog;
+
 import com.android.internal.R;
+
 import libcore.io.IoUtils;
 
 import java.io.DataInputStream;
@@ -241,6 +244,10 @@ public class PersistentDataBlockService extends SystemService {
 
         @Override
         public void setOemUnlockEnabled(boolean enabled) {
+            // do not allow monkey to flip the flag
+            if (ActivityManager.isUserAMonkey()) {
+                return;
+            }
             enforceOemUnlockPermission();
             FileOutputStream outputStream;
             try {
