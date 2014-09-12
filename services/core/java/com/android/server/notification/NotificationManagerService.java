@@ -1236,17 +1236,16 @@ public class NotificationManagerService extends SystemService {
                         final int N = keys.length;
                         for (int i = 0; i < N; i++) {
                             NotificationRecord r = mNotificationsByKey.get(keys[i]);
+                            if (r == null) continue;
                             final int userId = r.sbn.getUserId();
                             if (userId != info.userid && userId != UserHandle.USER_ALL &&
                                     !mUserProfiles.isCurrentProfile(userId)) {
                                 throw new SecurityException("Disallowed call from listener: "
                                         + info.service);
                             }
-                            if (r != null) {
-                                cancelNotificationFromListenerLocked(info, callingUid, callingPid,
-                                        r.sbn.getPackageName(), r.sbn.getTag(), r.sbn.getId(),
-                                        userId);
-                            }
+                            cancelNotificationFromListenerLocked(info, callingUid, callingPid,
+                                    r.sbn.getPackageName(), r.sbn.getTag(), r.sbn.getId(),
+                                    userId);
                         }
                     } else {
                         cancelAllLocked(callingUid, callingPid, info.userid,
