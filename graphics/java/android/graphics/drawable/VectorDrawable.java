@@ -256,21 +256,22 @@ public class VectorDrawable extends Drawable {
         }
 
         if (!mAllowCaching) {
-            mVectorState.mVPathRenderer.draw(canvas, bounds.width(), bounds.height());
+            // AnimatedVectorDrawable
+            if (!mVectorState.hasTranslucentRoot()) {
+                mVectorState.mVPathRenderer.draw(canvas, bounds.width(), bounds.height());
+            } else {
+                mVectorState.createCachedBitmapIfNeeded(bounds);
+                mVectorState.updateCachedBitmap(bounds);
+                mVectorState.drawCachedBitmapWithRootAlpha(canvas);
+            }
         } else {
-            Bitmap bitmap = mVectorState.mCachedBitmap;
-            if (bitmap == null || !mVectorState.canReuseCache(bounds.width(),
-                    bounds.height())) {
-                bitmap = Bitmap.createBitmap(bounds.width(), bounds.height(),
-                        Bitmap.Config.ARGB_8888);
-                Canvas tmpCanvas = new Canvas(bitmap);
-                mVectorState.mVPathRenderer.draw(tmpCanvas, bounds.width(), bounds.height());
-                mVectorState.mCachedBitmap = bitmap;
-
+            // Static Vector Drawable case.
+            mVectorState.createCachedBitmapIfNeeded(bounds);
+            if (!mVectorState.canReuseCache()) {
+                mVectorState.updateCachedBitmap(bounds);
                 mVectorState.updateCacheStates();
             }
-            // The bitmap's size is the same as the bounds.
-            canvas.drawBitmap(bitmap, 0, 0, null);
+            mVectorState.drawCachedBitmapWithRootAlpha(canvas);
         }
 
         canvas.restoreToCount(saveCount);
@@ -514,6 +515,15 @@ public class VectorDrawable extends Drawable {
             throw new XmlPullParserException(a.getPositionDescription() +
                     "<vector> tag requires height > 0");
         }
+
+        final float alphaInFloat = a.getFloat(R.styleable.VectorDrawable_alpha,
+                pathRenderer.getAlpha());
+        pathRenderer.setAlpha(alphaInFloat);
+
+        pathRenderer.mRootName = a.getString(R.styleable.VectorDrawable_name);
+        if (pathRenderer.mRootName != null) {
+            pathRenderer.mVGTargetsMap.put(pathRenderer.mRootName, pathRenderer);
+        }
     }
 
     private void inflateInternal(Resources res, XmlPullParser parser, AttributeSet attrs,
@@ -668,15 +678,60 @@ public class VectorDrawable extends Drawable {
             }
         }
 
-        public boolean canReuseCache(int width, int height) {
+        // TODO: Support colorFilter here.
+        public void drawCachedBitmapWithRootAlpha(Canvas canvas) {
+            Paint alphaPaint = getRootAlphaPaint();
+            // The bitmap's size is the same as the bounds.
+            canvas.drawBitmap(mCachedBitmap, 0, 0, alphaPaint);
+        }
+
+        public boolean hasTranslucentRoot() {
+            return mVPathRenderer.getRootAlpha() < 255;
+        }
+
+        /**
+         * @return null when there is no need for alpha paint.
+         */
+        public Paint getRootAlphaPaint() {
+            Paint paint = null;
+            boolean needsAlphaPaint = hasTranslucentRoot();
+            if (needsAlphaPaint) {
+                paint = new Paint();
+                paint.setAlpha(mVPathRenderer.getRootAlpha());
+            }
+            return paint;
+        }
+
+        public void updateCachedBitmap(Rect bounds) {
+            mCachedBitmap.eraseColor(Color.TRANSPARENT);
+            Canvas tmpCanvas = new Canvas(mCachedBitmap);
+            mVPathRenderer.draw(tmpCanvas, bounds.width(), bounds.height());
+        }
+
+        public void createCachedBitmapIfNeeded(Rect bounds) {
+            if (mCachedBitmap == null || !canReuseBitmap(bounds.width(),
+                    bounds.height())) {
+                mCachedBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(),
+                        Bitmap.Config.ARGB_8888);
+            }
+
+        }
+
+        public boolean canReuseBitmap(int width, int height) {
+            if (width == mCachedBitmap.getWidth()
+                    && height == mCachedBitmap.getHeight()) {
+                return true;
+            }
+            return false;
+        }
+
+        public boolean canReuseCache() {
             if (!mCacheDirty
                     && mCachedThemeAttrs == mThemeAttrs
                     && mCachedTint == mTint
                     && mCachedTintMode == mTintMode
                     && mCachedAutoMirrored == mAutoMirrored
-                    && width == mCachedBitmap.getWidth()
-                    && height == mCachedBitmap.getHeight()
-                    && mCachedRootAlpha == mVPathRenderer.getRootAlpha())  {
+                    && mCachedRootAlpha == mVPathRenderer.getRootAlpha()) {
                 return true;
             }
             return false;
@@ -763,7 +818,8 @@ public class VectorDrawable extends Drawable {
         float mBaseHeight = 0;
         float mViewportWidth = 0;
         float mViewportHeight = 0;
-        private int mRootAlpha = 0xFF;
+        int mRootAlpha = 0xFF;
+        String mRootName = null;
 
         final ArrayMap<String, Object> mVGTargetsMap = new ArrayMap<String, Object>();
 
@@ -781,6 +837,17 @@ public class VectorDrawable extends Drawable {
             return mRootAlpha;
         }
 
+        // setAlpha() and getAlpha() are used mostly for animation purpose, since
+        // Animator like to use alpha from 0 to 1.
+        public void setAlpha(float alpha) {
+            setRootAlpha((int) (alpha * 255));
+        }
+
+        @SuppressWarnings("unused")
+        public float getAlpha() {
+            return getRootAlpha() / 255.0f;
+        }
+
         public VPathRenderer(VPathRenderer copy) {
             mRootGroup = new VGroup(copy.mRootGroup, mVGTargetsMap);
             mPath = new Path(copy.mPath);
@@ -791,6 +858,10 @@ public class VectorDrawable extends Drawable {
             mViewportHeight = copy.mViewportHeight;
             mChangingConfigurations = copy.mChangingConfigurations;
             mRootAlpha = copy.mRootAlpha;
+            mRootName = copy.mRootName;
+            if (copy.mRootName != null) {
+                mVGTargetsMap.put(copy.mRootName, this);
+            }
         }
 
         public boolean canApplyTheme() {
@@ -894,7 +965,7 @@ public class VectorDrawable extends Drawable {
         }
 
         private void drawPath(VGroup vGroup, VPath vPath, Canvas canvas, int w, int h) {
-            final float scaleX =  w / mViewportWidth;
+            final float scaleX = w / mViewportWidth;
             final float scaleY = h / mViewportHeight;
             final float minScale = Math.min(scaleX, scaleY);
 
@@ -1256,7 +1327,7 @@ public class VectorDrawable extends Drawable {
     /**
      * Clip path, which only has name and pathData.
      */
-    private static class VClipPath extends VPath{
+    private static class VClipPath extends VPath {
         public VClipPath() {
             // Empty constructor.
         }
