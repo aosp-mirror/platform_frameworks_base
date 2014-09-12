@@ -223,7 +223,10 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         mSharedElementNames.addAll(sharedElements.keySet());
         mSharedElements.addAll(sharedElements.values());
         if (getViewsTransition() != null) {
-            getDecor().captureTransitioningViews(mTransitioningViews);
+            ViewGroup decorView = getDecor();
+            if (decorView != null) {
+                decorView.captureTransitioningViews(mTransitioningViews);
+            }
             mTransitioningViews.removeAll(mSharedElements);
         }
         setEpicenter();
@@ -350,7 +353,10 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 sharedElements.put(accepted.get(i), localViews.get(i));
             }
         } else {
-            getDecor().findNamedViews(sharedElements);
+            ViewGroup decorView = getDecor();
+            if (decorView != null) {
+                decorView.findNamedViews(sharedElements);
+            }
         }
         return sharedElements;
     }
@@ -471,16 +477,18 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
 
     protected void scheduleSetSharedElementEnd(final ArrayList<View> snapshots) {
         final View decorView = getDecor();
-        decorView.getViewTreeObserver().addOnPreDrawListener(
-                new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        decorView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        notifySharedElementEnd(snapshots);
-                        return true;
+        if (decorView != null) {
+            decorView.getViewTreeObserver().addOnPreDrawListener(
+                    new ViewTreeObserver.OnPreDrawListener() {
+                        @Override
+                        public boolean onPreDraw() {
+                            decorView.getViewTreeObserver().removeOnPreDrawListener(this);
+                            notifySharedElementEnd(snapshots);
+                            return true;
+                        }
                     }
-                }
-        );
+            );
+        }
     }
 
     private static SharedElementOriginalState getOldSharedElementState(View view, String name,
@@ -523,7 +531,10 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         ArrayList<View> snapshots = new ArrayList<View>(numSharedElements);
         Context context = getWindow().getContext();
         int[] decorLoc = new int[2];
-        getDecor().getLocationOnScreen(decorLoc);
+        ViewGroup decorView = getDecor();
+        if (decorView != null) {
+            decorView.getLocationOnScreen(decorLoc);
+        }
         for (String name: names) {
             Bundle sharedElementBundle = state.getBundle(name);
             if (sharedElementBundle != null) {
@@ -746,15 +757,17 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
 
     protected void scheduleGhostVisibilityChange(final int visibility) {
         final View decorView = getDecor();
-        decorView.getViewTreeObserver()
-                .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        decorView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        setGhostVisibility(visibility);
-                        return true;
-                    }
-                });
+        if (decorView != null) {
+            decorView.getViewTreeObserver()
+                    .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                        @Override
+                        public boolean onPreDraw() {
+                            decorView.getViewTreeObserver().removeOnPreDrawListener(this);
+                            setGhostVisibility(visibility);
+                            return true;
+                        }
+                    });
+        }
     }
 
     protected class ContinueTransitionListener extends Transition.TransitionListenerAdapter {
